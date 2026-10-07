@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "status": "durable-voting-slice-only",
+  "selection": "construction-time",
+  "third_party_runtime_dependencies": [],
+  "contracts": [
+    {
+      "design_id": "C01/C02",
+      "public_contract": "VoteStore",
+      "operations": ["binding", "recovered", "append_votes", "barrier"],
+      "native": "NativeVoteStore",
+      "conformance": ["tests/vote.rs", "tests/native_vote_store.rs"],
+      "scope": "Durable ballots only. Full LogStore, snapshots and entries pending."
+    },
+    {
+      "design_id": "C04",
+      "public_contract": "VoteIo",
+      "operations": ["read_manifest", "read_log", "append", "sync_log", "truncate_log", "publish_manifest"],
+      "native": "FileVoteIo",
+      "conformance": ["tests/native_vote_store.rs"],
+      "scope": "Synchronous bounded worker interface; no async runtime yet."
+    },
+    {
+      "design_id": "C08",
+      "public_contract": "VoteLogCodec",
+      "operations": ["format_version", "encode", "frame_length", "decode"],
+      "native": "NativeVoteCodec",
+      "conformance": ["tests/native_vote_store.rs"],
+      "scope": "Version-1 vote framing. Different physical formats require migration."
+    }
+  ],
+  "not_yet_implemented": ["snapshots", "replication-log", "application", "transport", "wire-codec", "secure-session", "scheduler", "timers", "clock", "entropy", "buffers", "admission-policy", "routing", "discovery", "placement", "observability", "configuration-admin", "authorization", "compression", "scope-transfer", "transactions"]
+}
