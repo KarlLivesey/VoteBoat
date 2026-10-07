@@ -9,8 +9,8 @@ record claims that unimplemented phases already work.
 
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
-| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config elections, replication, conflict repair, recovery, read barriers and deduplicated counter demo implemented; transport and snapshots remain |
+| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers and checkpoint/replay counter demo implemented; transport and peer snapshot installation remain |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Pending |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
@@ -344,10 +344,109 @@ checker and virtual-time read scheduling remain to be added with the runtime.
 The read mechanism does not enable leases, follower linearizable reads, snapshot
 installation or online policy changes. The full P0–P7 goal remains incomplete.
 
+## Slice 4: crash-atomic application checkpoints
+
+`SnapshotStore` is a public logical binding for one local group. Its native
+provider uses the same stage/chunk/seal/publish/load/abort operations available
+to downstream hosts. `SnapshotIo` and `SnapshotCodec` are separate replaceable
+native mechanisms; host implementations exercise both. Provider handles may
+share physical resources; this initial native implementation uses an explicit
+directory and lock per local group, with no threads or hidden resource owners.
+
+`begin` admits one bounded stage with exact metadata and an application length.
+Chunks have checked offsets, lengths and ticket identity. Admission and chunk
+writes are not durability receipts. The native provider incrementally computes
+CRC32C over submitted metadata and bytes, then compares it with the complete
+staged file before sealing, so corruption before seal cannot be silently blessed
+by calculating a new checksum from damaged storage. Seal verifies framing and
+synchronizes both data and its directory entry before the root can reference it.
+Publication writes and synchronizes a temporary manifest, atomically replaces
+the root, synchronizes the directory and only then returns `SnapshotReceipt`.
+Any uncertain I/O or staged/published corruption fences that snapshot binding.
+
+The root identifies one of two alternating data slots. A stage may overwrite
+only the inactive slot, so an interrupted stage cannot damage the latest
+published checkpoint. Both slots, the root and its temporary file have fixed
+budgets: defaults are 64 MiB application data, 1 MiB metadata and 64 KiB chunks.
+Seal re-reads the complete bounded file; this is not a zero-copy or throughput
+claim. An aborted stage leaves only the bounded inactive slot, and late tickets
+cannot publish it. There is no unbounded archive of orphan snapshot files.
+
+Tickets bind local store identity/incarnation, persisted snapshot-store session,
+group incarnation and stage generation. Each new stage in a session advances
+the generation, even after abort. Recovery validates the root and its complete
+referenced file, reconstructs the published generation, then persists a fresh
+session before admitting work. Generations alone are not global monotonic
+watermarks across restart; the entire ticket scope is required. Creation and
+recovery are distinct. A missing/corrupt old manifest or referenced file cannot
+be treated as an empty successful recovery. Store identities must not be reused
+after disk loss or reset while stale work may exist.
+
+Native `VBSNAP01` files contain schema/index/term, bounded embedded bootstrap
+metadata (native log framing version 2), application bytes and a CRC32C trailer.
+`VBSSTR01` roots bind store/group identities, session, selected slot, generation,
+length and checksum. Unsupported formats and oversized lengths are rejected
+before allocation. Checksums detect accidental corruption; they are not
+cryptographic identity or an authenticated import certificate.
+
+`CheckpointStateMachine` supplies explicit schema, serialization and restore
+operations. Counter schema 1 encodes its applied index, configured dedup capacity,
+value, sorted operation IDs, exact command content and original outcomes,
+including cached overflow. Capacity and schema changes require migration rather
+than silent restore. Malformed lengths, duplicate/zero IDs and invalid outcomes
+are rejected. A host adapter is responsible for serializing all of its own
+state, including any outbox or lineage fields; the current counter has neither.
+
+`checkpoint_application` captures only an applied contiguous prefix no greater
+than the core's durable commit index, with the matching term and exact persisted
+bootstrap. `restore_application` validates the local binding, bootstrap, schema
+and included boundary against the retained Raft log, restores a fresh application
+and replays only the later committed entries. It builds the restored result
+before replacing live application state, so a bad checkpoint or invalid tail
+cannot partly advance the application. Replayed results are not new client
+acknowledgements. The host serializes its correctly bound group/application
+while calling these helpers. Raft term/vote/commit state remains owned by its
+one authoritative log store.
+
+### Slice 4 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full native suite: 68 tests pass. Core/contracts/application-only suite:
+  27 tests pass. Both builds pass Clippy with warnings denied; documentation
+  builds successfully without dependencies.
+- Shared snapshot conformance runs against native storage and an independent
+  downstream provider with native features disabled. A host application uses
+  its own schema while exercising the same capture/restore helpers.
+- Interruptions at every prefix byte, chunk byte and trailer byte retain the
+  prior publication. Sync failures and root publication failures recover the
+  prior or complete new image. An uncertain receipt never certifies publication.
+- Every bit mutation and every truncation of a published image, plus every bit
+  mutation of its root, is rejected. Corruption during staging is detected before
+  seal. Missing roots, wrong group/store incarnations, stale sessions and mutated
+  sealed tickets cannot establish recovery or publication.
+- Valid-checksum oversized lengths, unsupported versions, bounds, offset gaps,
+  duplicate publication, cancellation and incompatible codecs are exercised.
+- Native WAL/checkpoint compositions preserve acknowledged counter state across
+  simulated power loss during later checkpoint sync/publication. Restore can
+  select the old checkpoint and replay the retained tail, or use the complete
+  new checkpoint; both preserve exact retry outcomes and Raft hard state.
+- Actual files verify exclusive writers, checkpoint/replay recovery and repeated
+  publication. Three real-WAL replicas restore checkpoint indices 3 then 6 in
+  repeated CLI runs, retain value 7 on retry, and reach 10 after a new operation.
+
+These local checkpoints do not install a remote leader's snapshot, reclaim any
+Raft prefix, or provide permanent pin/retention handles. A publication receipt
+is superseded by later publication and is deliberately not log-deletion
+permission. Local images must not be reused as imported voter state without
+the future snapshot-install protocol. Failed/corrupt recovery does not silently
+fall back to an empty application. Hardware power-cut and macOS execution remain
+outstanding; the finite failure model is regression evidence. P0–P7 remains active.
+
 ## Next slice
 
-Add application checkpoint/snapshot publication, then introduce
-the bounded shared scheduler, timers, wire codec and authenticated-session
+Add pinned snapshot installation and the dependent logical compaction boundary,
+then introduce the bounded shared scheduler, timers, wire codec and authenticated-session
 transport seams. Extend the simulator to explicit virtual time and independently
 delayed storage completion events. Native sockets must use established secure
 sessions supplied by the host; production assembly cannot silently select an

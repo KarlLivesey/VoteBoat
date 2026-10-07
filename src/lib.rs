@@ -21,4 +21,5 @@ pub mod log;
 pub mod native;
 pub mod quorum;
 pub mod raft;
+pub mod snapshot;
 pub mod vote;

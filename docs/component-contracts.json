@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "static-configuration-replication-and-reads",
+  "status": "static-replication-reads-and-local-checkpoints",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -115,7 +115,7 @@
         "tests/application.rs",
         "examples/replicated_counter.rs"
       ],
-      "scope": "Deterministic bounded counter and exact operation retries. Checkpoints pending."
+      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension."
     },
     {
       "design_id": "C05",
@@ -129,10 +129,80 @@
         "examples/replicated_counter.rs"
       ],
       "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases."
+    },
+    {
+      "design_id": "C03",
+      "public_contract": "SnapshotStore",
+      "operations": [
+        "identity",
+        "binding",
+        "limits",
+        "begin",
+        "write_chunk",
+        "seal",
+        "publish",
+        "abort",
+        "load"
+      ],
+      "native": "NativeSnapshotStore",
+      "conformance": [
+        "tests/snapshot.rs",
+        "examples/replicated_counter.rs"
+      ],
+      "scope": "One local group per logical handle, bounded stage/seal and atomic publication. No peer installation, permanent pins or log deletion yet."
+    },
+    {
+      "design_id": "C04",
+      "public_contract": "SnapshotIo",
+      "operations": [
+        "read_manifest",
+        "read_slot",
+        "begin_slot",
+        "append_slot",
+        "sync_slot",
+        "publish_manifest"
+      ],
+      "native": "FileSnapshotIo",
+      "conformance": [
+        "tests/snapshot.rs"
+      ],
+      "scope": "Exclusive two-slot I/O; data and file-name sync precede root publication."
+    },
+    {
+      "design_id": "C08",
+      "public_contract": "SnapshotCodec",
+      "operations": [
+        "format_version",
+        "prefix",
+        "finish",
+        "decode"
+      ],
+      "native": "NativeSnapshotCodec",
+      "conformance": [
+        "tests/snapshot.rs"
+      ],
+      "scope": "Version-1 CRC32C framing with bounded bootstrap/application data. No cryptographic provenance claim."
+    },
+    {
+      "design_id": "C05",
+      "public_contract": "CheckpointStateMachine",
+      "operations": [
+        "schema_version",
+        "checkpoint",
+        "restore_checkpoint"
+      ],
+      "native": "Counter",
+      "conformance": [
+        "tests/application.rs",
+        "tests/snapshot.rs",
+        "examples/replicated_counter.rs"
+      ],
+      "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable."
     }
   ],
   "not_yet_implemented": [
-    "snapshots",
+    "peer-snapshot-installation",
+    "snapshot-pins-and-log-reclamation",
     "transport",
     "wire-codec",
     "secure-session",

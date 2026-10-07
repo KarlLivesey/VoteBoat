@@ -518,7 +518,10 @@ fn apply_records(
 
 /// Standard reflected CRC32C (Castagnoli), for accidental corruption only.
 pub(crate) fn crc32c(bytes: &[u8]) -> u32 {
-    let mut crc = !0u32;
+    crc32c_extend(0, bytes)
+}
+pub(crate) fn crc32c_extend(previous: u32, bytes: &[u8]) -> u32 {
+    let mut crc = !previous;
     for byte in bytes {
         crc ^= *byte as u32;
         for _ in 0..8 {
@@ -643,5 +646,6 @@ mod tests {
     #[test]
     fn crc_castagnoli_check_vector() {
         assert_eq!(crc32c(b"123456789"), 0xe3069283);
+        assert_eq!(crc32c_extend(crc32c(b"1234"), b"56789"), 0xe3069283);
     }
 }

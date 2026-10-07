@@ -142,3 +142,71 @@ fn host_application_can_supply_its_own_receipt_type_through_the_public_seam() {
     assert_eq!(host.observed_batches, 1);
     assert_eq!(host.applied_index(), 2);
 }
+
+#[test]
+fn checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity() {
+    let mut original = Counter::new(5).unwrap();
+    original
+        .apply_batch(&[command(1, 1, i64::MAX), command(2, 2, 1), command(3, 3, -1)])
+        .unwrap();
+    let bytes = original.checkpoint(1024).unwrap();
+    let mut restored = Counter::new(5).unwrap();
+    restored.restore_checkpoint(1, 3, &bytes).unwrap();
+    assert_eq!(restored.checkpoint(1024).unwrap(), bytes);
+    assert_eq!(restored.remaining_operations(), 2);
+    let receipts = restored
+        .apply_batch(&[
+            command(4, 1, i64::MAX),
+            command(5, 2, 1),
+            command(6, 3, -2),
+            command(7, 4, 1),
+        ])
+        .unwrap();
+    assert_eq!(receipts[0].outcome, CounterOutcome::Value(i64::MAX));
+    assert_eq!(receipts[1].outcome, CounterOutcome::Overflow);
+    assert_eq!(receipts[2].outcome, CounterOutcome::OperationConflict);
+    assert!(receipts[..3].iter().all(|r| r.duplicate));
+    assert_eq!(restored.read_applied(7), Ok(i64::MAX));
+    assert_eq!(restored.remaining_operations(), 1);
+}
+
+#[test]
+fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
+    let mut original = Counter::new(10).unwrap();
+    original
+        .apply_batch(&[command(1, 1, 7), command(2, 2, 3)])
+        .unwrap();
+    let bytes = original.checkpoint(1024).unwrap();
+    let mut target = Counter::new(10).unwrap();
+    target.apply_batch(&[command(1, 9, 99)]).unwrap();
+    let previous = target.checkpoint(1024).unwrap();
+    for cut in 0..bytes.len() {
+        assert!(target.restore_checkpoint(1, 2, &bytes[..cut]).is_err());
+        assert_eq!(target.checkpoint(1024).unwrap(), previous);
+    }
+    for mutation in 0..6 {
+        let mut invalid = bytes.clone();
+        match mutation {
+            0 => invalid[0] ^= 1,
+            1 => invalid[8..16].copy_from_slice(&1u64.to_le_bytes()),
+            2 => invalid[16..20].copy_from_slice(&11u32.to_le_bytes()),
+            3 => invalid[28..32].copy_from_slice(&u32::MAX.to_le_bytes()),
+            4 => {
+                let first: Vec<_> = invalid[32..48].to_vec();
+                invalid[65..81].copy_from_slice(&first);
+            }
+            5 => invalid[56] = 9,
+            _ => unreachable!(),
+        }
+        assert!(target.restore_checkpoint(1, 2, &invalid).is_err());
+        assert_eq!(target.checkpoint(1024).unwrap(), previous);
+    }
+    assert_eq!(
+        target.restore_checkpoint(2, 2, &bytes),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert!(original.checkpoint(bytes.len() - 1).is_err());
+    let mut incompatible = Counter::new(9).unwrap();
+    assert!(incompatible.restore_checkpoint(1, 2, &bytes).is_err());
+    assert_eq!(incompatible.applied_index(), 0);
+}

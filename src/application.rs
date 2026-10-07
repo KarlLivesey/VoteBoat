@@ -39,6 +39,8 @@ pub enum ApplicationError {
     InvalidCommand,
     DedupCapacity,
     NotApplied,
+    InvalidCheckpoint,
+    UnsupportedSchema,
 }
 
 /// A host applies only committed, contiguous entries and emits client success
@@ -50,6 +52,20 @@ pub trait StateMachine {
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
+}
+
+/// A checkpoint contains every piece of state needed for deterministic replay,
+/// including operation identities/content/outcomes and its applied boundary.
+/// Restore must reject unsupported schemas and incompatible configured capacity.
+pub trait CheckpointStateMachine: StateMachine + Clone {
+    fn schema_version(&self) -> u64;
+    fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError>;
+    fn restore_checkpoint(
+        &mut self,
+        schema: u64,
+        applied_index: u64,
+        bytes: &[u8],
+    ) -> Result<(), ApplicationError>;
 }
 
 /// Read support is explicit and optional. `read_at` must observe immutable
@@ -183,5 +199,89 @@ impl ReadableStateMachine for Counter {
     type ReadResult = i64;
     fn read_at(&self, required_index: u64, (): ()) -> Result<i64, ApplicationError> {
         self.read_applied(required_index)
+    }
+}
+
+impl CheckpointStateMachine for Counter {
+    fn schema_version(&self) -> u64 {
+        1
+    }
+    fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
+        let length = 32 + 33 * self.dedup.len();
+        if length > max_bytes {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut bytes = Vec::with_capacity(length);
+        bytes.extend(b"VBCTR001");
+        bytes.extend(self.applied.to_le_bytes());
+        bytes.extend((self.max_operations as u32).to_le_bytes());
+        bytes.extend(self.value.to_le_bytes());
+        bytes.extend((self.dedup.len() as u32).to_le_bytes());
+        for (id, (request, outcome)) in &self.dedup {
+            bytes.extend(id.get().to_le_bytes());
+            bytes.extend(request);
+            match outcome {
+                CounterOutcome::Value(v) => {
+                    bytes.push(0);
+                    bytes.extend(v.to_le_bytes());
+                }
+                CounterOutcome::Overflow => {
+                    bytes.push(1);
+                    bytes.extend([0; 8]);
+                }
+                CounterOutcome::OperationConflict => {
+                    return Err(ApplicationError::InvalidCheckpoint)
+                }
+            }
+        }
+        Ok(bytes)
+    }
+    fn restore_checkpoint(
+        &mut self,
+        schema: u64,
+        applied: u64,
+        bytes: &[u8],
+    ) -> Result<(), ApplicationError> {
+        if schema != self.schema_version() {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        if bytes.len() < 32 || &bytes[..8] != b"VBCTR001" {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let index = u64::from_le_bytes(bytes[8..16].try_into().unwrap());
+        let capacity = u32::from_le_bytes(bytes[16..20].try_into().unwrap()) as usize;
+        let value = i64::from_le_bytes(bytes[20..28].try_into().unwrap());
+        let count = u32::from_le_bytes(bytes[28..32].try_into().unwrap()) as usize;
+        if index != applied
+            || capacity != self.max_operations
+            || count > capacity
+            || count as u64 > index
+            || bytes.len() != 32 + 33 * count
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut dedup = BTreeMap::new();
+        let mut previous = 0;
+        for record in bytes[32..].as_chunks::<33>().0 {
+            let id = u128::from_le_bytes(record[..16].try_into().unwrap());
+            if id <= previous {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            previous = id;
+            let request = record[16..24].try_into().unwrap();
+            let outcome = match record[24] {
+                0 => CounterOutcome::Value(i64::from_le_bytes(record[25..33].try_into().unwrap())),
+                1 if record[25..33] == [0; 8] => CounterOutcome::Overflow,
+                _ => return Err(ApplicationError::InvalidCheckpoint),
+            };
+            dedup.insert(
+                OperationId::new(id).ok_or(ApplicationError::InvalidCheckpoint)?,
+                (request, outcome),
+            );
+        }
+        self.value = value;
+        self.applied = index;
+        self.dedup = dedup;
+        Ok(())
     }
 }

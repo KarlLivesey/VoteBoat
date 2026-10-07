@@ -18,7 +18,15 @@ use std::{
     collections::{BTreeMap, VecDeque},
     path::PathBuf,
 };
-use voteboat::{application::*, identity::*, log::*, native::log_store::*, quorum::*, raft::*};
+use voteboat::{
+    application::*,
+    identity::*,
+    log::*,
+    native::{log_store::*, snapshot_store::*},
+    quorum::*,
+    raft::*,
+    snapshot::*,
+};
 
 struct Replica {
     core: Raft,
@@ -26,6 +34,8 @@ struct Replica {
     application: Counter,
     receipts: Vec<CounterReceipt>,
     read_value: Option<i64>,
+    snapshots: NativeSnapshotStore<FileSnapshotIo>,
+    restored_checkpoint: u64,
 }
 struct Demo {
     replicas: BTreeMap<NodeId, Replica>,
@@ -152,8 +162,25 @@ fn main() -> Result<(), Failure> {
         let core = Raft::recover(node, store.binding(), state, store.limits())
             .map_err(|e| format!("{e:?}"))?;
         let mut application = Counter::new(10000).map_err(|e| format!("{e:?}"))?;
-        application
-            .apply_batch(core.replay_committed())
+        let checkpoint_directory = directory.join("checkpoints");
+        let checkpoint_identity = SnapshotIdentity {
+            store: identity,
+            group,
+        };
+        let mut snapshots = if checkpoint_directory.join("MANIFEST").exists() {
+            NativeSnapshotStore::recover(
+                FileSnapshotIo::open(&checkpoint_directory)?,
+                checkpoint_identity,
+                SnapshotLimits::default(),
+            )?
+        } else {
+            NativeSnapshotStore::create(
+                FileSnapshotIo::create(&checkpoint_directory)?,
+                checkpoint_identity,
+                SnapshotLimits::default(),
+            )?
+        };
+        let restored = restore_application(&core, &mut application, &mut snapshots)
             .map_err(|e| format!("{e:?}"))?;
         demo.replicas.insert(
             node,
@@ -163,6 +190,8 @@ fn main() -> Result<(), Failure> {
                 application,
                 receipts: Vec::new(),
                 read_value: None,
+                snapshots,
+                restored_checkpoint: restored.checkpoint_index,
             },
         );
     }
@@ -200,15 +229,19 @@ fn main() -> Result<(), Failure> {
             .read_value
             .ok_or("read did not reach quorum")?
     );
-    for (node, r) in &demo.replicas {
+    for (node, r) in &mut demo.replicas {
+        let checkpoint = checkpoint_application(&r.core, &r.application, &mut r.snapshots)
+            .map_err(|e| format!("{e:?}"))?;
         println!(
-            "replica={} committed={} applied={} value={}",
+            "replica={} committed={} applied={} value={} restored_checkpoint={} checkpoint={}",
             node.get(),
             r.core.state().commit_index,
             r.application.applied_index(),
             r.application
                 .read_applied(r.core.state().commit_index)
-                .map_err(|e| format!("{e:?}"))?
+                .map_err(|e| format!("{e:?}"))?,
+            r.restored_checkpoint,
+            checkpoint.metadata.index,
         );
     }
     Ok(())

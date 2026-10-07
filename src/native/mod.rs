@@ -13,4 +13,5 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 pub mod log_store;
+pub mod snapshot_store;
 pub mod vote_store;

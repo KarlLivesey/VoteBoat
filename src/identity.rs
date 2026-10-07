@@ -51,7 +51,8 @@ id64!(
     WalLaneGeneration,
     LogGeneration,
     LogRevision,
-    ReadRequestId
+    ReadRequestId,
+    SnapshotGeneration
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 

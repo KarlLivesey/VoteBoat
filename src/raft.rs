@@ -254,6 +254,9 @@ impl Raft {
     pub fn state(&self) -> &GroupLog {
         &self.durable
     }
+    pub fn storage_binding(&self) -> StoreBinding {
+        self.binding
+    }
     /// Host replays these through its application checkpoint/dedup contract.
     pub fn replay_committed(&self) -> &[LogEntry] {
         &self.durable.entries[..self.durable.commit_index as usize]
