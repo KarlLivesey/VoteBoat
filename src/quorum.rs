@@ -17,14 +17,14 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::identity::NodeId;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Tree {
     Voter(NodeId),
     Majority(Vec<Tree>),
     Weighted(Vec<WeightedChild>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WeightedChild {
     pub weight: u64,
     pub node: Tree,
@@ -59,7 +59,7 @@ pub enum PolicyError {
     VoterSetMismatch,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Policy {
     tree: Tree,
     voters: BTreeSet<NodeId>,
@@ -90,6 +90,11 @@ impl Policy {
 
     pub fn voters(&self) -> &BTreeSet<NodeId> {
         &self.voters
+    }
+
+    /// Immutable validated structure, used by versioned persistence codecs.
+    pub fn tree(&self) -> &Tree {
+        &self.tree
     }
 
     /// `acks` must already have been authenticated and scoped to the correct

@@ -7,12 +7,16 @@ public interfaces that host applications can implement themselves.
 
 Initial target platforms are **Linux and macOS**. Windows is deferred.
 
-The first working slice is **durable voting**, not a complete Raft engine.
-It provides checked identities, validated recursive/weighted quorum predicates,
-a deterministic RequestVote gate, and a bounded native term/vote WAL. A ballot
-is released only after its exact storage dependency is durable. Restart,
-corruption and storage-failure tests exercise the real provider and injected
-host implementations. There are no third-party runtime dependencies.
+The working baseline now includes a **static-configuration Raft core** with
+durable elections, replication, ordered commitment and conflict repair, plus a
+three-replica counter demo. Group configuration and voter store identities are
+persisted with the native WAL. Operation retries return the original application
+result without repeating their effect. Restart, partition, corruption and
+storage-failure tests exercise native providers and host replacements. There
+are no third-party runtime dependencies.
+
+Transport, read barriers, snapshots and online reconfiguration remain under
+development; this is not a production consensus release.
 
 ## Run
 
@@ -24,7 +28,26 @@ cargo test --locked --offline --no-default-features
 cargo clippy --locked --offline --all-targets -- -D warnings
 ```
 
-Try the persistent voting example in a fresh directory:
+Try the three-replica counter in a fresh directory:
+
+```sh
+cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
+# operation=1 outcome=Value(7) retry_duplicate=true
+# All three replicas report value=7, with committed/applied boundaries matching.
+cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
+# Restart and retry operation 1: value remains 7.
+cargo run --example replicated_counter -- /tmp/voteboat-counter 2 3
+# A new operation adds 3: value becomes 10.
+```
+
+The demo uses three real WALs and host-driven in-process message delivery.
+It explicitly elects node 1 and submits each operation twice to demonstrate
+deduplication. Its reads are local applied-state diagnostics; no distributed
+linearizable-read API is advertised yet. Its counter accepts signed i64 deltas
+encoded as eight little-endian bytes. Application/deduplication capacity is
+bounded; the later service admission layer must reserve capacity before commits.
+
+The original standalone voting example remains available:
 
 ```sh
 cargo run --example durable_vote -- /tmp/voteboat-demo 2 1

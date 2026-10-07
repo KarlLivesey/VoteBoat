@@ -16,6 +16,10 @@ native = []
 name = "durable_vote"
 required-features = ["native"]
 
+[[example]]
+name = "replicated_counter"
+required-features = ["native"]
+
 [workspace]
 exclude = ["VoteBoat-Design-Pack/reference-rust"]
 

@@ -9,10 +9,10 @@ record claims that unimplemented phases already work.
 
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
-| P0 | Checked identities, validated policies, public seams, deterministic failure harness | First slice implemented; complete catalogue and virtual-time runtime remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Durable term/vote slice implemented; replication and the remaining features are next |
+| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config elections, replication, conflict repair, recovery and deduplicated counter demo implemented; transport, reads and snapshots remain |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Pending |
-| P3 | Recursive quorum integration at every consensus quorum site | Predicates validated; protocol integration pending |
+| P3 | Recursive quorum integration at every consensus quorum site | Elections and durable commitment use validated predicates; read/check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
@@ -130,7 +130,7 @@ The native codec is selected at construction. A replacement advertising format
 format is rejected before provider operations. Providers are trusted contract
 implementations, not a sandbox against malicious code in the host process.
 
-## Validation actually run
+## Slice 1 validation
 
 Linux, Rust 1.98.1, 7 October 2026. The installed toolchain is registered under
 the `stable` alias; local verification uses `cargo +stable` after checking that
@@ -159,14 +159,133 @@ macOS execution has not yet been observed. The CI template is committed at
 because GitHub rejected workflow publication with the current token's scopes.
 This does not block code pushes or implementation. No branch protection or
 required status checks have been configured.
-No full Raft history, networking, linearizable application operation, snapshot,
-joint transition, split/merge or throughput result is claimed by these checks.
+Those slice-1 checks do not establish replication, networking, snapshots,
+joint transitions, split/merge or throughput. Slice-2 evidence follows.
+
+## Slice 2: replicated log and static-configuration Raft
+
+`LogStore` exposes atomic per-group bootstrap and entry/hard-state transitions,
+explicit barriers, durable state recovery and bounded range fetch. A bootstrap
+persists the validated recursive policy, configuration identity and exact
+voter-to-store identity map before elections. Repeated creation, unknown groups,
+reused group IDs, ballot regression and local configuration hot reload are
+rejected. A node verifies that its authoritative store matches its persisted
+voter identity before entering the core.
+
+`LogUpdate` binds an expected revision, hard state, contiguous commit prefix and
+optional suffix. Missing indexes, decreasing entry terms, hard state behind the
+log, commit regression and replacement of committed entries are refused before
+submission. Each complete atomic transition advances the persisted revision.
+Replacement of an existing suffix additionally advances its logical generation
+and invalidates outstanding tickets for the old suffix. Pure append retains the
+generation. Restart reconstructs both numbers by verified physical batch order.
+The store does not invent a prefix by selecting the highest term at each index.
+
+The native full-log provider selects `FileLogIo` and `NativeLogCodec` through
+public seams. It uses `log.wal`, format `VBLOG002`/`VBLEND02`, and a `VBLSTR02`
+manifest. All integers are bounded, explicit little-endian fields. Batch CRC32C,
+header count/length checks and trailer validation cover the complete payload.
+Policy decoding bounds recursion, node counts and voter counts before creating
+a validated policy; command and entry allocations obey declared limits. The
+vote-only format remains separate and cannot be reopened as a full-log store.
+There is no automatic stacking of the two stores.
+
+The manifest uses the same exact 52-byte layout as the voting manifest, with
+the distinct magic above. Bootstrap records include policy trees and voter
+store identities; update records include group/revision, term/vote, commit and
+optional consecutive entries with operation IDs and owned command bytes. This
+is still a development format. New formats require explicit migration.
+
+Defaults bound the WAL to 64 MiB, batches to 1 MiB/256 group units, pending work
+to 1024 units, each group to 16,384 entries, and commands to 64 KiB. A 1 MiB WAL
+reserve is unavailable to application commands; control/term/commit/no-op
+records can use it. There is no reclamation or segment rotation yet. Exhaustion
+is explicit rejection, not silent weakening of durability.
+
+`Raft` is deterministic and constructs no concrete provider. Hosts supply
+campaign/heartbeat events and authenticated, identity-bound message delivery.
+An election persists the new term and self-vote before soliciting ballots.
+Follower votes and append acknowledgements wait for exact durable transitions.
+Candidates check log freshness; followers check matching prefixes and never
+replace committed entries. A leader persists a current-term no-op, counts only
+matching durable acknowledgements using the validated policy, and commits only
+through a qualifying current-term entry. Its own durable prefix is mandatory.
+Commit persistence precedes `Committed` notifications and commit publication.
+
+Requests carry the group/configuration, sender node/store incarnation and an
+origin store-session/sequence context. Replies must match the current request;
+old-session replies and foreign identities fail closed. Terms, group revisions
+and suffix generations are checked independently of request correlation.
+Peer authenticity is a host precondition at this stage, not a cryptographic
+claim from public message fields. No insecure production transport is supplied.
+
+One in-flight durable transition per core bounds its retained work. The host
+must queue or retry `Busy` deliveries within its own budget. Replication batches
+contain at most 64 entries and obey byte budgets. No majority counters bypass
+the validated policy for the implemented election/commit sites. Read-index,
+check-quorum and membership sites are still future work, so P3 is not complete.
+
+The `StateMachine` seam applies contiguous committed entries. `Counter` retains
+operation IDs, exact eight-byte request content and original outcomes; retries
+return the original result and conflicting content never changes the original
+effect. Overflow outcomes are also cached. No-ops advance the applied boundary.
+Malformed, gapped or capacity-exceeding batches do not partly advance state.
+Deduplication is bounded with no implicit eviction. Service admission must
+reserve application capacity before accepting work; the serial demo stays
+within its fixed 10,000-operation schema. Diagnostic `read_applied` checks only
+the local applied boundary and supplies no distributed read proof.
+
+The three-replica example exercises the real full-log store, public storage
+driver, deterministic core and application contract. Message delivery is
+explicit in-process host code. Restart reconstructs the counter and dedup map
+from the entire retained committed prefix. Checkpoint/replay truncation and
+snapshot state are not yet implemented.
+
+### Slice 2 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full native suite: 45 tests pass. Core/contracts/application-only suite:
+  14 tests pass, including a three-node host-store history and the recursive
+  election/commit history with native providers disabled.
+- The shared public-store conformance history runs against native storage and
+  a downstream host implementation. It covers bounded fetch, durability before
+  visibility, suffix fencing, commit protection, multi-group rejection atomicity,
+  unknown groups and stale revisions/tickets.
+- Every interrupted-byte boundary of a suffix replacement is recovered as the
+  old or complete new state. Every missing byte in the acknowledged prefix
+  fails recovery. Sync and publication faults fence without certifying the
+  transition. Every single-bit mutation of a complete bootstrap batch is rejected.
+- Three-node histories commit a command, isolate its leader, leave another
+  command uncommitted, elect a new leader, commit a new command and repair the
+  old leader's conflicting suffix. Native and host stores run the same history.
+- Thirty-two seeded schedules of 256 events combine elections, proposal attempts,
+  delayed/reordered/duplicated messages, partitions, healing, heartbeat events
+  and simulated power-loss restart. After every event the harness checks that
+  committed histories agree and no two leaders exist in the same term. Every
+  restart checks preservation of acknowledged committed state. A stable majority
+  subsequently elects a leader and commits a new command on all three replicas.
+- Nine-voter recursive scenarios elect/commit with two majorities in two sites,
+  refuse a flat five-voter set lacking the tree quorum, and prevent old durable
+  progress from certifying a later command while its recursive quorum is absent.
+- Actual native files on all three replicas recover the committed history.
+  The CLI demo is rerun against the same files: operation 1 adds seven once,
+  survives restart/retry at seven, then operation 2 adds three to reach ten on
+  every replica. Client results are printed only after commitment and application.
+- Formatting, warning-free Clippy, documentation and dependency-free builds
+  are checked locally. macOS CI activation remains deferred as recorded above.
+
+These finite histories are regression evidence, not a full protocol proof or a
+production release gate. There is no production network service, distributed
+linearizable-read API, checkpoint/snapshot, joint reconfiguration, scope transfer
+or throughput claim yet. Real hardware power-cut testing remains outstanding.
 
 ## Next slice
 
-Extend storage to recoverable entry/hard-state transition batches with bounded
-range fetch and generation-fenced suffix replacement. Bind group creation and
-static voter policy to durable metadata. Build a deterministic three-node
-replication/election simulator over that contract, then add ordered application,
-operation-ID retries, reads and snapshots. Preserve a simple native baseline
-and test downstream substitution at each newly introduced seam.
+Add read barriers and application checkpoint/snapshot publication, then introduce
+the bounded shared scheduler, timers, wire codec and authenticated-session
+transport seams. Extend the simulator to explicit virtual time and independently
+delayed storage completion events. Native sockets must use established secure
+sessions supplied by the host; production assembly cannot silently select an
+insecure simulation transport. Preserve downstream substitution and durable
+histories as these providers enter the assembly.

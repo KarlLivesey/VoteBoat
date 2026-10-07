@@ -53,6 +53,10 @@ impl FileVoteIo {
     /// Explicit new-store creation. Never turns an existing/missing old store
     /// into a fresh voter. An interrupted creation requires operator recovery.
     pub fn create(directory: impl AsRef<Path>) -> io::Result<Self> {
+        Self::create_named(directory, "votes.wal")
+    }
+
+    pub(super) fn create_named(directory: impl AsRef<Path>, name: &str) -> io::Result<Self> {
         let directory = directory.as_ref().to_owned();
         match fs::create_dir(&directory) {
             Ok(()) => (),
@@ -60,7 +64,10 @@ impl FileVoteIo {
             Err(e) => return Err(e),
         }
         let lock = Self::lock(&directory)?;
-        if directory.join("MANIFEST").exists() || directory.join("votes.wal").exists() {
+        if directory.join("MANIFEST").exists()
+            || directory.join("votes.wal").exists()
+            || directory.join("log.wal").exists()
+        {
             return Err(io::Error::new(
                 io::ErrorKind::AlreadyExists,
                 "store already exists",
@@ -70,7 +77,7 @@ impl FileVoteIo {
             .read(true)
             .write(true)
             .create_new(true)
-            .open(directory.join("votes.wal"))?;
+            .open(directory.join(name))?;
         // Persist the directory name in its parent, as well as the WAL name.
         File::open(&directory)?.sync_all()?;
         if let Some(parent) = directory.parent().filter(|p| !p.as_os_str().is_empty()) {
@@ -84,6 +91,10 @@ impl FileVoteIo {
     }
 
     pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
+        Self::open_named(directory, "votes.wal")
+    }
+
+    pub(super) fn open_named(directory: impl AsRef<Path>, name: &str) -> io::Result<Self> {
         let directory = directory.as_ref().to_owned();
         let lock = Self::lock(&directory)?;
         // Both names must exist; opening an old voter never creates its WAL.
@@ -91,7 +102,7 @@ impl FileVoteIo {
         let log = OpenOptions::new()
             .read(true)
             .write(true)
-            .open(directory.join("votes.wal"))?;
+            .open(directory.join(name))?;
         Ok(Self {
             directory,
             log,
@@ -506,7 +517,7 @@ fn apply_records(
 }
 
 /// Standard reflected CRC32C (Castagnoli), for accidental corruption only.
-fn crc32c(bytes: &[u8]) -> u32 {
+pub(crate) fn crc32c(bytes: &[u8]) -> u32 {
     let mut crc = !0u32;
     for byte in bytes {
         crc ^= *byte as u32;

@@ -13,9 +13,12 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Deterministic consensus components. See the README for implemented scope.
+pub mod application;
 pub mod contracts;
 pub mod identity;
+pub mod log;
 #[cfg(feature = "native")]
 pub mod native;
 pub mod quorum;
+pub mod raft;
 pub mod vote;

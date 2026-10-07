@@ -1,0 +1,760 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+//! Deterministic static-configuration Raft. Host drives elections and delivery.
+//! Every persistence-dependent send/application notification waits for its exact
+//! store/group/revision/generation ticket. No transport or clock is constructed.
+use crate::{
+    contracts::{HardState, StorageError},
+    identity::*,
+    log::*,
+};
+use std::collections::{BTreeMap, BTreeSet};
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RequestContext {
+    pub origin: StoreBinding,
+    pub sequence: u64,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Rpc {
+    Vote {
+        last_index: u64,
+        last_term: u64,
+    },
+    Voted {
+        granted: bool,
+    },
+    Append {
+        previous_index: u64,
+        previous_term: u64,
+        entries: Vec<LogEntry>,
+        leader_commit: u64,
+    },
+    Appended {
+        success: bool,
+        matching_index: u64,
+    },
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Message {
+    pub group: GroupIdentity,
+    pub configuration: ConfigurationId,
+    pub from: NodeId,
+    pub sender: StoreBinding,
+    pub to: NodeId,
+    pub term: u64,
+    pub context: RequestContext,
+    pub rpc: Rpc,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Role {
+    Follower,
+    Candidate,
+    Leader,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Event {
+    Campaign,
+    Heartbeat,
+    Receive(Message),
+    Propose {
+        operation: OperationId,
+        bytes: Vec<u8>,
+    },
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Effect {
+    Persist(LogUpdate),
+    Send(Message),
+    /// Ordered committed entries. Not a client success: application must apply
+    /// and return a result before a caller can acknowledge its operation.
+    Committed(Vec<LogEntry>),
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum RaftError {
+    Busy,
+    Fenced,
+    NotLeader,
+    WrongIdentity,
+    InvalidMessage,
+    WrongCompletion,
+    Exhausted,
+    InvalidRecovery,
+    Storage(StorageError),
+}
+impl From<StorageError> for RaftError {
+    fn from(e: StorageError) -> Self {
+        Self::Storage(e)
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+enum After {
+    Campaign,
+    Reply,
+    LeaderAppend,
+    Commit,
+}
+struct Pending {
+    update: LogUpdate,
+    next: GroupLog,
+    ticket: Option<LogTicket>,
+    after: After,
+    reply: Option<Message>,
+}
+#[derive(Clone, Copy)]
+struct Replication {
+    context: RequestContext,
+    end: u64,
+}
+
+pub struct Raft {
+    node: NodeId,
+    binding: StoreBinding,
+    limits: LogLimits,
+    durable: GroupLog,
+    role: Role,
+    votes: BTreeSet<NodeId>,
+    vote_context: Option<RequestContext>,
+    progress: BTreeMap<NodeId, u64>,
+    next_index: BTreeMap<NodeId, u64>,
+    requests: BTreeMap<NodeId, Replication>,
+    request_sequence: u64,
+    last_batch: u64,
+    pending: Option<Pending>,
+    fenced: bool,
+}
+
+impl Raft {
+    pub fn recover(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        let limits = limits.validate()?;
+        if state.bootstrap.voter_stores.get(&node) != Some(&binding.identity)
+            || state
+                .bootstrap
+                .voter_stores
+                .keys()
+                .copied()
+                .collect::<BTreeSet<_>>()
+                != *state.bootstrap.policy.voters()
+            || state.commit_index > state.last_index()
+            || state.last_term() > state.hard_state.term
+            || !state.hard_state.follows(HardState::default())
+            || state
+                .hard_state
+                .voted_for
+                .is_some_and(|n| !state.bootstrap.policy.voters().contains(&n))
+            || state.entries.len() > limits.max_entries_per_group
+        {
+            return Err(RaftError::InvalidRecovery);
+        }
+        let mut previous_term = 0;
+        for (i, e) in state.entries.iter().enumerate() {
+            if e.index != i as u64 + 1
+                || e.term == 0
+                || e.term < previous_term
+                || e.payload_bytes() > limits.max_command_bytes
+            {
+                return Err(RaftError::InvalidRecovery);
+            }
+            previous_term = e.term;
+        }
+        Ok(Self {
+            node,
+            binding,
+            limits,
+            durable: state,
+            role: Role::Follower,
+            votes: BTreeSet::new(),
+            vote_context: None,
+            progress: BTreeMap::new(),
+            next_index: BTreeMap::new(),
+            requests: BTreeMap::new(),
+            request_sequence: 0,
+            last_batch: 0,
+            pending: None,
+            fenced: false,
+        })
+    }
+    pub fn role(&self) -> Role {
+        self.role
+    }
+    pub fn state(&self) -> &GroupLog {
+        &self.durable
+    }
+    /// Host replays these through its application checkpoint/dedup contract.
+    pub fn replay_committed(&self) -> &[LogEntry] {
+        &self.durable.entries[..self.durable.commit_index as usize]
+    }
+    pub fn storage_failed(&mut self) {
+        self.fenced = true;
+        self.pending = None;
+        self.role = Role::Follower;
+    }
+
+    pub fn step(&mut self, event: Event) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if self.pending.is_some() {
+            return Err(RaftError::Busy);
+        }
+        match event {
+            Event::Campaign => {
+                self.role = Role::Candidate;
+                self.votes.clear();
+                self.requests.clear();
+                self.vote_context = None;
+                let term = self
+                    .durable
+                    .hard_state
+                    .term
+                    .checked_add(1)
+                    .ok_or(RaftError::Exhausted)?;
+                self.persist(
+                    HardState {
+                        term,
+                        voted_for: Some(self.node),
+                    },
+                    self.durable.commit_index,
+                    None,
+                    After::Campaign,
+                    None,
+                )
+            }
+            Event::Heartbeat => {
+                if self.role == Role::Leader {
+                    self.broadcast()
+                } else {
+                    Ok(Vec::new())
+                }
+            }
+            Event::Propose { operation, bytes } => {
+                if self.role != Role::Leader {
+                    return Err(RaftError::NotLeader);
+                }
+                if bytes.len() > self.limits.max_command_bytes {
+                    return Err(StorageError::Rejected("command byte budget").into());
+                }
+                let index = self
+                    .durable
+                    .last_index()
+                    .checked_add(1)
+                    .ok_or(RaftError::Exhausted)?;
+                let entry = LogEntry {
+                    index,
+                    term: self.durable.hard_state.term,
+                    payload: EntryPayload::Command { operation, bytes },
+                };
+                self.persist(
+                    self.durable.hard_state,
+                    self.durable.commit_index,
+                    Some(Suffix {
+                        from: index,
+                        entries: vec![entry],
+                    }),
+                    After::LeaderAppend,
+                    None,
+                )
+            }
+            Event::Receive(message) => self.receive(message),
+        }
+    }
+
+    pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        let p = self.pending.as_mut().ok_or(RaftError::WrongCompletion)?;
+        if p.ticket.is_some()
+            || ticket.binding != self.binding
+            || ticket.batch <= self.last_batch
+            || ticket.group != p.next.bootstrap.group
+            || ticket.revision != p.next.revision
+            || ticket.generation != p.next.generation
+            || ticket.last_index != p.next.last_index()
+            || ticket.term != p.next.hard_state.term
+        {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.last_batch = ticket.batch;
+        p.ticket = Some(ticket);
+        Ok(())
+    }
+    pub fn complete(&mut self, completion: &DurableLog) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        let p = self.pending.as_ref().ok_or(RaftError::WrongCompletion)?;
+        let ticket = p.ticket.ok_or(RaftError::WrongCompletion)?;
+        if !completion.tickets.contains(&ticket) {
+            return Err(RaftError::WrongCompletion);
+        }
+        let p = self.pending.take().unwrap();
+        let previous_commit = self.durable.commit_index;
+        self.durable = p.next;
+        let mut effects = Vec::new();
+        if self.durable.commit_index > previous_commit {
+            effects.push(Effect::Committed(
+                self.durable.entries[previous_commit as usize..self.durable.commit_index as usize]
+                    .to_vec(),
+            ));
+        }
+        match p.after {
+            After::Campaign => {
+                self.votes.insert(self.node);
+                if self.durable.bootstrap.policy.is_satisfied(&self.votes) {
+                    effects.extend(self.become_leader()?);
+                } else {
+                    let context = self.context()?;
+                    self.vote_context = Some(context);
+                    for peer in self.peers() {
+                        effects.push(Effect::Send(self.message(
+                            peer,
+                            context,
+                            Rpc::Vote {
+                                last_index: self.durable.last_index(),
+                                last_term: self.durable.last_term(),
+                            },
+                        )));
+                    }
+                }
+            }
+            After::Reply => {
+                if let Some(mut reply) = p.reply {
+                    reply.term = self.durable.hard_state.term;
+                    effects.push(Effect::Send(reply));
+                }
+            }
+            After::LeaderAppend => {
+                self.progress.insert(self.node, self.durable.last_index());
+                effects.extend(self.broadcast()?);
+                effects.extend(self.maybe_commit()?);
+            }
+            After::Commit => effects.extend(self.broadcast()?),
+        }
+        Ok(effects)
+    }
+
+    fn persist(
+        &mut self,
+        hard_state: HardState,
+        commit_index: u64,
+        suffix: Option<Suffix>,
+        after: After,
+        reply: Option<Message>,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let update = LogUpdate {
+            group: self.durable.bootstrap.group,
+            expected_revision: self.durable.revision,
+            hard_state,
+            commit_index,
+            suffix,
+        };
+        let mut state = BTreeMap::from([(update.group, self.durable.clone())]);
+        apply_batch(
+            &mut state,
+            &[LogMutation::Update(update.clone())],
+            self.limits,
+        )?;
+        self.pending = Some(Pending {
+            update: update.clone(),
+            next: state.remove(&update.group).unwrap(),
+            ticket: None,
+            after,
+            reply,
+        });
+        Ok(vec![Effect::Persist(update)])
+    }
+    fn peers(&self) -> Vec<NodeId> {
+        self.durable
+            .bootstrap
+            .policy
+            .voters()
+            .iter()
+            .filter(|n| **n != self.node)
+            .copied()
+            .collect()
+    }
+    fn context(&mut self) -> Result<RequestContext, RaftError> {
+        self.request_sequence = self
+            .request_sequence
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        Ok(RequestContext {
+            origin: self.binding,
+            sequence: self.request_sequence,
+        })
+    }
+    fn message(&self, to: NodeId, context: RequestContext, rpc: Rpc) -> Message {
+        Message {
+            group: self.durable.bootstrap.group,
+            configuration: self.durable.bootstrap.configuration,
+            from: self.node,
+            sender: self.binding,
+            to,
+            term: self.durable.hard_state.term,
+            context,
+            rpc,
+        }
+    }
+    fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
+        self.role = Role::Leader;
+        self.progress.clear();
+        self.next_index.clear();
+        self.requests.clear();
+        let next = self
+            .durable
+            .last_index()
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        for peer in self.peers() {
+            self.next_index.insert(peer, next);
+            self.progress.insert(peer, 0);
+        }
+        self.progress.insert(self.node, self.durable.last_index());
+        let entry = LogEntry {
+            index: next,
+            term: self.durable.hard_state.term,
+            payload: EntryPayload::Noop,
+        };
+        self.persist(
+            self.durable.hard_state,
+            self.durable.commit_index,
+            Some(Suffix {
+                from: next,
+                entries: vec![entry],
+            }),
+            After::LeaderAppend,
+            None,
+        )
+    }
+    fn broadcast(&mut self) -> Result<Vec<Effect>, RaftError> {
+        let mut effects = Vec::new();
+        for peer in self.peers() {
+            effects.push(self.append_for(peer)?);
+        }
+        Ok(effects)
+    }
+    fn append_for(&mut self, peer: NodeId) -> Result<Effect, RaftError> {
+        let next = self.next_index[&peer]
+            .min(self.durable.last_index() + 1)
+            .max(1);
+        let mut entries = Vec::new();
+        let mut bytes = 0usize;
+        // One bounded RPC can carry several entries; outer wire limits are
+        // negotiated by the later codec/transport assembly.
+        for entry in self
+            .durable
+            .entries
+            .iter()
+            .skip((next - 1) as usize)
+            .take(64)
+        {
+            let size = 37 + entry.payload_bytes();
+            if size > self.limits.max_batch_bytes.saturating_sub(bytes + 256) {
+                break;
+            }
+            entries.push(entry.clone());
+            bytes += size;
+        }
+        if entries.is_empty() && next <= self.durable.last_index() {
+            return Err(StorageError::Rejected("entry exceeds replication batch budget").into());
+        }
+        let end = entries.last().map_or(next - 1, |e| e.index);
+        let context = self.context()?;
+        self.requests.insert(peer, Replication { context, end });
+        Ok(Effect::Send(self.message(
+            peer,
+            context,
+            Rpc::Append {
+                previous_index: next - 1,
+                previous_term: self.durable.term_at(next - 1).unwrap(),
+                entries,
+                leader_commit: self.durable.commit_index,
+            },
+        )))
+    }
+    fn maybe_commit(&mut self) -> Result<Vec<Effect>, RaftError> {
+        let frontier = self
+            .durable
+            .bootstrap
+            .policy
+            .frontier(&self.progress)
+            .min(self.durable.last_index());
+        if frontier > self.durable.commit_index
+            && self.durable.term_at(frontier) == Some(self.durable.hard_state.term)
+        {
+            self.persist(self.durable.hard_state, frontier, None, After::Commit, None)
+        } else {
+            Ok(Vec::new())
+        }
+    }
+
+    fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        if m.to != self.node
+            || m.from == self.node
+            || m.group != self.durable.bootstrap.group
+            || m.configuration != self.durable.bootstrap.configuration
+            || self.durable.bootstrap.voter_stores.get(&m.from) != Some(&m.sender.identity)
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        if m.term == 0 || m.context.sequence == 0 {
+            return Err(RaftError::InvalidMessage);
+        }
+        let request = matches!(&m.rpc, Rpc::Vote { .. } | Rpc::Append { .. });
+        if request && m.context.origin != m.sender {
+            return Err(RaftError::WrongIdentity);
+        }
+        if !request && m.context.origin != self.binding {
+            return Err(RaftError::WrongIdentity);
+        }
+        let old = self.durable.hard_state;
+        let hard = if m.term > old.term {
+            HardState {
+                term: m.term,
+                voted_for: None,
+            }
+        } else {
+            old
+        };
+        if m.term > old.term {
+            self.role = Role::Follower;
+            self.vote_context = None;
+            self.requests.clear();
+        }
+        match &m.rpc {
+            Rpc::Vote {
+                last_index,
+                last_term,
+            } => {
+                if *last_term > m.term || ((*last_index == 0) != (*last_term == 0)) {
+                    return Err(RaftError::InvalidMessage);
+                }
+                let granted = m.term == hard.term
+                    && (hard.voted_for.is_none() || hard.voted_for == Some(m.from))
+                    && (*last_term, *last_index)
+                        >= (self.durable.last_term(), self.durable.last_index());
+                let next = HardState {
+                    voted_for: if granted {
+                        Some(m.from)
+                    } else {
+                        hard.voted_for
+                    },
+                    ..hard
+                };
+                let mut reply = self.message(m.from, m.context, Rpc::Voted { granted });
+                reply.term = next.term;
+                if next != old {
+                    self.persist(
+                        next,
+                        self.durable.commit_index,
+                        None,
+                        After::Reply,
+                        Some(reply),
+                    )
+                } else {
+                    Ok(vec![Effect::Send(reply)])
+                }
+            }
+            Rpc::Voted { granted } => {
+                if hard != old {
+                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+                }
+                if self.role != Role::Candidate
+                    || m.term != old.term
+                    || self.vote_context != Some(m.context)
+                {
+                    return Ok(Vec::new());
+                }
+                if *granted {
+                    self.votes.insert(m.from);
+                }
+                if self.durable.bootstrap.policy.is_satisfied(&self.votes) {
+                    self.become_leader()
+                } else {
+                    Ok(Vec::new())
+                }
+            }
+            Rpc::Append {
+                previous_index,
+                previous_term,
+                entries,
+                leader_commit,
+            } => {
+                if entries.len() > 64
+                    || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
+                        > self.limits.max_batch_bytes
+                {
+                    return Err(RaftError::InvalidMessage);
+                }
+                if m.term < old.term {
+                    return Ok(vec![Effect::Send(self.message(
+                        m.from,
+                        m.context,
+                        Rpc::Appended {
+                            success: false,
+                            matching_index: self.durable.last_index(),
+                        },
+                    ))]);
+                }
+                self.role = Role::Follower;
+                self.vote_context = None;
+                self.requests.clear();
+                if self.durable.term_at(*previous_index) != Some(*previous_term) {
+                    let mut reply = self.message(
+                        m.from,
+                        m.context,
+                        Rpc::Appended {
+                            success: false,
+                            matching_index: self.durable.last_index(),
+                        },
+                    );
+                    reply.term = hard.term;
+                    return if hard != old {
+                        self.persist(
+                            hard,
+                            self.durable.commit_index,
+                            None,
+                            After::Reply,
+                            Some(reply),
+                        )
+                    } else {
+                        Ok(vec![Effect::Send(reply)])
+                    };
+                }
+                let mut previous = *previous_term;
+                for (i, e) in entries.iter().enumerate() {
+                    if previous_index.checked_add(i as u64 + 1) != Some(e.index)
+                        || e.term == 0
+                        || e.term < previous
+                        || e.term > m.term
+                        || e.payload_bytes() > self.limits.max_command_bytes
+                    {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                    previous = e.term;
+                }
+                let mut suffix = None;
+                for (offset, entry) in entries.iter().enumerate() {
+                    match self.durable.entries.get((entry.index - 1) as usize) {
+                        Some(old_entry) if old_entry.term == entry.term => {
+                            if old_entry != entry {
+                                return Err(RaftError::InvalidMessage);
+                            }
+                        }
+                        _ => {
+                            suffix = Some(Suffix {
+                                from: entry.index,
+                                entries: entries[offset..].to_vec(),
+                            });
+                            break;
+                        }
+                    }
+                }
+                let matching = entries.last().map_or(*previous_index, |e| e.index);
+                let commit = self
+                    .durable
+                    .commit_index
+                    .max((*leader_commit).min(matching));
+                let mut reply = self.message(
+                    m.from,
+                    m.context,
+                    Rpc::Appended {
+                        success: true,
+                        matching_index: matching,
+                    },
+                );
+                reply.term = hard.term;
+                if hard != old || suffix.is_some() || commit != self.durable.commit_index {
+                    self.persist(hard, commit, suffix, After::Reply, Some(reply))
+                } else {
+                    Ok(vec![Effect::Send(reply)])
+                }
+            }
+            Rpc::Appended {
+                success,
+                matching_index,
+            } => {
+                if hard != old {
+                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+                }
+                if self.role != Role::Leader || m.term != old.term {
+                    return Ok(Vec::new());
+                }
+                let Some(sent) = self.requests.get(&m.from).copied() else {
+                    return Ok(Vec::new());
+                };
+                if sent.context != m.context {
+                    return Ok(Vec::new());
+                }
+                self.requests.remove(&m.from);
+                if *success {
+                    if *matching_index != sent.end {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                    let prefix = self.progress[&m.from].max(*matching_index);
+                    self.progress.insert(m.from, prefix);
+                    self.next_index.insert(m.from, prefix + 1);
+                    let mut effects = self.maybe_commit()?;
+                    if self.pending.is_none() && prefix < self.durable.last_index() {
+                        effects.push(self.append_for(m.from)?);
+                    }
+                    Ok(effects)
+                } else {
+                    let next = self.next_index[&m.from]
+                        .saturating_sub(1)
+                        .min(matching_index.saturating_add(1))
+                        .max(1);
+                    self.next_index.insert(m.from, next);
+                    Ok(vec![self.append_for(m.from)?])
+                }
+            }
+        }
+    }
+}
+
+/// Runs the storage portion of effects through the same seam used by hosts.
+/// Networking and application effects are returned to the caller, never hidden.
+pub fn persist_effect<S: LogStore>(
+    raft: &mut Raft,
+    store: &mut S,
+    update: LogUpdate,
+) -> Result<Vec<Effect>, RaftError> {
+    let result = (|| {
+        if store.binding() != raft.binding {
+            return Err(RaftError::WrongIdentity);
+        }
+        if raft.pending.as_ref().is_none_or(|p| p.update != update) {
+            return Err(RaftError::WrongCompletion);
+        }
+        let tickets = store.append_batch(vec![LogMutation::Update(update)])?;
+        if tickets.len() != 1 {
+            return Err(RaftError::WrongCompletion);
+        }
+        raft.admitted(tickets[0])?;
+        let completion = store.barrier(&tickets)?;
+        raft.complete(&completion)
+    })();
+    if result.is_err() {
+        raft.storage_failed();
+    }
+    result
+}

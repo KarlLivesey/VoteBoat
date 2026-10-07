@@ -48,7 +48,9 @@ id64!(
     OwnershipEpoch,
     ExecutionLaneId,
     WalLaneId,
-    WalLaneGeneration
+    WalLaneGeneration,
+    LogGeneration,
+    LogRevision
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 
