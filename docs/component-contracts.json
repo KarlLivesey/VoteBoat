@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "static-configuration-replication-slice",
+  "status": "static-configuration-replication-and-reads",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -18,7 +18,7 @@
         "tests/vote.rs",
         "tests/native_vote_store.rs"
       ],
-      "scope": "Durable ballots only. Full LogStore, snapshots and entries pending."
+      "scope": "Ballot-only provider. Full-log deployments select LogStore instead; no duplicate log stack."
     },
     {
       "design_id": "C04",
@@ -116,6 +116,19 @@
         "examples/replicated_counter.rs"
       ],
       "scope": "Deterministic bounded counter and exact operation retries. Checkpoints pending."
+    },
+    {
+      "design_id": "C05",
+      "public_contract": "ReadableStateMachine",
+      "operations": [
+        "read_at"
+      ],
+      "native": "Counter",
+      "conformance": [
+        "tests/raft.rs",
+        "examples/replicated_counter.rs"
+      ],
+      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases."
     }
   ],
   "not_yet_implemented": [

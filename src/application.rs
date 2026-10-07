@@ -16,6 +16,7 @@
 use crate::{
     identity::OperationId,
     log::{EntryPayload, LogEntry},
+    raft::{Raft, RaftError, ReadBarrier},
 };
 use std::collections::BTreeMap;
 
@@ -42,13 +43,47 @@ pub enum ApplicationError {
 
 /// A host applies only committed, contiguous entries and emits client success
 /// after application. Local reads do not create a linearizability proof; the
-/// later read-barrier protocol must authorize any distributed linearizable read.
+/// core's read-barrier protocol must authorize distributed linearizable reads.
 /// Application checkpoints and restore join this seam with snapshot support.
 pub trait StateMachine {
     type Receipt;
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
+}
+
+/// Read support is explicit and optional. `read_at` must observe immutable
+/// applied state and reject a boundary it has not applied. Hosts keep the group
+/// owner and its application serialized while invoking `read_at_barrier`.
+pub trait ReadableStateMachine: StateMachine {
+    type Query;
+    type ReadResult;
+    fn read_at(
+        &self,
+        required_index: u64,
+        query: Self::Query,
+    ) -> Result<Self::ReadResult, ApplicationError>;
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ReadError {
+    Consensus(RaftError),
+    Application(ApplicationError),
+}
+
+/// Serve the original pending invocation after a quorum and application catchup.
+/// The barrier is consumed once, including when the application rejects a query.
+pub fn read_at_barrier<A: ReadableStateMachine>(
+    raft: &mut Raft,
+    barrier: &ReadBarrier,
+    application: &A,
+    query: A::Query,
+) -> Result<A::ReadResult, ReadError> {
+    raft.finish_read(barrier, application.applied_index())
+        .map_err(ReadError::Consensus)?;
+    application
+        .read_at(barrier.index(), query)
+        .map_err(ReadError::Application)
 }
 
 #[derive(Clone)]
@@ -140,5 +175,13 @@ impl StateMachine for Counter {
         }
         *self = next;
         Ok(receipts)
+    }
+}
+
+impl ReadableStateMachine for Counter {
+    type Query = ();
+    type ReadResult = i64;
+    fn read_at(&self, required_index: u64, (): ()) -> Result<i64, ApplicationError> {
+        self.read_applied(required_index)
     }
 }

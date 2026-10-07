@@ -46,6 +46,9 @@ pub enum Rpc {
         success: bool,
         matching_index: u64,
     },
+    /// A fresh authority check for one admitted read, independent of log acks.
+    ReadProbe,
+    ReadAck,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Message {
@@ -73,6 +76,43 @@ pub enum Event {
         operation: OperationId,
         bytes: Vec<u8>,
     },
+    Read {
+        request: ReadRequestId,
+    },
+    CancelRead {
+        request: ReadRequestId,
+    },
+}
+
+/// One-use read authority. Only the core constructs it. The host must consume
+/// it through `finish_read` (or `application::read_at_barrier`) for the original
+/// read invocation; it is never a cached lease or authority for a later read.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReadBarrier {
+    group: GroupIdentity,
+    configuration: ConfigurationId,
+    term: u64,
+    context: RequestContext,
+    request: ReadRequestId,
+    index: u64,
+}
+impl ReadBarrier {
+    pub fn group(&self) -> GroupIdentity {
+        self.group
+    }
+    pub fn configuration(&self) -> ConfigurationId {
+        self.configuration
+    }
+    pub fn term(&self) -> u64 {
+        self.term
+    }
+    pub fn request(&self) -> ReadRequestId {
+        self.request
+    }
+    /// Contiguous committed prefix captured after a current-term commit.
+    pub fn index(&self) -> u64 {
+        self.index
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Effect {
@@ -81,6 +121,8 @@ pub enum Effect {
     /// Ordered committed entries. Not a client success: application must apply
     /// and return a result before a caller can acknowledge its operation.
     Committed(Vec<LogEntry>),
+    /// Quorum authority is established; application may still lag this index.
+    ReadReady(ReadBarrier),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
@@ -92,6 +134,10 @@ pub enum RaftError {
     WrongCompletion,
     Exhausted,
     InvalidRecovery,
+    ReadNotReady,
+    ReadInFlight,
+    StaleRead,
+    NotApplied,
     Storage(StorageError),
 }
 impl From<StorageError> for RaftError {
@@ -119,6 +165,10 @@ struct Replication {
     context: RequestContext,
     end: u64,
 }
+struct PendingRead {
+    barrier: ReadBarrier,
+    acknowledgements: BTreeSet<NodeId>,
+}
 
 pub struct Raft {
     node: NodeId,
@@ -134,6 +184,9 @@ pub struct Raft {
     request_sequence: u64,
     last_batch: u64,
     pending: Option<Pending>,
+    read: Option<PendingRead>,
+    ready_read: Option<ReadBarrier>,
+    last_read_request: u64,
     fenced: bool,
 }
 
@@ -189,6 +242,9 @@ impl Raft {
             request_sequence: 0,
             last_batch: 0,
             pending: None,
+            read: None,
+            ready_read: None,
+            last_read_request: 0,
             fenced: false,
         })
     }
@@ -206,6 +262,101 @@ impl Raft {
         self.fenced = true;
         self.pending = None;
         self.role = Role::Follower;
+        self.clear_reads();
+    }
+
+    fn clear_reads(&mut self) {
+        self.read = None;
+        self.ready_read = None;
+    }
+
+    /// Consume authority for the original invocation only, on the serialized
+    /// group owner immediately before reading immutable application state.
+    /// Insufficient application progress leaves the barrier available to retry.
+    pub fn finish_read(
+        &mut self,
+        barrier: &ReadBarrier,
+        applied_index: u64,
+    ) -> Result<(), RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if self.role != Role::Leader {
+            return Err(RaftError::NotLeader);
+        }
+        if self.ready_read.as_ref() != Some(barrier)
+            || barrier.group != self.durable.bootstrap.group
+            || barrier.configuration != self.durable.bootstrap.configuration
+            || barrier.term != self.durable.hard_state.term
+            || barrier.context.origin != self.binding
+            || barrier.index > self.durable.commit_index
+        {
+            return Err(RaftError::StaleRead);
+        }
+        if applied_index < barrier.index {
+            return Err(RaftError::NotApplied);
+        }
+        self.ready_read = None;
+        Ok(())
+    }
+
+    fn begin_read(&mut self, request: ReadRequestId) -> Result<Vec<Effect>, RaftError> {
+        if self.role != Role::Leader {
+            return Err(RaftError::NotLeader);
+        }
+        if self.read.is_some() || self.ready_read.is_some() {
+            return Err(RaftError::ReadInFlight);
+        }
+        if request.get() <= self.last_read_request {
+            return Err(RaftError::StaleRead);
+        }
+        if self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term) {
+            return Err(RaftError::ReadNotReady);
+        }
+        let context = self.context()?;
+        let barrier = ReadBarrier {
+            group: self.durable.bootstrap.group,
+            configuration: self.durable.bootstrap.configuration,
+            term: self.durable.hard_state.term,
+            context,
+            request,
+            index: self.durable.commit_index,
+        };
+        self.last_read_request = request.get();
+        self.read = Some(PendingRead {
+            barrier,
+            acknowledgements: BTreeSet::from([self.node]),
+        });
+        let ready = self.maybe_read_ready();
+        if !ready.is_empty() {
+            return Ok(ready);
+        }
+        Ok(self.read_probes())
+    }
+
+    fn read_probes(&self) -> Vec<Effect> {
+        let Some(read) = &self.read else {
+            return Vec::new();
+        };
+        self.peers()
+            .into_iter()
+            .map(|peer| Effect::Send(self.message(peer, read.barrier.context, Rpc::ReadProbe)))
+            .collect()
+    }
+
+    fn maybe_read_ready(&mut self) -> Vec<Effect> {
+        if self.read.as_ref().is_some_and(|r| {
+            self.durable
+                .bootstrap
+                .policy
+                .is_satisfied(&r.acknowledgements)
+        }) {
+            let barrier = self.read.take().unwrap().barrier;
+            self.ready_read = Some(barrier);
+            vec![Effect::ReadReady(barrier)]
+        } else {
+            Vec::new()
+        }
     }
 
     pub fn step(&mut self, event: Event) -> Result<Vec<Effect>, RaftError> {
@@ -217,6 +368,7 @@ impl Raft {
         }
         match event {
             Event::Campaign => {
+                self.clear_reads();
                 self.role = Role::Candidate;
                 self.votes.clear();
                 self.requests.clear();
@@ -240,7 +392,9 @@ impl Raft {
             }
             Event::Heartbeat => {
                 if self.role == Role::Leader {
-                    self.broadcast()
+                    let mut effects = self.broadcast()?;
+                    effects.extend(self.read_probes());
+                    Ok(effects)
                 } else {
                     Ok(Vec::new())
                 }
@@ -274,6 +428,20 @@ impl Raft {
                 )
             }
             Event::Receive(message) => self.receive(message),
+            Event::Read { request } => self.begin_read(request),
+            Event::CancelRead { request } => {
+                if self
+                    .read
+                    .as_ref()
+                    .is_some_and(|r| r.barrier.request == request)
+                    || self.ready_read.is_some_and(|r| r.request == request)
+                {
+                    self.clear_reads();
+                    Ok(Vec::new())
+                } else {
+                    Err(RaftError::StaleRead)
+                }
+            }
         }
     }
 
@@ -519,7 +687,10 @@ impl Raft {
         if m.term == 0 || m.context.sequence == 0 {
             return Err(RaftError::InvalidMessage);
         }
-        let request = matches!(&m.rpc, Rpc::Vote { .. } | Rpc::Append { .. });
+        let request = matches!(
+            &m.rpc,
+            Rpc::Vote { .. } | Rpc::Append { .. } | Rpc::ReadProbe
+        );
         if request && m.context.origin != m.sender {
             return Err(RaftError::WrongIdentity);
         }
@@ -536,6 +707,7 @@ impl Raft {
             old
         };
         if m.term > old.term {
+            self.clear_reads();
             self.role = Role::Follower;
             self.vote_context = None;
             self.requests.clear();
@@ -616,6 +788,7 @@ impl Raft {
                     ))]);
                 }
                 self.role = Role::Follower;
+                self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
                 if self.durable.term_at(*previous_index) != Some(*previous_term) {
@@ -726,6 +899,48 @@ impl Raft {
                     self.next_index.insert(m.from, next);
                     Ok(vec![self.append_for(m.from)?])
                 }
+            }
+            Rpc::ReadProbe => {
+                if m.term < old.term {
+                    // The higher-term response makes the requester step down;
+                    // its term cannot satisfy the request's read quorum.
+                    return Ok(vec![Effect::Send(self.message(
+                        m.from,
+                        m.context,
+                        Rpc::ReadAck,
+                    ))]);
+                }
+                self.role = Role::Follower;
+                self.clear_reads();
+                self.vote_context = None;
+                self.requests.clear();
+                let mut reply = self.message(m.from, m.context, Rpc::ReadAck);
+                reply.term = hard.term;
+                if hard != old {
+                    self.persist(
+                        hard,
+                        self.durable.commit_index,
+                        None,
+                        After::Reply,
+                        Some(reply),
+                    )
+                } else {
+                    Ok(vec![Effect::Send(reply)])
+                }
+            }
+            Rpc::ReadAck => {
+                if hard != old {
+                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+                }
+                if self.role != Role::Leader || m.term != old.term {
+                    return Ok(Vec::new());
+                }
+                if let Some(read) = &mut self.read {
+                    if read.barrier.context == m.context {
+                        read.acknowledgements.insert(m.from);
+                    }
+                }
+                Ok(self.maybe_read_ready())
             }
         }
     }

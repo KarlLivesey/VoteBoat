@@ -28,6 +28,7 @@ struct Cluster<S: LogStore> {
     messages: VecDeque<Message>,
     blocked: BTreeSet<(u64, u64)>,
     applied: BTreeMap<u64, Vec<LogEntry>>,
+    reads: BTreeMap<u64, Vec<ReadBarrier>>,
 }
 impl<S: LogStore> Cluster<S> {
     fn new(bootstrap: Bootstrap, mut factory: impl FnMut(u64) -> S) -> Self {
@@ -51,6 +52,7 @@ impl<S: LogStore> Cluster<S> {
             messages: VecDeque::new(),
             blocked: BTreeSet::new(),
             applied,
+            reads: BTreeMap::new(),
         }
     }
     fn act(&mut self, id: u64, event: Event) {
@@ -67,6 +69,7 @@ impl<S: LogStore> Cluster<S> {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             match effect {
+                Effect::ReadReady(barrier) => self.reads.entry(id).or_default().push(barrier),
                 Effect::Send(message) => {
                     assert!(self.messages.len() < 10000);
                     self.messages.push_back(message);
@@ -628,4 +631,602 @@ fn persistence_driver_rejects_a_different_body_with_identical_ticket_metadata() 
     );
     assert_eq!(io.0.borrow().log, before);
     assert_eq!(replica.core.step(Event::Heartbeat), Err(RaftError::Fenced));
+}
+
+fn read_request(id: u64) -> Event {
+    Event::Read {
+        request: ReadRequestId::new(id).unwrap(),
+    }
+}
+fn read_history<S: LogStore>(mut cluster: Cluster<S>) {
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.propose(1, 1, 7);
+    let required = cluster.applied[&1].len() as u64;
+    cluster.act(1, read_request(1));
+    assert!(
+        cluster.reads.is_empty(),
+        "local durability is not a read quorum"
+    );
+    cluster.pump();
+    let barrier = cluster.reads[&1][0];
+    assert_eq!(barrier.index(), required);
+    assert_eq!(barrier.group(), group(1));
+    assert_eq!(barrier.configuration(), ConfigurationId::new(1).unwrap());
+    let leader = &mut cluster.replicas.get_mut(&1).unwrap().core;
+    assert_eq!(
+        leader.finish_read(&barrier, required - 1),
+        Err(RaftError::NotApplied)
+    );
+    leader.finish_read(&barrier, required).unwrap();
+    assert_eq!(
+        leader.finish_read(&barrier, required),
+        Err(RaftError::StaleRead)
+    );
+
+    cluster.partition(&[1]);
+    cluster.act(1, read_request(2));
+    cluster.pump();
+    assert_eq!(cluster.reads[&1].len(), 1);
+    cluster.act(2, Event::Campaign);
+    cluster.pump();
+    cluster.propose(2, 2, 9);
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(
+        cluster.reads[&1].len(),
+        1,
+        "isolated previous leader cannot serve a new read"
+    );
+    cluster.heal();
+    cluster.act(2, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(cluster.replicas[&1].core.role(), Role::Follower);
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .step(read_request(3)),
+        Err(RaftError::NotLeader)
+    );
+    cluster.act(2, read_request(1));
+    cluster.pump();
+    let barrier = cluster.reads[&2][0];
+    assert_eq!(barrier.index(), cluster.applied[&2].len() as u64);
+    assert!(barrier.term() > cluster.reads[&1][0].term());
+}
+
+#[test]
+fn read_authority_and_applied_prefix_history_with_host_storage() {
+    read_history(Cluster::new(bootstrap(1, 3), |id| {
+        HostLogStore::new(id as u128)
+    }));
+}
+#[test]
+#[cfg(feature = "native")]
+fn read_authority_and_applied_prefix_history_with_native_storage() {
+    read_history(Cluster::new(bootstrap(1, 3), native));
+}
+
+#[test]
+fn read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable() {
+    let mut cluster = Cluster::new(bootstrap(1, 3), |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    while cluster.replicas[&1].core.role() != Role::Leader {
+        let m = cluster.messages.pop_front().unwrap();
+        cluster.deliver(m);
+    }
+    assert_eq!(cluster.replicas[&1].core.state().commit_index, 0);
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .step(read_request(1)),
+        Err(RaftError::ReadNotReady)
+    );
+    cluster.pump();
+    cluster.act(1, read_request(1));
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .step(read_request(2)),
+        Err(RaftError::ReadInFlight)
+    );
+    cluster.pump();
+    let barrier = cluster.reads[&1][0];
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .step(read_request(2)),
+        Err(RaftError::ReadInFlight)
+    );
+    cluster.act(
+        1,
+        Event::CancelRead {
+            request: ReadRequestId::new(1).unwrap(),
+        },
+    );
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .finish_read(&barrier, 1),
+        Err(RaftError::StaleRead)
+    );
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .step(read_request(1)),
+        Err(RaftError::StaleRead)
+    );
+    cluster.act(1, read_request(2));
+    cluster.act(
+        1,
+        Event::CancelRead {
+            request: ReadRequestId::new(2).unwrap(),
+        },
+    );
+    cluster.pump();
+    assert_eq!(
+        cluster.reads[&1].len(),
+        1,
+        "cancelled probes cannot re-create authority"
+    );
+    cluster.act(1, read_request(3));
+    cluster.pump();
+    let ready = cluster.reads[&1][1];
+    cluster.act(1, Event::Campaign);
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .finish_read(&ready, 1),
+        Err(RaftError::NotLeader)
+    );
+}
+
+#[test]
+fn recursive_reads_require_fresh_distinct_voters_for_the_exact_context() {
+    let mut b = bootstrap(1, 9);
+    b.policy = Policy::new(
+        Tree::Majority(
+            (0..3)
+                .map(|site| {
+                    Tree::Majority((1..=3).map(|n| Tree::Voter(node(site * 3 + n))).collect())
+                })
+                .collect(),
+        ),
+        Limits::default(),
+    )
+    .unwrap();
+    let mut cluster = Cluster::new(b, |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.act(1, read_request(1));
+    // Collect genuine responses before delivery; duplicated packets from one
+    // voter must never stand in for distinct leaves in the recursive policy.
+    let mut replies = Vec::new();
+    while let Some(m) = cluster.messages.pop_front() {
+        if matches!(m.rpc, Rpc::ReadAck) {
+            replies.push(m);
+        } else {
+            cluster.deliver(m);
+        }
+    }
+    let from2 = replies.iter().find(|m| m.from == node(2)).unwrap().clone();
+    for _ in 0..20 {
+        cluster.deliver(from2.clone());
+    }
+    assert!(cluster.reads.is_empty());
+    // Fresh {1,2,4,5} is a quorum; {1,2,3,4,7} is merely a flat majority.
+    for id in [3, 4, 7] {
+        cluster.deliver(replies.iter().find(|m| m.from == node(id)).unwrap().clone());
+    }
+    assert!(cluster.reads.is_empty());
+    cluster.deliver(replies.iter().find(|m| m.from == node(5)).unwrap().clone());
+    let first = cluster.reads[&1][0];
+    cluster
+        .replicas
+        .get_mut(&1)
+        .unwrap()
+        .core
+        .finish_read(&first, first.index())
+        .unwrap();
+    cluster.act(1, read_request(2));
+    cluster.messages.clear();
+    for m in &replies {
+        cluster.deliver(m.clone());
+    }
+    assert_eq!(
+        cluster.reads[&1].len(),
+        1,
+        "old read quorum must not authorize a new invocation"
+    );
+    cluster.partition(&[1, 2, 3, 4, 7]);
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(cluster.reads[&1].len(), 1);
+    cluster.partition(&[1, 2, 4, 5]);
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(
+        cluster.reads[&1].len(),
+        2,
+        "heartbeat retries the outstanding read context"
+    );
+}
+
+#[test]
+fn read_probe_higher_term_waits_for_its_exact_durability_ticket() {
+    let mut store = HostLogStore::new(2);
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let mut core = Raft::recover(
+        node(2),
+        store.binding(),
+        store.state(group(1)).unwrap(),
+        store.limits(),
+    )
+    .unwrap();
+    let origin = HostLogStore::new(1).binding();
+    let probe = Message {
+        group: group(1),
+        configuration: ConfigurationId::new(1).unwrap(),
+        from: node(1),
+        sender: origin,
+        to: node(2),
+        term: 7,
+        context: RequestContext {
+            origin,
+            sequence: 1,
+        },
+        rpc: Rpc::ReadProbe,
+    };
+    let effects = core.step(Event::Receive(probe)).unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!("read ack escaped before term durability");
+    };
+    assert_eq!(core.state().hard_state.term, 0);
+    let tickets = store
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    core.admitted(tickets[0]).unwrap();
+    assert_eq!(
+        core.complete(&DurableLog { tickets: vec![] }),
+        Err(RaftError::WrongCompletion)
+    );
+    let completion = store.barrier(&tickets).unwrap();
+    let effects = core.complete(&completion).unwrap();
+    assert!(matches!(
+        effects.as_slice(),
+        [Effect::Send(Message {
+            term: 7,
+            rpc: Rpc::ReadAck,
+            ..
+        })]
+    ));
+}
+
+#[test]
+fn counter_read_waits_for_application_and_cannot_reuse_or_move_barrier() {
+    use voteboat::application::*;
+    struct HostApplication(Counter);
+    impl StateMachine for HostApplication {
+        type Receipt = CounterReceipt;
+        fn applied_index(&self) -> u64 {
+            self.0.applied_index()
+        }
+        fn apply_batch(
+            &mut self,
+            entries: &[LogEntry],
+        ) -> Result<Vec<Self::Receipt>, ApplicationError> {
+            self.0.apply_batch(entries)
+        }
+    }
+    impl ReadableStateMachine for HostApplication {
+        type Query = &'static str;
+        type ReadResult = String;
+        fn read_at(&self, required: u64, units: Self::Query) -> Result<String, ApplicationError> {
+            Ok(format!("{} {units}", self.0.read_applied(required)?))
+        }
+    }
+    let mut cluster = Cluster::new(bootstrap(1, 3), |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.act(
+        1,
+        Event::Propose {
+            operation: OperationId::new(1).unwrap(),
+            bytes: 13i64.to_le_bytes().to_vec(),
+        },
+    );
+    cluster.pump();
+    cluster.act(1, read_request(1));
+    cluster.pump();
+    let barrier = cluster.reads[&1][0];
+    let mut application = Counter::new(20).unwrap();
+    assert_eq!(
+        read_at_barrier(
+            &mut cluster.replicas.get_mut(&1).unwrap().core,
+            &barrier,
+            &application,
+            ()
+        ),
+        Err(ReadError::Consensus(RaftError::NotApplied))
+    );
+    application.apply_batch(&cluster.applied[&1]).unwrap();
+    assert_eq!(
+        read_at_barrier(
+            &mut cluster.replicas.get_mut(&1).unwrap().core,
+            &barrier,
+            &application,
+            ()
+        ),
+        Ok(13)
+    );
+    assert_eq!(
+        read_at_barrier(
+            &mut cluster.replicas.get_mut(&1).unwrap().core,
+            &barrier,
+            &application,
+            ()
+        ),
+        Err(ReadError::Consensus(RaftError::StaleRead))
+    );
+    assert_eq!(
+        read_at_barrier(
+            &mut cluster.replicas.get_mut(&2).unwrap().core,
+            &barrier,
+            &application,
+            ()
+        ),
+        Err(ReadError::Consensus(RaftError::NotLeader))
+    );
+    cluster.act(1, read_request(2));
+    cluster.pump();
+    let host_barrier = cluster.reads[&1][1];
+    let host = HostApplication(application);
+    assert_eq!(
+        read_at_barrier(
+            &mut cluster.replicas.get_mut(&1).unwrap().core,
+            &host_barrier,
+            &host,
+            "units"
+        ),
+        Ok("13 units".to_string())
+    );
+}
+
+#[test]
+fn single_voter_read_and_restart_reject_prior_session_authority() {
+    let mut cluster = Cluster::new(bootstrap(1, 1), |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    cluster.act(1, read_request(1));
+    let barrier = cluster.reads[&1][0];
+    let store = &cluster.replicas[&1].store;
+    let mut reopened_binding = store.binding();
+    reopened_binding.session = StoreSession::new(reopened_binding.session.get() + 1).unwrap();
+    let mut core = Raft::recover(
+        node(1),
+        reopened_binding,
+        store.state(group(1)).unwrap(),
+        store.limits(),
+    )
+    .unwrap();
+    assert_eq!(
+        core.finish_read(&barrier, barrier.index()),
+        Err(RaftError::NotLeader)
+    );
+    // A new core cannot recover a volatile ready read from the persisted log.
+    assert_eq!(core.step(read_request(1)), Err(RaftError::NotLeader));
+    cluster.replicas.get_mut(&1).unwrap().core.storage_failed();
+    assert_eq!(
+        cluster
+            .replicas
+            .get_mut(&1)
+            .unwrap()
+            .core
+            .finish_read(&barrier, barrier.index()),
+        Err(RaftError::Fenced)
+    );
+}
+
+#[test]
+fn delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change() {
+    let mut cluster = Cluster::new(bootstrap(1, 3), |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.propose(1, 1, 7);
+    cluster.act(1, read_request(1));
+    let mut replies = Vec::new();
+    while let Some(m) = cluster.messages.pop_front() {
+        if matches!(m.rpc, Rpc::ReadAck) {
+            replies.push(m);
+        } else {
+            cluster.deliver(m);
+        }
+    }
+    assert_eq!(replies.len(), 2);
+    // The read began before this new leader/write. Its delayed old quorum may
+    // finish that overlapping read at the old prefix, but cannot be reused by
+    // another invocation after the new write's completion.
+    cluster.partition(&[1]);
+    cluster.act(2, Event::Campaign);
+    cluster.pump();
+    cluster.propose(2, 2, 9);
+    assert_eq!(cluster.commands(2), vec![vec![7], vec![9]]);
+    cluster.heal();
+    cluster.deliver(replies[0].clone());
+    let first = cluster.reads[&1][0];
+    assert_eq!(first.index(), 2);
+    cluster
+        .replicas
+        .get_mut(&1)
+        .unwrap()
+        .core
+        .finish_read(&first, 2)
+        .unwrap();
+    cluster.act(1, read_request(2));
+    for m in replies {
+        cluster.deliver(m);
+    }
+    assert_eq!(cluster.reads[&1].len(), 1);
+    cluster.pump();
+    assert_eq!(cluster.reads[&1].len(), 1);
+    assert_eq!(cluster.replicas[&1].core.role(), Role::Follower);
+    cluster.act(2, read_request(1));
+    cluster.pump();
+    let fresh = cluster.reads[&2][0];
+    assert_eq!(fresh.index(), 4);
+    assert_eq!(cluster.commands(2), vec![vec![7], vec![9]]);
+}
+
+#[test]
+fn read_ack_rejects_foreign_scope_old_term_and_previous_store_session() {
+    let mut cluster = Cluster::new(bootstrap(1, 3), |id| HostLogStore::new(id as u128));
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.act(1, read_request(1));
+    let mut reply = None;
+    while let Some(m) = cluster.messages.pop_front() {
+        if matches!(m.rpc, Rpc::ReadAck) {
+            reply = Some(m);
+        } else {
+            cluster.deliver(m);
+        }
+    }
+    let reply = reply.unwrap();
+    let core = &mut cluster.replicas.get_mut(&1).unwrap().core;
+    for mutate in 0..5 {
+        let mut stale = reply.clone();
+        match mutate {
+            0 => stale.group.incarnation = GroupIncarnation::new(2).unwrap(),
+            1 => stale.configuration = ConfigurationId::new(2).unwrap(),
+            2 => stale.sender.identity.incarnation = StoreIncarnation::new(2).unwrap(),
+            3 => stale.context.origin.session = StoreSession::new(99).unwrap(),
+            4 => stale.group.id = GroupId::new(99).unwrap(),
+            _ => unreachable!(),
+        }
+        assert_eq!(
+            core.step(Event::Receive(stale)),
+            Err(RaftError::WrongIdentity)
+        );
+    }
+    let mut stale_term = reply.clone();
+    stale_term.term += 1;
+    // Establish the new term while preserving the old pending read response.
+    let effects = core.step(Event::Receive(stale_term)).unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    let replica = cluster.replicas.get_mut(&1).unwrap();
+    persist_effect(&mut replica.core, &mut replica.store, update.clone()).unwrap();
+    assert_eq!(
+        replica.core.step(Event::Receive(reply)).unwrap(),
+        Vec::new()
+    );
+    assert_eq!(replica.core.role(), Role::Follower);
+    assert!(cluster.reads.is_empty());
+}
+
+#[test]
+#[cfg(feature = "native")]
+fn native_restart_and_failed_read_term_sync_never_release_old_authority() {
+    let io = ModelIo::default();
+    let mut cluster = Cluster::new(bootstrap(1, 1), |id| {
+        NativeLogStore::create(io.clone(), identity(id as u128), LogLimits::default()).unwrap()
+    });
+    cluster.act(1, Event::Campaign);
+    cluster.act(1, read_request(1));
+    let old = cluster.reads[&1][0];
+    let previous_session = cluster.replicas[&1].store.binding().session;
+    drop(cluster);
+    io.0.borrow_mut().power_loss();
+    let store = NativeLogStore::recover(io.clone(), identity(1), LogLimits::default()).unwrap();
+    assert!(store.binding().session > previous_session);
+    let core = Raft::recover(
+        node(1),
+        store.binding(),
+        store.state(group(1)).unwrap(),
+        store.limits(),
+    )
+    .unwrap();
+    let mut cluster = Cluster {
+        replicas: BTreeMap::from([(1, Replica { core, store })]),
+        applied: BTreeMap::from([(
+            1,
+            vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Noop,
+            }],
+        )]),
+        messages: VecDeque::new(),
+        blocked: BTreeSet::new(),
+        reads: BTreeMap::new(),
+    };
+    cluster.act(1, Event::Campaign);
+    cluster.act(1, read_request(1));
+    let fresh = cluster.reads[&1][0];
+    let core = &mut cluster.replicas.get_mut(&1).unwrap().core;
+    assert_eq!(
+        core.finish_read(&old, fresh.index()),
+        Err(RaftError::StaleRead)
+    );
+    core.finish_read(&fresh, fresh.index()).unwrap();
+
+    // A follower's higher-term probe creates a real native hard-state write.
+    // Neither a failed sync nor recovery of its interrupted tail can emit ack.
+    let io = ModelIo::default();
+    let mut store = NativeLogStore::create(io.clone(), identity(2), LogLimits::default()).unwrap();
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let mut core = Raft::recover(
+        node(2),
+        store.binding(),
+        store.state(group(1)).unwrap(),
+        store.limits(),
+    )
+    .unwrap();
+    let origin = HostLogStore::new(1).binding();
+    let effects = core
+        .step(Event::Receive(Message {
+            group: group(1),
+            configuration: ConfigurationId::new(1).unwrap(),
+            from: node(1),
+            sender: origin,
+            to: node(2),
+            term: 1,
+            context: RequestContext {
+                origin,
+                sequence: 3,
+            },
+            rpc: Rpc::ReadProbe,
+        }))
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    io.0.borrow_mut().fault = Fault::Sync;
+    assert!(persist_effect(&mut core, &mut store, update.clone()).is_err());
+    assert_eq!(core.step(Event::Heartbeat), Err(RaftError::Fenced));
+    drop(store);
+    io.0.borrow_mut().power_loss();
+    let recovered = NativeLogStore::recover(io, identity(2), LogLimits::default()).unwrap();
+    assert_eq!(recovered.state(group(1)).unwrap().hard_state.term, 0);
 }

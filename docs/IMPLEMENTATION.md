@@ -10,9 +10,9 @@ record claims that unimplemented phases already work.
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config elections, replication, conflict repair, recovery and deduplicated counter demo implemented; transport, reads and snapshots remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config elections, replication, conflict repair, recovery, read barriers and deduplicated counter demo implemented; transport and snapshots remain |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Pending |
-| P3 | Recursive quorum integration at every consensus quorum site | Elections and durable commitment use validated predicates; read/check-quorum sites and full audit remain |
+| P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
@@ -276,13 +276,77 @@ Linux, Rust 1.98.1, 8 October 2026:
   are checked locally. macOS CI activation remains deferred as recorded above.
 
 These finite histories are regression evidence, not a full protocol proof or a
-production release gate. There is no production network service, distributed
+production release gate. At the end of slice 2 there was no production network service, distributed
 linearizable-read API, checkpoint/snapshot, joint reconfiguration, scope transfer
 or throughput claim yet. Real hardware power-cut testing remains outstanding.
 
+## Slice 3: quorum-backed reads
+
+`Event::Read` admits one read invocation on the serialized group owner. The
+leader first requires a durably committed entry from its current term; a new
+leader cannot use an inherited committed prefix before establishing that fence.
+Admission captures the contiguous committed index and creates a fresh
+`RequestContext` scoped to the persisted store session. Explicit `ReadProbe`
+messages gather individual `ReadAck` responses under the same validated policy
+used for elections and writes. Append acknowledgements and previously collected
+read quorums do not count. Heartbeat events retry the outstanding read context.
+
+A follower persists any higher term before its acknowledgement can escape. A
+same-term acknowledgement depends on the already durable hard state; it proves
+current-term authority participation, not new log replication. The leader counts
+only distinct configured voter identities with matching group/configuration,
+request context, origin session and current term. Responses from a higher term
+invalidate read state and force term persistence. Leadership loss, campaigns,
+storage failure, cancellation and restart discard pending and ready reads.
+
+`ReadReady` carries an opaque, one-use `ReadBarrier`. Its index is the committed
+prefix captured at invocation, not the maximum received or applied index. The
+host waits for ordered application through that index, then consumes the barrier
+on the same core immediately before reading immutable application state. The
+public `ReadableStateMachine` extension and `read_at_barrier` helper perform this
+path for the native counter and a downstream application with its own query and
+result types. Insufficient application progress retains the barrier for retry;
+successful consumption prevents reuse for another invocation. The host must bind
+the correct application to the group and apply only committed entries.
+
+Read request IDs increase within a store session. One admitted or ready read per
+group bounds retained resources; callers receive `ReadInFlight` and must apply
+their own bounded admission/retry. Cancellation releases that slot without
+undoing any writes. No clock leases, cached leader hints or process-heartbeat
+authority are used. A delayed acknowledgement may finish its original read
+which overlapped a new leader's write; it cannot authorize a subsequent read.
+
+### Slice 3 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full native suite: 55 tests pass. Core/contracts/application-only suite:
+  22 tests pass. Both builds pass Clippy with warnings denied; documentation
+  builds without dependencies.
+- Read histories run against both native storage and a host-supplied store.
+  Local durability alone cannot complete a read, an isolated old leader cannot
+  serve a new read, and a replacement leader's barrier covers its committed write.
+- The nine-voter recursive policy rejects fresh responses from a flat majority
+  lacking the tree quorum. Duplicate voters, previous read contexts, foreign
+  groups/configurations/incarnations, and old origin sessions cannot certify it.
+- Higher-term read acknowledgements wait for their exact durability ticket;
+  insufficient applied progress, cancellation, token reuse, campaign and storage
+  fencing are checked. Recovery cannot restore a volatile ready read.
+- A delayed old quorum can finish only its original overlapping read. A second
+  invocation after the new leader's completed write cannot reuse those responses.
+- The real three-WAL counter example obtains its printed linearizable value
+  through the same public read path. Native and host applications exercise the
+  generic helper, including a host-specific query/result type. Three invocations
+  on the same files print 7, 7 after restart/retry, and 10 after the next operation.
+
+These histories are finite regression evidence. A general end-to-end history
+checker and virtual-time read scheduling remain to be added with the runtime.
+The read mechanism does not enable leases, follower linearizable reads, snapshot
+installation or online policy changes. The full P0–P7 goal remains incomplete.
+
 ## Next slice
 
-Add read barriers and application checkpoint/snapshot publication, then introduce
+Add application checkpoint/snapshot publication, then introduce
 the bounded shared scheduler, timers, wire codec and authenticated-session
 transport seams. Extend the simulator to explicit virtual time and independently
 delayed storage completion events. Native sockets must use established secure

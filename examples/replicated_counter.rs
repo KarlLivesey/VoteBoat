@@ -13,7 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Three real WALs, deterministic core and host-driven in-process delivery.
-//! This is a composition demo, not a network daemon or linearizable-read API.
+//! This composition demo includes quorum-backed reads, but is not a network daemon.
 use std::{
     collections::{BTreeMap, VecDeque},
     path::PathBuf,
@@ -25,6 +25,7 @@ struct Replica {
     store: NativeLogStore<FileLogIo>,
     application: Counter,
     receipts: Vec<CounterReceipt>,
+    read_value: Option<i64>,
 }
 struct Demo {
     replicas: BTreeMap<NodeId, Replica>,
@@ -36,6 +37,13 @@ impl Demo {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             match effect {
+                Effect::ReadReady(barrier) => {
+                    let r = self.replicas.get_mut(&id).unwrap();
+                    r.read_value = Some(
+                        read_at_barrier(&mut r.core, &barrier, &r.application, ())
+                            .map_err(|e| format!("{e:?}"))?,
+                    );
+                }
                 Effect::Send(m) => {
                     if self.messages.len() >= 1024 {
                         return Err("demo message budget exhausted".into());
@@ -154,6 +162,7 @@ fn main() -> Result<(), Failure> {
                 store,
                 application,
                 receipts: Vec::new(),
+                read_value: None,
             },
         );
     }
@@ -177,6 +186,19 @@ fn main() -> Result<(), Failure> {
         operation.get(),
         receipt.outcome,
         receipt.duplicate
+    );
+    demo.act(
+        leader,
+        Event::Read {
+            request: ReadRequestId::new(1).unwrap(),
+        },
+    )?;
+    demo.pump()?;
+    println!(
+        "linearizable_value={}",
+        demo.replicas[&leader]
+            .read_value
+            .ok_or("read did not reach quorum")?
     );
     for (node, r) in &demo.replicas {
         println!(

@@ -8,14 +8,15 @@ public interfaces that host applications can implement themselves.
 Initial target platforms are **Linux and macOS**. Windows is deferred.
 
 The working baseline now includes a **static-configuration Raft core** with
-durable elections, replication, ordered commitment and conflict repair, plus a
+durable elections, replication, ordered commitment, conflict repair and
+quorum-backed read barriers, plus a
 three-replica counter demo. Group configuration and voter store identities are
 persisted with the native WAL. Operation retries return the original application
 result without repeating their effect. Restart, partition, corruption and
 storage-failure tests exercise native providers and host replacements. There
 are no third-party runtime dependencies.
 
-Transport, read barriers, snapshots and online reconfiguration remain under
+Transport, snapshots and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run
@@ -33,6 +34,7 @@ Try the three-replica counter in a fresh directory:
 ```sh
 cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
 # operation=1 outcome=Value(7) retry_duplicate=true
+# linearizable_value=7
 # All three replicas report value=7, with committed/applied boundaries matching.
 cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
 # Restart and retry operation 1: value remains 7.
@@ -42,10 +44,17 @@ cargo run --example replicated_counter -- /tmp/voteboat-counter 2 3
 
 The demo uses three real WALs and host-driven in-process message delivery.
 It explicitly elects node 1 and submits each operation twice to demonstrate
-deduplication. Its reads are local applied-state diagnostics; no distributed
-linearizable-read API is advertised yet. Its counter accepts signed i64 deltas
+deduplication. The leader then uses a fresh quorum-backed read barrier and waits
+for application before printing `linearizable_value`. Per-replica `value` lines
+are explicitly local applied-state diagnostics. Its counter accepts signed i64 deltas
 encoded as eight little-endian bytes. Application/deduplication capacity is
 bounded; the later service admission layer must reserve capacity before commits.
+
+Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
+messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
+Each group allows one outstanding read (including an unconsumed ready barrier).
+Request IDs increase within a store session; cancellation frees the slot. A
+barrier is for its original invocation only and cannot authorize a later read.
 
 The original standalone voting example remains available:
 
