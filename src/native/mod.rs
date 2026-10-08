@@ -21,6 +21,10 @@ pub mod node;
 pub mod outbound;
 #[cfg(feature = "quic")]
 pub mod quic;
+#[cfg(feature = "quic")]
+pub mod quic_connect;
+#[cfg(feature = "quic")]
+mod quic_socket;
 pub mod runtime;
 pub mod snapshot_store;
 pub mod snapshot_worker;

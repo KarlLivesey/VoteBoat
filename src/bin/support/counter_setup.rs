@@ -18,12 +18,12 @@ use voteboat::{
     application::*,
     identity::*,
     log::*,
-    native::{node::*, startup::*, tls::*, worker::*},
+    native::{connect::*, node::*, startup::*, tls::*, worker::*},
     quorum::*,
     runtime::*,
 };
 pub type Failure = Box<dyn std::error::Error>;
-pub type Service = NativeNode<Counter>;
+pub type Service = NativeNode<Counter, NativeServiceConnector>;
 pub fn checked<T, E: std::fmt::Debug>(value: Result<T, E>) -> Result<T, Failure> {
     value.map_err(|e| format!("{e:?}").into())
 }
@@ -145,8 +145,9 @@ pub fn configuration(
     config.validate()?;
     Ok(config)
 }
-pub fn open(config: NativeStartup) -> Result<Service, Failure> {
-    match config.open(
+pub fn open(config: NativeStartup, protocol: NativePeerProtocol) -> Result<Service, Failure> {
+    match config.open_with_protocol(
+        protocol,
         checked(Counter::new(10000))?,
         Arc::new(ThreadWake::current()),
         MonoTime(0),
@@ -180,7 +181,10 @@ pub fn join(service: Service) -> Result<(), Failure> {
     let mut log_done = false;
     let mut snapshots_done = false;
     loop {
-        let dial_done = checked(dialer.try_finish())?;
+        let dial_done = match &mut dialer {
+            Some(d) => checked(d.try_finish())?,
+            None => true,
+        };
         if !log_done {
             log_done = parts.local.persistence.try_reclaim()?.is_some();
         }

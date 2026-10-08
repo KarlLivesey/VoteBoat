@@ -94,6 +94,17 @@ returns the selected provider; a native caller explicitly joins it with
 `try_finish`. Drop closes owned streams and relies on the selected dialer's drop
 contract for bounded cleanup, abandoning observation. No host reactor is stopped.
 
+## Optional QUIC provider
+
+With `quic`, `native::quic_connect::NativeQuicConnector` implements the same
+PeerConnector contract over one supplied UDP socket, fixed pinned peer addresses
+and fresh tickets. Peer leases bound packet queues and prevent a replacement
+session from consuming an old session's packets. Close cancels owned handshakes;
+transferred sessions retain their leases. There is no dial worker or anonymous
+routing preface. NativeStartup::open_with_protocol and the counter's --transport
+flag explicitly select it; TCP remains the default. See
+[QUIC construction, accounting and evidence](QUIC_TRANSPORT.md).
+
 The owner checks injected dialer identity, immutable limits, outstanding count,
 receipt bounds and exact tickets. Provider violations stop admission and return
 `ProviderViolation`; an alien/lost receipt cannot release the real ticket. A

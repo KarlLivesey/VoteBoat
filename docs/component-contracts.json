@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "typed-native-startup-and-configurable-service",
+  "status": "native-tcp-tls-and-optional-quic-service",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -12,19 +12,20 @@
   "contracts": [
     {
       "design_id": "C10/C15",
-      "public_contract": "NativeStartup / NativeStartupPeer / NativeOpenMode / NativeStartupRejected<A>",
+      "public_contract": "NativeStartup / NativeStartupPeer / NativeOpenMode / NativeStartupRejected<A> / NativePeerProtocol",
       "operations": [
         "validate",
         "open",
+        "open_with_protocol",
         "try_cleanup"
       ],
-      "native": "Explicit single-group native filesystem/listener/worker assembly over the public NodeParts providers; TLS feature required.",
+      "native": "Explicit single-group native filesystem/listener/worker assembly over public NodeParts providers; TCP/TLS default, optional QUIC with shared UDP socket and two storage workers.",
       "conformance": [
         "tests/startup.rs",
         "tests/counter_service.rs",
         "examples/embedded_counter.rs"
       ],
-      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. The service process tests use both default and configured TCP/TLS endpoints; no separate-host/macOS deployment evidence."
+      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence."
     },
     {
       "design_id": "C10/C15",
@@ -55,7 +56,7 @@
         "reclaim",
         "poll_reclaim"
       ],
-      "native": "NativeNode / NativeNodeParts / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
+      "native": "NativeNode<A, C=NativePeerConnector> / NativeNodeParts<A, C=NativePeerConnector> / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
       "conformance": [
         "tests/support/node.rs",
         "tests/support/native_node.rs",
@@ -518,9 +519,9 @@
       "design_id": "C09",
       "public_contract": "SecureSession",
       "operations": ["security", "state", "binding", "limits", "poll", "read_plaintext", "write_plaintext", "is_flushed", "close", "revoke"],
-      "native": "NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature)",
+      "native": "NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature); Box<S> forwarding",
       "conformance": ["tests/secure.rs", "tests/quic.rs"],
-      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativePeerConnector, NativeStartup and service CLI remain TCP/TLS; shared UDP establishment is pending. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence."
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence."
     },
     {
       "design_id": "C06",
@@ -574,13 +575,16 @@
         "close",
         "is_drained"
       ],
-      "native": "NativePeerConnector<D: PeerDialer<Endpoint=SocketAddr, Channel=TcpStream>> (tls feature)",
+      "native": "NativePeerConnector<D: PeerDialer<Endpoint=SocketAddr, Channel=TcpStream>> (tls feature); NativeQuicConnector (quic feature); NativeServiceConnector / NativePeerProtocol (explicit selection, boxed sessions)",
       "conformance": [
         "tests/connect.rs",
+        "tests/quic_connect.rs",
+        "tests/startup.rs",
+        "tests/counter_service.rs",
         "tests/peers.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Optional QUIC owns one supplied UDP socket with eight queued 1200-byte datagrams per live authorized peer lease. Source-address routing charges all consumed packets, including routed/unknown packets. No anonymous slots or worker. Full-ticket cancellation, monotonic per-peer generations, bounded fair visits, terminal slot retention and protocol deadlines. Transferred leases survive connector close/drop and block reuse until dropped. Four downstream shared-UDP tests, an internal queue/accounting test, late startup cleanup and a native-file three-process QUIC recovery history pass."
     },
     {
       "design_id": "C06/C10/C15",

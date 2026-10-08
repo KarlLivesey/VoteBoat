@@ -196,3 +196,40 @@ pub fn require_authenticated(
     }
     session.binding().ok_or(SessionError::NotReady)
 }
+
+impl<S: SecureSession + ?Sized> SecureSession for Box<S> {
+    fn security(&self) -> SessionSecurity {
+        (**self).security()
+    }
+    fn state(&self) -> SessionState {
+        (**self).state()
+    }
+    fn binding(&self) -> Option<SessionBinding> {
+        (**self).binding()
+    }
+    fn limits(&self) -> SessionLimits {
+        (**self).limits()
+    }
+    fn poll(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<SessionProgress, SessionError> {
+        (**self).poll(now, budget)
+    }
+    fn read_plaintext(&mut self, bytes: &mut [u8]) -> Result<usize, SessionError> {
+        (**self).read_plaintext(bytes)
+    }
+    fn write_plaintext(&mut self, bytes: &[u8]) -> Result<usize, SessionError> {
+        (**self).write_plaintext(bytes)
+    }
+    fn is_flushed(&self) -> bool {
+        (**self).is_flushed()
+    }
+    fn close(&mut self) {
+        (**self).close();
+    }
+    fn revoke(&mut self) {
+        (**self).revoke();
+    }
+}

@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Three independent native TCP/TLS nodes, with a bounded local control endpoint.
+//! Three independent native TCP/TLS or optional QUIC nodes, with a bounded local control endpoint.
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/counter_setup.rs"]
@@ -24,15 +24,16 @@ use std::{
     path::Path,
     time::{Duration, Instant},
 };
-use voteboat::{identity::*, raft::RaftError, runtime::*};
+use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE]\n\
+    "voteboat-counter serve create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
 voteboat-counter client BASE_PORT NODE status|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
+QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -172,6 +173,7 @@ fn serve(
     base: u16,
     tls: &Path,
     endpoints: Option<&Path>,
+    protocol: NativePeerProtocol,
 ) -> Result<(), Failure> {
     let create = match mode {
         "create" => true,
@@ -182,10 +184,10 @@ fn serve(
     listener.set_nonblocking(true)?;
     let config = setup::configuration(root, id, base, tls, create, endpoints)?;
     let peer_address = config.listen;
-    let mut service = setup::open(config)?;
+    let mut service = setup::open(config, protocol)?;
     let start = Instant::now();
     println!(
-        "ready node={id} peer={peer_address} command=127.0.0.1:{}",
+        "ready node={id} peer={peer_address} transport={protocol:?} command=127.0.0.1:{}",
         base + 100 + id as u16
     );
     let mut connection: Option<Connection> = None;
@@ -292,7 +294,24 @@ fn serve(
     Ok(())
 }
 fn main() -> Result<(), Failure> {
-    let args = std::env::args().skip(1).collect::<Vec<_>>();
+    let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+    let protocol = if args.first().is_some_and(|a| a == "serve")
+        && args.len() >= 3
+        && args[args.len() - 2] == "--transport"
+    {
+        let selected = args.pop().unwrap();
+        args.pop();
+        match selected.as_str() {
+            "tcp" => NativePeerProtocol::TcpTls,
+            #[cfg(feature = "quic")]
+            "quic" => NativePeerProtocol::Quic,
+            #[cfg(not(feature = "quic"))]
+            "quic" => return Err("QUIC support requires building with --features quic".into()),
+            _ => return Err("expected --transport tcp or --transport quic".into()),
+        }
+    } else {
+        NativePeerProtocol::TcpTls
+    };
     match args.as_slice() {
         [help] if help == "--help" || help == "-h" => {
             println!("{HELP}");
@@ -300,7 +319,15 @@ fn main() -> Result<(), Failure> {
         }
         [serve_arg, mode, root, id, base, tls] if serve_arg == "serve" => {
             let (base, id) = ports(base, id)?;
-            serve(mode, Path::new(root), id, base, Path::new(tls), None)
+            serve(
+                mode,
+                Path::new(root),
+                id,
+                base,
+                Path::new(tls),
+                None,
+                protocol,
+            )
         }
         [serve_arg, mode, root, id, base, tls, endpoints] if serve_arg == "serve" => {
             let (base, id) = ports(base, id)?;
@@ -311,6 +338,7 @@ fn main() -> Result<(), Failure> {
                 base,
                 Path::new(tls),
                 Some(Path::new(endpoints)),
+                protocol,
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {

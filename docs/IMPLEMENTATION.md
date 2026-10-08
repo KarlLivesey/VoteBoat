@@ -2676,12 +2676,70 @@ The combined final Linux QUIC/secure/transport/startup/service run passes
 Core-only and native-only all-target compilation and all-feature API docs pass.
 See QUIC_TRANSPORT.md for construction and integration scope.
 
+## Slice 44 — shared QUIC establishment and native service selection
+
+Mini schema plan: one explicit UDP socket per node, bounded queues routed by
+configured peer source addresses, and generation-scoped session leases. A live
+lease prevents reuse; cancellation/drop clears its queued packets. Preserve
+terminal request slots and transferred sessions during connector close. Reuse
+the native storage/recovery builder with explicit TCP/QUIC selection. Test shared
+peers, budget charging, cancellation, failed startup and native process recovery.
+
+NativeQuicConnector implements the public PeerConnector contract. It owns no
+thread or runtime, and consumes the host's bound UDP socket. Eight queued
+1200-byte datagrams per live peer lease bound socket sharing; unknown sources
+allocate no mailbox and full queues drop packets for QUIC retransmission. All
+consumed packets are charged to the visiting session, including foreign/routed
+packets; queued reads are charged conservatively again. At most one OS read
+occurs per read visit. Established QUIC sessions now have a five-second idle
+timeout so dead peer routes can be released for reconnect. Hosts still drive
+all polling and wakeups.
+
+Exact local/peer/store/generation/address/deadline checks precede admission.
+Owned handshakes release leases on cancellation/expiry, while accepted tickets
+retain slots through exactly one terminal poll. Transferred sessions retain
+their leases until dropped and survive connector close/drop. A new connection
+cannot overwrite a live lease. Generation-checked cleanup discards old queues
+without removing replacements. Protocol connection IDs and crypto isolate old
+packets; recovered store sessions and host generation ranges remain authoritative.
+No new wire format, escaping consensus effect or durability evidence is added.
+
+NativeStartup::open_with_protocol selects NativePeerProtocol::TcpTls or optional
+Quic, returning NativeNode with NativeServiceConnector. Box<S> now forwards the
+public SecureSession contract. Original open/default native aliases retain TCP;
+the aliases also accept an explicit connector type. The common builder performs
+the same WAL/snapshot verification and application restore/replay for both.
+QUIC starts two storage workers and no dial worker. Connector construction is
+the last provider step before node assembly so any subsequent rejection returns
+started TCP worker ownership or drops idle QUIC resources for explicit cleanup.
+No failed initialization is treated as rollback.
+
+The counter accepts trailing --transport tcp|quic after any peer file; QUIC
+requires --features quic. Each node uses one configured UDP peer port, with
+unchanged TCP local commands. The process fixture also reserves UDP ports before
+launch and releases all placeholders before any child starts.
+
+Four downstream connector tests check multi-peer one-socket establishment,
+one-call/one-visit fairness, independent sessions surviving connector close/drop,
+lease release and fresh generation reconnect, exact cancellation/terminal slots,
+expiry, rejected budgets/time/identities/routes and returned construction socket.
+One internal UDP test checks queue/drop ceilings, routed/unknown byte accounting
+and retired queue disposal. A sixth startup test rejects late node assembly,
+joins both storage workers, rebinds UDP and reopens the WAL. A seventh process
+test runs the durable counter history through QUIC, including abrupt leader loss,
+replacement writes, recovered former leader catch-up, checkpoint, shutdown/join,
+restart and dedup. The final Linux library/connect/service/QUIC/QUIC-connector/
+secure/startup/transport run passes 27/12/7/9/4/12/6/13 tests (90 total).
+Core-only/native-only all-target builds, all-feature API docs and Clippy pass.
+Default TCP service/startup regressions pass 7/5 tests, including unavailable QUIC
+selection before store creation. The QUIC process history passes again after
+selecting non-default ports through a peer file alongside --transport quic.
+Formatting, inventory JSON, local documentation links and diff checks pass.
+No macOS, remote deployment, production readiness or performance claim is made.
+
 ## Next slice
 
-Add bounded QUIC establishment and service startup/CLI selection. The first
-session provider requires dedicated peer sockets; independently polling a shared
-UDP socket would consume another peer's packets, so shared listener ownership
-must be designed explicitly. Continue P4 with promoted-leader catch-up
+Continue P4 with promoted-leader catch-up
 authorization, readiness/capability evidence, retiring-leader final propagation,
 route/roster admission, distributed activation modeling and faulted network
 membership histories before releasing online configuration ingress. Explicit

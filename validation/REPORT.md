@@ -123,4 +123,29 @@ The final combined run passes QUIC/secure/transport/startup/counter-service suit
 Earlier hello-FIN flow-control and closing-peer-loss failures were repaired and
 their focused checks plus this final run passed. These are finite checks, not
 formal protocol, native-file QUIC crash, macOS, remote deployment or performance
-evidence. The shared listener/connector and counter CLI remain TCP/TLS.
+evidence. At the end of that slice the shared listener/connector and counter CLI
+remained TCP/TLS; slice 44 adds QUIC establishment and service selection.
+
+## Slice 44 QUIC service evidence
+
+The final Linux run passes library/connect/service/QUIC/QUIC-connector/secure/
+startup/transport suites 27/12/7/9/4/12/6/13 tests (90 total). Four new downstream
+connector tests exercise simultaneous authorized peers through one UDP socket,
+small-budget fairness, terminal slot retention, cancellation, expiry, stale/wrong
+requests, fresh-generation reconnect after lease release, constructor socket
+return and transferred sessions surviving connector close/drop. An internal UDP
+test checks bounded packet queues, drop behavior, charged routed/unknown packets
+and retired queue disposal. Late failed QUIC startup releases UDP and joins its
+two storage workers before reopening the WAL.
+
+The actual three-process QUIC history uses native WAL/snapshot files and checks
+write/read/dedup, abrupt leader loss, replacement writes, recovered former leader
+catch-up, checkpoint/drain/join, restart and further read/retry. It supplements
+the earlier host-log session history. Core-only/native-only all-target compilation
+and all-feature all-target Clippy/API docs pass. Default TCP service/startup
+regressions pass 7/5 tests, including unavailable QUIC selection before store
+creation. The QUIC process history also passes separately after switching to
+non-default addresses through a peer file together with --transport quic.
+These finite tests do not establish formal
+protocol proof, arbitrary fault coverage, macOS execution, remote deployment,
+production readiness or performance.

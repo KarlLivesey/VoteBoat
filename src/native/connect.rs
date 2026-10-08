@@ -635,3 +635,117 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
         self.dialer.close();
     }
 }
+
+/// Explicit native service transport selection; TCP remains available without QUIC.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum NativePeerProtocol {
+    TcpTls,
+    #[cfg(feature = "quic")]
+    Quic,
+}
+/// Construction-selected connector for applications offering both native protocols.
+/// The boxed session still implements the same public SecureSession contract.
+pub enum NativeServiceConnector {
+    Tcp(Box<NativePeerConnector>),
+    #[cfg(feature = "quic")]
+    Quic(Box<super::quic_connect::NativeQuicConnector>),
+}
+impl NativeServiceConnector {
+    /// Reclaim the TCP worker, if selected, only after close and drain.
+    /// QUIC has no connector worker; transferred sessions own their socket leases.
+    pub fn into_dialer(self) -> Result<Option<NativeTcpDialer>, Box<Self>> {
+        match self {
+            Self::Tcp(c) => c
+                .into_dialer()
+                .map(Some)
+                .map_err(|c| Box::new(Self::Tcp(c))),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => {
+                if c.closed_and_drained() {
+                    Ok(None)
+                } else {
+                    Err(Box::new(Self::Quic(c)))
+                }
+            }
+        }
+    }
+}
+impl PeerConnector for NativeServiceConnector {
+    type Endpoint = SocketAddr;
+    type Session = Box<dyn SecureSession>;
+    fn local(&self) -> LocalIdentity {
+        match self {
+            Self::Tcp(c) => c.local(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.local(),
+        }
+    }
+    fn limits(&self) -> ConnectLimits {
+        match self {
+            Self::Tcp(c) => c.limits(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.limits(),
+        }
+    }
+    fn usage(&self) -> ConnectUsage {
+        match self {
+            Self::Tcp(c) => c.usage(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.usage(),
+        }
+    }
+    fn next_deadline(&self) -> Option<MonoTime> {
+        match self {
+            Self::Tcp(c) => c.next_deadline(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.next_deadline(),
+        }
+    }
+    fn submit(
+        &mut self,
+        r: ConnectRequest<SocketAddr>,
+        now: MonoTime,
+    ) -> Result<(), ConnectRejected<SocketAddr>> {
+        match self {
+            Self::Tcp(c) => c.submit(r, now),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.submit(r, now),
+        }
+    }
+    fn cancel(&mut self, t: ConnectTicket) -> bool {
+        match self {
+            Self::Tcp(c) => c.cancel(t),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.cancel(t),
+        }
+    }
+    fn poll(
+        &mut self,
+        now: MonoTime,
+        b: ConnectPollBudget,
+    ) -> Result<Vec<ConnectCompletion<Self::Session>>, ConnectError> {
+        fn boxed<S: SecureSession + 'static>(
+            events: Vec<ConnectCompletion<S>>,
+        ) -> Vec<ConnectCompletion<Box<dyn SecureSession>>> {
+            events
+                .into_iter()
+                .map(|e| ConnectCompletion {
+                    ticket: e.ticket,
+                    result: e.result.map(|s| Box::new(s) as Box<dyn SecureSession>),
+                })
+                .collect()
+        }
+        match self {
+            Self::Tcp(c) => c.poll(now, b).map(boxed),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.poll(now, b).map(boxed),
+        }
+    }
+    fn close(&mut self) {
+        match self {
+            Self::Tcp(c) => c.close(),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.close(),
+        }
+    }
+}

@@ -1,8 +1,9 @@
 # Native counter service and Rust embedding
 
 `voteboat-counter` runs one independent node per process, using the library's
-`native::node::NativeNode<Counter>`. Three nodes communicate over actual mutual
-TLS connections, elect leaders using native timers, and keep separate durable
+`native::node::NativeNode<Counter, NativeServiceConnector>`. Three nodes communicate
+over mutually authenticated TCP/TLS or optional QUIC, elect leaders using native
+timers, and keep separate durable
 WALs and snapshots. This is an initial usable local service, with static
 three-voter membership and one counter group. Peer addresses are configurable;
 the trusted local command endpoint always binds to 127.0.0.1.
@@ -39,6 +40,31 @@ local demo cluster. An optional peer-address file overrides BASE+1..3.
 Data directories encode fixed node/store IDs 1..3, group 1,
 configuration 1 and their initial incarnations. Never copy one live store over
 another or reuse these demo identities in an existing deployment.
+
+## Select QUIC
+
+Build with the optional feature:
+
+```sh
+cargo build --locked --offline --features quic --bin voteboat-counter
+```
+
+Append `--transport quic` to each of the three serve commands above:
+
+```sh
+target/debug/voteboat-counter serve create /tmp/voteboat-service-demo/1 1 43000 tests/fixtures/tls --transport quic
+```
+
+Use the flag for nodes 2/3 and subsequent recover commands too. Each node binds
+one UDP peer socket at BASE+NODE; local command ports remain TCP and client
+commands are unchanged. Put any PEERS_FILE before the flag. The same roots,
+certificate pins, exact identities, codec and native storage/recovery path apply.
+QUIC has no dial worker. It uses a fixed 1200-byte UDP payload, bounded per-peer
+queues and reliable stream chunks. Established sessions have a five-second idle
+timeout, and the host must keep polling. All nodes must select compatible peer
+protocols. Omit the flag or use `--transport tcp` for TCP/TLS. A build without
+QUIC rejects its flag before creating a store. See
+[QUIC ownership and limits](QUIC_TRANSPORT.md).
 
 ## Configure peers on different hosts
 
@@ -123,7 +149,8 @@ target/debug/voteboat-counter client 43000 3 quit
 
 A successful `quit` response acknowledges shutdown intake. Wait for each process's
 `stopped ... workers_joined=true` line and successful exit to establish completion.
-Shutdown drains admitted work and explicitly joins WAL, snapshot and dial workers.
+Shutdown drains admitted work and explicitly joins WAL/snapshot workers and the
+TCP dial worker when selected.
 An unsuccessful exit requires recovery of authoritative files; it does not claim
 healthy drain. `recover` never creates a missing store, and `create` refuses an
 existing store. Restart using the same directories and node IDs:
@@ -148,7 +175,11 @@ application, an explicit host WorkerWake and the initial MonoTime for that
 host clock domain. Startup verifies bootstrap identity,
 restores the pinned checkpoint, replays committed state and constructs the selected
 native Node providers. It supports any application implementing the existing
-public proposal, bounded-read, checkpoint and receipt contracts.
+public proposal, bounded-read, checkpoint and receipt contracts. Original `open`
+selects TCP/TLS. Use `open_with_protocol(NativePeerProtocol::Quic, app, wake, now)`
+for explicit QUIC selection, or TcpTls through the same method. It returns the
+same facade with NativeServiceConnector; reclaim its optional TCP dial worker
+after close/drain. QUIC has no dial worker to join.
 
 This convenience path selects one group and native providers with their default
 storage/queue limits. Use `runtime::Node::from_parts` for shared multi-group stores,

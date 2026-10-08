@@ -17,7 +17,7 @@
 use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
-    net::{Ipv4Addr, TcpListener},
+    net::{Ipv4Addr, TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command},
     sync::Mutex,
@@ -31,6 +31,8 @@ struct Cluster {
     children: Vec<Option<Child>>,
     endpoints: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
+    udp_sockets: Vec<UdpSocket>,
+    quic: bool,
 }
 impl Cluster {
     fn new() -> Self {
@@ -46,9 +48,9 @@ impl Cluster {
         // Never recycle a fixture's block within this test process: accepted
         // TCP sockets can still be closing after its listeners/children drop.
         // The finite suite uses fewer than 20 of the available 157 blocks.
-        let (base, listeners) = {
+        let (base, listeners, udp_sockets) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
-            let (base, listeners) = (10000u16..30000)
+            let (base, listeners, udp_sockets) = (10000u16..30000)
                 .step_by(128)
                 .find_map(|base| {
                     if blocks.contains(&base) {
@@ -62,11 +64,18 @@ impl Cluster {
                         })
                         .collect::<Result<BTreeMap<_, _>, _>>()
                         .ok()
-                        .map(|listeners| (base, listeners))
+                        .and_then(|listeners| {
+                            [1, 2, 3, 11, 12, 13]
+                                .into_iter()
+                                .map(|n| UdpSocket::bind((Ipv4Addr::LOCALHOST, base + n)))
+                                .collect::<Result<Vec<_>, _>>()
+                                .ok()
+                                .map(|sockets| (base, listeners, sockets))
+                        })
                 })
                 .expect("available independent port block");
             blocks.insert(base);
-            (base, listeners)
+            (base, listeners, udp_sockets)
         };
         Self {
             root,
@@ -74,6 +83,8 @@ impl Cluster {
             children: (0..3).map(|_| None).collect(),
             endpoints: None,
             listeners,
+            udp_sockets,
+            quic: false,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -87,6 +98,7 @@ impl Cluster {
         // Release every child port before starting the first child. Otherwise
         // early peers can connect to a placeholder listener for a later child.
         self.listeners.clear();
+        self.udp_sockets.clear();
         let log = fs::File::create(self.root.join(format!("{id}-{mode}.log"))).unwrap();
         let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
         let mut command = Command::new(BIN);
@@ -98,6 +110,9 @@ impl Cluster {
             .arg(tls);
         if let Some(path) = &self.endpoints {
             command.arg(path);
+        }
+        if self.quic {
+            command.args(["--transport", "quic"]);
         }
         self.children[id - 1] = Some(
             command
@@ -198,7 +213,29 @@ impl Drop for Cluster {
 }
 #[test]
 fn three_service_processes_retry_replace_leader_and_recover_native_files() {
+    replicated_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn three_quic_service_processes_retry_replace_leader_and_recover_native_files() {
+    replicated_history(true);
+}
+fn replicated_history(quic: bool) {
     let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    if quic {
+        let path = cluster.root.join("quic-peers.txt");
+        let peers = (1..=3)
+            .map(|n| {
+                format!(
+                    "{n} 127.0.0.1:{} node{n}.voteboat.test\n",
+                    cluster.base + 10 + n
+                )
+            })
+            .collect::<String>();
+        fs::write(&path, peers).unwrap();
+        cluster.endpoints = Some(path);
+    }
     for id in 1..=3 {
         cluster.start(id, "create");
     }
@@ -223,6 +260,35 @@ fn three_service_processes_retry_replace_leader_and_recover_native_files() {
     assert_ne!(replacement, leader);
     assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.start(leader, "recover");
+    if quic {
+        // Wait for the surviving peers' idle detection and fresh session lease,
+        // then prove the recovered former leader receives newly committed work.
+        assert!(cluster.routed(&["add", "3", "0"]).contains("Value(10)"));
+        let deadline = Instant::now() + Duration::from_secs(20);
+        loop {
+            let recovered = cluster.request(leader, &["status"]);
+            let active = cluster.request(replacement, &["status"]);
+            let committed = |bytes: &[u8]| {
+                String::from_utf8_lossy(bytes)
+                    .split("committed=")
+                    .nth(1)
+                    .and_then(|s| s.trim().parse::<u64>().ok())
+            };
+            if recovered.status.success()
+                && active.status.success()
+                && committed(&recovered.stdout)
+                    .is_some_and(|i| i > 0 && Some(i) == committed(&active.stdout))
+            {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "QUIC recovered peer failed to catch up; logs at {:?}",
+                cluster.root
+            );
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
     // Checkpoint admission is asynchronous; shutdown drains admitted work.
     cluster.ok(replacement, &["checkpoint"]);
     cluster.stop();
@@ -310,6 +376,26 @@ fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("invalid TLS material size"));
     assert!(!root.exists());
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+
+#[cfg(not(feature = "quic"))]
+#[test]
+fn unavailable_quic_selection_rejects_before_creating_a_store() {
+    let cluster = Cluster::new();
+    let directory = cluster.root.join("unsupported-quic");
+    let output = Command::new(BIN)
+        .args(["serve", "create"])
+        .arg(&directory)
+        .arg("1")
+        .arg(cluster.base.to_string())
+        .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
+        .args(["--transport", "quic"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("--features quic"));
+    assert!(!directory.exists());
     fs::remove_dir_all(&cluster.root).unwrap();
 }
 

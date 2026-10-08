@@ -75,24 +75,83 @@ Clean peer close retains already received plaintext for draining. A lost peer
 with unacknowledged output fails instead of remaining Closing forever. Invalid
 poll budgets reject before changing session state; time reversal, authentication
 failure, truncation and revocation latch failure. Failed sessions do no further
-I/O; dropping them releases their sockets and protocol buffers. QUIC's current
-default idle timeout also applies to established sessions.
+I/O; dropping them releases their sockets and protocol buffers. Established
+sessions use a five-second idle timeout so an unreachable peer releases its old
+route for reconnect. Active Raft heartbeats normally keep healthy connections
+live; hosts must continue polling.
 
-## Current integration and evidence
+## Shared connector and service selection
 
-This slice exposes the session backend and its existing framed transport
-integration. `NativePeerConnector`, `NativeStartup`, `NativeNode` aliases and
-the counter service CLI still use TCP/TLS. There is no shared UDP listener,
-QUIC connector, address discovery or CLI QUIC flag yet. A socket must not be
-shared by independently polling sessions: one session would consume another's
-packets. Bounded establishment and service selection are the next integration
-slice.
+`native::quic_connect::NativeQuicConnector` implements the same `PeerConnector`
+contract. Construct it with `NativeConnectConfig`, TLS configuration, a map of
+exact peer IDs to `(SocketAddr, TlsPeer)` pairs, an explicitly bound UDP socket,
+and initial monotonic time. Failed construction returns the supplied socket.
+
+One shared native socket routes packets by configured source address into session
+leases. At most eight 1200-byte packets are queued per live peer; full queues drop
+packets for QUIC retransmission. Unknown sources allocate no mailbox. Every
+consumed packet is charged to the visiting session's I/O budget, including packets
+queued for another peer or discarded. Queued reads are conservatively charged
+again. Each read visit performs at most one OS read. Sharing creates no additional
+reader or background task. Independently cloning/polling a dedicated socket is
+still unsupported; use this connector for sharing.
+
+An accepted connection ticket retains its request slot through exactly one
+terminal poll, including cancellation, expiry and unpolled Ready results. Fresh
+generations increase per peer. Identity, address and deadline rejection returns
+the original request before transfer. Fair handshake visits use the per-session
+I/O budget; terminal outputs have a separate completion ceiling. Zero completion
+budget retains terminal slots. `next_deadline` includes protocol timers, attempt
+expiry and immediately pollable terminal results. There are no TCP dial or
+anonymous-preface slots.
+
+Only one live lease may own a peer address. Cancellation drops an owned handshake
+and clears its queued packets; a transferred session retains its lease until
+dropped. A reconnect is overloaded while that old lease remains live. Generation
+checks prevent stale cleanup from removing a replacement route. Connector close
+cancels owned attempts and releases its socket reference; transferred sessions
+remain usable and keep the shared socket alive. Final session drop releases it.
+A fresh protocol engine/connection ID and crypto handshake reject old encrypted
+packets; application identity/generation checks remain unchanged. There is no
+migration or dynamic discovery.
+
+Call `NativeStartup::open_with_protocol(NativePeerProtocol::Quic, app, wake, now)`
+to bind one UDP socket and use the same verified native WAL/snapshot recovery
+path as TCP. This starts two storage workers and no dial worker. Select TcpTls
+for TCP through the same method. Original `NativeStartup::open` and default
+`NativeNode<A>` retain TCP/TLS. `NativeNode<A, C>` and `NativeNodeParts<A, C>`
+also accept an explicitly selected connector. `NativeServiceConnector` forwards
+the chosen provider and returns boxed authenticated sessions through the same
+public contract; its `into_dialer` returns None for drained QUIC and a reclaimed
+worker for TCP. Failed startup returns the application and existing cleanup
+handle; it is not file rollback.
+
+Build the counter with `--features quic`, then append `--transport quic` to each
+serve create/recover command, after any peer file. Peer ports BASE+1..3 use UDP;
+local command ports remain TCP. Omit the flag or select `--transport tcp` for
+TCP/TLS. A build without QUIC rejects its flag before creating a data store. See
+[the service quickstart](COUNTER_SERVICE.md).
+
+## Evidence
 
 Nine Linux loopback tests cover authenticated partial ordered I/O, exact pins and
 identities, small-budget fairness, clocks/deadlines, foreign datagrams, handshake
 limits, revocation, clean close, loss/retransmission, failure during close,
 framed outbound ownership, and three-replica election/commit/application over
 actual QUIC. That last history uses the host log provider and its exact durable
-tickets; it is not a native-file crash history. Existing secure, transport,
-startup and TCP service regressions also pass. These finite checks make no
-macOS execution, remote deployment, production readiness or performance claim.
+tickets; it is not a native-file crash history.
+
+Four downstream connector tests cover simultaneous peers through one socket per
+node, one-call/one-visit fairness, transferred sessions surviving connector
+close/drop, fresh-generation reconnect, exact cancellation, retained terminal
+slots, expiry, invalid budgets/time, identity/address rejection and failed
+constructor socket return. An internal real-UDP test checks queue/drop bounds,
+charged routed/unknown packets and discarded old queues on lease replacement.
+
+A three-process QUIC service history uses native files and workers. It checks
+election, write/read/dedup, abrupt leader loss, replacement writes, recovered-peer
+catch-up, checkpoints, shutdown/join, restart and further reads/retries. Late
+failed QUIC startup releases its socket and joins started storage workers before
+the WAL is reopened. TCP/TLS regressions also pass. These finite Linux checks
+make no macOS execution, remote deployment, production readiness or performance
+claim.

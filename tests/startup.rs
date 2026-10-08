@@ -370,3 +370,45 @@ fn startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines() {
     close(n);
     std::fs::remove_dir_all(root).unwrap();
 }
+
+#[cfg(feature = "quic")]
+#[test]
+fn quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers() {
+    use voteboat::native::{
+        connect::NativePeerProtocol,
+        log_store::{FileLogIo, NativeLogStore},
+    };
+    let root = root();
+    let socket = std::net::UdpSocket::bind("127.0.0.1:0").unwrap();
+    let address = socket.local_addr().unwrap();
+    drop(socket);
+    let mut selected = config(root.clone(), NativeOpenMode::Create);
+    selected.listen = address;
+    selected.limits.peers.staged_batches = 0; // Reject after native worker construction.
+    let mut rejected = match selected.open_with_protocol(
+        NativePeerProtocol::Quic,
+        app(),
+        Arc::new(ThreadWake::current()),
+        MonoTime(0),
+    ) {
+        Ok(_) => panic!("invalid late node limit accepted"),
+        Err(r) => r,
+    };
+    assert!(rejected.application.is_some());
+    assert_eq!(rejected.reason.stage, "node assembly");
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !rejected.try_cleanup().unwrap() {
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    let _socket = std::net::UdpSocket::bind(address).unwrap();
+    let recovered = NativeLogStore::recover(
+        FileLogIo::open(&root).unwrap(),
+        config(root.clone(), NativeOpenMode::Recover).store,
+        LogLimits::default(),
+    )
+    .unwrap();
+    assert_eq!(recovered.state(group()).unwrap().commit_index, 0);
+    drop(recovered);
+    std::fs::remove_dir_all(root).unwrap();
+}

@@ -14,7 +14,10 @@
 // rights and limitations under the RPL.
 //! Caller-polled, single-peer QUIC endpoint. Reliable stream chunks implement
 //! the existing authenticated byte-channel seam; QUIC ACKs are not durability.
-use super::tls::{decode_hello, encode_hello, NativeTlsConfig, TlsPeer, HELLO};
+use super::{
+    quic_socket::{SessionSocket, MTU},
+    tls::{decode_hello, encode_hello, NativeTlsConfig, TlsPeer, HELLO},
+};
 use crate::{identity::SecureSessionGeneration, runtime::MonoTime, secure::*};
 use bytes::{Bytes, BytesMut};
 use quinn_proto::{
@@ -27,7 +30,6 @@ use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
-const MTU: usize = 1200;
 const ALPN: &[u8] = b"voteboat-quic/1";
 
 /// One exact, construction-authorized peer and one fresh local generation.
@@ -41,7 +43,7 @@ pub struct QuicSessionOptions {
     pub limits: SessionLimits,
 }
 pub struct NativeQuicSession {
-    socket: UdpSocket,
+    socket: SessionSocket,
     endpoint: Endpoint,
     connection: Option<(ConnectionHandle, Connection)>,
     options: QuicSessionOptions,
@@ -76,7 +78,7 @@ impl NativeQuicSession {
         options: QuicSessionOptions,
         now: MonoTime,
     ) -> Result<Self, SessionError> {
-        Self::new(socket, config, options, now, true)
+        Self::new(SessionSocket::Dedicated(socket), config, options, now, true)
     }
     pub fn server(
         socket: UdpSocket,
@@ -84,10 +86,16 @@ impl NativeQuicSession {
         options: QuicSessionOptions,
         now: MonoTime,
     ) -> Result<Self, SessionError> {
-        Self::new(socket, config, options, now, false)
+        Self::new(
+            SessionSocket::Dedicated(socket),
+            config,
+            options,
+            now,
+            false,
+        )
     }
-    fn new(
-        socket: UdpSocket,
+    pub(super) fn new(
+        socket: SessionSocket,
         config: &NativeTlsConfig,
         options: QuicSessionOptions,
         now: MonoTime,
@@ -118,6 +126,11 @@ impl NativeQuicSession {
         let mut transport = TransportConfig::default();
         transport
             .max_concurrent_bidi_streams(0u32.into())
+            .max_idle_timeout(Some(
+                Duration::from_secs(5)
+                    .try_into()
+                    .map_err(|_| SessionError::InvalidLimits)?,
+            ))
             .max_concurrent_uni_streams(1u32.into())
             .stream_receive_window((limits.write_buffer_bytes as u32).into())
             .receive_window((limits.write_buffer_bytes as u32).into())
@@ -173,7 +186,7 @@ impl NativeQuicSession {
             None
         };
         socket
-            .set_nonblocking(true)
+            .set_nonblocking()
             .map_err(|e| SessionError::Io(e.kind()))?;
         let hello_out = encode_hello(options.local);
         Ok(Self {
@@ -479,10 +492,10 @@ impl NativeQuicSession {
                     continue;
                 }
                 progress.io_calls += 1;
-                match self.socket.recv_from(&mut self.receive) {
+                match self.socket.recv(&mut self.receive) {
                     Ok((n, remote)) => {
                         progress.read_bytes += n;
-                        if remote != self.options.remote {
+                        if remote != Some(self.options.remote) {
                             continue;
                         }
                         if self.state == SessionState::Handshaking {
@@ -494,7 +507,7 @@ impl NativeQuicSession {
                         self.scratch.clear();
                         let event = self.endpoint.handle(
                             instant,
-                            remote,
+                            self.options.remote,
                             None,
                             None,
                             BytesMut::from(&self.receive[..n]),

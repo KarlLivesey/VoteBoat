@@ -29,9 +29,10 @@ storage without TLS and the core/host-only build have no third-party runtime
 dependencies.
 
 The optional `quic` feature adds a caller-polled authenticated UDP session backend
-through the same framed transport API. A three-replica QUIC test elects, commits
-and applies a write. Service startup/CLI QUIC selection is still pending; see
-[QUIC construction and current scope](docs/QUIC_TRANSPORT.md).
+through the same framed transport API. The service selects it with
+`--transport quic` when built with `--features quic`; three-process tests cover
+replication, leader loss and native-file recovery. See
+[QUIC construction and limits](docs/QUIC_TRANSPORT.md).
 
 Shared runtime components now schedule many groups through bounded ready queues
 and explicit deadlines. The 100-group history uses one WAL per node, batches

@@ -149,6 +149,83 @@ impl<A> NativeStartupRejected<A> {
             && self.cleanup.snapshots.is_none())
     }
 }
+
+trait StartupConnector: PeerConnector<Endpoint = SocketAddr> {
+    fn reject(self, cleanup: &mut Cleanup);
+}
+impl StartupConnector for NativePeerConnector {
+    fn reject(self, cleanup: &mut Cleanup) {
+        cleanup.connector = Some(self);
+    }
+}
+impl StartupConnector for NativeServiceConnector {
+    fn reject(self, cleanup: &mut Cleanup) {
+        match self {
+            Self::Tcp(c) => cleanup.connector = Some(*c),
+            #[cfg(feature = "quic")]
+            Self::Quic(_) => (), // No requests accepted during assembly; drop releases socket.
+        }
+    }
+}
+fn pins(config: &NativeStartup) -> BTreeMap<NodeId, TlsPeer> {
+    config
+        .peers
+        .iter()
+        .map(|(n, p)| {
+            (
+                *n,
+                TlsPeer {
+                    identity: PeerIdentity {
+                        node: *n,
+                        store: config.bootstrap.voter_stores[n],
+                    },
+                    certificate: p.certificate.clone(),
+                    server_name: p.server_name.clone(),
+                },
+            )
+        })
+        .collect()
+}
+fn tcp_connector(
+    config: &NativeStartup,
+    local: LocalIdentity,
+    listener: TcpListener,
+    wake: Arc<dyn WorkerWake>,
+    cleanup: &mut Cleanup,
+    now: MonoTime,
+) -> Result<NativePeerConnector, NativeStartupError> {
+    cleanup.dialer = Some(checked(NativeTcpDialer::spawn(
+        local,
+        config
+            .bootstrap
+            .voter_stores
+            .iter()
+            .filter(|(n, _)| **n != config.node)
+            .map(|(n, s)| (*n, *s))
+            .collect(),
+        DialLimits::default(),
+        wake.clone(),
+    ))?);
+    match NativePeerConnector::new(
+        NativeConnectConfig {
+            local,
+            limits: ConnectLimits::default(),
+            session: SessionLimits::default(),
+        },
+        config.tls.clone(),
+        pins(config),
+        cleanup.dialer.take().unwrap(),
+        Some(listener),
+        now,
+    ) {
+        Ok(c) => Ok(c),
+        Err(r) => {
+            cleanup.dialer = Some(r.dialer);
+            Err(error("connector", r.reason))
+        }
+    }
+}
+
 impl NativeStartup {
     pub fn validate(&self) -> Result<(), NativeStartupError> {
         let voters = &self.bootstrap.voter_stores;
@@ -215,15 +292,15 @@ impl NativeStartup {
                 ));
             }
             let listener = TcpListener::bind(self.listen)?;
-            let create = self.mode == NativeOpenMode::Create;
             build(
                 self,
-                listener,
                 &mut application,
                 &mut cleanup,
                 wake,
-                create,
                 now,
+                |config, local, wake, cleanup| {
+                    tcp_connector(config, local, listener, wake, cleanup, now)
+                },
             )
         })();
         result.map_err(|reason| {
@@ -234,20 +311,115 @@ impl NativeStartup {
             })
         })
     }
+    /// Explicit TCP/TLS or optional QUIC startup, using the same storage/recovery path.
+    /// QUIC binds one UDP socket and starts only the two storage workers.
+    pub fn open_with_protocol<A>(
+        self,
+        protocol: NativePeerProtocol,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        let mut cleanup = Cleanup::default();
+        let mut application = Some(app);
+        let result = (|| {
+            self.validate()?;
+            if application.as_ref().unwrap().applied_index() != 0 {
+                return Err(error(
+                    "application",
+                    "provide a fresh application for verified restore/replay",
+                ));
+            }
+            match protocol {
+                NativePeerProtocol::TcpTls => {
+                    let listener = TcpListener::bind(self.listen)?;
+                    build(
+                        self,
+                        &mut application,
+                        &mut cleanup,
+                        wake,
+                        now,
+                        |config, local, wake, cleanup| {
+                            tcp_connector(config, local, listener, wake, cleanup, now)
+                                .map(|c| NativeServiceConnector::Tcp(Box::new(c)))
+                        },
+                    )
+                }
+                #[cfg(feature = "quic")]
+                NativePeerProtocol::Quic => {
+                    let mut addresses = std::collections::BTreeSet::new();
+                    if self.peers.values().any(|p| {
+                        p.address.ip().is_multicast()
+                            || p.address == self.listen
+                            || p.address.is_ipv4() != self.listen.is_ipv4()
+                            || !addresses.insert(p.address)
+                    }) {
+                        return Err(error(
+                            "configuration",
+                            "distinct compatible QUIC peer addresses required",
+                        ));
+                    }
+                    let socket = std::net::UdpSocket::bind(self.listen)?;
+                    build(
+                        self,
+                        &mut application,
+                        &mut cleanup,
+                        wake,
+                        now,
+                        |config, local, _, _| {
+                            let peers = pins(config)
+                                .into_iter()
+                                .map(|(n, p)| (n, (config.peers[&n].address, p)))
+                                .collect();
+                            super::quic_connect::NativeQuicConnector::new(
+                                NativeConnectConfig {
+                                    local,
+                                    limits: ConnectLimits::default(),
+                                    session: SessionLimits::default(),
+                                },
+                                config.tls.clone(),
+                                peers,
+                                socket,
+                                now,
+                            )
+                            .map(|c| NativeServiceConnector::Quic(Box::new(c)))
+                            .map_err(|e| error("QUIC connector", e.reason))
+                        },
+                    )
+                }
+            }
+        })();
+        result.map_err(|reason| {
+            Box::new(NativeStartupRejected {
+                reason,
+                application,
+                cleanup,
+            })
+        })
+    }
 }
-fn build<A>(
+fn build<A, C: StartupConnector>(
     config: NativeStartup,
-    listener: TcpListener,
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
-    create: bool,
     now: MonoTime,
-) -> Result<NativeNode<A>, NativeStartupError>
+    connector: impl FnOnce(
+        &NativeStartup,
+        LocalIdentity,
+        Arc<dyn WorkerWake>,
+        &mut Cleanup,
+    ) -> Result<C, NativeStartupError>,
+) -> Result<NativeNode<A, C>, NativeStartupError>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
+    let create = config.mode == NativeOpenMode::Create;
     let store = if create {
         let mut store = checked(NativeLogStore::create(
             FileLogIo::create(&config.directory)?,
@@ -405,46 +577,6 @@ where
         checked(NativeWireCodec::new(Default::default()))?,
         Default::default(),
     ))?;
-    cleanup.dialer = Some(checked(NativeTcpDialer::spawn(
-        local,
-        remote.clone(),
-        DialLimits::default(),
-        wake.clone(),
-    ))?);
-    let connector = NativePeerConnector::new(
-        NativeConnectConfig {
-            local,
-            limits: ConnectLimits::default(),
-            session: SessionLimits::default(),
-        },
-        config.tls,
-        remote
-            .iter()
-            .map(|(n, s)| {
-                (
-                    *n,
-                    TlsPeer {
-                        identity: PeerIdentity {
-                            node: *n,
-                            store: *s,
-                        },
-                        certificate: config.peers[n].certificate.clone(),
-                        server_name: config.peers[n].server_name.clone(),
-                    },
-                )
-            })
-            .collect(),
-        cleanup.dialer.take().unwrap(),
-        Some(listener),
-        now,
-    );
-    cleanup.connector = Some(match connector {
-        Ok(c) => c,
-        Err(r) => {
-            cleanup.dialer = Some(r.dialer);
-            return Err(error("connector", r.reason));
-        }
-    });
     cleanup.log = Some(checked(NativeLogWorker::spawn(
         store,
         StorageWorkerGeneration::new(1).unwrap(),
@@ -463,14 +595,15 @@ where
             generation: SnapshotWorkerGeneration::new(1).unwrap(),
         },
         SnapshotWorkLimits::default(),
-        wake,
+        wake.clone(),
     ))?);
     let router = checked(SnapshotRouter::new(
         owner.identity(),
         cleanup.snapshots.as_ref().unwrap().binding(),
         SnapshotRouterLimits::default(),
     ))?;
-    let built = NativeNode::from_parts(
+    let connector = connector(&config, local, wake.clone(), cleanup)?;
+    let built = NativeNode::<A, C>::from_parts(
         NativeNodeParts {
             local: NativeLocalParts {
                 owner,
@@ -486,7 +619,7 @@ where
                 }),
             },
             peers: Some(PeerParts {
-                connector: cleanup.connector.take().unwrap(),
+                connector,
                 roster,
                 factory,
                 ingress,
@@ -514,7 +647,9 @@ where
             *application = r.parts.local.applications.remove(&config.bootstrap.group);
             cleanup.log = Some(r.parts.local.persistence);
             cleanup.snapshots = r.parts.local.snapshots.take().map(|s| s.worker);
-            cleanup.connector = r.parts.peers.take().map(|p| p.connector);
+            if let Some(peers) = r.parts.peers.take() {
+                peers.connector.reject(cleanup);
+            }
             Err(error("node assembly", r.reason))
         }
     }
