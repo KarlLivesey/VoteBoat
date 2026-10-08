@@ -24,6 +24,8 @@ use std::collections::BTreeMap;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EntryPayload {
     Noop,
+    /// Replicated protocol state; never dispatched as an application command.
+    Configuration(Box<crate::membership::ConfigurationRecord>),
     Command {
         operation: OperationId,
         bytes: Vec<u8>,
@@ -36,9 +38,18 @@ pub struct LogEntry {
     pub payload: EntryPayload,
 }
 impl LogEntry {
+    /// Owned payload allocation accounting, excluding the inline LogEntry.
+    pub fn retained_payload_bytes(&self) -> usize {
+        match &self.payload {
+            EntryPayload::Noop => 0,
+            EntryPayload::Command { bytes, .. } => bytes.capacity(),
+            EntryPayload::Configuration(record) => record.retained_bytes(),
+        }
+    }
     pub fn payload_bytes(&self) -> usize {
         match &self.payload {
             EntryPayload::Noop => 0,
+            EntryPayload::Configuration(record) => record.retained_bytes(),
             EntryPayload::Command { bytes, .. } => bytes.len(),
         }
     }
@@ -66,6 +77,14 @@ pub struct GroupLog {
     pub entries: Vec<LogEntry>,
 }
 impl GroupLog {
+    /// Accepted-log activation, independent of application execution. Snapshot
+    /// compaction currently preserves every configuration record until the
+    /// configuration-aware snapshot format and live core are integrated.
+    pub fn membership(
+        &self,
+    ) -> Result<crate::membership::Membership, crate::membership::MembershipError> {
+        crate::membership::Membership::replay(&self.bootstrap, &self.entries, self.commit_index)
+    }
     pub fn base_index(&self) -> u64 {
         self.snapshot.map_or(0, |s| s.index)
     }
@@ -315,6 +334,14 @@ pub fn apply_batch(
                         return Err(StorageError::Rejected("invalid snapshot boundary/scope"));
                     }
                     let matching = current.term_at(reference.index) == Some(reference.term);
+                    if current.entries.iter().any(|entry| {
+                        matches!(entry.payload, EntryPayload::Configuration(_))
+                            && (entry.index <= reference.index || !matching)
+                    }) {
+                        return Err(StorageError::Rejected(
+                            "snapshot would discard configuration journal",
+                        ));
+                    }
                     if reference.index <= current.commit_index && !matching {
                         return Err(StorageError::Rejected(
                             "snapshot conflicts with committed history",
@@ -386,6 +413,15 @@ pub fn apply_batch(
                 }
                 current.hard_state = update.hard_state;
                 current.commit_index = update.commit_index;
+                if current
+                    .entries
+                    .iter()
+                    .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
+                {
+                    current
+                        .membership()
+                        .map_err(|_| StorageError::Rejected("invalid configuration journal"))?;
+                }
                 current.revision = current
                     .revision
                     .get()

@@ -47,6 +47,10 @@ with `Node::poll_reclaim`. See [live worker maintenance](docs/WORKER_MAINTENANCE
 Native filesystem/provider assembly, incremental WAL cleaning and online reconfiguration remain under
 development; this is not a production consensus release.
 
+The [durable configuration journal](docs/CONFIGURATION_JOURNAL.md) now validates
+learner, joint and final records through host/native storage, recovery and suffix
+rollback. Live admission remains disabled pending quorum and snapshot integration.
+
 ## Run
 
 Install Rust 1.98.1 (pinned in `rust-toolchain.toml`), then:

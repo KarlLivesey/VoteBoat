@@ -272,6 +272,10 @@ impl Raft {
                 .voted_for
                 .is_some_and(|n| !state.bootstrap.policy.voters().contains(&n))
             || state.entries.len() > limits.max_entries_per_group
+            || state
+                .entries
+                .iter()
+                .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
         {
             return Err(RaftError::InvalidRecovery);
         }
@@ -350,9 +354,7 @@ impl Raft {
             .len()
             .checked_mul(size_of::<LogEntry>())?;
         for entry in &self.durable.entries {
-            if let EntryPayload::Command { bytes, .. } = &entry.payload {
-                log = log.checked_add(bytes.capacity())?;
-            }
+            log = log.checked_add(entry.retained_payload_bytes())?;
         }
         // A heartbeat can produce append and read probes for every peer. Each
         // append contains at most 64 entries and max_batch_bytes payload/framing.
@@ -973,6 +975,12 @@ impl Raft {
             return Err(RaftError::WrongIdentity);
         }
         if m.term == 0 || m.context.sequence == 0 {
+            return Err(RaftError::InvalidMessage);
+        }
+        // Configuration journal storage is available before online activation.
+        // Do not accept these entries while any quorum use remains static.
+        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+        {
             return Err(RaftError::InvalidMessage);
         }
         let request = matches!(

@@ -15,10 +15,7 @@
 //! Reserved output ownership around a timed shard. No I/O or application runs
 //! implicitly. Owned effects remain charged through rejection and external work.
 use super::*;
-use crate::{
-    log::{EntryPayload, LogEntry},
-    worker::*,
-};
+use crate::{log::LogEntry, worker::*};
 use std::collections::BTreeSet;
 
 #[derive(Clone, Copy, Debug)]
@@ -850,9 +847,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
 fn entries_bytes(entries: &[LogEntry]) -> Option<usize> {
     let mut bytes = 0usize;
     for entry in entries {
-        if let EntryPayload::Command { bytes: payload, .. } = &entry.payload {
-            bytes = bytes.checked_add(payload.capacity())?;
-        }
+        bytes = bytes.checked_add(entry.retained_payload_bytes())?;
     }
     Some(bytes)
 }

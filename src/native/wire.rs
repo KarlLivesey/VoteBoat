@@ -289,6 +289,11 @@ impl Encoder {
                     self.u64(entry.term)?;
                     match &entry.payload {
                         EntryPayload::Noop => self.u8(0)?,
+                        EntryPayload::Configuration(_) => {
+                            return Err(WireError::InvalidMessage(
+                                "online reconfiguration not enabled",
+                            ))
+                        }
                         EntryPayload::Command { operation, bytes } => {
                             if bytes.len() > self.limits.max_command_bytes {
                                 return Err(WireError::TooLarge);

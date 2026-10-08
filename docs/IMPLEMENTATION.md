@@ -2025,8 +2025,73 @@ Full P0–P7 stays active. Native provider convenience assembly, incremental cle
 membership/policy transitions, recursive responsibilities, safe split/merge and
 P7 evidence remain unfinished.
 
+## Slice 31: durable learner/joint/final configuration journal
+
+The quorum-use audit found static bootstrap references in elections, commitment,
+read barriers, message membership/context checks, recovery and snapshots. Online
+changes cannot safely be enabled by replacing only the election predicate.
+This slice implements the durable journal those paths will consume, through the
+existing public LogStore seam and mandatory shared transition validator. It does
+not enable an incomplete live reconfiguration protocol.
+
+`membership::Configuration` validates exact voter/store bindings and separate
+learners with bounded policy and replica sets. Replicated configuration records
+carry operation IDs, expected configuration IDs and learner/joint/final phases.
+Learner edits preserve the voter policy. Joint promotion requires an exact-store
+learner in the preceding committed configuration; retained voters cannot change
+stores. Joint records immediately select old AND new predicates. Final records
+match the joint operation and reserved target ID, require joint commitment and
+immediately select new-only rules. Another transition waits for the previous
+configuration record's commitment. Strictly increasing configuration IDs fence
+distinct phases; operation IDs identify lifecycle work separately.
+
+`GroupLog::membership` reconstructs accepted-log state from the surviving journal.
+Uncommitted final rollback restores joint rules; uncommitted joint rollback
+restores the preceding learner/stable state. Existing commit/suffix-generation
+guards remain authoritative. Configuration data now counts toward retained
+payload, range, effect, ingress and outbound budgets; metadata-bearing Append
+input uses data capacity, preserving control reserves. The native format-2 WAL
+adds configuration entry tag 2 with subformat version 1; old logs remain readable,
+older binaries reject new records. Physical full-image reclamation preserves the
+whole journal and its operation-reuse checks.
+
+There are no new effects or durability domains. Existing exact LogTicket/barrier
+dependencies guard exposure; a derived predicate is not a receipt. Snapshot
+compaction refuses to discard configuration records pending configuration-base
+format integration. The bootstrap ballot membership guard remains static.
+Raft recovery/Append and native wire encoding explicitly reject configuration
+entries while live quorum/snapshot integration remains incomplete. Host-injected
+RPCs cannot bypass that refusal. See [configuration journal](CONFIGURATION_JOURNAL.md).
+
+Seventeen downstream journal tests cover host/native logical transitions,
+assignment and operation identity, overlap/early-final rejection, same-voter
+recursive weighted changes, all 3,125 five-replica prefix assignments, Written
+versus Durable, multi-group rejection, suffix rollback, snapshot refusal, bounded
+range/ingress accounting and live-core/wire refusal. Native crash tests cut every
+byte of learner, joint, final and rollback WAL frames, inject sync and manifest
+publication failures, and reclaim/reopen joint/final histories. Two native codec
+tests cover every record truncation, unknown tags, zero IDs, invalid counts,
+duplicate identities and overlapping maps.
+
+Full local suites pass 315 default/native/TLS tests, 294 native-only tests and
+179 core/host-only tests. The subsequently added ingress-budget regression also
+passes in focused runs of all 17 default and 11 core-only journal tests (316
+distinct default tests in total). Clippy passes all three configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL
+header checks pass. Native socket histories ran with loopback access. These
+finite Linux checks do not establish macOS execution, full joint Raft correctness,
+real power-loss behavior or throughput.
+
+Full P0–P7 remains active. Online learner catch-up/promotion, all-quorum activation,
+configuration-aware snapshots, removed-replica service fencing and the formal
+membership model/faulted network histories remain unfinished. Native provider
+convenience assembly, incremental cleanup, recursive responsibilities, split/merge
+and P7 evidence also remain outstanding.
+
 ## Next slice
 
-Implement joint membership/policy transitions as replicated protocol state, with
-explicit activation, rollback/recovery and fault/model histories. CI remains
-background feedback; relevant local checks guide direct commits.
+Integrate the configuration base into durable snapshots and recovery, then wire
+the accepted-log predicate through every core quorum/context use with learner
+catch-up and bounded prospective replication fanout. Validate the live protocol
+with its required activation/ballot model and crash/network histories before
+enabling administration. CI remains background feedback.

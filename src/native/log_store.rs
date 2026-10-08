@@ -619,6 +619,10 @@ impl Encoder {
                             self.u64(e.term)?;
                             match &e.payload {
                                 EntryPayload::Noop => self.u8(0)?,
+                                EntryPayload::Configuration(record) => {
+                                    self.u8(2)?;
+                                    self.configuration_record(record)?;
+                                }
                                 EntryPayload::Command { operation, bytes } => {
                                     self.u8(1)?;
                                     self.u128(operation.get())?;
@@ -630,6 +634,43 @@ impl Encoder {
                         Ok(())
                     }
                 }
+            }
+        }
+    }
+    fn configuration(&mut self, c: &crate::membership::Configuration) -> Result<(), StorageError> {
+        self.u64(c.id().get())?;
+        self.tree(c.policy().tree(), 0)?;
+        for stores in [c.voter_stores(), c.learners()] {
+            self.u32(stores.len() as u32)?;
+            for (node, store) in stores {
+                self.u64(node.get())?;
+                self.u128(store.id.get())?;
+                self.u64(store.incarnation.get())?;
+            }
+        }
+        Ok(())
+    }
+    fn configuration_record(
+        &mut self,
+        record: &crate::membership::ConfigurationRecord,
+    ) -> Result<(), StorageError> {
+        use crate::membership::ConfigurationChange;
+        self.u8(1)?; // configuration-journal subformat version
+        self.u128(record.operation.get())?;
+        self.u64(record.expected.get())?;
+        match &record.change {
+            ConfigurationChange::Learners(c) => {
+                self.u8(0)?;
+                self.configuration(c)
+            }
+            ConfigurationChange::Joint { id, next } => {
+                self.u8(1)?;
+                self.u64(id.get())?;
+                self.configuration(next)
+            }
+            ConfigurationChange::Final { id } => {
+                self.u8(2)?;
+                self.u64(id.get())
             }
         }
     }
@@ -688,13 +729,13 @@ impl<'a> Decoder<'a> {
                     return Err(StorageError::Corrupt("policy child limit"));
                 }
                 if kind == 1 {
-                    let mut children = Vec::new();
+                    let mut children = Vec::with_capacity(count);
                     for _ in 0..count {
                         children.push(self.tree(depth + 1, nodes)?);
                     }
                     Ok(Tree::Majority(children))
                 } else {
-                    let mut children = Vec::new();
+                    let mut children = Vec::with_capacity(count);
                     for _ in 0..count {
                         let weight = self.u64()?;
                         children.push(WeightedChild {
@@ -797,6 +838,15 @@ impl<'a> Decoder<'a> {
                             let term = self.u64()?;
                             let payload = match self.u8()? {
                                 0 => EntryPayload::Noop,
+                                2 => {
+                                    let record = self.configuration_record()?;
+                                    if record.retained_bytes() > limits.max_command_bytes {
+                                        return Err(StorageError::Corrupt(
+                                            "configuration payload budget",
+                                        ));
+                                    }
+                                    EntryPayload::Configuration(Box::new(record))
+                                }
                                 1 => {
                                     let operation = OperationId::new(self.u128()?)
                                         .ok_or(StorageError::Corrupt("zero operation"))?;
@@ -832,6 +882,73 @@ impl<'a> Decoder<'a> {
             }
             _ => Err(StorageError::Corrupt("mutation kind")),
         }
+    }
+    fn configuration(&mut self) -> Result<crate::membership::Configuration, StorageError> {
+        let id =
+            ConfigurationId::new(self.u64()?).ok_or(StorageError::Corrupt("zero configuration"))?;
+        let policy = Policy::new(self.tree(0, &mut 0)?, PolicyLimits::default())
+            .map_err(|_| StorageError::Corrupt("invalid configuration policy"))?;
+        let mut maps = Vec::with_capacity(2);
+        for _ in 0..2 {
+            let count = self.u32()? as usize;
+            if count > PolicyLimits::default().max_voters
+                || count > self.b.len().saturating_sub(self.offset) / 32
+            {
+                return Err(StorageError::Corrupt("configuration store budget"));
+            }
+            let mut stores = BTreeMap::new();
+            for _ in 0..count {
+                let node = NodeId::new(self.u64()?)
+                    .ok_or(StorageError::Corrupt("zero configuration node"))?;
+                let store = StoreIdentity {
+                    id: StoreId::new(self.u128()?)
+                        .ok_or(StorageError::Corrupt("zero configuration store"))?,
+                    incarnation: StoreIncarnation::new(self.u64()?).ok_or(
+                        StorageError::Corrupt("zero configuration store incarnation"),
+                    )?,
+                };
+                if stores.insert(node, store).is_some() {
+                    return Err(StorageError::Corrupt("duplicate configuration node"));
+                }
+            }
+            maps.push(stores);
+        }
+        let learners = maps.pop().unwrap();
+        crate::membership::Configuration::new(id, policy, maps.pop().unwrap(), learners)
+            .map_err(|_| StorageError::Corrupt("invalid configuration stores"))
+    }
+    fn configuration_record(
+        &mut self,
+    ) -> Result<crate::membership::ConfigurationRecord, StorageError> {
+        use crate::membership::{ConfigurationChange, ConfigurationRecord};
+        if self.u8()? != 1 {
+            return Err(StorageError::Corrupt("configuration journal version"));
+        }
+        let operation = OperationId::new(self.u128()?)
+            .ok_or(StorageError::Corrupt("zero configuration operation"))?;
+        let expected = ConfigurationId::new(self.u64()?)
+            .ok_or(StorageError::Corrupt("zero expected configuration"))?;
+        let change = match self.u8()? {
+            0 => ConfigurationChange::Learners(self.configuration()?),
+            1 => {
+                let id = ConfigurationId::new(self.u64()?)
+                    .ok_or(StorageError::Corrupt("zero joint configuration"))?;
+                ConfigurationChange::Joint {
+                    id,
+                    next: self.configuration()?,
+                }
+            }
+            2 => ConfigurationChange::Final {
+                id: ConfigurationId::new(self.u64()?)
+                    .ok_or(StorageError::Corrupt("zero final configuration"))?,
+            },
+            _ => return Err(StorageError::Corrupt("configuration change kind")),
+        };
+        Ok(ConfigurationRecord {
+            operation,
+            expected,
+            change,
+        })
     }
 }
 
@@ -931,5 +1048,101 @@ impl LogCodec for NativeLogCodec {
             return Err(StorageError::Corrupt("unparsed payload"));
         }
         Ok((u64::from_le_bytes(b[8..16].try_into().unwrap()), mutations))
+    }
+}
+
+#[cfg(test)]
+mod configuration_tests {
+    use super::*;
+    use crate::membership::*;
+    fn fixture() -> ConfigurationRecord {
+        let node = NodeId::new(1).unwrap();
+        let store = StoreIdentity {
+            id: StoreId::new(1).unwrap(),
+            incarnation: StoreIncarnation::new(1).unwrap(),
+        };
+        ConfigurationRecord {
+            operation: OperationId::new(9).unwrap(),
+            expected: ConfigurationId::new(1).unwrap(),
+            change: ConfigurationChange::Joint {
+                id: ConfigurationId::new(2).unwrap(),
+                next: Configuration::new(
+                    ConfigurationId::new(3).unwrap(),
+                    Policy::new(Tree::Voter(node), PolicyLimits::default()).unwrap(),
+                    [(node, store)].into(),
+                    BTreeMap::new(),
+                )
+                .unwrap(),
+            },
+        }
+    }
+    fn encoded() -> Vec<u8> {
+        let mut encoder = Encoder {
+            b: Vec::new(),
+            limit: 4096,
+        };
+        encoder.configuration_record(&fixture()).unwrap();
+        encoder.b
+    }
+    #[test]
+    fn configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag() {
+        let bytes = encoded();
+        assert_eq!(
+            Decoder::new(&bytes).configuration_record().unwrap(),
+            fixture()
+        );
+        for cut in 0..bytes.len() {
+            assert!(
+                Decoder::new(&bytes[..cut]).configuration_record().is_err(),
+                "cut {cut}"
+            );
+        }
+        for (offset, value) in [(0, 2), (25, 3), (42, 3)] {
+            let mut bad = bytes.clone();
+            bad[offset] = value;
+            assert!(
+                Decoder::new(&bad).configuration_record().is_err(),
+                "offset {offset}"
+            );
+        }
+        for range in [
+            1..17,
+            17..25,
+            26..34,
+            34..42,
+            43..51,
+            55..63,
+            63..79,
+            79..87,
+        ] {
+            let mut bad = bytes.clone();
+            bad[range].fill(0);
+            assert!(Decoder::new(&bad).configuration_record().is_err());
+        }
+    }
+    #[test]
+    fn configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members() {
+        let bytes = encoded();
+        for offset in [51, 87] {
+            let mut bad = bytes.clone();
+            bad[offset..offset + 4].copy_from_slice(&u32::MAX.to_le_bytes());
+            assert!(Decoder::new(&bad).configuration_record().is_err());
+        }
+        // One extra duplicated voter, with a truthful count and sufficient bytes.
+        let mut duplicate = bytes[..87].to_vec();
+        duplicate[51..55].copy_from_slice(&2u32.to_le_bytes());
+        duplicate.extend_from_slice(&bytes[55..87]);
+        duplicate.extend_from_slice(&bytes[87..]);
+        assert!(Decoder::new(&duplicate).configuration_record().is_err());
+        // The same node in the learner map cannot be treated as another voter.
+        let mut overlap = bytes.clone();
+        overlap[87..91].copy_from_slice(&1u32.to_le_bytes());
+        overlap.extend_from_slice(&bytes[55..87]);
+        assert!(Decoder::new(&overlap).configuration_record().is_err());
+        let mut tiny = Encoder {
+            b: Vec::new(),
+            limit: bytes.len() - 1,
+        };
+        assert!(tiny.configuration_record(&fixture()).is_err());
     }
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "live-selected-worker-maintenance",
+  "status": "durable-configuration-journal",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -133,10 +133,11 @@
       "native": "NativeLogStore",
       "conformance": [
         "tests/log_store.rs",
+        "tests/membership.rs",
         "tests/raft.rs",
         "tests/log_reclaim.rs"
       ],
-      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning is implemented; live worker maintenance is implemented, while general retention policies remain pending."
+      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Configuration-journal entry records validate learner/joint/final order, identity, accepted-log predicate and rollback in shared host/native transitions; full-image reclaim and native recovery preserve the journal. Snapshots cannot erase configuration records pending configuration-base integration. Live Raft/wire admission and recovery of configuration-bearing logs remain disabled until full quorum/learner/snapshot integration. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning and live worker maintenance are implemented; general retention policies remain pending."
     },
     {
       "design_id": "C04",

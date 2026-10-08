@@ -19,6 +19,7 @@ pub mod contracts;
 pub mod dial;
 pub mod identity;
 pub mod log;
+pub mod membership;
 #[cfg(feature = "native")]
 pub mod native;
 pub mod outbound;

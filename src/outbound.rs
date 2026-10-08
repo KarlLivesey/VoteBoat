@@ -306,8 +306,8 @@ pub fn message_cost(
                 .ok_or(OutboundError::BatchTooLarge)?)?;
             let mut class = MessageClass::Control;
             for entry in entries {
-                if let EntryPayload::Command { bytes, .. } = &entry.payload {
-                    add(bytes.capacity())?;
+                add(entry.retained_payload_bytes())?;
+                if !matches!(entry.payload, EntryPayload::Noop) {
                     class = MessageClass::Data;
                 }
             }
