@@ -68,7 +68,9 @@ tokens. No new consensus effect, watermark, generation source or storage format
 is introduced.
 
 The [source fence wrapper](SOURCE_FENCING.md) now commits an intent-bound fence
-and preserves immutable exports at its exact boundary. Directory orchestration
+and preserves immutable exports at its exact boundary. The
+[target guard](TARGET_IMPORTS.md) commits staging and inline data imports while
+remaining non-serving. Directory orchestration
 still has no cancellation/unlock, foreign fence/import receipt, ownership
 publication or activation command. Do not begin an operational transfer
 expecting this intent-only slice to finish it. Forward recovery, retained lineage,
@@ -84,9 +86,8 @@ election, snapshot catch-up, original retry and quorum read. Owners remain uncha
 Delivery is an in-process message pump; this new history is neither TCP/QUIC
 transport evidence nor modeled power loss nor a distributed transfer proof.
 
-Next establish non-serving target bootstrap and commit a source fence that captures
-immutable data at its exact boundary. Then commit recoverable target imports with
-source identity, boundary, operation and content binding. After that, verify all
+Source fencing and committed non-serving target imports now implement these
+local phases with exact identity/boundary/operation/content binding. Next verify all
 fence/import evidence before directory publication and durable target activation.
 Those steps turn this journal into a usable split; compatible merge reuses the same
 handoff machinery before P7 measured tuning.

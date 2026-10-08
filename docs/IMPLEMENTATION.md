@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; target import/publication/activation remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; publication/activation remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -97,7 +97,12 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
    routed application and tested P4 placement path with a genuinely splittable
    application adapter. Slice 84 supplies the public scope seam and native
    per-bucket counter with transferable retry results/outbox; ownership transfer
-   remains pending. Slice 85 records bounded durable intents and local target reservations without changing ownership. Slice 86 adds intent-bound source fencing, immutable exports and quorum-readable status. Next establish non-serving target bootstrap and committed imports, then verify publication/activation. Sketch bounded export/import records, source fencing,
+   remains pending. Slice 85 records durable intents/local target reservations.
+   Slice 86 supplies intent-bound source fencing and immutable exports. Slice 87
+   adds non-serving target staging, committed inline imports and source-observed
+   content commitments. Next verify cross-group evidence for publication and
+   durable activation, then exercise end-to-end interruption/no-dual-owner
+   histories. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
    source/target/directory recovery across interrupted stages and lost receipts,
@@ -4858,3 +4863,112 @@ Then verify all source/target evidence before metadata publication and durable
 activation, including interrupted-stage/no-dual-owner histories. Compatible merge
 and P7 follow. Recursive lifecycle, broader fault/macOS/separate-host evidence and
 full P0–P7 remain unfinished; P8 stays deferred. Static service use remains available.
+
+### Slice 87 mini schema — staging target and durable import (in progress)
+
+Purpose: supply the target half of the first split. TransferTarget<A,P> binds
+operation/intent/target identity, provider schema/initial checkpoint and explicit
+import/checkpoint budgets in a committed staging command. It rejects client writes
+and data reads before activation. An inline import contains canonical actual
+scope-image bytes and every source group/incarnation, fence F, epoch/operation,
+configuration context and range. Checked complete disjoint source coverage is
+required. SHA-256 from the already pinned ring dependency binds canonical content;
+this makes ring direct for core import integrity, without another hashing engine.
+The existing Raft/WAL durability path carries both data and record, so digest-only
+readiness is impossible in this first bounded format. Imported source F remains
+lineage while the application's applied index follows the target's own log.
+Exact staging/import retries preserve first outcomes; conflicting content refuses
+atomically. A checkpoint retains original import content/provenance and provider
+state; recovery exposes staging/import status through a quorum read barrier.
+The lifecycle operation ID is shared across its privileged staging/import phases,
+whose exact command kinds distinguish retries; it remains reserved from data IDs.
+Trusted authenticated hosts must verify foreign source status/configuration and
+committed intent; this is not a cryptographic foreign-quorum certificate.
+
+Checks: source export to actual three-node target WAL, committed import and status,
+pre/post-import NotActive, lost observation/restart, checkpoint recovery, source
+lineage/digest/content conflicts, complete coverage, truncation/atomic failure and
+provider capacity refusal. Next require verified source/target evidence for metadata
+publication and durable activation, with no-dual-owner/interrupted-stage histories.
+Following reuse that handoff for compatible merge. These advance P6; P7 and the
+full P0–P7 scope remain active, with recursive coordination still outstanding.
+
+Slice 87 check adjustment: the native inactive-write history initially expected
+an asynchronous refusal after accepting proposal ownership. The actual facade
+correctly rejects synchronously during application admission. Check that returned
+Application(InvalidCommand) and original owned request allocation instead; preserve
+production rejection timing. Then continue the same WAL/checkpoint histories.
+
+Slice 87 integration refinement: source status previously bound F and intent but
+not its exported image content. To bind source observation to actual imported data,
+derive per-target scope-image SHA-256 commitments from immutable F-state in the
+existing quorum-readable SourceFreezeStatus. TargetImport checks each image against
+that expected commitment, including schema/scheme/range/F/length/content. The trusted
+host verifies authenticated source provenance/configuration; a self-supplied digest
+still grants no authority. This adds bounded status metadata, not another owner or
+source checkpoint format. Source/result bounds and native histories must exercise it.
+
+## Slice 87 — non-serving target staging and committed inline imports
+
+Implemented TransferTarget<A,P> over existing public scope/application/checkpoint/
+read contracts and the same native Node/storage assembly. Committed staging binds
+operation, intent, exact target identity, provider schema/initial checkpoint and
+explicit budgets. The lifecycle ID is shared by privileged staging/import phases;
+exact command kind/content distinguishes phase retries and the ID is reserved from
+data. Ordinary native client admission rejects synchronously with original request
+ownership preserved; direct committed data and all data reads remain NotActive.
+There is no activation path or hidden permission from a client hint/election.
+
+TargetImport validates ordered complete source intersections, exact group and
+responsibility incarnations, epoch, lifecycle ID, source F, configuration context,
+schema/scheme/range/content and expected source commitments. SourceFreezeStatus now
+derives bounded per-target commitments from immutable F-state. Named VBSIMAGE
+SHA-256 covers image metadata/length/content; the canonical load-command digest
+also binds intent, target and bootstrap configuration. Pinned ring 0.17.14, already
+used by TLS, becomes a direct dependency (including core-only builds). No new
+package version or homemade hash is introduced. Hash identity is not authentication;
+trusted hosts verify foreign quorum observations, configuration and provenance.
+
+Inline load contains all actual image bytes in the existing Raft Command/WAL.
+Committed ordered application performs atomic scope import at target I, validates
+the provider checkpoint envelope and retains original canonical content, first I,
+source lineage and digest. Source F remains independent. Exact phase retries/status
+survive subsequent noops, WAL replay and checkpoints; competing imports cannot
+replace data. Multi-source operation-ID collisions refuse atomically. Outbox data
+is retained without external delivery. New application formats are VBTSOWN1,
+VBTIMP01, VBTLOAD1 and VBTRGT01; source checkpoint format remains unchanged.
+No consensus effect, persistence token, wire/WAL format or worker/store owner changes.
+
+Nine downstream target tests cover SHA-256 vector/canonical codecs, changed source
+content/metadata, incomplete/reordered multi-source coverage, original resource
+return, phase retries/conflicts, same-batch apply, provider-capacity refusal, every
+import/checkpoint truncation, checkpoint/WAL replay, and result/pending bounds.
+The compatible multi-source import test combines real independently frozen scope
+data and refuses colliding original IDs. It does not prove distributed merge.
+Four native TCP/TLS/QUIC histories stage two three-replica targets before fencing a
+three-replica source, then import one target against a quorum-readable source
+commitment while the other remains staged. WAL-only or checkpoint recovery,
+discarded observation, re-election, original import digest/index, repeated reopen,
+quorum status/data reads, synchronous write refusal and recovered values/outbox pass.
+These finite graceful-reopen schedules are not power-loss modeling or complete
+metadata publication/activation/no-dual-owner transfer evidence.
+
+Validation: all-feature core 57, directory 22, scopes 8, source 7, target 9 and routed
+18 pass (121 tests). Core-only library 48, scopes 7, source 7 and target 9 pass
+(71 tests). After the final command-ceiling and two-staging-target refinement,
+target/routed suites and all-target/all-feature Clippy with warnings denied pass
+again; the final core-only target suite passes separately. Formatting, inventory
+and diff checks pass; inventory now has 68 contracts. The initial native test
+incorrectly expected asynchronous rejection; its assertion now matches synchronous
+admission. A fixture variable shadowing the configuration builder, duplicate module
+loading, and a helper namespace typo were corrected before the passing runs.
+Review also corrected bootstrap framing size and enforced declared command ceilings.
+See docs/TARGET_IMPORTS.md for contract, ownership, formats and remaining limits.
+
+P6 remains current. Next verify every source-fenced/target-ready observation before
+committed metadata publication and durable target activation; test interrupted
+stages, lost receipts and old-owner restart without dual serving. Then finish
+compatible merge/resumption and recursive lifecycle/retirement rather than assuming
+that the local multi-source data test completes them. P7 measured tuning, broader
+fault/macOS/separate-host evidence and the full P0–P7 objective stay active. P8 is
+deferred. Static service availability remains independent of these gates.

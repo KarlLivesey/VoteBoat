@@ -53,7 +53,8 @@ or silently change a child's voting rules. Placement metadata is a declaration;
 actual replica/quorum changes still require the P4 protocol. The [transfer intent journal](TRANSFER_INTENTS.md) now records a proposed top-level
 split/merge and locks conflicting publications without changing ownership.
 The optional source wrapper supplies local committed fencing and exact-boundary
-export. Cross-group import, ownership publication and activation remain pending.
+export. The optional target guard supplies committed staging/inline imports. Cross-group
+verification, ownership publication and activation remain pending.
 
 There is one DirectoryReceipt per Command, including the initialization command. Published includes the resulting route
 generation. Valid commands that lose their compare-and-set race or violate the

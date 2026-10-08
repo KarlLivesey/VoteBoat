@@ -627,8 +627,7 @@ fn quic_child_writes_checkpoint_and_restart_without_parent_commits() {
     }
 }
 
-#[path = "../transfer_source/fixtures.rs"]
-mod source_fixture;
+use super::source_fixture;
 fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
     use voteboat::{bucket_counter::*, scope::*, transfer_source::*};
     let clock = Instant::now();
@@ -699,12 +698,19 @@ fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
         ),
         SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
     );
+    let SourceRead::Freeze(Some(status)) = read(&mut nodes, &clock, 20, SourceQuery::Freeze) else {
+        panic!("source status")
+    };
+    assert_eq!(status.fence, original_fence);
+    assert_eq!(status.intent, source_fixture::intent());
     assert_eq!(
-        read(&mut nodes, &clock, 20, SourceQuery::Freeze),
-        SourceRead::Freeze(Some(SourceFreezeStatus {
-            fence: original_fence,
-            intent: source_fixture::intent()
-        }))
+        status
+            .exports
+            .iter()
+            .find(|e| e.target == group(21))
+            .unwrap()
+            .digest,
+        voteboat::transfer::ContentDigest::scope_image(&original_image)
     );
     for n in &nodes {
         let source = &n.local().applications[&group(20)];
@@ -767,4 +773,243 @@ fn quic_transfer_source_freeze_survives_wal_reopen_and_lost_observation() {
 #[test]
 fn quic_transfer_source_freeze_survives_checkpoint_and_later_log_progress() {
     source_freeze_recovery(NativePeerProtocol::Quic, true);
+}
+
+#[path = "../transfer_target/fixtures.rs"]
+mod target_fixture;
+fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
+    use voteboat::{transfer::ContentDigest, transfer_source::*, transfer_target::*};
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-target-import-{}-{protocol:?}-{compact}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let mut sources = open(
+        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        target_fixture::source::fresh,
+    );
+    let mut targets = open(
+        configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        target_fixture::fresh,
+    );
+    let mut other_targets = open(
+        configuration(&root, 22, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        || target_fixture::fresh_for(22),
+    );
+    campaign(&mut other_targets, &clock, 22);
+    propose(
+        &mut other_targets,
+        &clock,
+        22,
+        200,
+        target_fixture::fresh_for(22)
+            .bootstrap_command(65536)
+            .unwrap(),
+    );
+    assert!(other_targets
+        .iter()
+        .all(|n| n.local().applications[&group(22)]
+            .status()
+            .staged_index
+            .is_some()));
+    campaign(&mut sources, &clock, 20);
+    campaign(&mut targets, &clock, 21);
+    // Stage targets before committing the source's irreversible cut.
+    let staged = propose(
+        &mut targets,
+        &clock,
+        21,
+        200,
+        target_fixture::fresh().bootstrap_command(65536).unwrap(),
+    );
+    assert!(matches!(staged.outcome, TargetOutcome::Staged { .. }));
+    let query = || {
+        TargetQuery::Data(RoutedQuery {
+            hint: target_fixture::source::hint(1),
+            key: vec![1],
+            query: vec![1],
+        })
+    };
+    assert_eq!(
+        read(&mut targets, &clock, 21, query()),
+        TargetRead::NotActive
+    );
+    propose(
+        &mut sources,
+        &clock,
+        20,
+        100,
+        target_fixture::source::fresh()
+            .bootstrap_command(100000)
+            .unwrap(),
+    );
+    propose(
+        &mut sources,
+        &clock,
+        20,
+        1,
+        target_fixture::source::data(1, 7),
+    );
+    propose(
+        &mut sources,
+        &clock,
+        20,
+        2,
+        target_fixture::source::data(200, 11),
+    );
+    propose(
+        &mut sources,
+        &clock,
+        20,
+        200,
+        target_fixture::source::freeze(),
+    );
+    let SourceRead::Freeze(Some(status)) = read(&mut sources, &clock, 20, SourceQuery::Freeze)
+    else {
+        panic!("source status")
+    };
+    let app = &sources[0].local().applications[&group(20)];
+    assert_eq!(status.fence, app.fence().unwrap());
+    let source_configuration = sources[0]
+        .local()
+        .owner
+        .core(group(20))
+        .unwrap()
+        .state()
+        .bootstrap
+        .configuration;
+    let import = target_fixture::from_source(app, 21, source_configuration);
+    let bytes = target_fixture::fresh()
+        .import_command(&import, 65536)
+        .unwrap();
+    // The first successful target observation is discarded; subsequent status is authoritative.
+    let _ = propose(&mut targets, &clock, 21, 200, bytes.clone());
+    let TargetRead::Status(original) = read(&mut targets, &clock, 21, TargetQuery::Status) else {
+        panic!("target status")
+    };
+    let imported = original.imported.as_ref().unwrap();
+    assert_eq!(imported.digest, ContentDigest::sha256(&bytes));
+    assert_eq!(imported.sources[0].fence, status.fence);
+    assert_eq!(
+        imported.sources[0].digest,
+        status
+            .exports
+            .iter()
+            .find(|e| e.target == group(21))
+            .unwrap()
+            .digest
+    );
+    assert_eq!(
+        read(&mut targets, &clock, 21, query()),
+        TargetRead::NotActive
+    );
+    // The selected facade rejects this synchronously, before proposal ownership.
+    let request = ClientRequest {
+        group: group(21),
+        operation: OperationId::new(3).unwrap(),
+        bytes: target_fixture::source::data(1, 1),
+    };
+    let ptr = request.bytes.as_ptr();
+    let rejected = targets[0].propose(request).unwrap_err();
+    assert_eq!(
+        rejected.reason,
+        ClientError::Application(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(rejected.request.bytes.as_ptr(), ptr);
+    assert!(other_targets
+        .iter()
+        .all(|n| n.local().applications[&group(22)]
+            .status()
+            .imported
+            .is_none()));
+    close(sources, &clock, 20, || {
+        drive(&mut targets, &clock, |_| true);
+        drive(&mut other_targets, &clock, |_| true);
+    });
+    close(other_targets, &clock, 22, || {
+        drive(&mut targets, &clock, |_| true);
+    });
+    if compact {
+        for target in &mut targets {
+            target.control(group(21), NodeControl::Checkpoint).unwrap();
+        }
+        drive(&mut targets, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local()
+                    .owner
+                    .core(group(21))
+                    .unwrap()
+                    .state()
+                    .base_index()
+                    == n.local().applications[&group(21)].applied_index()
+            })
+        });
+    }
+    close(targets, &clock, 21, || {});
+    let mut targets = open(
+        configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        target_fixture::fresh,
+    );
+    campaign(&mut targets, &clock, 21);
+    let receipt = propose(&mut targets, &clock, 21, 200, bytes);
+    assert_eq!(
+        receipt.outcome,
+        TargetOutcome::Imported {
+            index: imported.index,
+            digest: imported.digest
+        }
+    );
+    assert_eq!(
+        read(&mut targets, &clock, 21, TargetQuery::Status),
+        TargetRead::Status(original.clone())
+    );
+    assert_eq!(
+        read(&mut targets, &clock, 21, query()),
+        TargetRead::NotActive
+    );
+    for target in &targets {
+        let app = &target.local().applications[&group(21)];
+        assert_eq!(app.application().value(&[1]), Ok(7));
+        assert_eq!(app.application().outbox().count(), 1);
+        assert!(app.applied_index() > imported.index);
+    }
+    close(targets, &clock, 21, || {});
+    let targets = open(
+        configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        target_fixture::fresh,
+    );
+    for target in &targets {
+        assert_eq!(target.local().applications[&group(21)].status(), original);
+    }
+    close(targets, &clock, 21, || {});
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_target_staging_and_inline_import_survive_wal_reopen() {
+    target_import_recovery(NativePeerProtocol::TcpTls, false);
+}
+#[test]
+fn tcp_target_staging_and_inline_import_survive_checkpoint_reopen() {
+    target_import_recovery(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_target_staging_and_inline_import_survive_wal_reopen() {
+    target_import_recovery(NativePeerProtocol::Quic, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_target_staging_and_inline_import_survive_checkpoint_reopen() {
+    target_import_recovery(NativePeerProtocol::Quic, true);
 }

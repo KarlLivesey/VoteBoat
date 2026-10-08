@@ -34,6 +34,13 @@ pub const TRANSFER_SOURCE_SCHEMA: u64 = 1;
 pub struct SourceFreezeStatus {
     pub fence: OwnershipFence,
     pub intent: TransferIntent,
+    pub exports: Vec<SourceExportCommitment>,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SourceExportCommitment {
+    pub target: GroupIdentity,
+    pub scope: BucketRange,
+    pub digest: ContentDigest,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SourceQuery<Q> {
@@ -522,12 +529,28 @@ where
                 .routed
                 .read_at(required.min(self.routed.applied_index()), query)
                 .map(SourceRead::Data),
-            SourceQuery::Freeze => Ok(SourceRead::Freeze(self.intent.as_ref().map(|intent| {
-                SourceFreezeStatus {
-                    fence: self.fence().expect("frozen intent has fence"),
-                    intent: intent.clone(),
-                }
-            }))),
+            SourceQuery::Freeze => {
+                let status = if let Some(intent) = &self.intent {
+                    let ranges = self.export_ranges(intent)?;
+                    let mut exports = Vec::with_capacity(ranges.len());
+                    for (target, scope) in ranges {
+                        let image = self.export_target(target, self.export_bytes)?;
+                        exports.push(SourceExportCommitment {
+                            target,
+                            scope,
+                            digest: ContentDigest::scope_image(&image),
+                        });
+                    }
+                    Some(SourceFreezeStatus {
+                        fence: self.fence().expect("frozen intent has fence"),
+                        intent: intent.clone(),
+                        exports,
+                    })
+                } else {
+                    None
+                };
+                Ok(SourceRead::Freeze(status))
+            }
         }
     }
 }
@@ -550,10 +573,14 @@ where
                 .read_result_bound(q)?
                 .checked_sub(size_of::<RoutedRead<A::ReadResult>>())
                 .ok_or(ApplicationError::ReceiptBudget)?,
-            SourceQuery::Freeze => self
-                .intent
-                .as_ref()
-                .map_or(0, |i| i.retained_bytes() - size_of::<TransferIntent>()),
+            SourceQuery::Freeze => {
+                if let Some(i) = &self.intent {
+                    i.retained_bytes() - size_of::<TransferIntent>()
+                        + self.export_ranges(i)?.len() * size_of::<SourceExportCommitment>()
+                } else {
+                    0
+                }
+            }
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -568,6 +595,7 @@ where
             SourceRead::Data(r) => self.routed.read_result_bytes(r, limit)?,
             SourceRead::Freeze(s) => s.as_ref().map_or(0, |s| {
                 s.intent.retained_bytes() - size_of::<TransferIntent>()
+                    + s.exports.capacity() * size_of::<SourceExportCommitment>()
             }),
         };
         if bytes > limit {

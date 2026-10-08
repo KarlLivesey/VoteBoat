@@ -104,8 +104,9 @@ fencing, publication and activation remain separate lifecycle work.
 The [durable transfer intent journal](docs/TRANSFER_INTENTS.md) records proposed
 splits/merges and reserves local targets across recovery. The optional
 [source guard](docs/SOURCE_FENCING.md) now commits a fence and preserves exports
-at its exact boundary. Target staging/import, publication and activation remain
-pending.
+at its exact boundary. The [target guard](docs/TARGET_IMPORTS.md) now stages and
+durably imports data while remaining non-serving. Publication and activation
+remain pending.
 
 ## Run
 

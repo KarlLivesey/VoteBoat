@@ -4,8 +4,8 @@
 where A supplies public scope/checkpoint/bounded application contracts and P is a
 partition policy. It implements the same public application, proposal, read and
 checkpoint seams used by native Node and host assemblies. No core, transport,
-worker, file or storage binding is added. This is the source half of P6; targets
-are not yet created, durably imported or activated by this implementation.
+worker, file or storage binding is added. This is the source half of P6; the [target guard](TARGET_IMPORTS.md) separately supplies committed staging/import.
+Cross-group publication and activation remain unfinished.
 
 ## Inputs and state transitions
 
@@ -62,7 +62,10 @@ lineage alongside its provider data rather than treating an image as authorizati
 
 `SourceQuery::Data` uses the existing routed query and returns Fenced after the cut,
 including when a read barrier requires a later wrapper prefix. `SourceQuery::Freeze`
-returns optional `SourceFreezeStatus { fence, intent }`. Both refuse an unapplied
+returns optional `SourceFreezeStatus { fence, intent, exports }`. Each bounded
+export commitment names target/range and SHA-256 of canonical schema/scheme/F/
+length/content. The [target import](TARGET_IMPORTS.md) checks its images against
+these source-observed commitments. Both refuse an unapplied
 boundary. Use the existing one-use quorum read barrier for authoritative distributed
 observation after a lost receipt. `fence`, `frozen_intent`, `routed` and exports are
 local diagnostics. An authenticated non-Byzantine host must establish their provenance
@@ -117,8 +120,8 @@ These are selected source-side schedules, not modeled power loss or proof of the
 whole distributed transfer. The target import in those tests is local adapter
 validation, not a committed target-ready receipt or activation.
 
-Next implement non-serving target bootstrap and committed recoverable imports
-binding source identity, F, epoch, operation, scope and content. Then require all
+The target guard now implements committed staging/inline imports with source
+identity, F, epoch, operation, scope and observed content commitments. Next require all
 fence/import evidence before metadata publication and durable target activation,
 with interrupted-stage and no-dual-owner histories. Compatible merge reuses that
 path. P6, recursive lifecycle and the full P0–P7 objective remain unfinished.

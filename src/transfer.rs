@@ -301,3 +301,32 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         Ok(bytes)
     }
 }
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ContentDigest(pub [u8; 32]);
+impl ContentDigest {
+    pub fn sha256(bytes: &[u8]) -> Self {
+        Self(
+            ring::digest::digest(&ring::digest::SHA256, bytes)
+                .as_ref()
+                .try_into()
+                .expect("SHA-256 length"),
+        )
+    }
+}
+impl ContentDigest {
+    /// Canonical domain-separated image commitment; not an authentication proof.
+    pub fn scope_image(image: &crate::scope::ScopeImage) -> Self {
+        let mut hash = ring::digest::Context::new(&ring::digest::SHA256);
+        hash.update(b"VBSIMAGE");
+        hash.update(&image.schema().to_le_bytes());
+        hash.update(&image.scheme().id.get().to_le_bytes());
+        hash.update(&image.scheme().version.to_le_bytes());
+        hash.update(&image.scope().start().to_le_bytes());
+        hash.update(&image.scope().end().to_le_bytes());
+        hash.update(&image.source_applied().to_le_bytes());
+        hash.update(&(image.bytes().len() as u64).to_le_bytes());
+        hash.update(image.bytes());
+        Self(hash.finish().as_ref().try_into().expect("SHA-256 length"))
+    }
+}

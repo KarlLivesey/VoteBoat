@@ -1591,3 +1591,39 @@ introduced. Scope capability version 2 adds an explicit provider lifetime bound;
 new source application formats are separately documented. P6 target/import/
 publication/activation, recursive lifecycle and full P0–P7 remain active; macOS/
 separate-host operational evidence remains outstanding and P8 is deferred.
+
+## Slice 87 — non-serving target import and source content binding
+
+Nine target conformance tests exercise staging, original phase retries/status,
+canonical full-data imports, SHA-256 standard vector, source-observed metadata/
+content commitment matching, ordered complete multi-source coverage, duplicate
+operation-ID refusal, returned inputs, provider capacity, atomic truncation/batch/
+restore failures, WAL replay/checkpoints, command limits and read capacity. Source
+status now derives bounded per-target image commitments from exact F-state; its
+checkpoint format is unchanged. Hashing reuses pinned ring as a direct dependency.
+
+Four actual native network histories use TCP/TLS or QUIC with three replicas per
+source/target group. Both split targets stage before source fencing; one imports
+against a quorum-backed source commitment while the other stays staged. WAL-only
+or checkpoint/compaction recovery, lost application observation, re-election,
+repeated reopen, original digest/index status, recovered values/outbox, quorum
+NotActive reads and synchronous inactive-write refusal are checked. Import carries
+actual image bytes through the existing durable WAL quorum; no digest-only data
+availability claim is made. The source's F is retained separately from target I.
+
+All-feature core 57 + directory 22 + scopes 8 + source 7 + target 9 + routed 18 =
+121 tests pass. Core-only library 48 + scopes 7 + source 7 + target 9 = 71 pass.
+Final target/routed suites and all-target/all-feature Clippy pass after envelope/
+two-target-stage refinements; core-only target passes again. Formatting, diff and
+inventory checks pass; inventory has 68 contracts. Initial harness failures assumed
+asynchronous rejection instead of the facade's correct synchronous refusal; later
+fixture-shadowing, module-sharing and helper-name errors were fixed before passing.
+
+This is selected local phase/network/recovery evidence. It does not establish
+metadata publication, activation, complete distributed merge, whole-transfer
+no-dual-owner proof, power-loss behavior, or macOS/separate-host deployment.
+Foreign provenance/configuration validation and group-creation/preflight orchestration
+remain trusted-host duties and required work for the complete lifecycle. Inline
+imports have explicit 8 MiB body ceilings and selected native envelopes may be
+smaller. Further transfers/retirement, recursive parent coordination and full P0–P7
+remain unfinished; P8 stays deferred.

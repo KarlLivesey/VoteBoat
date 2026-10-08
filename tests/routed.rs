@@ -454,3 +454,7 @@ fn checkpoint_preserves_semantic_bindings_and_rejects_every_truncation_atomicall
     assert!(restored.restore_checkpoint(1, 3, &image).is_err());
     assert!(image.len() <= app.readiness_requirements().snapshot_bytes);
 }
+
+#[cfg(feature = "tls")]
+#[path = "transfer_source/fixtures.rs"]
+pub mod source_fixture;

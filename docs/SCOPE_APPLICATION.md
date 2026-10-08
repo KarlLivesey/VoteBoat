@@ -92,3 +92,9 @@ no published state, then publish/reopen and restore imported retries/outbox at t
 target index. They establish provider/checkpoint behavior, not a committed Import,
 quorum-ready receipt, split/merge completion, power-loss model or no-dual-owner
 protocol. Linux evidence does not establish macOS execution.
+
+The optional [source](SOURCE_FENCING.md) and [target](TARGET_IMPORTS.md) guards now
+retain intent/fence/import provenance through existing durable application paths.
+The source publishes quorum-readable image commitments; the target remains
+non-serving after committed import. Metadata publication and activation still
+require the remaining cross-group lifecycle protocol.

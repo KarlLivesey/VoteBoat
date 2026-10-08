@@ -6,7 +6,7 @@
     "rustls =0.23.45 (optional tls feature; std/ring)",
     "quinn-proto =0.11.19 (optional quic feature; rustls-ring, caller-polled)",
     "bytes =1.12.1 (optional quic feature)",
-    "ring 0.17.14 (Cargo.lock; Rustls crypto provider)",
+    "ring =0.17.14 (direct SHA-256 source/import integrity; Rustls crypto provider)",
     "transitive versions pinned in Cargo.lock"
   ],
   "contracts": [
@@ -1335,7 +1335,7 @@
     },
     {
       "design_id": "C05/C15",
-      "public_contract": "TransferIntent / TransferIntentStatus / LifecycleDirectory / DirectoryQuery / DirectoryRead",
+      "public_contract": "TransferIntent / TransferIntentStatus / LifecycleDirectory / DirectoryQuery / DirectoryRead / ContentDigest",
       "operations": [
         "new",
         "encode",
@@ -1343,7 +1343,9 @@
         "transfer_intent_at",
         "read_at",
         "checkpoint",
-        "restore"
+        "restore",
+        "ContentDigest::sha256",
+        "ContentDigest::scope_image"
       ],
       "native": "Directory intent journal and owning lifecycle query view over existing application/read/checkpoint contracts.",
       "conformance": [
@@ -1354,7 +1356,7 @@
     },
     {
       "design_id": "C05/C15",
-      "public_contract": "TransferSource<A,P> / SourceFreezeStatus / SourceQuery / SourceRead",
+      "public_contract": "TransferSource<A,P> / SourceFreezeStatus / SourceQuery / SourceRead / SourceExportCommitment",
       "operations": [
         "new",
         "bootstrap_command",
@@ -1372,7 +1374,31 @@
         "tests/transfer_source/fixtures.rs",
         "tests/routed/native.rs"
       ],
-      "scope": "Bootstrap-bound aggregate lifetime export budget, exact payload/envelope key check, committed irreversible local source fence, routed state frozen at F while wrapper applied prefix progresses. Immutable exact-boundary exports and quorum-readable local status survive WAL-only/checkpoint recovery through real three-node TCP/QUIC histories. Trusted host verifies foreign directory intent and target staging; no cryptographic certificate, committed target import, directory publication/activation, delegated-parent coordination or complete transfer proof. No new worker/store owner."
+      "scope": "Bootstrap-bound aggregate lifetime export budget, exact payload/envelope key check, committed irreversible local source fence, routed state frozen at F while wrapper applied prefix progresses. Immutable exact-boundary exports and quorum-readable local status survive WAL-only/checkpoint recovery through real three-node TCP/QUIC histories. Trusted host verifies foreign directory intent and target staging; no cryptographic certificate, committed target import, directory publication/activation, delegated-parent coordination or complete transfer proof. No new worker/store owner. Quorum-readable status now derives per-target SHA-256 commitments from immutable scope images, binding schema/scheme/range/F/length/content; bounded status metadata is charged without changing source checkpoint format."
+    },
+    {
+      "design_id": "C05/C15",
+      "public_contract": "TransferTarget<A,P> / TargetImport / SourceImport / TargetLimits / TargetStatus / ImportStatus / TargetReceipt / TargetQuery / TargetRead",
+      "operations": [
+        "new",
+        "bootstrap_command",
+        "import_command",
+        "validate_proposal",
+        "apply_batch",
+        "status",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "encode",
+        "decode"
+      ],
+      "native": "Non-serving deterministic target guard over existing ScopeStateMachine/application/checkpoint/read seams, native Node and the same authoritative WAL/snapshot providers; canonical SHA-256 uses pinned ring.",
+      "conformance": [
+        "tests/transfer_target.rs",
+        "tests/transfer_target/fixtures.rs",
+        "tests/routed/native.rs"
+      ],
+      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, complete ordered source coverage and source-observed content commitments. Inline committed load carries actual data and source fence/configuration lineage; source F is separate from target I. Exact phase retries/status survive native three-node TCP/QUIC WAL/checkpoint recovery while data remains NotActive. 8 MiB import body, 256 sources, bounded pending/read/result/state. Multi-source collision/coverage adapter tests do not prove distributed merge. Trusted authenticated host verifies foreign provenance/staging/envelopes. No metadata publication, activation, recursive coordination, later-transfer/retirement or complete transfer proof; no new store/thread owner."
     }
   ],
   "not_yet_implemented": [
