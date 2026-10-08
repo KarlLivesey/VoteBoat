@@ -1438,6 +1438,23 @@
         "tests/routed/repeat.rs"
       ],
       "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Selected complete top-level split, compatible multi-source merge and repeated activated-target transfer compositions recover original decisions over TCP/QUIC WAL/checkpoints. Source data and local activation remain guard obligations; structural publication alone grants no service. Native repeated split/merge preserves older decisions while newer fences/imports/publication/activation progress. No automatic resumer, reclamation, delegated-parent coordination, arbitrary-fault, mixed-version or macOS claim."
+    },
+    {
+      "design_id": "C05/C15",
+      "public_contract": "RetirementGuard<S> / RetirableOwner / RetirementProof / RetentionRelease / TargetActivationEvidence / RetirementStatus",
+      "operations": [
+        "new", "from_status", "encode", "decode", "retirement_command",
+        "validate_proposal", "apply_batch", "owner", "status", "freeze_status",
+        "retired_lineage", "export_target", "read_at", "checkpoint",
+        "restore_checkpoint", "readiness_requirements"
+      ],
+      "native": "Core retirement guard over source/target applications, ordinary Node admission/read/checkpoint seams and the same authoritative native WAL/snapshot binding. Host scope providers remain injectable; local fence authority is sealed.",
+      "conformance": [
+        "tests/retirement.rs", "tests/retirement/fixtures.rs",
+        "tests/retirement/host.rs", "tests/retirement/storage.rs",
+        "tests/routed/retirement.rs"
+      ],
+      "scope": "Complete matching publication and all required target activation observations plus an explicit trusted host release of external retention promises gate ordered committed retirement. Drops live provider/import payloads, retains fences, source commitments, decision/release and original activation lineage. Exact retries retain R; other owner operations cannot revive service. Versioned bounded proof/command/checkpoint formats, atomic restore and host resource lifetime checks. Both original and later sources have native-file interrupted-publication, replay and physical WAL reclamation evidence. TCP/QUIC three-replica WAL/checkpoint histories cover original split source retirement, lost receipts and target retries with source offline. No discovery of external pins, automatic cleanup/resumer, unwrapped deployment migration, later-source native-network retirement, delegated-parent lifecycle, arbitrary-power-loss, mixed-version, macOS or separate-host claim."
     }
   ],
   "not_yet_implemented": [

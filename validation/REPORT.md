@@ -1817,3 +1817,45 @@ reopens are not power-loss, arbitrary-fault liveness, macOS or separate-host pro
 Foreign provenance/configuration remains trusted authenticated host input. Current
 work is durable retirement, next recursive coordination, then measured P7 tuning.
 Full P0–P7 remains active; P8 deferred. See docs/REPEATED_TRANSFERS.md.
+
+## Slice 93 — old-owner retirement and recovery before reclamation
+
+The new initial-construction RetirementGuard uses the same authoritative source
+or target application/log. Complete matching publication, all target activation
+observations and explicit trusted host release of external retention promises
+gate committed retirement. It drops actual old provider/import buffers and retains
+source fences/commitments, decision/release and original target activation lineage.
+No external-pin discovery or migration of unwrapped deployments is implemented.
+
+Seven all-feature retirement tests pass: five deterministic/host-provider cases
+and two native-file histories. Both initial and later activated sources exercise
+sealed-but-unpublished, pre-publication failure and post-publication lost completion
+(six interruption histories). Recovery follows the old log-pinned snapshot plus
+retirement tail; verified retired checkpoint publication/installation then permits
+pin release and physical log reclamation. Fresh reopen needs no old provider or
+retained command entries. These are real-file interrupted publication checks,
+not whole-machine power-loss or secure-erasure evidence. The injected provider's
+live-resource weak witness survives admission/failed batches and expires only
+after actual retirement; retired checkpoint restore has no live owner.
+
+Four native network histories pass (28.37 seconds): TCP/TLS and QUIC, each WAL and
+checkpoint/reclaimed-log reopen. Four actual three-replica groups commit metadata
+intent, source freeze, both imports, publication and both activations before
+retiring the original source. Lost client completion is recovered via quorum
+status; original fences and exact retirement retries survive reopen. A target
+serves original data retries with the source offline. Later activated-source
+retirement currently has deterministic/native-file coverage only.
+
+Affected all-feature retirement/scopes/activation/publication/repeat/source/target/
+log-reclamation suites pass 7/8/9/7/5/7/9/8. Core-only equivalents excluding native
+log reclamation pass 5/7/9/7/5/7/9. All-target/all-feature Clippy with warnings denied
+passes. Native routing caught an overallocated receipt vector; exact command-count
+capacity and a direct capacity assertion fix the declared-bound violation. Test
+setup/import/order/limit errors were corrected with focused reruns. Unaffected
+native histories were not repeated. No storage/consensus protocol changed.
+
+These selected Linux ordinary-majority histories do not establish arbitrary-fault
+liveness, mixed-version deployment, macOS or separate-host support. Foreign
+quorum provenance and retention promises remain authenticated host obligations.
+Recursive lifecycle and broader P7 work remain; full P0–P7 stays active.
+Formatting, diff checks and the 70-contract inventory validator pass.

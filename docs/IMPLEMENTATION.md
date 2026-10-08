@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; recursive lifecycle and retirement remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; recursive lifecycle remains pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -98,31 +98,30 @@ checked publication and durable activation. Slice 90 covers the selected complet
 split phase/reopen ledger over TCP/QUIC with both targets eventually serving.
 Slice 91 adds compatible two-source merge, partial-fence/offline-source recovery
 and atomic collision refusal. Slice 92 makes activated targets reusable as later
-sources, with selected repeated transfer recovery. These establish selected
-top-level handoff paths; recursive coordination, retirement and broader faults
-remain.
+sources, with selected repeated transfer recovery. Slice 93 adds bounded retirement
+after complete activation and explicit host retention release, with native-file
+interrupted-publication/reclamation checks for both source kinds and TCP/QUIC
+original-source recovery. These establish selected top-level handoff/cleanup paths;
+recursive coordination, general retention and broader faults remain.
 
-1. **Durable retirement and bounded reclamation (current, P6).** Repeated movement
-   now retains every old provider and original import. Bind permission to retire
-   transferred data to the complete committed publication, all required target
-   activations and explicit retention/recovery release conditions. Retain durable
-   source tombstones and lineage after dropping payloads; use verified checkpoint
-   publication before log reclamation. Depends on the checked reusable handoff.
-   Completion requires refusal before those gates, lost receipts, interrupted
-   cleanup/checkpoint and restart without old-owner revival or lost target retries.
-   This completes the cleanup part of macro reusable ownership movement.
-2. **Delegated-parent lifecycle coordination (next, P6).** Bind parent/child epoch
+1. **Delegated-parent lifecycle coordination (current, P6).** Bind parent/child epoch
    changes to durable handoff decisions through the responsibility tree. Depends
    on reusable owners and existing routed/directory contracts; completion requires
    parent failure/recovery and recursive transfers without dual owners or an
    ancestor commit in ordinary child writes. This connects P6 movement to P5 trees.
-3. **Measured tuning and broader validation (following, P7).** Establish a
+2. **Committed/applied measurement baseline (next, P7).** Establish a
    reproducible committed/applied baseline with workload, durability and latency
    budget before changing lanes, batching, reclamation or recovery throttling.
    Depends on usable routed/lifecycle paths; independent baseline measurements can
-   start earlier. Completion requires attributable throughput improvement at fixed
-   correctness and p99 bounds, with relevant failure regressions. Linux/macOS remain
-   targets, operational evidence stays explicit and CI remains background feedback.
+   start earlier. Completion requires reproducible workload commands, hardware,
+   transport, replication/durability settings and throughput/p99 evidence. This
+   supplies the macro measured-tuning milestone with an actual baseline.
+3. **Measured tuning and broader validation (following, P7).** Use that baseline
+   to select batching/lanes/recovery changes; require attributable improvement at
+   fixed correctness and latency bounds with relevant failure regressions. Extend
+   later-source native-network retirement and recursive fault coverage. Linux/macOS
+   remain targets; macOS/separate-host execution is still unverified. This advances
+   the macro performance/validation milestone; CI stays background feedback.
 
 ### How the current work fits globally
 
@@ -141,8 +140,9 @@ advances P5 and supplies P6 with owner-context and retry-state foundations
 over the tested trusted P4 placement path.
 P6 now connects source-fence evidence, target import, checked publication and
 durable activation with selected split and compatible merge phase/reopen ledgers.
-Activated targets can participate in selected later moves; recursive coordination,
-retirement and broader fault validation remain.
+Activated targets can participate in selected later moves. Retirement can drop
+their old data while preserving fences/lineage; recursive coordination, general
+retention and broader fault validation remain.
 The P5 fixed-assignment path remains usable while that work and remaining P4 public
 administration proceed.
 
@@ -5351,3 +5351,100 @@ validation. All source payloads and lifecycle tombstones are still retained; no
 cleanup is implied by fencing. These are finite Linux ordinary-majority graceful
 committed-boundary histories, not power-loss/arbitrary-fault or macOS/separate-host
 proof. Full P0–P7 remains active; P8 deferred and CI background feedback.
+
+### Slice 93 mini schema — retirement after verified handoff
+
+Current deliverable: one RetirementGuard over either existing core-owned source
+or target guard, installed from initial construction in the same application/log
+binding. This avoids implementing two different deletion gates and can actually
+drop the old provider plus retained import payload, without requiring providers
+to impersonate empty application state. Its initial configuration/template stays
+immutable; retired state contains no mutable old provider. No worker/store is added.
+
+API/data sketch: a checked bounded RetirementProof contains the committed metadata
+publication/configuration, an ordered activation observation for every required
+target, and a RetentionRelease naming the exact source/freeze operation/F plus a
+unique host release ID. The trusted host authenticates foreign quorum observations
+and owns external backup/application retention promises; the release explicitly
+certifies those promises no longer pin this source. The guard validates scoping
+and complete activation, never infers release from timeout. Use the original freeze
+operation ID for this final phase, with exact-byte retry/conflict semantics.
+
+State sketch: before retirement, delegate ordinary application operations to the
+unchanged guard. Retire only from its actual frozen status, requiring exact intent,
+fence, source export commitments, publication and all matching target activations.
+Commit/apply Retire at R in the existing source log, retain bounded tombstone/status
+and original target activation lineage, and drop old provider/import buffers.
+Afterward reject owner/data operations, permit original Retire retry and report
+retained recovery status. Outer applied progress remains contiguous through R and
+later no-ops/refusals. No unfreeze, data export or empty replacement owner exists.
+
+Recovery sketch: a versioned wrapper checkpoint binds its original configuration,
+current applied boundary and either complete live owner checkpoint or the retired
+proof/lineage/status. Retired restore needs no old data. Initial checkpoints plus
+retained replay must reconstruct retirement if the latest checkpoint was not
+published. Only the existing verified checkpoint publication/install then allows
+log compaction/reclamation; no eager disk deletion during application apply.
+A sealed/non-published snapshot cannot release old replay. Keep original fences
+and lineage through cleanup and fresh-owner reopen. Direct migration of an already
+unwrapped deployment is not silently introduced; its application migration remains
+explicit. Receipt/query/snapshot/command budgets include proof and tombstone bytes.
+
+Acceptance: initial split source and later activated sources both retire only after
+all required activations and retention release, reject incomplete/foreign/conflicting
+facts atomically, survive lost receipts and WAL/checkpoint reopen, release actual
+provider/import payloads, retain historical lineage and never revive old service.
+Inject a host provider through the same public application/scope seams. Exercise
+native TCP/QUIC retirement and interrupted snapshot publication/replay/reclamation.
+This advances macro P6 cleanup; next delegated-parent lifecycle, following measured
+P7 tuning/general retention. Full P0–P7 remains active, with existing gaps explicit.
+
+### Slice 93 result — bounded retirement and verified reclamation
+
+Implemented RetirementGuard from initial construction over either core source
+guard, sharing its authoritative application/log and public provider seams. The
+checked proof requires exact local F/export facts, a complete matching publication,
+every target activation and explicit authenticated host retention release. The
+original freeze operation identifies the final retirement phase. Apply at R drops
+the actual old provider/import buffers, retaining the fence, decision/release and
+original target activation lineage. Exact retirement retries retain R; other
+owner commands/queries cannot restore service. Versioned bounded codecs and
+schema-1 checkpoints atomically restore live or retired state. Unwrapped existing
+deployments require explicit application migration. See docs/RETIREMENT.md.
+
+Five core conformance tests pass, including injected provider lifetime release,
+initial/later source retirement, preserved target retries/outbox, all truncations,
+binding/budget/refusal and failed-batch atomicity. Two additional native-file tests
+pass, each with three interruption cases: sealed/unpublished snapshot, failure
+before manifest publication and lost completion after publication. Both source
+kinds recover the old pinned live snapshot plus retirement tail, then publish/pin/
+install a retired snapshot, release the old pin, physically reclaim the log and
+reopen without live provider or retained command entries. These file interruptions
+do not simulate whole-machine power loss or secure erasure of inactive files.
+
+Four real TCP/QUIC three-replica histories pass in 28.37 seconds. Metadata/source/
+both targets commit the complete split/publication/activation before retiring the
+original source. Discarded client completion is reconstructed with quorum status;
+WAL or checkpoint/reclaimed-log reopen retains fences and exact retries. Targets
+serve original operation results with source offline. Later activated-source
+retirement has deterministic/native-file coverage, not native network coverage.
+
+Affected all-feature suites pass: retirement 7, scopes 8, activation 9, publication
+7, repeat 5, source 7, target 9 and log reclamation 8. Core-only retirement/scopes/
+activation/publication/repeat/source/target pass 5/7/9/7/5/7/9. All-target/all-feature
+Clippy with warnings denied passes. Native integration caught excess receipt-vector
+capacity beyond the declared bound; exact command-count allocation and a regression
+assertion fix it. Test setup also caught constructing activation before applying
+import, a missing encoder limit, directory imports and a shadowed helper; focused
+corrections pass. Unaffected native histories were not repeated. No consensus,
+transport, snapshot/log protocol, dependency or quorum-policy change was needed.
+
+Previous status-only goal turn was no progress; authoritative worktree/test review
+was followed by the missing provider/native-file/network checks and the capacity
+fix. This turn advances P6 cleanup. Macro review keeps the full P0–P7 scope active:
+delegated-parent lifecycle is current, measurement baseline next, measured tuning
+and broader validation following. General retention, later-source native-network
+retirement, arbitrary faults, macOS/separate-host execution and other explicit
+phase gaps remain. P8 stays deferred; CI remains background feedback.
+
+Final formatting, diff checks and the 70-contract inventory validator pass.

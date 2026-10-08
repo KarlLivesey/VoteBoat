@@ -1,5 +1,8 @@
 # Source fencing and exact-boundary export
 
+For final payload release after handoff, install the [retirement guard](RETIREMENT.md)
+from initial construction; fencing alone retains the old provider and replay state.
+
 `transfer_source::TransferSource<A,P>` wraps the existing `RoutedApplication`
 where A supplies public scope/checkpoint/bounded application contracts and P is a
 partition policy. It implements the same public application, proposal, read and

@@ -1406,3 +1406,76 @@ where
         Ok(bytes)
     }
 }
+
+impl<A, P> crate::retirement::sealed::Sealed for TransferTarget<A, P> {}
+impl<A, P> crate::retirement::RetirableOwner for TransferTarget<A, P>
+where
+    A: ScopeStateMachine + BoundedStateMachine + ProposalAdmission + BoundedReadableStateMachine,
+    A::Receipt: ApplicationReceipt,
+    P: PartitionPolicy + Clone,
+{
+    fn retirement_requirements(&self) -> crate::raft::ReadinessRequirements {
+        self.readiness_requirements()
+    }
+    fn retirement_source_status(&self) -> Result<Option<SourceFreezeStatus>, ApplicationError> {
+        self.freeze_status()
+    }
+    fn retirement_export(
+        &self,
+        target: GroupIdentity,
+        max_bytes: usize,
+    ) -> Result<ScopeImage, ApplicationError> {
+        self.export_target(target, max_bytes)
+    }
+    fn retirement_lineage(&self) -> Result<Vec<u8>, ApplicationError> {
+        let record = self
+            .activated
+            .as_ref()
+            .ok_or(ApplicationError::NotApplied)?;
+        let mut bytes = Vec::with_capacity(12 + record.bytes.len());
+        bytes.extend(record.status.index.to_le_bytes());
+        bytes.extend((record.bytes.len() as u32).to_le_bytes());
+        bytes.extend(&record.bytes);
+        Ok(bytes)
+    }
+    fn validate_retirement_source(
+        &self,
+        status: &SourceFreezeStatus,
+    ) -> Result<(), ApplicationError> {
+        self.validate_group(status.fence.group)?;
+        if status.intent.before() != self.intent.after() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+    fn validate_retirement_lineage(
+        &self,
+        bytes: &[u8],
+        fence_index: u64,
+    ) -> Result<(), ApplicationError> {
+        if bytes.len() > crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut r = Reader::new(bytes);
+        let index = r.u64()?;
+        let len = r.u32()? as usize;
+        let activation = self.activation(r.take(len)?)?;
+        if !r.done()
+            || activation.decision.publication.operation() != self.operation
+            || activation.decision.publication.intent() != &self.intent
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let evidence = activation
+            .decision
+            .publication
+            .targets()
+            .iter()
+            .find(|t| t.group == self.group)
+            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        if index <= evidence.imported.index || index >= fence_index {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+}

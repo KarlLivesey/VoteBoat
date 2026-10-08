@@ -604,3 +604,51 @@ where
         Ok(bytes)
     }
 }
+
+impl<A, P> crate::retirement::sealed::Sealed for TransferSource<A, P> {}
+impl<A, P> crate::retirement::RetirableOwner for TransferSource<A, P>
+where
+    A: ScopeStateMachine + BoundedStateMachine + ProposalAdmission + BoundedReadableStateMachine,
+    A::Receipt: ApplicationReceipt,
+    P: PartitionPolicy + Clone,
+{
+    fn retirement_requirements(&self) -> crate::raft::ReadinessRequirements {
+        self.readiness_requirements()
+    }
+    fn retirement_source_status(&self) -> Result<Option<SourceFreezeStatus>, ApplicationError> {
+        let SourceRead::Freeze(status) = self.read_at(self.applied_index(), SourceQuery::Freeze)?
+        else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        Ok(status)
+    }
+    fn retirement_export(
+        &self,
+        target: GroupIdentity,
+        max_bytes: usize,
+    ) -> Result<ScopeImage, ApplicationError> {
+        self.export_target(target, max_bytes)
+    }
+    fn retirement_lineage(&self) -> Result<Vec<u8>, ApplicationError> {
+        if self.fence().is_none() {
+            return Err(ApplicationError::NotApplied);
+        }
+        Ok(Vec::new())
+    }
+    fn validate_retirement_source(
+        &self,
+        status: &SourceFreezeStatus,
+    ) -> Result<(), ApplicationError> {
+        self.validate_group(status.fence.group)?;
+        if status.intent.before() != self.routed.grant() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+    fn validate_retirement_lineage(&self, bytes: &[u8], _: u64) -> Result<(), ApplicationError> {
+        if !bytes.is_empty() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+}

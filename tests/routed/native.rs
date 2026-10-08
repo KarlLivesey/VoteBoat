@@ -1633,3 +1633,6 @@ mod split;
 
 #[path = "merge.rs"]
 mod merge;
+
+#[path = "retirement.rs"]
+mod retirement;

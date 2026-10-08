@@ -84,6 +84,8 @@ and new writes; another reopen retains values/outbox and all old sources refuse.
 These are selected Linux ordinary-majority graceful committed-boundary histories,
 not power cuts, arbitrary partitions or a full liveness proof. Native evidence is
 split -> merge; the further split is downstream deterministic composition. Data
-and tombstones remain retained: durable retirement/reclamation is next, followed
-by delegated-parent coordination and P7 measured tuning. macOS/separate-host
+and tombstones remain retained in unwrapped guards. The optional
+[retirement guard](RETIREMENT.md) now releases old payloads after verified handoff
+and explicit host retention release, retaining fences and lineage. Delegated-parent
+coordination and P7 measured tuning remain. macOS/separate-host
 execution remains unverified. Full P0–P7 stays active; P8 remains deferred.
