@@ -124,14 +124,16 @@
         "state",
         "append_batch",
         "barrier",
+        "reclaim",
         "fetch_range"
       ],
       "native": "NativeLogStore",
       "conformance": [
         "tests/log_store.rs",
-        "tests/raft.rs"
+        "tests/raft.rs",
+        "tests/log_reclaim.rs"
       ],
-      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Physical WAL reclamation remains pending."
+      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning is implemented; live worker maintenance and general retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -142,14 +144,18 @@
         "append",
         "sync_log",
         "truncate_log",
-        "publish_manifest"
+        "publish_manifest",
+        "supports_replacement",
+        "replace_log"
       ],
       "native": "FileLogIo",
       "conformance": [
         "tests/log_store.rs",
-        "tests/raft.rs"
+        "tests/raft.rs",
+        "tests/log_reclaim.rs",
+        "src/native/log_store/file.rs"
       ],
-      "scope": "Same platform contract as VoteIo, with separate selected native storage binding."
+      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories."
     },
     {
       "design_id": "C08",
@@ -158,13 +164,17 @@
         "format_version",
         "encode_batch",
         "frame_length",
-        "decode_batch"
+        "decode_batch",
+        "supports_checkpoint",
+        "encode_checkpoint",
+        "decode_checkpoint"
       ],
       "native": "NativeLogCodec",
       "conformance": [
-        "tests/log_store.rs"
+        "tests/log_store.rs",
+        "tests/log_reclaim.rs"
       ],
-      "scope": "Bounded version-2 entry/bootstrap/transition framing."
+      "scope": "Bounded version-2 entry/bootstrap/transition framing plus explicit version-1 VBLCPT01 full live-state image before ordinary batches. Counts, lengths, CRCs, semantic bootstrap/snapshot/suffix validation and exact revision/generation/sequence restoration. Images may exceed one batch within the WAL budget. Existing uncleaned stores remain readable; cleaned data requires an image-capable codec/binary."
     },
     {
       "design_id": "C05",
@@ -295,7 +305,7 @@
       "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
       "native": "NativeSnapshotStore",
       "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs"],
-      "scope": "Durable local log anchors and atomic two-slot pin switches. Logical compaction and verified recovery; physical WAL cleaning and general backup retention remain pending."
+      "scope": "Durable local log anchors and atomic two-slot pin switches. Logical compaction and verified recovery; physical WAL cleaning now preserves these exact durable anchors. General backup retention remains pending."
     },
     {
       "design_id": "C03/C04/C10",
@@ -303,7 +313,7 @@
       "operations": ["binding", "limits", "usage", "load_reservation", "checkpoint_bytes", "submit", "poll", "close", "is_drained"],
       "native": "NativeSnapshotWorker<S: SnapshotRetention + Send>",
       "conformance": ["tests/snapshot_worker.rs", "tests/support/snapshot.rs", "tests/effect_owner.rs"],
-      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification, pinned loads and verified retention reconciliation. Owner-side helpers preserve WAL and application dependencies. Local checkpoint publication precedes WAL compaction; exact durability precedes retention cleanup. Real-file receipt-loss recovery, native-storage fault model and repeated native 100-group network maintenance. Full node assembly and physical WAL cleaning remain pending."
+      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification, pinned loads and verified retention reconciliation. Owner-side helpers preserve WAL and application dependencies. Local checkpoint publication precedes WAL compaction; exact durability precedes retention cleanup. Real-file receipt-loss recovery, native-storage fault model and repeated native 100-group network maintenance. Node now owns selected assembly/lifecycle, and physical WAL cleanup preserves existing pinned references; live WAL maintenance scheduling remains pending."
     },
     {
       "design_id": "C04",
@@ -565,7 +575,8 @@
     }
   ],
   "not_yet_implemented": [
-    "physical-wal-reclamation",
+    "live-wal-worker-maintenance",
+    "incremental-segment-cleaning-and-general-retention",
     "buffers",
     "admission-policy",
     "routing",

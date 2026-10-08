@@ -92,6 +92,8 @@ pub enum Fault {
     Sync,
     PublishBefore,
     PublishAfter,
+    ReplaceBefore,
+    ReplaceAfter,
 }
 #[derive(Default)]
 #[cfg(feature = "native")]
@@ -113,6 +115,22 @@ impl Device {
 pub struct ModelIo(pub Rc<RefCell<Device>>);
 #[cfg(feature = "native")]
 impl JournalIo for ModelIo {
+    fn supports_replacement(&self) -> bool {
+        true
+    }
+    fn replace_log(&mut self, bytes: &[u8], manifest: &[u8]) -> io::Result<()> {
+        let mut d = self.0.borrow_mut();
+        if matches!(d.fault, Fault::ReplaceBefore) {
+            return Err(io::Error::other("before replacement publication"));
+        }
+        d.log = bytes.to_vec();
+        d.synced = bytes.to_vec();
+        d.manifest = Some(manifest.to_vec());
+        if matches!(d.fault, Fault::ReplaceAfter) {
+            return Err(io::Error::other("after replacement publication"));
+        }
+        Ok(())
+    }
     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
         self.0
             .borrow()

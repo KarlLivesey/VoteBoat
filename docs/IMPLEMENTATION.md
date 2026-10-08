@@ -1911,8 +1911,69 @@ Full P0–P7 stays active. Native filesystem/provider convenience assembly, phys
 WAL cleaning, membership/policy transitions, recursive responsibilities, safe
 split/merge and P7 throughput evidence remain unfinished.
 
+## Slice 29: physical live-state WAL reclamation
+
+The optional public `LogStore::reclaim(max_bytes)` now rewrites native WAL
+history to a bounded, self-contained live-state checkpoint. It requires drained
+transition tickets and identical accepted/durable state, preserves every current
+group, voter binding, hard-state vote, exact revision/generation, snapshot
+reference, committed prefix and surviving committed/uncommitted suffix, and
+continues the original batch sequence. It advances no logical retention floor
+and emits no new durability ticket. A bounded codec round-trip must reproduce the
+entire state and sequence before I/O; non-shrinking images leave files untouched.
+
+JournalIo is now a dedicated public native platform seam with optional pair
+replacement. FileLogIo retains an exclusive lock across two bounded slots, syncs
+replacement WAL/manifest and directory, writes/syncs/renames CURRENT and syncs the
+directory again, then removes old files. Every uncertain I/O failure fences the
+store until recovery. Recovery follows only the selected pair; corrupt or missing
+selections/files cannot fall back to stale votes/history. Legacy journals still
+open unchanged, and new ballot/log creation rejects existing replacement stores.
+A failed first cleanup may leave legacy files; subsequent cleanup retires them.
+
+The explicit version-1 VBLCPT01 live-state image precedes unchanged format-2
+batches and preserves the exact high batch sequence. Canonical mandatory
+bootstrap/snapshot/suffix checks validate recovery before exact stored counters
+are restored. The full image may exceed one batch within the WAL budget. Old
+binaries/codecs without image support cannot read cleaned files; unsupported
+codecs/providers reject maintenance before work. See [physical cleanup](WAL_RECLAMATION.md).
+
+Implementation decision: this first cleaner rewrites the complete bounded live
+image and temporarily retains both old and replacement files. It does not yet
+implement segmented incremental/throttled cleaning. Maintenance is synchronous on
+an explicitly reclaimed store handle (or an externally selected storage worker),
+with live NativeLogWorker scheduling still pending. Logical compaction continues
+to require durable snapshot pins/application checkpoint/replay; no implicit backup
+retention or future tombstone/lifecycle policy is invented.
+
+Eight downstream tests cover exact votes/state/suffix/cold-group preservation,
+sequence/session continuation and stale tickets, pending-work/budget/capability
+rejection, non-shrinking images, image truncation/every-byte corruption and invalid
+semantic state, mandatory validation of host-decoder results, images exceeding one
+batch, repeated native slot reuse, exclusive
+locks, missing/corrupt selected files and cross-store creation rejection. A native
+file test injects failure after each of 13 publication/deletion boundaries for
+both initial replacement and slot reuse (26 cuts), recovers exact state and cleans
+again. The host journal models power loss before/after atomic publication; native
+file interruption tests are process-level evidence, not hardware power-loss tests.
+
+The actual three-node/100-group native WAL/TLS facade history now physically
+reclaims its stores after coordinated shutdown and explicit worker joins. It
+checks every exact group state before/after cleaning, reopens files, restores
+application snapshots/deduplication, retries operations and replicates new writes.
+Local validation passes 288 default/native/TLS tests, 266 native-only tests and
+164 core/host-only tests. Clippy passes all three configurations with warnings
+denied; formatting, documentation, contract JSON, diff and new RPL header checks
+pass. These finite Linux histories do not establish macOS execution, arbitrary
+schedules, live maintenance fairness or throughput claims.
+
+Full P0–P7 stays active. Native provider convenience assembly, live WAL-worker
+maintenance, incremental cleaning/general retention, membership/policy transitions,
+recursive responsibilities, safe split/merge and P7 evidence remain unfinished.
+
 ## Next slice
 
-Implement physical WAL cleaning with durable replacement/recovery dependencies
-and crash tests. Native provider setup remains explicit. CI stays background
-feedback; relevant local checks guide direct commits.
+Drive bounded explicit WAL maintenance inside the selected storage worker while
+preserving accepted-work ownership and local/core progress. Then implement joint
+membership/policy transitions with protocol-state recovery and fault histories.
+CI stays background feedback; relevant local checks guide direct commits.

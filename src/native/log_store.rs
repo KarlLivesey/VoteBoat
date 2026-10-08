@@ -13,49 +13,43 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native recoverable log: atomic group transitions, shared barriers, no threads.
-pub use super::vote_store::VoteIo as JournalIo;
-use super::vote_store::{crc32c, FileVoteIo};
+use super::vote_store::crc32c;
 use crate::{
     contracts::StorageError,
     identity::*,
     log::*,
     quorum::{Limits as PolicyLimits, Policy, Tree, WeightedChild},
 };
-use std::{collections::BTreeMap, io, path::Path};
+use std::{collections::BTreeMap, io};
+
+mod checkpoint;
+mod file;
+pub use file::FileLogIo;
 
 const HEADER: usize = 32;
 const TRAILER: usize = 16;
 const MAGIC: &[u8; 8] = b"VBLOG002";
 const END: &[u8; 8] = b"VBLEND02";
 
-/// Same platform contract as the voting provider, with a distinct log filename.
-pub struct FileLogIo(FileVoteIo);
-impl FileLogIo {
-    pub fn create(directory: impl AsRef<Path>) -> io::Result<Self> {
-        FileVoteIo::create_named(directory, "log.wal").map(Self)
+/// Exclusive native journal binding. Complete writes, bounded reads and durable
+/// atomic manifest publication are mandatory. Replacement is optional and must
+/// recover either the entire old journal/manifest or the entire new pair. Sync
+/// replacement data and metadata and their selection before deleting old data.
+pub trait JournalIo {
+    fn read_manifest(&mut self) -> io::Result<Vec<u8>>;
+    fn read_log(&mut self, limit: usize) -> io::Result<Vec<u8>>;
+    fn append(&mut self, bytes: &[u8]) -> io::Result<()>;
+    fn sync_log(&mut self) -> io::Result<()>;
+    fn truncate_log(&mut self, length: u64) -> io::Result<()>;
+    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()>;
+    fn supports_replacement(&self) -> bool {
+        false
     }
-    pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
-        FileVoteIo::open_named(directory, "log.wal").map(Self)
-    }
-}
-impl JournalIo for FileLogIo {
-    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
-        self.0.read_manifest()
-    }
-    fn read_log(&mut self, limit: usize) -> io::Result<Vec<u8>> {
-        self.0.read_log(limit)
-    }
-    fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
-        self.0.append(bytes)
-    }
-    fn sync_log(&mut self) -> io::Result<()> {
-        self.0.sync_log()
-    }
-    fn truncate_log(&mut self, length: u64) -> io::Result<()> {
-        self.0.truncate_log(length)
-    }
-    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
-        self.0.publish_manifest(bytes)
+    fn replace_log(&mut self, _bytes: &[u8], _manifest: &[u8]) -> io::Result<()> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "journal replacement unsupported",
+        ))
     }
 }
 
@@ -73,6 +67,25 @@ pub trait LogCodec {
         bytes: &[u8],
         limits: LogLimits,
     ) -> Result<(u64, Vec<LogMutation>), StorageError>;
+    fn supports_checkpoint(&self) -> bool {
+        false
+    }
+    fn encode_checkpoint(
+        &self,
+        _sequence: u64,
+        _state: &BTreeMap<GroupIdentity, GroupLog>,
+        _limits: LogLimits,
+        _max_bytes: usize,
+    ) -> Result<Vec<u8>, StorageError> {
+        Err(StorageError::Rejected("log checkpoint unsupported"))
+    }
+    fn decode_checkpoint(
+        &self,
+        _bytes: &[u8],
+        _limits: LogLimits,
+    ) -> Result<(u64, BTreeMap<GroupIdentity, GroupLog>, usize), StorageError> {
+        Err(StorageError::Corrupt("log checkpoint unsupported"))
+    }
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NativeLogCodec;
@@ -167,6 +180,19 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
         let mut offset = 0usize;
         let mut sequence = 0u64;
         let mut state = BTreeMap::new();
+        if bytes.starts_with(checkpoint::MAGIC) {
+            (sequence, state, offset) = codec.decode_checkpoint(&bytes, limits)?;
+            if offset < HEADER + TRAILER || offset > bytes.len() || offset > boundary as usize {
+                return Err(StorageError::Corrupt("checkpoint outside durable prefix"));
+            }
+            checkpoint::validate_state(sequence, &state, limits)?;
+            if state
+                .values()
+                .any(|s| s.snapshot.is_some_and(|r| r.store != identity))
+            {
+                return Err(StorageError::Corrupt("foreign checkpoint snapshot"));
+            }
+        }
         while offset < bytes.len() {
             let remaining = &bytes[offset..];
             if remaining.len() < HEADER {
@@ -350,6 +376,52 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         self.pending.retain(|t| !dependencies.contains(t));
         Ok(DurableLog {
             tickets: dependencies.to_vec(),
+        })
+    }
+    fn reclaim(&mut self, max_bytes: usize) -> Result<LogReclaimed, StorageError> {
+        if self.fenced {
+            return Err(StorageError::Fenced);
+        }
+        if !self.pending.is_empty() || self.accepted != self.durable {
+            return Err(StorageError::Rejected(
+                "reclamation requires drained transitions",
+            ));
+        }
+        if !self.io.supports_replacement() || !self.codec.supports_checkpoint() {
+            return Err(StorageError::Rejected("physical reclamation unsupported"));
+        }
+        if max_bytes < HEADER + TRAILER || max_bytes > self.limits.max_wal_bytes {
+            return Err(StorageError::Rejected("reclamation byte budget"));
+        }
+        let bytes =
+            self.codec
+                .encode_checkpoint(self.sequence, &self.durable, self.limits, max_bytes)?;
+        if bytes.len() > max_bytes || bytes.len() < HEADER + TRAILER {
+            return Err(StorageError::Rejected("checkpoint codec byte budget"));
+        }
+        let (sequence, recovered, length) = self.codec.decode_checkpoint(&bytes, self.limits)?;
+        if sequence != self.sequence || recovered != self.durable || length != bytes.len() {
+            return Err(StorageError::Rejected(
+                "checkpoint codec changed live state",
+            ));
+        }
+        let before_bytes = self.length;
+        if bytes.len() >= before_bytes {
+            return Ok(LogReclaimed {
+                before_bytes,
+                after_bytes: before_bytes,
+            });
+        }
+        if let Err(e) = self
+            .io
+            .replace_log(&bytes, &manifest(self.binding, bytes.len() as u64))
+        {
+            return Err(self.failed(e));
+        }
+        self.length = bytes.len();
+        Ok(LogReclaimed {
+            before_bytes,
+            after_bytes: self.length,
         })
     }
     fn fetch_range(
@@ -763,6 +835,25 @@ impl<'a> Decoder<'a> {
 impl LogCodec for NativeLogCodec {
     fn format_version(&self) -> u32 {
         2
+    }
+    fn supports_checkpoint(&self) -> bool {
+        true
+    }
+    fn encode_checkpoint(
+        &self,
+        sequence: u64,
+        state: &BTreeMap<GroupIdentity, GroupLog>,
+        limits: LogLimits,
+        max_bytes: usize,
+    ) -> Result<Vec<u8>, StorageError> {
+        checkpoint::encode(sequence, state, limits, max_bytes)
+    }
+    fn decode_checkpoint(
+        &self,
+        bytes: &[u8],
+        limits: LogLimits,
+    ) -> Result<(u64, BTreeMap<GroupIdentity, GroupLog>, usize), StorageError> {
+        checkpoint::decode(bytes, limits)
     }
     fn encode_batch(
         &self,

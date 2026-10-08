@@ -37,7 +37,12 @@ asynchronous snapshot worker now preserves publication, WAL durability and
 application-installation dependencies, and supports local checkpoints and logical
 compaction while both storage workers retain their handles.
 
-Native filesystem/provider assembly, physical WAL reclamation and online reconfiguration remain under
+`LogStore::reclaim` now rewrites the exact live WAL state through durable native
+file selection, freeing superseded history after logical compaction. It requires
+drained transitions and an explicit storage maintenance call. See
+[physical WAL cleanup](docs/WAL_RECLAMATION.md).
+
+Native filesystem/provider assembly, live WAL maintenance and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run

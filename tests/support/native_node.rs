@@ -111,7 +111,8 @@ fn facade_proposals(nodes: &mut [Facade], operation: u128, delta: i64, expected:
             })
     });
 }
-fn facade_close(mut nodes: Vec<Facade>) {
+fn facade_close(mut nodes: Vec<Facade>) -> usize {
+    let mut reclaimed = 0;
     for n in &mut nodes {
         n.begin_shutdown();
     }
@@ -142,7 +143,15 @@ fn facade_close(mut nodes: Vec<Facade>) {
             std::thread::park_timeout(Duration::from_millis(1));
         }
         loop {
-            if let Some(store) = p.local.persistence.try_reclaim().unwrap() {
+            if let Some(mut store) = p.local.persistence.try_reclaim().unwrap() {
+                let before = (1..=100)
+                    .map(|g| store.state(group(g)).unwrap())
+                    .collect::<Vec<_>>();
+                let report = store.reclaim(store.limits().max_wal_bytes).unwrap();
+                reclaimed += report.before_bytes - report.after_bytes;
+                for (g, expected) in (1..=100).zip(before) {
+                    assert_eq!(store.state(group(g)).unwrap(), expected);
+                }
                 drop(store);
                 break;
             }
@@ -150,6 +159,7 @@ fn facade_close(mut nodes: Vec<Facade>) {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
+    reclaimed
 }
 #[test]
 fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
@@ -208,7 +218,7 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
         .iter()
         .map(|n| n.local().owner.identity().store)
         .collect::<Vec<_>>();
-    facade_close(nodes);
+    assert!(facade_close(nodes) > 0);
     let mut nodes = facade_make(&root, true);
     for (n, old) in nodes.iter().zip(bindings) {
         assert_ne!(n.local().owner.identity().store, old);

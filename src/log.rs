@@ -130,6 +130,14 @@ pub struct DurableLog {
     pub tickets: Vec<LogTicket>,
 }
 
+/// Physical bytes before/after a quiescent rewrite. No logical boundary moves
+/// and no new durability evidence is issued by reclamation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct LogReclaimed {
+    pub before_bytes: usize,
+    pub after_bytes: usize,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct LogLimits {
     pub max_groups: usize,
@@ -187,8 +195,8 @@ impl LogLimits {
 /// No cross-group application transaction is promised. After admission, wait
 /// cancellation cannot roll back writes. Errors with uncertain persistence
 /// fence the store until recovery. Calls are synchronous progress steps.
-/// Snapshot installation/retention enter this contract when implemented; this
-/// version intentionally exposes no unsafe prefix-deletion operation.
+/// Logical compaction requires the durable snapshot dependency described by
+/// LogUpdate. Physical reclamation cannot move that logical retention floor.
 pub trait LogStore {
     fn binding(&self) -> StoreBinding;
     fn limits(&self) -> LogLimits;
@@ -197,6 +205,15 @@ pub trait LogStore {
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
+    /// Optional physical maintenance. Preserve every current durable group,
+    /// including its snapshot reference and full surviving suffix. Logical
+    /// retention/compaction must already have been authorized separately.
+    /// Reject outstanding transitions; bound replacement encoding by max_bytes.
+    /// Run blocking implementations off the consensus owner. Any uncertain
+    /// publication/deletion error fences the store until explicit recovery.
+    fn reclaim(&mut self, _max_bytes: usize) -> Result<LogReclaimed, StorageError> {
+        Err(StorageError::Rejected("physical reclamation unsupported"))
+    }
     /// Bounded durable matching range, guarded against suffix-generation reuse.
     /// A first entry exceeding max_bytes is refused rather than exceeding budget.
     fn fetch_range(

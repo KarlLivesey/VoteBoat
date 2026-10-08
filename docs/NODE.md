@@ -85,5 +85,7 @@ and explicit failed cleanup. A native three-node/100-group history selects the
 public native aliases with actual WAL files and loopback TCP/TLS, exercises
 snapshot catch-up, writes, quorum reads, checkpoint/restart, fresh store sessions,
 dedup retries and further writes, and explicitly drains/joins native workers.
+It now also physically cleans reclaimed WAL handles before reopening; see
+[WAL reclamation](WAL_RECLAMATION.md).
 These finite Linux histories do not establish arbitrary schedules, macOS
-execution, performance, online membership transitions or physical WAL cleanup.
+execution, performance or online membership transitions.

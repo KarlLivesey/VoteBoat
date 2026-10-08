@@ -67,6 +67,11 @@ impl FileVoteIo {
         if directory.join("MANIFEST").exists()
             || directory.join("votes.wal").exists()
             || directory.join("log.wal").exists()
+            || directory.join("CURRENT").exists()
+            || directory.join("log.0.wal").exists()
+            || directory.join("log.1.wal").exists()
+            || directory.join("MANIFEST.0").exists()
+            || directory.join("MANIFEST.1").exists()
         {
             return Err(io::Error::new(
                 io::ErrorKind::AlreadyExists,
