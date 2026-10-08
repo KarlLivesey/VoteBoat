@@ -134,6 +134,14 @@
       "scope": "Version-1 vote framing. Different physical formats require migration."
     },
     {
+      "design_id": "C01/C03/C10",
+      "public_contract": "Raft dynamic member recovery",
+      "operations": ["Raft::recover_member", "snapshot::recover_member_replica"],
+      "native": "Deterministic Raft with selected LogStore/SnapshotRetention/application providers",
+      "conformance": ["tests/member_recovery.rs"],
+      "scope": "Explicit host-authorized committed/accepted exact-store assignment, accepted stable/joint/final predicate reconstruction, historical ballots and verified pinned application replay before exposing compacted cores. Eleven host/native tests include joint/final election differences, weighted final policy, rollback, learner exclusion, replacement stores, missing data, torn frames, failed barriers and actual-file reclaim/restart/dedup. No network bootstrap, transferable election proof or online configuration ingress."
+    },
+    {
       "design_id": "C01/C02",
       "public_contract": "LogStore",
       "operations": [
@@ -154,9 +162,10 @@
         "tests/log_reclaim.rs",
         "tests/ballots.rs",
         "tests/replication_scope.rs",
-        "tests/learners.rs"
+        "tests/learners.rs",
+        "tests/member_recovery.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery verifies committed/accepted exact-store assignment with unchanged bootstrap electorate, while public dynamic voting ingress/recovery remain disabled pending learner authorization/readiness, retirement, resource and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -330,9 +339,9 @@
       "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
       "native": "NativeSnapshotStore",
       "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs",
-        "tests/membership.rs", "tests/learners.rs"
+        "tests/membership.rs", "tests/learners.rs", "tests/member_recovery.rs"
       ],
-      "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission. Explicit recover_learner_replica verifies exact committed/accepted learner assignment plus pinned snapshot/application replay before returning a non-voting core. Host/native learner histories cover compaction/reclaim and actual-file restart."
+      "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission. Explicit recover_learner_replica verifies exact committed/accepted learner assignment plus pinned snapshot/application replay before returning a non-voting core. Host/native learner and dynamic-member histories cover compaction/reclaim and actual-file restart. recover_member_replica also verifies joint/final assignment and restores the accepted voter/learner role before exposure."
     },
     {
       "design_id": "C03/C04/C10",

@@ -81,6 +81,12 @@ pub enum Role {
     Candidate,
     Leader,
 }
+#[derive(Clone, Copy, Eq, PartialEq)]
+pub(crate) enum RecoveryMode {
+    StaticVoter,
+    BootstrapLearner,
+    Member,
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Event {
     Campaign,
@@ -264,13 +270,29 @@ impl Raft {
         }
         Self::recover_learner_verified(node, binding, state, limits)
     }
+    /// Explicit host-authorized restart/import of a dynamic group member.
+    /// Both committed and accepted membership must assign this exact store.
+    /// Accepted log/snapshot state reconstructs voter or learner role; this
+    /// entry point is not network enrollment or proof of remote commitment.
+    /// Compacted state requires snapshot::recover_member_replica to verify data.
+    pub fn recover_member(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        if state.snapshot.is_some() {
+            return Err(RaftError::InvalidRecovery);
+        }
+        Self::recover_member_verified(node, binding, state, limits)
+    }
     pub(crate) fn recover_verified(
         node: NodeId,
         binding: StoreBinding,
         state: GroupLog,
         limits: LogLimits,
     ) -> Result<Self, RaftError> {
-        Self::recover_checked(node, binding, state, limits, false)
+        Self::recover_checked(node, binding, state, limits, RecoveryMode::StaticVoter)
     }
     pub(crate) fn recover_learner_verified(
         node: NodeId,
@@ -278,17 +300,26 @@ impl Raft {
         state: GroupLog,
         limits: LogLimits,
     ) -> Result<Self, RaftError> {
-        Self::recover_checked(node, binding, state, limits, true)
+        Self::recover_checked(node, binding, state, limits, RecoveryMode::BootstrapLearner)
+    }
+    pub(crate) fn recover_member_verified(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        Self::recover_checked(node, binding, state, limits, RecoveryMode::Member)
     }
     fn recover_checked(
         node: NodeId,
         binding: StoreBinding,
         state: GroupLog,
         limits: LogLimits,
-        learner: bool,
+        mode: RecoveryMode,
     ) -> Result<Self, RaftError> {
         let limits = limits.validate()?;
-        if (!learner && state.bootstrap.voter_stores.get(&node) != Some(&binding.identity))
+        if (mode == RecoveryMode::StaticVoter
+            && state.bootstrap.voter_stores.get(&node) != Some(&binding.identity))
             || state
                 .bootstrap
                 .voter_stores
@@ -318,8 +349,8 @@ impl Raft {
                 .snapshot_membership
                 .as_ref()
                 .is_some_and(|m| m.retained_bytes() > limits.max_batch_bytes)
-            || (!learner && state.snapshot_membership.is_some())
-            || (!learner
+            || (mode == RecoveryMode::StaticVoter && state.snapshot_membership.is_some())
+            || (mode == RecoveryMode::StaticVoter
                 && state
                     .entries
                     .iter()
@@ -339,7 +370,17 @@ impl Raft {
             previous_term = e.term;
         }
         let membership = state.membership().map_err(|_| RaftError::InvalidRecovery)?;
-        if learner {
+        if mode == RecoveryMode::Member {
+            let committed = state
+                .membership_at(state.commit_index)
+                .map_err(|_| RaftError::InvalidRecovery)?;
+            if membership.replica_store(node) != Some(binding.identity)
+                || committed.replica_store(node) != Some(binding.identity)
+            {
+                return Err(RaftError::InvalidRecovery);
+            }
+        }
+        if mode == RecoveryMode::BootstrapLearner {
             let committed = state
                 .membership_at(state.commit_index)
                 .map_err(|_| RaftError::InvalidRecovery)?;

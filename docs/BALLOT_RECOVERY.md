@@ -31,9 +31,10 @@ including when a host codec returns the map. Host providers remain trusted for
 persistence provenance: a constructible non-bootstrap origin is not cryptographic
 proof of a discarded history. CRC detects corruption, not a malicious provider.
 
-Public dynamic Raft recovery and ingress remain disabled. These storage and
-internal-core changes do not supply learner readiness, lagging-peer request
-scopes, a retiring leader's final propagation or online administration.
+Explicit [dynamic member recovery](MEMBER_RECOVERY.md) now preserves these
+historical promises while reconstructing accepted voter/learner roles from
+authorized durable state. Online configuration ingress remains disabled; local
+recovery supplies no promoted-leader catch-up proof or online administration.
 
 # Evidence
 

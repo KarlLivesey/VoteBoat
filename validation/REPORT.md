@@ -85,3 +85,24 @@ control service and admission under held output reservations. The core-only run
 passes 18/18/90 tests; its run preceded the final held-lease assertion checked in
 the default suite. This slice does not change the finite ballot model or establish
 distributed membership activation, macOS compatibility or performance evidence.
+
+## Slice 42 dynamic recovery evidence
+
+Eleven new downstream member recovery tests exercise host/native joint versus
+final elections, weighted final policy, exact committed/accepted assignments,
+replacement stores, learner exclusion, historical ballots, final rollback,
+verified snapshots and missing data. Native model histories cut every byte of a
+joint frame and inject synchronization/manifest failures; the recovered role
+matches a complete old or new membership. A real native-file history compacts,
+reclaims, closes/reopens both providers and checks dynamic membership, application
+state and duplicate operation behavior. Imported committed assignments and
+simulated election replies are explicit fixture premises, not network certificates.
+
+The default-feature library/ballot/learner/member/membership/Raft/snapshot suites
+pass 26/10/8/11/27/22/19 tests; core-only versions pass 18/3/4/7/16/10/8.
+The final service/startup run passes 6/5 tests after fixture listeners are retained
+for fake peers and all placeholder child listeners are released before launching
+the first child. Earlier fixture bind failures are not counted as passing runs.
+No persistent/wire format or finite ballot model changed. These Linux checks do
+not establish promoted-leader network authorization, online membership,
+distributed activation proof, macOS execution or performance.

@@ -2591,16 +2591,59 @@ formatting and diff checks pass. Persistent/wire formats and configuration gates
 are unchanged. No new storage optimization, formal model, macOS execution,
 separate-host deployment or performance claim is made; CI remains background.
 
+## Slice 42 — explicit dynamic member recovery
+
+Mini schema plan: use one checked recovery implementation with explicit static,
+bootstrap-learner and dynamic-member modes. Dynamic recovery requires committed
+and accepted exact local store assignment; reconstruct the accepted predicate
+without restoring volatile leadership. Verify pinned application data before
+exposing compacted cores. Preserve historical ballots and existing ingress gates;
+exercise host/native elections, rollback and crash/restart boundaries.
+
+Raft::recover_member now explicitly restores authorized durable dynamic voter or
+learner state. The new snapshot::recover_member_replica helper validates the same
+assignment and completes pinned checkpoint verification/application restoration
+and committed-tail replay before returning a core. Accepted joint records use
+both predicates; an accepted final uses new-only rules only after its predecessor
+joint commitment. Uncommitted final rollback restores joint rules. Historical
+ballot promises survive finalization/restart/rollback, and learners remain unable
+to campaign or vote. Original static and bootstrap-learner recovery contracts and
+NativeStartup remain unchanged. There is no new escaping effect, durability token,
+generation, persistent or wire format. The host remains responsible for authorized
+restart/import and trusted committed log provenance; this is no transferable
+network election certificate.
+
+Eleven new downstream host/native tests check joint versus final elections,
+weighted final policy, exact committed/accepted assignment, replacement stores,
+learner exclusion, historical ballots, rollback, missing checkpoint data and
+verified application restoration. Native model histories cut every byte of a
+joint frame and fail sync/manifest publication. A native file history compacts,
+reclaims, closes/reopens both providers and checks exact dynamic membership,
+application value and duplicate operation behavior.
+
+The service regression run exposed a probe/rebind race in fake-peer fixture ports.
+Fixtures now retain bound listeners and hand those listeners directly to fake
+peers. All placeholder child-process listeners are released before launching the first
+child, preventing early peers from connecting to them; the validation test also
+releases its directly launched child's ports. Used blocks are not
+recycled within the finite test process. Production networking is unchanged.
+
+Local Linux evidence: default library/ballot/learner/member/membership/Raft/snapshot
+suites pass 26/10/8/11/27/22/19 tests. Core-only versions pass
+18/3/4/7/16/10/8 tests. Default all-target Clippy, native-only all-target
+compilation, API docs, formatting, inventory JSON and diff checks pass. The
+existing six service/routing and five startup tests pass after the final fixture
+repair, including parallel fake peers, actual processes and native TLS restart.
+No new macOS, remote deployment, formal protocol or performance claim is made.
+
 ## Next slice
 
-The static service/library path remains usable with runnable commands, typed
-startup, configured peer addresses, verified restart/retry and local leader
-selection. Continue P4 with promoted-leader authorization carrying replay-resistant
-group, configuration, term, store and committed/election provenance. A claimed
-head or well-formed learner-supplied configuration alone is insufficient.
-Complete dynamic voter/learner recovery, readiness evidence, retiring-leader final
-propagation and route/roster admission before opening online configuration ingress.
-Any new administrative event needs prospective reservation coverage. The
-distributed activation/ballot model and faulted actual network membership histories
-remain gates. Full P0–P7 stays active; recursive responsibilities, safe split/merge
-and broader P7 evidence remain outstanding.
+Add optional QUIC transport alongside TCP/TLS, as requested, preserving selected
+provider composition, authenticated exact identities, bounded ownership and
+existing message/durability semantics. Continue P4 with promoted-leader catch-up
+authorization, readiness/capability evidence, retiring-leader final propagation,
+route/roster admission, distributed activation modeling and faulted network
+membership histories before releasing online configuration ingress. Explicit
+host-authorized dynamic recovery and prospective fanout reservations are now
+available. Full P0–P7 remains active, including recursive responsibilities,
+split/merge and broader P7 evidence.

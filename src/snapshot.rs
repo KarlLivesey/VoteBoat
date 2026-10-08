@@ -19,7 +19,7 @@ use crate::{
     contracts::StorageError,
     identity::*,
     log::{Bootstrap, LogStore},
-    raft::{persist_effect, Effect, Message, Raft, RaftError, RequestContext, Rpc},
+    raft::{persist_effect, Effect, Message, Raft, RaftError, RecoveryMode, RequestContext, Rpc},
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -393,7 +393,14 @@ pub fn recover_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
     store: &mut S,
     application: &mut A,
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
-    recover_replica_as(node, group, log, store, application, false)
+    recover_replica_as(
+        node,
+        group,
+        log,
+        store,
+        application,
+        RecoveryMode::StaticVoter,
+    )
 }
 /// Explicit host-authorized learner recovery verifies the committed exact-store
 /// assignment, pinned application data and replay before exposing a core. This
@@ -405,7 +412,26 @@ pub fn recover_learner_replica<A: CheckpointStateMachine, L: LogStore, S: Snapsh
     store: &mut S,
     application: &mut A,
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
-    recover_replica_as(node, group, log, store, application, true)
+    recover_replica_as(
+        node,
+        group,
+        log,
+        store,
+        application,
+        RecoveryMode::BootstrapLearner,
+    )
+}
+/// Explicit host-authorized dynamic member recovery. Exact committed/accepted
+/// assignment, pinned checkpoint verification and committed replay precede
+/// returning the core. Accepted membership determines voting eligibility.
+pub fn recover_member_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    node: NodeId,
+    group: GroupIdentity,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
+    recover_replica_as(node, group, log, store, application, RecoveryMode::Member)
 }
 fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
     node: NodeId,
@@ -413,13 +439,19 @@ fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetenti
     log: &L,
     store: &mut S,
     application: &mut A,
-    learner: bool,
+    mode: RecoveryMode,
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
     let state = log.state(group)?;
-    let core = if learner {
-        Raft::recover_learner_verified(node, log.binding(), state, log.limits())?
-    } else {
-        Raft::recover_verified(node, log.binding(), state, log.limits())?
+    let core = match mode {
+        RecoveryMode::BootstrapLearner => {
+            Raft::recover_learner_verified(node, log.binding(), state, log.limits())?
+        }
+        RecoveryMode::StaticVoter => {
+            Raft::recover_verified(node, log.binding(), state, log.limits())?
+        }
+        RecoveryMode::Member => {
+            Raft::recover_member_verified(node, log.binding(), state, log.limits())?
+        }
     };
     check_binding(&core, store)?;
     if core.state().snapshot.is_none() {

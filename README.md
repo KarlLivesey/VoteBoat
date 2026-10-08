@@ -64,7 +64,10 @@ Live configuration admission remains disabled pending complete quorum and learne
 integration. Explicit [learner enrollment/recovery](docs/LEARNER_RECOVERY.md) now
 accepts a committed exact-store learner assignment with unchanged bootstrap
 voters, restores verified checkpoints, and runs without election timers. It does
-not enable online promotion or administration.
+not enable online promotion or administration. Explicit
+[dynamic member recovery](docs/MEMBER_RECOVERY.md) now restores a voter or learner
+from authorized durable joint/final state and verified application data, retaining
+the accepted predicate and historical ballot through restart/rollback.
 
 ## Run
 

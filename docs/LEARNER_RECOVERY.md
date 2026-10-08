@@ -19,7 +19,9 @@ This entry point currently permits an unchanged bootstrap voter policy/store map
 no joint snapshot base and no joint/final record in the retained suffix. Snapshot
 bases must have that same electorate. It refuses a recovered vote and never
 promotes a node. The original voter recovery entry point retains its online
-configuration gate. General dynamic-electorate recovery remains unfinished.
+configuration gate. Hosts restoring general dynamic-electorate state can now
+use explicit [dynamic member recovery](MEMBER_RECOVERY.md), which reconstructs
+voter or learner eligibility from its accepted journal and exact assignments.
 
 Learners can durably accept ordinary Append traffic from an exact authorized
 voter, including command/commit updates, and return the checked matching prefix.
@@ -68,8 +70,8 @@ protocol proof.
 
 A promoted leader that an older receiver still sees as a learner remains rejected.
 Transport authentication is separate from group authority. Promotion/catch-up
-provenance, dynamic recovery, readiness evidence (storage/application capability
-and a durable caught-up prefix), prospective resource reservation, retiring-leader
+provenance, readiness evidence (storage/application capability
+and a durable caught-up prefix), retiring-leader
 final propagation, distributed activation modeling and faulted actual network
 membership histories remain release gates. Public configuration-bearing Append
 and membership Snapshot ingress remain disabled.

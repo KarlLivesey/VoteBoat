@@ -67,8 +67,11 @@ second election path inside `Raft`.
 
 The remaining bootstrap checks in `Raft::recover_verified` deliberately authorize
 only the existing static protocol: local voter identity, initial policy/map and
-snapshot scope. That voter path still refuses dynamic entries/bases. The explicit learner path
-accepts assignment-only state while preserving voter/promotion gates. Durable ballot validation
+snapshot scope. That voter path still refuses dynamic entries/bases. Explicit
+[dynamic member recovery](MEMBER_RECOVERY.md) instead verifies committed/accepted
+exact-store assignments and reconstructs stable/joint/final predicates, with
+verified checkpoint/application replay before exposing compacted members. The
+original learner path accepts assignment-only state. Durable ballot validation
 now uses historical origin rather than the current electorate; see
 [ballot recovery](BALLOT_RECOVERY.md). A removed candidate's retained promise
 cannot authorize another candidate or a replacement physical store in that term.
@@ -84,7 +87,7 @@ A retiring leader's final propagation also needs end-to-end histories.
 
 Initial learner-only enrollment/restart now uses committed exact-store
 assignments and verified application recovery. Remaining prerequisites include
-dynamic-electorate recovery, application/storage compatibility and caught-up
+application/storage compatibility and caught-up
 evidence, route/roster admission, the distributed
 activation/ballot state-machine model and faulted native/host network histories.
 The bounded local ballot model is one prerequisite, not that complete model.

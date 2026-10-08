@@ -15,7 +15,7 @@
 //! Actual executable processes, TCP/TLS, abrupt leader loss and disk recovery.
 #![cfg(feature = "tls")]
 use std::{
-    collections::BTreeSet,
+    collections::{BTreeMap, BTreeSet},
     fs,
     net::{Ipv4Addr, TcpListener},
     path::PathBuf,
@@ -30,6 +30,7 @@ struct Cluster {
     base: u16,
     children: Vec<Option<Child>>,
     endpoints: Option<PathBuf>,
+    listeners: BTreeMap<u16, TcpListener>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -42,34 +43,50 @@ impl Cluster {
                 .as_nanos()
         ));
         fs::create_dir(&root).unwrap();
-        // Keep non-overlapping blocks for each live fixture, rather than reusing
-        // a released ephemeral listener as a base during parallel socket tests.
-        let base = {
+        // Never recycle a fixture's block within this test process: accepted
+        // TCP sockets can still be closing after its listeners/children drop.
+        // The finite suite uses fewer than 20 of the available 157 blocks.
+        let (base, listeners) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
-            let base = (10000u16..30000)
+            let (base, listeners) = (10000u16..30000)
                 .step_by(128)
-                .find(|base| {
-                    if blocks.contains(base) {
-                        return false;
+                .find_map(|base| {
+                    if blocks.contains(&base) {
+                        return None;
                     }
                     [1, 2, 3, 11, 12, 13, 101, 102, 103]
                         .into_iter()
-                        .map(|offset| TcpListener::bind((Ipv4Addr::LOCALHOST, *base + offset)))
-                        .collect::<Result<Vec<_>, _>>()
-                        .is_ok()
+                        .map(|offset| {
+                            TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset))
+                                .map(|listener| (offset, listener))
+                        })
+                        .collect::<Result<BTreeMap<_, _>, _>>()
+                        .ok()
+                        .map(|listeners| (base, listeners))
                 })
                 .expect("available independent port block");
             blocks.insert(base);
-            base
+            (base, listeners)
         };
         Self {
             root,
             base,
             children: (0..3).map(|_| None).collect(),
             endpoints: None,
+            listeners,
         }
     }
+    fn take_listener(&mut self, offset: u16) -> TcpListener {
+        self.listeners
+            .remove(&offset)
+            .expect("reserved fixture listener")
+    }
     fn start(&mut self, id: usize, mode: &str) {
+        // Native child processes bind their own listeners. Fake peers instead
+        // take the reserved listener directly, with no probe/rebind interval.
+        // Release every child port before starting the first child. Otherwise
+        // early peers can connect to a placeholder listener for a later child.
+        self.listeners.clear();
         let log = fs::File::create(self.root.join(format!("{id}-{mode}.log"))).unwrap();
         let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
         let mut command = Command::new(BIN);
@@ -177,10 +194,6 @@ impl Drop for Cluster {
             let _ = c.kill();
             let _ = c.wait();
         }
-        PORT_BLOCKS
-            .lock()
-            .unwrap_or_else(|e| e.into_inner())
-            .remove(&self.base);
     }
 }
 #[test]
@@ -265,7 +278,10 @@ fn three_service_processes_retry_replace_leader_and_recover_native_files() {
 }
 #[test]
 fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
-    let cluster = Cluster::new();
+    let mut cluster = Cluster::new();
+    // These children are launched directly rather than through start().
+    cluster.listeners.remove(&1);
+    cluster.listeners.remove(&101);
     let root = cluster.root.join("missing");
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
     for (mode, id) in [("recover", "1"), ("create", "4")] {
@@ -402,18 +418,17 @@ fn reply_peer(
 #[test]
 fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
     for first_available in [false, true] {
-        let cluster = Cluster::new();
-        let first = first_available.then(|| {
-            reply_peer(
-                TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
-                Some(b"ERR NOT_LEADER\n"),
-            )
-        });
+        let mut cluster = Cluster::new();
+        if !first_available {
+            cluster.listeners.remove(&101);
+        }
+        let first = first_available
+            .then(|| reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n")));
         let second = reply_peer(
-            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap(),
+            cluster.take_listener(102),
             Some(b"OK outcome=Value(7) duplicate=false\n"),
         );
-        let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+        let third = cluster.take_listener(103);
         third.set_nonblocking(true).unwrap();
         let reply = cluster.routed(&["add", "42", "7"]);
         assert!(reply.contains("Value(7)"));
@@ -436,16 +451,10 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         Some(b"UNKNOWN LeadershipChanged\n".as_slice()),
         Some(b"ERR Overloaded\n".as_slice()),
     ] {
-        let cluster = Cluster::new();
-        let first = reply_peer(
-            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
-            Some(b"ERR NOT_LEADER\n"),
-        );
-        let second = reply_peer(
-            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap(),
-            reply,
-        );
-        let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+        let mut cluster = Cluster::new();
+        let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
+        let second = reply_peer(cluster.take_listener(102), reply);
+        let third = cluster.take_listener(103);
         third.set_nonblocking(true).unwrap();
         let result = cluster.target("auto", &["add", "42", "7"]);
         assert!(!result.status.success());
@@ -474,14 +483,11 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
 #[test]
 fn trickled_reply_cannot_extend_the_clients_absolute_routing_deadline() {
     use std::io::{Read, Write};
-    let cluster = Cluster::new();
-    let first = reply_peer(
-        TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
-        Some(b"ERR NOT_LEADER\n"),
-    );
-    let second = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap();
+    let mut cluster = Cluster::new();
+    let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
+    let second = cluster.take_listener(102);
     second.set_nonblocking(true).unwrap();
-    let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+    let third = cluster.take_listener(103);
     third.set_nonblocking(true).unwrap();
     let slow = std::thread::spawn(move || {
         let deadline = Instant::now() + Duration::from_secs(20);

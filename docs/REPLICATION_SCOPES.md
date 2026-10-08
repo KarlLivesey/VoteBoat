@@ -64,8 +64,9 @@ A newly promoted leader that is only a learner or absent in an older receiver's
 current view remains rejected. That path needs validated catch-up authorization;
 blindly trusting the declared head would let a learner self-authorize. Initial learner-only
 assignment recovery is available through an explicit host entry point; see
-[learner recovery](LEARNER_RECOVERY.md). Dynamic recovery/readiness, prospective
-fanout reservation, a retiring leader's
+[learner recovery](LEARNER_RECOVERY.md). Explicit
+[dynamic member recovery](MEMBER_RECOVERY.md) and prospective fanout reservation
+are now available. Readiness evidence, a retiring leader's
 final propagation, route/roster admission, distributed activation modeling and
 faulted actual network histories remain unfinished prerequisites to releasing
 online configuration changes. Linux evidence does not establish macOS execution,
