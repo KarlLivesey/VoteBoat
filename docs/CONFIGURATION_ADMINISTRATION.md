@@ -7,6 +7,22 @@ This supplies the service adapter over the existing public Node authorization,
 readiness and durable-status APIs; public configuration mutation ingress remains
 gated pending the fault-tested lifecycle release.
 
+Readiness rounds are volatile, exact-context checks. Owner-admitted
+`cancel_learner_readiness` clears the pending round and cached result; an old
+reply cannot satisfy a new round. It does not revoke durable membership or fence
+an owner. A promotion invocation must recheck each proof against the currently
+authenticated peer store/session when it executes, even if admission succeeded
+before a reconnect. A changed session requires fresh readiness. Cancelling a
+configuration observation remains a different operation: it does not undo a
+queued or persisted transition.
+
+Slice 81 exercises held replies through owning ingress/runtime and rejects a
+queued old-session proof before persistence, then commits with a fresh proof.
+Native TCP/QUIC tests hold an actual snapshot-verified reply in ingress across
+cancellation and continue through promotion, receipt-loss recovery and restart.
+The host keeps transport polling active while pausing ingress; QUIC acknowledgments
+and flow control must continue during such delivery schedules.
+
 `Node::configure(ConfigurationRequest)` admits a typed administrative proposal
 and returns a `ConfigurationTicket`. It preserves the original request on
 rejection. Admission is volatile; it does not certify persistence or commitment.

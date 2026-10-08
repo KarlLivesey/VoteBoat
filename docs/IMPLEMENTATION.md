@@ -92,8 +92,9 @@ plan to the explicitly retained P4 fault ledger; it does not declare the complet
 P0–P7 objective finished or activate transferred ownership.
 
 1. **Fault-tested remote membership release (current, P4).** Finish the finite
-   remaining schedules from slice 77: held/dropped readiness across cancellation
-   or session change through owning assembly; promoted-leader loss with older
+   remaining schedules from slice 77. Slice 81 now checks held readiness across
+   cancellation and changed-session promotion through owning assembly, including
+   native TCP/QUIC cancellation. Next is promoted-leader loss with older
    views and unavailable/restored/compacted witnesses; broader recursive partial
    joint/final delivery and restart. Depends on the existing executable lifecycle,
    authorization and recovery paths. Completion requires safe rejection/recovery
@@ -140,7 +141,7 @@ the capability milestones above:
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
 | Routed responsibility foundation (completed slices 78–80, P5) | Namespace and local ownership checks are necessary before safe data movement. | TCP/QUIC child writes, quorum reads and WAL/checkpoint recovery pass with all parents stopped and unchanged parent logs; stale contexts refuse at admission/apply. | Supplies routing and retry foundations for P6; remains usable independently of public membership ingress. |
-| Finish fault-tested remote membership release (current P4) | Executable-created add/enroll/promote/retire and divergent learner repair now pass. Remaining interrupted schedules are enumerated in slice 77. | Held readiness replies across cancellation/session change; promoted-leader loss with unavailable/restored/compacted witness; broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block independent P5 foundation work. |
+| Finish fault-tested remote membership release (current P4) | Executable-created lifecycle, divergent learner repair and slice 81 held-readiness checks now pass. | Remaining: promoted-leader loss with unavailable/restored/compacted witness; broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block the usable P5 path. |
 | First durable split/merge (next P6) | Routing selects a destination but cannot revoke an old owner's service. Both P5 and the P4 release checks are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
@@ -4332,7 +4333,7 @@ The P4 known fault-gap ledger is now:
 | --- | --- |
 | Executable-created full lifecycle and failed original voter | Slice 76 TCP/QUIC bootstrap → add/enroll/promote → retire absent voter → compact/reopen, with fresh survivor-quorum writes. |
 | Divergent retained-only uncommitted learner suffix | Slice 77 weighted/recursive TCP/QUIC plus native atomic-recovery faults and protected-conflict refusal. |
-| Lost readiness reply across cancellation/session change | Existing core expiry and Node cancellation/re-exchange tests; still require held/delayed reply scheduling through the owning assembly with fresh proof rejection/retry. |
+| Lost readiness reply across cancellation/session change | Slice 81 checks delayed replies through owning Node ingress/runtime, queued old-session proof rejection and fresh proof/joint commitment. Native TCP/QUIC hold an actual snapshot-verified reply in ingress across cancellation, then re-exchange and complete promotion/recovery. This is finite schedule evidence, not every possible loss/restart combination. |
 | Promoted leader failure while a replica retains an older view | Existing witness/catch-up and lost-leader histories; still require combined failure with unavailable/restored witness and compacted-base refusal, with no invented authority or empty replacement. |
 | Broader partial joint/final recursive delivery | Existing accepted-log core, finite activation model and native recursive repair evidence; broader remote partial-delivery/restart schedules remain required. |
 
@@ -4545,3 +4546,40 @@ The linked mini plan advances to P4's finite outstanding release-fault ledger,
 then P6 split/merge and P7 measured tuning. P5's fixed-assignment routed path stays
 usable independently. Full P0–P7 remains active, P8 deferred, RPL-1.5 unchanged,
 design pack ignored/preserved and CI background/non-gating.
+
+## Slice 81 — held readiness and changed-session promotion faults
+
+Schema plan: retain one delayed readiness request/reply at a public transport or
+ingress seam; cancellation clears volatile request/cache state through the owning
+Node. A fresh round has a different context. A learner restart changes its store
+session, so a queued promotion must recheck the authenticated binding immediately
+before persistence. Failure consumes/reports the invocation without changing the
+membership log; a fresh proof must still allow joint quorum commitment and clean
+shutdown. No new protocol record or production helper is needed.
+
+The downstream Node history holds a reply across cancellation, delivers it before
+and during a new round, and checks that it grants no readiness or durable change.
+It then holds another reply in the owning ingress/runtime with a one-step poll,
+queues a valid promotion proof, disconnects/reconnects the learner under a new
+store session and requires AuthenticationRequired before configuration persistence.
+The Node stays running with unchanged durable state. A current-session readiness
+round succeeds, and exact authenticated host append acknowledgments commit the
+joint record. Shutdown drains all owned work. The existing host transport now
+offers explicit test controls and construction-selected wire versions; these are
+downstream doubles, not production fault injection or remote durability evidence.
+
+The native administrative histories now hold application ingress at zero while
+continuing TCP/QUIC transport progress. A real learner snapshot-worker completion
+verifies readiness; its sent reply remains retained in leader ingress while the
+leader queues cancellation. Releasing ingress cannot grant readiness for that
+cancelled round or change its durable state. A new exchange then uses the existing
+authorized promotion, lost-receipt resumption, checkpoint and file-recovery path.
+The native history checks cancellation on one live binding; store-session change
+and queued proof refusal are checked separately through the owning downstream Node.
+
+The remaining P4 release ledger is promoted-leader loss combined with older views
+and unavailable/restored/compacted witnesses, plus broader recursive partial joint/
+final delivery and restart. This closes the stated held-readiness assembly case,
+not the full membership release or all possible failure schedules. Public mutation
+ingress stays gated. P6 split/merge and P7 tuning remain the next two macro-linked
+deliverables; the routed P5 path stays usable and the full P0–P7 goal remains active.

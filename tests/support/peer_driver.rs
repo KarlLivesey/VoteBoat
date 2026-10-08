@@ -68,6 +68,8 @@ impl SecureSession for Session {
 }
 #[derive(Default)]
 struct ConnectControl {
+    wire_version: u16,
+    peer_sessions: BTreeMap<NodeId, StoreSession>,
     pending: Vec<ConnectRequest<()>>,
     submitted: Vec<ConnectTicket>,
     cancelled: Vec<ConnectTicket>,
@@ -162,9 +164,15 @@ impl PeerConnector for Connector {
                         Ok(Session {
                             binding: SessionBinding {
                                 local: ticket.local,
-                                peer: local(ticket.peer.node.get()),
+                                peer: {
+                                    let mut peer = local(ticket.peer.node.get());
+                                    if let Some(session) = c.peer_sessions.get(&peer.node) {
+                                        peer.store.session = *session;
+                                    }
+                                    peer
+                                },
                                 generation: ticket.generation,
-                                wire_version: 1,
+                                wire_version: c.wire_version.max(1),
                             },
                             drops: c.drops.clone(),
                         })
@@ -183,6 +191,8 @@ struct TransportControl {
     blocked: bool,
     wrong: bool,
     incoming: Option<ReceivedBatch>,
+    readiness: Option<Message>,
+    append: Option<Message>,
 }
 pub(super) struct Transport {
     session: Session,
@@ -233,6 +243,14 @@ impl PeerTransport for Transport {
             return Ok(TransportProgress::default());
         }
         if let Some(batch) = self.sending.take() {
+            for message in &batch.messages {
+                if matches!(message.rpc, Rpc::LearnerReadinessRequest(_)) {
+                    assert!(c.readiness.replace(message.clone()).is_none());
+                }
+                if matches!(message.rpc, Rpc::Append { .. }) {
+                    c.append = Some(message.clone());
+                }
+            }
             let mut connection = c.binding;
             if c.wrong {
                 connection.generation = SecureSessionGeneration::new(999).unwrap();
@@ -281,6 +299,62 @@ pub(super) struct Factory {
     bad: bool,
     pub(super) capacity: Option<voteboat::wire::ConfigurationWireCapacity>,
 }
+/// Explicit downstream controls; held messages remain test-owned until delivered.
+pub(super) struct PeerNetwork {
+    controls: Controls,
+    connect: Rc<RefCell<ConnectControl>>,
+}
+impl Factory {
+    pub(super) fn network(&self, connector: &Connector) -> PeerNetwork {
+        PeerNetwork {
+            controls: self.controls.clone(),
+            connect: connector.0.clone(),
+        }
+    }
+}
+impl PeerNetwork {
+    pub(super) fn take_readiness(&self, peer: NodeId) -> Option<Message> {
+        self.controls
+            .borrow()
+            .get(&peer)?
+            .borrow_mut()
+            .readiness
+            .take()
+    }
+    pub(super) fn binding(&self, peer: NodeId) -> Option<SessionBinding> {
+        self.controls
+            .borrow()
+            .get(&peer)
+            .map(|c| c.borrow().binding)
+    }
+    pub(super) fn take_append(&self, peer: NodeId) -> Option<Message> {
+        self.controls
+            .borrow()
+            .get(&peer)?
+            .borrow_mut()
+            .append
+            .take()
+    }
+    pub(super) fn deliver(&self, peer: NodeId, message: Message) {
+        let controls = self.controls.borrow();
+        let mut c = controls[&peer].borrow_mut();
+        assert!(c.incoming.is_none());
+        let batch = ReceivedBatch {
+            connection: c.binding,
+            messages: vec![message],
+        };
+        batch
+            .info(TransportLimits::default().decoded_bytes)
+            .unwrap();
+        c.incoming = Some(batch);
+    }
+    pub(super) fn restart_session(&self, peer: NodeId, session: StoreSession) {
+        self.connect
+            .borrow_mut()
+            .peer_sessions
+            .insert(peer, session);
+    }
+}
 impl PeerTransportFactory<Session> for Factory {
     type Transport = Transport;
     fn configuration_capacity(
@@ -307,6 +381,8 @@ impl PeerTransportFactory<Session> for Factory {
             blocked: false,
             wrong: false,
             incoming: None,
+            readiness: None,
+            append: None,
         }));
         self.controls
             .borrow_mut()
@@ -331,7 +407,15 @@ pub(super) fn parts_for(
     owner: RuntimeOwner,
     outbound: OutboundBinding,
 ) -> PeerParts<Connector, Factory> {
+    parts_for_version(owner, outbound, 1)
+}
+pub(super) fn parts_for_version(
+    owner: RuntimeOwner,
+    outbound: OutboundBinding,
+    wire_version: u16,
+) -> PeerParts<Connector, Factory> {
     let connect = Rc::new(RefCell::new(ConnectControl {
+        wire_version,
         ready: true,
         ..Default::default()
     }));
@@ -343,6 +427,7 @@ fn parts_with(
     connect: Rc<RefCell<ConnectControl>>,
     transports: Controls,
 ) -> PeerParts<Connector, Factory> {
+    let wire_version = connect.borrow().wire_version.max(1);
     PeerParts {
         admission_routes: None,
         connector: Connector(connect),
@@ -357,7 +442,7 @@ fn parts_with(
                 outbound,
                 first_generation: SecureSessionGeneration::new(1).unwrap(),
                 last_generation: SecureSessionGeneration::new(100).unwrap(),
-                wire_version: 1,
+                wire_version,
                 limits: PeerRosterLimits {
                     peers: 2,
                     connecting: 2,

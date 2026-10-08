@@ -1378,3 +1378,44 @@ Existing provider fault evidence remains separate. These Linux loopback tests do
 not establish macOS or separate-host operations. The mini plan proceeds to the
 remaining P4 fault ledger, P6 lifecycle and P7 measurements; the full goal remains
 active and CI stays background feedback.
+
+## Slice 81 — owning readiness cancellation and session-change schedules
+
+The downstream owning-Node test holds a readiness reply across cancellation,
+delivers it before and during a fresh round, and checks no readiness/durable
+change. A separate one-step schedule leaves another old-session reply retained
+in ingress/runtime during disconnect/reconnect. A previously admitted promotion
+with an old authenticated store session returns AuthenticationRequired before
+persistence, with unchanged membership state and a still-running Node. A fresh
+current-session proof succeeds and exact host-provider append acknowledgments
+commit the joint record. Shutdown drains the fixture. Peer/session controls are
+explicit downstream doubles; they are not remote storage or cryptographic proof.
+
+Both actual native TCP/TLS and QUIC administrative histories now verify readiness
+through the real learner snapshot worker, retain the sent reply in leader ingress,
+queue cancellation before delivery, and require unchanged durable state. Fresh
+readiness then supports the existing promotion, lost-receipt resumption, checkpoint
+and actual-file recovery history. Native cancellation stays on one live store
+binding; changed-session promotion is checked in the owning host assembly.
+
+The initial host schedule attempted a zero consensus-step budget, which the
+existing bounded runtime correctly rejects. It now uses normal polling and checks
+refusal across disconnect/reconnect. The initial native QUIC schedule stopped
+peer polling, preventing transport acknowledgments and send completion. The
+corrected schedule pauses only ingress (budget zero), continues transport progress
+and asserts that the reply is retained in actual leader ingress before cancellation.
+No production guard, budget rule or QUIC behavior was weakened for these tests.
+
+Final verification:
+
+- All-feature `effect_owner` and `native_member_startup` suites: 127 + 32 = 159 passed.
+- Core-only `effect_owner delayed_readiness`: 1 passed; no native/TLS dependency required for the owning host schedule.
+- All-feature/all-target Clippy with warnings denied, formatting, diff checks and inventory validation pass. Inventory remains 64 contracts; no production seam is added.
+
+This is finite selected-schedule coverage. It closes the named held-readiness
+assembly gap while preserving the separate native/provider evidence boundaries.
+Combined promoted-leader failure with older views and unavailable/restored/compacted
+witnesses, plus broader recursive partial joint/final delivery/restart, remain P4
+release requirements. Public mutation ingress remains gated; P6 lifecycle, P7
+measurements and macOS/separate-host operational evidence remain outstanding.
+The full P0–P7 goal remains active; P8 remains deferred.

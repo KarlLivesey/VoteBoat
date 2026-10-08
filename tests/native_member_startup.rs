@@ -38,6 +38,7 @@ use voteboat::{
 };
 
 fn administrative_promotion(protocol: NativePeerProtocol) {
+    use voteboat::outbound::OutboundQueue;
     type Service = NativeNode<Counter, NativeServiceConnector>;
     fn drive(
         nodes: &mut [Service],
@@ -198,17 +199,84 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
     nodes[0]
         .request_learner_readiness(group(), node(2), requirements)
         .unwrap();
-    drive(&mut nodes, &allowed, clock, |nodes| {
-        nodes[0]
-            .local()
-            .owner
-            .core(group())
+    // Hold application ingress while allowing transport ACKs/flow control. Then
+    // let the real learner snapshot worker verify readiness and hold its reply
+    // in leader ingress. This works for both TCP and QUIC without starving I/O.
+    let deadline = Instant::now() + Duration::from_secs(5);
+    let held_ingress = NodePollBudget {
+        peers: PeerDriverBudget {
+            ingress: 0,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    loop {
+        let progress = nodes[0]
+            .poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        assert!(progress
+            .replica
             .unwrap()
-            .ready_learner()
-            .is_some()
-    });
-    // Owner-admitted cancellation clears only volatile checks/results. Reissue
-    // through the same authenticated binding before constructing the proposal.
+            .steps
+            .iter()
+            .all(|s| s.error.is_none()));
+        for index in [1, 2] {
+            nodes[index]
+                .poll(MonoTime(clock.elapsed().as_millis() as u64), held_ingress)
+                .unwrap();
+        }
+        if nodes[0].local().owner.is_drained() && nodes[0].local().outbound.is_drained() {
+            break;
+        }
+        assert!(Instant::now() < deadline, "readiness request did not send");
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    let mut verified = false;
+    loop {
+        let progress = nodes[1]
+            .poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        let replica = progress.replica.unwrap();
+        assert!(replica.steps.iter().all(|s| s.error.is_none()));
+        verified |= replica.snapshot_events > 0;
+        for index in [0, 2] {
+            nodes[index]
+                .poll(MonoTime(clock.elapsed().as_millis() as u64), held_ingress)
+                .unwrap();
+        }
+        if verified && nodes[1].local().owner.is_drained() && nodes[1].local().outbound.is_drained()
+        {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "readiness reply did not verify/send"
+        );
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    assert!(nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .ready_learner()
+        .is_none());
+    assert!(!nodes[0].peers().unwrap().ingress().is_drained());
+    let before_cancel = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .state()
+        .clone();
+    // Cancellation is queued before the held reply can enter the leader owner.
+    // It clears only volatile checks/results, never membership or application data.
     nodes[0].cancel_learner_readiness(group()).unwrap();
     drive(&mut nodes, &allowed, clock, |nodes| {
         nodes[0]
@@ -219,6 +287,10 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
             .ready_learner()
             .is_none()
     });
+    assert_eq!(
+        nodes[0].local().owner.core(group()).unwrap().state(),
+        &before_cancel
+    );
     nodes[0]
         .request_learner_readiness(group(), node(2), requirements)
         .unwrap();
