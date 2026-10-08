@@ -12,6 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+pub mod administration;
 #[cfg(feature = "tls")]
 pub mod connect;
 pub mod dial;

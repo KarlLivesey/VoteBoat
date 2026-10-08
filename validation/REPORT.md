@@ -1070,3 +1070,36 @@ assertion uses a borrowed expected-message slice.
   or storage design change required broader core test runs.
 - Final focused invalid-deployment rerun also passes independent malformed TLS
   name and missing-field cases added after the full target run.
+
+## Slice 74 — exact administration scope and native promotion
+
+- NativeAdministrationPlan binds exact group/record/application envelope and
+  selected host/native PlacementAuthorizer through the existing Node callback.
+  Tests refuse changed operation/expected head/payload/envelope, placement failure,
+  empty/duplicate/count/capacity/byte excess and invalid requirements, preserving
+  all constructor inputs. No new effect, token, generation, watermark or protocol
+  format is introduced. Application envelope enforcement remains a host obligation.
+- Actual TCP/TLS and QUIC owners authenticate learner readiness, refuse withdrawn
+  queued scope without durable mutation, resubmit/cancel observation, then really
+  commit joint/final through old 1/3 and new 1/2 voters. Durable status/resumption
+  drives finalization. They commit/apply counter 8, checkpoint and reopen all native
+  files with final membership/completed operation and no volatile readiness token.
+  The initial learner record is prepared; joint and final records are proposed
+  through Node, not seeded. No full add/enroll/remove-fault release claim.
+- Initial blanket event-success assertions failed on unadmitted WrongIdentity
+  ingress in final view 12. Core response validation requires current scope; the
+  fixture now permits only that refusal after membership transition and retains
+  strict administrative/application/storage/error and committed-outcome checks.
+- Complete native member target initially passes 28 and placement target 8;
+  final reruns cover the last generic host-placement/public API changes. Native-
+  only placement, all-target Clippy and metadata/docs checks are recorded below.
+- Inventory extends existing callback/placement contracts. CLI plan parsing and
+  authorized mutation adapter remain mini item 1, followed by fault-tested release
+  and P5 routing/P6 ownership/P7. Full goal active, default service mutations denied,
+  P8 deferred; no macOS/performance/general proof claim.
+- A later full run exposed AddrInUse in an older QUIC fixture's probe/rebind
+  handoff. Native fixture endpoints now remain unique for this test process's
+  lifetime, preventing parallel reuse of released probes. Corrected final native
+  member target passes 28 and placement passes 8. Native-only placement passes 8;
+  all-feature/all-target Clippy warnings-denied and all-feature docs pass. Inventory
+  metadata (60 contracts), formatting and diff checks pass.

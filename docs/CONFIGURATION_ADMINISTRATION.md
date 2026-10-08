@@ -191,3 +191,51 @@ and routes within the original three-voter bootstrap; it grants no membership or
 configuration execution authority. Versioned/size-bounded input, exact-identity
 refusal, fourth-learner enrollment/catch-up and TCP/QUIC restart are exercised.
 See the service guide for command syntax and partial-initialization limitations.
+
+## Exact trusted administration plans
+
+`native::administration::NativeAdministrationPlan<P>` supplies a native
+implementation of the existing Node execution-time authorization callback. Supply
+one exact group, the selected `PlacementAuthorizer`, the enforced application
+envelope and a finite list of trusted `ConfigurationRecord` intents:
+
+```rust
+let plan = NativeAdministrationPlan::new(group, placement, requirements, intents)?;
+boat.poll_with_configuration_authorization(now, budget, |core, proposal| {
+    plan.authorize(core.state().bootstrap.group, core.membership(), proposal)
+})?;
+```
+
+The constructor accepts at most 64 retained intent slots and 1 MiB of record
+footprints, apart from the selected placement provider's own bounds. Empty lists,
+zero schema/command/checkpoint requirements, excess vector capacity/record bytes
+and duplicate `(operation, expected configuration)` keys refuse with every input
+returned. Joint and final records can share their operation ID with different
+expected heads. Bind the envelope to the application's actual admission/restore
+limits; nonzero requirements alone do not prove application capacity. Derive
+intents from trusted operator policy, never from the request being authorized.
+
+Execution requires exact group, full record equality and exact envelope, then
+calls the selected native or host placement provider against current membership.
+Operation ID alone cannot approve a changed target. Node/core still enforce
+journal grammar, current-term commitment, fresh authenticated readiness and the
+actual selected wire/transport envelope. Approval itself emits no effect or
+receipt. The plan is immutable and owns no work or session; it adds no generation,
+watermark or durable authority. Reconstruct it from trusted input after restart.
+
+Select the current plan on each poll. A queued request retains no earlier scope
+approval; switching to a narrower plan can deny it before persistence. Ordinary
+polling denies all configuration execution. Cancellation of the observation
+ticket still does not revoke an executed intent or roll back configuration history.
+
+Owning native TCP/TLS and QUIC histories start from a prepared committed learner,
+authenticate readiness, deny a queued joint under a withdrawn scope with unchanged
+durable state, then cancel observation and commit the actual joint on the old/new
+voter sets. Durable status drives a fresh authorized final proposal. Both paths
+commit an application write, checkpoint/drain and reopen all native files with
+final membership, counter value and no readiness token. Unadmitted WrongIdentity
+ingress after scope transition is permitted in these histories; administrative,
+application, storage and other errors remain failures. These are finite available-
+quorum histories, not the complete faulted remote lifecycle. Service plan parsing
+and authorized mutation commands remain current integration work; default service
+polling stays gated.

@@ -14,7 +14,187 @@
 // rights and limitations under the RPL.
 #![cfg(feature = "native")]
 use std::collections::BTreeMap;
-use voteboat::{identity::*, log::*, membership::*, native::placement::*, placement::*, quorum::*};
+use voteboat::{
+    identity::*,
+    log::*,
+    membership::*,
+    native::{administration::*, placement::*},
+    placement::*,
+    quorum::*,
+    raft::*,
+};
+
+#[test]
+fn administration_plan_binds_complete_intent_group_and_application_envelope() {
+    let base = config(1, majority(&[1, 2, 3]), &[]);
+    let current = membership(&base);
+    let record = ConfigurationRecord {
+        operation: OperationId::new(50).unwrap(),
+        expected: base.id(),
+        change: ConfigurationChange::Learners(config(2, majority(&[1, 2, 3]), &[4])),
+    };
+    let requirements = voteboat::application::Counter::new(100)
+        .unwrap()
+        .readiness_requirements();
+    let make = || {
+        NativeAdministrationPlan::new(
+            group(1),
+            plan(&[(1, 1), (2, 2), (3, 3), (4, 4)], 3, true),
+            requirements,
+            vec![record.clone()],
+        )
+        .unwrap()
+    };
+    let native = make();
+    let proposal = ConfigurationProposal {
+        record: record.clone(),
+        readiness: vec![],
+        requirements,
+    };
+    assert_eq!(native.authorize(group(1), &current, &proposal), Ok(()));
+    assert_eq!(native.intents(), &[record]);
+    assert_eq!(native.requirements(), requirements);
+    assert_eq!(
+        native.authorize(group(2), &current, &proposal),
+        Err(ConfigurationProposalError::AuthenticationRequired)
+    );
+    for field in 0..3 {
+        let mut other = proposal.clone();
+        match field {
+            0 => other.record.operation = OperationId::new(51).unwrap(),
+            1 => other.record.expected = ConfigurationId::new(9).unwrap(),
+            _ => {
+                other.record.change =
+                    ConfigurationChange::Learners(config(2, majority(&[1, 2, 3]), &[]))
+            }
+        }
+        assert_eq!(
+            native.authorize(group(1), &current, &other),
+            Err(ConfigurationProposalError::AuthenticationRequired)
+        );
+    }
+    for field in 0..3 {
+        let mut other = proposal.clone();
+        match field {
+            0 => other.requirements.application_schema += 1,
+            1 => other.requirements.command_bytes -= 1,
+            _ => other.requirements.snapshot_bytes -= 1,
+        }
+        assert_eq!(
+            native.authorize(group(1), &current, &other),
+            Err(ConfigurationProposalError::Readiness(
+                ReadinessError::InvalidRequirements
+            ))
+        );
+    }
+    let denied = NativeAdministrationPlan::new(
+        group(1),
+        plan(&[(1, 1), (2, 1), (3, 2), (4, 3)], 3, false),
+        requirements,
+        native.intents().to_vec(),
+    )
+    .unwrap();
+    assert_eq!(
+        denied.authorize(group(1), &current, &proposal),
+        Err(ConfigurationProposalError::Placement(
+            PlacementError::TooFewVotingDomains
+        ))
+    );
+    #[derive(Debug)]
+    struct HostPlacement;
+    impl PlacementAuthorizer for HostPlacement {
+        fn authorize(
+            &self,
+            _: GroupIdentity,
+            _: &Membership,
+            _: &ConfigurationRecord,
+        ) -> Result<(), PlacementError> {
+            Err(PlacementError::InvalidPlan)
+        }
+    }
+    let host = NativeAdministrationPlan::new(
+        group(1),
+        HostPlacement,
+        requirements,
+        native.intents().to_vec(),
+    )
+    .unwrap();
+    assert_eq!(
+        host.authorize(group(1), &current, &proposal),
+        Err(ConfigurationProposalError::Placement(
+            PlacementError::InvalidPlan
+        ))
+    );
+}
+
+#[test]
+fn administration_plan_rejects_ambiguous_or_unbounded_intents_and_returns_inputs() {
+    let record = change(config(3, majority(&[1, 2, 3]), &[]));
+    let requirements = voteboat::application::Counter::new(100)
+        .unwrap()
+        .readiness_requirements();
+    let placement = || plan(&[(1, 1), (2, 2), (3, 3)], 3, true);
+    let rejected = NativeAdministrationPlan::new(
+        group(1),
+        placement(),
+        requirements,
+        vec![record.clone(), record.clone()],
+    )
+    .unwrap_err();
+    assert_eq!(rejected.reason, AdministrationPlanError::DuplicateIntent);
+    assert_eq!(rejected.intents, vec![record.clone(), record.clone()]);
+    assert_eq!(rejected.placement.group(), group(1));
+    assert_eq!(rejected.group, group(1));
+    assert_eq!(rejected.requirements, requirements);
+    assert_eq!(
+        NativeAdministrationPlan::new(group(1), placement(), requirements, vec![])
+            .unwrap_err()
+            .reason,
+        AdministrationPlanError::InvalidIntents
+    );
+    let mut overallocated = Vec::with_capacity(MAX_ADMINISTRATION_INTENTS + 1);
+    overallocated.push(record.clone());
+    assert_eq!(
+        NativeAdministrationPlan::new(group(1), placement(), requirements, overallocated)
+            .unwrap_err()
+            .reason,
+        AdministrationPlanError::TooLarge
+    );
+    assert_eq!(
+        NativeAdministrationPlan::new(
+            group(1),
+            placement(),
+            requirements,
+            vec![record.clone(); MAX_ADMINISTRATION_INTENTS + 1]
+        )
+        .unwrap_err()
+        .reason,
+        AdministrationPlanError::TooLarge
+    );
+    let mut invalid = requirements;
+    invalid.snapshot_bytes = 0;
+    assert_eq!(
+        NativeAdministrationPlan::new(group(1), placement(), invalid, vec![record])
+            .unwrap_err()
+            .reason,
+        AdministrationPlanError::InvalidRequirements
+    );
+    let learners = (4..=2000).collect::<Vec<_>>();
+    let large = config(2, majority(&[1, 2, 3]), &learners);
+    let intents = (1..=32)
+        .map(|n| ConfigurationRecord {
+            operation: OperationId::new(n).unwrap(),
+            expected: ConfigurationId::new(1).unwrap(),
+            change: ConfigurationChange::Learners(large.clone()),
+        })
+        .collect();
+    assert_eq!(
+        NativeAdministrationPlan::new(group(1), placement(), requirements, intents)
+            .unwrap_err()
+            .reason,
+        AdministrationPlanError::TooLarge
+    );
+}
 fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }

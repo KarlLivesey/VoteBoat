@@ -14,10 +14,10 @@
 // rights and limitations under the RPL.
 #![cfg(feature = "tls")]
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     net::{SocketAddr, TcpListener, UdpSocket},
     path::{Path, PathBuf},
-    sync::Arc,
+    sync::{Arc, Mutex},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use voteboat::{
@@ -32,6 +32,380 @@ use voteboat::{
     runtime::*,
     snapshot::*,
 };
+use voteboat::{
+    native::{administration::*, placement::*},
+    placement::*,
+};
+
+fn administrative_promotion(protocol: NativePeerProtocol) {
+    type Service = NativeNode<Counter, NativeServiceConnector>;
+    fn drive(
+        nodes: &mut [Service],
+        plan: &NativeAdministrationPlan,
+        clock: Instant,
+        mut done: impl FnMut(&mut [Service]) -> bool,
+    ) {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            for n in &mut *nodes {
+                let progress = n
+                    .poll_with_configuration_authorization(
+                        MonoTime(clock.elapsed().as_millis() as u64),
+                        NodePollBudget::default(),
+                        |core, proposal| {
+                            plan.authorize(
+                                core.state().bootstrap.group,
+                                core.membership(),
+                                proposal,
+                            )
+                        },
+                    )
+                    .unwrap();
+                if let Some(replica) = progress.replica {
+                    for step in replica.steps {
+                        let transitioned = matches!(
+                            n.local()
+                                .owner
+                                .core(group())
+                                .unwrap()
+                                .membership()
+                                .id()
+                                .get(),
+                            11 | 12
+                        );
+                        // Scope changes can reject already queued ingress. No
+                        // administrative/application admission or other error is
+                        // excused; exact committed outcomes remain mandatory.
+                        assert!(
+                            step.error.is_none()
+                                || (transitioned
+                                    && step.error == Some(RaftError::WrongIdentity)
+                                    && step.admission.is_none()
+                                    && step.operation.is_none()
+                                    && step.proposed.is_none()
+                                    && step.read.is_none()),
+                            "{step:?}"
+                        );
+                    }
+                }
+            }
+            if done(nodes) {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "administrative progress timed out"
+            );
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+    fn plan(
+        intents: Vec<ConfigurationRecord>,
+        requirements: ReadinessRequirements,
+    ) -> NativeAdministrationPlan {
+        NativeAdministrationPlan::new(
+            group(),
+            NativePlacementAuthorizer::new(
+                group(),
+                (1..=3)
+                    .map(|n| {
+                        (
+                            node(n),
+                            ReplicaPlacement {
+                                store: identity(n),
+                                domain: FailureDomainId::new(n).unwrap(),
+                            },
+                        )
+                    })
+                    .collect(),
+                PlacementRequirements {
+                    minimum_voting_domains: 2,
+                    survive_any_single_domain_loss: false,
+                },
+            )
+            .unwrap(),
+            requirements,
+            intents,
+        )
+        .unwrap()
+    }
+    let directory = root().join(format!("administration-{protocol:?}"));
+    std::fs::create_dir_all(&directory).unwrap();
+    for local in 1..=3 {
+        seed(&directory.join(local.to_string()), local, 1, 1, false);
+    }
+    let endpoints = [reservation(), reservation(), reservation()];
+    let configs = (1..=3)
+        .map(|local| {
+            let (mut config, _unused) =
+                startup(&directory.join(local.to_string()), local, &[1, 2, 3]);
+            config.startup.tls = config.startup.tls.with_wire_version(6).unwrap();
+            config.startup.listen = endpoints[local as usize - 1].0;
+            for (peer, route) in &mut config.startup.peers {
+                route.address = endpoints[peer.get() as usize - 1].0;
+            }
+            config
+        })
+        .collect::<Vec<_>>();
+    drop(endpoints);
+    let mut nodes = configs
+        .into_iter()
+        .map(|c| open(c, protocol).unwrap())
+        .collect::<Vec<_>>();
+    let requirements = Counter::new(100).unwrap().readiness_requirements();
+    let joint = ConfigurationRecord {
+        operation: OperationId::new(101).unwrap(),
+        expected: cid(10),
+        change: ConfigurationChange::Joint {
+            id: cid(11),
+            next: configuration(12, &[1, 2], &[3]),
+        },
+    };
+    let final_record = ConfigurationRecord {
+        operation: joint.operation,
+        expected: cid(11),
+        change: ConfigurationChange::Final { id: cid(12) },
+    };
+    let allowed = plan(vec![joint.clone(), final_record.clone()], requirements);
+    nodes[0].control(group(), NodeControl::Campaign).unwrap();
+    let clock = Instant::now();
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes[0].local().owner.core(group()).unwrap().role() == Role::Leader
+    });
+    let first = nodes[0]
+        .propose(ClientRequest {
+            group: group(),
+            operation: OperationId::new(899).unwrap(),
+            bytes: 1i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    let mut first_index = None;
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        while let Some(output) = nodes[0].poll_client() {
+            assert_eq!(output.ticket(), first);
+            let ClientOutcome::Applied { position, .. } = nodes[0].complete_client(output).unwrap()
+            else {
+                panic!("initial commit");
+            };
+            first_index = Some(position.index);
+        }
+        first_index.is_some_and(|index| {
+            nodes
+                .iter()
+                .all(|n| n.local().applications[&group()].read_applied(index) == Ok(1))
+        })
+    });
+    nodes[0]
+        .request_learner_readiness(group(), node(2), requirements)
+        .unwrap();
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .ready_learner()
+            .is_some()
+    });
+    let ready = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .ready_learner()
+        .unwrap()
+        .clone();
+    let authenticated = nodes[0]
+        .peers()
+        .unwrap()
+        .roster()
+        .binding(node(2))
+        .unwrap()
+        .peer
+        .store;
+    let proposal = ConfigurationProposal {
+        record: joint,
+        requirements,
+        readiness: vec![PromotionReadiness {
+            ready,
+            authenticated,
+        }],
+    };
+    // Admission does not cache authority: replace the selected plan while the
+    // request is queued, and require refusal without any durable transition.
+    let revoked = plan(vec![final_record], requirements);
+    let before = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .state()
+        .clone();
+    let denied = nodes[0]
+        .configure(ConfigurationRequest {
+            group: group(),
+            proposal: proposal.clone(),
+        })
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    loop {
+        nodes[0]
+            .poll_with_configuration_authorization(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+                |core, p| revoked.authorize(group(), core.membership(), p),
+            )
+            .unwrap();
+        if let Some(result) = nodes[0].poll_configuration() {
+            assert_eq!(result.ticket, denied);
+            assert_eq!(
+                result.outcome,
+                ConfigurationOutcome::NotProposed(
+                    ConfigurationProposalError::AuthenticationRequired.into()
+                )
+            );
+            break;
+        }
+        assert!(Instant::now() < deadline);
+    }
+    assert_eq!(
+        nodes[0].local().owner.core(group()).unwrap().state(),
+        &before
+    );
+    let lost = nodes[0]
+        .configure(ConfigurationRequest {
+            group: group(),
+            proposal,
+        })
+        .unwrap();
+    nodes[0].cancel_configuration(lost).unwrap();
+    let cancelled = nodes[0].poll_configuration().unwrap();
+    assert_eq!(cancelled.ticket, lost);
+    assert_eq!(
+        cancelled.outcome,
+        ConfigurationOutcome::Unknown(ConfigurationUnknown::CancelledWait)
+    );
+    // Lost observation is not rollback. Joint must actually commit over the old
+    // and new native voter sets before ordinary durable resumption can finalize.
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes.iter().all(|n| {
+            matches!(
+                n.configuration_status(group(), OperationId::new(101).unwrap())
+                    .unwrap()
+                    .resume_action(),
+                ConfigurationResumeAction::Finalize(_)
+            )
+        })
+    });
+    let ConfigurationResumption::Submitted(final_ticket) = nodes[0]
+        .resume_configuration(group(), OperationId::new(101).unwrap(), requirements)
+        .unwrap()
+    else {
+        panic!("resumable committed joint");
+    };
+    let mut final_receipt = false;
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        while let Some(result) = nodes[0].poll_configuration() {
+            assert_eq!(result.ticket, final_ticket);
+            assert!(matches!(result.outcome, ConfigurationOutcome::Committed(_)));
+            final_receipt = true;
+        }
+        final_receipt
+            && nodes.iter().all(|n| {
+                matches!(
+                    n.configuration_status(group(), OperationId::new(101).unwrap())
+                        .unwrap()
+                        .resume_action(),
+                    ConfigurationResumeAction::Completed
+                )
+            })
+    });
+    assert!(!nodes[2].local().owner.core(group()).unwrap().local_voter());
+    let write = nodes[0]
+        .propose(ClientRequest {
+            group: group(),
+            operation: OperationId::new(900).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    let mut applied = None;
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        while let Some(output) = nodes[0].poll_client() {
+            assert_eq!(output.ticket(), write);
+            let ClientOutcome::Applied { position, .. } = nodes[0].complete_client(output).unwrap()
+            else {
+                panic!("final-view write");
+            };
+            applied = Some(position.index);
+        }
+        applied.is_some_and(|index| {
+            nodes
+                .iter()
+                .all(|n| n.local().applications[&group()].read_applied(index) == Ok(8))
+        })
+    });
+    nodes[0].control(group(), NodeControl::Checkpoint).unwrap();
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .state()
+            .base_index()
+            > 0
+    });
+    for n in &mut nodes {
+        n.begin_shutdown();
+    }
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes.iter().all(|n| n.is_drained())
+    });
+    for n in nodes {
+        close(n);
+    }
+    for local in 1..=3 {
+        let path = directory.join(local.to_string());
+        let log = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut snapshots = NativeSnapshotStore::recover(
+            FileSnapshotIo::open(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        let mut app = Counter::new(100).unwrap();
+        let (core, _) =
+            recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app).unwrap();
+        assert_eq!(core.membership().id(), cid(12));
+        assert_eq!(core.local_voter(), local != 3);
+        assert_eq!(app.read_applied(core.state().commit_index), Ok(8));
+        assert!(core.ready_learner().is_none());
+        assert!(matches!(
+            core.configuration_status(OperationId::new(101).unwrap())
+                .unwrap()
+                .resume_action(),
+            ConfigurationResumeAction::Completed
+        ));
+    }
+    std::fs::remove_dir_all(directory).unwrap();
+}
+#[test]
+fn authorized_native_promotion_lost_receipt_resumption_and_file_recovery_tcp() {
+    administrative_promotion(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic() {
+    administrative_promotion(NativePeerProtocol::Quic);
+}
 fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }
@@ -180,12 +554,21 @@ fn seed(path: &Path, local: u64, phase: u64, commit: u64, compact: bool) {
         assert!(log.state(group()).unwrap().entries.is_empty());
     }
 }
+static ENDPOINT_PORTS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
 fn reservation() -> (SocketAddr, TcpListener, UdpSocket) {
+    // Opening native providers releases these probes before binding. Never let
+    // another fixture choose a released address during that handoff or reuse it
+    // while accepted sockets from an earlier fixture are still closing.
+    let mut ports = ENDPOINT_PORTS.lock().unwrap_or_else(|e| e.into_inner());
     (0..32)
         .find_map(|_| {
             let tcp = TcpListener::bind("127.0.0.1:0").ok()?;
             let address = tcp.local_addr().ok()?;
+            if ports.contains(&address.port()) {
+                return None;
+            }
             let udp = UdpSocket::bind(address).ok()?;
+            ports.insert(address.port());
             Some((address, tcp, udp))
         })
         .expect("TCP/UDP endpoint")

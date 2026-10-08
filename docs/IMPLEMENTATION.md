@@ -134,11 +134,19 @@ restart. Provisioning itself grants no assignment. Current item 1 now focuses on
 service placement-policy and execution authorization, readiness and durable admin
 outcomes; fault-tested release and P5 routing remain the next two deliverables.
 
+Slice 74 adds a bounded exact-intent/application-envelope administration plan over
+the existing host/native placement contract and Node authorization callback.
+TCP/QUIC histories now actually propose and commit promotion joint/final records,
+withdraw queued scope, lose observation, resume finalization and reopen native
+files. The initial learner is prepared, but joint/final are not seeded. Current
+item 1 still needs the service plan/command adapter; the next two remain fault-
+tested release and P5 routing. No new helper milestone or general liveness claim.
+
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
    schema/command/checkpoint bounds as deduplication grows. Depends on slices
-   51–73 and authenticated service scope. Check exact committed assignments,
+   51–74 and authenticated service scope. Check exact committed assignments,
    rejection before mutation, lost-reply resumption and matching TCP/QUIC
    assemblies. Provides the native path for release testing, not an early opening
    of public configuration ingress.
@@ -4160,3 +4168,53 @@ item 1 proceeds to authorized service administration and placement-policy inputs
 then fault-tested membership release and P5 routing. Full P0–P7 remains active;
 public mutation ingress remains gated. No macOS execution, throughput or complete
 protocol-proof claim; P8 remains deferred.
+
+## Slice 74 — exact native administration scope and real promotion
+
+Mini schema plan: an immutable plan binds one group, selected native/host
+PlacementAuthorizer, exact application envelope and explicit operation/expected-
+head/full-record intents. Bound vector retention to 64 slots and 1 MiB of record
+footprints; return all constructor inputs on refusal. Reject duplicate scope keys
+and nonpositive envelopes. Recheck scope/envelope/placement only through the
+existing Node execution callback; never retain earlier queue permission or infer
+authorization from incoming data. No new core effect, durability receipt, protocol
+format, generation or watermark. Caller owns/reconstructs the plan; pending Node
+work and uncertain receipts retain their existing ownership and recovery rules.
+
+NativeAdministrationPlan implements that policy through the existing callback,
+with a generic PlacementAuthorizer point for host injection. Exact record equality
+covers operation, expected view, phase, target policy and exact store/learner maps.
+The plan cannot waive core journal/current-term/readiness rules or selected
+transport capacity checks. It does not independently certify application bounds;
+the host must bind its declared envelope to the enforced application schema.
+
+Unit cases check group/record/envelope mismatches, native placement denial, host
+provider selection, duplicate/empty/oversize plans, retained vector capacity,
+record bytes and ownership returned after rejection. Actual native TCP/TLS and
+QUIC histories start with a prepared committed learner at configuration 10,
+commit a current-term application entry, authenticate its readiness, refuse a
+queued joint under a changed scope without durable mutation, then resubmit and
+cancel observation. The still-owned request really commits joint 11 over old
+voters 1/3 and new voters 1/2. Durable status/resumption proposes final 12, demotes
+3 to learner, commits/applies counter 8 and checkpoints/drains/reopens every store.
+Final operation completion and absent volatile readiness survive recovery.
+
+The first runs exposed the fixture's blanket no-ingress-error assumption: at final
+view 12, queued responses from earlier scope are correctly refused. Core receipt
+matching explicitly requires the current configuration. The fixture now permits
+only unadmitted WrongIdentity events after a view transition, while requiring exact
+committed outcomes and refusing other/configuration/application errors. Both new
+histories and the complete native member target pass; finite ordinary-majority
+available-quorum tests do not establish broader weighted/recursive failure traces.
+
+The inventory extends the existing administration callback/placement contracts,
+not a new replaceable consensus seam. Current mini item 1 now has the scope backend
+and actual distributed promotion evidence; the service adapter and fault-tested
+release gates remain before P5/P6/P7. Default service mutation polling stays denied.
+Full P0–P7 remains active, P8 deferred; no macOS/performance/general proof claim.
+
+Final validation: native member 28 and placement 8 pass; native-only placement 8,
+all-feature/all-target Clippy warnings-denied, all-feature docs, inventory metadata
+(60 contracts), formatting and diff checks pass. One later parallel run exposed
+an older fixture's AddrInUse probe/rebind race; per-process unique endpoint
+assignments resolve that reuse. No production socket/retry semantics changed.
