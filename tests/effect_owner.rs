@@ -362,6 +362,649 @@ mod application_results {
         replacement.complete(output).unwrap();
     }
 }
+mod client_admission {
+    use super::*;
+    #[test]
+    fn stopping_runtime_returns_exact_unprocessed_tracked_inputs() {
+        let mut store = HostLogStore::new(1);
+        let mut runtime = timed(1, &mut store, 1, 1);
+        let event = || Event::Propose {
+            operation: OperationId::new(1).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        };
+        let first = runtime.admit_tracked(group(1), event()).unwrap();
+        runtime.admit(group(1), Event::Heartbeat).unwrap();
+        let second = runtime.admit_tracked(group(1), event()).unwrap();
+        assert_ne!(first, second);
+        let stopped = runtime.stop_group(group(1)).unwrap();
+        assert_eq!(stopped.admissions, vec![first, second]);
+        assert_eq!(stopped.queued.len(), 3);
+        assert!(!stopped.had_active_visit);
+        assert_eq!(runtime.usage().items, 0);
+    }
+    type Clients = ClientRouter<CounterReceipt>;
+    fn setup(
+        count: u128,
+        capacity: usize,
+    ) -> (
+        Owner,
+        HostWorker,
+        Clients,
+        ApplicationRouter<CounterReceipt>,
+        BTreeMap<GroupIdentity, Counter>,
+    ) {
+        let (mut owner, mut worker) = single(count);
+        let mut apps = BTreeMap::new();
+        pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
+        for g in 1..=count {
+            let mut app = Counter::new(capacity).unwrap();
+            app.apply_batch(owner.core(group(g)).unwrap().replay_committed())
+                .unwrap();
+            apps.insert(group(g), app);
+        }
+        let clients = Clients::new(
+            ClientRouterBinding {
+                owner: owner.identity(),
+                generation: ClientRouterGeneration::new(1).unwrap(),
+            },
+            ClientRouterLimits::default(),
+        )
+        .unwrap();
+        let results = ApplicationRouter::new(
+            ApplicationRouterBinding {
+                owner: owner.identity(),
+                generation: ApplicationRouterGeneration::new(1).unwrap(),
+            },
+            ApplicationRouterLimits::default(),
+        )
+        .unwrap();
+        (owner, worker, clients, results, apps)
+    }
+    fn request(g: u128, id: u128, delta: i64) -> ClientRequest {
+        ClientRequest {
+            group: group(g),
+            operation: OperationId::new(id).unwrap(),
+            bytes: delta.to_le_bytes().to_vec(),
+        }
+    }
+    fn drive(
+        owner: &mut Owner,
+        worker: &mut HostWorker,
+        clients: &mut Clients,
+        results: &mut ApplicationRouter<CounterReceipt>,
+        apps: &mut BTreeMap<GroupIdentity, Counter>,
+    ) {
+        for _ in 0..1000 {
+            for event in worker.poll(1) {
+                owner.deliver_worker(event, MonoTime(400)).unwrap();
+            }
+            clients
+                .advance(owner, MonoTime(400), 3, |g| apps.get(&g))
+                .unwrap();
+            let mut persists = Vec::new();
+            while let Some(lease) = owner.take_effect().unwrap() {
+                match &lease.effect {
+                    Effect::Persist(_) => persists.push(lease),
+                    Effect::Committed(_) => {
+                        let group = lease.ticket.visit.group;
+                        results
+                            .submit(owner, lease, apps.get_mut(&group).unwrap(), MonoTime(400))
+                            .unwrap();
+                        let output = results.poll().unwrap();
+                        clients.deliver(owner, results, output).unwrap();
+                    }
+                    _ => panic!("unexpected single-voter effect"),
+                }
+            }
+            if !persists.is_empty() {
+                owner
+                    .submit_persists(worker, persists, MonoTime(400))
+                    .unwrap();
+            }
+            clients.reconcile(owner, 64).unwrap();
+            if owner.is_drained() && worker.is_drained() {
+                return;
+            }
+        }
+        panic!("client fixture did not drain");
+    }
+    #[test]
+    fn queued_retries_conflicts_and_capacity_use_exact_invocation_positions() {
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 1);
+        let mut tickets = Vec::new();
+        for delta in [7, 9, 7] {
+            tickets.push(
+                clients
+                    .submit(&mut owner, &apps[&group(1)], request(1, 1, delta))
+                    .unwrap(),
+            );
+        }
+        assert_eq!(clients.usage().requests, 3);
+        assert!(clients.poll().is_none());
+        let rejected = clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 2, 5))
+            .unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            ClientError::Application(ApplicationError::DedupCapacity)
+        );
+        assert_eq!(apps[&group(1)].applied_index(), 1);
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        for (i, expected) in [
+            CounterOutcome::Value(7),
+            CounterOutcome::OperationConflict,
+            CounterOutcome::Value(7),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let charge = clients.usage();
+            let completion = clients.poll().unwrap();
+            assert_eq!(completion.ticket(), tickets[i]);
+            assert_eq!(clients.usage(), charge);
+            match clients.complete(completion).unwrap() {
+                ClientOutcome::Applied { position, receipt } => {
+                    assert_eq!(position.index, i as u64 + 2);
+                    assert_eq!(position.term, 1);
+                    assert_eq!(receipt.index, position.index);
+                    assert_eq!(receipt.outcome, expected);
+                    assert_eq!(receipt.duplicate, i > 0);
+                }
+                _ => panic!("expected applied outcome"),
+            }
+        }
+        assert!(clients.is_drained());
+        assert_eq!(apps[&group(1)].read_applied(4), Ok(7));
+    }
+    #[test]
+    fn cancelled_queued_wait_retains_capacity_until_execution_then_retry_returns_original() {
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 1);
+        let ticket = clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        let charge = clients.usage();
+        clients.cancel_wait(ticket).unwrap();
+        let completion = clients.poll().unwrap();
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::Unknown(ClientUnknown::CancelledWait)
+        ));
+        assert_eq!(
+            clients.usage(),
+            charge,
+            "queued command still owns its dedup reservation"
+        );
+        assert_eq!(
+            clients
+                .submit(&mut owner, &apps[&group(1)], request(1, 2, 8))
+                .unwrap_err()
+                .reason,
+            ClientError::Application(ApplicationError::DedupCapacity)
+        );
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        assert!(
+            clients.poll().is_none(),
+            "cancel cannot produce a second completion"
+        );
+        assert!(clients.is_drained());
+        assert_eq!(apps[&group(1)].read_applied(2), Ok(7));
+        clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        let completion = clients.poll().unwrap();
+        let ClientOutcome::Applied { receipt, .. } = clients.complete(completion).unwrap() else {
+            panic!()
+        };
+        assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+        assert!(receipt.duplicate);
+    }
+    #[test]
+    fn tracked_step_and_written_do_not_publish_applied_before_commit_and_application() {
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 2);
+        clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        let steps = clients
+            .advance(&mut owner, MonoTime(400), 1, |g| apps.get(&g))
+            .unwrap();
+        assert!(steps[0].admission.is_some());
+        assert_eq!(
+            steps[0].proposed,
+            Some(ProposalPosition { index: 2, term: 1 })
+        );
+        let lease = owner.take_effect().unwrap().unwrap();
+        owner
+            .submit_persists(&mut worker, vec![lease], MonoTime(400))
+            .unwrap();
+        let written = worker.poll(1).pop().unwrap();
+        assert!(matches!(written, WorkerEvent::Written { .. }));
+        owner.deliver_worker(written, MonoTime(400)).unwrap();
+        assert!(clients.poll().is_none());
+        assert_eq!(apps[&group(1)].applied_index(), 1);
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        let completion = clients.poll().unwrap();
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::Applied { .. }
+        ));
+    }
+    #[test]
+    fn recovered_unapplied_log_reserves_capacity_without_old_router_memory() {
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 1);
+        owner
+            .admit(
+                group(1),
+                Event::Propose {
+                    operation: OperationId::new(1).unwrap(),
+                    bytes: 7i64.to_le_bytes().to_vec(),
+                },
+            )
+            .unwrap();
+        let held = loop {
+            for event in worker.poll(1) {
+                owner.deliver_worker(event, MonoTime(400)).unwrap();
+            }
+            clients
+                .advance(&mut owner, MonoTime(400), 1, |g| apps.get(&g))
+                .unwrap();
+            if let Some(lease) = owner.take_effect().unwrap() {
+                match &lease.effect {
+                    Effect::Persist(_) => {
+                        owner
+                            .submit_persists(&mut worker, vec![lease], MonoTime(400))
+                            .unwrap();
+                    }
+                    Effect::Committed(_) => break lease,
+                    _ => panic!(),
+                }
+            }
+        };
+        assert_eq!(owner.core(group(1)).unwrap().state().commit_index, 2);
+        assert_eq!(apps[&group(1)].applied_index(), 1);
+        assert!(clients.is_drained());
+        assert_eq!(
+            clients
+                .submit(&mut owner, &apps[&group(1)], request(1, 2, 5))
+                .unwrap_err()
+                .reason,
+            ClientError::Application(ApplicationError::DedupCapacity)
+        );
+        clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        results
+            .submit(
+                &mut owner,
+                held,
+                apps.get_mut(&group(1)).unwrap(),
+                MonoTime(400),
+            )
+            .unwrap();
+        let output = results.poll().unwrap();
+        assert_eq!(
+            clients.deliver(&mut owner, &mut results, output).unwrap(),
+            0
+        );
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        let output = clients.poll().unwrap();
+        let ClientOutcome::Applied { position, receipt } = clients.complete(output).unwrap() else {
+            panic!()
+        };
+        assert_eq!(position.index, 3);
+        assert!(receipt.duplicate);
+        assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+    }
+    #[test]
+    fn execution_revalidates_current_application_before_creating_persist() {
+        let (mut owner, mut worker, mut clients, _, apps) = setup(1, 2);
+        let ticket = clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 3))
+            .unwrap();
+        // A stricter selected host gate refuses this command at execution.
+        // Its state/boundary are identical; the runtime cannot trust the old check.
+        let host = HostApplication(apps[&group(1)].clone(), 0);
+        let steps = clients
+            .advance(&mut owner, MonoTime(400), 1, |_| Some(&host))
+            .unwrap();
+        assert_eq!(steps[0].proposed, None);
+        assert_eq!(
+            steps[0].error,
+            Some(RaftError::Admission(ApplicationError::InvalidCommand))
+        );
+        assert!(owner.take_effect().unwrap().is_none());
+        assert!(worker.poll(1).is_empty());
+        assert_eq!(owner.core(group(1)).unwrap().state().last_index(), 1);
+        let completion = clients.poll().unwrap();
+        assert_eq!(completion.ticket(), ticket);
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::NotProposed(RaftError::Admission(ApplicationError::InvalidCommand))
+        ));
+        assert!(clients.is_drained());
+        assert!(!owner.is_failed());
+        clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 2, 7))
+            .unwrap();
+        let grown = HostApplication(apps[&group(1)].clone(), 1);
+        let steps = clients
+            .advance(&mut owner, MonoTime(400), 1, |_| Some(&grown))
+            .unwrap();
+        assert_eq!(
+            steps[0].error,
+            Some(RaftError::Admission(ApplicationError::ReceiptBudget))
+        );
+        assert!(owner.take_effect().unwrap().is_none());
+        let completion = clients.poll().unwrap();
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::NotProposed(RaftError::Admission(ApplicationError::ReceiptBudget))
+        ));
+        assert_eq!(owner.core(group(1)).unwrap().state().last_index(), 1);
+    }
+    #[test]
+    fn delayed_applied_reply_retains_verified_position_through_actual_log_compaction() {
+        use voteboat::snapshot::{checkpoint_application, compact_replica};
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 2);
+        let ticket = clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        let output = loop {
+            for event in worker.poll(1) {
+                owner.deliver_worker(event, MonoTime(400)).unwrap();
+            }
+            clients
+                .advance(&mut owner, MonoTime(400), 1, |g| apps.get(&g))
+                .unwrap();
+            if let Some(lease) = owner.take_effect().unwrap() {
+                match &lease.effect {
+                    Effect::Persist(_) => {
+                        owner
+                            .submit_persists(&mut worker, vec![lease], MonoTime(400))
+                            .unwrap();
+                    }
+                    Effect::Committed(_) => {
+                        results
+                            .submit(
+                                &mut owner,
+                                lease,
+                                apps.get_mut(&group(1)).unwrap(),
+                                MonoTime(400),
+                            )
+                            .unwrap();
+                        break results.poll().unwrap();
+                    }
+                    _ => panic!(),
+                }
+            }
+        };
+        assert_eq!(
+            output.positions(),
+            &[ProposalPosition { index: 2, term: 1 }]
+        );
+        let charge = results.usage();
+        let mut snapshots = support::snapshot::HostSnapshots::new();
+        let receipt = checkpoint_application(
+            owner.core(group(1)).unwrap(),
+            &apps[&group(1)],
+            &mut snapshots,
+        )
+        .unwrap();
+        // Use the public synchronous compaction contract only while this host
+        // store has no accepted async work. The callback performs memory I/O.
+        assert!(worker.is_drained());
+        owner
+            .admit(
+                group(1),
+                Event::Read {
+                    request: ReadRequestId::new(1).unwrap(),
+                },
+            )
+            .unwrap();
+        clients
+            .advance(&mut owner, MonoTime(400), 1, |g| apps.get(&g))
+            .unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(lease.effect, Effect::ReadReady(_)));
+        owner
+            .complete_effect(
+                lease,
+                apps[&group(1)].applied_index(),
+                MonoTime(400),
+                |core| {
+                    let effects = compact_replica(
+                        core,
+                        &mut worker.store,
+                        &mut snapshots,
+                        &apps[&group(1)],
+                        receipt.reference(),
+                    )
+                    .unwrap();
+                    Ok((effects, ()))
+                },
+            )
+            .unwrap();
+        assert_eq!(owner.core(group(1)).unwrap().state().base_index(), 2);
+        assert!(owner.core(group(1)).unwrap().state().entry_at(2).is_none());
+        assert_eq!(results.usage(), charge);
+        assert_eq!(
+            clients.deliver(&mut owner, &mut results, output).unwrap(),
+            1
+        );
+        let completion = clients.poll().unwrap();
+        assert_eq!(completion.ticket(), ticket);
+        let ClientOutcome::Applied { position, receipt } = clients.complete(completion).unwrap()
+        else {
+            panic!()
+        };
+        assert_eq!(position, ProposalPosition { index: 2, term: 1 });
+        assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+        assert!(clients.is_drained());
+        assert!(results.is_drained());
+    }
+    struct HostApplication(Counter, usize);
+    impl StateMachine for HostApplication {
+        type Receipt = CounterReceipt;
+        fn applied_index(&self) -> u64 {
+            self.0.applied_index()
+        }
+        fn apply_batch(
+            &mut self,
+            entries: &[LogEntry],
+        ) -> Result<Vec<CounterReceipt>, ApplicationError> {
+            self.0.apply_batch(entries)
+        }
+    }
+    impl BoundedStateMachine for HostApplication {
+        fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+            self.0.receipt_bytes_bound(entries)
+        }
+    }
+    impl ProposalAdmission for HostApplication {
+        fn validate_proposal<'a>(
+            &self,
+            operation: OperationId,
+            bytes: &[u8],
+            pending: impl Iterator<Item = (OperationId, &'a [u8])>,
+        ) -> Result<usize, ApplicationError> {
+            // A host's deterministic command syntax can be stricter than Counter.
+            if bytes != 7i64.to_le_bytes() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            self.0
+                .validate_proposal(operation, bytes, pending)
+                .map(|n| n + self.1)
+        }
+    }
+    #[test]
+    fn host_admission_policy_and_wrong_runtime_reject_without_touching_shared_application() {
+        let (mut owner, _, mut clients, _, mut apps) = setup(1, 2);
+        let app = HostApplication(apps.remove(&group(1)).unwrap(), 0);
+        assert_eq!(
+            clients
+                .submit(&mut owner, &app, request(1, 1, 3))
+                .unwrap_err()
+                .reason,
+            ClientError::Application(ApplicationError::InvalidCommand)
+        );
+        assert_eq!(app.applied_index(), 1);
+        assert!(clients.is_drained());
+        let mut binding = clients.binding();
+        binding.owner.generation = RuntimeGeneration::new(9).unwrap();
+        let mut wrong = Clients::new(binding, ClientRouterLimits::default()).unwrap();
+        assert_eq!(
+            wrong
+                .submit(&mut owner, &app, request(1, 1, 7))
+                .unwrap_err()
+                .reason,
+            ClientError::WrongBinding
+        );
+        clients.submit(&mut owner, &app, request(1, 1, 7)).unwrap();
+        assert_eq!(clients.usage().requests, 1);
+        clients.abort(&mut owner).unwrap();
+        let completion = clients.poll().unwrap();
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::Unknown(ClientUnknown::Aborted)
+        ));
+        assert!(clients.is_drained());
+        assert_eq!(app.applied_index(), 1);
+    }
+    #[test]
+    fn runtime_rejection_preserves_original_request_without_spending_client_ticket() {
+        let (mut owner, mut worker, mut clients, mut results, mut apps) = setup(1, 2);
+        for _ in 0..ShardLimits::default().group_items {
+            owner.admit(group(1), Event::Heartbeat).unwrap();
+        }
+        let mut input = request(1, 1, 7);
+        input.bytes.reserve(200);
+        let original = input.bytes.as_ptr();
+        let rejected = clients
+            .submit(&mut owner, &apps[&group(1)], input)
+            .unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            ClientError::Runtime(RuntimeError::Overloaded)
+        );
+        assert_eq!(rejected.request.bytes.as_ptr(), original);
+        assert_eq!(clients.usage(), ClientUsage::default());
+        clients
+            .advance(&mut owner, MonoTime(400), 1, |g| apps.get(&g))
+            .unwrap();
+        let ticket = clients
+            .submit(&mut owner, &apps[&group(1)], rejected.request)
+            .unwrap();
+        assert_eq!(ticket.sequence, 1);
+        drive(
+            &mut owner,
+            &mut worker,
+            &mut clients,
+            &mut results,
+            &mut apps,
+        );
+        let completion = clients.poll().unwrap();
+        clients.complete(completion).unwrap();
+        assert!(clients.is_drained());
+    }
+    #[test]
+    fn per_group_budget_close_and_foreign_completion_preserve_shared_owner() {
+        let (mut owner, mut worker, _, results, apps) = setup(2, 2);
+        let mut clients = Clients::new(
+            ClientRouterBinding {
+                owner: owner.identity(),
+                generation: ClientRouterGeneration::new(2).unwrap(),
+            },
+            ClientRouterLimits {
+                requests: 2,
+                group_requests: 1,
+                ..ClientRouterLimits::default()
+            },
+        )
+        .unwrap();
+        clients
+            .submit(&mut owner, &apps[&group(1)], request(1, 1, 7))
+            .unwrap();
+        assert_eq!(
+            clients
+                .submit(&mut owner, &apps[&group(1)], request(1, 2, 8))
+                .unwrap_err()
+                .reason,
+            ClientError::Overloaded
+        );
+        let ticket = clients
+            .submit(&mut owner, &apps[&group(2)], request(2, 1, 3))
+            .unwrap();
+        clients.cancel_wait(ticket).unwrap();
+        let completion = clients.poll().unwrap();
+        let mut other = Clients::new(
+            ClientRouterBinding {
+                owner: owner.identity(),
+                generation: ClientRouterGeneration::new(3).unwrap(),
+            },
+            ClientRouterLimits::default(),
+        )
+        .unwrap();
+        let rejected = other.complete(completion).unwrap_err();
+        assert_eq!(rejected.reason, ClientError::StaleTicket);
+        clients.complete(*rejected.completion).unwrap();
+        // Explicit failed-owner abort resolves queued reservations without
+        // pretending cancellation reversed accepted work.
+        clients.abort(&mut owner).unwrap();
+        assert!(owner.is_failed());
+        while let Some(completion) = clients.poll() {
+            clients.complete(completion).unwrap();
+        }
+        assert!(clients.is_drained());
+        assert!(results.is_drained());
+        worker.close();
+        // A separate healthy owner remains independent.
+        let (mut independent, mut w, mut c, mut r, mut a) = setup(1, 2);
+        c.submit(&mut independent, &a[&group(1)], request(1, 1, 3))
+            .unwrap();
+        c.close();
+        assert_eq!(
+            c.submit(&mut independent, &a[&group(1)], request(1, 2, 8))
+                .unwrap_err()
+                .reason,
+            ClientError::Closed
+        );
+        drive(&mut independent, &mut w, &mut c, &mut r, &mut a);
+        let completion = c.poll().unwrap();
+        c.complete(completion).unwrap();
+        assert!(!independent.is_failed());
+        assert!(c.is_drained());
+    }
+}
 mod support;
 use std::collections::{BTreeMap, VecDeque};
 use support::*;
@@ -974,6 +1617,9 @@ mod native {
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
         ingress: IngressRouter,
         results: ApplicationRouter<CounterReceipt>,
+        clients: ClientRouter<CounterReceipt>,
+        client_applied: usize,
+        client_unknown: usize,
         #[cfg(feature = "tls")]
         connector: Option<voteboat::native::connect::NativePeerConnector>,
         staged: VecDeque<OutboundBatch>,
@@ -1181,6 +1827,16 @@ mod native {
             pending: Vec::new(),
             reads: Vec::new(),
             transports: None,
+            clients: ClientRouter::new(
+                ClientRouterBinding {
+                    owner: runtime_owner,
+                    generation: ClientRouterGeneration::new(1).unwrap(),
+                },
+                ClientRouterLimits::default(),
+            )
+            .unwrap(),
+            client_applied: 0,
+            client_unknown: 0,
             results: ApplicationRouter::new(
                 ApplicationRouterBinding {
                     owner: runtime_owner,
@@ -1433,7 +2089,11 @@ mod native {
                 for event in n.worker.poll(1) {
                     n.owner.deliver_worker(event, now).unwrap();
                 }
-                for step in n.owner.advance(now, 100).unwrap() {
+                for step in n
+                    .clients
+                    .advance(&mut n.owner, now, 100, |g| n.apps.get(&g))
+                    .unwrap()
+                {
                     assert!(step.error.is_none(), "{:?}", step.error);
                 }
                 while let Some(lease) = n.owner.take_effect().unwrap() {
@@ -1445,7 +2105,9 @@ mod native {
                             let output = n.results.poll().unwrap();
                             assert_eq!(output.ticket(), ticket);
                             assert_eq!(output.through(), app.applied_index());
-                            n.results.complete(output).unwrap();
+                            n.clients
+                                .deliver(&mut n.owner, &mut n.results, output)
+                                .unwrap();
                             assert!(n.results.is_drained());
                         }
                         Effect::ReadReady(barrier) => {
@@ -1470,6 +2132,18 @@ mod native {
                         }
                     }
                 }
+                n.clients.reconcile(&n.owner, 128).unwrap();
+                while let Some(completion) = n.clients.poll() {
+                    match n.clients.complete(completion).unwrap() {
+                        ClientOutcome::Applied { .. } => n.client_applied += 1,
+                        ClientOutcome::Unknown(_) => n.client_unknown += 1,
+                        ClientOutcome::NotProposed(e) => {
+                            panic!("unexpected client rejection: {e:?}")
+                        }
+                    }
+                }
+                n.clients.reconcile(&n.owner, 128).unwrap();
+                assert!(n.clients.usage().bytes <= ClientRouterLimits::default().bytes);
                 for _ in 0..n.send_pending.len() {
                     let EffectLease {
                         ticket,
@@ -1720,6 +2394,11 @@ mod native {
             assert!(n.ingress.is_drained());
             n.results.close();
             assert!(n.results.is_drained());
+            n.clients.close();
+            assert!(
+                n.clients.is_drained(),
+                "all client waits must resolve before healthy shutdown"
+            );
             assert!(n
                 .transports
                 .as_ref()
@@ -1761,12 +2440,15 @@ mod native {
         isolated: Option<NodeId>,
         now: MonoTime,
     ) {
+        let before = nodes[leader].client_applied;
         for g in 1..=100 {
-            nodes[leader]
-                .owner
-                .admit(
-                    group(g),
-                    Event::Propose {
+            let n = &mut nodes[leader];
+            n.clients
+                .submit(
+                    &mut n.owner,
+                    &n.apps[&group(g)],
+                    ClientRequest {
+                        group: group(g),
                         operation: OperationId::new(operation).unwrap(),
                         bytes: delta.to_le_bytes().to_vec(),
                     },
@@ -1774,6 +2456,12 @@ mod native {
                 .unwrap();
         }
         drain(nodes, isolated, now);
+        let expected = if isolated == Some(node(leader as u64 + 1)) {
+            0
+        } else {
+            100
+        };
+        assert_eq!(nodes[leader].client_applied - before, expected);
     }
     #[test]
     fn hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport() {
@@ -1940,11 +2628,14 @@ mod native {
         now: MonoTime,
     ) {
         for (g, leader) in leaders.iter().enumerate() {
-            nodes[*leader]
-                .owner
-                .admit(
-                    group(g as u128 + 1),
-                    Event::Propose {
+            let n = &mut nodes[*leader];
+            let group = group(g as u128 + 1);
+            n.clients
+                .submit(
+                    &mut n.owner,
+                    &n.apps[&group],
+                    ClientRequest {
+                        group,
                         operation: OperationId::new(operation).unwrap(),
                         bytes: delta.to_le_bytes().to_vec(),
                     },
@@ -1974,11 +2665,14 @@ mod native {
             .enumerate()
             .filter(|(_, l)| **l == isolated_index)
         {
-            nodes[*leader]
-                .owner
-                .admit(
-                    group(g as u128 + 1),
-                    Event::Propose {
+            let n = &mut nodes[*leader];
+            let group = group(g as u128 + 1);
+            n.clients
+                .submit(
+                    &mut n.owner,
+                    &n.apps[&group],
+                    ClientRequest {
+                        group,
                         operation: OperationId::new(99).unwrap(),
                         bytes: 100i64.to_le_bytes().to_vec(),
                     },
@@ -2054,6 +2748,7 @@ mod native {
             nodes[1].owner.admit(group(g), Event::Heartbeat).unwrap();
         }
         drain(&mut nodes, None, MonoTime(2));
+        assert_eq!(nodes[0].client_unknown, 100);
         for n in &nodes {
             for a in n.apps.values() {
                 assert_eq!(a.read_applied(a.applied_index()).unwrap(), 10);

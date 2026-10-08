@@ -82,6 +82,8 @@ pub struct EffectOwnerUsage {
 }
 #[derive(Debug)]
 pub struct OwnerStep {
+    pub admission: Option<AdmissionTicket>,
+    pub proposed: Option<ProposalPosition>,
     pub visit: VisitTicket,
     pub operation: Option<OperationId>,
     pub read: Option<ReadRequestId>,
@@ -263,6 +265,19 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         self.runtime.admit(group, event)
     }
+    pub fn admit_tracked(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+    ) -> Result<AdmissionTicket, Rejected> {
+        if self.failed.is_some() {
+            return Err(Rejected {
+                reason: RuntimeError::Fenced,
+                event: Box::new(event),
+            });
+        }
+        self.runtime.admit_tracked(group, event)
+    }
     fn refresh(&mut self, group: GroupIdentity) -> Result<(), EffectOwnerError> {
         let a = self
             .active
@@ -310,7 +325,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         limit: usize,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit);
+        self.advance_checked(now, limit, |_, _| Ok(()))
+    }
+    pub(super) fn advance_checked(
+        &mut self,
+        now: MonoTime,
+        limit: usize,
+        check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+        let result = self.advance_inner(now, limit, check);
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -322,6 +345,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
+        mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
         if limit > 4096 {
@@ -393,7 +417,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             );
             let stepped = self
                 .runtime
-                .step_next(visit, now)
+                .step_next_checked(visit, now, &mut check)
                 .map_err(EffectOwnerError::Runtime)?;
             if let Some(step) = stepped {
                 let (effects, error) = match step.result {
@@ -402,6 +426,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 };
                 self.install(visit, effects)?;
                 steps.push(OwnerStep {
+                    admission: step.admission,
+                    proposed: step.proposed,
                     visit,
                     operation: step.operation,
                     read: step.read,

@@ -62,6 +62,12 @@ inside its router binding, never a replicated/durable prefix or a client deliver
 receipt. Stored output also identifies its original EffectTicket (including group)
 and exact applied-through boundary. That boundary is contiguous application
 progress for the selected group, not a node-wide watermark.
+The envelope also retains an immutable verified index/term per receipt, captured
+from the validated committed entries before releasing the effect. These bounded
+records remain charged alongside receipt buffers and permit exact client
+correlation after logical compaction removes the live entry. Per-batch receipt
+byte limits cover application output; global byte accounting additionally includes
+these position records and pending metadata.
 
 `poll()` hands out one opaque `ApplicationResults<R>`. Receipt access is borrowed;
 polling retains every slot/count/byte charge. `complete(output)` consumes the
@@ -109,9 +115,9 @@ through this router, including TLS partitions/reconnects, snapshots/checkpoints,
 application retries/reads and actual-file recovery. Startup replay remains the
 separate checkpoint/recovery contract.
 
-This is committed application-result admission, not complete client admission.
-Pending client correlation, pre-proposal dedup/capacity reservation, unknown
-proposal outcomes, read-result storage, reactor/facade assembly, physical WAL
+Committed application results now feed the separate [client router](CLIENTS.md),
+which supplies proposal correlation, pre-proposal dedup/capacity reservation and
+unknown outcomes. Read-result storage, reactor/facade assembly, physical WAL
 cleanup, membership changes, responsibilities and split/merge remain unfinished.
 Finite Linux checks do not establish macOS execution, a full liveness proof,
 device power-cut behavior or performance.

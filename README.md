@@ -81,7 +81,8 @@ deduplication. The leader then uses a fresh quorum-backed read barrier and waits
 for application before printing `linearizable_value`. Per-replica `value` lines
 are explicitly local applied-state diagnostics. Its counter accepts signed i64 deltas
 encoded as eight little-endian bytes. Application/deduplication capacity is
-bounded; the later service admission layer must reserve capacity before commits.
+bounded; service embeddings use the ClientRouter below to reserve capacity before
+proposals. This older demo retains its direct host-driven API.
 
 Each replica publishes a checkpoint containing the full counter and retry state.
 Recovery verifies its configuration and index/term against the durable Raft log,
@@ -145,8 +146,16 @@ application and retains it through consumer completion. Native `Counter` and hos
 applications implement the public `BoundedStateMachine`/`ApplicationReceipt`
 capability. Exact lease/log/boundary checks precede application; malformed output
 fences the owner for recovery. The native 100-group histories use this same path.
-See [application results](docs/APPLICATION_RESULTS.md). Client proposal/dedup
-admission and read-result storage remain unfinished.
+See [application results](docs/APPLICATION_RESULTS.md).
+
+`runtime::ClientRouter` now reserves command/reply capacity and uses public
+`ProposalAdmission` to validate syntax and dedup capacity before admission and
+again immediately before proposal execution. Scoped tracked inputs correlate
+each invocation with its exact applied group/index/term/operation result.
+Cancellation and leadership changes report Unknown without rolling back commands.
+The native 100-group histories use this path, including quorum loss and recovery.
+See [client ownership](docs/CLIENTS.md). Read-result storage and the production
+reactor/facade remain unfinished.
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot

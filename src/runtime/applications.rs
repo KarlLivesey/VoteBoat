@@ -86,6 +86,7 @@ pub struct ApplicationResults<R> {
     effect: EffectTicket,
     through: u64,
     receipts: Vec<R>,
+    positions: Box<[ProposalPosition]>,
 }
 impl<R> ApplicationResults<R> {
     pub fn ticket(&self) -> ApplicationResultTicket {
@@ -99,6 +100,11 @@ impl<R> ApplicationResults<R> {
     }
     pub fn receipts(&self) -> &[R] {
         &self.receipts
+    }
+    /// Original verified committed position for each receipt, in the same order.
+    /// Retained after logical log compaction; only this router constructs it.
+    pub fn positions(&self) -> &[ProposalPosition] {
+        &self.positions
     }
 }
 #[derive(Debug)]
@@ -149,7 +155,12 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
             || limits.batch_bytes == 0
             || limits
                 .batch_bytes
-                .checked_add(size_of::<Held<R>>())
+                .checked_add(
+                    limits
+                        .batch_receipts
+                        .saturating_mul(size_of::<ProposalPosition>()),
+                )
+                .and_then(|n| n.checked_add(size_of::<Held<R>>()))
                 .is_none_or(|n| n > limits.bytes - limits.control_bytes)
         {
             return Err(ApplicationRouteError::InvalidLimits);
@@ -247,7 +258,12 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
                 return Err(ApplicationRouteError::ResultTooLarge);
             }
             let bytes = bound
-                .checked_add(size_of::<Held<R>>())
+                .checked_add(
+                    count
+                        .checked_mul(size_of::<ProposalPosition>())
+                        .ok_or(ApplicationRouteError::ResultTooLarge)?,
+                )
+                .and_then(|n| n.checked_add(size_of::<Held<R>>()))
                 .ok_or(ApplicationRouteError::ResultTooLarge)?;
             let control = count == 0;
             let l = self.limits;
@@ -326,6 +342,17 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
                 lease: Box::new(lease),
             });
         }
+        let mut positions = Vec::with_capacity(count);
+        positions.extend(
+            entries
+                .iter()
+                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                .map(|e| ProposalPosition {
+                    index: e.index,
+                    term: e.term,
+                }),
+        );
+        let positions = positions.into_boxed_slice();
         let effect = lease.ticket;
         if let Err(rejected) = owner.release(lease, through, now) {
             self.failed = true;
@@ -362,6 +389,7 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
                     effect,
                     through,
                     receipts,
+                    positions,
                 }),
                 charged,
                 control,

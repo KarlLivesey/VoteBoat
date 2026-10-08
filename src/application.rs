@@ -18,7 +18,27 @@ use crate::{
     log::{EntryPayload, LogEntry},
     raft::{Raft, RaftError, ReadBarrier},
 };
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+
+pub const PROPOSAL_ADMISSION_CONTRACT_VERSION: u32 = 1;
+
+/// Deterministic application admission against all unapplied durable commands
+/// and retained queued/in-flight client commands. The caller serializes this
+/// check with application and routes every service proposal through it.
+/// Return a per-command receipt retention bound (including inline receipt).
+/// Validation changes no state and performs no I/O; accepted capacity remains
+/// represented by the caller's pending commands until log/application takeover.
+pub trait ProposalAdmission: BoundedStateMachine
+where
+    Self::Receipt: ApplicationReceipt,
+{
+    fn validate_proposal<'a>(
+        &self,
+        operation: OperationId,
+        bytes: &[u8],
+        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
+    ) -> Result<usize, ApplicationError>;
+}
 
 /// Optional bounded receipt capability; wire and checkpoint schemas are separate.
 pub const BOUNDED_APPLICATION_CONTRACT_VERSION: u32 = 1;
@@ -41,6 +61,7 @@ pub enum ApplicationError {
     IndexGap,
     InvalidCommand,
     DedupCapacity,
+    ReceiptBudget,
     NotApplied,
     InvalidCheckpoint,
     UnsupportedSchema,
@@ -100,6 +121,35 @@ impl BoundedStateMachine for Counter {
             .count()
             .checked_mul(std::mem::size_of::<CounterReceipt>())
             .ok_or(ApplicationError::InvalidCommand)
+    }
+}
+
+impl ProposalAdmission for Counter {
+    fn validate_proposal<'a>(
+        &self,
+        operation: OperationId,
+        bytes: &[u8],
+        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
+    ) -> Result<usize, ApplicationError> {
+        if bytes.len() != 8 {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut reserved = BTreeSet::new();
+        for (id, _) in pending {
+            if !self.dedup.contains_key(&id) {
+                reserved.insert(id);
+            }
+            if reserved.len() > self.remaining_operations() {
+                return Err(ApplicationError::DedupCapacity);
+            }
+        }
+        if !self.dedup.contains_key(&operation) {
+            reserved.insert(operation);
+        }
+        if reserved.len() > self.remaining_operations() {
+            return Err(ApplicationError::DedupCapacity);
+        }
+        Ok(std::mem::size_of::<CounterReceipt>())
     }
 }
 

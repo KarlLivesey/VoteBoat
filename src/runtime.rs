@@ -25,11 +25,13 @@ use std::{
     mem::size_of,
 };
 mod applications;
+mod clients;
 mod effects;
 mod ingress;
 mod snapshots;
 mod timed;
 pub use applications::*;
+pub use clients::*;
 pub use effects::*;
 pub use ingress::*;
 pub use snapshots::*;
@@ -80,6 +82,19 @@ pub struct VisitTicket {
     pub owner: RuntimeOwner,
     pub group: GroupIdentity,
     pub sequence: u64,
+}
+/// Exact volatile input allocation, independent of the visit that executes it.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct AdmissionTicket {
+    pub owner: RuntimeOwner,
+    pub group: GroupIdentity,
+    pub sequence: u64,
+}
+/// Proposed position is not persistence, commitment or application evidence.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ProposalPosition {
+    pub index: u64,
+    pub term: u64,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RuntimeError {
@@ -257,6 +272,7 @@ struct Queued {
     event: Event,
     cost: usize,
     timer: Option<TimerToken>,
+    admission: Option<AdmissionTicket>,
 }
 struct Visit {
     ticket: VisitTicket,
@@ -291,6 +307,8 @@ pub struct Rejected {
     pub event: Box<Event>,
 }
 pub struct Stepped {
+    pub admission: Option<AdmissionTicket>,
+    pub proposed: Option<ProposalPosition>,
     pub operation: Option<OperationId>,
     pub read: Option<ReadRequestId>,
     /// A consumed live expiration. Stale queued timers produce no core effects.
@@ -298,6 +316,8 @@ pub struct Stepped {
     pub result: Result<Vec<Effect>, RaftError>,
 }
 pub struct Stopped {
+    /// Exact tracked inputs still unprocessed; active/stepped work is excluded.
+    pub admissions: Vec<AdmissionTicket>,
     /// Unprocessed inputs; return retryable failure to their callers.
     pub queued: Vec<Event>,
     /// Effects/work already handed out have unknown outcomes, not rollback.
@@ -314,6 +334,7 @@ pub struct Shard<Q: ReadyScheduler> {
     groups: BTreeMap<GroupIdentity, Group>,
     usage: [Usage; 3],
     sequence: u64,
+    admission_sequence: u64,
     now: MonoTime,
     closed: bool,
 }
@@ -334,6 +355,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             groups: BTreeMap::new(),
             usage: [Usage::default(); 3],
             sequence: 0,
+            admission_sequence: 0,
             now: MonoTime(0),
             closed: false,
         })
@@ -393,6 +415,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         group: GroupIdentity,
         event: &Event,
         timer: Option<TimerToken>,
+        tracked: bool,
     ) -> Result<(Class, usize), RuntimeError> {
         if self.closed {
             return Err(RuntimeError::Closed);
@@ -405,6 +428,12 @@ impl<Q: ReadyScheduler> Shard<Q> {
             return Err(RuntimeError::WrongOwner);
         }
         let (class, mut cost) = event_cost(event, self.limits.max_event_bytes)?;
+        if tracked {
+            cost = cost
+                .checked_add(size_of::<AdmissionTicket>())
+                .filter(|n| *n <= self.limits.max_event_bytes)
+                .ok_or(RuntimeError::EventTooLarge)?;
+        }
         if timer.is_some() {
             cost = cost
                 .checked_add(size_of::<TimerToken>())
@@ -453,19 +482,56 @@ impl<Q: ReadyScheduler> Shard<Q> {
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
         self.admit_tagged(group, event, None)
     }
+    pub fn admit_tracked(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+    ) -> Result<AdmissionTicket, Rejected> {
+        self.admit_record(group, event, None, true)
+            .map(|t| t.unwrap())
+    }
     fn admit_tagged(
         &mut self,
         group: GroupIdentity,
         event: Event,
         timer: Option<TimerToken>,
     ) -> Result<(), Rejected> {
-        match self.admit_inner(group, &event, timer) {
+        self.admit_record(group, event, timer, false).map(|_| ())
+    }
+    fn admit_record(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+        timer: Option<TimerToken>,
+        tracked: bool,
+    ) -> Result<Option<AdmissionTicket>, Rejected> {
+        let sequence = self.admission_sequence.checked_add(1);
+        if tracked && sequence.is_none() {
+            return Err(Rejected {
+                reason: RuntimeError::Exhausted,
+                event: Box::new(event),
+            });
+        }
+        match self.admit_inner(group, &event, timer, tracked) {
             Ok((class, cost)) => {
                 let g = self.groups.get_mut(&group).unwrap();
-                g.queues[class as usize].push_back(Queued { event, cost, timer });
+                let admission = tracked.then(|| AdmissionTicket {
+                    owner: self.owner,
+                    group,
+                    sequence: sequence.unwrap(),
+                });
+                if tracked {
+                    self.admission_sequence = sequence.unwrap();
+                }
+                g.queues[class as usize].push_back(Queued {
+                    event,
+                    cost,
+                    timer,
+                    admission,
+                });
                 g.usage[class as usize].add(cost);
                 self.usage[class as usize].add(cost);
-                Ok(())
+                Ok(admission)
             }
             Err(reason) => Err(Rejected {
                 reason,
@@ -570,6 +636,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
         ticket: VisitTicket,
         now: MonoTime,
     ) -> Result<Option<Stepped>, RuntimeError> {
+        self.step_next_checked(ticket, now, |_, _| Ok(()))
+    }
+    pub(super) fn step_next_checked(
+        &mut self,
+        ticket: VisitTicket,
+        now: MonoTime,
+        mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<Option<Stepped>, RuntimeError> {
         self.observe(now)?;
         let limits = self.limits;
         let g = self.live(ticket)?;
@@ -610,15 +684,29 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if timer.is_some() {
             g.timer = None;
         }
+        let result = if stale_timer {
+            Ok(Vec::new())
+        } else {
+            if matches!(q.event, Event::Propose { .. }) {
+                check(&g.core, &q.event)
+            } else {
+                Ok(())
+            }
+            .and_then(|_| g.core.step(q.event))
+        };
+        let proposed = operation.and_then(|operation| result.as_ref().ok()?.iter().find_map(|e| {
+            let Effect::Persist(update) = e else { return None; };
+            let entry = update.suffix.as_ref()?.entries.first()?;
+            matches!(entry.payload, crate::log::EntryPayload::Command { operation: id, .. } if id == operation)
+                .then_some(ProposalPosition { index: entry.index, term: entry.term })
+        }));
         Ok(Some(Stepped {
+            admission: q.admission,
+            proposed,
             operation,
             read,
             timer,
-            result: if stale_timer {
-                Ok(Vec::new())
-            } else {
-                g.core.step(q.event)
-            },
+            result,
         }))
     }
     /// Serialized owner access for the existing public durability, snapshot and
@@ -660,16 +748,24 @@ impl<Q: ReadyScheduler> Shard<Q> {
         g.core.storage_failed();
         g.fenced = true;
         g.timer = None;
+        let mut admissions = Vec::new();
         let queued = g
             .queues
             .iter_mut()
-            .flat_map(|q| q.drain(..).map(|v| v.event))
+            .flat_map(|q| q.drain(..))
+            .map(|v| {
+                if let Some(ticket) = v.admission {
+                    admissions.push(ticket);
+                }
+                v.event
+            })
             .collect();
         for i in 0..3 {
             self.usage[i].sub(g.usage[i]);
             g.usage[i] = Usage::default();
         }
         Ok(Stopped {
+            admissions,
             queued,
             had_active_visit,
         })

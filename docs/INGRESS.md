@@ -7,8 +7,9 @@ by native and host providers. It does not create a second Raft owner, execute th
 core, run application code, perform I/O or read a clock. The native TLS cluster
 histories now select this router instead of staging decoded messages in a shared
 fixture deque. Committed application results now use the separate
-[application-result router](APPLICATION_RESULTS.md). Client admission and the
-complete node facade/reactor remain unfinished.
+[application-result router](APPLICATION_RESULTS.md), followed by the
+[client router](CLIENTS.md). Read-result admission and the complete node
+facade/reactor remain unfinished.
 
 ## Inspect before ownership transfer
 

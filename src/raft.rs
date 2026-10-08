@@ -151,6 +151,9 @@ pub enum Effect {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
+    /// Owner-side deterministic application validation rejected this invocation
+    /// before the core proposed it. This is not a replicated outcome.
+    Admission(crate::application::ApplicationError),
     Busy,
     Fenced,
     NotLeader,

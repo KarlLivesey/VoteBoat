@@ -59,7 +59,8 @@ id64!(
     OutboundGeneration,
     SecureSessionGeneration,
     IngressGeneration,
-    ApplicationRouterGeneration
+    ApplicationRouterGeneration,
+    ClientRouterGeneration
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 

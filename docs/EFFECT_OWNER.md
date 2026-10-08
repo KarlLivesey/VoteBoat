@@ -137,7 +137,8 @@ and healing. Native-without-TLS uses bounded simulated delivery. Network isolati
 
 A bounded PeerRoster now coordinates the native connections in these histories,
 including real TLS reconnection. Asynchronous checkpoint creation and compaction
-also run through the selected workers. A full node facade, client/dedup/read-result
-admission, reactor execution and broader network fault schedules
+also run through the selected workers. ClientRouter now supplies exact proposal
+admission/results and Unknown outcomes through the same owner. A full node facade,
+read-result admission, reactor execution and broader network fault schedules
 remain. No complete deployable
 consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

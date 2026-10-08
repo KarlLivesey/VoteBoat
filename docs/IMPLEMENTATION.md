@@ -1591,9 +1591,64 @@ unknown outcomes, read-result admission, production reactor/facade, physical WAL
 cleanup, membership/policy changes, recursive responsibilities and safe split/merge
 remain unfinished. Full P0–P7 stays active; CI remains background feedback.
 
+## Slice 23: client proposal admission and exact outcomes
+
+Application admission contract 1 adds `ProposalAdmission`. Native Counter and
+host applications validate commands and reserve dedup capacity against applied
+state, unapplied durable log entries and all retained queued/in-flight commands.
+Repeated operation IDs share capacity while content conflicts still produce the
+existing deterministic application outcome. No format or checkpoint schema changes.
+
+`admit_tracked` on the three runtime layers allocates exact scoped volatile input
+tickets, carried through scheduling to Stepped/OwnerStep alongside the actual
+proposed index/term from the Persist effect. Runtime priority and repeated
+operation IDs cannot confuse invocations. These IDs/positions establish no new
+durability, prefix, quorum or application evidence.
+
+`ClientRouter` reserves bounded command/result/metadata space before ownership
+transfer and preserves the original rejected request. A mandatory internal check
+immediately before core proposal repeats current application/log/capacity and
+receipt-bound validation. This closes the queued-admission gap across snapshot
+installation, application catch-up and leadership changes. Admission errors
+produce NotProposed for that invocation without generating Persist; direct low-level
+embedding APIs remain explicitly host-budgeted alternatives, not the service path.
+
+Applied replies require exact application-result ownership plus the tracked
+group/index/term/operation match and retained-log content cross-check. Opaque
+application outputs now retain pre-budgeted original verified positions, so
+logical compaction cannot erase this evidence. Polling keeps charges through consumer
+completion. Cancellation emits Unknown and retains queued capacity; fair
+reconciliation transfers abandoned reservations only with exact execution/log
+evidence or a failed owner. Abort fences the owner and does not cancel accepted
+external WAL. Fresh router/runtime/store identities reject old observations.
+See [client contracts](CLIENTS.md) for budgets, all-service-proposals requirements,
+unknown outcomes, compacted correlation and shutdown.
+
+Nine host-only tests cover queued retries/conflicts, dedup exhaustion,
+cancellation reservation lifetime, exact positions and Written vs Applied,
+runtime rejection ownership, per-group isolation, foreign completions,
+close/abort, recovered unapplied capacity, host validation, wrong runtime,
+execution-time rejection, growing output bounds and delayed replies after actual
+pinned logical compaction. A separate host test checks
+exact tracked-input stop results. The native 100-group histories
+now submit client writes and consume their replies through these same contracts.
+They assert applied replies for healthy writes, no applied replies under isolated
+leader quorum loss, Unknown after replacement, and further writes/retries after
+healing, snapshots/checkpoints and actual-file recovery.
+
+Local validation passes 231 default native/TLS tests, 210 native-only tests and
+117 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL header
+checks pass. Native socket histories ran with loopback access enabled.
+
+Read-result admission, production reactor/facade, physical WAL cleanup,
+membership/policy changes, recursive responsibilities and safe split/merge remain
+unfinished. Full P0–P7 stays active; CI remains background feedback. Finite Linux
+checks do not establish macOS behavior, a full proof or performance.
+
 ## Next slice
 
-Continue full native node assembly with client/dedup/read-result admission and
+Continue full native node assembly with read-result admission and
 reactor driving, then physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.

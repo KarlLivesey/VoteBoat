@@ -262,6 +262,21 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.managed.get(&group).map(|m| m.token)
     }
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
+        self.admit_input(group, event, false).map(|_| ())
+    }
+    pub fn admit_tracked(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+    ) -> Result<AdmissionTicket, Rejected> {
+        self.admit_input(group, event, true).map(|t| t.unwrap())
+    }
+    fn admit_input(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+        tracked: bool,
+    ) -> Result<Option<AdmissionTicket>, Rejected> {
         let error = self.check().err().or_else(|| {
             self.shard
                 .core(group)
@@ -274,7 +289,11 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
                 event: Box::new(event),
             });
         }
-        self.shard.admit(group, event)
+        if tracked {
+            self.shard.admit_tracked(group, event).map(Some)
+        } else {
+            self.shard.admit(group, event).map(|_| None)
+        }
     }
     fn poll_timers_inner(&mut self, now: MonoTime) -> Result<TimerProgress, RuntimeError> {
         let mut progress = TimerProgress::default();
@@ -349,8 +368,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         visit: VisitTicket,
         now: MonoTime,
     ) -> Result<Option<Stepped>, RuntimeError> {
+        self.step_next_checked(visit, now, |_, _| Ok(()))
+    }
+    pub(super) fn step_next_checked(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<Option<Stepped>, RuntimeError> {
         self.check()?;
-        let step = self.shard.step_next(visit, now)?;
+        let step = self.shard.step_next_checked(visit, now, check)?;
         if let Some(s) = &step {
             self.refresh(visit.group, now, s.timer.is_some())?;
         }
