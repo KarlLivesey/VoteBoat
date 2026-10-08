@@ -12,26 +12,15 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Explicit native assembly shared by the service example and its process tests.
-use std::{collections::BTreeMap, net::TcpListener, path::Path, sync::Arc};
+//! Counter-specific CLI configuration; assembly is the public native startup API.
+use std::{collections::BTreeMap, net::SocketAddr, path::Path, sync::Arc};
 use voteboat::{
     application::*,
-    connect::*,
-    dial::*,
     identity::*,
     log::*,
-    native::{
-        connect::*, dial::*, log_store::*, node::*, outbound::*, runtime::*, snapshot_store::*,
-        snapshot_worker::*, tls::*, transport::*, wire::*, worker::*,
-    },
-    outbound::*,
+    native::{node::*, startup::*, tls::*, worker::*},
     quorum::*,
     runtime::*,
-    secure::*,
-    snapshot::*,
-    snapshot_worker::*,
-    transport::*,
-    worker::*,
 };
 pub type Failure = Box<dyn std::error::Error>;
 pub type Service = NativeNode<Counter>;
@@ -53,287 +42,127 @@ fn store_id(id: u64) -> StoreIdentity {
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
-fn material(path: &Path) -> Result<Vec<u8>, Failure> {
-    // Bounded before allocation, including files changed after metadata inspection.
+fn material(path: &Path, limit: u64) -> Result<Vec<u8>, Failure> {
     use std::io::Read;
     let mut bytes = Vec::new();
     std::fs::File::open(path)?
-        .take(65537)
+        .take(limit + 1)
         .read_to_end(&mut bytes)?;
-    if bytes.is_empty() || bytes.len() > 65536 {
-        return Err("invalid TLS material size".into());
+    if bytes.is_empty() || bytes.len() as u64 > limit {
+        return Err("invalid TLS material size or configuration file size".into());
     }
     Ok(bytes)
 }
-/// Each process has one explicit WAL, one snapshot store and three native workers.
-/// `create` never falls back to recovery; recovery never creates a missing store.
-pub fn open(root: &Path, id: u64, base: u16, tls: &Path, create: bool) -> Result<Service, Failure> {
+/// Optional endpoint file has exactly three lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.
+pub fn configuration(
+    root: &Path,
+    id: u64,
+    base: u16,
+    tls: &Path,
+    create: bool,
+    endpoints: Option<&Path>,
+) -> Result<NativeStartup, Failure> {
     if !(1..=3).contains(&id) || base == 0 || base > 65432 {
-        return Err("node must be 1..3 and base port must be 1..65432".into());
+        return Err("invalid node or base port".into());
     }
-    let peers = (1..=3)
+    let mut addresses = (1..=3)
+        .map(|n| {
+            (
+                node(n),
+                (
+                    (std::net::Ipv4Addr::LOCALHOST, base + n as u16).into(),
+                    format!("node{n}.voteboat.test"),
+                ),
+            )
+        })
+        .collect::<BTreeMap<NodeId, (SocketAddr, String)>>();
+    if let Some(path) = endpoints {
+        addresses.clear();
+        let data = material(path, 4096)?;
+        for line in std::str::from_utf8(&data)?.lines() {
+            let words = line.split_whitespace().collect::<Vec<_>>();
+            let [id, address, name] = words.as_slice() else {
+                return Err("expected NODE SOCKET_ADDRESS TLS_SERVER_NAME".into());
+            };
+            let id: u64 = id.parse()?;
+            if !(1..=3).contains(&id)
+                || addresses
+                    .insert(node(id), (address.parse()?, name.to_string()))
+                    .is_some()
+            {
+                return Err("invalid or duplicate endpoint node".into());
+            }
+        }
+        if addresses.len() != 3 {
+            return Err("exactly three peer endpoints required".into());
+        }
+    }
+    let voters = (1..=3)
         .map(|n| (node(n), store_id(n)))
         .collect::<BTreeMap<_, _>>();
-    let bootstrap = Bootstrap {
-        group: group(),
-        configuration: ConfigurationId::new(1).unwrap(),
-        policy: checked(Policy::new(
-            Tree::Majority(peers.keys().copied().map(Tree::Voter).collect()),
-            Limits::default(),
-        ))?,
-        voter_stores: peers.clone(),
-    };
-    // Check credentials/listener before modifying storage or starting workers.
     let credentials = checked(NativeTlsConfig::new(TlsCredentials {
-        roots: vec![material(&tls.join("ca.der"))?],
-        certificate_chain: vec![material(&tls.join(format!("node{id}.der")))?],
-        private_key: material(&tls.join(format!("node{id}-key.der")))?,
+        roots: vec![material(&tls.join("ca.der"), 65536)?],
+        certificate_chain: vec![material(&tls.join(format!("node{id}.der")), 65536)?],
+        private_key: material(&tls.join(format!("node{id}-key.der")), 65536)?,
     }))?;
-    let peer_certificates = (1..=3)
-        .filter(|n| *n != id)
-        .map(|n| Ok((node(n), material(&tls.join(format!("node{n}.der")))?)))
-        .collect::<Result<BTreeMap<_, _>, Failure>>()?;
-    let listener = TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, base + id as u16))?;
-    let store = if create {
-        let mut store =
-            NativeLogStore::create(FileLogIo::create(root)?, store_id(id), LogLimits::default())?;
-        let tickets = store.append_batch(vec![LogMutation::Create(bootstrap.clone())])?;
-        store.barrier(&tickets)?;
-        store
-    } else {
-        NativeLogStore::recover(FileLogIo::open(root)?, store_id(id), LogLimits::default())?
-    };
-    let state = store.state(group())?;
-    if state.bootstrap != bootstrap {
-        return Err("recovered bootstrap differs from selected cluster".into());
-    }
-    let mut snapshots = if create {
-        NativeSnapshotStore::create(
-            FileSnapshotIo::create(root.join("snapshots"))?,
-            SnapshotIdentity {
-                store: store_id(id),
-                group: group(),
-            },
-            SnapshotLimits::default(),
-        )?
-    } else {
-        NativeSnapshotStore::recover(
-            FileSnapshotIo::open(root.join("snapshots"))?,
-            SnapshotIdentity {
-                store: store_id(id),
-                group: group(),
-            },
-            SnapshotLimits::default(),
-        )?
-    };
-    let mut app = checked(Counter::new(10000))?;
-    let core = checked(recover_replica(
-        node(id),
-        group(),
-        &store,
-        &mut snapshots,
-        &mut app,
-    ))?
-    .0;
-    let owner_id = RuntimeOwner {
-        store: store.binding(),
-        lane: ExecutionLaneId::new(1).unwrap(),
-        generation: RuntimeGeneration::new(1).unwrap(),
-    };
-    // Store session makes each startup's transport generations disjoint.
-    let first = owner_id
-        .store
-        .session
-        .get()
-        .checked_mul(10000)
-        .ok_or("session exhausted")?;
-    let last = first.checked_add(9999).ok_or("session exhausted")?;
-    let local = LocalIdentity {
+    let config = NativeStartup {
+        directory: root.to_owned(),
+        mode: if create {
+            NativeOpenMode::Create
+        } else {
+            NativeOpenMode::Recover
+        },
         node: node(id),
-        store: owner_id.store,
-    };
-    let mut shard = checked(Shard::new(
-        owner_id,
-        ShardLimits {
-            max_groups: 1,
-            ..ShardLimits::default()
+        store: store_id(id),
+        bootstrap: Bootstrap {
+            group: group(),
+            configuration: ConfigurationId::new(1).unwrap(),
+            policy: checked(Policy::new(
+                Tree::Majority(voters.keys().copied().map(Tree::Voter).collect()),
+                Limits::default(),
+            ))?,
+            voter_stores: voters,
         },
-        checked(FairScheduler::new(1))?,
-    ))?;
-    checked(shard.register(core))?;
-    let timed = checked(TimedShard::new(
-        shard,
-        checked(DeadlineQueue::new(owner_id, 1))?,
-        JitterEntropy::new(id * 17),
-        TimerConfig::default(),
-        MonoTime(0),
-    ))?;
-    let outbound = checked(NativeOutbound::new(
-        OutboundBinding {
-            node: node(id),
-            store: owner_id.store,
-            generation: OutboundGeneration::new(1).unwrap(),
-        },
-        OutboundLimits::default(),
-    ))?;
-    let remote = peers
-        .into_iter()
-        .filter(|(n, _)| *n != node(id))
-        .collect::<BTreeMap<_, _>>();
-    let roster = checked(PeerRoster::new(
-        PeerRosterConfig {
-            local,
-            outbound: outbound.binding(),
-            first_generation: SecureSessionGeneration::new(first).ok_or("session exhausted")?,
-            last_generation: SecureSessionGeneration::new(last).ok_or("session exhausted")?,
-            wire_version: 1,
-            limits: PeerRosterLimits::default(),
-            transport_limits: TransportLimits::default(),
-        },
-        remote.clone(),
-        MonoTime(0),
-    ))?;
-    let ingress = checked(IngressRouter::new(
-        IngressBinding {
-            owner: owner_id,
-            local,
-            generation: IngressGeneration::new(1).unwrap(),
-        },
-        IngressLimits::default(),
-    ))?;
-    let results = checked(ApplicationRouter::new(
-        ApplicationRouterBinding {
-            owner: owner_id,
-            generation: ApplicationRouterGeneration::new(1).unwrap(),
-        },
-        ApplicationRouterLimits::default(),
-    ))?;
-    let clients = checked(ClientRouter::new(
-        ClientRouterBinding {
-            owner: owner_id,
-            generation: ClientRouterGeneration::new(1).unwrap(),
-        },
-        ClientRouterLimits::default(),
-    ))?;
-    let reads = checked(ReadRequests::new(
-        ReadInvocationBinding {
-            owner: owner_id,
-            generation: ReadInvocationGeneration::new(1).unwrap(),
-        },
-        ReadInvocationLimits::default(),
-        checked(ReadRouter::new(
-            ReadRouterBinding {
-                owner: owner_id,
-                generation: ReadRouterGeneration::new(1).unwrap(),
-            },
-            ReadRouterLimits::default(),
-        ))?,
-    ))?;
-    let factory = checked(NativeTransportFactory::new(
-        checked(NativeWireCodec::new(Default::default()))?,
-        Default::default(),
-    ))?;
-    let wake = Arc::new(ThreadWake::current());
-    let dialer = checked(NativeTcpDialer::spawn(
-        local,
-        remote.clone(),
-        DialLimits::default(),
-        wake.clone(),
-    ))?;
-    let connector = NativePeerConnector::new(
-        NativeConnectConfig {
-            local,
-            limits: ConnectLimits::default(),
-            session: SessionLimits::default(),
-        },
-        credentials,
-        remote
-            .iter()
-            .map(|(n, s)| {
-                (
-                    *n,
-                    TlsPeer {
-                        identity: PeerIdentity {
-                            node: *n,
-                            store: *s,
-                        },
-                        certificate: peer_certificates[n].clone(),
-                        server_name: format!("node{}.voteboat.test", n.get()),
+        listen: addresses[&node(id)].0,
+        peers: addresses
+            .into_iter()
+            .filter(|(n, _)| *n != node(id))
+            .map(|(n, (address, server_name))| {
+                Ok((
+                    n,
+                    NativeStartupPeer {
+                        address,
+                        server_name,
+                        certificate: material(&tls.join(format!("node{}.der", n.get())), 65536)?,
                     },
-                )
+                ))
             })
-            .collect(),
-        dialer,
-        Some(listener),
+            .collect::<Result<_, Failure>>()?,
+        tls: credentials,
+        entropy_seed: id * 17,
+        limits: NodeLimits::default(),
+    };
+    config.validate()?;
+    Ok(config)
+}
+pub fn open(config: NativeStartup) -> Result<Service, Failure> {
+    match config.open(
+        checked(Counter::new(10000))?,
+        Arc::new(ThreadWake::current()),
         MonoTime(0),
-    )
-    .map_err(|r| format!("connector: {:?}", r.reason))?;
-    let worker = checked(NativeLogWorker::spawn(
-        store,
-        StorageWorkerGeneration::new(1).unwrap(),
-        WorkerLimits::default(),
-        wake.clone(),
-    ))?;
-    let owner = checked(EffectOwner::new(
-        timed,
-        worker.binding(),
-        EffectOwnerLimits::default(),
-    ))?;
-    let snapshot_worker = checked(NativeSnapshotWorker::spawn(
-        [(group(), snapshots)].into(),
-        SnapshotWorkerBinding {
-            store: owner_id.store,
-            generation: SnapshotWorkerGeneration::new(1).unwrap(),
-        },
-        SnapshotWorkLimits::default(),
-        wake,
-    ))?;
-    let router = checked(SnapshotRouter::new(
-        owner.identity(),
-        snapshot_worker.binding(),
-        SnapshotRouterLimits::default(),
-    ))?;
-    NativeNode::from_parts(
-        NativeNodeParts {
-            local: NativeLocalParts {
-                owner,
-                persistence: worker,
-                applications: [(group(), app)].into(),
-                results,
-                clients,
-                reads,
-                outbound,
-                snapshots: Some(NodeSnapshots {
-                    router,
-                    worker: snapshot_worker,
-                }),
-            },
-            peers: Some(PeerParts {
-                connector,
-                roster,
-                factory,
-                ingress,
-                routes: remote
-                    .keys()
-                    .map(|n| {
-                        (
-                            *n,
-                            if node(id) < *n {
-                                ConnectDirection::Dial(
-                                    (std::net::Ipv4Addr::LOCALHOST, base + n.get() as u16).into(),
-                                )
-                            } else {
-                                ConnectDirection::Accept
-                            },
-                        )
-                    })
-                    .collect(),
-            }),
-        },
-        NodeLimits::default(),
-        MonoTime(0),
-    )
-    .map_err(|r| format!("node: {:?}", r.reason).into())
+    ) {
+        Ok(node) => Ok(node),
+        Err(mut rejected) => {
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+            while !rejected.try_cleanup()? {
+                if std::time::Instant::now() >= deadline {
+                    return Err("startup cleanup timed out; recover before reuse".into());
+                }
+                std::thread::park_timeout(std::time::Duration::from_millis(1));
+            }
+            Err(rejected.reason.into())
+        }
+    }
 }
 /// Call only after Node has reached Drained. Polling while draining is the host's job.
 pub fn join(service: Service) -> Result<(), Failure> {

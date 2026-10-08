@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "explicit-learner-enrollment-recovery",
+  "status": "typed-native-startup-and-configurable-service",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -8,6 +8,22 @@
     "transitive versions pinned in Cargo.lock"
   ],
   "contracts": [
+    {
+      "design_id": "C10/C15",
+      "public_contract": "NativeStartup / NativeStartupPeer / NativeOpenMode / NativeStartupRejected<A>",
+      "operations": [
+        "validate",
+        "open",
+        "try_cleanup"
+      ],
+      "native": "Explicit single-group native filesystem/listener/worker assembly over the public NodeParts providers; TLS feature required.",
+      "conformance": [
+        "tests/startup.rs",
+        "tests/counter_service.rs",
+        "examples/embedded_counter.rs"
+      ],
+      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. The service process tests use both default and configured TCP/TLS endpoints; no separate-host/macOS deployment evidence."
+    },
     {
       "design_id": "C10/C15",
       "public_contract": "Node / NodeParts / NodeLocalParts",

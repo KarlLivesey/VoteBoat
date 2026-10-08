@@ -11,8 +11,11 @@ NativeLocalParts}` aliases for the native scheduler, timers, jitter, WAL worker,
 outbound queue, snapshot worker, connector, transport factory and codec. Hosts
 explicitly create or recover stores, bootstrap/register groups, restore and
 replay applications, select provider limits and security identities, and start
-workers before calling `Node::from_parts`. This is an embeddable facade, not a
-filesystem configuration loader or daemon. Native recovery continues to use the
+workers before calling `Node::from_parts`. The separate `native::startup::NativeStartup` convenience API now performs
+explicit single-group native filesystem/listener/worker setup and verified
+recovery, generic over the application. The counter service and Rust embedding
+example use it; see [startup and service](COUNTER_SERVICE.md). The facade itself
+remains independent of filesystem configuration and executables. Native recovery continues to use the
 existing public checkpoint/WAL recovery contracts; no second authoritative log
 is introduced.
 

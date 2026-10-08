@@ -4,7 +4,8 @@
 `native::node::NativeNode<Counter>`. Three nodes communicate over actual mutual
 TLS connections, elect leaders using native timers, and keep separate durable
 WALs and snapshots. This is an initial usable local service, with static
-three-voter membership and one counter group. It binds only to 127.0.0.1.
+three-voter membership and one counter group. Peer addresses are configurable;
+the trusted local command endpoint always binds to 127.0.0.1.
 
 ## Start three processes
 
@@ -34,9 +35,38 @@ TLS authenticates peer node/store identities; it does not authorize group change
 
 The base port must be 1..65432, with peer ports BASE+1..3 and command ports
 BASE+101..103 available. Use a different base and data directory for another
-local demo cluster. Data directories encode fixed node/store IDs 1..3, group 1,
+local demo cluster. An optional peer-address file overrides BASE+1..3.
+Data directories encode fixed node/store IDs 1..3, group 1,
 configuration 1 and their initial incarnations. Never copy one live store over
 another or reuse these demo identities in an existing deployment.
+
+## Configure peers on different hosts
+
+Pass a final PEERS_FILE argument to serve. The file is limited to 4 KiB and must
+contain exactly three unique node IDs, each with a numeric socket address and its
+TLS server name:
+
+```text
+1 10.0.0.11:43001 node1.voteboat.test
+2 10.0.0.12:43002 node2.voteboat.test
+3 10.0.0.13:43003 node3.voteboat.test
+```
+
+For node 1, on the host owning 10.0.0.11:
+
+```sh
+target/debug/voteboat-counter serve create /your/data/node1 1 43000 /your/tls peers.txt
+```
+
+Use node 2/3 and their own data directories/credentials on the other hosts. The
+local entry selects the peer listener; other entries select authenticated routing
+hints. Server names must match the supplied certificates. The smaller node ID
+dials the larger, preventing duplicate connection direction choices. Recovery
+can use new addresses/names with the same authorized bootstrap/store identities;
+addresses cannot change membership or grant voting authority. Run client commands
+locally on the relevant host; the command port is not a remote service API.
+Actual acceptance tests use explicitly configured non-default loopback endpoints.
+Separate-host deployment has not been exercised here.
 
 ## Write, retry and read
 
@@ -98,14 +128,41 @@ replacement, then recover the terminated node from its original directory.
 
 ## Embedding in Rust
 
-The executable uses public library contracts throughout. The startup reference is
-[src/bin/support/counter_setup.rs](../src/bin/support/counter_setup.rs); its `open`
-function shows explicit bootstrap, checkpoint/replay recovery, provider limits,
-thread creation and `NativeNode::from_parts`. Its `join` function shows post-drain
-worker reclamation. It is executable reference code, not a newly exported generic
-configuration loader. A host can select different providers through `runtime::Node`
-and `NodeParts`; arbitrary applications implement the public state-machine,
-receipt, admission and bounded-read contracts.
+The executable uses public library contracts throughout. Its setup helper now
+selects `native::startup::NativeStartup`: typed node/store/bootstrap identities,
+create/recover mode, data directory, listener, peer addresses/pins/names, TLS
+configuration, election seed and node-driver limits. Call `open` with a fresh
+application, an explicit host WorkerWake and the initial MonoTime for that
+host clock domain. Startup verifies bootstrap identity,
+restores the pinned checkpoint, replays committed state and constructs the selected
+native Node providers. It supports any application implementing the existing
+public proposal, bounded-read, checkpoint and receipt contracts.
+
+This convenience path selects one group and native providers with their default
+storage/queue limits. Use `runtime::Node::from_parts` for shared multi-group stores,
+different providers or other provider limits. Startup creates no global runtime.
+A failed open returns the application and an explicit cleanup handle: poll
+`try_cleanup` until true to close/join any workers and release the listener/WAL
+lock. Files might already have been initialized or recovered; cleanup does not
+roll them back, and recovery remains an explicit choice.
+
+A complete standalone Rust embedding is
+[examples/embedded_counter.rs](../examples/embedded_counter.rs). It uses the same
+public startup API, then submits and consumes original proposal/read tickets and
+explicitly joins workers:
+
+```sh
+cargo run --locked --offline --example embedded_counter -- create /tmp/voteboat-embedded tests/fixtures/tls 1 7
+cargo run --locked --offline --example embedded_counter -- recover /tmp/voteboat-embedded tests/fixtures/tls 1 7
+# Retry: duplicate=true and linearizable_value=7
+cargo run --locked --offline --example embedded_counter -- recover /tmp/voteboat-embedded tests/fixtures/tls 2 3
+# New operation: linearizable_value=10
+```
+
+The embedding example is a single-voter group with its own directory. The service
+quickstart above demonstrates three-process replication using the same startup
+API. A recovered applied counter is not current leadership: the example waits
+for the new election's durable leader state before submitting service work.
 
 The service loop in [src/bin/counter_service.rs](../src/bin/counter_service.rs)
 shows the complete ownership flow for a Rust host:
@@ -132,9 +189,10 @@ A timed-out pending request cancels its wait; exact tickets prevent a late outpu
 from becoming another connection's reply. All consensus/provider queues retain
 their own existing bounded credits and control reserves.
 
-Initial scope is local three-process use. Configurable remote addresses, generic
-startup configuration, client leader routing, richer application protocols and
-operational packaging remain work. Counter deduplication and WAL capacity are
+Peer addresses and TLS names are configurable. Rust startup is generic over the
+application, while the CLI still selects a fixed three-voter counter bootstrap.
+Client leader routing, a generic multi-group configuration loader, richer
+application protocols and operational packaging remain work. Counter deduplication and WAL capacity are
 bounded; manual checkpoints do not automatically reclaim physical WAL bytes.
 Online membership, recursive responsibilities and split/merge remain unfinished.
 Linux process tests cover leader loss, quorum loss, retry identity, checkpoints,
@@ -144,5 +202,5 @@ This is not a production consensus release or a performance claim.
 Run the service acceptance tests with:
 
 ```sh
-cargo test --locked --offline --test counter_service
+cargo test --locked --offline --test counter_service --test startup
 ```

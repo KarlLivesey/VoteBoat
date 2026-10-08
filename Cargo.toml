@@ -37,3 +37,7 @@ all = "warn"
 name = "voteboat-counter"
 path = "src/bin/counter_service.rs"
 required-features = ["tls"]
+
+[[example]]
+name = "embedded_counter"
+required-features = ["tls"]

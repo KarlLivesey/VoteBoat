@@ -47,7 +47,8 @@ completed a quorum-backed read and durable checkpoint/compaction. This verifies
 that example, not a standalone network service or macOS execution. Actual
 TCP/TLS and Node-facade histories already exist in the integration suite; the
 first three-process executable now exposes that assembly. Generic startup
-configuration and remote deployment remain work; see Slice 38 below.
+the shared typed startup and configured endpoint path are described in Slices
+38–39 below. Separate-host deployment and operational packaging remain work.
 
 ## Safety rules carried forward
 
@@ -2458,13 +2459,60 @@ pass. The unchanged core/storage suites were not repeated for this executable-on
 slice. No macOS run, production certification or performance claim is established.
 CI remains background feedback.
 
+## Slice 39 — shared typed native startup and Rust embedding
+
+Mini schema plan: one explicit config holds bootstrap/node/store identities,
+mode, files, routing and TLS; a fresh host application is restored/replayed before
+exposure. Validate → bind → create/recover → verify → spawn → assemble. Failure
+returns the application and owns idle-worker cleanup; initialized files are not
+rolled back. Verify generic embedding, real configured peer traffic, restart,
+resource cleanup and independent host instances before extending the service.
+
+NativeStartup now implements that single-group convenience path over the existing
+public providers. The application is generic; the host supplies WorkerWake and
+initial monotonic time. Node-driver limits are explicit, with other native provider
+limits selected at their existing defaults. Exact bootstrap/local/voter/peer
+identities, endpoint shapes, TLS names and retained peer metadata validate before
+file modification. Open creates one authoritative native WAL path and uses verified
+checkpoint/replay recovery. Create and Recover stay separate; learner/dynamic-voter
+recovery gates remain unchanged. Node::from_parts remains available for shared
+multi-group stores, alternative providers and other provider limits.
+
+NativeStartupRejected returns the host application and explicit nonblocking
+try_cleanup, which closes/joins any started idle workers and releases listener/WAL
+ownership. There has been no accepted runtime work before successful construction.
+Initialization or recovery may already have changed files, so cleanup is not a
+rollback. No new consensus effect, watermark, durability token or generation type
+is introduced; startup reserves the existing per-store-session connection range.
+
+The counter executable now selects this public API and accepts an optional bounded
+peer-address/TLS-name file. Commands remain a trusted loopback-only endpoint; peer
+listeners/addresses can target configured interfaces. Routing cannot grant voter
+membership. The process acceptance history now exercises non-default configured
+TCP/TLS ports through the same startup path. Separate-host networking is configurable
+but has not been exercised here. The new embedded_counter example also uses the
+public API, submits and consumes original client/read tickets, verifies checkpoint
+recovery and explicitly joins workers. It waits for the new durable leader state
+after recovery, rather than interpreting restored applied state as leadership.
+
+Local evidence: all three executable-process tests and five downstream startup
+tests pass on Linux. The startup tests use a host-defined application and non-demo
+identities, late constructor failure after worker creation, returned application
+and explicit joins, two independent instances sharing a host wake, invalid identity
+refusal and propagation of the host's initial clock domain. The embedding example
+was run for create/write 7, checkpoint/restart/retry (duplicate=true, value 7), then
+restart/new operation (value 10); each run reported joined workers. Default-feature
+Clippy across all targets, native-only/core-only all-target compilation, API docs,
+formatting, inventory JSON, new Rust RPL headers and diff checks pass. Core/storage
+protocol suites were unchanged and were not repeated. macOS, separate-host deployment,
+production certification and performance remain unestablished; CI is background.
+
 ## Next slice
 
-Continue the first usable milestone with reusable typed Rust startup configuration,
-configurable remote peer addresses/TLS names and a library-startup example sharing
-the service's provider assembly. Keep the executable-process acceptance tests on
-that shared path. Resume the remaining membership work after the usable service
-and embedding milestone.
+Continue usability with bounded client leader selection for the local quickstart,
+using original operation IDs and explicit unknown-result handling. Keep successful
+reads dependent on fresh quorum evidence. Improve release/run ergonomics without
+making membership or split/merge prerequisites for the static baseline.
 
 Then complete the promoted-leader authorization protocol with replay-resistant group,
 configuration, term, store and committed/election provenance; a claimed head or

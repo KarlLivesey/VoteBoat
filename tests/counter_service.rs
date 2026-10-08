@@ -26,6 +26,7 @@ struct Cluster {
     root: PathBuf,
     base: u16,
     children: Vec<Option<Child>>,
+    endpoints: Option<PathBuf>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -45,7 +46,7 @@ impl Cluster {
                 if base > 65432 {
                     return None;
                 }
-                let reservations = [1, 2, 3, 101, 102, 103]
+                let reservations = [1, 2, 3, 11, 12, 13, 101, 102, 103]
                     .into_iter()
                     .map(|offset| TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset)))
                     .collect::<Result<Vec<_>, _>>()
@@ -58,24 +59,31 @@ impl Cluster {
             root,
             base,
             children: (0..3).map(|_| None).collect(),
+            endpoints: None,
         }
     }
     fn start(&mut self, id: usize, mode: &str) {
         let log = fs::File::create(self.root.join(format!("{id}-{mode}.log"))).unwrap();
         let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let mut command = Command::new(BIN);
+        command
+            .args(["serve", mode])
+            .arg(self.root.join(id.to_string()))
+            .arg(id.to_string())
+            .arg(self.base.to_string())
+            .arg(tls);
+        if let Some(path) = &self.endpoints {
+            command.arg(path);
+        }
         self.children[id - 1] = Some(
-            Command::new(BIN)
-                .args(["serve", mode])
-                .arg(self.root.join(id.to_string()))
-                .arg(id.to_string())
-                .arg(self.base.to_string())
-                .arg(tls)
+            command
                 .stdout(log.try_clone().unwrap())
                 .stderr(log)
                 .spawn()
                 .unwrap(),
         );
     }
+
     fn request(&self, id: usize, args: &[&str]) -> std::process::Output {
         Command::new(BIN)
             .args(["client", &self.base.to_string(), &id.to_string()])
@@ -267,6 +275,20 @@ fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
 fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
     use std::io::{Read, Write};
     let mut cluster = Cluster::new();
+    let path = cluster.root.join("peers.txt");
+    fs::write(
+        &path,
+        (1..=3)
+            .map(|id| {
+                format!(
+                    "{id} 127.0.0.1:{} node{id}.voteboat.test\n",
+                    cluster.base + 10 + id
+                )
+            })
+            .collect::<String>(),
+    )
+    .unwrap();
+    cluster.endpoints = Some(path);
     for id in 1..=3 {
         cluster.start(id, "create");
     }
