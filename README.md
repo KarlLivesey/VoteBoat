@@ -7,6 +7,12 @@ public interfaces that host applications can implement themselves.
 
 Initial target platforms are **Linux and macOS**. Windows is deferred.
 
+The immediate milestone is an **embeddable Rust library and a runnable networked
+service**, starting with static membership. The library and local counter demo
+already run; standalone network-service setup is the next priority. Online
+reconfiguration, recursive responsibilities and split/merge follow that milestone.
+See the [first usable milestone](docs/IMPLEMENTATION.md#first-usable-milestone--priority-updated-8-october-2026).
+
 The working baseline now includes a **static-configuration Raft core** with
 durable elections, replication, ordered commitment, conflict repair and
 quorum-backed read barriers, plus a three-replica counter demo with durable

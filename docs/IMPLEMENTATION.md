@@ -23,6 +23,31 @@ Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
 in the background without gating changes or implementation progress. Local tests
 should follow the changed contract, without repeatedly running unrelated checks.
 
+## First usable milestone — priority updated 8 October 2026
+
+The user's immediate priority is both an embeddable Rust library and a runnable
+networked service, as quickly as possible. This milestone comes before finishing
+the full P0–P7 roadmap. Static membership is sufficient for the first service;
+online membership, recursive responsibilities and split/merge follow afterward.
+The existing durability, bounded-resource and quorum contracts still apply.
+
+Deliver a small native service over the existing Node facade and public provider
+contracts, with explicit local identity, durable data directory, peer addresses
+and host-supplied TLS credentials. Provide a three-node Linux/macOS quickstart,
+an application write/read entry point, verified restart and retry behavior, and
+graceful shutdown that drains and joins the selected workers. Keep setup code
+usable from Rust embeddings as well as the executable. Do not build a second
+consensus engine or substitute an in-process message demo for a network service.
+
+The existing replicated_counter example is usable today as a local library
+composition demo. On Linux, three consecutive invocations on a fresh directory
+were checked on 8 October: operation 1 adds 7; restart/retry of operation 1 keeps
+7; operation 2 adds 3 and reaches 10 on all three replicas. Each invocation
+completed a quorum-backed read and durable checkpoint/compaction. This verifies
+that example, not a standalone network service or macOS execution. Actual
+TCP/TLS and Node-facade histories already exist in the integration suite; making
+that assembly straightforward for users is the next implementation priority.
+
 ## Safety rules carried forward
 
 Responsibilities, quorum trees, execution lanes and WAL lanes are distinct
@@ -2397,7 +2422,11 @@ CI remains background feedback and did not gate this slice.
 
 ## Next slice
 
-Complete the promoted-leader authorization protocol with replay-resistant group,
+Prioritize the first usable milestone above: native provider setup and a runnable
+static-membership network service with an embedding example. Resume the remaining
+membership work after that service path works end to end.
+
+Then complete the promoted-leader authorization protocol with replay-resistant group,
 configuration, term, store and committed/election provenance; a claimed head or
 well-formed learner-supplied configuration alone is insufficient. Complete voter
 and learner dynamic recovery, readiness evidence, prospective fanout reservation
