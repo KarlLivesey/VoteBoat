@@ -1935,3 +1935,26 @@ remain in the active baseline scope; P8 research remains deferred.
 The downstream test in tests/delegation/repeat.rs performs an actual delegated split 20 -> 21/22, merge 21/22 -> 23, and split 23 -> 24/25. Later sources are the actual prior activated targets. Real exports/imports carry data, original retries and outbox history; child decisions and immediate-parent completions come from retained journal state. Parent/child journals recover after later actions; targets restore into fresh unstaged applications derived from original child intents at staging/import/activation/fencing and final writes. Exact freeze/completion retries retain outcomes, stale source intents and wrong bound operation IDs refuse, old owners stay fenced, final values are 10/16 with exactly three outbox records each. Parent generation reaches 4 with ownership epoch 1; grandparent locator remains unchanged. Cold recursive and child-only warm routing agree.
 
 All-feature delegation 8/8 and repeat 5/5 pass; core-only 7/7 and 5/5 pass. This is deterministic public-contract application composition, not native delegated merge/repeated recovery. No production code, protocol, format or dependency changed. The four native split cases from slice 95 remain the network evidence; native repeated movement, abandoned reservation recovery and broader platform/fault/performance gaps remain active.
+## Slice 97 — native delegated repeated movement
+
+`tests/routed/delegation_repeat.rs` composes an actual split 20 -> 21/22,
+merge 21/22 -> 23, and further split 23 -> 24/25 with distinct grandparent,
+parent and child metadata groups. All groups have three ordinary-majority
+replicas. The two later moves have 20 committed phases: target staging, each
+source fence, each import, child/parent publication and target activation, plus
+reservation/intent. Each action completion is discarded and every created
+group is reopened before the next action is chosen from fresh quorum status.
+Original retained intents reconstruct each later target's immutable bootstrap.
+
+Checks include partial merge fencing, parent outage after each child publication,
+unchanged grandparent locator/parent ownership epoch, refreshed immediate-parent
+cache, target refusal before activation, permanently fenced old owners, and
+child-only resolved final retries/new writes while all metadata and old owners
+are stopped. Final values 10/16 survive another reopen. Metadata ordinary slots
+increase only in this test assembly from 3 to 10 for three lifecycle operations;
+no production protocol, timer, dependency or durable format changed.
+
+TCP/TLS WAL case: 1/1 passed in 225.92 seconds. All-target/all-feature Clippy,
+formatting, diff checks and the 71-contract inventory pass. The remaining TCP/TLS checkpoint and QUIC WAL/checkpoint cases passed 3/3 in 1106.42 seconds under the shared native-history serialization guard. Together with the separately run TCP/TLS WAL case, all four selected cases passed. No case was restarted on an observation timeout. These results predate slice-98 decline/cancellation protocol changes.
+Selected Linux process-reopen histories do not establish arbitrary power-loss/
+fault completeness, mixed-version behavior, macOS or separate-host operation.

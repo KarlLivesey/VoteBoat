@@ -62,10 +62,10 @@ fn root_metadata() -> LifecycleDirectory {
     )
 }
 fn parent_metadata() -> LifecycleDirectory {
-    fixture::fresh_directory(true, 3)
+    fixture::fresh_directory(true, 10)
 }
 fn child_metadata() -> LifecycleDirectory {
-    fixture::fresh_directory(false, 3)
+    fixture::fresh_directory(false, 10)
 }
 fn manifest(
     nodes: &mut [Node<LifecycleDirectory>],
@@ -846,3 +846,6 @@ fn quic_delegated_split_recovers_every_phase_from_wal() {
 fn quic_delegated_split_recovers_every_phase_from_checkpoints() {
     interrupted(NativePeerProtocol::Quic, true);
 }
+
+#[path = "delegation_repeat.rs"]
+mod repeat;

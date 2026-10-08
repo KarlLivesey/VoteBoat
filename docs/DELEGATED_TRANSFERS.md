@@ -97,8 +97,15 @@ records; new final writes execute with only the child manifest needed for routin
 Parent ownership epoch/ancestry and grandparent locator remain unchanged. Old
 owners remain fenced, and stale intents or wrong bound freeze operations refuse.
 
-This is selected native split and deterministic repeated-movement evidence,
-not native delegated merge/repeated recovery, pre-fence cancellation,
-arbitrary-fault liveness,
+`tests/routed/delegation_repeat.rs` extends the native assembly through both later
+moves over TCP/TLS and QUIC, with WAL and checkpoint recovery. All four selected
+histories pass: every created group reopens after each of 20 later committed
+phases, including partial merge fencing and parent outages after child publication.
+Final child-only resolved retries and new writes succeed with all metadata and
+old-owner workers stopped; final values 10/16 survive a further reopen. Immutable
+original decisions and the grandparent locator remain unchanged.
+
+This is selected native split and repeated-movement evidence, not pre-fence
+cancellation, arbitrary-fault liveness,
 mixed-version, macOS or separate-host validation. Those remain in the active P0–P7
 scope; ordinary top-level handoffs and the static service remain usable.

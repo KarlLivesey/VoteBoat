@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; recursive lifecycle remains pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; abandoned pre-intent reservations and broader lifecycle recovery remain |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -5678,3 +5678,137 @@ All-feature delegation 8/8 and later-source repeat 5/5 pass; core-only equivalen
 7/7 and 5/5 pass. Native delegated repeated-movement phase/reopen, abandoned
 reservation recovery and the other recorded P0–P7 gaps remain unfinished. This
 adds deterministic composition evidence to P6, not a broader native recovery claim.
+
+### Slice 97 mini schema — native delegated split/merge/split phase recovery
+
+Previous turn was progress: c253352 and 5316fe5 are published. Current macro P6
+deliverable closes missing native repeated-movement evidence. Next is abandoned
+pre-fence reservation recovery, following the P7 committed/applied baseline;
+those depend respectively on permanent child-side rejection of stale fencing
+authority and completed usable lifecycle paths.
+
+Reuse the six-group delegated split rig, raising only its test metadata history
+slots from 3 to 10 for three lifecycle operations. Add groups 23/24/25 only after
+their actual child intent is committed. Merge uses parent reservation 402, child
+intent 202 and publication 203; the next split uses 404, 204 and 205. Each source
+is the actual prior activated target. Next-action decisions use fresh quorum
+status, never volatile phase counters. Observe original source/target/parent/
+child facts and reopen all created groups after each action, including partial
+two-source fencing. Reconstruct target bootstrap from retained child intents.
+No production format, quorum, provider or ownership protocol changes.
+
+The wrapper owns later-target workers; drain and join them with the original rig
+still driven before reopening stores. Original rig shutdown/reopen then restores
+later groups from their existing directories. No timeout or missing receipt can
+release a fence or reservation. Parent outage after child publication must leave
+all prior owners fenced and new targets inactive until recovery. After the final
+split, stop all metadata/old-owner workers; child-only resolved retries and new
+writes must succeed and survive reopening again. Compare immutable phase facts,
+not term/noop prefix changes. Check original outcomes and final values 10/16.
+
+Acceptance: TCP/TLS and QUIC, WAL and checkpoint histories through the two later
+moves, exact original decisions across every reopen, parent outage, permanent
+old-owner refusal and direct final-owner progress with ancestors stopped.
+Selected Linux ordinary-majority process-reopen evidence remains narrower than
+arbitrary faults, power loss, mixed-version, macOS or separate-host validation.
+
+Slice 97 current evidence: the native TCP/TLS WAL split -> merge -> split history
+passes in 225.92 seconds. It reopens every created group at all 20 later movement
+phases, including partial merge fencing and parent outages after each child
+publication. Final retries and writes succeed with metadata/old owners stopped,
+and final values 10/16 survive another reopen. The remaining TCP/TLS checkpoint and QUIC WAL/checkpoint cases pass 3/3 in
+1106.42 seconds. Together with the separately run TCP/TLS WAL case, all four
+selected native cases pass. This evidence predates slice-98 decline/cancel changes.
+The test metadata slot increase only permits three recorded moves; no production
+code, timer, provider, dependency or persistent format changed. All-target/
+all-feature Clippy, formatting and diff checks pass for the current test code.
+
+### Next P6 schema review — abandoned reservation before child intent
+
+Planned, not implemented. A parent-only cancel or timeout is unsafe: a delayed
+child intent could still commit under the old reservation. The smallest safe
+recovery path first commits a permanent child-side refusal for the exact bound
+child operation, then releases the immediate-parent lock using that committed
+refusal. Once a child intent has actually committed, retain forward resumption,
+even if the source fence has not committed yet. This path revokes no previously
+valid source-fencing authority and never thaws an owner.
+
+Proposed public data/API: a bounded decline request carrying the complete bound
+intent; retained decline status with its original command/index; parent
+cancellation carrying that status and authenticated child/parent configuration
+observations. Child decline verifies the real local responsibility/parent/group
+binding and refuses if that operation has any successful retained intent,
+including a completed transfer. It can cover an absent intent or a retained
+failed intent. Denial is keyed by child operation, remains permanent through
+checkpoint/replay, and makes any later attempt to begin that operation refuse.
+The decline command has its own distinct operation ID and retains its original
+result. A duplicate with a changed intent cannot replace the first denial.
+
+Parent cancellation must match the actual live reservation, reservation index,
+bound intent and child operation. Same-group metadata verifies the actual local
+retained denial; remote facts retain the existing authenticated non-Byzantine
+host obligation. Release only the reservation and reserved final-control credit;
+leave every manifest/route/ownership generation unchanged. Retain cancellation
+outcome and original denial for queries and exact retries. Replanning uses fresh
+operation IDs and the actual compatible current manifests; cancellation cannot
+repair an independently incompatible application grant or create new authority.
+
+The existing bounded Directory replay journal can retain these commands without
+a second storage owner. Add explicit denial/cancellation query accounting and
+bounded codec lengths. Child denial requires ordinary history credit, so preflight
+that credit before parent reservation; parent final cancellation must use the
+already reserved control credit, including when ordinary parent history is full.
+No capacity fallback weakens the ordering gate. Old readers cannot understand new
+tags; no mixed-version compatibility claim.
+
+Acceptance before implementation release: both child-intent/decline commit
+orders, rejected/pending old intent, exact retry and changed-binding refusal,
+checkpoint/replay, capacity and competing final-publication/cancellation credit,
+same-group provenance, codec truncation and bounded query tests. Native recovery
+must lose receipts/reopen child denial and parent cancellation, keep the source
+serving, permanently reject the old child intent, then complete a fresh compatible
+transfer. This advances P6 recovery; P7 measurement remains the next macro milestone.
+
+Background platform validation review: GitHub currently reports no workflow runs;
+the existing `ci/platform-feedback.yml` remains an inactive template because of
+the previously recorded workflow-write token restriction. Do not count it as
+macOS execution evidence or make local progress depend on it. Its default-feature
+test command omits QUIC, now an agreed target. Update the template to run the
+all-feature suite/lint on Linux and macOS, retain core-only/native-only build
+coverage and cap each background job's duration. This changes only prospective
+validation coverage; no workflow activation, permissions or branch gates change.
+The current GitHub scope header confirms `gist, read:org, repo`, without
+`workflow`; the activation limitation is still current, not merely historical.
+
+### Slice 98 implementation schema — bounded decline and cancellation records
+
+Start with `DelegationDecline` (private validated bound intent), original child
+`DelegationDeclineStatus`, parent `DelegationCancellation` and retained parent
+cancellation status. Codecs are `VBDDECL1` (12-byte header plus intent),
+`VBDREFS1` (36-byte header plus decline) and `VBDCANC1` (52-byte header plus
+decline status). The largest cancellation is intent budget + 100 bytes, within
+the existing parent control slot. Reject unbound intents, zero/MAX exact indices
+and decline command ID equal to the child intent ID. All retained route capacity
+must be charged by query accounting. These types alone grant no authority.
+
+Then extend the Directory journal with bounded denial/cancellation maps and
+queries, reconstructed by ordinary ordered replay. The original child operation
+is denied permanently only when no successful retained intent exists. Parent
+cancel spends the existing reserved final credit and must verify the exact
+actual reservation/decline binding; successful cancellations join the existing
+bounded final-control history accounting. No new generation/watermark or storage
+owner. Release is permitted only by the applied committed child decline and
+applied committed parent cancellation. Host authentication of remote quorum
+observations remains mandatory. Same-group provenance is checked locally.
+
+First acceptance gate is codec round-trip/budget/truncation and query shape;
+the state-machine release still requires the race/replay/capacity/native checks
+listed in the preceding schema. Keep native slice-97 results separate: its
+running process uses the earlier protocol and no decline/cancel requests.
+
+Test assembly refinement: the shared deterministic split helper currently fixes
+operation 200. Generalize that helper with an explicit operation argument (keep
+the old wrapper) so the cancellation test can complete a fresh operation 202
+using actual imports/publication/activation instead of inventing a new decision.
+This is needed to prove safe usable replanning after cancellation, not merely
+that the parent lock can be removed.
