@@ -1245,6 +1245,55 @@ fn batched_repair_checks_authority_ranges_and_ack_context_before_progress() {
 }
 
 #[test]
+fn batched_repair_rejects_committed_divergence_and_accepted_configuration_work() {
+    for accepted_joint in [false, true] {
+        let (source, receiver) = retained_repair_pair(160, 1);
+        let mut source = source.with_batched_joint_repair();
+        let effects = source.step(Event::Campaign).unwrap();
+        let mut request = durable(&mut source, effects)
+            .into_iter()
+            .find_map(|e| match e {
+                Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+                _ => None,
+            })
+            .unwrap();
+        let mut receiver = if accepted_joint {
+            follower(joint(false), 4)
+        } else {
+            let mut state = receiver.state().clone();
+            state.commit_index = 3;
+            Raft::recover_member(node(4), receiver.binding, state, receiver.limits).unwrap()
+        };
+        // The proposed replacement is well formed and differs in term from the
+        // protected committed entry. It must fail even though it is not a
+        // same-term payload fork. Accepted configuration work is a separate gate.
+        if let Rpc::LearnerRepair { entries, joint, .. } = &mut request.rpc {
+            for entry in entries {
+                entry.term = request.term;
+            }
+            joint.term = request.term;
+        }
+        let before = (
+            receiver.state().clone(),
+            receiver.role(),
+            receiver.election_reset_sequence(),
+        );
+        assert_eq!(
+            receiver.step(Event::Receive(request)),
+            Err(RaftError::InvalidMessage)
+        );
+        assert_eq!(
+            (
+                receiver.state().clone(),
+                receiver.role(),
+                receiver.election_reset_sequence()
+            ),
+            before
+        );
+        assert!(!receiver.has_pending_dependency());
+    }
+}
+#[test]
 fn batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority() {
     let (source, mut receiver) = retained_repair_pair(160, 140);
     let mut source = source.with_batched_joint_repair();

@@ -257,9 +257,14 @@ impl Raft {
                 || (matches!(entry.payload, EntryPayload::Configuration(_))
                     && entry != joint.as_ref())
                 || (entry.index == joint.index && entry != joint.as_ref())
-                || (entry.index > self.durable.base_index()
-                    && entry.index <= self.durable.last_index()
-                    && self.durable.entry_at(entry.index) != Some(entry))
+                // Only an exact committed stable learner reaches this path.
+                // A different-term uncommitted command suffix may be replaced
+                // through ordinary atomic suffix persistence. Committed entries
+                // and same-term payload forks remain immutable/rejected.
+                || self.durable.entry_at(entry.index).is_some_and(|local| {
+                    local != entry
+                        && (entry.index <= self.durable.commit_index || local.term == entry.term)
+                })
             {
                 return Err(RaftError::InvalidMessage);
             }

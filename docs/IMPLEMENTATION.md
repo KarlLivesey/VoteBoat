@@ -156,22 +156,31 @@ compacted native reopen are checked. The ordinary lifecycle is now evidenced;
 the current item's remaining work is interrupted delivery/repair and the stated
 broader fault schedules, not another prepared happy-path assembly.
 
-1. **Fault-tested remote membership release (current, P4).** Exercise actual
+Slice 77 repairs retained-only divergent uncommitted learner tails, with committed
+and same-term protection, native atomic-recovery faults and TCP/QUIC weighted and
+recursive histories. Full lifecycle integration and this repair are now evidenced.
+P5's manifest/routing foundation can proceed over existing concrete groups without
+releasing public membership ingress. Prioritize that independently useful capability
+next, retain the remaining P4 fault work explicitly, and require both foundations
+before P6 ownership movement. This changes sequencing, not the full scope or gates.
+
+1. **Responsibility manifests and routing (current, P5).** Implement the first
+   usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
+   over concrete groups, with explicit ordering boundaries. Depends on the group,
+   runtime and application foundations; the initial path uses existing group
+   assignments. Placement changes use safe P4 operations and do not waive its
+   remaining release checks. Check range coverage, generations/stale routes and
+   cached child operation during parent unavailability without ancestor commits
+   on ordinary writes. Supplies routing/ownership context required by P6.
+2. **Fault-tested remote membership release (next, P4).** Exercise actual
    add/catch-up/promote/remove with partial joint/final delivery, weighted and
    recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
    Depends on the integrated service path and implemented recovery/authorization paths. Check
-   divergent retained-only learner histories, unavailable/compacted witnesses,
+   unavailable/compacted witnesses,
    promoted-leader failures and broader recursive-policy schedules; resolve
    activation/catch-up gaps before releasing service mutation endpoints.
    Completes safe placement for P5 responsibility routing and P6 ownership movement;
    P5–P7 remain the global capability chain above.
-2. **Responsibility manifests and routing (next, P5).** Implement the first
-   usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
-   over concrete groups, with explicit ordering boundaries. Depends on the group,
-   runtime and application foundations; placement changes use safe P4 operations.
-   Check range coverage, generations/stale routes and cached child operation during
-   parent unavailability without ancestor commits on the ordinary write path.
-   Supplies the routing/ownership context required by P6 split and merge.
 3. **First durable split/merge lifecycle (following, P6).** Move real application
    data using P5 ownership manifests, exact source fencing, target import readiness
    and durable activation. Preserve operation/deduplication/outbox/lineage state.
@@ -4333,3 +4342,59 @@ learner tails, unavailable/compacted witnesses, dropped readiness reply schedule
 and broader recursive-policy faults remain release work. The mini plan stays
 fault-tested membership → P5 routing → P6 ownership movement; P7 and the full goal
 remain active. Linux evidence does not establish macOS or separate-host operation.
+
+## Slice 77 — retained repair of divergent uncommitted learner tails
+
+Mini schema: preserve exact committed stable learner/old-voter/store/session and
+journal admission, but permit the existing format-5/6 repair to replace a
+**different-term uncommitted command/noop suffix**. Committed overlap and same-term
+payload forks remain immutable; accepted configuration work and local voters still
+reject. Validate the full bounded batch before mutation, then reuse ordinary atomic
+suffix persistence and exact durability-dependent replies. Cursor progress stays
+candidate-local and separate from ballots, commitment, reads and application.
+Acceptance: reproduce rejection with a native divergent tail, repair in multiple
+batches and commit/apply/reopen without abandoned commands; reject protected
+conflicts; inject storage faults and recover exact old or complete new suffix plus
+hard state before retry. No new resource owner, API/provider seam or wire/storage
+format is needed.
+
+The new TCP history initially failed on the first learner repair with
+InvalidMessage. The batch overlap check required equality even for an abandoned
+uncommitted tail. The focused change preserves committed and same-term equality,
+while allowing different-term uncommitted overlap to reach the existing suffix
+replacement machinery. Formats 2–4 keep their pure-extension exception unchanged.
+Only exact stable committed learners with no accepted configuration work qualify;
+this does not permit candidate repair to erase any voting configuration, assert
+commitment, or grant application/read service. Existing LogTicket/DurableLog
+completion releases acknowledgements; failed barriers fence with no reply.
+No token, generation, watermark, persistent cursor or new effect is introduced.
+
+Four native TCP/QUIC histories seed a committed learner and a 199-entry abandoned
+term-2 command tail extending beyond the candidate's term-3 joint record. Retained
+format-5 and recursive format-6 repair replace it in three bounded batches, then
+normal ballots/election/commit/application succeed and actual file recovery
+contains no abandoned commands. Weighted and recursive policies are tested.
+A separate format-5/6 NativeLogStore/ModelIo fault history injects short append,
+sync and before/after-publication errors. Both old and complete replacement
+recovery outcomes must be reached, including their matching hard states. Retry
+finishes repair while commit remains 1 and the sender remains Candidate; final
+repair only resumes Vote. Core negative tests reject committed different-term
+conflicts and accepted joint work before mutation, alongside existing same-term
+payload, voter, identity, malformed-range and stale-context checks.
+
+The P4 known fault-gap ledger is now:
+
+| Case | Evidence / remaining acceptance |
+| --- | --- |
+| Executable-created full lifecycle and failed original voter | Slice 76 TCP/QUIC bootstrap → add/enroll/promote → retire absent voter → compact/reopen, with fresh survivor-quorum writes. |
+| Divergent retained-only uncommitted learner suffix | Slice 77 weighted/recursive TCP/QUIC plus native atomic-recovery faults and protected-conflict refusal. |
+| Lost readiness reply across cancellation/session change | Existing core expiry and Node cancellation/re-exchange tests; still require held/delayed reply scheduling through the owning assembly with fresh proof rejection/retry. |
+| Promoted leader failure while a replica retains an older view | Existing witness/catch-up and lost-leader histories; still require combined failure with unavailable/restored witness and compacted-base refusal, with no invented authority or empty replacement. |
+| Broader partial joint/final recursive delivery | Existing accepted-log core, finite activation model and native recursive repair evidence; broader remote partial-delivery/restart schedules remain required. |
+
+This is a concrete remaining-work ledger, not a complete protocol proof. P5
+manifest/routing work over established concrete groups is independent of opening
+public membership ingress, so it becomes the current mini deliverable. The next
+item retains these P4 release checks; P6 ownership movement depends on both.
+P7 and the complete original goal remain active. Linux results do not establish
+macOS or separate-host operation.

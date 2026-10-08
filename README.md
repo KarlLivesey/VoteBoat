@@ -66,8 +66,8 @@ The [durable configuration journal](docs/CONFIGURATION_JOURNAL.md) now validates
 learner, joint and final records through host/native storage, recovery and suffix
 rollback. [Configuration-aware snapshots](docs/CONFIGURATION_SNAPSHOTS.md) now
 preserve membership and operation identities across compaction and recovery.
-Live configuration admission remains disabled pending complete quorum and learner
-integration. Explicit [learner enrollment/recovery](docs/LEARNER_RECOVERY.md) now
+Default/static assemblies keep configuration admission disabled. Explicit
+[learner enrollment/recovery](docs/LEARNER_RECOVERY.md) now
 accepts a committed exact-store learner assignment with unchanged bootstrap
 voters, restores verified checkpoints, and runs without election timers. It does
 not enable online promotion or administration. Explicit
@@ -76,7 +76,14 @@ from authorized durable joint/final state and verified application data, retaini
 the accepted predicate and historical ballot through restart/rollback.
 The [owned administration API](docs/CONFIGURATION_ADMINISTRATION.md) now connects
 typed proposals, execution-time host authorization, committed receipts and
-cancellation through Node. Remote configuration delivery remains gated.
+cancellation through Node. The counter's explicit `recover-member` assembly now
+supports bounded trusted startup plans, exact deployment stores, offline checkpoint
+enrollment and validated configuration replication over TCP or QUIC. Executable
+tests start from bootstrap, add/enroll/promote a new store, retire an absent voter,
+and recover survivor checkpoints with preserved retries. See
+[trusted plans and lifecycle evidence](docs/COUNTER_SERVICE.md#trusted-startup-administration-plan).
+Public configuration mutation ingress remains gated on the remaining interrupted
+delivery and repair fault checks; this is not a production membership release.
 
 ## Run
 
@@ -255,18 +262,22 @@ effects, encoded buffers and receive queues separately. This queue creates no
 sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
 `wire::WireCodec` supplies a public bounded framing seam. The native
-`NativeWireCodec` implements [wire formats 1–5](docs/WIRE_FORMAT.md).
+`NativeWireCodec` implements [wire formats 1–6](docs/WIRE_FORMAT.md).
 The default constructor retains format 1 for current static-configuration peers;
 `with_membership` explicitly selects format 2 for configuration entries and
 membership-aware snapshots. `with_authority` selects format 3 for
 [direct promoted-replica witness authorization](docs/REPLICATION_AUTHORITY.md).
 `with_readiness` selects format 4; `with_learner_repair` selects format 5 for
-bounded multi-batch pre-election learner catch-up. These capabilities do not
+bounded multi-batch pre-election learner catch-up. Format 6 adds historical
+committed checkpoint repair. Retained format-5/6 repair can replace different-term
+uncommitted learner tails while protecting committed and same-term overlap;
+[native fault checks](docs/MEMBERSHIP_CORE.md) cover that restricted path.
+These capabilities do not
 release general online configuration ingress.
 Native TLS/QUIC startup defaults to format 1; select an exact supported version
 with `NativeTlsConfig::with_wire_version` before constructing it. Startup uses
 that version for its codec, roster and authenticated sessions.
-Online Raft membership changes remain disabled; the
+Default configuration ingress remains disabled; the
 [accepted-log core audit](docs/MEMBERSHIP_CORE.md) records quorum integration
 and the remaining activation/recovery gates. Validate its fixed prefix before
 allocating a receive frame, then decode one exact frame with the connection's

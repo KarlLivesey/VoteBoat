@@ -889,6 +889,15 @@ fn remote_joint_repair(
     checkpoint_mode: Option<bool>,
     recursive: bool,
 ) {
+    remote_joint_repair_with_tail(protocol, missing_entries, checkpoint_mode, recursive, false);
+}
+fn remote_joint_repair_with_tail(
+    protocol: NativePeerProtocol,
+    missing_entries: u64,
+    checkpoint_mode: Option<bool>,
+    recursive: bool,
+    divergent: bool,
+) {
     let root = root();
     std::fs::create_dir(&root).unwrap();
     let policy = |required| {
@@ -1000,6 +1009,12 @@ fn remote_joint_repair(
             },
         });
     }
+    if divergent {
+        assert!(checkpoint_mode.is_none() && missing_entries > 63);
+        for entry in history.iter_mut().skip(1) {
+            entry.term = 3;
+        }
+    }
     let expected_value = if recursive { 18 } else { 7 };
     let locals: &[u64] = if recursive { &[1, 2, 3] } else { &[2, 3] };
     let election_commit = history.len() as u64 + 1;
@@ -1017,12 +1032,27 @@ fn remote_joint_repair(
             .unwrap();
         log.barrier(&tickets).unwrap();
         let state = log.state(group()).unwrap();
+        let mut retained = history[..count].to_vec();
+        if divergent && local == 2 {
+            // An abandoned term-2 command suffix is durable but uncommitted,
+            // and extends beyond the candidate's term-3 joint record.
+            for index in 2..=missing_entries + 40 {
+                retained.push(LogEntry {
+                    index,
+                    term: 2,
+                    payload: EntryPayload::Command {
+                        operation: OperationId::new(6000 + u128::from(index)).unwrap(),
+                        bytes: 99i64.to_le_bytes().to_vec(),
+                    },
+                });
+            }
+        }
         let tickets = log
             .append_batch(vec![LogMutation::Update(LogUpdate {
                 group: group(),
                 expected_revision: state.revision,
                 hard_state: HardState {
-                    term: 1,
+                    term: if divergent { 3 } else { 1 },
                     voted_for: None,
                 },
                 commit_index: if local == 3 && checkpoint_mode.is_some() {
@@ -1032,7 +1062,7 @@ fn remote_joint_repair(
                 },
                 suffix: Some(Suffix {
                     from: 1,
-                    entries: history[..count].to_vec(),
+                    entries: retained,
                 }),
                 snapshot: None,
                 snapshot_membership: None,
@@ -1226,6 +1256,10 @@ fn remote_joint_repair(
         assert!(core.local_voter());
         assert_eq!(core.membership().id(), cid(11));
         assert_eq!(app.read_applied(applied_index.unwrap()), Ok(expected_value));
+        if divergent {
+            assert!(!log.state(group()).unwrap().entries.iter().any(|entry|
+                matches!(&entry.payload, EntryPayload::Command { operation, .. } if operation.get() >= 6000)), "abandoned learner commands must not survive/apply");
+        }
     }
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -1255,6 +1289,24 @@ fn tcp_native_joint_repair_catches_up_multiple_batches() {
 #[test]
 fn quic_native_joint_repair_catches_up_multiple_batches() {
     remote_joint_repair(NativePeerProtocol::Quic, 160, None, false);
+}
+#[test]
+fn tcp_retained_repair_replaces_divergent_uncommitted_learner_tail() {
+    remote_joint_repair_with_tail(NativePeerProtocol::TcpTls, 160, None, false, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_retained_repair_replaces_divergent_uncommitted_learner_tail() {
+    remote_joint_repair_with_tail(NativePeerProtocol::Quic, 160, None, false, true);
+}
+#[test]
+fn tcp_recursive_retained_repair_replaces_divergent_learner_tail() {
+    remote_joint_repair_with_tail(NativePeerProtocol::TcpTls, 160, None, true, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_recursive_retained_repair_replaces_divergent_learner_tail() {
+    remote_joint_repair_with_tail(NativePeerProtocol::Quic, 160, None, true, true);
 }
 #[cfg(feature = "quic")]
 #[test]

@@ -1663,6 +1663,126 @@ mod joint_repair {
         }
     }
 
+    #[test]
+    fn divergent_learner_suffix_replacement_recovers_old_or_complete_batch_after_power_loss() {
+        for codec in [
+            NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap(),
+            NativeWireCodec::with_snapshot_repair(WireLimits::default()).unwrap(),
+        ] {
+            let mut recovered_old = false;
+            let mut recovered_new = false;
+            for fault in [
+                Fault::Append(0),
+                Fault::Append(64),
+                Fault::Sync,
+                Fault::PublishBefore,
+                Fault::PublishAfter,
+            ] {
+                let (_, mut sender, first) = batched_source();
+                assert!(first.term >= 2);
+                let io = ModelIo::default();
+                let mut log =
+                    NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+                let _initial = destination(&mut log);
+                let state = log.state(group(1)).unwrap();
+                let abandoned = (2..=200)
+                    .map(|index| LogEntry {
+                        index,
+                        term: 2,
+                        payload: EntryPayload::Command {
+                            operation: OperationId::new(6000 + u128::from(index)).unwrap(),
+                            bytes: 99i64.to_le_bytes().to_vec(),
+                        },
+                    })
+                    .collect::<Vec<_>>();
+                append(
+                    &mut log,
+                    vec![LogMutation::Update(LogUpdate {
+                        group: group(1),
+                        expected_revision: state.revision,
+                        hard_state: voteboat::contracts::HardState {
+                            term: 2,
+                            voted_for: None,
+                        },
+                        commit_index: 1,
+                        suffix: Some(Suffix {
+                            from: 2,
+                            entries: abandoned.clone(),
+                        }),
+                        snapshot: None,
+                        snapshot_membership: None,
+                    })],
+                );
+                let mut receiver = Raft::recover_member(
+                    node(4),
+                    log.binding(),
+                    log.state(group(1)).unwrap(),
+                    log.limits(),
+                )
+                .unwrap();
+                let before = receiver.state().clone();
+                io.0.borrow_mut().fault = fault;
+                assert!(install(&mut log, &mut receiver, roundtrip(&codec, &first)).is_err());
+                assert!(receiver.is_fenced());
+                assert_eq!(
+                    receiver.state(),
+                    &before,
+                    "failed durability must expose no replacement prefix"
+                );
+                drop(log);
+                io.0.borrow_mut().power_loss();
+                let mut log =
+                    NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+                let state = log.state(group(1)).unwrap();
+                assert_eq!(state.commit_index, 1);
+                match state.last_index() {
+                    200 => {
+                        recovered_old = true;
+                        assert_eq!(state.entries, before.entries);
+                        assert_eq!(state.hard_state, before.hard_state);
+                    }
+                    65 => {
+                        recovered_new = true;
+                        let Rpc::LearnerRepair { entries, .. } = &first.rpc else {
+                            unreachable!()
+                        };
+                        assert_eq!(&state.entries[1..], entries.as_slice());
+                        assert_eq!(state.hard_state.term, first.term);
+                        assert_eq!(state.hard_state.voted_for, None);
+                    }
+                    other => panic!("partial suffix replacement survived: {other}"),
+                }
+                let mut receiver =
+                    Raft::recover_member(node(4), log.binding(), state, log.limits()).unwrap();
+                assert!(!receiver.local_voter());
+                let mut request = first;
+                let mut batches = 0;
+                loop {
+                    let ack =
+                        one(install(&mut log, &mut receiver, roundtrip(&codec, &request)).unwrap());
+                    assert_eq!(receiver.state().commit_index, 1);
+                    let next = one(sender
+                        .step(Event::Receive(roundtrip(&codec, &ack)))
+                        .unwrap());
+                    assert_eq!(sender.role(), Role::Candidate);
+                    batches += 1;
+                    if matches!(next.rpc, Rpc::Vote { .. }) {
+                        break;
+                    }
+                    request = next;
+                    assert!(batches < 4);
+                }
+                assert_eq!(batches, 3);
+                assert!(receiver.local_voter());
+                assert_eq!(receiver.state().entries, sender.state().entries);
+                assert_eq!(receiver.state().commit_index, 1);
+            }
+            assert!(
+                recovered_old && recovered_new,
+                "fault schedule must exercise both atomic recovery outcomes"
+            );
+        }
+    }
     fn snapshot_source(joint: bool) -> (HostLogStore, Raft, Message) {
         let (mut log, _, _) = source(32);
         commit(&mut log, if joint { 34 } else { 33 });

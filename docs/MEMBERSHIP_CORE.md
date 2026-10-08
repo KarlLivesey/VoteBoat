@@ -250,9 +250,15 @@ still emitting ordinary Vote requests; explicit format 6 supplies the committed
 checkpoint path described below.
 
 Every range checks the committed/accepted stable exact learner, trusted old
-voter/store, promotion journal, contiguous indices/terms, byte bounds and identical
-retained overlap before normal persistence. It cannot replace any suffix, assert
-commit or grant serving authority. Late repair after joint activation is refused.
+voter/store, promotion journal, contiguous indices/terms and byte bounds before
+normal persistence. Committed overlap and same-term payloads must remain identical.
+For an exact stable committed learner with no accepted configuration work, formats
+5/6 may replace a different-term **uncommitted** command/noop suffix through the
+existing atomic suffix-replacement path. A longer abandoned tail is discarded at
+the first conflict. Accepted configuration work, local voters, committed conflicts
+and same-term payload forks reject before mutation. Formats 2–4 retain their pure
+extension restriction. No repair asserts commit or serving authority. Late repair
+after joint activation is refused.
 Dependent acknowledgements wait for the ordinary exact LogTicket/DurableLog
 completion. Existing durable matching ranges may acknowledge immediately; a
 compacted range returns a retained checkpoint hint. Hints require the candidate's
@@ -272,8 +278,15 @@ commit/apply and reopen a write. Core histories cover lost reply/restart, delaye
 traffic after promotion, malformed authority/ranges, stale contexts, higher-term
 persistence and a matching compacted receiver hint. Native WAL faults fence with
 no reply and recover an old or complete batch. These are bounded histories, not
-a full fork/term/liveness proof. Conflicting learner tails, promoted senders and broader recursive
-policy histories remain release work. Service mutation ingress remains gated.
+a full fork/term/liveness proof. Four additional native TCP/QUIC histories replace
+a longer abandoned term-2 learner tail with a term-3 retained prefix across three
+batches, elect, commit/apply and recover native files; weighted and recursive
+policies are exercised. Format-5/6 native WAL modeled append/sync/publication
+faults recover the complete old or replacement batch, including hard state, then
+resume without exporting commitment. Core tests retain committed-conflict,
+same-term-fork and accepted-configuration refusal. Broader promoted-sender,
+candidate-suffix and recursive failure schedules remain release work. Service
+mutation ingress remains gated.
 
 ### Historical committed snapshot repair (native format 6)
 

@@ -1189,3 +1189,55 @@ pinned-base assertions; the TCP-only lifecycle passed with
 passed before that assertion strengthening; final targeted runs cover the changed
 checks. Warnings-denied all-target Clippy, formatting, diff and inventory checks
 passed. No additional provider, core or storage implementation changed.
+
+## Slice 77 — divergent retained learner-tail repair
+
+The initial native TCP regression failed with InvalidMessage at the first repair
+batch. Its exact committed learner had an abandoned durable-but-uncommitted term-2
+command suffix extending beyond the candidate's term-3 joint record. Retained
+repair required identical overlap even there. The focused format-5/6 change now
+permits different-term uncommitted command/noop replacement through ordinary
+atomic suffix persistence. Committed entries, same-term payload forks, local
+voters and accepted configuration work remain protected. Formats 2–4 are unchanged.
+
+Validation completed:
+
+- Four new native TCP/QUIC histories pass for weighted and recursive policies,
+  repairing a 199-entry abandoned suffix in three batches before normal election,
+  commitment, application and native-file recovery. Reopened files contain no
+  abandoned command IDs; application values are 7/18 as expected.
+- The all-feature member_recovery suite passed 33 tests, including the new native
+  modeled-power-loss replacement test. Formats 5 and 6 each inject zero/short
+  append, sync and before/after-publication failures. Failed transitions fence,
+  expose no replacement prefix/reply, and recover exactly the old suffix with old
+  hard state or the complete first repair batch with its new hard state. Both
+  outcomes are required. Retry completes three batches with unchanged commit=1;
+  only ordinary Vote resumes. This is modeled power loss plus native WAL, separate
+  from the actual-file TCP/QUIC process histories.
+- The all-feature native_member_startup suite passed all 32 tests after the change.
+- Core-only library tests passed 48 tests, including a new protected committed-
+  divergence/accepted-joint refusal test. Existing same-term fork and authority/
+  range/cursor refusal tests pass. Core-only activation_model, learners,
+  membership and raft suites passed 4, 13, 18 and 10 tests respectively.
+- Inventory remains at 60 implemented contracts; this changes the existing core
+  repair semantics, not its provider seams. Final lint/format and service
+  regression results are recorded below after completion.
+
+One fault-test compile initially lacked a qualified HardState type; it was
+corrected to the existing public contracts type. No production API was added.
+
+Held/dropped readiness replies across cancellation/session change, unavailable/
+compacted witness plus promoted-leader failure, and broader recursive partial
+joint/final delivery schedules remain release work. Public mutation ingress stays
+gated. The full P0–P7 goal remains active; P5 routing over established groups can
+proceed independently, while P6 movement retains its own and P4's release checks.
+
+Final slice-77 checks: warnings-denied all-feature/all-target Clippy passed;
+format/diff checks and inventory validation passed at 60 contracts. The full
+20-test executable service suite passed against the changed core. The strengthened
+native replacement fault test requiring both old/new outcomes passed for formats
+5/6, and also passed in the native-only build without TLS. The full 33-test
+member_recovery suite passed before that assertion strengthening; its changed
+test passed afterward. The 32 native membership and 48 core library regressions,
+plus the four core-only integration targets above, passed. README now distinguishes
+working explicit member administration from the remaining public-ingress gate.
