@@ -1384,6 +1384,56 @@ remain unfinished. Host-owned external handshakes must be canceled on expiry or
 shutdown and remain under separate budgets. No production release, performance
 claim, macOS execution or power-cut evidence is implied. Full P0–P7 remains active.
 
+## Slice 19: bounded asynchronous native TCP dialing
+
+`PeerDialer` is the public address-execution boundary, with host-selected endpoint
+and channel types. `NativeTcpDialer` implements it using a fixed authorized
+node/store map, the recovered local identity, existing `ConnectTicket` scopes,
+request limits, per-call timeouts and a shared wake handle. It explicitly starts
+one blocking connect worker and returns nonblocking TCP streams. No dependencies,
+listener, TLS authority or consensus state are added to that worker. Dial results
+are untrusted address outcomes; TLS authentication and exact roster attachment
+remain required. No durability token or Raft acknowledgement follows from them.
+
+Accepted requests retain credits across queueing, connecting and unpolled
+completion. Exact-ticket cancellation skips queued network work, holds active
+credits until the connect returns, and closes late/unobserved successful sockets
+before releasing their slots. Generation floors increase per peer and are bounded
+by the fixed peer map. Hosts reserve nonoverlapping ranges within a persisted
+store session; restart requires a fresh session. Close stops admission and
+cancels all accepted work; terminal polling and nonblocking join finish shutdown.
+Worker panic/disconnection reports every outstanding ticket and stops admission.
+See [the complete dialing contract](DIALING.md) for queue-delay, socket-budget and
+drop limitations.
+
+The shared TCP/TLS fixtures used by the native worker and three-node/100-group
+effect-owner histories now dial through this public provider, then authenticate
+and frame traffic as before. They drain/join the dial worker explicitly. Listener
+acceptance and TLS driving remain fixture-owned; this is concrete dialing
+integration, not a finished production connection owner or node service.
+
+Validation on Linux:
+
+- Full local suites pass: 195 default native/TLS tests, 184 native-only tests,
+  and 91 core/host-only tests. The core-only public host provider uses a local
+  channel type without native implementation dependencies.
+- Clippy passes all three feature configurations with warnings denied;
+  formatting, documentation, contract JSON and new RPL header checks pass.
+- New tests cover real TCP success/nonblocking I/O, exact scope and rejection
+  ownership, refusal, timeout/generation validation, completed-but-unpolled
+  socket cancellation, and independent shutdown while sharing a host wake.
+- Deterministic held-worker tests verify active/queued cancellation credit
+  lifetime, skipping queued connects, drop cleanup, and exact terminal accounting
+  after a worker panic. They do not rely on a nondeterministic unreachable address
+  to simulate a slow kernel connect.
+
+The timeout bounds one connect call and excludes queue delay; the future
+connection owner must cancel on the roster's end-to-end deadline. Production
+listener/routing/TLS-handshake ownership, decoded ingress/result admission,
+physical WAL cleaning, membership/policy changes, recursive responsibilities
+and split/merge remain unfinished. macOS execution and power-cut evidence remain
+outstanding. Full P0–P7 stays active; CI remains background feedback.
+
 ## Next slice
 
 Continue full native node assembly with bounded socket establishment, decoded

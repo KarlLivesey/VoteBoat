@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-peer-reconnect-coordination",
+  "status": "shared-runtime-with-bounded-peer-reconnect-and-native-dialing",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -335,6 +335,28 @@
       "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
       "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
       "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Host owns socket/TLS establishment and separate ingress/staging resources. No membership or quorum authority."
+    },
+    {
+      "design_id": "C06/C15",
+      "public_contract": "PeerDialer",
+      "operations": [
+        "local",
+        "limits",
+        "outstanding",
+        "submit",
+        "cancel",
+        "poll",
+        "close",
+        "is_drained"
+      ],
+      "native": "NativeTcpDialer (native feature)",
+      "conformance": [
+        "tests/dial.rs",
+        "src/native/dial.rs (deterministic worker fault tests)",
+        "tests/effect_owner.rs",
+        "tests/worker.rs"
+      ],
+      "scope": "Explicit bounded TCP dial worker, checked node/store/session/generation tickets, nonblocking connected streams, exact cancellation and terminal credit lifetime, failure/drain/join. Native TCP/TLS histories dial through this public contract. Channels are unauthenticated address results; production listener/routing/TLS handshake ownership and full node admission remain unfinished. Timeout bounds one connect call, excluding queue delay; roster deadlines require cancellation."
     },
     {
       "design_id": "C13",

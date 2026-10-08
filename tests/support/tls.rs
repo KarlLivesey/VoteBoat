@@ -12,13 +12,20 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Real TLS fixtures over caller-owned loopback TCP, with no background runtime.
+//! Real TLS fixtures over caller-owned listeners and bounded native TCP dialing.
 use std::{
     net::{TcpListener, TcpStream},
     thread,
     time::{Duration, Instant},
 };
-use voteboat::{identity::SecureSessionGeneration, native::tls::*, runtime::MonoTime, secure::*};
+use voteboat::{
+    dial::*,
+    identity::SecureSessionGeneration,
+    native::{dial::NativeTcpDialer, tls::*, worker::ThreadWake},
+    runtime::MonoTime,
+    secure::*,
+    transport::ConnectTicket,
+};
 fn certificate(n: u64) -> &'static [u8] {
     match n {
         1 => include_bytes!("../fixtures/tls/node1.der"),
@@ -65,7 +72,39 @@ pub fn pair_generations(
     b_generation: u64,
 ) -> (NativeTlsSession<TcpStream>, NativeTlsSession<TcpStream>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let stream_a = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+    let mut dialer = NativeTcpDialer::spawn(
+        a,
+        [(b.node, b.store.identity)].into(),
+        DialLimits::default(),
+        std::sync::Arc::new(ThreadWake::current()),
+    )
+    .unwrap();
+    let ticket = ConnectTicket {
+        local: a,
+        peer: peer(b).identity,
+        generation: SecureSessionGeneration::new(a_generation).unwrap(),
+    };
+    dialer
+        .submit(DialRequest {
+            connection: ticket,
+            endpoint: listener.local_addr().unwrap(),
+            timeout_ms: 1_000,
+        })
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    let stream_a = loop {
+        if let Some(event) = dialer.poll(1).pop() {
+            assert_eq!(event.connection, ticket);
+            break event.result.unwrap();
+        }
+        assert!(Instant::now() < deadline, "dial timed out");
+        thread::park_timeout(Duration::from_millis(1));
+    };
+    dialer.close();
+    while !dialer.try_finish().unwrap() {
+        assert!(Instant::now() < deadline, "dial shutdown timed out");
+        thread::yield_now();
+    }
     let (stream_b, _) = listener.accept().unwrap();
     stream_a.set_nodelay(true).unwrap();
     stream_b.set_nodelay(true).unwrap();

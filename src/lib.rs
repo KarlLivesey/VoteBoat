@@ -15,6 +15,7 @@
 //! Deterministic consensus components. See the README for implemented scope.
 pub mod application;
 pub mod contracts;
+pub mod dial;
 pub mod identity;
 pub mod log;
 #[cfg(feature = "native")]

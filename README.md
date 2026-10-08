@@ -209,6 +209,15 @@ reconnects a peer pair before further replicated work. See the
 [transport](docs/TRANSPORT.md) and [peer-roster](docs/PEER_ROSTER.md) contracts for
 ownership, failure and shutdown details.
 
+`dial::PeerDialer` provides bounded asynchronous address execution.
+`native::dial::NativeTcpDialer` uses one explicit worker and checked roster
+tickets, returning nonblocking TCP streams. Queued, active and unpolled work
+retain slots; cancellation closes a late successful socket before releasing its
+slot. The TCP/TLS histories now use this provider for dialing. A dial result
+still needs TLS authentication; production listener/handshake ownership remains
+in progress. See [dialing](docs/DIALING.md) for timeout, cancellation and
+close/drain/join behavior.
+
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
 Each group allows one outstanding read (including an unconsumed ready barrier).

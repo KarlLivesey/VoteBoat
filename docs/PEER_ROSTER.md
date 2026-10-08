@@ -130,8 +130,11 @@ then continues timer heartbeats, replicated writes, reads, repeated checkpoints
 and actual-file recovery. This is bounded reconnect evidence, not a complete
 kernel-network fault matrix or proof. Native-only histories use bounded simulated
 delivery and test roster coordination separately. macOS execution remains
-unobserved. Listener/dial execution, complete ingress/result admission and the
-full node facade remain in progress.
+unobserved. Native TCP dialing now uses the public `PeerDialer` contract and a
+bounded worker; see [dialing](DIALING.md). The host must cancel accepted dials
+when roster attempts expire and retain their separate credits until terminal
+completion. Listener/TLS handshake ownership, complete ingress/result admission
+and the full node facade remain in progress.
 
 The native histories also explicitly close every roster, poll TLS shutdown and
 check that all connection reservations are released before dropping the nodes.
