@@ -30,13 +30,46 @@ pub struct SnapshotIdentity {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SnapshotMetadata {
     pub bootstrap: Bootstrap,
+    pub membership: Option<Box<crate::membership::Membership>>,
     pub index: u64,
     pub term: u64,
     pub application_schema: u64,
 }
 impl SnapshotMetadata {
+    pub fn configuration(&self) -> ConfigurationId {
+        self.membership
+            .as_ref()
+            .map_or(self.bootstrap.configuration, |m| m.id())
+    }
+    /// A later local checkpoint cannot rewrite its already published prefix.
+    /// Log installation still verifies the exact matching configuration base.
+    pub fn follows(&self, previous: &Self) -> bool {
+        if self.bootstrap != previous.bootstrap
+            || self.index <= previous.index
+            || self.term < previous.term
+            || self.application_schema != previous.application_schema
+            || self.configuration() < previous.configuration()
+        {
+            return false;
+        }
+        if self.configuration() == previous.configuration() {
+            return self.membership == previous.membership;
+        }
+        let Some(next) = &self.membership else {
+            return false;
+        };
+        next.last_configuration_index() > previous.index
+            && previous
+                .membership
+                .as_ref()
+                .is_none_or(|old| next.operations().is_superset(old.operations()))
+    }
     pub fn validate(&self) -> Result<(), StorageError> {
-        if self.index == 0 || self.term == 0 || self.application_schema == 0 {
+        if self.index == 0
+            || self.index == u64::MAX
+            || self.term == 0
+            || self.application_schema == 0
+        {
             return Err(StorageError::Rejected("invalid snapshot boundary/schema"));
         }
         // Reuse the authoritative bootstrap validation, including membership.
@@ -45,7 +78,13 @@ impl SnapshotMetadata {
             &mut empty,
             &[crate::log::LogMutation::Create(self.bootstrap.clone())],
             crate::log::LogLimits::default(),
-        )
+        )?;
+        if let Some(membership) = &self.membership {
+            membership
+                .validate_checkpoint(&self.bootstrap, self.index)
+                .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
+        }
+        Ok(())
     }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -93,7 +132,7 @@ impl SnapshotReceipt {
             store: self.sealed.ticket.binding.identity,
             group: self.metadata.bootstrap.group,
             generation: self.sealed.ticket.generation,
-            configuration: self.metadata.bootstrap.configuration,
+            configuration: self.metadata.configuration(),
             index: self.metadata.index,
             term: self.metadata.term,
             application_schema: self.metadata.application_schema,
@@ -105,7 +144,7 @@ impl SnapshotReceipt {
 impl SnapshotRef {
     pub fn matches(&self, snapshot: &Snapshot) -> bool {
         self.group == snapshot.metadata.bootstrap.group
-            && self.configuration == snapshot.metadata.bootstrap.configuration
+            && self.configuration == snapshot.metadata.configuration()
             && self.index == snapshot.metadata.index
             && self.term == snapshot.metadata.term
             && self.application_schema == snapshot.metadata.application_schema
@@ -239,6 +278,10 @@ pub fn checkpoint_application<A: CheckpointStateMachine, S: SnapshotStore>(
         return Err(CheckpointError::InvalidBoundary);
     }
     let metadata = SnapshotMetadata {
+        membership: raft
+            .state()
+            .checkpoint_membership(index)
+            .map_err(|_| CheckpointError::InvalidBoundary)?,
         bootstrap: raft.state().bootstrap.clone(),
         index,
         term: raft
@@ -307,6 +350,14 @@ pub fn restore_application<A: CheckpointStateMachine, S: SnapshotRetention>(
             return Err(CheckpointError::InvalidBoundary);
         }
         m.validate()?;
+        if raft
+            .state()
+            .checkpoint_membership(m.index)
+            .map_err(|_| CheckpointError::InvalidBoundary)?
+            != m.membership
+        {
+            return Err(CheckpointError::InvalidBoundary);
+        }
         next.restore_checkpoint(m.application_schema, m.index, &snapshot.application)?;
         if next.applied_index() != m.index {
             return Err(CheckpointError::InvalidBoundary);
@@ -379,7 +430,14 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
     }
     store.pin_for_log(reference)?;
     let snapshot = store.load_pinned(reference)?;
-    if !reference.matches(&snapshot) || snapshot.metadata.bootstrap != raft.state().bootstrap {
+    if !reference.matches(&snapshot)
+        || snapshot.metadata.bootstrap != raft.state().bootstrap
+        || snapshot.metadata.membership
+            != raft
+                .state()
+                .checkpoint_membership(reference.index)
+                .map_err(|_| CheckpointError::InvalidBoundary)?
+    {
         return Err(CheckpointError::InvalidBoundary);
     }
     let mut check = application.clone();
@@ -484,7 +542,10 @@ pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: Snapsh
             return Err(CheckpointError::InvalidBoundary);
         }
         let snapshot = store.load_pinned(reference)?;
-        if !reference.matches(&snapshot) || snapshot.metadata.bootstrap != raft.state().bootstrap {
+        if !reference.matches(&snapshot)
+            || snapshot.metadata.bootstrap != raft.state().bootstrap
+            || snapshot.metadata.membership != raft.state().snapshot_membership
+        {
             return Err(CheckpointError::InvalidBoundary);
         }
         let mut next = application.clone();

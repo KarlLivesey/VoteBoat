@@ -750,6 +750,7 @@ mod native {
         snapshot.rpc = Rpc::Snapshot {
             snapshot: Box::new(Snapshot {
                 metadata: SnapshotMetadata {
+                    membership: None,
                     bootstrap,
                     index: 3,
                     term: 1,

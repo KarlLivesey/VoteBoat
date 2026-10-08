@@ -289,6 +289,7 @@ mod tests {
             let s = store.state(group()).unwrap();
             let tickets = store
                 .append_batch(vec![LogMutation::Update(LogUpdate {
+                    snapshot_membership: None,
                     group: group(),
                     expected_revision: s.revision,
                     hard_state: HardState {

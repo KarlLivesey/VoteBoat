@@ -123,6 +123,7 @@ mod native {
         message(Rpc::Snapshot {
             snapshot: Box::new(Snapshot {
                 metadata: SnapshotMetadata {
+                    membership: None,
                     bootstrap: bootstrap(1, 3),
                     index: 2,
                     term: 2,

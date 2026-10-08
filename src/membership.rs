@@ -21,6 +21,10 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+/// Retain operation identities across compaction without unbounded tombstones.
+/// Exhaustion rejects further transitions; identities are never silently evicted.
+pub const MAX_CONFIGURATION_OPERATIONS: usize = 16384;
+
 /// A stable configuration, including separate non-voting learners. Construction
 /// bounds the combined replica set and validates every durable store binding.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -42,6 +46,7 @@ pub enum MembershipError {
     JointNotCommitted,
     InvalidFinal,
     InvalidHistory,
+    HistoryFull,
 }
 impl Configuration {
     pub fn new(
@@ -161,25 +166,40 @@ impl Membership {
         entries: &[LogEntry],
         committed_prefix: u64,
     ) -> Result<Self, MembershipError> {
-        let mut result = Self {
-            stable: Configuration::new(
-                bootstrap.configuration,
-                bootstrap.policy.clone(),
-                bootstrap.voter_stores.clone(),
-                BTreeMap::new(),
-            )?,
-            joint: None,
-            last_index: 0,
-            operations: BTreeSet::new(),
+        Self::replay_from(bootstrap, None, 0, entries, committed_prefix)
+    }
+    pub fn replay_from(
+        bootstrap: &Bootstrap,
+        base: Option<&Self>,
+        base_index: u64,
+        entries: &[LogEntry],
+        committed_prefix: u64,
+    ) -> Result<Self, MembershipError> {
+        if committed_prefix < base_index {
+            return Err(MembershipError::InvalidHistory);
+        }
+        let mut result = if let Some(base) = base {
+            base.validate_checkpoint(bootstrap, base_index)?;
+            base.clone()
+        } else {
+            Self {
+                stable: Configuration::new(
+                    bootstrap.configuration,
+                    bootstrap.policy.clone(),
+                    bootstrap.voter_stores.clone(),
+                    BTreeMap::new(),
+                )?,
+                joint: None,
+                last_index: 0,
+                operations: BTreeSet::new(),
+            }
         };
-        let mut previous = None;
+        let mut previous = base_index;
         for entry in entries {
-            if entry.index == 0
-                || previous.is_some_and(|i: u64| i.checked_add(1) != Some(entry.index))
-            {
+            if previous.checked_add(1) != Some(entry.index) {
                 return Err(MembershipError::InvalidHistory);
             }
-            previous = Some(entry.index);
+            previous = entry.index;
             if let EntryPayload::Configuration(record) = &entry.payload {
                 result.accept(entry.index, record, committed_prefix)?;
             }
@@ -213,6 +233,9 @@ impl Membership {
                 }
                 if self.operations.contains(&record.operation) {
                     return Err(MembershipError::ReusedOperation);
+                }
+                if self.operations.len() == MAX_CONFIGURATION_OPERATIONS {
+                    return Err(MembershipError::HistoryFull);
                 }
                 match change {
                     ConfigurationChange::Learners(next) => {
@@ -292,6 +315,88 @@ impl Membership {
     }
     pub fn last_configuration_index(&self) -> u64 {
         self.last_index
+    }
+    pub fn operations(&self) -> &BTreeSet<OperationId> {
+        &self.operations
+    }
+    /// Restore a bounded checkpoint, then bind it to bootstrap with
+    /// validate_checkpoint. This validates structure, not remote provenance.
+    pub fn from_checkpoint(
+        stable: Configuration,
+        joint: Option<JointConfiguration>,
+        last_index: u64,
+        operations: BTreeSet<OperationId>,
+        boundary: u64,
+    ) -> Result<Self, MembershipError> {
+        if last_index > boundary
+            || operations.len() > MAX_CONFIGURATION_OPERATIONS
+            || operations.len() as u64 > last_index
+            || (last_index == 0) != operations.is_empty()
+        {
+            return Err(MembershipError::InvalidHistory);
+        }
+        if let Some(joint) = &joint {
+            if joint.index != last_index || !operations.contains(&joint.operation) {
+                return Err(MembershipError::InvalidHistory);
+            }
+            let mut check = Self {
+                stable: stable.clone(),
+                joint: None,
+                last_index: 0,
+                operations: BTreeSet::new(),
+            };
+            check.accept(
+                joint.index,
+                &ConfigurationRecord {
+                    operation: joint.operation,
+                    expected: stable.id,
+                    change: ConfigurationChange::Joint {
+                        id: joint.id,
+                        next: joint.next.clone(),
+                    },
+                },
+                boundary,
+            )?;
+        }
+        Ok(Self {
+            stable,
+            joint,
+            last_index,
+            operations,
+        })
+    }
+    pub fn validate_checkpoint(
+        &self,
+        bootstrap: &Bootstrap,
+        boundary: u64,
+    ) -> Result<(), MembershipError> {
+        Self::from_checkpoint(
+            self.stable.clone(),
+            self.joint.clone(),
+            self.last_index,
+            self.operations.clone(),
+            boundary,
+        )?;
+        let initial = Configuration::new(
+            bootstrap.configuration,
+            bootstrap.policy.clone(),
+            bootstrap.voter_stores.clone(),
+            BTreeMap::new(),
+        )?;
+        if self.stable.id < initial.id
+            || (self.stable.id == initial.id && self.stable != initial)
+            || (self.last_index == 0 && (self.stable != initial || self.joint.is_some()))
+            || (self.last_index > 0 && self.joint.is_none() && self.stable.id == initial.id)
+        {
+            return Err(MembershipError::InvalidHistory);
+        }
+        Ok(())
+    }
+    pub fn retained_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+            .saturating_add(self.stable.retained_bytes())
+            .saturating_add(self.joint.as_ref().map_or(0, |j| j.next.retained_bytes()))
+            .saturating_add(self.operations.len().saturating_mul(192))
     }
     pub fn is_voter(&self, node: NodeId) -> bool {
         self.stable.policy.voters().contains(&node)

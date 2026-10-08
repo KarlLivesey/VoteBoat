@@ -316,6 +316,9 @@ pub fn message_cost(
         Rpc::Snapshot { snapshot } => {
             add(size_of::<crate::snapshot::Snapshot>())?;
             add(snapshot.application.capacity())?;
+            if let Some(membership) = &snapshot.metadata.membership {
+                add(membership.retained_bytes())?;
+            }
             let b = &snapshot.metadata.bootstrap;
             if b.voter_stores.len() > 4096 || b.policy.voters().len() > 4096 {
                 return Err(OutboundError::BatchTooLarge);

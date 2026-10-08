@@ -74,16 +74,49 @@ pub struct GroupLog {
     /// Contiguous committed prefix, never a largest completed index.
     pub commit_index: u64,
     pub snapshot: Option<SnapshotRef>,
+    pub snapshot_membership: Option<Box<crate::membership::Membership>>,
     pub entries: Vec<LogEntry>,
 }
 impl GroupLog {
     /// Accepted-log activation, independent of application execution. Snapshot
-    /// compaction currently preserves every configuration record until the
-    /// configuration-aware snapshot format and live core are integrated.
+    /// suffix records replay from the configuration at the snapshot boundary.
     pub fn membership(
         &self,
     ) -> Result<crate::membership::Membership, crate::membership::MembershipError> {
-        crate::membership::Membership::replay(&self.bootstrap, &self.entries, self.commit_index)
+        crate::membership::Membership::replay_from(
+            &self.bootstrap,
+            self.snapshot_membership.as_deref(),
+            self.base_index(),
+            &self.entries,
+            self.commit_index,
+        )
+    }
+    pub fn membership_at(
+        &self,
+        index: u64,
+    ) -> Result<crate::membership::Membership, crate::membership::MembershipError> {
+        if index < self.base_index() || index > self.last_index() {
+            return Err(crate::membership::MembershipError::InvalidHistory);
+        }
+        let count = usize::try_from(index - self.base_index())
+            .map_err(|_| crate::membership::MembershipError::InvalidHistory)?;
+        crate::membership::Membership::replay_from(
+            &self.bootstrap,
+            self.snapshot_membership.as_deref(),
+            self.base_index(),
+            self.entries
+                .get(..count)
+                .ok_or(crate::membership::MembershipError::InvalidHistory)?,
+            self.commit_index.min(index),
+        )
+    }
+    pub fn checkpoint_membership(
+        &self,
+        index: u64,
+    ) -> Result<Option<Box<crate::membership::Membership>>, crate::membership::MembershipError>
+    {
+        let membership = self.membership_at(index)?;
+        Ok((membership.last_configuration_index() > 0).then(|| Box::new(membership)))
     }
     pub fn base_index(&self) -> u64 {
         self.snapshot.map_or(0, |s| s.index)
@@ -126,6 +159,9 @@ pub struct LogUpdate {
     /// Requires a durable snapshot pin before submission. The core/storage
     /// driver controls this dependency; a publication receipt alone is insufficient.
     pub snapshot: Option<SnapshotRef>,
+    /// Configuration bound to that same durable snapshot. None denotes the
+    /// original bootstrap only, and cannot discard committed configuration work.
+    pub snapshot_membership: Option<Box<crate::membership::Membership>>,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogMutation {
@@ -294,6 +330,7 @@ pub fn apply_batch(
                 next.insert(
                     group,
                     GroupLog {
+                        snapshot_membership: None,
                         bootstrap: b.clone(),
                         revision: LogRevision::new(1).unwrap(),
                         generation: LogGeneration::new(1).unwrap(),
@@ -317,10 +354,17 @@ pub fn apply_batch(
                 {
                     return Err(StorageError::Rejected("stale revision or invalid ballot"));
                 }
+                if update.snapshot.is_none() && update.snapshot_membership.is_some() {
+                    return Err(StorageError::Rejected("membership base without snapshot"));
+                }
                 if let Some(reference) = update.snapshot {
                     if update.suffix.is_some()
                         || reference.group != group
-                        || reference.configuration != current.bootstrap.configuration
+                        || reference.configuration
+                            != update
+                                .snapshot_membership
+                                .as_ref()
+                                .map_or(current.bootstrap.configuration, |m| m.id())
                         || reference.index <= current.base_index()
                         || reference.index == u64::MAX
                         || reference.term == 0
@@ -334,13 +378,44 @@ pub fn apply_batch(
                         return Err(StorageError::Rejected("invalid snapshot boundary/scope"));
                     }
                     let matching = current.term_at(reference.index) == Some(reference.term);
-                    if current.entries.iter().any(|entry| {
-                        matches!(entry.payload, EntryPayload::Configuration(_))
-                            && (entry.index <= reference.index || !matching)
-                    }) {
+                    if let Some(base) = &update.snapshot_membership {
+                        base.validate_checkpoint(&current.bootstrap, reference.index)
+                            .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
+                        if base.retained_bytes() > limits.max_batch_bytes {
+                            return Err(StorageError::Rejected("snapshot membership budget"));
+                        }
+                    }
+                    if matching
+                        && current
+                            .checkpoint_membership(reference.index)
+                            .map_err(|_| StorageError::Rejected("invalid local membership"))?
+                            != update.snapshot_membership
+                    {
                         return Err(StorageError::Rejected(
-                            "snapshot would discard configuration journal",
+                            "snapshot membership differs from matching prefix",
                         ));
+                    }
+                    if !matching {
+                        let committed = current
+                            .membership_at(current.commit_index)
+                            .map_err(|_| StorageError::Rejected("invalid committed membership"))?;
+                        let incoming = crate::membership::Membership::replay_from(
+                            &current.bootstrap,
+                            update.snapshot_membership.as_deref(),
+                            reference.index,
+                            &[],
+                            reference.index,
+                        )
+                        .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
+                        if incoming.id() < committed.id()
+                            || incoming.last_configuration_index()
+                                < committed.last_configuration_index()
+                            || !incoming.operations().is_superset(committed.operations())
+                        {
+                            return Err(StorageError::Rejected(
+                                "snapshot regresses committed membership",
+                            ));
+                        }
                     }
                     if reference.index <= current.commit_index && !matching {
                         return Err(StorageError::Rejected(
@@ -355,6 +430,7 @@ pub fn apply_batch(
                         current.entries.clear();
                     }
                     current.snapshot = Some(reference);
+                    current.snapshot_membership = update.snapshot_membership.clone();
                     current.generation = current
                         .generation
                         .get()
@@ -413,10 +489,11 @@ pub fn apply_batch(
                 }
                 current.hard_state = update.hard_state;
                 current.commit_index = update.commit_index;
-                if current
-                    .entries
-                    .iter()
-                    .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
+                if current.snapshot_membership.is_some()
+                    || current
+                        .entries
+                        .iter()
+                        .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
                 {
                     current
                         .membership()

@@ -60,6 +60,7 @@ fn populated<I: JournalIo>(io: I) -> NativeLogStore<I> {
                 }),
             ),
             LogMutation::Update(LogUpdate {
+                snapshot_membership: None,
                 group: group(2),
                 expected_revision: second.revision,
                 hard_state: HardState {

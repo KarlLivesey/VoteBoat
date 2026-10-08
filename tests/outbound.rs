@@ -87,6 +87,7 @@ fn message(peer: u64, class: MessageClass) -> Message {
             MessageClass::Background => Rpc::Snapshot {
                 snapshot: Box::new(voteboat::snapshot::Snapshot {
                     metadata: voteboat::snapshot::SnapshotMetadata {
+                        membership: None,
                         bootstrap: bootstrap(1, 3),
                         index: 1,
                         term: 1,

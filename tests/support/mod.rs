@@ -56,6 +56,7 @@ pub fn bootstrap(g: u128, nodes: u64) -> Bootstrap {
 }
 pub fn update(state: &GroupLog, term: u64, commit: u64, suffix: Option<Suffix>) -> LogMutation {
     LogMutation::Update(LogUpdate {
+        snapshot_membership: None,
         group: state.bootstrap.group,
         expected_revision: state.revision,
         hard_state: HardState {

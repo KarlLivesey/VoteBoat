@@ -233,6 +233,10 @@ pub fn prepare_local_checkpoint_work<A: CheckpointStateMachine>(
     }
     let snapshot = Snapshot {
         metadata: SnapshotMetadata {
+            membership: raft
+                .state()
+                .checkpoint_membership(index)
+                .map_err(|_| CheckpointError::InvalidBoundary)?,
             bootstrap: raft.state().bootstrap.clone(),
             index,
             term: raft
@@ -292,7 +296,12 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
             (Effect::CheckpointRequired { context }, SnapshotOutput::Published(reference)) => {
                 if reference.store != raft.storage_binding().identity
                     || reference.group != raft.state().bootstrap.group
-                    || reference.configuration != raft.state().bootstrap.configuration
+                    || reference.configuration
+                        != raft
+                            .state()
+                            .membership_at(reference.index)
+                            .map_err(|_| CheckpointError::InvalidBoundary)?
+                            .id()
                     || reference.index != application.applied_index()
                     || reference.application_schema != application.schema_version()
                     || raft.state().term_at(reference.index) != Some(reference.term)
@@ -334,6 +343,7 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
                 if raft.state().snapshot != Some(loaded)
                     || !loaded.matches(&snapshot)
                     || snapshot.metadata.bootstrap != raft.state().bootstrap
+                    || snapshot.metadata.membership != raft.state().snapshot_membership
                     || application.applied_index() > loaded.index
                 {
                     return Err(CheckpointError::InvalidBoundary);
@@ -370,6 +380,9 @@ pub fn snapshot_image_bytes(snapshot: &Snapshot) -> Option<usize> {
     let mut bytes = size_of::<Snapshot>()
         .checked_add(snapshot.application.capacity())?
         .checked_add((b.voter_stores.len() + b.policy.voters().len()).checked_mul(128)?)?;
+    if let Some(membership) = &snapshot.metadata.membership {
+        bytes = bytes.checked_add(membership.retained_bytes())?;
+    }
     let mut stack = vec![(b.policy.tree(), 0)];
     let mut count = 0;
     while let Some((tree, depth)) = stack.pop() {

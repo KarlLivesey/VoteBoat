@@ -49,7 +49,9 @@ development; this is not a production consensus release.
 
 The [durable configuration journal](docs/CONFIGURATION_JOURNAL.md) now validates
 learner, joint and final records through host/native storage, recovery and suffix
-rollback. Live admission remains disabled pending quorum and snapshot integration.
+rollback. [Configuration-aware snapshots](docs/CONFIGURATION_SNAPSHOTS.md) now
+preserve membership and operation identities across compaction and recovery.
+Live admission remains disabled pending complete quorum and learner integration.
 
 ## Run
 

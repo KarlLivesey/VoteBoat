@@ -51,6 +51,7 @@ fn image(g: u128) -> Snapshot {
     .unwrap();
     Snapshot {
         metadata: SnapshotMetadata {
+            membership: None,
             bootstrap: bootstrap(g, 3),
             index: 1,
             term: 1,

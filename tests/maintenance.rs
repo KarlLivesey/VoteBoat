@@ -166,6 +166,7 @@ fn unit(w: &impl PersistenceWorker, g: u128, data: bool) -> Vec<PersistUnit> {
             sequence: 1,
         },
         update: LogUpdate {
+            snapshot_membership: None,
             group,
             expected_revision: LogRevision::new(1).unwrap(),
             hard_state: HardState {

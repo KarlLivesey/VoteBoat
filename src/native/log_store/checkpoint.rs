@@ -40,6 +40,7 @@ pub(super) fn encode(
         e.u8(u8::from(s.snapshot.is_some()))?;
         if let Some(reference) = s.snapshot {
             e.mutation(&LogMutation::Update(LogUpdate {
+                snapshot_membership: s.snapshot_membership.clone(),
                 group: s.bootstrap.group,
                 expected_revision: LogRevision::new(1).unwrap(),
                 hard_state: s.hard_state,
@@ -49,6 +50,7 @@ pub(super) fn encode(
             }))?;
         }
         e.mutation(&LogMutation::Update(LogUpdate {
+            snapshot_membership: None,
             group: s.bootstrap.group,
             expected_revision: LogRevision::new(if s.snapshot.is_some() { 2 } else { 1 }).unwrap(),
             hard_state: s.hard_state,
@@ -216,6 +218,7 @@ pub(super) fn validate_state(
             apply_batch(
                 &mut one,
                 &[LogMutation::Update(LogUpdate {
+                    snapshot_membership: s.snapshot_membership.clone(),
                     group: *group,
                     expected_revision: initial.revision,
                     hard_state: s.hard_state,
@@ -235,6 +238,7 @@ pub(super) fn validate_state(
         apply_batch(
             &mut one,
             &[LogMutation::Update(LogUpdate {
+                snapshot_membership: None,
                 group: *group,
                 expected_revision: revision,
                 hard_state: s.hard_state,

@@ -587,7 +587,16 @@ impl Encoder {
                 Ok(())
             }
             LogMutation::Update(u) => {
-                self.u8(if u.snapshot.is_some() { 2 } else { 1 })?;
+                if u.snapshot.is_none() && u.snapshot_membership.is_some() {
+                    return Err(StorageError::Rejected("membership base without snapshot"));
+                }
+                self.u8(if u.snapshot_membership.is_some() {
+                    3
+                } else if u.snapshot.is_some() {
+                    2
+                } else {
+                    1
+                })?;
                 self.group(u.group)?;
                 self.u64(u.expected_revision.get())?;
                 self.u64(u.hard_state.term)?;
@@ -606,7 +615,11 @@ impl Encoder {
                     self.u64(r.term)?;
                     self.u64(r.application_schema)?;
                     self.u64(r.file_bytes)?;
-                    return self.u32(r.checksum);
+                    self.u32(r.checksum)?;
+                    if let Some(membership) = &u.snapshot_membership {
+                        self.membership(membership)?;
+                    }
+                    return Ok(());
                 }
                 match &u.suffix {
                     None => self.u8(0),
@@ -673,6 +686,23 @@ impl Encoder {
                 self.u64(id.get())
             }
         }
+    }
+    fn membership(&mut self, m: &crate::membership::Membership) -> Result<(), StorageError> {
+        self.u8(1)?;
+        self.configuration(m.stable())?;
+        self.u64(m.last_configuration_index())?;
+        self.u8(u8::from(m.joint().is_some()))?;
+        if let Some(j) = m.joint() {
+            self.u128(j.operation.get())?;
+            self.u64(j.id.get())?;
+            self.u64(j.index)?;
+            self.configuration(&j.next)?;
+        }
+        self.u32(m.operations().len() as u32)?;
+        for op in m.operations() {
+            self.u128(op.get())?;
+        }
+        Ok(())
     }
 }
 
@@ -785,7 +815,7 @@ impl<'a> Decoder<'a> {
                     voter_stores,
                 }))
             }
-            1 | 2 => {
+            1..=3 => {
                 let expected_revision =
                     LogRevision::new(self.u64()?).ok_or(StorageError::Corrupt("zero revision"))?;
                 let hard_state = crate::contracts::HardState {
@@ -793,7 +823,7 @@ impl<'a> Decoder<'a> {
                     voted_for: NodeId::new(self.u64()?),
                 };
                 let commit_index = self.u64()?;
-                if kind == 2 {
+                if kind == 2 || kind == 3 {
                     let store = StoreIdentity {
                         id: StoreId::new(self.u128()?)
                             .ok_or(StorageError::Corrupt("zero snapshot store"))?,
@@ -814,6 +844,11 @@ impl<'a> Decoder<'a> {
                         checksum: self.u32()?,
                     };
                     return Ok(LogMutation::Update(LogUpdate {
+                        snapshot_membership: if kind == 3 {
+                            Some(Box::new(self.membership(reference.index)?))
+                        } else {
+                            None
+                        },
                         group,
                         expected_revision,
                         hard_state,
@@ -872,6 +907,7 @@ impl<'a> Decoder<'a> {
                     _ => return Err(StorageError::Corrupt("suffix flag")),
                 };
                 Ok(LogMutation::Update(LogUpdate {
+                    snapshot_membership: None,
                     group,
                     expected_revision,
                     hard_state,
@@ -949,6 +985,67 @@ impl<'a> Decoder<'a> {
             expected,
             change,
         })
+    }
+    fn membership(&mut self, boundary: u64) -> Result<crate::membership::Membership, StorageError> {
+        use crate::membership::{JointConfiguration, Membership, MAX_CONFIGURATION_OPERATIONS};
+        if self.u8()? != 1 {
+            return Err(StorageError::Corrupt("membership checkpoint version"));
+        }
+        let stable = self.configuration()?;
+        let index = self.u64()?;
+        let joint = match self.u8()? {
+            0 => None,
+            1 => Some(JointConfiguration {
+                operation: OperationId::new(self.u128()?)
+                    .ok_or(StorageError::Corrupt("zero membership operation"))?,
+                id: ConfigurationId::new(self.u64()?)
+                    .ok_or(StorageError::Corrupt("zero joint identity"))?,
+                index: self.u64()?,
+                next: self.configuration()?,
+            }),
+            _ => return Err(StorageError::Corrupt("membership joint flag")),
+        };
+        let count = self.u32()? as usize;
+        if count > MAX_CONFIGURATION_OPERATIONS
+            || count > self.b.len().saturating_sub(self.offset) / 16
+        {
+            return Err(StorageError::Corrupt("membership operation budget"));
+        }
+        let mut operations = std::collections::BTreeSet::new();
+        for _ in 0..count {
+            let op = OperationId::new(self.u128()?)
+                .ok_or(StorageError::Corrupt("zero membership operation"))?;
+            if !operations.insert(op) {
+                return Err(StorageError::Corrupt("duplicate membership operation"));
+            }
+        }
+        Membership::from_checkpoint(stable, joint, index, operations, boundary)
+            .map_err(|_| StorageError::Corrupt("invalid membership checkpoint"))
+    }
+}
+
+impl NativeLogCodec {
+    pub(crate) fn encode_membership(
+        m: &crate::membership::Membership,
+        max_bytes: usize,
+    ) -> Result<Vec<u8>, StorageError> {
+        let mut e = Encoder {
+            b: Vec::new(),
+            limit: max_bytes,
+        };
+        e.membership(m)?;
+        Ok(e.b)
+    }
+    pub(crate) fn decode_membership(
+        bytes: &[u8],
+        boundary: u64,
+    ) -> Result<crate::membership::Membership, StorageError> {
+        let mut d = Decoder::new(bytes);
+        let membership = d.membership(boundary)?;
+        if d.offset != bytes.len() {
+            return Err(StorageError::Corrupt("membership trailing bytes"));
+        }
+        Ok(membership)
     }
 }
 
@@ -1144,5 +1241,59 @@ mod configuration_tests {
             limit: bytes.len() - 1,
         };
         assert!(tiny.configuration_record(&fixture()).is_err());
+    }
+    #[test]
+    fn membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation() {
+        let record = fixture();
+        let node = NodeId::new(1).unwrap();
+        let bootstrap = Bootstrap {
+            group: GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            },
+            configuration: record.expected,
+            policy: Policy::new(Tree::Voter(node), PolicyLimits::default()).unwrap(),
+            voter_stores: [(
+                node,
+                StoreIdentity {
+                    id: StoreId::new(1).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+            )]
+            .into(),
+        };
+        let state = Membership::replay(
+            &bootstrap,
+            &[LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(record)),
+            }],
+            0,
+        )
+        .unwrap();
+        let bytes = NativeLogCodec::encode_membership(&state, 4096).unwrap();
+        assert_eq!(NativeLogCodec::decode_membership(&bytes, 1).unwrap(), state);
+        for cut in 0..bytes.len() {
+            assert!(
+                NativeLogCodec::decode_membership(&bytes[..cut], 1).is_err(),
+                "cut {cut}"
+            );
+        }
+        for (offset, value) in [(0, 2), (66, 2)] {
+            let mut bad = bytes.clone();
+            bad[offset] = value;
+            assert!(NativeLogCodec::decode_membership(&bad, 1).is_err());
+        }
+        let mut bad = bytes.clone();
+        bad[156..160].copy_from_slice(&u32::MAX.to_le_bytes());
+        assert!(NativeLogCodec::decode_membership(&bad, 1).is_err());
+        let mut bad = bytes.clone();
+        bad[160..176].copy_from_slice(&999u128.to_le_bytes());
+        assert!(NativeLogCodec::decode_membership(&bad, 1).is_err());
+        let mut bad = bytes.clone();
+        bad.push(0);
+        assert!(NativeLogCodec::decode_membership(&bad, 1).is_err());
+        assert!(NativeLogCodec::decode_membership(&bytes, 0).is_err());
     }
 }

@@ -2088,10 +2088,74 @@ membership model/faulted network histories remain unfinished. Native provider
 convenience assembly, incremental cleanup, recursive responsibilities, split/merge
 and P7 evidence also remain outstanding.
 
+## Slice 32: configuration-aware snapshot bases and recovery
+
+Snapshots now retain the validated stable/joint membership at their included
+boundary, alongside immutable bootstrap and application state. GroupLog and
+LogUpdate carry the same optional boxed membership base; None denotes original
+bootstrap. Snapshot references now name the included effective configuration,
+which can differ from the current accepted suffix. Accepted-log replay starts
+from this base, preserving joint rules after an uncommitted final is rolled back.
+Final checkpoints retain new membership and lifecycle operation identities even
+when all configuration entries have been compacted.
+
+Shared logical validation requires exact base equality for matching prefixes.
+Nonmatching snapshot installation cannot regress committed configuration identity
+or index, or discard committed operation identities. A membership base without
+its snapshot is rejected. Publication separately rejects configuration regression
+and changed content under one ID; new configuration records must be beyond the
+previous published boundary. Configuration operation retention is bounded to
+16,384 identities; exhaustion refuses future transitions rather than evicting
+retry evidence. Metadata byte limits can bind sooner.
+
+Native VBSNAP02 preserves original bootstrap plus membership-checkpoint subformat
+1 and application data under the existing checked root. Static VBSNAP01 remains
+readable and is still emitted for static metadata. Snapshot codec capability 2
+preserves membership and reads legacy data; capability 1 is restricted to static
+metadata, rejecting unsupported publication/recovery before mutation. Native
+format-2 WAL snapshot tag 3 carries the membership base in the atomic snapshot
+update. Full-image reclaim restores and revalidates base, suffix and exact
+counters. Old binaries fail closed on new mandatory data; downgrade needs migration.
+
+Existing publish, durable pin, exact WAL barrier and reconciliation dependencies
+remain authoritative. No new effects or durability domains are introduced.
+Snapshot and log generations retain their existing reconstruction/stale-completion
+rules. Membership allocations now count toward snapshot, ingress, effect and
+persistence-worker budgets. The worker audit also fixed configuration-entry
+payload accounting; configuration-bearing persistence uses data credits and
+preserves control reserves. Static core recovery, Append and Snapshot paths and
+native wire continue to refuse configuration-bearing state until live protocol
+integration is complete. See [configuration snapshots](CONFIGURATION_SNAPSHOTS.md).
+
+Ten new downstream snapshot tests cover host/native compaction through joint
+rollback and later finalization, original application deduplication outcomes,
+operation reuse after complete prefix compaction, forged/missing metadata,
+publication regression, bounded operation retention, worker/ingress accounting,
+legacy codec capability rejection, actual-file restart and full-image reclaim.
+Restore, compaction, installation and send helpers validate the full membership
+base, with a regression rejecting altered metadata under the same configuration ID
+without advancing application state.
+Native fault histories cut every snapshot-prefix and application/footer write,
+fail sync/publication before/after durable selection, and cut every byte of a WAL
+snapshot/base switch while both roots are pinned. A codec unit test checks every
+membership-checkpoint truncation, versions/flags, count limits, changed operation
+identity, boundary and trailing bytes.
+
+Local suites pass 327 default/native/TLS tests, 305 native-only tests and 184
+core/host-only tests. Clippy passes all three feature configurations with warnings
+denied; formatting, docs, contract JSON and diff checks pass. Native loopback
+histories ran locally. These finite Linux checks do not establish macOS execution,
+full joint Raft correctness, power-loss certification or throughput.
+
+Full P0–P7 remains active. All-quorum live activation, learner catch-up/admission,
+request/context handling, removed-replica service fencing, the formal membership
+model and faulted network histories remain unfinished. Native convenience
+assembly, incremental cleanup, recursive responsibilities, safe split/merge and
+P7 evidence remain outstanding.
+
 ## Next slice
 
-Integrate the configuration base into durable snapshots and recovery, then wire
-the accepted-log predicate through every core quorum/context use with learner
-catch-up and bounded prospective replication fanout. Validate the live protocol
-with its required activation/ballot model and crash/network histories before
+Wire the accepted-log predicate through every core quorum/context use with
+learner catch-up and bounded prospective replication fanout. Validate the live
+protocol with its activation/ballot model and crash/network histories before
 enabling administration. CI remains background feedback.

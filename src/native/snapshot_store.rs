@@ -13,7 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native crash-atomic local checkpoints. Two alternating data slots per bound
-//! group keep publication atomic and disk use bounded. No log deletion is enabled.
+//! group keep publication atomic and disk use bounded. Publication alone never
+//! authorizes log deletion.
 use super::{
     log_store::{LogCodec, NativeLogCodec},
     vote_store::{crc32c, crc32c_extend},
@@ -158,7 +159,8 @@ impl SnapshotIo for FileSnapshotIo {
 }
 
 /// Native snapshot encoding is independently selectable from logical storage.
-/// format_version must be 1 for this provider. Prefix and finish must preserve
+/// Version 1 supports static metadata; version 2 also preserves membership bases
+/// and reads version-1 data. Prefix and finish must preserve
 /// metadata and enforce length/format/checksum bounds before decode allocation.
 pub trait SnapshotCodec {
     fn format_version(&self) -> u32;
@@ -184,7 +186,7 @@ fn codec_log_limits(limits: SnapshotLimits) -> LogLimits {
 impl NativeSnapshotCodec {
     fn parse(&self, body: &[u8], limits: SnapshotLimits) -> Result<Snapshot, StorageError> {
         limits.validate()?;
-        if body.len() < HEADER || &body[..8] != b"VBSNAP01" {
+        if body.len() < HEADER || !matches!(&body[..8], b"VBSNAP01" | b"VBSNAP02") {
             return Err(StorageError::Corrupt("snapshot header/version"));
         }
         let schema = u64::from_le_bytes(body[8..16].try_into().unwrap());
@@ -199,10 +201,21 @@ impl NativeSnapshotCodec {
         {
             return Err(StorageError::Corrupt("snapshot length budgets"));
         }
-        let (sequence, mutations) = NativeLogCodec.decode_batch(
-            &body[HEADER..HEADER + metadata_bytes],
-            codec_log_limits(limits),
-        )?;
+        let encoded = &body[HEADER..HEADER + metadata_bytes];
+        let (bootstrap_bytes, membership_bytes) = if &body[..8] == b"VBSNAP02" {
+            if encoded.len() < 4 {
+                return Err(StorageError::Corrupt("snapshot metadata prefix"));
+            }
+            let len = u32::from_le_bytes(encoded[..4].try_into().unwrap()) as usize;
+            if len > encoded.len() - 4 {
+                return Err(StorageError::Corrupt("snapshot bootstrap length"));
+            }
+            (&encoded[4..4 + len], Some(&encoded[4 + len..]))
+        } else {
+            (encoded, None)
+        };
+        let (sequence, mutations) =
+            NativeLogCodec.decode_batch(bootstrap_bytes, codec_log_limits(limits))?;
         let [LogMutation::Create(bootstrap)] = mutations.as_slice() else {
             return Err(StorageError::Corrupt("snapshot bootstrap record"));
         };
@@ -210,6 +223,10 @@ impl NativeSnapshotCodec {
             return Err(StorageError::Corrupt("snapshot bootstrap sequence"));
         }
         let metadata = SnapshotMetadata {
+            membership: membership_bytes
+                .map(|b| NativeLogCodec::decode_membership(b, index))
+                .transpose()?
+                .map(Box::new),
             bootstrap: bootstrap.clone(),
             index,
             term,
@@ -218,6 +235,13 @@ impl NativeSnapshotCodec {
         metadata
             .validate()
             .map_err(|_| StorageError::Corrupt("snapshot metadata invalid"))?;
+        if metadata
+            .membership
+            .as_ref()
+            .is_some_and(|m| m.retained_bytes() > limits.max_metadata_bytes)
+        {
+            return Err(StorageError::Corrupt("snapshot membership budget"));
+        }
         Ok(Snapshot {
             metadata,
             application: body[HEADER + metadata_bytes..].to_vec(),
@@ -226,7 +250,7 @@ impl NativeSnapshotCodec {
 }
 impl SnapshotCodec for NativeSnapshotCodec {
     fn format_version(&self) -> u32 {
-        1
+        2
     }
     fn prefix(
         &self,
@@ -239,12 +263,34 @@ impl SnapshotCodec for NativeSnapshotCodec {
         if application_bytes == 0 || application_bytes > limits.max_application_bytes {
             return Err(StorageError::Rejected("snapshot application budget"));
         }
-        let encoded = NativeLogCodec.encode_batch(
+        if metadata
+            .membership
+            .as_ref()
+            .is_some_and(|m| m.retained_bytes() > limits.max_metadata_bytes)
+        {
+            return Err(StorageError::Rejected("snapshot membership budget"));
+        }
+        let bootstrap = NativeLogCodec.encode_batch(
             1,
             &[LogMutation::Create(metadata.bootstrap.clone())],
             codec_log_limits(limits),
         )?;
-        let mut b = b"VBSNAP01".to_vec();
+        let encoded = if let Some(membership) = &metadata.membership {
+            let mut encoded = (bootstrap.len() as u32).to_le_bytes().to_vec();
+            encoded.extend(bootstrap);
+            encoded.extend(NativeLogCodec::encode_membership(
+                membership,
+                limits.max_metadata_bytes.saturating_sub(encoded.len()),
+            )?);
+            encoded
+        } else {
+            bootstrap
+        };
+        let mut b = if metadata.membership.is_some() {
+            b"VBSNAP02".to_vec()
+        } else {
+            b"VBSNAP01".to_vec()
+        };
         b.extend(metadata.application_schema.to_le_bytes());
         b.extend(metadata.index.to_le_bytes());
         b.extend(metadata.term.to_le_bytes());
@@ -324,7 +370,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
         codec: C,
     ) -> Result<Self, StorageError> {
         let limits = limits.validate()?;
-        if codec.format_version() != 1 {
+        if !matches!(codec.format_version(), 1 | 2) {
             return Err(StorageError::Rejected("snapshot codec format incompatible"));
         }
         match io.read_manifest() {
@@ -369,7 +415,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
         codec: C,
     ) -> Result<Self, StorageError> {
         let limits = limits.validate()?;
-        if codec.format_version() != 1 {
+        if !matches!(codec.format_version(), 1 | 2) {
             return Err(StorageError::Rejected("snapshot codec format incompatible"));
         }
         let bytes = io.read_manifest().map_err(uncertain)?;
@@ -465,15 +511,19 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
             return Err(StorageError::Rejected("snapshot stage already admitted"));
         }
         metadata.validate()?;
+        if metadata.membership.is_some() && self.codec.format_version() < 2 {
+            return Err(StorageError::Rejected(
+                "snapshot codec lacks membership support",
+            ));
+        }
         if metadata.bootstrap.group != self.identity.group {
             return Err(StorageError::WrongIdentity);
         }
-        if self.root.as_ref().is_some_and(|r| {
-            metadata.index <= r.metadata.index
-                || metadata.term < r.metadata.term
-                || metadata.bootstrap != r.metadata.bootstrap
-                || metadata.application_schema != r.metadata.application_schema
-        }) {
+        if self
+            .root
+            .as_ref()
+            .is_some_and(|r| !metadata.follows(&r.metadata))
+        {
             return Err(StorageError::Rejected(
                 "snapshot regression or configuration/schema migration",
             ));
@@ -678,7 +728,7 @@ impl Root {
             store: identity.store,
             group: identity.group,
             generation: self.generation,
-            configuration: self.metadata.bootstrap.configuration,
+            configuration: self.metadata.configuration(),
             index: self.metadata.index,
             term: self.metadata.term,
             application_schema: self.metadata.application_schema,
@@ -705,6 +755,15 @@ fn recover_root<I: SnapshotIo, C: SnapshotCodec>(
         return Err(StorageError::Corrupt("snapshot root/data mismatch"));
     }
     let snapshot = codec.decode(&bytes, limits)?;
+    snapshot
+        .metadata
+        .validate()
+        .map_err(|_| StorageError::Corrupt("snapshot metadata invalid"))?;
+    if snapshot.metadata.membership.is_some() && codec.format_version() < 2 {
+        return Err(StorageError::Corrupt(
+            "snapshot codec lacks membership support",
+        ));
+    }
     if snapshot.metadata.bootstrap.group != identity.group {
         return Err(StorageError::WrongIdentity);
     }

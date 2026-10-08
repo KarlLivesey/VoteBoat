@@ -26,6 +26,7 @@ fn snapshot_identity() -> SnapshotIdentity {
 }
 fn metadata(index: u64) -> SnapshotMetadata {
     SnapshotMetadata {
+        membership: None,
         bootstrap: bootstrap(1, 1),
         index,
         term: 1,
@@ -702,7 +703,7 @@ mod native {
             io.clone(),
             snapshot_identity(),
             SnapshotLimits::default(),
-            HostCodec { calls, version: 2 }
+            HostCodec { calls, version: 3 }
         )
         .is_err());
         assert_eq!(io.0.borrow().manifest, before);
@@ -920,6 +921,7 @@ mod native {
             .encode_batch(
                 1,
                 &[LogMutation::Update(LogUpdate {
+                    snapshot_membership: None,
                     group: group(1),
                     expected_revision: state.revision,
                     hard_state: state.hard_state,
@@ -1423,4 +1425,29 @@ fn retention_history<S: SnapshotRetention>(store: &mut S) {
 #[test]
 fn durable_pin_switch_conformance_with_host_provider() {
     retention_history(&mut HostSnapshots::new());
+}
+
+#[test]
+fn restore_refuses_altered_membership_even_with_same_reference_configuration_id() {
+    use voteboat::membership::Membership;
+    let core = committed_core();
+    let mut app = Counter::new(10).unwrap();
+    app.apply_batch(core.replay_committed()).unwrap();
+    let mut snapshots = HostSnapshots::new();
+    let receipt = checkpoint_application(&core, &app, &mut snapshots).unwrap();
+    let snapshot = snapshots.current.as_mut().unwrap();
+    snapshot.metadata.membership = Some(Box::new(
+        Membership::replay(&core.state().bootstrap, &[], 0).unwrap(),
+    ));
+    assert_eq!(
+        snapshot.metadata.configuration(),
+        receipt.reference().configuration
+    );
+    snapshot.metadata.validate().unwrap();
+    let mut restored = Counter::new(10).unwrap();
+    assert!(matches!(
+        restore_application(&core, &mut restored, &mut snapshots),
+        Err(CheckpointError::InvalidBoundary)
+    ));
+    assert_eq!(restored.applied_index(), 0);
 }

@@ -188,6 +188,12 @@ pub(crate) const PERSIST_UNIT_METADATA: usize =
 pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), WorkerError> {
     let mut bytes = 0usize;
     let mut control = true;
+    if let Some(base) = &update.snapshot_membership {
+        bytes = bytes
+            .checked_add(base.retained_bytes())
+            .ok_or(WorkerError::BatchTooLarge)?;
+        control = false;
+    }
     if let Some(suffix) = &update.suffix {
         bytes = bytes
             .checked_add(
@@ -199,10 +205,10 @@ pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), 
             )
             .ok_or(WorkerError::BatchTooLarge)?;
         for entry in &suffix.entries {
-            if let EntryPayload::Command { bytes: command, .. } = &entry.payload {
+            if !matches!(entry.payload, EntryPayload::Noop) {
                 control = false;
                 bytes = bytes
-                    .checked_add(command.capacity())
+                    .checked_add(entry.retained_payload_bytes())
                     .ok_or(WorkerError::BatchTooLarge)?;
             }
         }

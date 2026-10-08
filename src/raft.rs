@@ -272,6 +272,7 @@ impl Raft {
                 .voted_for
                 .is_some_and(|n| !state.bootstrap.policy.voters().contains(&n))
             || state.entries.len() > limits.max_entries_per_group
+            || state.snapshot_membership.is_some()
             || state
                 .entries
                 .iter()
@@ -355,6 +356,9 @@ impl Raft {
             .checked_mul(size_of::<LogEntry>())?;
         for entry in &self.durable.entries {
             log = log.checked_add(entry.retained_payload_bytes())?;
+        }
+        if let Some(base) = &self.durable.snapshot_membership {
+            log = log.checked_add(base.retained_bytes())?;
         }
         // A heartbeat can produce append and read probes for every peer. Each
         // append contains at most 64 entries and max_batch_bytes payload/framing.
@@ -723,6 +727,7 @@ impl Raft {
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
         let update = LogUpdate {
+            snapshot_membership: None,
             group: self.durable.bootstrap.group,
             expected_revision: self.durable.revision,
             hard_state,
@@ -981,6 +986,9 @@ impl Raft {
         // Do not accept these entries while any quorum use remains static.
         if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
         {
+            return Err(RaftError::InvalidMessage);
+        }
+        if matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()) {
             return Err(RaftError::InvalidMessage);
         }
         let request = matches!(
@@ -1378,6 +1386,10 @@ impl Raft {
         }
         self.persist_update(
             LogUpdate {
+                snapshot_membership: self
+                    .durable
+                    .checkpoint_membership(reference.index)
+                    .map_err(|_| RaftError::InvalidRecovery)?,
                 group: self.durable.bootstrap.group,
                 expected_revision: self.durable.revision,
                 hard_state: self.durable.hard_state,
@@ -1444,6 +1456,7 @@ impl Raft {
             .is_none_or(|r| r.context != context || r.snapshot != Some(reference))
             || !reference.matches(&snapshot)
             || snapshot.metadata.bootstrap != self.durable.bootstrap
+            || snapshot.metadata.membership != self.durable.snapshot_membership
             || snapshot.application.len() > self.limits.max_snapshot_bytes
         {
             return Err(RaftError::WrongCompletion);
@@ -1491,6 +1504,7 @@ impl Raft {
         );
         self.persist_update(
             LogUpdate {
+                snapshot_membership: snapshot.metadata.membership.clone(),
                 group: self.durable.bootstrap.group,
                 expected_revision: self.durable.revision,
                 hard_state: hard,

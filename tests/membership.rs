@@ -623,6 +623,7 @@ fn snapshots_cannot_erase_the_only_recoverable_configuration() {
         checksum: 0,
     };
     let compact = LogMutation::Update(LogUpdate {
+        snapshot_membership: None,
         group: group(1),
         expected_revision: state.revision,
         hard_state: state.hard_state,
@@ -633,7 +634,7 @@ fn snapshots_cannot_erase_the_only_recoverable_configuration() {
     assert_eq!(
         store.append_batch(vec![compact]),
         Err(voteboat::contracts::StorageError::Rejected(
-            "snapshot would discard configuration journal"
+            "snapshot membership differs from matching prefix"
         ))
     );
     assert_eq!(store.state(group(1)).unwrap(), state);
@@ -897,4 +898,909 @@ fn configuration_ingress_charges_owned_metadata_to_data_budget() {
     let (noop_class, noop_cost) = message_cost(&message, 65536).unwrap();
     assert_eq!(noop_class, MessageClass::Control);
     assert_eq!(cost - noop_cost, learners().retained_payload_bytes());
+}
+
+mod configuration_snapshots {
+    use super::*;
+    use voteboat::{application::*, runtime::*, snapshot::*, worker::*};
+    fn command(index: u64, term: u64) -> LogEntry {
+        LogEntry {
+            index,
+            term,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(1000).unwrap(),
+                bytes: 7i64.to_le_bytes().to_vec(),
+            },
+        }
+    }
+    fn history() -> Vec<LogEntry> {
+        let mut learner = learners();
+        learner.index = 2;
+        let mut joint = super::joint();
+        joint.index = 3;
+        let mut final_entry = final_record();
+        final_entry.index = 4;
+        vec![command(1, 1), learner, joint, final_entry]
+    }
+    fn metadata(s: &GroupLog, index: u64) -> SnapshotMetadata {
+        SnapshotMetadata {
+            bootstrap: s.bootstrap.clone(),
+            membership: s.checkpoint_membership(index).unwrap(),
+            index,
+            term: s.term_at(index).unwrap(),
+            application_schema: 1,
+        }
+    }
+    fn publish<S: SnapshotStore>(
+        snapshots: &mut S,
+        metadata: SnapshotMetadata,
+        bytes: &[u8],
+    ) -> SnapshotReceipt {
+        let ticket = snapshots.begin(metadata, bytes.len()).unwrap();
+        for (i, chunk) in bytes.chunks(snapshots.limits().max_chunk_bytes).enumerate() {
+            snapshots
+                .write_chunk(ticket, i * snapshots.limits().max_chunk_bytes, chunk)
+                .unwrap();
+        }
+        let sealed = snapshots.seal(ticket).unwrap();
+        snapshots.publish(sealed).unwrap()
+    }
+    fn compact<L: LogStore, S: SnapshotRetention>(
+        log: &mut L,
+        snapshots: &mut S,
+        receipt: &SnapshotReceipt,
+    ) {
+        let reference = receipt.reference();
+        snapshots.pin_for_log(reference).unwrap();
+        assert_eq!(
+            snapshots.load_pinned(reference).unwrap().metadata,
+            receipt.metadata
+        );
+        let s = log.state(group(1)).unwrap();
+        let mutation = LogMutation::Update(LogUpdate {
+            group: group(1),
+            expected_revision: s.revision,
+            hard_state: s.hard_state,
+            commit_index: s.commit_index,
+            suffix: None,
+            snapshot: Some(reference),
+            snapshot_membership: receipt.metadata.membership.clone(),
+        });
+        let tickets = log.append_batch(vec![mutation]).unwrap();
+        assert_eq!(log.state(group(1)).unwrap(), s);
+        log.barrier(&tickets).unwrap();
+        snapshots.reconcile_log(Some(reference)).unwrap();
+    }
+    fn conformance<L: LogStore, S: SnapshotRetention>(mut log: L, mut snapshots: S) -> (L, S) {
+        append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let s = log.state(group(1)).unwrap();
+        append(
+            &mut log,
+            vec![update(
+                &s,
+                1,
+                3,
+                Some(Suffix {
+                    from: 1,
+                    entries: history(),
+                }),
+            )],
+        );
+        let original = log.state(group(1)).unwrap();
+        let mut application = Counter::new(10).unwrap();
+        application.apply_batch(&original.entries[..3]).unwrap();
+        let bytes = application.checkpoint(16384).unwrap();
+        let receipt = publish(&mut snapshots, metadata(&original, 3), &bytes);
+        assert_eq!(receipt.reference().configuration, cid(3));
+        assert_eq!(
+            receipt
+                .metadata
+                .membership
+                .as_ref()
+                .unwrap()
+                .joint()
+                .unwrap()
+                .index,
+            3
+        );
+        compact(&mut log, &mut snapshots, &receipt);
+        let compacted = log.state(group(1)).unwrap();
+        assert_eq!(
+            compacted.membership().unwrap(),
+            original.membership().unwrap()
+        );
+        assert_eq!(compacted.entries.len(), 1);
+        assert_eq!(compacted.snapshot_membership.as_ref().unwrap().id(), cid(3));
+        assert_eq!(compacted.membership().unwrap().id(), cid(4));
+        // The final record is uncommitted. Rollback must expose the joint base.
+        append(
+            &mut log,
+            vec![update(
+                &compacted,
+                2,
+                3,
+                Some(Suffix {
+                    from: 4,
+                    entries: vec![LogEntry {
+                        index: 4,
+                        term: 2,
+                        payload: EntryPayload::Noop,
+                    }],
+                }),
+            )],
+        );
+        let rolled = log.state(group(1)).unwrap();
+        assert_eq!(rolled.membership().unwrap().id(), cid(3));
+        assert!(!rolled.membership().unwrap().is_satisfied(&set(&[4, 5])));
+        let mut final_entry = final_record();
+        final_entry.index = 4;
+        final_entry.term = 3;
+        append(
+            &mut log,
+            vec![update(
+                &rolled,
+                3,
+                5,
+                Some(Suffix {
+                    from: 4,
+                    entries: vec![final_entry, command(5, 3)],
+                }),
+            )],
+        );
+        let finished = log.state(group(1)).unwrap();
+        let saved = snapshots.load_pinned(receipt.reference()).unwrap();
+        let mut restored = Counter::new(10).unwrap();
+        restored
+            .restore_checkpoint(1, 3, &saved.application)
+            .unwrap();
+        let receipts = restored.apply_batch(&finished.entries).unwrap();
+        assert_eq!(receipts.len(), 1);
+        assert!(receipts[0].duplicate);
+        assert_eq!(receipts[0].outcome, CounterOutcome::Value(7));
+        let final_bytes = restored.checkpoint(16384).unwrap();
+        let final_receipt = publish(&mut snapshots, metadata(&finished, 5), &final_bytes);
+        assert_eq!(final_receipt.reference().configuration, cid(4));
+        compact(&mut log, &mut snapshots, &final_receipt);
+        let mut regression = receipt.metadata.clone();
+        regression.index = 6;
+        regression.term = 3;
+        assert!(snapshots.begin(regression, final_bytes.len()).is_err());
+        let mut rewritten = final_receipt.metadata.clone();
+        rewritten.index = 6;
+        rewritten.membership = Some(Box::new(
+            Membership::from_checkpoint(
+                config(4, &[1, 2, 3], &[]),
+                None,
+                4,
+                final_receipt
+                    .metadata
+                    .membership
+                    .as_ref()
+                    .unwrap()
+                    .operations()
+                    .clone(),
+                6,
+            )
+            .unwrap(),
+        ));
+        assert!(snapshots.begin(rewritten, final_bytes.len()).is_err());
+        let base = log.state(group(1)).unwrap();
+        assert!(base.entries.is_empty());
+        assert_eq!(base.membership().unwrap().id(), cid(4));
+        assert_eq!(base.membership().unwrap().operations().len(), 2);
+        assert!(!base.membership().unwrap().is_voter(node(1)));
+        let mut reused = record(
+            6,
+            101,
+            4,
+            ConfigurationChange::Learners(config(5, &[3, 4, 5], &[])),
+        );
+        reused.term = 3;
+        assert!(log
+            .append_batch(vec![update(
+                &base,
+                3,
+                5,
+                Some(Suffix {
+                    from: 6,
+                    entries: vec![reused]
+                })
+            )])
+            .is_err());
+        let mut next = record(
+            6,
+            102,
+            4,
+            ConfigurationChange::Learners(config(5, &[3, 4, 5], &[])),
+        );
+        next.term = 3;
+        append(
+            &mut log,
+            vec![update(
+                &base,
+                3,
+                5,
+                Some(Suffix {
+                    from: 6,
+                    entries: vec![next],
+                }),
+            )],
+        );
+        assert_eq!(
+            log.state(group(1)).unwrap().membership().unwrap().id(),
+            cid(5)
+        );
+        (log, snapshots)
+    }
+    #[test]
+    fn host_snapshot_base_preserves_joint_rollback_final_and_application_dedup() {
+        conformance(
+            HostLogStore::new(1),
+            support::snapshot::HostSnapshots::new(),
+        );
+    }
+    #[test]
+    fn checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity() {
+        let mut log = HostLogStore::new(1);
+        append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let mut malformed = log.state(group(1)).unwrap();
+        malformed.entries = vec![entry(77, 1, 1)];
+        assert_eq!(
+            malformed.membership_at(2),
+            Err(MembershipError::InvalidHistory)
+        );
+        let state = replay(&[learners(), joint()], 1).unwrap();
+        let ops = state.operations().clone();
+        assert!(Membership::from_checkpoint(
+            state.stable().clone(),
+            state.joint().cloned(),
+            2,
+            ops.clone(),
+            1
+        )
+        .is_err());
+        assert!(Membership::from_checkpoint(
+            state.stable().clone(),
+            state.joint().cloned(),
+            2,
+            BTreeSet::new(),
+            2
+        )
+        .is_err());
+        let mut wrong = state.joint().cloned().unwrap();
+        wrong.index = 1;
+        assert!(Membership::from_checkpoint(
+            state.stable().clone(),
+            Some(wrong),
+            2,
+            ops.clone(),
+            2
+        )
+        .is_err());
+        let mut wrong = state.joint().cloned().unwrap();
+        wrong.id = cid(2);
+        assert!(
+            Membership::from_checkpoint(state.stable().clone(), Some(wrong), 2, ops, 2).is_err()
+        );
+        let empty =
+            Membership::from_checkpoint(config(2, &[1, 2, 3], &[]), None, 0, BTreeSet::new(), 0)
+                .unwrap();
+        assert!(empty.validate_checkpoint(&bootstrap(1, 3), 0).is_err());
+        let operations = (1..=MAX_CONFIGURATION_OPERATIONS as u128)
+            .map(|n| OperationId::new(n).unwrap())
+            .collect();
+        let full = Membership::from_checkpoint(
+            config(2, &[1, 2, 3], &[]),
+            None,
+            MAX_CONFIGURATION_OPERATIONS as u64,
+            operations,
+            MAX_CONFIGURATION_OPERATIONS as u64,
+        )
+        .unwrap();
+        let entry = record(
+            MAX_CONFIGURATION_OPERATIONS as u64 + 1,
+            99999,
+            2,
+            ConfigurationChange::Learners(config(3, &[1, 2, 3], &[])),
+        );
+        assert_eq!(
+            Membership::replay_from(
+                &bootstrap(1, 3),
+                Some(&full),
+                MAX_CONFIGURATION_OPERATIONS as u64,
+                &[entry],
+                MAX_CONFIGURATION_OPERATIONS as u64
+            ),
+            Err(MembershipError::HistoryFull)
+        );
+    }
+    #[test]
+    fn matching_snapshot_cannot_forge_configuration_or_drop_operation_history() {
+        let mut log = HostLogStore::new(1);
+        append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let s = log.state(group(1)).unwrap();
+        append(
+            &mut log,
+            vec![update(
+                &s,
+                1,
+                3,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![learners(), joint(), final_record()],
+                }),
+            )],
+        );
+        let s = log.state(group(1)).unwrap();
+        let real = s.checkpoint_membership(3).unwrap().unwrap();
+        let forged = Membership::from_checkpoint(
+            config(4, &[1, 2, 3], &[]),
+            None,
+            3,
+            real.operations().clone(),
+            3,
+        )
+        .unwrap();
+        let reference = SnapshotRef {
+            store: identity(1),
+            group: group(1),
+            generation: SnapshotGeneration::new(1).unwrap(),
+            configuration: cid(4),
+            index: 3,
+            term: 1,
+            application_schema: 1,
+            file_bytes: 100,
+            checksum: 0,
+        };
+        let mut mutation = LogUpdate {
+            group: group(1),
+            expected_revision: s.revision,
+            hard_state: s.hard_state,
+            commit_index: 3,
+            suffix: None,
+            snapshot: Some(reference),
+            snapshot_membership: Some(Box::new(forged)),
+        };
+        assert!(log
+            .append_batch(vec![LogMutation::Update(mutation.clone())])
+            .is_err());
+        mutation.snapshot_membership = Some(real);
+        mutation.snapshot.as_mut().unwrap().configuration = cid(3);
+        assert!(log
+            .append_batch(vec![LogMutation::Update(mutation.clone())])
+            .is_err());
+        mutation.snapshot = None;
+        assert!(log
+            .append_batch(vec![LogMutation::Update(mutation)])
+            .is_err());
+        assert_eq!(log.state(group(1)).unwrap(), s);
+        // A nonmatching snapshot beyond the log cannot roll back committed config.
+        let mut bad = reference;
+        bad.index = 9;
+        bad.configuration = cid(1);
+        let mutation = LogUpdate {
+            group: group(1),
+            expected_revision: s.revision,
+            hard_state: s.hard_state,
+            commit_index: 9,
+            suffix: None,
+            snapshot: Some(bad),
+            snapshot_membership: None,
+        };
+        assert!(log
+            .append_batch(vec![LogMutation::Update(mutation)])
+            .is_err());
+    }
+    #[test]
+    fn snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations() {
+        let mut state = BTreeMap::new();
+        apply_batch(
+            &mut state,
+            &[LogMutation::Create(bootstrap(1, 3))],
+            LogLimits::default(),
+        )
+        .unwrap();
+        let original = state[&group(1)].clone();
+        apply_batch(
+            &mut state,
+            &[update(
+                &original,
+                1,
+                2,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![learners(), joint()],
+                }),
+            )],
+            LogLimits::default(),
+        )
+        .unwrap();
+        let state = &state[&group(1)];
+        let m = metadata(state, 2);
+        let snapshot = Snapshot {
+            metadata: m.clone(),
+            application: vec![7; 64],
+        };
+        let cost = voteboat::snapshot_worker::snapshot_image_bytes(&snapshot).unwrap();
+        let mut plain = snapshot.clone();
+        plain.metadata.membership = None;
+        assert_eq!(
+            cost - voteboat::snapshot_worker::snapshot_image_bytes(&plain).unwrap(),
+            m.membership.as_ref().unwrap().retained_bytes()
+        );
+        let sender = HostLogStore::new(1).binding();
+        let message = Message {
+            group: group(1),
+            configuration: cid(3),
+            from: node(1),
+            sender,
+            to: node(2),
+            term: 1,
+            context: RequestContext {
+                origin: sender,
+                sequence: 1,
+            },
+            rpc: Rpc::Snapshot {
+                snapshot: Box::new(snapshot),
+            },
+        };
+        let (_, cost) = voteboat::outbound::message_cost(&message, 65536).unwrap();
+        assert!(voteboat::outbound::message_cost(&message, cost - 1).is_err());
+        let unit = PersistUnit {
+            visit: VisitTicket {
+                owner: RuntimeOwner {
+                    store: sender,
+                    lane: ExecutionLaneId::new(1).unwrap(),
+                    generation: RuntimeGeneration::new(1).unwrap(),
+                },
+                group: group(1),
+                sequence: 1,
+            },
+            update: LogUpdate {
+                group: group(1),
+                expected_revision: state.revision,
+                hard_state: state.hard_state,
+                commit_index: 2,
+                suffix: None,
+                snapshot: Some(SnapshotRef {
+                    store: identity(1),
+                    group: group(1),
+                    generation: SnapshotGeneration::new(1).unwrap(),
+                    configuration: cid(3),
+                    index: 2,
+                    term: 1,
+                    application_schema: 1,
+                    file_bytes: 100,
+                    checksum: 0,
+                }),
+                snapshot_membership: m.membership,
+            },
+        };
+        let (cost, control) =
+            batch_cost(std::slice::from_ref(&unit), 1, WorkerLimits::default()).unwrap();
+        assert!(!control);
+        let mut plain = PersistUnit {
+            visit: unit.visit,
+            update: unit.update.clone(),
+        };
+        plain.update.snapshot_membership = None;
+        let (plain_cost, plain_control) = batch_cost(&[plain], 1, WorkerLimits::default()).unwrap();
+        assert!(plain_control);
+        assert_eq!(
+            cost - plain_cost,
+            unit.update
+                .snapshot_membership
+                .as_ref()
+                .unwrap()
+                .retained_bytes()
+        );
+        let mut journal = PersistUnit {
+            visit: unit.visit,
+            update: unit.update.clone(),
+        };
+        journal.update.snapshot = None;
+        journal.update.snapshot_membership = None;
+        journal.update.suffix = Some(Suffix {
+            from: 1,
+            entries: vec![learners()],
+        });
+        let (cost, control) =
+            batch_cost(std::slice::from_ref(&journal), 1, WorkerLimits::default()).unwrap();
+        assert!(!control);
+        journal.update.suffix.as_mut().unwrap().entries[0].payload = EntryPayload::Noop;
+        let (noop_cost, control) = batch_cost(&[journal], 1, WorkerLimits::default()).unwrap();
+        assert!(control);
+        assert_eq!(cost - noop_cost, learners().retained_payload_bytes());
+    }
+
+    #[cfg(feature = "native")]
+    mod native {
+        use super::*;
+        use std::{cell::RefCell, io, rc::Rc};
+        use voteboat::{
+            contracts::StorageError,
+            native::{log_store::*, snapshot_store::*},
+        };
+        #[derive(Clone, Copy, Default)]
+        enum Failure {
+            #[default]
+            None,
+            Begin(usize),
+            Append(usize),
+            SyncBefore,
+            SyncAfter,
+            PublishBefore,
+            PublishAfter,
+        }
+        #[derive(Clone, Default)]
+        struct Device {
+            manifest: Option<Vec<u8>>,
+            slots: [Option<Vec<u8>>; 2],
+            synced: [Option<Vec<u8>>; 2],
+            failure: Failure,
+        }
+        impl Device {
+            fn power_loss(&mut self) {
+                self.slots = self.synced.clone();
+                self.failure = Failure::None;
+            }
+        }
+        #[derive(Clone, Default)]
+        struct Memory(Rc<RefCell<Device>>);
+        impl SnapshotIo for Memory {
+            fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
+                self.0
+                    .borrow()
+                    .manifest
+                    .clone()
+                    .ok_or(io::ErrorKind::NotFound.into())
+            }
+            fn read_slot(&mut self, slot: u8, limit: usize) -> io::Result<Vec<u8>> {
+                let bytes = self.0.borrow().slots[slot as usize]
+                    .clone()
+                    .ok_or(io::ErrorKind::NotFound)?;
+                if bytes.len() > limit {
+                    return Err(io::Error::other("budget"));
+                }
+                Ok(bytes)
+            }
+            fn begin_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
+                let mut d = self.0.borrow_mut();
+                if let Failure::Begin(cut) = d.failure {
+                    d.slots[slot as usize] = Some(bytes[..cut.min(bytes.len())].to_vec());
+                    return Err(io::Error::other("begin cut"));
+                }
+                d.slots[slot as usize] = Some(bytes.to_vec());
+                Ok(())
+            }
+            fn append_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
+                let mut d = self.0.borrow_mut();
+                if let Failure::Append(cut) = d.failure {
+                    d.slots[slot as usize]
+                        .as_mut()
+                        .unwrap()
+                        .extend(&bytes[..cut.min(bytes.len())]);
+                    return Err(io::Error::other("append cut"));
+                }
+                d.slots[slot as usize].as_mut().unwrap().extend(bytes);
+                Ok(())
+            }
+            fn sync_slot(&mut self, slot: u8) -> io::Result<()> {
+                let mut d = self.0.borrow_mut();
+                if matches!(d.failure, Failure::SyncBefore) {
+                    return Err(io::Error::other("sync"));
+                }
+                d.synced[slot as usize] = d.slots[slot as usize].clone();
+                if matches!(d.failure, Failure::SyncAfter) {
+                    return Err(io::Error::other("sync receipt lost"));
+                }
+                Ok(())
+            }
+            fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
+                let mut d = self.0.borrow_mut();
+                if matches!(d.failure, Failure::PublishBefore) {
+                    return Err(io::Error::other("publish"));
+                }
+                d.manifest = Some(bytes.to_vec());
+                if matches!(d.failure, Failure::PublishAfter) {
+                    return Err(io::Error::other("publish receipt lost"));
+                }
+                Ok(())
+            }
+        }
+        fn sid() -> SnapshotIdentity {
+            SnapshotIdentity {
+                store: identity(1),
+                group: group(1),
+            }
+        }
+        fn create(io: Memory) -> NativeSnapshotStore<Memory> {
+            NativeSnapshotStore::create(io, sid(), SnapshotLimits::default()).unwrap()
+        }
+        fn recover(io: Memory) -> NativeSnapshotStore<Memory> {
+            NativeSnapshotStore::recover(io, sid(), SnapshotLimits::default()).unwrap()
+        }
+        fn populated(io: ModelIo) -> NativeLogStore<ModelIo> {
+            let mut log = NativeLogStore::create(io, identity(1), LogLimits::default()).unwrap();
+            append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+            let s = log.state(group(1)).unwrap();
+            append(
+                &mut log,
+                vec![update(
+                    &s,
+                    1,
+                    3,
+                    Some(Suffix {
+                        from: 1,
+                        entries: history(),
+                    }),
+                )],
+            );
+            log
+        }
+        #[test]
+        fn native_configuration_snapshot_recovery_and_physical_reclaim_conformance() {
+            let io = ModelIo::default();
+            let snapshots_io = Memory::default();
+            let log =
+                NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
+            let (mut log, snapshots) = conformance(log, create(snapshots_io.clone()));
+            for term in 4..=30 {
+                let s = log.state(group(1)).unwrap();
+                append(&mut log, vec![update(&s, term, s.commit_index, None)]);
+            }
+            let expected = log.state(group(1)).unwrap();
+            let report = log.reclaim(log.limits().max_wal_bytes).unwrap();
+            assert!(report.after_bytes < report.before_bytes);
+            drop(log);
+            drop(snapshots);
+            io.0.borrow_mut().power_loss();
+            snapshots_io.0.borrow_mut().power_loss();
+            let log = NativeLogStore::recover(io, identity(1), LogLimits::default()).unwrap();
+            assert_eq!(log.state(group(1)).unwrap(), expected);
+            let mut snapshots = recover(snapshots_io);
+            let reference = expected.snapshot.unwrap();
+            let snapshot = snapshots.load_pinned(reference).unwrap();
+            assert!(reference.matches(&snapshot));
+            assert_eq!(snapshot.metadata.membership, expected.snapshot_membership);
+            let mut app = Counter::new(10).unwrap();
+            app.restore_checkpoint(1, reference.index, &snapshot.application)
+                .unwrap();
+            app.apply_batch(
+                &expected.entries[..(expected.commit_index - reference.index) as usize],
+            )
+            .unwrap();
+            assert_eq!(app.applied_index(), expected.commit_index);
+            assert!(matches!(
+                recover_replica(
+                    node(1),
+                    group(1),
+                    &log,
+                    &mut snapshots,
+                    &mut Counter::new(10).unwrap()
+                ),
+                Err(CheckpointError::Consensus(RaftError::InvalidRecovery))
+            ));
+        }
+        #[test]
+        fn actual_files_preserve_joint_and_final_configuration_bases() {
+            let directory = std::env::temp_dir().join(format!(
+                "voteboat-membership-snapshot-{}",
+                std::process::id()
+            ));
+            let log = NativeLogStore::create(
+                FileLogIo::create(&directory).unwrap(),
+                identity(1),
+                LogLimits::default(),
+            )
+            .unwrap();
+            let snapshots = NativeSnapshotStore::create(
+                FileSnapshotIo::create(directory.join("snapshots")).unwrap(),
+                sid(),
+                SnapshotLimits::default(),
+            )
+            .unwrap();
+            let (log, snapshots) = conformance(log, snapshots);
+            let expected = log.state(group(1)).unwrap();
+            drop(log);
+            drop(snapshots);
+            let log = NativeLogStore::recover(
+                FileLogIo::open(&directory).unwrap(),
+                identity(1),
+                LogLimits::default(),
+            )
+            .unwrap();
+            let mut snapshots = NativeSnapshotStore::recover(
+                FileSnapshotIo::open(directory.join("snapshots")).unwrap(),
+                sid(),
+                SnapshotLimits::default(),
+            )
+            .unwrap();
+            assert_eq!(log.state(group(1)).unwrap(), expected);
+            assert_eq!(
+                snapshots
+                    .load_pinned(expected.snapshot.unwrap())
+                    .unwrap()
+                    .metadata
+                    .membership,
+                expected.snapshot_membership
+            );
+            drop(log);
+            drop(snapshots);
+            std::fs::remove_dir_all(directory).unwrap();
+        }
+        #[test]
+        fn interrupted_snapshot_publication_never_exposes_a_partial_membership_base() {
+            let log = populated(ModelIo::default());
+            let state = log.state(group(1)).unwrap();
+            let io = Memory::default();
+            let mut snapshots = create(io.clone());
+            let old = publish(&mut snapshots, metadata(&state, 1), &[7; 64]);
+            snapshots.pin_for_log(old.reference()).unwrap();
+            drop(snapshots);
+            let baseline = io.0.borrow().clone();
+            let m = metadata(&state, 3);
+            let prefix = NativeSnapshotCodec
+                .prefix(&m, 64, SnapshotLimits::default())
+                .unwrap();
+            for cut in 0..=prefix.len() {
+                let io = Memory(Rc::new(RefCell::new(baseline.clone())));
+                let mut snapshots = recover(io.clone());
+                io.0.borrow_mut().failure = Failure::Begin(cut);
+                assert!(snapshots.begin(m.clone(), 64).is_err());
+                drop(snapshots);
+                io.0.borrow_mut().power_loss();
+                let mut snapshots = recover(io);
+                assert_eq!(snapshots.load().unwrap().unwrap().metadata, old.metadata);
+            }
+            let faults = (0..=64)
+                .map(|cut| (0, Failure::Append(cut)))
+                .chain((0..=4).map(|cut| (1, Failure::Append(cut))))
+                .chain([
+                    (1, Failure::SyncBefore),
+                    (1, Failure::SyncAfter),
+                    (2, Failure::PublishBefore),
+                    (2, Failure::PublishAfter),
+                ]);
+            for (phase, failure) in faults {
+                let io = Memory(Rc::new(RefCell::new(baseline.clone())));
+                let mut snapshots = recover(io.clone());
+                let ticket = snapshots.begin(m.clone(), 64).unwrap();
+                if phase == 0 {
+                    io.0.borrow_mut().failure = failure;
+                    assert!(snapshots.write_chunk(ticket, 0, &[9; 64]).is_err());
+                } else {
+                    snapshots.write_chunk(ticket, 0, &[9; 64]).unwrap();
+                    if phase == 1 {
+                        io.0.borrow_mut().failure = failure;
+                        assert!(snapshots.seal(ticket).is_err());
+                    } else {
+                        let sealed = snapshots.seal(ticket).unwrap();
+                        io.0.borrow_mut().failure = failure;
+                        assert!(snapshots.publish(sealed).is_err());
+                    }
+                }
+                drop(snapshots);
+                io.0.borrow_mut().power_loss();
+                let mut snapshots = recover(io);
+                let loaded = snapshots.load().unwrap().unwrap();
+                assert_eq!(
+                    loaded.metadata,
+                    if matches!(failure, Failure::PublishAfter) {
+                        m.clone()
+                    } else {
+                        old.metadata.clone()
+                    }
+                );
+                assert_eq!(
+                    snapshots.load_pinned(old.reference()).unwrap().metadata,
+                    old.metadata
+                );
+            }
+        }
+        #[test]
+        fn every_torn_wal_snapshot_switch_retains_the_selected_pinned_membership() {
+            let io = ModelIo::default();
+            let mut log = populated(io.clone());
+            let state = log.state(group(1)).unwrap();
+            let snapshots_io = Memory::default();
+            let mut snapshots = create(snapshots_io.clone());
+            let old = publish(&mut snapshots, metadata(&state, 1), &[7; 64]);
+            compact(&mut log, &mut snapshots, &old);
+            let prior = log.state(group(1)).unwrap();
+            let next = publish(&mut snapshots, metadata(&prior, 3), &[9; 64]);
+            snapshots.pin_for_log(next.reference()).unwrap();
+            let snapshot_image = snapshots_io.0.borrow().clone();
+            let old_len = io.0.borrow().log.len();
+            let old_manifest = io.0.borrow().manifest.clone();
+            let mutation = LogMutation::Update(LogUpdate {
+                group: group(1),
+                expected_revision: prior.revision,
+                hard_state: prior.hard_state,
+                commit_index: prior.commit_index,
+                suffix: None,
+                snapshot: Some(next.reference()),
+                snapshot_membership: next.metadata.membership.clone(),
+            });
+            let mut expected = [(group(1), prior.clone())].into();
+            apply_batch(&mut expected, std::slice::from_ref(&mutation), log.limits()).unwrap();
+            log.append_batch(vec![mutation]).unwrap();
+            let full = io.0.borrow().log.clone();
+            drop(log);
+            drop(snapshots);
+            for cut in old_len..=full.len() {
+                let io = ModelIo::default();
+                io.0.borrow_mut().log = full[..cut].to_vec();
+                io.0.borrow_mut().manifest = old_manifest.clone();
+                let log = NativeLogStore::recover(io, identity(1), LogLimits::default()).unwrap();
+                let state = log.state(group(1)).unwrap();
+                assert_eq!(
+                    state,
+                    if cut == full.len() {
+                        expected[&group(1)].clone()
+                    } else {
+                        prior.clone()
+                    }
+                );
+                let mut snapshots = recover(Memory(Rc::new(RefCell::new(snapshot_image.clone()))));
+                let reference = state.snapshot.unwrap();
+                let loaded = snapshots.load_pinned(reference).unwrap();
+                assert_eq!(loaded.metadata.membership, state.snapshot_membership);
+                assert!(reference.matches(&loaded));
+                snapshots.reconcile_log(Some(reference)).unwrap();
+                assert_eq!(snapshots.latest_reference().unwrap(), Some(reference));
+                assert_eq!(state.membership().unwrap().id(), cid(4));
+            }
+        }
+        #[test]
+        fn legacy_codec_capability_cannot_drop_membership_metadata() {
+            struct Legacy;
+            impl SnapshotCodec for Legacy {
+                fn format_version(&self) -> u32 {
+                    1
+                }
+                fn prefix(
+                    &self,
+                    m: &SnapshotMetadata,
+                    n: usize,
+                    l: SnapshotLimits,
+                ) -> Result<Vec<u8>, StorageError> {
+                    NativeSnapshotCodec.prefix(m, n, l)
+                }
+                fn finish(&self, b: &[u8], l: SnapshotLimits) -> Result<[u8; 4], StorageError> {
+                    NativeSnapshotCodec.finish(b, l)
+                }
+                fn decode(&self, b: &[u8], l: SnapshotLimits) -> Result<Snapshot, StorageError> {
+                    NativeSnapshotCodec.decode(b, l)
+                }
+            }
+            let log = populated(ModelIo::default());
+            let state = log.state(group(1)).unwrap();
+            let io = Memory::default();
+            let mut snapshots = NativeSnapshotStore::create_with_codec(
+                io.clone(),
+                sid(),
+                SnapshotLimits::default(),
+                Legacy,
+            )
+            .unwrap();
+            let before = io.0.borrow().clone();
+            assert!(snapshots.begin(metadata(&state, 3), 64).is_err());
+            assert_eq!(io.0.borrow().manifest, before.manifest);
+            assert_eq!(io.0.borrow().slots, before.slots);
+            drop(snapshots);
+            let mut snapshots = recover(io.clone());
+            publish(&mut snapshots, metadata(&state, 3), &[7; 64]);
+            drop(snapshots);
+            let before = io.0.borrow().manifest.clone();
+            assert!(NativeSnapshotStore::recover_with_codec(
+                io.clone(),
+                sid(),
+                SnapshotLimits::default(),
+                Legacy
+            )
+            .is_err());
+            assert_eq!(io.0.borrow().manifest, before);
+        }
+    }
 }

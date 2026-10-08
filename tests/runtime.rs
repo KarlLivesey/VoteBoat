@@ -564,6 +564,7 @@ fn retained_capacity_group_identity_and_background_are_charged_before_admission(
         rpc: Rpc::Snapshot {
             snapshot: Box::new(voteboat::snapshot::Snapshot {
                 metadata: voteboat::snapshot::SnapshotMetadata {
+                    membership: None,
                     bootstrap: bootstrap(1, 3),
                     index: 1,
                     term: 1,

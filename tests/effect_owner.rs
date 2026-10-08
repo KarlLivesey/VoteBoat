@@ -3005,6 +3005,7 @@ mod snapshot_routes {
         .unwrap();
         let snapshot = Snapshot {
             metadata: SnapshotMetadata {
+                membership: None,
                 bootstrap: bootstrap(g, 3),
                 index: 1,
                 term: 1,
@@ -3512,6 +3513,7 @@ mod ingress {
             MessageClass::Background => Rpc::Snapshot {
                 snapshot: Box::new(Snapshot {
                     metadata: SnapshotMetadata {
+                        membership: None,
                         bootstrap: bootstrap(g, 3),
                         index: 1,
                         term: 1,

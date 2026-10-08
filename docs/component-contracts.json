@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "durable-configuration-journal",
+  "status": "configuration-aware-snapshot-bases",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -137,7 +137,7 @@
         "tests/raft.rs",
         "tests/log_reclaim.rs"
       ],
-      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Configuration-journal entry records validate learner/joint/final order, identity, accepted-log predicate and rollback in shared host/native transitions; full-image reclaim and native recovery preserve the journal. Snapshots cannot erase configuration records pending configuration-base integration. Live Raft/wire admission and recovery of configuration-bearing logs remain disabled until full quorum/learner/snapshot integration. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning and live worker maintenance are implemented; general retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Live Raft/wire reconfiguration remains disabled pending quorum, learner and protocol validation. General retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -176,9 +176,10 @@
       "native": "NativeLogCodec",
       "conformance": [
         "tests/log_store.rs",
-        "tests/log_reclaim.rs"
+        "tests/log_reclaim.rs",
+        "tests/membership.rs"
       ],
-      "scope": "Bounded version-2 entry/bootstrap/transition framing plus explicit version-1 VBLCPT01 full live-state image before ordinary batches. Counts, lengths, CRCs, semantic bootstrap/snapshot/suffix validation and exact revision/generation/sequence restoration. Images may exceed one batch within the WAL budget. Existing uncleaned stores remain readable; cleaned data requires an image-capable codec/binary."
+      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. Version-1 VBLCPT01 full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records."
     },
     {
       "design_id": "C05",
@@ -299,17 +300,20 @@
       "native": "NativeSnapshotStore",
       "conformance": [
         "tests/snapshot.rs",
-        "examples/replicated_counter.rs"
+        "examples/replicated_counter.rs",
+        "tests/membership.rs"
       ],
-      "scope": "One local group per logical handle, bounded stage/seal and atomic publication. Shared drivers compose peer installation with authoritative log persistence and application restore."
+      "scope": "Atomic bounded stage/seal/publication with immutable bootstrap and validated stable/joint membership bases. Snapshot references bind the included effective configuration and checked data. Publication rejects configuration regression or changed content under one ID. Host/native conformance preserves joint rollback, finalization and application dedup across compaction; codec capability version 1 is static-only and version 2 preserves membership."
     },
     {
       "design_id": "C03",
       "public_contract": "SnapshotRetention",
       "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
       "native": "NativeSnapshotStore",
-      "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs"],
-      "scope": "Durable local log anchors and atomic two-slot pin switches. Logical compaction and verified recovery; physical WAL cleaning now preserves these exact durable anchors. General backup retention remains pending."
+      "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs",
+        "tests/membership.rs"
+      ],
+      "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission."
     },
     {
       "design_id": "C03/C04/C10",
@@ -347,9 +351,10 @@
       ],
       "native": "NativeSnapshotCodec",
       "conformance": [
-        "tests/snapshot.rs"
+        "tests/snapshot.rs",
+        "tests/membership.rs"
       ],
-      "scope": "Version-1 CRC32C framing with bounded bootstrap/application data. No cryptographic provenance claim."
+      "scope": "Native VBSNAP01 static framing remains readable; VBSNAP02 adds bounded membership-checkpoint subformat 1 alongside original bootstrap/application data. Codec capability version 2 declares preservation plus legacy readability; version 1 is static-only. Exact metadata round-trip, CRC32C, versions, lengths/counts and checkpoint state validation fail closed. No cryptographic provenance claim."
     },
     {
       "design_id": "C05",

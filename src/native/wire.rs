@@ -110,6 +110,11 @@ fn validate_message(m: &Message) -> Result<(), WireError> {
         }
         Rpc::Snapshot { snapshot } => {
             let meta = &snapshot.metadata;
+            if meta.membership.is_some() {
+                return Err(WireError::InvalidMessage(
+                    "online reconfiguration not enabled",
+                ));
+            }
             if meta.bootstrap.group != m.group
                 || meta.bootstrap.configuration != m.configuration
                 || meta.index == 0
@@ -596,6 +601,7 @@ impl<'a> Decoder<'a> {
                 Rpc::Snapshot {
                     snapshot: Box::new(Snapshot {
                         metadata: SnapshotMetadata {
+                            membership: None,
                             bootstrap: Bootstrap {
                                 group,
                                 configuration,

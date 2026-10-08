@@ -32,7 +32,7 @@ The journal grammar is:
 Another learner/joint transition waits for the preceding configuration record's
 commitment. A joint transition remains exclusive until its matching final.
 Operation reuse is rejected across the surviving journal. Suffix replacement
-replays from bootstrap to reconstruct the surviving effective configuration;
+replays from the snapshot base (or bootstrap) to reconstruct effective configuration;
 replacing an uncommitted final restores joint rules, and replacing an uncommitted
 joint restores the previous stable configuration. Committed entries remain
 protected by the existing replacement guard. Strictly increasing configuration
@@ -59,15 +59,16 @@ Configuration content includes the validated policy and both store maps. Existin
 format-2 logs remain readable. Older binaries reject the new entry tag; downgrade
 requires explicit migration. Unknown versions, invalid trees/IDs/maps, duplicate
 nodes, oversized counts and incomplete records fail closed. Full-image physical
-reclamation retains the entire journal and reconstructs identical state.
+reclamation retains the snapshot configuration base and surviving journal.
 
-Snapshot format integration remains next. Until snapshots can carry the complete
-configuration base, storage rejects any snapshot that would remove a configuration
-record, including a mismatching snapshot that would discard that suffix. A matching
-snapshot strictly before the first configuration record can still preserve the
-whole journal. The bootstrap ballot membership guard also remains static until
-live-core integration. Hosts must not interpret storage acceptance as permission
-to start a dynamically configured replica: core recovery refuses such state.
+Snapshots now carry the complete stable/joint configuration base and operation
+identities, allowing matching-prefix compaction without losing membership.
+See [configuration-aware snapshots](CONFIGURATION_SNAPSHOTS.md) for validation,
+format compatibility and crash evidence. A hard limit of 16,384 configuration
+operations prevents unbounded identity retention; exhaustion refuses further work
+without evicting identities. The bootstrap ballot guard remains static pending
+live-core integration. Storage acceptance does not authorize starting a dynamically
+configured replica: core recovery still refuses such state.
 
 Tests in `tests/membership.rs` use independent host storage and the native WAL.
 They cover stage ordering, identity/store mismatch, same-voter recursive weighted

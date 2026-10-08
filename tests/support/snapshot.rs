@@ -75,12 +75,10 @@ impl SnapshotStore for HostSnapshots {
             || self.pins.values().any(|(r, _)| Some(*r) != self.reference)
             || n == 0
             || n > self.limits.max_application_bytes
-            || self.current.as_ref().is_some_and(|s| {
-                m.index <= s.metadata.index
-                    || m.term < s.metadata.term
-                    || m.bootstrap != s.metadata.bootstrap
-                    || m.application_schema != s.metadata.application_schema
-            })
+            || self
+                .current
+                .as_ref()
+                .is_some_and(|s| !m.follows(&s.metadata))
         {
             return Err(StorageError::Rejected("stage limits or regression"));
         }

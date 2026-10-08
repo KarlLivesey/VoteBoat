@@ -46,6 +46,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
         checksum: 7,
     };
     let compact = LogUpdate {
+        snapshot_membership: None,
         group: group(1),
         expected_revision: old.revision,
         hard_state: old.hard_state,
@@ -74,6 +75,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
         bad.term = term;
         bad.store = identity(owner);
         let mutation = LogUpdate {
+            snapshot_membership: None,
             group: group(1),
             expected_revision: base.revision,
             hard_state: HardState {
@@ -292,6 +294,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
     // The accepted revision is carried by the ticket. A host driving more than
     // one unit supplies that revision; the durable range remains unchanged.
     let replacement = LogMutation::Update(LogUpdate {
+        snapshot_membership: None,
         snapshot: None,
         group: group(1),
         expected_revision: old[0].revision,
@@ -460,6 +463,7 @@ fn valid_checksums_cannot_hide_unbounded_policy_or_command_lengths() {
         Err(StorageError::Corrupt("policy child limit"))
     ));
     let mutation = LogMutation::Update(LogUpdate {
+        snapshot_membership: None,
         snapshot: None,
         group: group(1),
         expected_revision: voteboat::identity::LogRevision::new(1).unwrap(),
