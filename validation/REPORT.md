@@ -149,3 +149,23 @@ non-default addresses through a peer file together with --transport quic.
 These finite tests do not establish formal
 protocol proof, arbitrary fault coverage, macOS execution, remote deployment,
 production readiness or performance.
+
+## Slice 45 retiring leader evidence
+
+Three actual-core tests cover durable final announcements from removed/demoted
+leaders, exact completion ordering, prepared receiver commitment, duplicates,
+unchanged authority/timers, eleven invalid/obsolete messages and joint/final
+compaction boundaries. Compacted fixture pins are host assertions, not native
+snapshot publication proof. Three downstream host/native tests use public
+dynamic recovery and commit receipt, including failed synchronization/manifest
+publication, power loss, recovery and retry. Fixture committed membership is an
+explicit authorized import premise; it is not an online admin or election proof.
+
+Default library/member/membership/Raft/replication-scope/runtime/snapshot suites
+pass 29/14/27/22/4/25/19 tests; core-only versions pass 21/8/16/10/1/8, omitting
+runtime. A focused run passes the final added newer-term negative assertion.
+TCP/QUIC service, QUIC session/connector and startup suites pass 7/9/4/6 tests.
+All-feature Clippy, native-only all-target compilation and all-feature API docs
+pass. Notifications are one-shot; faulted delivery, missing configuration catch-up,
+promoted-leader authorization and full distributed activation remain open gates.
+These finite Linux checks establish no macOS execution or performance claim.

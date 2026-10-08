@@ -1248,3 +1248,233 @@ fn prospective_reservation_retains_intermediate_joint_fanout_after_final() {
     );
     assert_eq!(leader.rollback_replicas(), 3);
 }
+
+fn retiring_leader(removed: bool) -> Raft {
+    let mut core = staged();
+    let next = configuration(4, &[2, 3, 4], if removed { &[5] } else { &[1, 5] });
+    let effects = accept(
+        &mut core,
+        101,
+        ConfigurationChange::Joint { id: cid(3), next },
+    );
+    durable(&mut core, effects);
+    committed_fixture(&mut core, 3);
+    let effects = accept(&mut core, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut core, effects);
+    core
+}
+#[test]
+fn retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority() {
+    for removed in [false, true] {
+        let mut leader = retiring_leader(removed);
+        let mut receiver = Raft::recover_member(
+            node(4),
+            StoreBinding {
+                identity: store(4),
+                session: StoreSession::new(7).unwrap(),
+            },
+            leader.state().clone(),
+            leader.limits,
+        )
+        .unwrap();
+        assert!(acknowledge(&mut leader, 2).is_empty());
+        let commit = acknowledge(&mut leader, 3);
+        assert!(matches!(&commit[..],[Effect::Persist(u)] if u.commit_index==4));
+        assert_eq!(leader.state().commit_index, 3);
+        assert_eq!(
+            leader.complete(&DurableLog { tickets: vec![] }),
+            Err(RaftError::WrongCompletion)
+        );
+        let reservation = leader.effect_reservation(0).unwrap();
+        let effects = durable(&mut leader, commit);
+        assert_eq!(leader.role(), Role::Follower);
+        assert!(leader.requests.is_empty() && leader.progress.is_empty());
+        let notices = effects
+            .into_iter()
+            .filter_map(|e| {
+                if let Effect::Send(m) = e {
+                    Some(m)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(notices.len(), 4);
+        assert!(notices.iter().all(|m|m.configuration==cid(4) && m.term==1 && m.context.origin==leader.binding
+            && matches!(&m.rpc,Rpc::Append { previous_index:4,previous_term:1,entries,leader_commit:4 } if entries.is_empty())));
+        assert!(reservation > notices.len() * std::mem::size_of::<Message>());
+        let notice = notices.into_iter().find(|m| m.to == node(4)).unwrap();
+        let reset = receiver.election_reset_sequence();
+        let hard = receiver.state().hard_state;
+        let effects = receiver.step(Event::Receive(notice.clone())).unwrap();
+        assert!(
+            matches!(&effects[..],[Effect::Persist(u)] if u.commit_index==4 && u.suffix.is_none() && u.hard_state==hard)
+        );
+        assert_eq!(receiver.state().commit_index, 3);
+        assert_eq!(
+            receiver.complete(&DurableLog { tickets: vec![] }),
+            Err(RaftError::WrongCompletion)
+        );
+        let effects = durable(&mut receiver, effects);
+        assert_eq!(receiver.state().commit_index, 4);
+        assert_eq!(receiver.election_reset_sequence(), reset);
+        assert_eq!(receiver.state().hard_state, hard);
+        assert_eq!(receiver.role(), Role::Follower);
+        assert!(effects.iter().any(
+            |e| matches!(e,Effect::Committed(entries) if entries.len()==1 && entries[0].index==4)
+        ));
+        assert!(effects.iter().any(|e|matches!(e,Effect::Send(m) if m.to==node(1) && matches!(m.rpc,Rpc::Appended{success:true,matching_index:4}))));
+        let duplicate = receiver.step(Event::Receive(notice)).unwrap();
+        assert!(matches!(&duplicate[..], [Effect::Send(_)]));
+        assert_eq!(receiver.election_reset_sequence(), reset);
+        assert!(leader.step(Event::Heartbeat).unwrap().is_empty());
+    }
+}
+#[test]
+fn retired_commit_exception_cannot_append_raise_terms_or_authorize_learners() {
+    let leader = retiring_leader(false);
+    let base = leader.state().clone();
+    let sender = leader.binding;
+    let notice = Message {
+        group: base.bootstrap.group,
+        configuration: cid(4),
+        from: node(1),
+        sender,
+        to: node(4),
+        term: 1,
+        context: RequestContext {
+            origin: sender,
+            sequence: 91,
+        },
+        rpc: Rpc::Append {
+            previous_index: 4,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 4,
+        },
+    };
+    for variant in 0..11 {
+        let mut receiver = Raft::recover_member(
+            node(4),
+            StoreBinding {
+                identity: store(4),
+                session: StoreSession::new(7).unwrap(),
+            },
+            base.clone(),
+            leader.limits,
+        )
+        .unwrap();
+        let mut invalid = notice.clone();
+        match variant {
+            0 => invalid.term = 2,
+            1 => invalid.configuration = cid(3),
+            2 => invalid.sender.identity = store(99),
+            3 => invalid.context.origin.session = StoreSession::new(99).unwrap(),
+            4 => invalid.context.sequence = 0,
+            5 => {
+                invalid.from = node(5);
+                invalid.sender.identity = store(5);
+                invalid.context.origin = invalid.sender;
+            }
+            6 => invalid.rpc = Rpc::ReadProbe,
+            7 => {
+                invalid.rpc = Rpc::Append {
+                    previous_index: 4,
+                    previous_term: 1,
+                    entries: vec![LogEntry {
+                        index: 5,
+                        term: 1,
+                        payload: EntryPayload::Noop,
+                    }],
+                    leader_commit: 4,
+                }
+            }
+            8 => {
+                invalid.rpc = Rpc::Append {
+                    previous_index: 4,
+                    previous_term: 2,
+                    entries: vec![],
+                    leader_commit: 4,
+                }
+            }
+            9 => {
+                invalid.rpc = Rpc::Append {
+                    previous_index: 4,
+                    previous_term: 1,
+                    entries: vec![],
+                    leader_commit: 5,
+                }
+            }
+            10 => {
+                let effects = receiver.step(Event::Campaign).unwrap();
+                durable(&mut receiver, effects);
+                invalid.term = receiver.state().hard_state.term;
+            }
+            _ => unreachable!(),
+        }
+        let before = receiver.state().clone();
+        let reset = receiver.election_reset_sequence();
+        assert!(
+            receiver.step(Event::Receive(invalid)).is_err(),
+            "variant {variant}"
+        );
+        assert_eq!(receiver.state(), &before);
+        assert!(!receiver.has_pending_dependency());
+        assert_eq!(receiver.election_reset_sequence(), reset);
+    }
+}
+
+#[test]
+fn retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history() {
+    let mut leader = retiring_leader(true);
+    let reference = SnapshotRef {
+        store: leader.binding.identity,
+        group: leader.state().bootstrap.group,
+        configuration: cid(3),
+        index: 3,
+        term: 1,
+        application_schema: 1,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        file_bytes: 128,
+        checksum: 7,
+    };
+    // This internal fixture asserts an already verified/pinned joint checkpoint.
+    let compact = leader.begin_compact(reference).unwrap();
+    durable(&mut leader, compact);
+    let binding = StoreBinding {
+        identity: store(4),
+        session: StoreSession::new(7).unwrap(),
+    };
+    // The host-verified local pin belongs to the receiver's physical store.
+    let mut receiver_state = leader.state().clone();
+    receiver_state.snapshot.as_mut().unwrap().store = binding.identity;
+    let mut receiver =
+        Raft::recover_member_verified(node(4), binding, receiver_state, leader.limits).unwrap();
+    assert!(acknowledge(&mut leader, 2).is_empty());
+    let commit = acknowledge(&mut leader, 3);
+    let notice = durable(&mut leader, commit)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if m.to == node(4) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let effects = receiver.step(Event::Receive(notice.clone())).unwrap();
+    durable(&mut receiver, effects);
+    assert_eq!(receiver.state().commit_index, 4);
+    let final_reference = SnapshotRef {
+        store: binding.identity,
+        configuration: cid(4),
+        index: 4,
+        generation: SnapshotGeneration::new(2).unwrap(),
+        ..reference
+    };
+    let compact = receiver.begin_compact(final_reference).unwrap();
+    durable(&mut receiver, compact);
+    assert_eq!(receiver.state().base_index(), 4);
+    assert_eq!(
+        receiver.step(Event::Receive(notice)),
+        Err(RaftError::WrongIdentity)
+    );
+    assert_eq!(receiver.state().commit_index, 4);
+}

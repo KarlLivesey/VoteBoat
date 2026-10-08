@@ -83,7 +83,10 @@ request; elections/reads still require equal configurations. See
 [replication scopes](REPLICATION_SCOPES.md) for catch-up, rollback and snapshot
 evidence. A newly promoted sender that is only a learner or absent in the older
 receiver's view remains rejected pending its catch-up authorization protocol.
-A retiring leader's final propagation also needs end-to-end histories.
+A retiring leader now sends a restricted final commitment announcement before
+stepping down; an already prepared receiver persists it without granting ongoing
+authority. See [retiring leaders](RETIRING_LEADERS.md). Lost notices, lagging
+configuration catch-up and roster retirement still need end-to-end histories.
 
 Initial learner-only enrollment/restart now uses committed exact-store
 assignments and verified application recovery. Remaining prerequisites include

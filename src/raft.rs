@@ -874,6 +874,18 @@ impl Raft {
         if configuration_changed {
             self.configuration_changed()?;
         }
+        // A retiring leader must publish its durable final commitment before
+        // discarding replication state. These bounded announcements carry no
+        // new entries and cannot confer ongoing leadership on the old voter.
+        let retirement = if self.role == Role::Leader
+            && !self.local_voter()
+            && previous_commit < self.membership.last_configuration_index()
+            && self.membership.last_configuration_index() <= self.durable.commit_index
+        {
+            self.retirement_announcements()?
+        } else {
+            Vec::new()
+        };
         if !self.local_voter()
             && self.membership.last_configuration_index() <= self.durable.commit_index
         {
@@ -895,6 +907,7 @@ impl Raft {
                     .to_vec(),
             ));
         }
+        effects.extend(retirement);
         match p.after {
             After::Campaign => {
                 self.votes.insert(self.node);
@@ -1244,6 +1257,87 @@ impl Raft {
         }
     }
 
+    /// The final record and its committed predecessor authorize only this
+    /// exact commit-only notification from a former voter. Compacted-away
+    /// history cannot be used to recreate retired sender authority.
+    fn retirement_predecessor(&self) -> Option<(u64, u64, Membership)> {
+        let index = self.membership().last_configuration_index();
+        let entry = self.durable.entry_at(index)?;
+        let EntryPayload::Configuration(record) = &entry.payload else {
+            return None;
+        };
+        if !matches!(record.change, crate::membership::ConfigurationChange::Final { id } if id == self.membership().id())
+        {
+            return None;
+        }
+        let previous = self.durable.membership_at(index.checked_sub(1)?).ok()?;
+        let joint = previous.joint()?;
+        if joint.id != record.expected || joint.index > self.durable.commit_index {
+            return None;
+        }
+        Some((index, entry.term, previous))
+    }
+    fn retirement_announcements(&mut self) -> Result<Vec<Effect>, RaftError> {
+        let Some((index, term, previous)) = self.retirement_predecessor() else {
+            return Err(RaftError::InvalidRecovery);
+        };
+        if term != self.durable.hard_state.term
+            || previous.voter_store(self.node) != Some(self.binding.identity)
+        {
+            return Err(RaftError::InvalidRecovery);
+        }
+        let context = self.context()?;
+        Ok(self
+            .peers()
+            .into_iter()
+            .map(|peer| {
+                Effect::Send(self.message(
+                    peer,
+                    context,
+                    Rpc::Append {
+                        previous_index: index,
+                        previous_term: term,
+                        entries: Vec::new(),
+                        leader_commit: index,
+                    },
+                ))
+            })
+            .collect())
+    }
+    fn retirement_commit(&self, m: &Message) -> Option<u64> {
+        // Ordinary active voters use the normal replication path. A retiring
+        // sender cannot append data, raise a term, or claim another boundary.
+        if self.membership().is_voter(m.from)
+            || m.to != self.node
+            || m.from == self.node
+            || m.group != self.durable.bootstrap.group
+            || m.configuration != self.membership().id()
+            || m.term == 0
+            || m.term != self.durable.hard_state.term
+            || m.context.sequence == 0
+            || m.context.origin != m.sender
+        {
+            return None;
+        }
+        let Rpc::Append {
+            previous_index,
+            previous_term,
+            entries,
+            leader_commit,
+        } = &m.rpc
+        else {
+            return None;
+        };
+        if !entries.is_empty()
+            || *previous_index != self.membership().last_configuration_index()
+            || leader_commit != previous_index
+            || self.durable.term_at(*previous_index) != Some(*previous_term)
+        {
+            return None;
+        }
+        let (index, term, previous) = self.retirement_predecessor()?;
+        (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
+    }
     fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
         // Keep public online activation closed while the remaining learner,
         // prospective resource and distributed protocol gates are unfinished.
@@ -1253,7 +1347,8 @@ impl Raft {
         {
             return Err(RaftError::InvalidMessage);
         }
-        let contact = m.term >= self.durable.hard_state.term
+        let contact = self.membership().is_voter(m.from)
+            && m.term >= self.durable.hard_state.term
             && matches!(
                 &m.rpc,
                 Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
@@ -1275,6 +1370,26 @@ impl Raft {
         Ok(effects)
     }
     fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        if let Some(index) = self.retirement_commit(&m) {
+            let reply = self.reply(
+                &m,
+                Rpc::Appended {
+                    success: true,
+                    matching_index: index,
+                },
+            );
+            return if index > self.durable.commit_index {
+                self.persist(
+                    self.durable.hard_state,
+                    index,
+                    None,
+                    After::Reply,
+                    Some(reply),
+                )
+            } else {
+                Ok(vec![Effect::Send(reply)])
+            };
+        }
         // Replication from an exact locally authorized voter may bridge
         // differing accepted heads. It still proves only the checked matching
         // prefix. Election/read authority and every response require the local

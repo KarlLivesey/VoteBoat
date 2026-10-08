@@ -733,3 +733,105 @@ fn failed_joint_barriers_recover_only_a_complete_old_or_new_membership() {
         assert_eq!(core.role(), Role::Follower);
     }
 }
+
+fn retired_notice() -> Message {
+    let sender = StoreBinding {
+        identity: identity(3),
+        session: StoreSession::new(1).unwrap(),
+    };
+    Message {
+        group: group(1),
+        configuration: cid(4),
+        from: node(3),
+        sender,
+        to: node(4),
+        term: 1,
+        context: RequestContext {
+            origin: sender,
+            sequence: 21,
+        },
+        rpc: Rpc::Append {
+            previous_index: 3,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 3,
+        },
+    }
+}
+fn retirement_receipt<S: LogStore>(log: &mut S) {
+    prepare(log, true, false);
+    let mut core = recover(log);
+    let membership = core.membership().clone();
+    let hard = core.state().hard_state;
+    let reset = core.election_reset_sequence();
+    let effects = core.step(Event::Receive(retired_notice())).unwrap();
+    assert!(matches!(&effects[..],[Effect::Persist(u)] if u.commit_index==3 && u.suffix.is_none()));
+    assert_eq!(core.state().commit_index, 2);
+    assert!(core.complete(&DurableLog { tickets: vec![] }).is_err());
+    let effects = persist(&mut core, log, effects);
+    assert!(effects.iter().any(
+        |e| matches!(e,Effect::Committed(entries) if entries.len()==1 && entries[0].index==3)
+    ));
+    assert!(effects.iter().any(
+        |e| matches!(e,Effect::Send(m) if m.to==node(3) && m.context==retired_notice().context)
+    ));
+    assert_eq!(core.state().commit_index, 3);
+    assert_eq!(core.state().hard_state, hard);
+    assert_eq!(core.membership(), &membership);
+    assert_eq!(core.election_reset_sequence(), reset);
+    assert_eq!(core.role(), Role::Follower);
+    assert_eq!(recover(log).state().commit_index, 3);
+    assert!(matches!(
+        &core.step(Event::Receive(retired_notice())).unwrap()[..],
+        [Effect::Send(_)]
+    ));
+}
+#[test]
+fn host_member_records_an_exact_retired_voters_final_commit_after_its_barrier() {
+    retirement_receipt(&mut HostLogStore::new(4));
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_member_records_an_exact_retired_voters_final_commit_after_its_barrier() {
+    use voteboat::native::log_store::*;
+    retirement_receipt(
+        &mut NativeLogStore::create(ModelIo::default(), identity(4), LogLimits::default()).unwrap(),
+    );
+}
+#[cfg(feature = "native")]
+#[test]
+fn failed_retirement_commit_barriers_release_no_reply_and_recover_whole_boundaries() {
+    use voteboat::native::log_store::*;
+    for fault in [Fault::Sync, Fault::PublishBefore, Fault::PublishAfter] {
+        let io = ModelIo::default();
+        let mut log =
+            NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+        prepare(&mut log, true, false);
+        let mut core = recover(&log);
+        let effects = core.step(Event::Receive(retired_notice())).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("persistence must precede reply")
+        };
+        let tickets = log
+            .append_batch(vec![LogMutation::Update(update.clone())])
+            .unwrap();
+        core.admitted(tickets[0]).unwrap();
+        assert_eq!(core.state().commit_index, 2);
+        io.0.borrow_mut().fault = fault;
+        assert!(log.barrier(&tickets).is_err());
+        core.storage_failed();
+        assert!(core.step(Event::Receive(retired_notice())).is_err());
+        drop(log);
+        io.0.borrow_mut().power_loss();
+        let log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+        let mut core = recover(&log);
+        assert!([2, 3].contains(&core.state().commit_index));
+        assert_eq!(core.membership().id(), cid(4));
+        let effects = core.step(Event::Receive(retired_notice())).unwrap();
+        if core.state().commit_index == 2 {
+            assert!(matches!(&effects[..], [Effect::Persist(_)]));
+        } else {
+            assert!(matches!(&effects[..], [Effect::Send(_)]));
+        }
+    }
+}

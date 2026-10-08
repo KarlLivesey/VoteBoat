@@ -2737,6 +2737,48 @@ selecting non-default ports through a peer file alongside --transport quic.
 Formatting, inventory JSON, local documentation links and diff checks pass.
 No macOS, remote deployment, production readiness or performance claim is made.
 
+## Slice 45 — retiring leader final commitment
+
+Mini schema plan: produce commit-only output from the exact durable final
+completion before clearing a removed/demoted leader's volatile state. Accept
+only the receiver's already stored final boundary, from an exact predecessor
+joint voter in the same current/final term. Preserve role, term, vote and timers;
+persist changed commitment before reply. Check duplicates, malformed/obsolete
+messages, compaction, failed barriers and restart without opening online ingress.
+
+The audit found that final durability cleared a retiring leader's role before
+After::Commit could broadcast. The core now constructs bounded final notices
+before that cleanup and emits them after its exact DurableLog completion. The
+existing empty Append encoding carries only the final index/term and matching
+leader_commit. A separate restricted receive path checks locally surviving final
+and committed joint history, exact group/configuration/node/store/context, same
+current/final term and empty data. It cannot append, raise a term, campaign,
+establish reads or reset election timers. Changed receipt commitment and reply
+wait for the receiver's exact storage dependency; duplicates are idempotent.
+Existing request generations, formats and durability tokens are unchanged.
+
+Three internal tests cover removed/demoted leaders, missing exact completion,
+bounded current-peer fanout, prepared receiver commitment, duplicate receipt,
+eleven invalid/obsolete messages, verified joint snapshot bases and refusal to
+recreate old authority after final compaction. The compacted fixture initially
+used the leader's physical-store pin for the receiver and correctly failed
+recovery; its explicit host-verified local pin now binds the receiver store.
+Three public host/native tests check dynamic recovery receipt, unchanged voting
+state/timers, failed sync/manifest publication, power-loss recovery and retry.
+
+Default library/member/membership/Raft/replication-scope/runtime/snapshot suites
+pass 29/14/27/22/4/25/19 tests (140). Core-only versions pass 21/8/16/10/1/8,
+omitting runtime. The final added newer-term negative assertion passes its focused
+check. TCP/QUIC service, QUIC session/connector and startup regressions pass
+7/9/4/6 tests. All-feature all-target Clippy, native-only all-target compilation
+and all-feature API docs pass. See RETIRING_LEADERS.md for authority and evidence.
+
+This is one-shot final commitment notification, not retired leadership, a
+transferable election certificate or a persistent retry outbox. Receivers missing
+the final entry still need catch-up. Full faulted activation/retirement and roster
+histories remain required. Online configuration ingress remains closed; full
+P0–P7 remains active. No macOS, formal completeness or performance claim is made.
+
 ## Next slice
 
 Continue P4 with promoted-leader catch-up

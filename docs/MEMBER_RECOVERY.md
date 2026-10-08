@@ -57,8 +57,11 @@ explicitly assume authorized committed imports and simulate vote replies; they
 do not establish a networked administration operation or transferable election
 proof.
 
+Recovered prepared members now accept an exact
+[retired voter's final commitment](RETIRING_LEADERS.md) after their own barrier,
+without restoring the sender's leadership or changing local voting authority.
 Promoted-leader authorization at lagging receivers, readiness/capability evidence,
-retiring-leader propagation, route/roster admission, distributed activation modeling
+faulted retirement propagation, route/roster admission, distributed activation modeling
 and faulted network membership histories remain prerequisites for online changes.
 Public configuration-bearing Append and membership Snapshot ingress remain gated.
 An attached configuration or newer scope alone cannot self-authorize a learner.

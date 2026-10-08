@@ -145,6 +145,21 @@
       "scope": "Explicit host-authorized committed/accepted exact-store assignment, accepted stable/joint/final predicate reconstruction, historical ballots and verified pinned application replay before exposing compacted cores. Eleven host/native tests include joint/final election differences, weighted final policy, rollback, learner exclusion, replacement stores, missing data, torn frames, failed barriers and actual-file reclaim/restart/dedup. No network bootstrap, transferable election proof or online configuration ingress."
     },
     {
+      "design_id": "C01/C03/C10",
+      "public_contract": "Raft final commitment retirement",
+      "operations": [
+        "step(Event::Receive)",
+        "admitted",
+        "complete"
+      ],
+      "native": "Deterministic commit-only announcement/receipt over existing Append and LogStore contracts",
+      "conformance": [
+        "src/raft/membership_tests.rs",
+        "tests/member_recovery.rs"
+      ],
+      "scope": "A removed/demoted leader announces only its exact durable final commitment, then clears leadership. Prepared receivers require a local final record, committed joint predecessor, exact historical voter store, group/configuration/context and same current/final term. Empty Append only; no data, term, role, vote or timer authority changes. Changed commit/reply waits for exact durability; duplicates are idempotent. Three actual-core and three public host/native tests include malformed/obsolete messages, compaction boundaries and failed sync/manifest power-loss recovery. No persistent retries, missing-entry catch-up, new wire format or election certificate. Online configuration ingress remains gated; faulted end-to-end retirement and roster integration remain pending."
+    },
+    {
       "design_id": "C01/C02",
       "public_contract": "LogStore",
       "operations": [

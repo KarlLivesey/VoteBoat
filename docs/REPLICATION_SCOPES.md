@@ -60,6 +60,12 @@ the election deadline without activating the echoed scope or changing its vote.
 These complement existing static TCP/TLS histories, which do not exercise online
 membership.
 
+An exact voter from the preceding joint configuration can now send a restricted
+commit-only notification for the receiver's already stored final record, even
+after removal/demotion. It cannot append entries, raise terms or reset election
+timers. See [retiring leader commitment](RETIRING_LEADERS.md); this is separate
+from ongoing replication authority.
+
 A newly promoted leader that is only a learner or absent in an older receiver's
 current view remains rejected. That path needs validated catch-up authorization;
 blindly trusting the declared head would let a learner self-authorize. Initial learner-only
