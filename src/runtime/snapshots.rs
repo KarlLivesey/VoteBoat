@@ -137,6 +137,8 @@ impl SnapshotRouter {
                 Effect::StageSnapshot(_)
                     | Effect::SnapshotRequired { .. }
                     | Effect::SnapshotInstalled(_)
+                    | Effect::CheckpointRequired { .. }
+                    | Effect::CheckpointCompacted(_)
             ) {
                 return Err(SnapshotRouteError::NotSnapshot);
             }
@@ -172,14 +174,36 @@ impl SnapshotRouter {
                 .reserve_snapshot(&lease, extra)
                 .map_err(SnapshotRouteError::Owner)?;
             let core = owner.core(lease.ticket.visit.group).unwrap();
-            let work = prepare_snapshot_work(
-                core,
-                application,
-                lease.ticket.visit,
-                &lease.effect,
-                self.worker,
-            )
-            .map_err(SnapshotRouteError::Checkpoint)?;
+            let work = if let Effect::CheckpointRequired { context } = &lease.effect {
+                let max_bytes = worker
+                    .checkpoint_bytes(lease.ticket.visit.group)
+                    .filter(|n| *n > 0 && *n <= allowance)
+                    .ok_or(SnapshotRouteError::TooLarge)?;
+                let work = prepare_local_checkpoint_work(
+                    core,
+                    application,
+                    lease.ticket.visit,
+                    *context,
+                    self.worker,
+                    max_bytes,
+                )
+                .map_err(SnapshotRouteError::Checkpoint)?;
+                if let SnapshotJob::Publish { snapshot, .. } = &work.job {
+                    if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
+                        return Err(SnapshotRouteError::TooLarge);
+                    }
+                }
+                work
+            } else {
+                prepare_snapshot_work(
+                    core,
+                    application,
+                    lease.ticket.visit,
+                    &lease.effect,
+                    self.worker,
+                )
+                .map_err(SnapshotRouteError::Checkpoint)?
+            };
             Ok((allowance, work))
         })();
         let (allowance, work) = match checked {

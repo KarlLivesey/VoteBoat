@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-snapshot-routing",
+  "status": "shared-runtime-with-asynchronous-checkpoint-maintenance",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -166,10 +166,10 @@
     {
       "design_id": "C03/C04/C10",
       "public_contract": "SnapshotWorker",
-      "operations": ["binding", "limits", "usage", "load_reservation", "submit", "poll", "close", "is_drained"],
+      "operations": ["binding", "limits", "usage", "load_reservation", "checkpoint_bytes", "submit", "poll", "close", "is_drained"],
       "native": "NativeSnapshotWorker<S: SnapshotRetention + Send>",
       "conformance": ["tests/snapshot_worker.rs", "tests/support/snapshot.rs", "tests/effect_owner.rs"],
-      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification and pinned loads. Owner-side helpers preserve separate WAL and application dependencies. Real-file effect-owner/WAL-worker installation and receipt-loss recovery; thread-safe native-storage fault model. SnapshotRouter supplies bounded admission-to-lease routing; native 100-group TCP/TLS catch-up also passes. Asynchronous checkpoint creation/compaction and full node assembly remain pending."
+      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification, pinned loads and verified retention reconciliation. Owner-side helpers preserve WAL and application dependencies. Local checkpoint publication precedes WAL compaction; exact durability precedes retention cleanup. Real-file receipt-loss recovery, native-storage fault model and repeated native 100-group network maintenance. Full node assembly and physical WAL cleaning remain pending."
     },
     {
       "design_id": "C04",

@@ -70,6 +70,8 @@ impl<S: LogStore> Cluster<S> {
         while let Some(effect) = effects.pop_front() {
             match effect {
                 Effect::SnapshotRequired { .. }
+                | Effect::CheckpointRequired { .. }
+                | Effect::CheckpointCompacted(_)
                 | Effect::StageSnapshot(_)
                 | Effect::SnapshotInstalled(_) => {
                     panic!("baseline history has no compacted groups")

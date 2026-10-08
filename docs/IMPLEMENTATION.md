@@ -10,8 +10,8 @@ record claims that unimplemented phases already work.
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; native WAL worker history traverses real TCP/TLS; production node/effect staging and asynchronous snapshots remain |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/outbound scheduling, asynchronous shared WAL batches and 100-group overload isolation implemented; production transport coalescing, effect staging and snapshot workers remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers and real TCP/TLS histories; full node facade remains |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, shared WAL and snapshot workers, timers and 100-group histories implemented; production peer roster/reconnect and result admission remain |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -1266,10 +1266,63 @@ necessary. Physical WAL cleaning, membership, recursive responsibilities and
 split/merge protocols remain unfinished. macOS execution and hardware power cuts
 remain unobserved. Full P0–P7 remains active.
 
+## Slice 17: asynchronous local checkpoint maintenance
+
+`Event::Checkpoint` now enters bounded background ingress and emits a local
+CheckpointRequired effect with an existing checked RequestContext. The context
+is scoped to group and recovered WAL session, not a new durable generation.
+`SnapshotWorker::checkpoint_bytes(group)` declares the selected store's stable
+serialization ceiling. The router reserves image capacity before preparing work;
+the owner serializes and validates restore on an application clone. Only a
+contiguous applied prefix strictly beyond the old base and at most the committed
+prefix is eligible. All file I/O remains on the selected worker.
+
+The same native Publish path reconciles the old WAL anchor, stages/seals/publishes,
+pins and verifies the image. Its exact Published completion permits only Persist.
+The WAL worker's Written event releases nothing. Exact durable anchoring advances
+the logical base and emits CheckpointCompacted, retaining the suspended visit.
+The new Reconcile job loads/verifies the pinned image, then durably reconciles
+retention against that authoritative anchor. Only its exact Reconciled completion
+finishes maintenance and refreshes leader replication requests. Other groups
+remain schedulable. Maintenance produces no client result or quorum evidence.
+
+No native file format, quorum rule, durable watermark or persisted generation
+changes. Restart uses the authoritative WAL snapshot reference and existing pin
+manifest. Losing observation before WAL anchoring retains the old image and
+required log tail; losing it after anchoring restores the new image. An uncertain
+retention error fences the live owner and requires recovery. Synchronous
+checkpoint/compaction helpers remain available for quiescent callers.
+
+### Slice 17 validation
+
+- Full local suites passed with 173 tests for default native/TLS, 162 for
+  native-only and 76 for core/host-only. Clippy passes all three feature sets
+  with warnings denied; formatting and documentation builds pass.
+- Public-interface tests reject stale contexts/bindings, insufficient applied
+  progress, serialization ceilings, foreign publication references and incorrect
+  retention completion kinds before releasing their dependent stage.
+- Actual-file recovery covers five receipt-loss boundaries: publication before
+  owner delivery, before WAL submission, after durable WAL compaction, after
+  retention work without delivery, and normal completion. It starts with an
+  older pinned checkpoint and committed replay tail, verifies the correct old/new
+  base, checks old pin retention/release, restores exact state and preserves retries.
+  Another group completes a durable election while one checkpoint receipt is held.
+- Native snapshot storage injects failed and lost reconciliation-manifest
+  receipts. Both failures fence the core; recovery restores the durable WAL anchor.
+- The native three-node/100-group history now repeats checkpoints across all
+  replicas while both workers retain their storage handles, continues replicated
+  writes/retries/reads, recovers actual files, and repeats maintenance. Defaults
+  use actual loopback TCP/TLS; native-only uses bounded simulated delivery.
+  Admissions occur in bounded waves within background ingress ceilings.
+
+Physical WAL reclamation, full node facade, peer roster/reconnect management,
+application result admission, membership, recursive responsibilities and
+split/merge remain unfinished. macOS execution and hardware power cuts remain
+unobserved. The full P0–P7 goal remains active.
+
 ## Next slice
 
-Implement asynchronous checkpoint creation and compaction using the selected
-snapshot and authoritative WAL workers, preserving publication/pin dependencies
-and safe retention reconciliation. Continue native node assembly with bounded
-peer roster/reconnect handling, decoded ingress and application result admission.
-CI stays background feedback; relevant local checks guide direct commits.
+Continue native node assembly with bounded peer roster/reconnect handling,
+decoded ingress and application result admission. Implement physical WAL cleaning
+with explicit durable replacement and recovery dependencies. CI stays background
+feedback; relevant local checks guide direct commits.

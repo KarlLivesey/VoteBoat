@@ -32,7 +32,8 @@ TCP/TLS connections, including leader replacement and restart. The bounded
 leases through rejection, persistence, application and read completion. Peer
 roster/reconnect management and full node assembly remain in progress. An explicit
 asynchronous snapshot worker now preserves publication, WAL durability and
-application-installation dependencies.
+application-installation dependencies, and supports local checkpoints and logical
+compaction while both storage workers retain their handles.
 
 Production node assembly, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
@@ -153,8 +154,12 @@ and recovers actual files before further replicated writes. Native timers drive
 heartbeat traffic; elections remain explicit in that history. See the
 [snapshot-worker](docs/SNAPSHOT_WORKER.md) and [snapshot-routing](docs/SNAPSHOT_ROUTER.md)
 contracts. A separate native 100-group network history uses timer-driven
-elections, partition replacement and healing. Asynchronous checkpoint creation
-and full node assembly remain in progress.
+elections, partition replacement and healing. Admit `Event::Checkpoint` as bounded
+background work for a group with new committed/applied entries. Route
+CheckpointRequired and CheckpointCompacted through the same snapshot router:
+publication/pinning precedes WAL compaction, and verified retention reconciliation
+finishes maintenance. The native network history repeats this cycle before and
+after file recovery. Full node assembly remains in progress.
 
 Use `outbound::OutboundQueue` (native provider `NativeOutbound`) to retain
 same-peer batches of `Effect::Send` under node and peer budgets. Admission

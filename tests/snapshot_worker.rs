@@ -101,6 +101,9 @@ struct HostWorker {
     closed: bool,
 }
 impl SnapshotWorker for HostWorker {
+    fn checkpoint_bytes(&self, group: GroupIdentity) -> Option<usize> {
+        (group == support::group(1)).then_some(SnapshotLimits::default().max_application_bytes)
+    }
     fn binding(&self) -> SnapshotWorkerBinding {
         binding()
     }
@@ -224,6 +227,181 @@ fn invalid_application_and_store_scope_never_submit_work() {
     assert!(!core.is_fenced());
 }
 
+fn checkpoint_source() -> (Raft, HostLogStore, Counter) {
+    let (_, mut log) = follower();
+    let command = LogEntry {
+        index: 1,
+        term: 1,
+        payload: EntryPayload::Command {
+            operation: OperationId::new(1).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        },
+    };
+    let mutation = update(
+        &log.state(group(1)).unwrap(),
+        1,
+        1,
+        Some(Suffix {
+            from: 1,
+            entries: vec![command.clone()],
+        }),
+    );
+    append(&mut log, vec![mutation]);
+    let core = Raft::recover(
+        node(2),
+        log.binding(),
+        log.state(group(1)).unwrap(),
+        log.limits(),
+    )
+    .unwrap();
+    let mut app = Counter::new(20).unwrap();
+    app.apply_batch(&[command]).unwrap();
+    (core, log, app)
+}
+#[test]
+fn local_checkpoint_checks_context_boundary_and_exact_retention_completion() {
+    let (mut core, mut log, mut app) = checkpoint_source();
+    let effect = core.step(Event::Checkpoint).unwrap().remove(0);
+    let Effect::CheckpointRequired { context } = effect else {
+        panic!()
+    };
+    assert_eq!(core.step(Event::Heartbeat), Err(RaftError::Busy));
+    let mut wrong = context;
+    wrong.sequence += 1;
+    assert!(prepare_local_checkpoint_work(&core, &app, visit(), wrong, binding(), 65536).is_err());
+    assert!(prepare_local_checkpoint_work(&core, &app, visit(), context, binding(), 1).is_err());
+    assert!(prepare_local_checkpoint_work(
+        &core,
+        &Counter::new(20).unwrap(),
+        visit(),
+        context,
+        binding(),
+        65536
+    )
+    .is_err());
+    let work =
+        prepare_local_checkpoint_work(&core, &app, visit(), context, binding(), 65536).unwrap();
+    let SnapshotJob::Publish {
+        snapshot,
+        durable: None,
+    } = work.job
+    else {
+        panic!()
+    };
+    assert_eq!(snapshot, image(1));
+    let mut snapshots = support::snapshot::HostSnapshots::new();
+    snapshots.identity.store = identity(2);
+    snapshots.binding.identity = identity(2);
+    let reference = checkpoint_application(&core, &app, &mut snapshots)
+        .unwrap()
+        .reference();
+    snapshots.pin_for_log(reference).unwrap();
+    let ticket = SnapshotWorkTicket {
+        binding: binding(),
+        sequence: 1,
+    };
+    let mut stale = ticket;
+    stale.binding.store.session = StoreSession::new(2).unwrap();
+    assert_eq!(
+        complete_snapshot_work(
+            &mut core,
+            &mut app,
+            &effect,
+            ticket,
+            visit(),
+            SnapshotWorkEvent {
+                request: stale,
+                visit: visit(),
+                result: Ok(SnapshotOutput::Published(reference)),
+            }
+        ),
+        Err(CheckpointError::InvalidBinding)
+    );
+    assert!(!core.is_fenced());
+    let effects = complete_snapshot_work(
+        &mut core,
+        &mut app,
+        &effect,
+        ticket,
+        visit(),
+        SnapshotWorkEvent {
+            request: ticket,
+            visit: visit(),
+            result: Ok(SnapshotOutput::Published(reference)),
+        },
+    )
+    .unwrap();
+    assert_eq!(core.state().base_index(), 0);
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+    assert_eq!(effects, vec![Effect::CheckpointCompacted(reference)]);
+    assert_eq!(core.state().base_index(), 1);
+    assert!(core.has_pending_dependency());
+    // The pin is now anchored by WAL, but a send-load receipt cannot finish
+    // maintenance: only the exact verified retention operation can release it.
+    let wrong_output = SnapshotOutput::Loaded {
+        reference,
+        snapshot,
+        reconciled: true,
+    };
+    assert!(complete_snapshot_work(
+        &mut core,
+        &mut app,
+        &effects[0],
+        ticket,
+        visit(),
+        SnapshotWorkEvent {
+            request: ticket,
+            visit: visit(),
+            result: Ok(wrong_output),
+        }
+    )
+    .is_err());
+    assert!(core.is_fenced());
+    assert_eq!(app.read_applied(1), Ok(7));
+}
+#[test]
+fn local_checkpoint_rejects_foreign_published_boundary_before_wal() {
+    for invalid in 0..5 {
+        let (mut core, _, mut app) = checkpoint_source();
+        let effect = core.step(Event::Checkpoint).unwrap().remove(0);
+        let mut snapshots = support::snapshot::HostSnapshots::new();
+        snapshots.identity.store = identity(2);
+        snapshots.binding.identity = identity(2);
+        let mut reference = checkpoint_application(&core, &app, &mut snapshots)
+            .unwrap()
+            .reference();
+        match invalid {
+            0 => reference.store = identity(9),
+            1 => reference.group = group(9),
+            2 => reference.configuration = ConfigurationId::new(9).unwrap(),
+            3 => reference.index = 2,
+            _ => reference.application_schema += 1,
+        }
+        let ticket = SnapshotWorkTicket {
+            binding: binding(),
+            sequence: 1,
+        };
+        assert!(complete_snapshot_work(
+            &mut core,
+            &mut app,
+            &effect,
+            ticket,
+            visit(),
+            SnapshotWorkEvent {
+                request: ticket,
+                visit: visit(),
+                result: Ok(SnapshotOutput::Published(reference)),
+            }
+        )
+        .is_err());
+        assert!(core.is_fenced());
+        assert!(core.state().snapshot.is_none());
+    }
+}
+
 #[cfg(feature = "native")]
 mod native {
     use super::*;
@@ -249,6 +427,9 @@ mod native {
         }
     }
     fn owner<L: LogStore>(log: &L, core: Raft, worker: WorkerBinding) -> Owner {
+        owner_with(log, vec![core], worker)
+    }
+    fn owner_with<L: LogStore>(log: &L, cores: Vec<Raft>, worker: WorkerBinding) -> Owner {
         let runtime = RuntimeOwner {
             store: log.binding(),
             ..visit().owner
@@ -262,7 +443,9 @@ mod native {
             FairScheduler::new(16).unwrap(),
         )
         .unwrap();
-        shard.register(core).unwrap();
+        for core in cores {
+            shard.register(core).unwrap();
+        }
         let timed = TimedShard::new(
             shard,
             DeadlineQueue::new(runtime, 16).unwrap(),
@@ -636,6 +819,236 @@ mod native {
         reclaim(&mut worker);
     }
     #[test]
+    fn local_checkpoint_receipt_loss_recovers_exact_wal_anchor_and_tail() {
+        for phase in 0..5 {
+            let root = std::env::temp_dir().join(format!(
+                "voteboat-local-checkpoint-{}-{phase}",
+                std::process::id()
+            ));
+            std::fs::create_dir(&root).unwrap();
+            let mut log = NativeLogStore::create(
+                FileLogIo::create(root.join("wal")).unwrap(),
+                identity(2),
+                LogLimits::default(),
+            )
+            .unwrap();
+            append(
+                &mut log,
+                vec![
+                    LogMutation::Create(bootstrap(1, 3)),
+                    LogMutation::Create(bootstrap(2, 3)),
+                ],
+            );
+            let commands = [7i64, 3]
+                .into_iter()
+                .enumerate()
+                .map(|(i, delta)| LogEntry {
+                    index: i as u64 + 1,
+                    term: 1,
+                    payload: EntryPayload::Command {
+                        operation: OperationId::new(i as u128 + 1).unwrap(),
+                        bytes: delta.to_le_bytes().to_vec(),
+                    },
+                })
+                .collect::<Vec<_>>();
+            let mutation = update(
+                &log.state(group(1)).unwrap(),
+                1,
+                2,
+                Some(Suffix {
+                    from: 1,
+                    entries: commands.clone(),
+                }),
+            );
+            append(&mut log, vec![mutation]);
+            let mut core = Raft::recover(
+                node(2),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            let mut snapshots = NativeSnapshotStore::create(
+                FileSnapshotIo::create(root.join("snap")).unwrap(),
+                SnapshotIdentity {
+                    store: identity(2),
+                    group: group(1),
+                },
+                limits(),
+            )
+            .unwrap();
+            let mut app = Counter::new(20).unwrap();
+            app.apply_batch(&commands[..1]).unwrap();
+            let old = checkpoint_application(&core, &app, &mut snapshots)
+                .unwrap()
+                .reference();
+            compact_replica(&mut core, &mut log, &mut snapshots, &app, old).unwrap();
+            app.apply_batch(&commands[1..]).unwrap();
+            let sb = SnapshotWorkerBinding {
+                store: log.binding(),
+                ..binding()
+            };
+            let wb = WorkerBinding {
+                store: log.binding(),
+                generation: StorageWorkerGeneration::new(1).unwrap(),
+            };
+            let other = Raft::recover(
+                node(2),
+                log.binding(),
+                log.state(group(2)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            let mut owner = owner_with(&log, vec![core, other], wb);
+            let mut router =
+                SnapshotRouter::new(owner.identity(), sb, SnapshotRouterLimits::default()).unwrap();
+            let mut sw = NativeSnapshotWorker::spawn(
+                [(group(1), snapshots)].into(),
+                sb,
+                SnapshotWorkLimits::default(),
+                Arc::new(ThreadWake::current()),
+            )
+            .unwrap();
+            let mut wal = NativeLogWorker::spawn(
+                log,
+                wb.generation,
+                WorkerLimits::default(),
+                Arc::new(ThreadWake::current()),
+            )
+            .unwrap();
+            owner.admit(group(1), Event::Checkpoint).unwrap();
+            owner.advance(MonoTime(0), 1).unwrap();
+            let lease = owner.take_effect().unwrap().unwrap();
+            assert!(matches!(lease.effect, Effect::CheckpointRequired { .. }));
+            router.submit(&mut owner, &mut sw, lease, &app).unwrap();
+            let event = wait(&mut sw);
+            assert_eq!(owner.core(group(1)).unwrap().state().snapshot, Some(old));
+            assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+            if phase == 0 {
+                // Delay delivery of this snapshot receipt while the same owner
+                // and WAL worker complete another group's durable election.
+                owner.admit(group(2), Event::Campaign).unwrap();
+                owner.advance(MonoTime(0), 1).unwrap();
+                let persist = owner.take_effect().unwrap().unwrap();
+                assert_eq!(persist.ticket.visit.group, group(2));
+                owner
+                    .submit_persists(&mut wal, vec![persist], MonoTime(0))
+                    .unwrap();
+                let until = Instant::now() + Duration::from_secs(10);
+                while owner.core(group(2)).unwrap().has_pending_dependency() {
+                    for event in wal.poll(1) {
+                        owner.deliver_worker(event, MonoTime(0)).unwrap();
+                    }
+                    assert!(Instant::now() < until);
+                    std::thread::park_timeout(Duration::from_millis(1));
+                }
+                while let Some(lease) = owner.take_effect().unwrap() {
+                    assert_eq!(lease.ticket.visit.group, group(2));
+                    assert!(matches!(lease.effect, Effect::Send(_)));
+                    owner.release(lease, 0, MonoTime(0)).unwrap();
+                }
+                assert_eq!(owner.core(group(2)).unwrap().state().hard_state.term, 1);
+                assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+                assert_eq!(router.usage().requests, 1);
+            }
+            if phase > 0 {
+                router
+                    .deliver(&mut owner, &mut app, event, MonoTime(0))
+                    .unwrap();
+                let persist = owner.take_effect().unwrap().unwrap();
+                assert!(matches!(persist.effect, Effect::Persist(_)));
+                assert_eq!(owner.core(group(1)).unwrap().state().snapshot, Some(old));
+                if phase > 1 {
+                    owner
+                        .submit_persists(&mut wal, vec![persist], MonoTime(0))
+                        .unwrap();
+                    let until = Instant::now() + Duration::from_secs(10);
+                    let mut durable = false;
+                    while !durable {
+                        for event in wal.poll(1) {
+                            let written = matches!(event, WorkerEvent::Written { .. });
+                            durable |= matches!(event, WorkerEvent::Durable { .. });
+                            owner.deliver_worker(event, MonoTime(0)).unwrap();
+                            if written {
+                                assert_eq!(
+                                    owner.core(group(1)).unwrap().state().snapshot,
+                                    Some(old)
+                                );
+                                assert!(owner.take_effect().unwrap().is_none());
+                            }
+                        }
+                        assert!(Instant::now() < until);
+                        std::thread::park_timeout(Duration::from_millis(1));
+                    }
+                    let compacted = owner.take_effect().unwrap().unwrap();
+                    assert!(matches!(compacted.effect, Effect::CheckpointCompacted(_)));
+                    assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+                    if phase > 2 {
+                        router.submit(&mut owner, &mut sw, compacted, &app).unwrap();
+                        let event = wait(&mut sw);
+                        if phase > 3 {
+                            router
+                                .deliver(&mut owner, &mut app, event, MonoTime(0))
+                                .unwrap();
+                            assert!(owner.is_drained());
+                        }
+                    }
+                }
+            }
+            // Abandon observation at each boundary; accepted work is drained,
+            // then actual files are reopened with fresh recovered sessions.
+            drop(router);
+            drop(owner);
+            let mut stores = reclaim(&mut sw);
+            let snapshots = stores.get_mut(&group(1)).unwrap();
+            assert_eq!(snapshots.load_pinned(old).is_ok(), phase < 3);
+            drop(stores);
+            wal.close();
+            let until = Instant::now() + Duration::from_secs(10);
+            loop {
+                if let Some(log) = wal.try_reclaim().unwrap() {
+                    drop(log);
+                    break;
+                }
+                assert!(Instant::now() < until);
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+            let log = NativeLogStore::recover(
+                FileLogIo::open(root.join("wal")).unwrap(),
+                identity(2),
+                LogLimits::default(),
+            )
+            .unwrap();
+            assert_ne!(log.binding(), wb.store);
+            let mut snapshots = NativeSnapshotStore::recover(
+                FileSnapshotIo::open(root.join("snap")).unwrap(),
+                SnapshotIdentity {
+                    store: identity(2),
+                    group: group(1),
+                },
+                limits(),
+            )
+            .unwrap();
+            let mut app = Counter::new(20).unwrap();
+            let (core, restored) =
+                recover_replica(node(2), group(1), &log, &mut snapshots, &mut app).unwrap();
+            assert_eq!(core.state().base_index(), if phase < 2 { 1 } else { 2 });
+            assert_eq!(core.state().commit_index, 2);
+            assert_eq!(restored.checkpoint_index, core.state().base_index());
+            assert_eq!(app.read_applied(2), Ok(10));
+            let retry = LogEntry {
+                index: 3,
+                ..commands[0].clone()
+            };
+            let receipts = app.apply_batch(&[retry]).unwrap();
+            assert!(receipts[0].duplicate);
+            assert_eq!(app.read_applied(3), Ok(10));
+            drop(snapshots);
+            drop(log);
+            std::fs::remove_dir_all(root).unwrap();
+        }
+    }
+    #[test]
     fn real_files_install_through_effect_owner_snapshot_worker_and_wal_worker() {
         for phase in 0..3 {
             let root = std::env::temp_dir().join(format!(
@@ -871,6 +1284,8 @@ mod faults {
         RootAfter,
         PinBefore,
         PinAfter,
+        ReconcileBefore,
+        ReconcileAfter,
         Panic,
     }
     #[derive(Default)]
@@ -943,11 +1358,11 @@ mod faults {
             // First root is reconcile(None), second is publication, third pin.
             let before = matches!(
                 (d.fault, d.roots),
-                (Fault::RootBefore, 2) | (Fault::PinBefore, 3)
+                (Fault::RootBefore, 2) | (Fault::PinBefore, 3) | (Fault::ReconcileBefore, 4)
             );
             let after = matches!(
                 (d.fault, d.roots),
-                (Fault::RootAfter, 2) | (Fault::PinAfter, 3)
+                (Fault::RootAfter, 2) | (Fault::PinAfter, 3) | (Fault::ReconcileAfter, 4)
             );
             if before {
                 return Err(io::Error::other("root publication failed"));
@@ -967,6 +1382,83 @@ mod faults {
             }
             assert!(Instant::now() < until);
             std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+    #[test]
+    fn checkpoint_retention_failure_fences_and_recovers_the_durable_anchor() {
+        for fault in [Fault::ReconcileBefore, Fault::ReconcileAfter] {
+            let io = Io::default();
+            let sid = SnapshotIdentity {
+                store: identity(2),
+                group: group(1),
+            };
+            let store =
+                NativeSnapshotStore::create(io.clone(), sid, SnapshotLimits::default()).unwrap();
+            io.0.lock().unwrap().roots = 0;
+            let mut worker = NativeSnapshotWorker::spawn(
+                [(group(1), store)].into(),
+                binding(),
+                SnapshotWorkLimits::default(),
+                Arc::new(ThreadWake::current()),
+            )
+            .unwrap();
+            let (mut core, mut log, mut app) = checkpoint_source();
+            let effect = core.step(Event::Checkpoint).unwrap().remove(0);
+            let Effect::CheckpointRequired { context } = effect else {
+                panic!()
+            };
+            let work =
+                prepare_local_checkpoint_work(&core, &app, visit(), context, binding(), 65536)
+                    .unwrap();
+            let ticket = worker.submit(work).unwrap();
+            let event = wait(&mut worker);
+            let effects =
+                complete_snapshot_work(&mut core, &mut app, &effect, ticket, visit(), event)
+                    .unwrap();
+            let [Effect::Persist(update)] = effects.as_slice() else {
+                panic!()
+            };
+            let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+            assert!(matches!(effects[0], Effect::CheckpointCompacted(_)));
+            io.0.lock().unwrap().fault = fault;
+            let work = prepare_snapshot_work(&core, &app, visit(), &effects[0], binding()).unwrap();
+            let ticket = worker.submit(work).unwrap();
+            let event = wait(&mut worker);
+            assert!(event.result.is_err());
+            assert!(complete_snapshot_work(
+                &mut core,
+                &mut app,
+                &effects[0],
+                ticket,
+                visit(),
+                event
+            )
+            .is_err());
+            assert!(core.is_fenced());
+            assert_eq!(core.state().base_index(), 1);
+            worker.close();
+            let until = Instant::now() + Duration::from_secs(10);
+            loop {
+                if let Some(stores) = worker.try_reclaim().unwrap() {
+                    drop(stores);
+                    break;
+                }
+                assert!(Instant::now() < until);
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+            {
+                let mut device = io.0.lock().unwrap();
+                device.fault = Fault::None;
+                device.slots = device.synced.clone();
+            }
+            let mut recovered =
+                NativeSnapshotStore::recover(io, sid, SnapshotLimits::default()).unwrap();
+            let mut app = Counter::new(20).unwrap();
+            let (core, _) =
+                recover_replica(node(2), group(1), &log, &mut recovered, &mut app).unwrap();
+            assert_eq!(core.state().base_index(), 1);
+            assert!(!core.has_pending_dependency());
+            assert_eq!(app.read_applied(1), Ok(7));
         }
     }
     #[test]

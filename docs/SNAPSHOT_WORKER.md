@@ -18,7 +18,8 @@ Selected handles must be quiescent before transfer. Construction checks their
 store identities and group keys rather than requiring
 their sessions to equal the WAL's. No new durable watermark is introduced.
 
-A work item owns one scoped runtime `VisitTicket` and one Publish or Load job.
+A work item owns one scoped runtime `VisitTicket` and one Publish, Load or
+Reconcile job.
 Admission returns a checked, strictly increasing worker-local sequence or returns the original work
 on rejection. One request per group can remain accepted, including an unpolled
 terminal event. Request/byte credits are retained until terminal polling transfers
@@ -37,7 +38,7 @@ host-owned executor or another worker.
 
 Defaults bound 4,096 selected group handles, 16 requests and 256 MiB of retained
 work/completion reservation. Two requests and 64 MiB are reserved against bulk
-snapshot sends. Publish and installation loads use control capacity; send loads
+snapshot sends. Publish, installation loads and reconciliation use control capacity; send loads
 cannot consume that reserve. These are configurable limits, not progress promises
 when control consumers stall. Provider handles and their resident metadata have
 separate host budgets.
@@ -104,6 +105,33 @@ without cloning its image. Hosts may use the helpers directly if they implement
 the same routing and lifetime obligations. See [snapshot routing](SNAPSHOT_ROUTER.md).
 Provider attestations still assume the selected public storage contract.
 
+## Local checkpoint dependencies
+
+`Event::Checkpoint` is bounded background ingress. It requires a committed prefix
+beyond the current snapshot base and emits CheckpointRequired with a checked
+session-scoped request context. `checkpoint_bytes(group)` declares the selected
+store's stable application serialization ceiling. `prepare_local_checkpoint_work`
+validates that exact context, binding and group, then serializes the application's
+applied prefix and verifies restore on a clone. It requires old base < applied
+index <= committed index. The core and live application do no file I/O.
+
+Publish uses the same reconcile-old-anchor, stage, seal, publish, pin and exact
+image verification path as installation. Its Published receipt permits only a
+WAL Persist. Written admission releases nothing. Exact WAL durability installs
+the new logical base and emits CheckpointCompacted, holding the group's visit.
+Reconcile loads/verifies that pinned image before reconciling retention to this
+already-durable reference. Exact Reconciled completion clears maintenance and
+refreshes leader replication. This path does not restore the live application or
+produce application success. The old synchronous checkpoint/compaction helpers
+remain available for quiescent callers.
+
+There is no new durable watermark or persistent maintenance generation. The
+checkpoint index is a contiguous applied/committed prefix; request contexts are
+local one-use correlation, not durability proof. On restart, the WAL reference
+selects the image and reconciles pins. Lost publication receipts retain the old
+anchor and required replay tail; lost retention receipts recover the new anchor.
+An accepted retention error fences service even if its manifest became durable.
+
 ## Evidence and remaining assembly
 
 Downstream tests select a host `SnapshotWorker` through a trait object and native
@@ -124,8 +152,15 @@ No failed request advances the core/application; recovery discards orphan data
 without a durable WAL anchor. Earlier snapshot histories retain their broader
 synchronous corruption and durability coverage.
 
-Native checkpoint creation/compaction still require quiescent synchronous store
-access. The new router and native 100-group TCP/TLS catch-up history cover lease
-routing and network installation. Full node admission/facade, peer reconnect
-handling and broader automatic-election network histories remain pending. macOS execution and hardware power-cut testing remain unobserved. The
+Local maintenance tests cover stale contexts/bindings, insufficient applied
+progress, serialization ceilings, foreign publication references and wrong
+retention completion kinds. Actual-file receipt loss at five stages preserves
+the authoritative old/new anchor, committed tail and deduplication. A second
+group completes durable election work while one checkpoint receipt is held.
+Failed/lost reconciliation-manifest receipts are injected through native storage
+and recovered against the durable WAL. The 100-group TCP/TLS history repeats
+local checkpoints without reclaiming either worker's stores.
+
+Full node admission/facade, peer reconnect handling, physical WAL reclamation and
+broader network fault schedules remain pending. macOS execution and hardware power-cut testing remain unobserved. The
 full P0–P7 goal remains active.

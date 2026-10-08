@@ -948,7 +948,9 @@ mod native {
                         Effect::Send(_) => n.send_pending.push_back(lease),
                         Effect::StageSnapshot(_)
                         | Effect::SnapshotRequired { .. }
-                        | Effect::SnapshotInstalled(_) => {
+                        | Effect::SnapshotInstalled(_)
+                        | Effect::CheckpointRequired { .. }
+                        | Effect::CheckpointCompacted(_) => {
                             assert!(n.router.is_some());
                             n.snapshot_pending.push_back(lease);
                         }
@@ -1162,6 +1164,10 @@ mod native {
         assert!(nodes[0].sent > before_heartbeat);
         proposals(&mut nodes, 0, 1, 7, None, MonoTime(101));
         proposals(&mut nodes, 0, 2, 3, None, MonoTime(101));
+        checkpoints(&mut nodes, MonoTime(101));
+        // Continue writing with both workers still owning all storage handles.
+        proposals(&mut nodes, 0, 1, 7, None, MonoTime(101));
+        checkpoints(&mut nodes, MonoTime(101));
         for g in 1..=100 {
             nodes[0]
                 .owner
@@ -1198,6 +1204,7 @@ mod native {
         drain(&mut nodes, None, MonoTime(0));
         proposals(&mut nodes, 1, 1, 7, None, MonoTime(0));
         proposals(&mut nodes, 1, 3, 5, None, MonoTime(0));
+        checkpoints(&mut nodes, MonoTime(0));
         for n in &nodes {
             for app in n.apps.values() {
                 assert_eq!(app.read_applied(app.applied_index()), Ok(15));
@@ -1206,6 +1213,36 @@ mod native {
         close(&mut nodes);
         drop(nodes);
         std::fs::remove_dir_all(root).unwrap();
+    }
+    fn checkpoints(nodes: &mut [Node], now: MonoTime) {
+        let before = nodes
+            .iter()
+            .map(|n| {
+                (1..=100)
+                    .map(|g| n.owner.core(group(g)).unwrap().state().snapshot.unwrap())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        // Background admission has a smaller ceiling than foreground traffic.
+        for start in (1..=100).step_by(8) {
+            for n in nodes.iter_mut() {
+                for g in start..=(start + 7).min(100) {
+                    n.owner.admit(group(g), Event::Checkpoint).unwrap();
+                }
+            }
+            drain(nodes, None, now);
+        }
+        for (i, n) in nodes.iter().enumerate() {
+            for g in 1..=100 {
+                let core = n.owner.core(group(g)).unwrap();
+                let reference = core.state().snapshot.unwrap();
+                assert!(reference.index > before[i][g as usize - 1].index);
+                assert!(reference.generation > before[i][g as usize - 1].generation);
+                assert_eq!(reference.index, n.apps[&group(g)].applied_index());
+                assert_eq!(core.state().base_index(), reference.index);
+                assert!(!core.has_pending_dependency());
+            }
+        }
     }
     fn leaders(nodes: &[Node], isolated: Option<NodeId>) -> Option<Vec<usize>> {
         (1..=100)
@@ -1499,6 +1536,9 @@ mod snapshot_routes {
         images: BTreeMap<GroupIdentity, Snapshot>,
     }
     impl SnapshotWorker for Worker {
+        fn checkpoint_bytes(&self, _: GroupIdentity) -> Option<usize> {
+            Some(self.allowance / 2)
+        }
         fn binding(&self) -> SnapshotWorkerBinding {
             self.binding
         }
@@ -1541,6 +1581,9 @@ mod snapshot_routes {
                 .filter_map(|_| self.pending.pop_front())
                 .map(|(request, work)| {
                     let result = match work.job {
+                        SnapshotJob::Reconcile { reference } => {
+                            SnapshotOutput::Reconciled(reference)
+                        }
                         SnapshotJob::Publish { snapshot, .. } => {
                             let reference = reference(&snapshot);
                             self.images.insert(work.visit.group, snapshot);

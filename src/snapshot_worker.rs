@@ -18,7 +18,7 @@ use crate::{
     application::CheckpointStateMachine,
     contracts::StorageError,
     identity::*,
-    raft::{Effect, Raft, RaftError, Rpc},
+    raft::{Effect, Raft, RaftError, RequestContext, Rpc},
     runtime::VisitTicket,
     snapshot::*,
 };
@@ -48,6 +48,8 @@ pub enum SnapshotJob {
         reference: SnapshotRef,
         install: bool,
     },
+    /// Verify the already-durable WAL anchor before releasing older pins.
+    Reconcile { reference: SnapshotRef },
 }
 #[derive(Debug)]
 pub struct SnapshotWork {
@@ -57,6 +59,7 @@ pub struct SnapshotWork {
 #[derive(Debug)]
 pub enum SnapshotOutput {
     Published(SnapshotRef),
+    Reconciled(SnapshotRef),
     Loaded {
         reference: SnapshotRef,
         snapshot: Snapshot,
@@ -141,6 +144,8 @@ pub trait SnapshotWorker {
     /// Maximum capacity-costed loaded image for this selected group. None
     /// rejects an unassigned group before I/O. Must remain stable while live.
     fn load_reservation(&self, group: GroupIdentity) -> Option<usize>;
+    /// Stable maximum serialized application bytes for local checkpoints.
+    fn checkpoint_bytes(&self, group: GroupIdentity) -> Option<usize>;
     fn submit(&mut self, work: SnapshotWork) -> Result<SnapshotWorkTicket, SnapshotWorkRejected>;
     fn poll(&mut self, limit: usize) -> Vec<SnapshotWorkEvent>;
     fn close(&mut self);
@@ -192,9 +197,72 @@ pub fn prepare_snapshot_work<A: CheckpointStateMachine>(
                 install: true,
             }
         }
+        Effect::CheckpointCompacted(reference) if raft.state().snapshot == Some(*reference) => {
+            SnapshotJob::Reconcile {
+                reference: *reference,
+            }
+        }
         _ => return Err(CheckpointError::Consensus(RaftError::WrongCompletion)),
     };
     Ok(SnapshotWork { visit, job })
+}
+
+/// Serialize on the group owner after reserving image capacity. All file I/O
+/// remains on the selected worker. Validation on a clone cannot grant durability.
+pub fn prepare_local_checkpoint_work<A: CheckpointStateMachine>(
+    raft: &Raft,
+    application: &A,
+    visit: VisitTicket,
+    context: RequestContext,
+    binding: SnapshotWorkerBinding,
+    max_bytes: usize,
+) -> Result<SnapshotWork, CheckpointError> {
+    if visit.owner.store != binding.store
+        || raft.storage_binding() != binding.store
+        || visit.group != raft.state().bootstrap.group
+    {
+        return Err(CheckpointError::InvalidBinding);
+    }
+    let index = application.applied_index();
+    if !raft.checkpoint_matches(context)
+        || index <= raft.state().base_index()
+        || index > raft.state().commit_index
+        || max_bytes == 0
+    {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let snapshot = Snapshot {
+        metadata: SnapshotMetadata {
+            bootstrap: raft.state().bootstrap.clone(),
+            index,
+            term: raft
+                .state()
+                .term_at(index)
+                .ok_or(CheckpointError::InvalidBoundary)?,
+            application_schema: application.schema_version(),
+        },
+        application: application.checkpoint(max_bytes)?,
+    };
+    if snapshot.application.is_empty() || snapshot.application.len() > max_bytes {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    snapshot.metadata.validate()?;
+    let mut check = application.clone();
+    check.restore_checkpoint(
+        snapshot.metadata.application_schema,
+        index,
+        &snapshot.application,
+    )?;
+    if check.applied_index() != index {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    Ok(SnapshotWork {
+        visit,
+        job: SnapshotJob::Publish {
+            snapshot,
+            durable: raft.state().snapshot,
+        },
+    })
 }
 
 /// Validate exact envelope before touching the core. The expected ticket and
@@ -221,6 +289,23 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
     let result = (|| {
         let output = event.result?;
         match (effect, output) {
+            (Effect::CheckpointRequired { context }, SnapshotOutput::Published(reference)) => {
+                if reference.store != raft.storage_binding().identity
+                    || reference.group != raft.state().bootstrap.group
+                    || reference.configuration != raft.state().bootstrap.configuration
+                    || reference.index != application.applied_index()
+                    || reference.application_schema != application.schema_version()
+                    || raft.state().term_at(reference.index) != Some(reference.term)
+                {
+                    return Err(CheckpointError::InvalidBoundary);
+                }
+                Ok(raft.checkpoint_stored(*context, reference)?)
+            }
+            (Effect::CheckpointCompacted(reference), SnapshotOutput::Reconciled(reconciled))
+                if *reference == reconciled =>
+            {
+                Ok(raft.checkpoint_reconciled(reconciled)?)
+            }
             (Effect::StageSnapshot(message), SnapshotOutput::Published(reference))
                 if raft.staged_matches(message) =>
             {

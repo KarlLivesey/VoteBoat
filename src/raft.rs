@@ -82,6 +82,8 @@ pub enum Role {
 pub enum Event {
     Campaign,
     Heartbeat,
+    /// Request a local application checkpoint; never establishes quorum evidence.
+    Checkpoint,
     Receive(Message),
     Propose {
         operation: OperationId,
@@ -141,6 +143,11 @@ pub enum Effect {
     },
     StageSnapshot(Message),
     SnapshotInstalled(SnapshotRef),
+    CheckpointRequired {
+        context: RequestContext,
+    },
+    /// The exact WAL anchor is durable; reconcile snapshot retention next.
+    CheckpointCompacted(SnapshotRef),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
@@ -171,6 +178,7 @@ enum After {
     LeaderAppend,
     Commit,
     Compact,
+    CheckpointCompact(SnapshotRef),
     SnapshotInstall(SnapshotRef),
 }
 struct Pending {
@@ -212,6 +220,8 @@ pub struct Raft {
     fenced: bool,
     staged_snapshot: Option<Message>,
     application_install: Option<(SnapshotRef, Message)>,
+    checkpoint_requested: Option<RequestContext>,
+    checkpoint_reconcile: Option<SnapshotRef>,
     election_reset: u64,
 }
 
@@ -293,6 +303,8 @@ impl Raft {
             fenced: false,
             staged_snapshot: None,
             application_install: None,
+            checkpoint_requested: None,
+            checkpoint_reconcile: None,
             election_reset: 0,
         })
     }
@@ -355,6 +367,8 @@ impl Raft {
         self.pending.is_some()
             || self.staged_snapshot.is_some()
             || self.application_install.is_some()
+            || self.checkpoint_requested.is_some()
+            || self.checkpoint_reconcile.is_some()
     }
     /// Host replays these through its application checkpoint/dedup contract.
     pub fn replay_committed(&self) -> &[LogEntry] {
@@ -365,6 +379,8 @@ impl Raft {
         self.pending = None;
         self.staged_snapshot = None;
         self.application_install = None;
+        self.checkpoint_requested = None;
+        self.checkpoint_reconcile = None;
         self.role = Role::Follower;
         self.clear_reads();
     }
@@ -467,13 +483,18 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
-        if self.pending.is_some()
-            || self.staged_snapshot.is_some()
-            || self.application_install.is_some()
-        {
+        if self.has_pending_dependency() {
             return Err(RaftError::Busy);
         }
         match event {
+            Event::Checkpoint => {
+                if self.durable.commit_index <= self.durable.base_index() {
+                    return Err(RaftError::NotApplied);
+                }
+                let context = self.context()?;
+                self.checkpoint_requested = Some(context);
+                Ok(vec![Effect::CheckpointRequired { context }])
+            }
             Event::Campaign => {
                 self.reset_election()?;
                 self.clear_reads();
@@ -658,6 +679,11 @@ impl Raft {
                 self.application_install =
                     Some((reference, p.reply.ok_or(RaftError::WrongCompletion)?));
                 effects.push(Effect::SnapshotInstalled(reference));
+            }
+            After::CheckpointCompact(reference) => {
+                self.requests.clear();
+                self.checkpoint_reconcile = Some(reference);
+                effects.push(Effect::CheckpointCompacted(reference));
             }
         }
         if effects.iter().any(|e| {
@@ -1321,10 +1347,7 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
-        if self.pending.is_some()
-            || self.staged_snapshot.is_some()
-            || self.application_install.is_some()
-        {
+        if self.has_pending_dependency() {
             return Err(RaftError::Busy);
         }
         if reference.store != self.binding.identity
@@ -1345,6 +1368,42 @@ impl Raft {
             After::Compact,
             None,
         )
+    }
+    pub(crate) fn checkpoint_matches(&self, context: RequestContext) -> bool {
+        !self.fenced && self.checkpoint_requested == Some(context)
+    }
+    pub(crate) fn checkpoint_stored(
+        &mut self,
+        context: RequestContext,
+        reference: SnapshotRef,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if !self.checkpoint_matches(context) {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.checkpoint_requested = None;
+        let effects = self.begin_compact(reference)?;
+        self.pending
+            .as_mut()
+            .ok_or(RaftError::WrongCompletion)?
+            .after = After::CheckpointCompact(reference);
+        Ok(effects)
+    }
+    pub(crate) fn checkpoint_reconciled(
+        &mut self,
+        reference: SnapshotRef,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced
+            || self.checkpoint_reconcile != Some(reference)
+            || self.durable.snapshot != Some(reference)
+        {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.checkpoint_reconcile = None;
+        if self.role == Role::Leader {
+            self.broadcast()
+        } else {
+            Ok(Vec::new())
+        }
     }
     pub(crate) fn snapshot_send(
         &self,

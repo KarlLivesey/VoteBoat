@@ -15,8 +15,9 @@ capacity allowance for a selected group, or rejects an unassigned group. The
 native worker derives it from that group's selected snapshot store limits.
 
 `submit` validates the exact runtime owner, selected worker generation and live
-effect lease before preparing work. Only StageSnapshot, SnapshotRequired and
-SnapshotInstalled can enter this path. It rejects another accepted snapshot for
+effect lease before preparing work. StageSnapshot, SnapshotRequired,
+SnapshotInstalled, CheckpointRequired and CheckpointCompacted enter this path.
+It rejects another accepted snapshot for
 the same group, an exhausted request map, excessive declared image size or an
 oversized original Publish image before transferring ownership.
 
@@ -27,6 +28,11 @@ the same lease's charge. A requirement above the owner's entire applicable
 ceiling returns a size error; temporary shared saturation returns overload. It
 preserves effect-owner control reserves. Application
 clone and provider scratch memory remain separate budgets.
+
+For local checkpoints, the worker also declares a stable `checkpoint_bytes(group)`
+serialization ceiling. The router reserves image space before calling application
+serialization, then checks the returned capacity-costed image. Invalid boundaries
+or excessive images return the original lease without submitting I/O.
 
 Preflight validates the application image on the serialized owner. Worker
 rejection drops the returned prepared request and returns the original lease
@@ -59,6 +65,17 @@ and application restore produce SnapshotAck. Snapshot reads for Send use the
 original leader request context. No new quorum rule, durable watermark, Raft
 acknowledgement type or on-disk format is introduced.
 
+Local maintenance uses the existing checked RequestContext sequence, scoped to
+the WAL session and group. CheckpointRequired asks the application owner to
+serialize its contiguous applied prefix (strictly beyond the old snapshot base
+and at most the committed prefix). Publication/pinning releases only Persist.
+Exact WAL durability releases CheckpointCompacted. Its Reconcile request verifies
+the pinned image before releasing older pins; only its exact Reconciled completion
+finishes maintenance and allows a leader's refreshed replication requests out.
+The visit remains suspended throughout. It grants no vote, quorum evidence or
+client result. Restart reconstructs the snapshot from the authoritative WAL and
+existing pin manifest; no maintenance generation or new file format is persisted.
+
 A storage/install error fences the effect owner. The router explicitly discards
 the current failed lease after dropping its payload; other accepted leases remain
 charged. `discard_failed` drops those router-owned payloads only after the exact
@@ -76,7 +93,9 @@ Close effect-owner ingress and keep polling/delivering all existing dependencies
 A publication can produce WAL work and then require an installation Load during
 this drain. The router therefore allows these continuations after ingress closes.
 Only after the healthy effect owner and router drain should the host close and
-reclaim the snapshot/WAL workers and drain outbound transport. A failed owner
+reclaim the snapshot/WAL workers and drain outbound transport. Local checkpoint
+drain similarly requires publication, WAL anchoring and retention reconciliation.
+A failed owner
 uses explicit discard plus provider drain/recovery instead of healthy shutdown.
 
 The router's identity is the existing runtime owner, including WAL session,
@@ -103,7 +122,10 @@ images through the network and the router, then catches up through ordinary
 Raft replication. It checks fresh reads, operation retries and actual-file restart
 with fresh WAL/store sessions before further replicated writes. The native timer
 provider triggers network heartbeat traffic without explicit Heartbeat events.
-Elections in this history are explicit campaigns.
+Elections in this history are explicit campaigns. It now also creates repeated
+local checkpoints for all replicas while both workers retain their stores, checks
+advancing snapshot generations/bases, and repeats maintenance after actual-file
+recovery. Checkpoint admissions are batched within background ingress ceilings.
 
 The driver retains rejected outbound sends under their original effect tickets,
 reserves decoded ingress, bounds rejected snapshot staging by active leases and

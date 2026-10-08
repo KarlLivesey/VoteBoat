@@ -674,6 +674,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
 
 fn event_cost(event: &Event, limit: usize) -> Result<(Class, usize), RuntimeError> {
     let (class, extra) = match event {
+        Event::Checkpoint => (Class::Background, 0),
         Event::Read { .. } => (Class::Data, 0),
         Event::Propose { bytes, .. } => (Class::Data, bytes.capacity()),
         Event::Receive(message) => {

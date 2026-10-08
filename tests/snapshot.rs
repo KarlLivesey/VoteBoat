@@ -1103,6 +1103,9 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
         while let Some(effect) = queue.pop_front() {
             let r = self.replicas.get_mut(&id).unwrap();
             match effect {
+                Effect::CheckpointRequired { .. } | Effect::CheckpointCompacted(_) => {
+                    panic!("synchronous history does not request asynchronous checkpoints")
+                }
                 Effect::Persist(u) => {
                     queue.extend(persist_effect(&mut r.core, &mut r.log, u).unwrap())
                 }

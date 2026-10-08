@@ -167,6 +167,12 @@ impl<S: SnapshotRetention + Send + 'static> NativeSnapshotWorker<S> {
                 }
                 (0, *install)
             }
+            SnapshotJob::Reconcile { reference } => {
+                if !check_ref(*reference) {
+                    return Err(SnapshotWorkError::WrongBinding);
+                }
+                (0, true)
+            }
         };
         let bytes = snapshot_load_reservation(l)
             .and_then(|n| n.checked_add(input))
@@ -234,6 +240,9 @@ impl<S: SnapshotRetention + Send + 'static> SnapshotWorker for NativeSnapshotWor
     }
     fn load_reservation(&self, group: GroupIdentity) -> Option<usize> {
         snapshot_load_reservation(*self.stores.get(&group)?)
+    }
+    fn checkpoint_bytes(&self, group: GroupIdentity) -> Option<usize> {
+        Some(self.stores.get(&group)?.max_application_bytes)
     }
     fn submit(&mut self, work: SnapshotWork) -> Result<SnapshotWorkTicket, SnapshotWorkRejected> {
         let (bytes, control) = match self.admission(&work) {
@@ -385,6 +394,18 @@ fn perform<S: SnapshotRetention>(
                 snapshot,
                 reconciled: install,
             })
+        }
+        SnapshotJob::Reconcile { reference } => {
+            let snapshot = store.load_pinned(reference)?;
+            if !reference.matches(&snapshot)
+                || snapshot_image_bytes(&snapshot).is_none_or(|n| n > allowance)
+            {
+                return Err(StorageError::Corrupt(
+                    "checkpoint retention verification/budget",
+                ));
+            }
+            store.reconcile_log(Some(reference))?;
+            Ok(SnapshotOutput::Reconciled(reference))
         }
     }
 }
