@@ -12,10 +12,10 @@ fenced rather than allowed to publish a successful result.
 `runtime::ReadRouter<R>` owns results from original `ReadReady` effect leases.
 The host supplies the selected application and the query for that exact original
 request. This router does not create or queue read invocations before quorum
-establishment. The embedding host still budgets those pending queries, allocates
-monotonic per-core `ReadRequestId`s, correlates original queries, handles read-step
-errors, and cancels abandoned reads through the core. A production facade that
-owns that full invocation lifecycle remains pending.
+establishment. [ReadRequests](READ_REQUESTS.md) now composes this explicitly
+selected guard and owns pending queries, ID allocation, exact step correlation,
+reply reservations and cancellation. Lower-level hosts that select ReadRouter
+alone retain those obligations. The complete production reactor remains pending.
 
 Construction selects one `RuntimeOwner`, a fresh host-reserved
 `ReadRouterGeneration`, and node/per-group result and byte ceilings. Defaults are
@@ -65,7 +65,8 @@ restart uses the new persisted store session and new runtime generation. These
 volatile result sequences are allocation identities, not persisted watermarks or
 contiguous protocol progress. A read completed before an owner failure remains a
 valid result of that original invocation and can still be consumed. Pending
-unexecuted invocations belong to the host/future facade, not this result queue.
+unexecuted invocations belong to ReadRequests or the embedding host, not this
+result queue.
 
 Six downstream host conformance tests exercise one-use authority, original
 allocation ownership, application catch-up, node byte/per-group overload,

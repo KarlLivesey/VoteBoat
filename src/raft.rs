@@ -423,6 +423,12 @@ impl Raft {
         Ok(())
     }
 
+    /// Highest accepted read request in this core lifetime. Allocation floor,
+    /// not quorum, persistence, application or contiguous-prefix evidence.
+    pub fn read_request_floor(&self) -> u64 {
+        self.last_read_request
+    }
+
     fn begin_read(&mut self, request: ReadRequestId) -> Result<Vec<Effect>, RaftError> {
         if self.role != Role::Leader {
             return Err(RaftError::NotLeader);

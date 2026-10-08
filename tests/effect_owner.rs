@@ -1617,7 +1617,8 @@ mod native {
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
         ingress: IngressRouter,
         results: ApplicationRouter<CounterReceipt>,
-        read_results: ReadRouter<i64>,
+        read_requests: ReadRequests<(), i64>,
+        read_unavailable: usize,
         clients: ClientRouter<CounterReceipt>,
         client_applied: usize,
         client_unknown: usize,
@@ -1838,12 +1839,21 @@ mod native {
             .unwrap(),
             client_applied: 0,
             client_unknown: 0,
-            read_results: ReadRouter::new(
-                ReadRouterBinding {
+            read_unavailable: 0,
+            read_requests: ReadRequests::new(
+                ReadInvocationBinding {
                     owner: runtime_owner,
-                    generation: ReadRouterGeneration::new(1).unwrap(),
+                    generation: ReadInvocationGeneration::new(1).unwrap(),
                 },
-                ReadRouterLimits::default(),
+                ReadInvocationLimits::default(),
+                ReadRouter::new(
+                    ReadRouterBinding {
+                        owner: runtime_owner,
+                        generation: ReadRouterGeneration::new(1).unwrap(),
+                    },
+                    ReadRouterLimits::default(),
+                )
+                .unwrap(),
             )
             .unwrap(),
             results: ApplicationRouter::new(
@@ -2098,12 +2108,17 @@ mod native {
                 for event in n.worker.poll(1) {
                     n.owner.deliver_worker(event, now).unwrap();
                 }
-                for step in n
+                let steps = n
                     .clients
                     .advance(&mut n.owner, now, 100, |g| n.apps.get(&g))
-                    .unwrap()
-                {
-                    assert!(step.error.is_none(), "{:?}", step.error);
+                    .unwrap();
+                n.read_requests.observe_steps(&mut n.owner, &steps).unwrap();
+                for step in steps {
+                    assert!(
+                        step.error.is_none() || step.error == Some(RaftError::StaleRead),
+                        "{:?}",
+                        step.error
+                    );
                 }
                 while let Some(lease) = n.owner.take_effect().unwrap() {
                     match &lease.effect {
@@ -2119,20 +2134,11 @@ mod native {
                                 .unwrap();
                             assert!(n.results.is_drained());
                         }
-                        Effect::ReadReady(barrier) => {
+                        Effect::ReadReady(_) => {
                             let app = &n.apps[&lease.ticket.visit.group];
-                            let request = barrier.request();
-                            let ticket = n
-                                .read_results
-                                .submit(&mut n.owner, lease, app, (), now)
+                            n.read_requests
+                                .execute(&mut n.owner, lease, app, now)
                                 .unwrap();
-                            let output = n.read_results.poll().unwrap();
-                            assert_eq!(output.ticket(), ticket);
-                            assert_eq!(output.barrier().request(), request);
-                            assert_eq!(n.read_results.usage().results, 1);
-                            let value = n.read_results.complete(output).unwrap().unwrap();
-                            assert!(n.read_results.is_drained());
-                            n.reads.push(value);
                         }
                         Effect::Send(_) => n.send_pending.push_back(lease),
                         Effect::StageSnapshot(_)
@@ -2146,6 +2152,14 @@ mod native {
                     }
                 }
                 n.clients.reconcile(&n.owner, 128).unwrap();
+                n.read_requests.reconcile(&mut n.owner, 128).unwrap();
+                while let Some(output) = n.read_requests.poll() {
+                    match n.read_requests.complete(output).unwrap() {
+                        ReadOutcome::Read { result, .. } => n.reads.push(result.unwrap()),
+                        ReadOutcome::Unavailable(_) => n.read_unavailable += 1,
+                        ReadOutcome::NotRead(e) => panic!("unexpected read rejection: {e:?}"),
+                    }
+                }
                 while let Some(completion) = n.clients.poll() {
                     match n.clients.complete(completion).unwrap() {
                         ClientOutcome::Applied { .. } => n.client_applied += 1,
@@ -2407,8 +2421,8 @@ mod native {
             assert!(n.ingress.is_drained());
             n.results.close();
             assert!(n.results.is_drained());
-            n.read_results.close();
-            assert!(n.read_results.is_drained());
+            n.read_requests.close();
+            assert!(n.read_requests.is_drained());
             n.clients.close();
             assert!(
                 n.clients.is_drained(),
@@ -2446,6 +2460,11 @@ mod native {
                 std::thread::park_timeout(Duration::from_millis(1));
             }
         }
+    }
+    fn admit_read(n: &mut Node, group: GroupIdentity) -> ReadInvocationTicket {
+        n.read_requests
+            .submit(&mut n.owner, &n.apps[&group], group, ())
+            .unwrap()
     }
     fn proposals(
         nodes: &mut [Node],
@@ -2518,15 +2537,7 @@ mod native {
         proposals(&mut nodes, 0, 1, 7, None, MonoTime(101));
         checkpoints(&mut nodes, MonoTime(101));
         for g in 1..=100 {
-            nodes[0]
-                .owner
-                .admit(
-                    group(g),
-                    Event::Read {
-                        request: ReadRequestId::new(1).unwrap(),
-                    },
-                )
-                .unwrap();
+            admit_read(&mut nodes[0], group(g));
         }
         drain(&mut nodes, None, MonoTime(101));
         assert_eq!(nodes[0].reads, vec![10; 100]);
@@ -2701,15 +2712,7 @@ mod native {
         let (healed, now) = elect_automatically(&mut nodes, None, now.0 + 25, Some(10));
         routed_proposals(&mut nodes, &healed, 1, 7, None, now);
         for (g, leader) in healed.iter().enumerate() {
-            nodes[*leader]
-                .owner
-                .admit(
-                    group(g as u128 + 1),
-                    Event::Read {
-                        request: ReadRequestId::new(1).unwrap(),
-                    },
-                )
-                .unwrap();
+            admit_read(&mut nodes[*leader], group(g as u128 + 1));
         }
         drain(&mut nodes, None, now);
         assert_eq!(nodes.iter().map(|n| n.reads.len()).sum::<usize>(), 100);
@@ -2741,19 +2744,21 @@ mod native {
         proposals(&mut nodes, 0, 1, 7, None, MonoTime(0));
         proposals(&mut nodes, 0, 1, 7, None, MonoTime(0));
         for g in 1..=100 {
-            nodes[0]
-                .owner
-                .admit(
-                    group(g),
-                    Event::Read {
-                        request: ReadRequestId::new(1).unwrap(),
-                    },
-                )
-                .unwrap();
+            admit_read(&mut nodes[0], group(g));
         }
         drain(&mut nodes, None, MonoTime(0));
         assert_eq!(nodes[0].reads, vec![7; 100]);
         proposals(&mut nodes, 0, 99, 100, Some(node(1)), MonoTime(1));
+        for g in 1..=100 {
+            admit_read(&mut nodes[0], group(g));
+        }
+        drain(&mut nodes, Some(node(1)), MonoTime(1));
+        assert_eq!(
+            nodes[0].reads.len(),
+            100,
+            "isolated reads cannot publish results"
+        );
+        assert_eq!(nodes[0].read_requests.usage().requests, 100);
         for g in 1..=100 {
             nodes[1].owner.admit(group(g), Event::Campaign).unwrap();
         }
@@ -2764,6 +2769,18 @@ mod native {
         }
         drain(&mut nodes, None, MonoTime(2));
         assert_eq!(nodes[0].client_unknown, 100);
+        assert_eq!(nodes[0].read_unavailable, 100);
+        assert!(nodes[0].read_requests.is_drained());
+        assert_eq!(
+            nodes[0].reads.len(),
+            100,
+            "obsolete read authority stays cancelled after healing"
+        );
+        for g in 1..=100 {
+            admit_read(&mut nodes[1], group(g));
+        }
+        drain(&mut nodes, None, MonoTime(2));
+        assert_eq!(nodes[1].reads, vec![10; 100]);
         for n in &nodes {
             for a in n.apps.values() {
                 assert_eq!(a.read_applied(a.applied_index()).unwrap(), 10);
@@ -3844,12 +3861,12 @@ mod ingress {
 mod read_results {
     use super::*;
     use std::cell::Cell;
-    struct App {
-        counter: Counter,
-        calls: Cell<usize>,
-        bound: usize,
-        invalid: bool,
-        fail_query: bool,
+    pub(super) struct App {
+        pub(super) counter: Counter,
+        pub(super) calls: Cell<usize>,
+        pub(super) bound: usize,
+        pub(super) invalid: bool,
+        pub(super) fail_query: bool,
     }
     impl StateMachine for App {
         type Receipt = CounterReceipt;
@@ -3890,7 +3907,7 @@ mod read_results {
             })
         }
     }
-    fn setup(count: u128) -> (Owner, App) {
+    pub(super) fn setup(count: u128) -> (Owner, App) {
         let (mut owner, mut worker) = single(count);
         let mut apps = BTreeMap::new();
         pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
@@ -4196,5 +4213,483 @@ mod read_results {
         assert_eq!(r.complete(valid_before_failure).unwrap().unwrap(), vec![9]);
         assert!(r.is_drained());
         assert_eq!(app.calls.get(), 3);
+    }
+}
+
+mod read_invocations {
+    use super::read_results::{setup, App};
+    use super::*;
+    type Requests = ReadRequests<Vec<u8>, Vec<u8>>;
+    fn requests(owner: &Owner, generation: u64, limits: ReadInvocationLimits) -> Requests {
+        ReadRequests::new(
+            ReadInvocationBinding {
+                owner: owner.identity(),
+                generation: ReadInvocationGeneration::new(generation).unwrap(),
+            },
+            limits,
+            ReadRouter::new(
+                ReadRouterBinding {
+                    owner: owner.identity(),
+                    generation: ReadRouterGeneration::new(generation).unwrap(),
+                },
+                ReadRouterLimits::default(),
+            )
+            .unwrap(),
+        )
+        .unwrap()
+    }
+    fn step(owner: &mut Owner, reads: &mut Requests) -> Vec<OwnerStep> {
+        let steps = owner.advance(MonoTime(400), 1).unwrap();
+        reads.observe_steps(owner, &steps).unwrap();
+        steps
+    }
+    fn execute(owner: &mut Owner, reads: &mut Requests, app: &App) {
+        step(owner, reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        reads.execute(owner, lease, app, MonoTime(400)).unwrap();
+    }
+    fn read_value(reads: &mut Requests) -> (ReadInvocationTicket, Vec<u8>) {
+        let output = reads.poll().unwrap();
+        let ticket = output.ticket();
+        let ReadOutcome::Read { barrier, result } = reads.complete(output).unwrap() else {
+            panic!("not read");
+        };
+        assert_eq!(barrier.group(), ticket.group);
+        assert_eq!(barrier.request(), ticket.request);
+        (ticket, result.unwrap())
+    }
+    #[test]
+    fn stale_queued_read_step_returns_exact_not_read_and_id_exhaustion_never_wraps() {
+        let (mut owner, app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        // Deliberately mix a lower-level pending invocation to test rejection;
+        // service embeddings select one invocation owner instead.
+        owner
+            .admit(
+                group(1),
+                Event::Read {
+                    request: ReadRequestId::new(900).unwrap(),
+                },
+            )
+            .unwrap();
+        let ticket = reads.submit(&mut owner, &app, group(1), vec![5]).unwrap();
+        step(&mut owner, &mut reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        let ReadExecutionError::Rejected { reason, lease } = reads
+            .execute(&mut owner, lease, &app, MonoTime(400))
+            .unwrap_err()
+        else {
+            panic!();
+        };
+        assert_eq!(
+            reason,
+            ReadInvocationError::StaleTicket,
+            "another invocation's live barrier cannot authorize this query"
+        );
+        owner
+            .release(*lease, app.applied_index(), MonoTime(400))
+            .unwrap();
+        let steps = step(&mut owner, &mut reads);
+        assert_eq!(steps[0].error, Some(RaftError::StaleRead));
+        let output = reads.poll().unwrap();
+        assert_eq!(output.ticket(), ticket);
+        assert!(matches!(
+            reads.complete(output).unwrap(),
+            ReadOutcome::NotRead(RaftError::StaleRead)
+        ));
+        assert!(reads.is_drained());
+        assert_eq!(app.calls.get(), 0);
+        owner
+            .admit(
+                group(1),
+                Event::Read {
+                    request: ReadRequestId::new(u64::MAX).unwrap(),
+                },
+            )
+            .unwrap();
+        step(&mut owner, &mut reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        owner
+            .release(lease, app.applied_index(), MonoTime(400))
+            .unwrap();
+        let query = Vec::with_capacity(64);
+        let pointer = query.as_ptr();
+        let rejected = reads.submit(&mut owner, &app, group(1), query).unwrap_err();
+        assert_eq!(rejected.reason, ReadInvocationError::Exhausted);
+        assert_eq!(rejected.query.as_ptr(), pointer);
+        assert_eq!(owner.core(group(1)).unwrap().read_request_floor(), u64::MAX);
+        assert!(reads.is_drained());
+        assert!(!owner.is_failed());
+    }
+    #[test]
+    fn failed_construction_returns_selected_execution_owner_and_held_result() {
+        let (mut owner, app) = setup(1);
+        let mut execution = ReadRouter::new(
+            ReadRouterBinding {
+                owner: owner.identity(),
+                generation: ReadRouterGeneration::new(1).unwrap(),
+            },
+            ReadRouterLimits::default(),
+        )
+        .unwrap();
+        owner
+            .admit(
+                group(1),
+                Event::Read {
+                    request: ReadRequestId::new(1).unwrap(),
+                },
+            )
+            .unwrap();
+        owner.advance(MonoTime(400), 1).unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        execution
+            .submit(&mut owner, lease, &app, vec![7], MonoTime(400))
+            .unwrap();
+        let output = execution.poll().unwrap();
+        let binding = ReadInvocationBinding {
+            owner: owner.identity(),
+            generation: ReadInvocationGeneration::new(1).unwrap(),
+        };
+        let mut rejected = Requests::new(binding, ReadInvocationLimits::default(), execution)
+            .err()
+            .unwrap();
+        assert_eq!(rejected.reason, ReadInvocationError::InFlight);
+        assert_eq!(
+            rejected.execution.complete(output).unwrap().unwrap(),
+            vec![7]
+        );
+        let wrong = ReadInvocationBinding {
+            owner: RuntimeOwner {
+                generation: RuntimeGeneration::new(999).unwrap(),
+                ..owner.identity()
+            },
+            ..binding
+        };
+        let rejected = Requests::new(wrong, ReadInvocationLimits::default(), *rejected.execution)
+            .err()
+            .unwrap();
+        assert_eq!(rejected.reason, ReadInvocationError::WrongBinding);
+        let rejected = Requests::new(
+            binding,
+            ReadInvocationLimits {
+                query_bytes: 1024 * 1024,
+                ..Default::default()
+            },
+            *rejected.execution,
+        )
+        .err()
+        .unwrap();
+        assert_eq!(rejected.reason, ReadInvocationError::InvalidLimits);
+        let mut reads = Requests::new(
+            binding,
+            ReadInvocationLimits::default(),
+            *rejected.execution,
+        )
+        .unwrap();
+        reads.submit(&mut owner, &app, group(1), vec![8]).unwrap();
+        execute(&mut owner, &mut reads, &app);
+        assert_eq!(read_value(&mut reads).1, vec![8]);
+        assert!(reads.is_drained());
+        let mut closed = ReadRouter::<Vec<u8>>::new(
+            ReadRouterBinding {
+                owner: owner.identity(),
+                generation: ReadRouterGeneration::new(99).unwrap(),
+            },
+            ReadRouterLimits::default(),
+        )
+        .unwrap();
+        closed.close();
+        let rejected = Requests::new(binding, ReadInvocationLimits::default(), closed)
+            .err()
+            .unwrap();
+        assert_eq!(rejected.reason, ReadInvocationError::Closed);
+        assert!(rejected.execution.is_drained());
+    }
+    #[test]
+    fn admission_correlates_original_queries_and_retains_credits_through_consumer() {
+        let (mut owner, app) = setup(2);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        let first = reads
+            .submit(&mut owner, &app, group(1), vec![7; 32])
+            .unwrap();
+        let usage = reads.usage();
+        assert!(usage.bytes >= 32 + 128);
+        let rejected = reads
+            .submit(&mut owner, &app, group(1), vec![9])
+            .unwrap_err();
+        assert_eq!(rejected.reason, ReadInvocationError::InFlight);
+        assert_eq!(rejected.query, vec![9]);
+        execute(&mut owner, &mut reads, &app);
+        let output = reads.poll().unwrap();
+        assert_eq!(output.ticket(), first);
+        assert_eq!(reads.usage(), usage);
+        let second = reads.submit(&mut owner, &app, group(1), vec![9]).unwrap();
+        assert!(second.request > first.request);
+        execute(&mut owner, &mut reads, &app);
+        let mut foreign = requests(&owner, 2, ReadInvocationLimits::default());
+        let rejected = foreign.complete(output).unwrap_err();
+        assert_eq!(rejected.reason, ReadInvocationError::StaleTicket);
+        let ReadOutcome::Read { result, .. } = reads.complete(*rejected.completion).unwrap() else {
+            panic!();
+        };
+        assert_eq!(result.unwrap(), vec![7; 32]);
+        assert_eq!(read_value(&mut reads), (second, vec![9]));
+        assert_eq!(app.calls.get(), 2);
+        assert!(reads.is_drained());
+        assert_eq!(reads.usage(), ReadInvocationUsage::default());
+    }
+    #[test]
+    fn cancellation_before_read_step_keeps_capacity_and_cancels_ready_without_catchup() {
+        let (mut owner, mut app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        let ticket = reads.submit(&mut owner, &app, group(1), vec![7]).unwrap();
+        let used = reads.usage();
+        reads.cancel_wait(ticket).unwrap();
+        reads.reconcile(&mut owner, 10).unwrap();
+        let output = reads.poll().unwrap();
+        assert!(matches!(
+            reads.complete(output).unwrap(),
+            ReadOutcome::Unavailable(ReadUnavailable::Cancelled)
+        ));
+        assert_eq!(reads.usage(), used);
+        assert_eq!(
+            reads
+                .submit(&mut owner, &app, group(1), vec![])
+                .unwrap_err()
+                .reason,
+            ReadInvocationError::InFlight
+        );
+        let steps = step(&mut owner, &mut reads);
+        assert_eq!(
+            steps[0].read,
+            Some(ticket.request),
+            "control cancellation cannot overtake queued data read"
+        );
+        app.counter = Counter::new(100).unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        reads
+            .execute(&mut owner, lease, &app, MonoTime(400))
+            .unwrap();
+        assert_eq!(app.calls.get(), 0);
+        assert!(reads.poll().is_none());
+        assert!(reads.is_drained());
+        assert!(owner.is_drained());
+        app.counter
+            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
+            .unwrap();
+        let next = reads.submit(&mut owner, &app, group(1), vec![3]).unwrap();
+        assert!(next.request > ticket.request);
+        execute(&mut owner, &mut reads, &app);
+        assert_eq!(read_value(&mut reads), (next, vec![3]));
+    }
+    #[test]
+    fn lagging_ready_read_retries_and_cancelled_wait_does_not_execute_query() {
+        let (mut owner, mut app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        let ticket = reads.submit(&mut owner, &app, group(1), vec![7]).unwrap();
+        step(&mut owner, &mut reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        app.counter = Counter::new(100).unwrap();
+        let ReadExecutionError::Rejected { reason, lease } = reads
+            .execute(&mut owner, lease, &app, MonoTime(400))
+            .unwrap_err()
+        else {
+            panic!();
+        };
+        assert_eq!(
+            reason,
+            ReadInvocationError::Execution(ReadRouteError::Owner(EffectOwnerError::Consensus(
+                RaftError::NotApplied
+            )))
+        );
+        assert_eq!(app.calls.get(), 0);
+        assert!(reads.poll().is_none());
+        reads.cancel_wait(ticket).unwrap();
+        let output = reads.poll().unwrap();
+        reads.complete(output).unwrap();
+        reads
+            .execute(&mut owner, *lease, &app, MonoTime(400))
+            .unwrap();
+        assert!(reads.is_drained());
+        assert_eq!(app.calls.get(), 0);
+        assert!(!owner.is_failed());
+    }
+    #[test]
+    fn queued_cancel_is_exact_and_cannot_cancel_a_subsequent_read() {
+        let (mut owner, app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        let first = reads.submit(&mut owner, &app, group(1), vec![1]).unwrap();
+        step(&mut owner, &mut reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        reads.cancel_wait(first).unwrap();
+        reads.reconcile(&mut owner, 1).unwrap();
+        let output = reads.poll().unwrap();
+        reads.complete(output).unwrap();
+        reads
+            .execute(&mut owner, lease, &app, MonoTime(400))
+            .unwrap();
+        assert_eq!(
+            reads.usage().requests,
+            1,
+            "queued cancellation still owns its reservation"
+        );
+        let second = reads.submit(&mut owner, &app, group(1), vec![2]).unwrap();
+        let cancel = step(&mut owner, &mut reads);
+        assert_eq!(cancel[0].error, Some(RaftError::StaleRead));
+        assert_eq!(reads.usage().requests, 1, "only the new read remains");
+        execute(&mut owner, &mut reads, &app);
+        assert_eq!(read_value(&mut reads), (second, vec![2]));
+        assert_eq!(app.calls.get(), 1);
+        assert!(reads.is_drained());
+    }
+    #[test]
+    fn current_output_bound_is_revalidated_before_executing_an_admitted_query() {
+        let (mut owner, mut app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        reads.submit(&mut owner, &app, group(1), vec![1]).unwrap();
+        app.bound = 129;
+        execute(&mut owner, &mut reads, &app);
+        let output = reads.poll().unwrap();
+        assert!(matches!(
+            reads.complete(output).unwrap(),
+            ReadOutcome::NotRead(RaftError::Admission(ApplicationError::ReceiptBudget))
+        ));
+        assert_eq!(app.calls.get(), 0);
+        assert!(!owner.is_failed());
+        assert!(reads.is_drained());
+        app.bound = 128;
+        app.fail_query = true;
+        reads.submit(&mut owner, &app, group(1), vec![3]).unwrap();
+        execute(&mut owner, &mut reads, &app);
+        let output = reads.poll().unwrap();
+        assert!(matches!(
+            reads.complete(output).unwrap(),
+            ReadOutcome::Read {
+                result: Err(ApplicationError::InvalidCommand),
+                ..
+            }
+        ));
+        assert!(!owner.is_failed());
+        app.fail_query = false;
+        app.invalid = true;
+        reads.submit(&mut owner, &app, group(1), vec![2]).unwrap();
+        step(&mut owner, &mut reads);
+        let lease = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(
+            reads.execute(&mut owner, lease, &app, MonoTime(400)),
+            Err(ReadExecutionError::Failed { .. })
+        ));
+        assert!(owner.is_failed());
+        let output = reads.poll().unwrap();
+        assert!(matches!(
+            reads.complete(output).unwrap(),
+            ReadOutcome::Unavailable(ReadUnavailable::OwnerFailed)
+        ));
+        assert!(reads.is_drained());
+    }
+    #[test]
+    fn runtime_rejection_preserves_original_query_without_spending_ticket() {
+        let (mut owner, app) = setup(1);
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        for _ in 0..65536 {
+            if owner.admit(group(1), Event::Heartbeat).is_err() {
+                break;
+            }
+        }
+        let query = Vec::with_capacity(64);
+        let pointer = query.as_ptr();
+        let rejected = reads.submit(&mut owner, &app, group(1), query).unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            ReadInvocationError::Runtime(RuntimeError::Overloaded)
+        );
+        assert_eq!(rejected.query.as_ptr(), pointer);
+        assert!(reads.is_drained());
+        for _ in 0..65536 {
+            owner.advance(MonoTime(400), 1).unwrap();
+            assert!(owner.take_effect().unwrap().is_none());
+            if owner.is_drained() {
+                break;
+            }
+        }
+        let ticket = reads
+            .submit(&mut owner, &app, group(1), rejected.query)
+            .unwrap();
+        assert_eq!(ticket.sequence, 1);
+        execute(&mut owner, &mut reads, &app);
+        read_value(&mut reads);
+    }
+    #[test]
+    fn fresh_owner_uses_live_core_read_floor_and_abort_preserves_completed_success() {
+        let (mut owner, app) = setup(1);
+        owner
+            .admit(
+                group(1),
+                Event::Read {
+                    request: ReadRequestId::new(900).unwrap(),
+                },
+            )
+            .unwrap();
+        owner.advance(MonoTime(400), 1).unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        owner
+            .release(lease, app.applied_index(), MonoTime(400))
+            .unwrap();
+        let mut reads = requests(&owner, 1, ReadInvocationLimits::default());
+        let ticket = reads.submit(&mut owner, &app, group(1), vec![4]).unwrap();
+        assert_eq!(ticket.request.get(), 901);
+        execute(&mut owner, &mut reads, &app);
+        let success = reads.poll().unwrap();
+        reads.submit(&mut owner, &app, group(1), vec![5]).unwrap();
+        reads.abort(&mut owner).unwrap();
+        assert!(owner.is_failed());
+        let ReadOutcome::Read { result, .. } = reads.complete(success).unwrap() else {
+            panic!();
+        };
+        assert_eq!(result.unwrap(), vec![4]);
+        let abandoned = reads.poll().unwrap();
+        assert!(matches!(
+            reads.complete(abandoned).unwrap(),
+            ReadOutcome::Unavailable(ReadUnavailable::Aborted)
+        ));
+        assert!(reads.is_drained());
+        assert_eq!(app.calls.get(), 1);
+    }
+    #[test]
+    fn per_group_retention_budget_leaves_other_groups_and_close_drains_accepted_work() {
+        let (mut owner, app) = setup(2);
+        let mut reads = requests(
+            &owner,
+            1,
+            ReadInvocationLimits {
+                requests: 2,
+                group_requests: 1,
+                ..Default::default()
+            },
+        );
+        reads.submit(&mut owner, &app, group(1), vec![1]).unwrap();
+        execute(&mut owner, &mut reads, &app);
+        let first = reads.poll().unwrap();
+        assert_eq!(
+            reads
+                .submit(&mut owner, &app, group(1), vec![2])
+                .unwrap_err()
+                .reason,
+            ReadInvocationError::Overloaded
+        );
+        let second = reads.submit(&mut owner, &app, group(2), vec![2]).unwrap();
+        reads.close();
+        assert_eq!(
+            reads
+                .submit(&mut owner, &app, group(1), vec![3])
+                .unwrap_err()
+                .reason,
+            ReadInvocationError::Closed
+        );
+        execute(&mut owner, &mut reads, &app);
+        reads.complete(first).unwrap();
+        assert_eq!(read_value(&mut reads), (second, vec![2]));
+        assert!(reads.is_drained());
+        assert!(!owner.is_failed());
     }
 }

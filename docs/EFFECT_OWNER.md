@@ -87,7 +87,9 @@ The callback can read immutable application state at that exact boundary and
 return its result. Insufficient application progress retains the lease and
 barrier for retry, without running the callback. A consumed lease cannot
 provide authority for another read. The original invocation/query mapping is
-host-owned. Return application query errors as part of the callback's result
+owned by ReadRequests or the lower-level embedding host. `cancel_read` validates
+the exact ready lease and consumes only that original request without requiring
+application catch-up or executing a query. Return application query errors as part of the callback's result
 rather than pretending they are successful reads.
 
 Callbacks may return follow-up core effects, which are capacity-checked and
@@ -142,7 +144,8 @@ including real TLS reconnection. Asynchronous checkpoint creation and compaction
 also run through the selected workers. ClientRouter now supplies exact proposal
 admission/results and Unknown outcomes through the same owner. ReadRouter now
 reserves read callback/result capacity and consumes original one-use barriers
-through this owner. A full node facade, pre-quorum read invocation ownership,
-reactor execution and broader network fault schedules
+through this owner. ReadRequests now supplies pre-quorum original query/reply
+reservation, exact invocation correlation and checked cancellation. A full node
+facade, reactor execution and broader network fault schedules
 remain. No complete deployable
 consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

@@ -546,6 +546,27 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         callback: impl FnOnce(&mut Raft, &Effect) -> Result<(Vec<Effect>, R), RaftError>,
     ) -> Result<R, EffectRejected> {
+        self.complete_effect_inner(lease, applied_index, now, false, callback)
+    }
+    /// Abandon only this exact ready read, including while application lags.
+    /// No query executes and no durability/application evidence is produced.
+    pub fn cancel_read(&mut self, lease: EffectLease, now: MonoTime) -> Result<(), EffectRejected> {
+        if !matches!(lease.effect, Effect::ReadReady(_)) {
+            return Err(EffectRejected {
+                reason: EffectOwnerError::StaleEffect,
+                lease: Box::new(lease),
+            });
+        }
+        self.complete_effect_inner(lease, 0, now, true, |_, _| Ok((vec![], ())))
+    }
+    fn complete_effect_inner<R>(
+        &mut self,
+        lease: EffectLease,
+        applied_index: u64,
+        now: MonoTime,
+        cancel_read: bool,
+        callback: impl FnOnce(&mut Raft, &Effect) -> Result<(Vec<Effect>, R), RaftError>,
+    ) -> Result<R, EffectRejected> {
         let result = (|| {
             self.validate_lease(&lease)?;
             if matches!(lease.effect, Effect::Persist(_)) {
@@ -559,7 +580,18 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             if let Effect::ReadReady(barrier) = &lease.effect {
                 self.runtime
                     .with_core(lease.ticket.visit, now, |core| {
-                        core.finish_read(barrier, applied_index)
+                        if cancel_read {
+                            match core.step(Event::CancelRead {
+                                request: barrier.request(),
+                            }) {
+                                Ok(effects) if effects.is_empty() => Ok(()),
+                                Err(RaftError::StaleRead) => Ok(()),
+                                Err(error) => Err(error),
+                                Ok(_) => Err(RaftError::StaleRead),
+                            }
+                        } else {
+                            core.finish_read(barrier, applied_index)
+                        }
                     })
                     .map_err(EffectOwnerError::Runtime)?
                     .map_err(EffectOwnerError::Consensus)?;

@@ -123,6 +123,18 @@ pub struct ReadRouter<R> {
     closed: bool,
 }
 impl<R> ReadRouter<R> {
+    pub(super) fn accepts_work(&self) -> bool {
+        !self.closed
+    }
+    pub(super) fn fits_single<Q>(&self, query: usize, result: usize) -> bool {
+        query <= self.limits.query_bytes
+            && result <= self.limits.result_bytes
+            && query
+                .checked_add(size_of::<Q>())
+                .and_then(|n| n.checked_add(result))
+                .and_then(|n| n.checked_add(size_of::<Held<R>>()))
+                .is_some_and(|n| n <= self.limits.bytes)
+    }
     pub fn new(
         binding: ReadRouterBinding,
         limits: ReadRouterLimits,

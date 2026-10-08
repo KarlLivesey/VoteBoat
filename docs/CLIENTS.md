@@ -4,9 +4,10 @@
 the existing effect owner, application-result router and public application
 providers. It creates no I/O, executor, clock, application store or consensus
 owner. Native 100-group histories now use this path for client writes/retries and
-consume their applied/unknown completions. Read invocation/result ownership,
-responsibility routing/authorization and the complete production facade/reactor
-remain separate work.
+consume their applied/unknown completions. The separate
+[read invocation owner](READ_REQUESTS.md) now handles reads through the same
+shared steps and effect owner. Responsibility routing/authorization and the
+complete production facade/reactor remain unfinished.
 
 ## Application admission contract 1
 
@@ -141,6 +142,6 @@ no applied replies to an isolated leader, Unknown on replacement, healing,
 checkpoint/snapshot/retry/read behavior and actual-file restart.
 
 These finite Linux checks do not establish a complete proof, macOS execution,
-device power-cut behavior or performance. Read-result admission, reactor/facade,
+device power-cut behavior or performance. The production reactor/facade,
 physical WAL cleanup, reconfiguration, responsibilities and split/merge remain
 unfinished. Full P0–P7 remains active and CI remains background feedback.

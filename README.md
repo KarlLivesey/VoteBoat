@@ -158,8 +158,12 @@ See [client ownership](docs/CLIENTS.md). `runtime::ReadRouter` now reserves quer
 and result capacity before consuming an original one-use read barrier, and holds
 opaque output credits until consumer completion. Counter and host applications
 share `BoundedReadableStateMachine`; native multi-group histories use this path.
-See [read result ownership](docs/READ_RESULTS.md). Pre-quorum read invocation
-ownership and the production reactor/facade remain unfinished.
+See [read result ownership](docs/READ_RESULTS.md). `runtime::ReadRequests` now
+owns original queries and reply reservations before Read admission, correlates
+exact steps/barriers, and drains cancellation after quorum loss or leadership
+changes. It composes an explicitly selected ReadRouter; the native histories
+use both. See [read invocation ownership](docs/READ_REQUESTS.md).
+The production reactor/facade remains unfinished.
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
@@ -254,9 +258,10 @@ histories use one long-lived connector per node and explicitly drain/join their
 dial workers. See [connection establishment](docs/CONNECTIONS.md). Complete node
 ingress/result admission and the production reactor/facade remain in progress.
 
-Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
-messages, then consume `Effect::ReadReady` through `runtime::ReadRouter` for
-bounded execution/results. Lower-level embeddings can use
+Embedding hosts submit original queries through `runtime::ReadRequests`, feed
+shared owner steps back to it, drive ReadProbe/ReadAck messages, and dispatch
+ReadReady leases through its execute method. Lower-level embeddings can use
+`Event::Read` with `ReadRouter`, or
 `application::read_at_barrier` under their own query/result budget.
 Each group allows one outstanding read (including an unconsumed ready barrier).
 Request IDs increase within a store session; cancellation frees the slot. A

@@ -1695,9 +1695,73 @@ throughput evidence also remain unfinished. Full P0–P7 stays active. CI stays
 background feedback. Finite Linux tests do not prove macOS behavior or the full
 protocol across arbitrary schedules.
 
+## Slice 25: original pending-read admission and cancellation
+
+`ReadRequests<Q, R>` now owns the original query, tracked Read admission,
+future result reservation and exact completion before quorum establishment.
+Construction composes an explicitly selected empty/open ReadRouter, validates
+owner and execution capacities, and returns that original execution owner on
+failure. Native and downstream applications use BoundedReadableStateMachine;
+there is no additional backend, thread, runtime, clock or application store.
+
+Bounded node/per-group request and byte ceilings include pending queries and
+consumer-held replies. The separate ReadInvocationUsage request gauge does not
+pretend pending work is a completed result. One unresolved protocol read per
+group is admitted, while completed outputs may remain held under the group's
+retention budget. Admission rejection preserves the original query allocation
+without spending a ticket. The checked request allocator uses the live core's
+maximum accepted read-ID floor and service sequence; neither is a contiguous
+protocol prefix or durability watermark. Restart and replacement use fresh
+invocation/runtime/store lifetimes; no query or authority is replayed as a write.
+
+Shared owner steps, including ClientRouter-driven steps, feed exact tracked
+invocation/cancellation correlation before effect dispatch. ReadReady execution
+selects only the original owned query, revalidates current bounds against the
+original reservation, and passes the exact live lease through ReadRouter's
+existing one-use quorum/application checks. A successful step, local send,
+Written receipt or cached leader cannot produce Read. Query errors consume
+authority once; provider capacity violations fence the owner. Output envelopes
+remain opaque and charged through consumer completion, with foreign envelopes
+returned intact and earlier valid results preserved across later failure.
+
+The checked EffectOwner.cancel_read path now consumes an exact ready lease
+without a query callback or application catch-up requirement. Otherwise fair
+reconciliation queues tracked control cancellation only after the original data
+Read step, preventing priority inversion from orphaning a read. Queued
+cancellation remains charged through its exact step even when its ready lease
+was already canceled; an obsolete request ID cannot clear a subsequent read.
+Cancel/leadership/failure outcomes never roll back accepted WAL. Close drains
+accepted work; explicit abort fences the runtime and preserves already completed
+outcomes. No new durability effect, quorum predicate, WAL/wire format or checkpoint
+schema is introduced. See [read invocation contracts](READ_REQUESTS.md).
+
+Ten downstream tests cover original query/result identity, a different live
+invocation's barrier, retained consumer credits, foreign completions, capacity
+isolation, runtime rejection ownership, pre-step and lagging/ready cancellation,
+queued cancellation against newer reads, bound growth, query/provider failures,
+core read-ID floor/exhaustion, stale step rejection, explicit construction-owner
+return, close/drain and abort retaining an earlier valid result. The actual
+three-node/100-group native WAL/TLS history verifies 100 isolated reads return
+no values under quorum loss, resolve unavailable after replacement, stay canceled
+after healing, and permit fresh replacement-leader reads. Snapshot/checkpoint,
+reconnect, automatic-election, file-recovery and native-only histories also use
+the same original invocation/result owners.
+
+Local validation passes 247 default/native/TLS tests, 226 native-only tests and
+133 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL header
+checks pass. Native socket histories ran with loopback access enabled.
+
+Production reactor/facade assembly, physical WAL cleaning, membership/policy
+transitions, recursive responsibilities, safe split/merge and P7 throughput
+evidence remain unfinished. Full P0–P7 stays active; CI is background feedback.
+Finite Linux histories do not establish macOS execution, arbitrary schedules or
+production protocol/performance claims.
+
 ## Next slice
 
-Continue full native node assembly with pre-quorum read invocation ownership and
-reactor driving, then physical WAL cleaning with durable
+Continue full native node assembly with production reactor driving over the
+selected ingress, proposal, original read, worker and transport owners, then
+physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.
