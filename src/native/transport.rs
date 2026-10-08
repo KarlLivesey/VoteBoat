@@ -397,6 +397,11 @@ impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C>
     fn take_send(&mut self) -> Option<TransportSend> {
         self.completed.take()
     }
+    fn received_info(&self) -> Option<ReceiveInfo> {
+        self.received
+            .as_ref()
+            .and_then(|b| b.info(self.limits.decoded_bytes).ok())
+    }
     fn take_received(&mut self) -> Option<ReceivedBatch> {
         let batch = self.received.take();
         if batch.is_some() {

@@ -76,6 +76,9 @@ fn transport_limits_are_available_without_native_dependencies() {
         fn take_received(&mut self) -> Option<ReceivedBatch> {
             None
         }
+        fn received_info(&self) -> Option<ReceiveInfo> {
+            None
+        }
         fn close(&mut self) {}
         fn abort(&mut self) {}
     }

@@ -1490,9 +1490,63 @@ WAL cleaning, membership/policy changes, recursive responsibilities and safe
 split/merge remain unfinished. macOS execution and hardware power-cut evidence
 remain outstanding. Full P0–P7 stays active; CI remains background feedback.
 
+## Slice 21: bounded decoded-frame ingress ownership
+
+Transport contract 2 adds immutable exact `received_info` metadata while retaining
+wire format 1. `ReceivedBatch::info` validates identity/class/count/capacity;
+`PeerRoster` validates inspection and compares eventual owned frames against it.
+Host providers implement this same required method, including boxed forwarding.
+The native provider exposes its one retained decoded frame without transferring it.
+
+`runtime::IngressRouter` is a fixed ownership/identity guard over these public
+peer providers and the existing serialized effect owner. It reserves
+frame/message/byte/class credits before extraction. Overload leaves the frame in
+the transport and prevents further decoding there. Control has explicit reserves;
+background/snapshot traffic has a separate ceiling. Accepted frames retain their
+full original charge across partial admission, including original spare vector
+capacity and nested payloads. Fair frame/message scans retry overloaded groups
+while allowing other groups to enter the owner.
+
+Dispatch checks the runtime lifetime and current connection before each transfer.
+Retired connections discard only still-held input; previously admitted events
+remain runtime-owned. Unknown groups and other terminal admission rejections are
+explicitly reported, not used to create replicas. Scoped checked ingress tickets
+are allocation IDs, never durable maxima/prefixes. Close drains, and abort reports
+remaining cancellations without rolling back runtime work. No new effect,
+durability token, membership authority or client success follows from ingress.
+All existing Raft persistence/application dependencies remain mandatory. See
+[decoded ingress](INGRESS.md) for accounting, ordering, physical TCP head-of-line
+limits, provider errors and shutdown semantics.
+
+The default native three-node/100-group histories now route decoded TLS frames
+through a per-node ingress router into the same effect owner that drives WAL,
+snapshot and application work. Fixture-owned partition injection still discards
+authenticated traffic explicitly; it is absent from the production router.
+Quiescence and shutdown assert that all ingress charges drain. Native-only
+histories retain their bounded simulated network, while the public ingress tests
+also execute in core/host-only builds.
+
+Seven new host-provider tests check retained full charges through blocked/partial
+admission and retry, separate control/background budgets, no extraction on
+overload or excessive spare capacity, old connection replacement with partial
+admission, false metadata returning the original batch and fencing, wrong runtime
+generation, explicit unknown-group rejection, abort counts, and independent
+router shutdown over a shared owner/roster. These finite Linux checks do not prove
+complete liveness, macOS behavior or power-cut durability.
+
+Local validation passes 214 default native/TLS tests, 193 native-only tests and
+100 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON and new RPL header
+checks pass. Native socket tests ran with loopback access enabled after the
+sandbox rejected listener creation in the first native-only run.
+
+Complete client/dedup/result admission, production reactor/facade, physical WAL
+cleanup, membership/policy changes, recursive responsibilities and safe split/merge
+remain unfinished. Full P0–P7 stays active; CI remains background feedback.
+
 ## Next slice
 
-Continue full native node assembly with decoded ingress and application result
-admission and reactor driving, then physical WAL cleaning with durable
+Continue full native node assembly with client/application result admission and
+reactor driving, then physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.

@@ -622,6 +622,7 @@ mod native {
         reads: Vec<i64>,
         transports:
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
+        ingress: IngressRouter,
         #[cfg(feature = "tls")]
         connector: Option<voteboat::native::connect::NativePeerConnector>,
         staged: VecDeque<OutboundBatch>,
@@ -829,6 +830,18 @@ mod native {
             pending: Vec::new(),
             reads: Vec::new(),
             transports: None,
+            ingress: IngressRouter::new(
+                IngressBinding {
+                    owner: runtime_owner,
+                    local: voteboat::secure::LocalIdentity {
+                        node: node(id),
+                        store: runtime_owner.store,
+                    },
+                    generation: IngressGeneration::new(1).unwrap(),
+                },
+                IngressLimits::default(),
+            )
+            .unwrap(),
             #[cfg(feature = "tls")]
             connector: None,
             staged: VecDeque::new(),
@@ -1163,13 +1176,30 @@ mod native {
                             if let Some(done) = roster.take_send(peer).unwrap() {
                                 n.outbound.complete(done.batch, done.result).unwrap();
                             }
-                            if network.len() <= 8192 - 128 {
-                                if let Some(batch) = roster.take_received(peer).unwrap() {
-                                    network.extend(batch.messages);
+                            if isolated.is_some_and(|id| id == peer || id == local_node) {
+                                // Fixture-owned partition injection after authentication.
+                                // Production ingress contains no test fault policy.
+                                if roster.take_received(peer).unwrap().is_some() {
                                     n.received += 1;
+                                }
+                            } else {
+                                match n.ingress.receive(roster, peer) {
+                                    Ok(Some(_)) => n.received += 1,
+                                    Ok(None) => (),
+                                    Err(rejected) => {
+                                        assert_eq!(rejected.reason, IngressError::Overloaded);
+                                        assert!(
+                                            rejected.batch.is_none(),
+                                            "overload must leave the transport owning its frame"
+                                        );
+                                    }
                                 }
                             }
                         }
+                        let progress = n.ingress.dispatch(roster, &mut n.owner, 32).unwrap();
+                        assert!(progress.rejected.is_empty());
+                        assert_eq!(progress.discarded, 0);
+                        assert!(n.ingress.usage().bytes <= IngressLimits::default().bytes);
                     }
                 }
                 assert!(
@@ -1209,6 +1239,7 @@ mod native {
                         && n.outbound.is_drained()
                         && n.pending.is_empty()
                         && n.staged.is_empty()
+                        && n.ingress.is_drained()
                         && n.send_pending.is_empty()
                         && n.snapshot_pending.is_empty()
                         && n.router.as_ref().is_none_or(|r| r.is_drained())
@@ -1322,6 +1353,8 @@ mod native {
             std::thread::park_timeout(Duration::from_millis(1));
         }
         for n in nodes {
+            n.ingress.close();
+            assert!(n.ingress.is_drained());
             assert!(n
                 .transports
                 .as_ref()
@@ -2240,5 +2273,495 @@ mod snapshot_routes {
         assert_eq!(worker.usage().requests, 1);
         worker.close();
         worker.poll(1);
+    }
+}
+
+mod ingress {
+    use super::*;
+    use std::{cell::RefCell, rc::Rc};
+    use voteboat::{
+        outbound::*,
+        secure::*,
+        snapshot::{Snapshot, SnapshotMetadata},
+        transport::*,
+    };
+    #[derive(Default)]
+    struct Input {
+        batch: Option<ReceivedBatch>,
+        takes: usize,
+        wrong_class: bool,
+    }
+    /// Host channel security is attested only for ownership/fault scheduling.
+    struct Peer {
+        binding: SessionBinding,
+        input: Rc<RefCell<Input>>,
+    }
+    impl PeerTransport for Peer {
+        fn security(&self) -> SessionSecurity {
+            SessionSecurity::Authenticated
+        }
+        fn binding(&self) -> SessionBinding {
+            self.binding
+        }
+        fn state(&self) -> TransportState {
+            TransportState::Open
+        }
+        fn limits(&self) -> TransportLimits {
+            TransportLimits::default()
+        }
+        fn usage(&self) -> TransportUsage {
+            TransportUsage {
+                decoded_bytes: self.received_info().map_or(0, |i| i.bytes),
+                ..TransportUsage::default()
+            }
+        }
+        fn submit(&mut self, batch: OutboundBatch) -> Result<(), TransportRejected> {
+            Err(TransportRejected {
+                reason: TransportError::Overloaded,
+                batch: Box::new(batch),
+            })
+        }
+        fn poll(
+            &mut self,
+            _: MonoTime,
+            b: TransportPollBudget,
+        ) -> Result<TransportProgress, TransportError> {
+            b.validate()?;
+            Ok(TransportProgress::default())
+        }
+        fn take_send(&mut self) -> Option<TransportSend> {
+            None
+        }
+        fn received_info(&self) -> Option<ReceiveInfo> {
+            let input = self.input.borrow();
+            let mut info = input
+                .batch
+                .as_ref()?
+                .info(self.limits().decoded_bytes)
+                .ok()?;
+            if input.wrong_class {
+                info.class = MessageClass::Data;
+            }
+            Some(info)
+        }
+        fn take_received(&mut self) -> Option<ReceivedBatch> {
+            let mut input = self.input.borrow_mut();
+            input.takes += 1;
+            input.batch.take()
+        }
+        fn close(&mut self) {}
+        fn abort(&mut self) {
+            self.input.borrow_mut().batch = None;
+        }
+    }
+    fn setup() -> (
+        Owner,
+        PeerRoster<Peer>,
+        BTreeMap<NodeId, Rc<RefCell<Input>>>,
+    ) {
+        let mut store = HostLogStore::new(1);
+        let runtime = timed(1, &mut store, 2, 3);
+        let owner = EffectOwner::new(
+            runtime,
+            WorkerBinding {
+                store: store.binding(),
+                generation: StorageWorkerGeneration::new(1).unwrap(),
+            },
+            EffectOwnerLimits::default(),
+        )
+        .unwrap();
+        let local = LocalIdentity {
+            node: node(1),
+            store: store.binding(),
+        };
+        let mut roster = PeerRoster::new(
+            PeerRosterConfig {
+                local,
+                outbound: OutboundBinding {
+                    node: local.node,
+                    store: local.store,
+                    generation: OutboundGeneration::new(1).unwrap(),
+                },
+                first_generation: SecureSessionGeneration::new(1).unwrap(),
+                last_generation: SecureSessionGeneration::new(u64::MAX).unwrap(),
+                wire_version: 1,
+                limits: PeerRosterLimits::default(),
+                transport_limits: TransportLimits::default(),
+            },
+            [(node(2), identity(2)), (node(3), identity(3))].into(),
+            MonoTime(0),
+        )
+        .unwrap();
+        let mut inputs = BTreeMap::new();
+        for t in roster.due_connections(MonoTime(0), 2).unwrap() {
+            let input = Rc::new(RefCell::new(Input::default()));
+            let binding = SessionBinding {
+                local,
+                peer: LocalIdentity {
+                    node: t.peer.node,
+                    store: StoreBinding {
+                        identity: t.peer.store,
+                        session: StoreSession::new(1).unwrap(),
+                    },
+                },
+                generation: t.generation,
+                wire_version: 1,
+            };
+            roster
+                .attach(
+                    t,
+                    Peer {
+                        binding,
+                        input: input.clone(),
+                    },
+                    MonoTime(0),
+                )
+                .unwrap_or_else(|r| panic!("attach: {:?}", r.reason));
+            inputs.insert(t.peer.node, input);
+        }
+        (owner, roster, inputs)
+    }
+    fn router(owner: &Owner, roster: &PeerRoster<Peer>, limits: IngressLimits) -> IngressRouter {
+        IngressRouter::new(
+            IngressBinding {
+                owner: owner.identity(),
+                local: roster.local(),
+                generation: IngressGeneration::new(1).unwrap(),
+            },
+            limits,
+        )
+        .unwrap()
+    }
+    fn message(binding: SessionBinding, g: u128, class: MessageClass) -> Message {
+        let rpc = match class {
+            MessageClass::Control => Rpc::ReadProbe,
+            MessageClass::Data => Rpc::Append {
+                previous_index: 0,
+                previous_term: 0,
+                leader_commit: 0,
+                entries: vec![LogEntry {
+                    index: 1,
+                    term: 1,
+                    payload: EntryPayload::Command {
+                        operation: OperationId::new(g).unwrap(),
+                        bytes: 1i64.to_le_bytes().to_vec(),
+                    },
+                }],
+            },
+            MessageClass::Background => Rpc::Snapshot {
+                snapshot: Box::new(Snapshot {
+                    metadata: SnapshotMetadata {
+                        bootstrap: bootstrap(g, 3),
+                        index: 1,
+                        term: 1,
+                        application_schema: 1,
+                    },
+                    application: vec![],
+                }),
+            },
+        };
+        Message {
+            group: group(g),
+            configuration: ConfigurationId::new(1).unwrap(),
+            from: binding.peer.node,
+            sender: binding.peer.store,
+            to: binding.local.node,
+            term: 1,
+            context: RequestContext {
+                origin: binding.peer.store,
+                sequence: g as u64,
+            },
+            rpc,
+        }
+    }
+    fn inject(
+        roster: &PeerRoster<Peer>,
+        input: &Rc<RefCell<Input>>,
+        peer: u64,
+        groups: &[u128],
+        class: MessageClass,
+    ) {
+        assert!(input.borrow().batch.is_none());
+        let connection = roster.binding(node(peer)).unwrap();
+        input.borrow_mut().batch = Some(ReceivedBatch {
+            connection,
+            messages: groups
+                .iter()
+                .map(|g| message(connection, *g, class))
+                .collect(),
+        });
+    }
+    fn small() -> IngressLimits {
+        IngressLimits {
+            batches: 4,
+            messages: 512,
+            bytes: 1024 * 1024,
+            control_batches: 1,
+            control_messages: 128,
+            control_bytes: 128 * 1024,
+            background_batches: 1,
+            background_messages: 128,
+            background_bytes: 256 * 1024,
+            batch_messages: 128,
+            batch_bytes: 64 * 1024,
+        }
+    }
+    #[test]
+    fn blocked_group_retains_full_frame_charge_while_other_group_progresses_and_retry_completes() {
+        let (mut owner, mut roster, inputs) = setup();
+        let mut router = router(&owner, &roster, IngressLimits::default());
+        for _ in 0..ShardLimits::default().group_items {
+            owner.admit(group(1), Event::Heartbeat).unwrap();
+        }
+        inject(
+            &roster,
+            &inputs[&node(2)],
+            2,
+            &[1, 2],
+            MessageClass::Control,
+        );
+        let ticket = router.receive(&mut roster, node(2)).unwrap().unwrap();
+        let charged = router.usage();
+        assert!(router
+            .dispatch(&roster, &mut owner, 0)
+            .unwrap()
+            .completed
+            .is_empty());
+        assert_eq!(router.usage(), charged);
+        let blocked = router.dispatch(&roster, &mut owner, 1).unwrap();
+        assert_eq!(blocked.blocked, 1);
+        assert_eq!(router.usage(), charged);
+        let other = router.dispatch(&roster, &mut owner, 1).unwrap();
+        assert_eq!(other.admitted, 1);
+        assert!(other.completed.is_empty());
+        assert_eq!(router.usage(), charged);
+        // Free one event in group 1 without performing storage or application I/O.
+        let step = owner.advance(MonoTime(0), 1).unwrap();
+        assert_eq!(step.len(), 1);
+        assert_eq!(step[0].visit.group, group(1));
+        assert!(owner.take_effect().unwrap().is_none());
+        let completed = router.dispatch(&roster, &mut owner, 1).unwrap();
+        assert_eq!(completed.admitted, 1);
+        assert_eq!(completed.completed.len(), 1);
+        assert_eq!(completed.completed[0].ticket, ticket);
+        assert_eq!(completed.completed[0].admitted, 2);
+        assert_eq!(completed.completed[0].end, IngressEnd::Drained);
+        assert_eq!(router.usage(), IngressUsage::default());
+        assert!(router.is_drained());
+        assert_eq!(
+            owner.core(group(1)).unwrap().state().hard_state.term,
+            0,
+            "ingress admission proves no election or durable progress"
+        );
+    }
+    #[test]
+    fn bulk_saturation_leaves_transport_ownership_and_control_reserve_for_another_peer() {
+        let (owner, mut roster, inputs) = setup();
+        let mut router = router(&owner, &roster, small());
+        for _ in 0..3 {
+            inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Data);
+            router.receive(&mut roster, node(2)).unwrap().unwrap();
+        }
+        inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Data);
+        let takes = inputs[&node(2)].borrow().takes;
+        let rejected = router.receive(&mut roster, node(2)).unwrap_err();
+        assert_eq!(rejected.reason, IngressError::Overloaded);
+        assert!(rejected.batch.is_none());
+        assert_eq!(inputs[&node(2)].borrow().takes, takes);
+        assert!(inputs[&node(2)].borrow().batch.is_some());
+        inject(&roster, &inputs[&node(3)], 3, &[2], MessageClass::Control);
+        router.receive(&mut roster, node(3)).unwrap().unwrap();
+        assert_eq!(router.usage().batches, 4);
+        let completed = router.abort();
+        assert_eq!(completed.len(), 4);
+        assert!(completed
+            .iter()
+            .all(|c| c.end == IngressEnd::Cancelled && c.discarded == 1 && c.admitted == 0));
+        assert!(router.is_drained());
+        assert_eq!(router.usage(), IngressUsage::default());
+        assert!(inputs[&node(2)].borrow().batch.is_some());
+        assert!(owner.is_drained());
+    }
+    #[test]
+    fn snapshots_have_separate_ceiling_and_cannot_consume_all_data_or_control_slots() {
+        let (owner, mut roster, inputs) = setup();
+        let mut router = router(&owner, &roster, small());
+        inject(
+            &roster,
+            &inputs[&node(2)],
+            2,
+            &[1],
+            MessageClass::Background,
+        );
+        router.receive(&mut roster, node(2)).unwrap().unwrap();
+        inject(
+            &roster,
+            &inputs[&node(3)],
+            3,
+            &[1],
+            MessageClass::Background,
+        );
+        assert_eq!(
+            router.receive(&mut roster, node(3)).unwrap_err().reason,
+            IngressError::Overloaded
+        );
+        inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Data);
+        router.receive(&mut roster, node(2)).unwrap().unwrap();
+        inject(&roster, &inputs[&node(2)], 2, &[2], MessageClass::Control);
+        router.receive(&mut roster, node(2)).unwrap().unwrap();
+        assert_eq!(router.usage().batches, 3);
+        assert_eq!(router.abort().len(), 3);
+        assert!(inputs[&node(3)].borrow().batch.is_some());
+    }
+    #[test]
+    fn retired_connection_discards_only_still_held_input_and_new_generation_can_progress() {
+        let (mut owner, mut roster, mut inputs) = setup();
+        let mut router = router(&owner, &roster, IngressLimits::default());
+        inject(
+            &roster,
+            &inputs[&node(2)],
+            2,
+            &[1, 2],
+            MessageClass::Control,
+        );
+        let old = router.receive(&mut roster, node(2)).unwrap().unwrap();
+        assert_eq!(router.dispatch(&roster, &mut owner, 1).unwrap().admitted, 1);
+        let old_binding = roster.binding(node(2)).unwrap();
+        roster.disconnect(node(2), MonoTime(0)).unwrap();
+        let t = roster
+            .due_connections(MonoTime(100), 2)
+            .unwrap()
+            .pop()
+            .unwrap();
+        assert_eq!(t.peer.node, node(2));
+        let binding = SessionBinding {
+            generation: t.generation,
+            ..old_binding
+        };
+        let input = Rc::new(RefCell::new(Input::default()));
+        roster
+            .attach(
+                t,
+                Peer {
+                    binding,
+                    input: input.clone(),
+                },
+                MonoTime(100),
+            )
+            .unwrap_or_else(|r| panic!("reattach: {:?}", r.reason));
+        inputs.insert(node(2), input);
+        let progress = router.dispatch(&roster, &mut owner, 1).unwrap();
+        assert_eq!(progress.discarded, 1);
+        assert_eq!(progress.admitted, 0);
+        let c = progress.completed[0];
+        assert_eq!(c.ticket, old);
+        assert_eq!(c.admitted, 1);
+        assert_eq!(c.discarded, 1);
+        assert_eq!(c.end, IngressEnd::StaleConnection);
+        assert!(
+            !owner.is_drained(),
+            "already admitted old input remains owned by the runtime"
+        );
+        inject(&roster, &inputs[&node(2)], 2, &[2], MessageClass::Control);
+        let fresh = router.receive(&mut roster, node(2)).unwrap().unwrap();
+        assert!(fresh.sequence > old.sequence);
+        assert_eq!(
+            router.dispatch(&roster, &mut owner, 1).unwrap().completed[0].admitted,
+            1
+        );
+        assert!(router.is_drained());
+    }
+    #[test]
+    fn false_receive_metadata_returns_original_batch_and_fences_without_credit_release() {
+        let (mut owner, mut roster, inputs) = setup();
+        let mut router = router(&owner, &roster, IngressLimits::default());
+        inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Control);
+        router.receive(&mut roster, node(2)).unwrap().unwrap();
+        let charged = router.usage();
+        inject(&roster, &inputs[&node(2)], 2, &[2], MessageClass::Control);
+        inputs[&node(2)].borrow_mut().wrong_class = true;
+        let rejected = router.receive(&mut roster, node(2)).unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            IngressError::Peer(PeerRosterError::ProviderViolation)
+        );
+        let batch = rejected.batch.unwrap();
+        assert_eq!(batch.messages.len(), 1);
+        assert_eq!(batch.messages[0].group, group(2));
+        assert!(roster.is_fenced());
+        assert_eq!(router.usage(), charged);
+        assert!(matches!(
+            router.dispatch(&roster, &mut owner, 1),
+            Err(IngressError::Peer(PeerRosterError::Fenced))
+        ));
+        assert_eq!(router.abort()[0].discarded, 1);
+        assert!(owner.is_drained());
+    }
+    #[test]
+    fn capacity_bytes_are_inspected_before_take_and_wrong_owner_cannot_dispatch() {
+        let (mut owner, mut roster, inputs) = setup();
+        let mut router = router(
+            &owner,
+            &roster,
+            IngressLimits {
+                batch_bytes: 1024,
+                ..IngressLimits::default()
+            },
+        );
+        let connection = roster.binding(node(2)).unwrap();
+        let mut messages = Vec::with_capacity(256);
+        messages.push(message(connection, 1, MessageClass::Control));
+        inputs[&node(2)].borrow_mut().batch = Some(ReceivedBatch {
+            connection,
+            messages,
+        });
+        let takes = inputs[&node(2)].borrow().takes;
+        let rejected = router.receive(&mut roster, node(2)).unwrap_err();
+        assert_eq!(rejected.reason, IngressError::BatchTooLarge);
+        assert!(rejected.batch.is_none());
+        assert_eq!(inputs[&node(2)].borrow().takes, takes);
+        assert!(router.is_drained());
+        // This host explicitly abandons the oversized input, then offers a valid one.
+        inputs[&node(2)].borrow_mut().batch = None;
+        inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Control);
+        let mut binding = router.binding();
+        binding.owner.generation = RuntimeGeneration::new(2).unwrap();
+        let mut replacement = IngressRouter::new(binding, IngressLimits::default()).unwrap();
+        replacement.receive(&mut roster, node(2)).unwrap().unwrap();
+        let charged = replacement.usage();
+        assert_eq!(
+            replacement.dispatch(&roster, &mut owner, 1).unwrap_err(),
+            IngressError::WrongBinding
+        );
+        assert_eq!(replacement.usage(), charged);
+        assert_eq!(replacement.abort()[0].discarded, 1);
+    }
+    #[test]
+    fn unknown_group_reports_terminal_rejection_and_closing_one_router_preserves_shared_owner() {
+        let (mut owner, mut roster, inputs) = setup();
+        let mut first = router(&owner, &roster, IngressLimits::default());
+        inject(&roster, &inputs[&node(2)], 2, &[999], MessageClass::Control);
+        let ticket = first.receive(&mut roster, node(2)).unwrap().unwrap();
+        first.close();
+        let progress = first.dispatch(&roster, &mut owner, 1).unwrap();
+        assert_eq!(progress.rejected.len(), 1);
+        assert_eq!(progress.rejected[0].reason, RuntimeError::UnknownGroup);
+        assert_eq!(progress.completed[0].ticket, ticket);
+        assert_eq!(progress.completed[0].rejected, 1);
+        assert_eq!(progress.completed[0].admitted, 0);
+        assert!(first.is_drained());
+        let mut binding = first.binding();
+        binding.generation = IngressGeneration::new(2).unwrap();
+        let mut second = IngressRouter::new(binding, IngressLimits::default()).unwrap();
+        inject(&roster, &inputs[&node(2)], 2, &[1], MessageClass::Control);
+        assert_eq!(
+            first.receive(&mut roster, node(2)).unwrap_err().reason,
+            IngressError::Closed
+        );
+        let fresh = second.receive(&mut roster, node(2)).unwrap().unwrap();
+        assert_ne!(fresh, ticket);
+        assert_eq!(second.dispatch(&roster, &mut owner, 1).unwrap().admitted, 1);
+        assert!(!owner.is_drained());
+        assert_eq!(second.usage(), IngressUsage::default());
     }
 }

@@ -246,6 +246,55 @@ impl<P: PeerTransport> PeerRoster<P> {
     pub fn is_fenced(&self) -> bool {
         self.fenced
     }
+    pub fn local(&self) -> LocalIdentity {
+        self.local
+    }
+    /// Inspect a retained receive without transferring it. The exact metadata
+    /// must still match when take_received transfers the batch.
+    pub fn received_info(&mut self, peer: NodeId) -> Result<Option<ReceiveInfo>, PeerRosterError> {
+        if self.fenced {
+            return Err(PeerRosterError::Fenced);
+        }
+        let Some(p) = self.peers.get(&peer) else {
+            return Ok(None);
+        };
+        if p.retiring {
+            return Ok(None);
+        }
+        let Some(t) = &p.transport else {
+            return Ok(None);
+        };
+        let info = t.received_info();
+        let limits = t.limits();
+        let usage = t.usage();
+        let limit = self
+            .transport_limits
+            .decoded_bytes
+            .min(limits.decoded_bytes);
+        if Some(t.binding()) != p.binding
+            || t.security() != SessionSecurity::Authenticated
+            || limits.validate().is_err()
+            || limits.send_frame_bytes > self.transport_limits.send_frame_bytes
+            || limits.receive_frame_bytes > self.transport_limits.receive_frame_bytes
+            || limits.decoded_bytes > self.transport_limits.decoded_bytes
+            || usage.send_frame_bytes > limits.send_frame_bytes
+            || usage.receive_frame_bytes > limits.receive_frame_bytes
+            || usage.decoded_bytes > limits.decoded_bytes
+            || info.is_some_and(|i| {
+                Some(i.connection) != p.binding
+                    || i.messages == 0
+                    || i.bytes > limit
+                    || i.bytes > usage.decoded_bytes
+                    || i.messages
+                        .checked_mul(std::mem::size_of::<crate::raft::Message>())
+                        .is_none_or(|n| n > i.bytes)
+            })
+        {
+            self.fenced = true;
+            return Err(PeerRosterError::ProviderViolation);
+        }
+        Ok(info)
+    }
     /// Local scheduling hint only. A due waiting peer is omitted while no
     /// connection/handshake capacity is available, preventing a busy retry loop.
     pub fn next_deadline(&self) -> Option<MonoTime> {
@@ -653,6 +702,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         let Some(t) = &mut p.transport else {
             return Ok(None);
         };
+        let expected = t.received_info();
         let Some(batch) = t.take_received() else {
             return Ok(None);
         };
@@ -661,30 +711,13 @@ impl<P: PeerTransport> PeerRoster<P> {
             .transport_limits
             .decoded_bytes
             .min(t.limits().decoded_bytes);
-        let mut cost = batch
-            .messages
-            .capacity()
-            .checked_mul(std::mem::size_of::<crate::raft::Message>());
-        for m in &batch.messages {
-            if m.from != b.peer.node || m.sender != b.peer.store || m.to != b.local.node {
-                cost = None;
-                break;
-            }
-            cost = cost.and_then(|n| {
-                message_cost(m, limit).ok().and_then(|(_, extra)| {
-                    n.checked_add(extra - std::mem::size_of::<crate::raft::Message>())
-                })
-            });
-            if cost.is_none_or(|n| n > limit) {
-                break;
-            }
-        }
+        let info = batch.info(limit).ok();
         if Some(batch.connection) != p.binding
-            || t.binding() != p.binding.unwrap()
+            || t.binding() != b
             || t.security() != SessionSecurity::Authenticated
             || self.fenced
-            || batch.messages.is_empty()
-            || cost.is_none_or(|n| n > limit)
+            || info.is_none()
+            || info != expected
         {
             self.fenced = true;
             return Err(PeerReceiveRejected {

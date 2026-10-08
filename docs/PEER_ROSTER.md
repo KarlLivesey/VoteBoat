@@ -136,7 +136,10 @@ when roster attempts expire and retain their separate credits until terminal
 completion. `PeerConnector` now owns bounded listener/preface/TLS establishment
 using exact `attempt_deadline(ticket)` values; the native histories keep one
 connector per node across reconnects. See [connection establishment](CONNECTIONS.md).
-Complete ingress/result admission and the full node facade remain in progress.
+`received_info(peer)` now validates transport contract 2 metadata before the
+[ingress router](INGRESS.md) reserves and extracts a frame. Eventual ownership
+transfer must match that exact metadata. Client/result admission and the full
+node facade remain in progress.
 
 The native histories also explicitly close every roster, poll TLS shutdown and
 check that all connection reservations are released before dropping the nodes.

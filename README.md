@@ -200,6 +200,12 @@ batch and encoded frame until local channel output drains. Consume `take_send`
 through the original queue's `complete` to release its retained credits. One
 completed receive batch blocks further frame reads until `take_received` moves
 it into separately bounded ingress. Neither event proves Raft durability.
+Transport contract 2 exposes immutable `received_info` so
+`runtime::IngressRouter` can reserve count/byte/control credits before taking a
+decoded frame. It retains full charges through partial admission, rotates past
+overloaded groups, and discards still-held input from retired connections.
+Native 100-group TCP/TLS histories now use this path. See
+[decoded ingress](docs/INGRESS.md); application-result admission remains in progress.
 `transport::PeerRoster` coordinates construction-authorized peers, fair visits,
 bounded connection reservations, retry deadlines and fresh connection generations.
 It preserves accepted send ownership across failure and rejects obsolete input.

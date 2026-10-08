@@ -82,8 +82,10 @@ impl PeerTransport for Host {
         self.control.lock().unwrap().limits
     }
     fn usage(&self) -> TransportUsage {
+        let decoded_bytes = self.received_info().map_or(0, |i| i.bytes);
         TransportUsage {
             send_frame_bytes: self.control.lock().unwrap().reported_bytes,
+            decoded_bytes,
             sending: self.sending.is_some(),
             completion: self.completed.is_some(),
             ..TransportUsage::default()
@@ -101,6 +103,12 @@ impl PeerTransport for Host {
         }
         self.sending = Some(batch);
         Ok(())
+    }
+    fn received_info(&self) -> Option<ReceiveInfo> {
+        let c = self.control.lock().unwrap();
+        c.incoming
+            .as_ref()
+            .and_then(|b| b.info(c.limits.decoded_bytes).ok())
     }
     fn poll(
         &mut self,
@@ -323,8 +331,16 @@ fn authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejecte
             .reason,
         PeerRosterError::WrongBinding
     );
-    r.attach(retry, Host::new(retry, 5), MonoTime(5)).unwrap();
+    let host = Host::new(retry, 5);
+    let control = host.control.clone();
+    r.attach(retry, host, MonoTime(5)).unwrap();
     assert_eq!(r.binding(t.peer.node).unwrap().peer.store.session.get(), 5);
+    control.lock().unwrap().limits.decoded_bytes *= 2;
+    assert_eq!(
+        r.received_info(t.peer.node),
+        Err(PeerRosterError::ProviderViolation)
+    );
+    assert!(r.is_fenced());
 }
 #[test]
 fn failed_connection_holds_original_send_and_capacity_until_exact_completion() {

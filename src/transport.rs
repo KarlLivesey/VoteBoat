@@ -17,7 +17,7 @@ use crate::{outbound::*, raft::Message, runtime::MonoTime, secure::*};
 mod peers;
 pub use peers::*;
 
-pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 1;
+pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 2;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransportState {
@@ -131,8 +131,52 @@ pub struct ReceivedBatch {
     pub connection: SessionBinding,
     pub messages: Vec<Message>,
 }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReceiveInfo {
+    pub connection: SessionBinding,
+    pub class: MessageClass,
+    pub messages: usize,
+    /// Original vector capacity plus all retained nested payload capacities.
+    pub bytes: usize,
+}
+impl ReceivedBatch {
+    /// Bounded inspection shared by native and host providers. This validates
+    /// scope and accounting, not cryptography; the session must authenticate.
+    pub fn info(&self, limit: usize) -> Result<ReceiveInfo, TransportError> {
+        let invalid = TransportError::ProviderViolation;
+        let mut bytes = self
+            .messages
+            .capacity()
+            .checked_mul(std::mem::size_of::<Message>())
+            .filter(|n| *n <= limit)
+            .ok_or(invalid)?;
+        if self.messages.is_empty() || self.connection.local.node == self.connection.peer.node {
+            return Err(invalid);
+        }
+        let mut class = MessageClass::Control;
+        for message in &self.messages {
+            if !self.connection.incoming().matches(message) {
+                return Err(invalid);
+            }
+            let (kind, cost) = message_cost(message, limit).map_err(|_| invalid)?;
+            if kind.index() > class.index() {
+                class = kind;
+            }
+            bytes = bytes
+                .checked_add(cost - std::mem::size_of::<Message>())
+                .filter(|n| *n <= limit)
+                .ok_or(invalid)?;
+        }
+        Ok(ReceiveInfo {
+            connection: self.connection,
+            class,
+            messages: self.messages.len(),
+            bytes,
+        })
+    }
+}
 
-/// Version 1 is one authenticated peer connection, multiplexing groups per frame.
+/// Contract 2 is one authenticated peer connection, multiplexing groups per frame.
 /// Construction selects a ready session, codec, exact outbound queue binding and
 /// finite budgets. The host owns the peer roster, fair connection visits,
 /// reconnects and global budgets; this handle creates no threads or listeners.
@@ -172,6 +216,10 @@ pub trait PeerTransport {
         budget: TransportPollBudget,
     ) -> Result<TransportProgress, TransportError>;
     fn take_send(&mut self) -> Option<TransportSend>;
+    /// Immutable exact metadata for the retained decoded receive. Until taken
+    /// or aborted, polls cannot replace it. Inspection transfers no ownership.
+    /// This enables ingress to reserve count/byte/control credits before take.
+    fn received_info(&self) -> Option<ReceiveInfo>;
     fn take_received(&mut self) -> Option<ReceivedBatch>;
     fn close(&mut self);
     fn abort(&mut self);
@@ -205,6 +253,9 @@ impl<P: PeerTransport + ?Sized> PeerTransport for Box<P> {
     }
     fn take_send(&mut self) -> Option<TransportSend> {
         (**self).take_send()
+    }
+    fn received_info(&self) -> Option<ReceiveInfo> {
+        (**self).received_info()
     }
     fn take_received(&mut self) -> Option<ReceivedBatch> {
         (**self).take_received()

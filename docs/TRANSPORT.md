@@ -1,4 +1,4 @@
-# Peer transport, contract version 1
+# Peer transport, contract version 2
 
 `transport::PeerTransport` owns one authenticated peer connection and multiplexes
 Raft groups in bounded frames. `NativePeerTransport<S, C>` uses the same public
@@ -61,6 +61,14 @@ validated batch remains available after a later failure or abort. Every batch
 carries its exact connection binding; the node owner rejects obsolete store
 sessions/connections before ingress. The driver itself rejects any in-place
 change of authenticated identity/generation.
+
+Contract 2 adds `received_info`: exact immutable connection/class/count/capacity
+metadata for that retained receive, without ownership transfer. Native and host
+providers can use `ReceivedBatch::info` for bounded accounting. `PeerRoster`
+validates inspection and compares the eventual owned batch against it. The new
+`IngressRouter` reserves class/count/byte credits before extraction, retains
+frames across overloaded groups, and rejects still-held obsolete input. See
+[decoded ingress](INGRESS.md). Wire frames and negotiated wire version remain 1.
 
 Default ceilings are 1 MiB encoded output, 1 MiB partial receive and 4 MiB
 conservative decoded retention per connection. Original outbound messages are

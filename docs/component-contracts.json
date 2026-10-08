@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-native-authenticated-connection-establishment",
+  "status": "shared-runtime-with-bounded-authenticated-connection-and-decoded-ingress",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -270,7 +270,7 @@
       "operations": ["new", "submit", "deliver", "usage", "is_drained", "discard_failed"],
       "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
       "conformance": ["tests/effect_owner.rs"],
-      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. Full node facade and reconnect/result assembly remain pending."
+      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. Full client/result/reactor facade remains pending."
     },
     {
       "design_id": "C12",
@@ -323,15 +323,15 @@
     {
       "design_id": "C06",
       "public_contract": "PeerTransport",
-      "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
+      "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "received_info", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": ["tests/transport.rs", "tests/worker.rs", "tests/peers.rs", "tests/effect_owner.rs"],
-      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; complete ingress/result assembly remains pending."
+      "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; client/result and reactor assembly remain pending."
     },
     {
       "design_id": "C06/C15",
       "public_contract": "PeerRoster<P: PeerTransport>",
-      "operations": ["new", "usage", "binding", "next_deadline", "attempt_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
+      "operations": ["new", "local", "usage", "binding", "received_info", "next_deadline", "attempt_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
       "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
       "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
       "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; the host binds exact attempt deadlines and owns separate ingress/staging resources. No membership or quorum authority."
@@ -352,7 +352,7 @@
       "native": "NativeTcpDialer (native feature)",
       "conformance": [
         "tests/dial.rs",
-        "src/native/dial.rs (deterministic worker fault tests)",
+        "src/native/dial.rs",
         "tests/effect_owner.rs",
         "tests/worker.rs"
       ],
@@ -378,7 +378,29 @@
         "tests/peers.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Full node ingress/result admission and production reactor remain pending."
+      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Decoded ingress now uses IngressRouter; client/result admission and production reactor remain pending."
+    },
+    {
+      "design_id": "C06/C10/C15",
+      "public_contract": "IngressRouter",
+      "operations": [
+        "new",
+        "binding",
+        "limits",
+        "usage",
+        "receive",
+        "dispatch",
+        "close",
+        "is_drained",
+        "abort"
+      ],
+      "native": "Fixed ownership/identity guard over public PeerTransport and EffectOwner providers; native TCP/TLS histories use it directly",
+      "conformance": [
+        "tests/effect_owner.rs",
+        "tests/peers.rs",
+        "tests/transport.rs"
+      ],
+      "scope": "Transport contract 2 exact receive metadata permits class/count/capacity reservation before extraction. Bounded control reserve and background ceiling, full frame charge through partial admission, fair batch/message retries, current-connection/runtime generation checks, explicit stale/group rejection and close/abort accounting. Core-only host-provider tests and native three-node/100-group WAL/snapshot/reconnect/recovery histories. Admission is no execution, application, commitment or durability evidence. Client/result admission and production reactor/facade remain pending."
     },
     {
       "design_id": "C13",
@@ -391,7 +413,7 @@
   ],
   "not_yet_implemented": [
     "physical-wal-reclamation",
-    "complete-node-ingress-result-and-reactor-assembly",
+    "complete-client-result-and-reactor-assembly",
     "buffers",
     "admission-policy",
     "routing",
