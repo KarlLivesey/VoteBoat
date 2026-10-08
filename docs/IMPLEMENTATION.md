@@ -103,38 +103,40 @@ recovery. Broader recovery cases remain below. Resolve these before
 exposing service mutations that could strand a group; it is part of the existing
 P4 activation gate, not an additional global milestone.
 
-1. **Partial-joint catch-up and election repair (current, P4).** Define and
-   implement a bounded authenticated recovery path that delivers the needed
-   configuration before election without granting a learner votes or service
-   authority. Depends on accepted/committed history, exact store/session checks
-   and the reproduced slice 63 history. Check available weighted/recursive
-   quorums, stale/forked history, lost replies, pending/Written durability,
-   leader loss and restart. Replace the diagnostic stall expectation with a
-   successful production-path recovery check (done for the exact-prefix case in
-   slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66;
-   retained multi-batch recovery with explicit format 5 in slice 67; historical
-   committed snapshot repair with explicit format 6 in slice 68; recursive
-   election/write/read and native old-voter catch-up plus retained candidate
-   suffix in slice 69). Explicit member assemblies now receive ordinary validated
-   configuration replication; default/static assemblies retain their gate.
-   Still check divergent retained-only learner tails, promoted-leader/witness
-   lifecycle integration and broader recursive-policy failure histories before
-   claiming the general release gate is complete. This removes a P4 release blocker
-   needed by safe online placement.
-2. **Enrollment and administrative service integration (next, P4).** Connect
+Slices 64–70 supply bounded exact-prefix, retained-range/multi-batch and committed
+snapshot repair, recursive election/write/read, old-voter catch-up with a retained
+candidate suffix, explicit member reception and owning-node witness controls.
+Native TCP/QUIC retained/snapshot promoted-leader histories now cancel/refuse a
+late grant, retry, catch up a demoted old voter, commit a write and reopen files.
+These paths are sufficient to integrate administration through public providers.
+The mini plan advances to that integration; unresolved divergent retained-only
+learner histories and broader policy/fault schedules remain release gates in item
+2 below. This does not declare P4 complete or open service mutation endpoints.
+
+1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
    schema/command/checkpoint bounds as deduplication grows. Depends on slices
-   51–62 and authenticated service scope. Check exact committed assignments,
+   51–70 and authenticated service scope. Check exact committed assignments,
    rejection before mutation, lost-reply resumption and matching TCP/QUIC
    assemblies. Provides the native path for release testing, not an early opening
    of public configuration ingress.
-3. **Fault-tested remote membership release (following, P4).** Exercise actual
+2. **Fault-tested remote membership release (next, P4).** Exercise actual
    add/catch-up/promote/remove with partial joint/final delivery, weighted and
    recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
-   Depends on items 1–2. Resolve activation/catch-up gaps before releasing ingress.
+   Depends on item 1 and the implemented recovery/authorization paths. Check
+   divergent retained-only learner histories, unavailable/compacted witnesses,
+   promoted-leader failures and broader recursive-policy schedules; resolve
+   activation/catch-up gaps before releasing service mutation endpoints.
    Completes safe placement for P5 responsibility routing and P6 ownership movement;
    P5–P7 remain the global capability chain above.
+3. **Responsibility manifests and routing (following, P5).** Implement the first
+   usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
+   over concrete groups, with explicit ordering boundaries. Depends on the group,
+   runtime and application foundations; placement changes use safe P4 operations.
+   Check range coverage, generations/stale routes and cached child operation during
+   parent unavailability without ancestor commits on the ordinary write path.
+   Supplies the routing/ownership context required by P6 split and merge.
 
 ### How the current work fits globally
 
@@ -143,9 +145,9 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Repair partial-joint catch-up/election | Actual-core and independent model histories confirm that available weighted quorums do not suffice when a required new voter still has only its learner view. | Production-path recovery without learner votes, premature durability evidence or serving authority, including lost replies and restart. | Removes a P4 activation prerequisite before native mutation release. |
-| Integrate native enrollment and administration | Placement, durable resumption, selected transport envelope checks and explicit native member restart now exist; the native service must bind them to enrollment and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
+| Integrate native enrollment and administration | Placement, durable resumption, transport envelopes, member restart/reception and recovery/witness controls now exist; the native service must bind them to enrollment and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
+| Resolve and route responsibility manifests | Concrete groups need an explicit namespace/partition ownership view before safe data movement. | Validated manifests and bounded cached routing; established child work survives parent failure without ancestor commits. | Implements P5 routing and supplies P6 ownership lineage. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
 and actual-core limitations recorded below. Slice 63 confirms the separate
@@ -3958,3 +3960,50 @@ placement supplies P5 responsibility routing and P6 ownership movement; P7 and t
 full P0–P7 goal remain active. Static service usability remains independent of
 later milestones. No macOS, performance, complete online lifecycle or general
 fork/term/liveness proof claim. P8 remains deferred.
+
+## Slice 70 — owning witness controls and promoted-leader catch-up
+
+Mini schema plan: expose the existing single-request/permit protocol through
+NodeControl, with a local volatile status view for host-driven cancellation and
+retry. Reject unsupported peer formats before admission. Reuse bounded owner
+queues, authenticated witness RPCs, exact candidate/base/head checks and existing
+connection reservations. Cancellation is queued and takes effect on execution;
+fencing/configuration change/restart retain their existing revocation rules. No
+new RPC, wire/storage format, provider owner, timer, persisted cursor or receipt.
+
+NodeControl now queues AuthorizeReplication and CancelReplicationAuthorization.
+Requests require a peer roster supporting format 3 or later before any admission;
+closed nodes refuse both controls. Core checks execute at the actual queued event,
+so submission is neither authorization nor commitment. The new public
+ReplicationAuthorizationStatus exposes None/Pending/Granted, exact stores and
+base/head, plus a pending context. This describes volatile inline state only.
+A new pending request may coexist with a prior permit; Pending takes precedence,
+so hosts cancel first when they intend revocation. No fallback trusts a candidate's
+advertised configuration, and no automatic discovery/retry is introduced.
+
+Four three-store native TCP/QUIC histories cover retained and compacted promoted
+final-view leaders. An old-view voter cancels its request before the witness reply,
+refuses the late grant, then receives a fresh-context grant. Its term/log/commit
+and election reset remain unchanged by the exchange. The promoted leader catches
+up joint/final history or a verified pinned final checkpoint, commits/applies a
+client write, and the receiver activates its demoted learner assignment. All three
+native file stores reopen with the write and no volatile permit. The compacted
+leader uses a different old-view witness that retains the historical base; all
+old witnesses losing that base remains a documented fail-closed limitation.
+Initial records are seeded, not distributed enrollment evidence.
+
+Host Node tests reject no-peer and format-1/2 queries before admission, check local
+cancellation and closed-node refusal. Existing public witness tests additionally
+assert pending/granted status and loss on fencing/recovery. The wire-2 fixture
+initially substituted default roster limits incompatible with its bounded peer
+driver; preserving the original selected limits fixes construction. Final owning
+Node/native/recovery/runtime targets pass. See validation/REPORT.md.
+
+The linked mini plan now advances to enrollment/admin service integration, then
+faulted remote membership release, then the first P5 manifest/routing slice. The
+remaining divergent retained-only learner and broader policy/failure schedules
+stay explicit release requirements. This moves P4 toward usable administration;
+P4 completion, P5 routing, P6 split/merge and P7 remain required by the active full
+P0–P7 goal. Static service/embedding usability remains independent. Public service
+mutations are still gated; no macOS, performance or complete protocol-proof claim.
+P8 remains deferred.

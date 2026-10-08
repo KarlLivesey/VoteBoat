@@ -257,7 +257,8 @@ NativeMemberStartup provides the native assembly for an already durably assigned
 learner or changed member. Wrap a NativeStartup in Recover mode with a bounded
 provisioned_stores map of exact node/store identities, then call
 open_with_protocol with TCP/TLS or QUIC, a fresh application and the explicit host
-wake/clock. Select membership wire format 2–4 (the tests here use 4). NativeStartup's
+wake/clock. Select membership wire format 2–6; witness controls require at least 3,
+multi-batch repair selects 5 and snapshot repair selects 6. NativeStartup's
 original static open methods retain their existing rejection of dynamic journals.
 
 Keep the original bootstrap; it is immutable history, not the current voter map.
@@ -292,9 +293,31 @@ wrong peer incarnation, uncommitted local assignment, removed local membership,
 missing checkpoint data, pre-I/O mode/version rejection, and late worker/socket
 cleanup. These histories seed native durable journal fixtures; they do not prove
 online distributed creation/commit of those configurations. The counter CLI still
-uses static startup. Native enrollment, service administration/enforced application
-envelopes and full faulted remote transitions remain pending; public configuration
-ingress stays gated.
+uses static startup. Trusted checkpoint enrollment and enforced counter envelopes
+are implemented below. Service administration, generic application-envelope
+integration and full faulted remote transitions remain pending; public service
+mutation endpoints stay gated. Explicit member assemblies receive validated
+configuration replication.
+
+For a promoted leader that an older replica still regards as a learner, use
+the older replica's owning Node to request an old-view witness assertion:
+
+```rust
+boat.control(group, NodeControl::AuthorizeReplication {
+    witness, // exact old-view voter/store supplied by the host
+    candidate: promoted,
+    configuration: promoted_head,
+})?;
+```
+
+Poll normally and observe the core's `replication_authorization_status`. Admission
+is not authorization; Pending/Granted are volatile local observations. The grant
+permits only exact-store/head replication, with ordinary log/snapshot/durability
+checks. Hosts choose a trusted old witness and drive expiry: queue
+`NodeControl::CancelReplicationAuthorization`, observe its execution, then retry
+with a fresh context. Cancellation is queued, not immediate revocation. If all
+old witnesses are unavailable or have compacted the required base, this exchange
+cannot authorize catch-up. See the [authorization contract](REPLICATION_AUTHORITY.md).
 
 ## Explicit learner enrollment from a trusted checkpoint
 

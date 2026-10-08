@@ -907,6 +907,9 @@ fn witnessed_replication_with<S: LogStore>(
     let [Effect::Send(query)] = query.as_slice() else {
         panic!()
     };
+    assert!(matches!(receiver.replication_authorization_status(),
+        ReplicationAuthorizationStatus::Pending { context, base, configuration, .. }
+        if context == query.context && base == cid(2) && configuration == cid(3)));
     let reply = witness.step(Event::Receive(transfer(query))).unwrap();
     let [Effect::Send(reply)] = reply.as_slice() else {
         panic!()
@@ -920,6 +923,10 @@ fn witnessed_replication_with<S: LogStore>(
         }
     ));
     receiver.step(Event::Receive(transfer(reply))).unwrap();
+    assert!(matches!(receiver.replication_authorization_status(),
+        ReplicationAuthorizationStatus::Granted { candidate, base, configuration }
+        if candidate.node == node(4) && candidate.store == identity(4)
+            && base == cid(2) && configuration == cid(3)));
     assert_eq!(receiver.state(), &before);
     assert_eq!(receiver.election_reset_sequence(), reset);
     let sender = StoreBinding {
@@ -954,6 +961,10 @@ fn witnessed_replication_with<S: LogStore>(
     ));
     receiver.storage_failed();
     assert_eq!(
+        receiver.replication_authorization_status(),
+        ReplicationAuthorizationStatus::None
+    );
+    assert_eq!(
         receiver.step(Event::Receive(probe.clone())),
         Err(RaftError::Fenced)
     );
@@ -964,6 +975,10 @@ fn witnessed_replication_with<S: LogStore>(
         receiver_log.limits(),
     )
     .unwrap();
+    assert_eq!(
+        receiver.replication_authorization_status(),
+        ReplicationAuthorizationStatus::None
+    );
     assert_eq!(
         receiver.step(Event::Receive(probe)),
         Err(RaftError::WrongIdentity)

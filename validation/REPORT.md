@@ -947,3 +947,37 @@ assertion uses a borrowed expected-message slice.
   remain active. No macOS execution/performance or general protocol-proof claim.
 - Final all-feature/all-target Clippy with warnings denied, all-feature docs,
   formatting/diff checks and inventory metadata verification pass (60 contracts).
+
+## Slice 70 — owning witness controls and promoted-leader catch-up
+
+- NodeControl exposes existing authority request/cancellation through bounded owner
+  admission. No-peer and format-1/2 queries refuse before admission; closed nodes
+  refuse both. Local volatile status reports existing request/permit data without
+  becoming an authority token. Pending may coexist with a prior permit; cancel
+  first when revocation is intended. Cancellation takes effect on execution.
+- Four owning native TCP/TLS and QUIC histories cover retained and compacted
+  promoted final-view sources. Cancel before reply, refuse the late grant, retry
+  with a distinct request context, and verify the new grant changes no durable
+  state or election reset. The promoted leader then transfers joint/final history
+  or a pinned final snapshot, commits/applies a write and demotes the older voter
+  to a learner. Coordinated drain/joins and all three file reopens recover exact
+  membership/application and no volatile permit.
+- A separate old-view witness retains the committed base needed to authorize the
+  compacted leader. This adds no portable/Byzantine commitment certificate and
+  cannot authorize catch-up if all witnesses lose the required history. The
+  initial assignment records are seeded; these histories do not prove enrollment
+  or the original distributed joint/final proposal commitment.
+- Public host/native witness histories now assert pending/granted status and
+  revocation on fencing/recovery. The format-2 facade fixture initially used
+  incompatible default roster limits; copying its selected bounded limits fixes
+  construction. Final affected runs: all-feature library 56, effect_owner 126,
+  member_recovery 32, native_member_startup 26 and runtime 25 pass. Socket suites
+  use local socket permission. The independent activation model is unchanged;
+  finite histories are not a general fork/term/liveness proof.
+- Mini plan advances to native enrollment/admin integration, then remote lifecycle
+  release with remaining divergent retained-only learner and broader policy/fault
+  gates, then P5 manifests/routing. Public service mutations stay gated. Full
+  P0–P7 remains active; no macOS execution/performance claim and P8 stays deferred.
+- Final core-only library 47 pass; all-feature/all-target Clippy with warnings
+  denied, all-feature docs, formatting/diff and inventory metadata checks pass
+  (60 contracts). No new provider seam or production dependency.

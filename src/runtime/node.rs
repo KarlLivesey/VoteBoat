@@ -139,6 +139,15 @@ pub enum NodeControl {
     Campaign,
     Heartbeat,
     Checkpoint,
+    /// Queue a direct old-view witness query. Requires an authority-capable
+    /// peer assembly; admission is neither a grant nor a durability receipt.
+    AuthorizeReplication {
+        witness: crate::secure::PeerIdentity,
+        candidate: crate::secure::PeerIdentity,
+        configuration: ConfigurationId,
+    },
+    /// Queue cancellation of the core's pending request and installed permit.
+    CancelReplicationAuthorization,
 }
 #[derive(Debug)]
 pub struct NodeProgress {
@@ -427,6 +436,25 @@ where
                 }
                 Event::Checkpoint
             }
+            NodeControl::AuthorizeReplication {
+                witness,
+                candidate,
+                configuration,
+            } => {
+                if self
+                    .peers
+                    .as_ref()
+                    .is_none_or(|p| p.roster().wire_version() < 3)
+                {
+                    return Err(NodeError::IncompatiblePeerProtocol);
+                }
+                Event::AuthorizeReplication {
+                    witness,
+                    candidate,
+                    configuration,
+                }
+            }
+            NodeControl::CancelReplicationAuthorization => Event::CancelReplicationAuthorization,
         };
         self.local
             .owner

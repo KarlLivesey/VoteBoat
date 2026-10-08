@@ -28,6 +28,7 @@ use std::collections::{BTreeMap, BTreeSet};
 mod readiness;
 pub use readiness::*;
 mod configuration;
+pub use authority::ReplicationAuthorizationStatus;
 pub use configuration::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

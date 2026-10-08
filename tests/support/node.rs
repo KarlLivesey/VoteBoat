@@ -70,6 +70,67 @@ fn elected() -> Boat {
     settle(&mut n);
     n
 }
+
+#[test]
+fn witness_controls_require_authority_wire_before_admission_and_close_with_node() {
+    let query = NodeControl::AuthorizeReplication {
+        witness: voteboat::secure::PeerIdentity {
+            node: node(2),
+            store: identity(2),
+        },
+        candidate: voteboat::secure::PeerIdentity {
+            node: node(4),
+            store: identity(4),
+        },
+        configuration: ConfigurationId::new(2).unwrap(),
+    };
+    for version in [None, Some(1), Some(2)] {
+        let mut p = parts(1, version.is_some());
+        if version == Some(2) {
+            use voteboat::transport::*;
+            let net = p.peers.as_mut().unwrap();
+            net.roster = PeerRoster::new(
+                PeerRosterConfig {
+                    local: net.roster.local(),
+                    outbound: net.roster.outbound_binding(),
+                    first_generation: SecureSessionGeneration::new(1).unwrap(),
+                    last_generation: SecureSessionGeneration::new(100).unwrap(),
+                    wire_version: 2,
+                    limits: net.roster.limits(),
+                    transport_limits: TransportLimits::default(),
+                },
+                [(node(2), identity(2)), (node(3), identity(3))].into(),
+                MonoTime(0),
+            )
+            .unwrap();
+        }
+        let mut n = boat(p);
+        let before = n.local().owner.core(group(1)).unwrap().state().clone();
+        assert_eq!(
+            n.control(group(1), query),
+            Err(NodeError::IncompatiblePeerProtocol)
+        );
+        assert!(n.local().owner.is_drained());
+        assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+        n.control(group(1), NodeControl::CancelReplicationAuthorization)
+            .unwrap();
+        n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+        assert_eq!(
+            n.local()
+                .owner
+                .core(group(1))
+                .unwrap()
+                .replication_authorization_status(),
+            ReplicationAuthorizationStatus::None
+        );
+        n.begin_shutdown();
+        assert_eq!(n.control(group(1), query), Err(NodeError::Closed));
+        assert_eq!(
+            n.control(group(1), NodeControl::CancelReplicationAuthorization),
+            Err(NodeError::Closed)
+        );
+    }
+}
 fn admin_request(group_id: u128, operation: u128, finalizing: bool) -> ConfigurationRequest {
     use voteboat::membership::*;
     let b = bootstrap(group_id, 1);

@@ -1024,3 +1024,380 @@ fn tcp_recursive_repair_catches_up_old_voter_and_candidate_tail() {
 fn quic_recursive_repair_catches_up_old_voter_and_candidate_tail() {
     remote_joint_repair(NativePeerProtocol::Quic, 80, None, true);
 }
+
+fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool) {
+    use voteboat::secure::PeerIdentity;
+    let root = root();
+    std::fs::create_dir(&root).unwrap();
+    let weighted = |voters: &[u64], required| {
+        Policy::new(
+            Tree::Weighted(
+                voters
+                    .iter()
+                    .map(|id| WeightedChild {
+                        weight: if *id == required { 3 } else { 1 },
+                        node: Tree::Voter(node(*id)),
+                    })
+                    .collect(),
+            ),
+            Limits::default(),
+        )
+        .unwrap()
+    };
+    let mut initial = bootstrap();
+    initial.policy = weighted(&[1, 3], 3);
+    let stable = Configuration::new(
+        cid(10),
+        initial.policy.clone(),
+        initial.voter_stores.clone(),
+        [(node(2), identity(2))].into(),
+    )
+    .unwrap();
+    let next = Configuration::new(
+        cid(12),
+        weighted(&[2, 3], 2),
+        [(node(2), identity(2)), (node(3), identity(3))].into(),
+        [(node(1), identity(1))].into(),
+    )
+    .unwrap();
+    let history: Vec<_> = [
+        ConfigurationRecord {
+            operation: OperationId::new(100).unwrap(),
+            expected: cid(9),
+            change: ConfigurationChange::Learners(stable),
+        },
+        ConfigurationRecord {
+            operation: OperationId::new(101).unwrap(),
+            expected: cid(10),
+            change: ConfigurationChange::Joint { id: cid(11), next },
+        },
+        ConfigurationRecord {
+            operation: OperationId::new(101).unwrap(),
+            expected: cid(11),
+            change: ConfigurationChange::Final { id: cid(12) },
+        },
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(i, record)| LogEntry {
+        index: i as u64 + 1,
+        term: 1,
+        payload: EntryPayload::Configuration(Box::new(record)),
+    })
+    .collect();
+    for local in 1..=3 {
+        let path = root.join(local.to_string());
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let tickets = log
+            .append_batch(vec![LogMutation::Create(initial.clone())])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        let state = log.state(group()).unwrap();
+        let count = if local == 1 { 1 } else { 3 };
+        let tickets = log
+            .append_batch(vec![LogMutation::Update(LogUpdate {
+                group: group(),
+                expected_revision: state.revision,
+                hard_state: HardState {
+                    term: 1,
+                    voted_for: None,
+                },
+                commit_index: count as u64,
+                suffix: Some(Suffix {
+                    from: 1,
+                    entries: history[..count].to_vec(),
+                }),
+                snapshot: None,
+                snapshot_membership: None,
+            })])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        let mut snapshots = NativeSnapshotStore::create(
+            FileSnapshotIo::create(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        // The promoted leader may have compacted its old history. A different
+        // old-view voter retains the committed base needed to witness it.
+        if local == 2 && compacted {
+            let mut app = Counter::new(100).unwrap();
+            let (mut core, _) =
+                recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app)
+                    .unwrap();
+            let reference = checkpoint_application(&core, &app, &mut snapshots)
+                .unwrap()
+                .reference();
+            compact_replica(&mut core, &mut log, &mut snapshots, &app, reference).unwrap();
+        }
+    }
+    let endpoints: Vec<_> = (0..3).map(|_| reservation()).collect();
+    let configs: Vec<_> = (1..=3)
+        .map(|local| {
+            let (mut config, _hints) = startup(&root.join(local.to_string()), local, &[1, 2, 3]);
+            config.startup.bootstrap = initial.clone();
+            config.startup.tls = config.startup.tls.with_wire_version(6).unwrap();
+            config.startup.listen = endpoints[local as usize - 1].0;
+            for (peer, entry) in &mut config.startup.peers {
+                entry.address = endpoints[peer.get() as usize - 1].0;
+            }
+            config
+        })
+        .collect();
+    drop(endpoints);
+    let mut nodes: Vec<_> = configs
+        .into_iter()
+        .map(|c| open(c, protocol).unwrap())
+        .collect();
+    let status = |n: &NativeNode<Counter, NativeServiceConnector>| {
+        n.local()
+            .owner
+            .core(group())
+            .unwrap()
+            .replication_authorization_status()
+    };
+    let before = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .state()
+        .clone();
+    let reset = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .election_reset_sequence();
+    let candidate = PeerIdentity {
+        node: node(2),
+        store: identity(2),
+    };
+    let query = NodeControl::AuthorizeReplication {
+        witness: PeerIdentity {
+            node: node(3),
+            store: identity(3),
+        },
+        candidate,
+        configuration: cid(12),
+    };
+    nodes[0].control(group(), query).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    // Keep virtual time fixed during the control exchange: a query/grant does
+    // not establish leadership or cause election-timer resets.
+    while status(&nodes[0]) == ReplicationAuthorizationStatus::None {
+        nodes[0]
+            .poll(MonoTime(0), NodePollBudget::default())
+            .unwrap();
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    let ReplicationAuthorizationStatus::Pending { context: first, .. } = status(&nodes[0]) else {
+        panic!("pending query")
+    };
+    nodes[0]
+        .control(group(), NodeControl::CancelReplicationAuthorization)
+        .unwrap();
+    while status(&nodes[0]) != ReplicationAuthorizationStatus::None {
+        nodes[0]
+            .poll(MonoTime(0), NodePollBudget::default())
+            .unwrap();
+        assert!(Instant::now() < deadline);
+    }
+    let mut refused_late_grant = false;
+    while !refused_late_grant {
+        for index in [2, 0] {
+            let progress = nodes[index]
+                .poll(MonoTime(0), NodePollBudget::default())
+                .unwrap();
+            if let Some(replica) = progress.replica {
+                for step in replica.steps {
+                    if index == 0 && step.error == Some(RaftError::WrongIdentity) {
+                        refused_late_grant = true;
+                    } else {
+                        assert!(step.error.is_none(), "{step:?}");
+                    }
+                }
+            }
+        }
+        assert_eq!(status(&nodes[0]), ReplicationAuthorizationStatus::None);
+        assert!(Instant::now() < deadline, "canceled reply was not observed");
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    nodes[0].control(group(), query).unwrap();
+    while !matches!(
+        status(&nodes[0]),
+        ReplicationAuthorizationStatus::Pending { .. }
+    ) {
+        nodes[0]
+            .poll(MonoTime(0), NodePollBudget::default())
+            .unwrap();
+        assert!(Instant::now() < deadline);
+    }
+    let ReplicationAuthorizationStatus::Pending {
+        context: second, ..
+    } = status(&nodes[0])
+    else {
+        unreachable!()
+    };
+    assert_ne!(first, second);
+    while !matches!(
+        status(&nodes[0]),
+        ReplicationAuthorizationStatus::Granted { .. }
+    ) {
+        for index in [2, 0] {
+            nodes[index]
+                .poll(MonoTime(0), NodePollBudget::default())
+                .unwrap();
+        }
+        assert!(Instant::now() < deadline);
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    assert_eq!(
+        status(&nodes[0]),
+        ReplicationAuthorizationStatus::Granted {
+            candidate,
+            configuration: cid(12),
+            base: cid(10)
+        }
+    );
+    assert_eq!(
+        nodes[0].local().owner.core(group()).unwrap().state(),
+        &before
+    );
+    assert_eq!(
+        nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .election_reset_sequence(),
+        reset
+    );
+    nodes[1].control(group(), NodeControl::Campaign).unwrap();
+    let clock = Instant::now();
+    let mut ticket = None;
+    let mut applied = None;
+    loop {
+        let now = MonoTime(clock.elapsed().as_millis() as u64);
+        for n in &mut nodes {
+            let progress = n.poll(now, NodePollBudget::default()).unwrap();
+            if let Some(replica) = progress.replica {
+                for step in replica.steps {
+                    assert!(step.error.is_none(), "{step:?}");
+                }
+            }
+        }
+        let core = nodes[1].local().owner.core(group()).unwrap();
+        if core.role() == Role::Leader && core.state().commit_index >= 4 && ticket.is_none() {
+            ticket = Some(
+                nodes[1]
+                    .propose(ClientRequest {
+                        group: group(),
+                        operation: OperationId::new(900).unwrap(),
+                        bytes: 7i64.to_le_bytes().to_vec(),
+                    })
+                    .unwrap(),
+            );
+        }
+        while let Some(output) = nodes[1].poll_client() {
+            assert_eq!(Some(output.ticket()), ticket);
+            let ClientOutcome::Applied { position, .. } = nodes[1].complete_client(output).unwrap()
+            else {
+                panic!("application outcome")
+            };
+            applied = Some(position.index);
+        }
+        if applied.is_some_and(|index| {
+            nodes
+                .iter()
+                .all(|n| n.local().applications[&group()].read_applied(index) == Ok(7))
+        }) {
+            break;
+        }
+        assert!(
+            clock.elapsed() < Duration::from_secs(10),
+            "protocol={protocol:?} compacted={compacted}"
+        );
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    let receiver = nodes[0].local().owner.core(group()).unwrap();
+    assert_eq!(receiver.membership().id(), cid(12));
+    assert!(!receiver.local_voter());
+    assert_eq!(status(&nodes[0]), ReplicationAuthorizationStatus::None);
+    assert_eq!(receiver.state().snapshot.is_some(), compacted);
+    for n in &mut nodes {
+        n.begin_shutdown();
+    }
+    let shutdown = Instant::now();
+    while nodes.iter().any(|n| !n.is_drained()) {
+        for n in &mut nodes {
+            n.poll(
+                MonoTime(10000 + clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        }
+        assert!(shutdown.elapsed() < Duration::from_secs(5));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    for n in nodes {
+        close(n);
+    }
+    for local in 1..=3 {
+        let path = root.join(local.to_string());
+        let log = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut snapshots = NativeSnapshotStore::recover(
+            FileSnapshotIo::open(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        let mut app = Counter::new(100).unwrap();
+        let (core, _) =
+            recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app).unwrap();
+        assert_eq!(core.membership().id(), cid(12));
+        assert_eq!(core.local_voter(), local != 1);
+        assert_eq!(
+            core.replication_authorization_status(),
+            ReplicationAuthorizationStatus::None
+        );
+        assert_eq!(app.read_applied(applied.unwrap()), Ok(7));
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn tcp_promoted_leader_witness_repairs_old_view_after_canceled_grant() {
+    promoted_leader_witness_catchup(NativePeerProtocol::TcpTls, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_promoted_leader_witness_repairs_old_view_after_canceled_grant() {
+    promoted_leader_witness_catchup(NativePeerProtocol::Quic, false);
+}
+#[test]
+fn tcp_promoted_leader_witness_installs_compacted_final_snapshot() {
+    promoted_leader_witness_catchup(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_promoted_leader_witness_installs_compacted_final_snapshot() {
+    promoted_leader_witness_catchup(NativePeerProtocol::Quic, true);
+}

@@ -59,12 +59,12 @@ a checksum is integrity detection, not authentication.
 Native TLS/QUIC startup defaults to wire format 1. Select format 3 explicitly
 with `NativeTlsConfig::with_wire_version(3)` on every peer. Native sessions require
 an exact encrypted hello match, and startup selects its codec and roster from the
-same config. Existing connections retain their selected version. Public
-configuration-bearing Append and membership Snapshot ingress remains gated.
-Internal actual-core tests exercise
-promoted joint activation behind that gate. Public host/native tests exercise
-query/grant and static-prefix probing. This protocol is groundwork for online
-membership, not a released online administration flow.
+same config. Existing connections retain their selected version. Default/static
+cores retain their configuration-bearing Append and membership Snapshot gate.
+Explicit member assemblies select validated receive-side configuration
+replication. The owning-node controls below exercise real promoted-leader catch-up
+through that path. Public service mutation endpoints remain gated pending full
+enrollment/admin integration and faulted lifecycle release.
 
 If every old witness is unavailable or has compacted the required old view, this
 exchange cannot authorize catch-up. Retaining historical evidence, authenticated
@@ -90,3 +90,36 @@ witness exchange through actual TCP/TLS and QUIC format-3 framed sessions with
 exact outbound credit completion. They exercise public core/storage/transport
 composition, not an online membership service. These finite checks do not prove
 arbitrary distributed membership schedules, macOS execution or performance.
+
+## Owning Node controls and local status
+
+`NodeControl::AuthorizeReplication { witness, candidate, configuration }` queues
+the existing core event through bounded owner admission. Node rejects absent
+networking or peer roster formats below 3 before admission. The core checks the
+current base/witness again when executing; the selected authenticated transport
+and existing route/connection reservations still validate every reply. Admission
+is not a grant. Candidate hints alone cannot confer authority.
+
+`NodeControl::CancelReplicationAuthorization` queues cancellation of both pending
+request and installed permit. Cancellation takes effect when the owner executes
+it, rather than immediately at host submission. Closed nodes reject both controls.
+No hidden deadline, retries, discovery or witness selection is introduced: hosts
+drive bounded timeouts, cancellation and a new request context.
+
+`Raft::replication_authorization_status` returns local volatile None, Pending or
+Granted with exact identities, base/head and the pending request context. It is
+an observation of existing inline state, not a portable credential or durable
+operation outcome. Pending takes precedence if a new query coexists with a prior
+permit; it does not mean that prior permit was revoked. Cancel first if revocation
+is intended. Configuration change, fencing and restart discard authority as before.
+
+Four owning native-node histories cover retained and compacted promoted-leader
+sources over TCP/TLS and QUIC. An old-view voter cancels a query before its reply,
+refuses the late grant, then queries again with a distinct context. The fresh
+grant changes no durable log/term/commit or election reset. A promoted final-view
+leader then transfers the missing joint/final records or a pinned final snapshot,
+replicates a client write, and the receiver recovers its demoted learner role.
+All three native file stores reopen with the write and no volatile permit. A
+separate old-view voter retains the historical base needed to witness the compacted
+leader; if every witness loses it, the existing fail-closed limit still applies.
+Initial membership records are seeded, not distributed enrollment/proposal evidence.

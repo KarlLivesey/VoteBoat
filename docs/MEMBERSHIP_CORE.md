@@ -345,6 +345,5 @@ The native history permits intentional ingress refusals from competing campaigns
 (late learner repair and an unauthorized promoted candidate); it still requires
 end-to-end progress and recovery and permits no storage/fencing errors. Distinct
 per-node election entropy avoids the fixture's previous lockstep campaigns.
-Finite histories are not a general fork/term/liveness proof. Service mutations,
-promoted-leader/witness lifecycle integration and broader fault histories remain
-release work.
+Finite histories are not a general fork/term/liveness proof. Service mutations
+and broader promoted-leader/witness failure histories remain release work.

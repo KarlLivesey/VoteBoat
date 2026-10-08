@@ -16,6 +16,25 @@
 use super::*;
 use crate::membership::ConfigurationChange;
 
+/// Local volatile observation, never a portable authorization or durable receipt.
+/// Queued host controls have not taken effect until the owner executes them.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ReplicationAuthorizationStatus {
+    None,
+    Pending {
+        witness: PeerIdentity,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+        base: ConfigurationId,
+        context: RequestContext,
+    },
+    Granted {
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+        base: ConfigurationId,
+    },
+}
+
 pub(super) struct PendingAuthority {
     witness: PeerIdentity,
     candidate: PeerIdentity,
@@ -29,6 +48,29 @@ pub(super) struct ReplicationPermit {
     base: ConfigurationId,
 }
 impl Raft {
+    /// Observe the single request/permit for host-driven timeout and retry.
+    /// Pending takes precedence when a new query coexists with an older permit;
+    /// cancel first when the host intends to revoke that earlier authorization.
+    pub fn replication_authorization_status(&self) -> ReplicationAuthorizationStatus {
+        if let Some(pending) = &self.authority_request {
+            return ReplicationAuthorizationStatus::Pending {
+                witness: pending.witness,
+                candidate: pending.candidate,
+                configuration: pending.configuration,
+                base: pending.base,
+                context: pending.context,
+            };
+        }
+        if let Some(permit) = &self.replication_permit {
+            return ReplicationAuthorizationStatus::Granted {
+                candidate: permit.candidate,
+                configuration: permit.configuration,
+                base: permit.base,
+            };
+        }
+        ReplicationAuthorizationStatus::None
+    }
+
     pub(super) fn connection_permit(&self) -> Option<PeerIdentity> {
         self.replication_permit
             .as_ref()
