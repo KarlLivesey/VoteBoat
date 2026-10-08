@@ -91,9 +91,12 @@ perform no blocking I/O. Arbitrary host assertions are not independent proof of
 security, storage durability or application correctness. `extend_reservation`
 reserves additional finite space before host work that can produce a larger
 result; bulk extensions cannot consume the control reserve. An oversized result
-or a callback consensus failure fences service. Native asynchronous snapshot
-request/completion workers and their installation integration are still pending;
-the present owner can hold those effects as leases without claiming completion.
+or a callback consensus failure fences service. The explicit
+[snapshot worker](SNAPSHOT_WORKER.md) now drives publication and
+installation through these callbacks. `complete_effect_with` exposes the
+original leased effect without cloning its image. The host retains a bounded
+admission-to-lease map and reserves loaded-image space before polling. Full node
+routing and network snapshot catch-up through this worker remain pending.
 
 ## Failure and drain
 
@@ -127,7 +130,7 @@ automatic election behavior is tested separately. The native scheduler/timer
 providers retain their earlier conformance histories. Native-without-TLS uses
 bounded simulated delivery. Network isolation is injected after decode.
 
-A full node facade, bounded peer roster/reconnect handling, asynchronous snapshot
-workers, administrative/application result admission and broader automatic-timer
-network histories remain. No complete deployable consensus release or macOS
-execution is claimed. The full P0–P7 goal remains active.
+A full node facade, bounded peer roster/reconnect handling, asynchronous
+checkpoint creation/compaction, administrative/application result admission and
+broader automatic-timer network histories remain. No complete deployable
+consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

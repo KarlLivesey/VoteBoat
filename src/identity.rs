@@ -55,6 +55,7 @@ id64!(
     SnapshotGeneration,
     RuntimeGeneration,
     StorageWorkerGeneration,
+    SnapshotWorkerGeneration,
     OutboundGeneration,
     SecureSessionGeneration
 );

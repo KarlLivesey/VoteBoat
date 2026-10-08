@@ -30,7 +30,9 @@ The native three-node/100-group durable history now runs through actual loopback
 TCP/TLS connections, including leader replacement and restart. The bounded
 `EffectOwner` now reserves output space before execution and retains exact effect
 leases through rejection, persistence, application and read completion. Peer
-roster/reconnect management and asynchronous snapshot workers remain in progress.
+roster/reconnect management and full node assembly remain in progress. An explicit
+asynchronous snapshot worker now preserves publication, WAL durability and
+application-installation dependencies.
 
 Production node assembly, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
@@ -118,8 +120,9 @@ Written admission releases no dependent effects; only the exact durable barrier
 does. Queue rejection returns the batch. Request, unit and retained capacity-byte
 credits include reserved control space and remain charged until terminal delivery.
 The caller budgets effects after delivery. Close, drain and `try_reclaim` return
-the store; dropping observation cannot cancel accepted writes. Snapshot helpers
-currently require quiescent synchronous store access.
+the store; dropping observation cannot cancel accepted writes. The older snapshot
+helpers require quiescent synchronous store access; asynchronous installation uses the
+separate snapshot worker.
 
 For bounded output coordination, wrap a quiescent `TimedShard` in
 `runtime::EffectOwner`. It reserves effect capacity before each event, holds one
@@ -134,6 +137,17 @@ also uses native WAL workers and actual TCP/TLS connections:
 ```sh
 cargo test --locked --offline --test effect_owner
 ```
+
+`snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
+loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
+handles on one explicit thread, with request/byte limits and control reserves.
+Owner-side helpers validate the original effect and exact admission envelope.
+Installation produces Persist after snapshot publication, SnapshotInstalled after
+WAL durability, and SnapshotAck after verified application restore. The real-file
+history composes both native workers with the effect owner and checks recovery
+before WAL submission and after lost application completion. See [the snapshot-worker contract](docs/SNAPSHOT_WORKER.md).
+Native asynchronous checkpoint creation and full node/network assembly remain
+in progress.
 
 Use `outbound::OutboundQueue` (native provider `NativeOutbound`) to retain
 same-peer batches of `Effect::Send` under node and peer budgets. Admission

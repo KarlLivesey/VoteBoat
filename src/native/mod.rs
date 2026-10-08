@@ -16,6 +16,7 @@ pub mod log_store;
 pub mod outbound;
 pub mod runtime;
 pub mod snapshot_store;
+pub mod snapshot_worker;
 #[cfg(feature = "tls")]
 pub mod tls;
 pub mod transport;

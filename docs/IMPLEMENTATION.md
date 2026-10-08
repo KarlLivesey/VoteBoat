@@ -1113,11 +1113,85 @@ state-machine contract; host result admission is separate. macOS execution,
 hardware power cuts, physical WAL cleaning and the later P0–P7 protocols remain
 unobserved or unimplemented. Full P0–P7 remains active.
 
+## Slice 15: asynchronous snapshot publication and installation
+
+`SnapshotWorker` now exposes owned Publish and Load requests with exact runtime
+visits and a distinct snapshot-worker generation scoped to the recovered WAL
+session. Native snapshot handles retain their separate persisted sessions.
+`NativeSnapshotWorker<S>` owns a bounded selected group map on one explicit
+thread. It never owns the log store or application, and uses the same public
+snapshot-retention seam as host providers. Construction validates identities,
+limits and output allowances before starting the thread. No dependencies or
+persisted formats change. See [the contract](SNAPSHOT_WORKER.md).
+
+Request and capacity-byte credits include original payload capacities and a
+finite loaded-image allowance; they remain charged through terminal observation.
+Bulk send loads cannot consume reserved installation/control capacity. Rejection
+returns original work. One accepted request per group includes unpolled terminal
+results. Errors fence further work on this snapshot worker; accepted requests
+receive explicit failure. Panic/disconnection reports unknown accepted outcomes.
+Explicit close/drain/reclaim returns selected handles without closing host resources.
+
+Owner-side helpers validate binding, the original staged effect and application
+checkpoint before preparing publication. Publish reconciles the current durable
+anchor, chunks/seals/publishes, pins and verifies the image. Its completion
+produces only Persist. The selected WAL worker's exact durable completion then
+produces SnapshotInstalled. An installation Load verifies and reconciles that
+durable reference; owner completion restores a clone, replays the committed tail
+and calls the existing core application-install transition before SnapshotAck.
+A send Load preserves pins and uses the original leader request context.
+`EffectOwner::complete_effect_with` inspects its original owned effect without
+cloning a snapshot merely to complete its lease.
+
+No new effect or persisted watermark is introduced. Existing snapshot references,
+log admission/durability tickets and core request contexts retain authority.
+Worker request sequences identify accepted work only. Host assembly must retain
+a bounded one-use admission-to-lease map, reject obsolete/duplicate events and
+reserve loaded-image space before polling; helpers do not replace that mapping.
+Provider buffer/codec scratch and application clones remain separately budgeted.
+
+### Slice 15 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full local suites pass: 161 default native/TLS tests, 150 native-without-TLS
+  tests and 68 core/host-only tests. All three feature sets pass Clippy with
+  warnings denied; formatting and documentation pass.
+- Downstream selection covers an object-safe host snapshot worker, rejection
+  ownership, zero-limit polling, stale generation rejection and failure fencing.
+  Native worker tests use host snapshot stores, shared group requests, exact
+  terminal ordering, unpolled credit retention, control reserves, excess retained
+  capacity, invalid construction and close/reclaim. A failed request returns
+  failure for every already accepted group without publishing later work.
+- A pinned asynchronous load supplies an actual current leader snapshot request
+  through its original context. Missing retention reconciliation and invalid
+  application bytes fail before application replacement or acknowledgement.
+- The real-file installation history composes native ready/timer/entropy
+  providers, EffectOwner, snapshot thread and WAL thread. Snapshot publication
+  produces only Persist; Written releases no effect; Durable produces only
+  SnapshotInstalled; verified application completion finally produces SnapshotAck.
+  Restart covers loss before WAL submission, loss after WAL durability but before
+  application completion, and completed installation. Recovery preserves value
+  and exact operation deduplication, discarding publications without a WAL anchor.
+- A thread-safe native-storage crash model injects short prefix/chunk writes,
+  failed and lost syncs, failed and lost publication/pin receipts, and provider
+  panic. No failure advances core commitment or application state. Recovery uses
+  the authoritative WAL anchor and discards orphan publications/pins. Earlier
+  synchronous snapshot tests retain exhaustive corruption/interruption coverage.
+
+The new real-file history directly injects a protocol message; it is not a
+network/automatic-election history. Broader TCP/TLS and 100-group histories still
+pass, but snapshot catch-up through this worker has not yet been integrated into
+them. Checkpoint creation and compaction still use quiescent synchronous handles.
+Full node admission, reconnect/result routing, physical WAL cleaning, membership
+and later lifecycle protocols remain pending. macOS execution and hardware power
+cuts remain unobserved. Full P0–P7 remains active.
+
 ## Next slice
 
-Add asynchronous snapshot request/completion ownership without bypassing native
-log persistence and application installation dependencies. Continue bounded node
-assembly with peer roster/reconnect management, decoded ingress, application
-result admission and integrated automatic-timer network histories. CI remains
-background feedback; relevant local checks guide direct commits without a remote
-gate.
+Assemble bounded snapshot admission-to-lease routing and exercise catch-up through
+the shared native WAL, snapshot workers and authenticated network driver. Extend
+node assembly with peer roster/reconnect handling, decoded ingress and application
+result admission; include automatic-timer network histories. Asynchronous
+checkpoint creation/compaction must preserve the same log-anchor dependencies.
+CI remains background feedback; local verification guides direct commits.

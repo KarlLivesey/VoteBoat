@@ -480,6 +480,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         callback: impl FnOnce(&mut Raft) -> Result<(Vec<Effect>, R), RaftError>,
     ) -> Result<R, EffectRejected> {
+        self.complete_effect_with(lease, applied_index, now, |core, _| callback(core))
+    }
+    /// Complete against the original owned effect without cloning a potentially
+    /// large snapshot. The callback still runs on the serialized core owner.
+    pub fn complete_effect_with<R>(
+        &mut self,
+        lease: EffectLease,
+        applied_index: u64,
+        now: MonoTime,
+        callback: impl FnOnce(&mut Raft, &Effect) -> Result<(Vec<Effect>, R), RaftError>,
+    ) -> Result<R, EffectRejected> {
         let result = (|| {
             self.validate_lease(&lease)?;
             if matches!(lease.effect, Effect::Persist(_)) {
@@ -500,7 +511,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             }
             let result = self
                 .runtime
-                .with_core(lease.ticket.visit, now, callback)
+                .with_core(lease.ticket.visit, now, |core| {
+                    callback(core, &lease.effect)
+                })
                 .map_err(EffectOwnerError::Runtime)?;
             let (effects, result) = match result {
                 Ok(result) => result,
