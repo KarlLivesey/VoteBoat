@@ -47,6 +47,8 @@ id64!(
     StoreSession,
     ConfigurationId,
     OwnershipEpoch,
+    ResponsibilityIncarnation,
+    RouteGeneration,
     ExecutionLaneId,
     WalLaneId,
     WalLaneGeneration,
@@ -65,7 +67,20 @@ id64!(
     ReadRouterGeneration,
     ReadInvocationGeneration
 );
-id128!(GroupId, StoreId, ResponsibilityId, OperationId);
+id128!(
+    GroupId,
+    StoreId,
+    ResponsibilityId,
+    OperationId,
+    RoutingSchemeId,
+    ApplicationAdapterId
+);
+
+#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Hash)]
+pub struct ResponsibilityIdentity {
+    pub id: ResponsibilityId,
+    pub incarnation: ResponsibilityIncarnation,
+}
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, Hash)]
 pub struct GroupIdentity {

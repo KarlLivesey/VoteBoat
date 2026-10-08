@@ -1199,6 +1199,38 @@
         "tests/wire.rs"
       ],
       "scope": "Restricted pre-election repair to an exact stable committed learner from a trusted old-view voter, with valid exact promotion assignment, terms/group/store/context/journal and byte bounds. Formats 2–4 retain a bounded pure-extension tail ending at the joint. Format 5 transfers retained history in bounded batches carrying joint metadata; only the final range installs the joint. Candidate-local cursors are separate from votes/replication, cleared on campaign/term/view/leadership/compaction/fencing and reconstructed after restart. Replies wait for ordinary exact durability or name existing matching durable overlap/checkpoint boundaries; no commit/serving authority, and final reply only resends a normal Vote. Formats 5/6 may replace only different-term uncommitted learner command/noop overlap through normal atomic suffix persistence; committed overlap and same-term payload forks remain protected. Accepted configuration work blocks repair and delayed repair after promotion refuses. Native TCP/QUIC 160-entry histories repair, elect, commit/apply and reopen a write. Native wire limits/truncations and WAL fault/model-power-loss old-or-complete-batch retry covered. Core lost-cursor/restart, stale/wrong replies, malformed ranges, higher-term persistence and checkpoint hints covered. No new storage format/durability token/generation or persisted cursor. Initial records are fixtures, not distributed enrollment. Promoted senders, candidate suffixes and broader recursive/fork/term histories remain gates; general configuration ingress stays closed. Direct core hosts select compatible codecs/budgets; Node checks roster version and native startup selects matching providers. Format 6 supplies an exact pinned local committed checkpoint from an authenticated old-view voter to an exact committed stable learner. Stable images lead to retained joint repair; exact committed-joint images activate through publication/pin/WAL/application restoration. Repair acknowledgements wait for restoration, never count as ballots and only advance separate candidate cursors. Native TCP/QUIC stable/compacted-joint transfer and reopening, host-provider pending/lost-completion/schema/identity/voter refusal, divergent uncommitted learner tail replacement and every-byte WAL binding faults are covered. Existing shared snapshot-worker fault tests exercise publication/pin barriers. No Byzantine commitment certificate, final/new-only source authority or general configuration ingress. Slice 77 adds four native TCP/QUIC retained-only divergent-tail histories with weighted and recursive policies: a 199-entry abandoned term-2 suffix beyond the joint is replaced in three bounded batches, then ordinary election/commit/application and file reopen exclude abandoned commands. Format-5/6 native modeled append/sync/publication faults recover the exact old or complete replacement batch plus hard state, exercise both outcomes and resume with unchanged commitment. Core negative tests cover committed different-term divergence and accepted joint state in addition to existing same-term fork/voter/authority/range refusal. No new effect, durability token, watermark, generation, persistent cursor or format."
+    },
+    {
+      "design_id": "C16",
+      "public_contract": "PartitionPolicy / ResponsibilityManifest / resolve / check_owner",
+      "operations": [
+        "scheme",
+        "bucket",
+        "ResponsibilityManifest::new",
+        "resolve",
+        "check_owner"
+      ],
+      "native": "NativeBytePartition: stable unsigned single-byte bucket scheme 1/version 1; native and host caches pass the same checked core resolver.",
+      "conformance": [
+        "tests/routing.rs"
+      ],
+      "scope": "Synchronous deterministic 256-bucket routing, immutable checked Single/Partitioned/Delegated manifests, distinct responsibility incarnation/ownership epoch/route generation, disjoint full coverage and bounded 32-visit traversal. Provider results and parent/child identity/authority/scope/epoch bindings are checked. Route hints cannot grant authority; check_owner requires caller-supplied local committed/applied ownership at admission and application. Host cache/policy injection and all-bucket/refusal/fence tests pass. No replicated directory, Node command integration, network discovery, durable fence/import/activation or parent-outage child-write evidence yet."
+    },
+    {
+      "design_id": "C17",
+      "public_contract": "ManifestCache",
+      "operations": [
+        "get",
+        "admit",
+        "invalidate",
+        "limits",
+        "usage"
+      ],
+      "native": "NativeManifestCache: explicit caller-owned BTreeMap hints, bounded count and retained value/route capacity, atomic owned admission/replacement and generation-scoped invalidation.",
+      "conformance": [
+        "tests/routing.rs"
+      ],
+      "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch mapping edits/reactivation and capacity overflow reject. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage."
     }
   ],
   "not_yet_implemented": [
@@ -1206,7 +1238,6 @@
     "incremental-segment-cleaning-and-general-retention",
     "buffers",
     "admission-policy",
-    "routing",
     "discovery",
     "observability",
     "native-configuration-service-endpoints",
@@ -1215,6 +1246,7 @@
     "scope-transfer",
     "transactions",
     "placement-planning-scoring-and-move-proposals",
-    "service-enforced-configuration-application-envelope"
+    "service-enforced-configuration-application-envelope",
+    "replicated-directory-and-routed-node-admission"
   ]
 }

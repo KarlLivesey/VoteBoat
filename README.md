@@ -85,6 +85,13 @@ and recover survivor checkpoints with preserved retries. See
 Public configuration mutation ingress remains gated on the remaining interrupted
 delivery and repair fault checks; this is not a production membership release.
 
+The [responsibility routing foundation](docs/RESPONSIBILITY_ROUTING.md) now provides
+checked Single/Partitioned/Delegated manifests, bounded native/host cache and
+partition-policy seams, and local committed-owner checks. Cached child lookup
+works without a parent cache entry. Replicated directory state, routed Node
+commands and durable child writes during parent quorum loss remain P5 work;
+these cache hints do not activate or transfer ownership.
+
 ## Run
 
 For three independent networked processes, start with the

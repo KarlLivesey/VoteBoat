@@ -1241,3 +1241,43 @@ member_recovery suite passed before that assertion strengthening; its changed
 test passed afterward. The 32 native membership and 48 core library regressions,
 plus the four core-only integration targets above, passed. README now distinguishes
 working explicit member administration from the remaining public-ingress gate.
+
+## Slice 78 — responsibility routing foundation
+
+Implemented public immutable checked manifests, deterministic partition-policy
+and volatile manifest-cache contracts, native byte-key/cache providers, bounded
+recursive resolution and a separate local committed-owner context check. No
+consensus/storage or persistent/wire format changes. See
+[contract and limits](../docs/RESPONSIBILITY_ROUTING.md).
+
+Actual checks:
+
+- All-feature routing target: 11 passed. Native-only routing target: 11 passed.
+  Core/host-only routing target: 7 passed. Every bucket in the 256-bucket universe
+  resolves through native/host providers with the expected group. Tests include
+  exact 32-visit success and 33-level refusal, composite local/delegated scopes,
+  gaps/overlaps/ordering, malformed schemes/modes, exact parent/child bindings,
+  wrong provider results, indirect cycles, epoch/incarnation/owner/scope/key
+  refusal, admission-before/apply-after fixture fencing, generation conflict and
+  stale invalidation, original allocation return and spare-capacity accounting.
+- Native warm child lookup still resolves after parent cache invalidation; cold
+  root lookup returns the missing identity. This checks cache independence only.
+- All-feature library regressions: 57 passed with local UDP socket permission.
+  Initial sandboxed run passed 56 and denied the existing QUIC socket test's bind
+  with Operation not permitted; rerun with socket access passed all 57.
+- All-feature/all-target Clippy with warnings denied, fmt/diff checks and inventory
+  validation pass (62 public contract records). No new dependencies.
+
+The first test compile found a harness function shadow and was fixed. Clippy's
+large-error warning is narrowly allowed at the two owned rejection contracts so
+failure returns original inputs without an extra box/allocation. No runtime
+failure was suppressed or converted to success.
+
+Evidence limits: manifests in these tests are trusted fixtures. No replicated
+directory, directory codec/checkpoint/replay, routed Node command execution,
+actual committed ownership fence, parent-quorum outage child-write history,
+source export/import or target activation is established by these checks. Cache
+hints do not grant authority; local owner checks still need admission/apply wiring.
+Those remain the current P5 deliverable, followed by the explicit remaining P4
+release-fault ledger and P6 split/merge. Full P0–P7 remains active, P8 deferred.
+No new macOS or separate-host execution evidence.

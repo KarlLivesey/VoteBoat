@@ -164,7 +164,12 @@ releasing public membership ingress. Prioritize that independently useful capabi
 next, retain the remaining P4 fault work explicitly, and require both foundations
 before P6 ownership movement. This changes sequencing, not the full scope or gates.
 
-1. **Responsibility manifests and routing (current, P5).** Implement the first
+1. **Responsibility manifests and routing (current, P5).** Slice 78 supplies
+   checked manifests, bounded native/host cached resolution and local owner checks.
+   Next bind them to a replicated directory application with bounded command and
+   checkpoint encoding/replay, then routed command admission and ordered apply.
+   These are required to establish actual durable child progress rather than
+   merely a successful cache lookup. Implement the first
    usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
    over concrete groups, with explicit ordering boundaries. Depends on the group,
    runtime and application foundations; the initial path uses existing group
@@ -196,9 +201,9 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Integrated native enrollment and administration (slices 71–75) | Member restart, offline enrollment, explicit deployment, enforced Counter bounds and trusted startup plans now compose through public Node APIs. | Executable TCP/QUIC promotion and same-plan native recovery pass; broader lifecycle faults remain the current release checks. | Makes P4 usable through the native service and supplies the release-test path. |
-| Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
-| Resolve and route responsibility manifests | Concrete groups need an explicit namespace/partition ownership view before safe data movement. | Validated manifests and bounded cached routing; established child work survives parent failure without ancestor commits. | Implements P5 routing and supplies P6 ownership lineage. |
+| Resolve and route responsibility manifests (current P5) | Concrete groups need an explicit namespace/partition ownership view before safe data movement. Slice 78 establishes checked shape/cache/owner-check contracts; replicated directory and command integration are next within this item. | Native directory replay/checkpoints; actual durable child writes with parent unable to commit and unchanged parent logs; stale owner commands refuse at admission and apply. | Completes recursive routing and supplies P6 ownership lineage. Uses established groups independently of opening public membership ingress. |
+| Finish fault-tested remote membership release (next P4) | Executable-created add/enroll/promote/retire and divergent learner repair now pass. Remaining interrupted schedules are enumerated in slice 77. | Held readiness replies across cancellation/session change; promoted-leader loss with unavailable/restored/compacted witness; broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block independent P5 foundation work. |
+| First durable split/merge (following P6) | Routing selects a destination but cannot revoke an old owner's service. Both P5 and the P4 release checks are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
 and actual-core limitations recorded below. Slice 63 confirms the separate
@@ -207,8 +212,9 @@ milestones. Review the immediate chain after each completed slice. Keep the stat
 service and embedding usable throughout; their remaining macOS and operational
 validation does not depend on finishing P4.
 
-The capability chain is **safe replica placement → responsibility routing →
-safe data/ownership movement → measured tuning**. Readiness establishes whether
+The capability chain is **usable durable groups → responsibility routing →
+safe data/ownership movement → measured tuning**, with safe replica placement
+supporting routing deployments and required by movement. Readiness establishes whether
 an exact learner/store/session can support the required application and retained
 history. Joint consensus uses that evidence to change a group's voter set. P5
 uses concrete groups and placement to resolve which group serves a responsibility.
@@ -4398,3 +4404,60 @@ public membership ingress, so it becomes the current mini deliverable. The next
 item retains these P4 release checks; P6 ownership movement depends on both.
 P7 and the complete original goal remain active. Linux results do not establish
 macOS or separate-host operation.
+
+## Slice 78 — checked responsibility manifests and bounded routing hints
+
+Schema plan: separate responsibility ID/incarnation, metadata authority group,
+application namespace/adapter, partition scheme/version, scope, ownership epoch
+and route generation. Use explicit half-open ranges in a fixed 256-bucket universe.
+One immutable checked manifest carries Single, Partitioned or Delegated execution,
+effective placement requirements and Active/Fenced state. Reject malformed input
+before retention, returning its original allocation. This slice does not modify
+consensus/storage design or add a persistent/wire format.
+
+The public PartitionPolicy/ManifestCache seams have native byte-key and bounded
+cache providers. Core resolve validates host results, exact parent/child bindings
+and range/epoch/schema context. The path is bounded to 32 visits and keys to 4096
+bytes; only the requested subtree is visited. Cache admission and generation-
+scoped invalidation are synchronous, atomic and caller-owned. Rejections retain
+no work or credits. Fixed manifest/cache entry ceilings bound collection overhead;
+charged payload bytes include route spare capacity. There are no hidden workers,
+network fetch loops, clocks or automatic eviction.
+
+A location hint is not authority. check_owner requires independently supplied
+local committed/applied ownership and the original command key. It rejects stale
+namespace/incarnation, owner, scope, scheme, bucket and epoch, and refuses fenced
+state. Embeddings must call it at admission and ordered apply and separately
+establish leadership, assignment, authorization and deduplication. A newer route
+location generation alone does not revoke unchanged ownership. The cache cannot
+fence an old group or grant imported-target activation.
+
+The cache retains monotonic generations/epochs only while an entry remains.
+Restart/invalidation forgets that cache history; refetch may yield a stale hint,
+which must still fail against the actual local owner. Replicated directory history
+and tombstones cannot be inferred from cache state. No new durability token,
+effect, watermark or persisted generation is introduced. The source reconstructs
+manifest generations after restart; this slice supplies no directory persistence.
+Cross-parent movement and per-bucket transfer lifecycles remain unimplemented.
+
+Eleven routing tests pass in native-only and all-feature builds; seven core/host routing tests pass
+without default features. Tests cover all 256 bucket boundaries through host and
+native providers, partition-scoped ordering, original-allocation capacity refusal,
+atomic generation/conflict/lineage/epoch updates, stale invalidation, exact parent/
+child identities and scopes, cycles/hop limits, malformed maps/schemas and forged
+provider/command context. The same queued hint succeeds before a fixture fence
+and fails against fenced apply-time state. Warm child lookup survives removing
+the parent hint while a cold root returns an explicit miss. These are deterministic
+contract checks, not replicated-directory, actual committed-fence or networked
+parent-outage evidence. Initial test compilation caught a harness function shadow;
+fixed before tests ran. Clippy's large-owned-error diagnostic is explicitly scoped
+to ownership-preserving API returns rather than allocating rejection wrappers.
+
+The next P5 step remains a replicated directory application with bounded codecs,
+checkpoint/replay recovery and command admission/apply integration, followed by a
+real child durable-quorum write with unavailable parent and unchanged parent logs.
+Slice 78 is the first schema/cache component of that usable path, not P5 completion.
+The next two mini deliverables remain the finite P4 fault-gap ledger and P6 durable
+split/merge. Public membership ingress stays gated. P7 and full P0–P7 remain active;
+macOS and separate-host operational evidence are still missing. Detailed contract:
+[responsibility routing](RESPONSIBILITY_ROUTING.md).
