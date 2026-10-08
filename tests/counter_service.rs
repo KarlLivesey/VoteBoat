@@ -15,13 +15,16 @@
 //! Actual executable processes, TCP/TLS, abrupt leader loss and disk recovery.
 #![cfg(feature = "tls")]
 use std::{
+    collections::BTreeSet,
     fs,
     net::{Ipv4Addr, TcpListener},
     path::PathBuf,
     process::{Child, Command},
+    sync::Mutex,
     time::{Duration, Instant},
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-counter");
+static PORT_BLOCKS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
 struct Cluster {
     root: PathBuf,
     base: u16,
@@ -39,22 +42,26 @@ impl Cluster {
                 .as_nanos()
         ));
         fs::create_dir(&root).unwrap();
-        let base = (0..100)
-            .find_map(|_| {
-                let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 0)).unwrap();
-                let base = listener.local_addr().unwrap().port();
-                if base > 65432 {
-                    return None;
-                }
-                let reservations = [1, 2, 3, 11, 12, 13, 101, 102, 103]
-                    .into_iter()
-                    .map(|offset| TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset)))
-                    .collect::<Result<Vec<_>, _>>()
-                    .ok()?;
-                drop(reservations);
-                Some(base)
-            })
-            .expect("available port range");
+        // Keep non-overlapping blocks for each live fixture, rather than reusing
+        // a released ephemeral listener as a base during parallel socket tests.
+        let base = {
+            let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
+            let base = (10000u16..30000)
+                .step_by(128)
+                .find(|base| {
+                    if blocks.contains(base) {
+                        return false;
+                    }
+                    [1, 2, 3, 11, 12, 13, 101, 102, 103]
+                        .into_iter()
+                        .map(|offset| TcpListener::bind((Ipv4Addr::LOCALHOST, *base + offset)))
+                        .collect::<Result<Vec<_>, _>>()
+                        .is_ok()
+                })
+                .expect("available independent port block");
+            blocks.insert(base);
+            base
+        };
         Self {
             root,
             base,
@@ -85,14 +92,27 @@ impl Cluster {
     }
 
     fn request(&self, id: usize, args: &[&str]) -> std::process::Output {
+        self.target(&id.to_string(), args)
+    }
+    fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
         Command::new(BIN)
-            .args(["client", &self.base.to_string(), &id.to_string()])
+            .args(["client", &self.base.to_string(), target])
             .args(args)
             .output()
             .unwrap()
     }
     fn ok(&self, id: usize, args: &[&str]) -> String {
         let output = self.request(id, args);
+        assert!(
+            output.status.success(),
+            "{args:?}: {} {}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        String::from_utf8(output.stdout).unwrap()
+    }
+    fn routed(&self, args: &[&str]) -> String {
+        let output = self.target("auto", args);
         assert!(
             output.status.success(),
             "{args:?}: {} {}",
@@ -157,6 +177,10 @@ impl Drop for Cluster {
             let _ = c.kill();
             let _ = c.wait();
         }
+        PORT_BLOCKS
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .remove(&self.base);
     }
 }
 #[test]
@@ -166,22 +190,25 @@ fn three_service_processes_retry_replace_leader_and_recover_native_files() {
         cluster.start(id, "create");
     }
     let leader = cluster.leader();
-    assert!(cluster.ok(leader, &["add", "1", "7"]).contains("Value(7)"));
-    let retry = cluster.ok(leader, &["add", "1", "7"]);
+    assert!(cluster.routed(&["add", "1", "7"]).contains("Value(7)"));
+    let retry = cluster.routed(&["add", "1", "7"]);
     assert!(retry.contains("Value(7)") && retry.contains("duplicate=true"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=7\n");
+    assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     // A local applied value cannot make a follower's read linearizable.
     let follower = leader % 3 + 1;
-    assert!(!cluster.request(follower, &["read"]).status.success());
+    let denied = cluster.request(follower, &["read"]);
+    assert!(!denied.status.success());
+    assert_eq!(
+        String::from_utf8(denied.stdout).unwrap(),
+        "ERR NOT_LEADER\n"
+    );
     let mut killed = cluster.children[leader - 1].take().unwrap();
     killed.kill().unwrap();
     killed.wait().unwrap();
+    assert!(cluster.routed(&["add", "2", "3"]).contains("Value(10)"));
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);
-    assert!(cluster
-        .ok(replacement, &["add", "2", "3"])
-        .contains("Value(10)"));
-    assert_eq!(cluster.ok(replacement, &["read"]), "OK value=10\n");
+    assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.start(leader, "recover");
     // Checkpoint admission is asynchronous; shutdown drains admitted work.
     cluster.ok(replacement, &["checkpoint"]);
@@ -222,11 +249,10 @@ fn three_service_processes_retry_replace_leader_and_recover_native_files() {
     for id in 1..=3 {
         cluster.start(id, "recover");
     }
-    let leader = cluster.leader();
     assert!(cluster
-        .ok(leader, &["add", "2", "3"])
+        .routed(&["add", "2", "3"])
         .contains("duplicate=true"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=10\n");
+    assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.stop();
     for id in 1..=3 {
         assert!(
@@ -333,4 +359,179 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
         .contains("duplicate=true"));
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
+}
+
+// Fault peers exercise the CLI's routing boundary; actual Raft histories are above.
+fn reply_peer(
+    listener: TcpListener,
+    reply: Option<&'static [u8]>,
+) -> std::thread::JoinHandle<Vec<u8>> {
+    std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        listener.set_nonblocking(true).unwrap();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        let mut stream = loop {
+            match listener.accept() {
+                Ok((s, _)) => break s,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                Err(e) => panic!("{e}"),
+            }
+            assert!(Instant::now() < deadline, "expected a client connection");
+            std::thread::sleep(Duration::from_millis(1));
+        };
+        stream
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let mut bytes = [0u8; 256];
+        let mut used = 0;
+        loop {
+            let n = stream.read(&mut bytes[used..]).unwrap();
+            assert_ne!(n, 0);
+            used += n;
+            if bytes[..used].ends_with(b"\n") {
+                break;
+            }
+            assert!(used < bytes.len());
+        }
+        if let Some(reply) = reply {
+            stream.write_all(reply).unwrap();
+        }
+        bytes[..used].to_vec()
+    })
+}
+#[test]
+fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
+    for first_available in [false, true] {
+        let cluster = Cluster::new();
+        let first = first_available.then(|| {
+            reply_peer(
+                TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
+                Some(b"ERR NOT_LEADER\n"),
+            )
+        });
+        let second = reply_peer(
+            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap(),
+            Some(b"OK outcome=Value(7) duplicate=false\n"),
+        );
+        let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+        third.set_nonblocking(true).unwrap();
+        let reply = cluster.routed(&["add", "42", "7"]);
+        assert!(reply.contains("Value(7)"));
+        if let Some(first) = first {
+            assert_eq!(first.join().unwrap(), b"add 42 7\n");
+        }
+        assert_eq!(second.join().unwrap(), b"add 42 7\n");
+        assert_eq!(
+            third.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
+        std::fs::remove_dir_all(&cluster.root).unwrap();
+    }
+}
+#[test]
+fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
+    for reply in [
+        None,
+        Some(b"OK outcome=Value(7)".as_slice()),
+        Some(b"UNKNOWN LeadershipChanged\n".as_slice()),
+        Some(b"ERR Overloaded\n".as_slice()),
+    ] {
+        let cluster = Cluster::new();
+        let first = reply_peer(
+            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
+            Some(b"ERR NOT_LEADER\n"),
+        );
+        let second = reply_peer(
+            TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap(),
+            reply,
+        );
+        let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+        third.set_nonblocking(true).unwrap();
+        let result = cluster.target("auto", &["add", "42", "7"]);
+        assert!(!result.status.success());
+        let stdout = String::from_utf8(result.stdout).unwrap();
+        if reply.is_none()
+            || reply.is_some_and(|r| !r.ends_with(b"\n") || r.starts_with(b"UNKNOWN"))
+        {
+            assert!(stdout.starts_with("UNKNOWN "), "{stdout}");
+        }
+        assert_eq!(first.join().unwrap(), b"add 42 7\n");
+        assert_eq!(second.join().unwrap(), b"add 42 7\n");
+        assert_eq!(
+            third.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
+        let rejected = cluster.target("auto", &["quit"]);
+        assert!(!rejected.status.success());
+        assert_eq!(
+            third.accept().unwrap_err().kind(),
+            std::io::ErrorKind::WouldBlock
+        );
+        std::fs::remove_dir_all(&cluster.root).unwrap();
+    }
+}
+
+#[test]
+fn trickled_reply_cannot_extend_the_clients_absolute_routing_deadline() {
+    use std::io::{Read, Write};
+    let cluster = Cluster::new();
+    let first = reply_peer(
+        TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 101)).unwrap(),
+        Some(b"ERR NOT_LEADER\n"),
+    );
+    let second = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 102)).unwrap();
+    second.set_nonblocking(true).unwrap();
+    let third = TcpListener::bind((Ipv4Addr::LOCALHOST, cluster.base + 103)).unwrap();
+    third.set_nonblocking(true).unwrap();
+    let slow = std::thread::spawn(move || {
+        let deadline = Instant::now() + Duration::from_secs(20);
+        let mut stream = loop {
+            match second.accept() {
+                Ok((s, _)) => break s,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                Err(e) => panic!("{e}"),
+            }
+            assert!(Instant::now() < deadline);
+            std::thread::sleep(Duration::from_millis(1));
+        };
+        stream
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let mut request = [0; 256];
+        let mut used = 0;
+        loop {
+            let n = stream.read(&mut request[used..]).unwrap();
+            assert_ne!(n, 0);
+            used += n;
+            if request[..used].ends_with(b"\n") {
+                break;
+            }
+        }
+        stream.set_nonblocking(true).unwrap();
+        // Continual incomplete progress must not reset the client's deadline.
+        while Instant::now() < deadline {
+            match stream.write(b"x") {
+                Ok(1) => (),
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                _ => break,
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+        request[..used].to_vec()
+    });
+    let start = Instant::now();
+    let output = cluster.target("auto", &["add", "42", "7"]);
+    assert!(
+        start.elapsed() < Duration::from_millis(11500),
+        "routing deadline was extended"
+    );
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stdout).starts_with("UNKNOWN "));
+    assert_eq!(first.join().unwrap(), b"add 42 7\n");
+    assert_eq!(slow.join().unwrap(), b"add 42 7\n");
+    assert_eq!(
+        third.accept().unwrap_err().kind(),
+        std::io::ErrorKind::WouldBlock
+    );
+    std::fs::remove_dir_all(&cluster.root).unwrap();
 }

@@ -10,7 +10,8 @@ Initial target platforms are **Linux and macOS**. Windows is deferred.
 The immediate milestone is an **embeddable Rust library and a runnable networked
 service**, starting with static membership. The library, local counter demo and
 initial three-process TCP/TLS counter service now run. The service shares a typed
-startup API with the Rust embedding example and accepts configured peer addresses. See the
+startup API with the Rust embedding example and accepts configured peer addresses.
+The local client supports automatic leader selection for writes and reads. See the
 [service quickstart and embedding guide](docs/COUNTER_SERVICE.md). Online
 reconfiguration, recursive responsibilities and split/merge follow that milestone.
 See the [first usable milestone](docs/IMPLEMENTATION.md#first-usable-milestone--priority-updated-8-october-2026).

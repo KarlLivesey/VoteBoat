@@ -2507,12 +2507,49 @@ formatting, inventory JSON, new Rust RPL headers and diff checks pass. Core/stor
 protocol suites were unchanged and were not repeated. macOS, separate-host deployment,
 production certification and performance remain unestablished; CI is background.
 
+## Slice 40 — bounded automatic local leader selection
+
+Mini schema plan: keep one original add/read command, one socket and one bounded
+reply. Try the three local command endpoints; move on only after a connection
+failure before sending or an explicit not-leader rejection. After connection,
+uncertain writes stop routing and retain their operation identity for manual retry.
+Use an absolute deadline, not an I/O-progress timeout. Verify actual leader loss
+and native restart, then fault peers proving no resend after receipt loss.
+
+The executable now accepts client BASE auto for add/read. It tries local nodes
+without caching leadership or interpreting status as authority. Exact
+ERR NOT_LEADER replies come from typed admission failures or exact not-proposed /
+not-read outputs. Other errors and Unknown outputs terminate routing. Connected
+I/O failure or a missing complete framed reply marks a write Unknown; no new
+operation ID is generated and another node is not contacted. Requests are bounded
+before concatenation, replies use a fixed 4096-byte buffer, and nonblocking partial
+I/O observes one ten-second deadline. Automatic mode has at most 100 rounds with
+bounded backoff. Administrative controls still require an explicit node. This is
+local routing; configured remote peer addresses do not expose remote client ports.
+
+The real three-process history now uses auto for writes, retries and quorum reads,
+including immediately after abrupt leader loss and after full native-file restart.
+Fault socket tests verify exact command bytes after proven non-acceptance, no third
+node contact after receipt loss, truncated success, explicit Unknown or another
+error, and rejection of automatic administrative commands. A slow peer trickles
+an incomplete reply; the client still exits at its absolute deadline and does not
+reroute. These are finite executable/client checks, not new consensus proofs.
+The expanded parallel fixtures now hold distinct port-block assignments for their
+lifetimes instead of choosing bases from released ephemeral listeners.
+
+Local validation passes all six service/routing tests together in the final
+combined run; targeted Clippy, formatting, new Rust RPL headers,
+document links and diff checks pass. No consensus/storage protocol, native startup
+contract, peer wire format or persistent format changed. The prior five startup
+conformance tests were not repeated. Linux only; no new macOS, separate-host or
+performance evidence is claimed. CI remains background feedback.
+
 ## Next slice
 
-Continue usability with bounded client leader selection for the local quickstart,
-using original operation IDs and explicit unknown-result handling. Keep successful
-reads dependent on fresh quorum evidence. Improve release/run ergonomics without
-making membership or split/merge prerequisites for the static baseline.
+The static service/library path now has runnable commands, shared typed startup,
+configured peer addresses, verified restart/retry and local leader selection.
+Continue P4 with prospective output reservation before enabling configuration
+fanout or rollback, keeping the usable static baseline available throughout.
 
 Then complete the promoted-leader authorization protocol with replay-resistant group,
 configuration, term, store and committed/election provenance; a claimed head or

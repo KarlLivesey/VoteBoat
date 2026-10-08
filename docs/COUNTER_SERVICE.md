@@ -70,7 +70,7 @@ Separate-host deployment has not been exercised here.
 
 ## Write, retry and read
 
-Find the leader:
+Inspect local roles if needed:
 
 ```sh
 target/debug/voteboat-counter client 43000 1 status
@@ -78,15 +78,15 @@ target/debug/voteboat-counter client 43000 2 status
 target/debug/voteboat-counter client 43000 3 status
 ```
 
-Use the node reporting `role=Leader` for the commands below; this example assumes
-node 1 is leader. Election is automatic, so another node can lead.
+For the local three-process quickstart, use `auto` to find a willing leader
+without a manual status lookup:
 
 ```sh
-target/debug/voteboat-counter client 43000 1 add 1 7
+target/debug/voteboat-counter client 43000 auto add 1 7
 # OK outcome=Value(7) duplicate=false
 target/debug/voteboat-counter client 43000 1 add 1 7
 # OK outcome=Value(7) duplicate=true
-target/debug/voteboat-counter client 43000 1 read
+target/debug/voteboat-counter client 43000 auto read
 # OK value=7
 ```
 
@@ -95,8 +95,20 @@ payload when retrying. A timeout, disconnection or Unknown response can follow a
 accepted write that later commits. A changed payload under the same ID yields the
 application's conflict outcome. Read success requires a fresh quorum barrier and
 application completion; a live process or local applied value is insufficient.
-Followers reject service writes/reads. The first executable exposes that rejection
-rather than automatically discovering/forwarding a client to the leader.
+Followers reject service writes/reads. Automatic routing retries the exact original
+command only after a failed connection attempt or the explicit `ERR NOT_LEADER`
+reply (including an invocation rejected before proposal execution). It stops on
+Unknown, incomplete/invalid replies, connected I/O failures, or other errors. It
+never automatically resends an uncertain write to another node. A lost write
+reply prints Unknown; retry manually using the same operation ID and delta.
+
+Automatic mode scans the three local command ports with one active socket, at
+most 100 rounds, a ten-second absolute observation deadline and bounded reply
+storage. Partial reply progress cannot reset that deadline. Each successful read
+still obtains a fresh quorum barrier. Automatic mode accepts only add/read;
+status, checkpoint and quit require an explicit node ID. Explicit IDs remain
+available for writes/reads too. Routing is limited to the local quickstart; it
+does not discover or forward to command endpoints on other hosts.
 
 `status` shows local role, term and commit index; it is a diagnostic, not a
 linearizable application read. `checkpoint` reports admission, not durable
@@ -191,12 +203,15 @@ their own existing bounded credits and control reserves.
 
 Peer addresses and TLS names are configurable. Rust startup is generic over the
 application, while the CLI still selects a fixed three-voter counter bootstrap.
-Client leader routing, a generic multi-group configuration loader, richer
+Remote client routing, a generic multi-group configuration loader, richer
 application protocols and operational packaging remain work. Counter deduplication and WAL capacity are
 bounded; manual checkpoints do not automatically reclaim physical WAL bytes.
 Online membership, recursive responsibilities and split/merge remain unfinished.
 Linux process tests cover leader loss, quorum loss, retry identity, checkpoints,
-restart, command limits and worker joins. macOS is a target but was not run here.
+restart, command limits and worker joins. Routing fault tests cover exact command
+preservation, unavailable/non-leader candidates, uncertain/malformed replies,
+non-retryable errors and an incomplete trickled reply that cannot extend the
+absolute deadline. macOS is a target but was not run here.
 This is not a production consensus release or a performance claim.
 
 Run the service acceptance tests with:

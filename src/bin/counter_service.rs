@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Three independent native TCP/TLS nodes, with a bounded local control endpoint.
+#[path = "support/local_client.rs"]
+mod local_client;
 #[path = "support/counter_setup.rs"]
 mod setup;
 use setup::{checked, group, Failure, Service};
@@ -22,11 +24,12 @@ use std::{
     path::Path,
     time::{Duration, Instant},
 };
-use voteboat::{identity::*, runtime::*};
+use voteboat::{identity::*, raft::RaftError, runtime::*};
 
 const HELP: &str =
     "voteboat-counter serve create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE]\n\
 voteboat-counter client BASE_PORT NODE status|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
@@ -91,13 +94,17 @@ fn command(service: &mut Service, command: &str, quit: &mut bool) -> Result<Phas
                     operation,
                     bytes: delta.to_le_bytes().to_vec(),
                 })
-                .map_err(|r| format!("{:?}", r.reason))?;
+                .map_err(|r| match r.reason {
+                    ClientError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
+                    other => format!("{other:?}"),
+                })?;
             return Ok(Phase::Pending(Pending::Write(ticket)));
         }
         ["read"] => {
-            let ticket = service
-                .read(group(), ())
-                .map_err(|r| format!("{:?}", r.reason))?;
+            let ticket = service.read(group(), ()).map_err(|r| match r.reason {
+                ReadInvocationError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
+                other => format!("{other:?}"),
+            })?;
             return Ok(Phase::Pending(Pending::Read(ticket)));
         }
         ["checkpoint"] => {
@@ -132,6 +139,7 @@ fn outputs(service: &mut Service, connection: &mut Option<Connection>) -> Result
                     "OK outcome={:?} duplicate={}",
                     receipt.outcome, receipt.duplicate
                 ),
+                ClientOutcome::NotProposed(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
                 ClientOutcome::NotProposed(e) => format!("ERR not_proposed={e:?}"),
                 ClientOutcome::Unknown(e) => {
                     format!("UNKNOWN {e:?}; retry the same operation ID and delta")
@@ -150,6 +158,7 @@ fn outputs(service: &mut Service, connection: &mut Option<Connection>) -> Result
                 ReadOutcome::Read {
                     result: Ok(value), ..
                 } => format!("OK value={value}"),
+                ReadOutcome::NotRead(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
                 other => format!("ERR {other:?}"),
             });
         }
@@ -282,26 +291,6 @@ fn serve(
     println!("stopped node={id} workers_joined=true");
     Ok(())
 }
-fn client(base: u16, id: u64, command: &[String]) -> Result<(), Failure> {
-    let text = format!("{}\n", command.join(" "));
-    if text.len() > 256 {
-        return Err("command too long".into());
-    }
-    let mut stream = TcpStream::connect_timeout(
-        &(Ipv4Addr::LOCALHOST, base + 100 + id as u16).into(),
-        Duration::from_secs(2),
-    )?;
-    stream.set_read_timeout(Some(Duration::from_secs(7)))?;
-    stream.set_write_timeout(Some(Duration::from_secs(2)))?;
-    stream.write_all(text.as_bytes())?;
-    let mut response = String::new();
-    stream.take(4096).read_to_string(&mut response)?;
-    print!("{response}");
-    if !response.starts_with("OK ") {
-        return Err("request unsuccessful; an interrupted write may still commit; retry its original operation ID and delta".into());
-    }
-    Ok(())
-}
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     match args.as_slice() {
@@ -325,8 +314,13 @@ fn main() -> Result<(), Failure> {
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {
-            let (base, id) = ports(base, id)?;
-            client(base, id, rest)
+            if id == "auto" {
+                let (base, _) = ports(base, "1")?;
+                local_client::run(base, None, rest)
+            } else {
+                let (base, id) = ports(base, id)?;
+                local_client::run(base, Some(id), rest)
+            }
         }
         _ => Err(HELP.into()),
     }
