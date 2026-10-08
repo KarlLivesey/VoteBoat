@@ -51,6 +51,13 @@ WAL durability, application installation and cleanup preserve their existing
 ordered dependencies. Fresh store sessions on restart and host-reserved secure
 generation ranges remain authoritative for stale-completion rejection.
 
+`reclaim(max_bytes)` now submits explicit physical cleanup to the selected
+PersistenceWorker while Running. The existing WAL thread serializes it between
+complete barriers. `poll_reclaim` returns the exact scoped result; pending work
+and unconsumed results keep shutdown from draining. Fatal maintenance errors
+fence the node and retain the result for explicit recovery. See
+[live worker maintenance](WORKER_MAINTENANCE.md).
+
 ## Shutdown and recovery
 
 `begin_shutdown` changes Running to Quiescing and closes client/read intake.

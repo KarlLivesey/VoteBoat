@@ -27,6 +27,17 @@ pub struct WorkerTicket {
     pub binding: WorkerBinding,
     pub sequence: u64,
 }
+/// Physical maintenance admission, never a Raft durability token.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ReclaimTicket {
+    pub binding: WorkerBinding,
+    pub sequence: u64,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ReclaimEvent {
+    pub request: ReclaimTicket,
+    pub result: Result<LogReclaimed, StorageError>,
+}
 #[derive(Debug)]
 pub struct PersistUnit {
     pub visit: VisitTicket,
@@ -41,6 +52,7 @@ pub enum WorkerError {
     Fenced,
     Exhausted,
     InvalidLimits,
+    Unsupported,
     Runtime(RuntimeError),
     Consensus(RaftError),
 }
@@ -152,6 +164,15 @@ pub trait PersistenceWorker {
     fn usage(&self) -> WorkerUsage;
     fn submit(&mut self, units: Vec<PersistUnit>) -> Result<WorkerTicket, WorkerRejected>;
     fn poll(&mut self, limit: usize) -> Vec<WorkerEvent>;
+    /// Optional bounded background work; scoped close drains accepted cleanup.
+    /// Terminal polling releases worker admission credits. Results cannot stand
+    /// in for Written/Durable events. Rejected cleanup performs no work.
+    fn submit_reclaim(&mut self, _max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
+        Err(WorkerError::Unsupported)
+    }
+    fn poll_reclaims(&mut self, _limit: usize) -> Vec<ReclaimEvent> {
+        Vec::new()
+    }
     fn close(&mut self);
     fn is_drained(&self) -> bool {
         self.usage().requests == 0

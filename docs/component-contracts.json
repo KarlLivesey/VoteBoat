@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "owning-node-facade-over-selected-providers",
+  "status": "live-selected-worker-maintenance",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -33,7 +33,9 @@
         "abort",
         "is_drained",
         "into_parts",
-        "into_recovery"
+        "into_recovery",
+        "reclaim",
+        "poll_reclaim"
       ],
       "native": "NativeNode / NativeNodeParts / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
       "conformance": [
@@ -41,7 +43,7 @@
         "tests/support/native_node.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Owning composition of local and peer drivers with explicit selected providers, quiescent construction and original component return on rejection. Configured remote voter stores require authorized peer coverage and snapshots; recovered compacted groups require snapshots. Both budgets/time prevalidate before work. Exact original client/read outputs survive consumer holding; shutdown quiesces service intake before draining owner, timers, network and selected workers. Provider faults/abort fence the owner and preserve earlier results and outstanding worker/driver ownership for explicit recovery. Nine host tests and an actual three-node/100-group native WAL/TLS checkpoint/restart/dedup history with explicit worker joins. No hidden I/O/runtime, new durability evidence, filesystem configuration loader or daemon."
+      "scope": "Owning composition of local and peer drivers with explicit selected providers, quiescent construction and original component return on rejection. Configured remote voter stores require authorized peer coverage and snapshots; recovered compacted groups require snapshots. Both budgets/time prevalidate before work. Exact original client/read outputs survive consumer holding; shutdown quiesces service intake before draining owner, timers, network and selected workers. Provider faults/abort fence the owner and preserve earlier results and outstanding worker/driver ownership for explicit recovery. Thirteen host tests and an actual three-node/100-group native WAL/TLS checkpoint/restart/dedup history with explicit worker joins. Explicit live worker maintenance retains exact results through shutdown; fatal cleanup fences while preserving earlier replies. No hidden I/O/runtime, new durability evidence, filesystem configuration loader or daemon."
     },
     {
       "design_id": "C06/C07/C15",
@@ -62,10 +64,10 @@
     {
       "design_id": "C10/C15",
       "public_contract": "ReplicaDriver / ReplicaParts",
-      "operations": ["new", "binding", "limits", "usage", "poll", "close_intake", "discard_failed", "is_drained", "is_failed"],
+      "operations": ["new", "binding", "limits", "usage", "poll", "close_intake", "discard_failed", "is_drained", "is_failed", "request_reclaim", "poll_reclaim", "failed_reclaim"],
       "native": "Fixed bounded local assembly over selected public worker/outbound/application/service/snapshot providers; native histories use the same driver",
-      "conformance": ["tests/support/replica_driver.rs", "tests/effect_owner.rs"],
-      "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain remains the host responsibility; PeerDriver now supplies peer/ingress reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "conformance": ["tests/support/replica_driver.rs", "tests/effect_owner.rs", "tests/support/node.rs"],
+      "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain remains the host responsibility; PeerDriver now supplies peer/ingress reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. One accepted maintenance ticket/budget and one matched result are separately bounded, scoped and included in drain accounting; unexpected receipts are retained for failed recovery and fatal results fence the owner."
     },
     {
       "design_id": "C01/C02",
@@ -125,7 +127,8 @@
         "append_batch",
         "barrier",
         "reclaim",
-        "fetch_range"
+        "fetch_range",
+        "supports_reclaim"
       ],
       "native": "NativeLogStore",
       "conformance": [
@@ -133,7 +136,7 @@
         "tests/raft.rs",
         "tests/log_reclaim.rs"
       ],
-      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning is implemented; live worker maintenance and general retention policies remain pending."
+      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Optional quiescent physical reclaim preserves every exact live group, vote, snapshot, surviving suffix, revision/generation and batch ID; bounded encoding and round-trip validation precede replacement. Uncertain replacement fences. Native full live-image cleaning is implemented; live worker maintenance is implemented, while general retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -446,10 +449,10 @@
     {
       "design_id": "C04/C10",
       "public_contract": "PersistenceWorker",
-      "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained"],
+      "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained", "submit_reclaim", "poll_reclaims"],
       "native": "NativeLogWorker<L: LogStore + Send>",
-      "conformance": ["tests/worker.rs"],
-      "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store. Three-node/100-group integration covers replication, read barriers, retries, leader replacement and actual-file restart."
+      "conformance": ["tests/worker.rs", "tests/maintenance.rs", "tests/support/native_node.rs"],
+      "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store. Three-node/100-group integration covers replication, read barriers, retries, leader replacement and actual-file restart. Optional explicit physical maintenance uses the same bounded worker queue/checked sequence and ordinary data credits, preserving control reserves. At most one accepted request; separate exact terminals never certify Raft persistence. Execution follows complete barriers and retains the same store binding. Fatal/invalid results or panic fence queued writes; safe rejection continues. Five downstream gated host-store tests and actual 100-group native live-cleanup/restart coverage."
     },
     {
       "design_id": "C10",
@@ -575,7 +578,7 @@
     }
   ],
   "not_yet_implemented": [
-    "live-wal-worker-maintenance",
+    "automatic-wal-maintenance-scheduling",
     "incremental-segment-cleaning-and-general-retention",
     "buffers",
     "admission-policy",

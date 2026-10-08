@@ -110,6 +110,7 @@ pub enum ReplicaError {
     Client(ClientError),
     Read(ReadInvocationError),
     Snapshot(SnapshotRouteError),
+    Maintenance(crate::contracts::StorageError),
 }
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct ReplicaDriverUsage {
@@ -117,6 +118,7 @@ pub struct ReplicaDriverUsage {
     pub data_persists: usize,
     pub retries: usize,
     pub failed_results: usize,
+    pub reclaims: usize,
 }
 impl ReplicaDriverUsage {
     pub fn leases(self) -> usize {
@@ -159,6 +161,10 @@ pub struct ReplicaDriver<R> {
     failed_result: Option<ApplicationResults<R>>,
     now: MonoTime,
     failed: Option<ReplicaError>,
+    reclaim: Option<(ReclaimTicket, usize)>,
+    reclaim_result: Option<ReclaimEvent>,
+    failed_reclaim: Option<ReclaimEvent>,
+    reclaim_sequence: u64,
 }
 impl<R: ApplicationReceipt> ReplicaDriver<R> {
     fn bindings<
@@ -219,7 +225,10 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             .checked_mul(3)
             .and_then(|n| n.checked_add(limits.persistence_batch_units))
             .and_then(|n| n.checked_mul(size_of::<EffectLease>()))
-            .and_then(|n| n.checked_add(size_of::<ApplicationResults<R>>()));
+            .and_then(|n| n.checked_add(size_of::<ApplicationResults<R>>()))
+            .and_then(|n| {
+                n.checked_add(2 * size_of::<ReclaimEvent>() + size_of::<(ReclaimTicket, usize)>())
+            });
         if limits.leases == 0
             || limits.leases > 65536
             || limits.leases < parts.owner.limits().active_visits
@@ -281,6 +290,10 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             failed_result: None,
             now,
             failed: None,
+            reclaim: None,
+            reclaim_result: None,
+            failed_reclaim: None,
+            reclaim_sequence: 0,
         })
     }
     pub fn binding(&self) -> ReplicaBindings {
@@ -295,14 +308,67 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             data_persists: self.data.len(),
             retries: self.retries.len(),
             failed_results: usize::from(self.failed_result.is_some()),
+            reclaims: usize::from(self.reclaim.is_some())
+                + usize::from(self.reclaim_result.is_some())
+                + usize::from(self.failed_reclaim.is_some()),
         }
     }
     /// Only local retained effects, not quorum/client/network quiescence.
     pub fn is_drained(&self) -> bool {
-        self.usage().leases() == 0 && self.failed_result.is_none()
+        self.usage().leases() == 0 && self.failed_result.is_none() && self.usage().reclaims == 0
     }
     pub fn is_failed(&self) -> bool {
         self.failed.is_some()
+    }
+    pub fn poll_reclaim(&mut self) -> Option<ReclaimEvent> {
+        self.reclaim_result.take()
+    }
+    pub fn failed_reclaim(&self) -> Option<&ReclaimEvent> {
+        self.failed_reclaim.as_ref()
+    }
+    pub fn request_reclaim<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        max_bytes: usize,
+    ) -> Result<ReclaimTicket, ReplicaError> {
+        if Self::bindings(p)? != self.binding {
+            return Err(ReplicaError::WrongBinding);
+        }
+        if self.failed.is_some() {
+            return Err(ReplicaError::Fenced);
+        }
+        if self.usage().reclaims != 0 {
+            return Err(ReplicaError::Worker(WorkerError::Overloaded));
+        }
+        if max_bytes == 0 || max_bytes > u32::MAX as usize {
+            return Err(ReplicaError::InvalidLimits);
+        }
+        let ticket = match p.persistence.submit_reclaim(max_bytes) {
+            Ok(ticket) => ticket,
+            Err(reason) => {
+                let error = ReplicaError::Worker(reason.clone());
+                if matches!(reason, WorkerError::Fenced | WorkerError::Closed) {
+                    let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
+                    self.failed = Some(error.clone());
+                }
+                return Err(error);
+            }
+        };
+        self.reclaim = Some((ticket, max_bytes));
+        if ticket.binding != self.binding.persistence || ticket.sequence <= self.reclaim_sequence {
+            let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
+            self.failed = Some(ReplicaError::ProviderContract);
+            return Err(ReplicaError::ProviderContract);
+        }
+        self.reclaim_sequence = ticket.sequence;
+        Ok(ticket)
     }
 
     pub fn poll<
@@ -352,6 +418,35 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         b: ReplicaPollBudget,
     ) -> Result<ReplicaProgress, ReplicaError> {
         let mut out = ReplicaProgress::default();
+        let reclaims = p.persistence.poll_reclaims(1);
+        if reclaims.len() > 1 {
+            return Err(ReplicaError::ProviderContract);
+        }
+        for event in reclaims {
+            let valid = self.reclaim.is_some_and(|(ticket, max_bytes)| {
+                ticket == event.request
+                    && event.result.as_ref().map_or(true, |r| {
+                        r.after_bytes <= r.before_bytes && r.after_bytes <= max_bytes
+                    })
+            });
+            if !valid || self.reclaim_result.is_some() {
+                self.failed_reclaim = Some(event);
+                return Err(ReplicaError::ProviderContract);
+            }
+            self.reclaim = None;
+            let fatal = match &event.result {
+                Err(
+                    e @ (crate::contracts::StorageError::Uncertain(_)
+                    | crate::contracts::StorageError::Corrupt(_)
+                    | crate::contracts::StorageError::Fenced),
+                ) => Some(e.clone()),
+                _ => None,
+            };
+            self.reclaim_result = Some(event);
+            if let Some(e) = fatal {
+                return Err(ReplicaError::Maintenance(e));
+            }
+        }
         if let Some(s) = &mut p.snapshots {
             let events = s.worker.poll(b.snapshot_events);
             if events.len() > b.snapshot_events {

@@ -378,6 +378,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             tickets: dependencies.to_vec(),
         })
     }
+    fn supports_reclaim(&self) -> bool {
+        self.io.supports_replacement() && self.codec.supports_checkpoint()
+    }
     fn reclaim(&mut self, max_bytes: usize) -> Result<LogReclaimed, StorageError> {
         if self.fenced {
             return Err(StorageError::Fenced);

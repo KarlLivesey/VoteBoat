@@ -1163,6 +1163,10 @@ struct HostWorker {
     reject: bool,
     fail: bool,
     closed: bool,
+    reclaim_supported: bool,
+    reclaim: Option<(ReclaimTicket, usize)>,
+    reclaim_error: Option<voteboat::contracts::StorageError>,
+    reclaim_wrong: bool,
 }
 impl HostWorker {
     fn new(store: HostLogStore) -> Self {
@@ -1179,10 +1183,53 @@ impl HostWorker {
             reject: false,
             fail: false,
             closed: false,
+            reclaim_supported: false,
+            reclaim: None,
+            reclaim_error: None,
+            reclaim_wrong: false,
         }
     }
 }
 impl PersistenceWorker for HostWorker {
+    fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
+        if !self.reclaim_supported {
+            return Err(WorkerError::Unsupported);
+        }
+        if self.closed {
+            return Err(WorkerError::Closed);
+        }
+        if self.reclaim.is_some() {
+            return Err(WorkerError::Overloaded);
+        }
+        self.sequence += 1;
+        let ticket = ReclaimTicket {
+            binding: self.binding,
+            sequence: self.sequence,
+        };
+        self.reclaim = Some((ticket, max_bytes));
+        Ok(ticket)
+    }
+    fn poll_reclaims(&mut self, limit: usize) -> Vec<ReclaimEvent> {
+        if limit == 0 {
+            return vec![];
+        }
+        let Some((mut request, max_bytes)) = self.reclaim.take() else {
+            return vec![];
+        };
+        if self.reclaim_wrong {
+            request.sequence += 1;
+        }
+        vec![ReclaimEvent {
+            request,
+            result: self.reclaim_error.take().map_or(
+                Ok(LogReclaimed {
+                    before_bytes: 100,
+                    after_bytes: max_bytes.min(50),
+                }),
+                Err,
+            ),
+        }]
+    }
     fn binding(&self) -> WorkerBinding {
         self.binding
     }
@@ -1191,7 +1238,8 @@ impl PersistenceWorker for HostWorker {
     }
     fn usage(&self) -> WorkerUsage {
         WorkerUsage {
-            requests: usize::from(self.accepted.is_some() || self.written.is_some()),
+            requests: usize::from(self.accepted.is_some() || self.written.is_some())
+                + usize::from(self.reclaim.is_some()),
             units: self.accepted.as_ref().map_or_else(
                 || self.written.as_ref().map_or(0, |(_, v, _)| v.len()),
                 |(_, u)| u.len(),

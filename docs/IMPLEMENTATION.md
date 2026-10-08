@@ -1971,9 +1971,62 @@ Full P0–P7 stays active. Native provider convenience assembly, live WAL-worker
 maintenance, incremental cleaning/general retention, membership/policy transitions,
 recursive responsibilities, safe split/merge and P7 evidence remain unfinished.
 
+## Slice 30: bounded maintenance inside selected WAL workers
+
+The public PersistenceWorker contract now offers optional submit_reclaim and
+poll_reclaims operations, with explicit unsupported defaults. LogStore exposes
+its optional reclaim capability. NativeLogWorker captures the selected capability
+and WAL ceiling, admits at most one cleanup request through its existing bounded
+queue and checked worker sequence, and charges fixed request/result metadata to
+data credits while preserving control reserves. ReclaimTicket is distinct from
+persistence tickets and carries the exact store session/worker generation.
+
+The existing WAL thread executes cleanup between complete append/barrier units.
+Older Written/Durable receipts may remain owner-held because reclamation preserves
+their state/IDs; later bounded accepted writes execute against the same binding
+and revisions. No new runtime, store or worker is created. Pending/unpolled work
+retains original credits, and scoped close drains both event classes before
+explicit thread join/store return. Cleanup does not certify Raft persistence or
+application success. No persistent format or logical watermark changes here.
+
+Safe refusal preserves worker usability. Uncertain, corrupt and fenced results,
+invalid reports or changed store bindings fence the worker and fail queued writes
+without fabricated Written/Durable events. Panic/disconnection reports each
+retained request once in its own event class. ReplicaDriver tracks one original
+maintenance ticket/budget and one matched result, validates exact completion
+scope/bounds, preserves an observed bad receipt for recovery and includes the
+fixed metadata in construction/drain accounting. Fatal results fence the owner.
+Node now exposes reclaim while Running and poll_reclaim through shutdown/recovery;
+unconsumed maintenance results hold healthy drain open. Earlier service replies
+and uncertain accepted writes retain their existing semantics. See
+[live worker maintenance](WORKER_MAINTENANCE.md).
+
+Four new host-facade tests cover held-result shutdown, unsupported/safe rejection
+with continued proposals, wrong-receipt fencing and original ticket retention,
+and uncertain cleanup preserving earlier replies and unknown pending writes.
+Five native-worker tests inject an independent gated host LogStore and exercise
+complete-barrier ordering, retained credits/close/join, control reserves,
+capability/byte rejection without sequence consumption, safe refusal,
+uncertain/invalid/binding-changing providers and panic recovery of both classes.
+The actual three-node/100-group native WAL/TLS facade history now cleans inside
+live selected workers and continues new writes before shutdown, actual-file
+recovery, snapshot/dedup restoration, retries and further writes.
+
+Local validation passes 297 default/native/TLS tests, 275 native-only tests and
+168 core/host-only tests. Clippy passes all three configurations with warnings
+denied; formatting, documentation, contract JSON, diff and new RPL header checks
+pass. Native socket histories ran with loopback access. These finite Linux runs
+do not establish macOS execution, arbitrary schedules or throughput claims.
+Cleanup still pauses I/O on its selected WAL lane for a bounded full-image rewrite;
+incremental cleaning, automatic scheduling/throttling and general backup retention
+remain unfinished.
+
+Full P0–P7 stays active. Native provider convenience assembly, incremental cleanup,
+membership/policy transitions, recursive responsibilities, safe split/merge and
+P7 evidence remain unfinished.
+
 ## Next slice
 
-Drive bounded explicit WAL maintenance inside the selected storage worker while
-preserving accepted-work ownership and local/core progress. Then implement joint
-membership/policy transitions with protocol-state recovery and fault histories.
-CI stays background feedback; relevant local checks guide direct commits.
+Implement joint membership/policy transitions as replicated protocol state, with
+explicit activation, rollback/recovery and fault/model histories. CI remains
+background feedback; relevant local checks guide direct commits.

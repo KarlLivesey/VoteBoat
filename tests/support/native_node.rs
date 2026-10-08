@@ -214,11 +214,31 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
             })
         });
     }
+    let maintenance = nodes
+        .iter_mut()
+        .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
+        .collect::<Vec<_>>();
+    // New accepted commands continue through the same workers after their
+    // queued replacement, without moving or closing any selected provider.
+    facade_proposals(&mut nodes, 3, 4, 14);
+    let mut reclaimed = 0;
+    facade_drive(&mut nodes, |nodes| {
+        nodes
+            .iter()
+            .all(|n| n.replica_usage().reclaims == 1 && n.local().persistence.is_drained())
+    });
+    for (n, ticket) in nodes.iter_mut().zip(maintenance) {
+        let event = n.poll_reclaim().unwrap();
+        assert_eq!(event.request, ticket);
+        let report = event.result.unwrap();
+        reclaimed += report.before_bytes - report.after_bytes;
+    }
+    assert!(reclaimed > 0);
     let bindings = nodes
         .iter()
         .map(|n| n.local().owner.identity().store)
         .collect::<Vec<_>>();
-    assert!(facade_close(nodes) > 0);
+    facade_close(nodes);
     let mut nodes = facade_make(&root, true);
     for (n, old) in nodes.iter().zip(bindings) {
         assert_ne!(n.local().owner.identity().store, old);
@@ -229,8 +249,9 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
     facade_drive(&mut nodes, |nodes| {
         (1..=100).all(|g| nodes[0].local().owner.core(group(g)).unwrap().role() == Role::Leader)
     });
-    facade_proposals(&mut nodes, 2, 3, 10);
+    facade_proposals(&mut nodes, 2, 3, 14);
     facade_proposals(&mut nodes, 3, 4, 14);
+    facade_proposals(&mut nodes, 4, 1, 15);
     facade_close(nodes);
     std::fs::remove_dir_all(root).unwrap();
 }

@@ -39,10 +39,12 @@ compaction while both storage workers retain their handles.
 
 `LogStore::reclaim` now rewrites the exact live WAL state through durable native
 file selection, freeing superseded history after logical compaction. It requires
-drained transitions and an explicit storage maintenance call. See
+drained store transitions. `Node::reclaim` now submits bounded maintenance to the
+existing selected WAL worker while the node stays live; poll its exact result
+with `Node::poll_reclaim`. See [live worker maintenance](docs/WORKER_MAINTENANCE.md) and
 [physical WAL cleanup](docs/WAL_RECLAMATION.md).
 
-Native filesystem/provider assembly, live WAL maintenance and online reconfiguration remain under
+Native filesystem/provider assembly, incremental WAL cleaning and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run

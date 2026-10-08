@@ -205,6 +205,9 @@ pub trait LogStore {
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
+    fn supports_reclaim(&self) -> bool {
+        false
+    }
     /// Optional physical maintenance. Preserve every current durable group,
     /// including its snapshot reference and full surviving suffix. Logical
     /// retention/compaction must already have been authorized separately.

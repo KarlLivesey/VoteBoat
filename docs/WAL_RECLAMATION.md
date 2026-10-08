@@ -4,10 +4,11 @@
 The default rejects unsupported providers. NativeLogStore implements it when the
 selected JournalIo supports atomic replacement and the selected LogCodec supports
 live-state checkpoints. Run it on a storage worker or an explicitly drained,
-reclaimed store handle, outside the consensus owner's hot loop. Live WAL-worker
-maintenance scheduling is not yet implemented.
+reclaimed store handle, outside the consensus owner's hot loop. NativeLogWorker
+now executes explicit bounded requests on its existing thread; Node exposes
+reclaim/poll_reclaim. See [live worker maintenance](WORKER_MAINTENANCE.md).
 
-Reclamation requires no outstanding transition tickets and identical accepted and
+Reclamation requires no outstanding store-side transition tickets and identical accepted and
 durable state. It retains every current group, bootstrap/configuration/voter-store
 binding, hard state including votes, exact revision and suffix generation,
 committed boundary, snapshot reference and complete surviving suffix. It drops
@@ -78,7 +79,7 @@ readable; old binaries/codecs that do not implement checkpoint images cannot rea
 cleaned journals. Unsupported codecs reject maintenance before publication and
 reject checkpoint recovery. Do not use binary rollback as a format migration.
 The baseline rewrites the full bounded live image; segmented incremental cleaning
-and live worker scheduling remain future work.
+and automatic scheduling/throttling remain future work.
 
 ## Evidence
 

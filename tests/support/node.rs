@@ -404,3 +404,117 @@ fn unknown_and_closed_admission_return_original_command_allocation_and_instances
     assert_eq!(other.state(), NodeState::Running);
     shutdown(&mut other);
 }
+
+#[test]
+fn maintenance_result_is_scoped_retained_and_part_of_shutdown() {
+    let mut p = parts(1, false);
+    p.local.persistence.reclaim_supported = true;
+    let mut n = boat(p);
+    let ticket = n.reclaim(1024).unwrap();
+    assert_eq!(
+        n.reclaim(1024),
+        Err(NodeError::Replica(ReplicaError::Worker(
+            WorkerError::Overloaded
+        )))
+    );
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    assert_eq!(n.replica_usage().reclaims, 1);
+    n.begin_shutdown();
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    assert!(!n.is_drained());
+    let event = n.poll_reclaim().unwrap();
+    assert_eq!(event.request, ticket);
+    assert_eq!(
+        event.result.unwrap(),
+        LogReclaimed {
+            before_bytes: 100,
+            after_bytes: 50
+        }
+    );
+    shutdown(&mut n);
+}
+#[test]
+fn unsupported_and_rejected_maintenance_preserve_running_service() {
+    let mut n = boat(parts(1, false));
+    assert_eq!(
+        n.reclaim(1024),
+        Err(NodeError::Replica(ReplicaError::Worker(
+            WorkerError::Unsupported
+        )))
+    );
+    assert_eq!(n.state(), NodeState::Running);
+    shutdown(&mut n);
+    let mut p = parts(1, false);
+    p.local.persistence.reclaim_supported = true;
+    p.local.persistence.reclaim_error = Some(voteboat::contracts::StorageError::Rejected(
+        "maintenance budget",
+    ));
+    let mut n = boat(p);
+    n.reclaim(1024).unwrap();
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    assert!(matches!(
+        n.poll_reclaim().unwrap().result,
+        Err(voteboat::contracts::StorageError::Rejected(_))
+    ));
+    n.control(group(1), NodeControl::Campaign).unwrap();
+    settle(&mut n);
+    n.propose(request(1)).unwrap();
+    settle(&mut n);
+    let output = n.poll_client().unwrap();
+    assert!(matches!(
+        n.complete_client(output).unwrap(),
+        ClientOutcome::Applied { .. }
+    ));
+    let ticket = n.reclaim(1).unwrap();
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    let result = n.poll_reclaim().unwrap();
+    assert_eq!(result.request, ticket);
+    assert_eq!(result.result.unwrap().after_bytes, 1);
+    shutdown(&mut n);
+}
+#[test]
+fn wrong_maintenance_receipt_fences_without_losing_original_ticket() {
+    let mut p = parts(1, false);
+    p.local.persistence.reclaim_supported = true;
+    p.local.persistence.reclaim_wrong = true;
+    let mut n = boat(p);
+    let ticket = n.reclaim(1024).unwrap();
+    assert_eq!(
+        n.poll(MonoTime(0), NodePollBudget::default()).unwrap_err(),
+        NodeError::Replica(ReplicaError::ProviderContract)
+    );
+    assert_eq!(n.state(), NodeState::RecoveryRequired);
+    let recovered = n.into_recovery().unwrap_or_else(|_| panic!("not failed"));
+    assert!(recovered.local.owner.is_failed());
+    assert_eq!(recovered.replica.usage().reclaims, 2);
+    assert_ne!(recovered.replica.failed_reclaim().unwrap().request, ticket);
+}
+#[test]
+fn uncertain_maintenance_preserves_earlier_reply_and_failed_result() {
+    let mut p = parts(1, false);
+    p.local.persistence.reclaim_supported = true;
+    p.local.persistence.reclaim_error = Some(voteboat::contracts::StorageError::Uncertain(
+        "lost replacement receipt".into(),
+    ));
+    let mut n = boat(p);
+    n.control(group(1), NodeControl::Campaign).unwrap();
+    settle(&mut n);
+    n.propose(request(1)).unwrap();
+    settle(&mut n);
+    let earlier = n.poll_client().unwrap();
+    let ticket = n.reclaim(1024).unwrap();
+    n.propose(request(2)).unwrap();
+    assert!(n.poll(MonoTime(0), NodePollBudget::default()).is_err());
+    assert_eq!(n.state(), NodeState::RecoveryRequired);
+    assert!(matches!(
+        n.complete_client(earlier).unwrap(),
+        ClientOutcome::Applied { .. }
+    ));
+    assert_eq!(n.poll_reclaim().unwrap().request, ticket);
+    let pending = n.poll_client().unwrap();
+    assert!(matches!(
+        n.complete_client(pending).unwrap(),
+        ClientOutcome::Unknown(_)
+    ));
+    assert!(n.poll_reclaim().is_none());
+}

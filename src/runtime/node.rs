@@ -278,6 +278,24 @@ where
     pub fn replica_usage(&self) -> ReplicaDriverUsage {
         self.replica.usage()
     }
+    pub fn reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        let result = self
+            .replica
+            .request_reclaim(&mut self.local.as_parts(), max_bytes)
+            .map_err(NodeError::Replica);
+        if let Err(reason) = &result {
+            if self.replica.is_failed() {
+                self.enter_recovery(reason.clone());
+            }
+        }
+        result
+    }
+    pub fn poll_reclaim(&mut self) -> Option<ReclaimEvent> {
+        self.replica.poll_reclaim()
+    }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
         let Some(app) = self.local.applications.get(&request.group) else {
             return Err(ClientRejected {

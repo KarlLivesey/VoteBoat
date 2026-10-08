@@ -43,17 +43,29 @@ struct Batch {
     ticket: WorkerTicket,
     units: Vec<PersistUnit>,
 }
+enum Work {
+    Persist(Batch),
+    Reclaim {
+        ticket: ReclaimTicket,
+        max_bytes: usize,
+    },
+}
 struct Retained {
     usage: WorkerUsage,
     control: bool,
     visits: Vec<VisitTicket>,
+    reclaim: bool,
 }
 pub struct NativeLogWorker<L: LogStore + Send + 'static> {
     binding: WorkerBinding,
     limits: WorkerLimits,
     sequence: u64,
-    sender: Option<SyncSender<Batch>>,
+    sender: Option<SyncSender<Work>>,
     events: Receiver<WorkerEvent>,
+    reclaims: Receiver<ReclaimEvent>,
+    reclaim_supported: bool,
+    max_reclaim_bytes: usize,
+    reclaim_pending: bool,
     thread: Option<JoinHandle<L>>,
     retained: BTreeMap<u64, Retained>,
     groups: BTreeSet<GroupIdentity>,
@@ -83,13 +95,50 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             store: store.binding(),
             generation,
         };
-        let (sender, requests) = mpsc::sync_channel::<Batch>(limits.max_requests);
+        let reclaim_supported = store.supports_reclaim();
+        let max_reclaim_bytes = store.limits().max_wal_bytes;
+        let (sender, requests) = mpsc::sync_channel::<Work>(limits.max_requests);
         let (out, events) = mpsc::sync_channel(limits.max_requests * 2);
+        let (reclaim_out, reclaims) = mpsc::sync_channel(1);
         let thread = thread::Builder::new()
             .name("voteboat-wal".into())
             .spawn(move || {
                 let mut fenced = false;
-                while let Ok(batch) = requests.recv() {
+                while let Ok(work) = requests.recv() {
+                    let batch = match work {
+                        Work::Persist(batch) => batch,
+                        Work::Reclaim { ticket, max_bytes } => {
+                            let mut result = if fenced {
+                                Err(StorageError::Fenced)
+                            } else {
+                                match store.reclaim(max_bytes) {
+                                    Ok(r)
+                                        if r.after_bytes <= r.before_bytes
+                                            && r.after_bytes <= max_bytes =>
+                                    {
+                                        Ok(r)
+                                    }
+                                    Ok(_) => Err(StorageError::Corrupt(
+                                        "reclamation result outside budget",
+                                    )),
+                                    Err(e) => Err(e),
+                                }
+                            };
+                            if store.binding() != binding.store {
+                                result =
+                                    Err(StorageError::Corrupt("maintenance changed store binding"));
+                            }
+                            if result.as_ref().is_err_and(fatal) {
+                                fenced = true;
+                            }
+                            let _ = reclaim_out.send(ReclaimEvent {
+                                request: ticket,
+                                result,
+                            });
+                            wake.wake();
+                            continue;
+                        }
+                    };
                     let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
                     let result = if fenced {
                         Err(StorageError::Fenced)
@@ -188,6 +237,10 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             sequence: 0,
             sender: Some(sender),
             events,
+            reclaims,
+            reclaim_supported,
+            max_reclaim_bytes,
+            reclaim_pending: false,
             thread: Some(thread),
             retained: BTreeMap::new(),
             groups: BTreeSet::new(),
@@ -264,6 +317,9 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
     }
     fn release(&mut self, sequence: u64) {
         if let Some(r) = self.retained.remove(&sequence) {
+            if r.reclaim {
+                self.reclaim_pending = false;
+            }
             for v in r.visits {
                 self.groups.remove(&v.group);
             }
@@ -294,6 +350,106 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
     fn usage(&self) -> WorkerUsage {
         self.usage
     }
+    fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
+        if self.fenced {
+            return Err(WorkerError::Fenced);
+        }
+        if self.sender.is_none() {
+            return Err(WorkerError::Closed);
+        }
+        if !self.reclaim_supported {
+            return Err(WorkerError::Unsupported);
+        }
+        if max_bytes == 0 || max_bytes > self.max_reclaim_bytes {
+            return Err(WorkerError::BatchTooLarge);
+        }
+        let bytes = std::mem::size_of::<Work>()
+            + std::mem::size_of::<Retained>()
+            + std::mem::size_of::<ReclaimEvent>();
+        if self.reclaim_pending
+            || self.usage.requests == self.limits.max_requests
+            || self.data.requests >= self.limits.max_requests - self.limits.control_requests
+            || bytes > self.limits.max_bytes.saturating_sub(self.usage.bytes)
+            || bytes
+                > (self.limits.max_bytes - self.limits.control_bytes)
+                    .saturating_sub(self.data.bytes)
+        {
+            return Err(WorkerError::Overloaded);
+        }
+        let sequence = self.sequence.checked_add(1).ok_or(WorkerError::Exhausted)?;
+        let ticket = ReclaimTicket {
+            binding: self.binding,
+            sequence,
+        };
+        match self
+            .sender
+            .as_ref()
+            .unwrap()
+            .try_send(Work::Reclaim { ticket, max_bytes })
+        {
+            Ok(()) => (),
+            Err(TrySendError::Full(_)) => return Err(WorkerError::Overloaded),
+            Err(TrySendError::Disconnected(_)) => {
+                self.fenced = true;
+                self.sender.take();
+                return Err(WorkerError::Fenced);
+            }
+        }
+        self.sequence = sequence;
+        self.reclaim_pending = true;
+        self.usage.requests += 1;
+        self.usage.bytes += bytes;
+        self.data.requests += 1;
+        self.data.bytes += bytes;
+        self.retained.insert(
+            sequence,
+            Retained {
+                usage: WorkerUsage {
+                    requests: 1,
+                    units: 0,
+                    bytes,
+                },
+                control: false,
+                visits: Vec::new(),
+                reclaim: true,
+            },
+        );
+        Ok(ticket)
+    }
+    fn poll_reclaims(&mut self, limit: usize) -> Vec<ReclaimEvent> {
+        if limit == 0 {
+            return Vec::new();
+        }
+        let event = match self.reclaims.try_recv() {
+            Ok(event) => event,
+            Err(TryRecvError::Empty) => return Vec::new(),
+            Err(TryRecvError::Disconnected) => {
+                if self.sender.is_some() {
+                    self.fenced = true;
+                    self.sender.take();
+                }
+                let Some((&sequence, _)) = self.retained.iter().find(|(_, r)| r.reclaim) else {
+                    return Vec::new();
+                };
+                self.fenced = true;
+                ReclaimEvent {
+                    request: ReclaimTicket {
+                        binding: self.binding,
+                        sequence,
+                    },
+                    result: Err(StorageError::Uncertain(
+                        "worker disconnected; recover maintenance".into(),
+                    )),
+                }
+            }
+        };
+        if event.result.as_ref().is_err_and(fatal) {
+            self.fenced = true;
+            self.sender.take();
+        }
+        self.release(event.request.sequence);
+        vec![event]
+    }
     fn submit(&mut self, units: Vec<PersistUnit>) -> Result<WorkerTicket, WorkerRejected> {
         let (bytes, control) = match self.admission(&units, units.capacity()) {
             Ok(v) => v,
@@ -315,7 +471,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
             .sender
             .as_ref()
             .unwrap()
-            .try_send(Batch { ticket, units })
+            .try_send(Work::Persist(Batch { ticket, units }))
         {
             Ok(()) => {
                 self.sequence = sequence;
@@ -341,15 +497,16 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                         usage,
                         control,
                         visits,
+                        reclaim: false,
                     },
                 );
                 Ok(ticket)
             }
-            Err(TrySendError::Full(batch)) => Err(WorkerRejected {
+            Err(TrySendError::Full(Work::Persist(batch))) => Err(WorkerRejected {
                 reason: WorkerError::Overloaded,
                 units: batch.units,
             }),
-            Err(TrySendError::Disconnected(batch)) => {
+            Err(TrySendError::Disconnected(Work::Persist(batch))) => {
                 self.fenced = true;
                 self.sender.take();
                 Err(WorkerRejected {
@@ -357,6 +514,7 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                     units: batch.units,
                 })
             }
+            Err(_) => unreachable!("submitted persistence work returned with another kind"),
         }
     }
     fn poll(&mut self, limit: usize) -> Vec<WorkerEvent> {
@@ -370,7 +528,8 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
                         self.fenced = true;
                         self.sender.take();
                     }
-                    let Some((&sequence, r)) = self.retained.first_key_value() else {
+                    let Some((&sequence, r)) = self.retained.iter().find(|(_, r)| !r.reclaim)
+                    else {
                         break;
                     };
                     self.fenced = true;
