@@ -228,7 +228,9 @@ sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 `NativeWireCodec` implements [wire formats 1 and 2](docs/WIRE_FORMAT.md).
 The default constructor retains format 1 for current static-configuration peers;
 `with_membership` explicitly selects format 2 for configuration entries and
-membership-aware snapshots. Online Raft membership changes remain disabled. Validate its fixed prefix before
+membership-aware snapshots. Online Raft membership changes remain disabled; the
+[accepted-log core audit](docs/MEMBERSHIP_CORE.md) records quorum integration
+and the remaining activation/recovery gates. Validate its fixed prefix before
 allocating a receive frame, then decode one exact frame with the connection's
 trusted `WireScope`. Size, shape and decoded retention checks precede payload
 allocations. Checksums provide integrity only; the transport must authenticate

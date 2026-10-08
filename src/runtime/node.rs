@@ -208,15 +208,15 @@ where
                 if core.state().base_index() > 0 && parts.local.snapshots.is_none() {
                     return Err(NodeError::MissingSnapshots);
                 }
-                for (peer, store) in &core.state().bootstrap.voter_stores {
-                    if *peer == core.local_node() {
+                for (peer, store) in core.membership().replicas() {
+                    if peer == core.local_node() {
                         continue;
                     }
                     let network = parts.peers.as_ref().ok_or(NodeError::MissingPeers)?;
                     if network
                         .roster
-                        .peer_identity(*peer)
-                        .is_none_or(|p| p.store != *store)
+                        .peer_identity(peer)
+                        .is_none_or(|p| p.store != store)
                     {
                         return Err(NodeError::WrongPeerStore);
                     }

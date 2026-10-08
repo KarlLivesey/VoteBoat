@@ -10,10 +10,10 @@ record claims that unimplemented phases already work.
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers and real TCP/TLS histories; full node facade remains |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, local replica and peer reactor drivers, and native 100-group histories implemented; full node facade/lifecycle assembly remains |
-| P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
+| P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, snapshot/wire and core-predicate foundations implemented; learner recovery/readiness, formal activation model and full online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -2208,9 +2208,67 @@ learner readiness/admission, configuration-scoped requests, removed-replica
 service fencing and the formal activation/ballot model remain unfinished.
 Recursive responsibilities, safe split/merge and P7 evidence remain outstanding.
 
+## Slice 34 — accepted-log membership at core quorum sites
+
+`Raft` now keeps one derived membership view for its durable state and one for
+an accepted pending transition. The public borrowed view exposes the latest
+accepted predicate without certifying persistence. The authoritative durable log
+advances only on the exact admitted ticket's completion; other events stay busy
+while that dependency is unresolved. Storage failure discards the pending view
+and fences the replica. No new effect, receipt, watermark or generation is added.
+
+Election admission, self-vote completion, received ballots, commit frontier,
+read admission/probes/readiness/consumption and outgoing configuration IDs now
+use the accepted-log predicate. Joint state requires both validated policies.
+Current-term commitment, local durability, exact sender/term/request checks and
+one-use applied read barriers remain mandatory. Changes invalidate old read
+barriers immediately and conservatively recollect ballots/replication progress
+under fresh contexts after durability, including same-voter weighted changes.
+Rollback and compaction derive the view from the surviving journal and base.
+
+Voting store identity and replication store identity are separate queries.
+The bounded allocation-free replica iterator includes learners and both sides of
+a joint configuration exactly once. Elections and read probes target voters;
+replication includes learners, whose progress never satisfies a policy.
+Learners cannot originate election, leader or read-authority messages. Nonvoters
+cannot campaign or admit new client work. A locally retiring leader can finish
+final commitment, then relinquishes leadership and volatile quorum state.
+Node construction now checks roster compatibility for every effective replication
+assignment. Output reservation counts all current replicas, including learners.
+See [the core membership audit](MEMBERSHIP_CORE.md) for each implemented site.
+
+Six internal tests drive the real core helpers with explicit journal fixtures
+and exact host-asserted completion tokens. They check accepted/durable separation,
+storage failure, learner identity/exclusion, promoted-voter joint commits,
+same-voter weighted elections and reads, invalidated barriers, stale responses,
+final rollback into a compacted joint base and local demotion fencing. The
+fixtures deliberately prepare committed boundaries and do not prove their tokens
+represent physical storage. A downstream public-interface test checks replica
+and voter identities across activation, rollback and snapshot replay. Public
+online ingress/recovery gates remain in place; these checks do not validate the
+complete transition protocol or replace its formal activation/ballot model.
+
+Local validation passes 341 default/native/TLS tests, 319 native-only tests and
+191 core/host-only tests. Clippy passes all three configurations with warnings
+denied. Formatting, API docs, inventory JSON, RPL headers and diff checks pass.
+Existing real TCP/TLS histories remain static-configuration histories and ran on
+Linux; no macOS, power-failure, online-membership proof or performance claim is
+made. CI remains background feedback.
+
+The audit exposes remaining bootstrap ballot checks in both log validation and
+core recovery. Simply validating a recovered ballot against the latest electorate
+would lose valid earlier promises after removal/rollback/compaction. A ballot
+provenance/recovery design and model are required before promoting new candidates.
+Strict ingress configuration equality also needs lagging-follower protocol rules,
+without allowing stale acknowledgements to authorize a newer context. Explicit
+learner recovery/readiness, prospective fanout reservation, retiring-leader final
+propagation, route/roster admission and faulted native/host transition histories
+remain unfinished. Full P0–P7 stays active; recursive responsibilities, safe
+split/merge and P7 evidence remain outstanding.
+
 ## Next slice
 
-Integrate the accepted-log membership view into all Raft quorum/context paths,
-including bounded learner replication and recovery, then validate activation,
-elections, rollback and removal with the formal model and faulted actual-core
-histories before enabling online administration. CI remains background feedback.
+Specify and model durable ballot provenance through configuration activation,
+rollback, compaction and recovery; implement the corresponding recovery contract.
+Then complete lagging-peer request scopes, learner readiness and prospective
+reservation before enabling online changes and their faulted actual-core histories.

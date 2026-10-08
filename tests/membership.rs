@@ -1818,3 +1818,44 @@ mod configuration_snapshots {
         }
     }
 }
+
+#[test]
+fn replica_and_voter_identity_views_follow_activation_rollback_and_compaction() {
+    let staged = replay(&[learners()], 0).unwrap();
+    let joint = replay(&[learners(), joint()], 1).unwrap();
+    let finalized = replay(&[learners(), self::joint(), final_record()], 2).unwrap();
+    for (membership, replicas, voters) in [
+        (&staged, vec![1, 2, 3, 4, 5], vec![1, 2, 3]),
+        (&joint, vec![1, 2, 3, 4, 5], vec![1, 2, 3, 4, 5]),
+        (&finalized, vec![1, 3, 4, 5], vec![3, 4, 5]),
+    ] {
+        let identities = membership.replicas().collect::<BTreeMap<_, _>>();
+        assert_eq!(identities.len(), membership.replicas().count());
+        assert_eq!(
+            identities.keys().copied().collect::<BTreeSet<_>>(),
+            set(&replicas)
+        );
+        for n in 1..=6 {
+            let expected_store = identity(n as u128);
+            assert_eq!(
+                membership.replica_store(node(n)),
+                replicas.contains(&n).then_some(expected_store)
+            );
+            assert_eq!(
+                membership.voter_store(node(n)),
+                voters.contains(&n).then_some(expected_store)
+            );
+        }
+    }
+    let compacted =
+        Membership::replay_from(&bootstrap(1, 3), Some(&joint), 2, &[final_record()], 2).unwrap();
+    assert_eq!(
+        compacted.replicas().collect::<BTreeMap<_, _>>(),
+        finalized.replicas().collect()
+    );
+    let rollback = Membership::replay_from(&bootstrap(1, 3), Some(&joint), 2, &[], 2).unwrap();
+    assert_eq!(rollback.voter_store(node(2)), Some(identity(2)));
+    assert_eq!(finalized.replica_store(node(2)), None);
+    assert_eq!(finalized.voter_store(node(1)), None);
+    assert_eq!(finalized.replica_store(node(1)), Some(identity(1)));
+}

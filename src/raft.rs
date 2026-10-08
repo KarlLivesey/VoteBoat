@@ -19,6 +19,7 @@ use crate::{
     contracts::{HardState, StorageError},
     identity::*,
     log::*,
+    membership::Membership,
     snapshot::{Snapshot, SnapshotRef},
 };
 use std::collections::{BTreeMap, BTreeSet};
@@ -157,6 +158,8 @@ pub enum RaftError {
     Busy,
     Fenced,
     NotLeader,
+    /// A learner or removed replica cannot start an election.
+    NotVoter,
     WrongIdentity,
     InvalidMessage,
     WrongCompletion,
@@ -187,6 +190,7 @@ enum After {
 struct Pending {
     update: LogUpdate,
     next: GroupLog,
+    membership: Membership,
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
@@ -208,6 +212,7 @@ pub struct Raft {
     binding: StoreBinding,
     limits: LogLimits,
     durable: GroupLog,
+    membership: Membership,
     role: Role,
     votes: BTreeSet<NodeId>,
     vote_context: Option<RequestContext>,
@@ -291,11 +296,13 @@ impl Raft {
             }
             previous_term = e.term;
         }
+        let membership = state.membership().map_err(|_| RaftError::InvalidRecovery)?;
         Ok(Self {
             node,
             binding,
             limits,
             durable: state,
+            membership,
             role: Role::Follower,
             votes: BTreeSet::new(),
             vote_context: None,
@@ -340,6 +347,14 @@ impl Raft {
     pub fn state(&self) -> &GroupLog {
         &self.durable
     }
+    /// Latest accepted-log predicate. Pending accepted state can precede its
+    /// durable WAL completion; this value is never a durability receipt.
+    /// The core processes no other events while that dependency is pending.
+    pub fn membership(&self) -> &Membership {
+        self.pending
+            .as_ref()
+            .map_or(&self.membership, |p| &p.membership)
+    }
     pub fn storage_binding(&self) -> StoreBinding {
         self.binding
     }
@@ -347,6 +362,8 @@ impl Raft {
     /// completions. The owner must bound input retention by `input_bytes`, drain
     /// each output batch before another completion, and run only one event in
     /// the visit. Core/log memory and host snapshot-worker buffers are separate.
+    /// This covers current replicas only. Online configuration growth remains
+    /// gated until its prospective fanout can be reserved before execution.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
         use std::mem::size_of;
         let mut log = self
@@ -363,7 +380,7 @@ impl Raft {
         // A heartbeat can produce append and read probes for every peer. Each
         // append contains at most 64 entries and max_batch_bytes payload/framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.
-        let peers = self.durable.bootstrap.policy.voters().len();
+        let peers = self.membership().replicas().count();
         let message = self
             .limits
             .max_batch_bytes
@@ -418,7 +435,7 @@ impl Raft {
         }
         if self.ready_read.as_ref() != Some(barrier)
             || barrier.group != self.durable.bootstrap.group
-            || barrier.configuration != self.durable.bootstrap.configuration
+            || barrier.configuration != self.membership().id()
             || barrier.term != self.durable.hard_state.term
             || barrier.context.origin != self.binding
             || barrier.index > self.durable.commit_index
@@ -439,7 +456,7 @@ impl Raft {
     }
 
     fn begin_read(&mut self, request: ReadRequestId) -> Result<Vec<Effect>, RaftError> {
-        if self.role != Role::Leader {
+        if self.role != Role::Leader || !self.membership().is_voter(self.node) {
             return Err(RaftError::NotLeader);
         }
         if self.read.is_some() || self.ready_read.is_some() {
@@ -454,7 +471,7 @@ impl Raft {
         let context = self.context()?;
         let barrier = ReadBarrier {
             group: self.durable.bootstrap.group,
-            configuration: self.durable.bootstrap.configuration,
+            configuration: self.membership().id(),
             term: self.durable.hard_state.term,
             context,
             request,
@@ -476,7 +493,7 @@ impl Raft {
         let Some(read) = &self.read else {
             return Vec::new();
         };
-        self.peers()
+        self.voting_peers()
             .into_iter()
             .map(|peer| Effect::Send(self.message(peer, read.barrier.context, Rpc::ReadProbe)))
             .collect()
@@ -484,10 +501,8 @@ impl Raft {
 
     fn maybe_read_ready(&mut self) -> Vec<Effect> {
         if self.read.as_ref().is_some_and(|r| {
-            self.durable
-                .bootstrap
-                .policy
-                .is_satisfied(&r.acknowledgements)
+            r.barrier.configuration == self.membership().id()
+                && self.membership().is_satisfied(&r.acknowledgements)
         }) {
             let barrier = self.read.take().unwrap().barrier;
             self.ready_read = Some(barrier);
@@ -514,6 +529,9 @@ impl Raft {
                 Ok(vec![Effect::CheckpointRequired { context }])
             }
             Event::Campaign => {
+                if !self.membership().is_voter(self.node) {
+                    return Err(RaftError::NotVoter);
+                }
                 self.reset_election()?;
                 self.clear_reads();
                 self.role = Role::Candidate;
@@ -547,7 +565,7 @@ impl Raft {
                 }
             }
             Event::Propose { operation, bytes } => {
-                if self.role != Role::Leader {
+                if self.role != Role::Leader || !self.membership().is_voter(self.node) {
                     return Err(RaftError::NotLeader);
                 }
                 if bytes.len() > self.limits.max_command_bytes {
@@ -644,7 +662,23 @@ impl Raft {
         }
         let p = self.pending.take().unwrap();
         let previous_commit = self.durable.commit_index;
+        let configuration_changed = p.membership.id() != self.membership.id();
         self.durable = p.next;
+        self.membership = p.membership;
+        if configuration_changed {
+            self.configuration_changed()?;
+        }
+        if !self.membership.is_voter(self.node)
+            && self.membership.last_configuration_index() <= self.durable.commit_index
+        {
+            self.role = Role::Follower;
+            self.clear_reads();
+            self.votes.clear();
+            self.vote_context = None;
+            self.requests.clear();
+            self.progress.clear();
+            self.next_index.clear();
+        }
         let mut effects = Vec::new();
         if self.durable.commit_index > previous_commit
             && !matches!(p.after, After::SnapshotInstall(_))
@@ -658,12 +692,12 @@ impl Raft {
         match p.after {
             After::Campaign => {
                 self.votes.insert(self.node);
-                if self.durable.bootstrap.policy.is_satisfied(&self.votes) {
+                if self.membership().is_satisfied(&self.votes) {
                     effects.extend(self.become_leader()?);
                 } else {
                     let context = self.context()?;
                     self.vote_context = Some(context);
-                    for peer in self.peers() {
+                    for peer in self.voting_peers() {
                         effects.push(Effect::Send(self.message(
                             peer,
                             context,
@@ -686,7 +720,8 @@ impl Raft {
                 effects.extend(self.broadcast()?);
                 effects.extend(self.maybe_commit()?);
             }
-            After::Commit => effects.extend(self.broadcast()?),
+            After::Commit if self.role == Role::Leader => effects.extend(self.broadcast()?),
+            After::Commit => (),
             After::Compact => {
                 self.requests.clear();
                 if self.role == Role::Leader {
@@ -749,9 +784,15 @@ impl Raft {
             &[LogMutation::Update(update.clone())],
             self.limits,
         )?;
+        let next = state.remove(&update.group).unwrap();
+        let membership = next.membership().map_err(|_| RaftError::InvalidRecovery)?;
+        if membership.id() != self.membership().id() {
+            self.clear_reads();
+        }
         self.pending = Some(Pending {
             update: update.clone(),
-            next: state.remove(&update.group).unwrap(),
+            next,
+            membership,
             ticket: None,
             after,
             reply,
@@ -759,14 +800,49 @@ impl Raft {
         Ok(vec![Effect::Persist(update)])
     }
     fn peers(&self) -> Vec<NodeId> {
-        self.durable
-            .bootstrap
-            .policy
-            .voters()
-            .iter()
-            .filter(|n| **n != self.node)
-            .copied()
+        self.membership()
+            .replicas()
+            .map(|(node, _)| node)
+            .filter(|node| *node != self.node)
             .collect()
+    }
+    fn voting_peers(&self) -> Vec<NodeId> {
+        self.peers()
+            .into_iter()
+            .filter(|node| self.membership().is_voter(*node))
+            .collect()
+    }
+    /// Changing the accepted configuration invalidates every volatile quorum
+    /// collection. Durable matching evidence is conservatively recollected in
+    /// fresh request contexts, including unchanged identities and same-voter
+    /// policy changes. This is not a durability or catch-up assertion.
+    fn configuration_changed(&mut self) -> Result<(), RaftError> {
+        self.clear_reads();
+        self.votes.clear();
+        self.vote_context = None;
+        self.requests.clear();
+        self.progress.clear();
+        self.next_index.clear();
+        if self.role == Role::Candidate {
+            self.role = Role::Follower;
+        }
+        if self.role == Role::Leader {
+            self.initialize_replication()?;
+        }
+        Ok(())
+    }
+    fn initialize_replication(&mut self) -> Result<(), RaftError> {
+        let next = self
+            .durable
+            .last_index()
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        for peer in self.peers() {
+            self.next_index.insert(peer, next);
+            self.progress.insert(peer, 0);
+        }
+        self.progress.insert(self.node, self.durable.last_index());
+        Ok(())
     }
     fn context(&mut self) -> Result<RequestContext, RaftError> {
         self.request_sequence = self
@@ -781,7 +857,7 @@ impl Raft {
     fn message(&self, to: NodeId, context: RequestContext, rpc: Rpc) -> Message {
         Message {
             group: self.durable.bootstrap.group,
-            configuration: self.durable.bootstrap.configuration,
+            configuration: self.membership().id(),
             from: self.node,
             sender: self.binding,
             to,
@@ -800,11 +876,7 @@ impl Raft {
             .last_index()
             .checked_add(1)
             .ok_or(RaftError::Exhausted)?;
-        for peer in self.peers() {
-            self.next_index.insert(peer, next);
-            self.progress.insert(peer, 0);
-        }
-        self.progress.insert(self.node, self.durable.last_index());
+        self.initialize_replication()?;
         let entry = LogEntry {
             index: next,
             term: self.durable.hard_state.term,
@@ -934,9 +1006,7 @@ impl Raft {
     }
     fn maybe_commit(&mut self) -> Result<Vec<Effect>, RaftError> {
         let frontier = self
-            .durable
-            .bootstrap
-            .policy
+            .membership()
             .frontier(&self.progress)
             .min(self.durable.last_index());
         if frontier > self.durable.commit_index
@@ -974,8 +1044,18 @@ impl Raft {
         if m.to != self.node
             || m.from == self.node
             || m.group != self.durable.bootstrap.group
-            || m.configuration != self.durable.bootstrap.configuration
-            || self.durable.bootstrap.voter_stores.get(&m.from) != Some(&m.sender.identity)
+            || m.configuration != self.membership().id()
+            || self.membership().replica_store(m.from) != Some(m.sender.identity)
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        // Learners return replication evidence but never vote, lead, or
+        // establish read authority. Replication replies remain non-voting.
+        if !self.membership().is_voter(m.from)
+            && !matches!(
+                m.rpc,
+                Rpc::Appended { .. } | Rpc::SnapshotAck { .. } | Rpc::Compacted { .. }
+            )
         {
             return Err(RaftError::WrongIdentity);
         }
@@ -983,7 +1063,8 @@ impl Raft {
             return Err(RaftError::InvalidMessage);
         }
         // Configuration journal storage is available before online activation.
-        // Do not accept these entries while any quorum use remains static.
+        // Live ingress remains gated on catch-up, lagging-peer request scopes,
+        // ballot recovery and the formal activation model.
         if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
         {
             return Err(RaftError::InvalidMessage);
@@ -1024,7 +1105,9 @@ impl Raft {
                 if *last_term > m.term || ((*last_index == 0) != (*last_term == 0)) {
                     return Err(RaftError::InvalidMessage);
                 }
-                let granted = m.term == hard.term
+                let granted = self.membership().is_voter(self.node)
+                    && self.membership().is_voter(m.from)
+                    && m.term == hard.term
                     && (hard.voted_for.is_none() || hard.voted_for == Some(m.from))
                     && (*last_term, *last_index)
                         >= (self.durable.last_term(), self.durable.last_index());
@@ -1063,7 +1146,7 @@ impl Raft {
                 if *granted {
                     self.votes.insert(m.from);
                 }
-                if self.durable.bootstrap.policy.is_satisfied(&self.votes) {
+                if self.membership().is_satisfied(&self.votes) {
                     self.become_leader()
                 } else {
                     Ok(Vec::new())
@@ -1565,3 +1648,7 @@ pub fn persist_effect<S: LogStore>(
     }
     result
 }
+
+#[cfg(test)]
+#[path = "raft/membership_tests.rs"]
+mod membership_tests;

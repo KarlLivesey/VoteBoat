@@ -2,11 +2,13 @@
 
 `EntryPayload::Configuration` now stores membership intent and accepted-log
 activation state in the same atomic log transitions as entries, hard state and
-commit boundaries. This is groundwork for P3. The live Raft core
-deliberately refuses these entries until every quorum use, snapshot path, learner
-catch-up gate and service-removal rule is integrated. The explicitly selected
-[native wire format 2](WIRE_FORMAT.md) carries them; default format 1 refuses them. There is no online
-administration API yet. The full P0–P7 objective remains unchanged.
+commit boundaries. This is groundwork for P4 replication management. The live Raft core
+deliberately refuses online ingress/recovery while learner catch-up, ballot
+recovery, scoped catch-up requests and the activation model remain unfinished.
+Its implemented quorum sites now use the accepted-log membership view; see
+[the core audit](MEMBERSHIP_CORE.md) for evidence and remaining gates. Explicitly
+selected [native wire format 2](WIRE_FORMAT.md) carries the records; default format
+1 refuses them. There is no online administration API yet. The full P0–P7 objective remains unchanged.
 
 `membership::Configuration` validates a recursive policy, its exact voter/store
 map, and a separate learner/store map. Voters and learners are disjoint; each

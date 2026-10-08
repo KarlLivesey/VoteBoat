@@ -398,6 +398,43 @@ impl Membership {
             .saturating_add(self.joint.as_ref().map_or(0, |j| j.next.retained_bytes()))
             .saturating_add(self.operations.len().saturating_mul(192))
     }
+    /// Exact store allowed to cast a ballot in either active joint predicate.
+    /// Learner assignment alone never grants voting authority.
+    pub fn voter_store(&self, node: NodeId) -> Option<StoreIdentity> {
+        self.stable.voter_stores.get(&node).copied().or_else(|| {
+            self.joint
+                .as_ref()
+                .and_then(|j| j.next.voter_stores.get(&node).copied())
+        })
+    }
+    /// Replication identity, including learners and both sides of a joint state.
+    pub fn replica_store(&self, node: NodeId) -> Option<StoreIdentity> {
+        self.voter_store(node)
+            .or_else(|| self.stable.learners.get(&node).copied())
+            .or_else(|| {
+                self.joint
+                    .as_ref()
+                    .and_then(|j| j.next.learners.get(&node).copied())
+            })
+    }
+    /// Each replication identity exactly once, without allocating a union map.
+    /// Iteration is deterministic; it is not globally sorted across roles.
+    pub fn replicas(&self) -> impl Iterator<Item = (NodeId, StoreIdentity)> + '_ {
+        let old = self
+            .stable
+            .voter_stores
+            .iter()
+            .chain(self.stable.learners.iter());
+        let new = self
+            .joint
+            .iter()
+            .flat_map(|j| j.next.voter_stores.iter().chain(j.next.learners.iter()))
+            .filter(|(node, _)| {
+                !self.stable.voter_stores.contains_key(node)
+                    && !self.stable.learners.contains_key(node)
+            });
+        old.chain(new).map(|(node, store)| (*node, *store))
+    }
     pub fn is_voter(&self, node: NodeId) -> bool {
         self.stable.policy.voters().contains(&node)
             || self

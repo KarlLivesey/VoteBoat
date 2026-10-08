@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "membership-aware-wire-format",
+  "status": "accepted-log-core-membership-view",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -137,7 +137,7 @@
         "tests/raft.rs",
         "tests/log_reclaim.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Live Raft/wire reconfiguration remains disabled pending quorum, learner and protocol validation. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner, ballot-recovery, request-context and formal protocol validation. General retention policies remain pending."
     },
     {
       "design_id": "C04",
