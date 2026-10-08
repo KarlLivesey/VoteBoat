@@ -530,7 +530,7 @@ where
                 .ok_or_else(|| error("generation", "session exhausted"))?,
             last_generation: SecureSessionGeneration::new(last)
                 .ok_or_else(|| error("generation", "session exhausted"))?,
-            wire_version: 1,
+            wire_version: config.tls.wire_version(),
             limits: PeerRosterLimits::default(),
             transport_limits: TransportLimits::default(),
         },
@@ -573,8 +573,14 @@ where
             ReadRouterLimits::default(),
         ))?,
     ))?;
+    let codec = match config.tls.wire_version() {
+        1 => NativeWireCodec::new(Default::default()),
+        2 => NativeWireCodec::with_membership(Default::default()),
+        3 => NativeWireCodec::with_authority(Default::default()),
+        _ => return Err(error("wire version", "unsupported native format")),
+    };
     let factory = checked(NativeTransportFactory::new(
-        checked(NativeWireCodec::new(Default::default()))?,
+        checked(codec)?,
         Default::default(),
     ))?;
     cleanup.log = Some(checked(NativeLogWorker::spawn(

@@ -257,7 +257,9 @@ The default constructor retains format 1 for current static-configuration peers;
 `with_membership` explicitly selects format 2 for configuration entries and
 membership-aware snapshots. `with_authority` selects format 3 for
 [direct promoted-replica witness authorization](docs/REPLICATION_AUTHORITY.md).
-Native TLS/QUIC startup still selects format 1.
+Native TLS/QUIC startup defaults to format 1; select an exact supported version
+with `NativeTlsConfig::with_wire_version` before constructing it. Startup uses
+that version for its codec, roster and authenticated sessions.
 Online Raft membership changes remain disabled; the
 [accepted-log core audit](docs/MEMBERSHIP_CORE.md) records quorum integration
 and the remaining activation/recovery gates. Validate its fixed prefix before

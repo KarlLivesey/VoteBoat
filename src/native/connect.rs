@@ -452,7 +452,7 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
                                 && b.peer.node == attempt.ticket.peer.node
                                 && b.peer.store.identity == attempt.ticket.peer.store
                                 && b.generation == attempt.ticket.generation
-                                && b.wire_version == 1
+                                && b.wire_version == self.tls.wire_version()
                         });
                         if valid {
                             let Stage::Handshake(session) =

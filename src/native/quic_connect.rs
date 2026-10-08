@@ -336,7 +336,7 @@ impl PeerConnector for NativeQuicConnector {
                                     && b.peer.node == a.ticket.peer.node
                                     && b.peer.store.identity == a.ticket.peer.store
                                     && b.generation == a.ticket.generation
-                                    && b.wire_version == 1
+                                    && b.wire_version == self.tls.wire_version()
                             });
                             if valid {
                                 let Stage::Handshake(s) = std::mem::replace(

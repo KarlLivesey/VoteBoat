@@ -25,7 +25,7 @@
         "tests/counter_service.rs",
         "examples/embedded_counter.rs"
       ],
-      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence."
+      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1–3, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3."
     },
     {
       "design_id": "C10/C15",
@@ -183,7 +183,7 @@
         "tests/learners.rs",
         "tests/member_recovery.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; direct committed-voter witness queries now authorize exact promoted-store replication, while public configuration activation remains gated. General retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -528,15 +528,15 @@
       "operations": ["format_version", "header_bytes", "limits", "frame_length", "encode_batch", "decode_batch"],
       "native": "NativeWireCodec",
       "conformance": ["tests/wire.rs", "tests/worker.rs", "tests/snapshot.rs"],
-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions still select format 1."
+      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig."
     },
     {
       "design_id": "C09",
       "public_contract": "SecureSession",
       "operations": ["security", "state", "binding", "limits", "poll", "read_plaintext", "write_plaintext", "is_flushed", "close", "revoke"],
-      "native": "NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature); Box<S> forwarding",
+      "native": "NativeTlsConfig with with_wire_version/wire_version selection; NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature); Box<S> forwarding",
       "conformance": ["tests/secure.rs", "tests/quic.rs"],
-      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence."
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–3 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport."
     },
     {
       "design_id": "C06",
@@ -630,6 +630,22 @@
       "native": "JitterEntropy",
       "conformance": ["tests/runtime.rs"],
       "scope": "Explicitly seeded reproducible election jitter; independent node seeds supplied by host. No cryptographic/identity use."
+    },
+    {
+      "design_id": "C01/C03/C10",
+      "public_contract": "Raft promoted replication authorization",
+      "operations": [
+        "step(Event::AuthorizeReplication)",
+        "step(Event::CancelReplicationAuthorization)",
+        "step(Event::Receive)"
+      ],
+      "native": "Deterministic direct witness query/reply and volatile replication-only permit; explicit NativeWireCodec format 3",
+      "conformance": [
+        "src/raft/membership_tests.rs",
+        "tests/member_recovery.rs",
+        "tests/wire.rs"
+      ],
+      "scope": "One pending request and one permit per core, exact trusted witness/candidate store, base head and fresh context. Witness grants only from durable committed membership or its reserved final target. No ballot/read/term/commit/timer authority from controls. Exact Append/Snapshot checks and durable completions remain mandatory. Cancellation, configuration change, fencing and recovery discard volatile authority. Authenticated non-Byzantine source premise; no transferable certificate. Public membership ingress and readiness/roster integration remain gated. Native TLS/QUIC format-3 witness exchange is now tested through real authenticated framed sessions; native startup can explicitly select that version."
     }
   ],
   "not_yet_implemented": [
@@ -645,22 +661,6 @@
     "authorization",
     "compression",
     "scope-transfer",
-    "transactions",
-    {
-      "design_id": "C01/C03/C10",
-      "public_contract": "Raft promoted replication authorization",
-      "operations": [
-        "step(Event::AuthorizeReplication)",
-        "step(Event::CancelReplicationAuthorization)",
-        "step(Event::Receive)"
-      ],
-      "native": "Deterministic direct witness query/reply and volatile replication-only permit; explicit NativeWireCodec format 3",
-      "conformance": [
-        "src/raft/membership_tests.rs",
-        "tests/member_recovery.rs",
-        "tests/wire.rs"
-      ],
-      "scope": "One pending request and one permit per core, exact trusted witness/candidate store, base head and fresh context. Witness grants only from durable committed membership or its reserved final target. No ballot/read/term/commit/timer authority from controls. Exact Append/Snapshot checks and durable completions remain mandatory. Cancellation, configuration change, fencing and recovery discard volatile authority. Authenticated non-Byzantine source premise; no transferable certificate. Public membership ingress and native session format upgrade remain gated."
-    }
+    "transactions"
   ]
 }

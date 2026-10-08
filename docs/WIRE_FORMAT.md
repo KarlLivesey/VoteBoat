@@ -202,8 +202,9 @@ fresh read contexts. Production assembly must supply authenticated sessions.
 ## Format 3 direct witness extensions
 
 Format 3 retains all format 2 layouts and adds RPC tags 10/11. Native session
-startup still selects format 1; hosts must explicitly negotiate matching format
-3 sessions. There is no automatic upgrade or fallback.
+startup defaults to format 1; `NativeTlsConfig::with_wire_version(3)` selects
+format 3 for its encrypted identity hello, codec and roster. Both peers must
+select the same version. There is no automatic upgrade or fallback.
 
 - Kind 10, AuthorityRequest: candidate node (`u64`), store ID (16 bytes), store
   incarnation (`u64`), requested configuration (`u64`).

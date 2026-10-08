@@ -37,7 +37,9 @@ writes across polls.
 
 Before Ready, mutual TLS authentication, the exact peer leaf certificate pin,
 QUIC ALPN `voteboat-quic/1`, and the authenticated `VBSESS01` node/store/session
-hello must all succeed. The hello selects existing message wire format 1. Remote
+hello must all succeed. The hello requires the exact message version selected by
+`NativeTlsConfig::with_wire_version` (1–3, default 1), matching the local codec and
+roster. Version mismatch fails before Ready with no fallback. Remote
 addresses are routing inputs, not membership authority. Foreign source addresses
 are discarded before protocol admission. Migration, early data, bidirectional
 streams and unreliable application datagrams are disabled.

@@ -412,3 +412,243 @@ fn quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers(
     drop(recovered);
     std::fs::remove_dir_all(root).unwrap();
 }
+
+fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol, version: u16) {
+    use voteboat::{native::connect::NativeServiceConnector, raft::Role};
+    let directory = root();
+    std::fs::create_dir(&directory).unwrap();
+    let reservations = (0..3)
+        .map(|_| {
+            (0..32)
+                .find_map(|_| {
+                    let tcp = std::net::TcpListener::bind("127.0.0.1:0").ok()?;
+                    let udp = std::net::UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
+                    Some((tcp, udp))
+                })
+                .expect("available TCP/UDP endpoint")
+        })
+        .collect::<Vec<_>>();
+    let addresses = reservations
+        .iter()
+        .map(|(tcp, _)| tcp.local_addr().unwrap())
+        .collect::<Vec<_>>();
+    let stores = (1..=3)
+        .map(|n| {
+            (
+                NodeId::new(n).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(n as u128).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    let bootstrap = Bootstrap {
+        group: group(),
+        configuration: ConfigurationId::new(9).unwrap(),
+        policy: Policy::new(
+            Tree::Majority(stores.keys().copied().map(Tree::Voter).collect()),
+            Limits::default(),
+        )
+        .unwrap(),
+        voter_stores: stores.clone(),
+    };
+    let certificate = |n| match n {
+        1 => include_bytes!("fixtures/tls/node1.der").as_slice(),
+        2 => include_bytes!("fixtures/tls/node2.der").as_slice(),
+        _ => include_bytes!("fixtures/tls/node3.der").as_slice(),
+    };
+    let key = |n| match n {
+        1 => include_bytes!("fixtures/tls/node1-key.der").as_slice(),
+        2 => include_bytes!("fixtures/tls/node2-key.der").as_slice(),
+        _ => include_bytes!("fixtures/tls/node3-key.der").as_slice(),
+    };
+    let make_config = |n: usize, mode| {
+        let mut config = config(directory.join(n.to_string()), mode);
+        config.node = NodeId::new(n as u64).unwrap();
+        config.store = stores[&config.node];
+        config.bootstrap = bootstrap.clone();
+        config.listen = addresses[n - 1];
+        config.peers = (1..=3)
+            .filter(|p| *p != n)
+            .map(|p| {
+                (
+                    NodeId::new(p as u64).unwrap(),
+                    NativeStartupPeer {
+                        address: addresses[p - 1],
+                        certificate: certificate(p).to_vec(),
+                        server_name: format!("node{p}.voteboat.test"),
+                    },
+                )
+            })
+            .collect();
+        config.entropy_seed += n as u64;
+        config.tls = NativeTlsConfig::new(TlsCredentials {
+            roots: vec![include_bytes!("fixtures/tls/ca.der").to_vec()],
+            certificate_chain: vec![certificate(n).to_vec()],
+            private_key: key(n).to_vec(),
+        })
+        .unwrap()
+        .with_wire_version(version)
+        .unwrap();
+        config
+    };
+    // Release every placeholder before any real peer can connect to it.
+    drop(reservations);
+    let open = |mode| {
+        (1..=3)
+            .map(|n| {
+                make_config(n, mode)
+                    .open_with_protocol(
+                        protocol,
+                        app(),
+                        Arc::new(ThreadWake::current()),
+                        MonoTime(0),
+                    )
+                    .unwrap()
+            })
+            .collect::<Vec<_>>()
+    };
+    let mut nodes = open(NativeOpenMode::Create);
+    for node in &nodes {
+        assert_eq!(node.peers().unwrap().roster().wire_version(), version);
+    }
+    nodes[0].control(group(), NodeControl::Campaign).unwrap();
+    let clock = Instant::now();
+    loop {
+        for node in &mut nodes {
+            node.poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        }
+        if nodes
+            .iter()
+            .all(|n| n.local().applications[&group()].applied_index() > 0)
+        {
+            break;
+        }
+        assert!(clock.elapsed() < Duration::from_secs(10));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    assert_eq!(
+        nodes[0].local().owner.core(group()).unwrap().role(),
+        Role::Leader
+    );
+    nodes[0]
+        .propose(ClientRequest {
+            group: group(),
+            operation: OperationId::new(88).unwrap(),
+            bytes: 9i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    let mut completed = false;
+    loop {
+        for node in &mut nodes {
+            node.poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        }
+        if let Some(reply) = nodes[0].poll_client() {
+            assert!(matches!(
+                nodes[0].complete_client(reply).unwrap(),
+                ClientOutcome::Applied {
+                    receipt: CounterReceipt {
+                        outcome: CounterOutcome::Value(9),
+                        ..
+                    },
+                    ..
+                }
+            ));
+            completed = true;
+        }
+        if completed
+            && nodes
+                .iter()
+                .all(|n| n.local().applications[&group()].applied_index() >= 2)
+        {
+            break;
+        }
+        assert!(clock.elapsed() < Duration::from_secs(10));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    fn drain(mut nodes: Vec<NativeNode<HostApplication, NativeServiceConnector>>) {
+        for node in &mut nodes {
+            node.begin_shutdown();
+        }
+        let clock = Instant::now();
+        loop {
+            for node in &mut nodes {
+                node.poll(
+                    MonoTime(10000 + clock.elapsed().as_millis() as u64),
+                    NodePollBudget::default(),
+                )
+                .unwrap();
+            }
+            if nodes.iter().all(|n| n.is_drained()) {
+                break;
+            }
+            assert!(clock.elapsed() < Duration::from_secs(10));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        for node in nodes {
+            let mut parts = node.into_parts().unwrap_or_else(|_| panic!("not drained"));
+            let mut dialer = parts
+                .peers
+                .take()
+                .unwrap()
+                .connector
+                .into_dialer()
+                .unwrap_or_else(|_| panic!("connector not drained"));
+            let mut snapshots = parts.local.snapshots.take().unwrap();
+            let (mut log_done, mut snapshot_done) = (false, false);
+            loop {
+                let dial_done = dialer
+                    .as_mut()
+                    .is_none_or(|dialer| dialer.try_finish().unwrap());
+                if !log_done {
+                    log_done = parts.local.persistence.try_reclaim().unwrap().is_some();
+                }
+                if !snapshot_done {
+                    snapshot_done = snapshots.worker.try_reclaim().unwrap().is_some();
+                }
+                if dial_done && log_done && snapshot_done {
+                    break;
+                }
+                assert!(clock.elapsed() < Duration::from_secs(10));
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+        }
+    }
+    drain(nodes);
+    let nodes = open(NativeOpenMode::Recover);
+    for node in &nodes {
+        assert_eq!(node.peers().unwrap().roster().wire_version(), version);
+        let application = &node.local().applications[&group()];
+        assert_eq!(
+            application.0.read_applied(application.applied_index()),
+            Ok(9)
+        );
+    }
+    drain(nodes);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+#[test]
+fn tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_and_three() {
+    for version in [2, 3] {
+        selected_wire_cluster(
+            voteboat::native::connect::NativePeerProtocol::TcpTls,
+            version,
+        );
+    }
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_and_three() {
+    for version in [2, 3] {
+        selected_wire_cluster(voteboat::native::connect::NativePeerProtocol::Quic, version);
+    }
+}

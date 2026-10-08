@@ -283,6 +283,9 @@ mod native {
         native::{connect::*, dial::NativeTcpDialer, tls::NativeTlsSession, worker::ThreadWake},
     };
     fn make(id: u64, peers: &[u64], limit: usize) -> NativePeerConnector {
+        versioned_make(id, peers, limit, 1)
+    }
+    fn versioned_make(id: u64, peers: &[u64], limit: usize, version: u16) -> NativePeerConnector {
         let map = peers
             .iter()
             .map(|id| (local(*id).node, local(*id).store.identity))
@@ -307,7 +310,9 @@ mod native {
                     ..SessionLimits::default()
                 },
             },
-            support::tls::configuration(id),
+            support::tls::configuration(id)
+                .with_wire_version(version)
+                .unwrap(),
             peers
                 .iter()
                 .map(|id| (local(*id).node, support::tls::peer(local(*id))))
@@ -865,5 +870,43 @@ mod native {
         // This deliberately broken provider lost its real receipt. Observation
         // must be abandoned; no result can be passed to a roster as evidence.
         assert!(c.into_dialer().is_err());
+    }
+
+    #[test]
+    fn connector_transfers_selected_versions_and_rejects_mismatch_without_ready() {
+        for (av, bv) in [(2, 2), (3, 3), (1, 3), (3, 2)] {
+            let mut a = versioned_make(1, &[2], 1, av);
+            let mut b = versioned_make(2, &[1], 1, bv);
+            let address = b.listener_addr().unwrap().unwrap();
+            a.submit(
+                req(ticket(1, 2, 1), ConnectDirection::Dial(address)),
+                MonoTime(0),
+            )
+            .unwrap();
+            b.submit(req(ticket(2, 1, 1), ConnectDirection::Accept), MonoTime(0))
+                .unwrap();
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let mut events = Vec::new();
+            while events.len() < 2 {
+                events.extend(step(&mut a, 0));
+                events.extend(step(&mut b, 0));
+                assert!(Instant::now() < deadline);
+                thread::park_timeout(Duration::from_millis(1));
+            }
+            for event in events {
+                if av == bv {
+                    let session = event.result.unwrap();
+                    assert_eq!(require_authenticated(&session).unwrap().wire_version, av);
+                } else {
+                    assert!(matches!(
+                        event.result,
+                        Err(ConnectError::Session(SessionError::IncompatibleProtocol))
+                    ));
+                }
+            }
+            assert!(a.is_drained() && b.is_drained());
+            finish(a, 0);
+            finish(b, 0);
+        }
     }
 }

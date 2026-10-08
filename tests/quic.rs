@@ -27,6 +27,9 @@ fn local(n: u64) -> LocalIdentity {
     }
 }
 fn pair() -> (NativeQuicSession, NativeQuicSession) {
+    versioned_pair(1, 1)
+}
+fn versioned_pair(a_version: u16, b_version: u16) -> (NativeQuicSession, NativeQuicSession) {
     let a = UdpSocket::bind("127.0.0.1:0").unwrap();
     let b = UdpSocket::bind("127.0.0.1:0").unwrap();
     let aa = a.local_addr().unwrap();
@@ -44,14 +47,18 @@ fn pair() -> (NativeQuicSession, NativeQuicSession) {
     (
         NativeQuicSession::client(
             a,
-            &support::tls::configuration(1),
+            &support::tls::configuration(1)
+                .with_wire_version(a_version)
+                .unwrap(),
             options(1, 2, ba),
             MonoTime(0),
         )
         .unwrap(),
         NativeQuicSession::server(
             b,
-            &support::tls::configuration(2),
+            &support::tls::configuration(2)
+                .with_wire_version(b_version)
+                .unwrap(),
             options(2, 1, aa),
             MonoTime(0),
         )
@@ -693,4 +700,32 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
         Err(SessionError::HandshakeTooLarge)
     );
     assert!(server.binding().is_none());
+}
+
+#[test]
+fn quic_authenticates_exact_selected_wire_version_without_downgrade() {
+    for version in [2, 3] {
+        let (mut a, mut b) = versioned_pair(version, version);
+        ready(&mut a, &mut b);
+        assert_eq!(require_authenticated(&a).unwrap().wire_version, version);
+        assert_eq!(require_authenticated(&b).unwrap().wire_version, version);
+    }
+    for (av, bv) in [(1, 3), (2, 3), (3, 1)] {
+        let (mut a, mut b) = versioned_pair(av, bv);
+        let mut rejected = false;
+        for now in 0..5000 {
+            for s in [&mut a, &mut b] {
+                if let Err(error) = s.poll(MonoTime(now), SessionPollBudget::default()) {
+                    assert_eq!(error, SessionError::IncompatibleProtocol);
+                    rejected = true;
+                }
+                assert!(s.binding().is_none());
+                assert_ne!(s.state(), SessionState::Ready);
+            }
+            if rejected {
+                break;
+            }
+        }
+        assert!(rejected);
+    }
 }

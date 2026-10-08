@@ -47,6 +47,7 @@ pub struct NativeQuicSession {
     endpoint: Endpoint,
     connection: Option<(ConnectionHandle, Connection)>,
     options: QuicSessionOptions,
+    wire_version: u16,
     state: SessionState,
     failure: Option<SessionError>,
     binding: Option<SessionBinding>,
@@ -188,12 +189,13 @@ impl NativeQuicSession {
         socket
             .set_nonblocking()
             .map_err(|e| SessionError::Io(e.kind()))?;
-        let hello_out = encode_hello(options.local);
+        let hello_out = encode_hello(options.local, config.wire_version());
         Ok(Self {
             socket,
             endpoint,
             connection,
             options,
+            wire_version: config.wire_version(),
             state: SessionState::Handshaking,
             failure: None,
             binding: None,
@@ -454,6 +456,7 @@ impl NativeQuicSession {
                 self.options.local,
                 self.options.peer.identity,
                 self.options.generation,
+                self.wire_version,
             )?);
             self.state = SessionState::Ready;
         }

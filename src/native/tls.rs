@@ -37,6 +37,7 @@ pub struct TlsCredentials {
 pub struct NativeTlsConfig {
     pub(crate) client: Arc<ClientConfig>,
     pub(crate) server: Arc<ServerConfig>,
+    wire_version: u16,
 }
 impl NativeTlsConfig {
     pub fn new(material: TlsCredentials) -> Result<Self, SessionError> {
@@ -101,7 +102,20 @@ impl NativeTlsConfig {
         Ok(Self {
             client: Arc::new(client),
             server: Arc::new(server),
+            wire_version: 1,
         })
+    }
+    /// Select one exact native message format (1–3) for future sessions.
+    /// Peers must select the same version; there is no automatic downgrade.
+    pub fn with_wire_version(mut self, version: u16) -> Result<Self, SessionError> {
+        if !(1..=3).contains(&version) {
+            return Err(SessionError::IncompatibleProtocol);
+        }
+        self.wire_version = version;
+        Ok(self)
+    }
+    pub fn wire_version(&self) -> u16 {
+        self.wire_version
     }
 }
 /// Trusted construction-time certificate pin and stable node/store identity.
@@ -120,6 +134,7 @@ pub struct NativeTlsSession<I: Read + Write> {
     local: LocalIdentity,
     peer: TlsPeer,
     generation: SecureSessionGeneration,
+    wire_version: u16,
     binding: Option<SessionBinding>,
     limits: SessionLimits,
     state: SessionState,
@@ -153,7 +168,16 @@ impl<I: Read + Write> NativeTlsSession<I> {
             .map_err(|_| SessionError::InvalidCredentials)?;
         let connection = ClientConnection::new(config.client.clone(), name)
             .map_err(|_| SessionError::InvalidCredentials)?;
-        Self::new(io, connection.into(), local, peer, generation, limits, now)
+        Self::new(
+            io,
+            connection.into(),
+            local,
+            peer,
+            generation,
+            limits,
+            now,
+            config.wire_version(),
+        )
     }
     pub fn server(
         io: I,
@@ -166,8 +190,18 @@ impl<I: Read + Write> NativeTlsSession<I> {
     ) -> Result<Self, SessionError> {
         let connection = ServerConnection::new(config.server.clone())
             .map_err(|_| SessionError::InvalidCredentials)?;
-        Self::new(io, connection.into(), local, peer, generation, limits, now)
+        Self::new(
+            io,
+            connection.into(),
+            local,
+            peer,
+            generation,
+            limits,
+            now,
+            config.wire_version(),
+        )
     }
+    #[allow(clippy::too_many_arguments)] // Existing session scope plus private selected format.
     fn new(
         io: I,
         mut connection: Connection,
@@ -176,6 +210,7 @@ impl<I: Read + Write> NativeTlsSession<I> {
         generation: SecureSessionGeneration,
         limits: SessionLimits,
         now: MonoTime,
+        wire_version: u16,
     ) -> Result<Self, SessionError> {
         let limits = limits.validate()?;
         if local.node == peer.identity.node
@@ -191,13 +226,14 @@ impl<I: Read + Write> NativeTlsSession<I> {
                 .ok_or(SessionError::InvalidLimits)?,
         );
         connection.set_buffer_limit(Some(limits.write_buffer_bytes));
-        let hello = encode_hello(local);
+        let hello = encode_hello(local, wire_version);
         Ok(Self {
             io: Some(io),
             connection,
             local,
             peer,
             generation,
+            wire_version,
             binding: None,
             limits,
             state: SessionState::Handshaking,
@@ -275,6 +311,7 @@ impl<I: Read + Write> NativeTlsSession<I> {
                 self.local,
                 self.peer.identity,
                 self.generation,
+                self.wire_version,
             )?);
             self.state = SessionState::Ready;
             progress = true;
@@ -555,10 +592,10 @@ impl<I: Read + Write> SecureSession for NativeTlsSession<I> {
     }
 }
 
-pub(crate) fn encode_hello(local: LocalIdentity) -> [u8; HELLO] {
+pub(crate) fn encode_hello(local: LocalIdentity, wire_version: u16) -> [u8; HELLO] {
     let mut hello = [0; HELLO];
     hello[..8].copy_from_slice(b"VBSESS01");
-    hello[8..10].copy_from_slice(&1u16.to_le_bytes());
+    hello[8..10].copy_from_slice(&wire_version.to_le_bytes());
     hello[12..20].copy_from_slice(&local.node.get().to_le_bytes());
     hello[20..36].copy_from_slice(&local.store.identity.id.get().to_le_bytes());
     hello[36..44].copy_from_slice(&local.store.identity.incarnation.get().to_le_bytes());
@@ -571,8 +608,12 @@ pub(crate) fn decode_hello(
     local: LocalIdentity,
     peer: PeerIdentity,
     generation: SecureSessionGeneration,
+    wire_version: u16,
 ) -> Result<SessionBinding, SessionError> {
-    if &h[..8] != b"VBSESS01" || h[8..12] != [1, 0, 0, 0] {
+    if &h[..8] != b"VBSESS01"
+        || u16::from_le_bytes(h[8..10].try_into().unwrap()) != wire_version
+        || h[10..12] != [0, 0]
+    {
         return Err(SessionError::IncompatibleProtocol);
     }
     let node = NodeId::new(u64::from_le_bytes(h[12..20].try_into().unwrap()))
@@ -598,6 +639,6 @@ pub(crate) fn decode_hello(
             },
         },
         generation,
-        wire_version: 1,
+        wire_version,
     })
 }

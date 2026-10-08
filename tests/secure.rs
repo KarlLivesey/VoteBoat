@@ -224,6 +224,13 @@ mod tls {
         )
     }
     fn sessions(chunk: usize) -> (NativeTlsSession<Memory>, NativeTlsSession<Memory>) {
+        versioned_sessions(chunk, 1, 1)
+    }
+    fn versioned_sessions(
+        chunk: usize,
+        a_version: u16,
+        b_version: u16,
+    ) -> (NativeTlsSession<Memory>, NativeTlsSession<Memory>) {
         let (a, b) = duplex(chunk);
         let limits = SessionLimits {
             write_buffer_bytes: 128,
@@ -232,7 +239,7 @@ mod tls {
         (
             NativeTlsSession::client(
                 a,
-                &config(1),
+                &config(1).with_wire_version(a_version).unwrap(),
                 identity(1, 2),
                 peer(2),
                 SecureSessionGeneration::new(1).unwrap(),
@@ -242,7 +249,7 @@ mod tls {
             .unwrap(),
             NativeTlsSession::server(
                 b,
-                &config(2),
+                &config(2).with_wire_version(b_version).unwrap(),
                 identity(2, 7),
                 peer(1),
                 SecureSessionGeneration::new(9).unwrap(),
@@ -738,6 +745,79 @@ mod tls {
                 b"still live"
             );
             // Next iteration reuses the same listener/configs with a fresh generation and store session.
+        }
+    }
+
+    #[test]
+    fn explicit_wire_versions_are_exact_authenticated_and_do_not_mutate_shared_configs() {
+        let original = config(1);
+        assert_eq!(original.wire_version(), 1);
+        for version in [2, 3] {
+            assert_eq!(
+                original
+                    .clone()
+                    .with_wire_version(version)
+                    .unwrap()
+                    .wire_version(),
+                version
+            );
+            assert_eq!(original.wire_version(), 1);
+            let (mut a, mut b) = versioned_sessions(7, version, version);
+            ready(&mut a, &mut b);
+            assert_eq!(require_authenticated(&a).unwrap().wire_version, version);
+            assert_eq!(require_authenticated(&b).unwrap().wire_version, version);
+            assert_eq!(
+                transfer(&mut a, &mut b, b"versioned partial stream"),
+                b"versioned partial stream"
+            );
+        }
+        for version in [0, 4, u16::MAX] {
+            assert_eq!(
+                original.clone().with_wire_version(version).err(),
+                Some(SessionError::IncompatibleProtocol)
+            );
+        }
+        for (a_version, b_version) in [(1, 2), (2, 3), (3, 1)] {
+            let (mut a, mut b) = versioned_sessions(7, a_version, b_version);
+            let mut rejected = false;
+            for _ in 0..10000 {
+                for s in [&mut a, &mut b] {
+                    if let Err(error) = poll(s) {
+                        assert_eq!(error, SessionError::IncompatibleProtocol);
+                        rejected = true;
+                    }
+                    assert_ne!(s.state(), SessionState::Ready);
+                    assert!(s.binding().is_none());
+                }
+                if rejected {
+                    break;
+                }
+            }
+            assert!(rejected);
+        }
+    }
+    #[test]
+    fn real_tcp_selects_wire_three_and_rejects_a_different_peer_version() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let c1 = config(1).with_wire_version(3).unwrap();
+        let c2 = config(2).with_wire_version(3).unwrap();
+        let (mut a, mut b) = sockets(&listener, &c1, &c2, 1, 7);
+        ready(&mut a, &mut b);
+        assert_eq!(require_authenticated(&a).unwrap().wire_version, 3);
+        assert_eq!(require_authenticated(&b).unwrap().wire_version, 3);
+        let (mut a, mut b) = sockets(&listener, &c1, &config(2), 2, 8);
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            let results = [poll(&mut a), poll(&mut b)];
+            assert!(a.binding().is_none() && b.binding().is_none());
+            if results
+                .iter()
+                .any(|r| matches!(r, Err(SessionError::IncompatibleProtocol)))
+            {
+                break;
+            }
+            assert!(Instant::now() < deadline);
+            std::thread::park_timeout(Duration::from_millis(1));
         }
     }
 }

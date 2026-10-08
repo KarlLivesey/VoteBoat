@@ -56,18 +56,20 @@ explicit membership snapshot). Formats 1/2 reject authority traffic. Decoding
 checks identities, scope, boundary, booleans, lengths and retained-memory budgets;
 a checksum is integrity detection, not authentication.
 
-Native TLS/QUIC startup still selects wire format 1. Hosts selecting format 3
-must provide a matching authenticated session capability; this slice does not
-silently upgrade existing connections. Public configuration-bearing Append and
-membership Snapshot ingress remains gated. Internal actual-core tests exercise
+Native TLS/QUIC startup defaults to wire format 1. Select format 3 explicitly
+with `NativeTlsConfig::with_wire_version(3)` on every peer. Native sessions require
+an exact encrypted hello match, and startup selects its codec and roster from the
+same config. Existing connections retain their selected version. Public
+configuration-bearing Append and membership Snapshot ingress remains gated.
+Internal actual-core tests exercise
 promoted joint activation behind that gate. Public host/native tests exercise
 query/grant and static-prefix probing. This protocol is groundwork for online
 membership, not a released online administration flow.
 
 If every old witness is unavailable or has compacted the required old view, this
 exchange cannot authorize catch-up. Retaining historical evidence, authenticated
-route/roster admission, readiness and session-version negotiation, faulted full
-activation/retirement histories and administrative integration remain required.
+route/roster admission, readiness capabilities, faulted full activation/retirement
+histories and administrative integration remain required.
 No fallback accepts a candidate's self-reported configuration as authority.
 
 ## Evidence
@@ -83,5 +85,8 @@ Three downstream tests cover public host/native query/grant/probing and loss of
 volatile authority on fencing/recovery, including a term-zero request. A native
 codec test covers all authority variants, old-format rejection, round trips,
 invalid booleans/boundaries/identities, every truncation, batch limits and existing
-membership snapshots. These finite checks do not prove arbitrary distributed
-membership schedules, macOS execution or performance.
+membership snapshots. Two further native-storage histories run the direct
+witness exchange through actual TCP/TLS and QUIC format-3 framed sessions with
+exact outbound credit completion. They exercise public core/storage/transport
+composition, not an online membership service. These finite checks do not prove
+arbitrary distributed membership schedules, macOS execution or performance.

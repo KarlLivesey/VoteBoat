@@ -54,6 +54,9 @@ fn config(n: u64) -> NativeConnectConfig {
     }
 }
 fn connectors() -> Vec<NativeQuicConnector> {
+    versioned_connectors([1, 1, 1])
+}
+fn versioned_connectors(versions: [u16; 3]) -> Vec<NativeQuicConnector> {
     let sockets = (0..3)
         .map(|_| UdpSocket::bind("127.0.0.1:0").unwrap())
         .collect::<Vec<_>>();
@@ -68,7 +71,9 @@ fn connectors() -> Vec<NativeQuicConnector> {
             let n = i as u64 + 1;
             NativeQuicConnector::new(
                 config(n),
-                support::tls::configuration(n),
+                support::tls::configuration(n)
+                    .with_wire_version(versions[i])
+                    .unwrap(),
                 (1..=3)
                     .filter(|p| *p != n)
                     .map(|p| {
@@ -313,4 +318,43 @@ fn failed_construction_returns_socket_without_starting_protocol_work() {
     assert_eq!(rejection.socket.local_addr().unwrap(), address);
     drop(rejection);
     UdpSocket::bind(address).unwrap();
+}
+
+#[test]
+fn shared_quic_connector_preserves_selected_versions_and_rejects_mismatches() {
+    for version in [2, 3] {
+        let mut connectors = versioned_connectors([version; 3]);
+        let (mut sessions, now) = establish(&mut connectors, 0, 1);
+        assert!(sessions
+            .values()
+            .all(|s| require_authenticated(s).unwrap().wire_version == version));
+        exchange(&mut sessions, now);
+        for connector in &mut connectors {
+            connector.close();
+            assert!(connector.is_drained());
+        }
+    }
+    let mut connectors = versioned_connectors([1, 3, 3]);
+    let address = connectors[1].local_addr();
+    request(&mut connectors[0], 1, 2, 1, address, 0);
+    request(&mut connectors[1], 2, 1, 1, address, 0);
+    let mut results = Vec::new();
+    for now in 0..10001 {
+        for c in &mut connectors {
+            results.extend(c.poll(MonoTime(now), ConnectPollBudget::default()).unwrap());
+        }
+        if results.len() == 2 {
+            break;
+        }
+    }
+    assert_eq!(results.len(), 2);
+    assert!(results.iter().all(|event| event.result.is_err()));
+    assert!(results.iter().any(|event| matches!(
+        event.result,
+        Err(ConnectError::Session(SessionError::IncompatibleProtocol))
+    )));
+    for c in &mut connectors {
+        c.close();
+        assert!(c.is_drained());
+    }
 }

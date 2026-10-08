@@ -855,6 +855,12 @@ fn authority_transfer(message: &Message) -> Message {
     message.clone()
 }
 fn witnessed_replication<S: LogStore>(witness_log: &mut S) {
+    witnessed_replication_with(witness_log, authority_transfer);
+}
+fn witnessed_replication_with<S: LogStore>(
+    witness_log: &mut S,
+    mut transfer: impl FnMut(&Message) -> Message,
+) {
     use voteboat::secure::PeerIdentity;
     prepare(witness_log, false, false);
     commit(witness_log, 2);
@@ -901,9 +907,7 @@ fn witnessed_replication<S: LogStore>(witness_log: &mut S) {
     let [Effect::Send(query)] = query.as_slice() else {
         panic!()
     };
-    let reply = witness
-        .step(Event::Receive(authority_transfer(query)))
-        .unwrap();
+    let reply = witness.step(Event::Receive(transfer(query))).unwrap();
     let [Effect::Send(reply)] = reply.as_slice() else {
         panic!()
     };
@@ -915,9 +919,7 @@ fn witnessed_replication<S: LogStore>(witness_log: &mut S) {
             ..
         }
     ));
-    receiver
-        .step(Event::Receive(authority_transfer(reply)))
-        .unwrap();
+    receiver.step(Event::Receive(transfer(reply))).unwrap();
     assert_eq!(receiver.state(), &before);
     assert_eq!(receiver.election_reset_sequence(), reset);
     let sender = StoreBinding {
@@ -1007,4 +1009,169 @@ fn term_zero_replica_can_query_without_advancing_hard_state() {
     receiver
         .step(Event::CancelReplicationAuthorization)
         .unwrap();
+}
+
+#[cfg(feature = "tls")]
+mod authenticated_witness {
+    use super::*;
+    use std::{
+        net::{TcpListener, TcpStream},
+        time::{Duration, Instant},
+    };
+    use voteboat::{
+        native::{
+            log_store::*, outbound::NativeOutbound, tls::*, transport::NativePeerTransport,
+            wire::NativeWireCodec,
+        },
+        outbound::*,
+        runtime::MonoTime,
+        secure::*,
+        transport::*,
+        wire::WireLimits,
+    };
+    fn identities(log: &impl LogStore) -> (LocalIdentity, LocalIdentity) {
+        (
+            LocalIdentity {
+                node: node(3),
+                store: HostLogStore::new(3).binding(),
+            },
+            LocalIdentity {
+                node: node(1),
+                store: log.binding(),
+            },
+        )
+    }
+    fn run<S: SecureSession>(log: &mut impl LogStore, mut a: S, mut b: S) {
+        let clock = Instant::now();
+        while a.state() != SessionState::Ready || b.state() != SessionState::Ready {
+            let now = MonoTime(clock.elapsed().as_millis() as u64);
+            a.poll(now, SessionPollBudget::default()).unwrap();
+            b.poll(now, SessionPollBudget::default()).unwrap();
+            assert!(clock.elapsed() < Duration::from_secs(5));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        assert_eq!(require_authenticated(&a).unwrap().wire_version, 3);
+        assert_eq!(require_authenticated(&b).unwrap().wire_version, 3);
+        let queue = |local: LocalIdentity| {
+            NativeOutbound::new(
+                OutboundBinding {
+                    node: local.node,
+                    store: local.store,
+                    generation: OutboundGeneration::new(1).unwrap(),
+                },
+                OutboundLimits::default(),
+            )
+            .unwrap()
+        };
+        let mut qa = queue(a.binding().unwrap().local);
+        let mut qb = queue(b.binding().unwrap().local);
+        let codec = || NativeWireCodec::with_authority(WireLimits::default()).unwrap();
+        let mut a = NativePeerTransport::new(a, codec(), &qa, TransportLimits::default()).unwrap();
+        let mut b = NativePeerTransport::new(b, codec(), &qb, TransportLimits::default()).unwrap();
+        witnessed_replication_with(log, |message| {
+            let forward = message.from == node(3);
+            if forward {
+                qa.submit(vec![message.clone()]).unwrap();
+                a.submit(qa.poll(1).pop().unwrap()).unwrap();
+            } else {
+                qb.submit(vec![message.clone()]).unwrap();
+                b.submit(qb.poll(1).pop().unwrap()).unwrap();
+            }
+            loop {
+                let now = MonoTime(clock.elapsed().as_millis() as u64);
+                a.poll(now, TransportPollBudget::default()).unwrap();
+                b.poll(now, TransportPollBudget::default()).unwrap();
+                let done = if forward {
+                    a.usage().completion && b.received_info().is_some()
+                } else {
+                    b.usage().completion && a.received_info().is_some()
+                };
+                if done {
+                    break;
+                }
+                assert!(clock.elapsed() < Duration::from_secs(10));
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+            let received = if forward {
+                b.take_received().unwrap()
+            } else {
+                a.take_received().unwrap()
+            };
+            assert_eq!(received.messages.as_slice(), std::slice::from_ref(message));
+            let completion = if forward {
+                a.take_send().unwrap()
+            } else {
+                b.take_send().unwrap()
+            };
+            assert_eq!(completion.result, LocalSendResult::Sent);
+            if forward {
+                qa.complete(completion.batch, completion.result).unwrap();
+            } else {
+                qb.complete(completion.batch, completion.result).unwrap();
+            }
+            assert_eq!(qa.usage().batches + qb.usage().batches, 0);
+            received.messages.into_iter().next().unwrap()
+        });
+    }
+    #[test]
+    fn native_durable_witness_exchange_uses_real_tcp_tls_wire_three() {
+        let mut log =
+            NativeLogStore::create(ModelIo::default(), identity(1), LogLimits::default()).unwrap();
+        let (receiver, witness) = identities(&log);
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        let (server, _) = listener.accept().unwrap();
+        client.set_nodelay(true).unwrap();
+        server.set_nodelay(true).unwrap();
+        let config = |n| support::tls::configuration(n).with_wire_version(3).unwrap();
+        let a = NativeTlsSession::client_tcp(
+            client,
+            &config(3),
+            receiver,
+            support::tls::peer(witness),
+            SecureSessionGeneration::new(1).unwrap(),
+            SessionLimits::default(),
+            MonoTime(0),
+        )
+        .unwrap();
+        let b = NativeTlsSession::server_tcp(
+            server,
+            &config(1),
+            witness,
+            support::tls::peer(receiver),
+            SecureSessionGeneration::new(1).unwrap(),
+            SessionLimits::default(),
+            MonoTime(0),
+        )
+        .unwrap();
+        run(&mut log, a, b);
+    }
+    #[cfg(feature = "quic")]
+    #[test]
+    fn native_durable_witness_exchange_uses_real_quic_wire_three() {
+        use std::net::UdpSocket;
+        use voteboat::native::quic::*;
+        let mut log =
+            NativeLogStore::create(ModelIo::default(), identity(1), LogLimits::default()).unwrap();
+        let (receiver, witness) = identities(&log);
+        let a = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let b = UdpSocket::bind("127.0.0.1:0").unwrap();
+        let aa = a.local_addr().unwrap();
+        let ba = b.local_addr().unwrap();
+        let config = |n| support::tls::configuration(n).with_wire_version(3).unwrap();
+        let options = |local, remote, address| QuicSessionOptions {
+            local,
+            peer: support::tls::peer(remote),
+            remote: address,
+            generation: SecureSessionGeneration::new(1).unwrap(),
+            limits: SessionLimits::default(),
+        };
+        let a =
+            NativeQuicSession::client(a, &config(3), options(receiver, witness, ba), MonoTime(0))
+                .unwrap();
+        let b =
+            NativeQuicSession::server(b, &config(1), options(witness, receiver, aa), MonoTime(0))
+                .unwrap();
+        run(&mut log, a, b);
+    }
 }

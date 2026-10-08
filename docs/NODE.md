@@ -99,3 +99,11 @@ It now also physically cleans reclaimed WAL handles before reopening; see
 [WAL reclamation](WAL_RECLAMATION.md).
 These finite Linux histories do not establish arbitrary schedules, macOS
 execution, performance or online membership transitions.
+
+NativeStartup uses `tls.wire_version()` for its message codec, PeerRoster and
+TCP/TLS or QUIC connector. The default remains 1. Call
+`NativeTlsConfig::with_wire_version(2)` or `(3)` before opening to select an exact
+matching version on every peer; mismatches fail the encrypted identity hello
+before a session becomes Ready. Unsupported values reject at configuration
+selection. This is independent of persistent formats and does not enable online
+configuration ingress. The counter executable retains its default version 1.

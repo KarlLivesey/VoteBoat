@@ -206,3 +206,39 @@ format 3 when native support is enabled; this is codec/provider composition,
 not encrypted format-3 session negotiation. Final focused library/member checks
 also cover rejecting a claimed committed boundary at or before the base's last
 configuration and ignoring a high term carried by a control query.
+
+## Slice 47 authenticated wire selection evidence
+
+Two new TLS tests and one QUIC test verify explicit versions 2/3, invalid
+selection, independent config clones, fragmented authenticated stream transfer,
+real sockets and mismatch before Ready. One TCP and one shared-QUIC connector
+test verify the selected version survives handoff and mismatches release terminal
+ownership without a Ready session. Two native-storage public witness histories
+send real core query/reply through authenticated TCP/TLS and QUIC format-3 framed
+transports with original outbound credits held until exact local completion.
+
+Two startup histories run both versions over three-node native TCP and QUIC
+clusters, commit a write, drain/join workers and restore applied state after
+recovery. The fixture's initially missing parent directory was corrected;
+production startup semantics remain unchanged. Final QUIC-enabled library/
+connect/member/QUIC/QUIC-connector/secure/startup tests pass 38/13/19/10/5/14/8
+(107 total). Existing service/effect-owner/peers/transport regressions pass
+7/94/13/13 (127 total). Core-only and native-only all-target builds, all-feature
+all-target Clippy and API docs pass.
+
+The prior inventory accidentally placed an implemented authorization record in
+the deferred-name array. The record now belongs to contracts. The new Node-only
+validation/check-inventory.mjs verifies array shapes, unique names, required
+fields and actual conformance files; it passes all 46 contracts and rejects the
+previous committed inventory as a negative control. This is metadata validation,
+not new consensus evidence.
+
+This selects one exact supported wire version; it does not negotiate a list or
+establish membership readiness. NativeStartup still exposes the static service;
+public configuration ingress and complete faulted activation/retirement remain
+gated. There is no macOS execution, formal completeness or performance claim.
+
+Default TCP/TLS member/secure/startup suites independently pass 18/14/6 tests.
+Formatting, changed-document links, inventory shape/conformance paths and diff
+checks pass. The QUIC-enabled combined history also passes after the final
+assertion uses a borrowed expected-message slice.

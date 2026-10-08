@@ -2828,10 +2828,54 @@ links and diff checks pass. Public witness histories also traverse format-3
 query/reply frames with native support. Final focused library/member checks
 include a too-old claimed commit boundary and a high-term control query.
 
+## Slice 47 — authenticated native wire selection
+
+Mini schema plan: select one supported message version in NativeTlsConfig,
+defaulting to 1. Bind it into the encrypted fixed-size identity hello, session
+binding and connector completion checks. Derive startup codec/roster from the
+same value. Preserve identities, ownership, handshake budgets and persistent
+formats. Reject mismatch before Ready without downgrade. Check actual witness
+traffic and complete native create/write/drain/recover composition.
+
+NativeTlsConfig now exposes with_wire_version and wire_version for exact versions
+1–3. TCP/TLS and QUIC use that choice in the existing 52-byte encrypted hello;
+ALPN/session framing families, pins and TLS security remain unchanged. Unsupported
+selections reject before session construction. The choice is copied per config
+and session; cloned credentials may select independently. Both connectors verify
+the transferred version. NativeStartup selects its message codec and PeerRoster
+from the same config for create/recover, retaining version 1 defaults.
+
+Two TLS tests and one QUIC test cover versions 2/3, invalid selections, config
+clone isolation, fragmented streams, real TCP and mismatches before Ready. One
+TCP connector and one shared QUIC connector test verify selected-version handoff
+and mismatch cleanup. Two native-storage witness histories send actual core
+queries/replies through format-3 authenticated TCP/TLS and QUIC framed transports,
+with exact send completion/credit release. Two startup tests exercise both
+versions and transports in three-node native-file clusters: election, committed
+write, full drain/join, restart and applied recovery. The cluster fixture was
+corrected to create its parent directory; it reserves TCP/UDP endpoints and
+releases all placeholders before any real peer starts.
+
+The final QUIC-enabled library/connect/member/QUIC/QUIC-connector/secure/startup
+run passes 38/13/19/10/5/14/8 tests (107 total). Default service/effect-owner/
+peers/transport regressions with QUIC enabled pass 7/94/13/13 tests (127 total).
+Core-only and native-only all-target builds, all-feature Clippy and API docs pass.
+The inventory's prior authorization entry was misplaced under not_yet_implemented;
+it is now in contracts. validation/check-inventory.mjs checks all entry shapes,
+uniqueness and conformance paths, and rejects the prior committed metadata as a
+negative control. Its pass validates metadata, not component behavior.
+
+Online membership remains gated. This is exact compatibility selection, not
+multi-version fallback or a readiness protocol. The counter executable remains
+on its default version 1; embedding hosts select a version in their startup TLS
+config. Historical evidence retention, membership-aware roster/route admission,
+readiness and complete faulted activation/retirement remain required. Full P0–P7
+remains active; no macOS, formal proof or performance claim is made.
+
 ## Next slice
 
-Continue P4 with authenticated session capability/version selection and
-route/roster admission for promoted catch-up, readiness evidence and distributed
-activation/retirement fault histories before releasing online configuration
-ingress. Preserve the usable static TCP/QUIC service. Full P0–P7 also retains
-recursive responsibilities, split/merge and broader P7 evidence.
+Continue P4 with membership-aware route/roster admission for promoted catch-up,
+readiness evidence and distributed activation/retirement fault histories before
+releasing online configuration ingress. Preserve the usable static TCP/QUIC
+service. Full P0–P7 retains recursive responsibilities, split/merge and broader
+P7 evidence.

@@ -22,7 +22,7 @@ After TLS authentication, both sides exchange a 52-byte encrypted hello:
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | `VBSESS01` |
-| 8 | 2 | little-endian wire version 1 |
+| 8 | 2 | little-endian selected wire version, 1–3 |
 | 10 | 2 | zero reserved flags |
 | 12 | 8 | node ID |
 | 20 | 16 | store ID |
@@ -34,8 +34,21 @@ mapping. The recovered peer store session is authenticated channel data. It is
 not evidence that any remote log index is durable. The hello must finish and
 its local ciphertext must drain before `binding` and `Ready` become visible.
 No application plaintext can be written or read before this transition.
-Unknown hello versions and flags fail closed. This slice supports wire version
-1 only; version negotiation is an explicit future extension.
+Unknown hello versions and flags fail closed. `NativeTlsConfig::new` selects
+wire version 1. `config.with_wire_version(2)` or `(3)` selects one exact native
+format for future sessions; other versions are rejected before constructing a
+session. `wire_version()` reports that choice. Cloned configs can select different
+versions without mutating shared credentials or existing sessions. Both peers
+must select the same version: mismatch fails before Ready, with no automatic
+downgrade or alternate-format retry. The 52-byte hello layout and ALPN family
+remain unchanged. The message version is authenticated encrypted data, separate
+from the TLS/QUIC protocol and persistent storage formats.
+
+TCP and shared QUIC connectors validate their transferred session against this
+selection. NativeStartup derives its codec and PeerRoster version from the same
+config, including recovery. Configure every peer consistently. Changing wire
+selection never changes disk bytes or grants membership authority. This selects
+one version; it does not negotiate a list of alternatives or readiness capabilities.
 
 A connection generation is supplied by its owner. Allocate strictly fresh
 `SecureSessionGeneration` values within the local recovered store session; after
@@ -96,3 +109,12 @@ native WAL history now also traverses real TCP/TLS using the public
 `PeerTransport` frame driver. Production effect staging, peer roster/reconnect
 policy and asynchronous snapshot workers remain pending. Do not describe this
 channel provider as a complete networked Raft service.
+
+Explicit selection tests cover formats 2/3 with fragmented authenticated I/O,
+invalid selections, cloned-config isolation, mismatches before Ready, real TCP
+and QUIC sockets, and TCP/shared-QUIC connector handoff. Native startup histories
+form three-node clusters, commit a write, drain/join storage/dial workers and
+recover the applied result with both formats and transports. Native durable
+membership-witness queries/replies also cross real format-3 TCP/TLS and QUIC
+framed transports. This establishes exact message-version compatibility, not
+online membership readiness, distributed activation safety or macOS execution.
