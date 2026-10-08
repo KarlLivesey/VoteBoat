@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-automatic-consensus-timers",
+  "status": "shared-runtime-with-bounded-asynchronous-wal-worker",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -68,7 +68,7 @@
         "tests/log_store.rs",
         "tests/raft.rs"
       ],
-      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing. Snapshots and retention pending."
+      "scope": "Static bootstrap, atomic entries/hard-state/commit, suffix fencing and durably pinned snapshot bases. Physical WAL reclamation remains pending."
     },
     {
       "design_id": "C04",
@@ -240,6 +240,22 @@
       "scope": "Local monotonic milliseconds with clone-shared epoch; virtual host clock injection. No core clock reads or diagnostic wall-clock API."
     },
     {
+      "design_id": "C04/C10",
+      "public_contract": "PersistenceWorker",
+      "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained"],
+      "native": "NativeLogWorker<L: LogStore + Send>",
+      "conformance": ["tests/worker.rs"],
+      "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store."
+    },
+    {
+      "design_id": "C10",
+      "public_contract": "WorkerWake",
+      "operations": ["wake"],
+      "native": "ThreadWake",
+      "conformance": ["tests/worker.rs"],
+      "scope": "Injected nonblocking completion hint, never durable evidence. Shared host resources remain host-owned."
+    },
+    {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
       "operations": ["sample"],
@@ -253,7 +269,7 @@
     "transport",
     "wire-codec",
     "secure-session",
-    "background-worker-assembly",
+    "asynchronous-snapshot-worker-assembly",
     "outbound-admission",
     "buffers",
     "admission-policy",

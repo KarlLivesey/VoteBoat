@@ -53,7 +53,8 @@ id64!(
     LogRevision,
     ReadRequestId,
     SnapshotGeneration,
-    RuntimeGeneration
+    RuntimeGeneration,
+    StorageWorkerGeneration
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 

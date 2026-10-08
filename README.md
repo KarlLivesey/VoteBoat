@@ -97,6 +97,18 @@ monotonic time when polling, stepping and delivering completions. Its visit
 access updates timers after valid leader contact, durable vote grants and role
 changes. Deadlines trigger protocol work; reads still require a fresh quorum.
 
+For asynchronous WAL work, construct `native::worker::NativeLogWorker` with the
+quiescent selected `LogStore`, an explicit worker generation, limits and a shared
+`WorkerWake`. Recover cores before moving the store to the worker. Submit exact
+`Effect::Persist` batches using `worker::submit_for_shard` (or its timed variant),
+then route polled events through `apply_to_shard`/`apply_to_timed` on the owner.
+Written admission releases no dependent effects; only the exact durable barrier
+does. Queue rejection returns the batch. Request, unit and retained capacity-byte
+credits include reserved control space and remain charged until terminal delivery.
+The caller budgets effects after delivery. Close, drain and `try_reclaim` return
+the store; dropping observation cannot cancel accepted writes. Snapshot helpers
+currently require quiescent synchronous store access.
+
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
 Each group allows one outstanding read (including an unconsumed ready barrier).

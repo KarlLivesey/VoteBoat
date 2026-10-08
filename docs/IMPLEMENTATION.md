@@ -684,9 +684,68 @@ authenticated transport remain pending. This is finite regression evidence,
 not a full liveness proof or production performance claim. macOS and hardware
 power-cut execution remain outstanding; P0–P7 remains active.
 
+## Slice 8: bounded asynchronous WAL worker
+
+`PersistenceWorker` is a public host replacement seam. `NativeLogWorker` moves
+the selected quiescent `LogStore` into one explicitly created blocking thread;
+many groups share it. It creates no second log and no hidden executor. Cores
+remain on their shard owner. `submit_for_shard` and `submit_for_timed` validate
+the complete pending persistence effect before transferring the owned batch.
+Written admission associates the exact log ticket but releases no dependent
+effect. Only its durable barrier completion releases votes or acknowledgements.
+Each delivery validates its original visit; a stopped group does not discard
+other groups in the same completion.
+
+Worker tickets identify admissions, not durable prefixes. A construction-time
+worker generation is scoped to the recovered store session and must not be
+reused there. Runtime visit and store-session checks reject stale owner delivery;
+the existing exact log-ticket check remains the durability authority. Recovery
+obtains a fresh store session and reconstructs cores from the authoritative WAL.
+
+Admission bounds outstanding requests, units and retained vector-capacity bytes,
+with reserves for control work. Mixed command/control batches consume the bulk
+budget. One pending unit per group prevents competing transitions. Credits stay
+charged until terminal events are consumed, including when physical sync has
+already completed. The completion channel holds at most two stages per admitted
+request. `WorkerWake` is an injected nonblocking scheduling hint; `ThreadWake`
+unparks a caller-selected thread. Neither supplies quorum evidence. Caller-held
+events and output effects need their own budgets; these bounds are not an RSS
+limit or an operating-system fsync latency guarantee.
+
+Close rejects new work, drains accepted requests and allows nonblocking
+`try_reclaim` to return the store after terminal consumption and thread exit.
+Dropping observation cannot cancel accepted writes. Uncertain writes, corrupt
+provider completions and worker panics produce failures, never fabricated
+durable evidence; the host fences affected cores and recovers the store.
+Shared host wake resources remain host-owned.
+
+### Slice 8 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native suite: 104 tests pass; core/host-only suite: 48 tests pass. Both builds
+  pass Clippy with warnings denied; formatting and documentation pass.
+- A manually progressed host worker uses only public contracts with native
+  features disabled. Exact-effect rejection, written-before-durable delivery,
+  stale visits and independent delivery after one group stops are exercised.
+- Blocked sync leaves another group runnable. Control admission survives bulk
+  saturation, oversized retained capacity is rejected, and completed physical
+  work retains credits until terminal consumption. Close drains every request.
+- Injected barrier uncertainty and worker panic fail every accepted request
+  without releasing durable effects. One actual native WAL worker persists 100
+  groups in one batch; reopening recovers every exact term/vote with a fresh
+  store session.
+
+This worker slice tests durable voting and worker lifecycle, not a new
+three-node asynchronous replication assembly. Existing synchronous three-node
+replication, timer, snapshot and crash histories still pass. Live asynchronous
+snapshot work, outbound admission and authenticated transport remain pending.
+Current snapshot helpers require quiescent synchronous store access. macOS and
+hardware power-cut execution remain outstanding; P0–P7 remains active.
+
 ## Next slice
 
-Add bounded worker/output admission, wire
+Add bounded output admission, wire
 codec and authenticated-session transport seams. Extend virtual-time histories
 to leader loss, overload and message delay through the new assembly. Native
 sockets must use established secure

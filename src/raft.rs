@@ -526,6 +526,19 @@ impl Raft {
 
     /// Async/batched workers must correlate the full submitted effect as well
     /// as its scoped ticket before delivering a later durable completion.
+    pub fn validate_persist_effect(&self, update: &LogUpdate) -> Result<(), RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if self
+            .pending
+            .as_ref()
+            .is_none_or(|p| &p.update != update || p.ticket.is_some())
+        {
+            return Err(RaftError::WrongCompletion);
+        }
+        Ok(())
+    }
     pub fn admit_effect(&mut self, update: &LogUpdate, ticket: LogTicket) -> Result<(), RaftError> {
         if self.pending.as_ref().is_none_or(|p| &p.update != update) {
             return Err(RaftError::WrongCompletion);
