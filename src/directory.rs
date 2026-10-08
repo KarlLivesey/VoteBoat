@@ -18,6 +18,7 @@
 //! cannot transfer ownership, fence a source or activate a target. Host-controlled
 //! authorization remains required before proposal. Durable progress comes solely
 //! from the existing Raft/WAL/application/checkpoint contracts.
+use crate::delegation::*;
 use crate::routing::codec::*;
 use crate::transfer::{TransferIntent, TransferIntentStatus};
 use crate::transfer_publication::*;
@@ -34,6 +35,7 @@ pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_DIRECTORY_PUBLICATION_BYTES: usize = 32768;
 pub const MAX_DIRECTORY_COMMAND_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_DIRECTORY_PENDING: usize = 8192;
+pub const MAX_DIRECTORY_CONTROL_BYTES: usize = MAX_TRANSFER_PUBLICATION_BYTES + 128;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryLimits {
@@ -247,6 +249,8 @@ pub enum DirectoryOutcome {
     TransferControlBusy,
     TransferEvidenceMismatch,
     TransferPublished(RouteGeneration),
+    DelegationReserved,
+    DelegationPublished(RouteGeneration),
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
@@ -254,6 +258,8 @@ enum Request {
     Publish(DirectoryCommand),
     Transfer(TransferIntent),
     Publication(TransferPublication),
+    Delegation(DelegationPlan),
+    DelegationCompletion(DelegationCompletion),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryReceipt {
@@ -293,6 +299,8 @@ pub struct Directory {
     /// Locks reference existing bounded history rather than duplicate manifests.
     transfers: BTreeMap<ResponsibilityIdentity, OperationId>,
     transfer_targets: BTreeSet<GroupIdentity>,
+    delegations: BTreeMap<ResponsibilityIdentity, OperationId>,
+    delegation_publications: BTreeMap<OperationId, OperationId>,
 }
 impl Directory {
     pub fn new(
@@ -318,6 +326,8 @@ impl Directory {
             publications: BTreeMap::new(),
             transfers: BTreeMap::new(),
             transfer_targets: BTreeSet::new(),
+            delegations: BTreeMap::new(),
+            delegation_publications: BTreeMap::new(),
         })
     }
     /// Local applied diagnostic, not a distributed linearizable directory read.
@@ -331,14 +341,16 @@ impl Directory {
         self.limits
     }
     pub fn remaining_operations(&self) -> usize {
-        self.limits.operations - (self.history.len() - self.publications.len())
+        self.limits.operations
+            - (self.history.len() - self.publications.len() - self.delegation_publications.len())
     }
     /// Extra bounded control pool; successful publications never use ordinary history.
     pub fn control_history_capacity(&self) -> usize {
-        self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * MAX_TRANSFER_PUBLICATION_BYTES
+        self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * MAX_DIRECTORY_CONTROL_BYTES
     }
     pub fn reserved_publication_bytes(&self) -> usize {
         self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
+            + self.delegations.len() * MAX_DIRECTORY_CONTROL_BYTES
     }
     /// Commit this exact plan/capacity binding before any publication. It uses
     /// an ordinary operation ID and retains its original request/result. Large
@@ -376,10 +388,14 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if bytes.starts_with(b"VBTINT01") {
+            if bytes.starts_with(b"VBTINT01") || bytes.starts_with(b"VBTINT02") {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01") {
                 TransferPublication::decode(bytes).map(Request::Publication)
+            } else if bytes.starts_with(b"VBDPLAN1") {
+                DelegationPlan::decode(bytes).map(Request::Delegation)
+            } else if bytes.starts_with(b"VBDCOMP1") {
+                DelegationCompletion::decode(bytes).map(Request::DelegationCompletion)
             } else {
                 DirectoryCommand::decode(bytes).map(Request::Publish)
             }
@@ -388,7 +404,7 @@ impl Directory {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: DIRECTORY_APPLICATION_SCHEMA,
-            command_bytes: MAX_TRANSFER_PUBLICATION_BYTES.max(46 + self.plan.encoded_len()),
+            command_bytes: MAX_DIRECTORY_CONTROL_BYTES.max(46 + self.plan.encoded_len()),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
                 + 56 * self.limits.operations
@@ -399,7 +415,7 @@ impl Directory {
     fn publish(&mut self, command: DirectoryCommand) -> DirectoryOutcome {
         let input = command.manifest.input();
         let id = input.responsibility;
-        if self.transfers.contains_key(&id) {
+        if self.transfers.contains_key(&id) || self.delegations.contains_key(&id) {
             return DirectoryOutcome::LifecycleBusy;
         }
         let Some(grant) = self.plan.manifests.get(&id) else {
@@ -458,11 +474,32 @@ impl Directory {
         {
             return DirectoryOutcome::UnknownResponsibility;
         }
-        if self.transfers.contains_key(&before.responsibility) {
+        if self.transfers.contains_key(&before.responsibility)
+            || self.delegations.contains_key(&before.responsibility)
+        {
             return DirectoryOutcome::LifecycleBusy;
         }
         if self.manifests.get(&before.responsibility) != Some(intent.before()) {
             return DirectoryOutcome::GenerationMismatch;
+        }
+        if !intent.permits_operation(operation) {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        if let Some(parent) = before.parent.filter(|p| p.group == self.plan.authority) {
+            let Some(binding) = intent.delegation() else {
+                return DirectoryOutcome::TransferEvidenceMismatch;
+            };
+            if self.delegations.get(&parent.responsibility) != Some(&binding.operation)
+                || self
+                    .delegation_reservation_at(self.applied, binding.operation)
+                    .ok()
+                    .flatten()
+                    .and_then(|s| s.child_intent(binding.configuration).ok())
+                    .as_ref()
+                    != Some(&intent)
+            {
+                return DirectoryOutcome::TransferEvidenceMismatch;
+            }
         }
         let targets = intent.targets();
         for target in &targets {
@@ -579,6 +616,140 @@ impl Directory {
             publication: TransferPublication::decode(&record.1.bytes)?,
         }))
     }
+    fn begin_delegation(
+        &mut self,
+        operation: OperationId,
+        plan: DelegationPlan,
+    ) -> DirectoryOutcome {
+        let parent = plan.parent().input();
+        if parent.authority != self.plan.authority
+            || !self.plan.manifests.contains_key(&parent.responsibility)
+        {
+            return DirectoryOutcome::UnknownResponsibility;
+        }
+        if operation == plan.child_operation() {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        if self.delegations.contains_key(&parent.responsibility)
+            || self.transfers.contains_key(&parent.responsibility)
+        {
+            return DirectoryOutcome::LifecycleBusy;
+        }
+        if self.manifests.get(&parent.responsibility) != Some(plan.parent()) {
+            return DirectoryOutcome::GenerationMismatch;
+        }
+        if plan.before().input().authority == self.plan.authority
+            && self.manifests.get(&plan.before().input().responsibility) != Some(plan.before())
+        {
+            return DirectoryOutcome::GenerationMismatch;
+        }
+        if self.control_bytes + self.reserved_publication_bytes() + MAX_DIRECTORY_CONTROL_BYTES
+            > self.control_history_capacity()
+        {
+            return DirectoryOutcome::TransferControlBusy;
+        }
+        self.delegations.insert(parent.responsibility, operation);
+        DirectoryOutcome::DelegationReserved
+    }
+    pub fn delegation_reservation_at(
+        &self,
+        required: u64,
+        operation: OperationId,
+    ) -> Result<Option<DelegationReservationStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some(h) = self
+            .history
+            .get(&operation)
+            .filter(|h| h.outcome == DirectoryOutcome::DelegationReserved)
+        else {
+            return Ok(None);
+        };
+        Ok(Some(DelegationReservationStatus {
+            operation,
+            index: h.index,
+            plan: DelegationPlan::decode(&h.bytes)?,
+        }))
+    }
+    fn delegation_permitted(&self, completion: &DelegationCompletion) -> bool {
+        let Some(status) = self
+            .delegation_reservation_at(self.applied, completion.reservation)
+            .ok()
+            .flatten()
+        else {
+            return false;
+        };
+        let parent = status.plan.parent().input();
+        if self.delegations.get(&parent.responsibility) != Some(&completion.reservation)
+            || self.manifests.get(&parent.responsibility) != Some(status.plan.parent())
+            || status.index != completion.reservation_index
+            || status
+                .child_intent(completion.parent_configuration)
+                .ok()
+                .as_ref()
+                != Some(completion.decision.publication.intent())
+            || status.plan.child_operation() != completion.decision.publication.operation()
+        {
+            return false;
+        }
+        // Local provenance is verifiable and cannot be replaced by host assertions.
+        if status.plan.before().input().authority == self.plan.authority
+            && (completion.child_configuration != completion.parent_configuration
+                || self
+                    .transfer_publication_at(self.applied, status.plan.child_operation())
+                    .ok()
+                    .flatten()
+                    .as_ref()
+                    != Some(&completion.decision))
+        {
+            return false;
+        }
+        true
+    }
+    fn complete_delegation(
+        &mut self,
+        operation: OperationId,
+        completion: DelegationCompletion,
+    ) -> DirectoryOutcome {
+        if !self.delegation_permitted(&completion) {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        let status = self
+            .delegation_reservation_at(self.applied, completion.reservation)
+            .expect("checked reservation")
+            .expect("checked reservation");
+        let updated = status.plan.updated_parent().expect("checked generation");
+        let input = updated.input();
+        let id = input.responsibility;
+        let generation = input.generation;
+        self.manifests.insert(id, updated);
+        self.delegations.remove(&id);
+        self.delegation_publications
+            .insert(completion.reservation, operation);
+        DirectoryOutcome::DelegationPublished(generation)
+    }
+    pub fn delegation_publication_at(
+        &self,
+        required: u64,
+        reservation: OperationId,
+    ) -> Result<Option<DelegationPublicationStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some((operation, h)) = self
+            .delegation_publications
+            .get(&reservation)
+            .and_then(|op| self.history.get(op).map(|h| (*op, h)))
+        else {
+            return Ok(None);
+        };
+        Ok(Some(DelegationPublicationStatus {
+            operation,
+            index: h.index,
+            completion: DelegationCompletion::decode(&h.bytes)?,
+        }))
+    }
     fn execute(
         &mut self,
         index: u64,
@@ -596,13 +767,13 @@ impl Directory {
                 true,
             )
         } else {
-            let control =
-                matches!(&command,Request::Publication(p) if self.publication_permitted(p));
+            let control = matches!(&command,Request::Publication(p) if self.publication_permitted(p))
+                || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c));
             if !control
                 && (self.remaining_operations() == 0
                     || self.history_bytes + bytes.len() > self.limits.history_bytes)
                 || control
-                    && (bytes.len() > MAX_TRANSFER_PUBLICATION_BYTES
+                    && (bytes.len() > MAX_DIRECTORY_CONTROL_BYTES
                         || self.control_bytes + bytes.len() > self.control_history_capacity())
             {
                 return Err(ApplicationError::DedupCapacity);
@@ -611,6 +782,10 @@ impl Directory {
                 Request::Publish(command) => self.publish(command),
                 Request::Transfer(intent) => self.begin_transfer(operation, intent),
                 Request::Publication(publication) => self.complete_transfer(operation, publication),
+                Request::Delegation(plan) => self.begin_delegation(operation, plan),
+                Request::DelegationCompletion(completion) => {
+                    self.complete_delegation(operation, completion)
+                }
                 Request::Bootstrap => {
                     self.initialized = true;
                     DirectoryOutcome::Initialized
@@ -702,6 +877,9 @@ impl ProposalAdmission for Directory {
             }
             let lifecycle = match request {
                 Request::Publication(p) if self.publication_permitted(&p) => Some(p.operation()),
+                Request::DelegationCompletion(c) if self.delegation_permitted(&c) => {
+                    Some(c.reservation)
+                }
                 _ => None,
             };
             reserved

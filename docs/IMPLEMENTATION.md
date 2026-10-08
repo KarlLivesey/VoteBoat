@@ -102,13 +102,18 @@ sources, with selected repeated transfer recovery. Slice 93 adds bounded retirem
 after complete activation and explicit host retention release, with native-file
 interrupted-publication/reclamation checks for both source kinds and TCP/QUIC
 original-source recovery. These establish selected top-level handoff/cleanup paths;
-recursive coordination, general retention and broader faults remain.
+slice 94 adds checked parent reservation/completion and a selected deterministic
+delegated-child split. Native recursive phase/reopen, abandoned-reservation
+recovery, general retention and broader faults remain.
 
 1. **Delegated-parent lifecycle coordination (current, P6).** Bind parent/child epoch
    changes to durable handoff decisions through the responsibility tree. Depends
    on reusable owners and existing routed/directory contracts; completion requires
    parent failure/recovery and recursive transfers without dual owners or an
-   ancestor commit in ordinary child writes. This connects P6 movement to P5 trees.
+   ancestor commit in ordinary child writes. Deterministic parent binding is now
+   implemented; next within this deliverable is native TCP/QUIC phase/reopen,
+   delegated merge/repeated moves and safe pre-fence conflict/cancellation handling.
+   This connects P6 movement to P5 trees.
 2. **Committed/applied measurement baseline (next, P7).** Establish a
    reproducible committed/applied baseline with workload, durability and latency
    budget before changing lanes, batching, reclamation or recovery throttling.
@@ -5448,3 +5453,94 @@ retirement, arbitrary faults, macOS/separate-host execution and other explicit
 phase gaps remain. P8 stays deferred; CI remains background feedback.
 
 Final formatting, diff checks and the 70-contract inventory validator pass.
+
+### Slice 94 mini schema — reserved delegated-child epoch publication
+
+Previous turn was progress: slice 93 is committed/pushed as 36cd769, with retirement
+and recovery/reclamation checks. Current macro work remains delegated-parent P6;
+next is the committed/applied baseline, then measured tuning/broader validation.
+
+Use the existing Directory journal and its single authoritative log. A checked
+DelegationPlan binds one active Delegated parent manifest to one child's exact
+before/after whole-responsibility transfer and child operation ID. Before fencing,
+the parent commits a reservation under a distinct operation ID, locking its
+manifest generation and reserving bounded final-publication history. Quorum-read
+reservation status plus authenticated parent configuration produces a compact
+binding in the child's TransferIntent. The binding includes parent-manifest digest,
+parent generation, reservation operation/index/configuration and child operation;
+canonical child manifests bind its content. Unbound child intents remain rejected.
+The host authenticates foreign observations just as for existing handoffs.
+
+The child metadata/source/target protocol stays the same after this checked
+intent. Its committed publication then permits a parent completion command naming
+the exact reservation/configuration and child decision. Parent apply validates
+the exact plan/child intent and changes only that child route's epoch plus the
+parent route generation. Parent ownership epoch, authority, scope, other routes
+and its own parent binding stay fixed, so the update does not cascade through
+all ancestors. Same-group parent/child checks use actual local retained decisions.
+Cross-parent moves, creating/deleting delegated namespaces and parent data-owner
+changes remain separate protocols; never replace an unreachable child with empty
+state. Parent reservation has no timeout/unfreeze/cancellation shortcut.
+
+Reserve final command bytes before source fencing, including pending admission
+and ordinary-history exhaustion. Keep original reservation/completion outcomes
+and IDs; replay reconstructs locks/reservations and final parent manifests from
+the bounded journal. Extend LifecycleDirectory quorum queries and bound nested
+results. Top-level intent bytes remain VBTINT01; bound delegated intents use a
+new versioned tag. Checkpoints retain their replay journal; unknown/new request
+types need the new reader, with no mixed-version deployment claim.
+
+Acceptance: real deterministic parent/child split with actual provider images,
+all source fences/imports/publication/activation, parent completion and warm/cold
+routing; reject missing/changed reservation, wrong operation/configuration/parent,
+concurrent lifecycle and stale parent generation. Recover lost receipts at every
+new phase via checkpoint/replay, preserve new-owner retries with parent stopped,
+and verify ordinary/control history exhaustion and codec truncations. Native
+TCP/QUIC recursive phase/reopen histories follow this deterministic contract slice;
+do not claim those until exercised. No worker, storage provider or ancestor
+dependency is added to ordinary child writes.
+
+Binding review before finalizing the new format: retain a plan digest computed
+from the exact parent-manifest digest, reservation generation/operation/index/
+configuration, canonical child before/after manifests and child operation.
+Child-intent decoding recomputes it before any fence, so an
+accidental changed child transition cannot survive until parent completion. The
+compact binding is 120 bytes; this does not authenticate fabricated foreign facts.
+
+### Slice 94 result — parent-reserved child handoff
+
+Implemented DelegationPlan/reservation/completion in the existing Directory journal
+and LifecycleDirectory quorum read view. Parent prepare reserves its exact manifest
+generation and final control bytes. A contract-2 VBTINT02 child intent binds parent
+digest/generation, reservation operation/index/configuration, exact child manifests
+and child operation through a checked 120-byte digest-bearing binding. Existing
+top-level VBTINT01 bytes remain unchanged. Source freezes, target construction/
+imports, later-source freezes and checked publications reject the wrong child
+operation; checkpoint restore retains the check. Parent completion matches the
+actual reservation and committed child decision before changing only the child's
+route epoch and parent route generation. Same-group metadata verifies actual local
+retained decisions/configuration consistency. No extra store/worker or ordinary
+child-write ancestor dependency exists. See docs/DELEGATED_TRANSFERS.md.
+
+Five downstream tests cover real source images/import/publication/activation,
+source refusal and target original retry/new writes; distinct and same-group
+metadata; parent/child checkpoints and exact parent-log replay; original reservation
+and completion retry status; three-level cold routing with unchanged grandparent
+locator and parent-free warm writes; concurrent/stale/wrong-ID/context refusal;
+ordinary operation/byte exhaustion and competing pending completion reservations;
+all new codec/checkpoint truncations and a bit flip at every byte position of a bound
+intent. Both core-only and all-feature retirement/routing/handoff suites pass.
+
+Existing TCP/QUIC original-source retirement matrix passes 4/4 in 27.15 seconds,
+checking enlarged directory query accounting and top-level compatibility. This
+does not validate the new delegated protocol over native networks. Native
+delegated phase/reopen, delegated merge/repeated movement and safe cancellation/
+replanning of abandoned pre-fence reservations remain current P6 work. A remote
+child metadata edit can invalidate a reserved before manifest; detect it before
+fencing and report the conflict, without a timeout/unfreeze bypass. New requests
+use the bounded existing replay journal; old readers cannot parse new tags, so no
+mixed-version claim. Full P0–P7 remains active; P8 deferred and CI background.
+
+Final all-target/all-feature Clippy with warnings denied, formatting, diff checks
+and the 71-contract inventory validator pass. No consensus timers, quorum policy,
+storage/transport provider or dependency changed.

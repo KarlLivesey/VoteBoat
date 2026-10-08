@@ -104,6 +104,9 @@ impl TransferPublication {
         ),
     > {
         let validate = || -> Result<(), ApplicationError> {
+            if !intent.permits_operation(operation) {
+                return Err(ApplicationError::InvalidCommand);
+            }
             let old = intent.sources();
             let new = intent.targets();
             if sources.len() != old.len()

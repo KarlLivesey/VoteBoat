@@ -1859,3 +1859,43 @@ liveness, mixed-version deployment, macOS or separate-host support. Foreign
 quorum provenance and retention promises remain authenticated host obligations.
 Recursive lifecycle and broader P7 work remain; full P0–P7 stays active.
 Formatting, diff checks and the 70-contract inventory validator pass.
+
+## Slice 94 — reserved delegated-child epoch publication
+
+The existing Directory journal now retains parent reservation and completion
+records. A checked parent/child plan locks one parent generation and reserves
+final publication history before source fencing. Contract-2 VBTINT02 binds exact
+child manifests/operation to parent digest/generation and reservation provenance;
+decode recomputes the 120-byte binding's digest. Top-level VBTINT01 is unchanged.
+Source/target/import/publication operation gates and checkpoint restore enforce
+the child binding. Parent completion requires the exact reservation and matching
+child decision; same-group metadata checks its actual retained local decision.
+Only the child route epoch and parent route generation change, keeping the parent
+ownership epoch and grandparent locator stable. No provider/worker/store was added.
+
+Five downstream deterministic tests pass in both core-only and all-feature builds.
+They use actual provider exports, final imports, child publication and activation;
+verify source refusal, original target retry and new warm writes without parent
+access; restore parent/child checkpoints and replay the exact parent log; test
+three-level cold routing, same-group metadata provenance, original outcomes,
+stale/concurrent/wrong-context refusal, ordinary operation/byte exhaustion and
+competing pending completions. Every new codec/checkpoint truncation refuses;
+one low-bit flip at each byte position of a bound intent also refuses atomically.
+
+Affected all-feature directory/retirement/routing/activation/publication/repeat/
+source/target suites pass 22/7/11/9/7/5/7/9. Core-only equivalents pass
+20/5/7/9/7/5/7/9. Existing TCP/QUIC original-source retirement WAL/checkpoint matrix
+passes 4/4 in 27.15 seconds, validating enlarged query/accounting composition and
+top-level compatibility. It does not test delegated network recovery. Focused
+setup fixes corrected cache-limit construction and receipt outcome names; review
+added the child-content digest before finalizing VBTINT02 and retained exact
+top-level 64 KiB reservation accounting. No consensus/storage protocol changed.
+
+Foreign reservation/configuration/child-decision provenance remains authenticated
+host input. Native delegated phase/reopen, delegated merge/repeated movement,
+abandoned pre-fence reservation cancellation/replanning and broader faults remain
+unverified or unimplemented. Concurrent remote child metadata changes must be
+detected before fencing; no timeout/unfreeze bypass exists. No mixed-version,
+macOS or separate-host claim. Full P0–P7 remains active; P8 deferred.
+All-target/all-feature Clippy with warnings denied, formatting, diff checks and
+the 71-contract inventory validator pass.

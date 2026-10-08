@@ -231,7 +231,7 @@ where
         }
         let mut next = entry.clone();
         let mut freeze = None;
-        if let EntryPayload::Command { bytes, .. } = &entry.payload {
+        if let EntryPayload::Command { operation, bytes } = &entry.payload {
             let replacement = if bytes.starts_with(b"VBSROWN1") {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
@@ -241,7 +241,11 @@ where
                 if !self.routed.is_initialized() {
                     return Err(ApplicationError::NotApplied);
                 }
-                freeze = Some(self.checked_intent(inner)?);
+                let intent = self.checked_intent(inner)?;
+                if !intent.permits_operation(*operation) {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                freeze = Some(intent);
                 encode_fence(self.routed.grant().input().epoch)
             } else {
                 match decode(bytes, self.routed.limits().payload_bytes)? {
@@ -500,6 +504,12 @@ where
         next.intent = intent;
         next.applied = applied;
         if let Some(intent) = &next.intent {
+            if next
+                .fence()
+                .is_none_or(|f| !intent.permits_operation(f.operation))
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
             for (target, _) in next.export_ranges(intent)? {
                 next.export_target(target, next.export_bytes)?;
             }

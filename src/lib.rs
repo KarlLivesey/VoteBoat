@@ -17,6 +17,7 @@ pub mod application;
 pub mod bucket_counter;
 pub mod connect;
 pub mod contracts;
+pub mod delegation;
 pub mod dial;
 pub mod directory;
 pub mod identity;

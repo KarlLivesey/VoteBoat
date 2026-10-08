@@ -58,6 +58,9 @@ impl TargetImport {
         sources: Vec<SourceImport>,
     ) -> Result<Self, (ApplicationError, TransferIntent, Vec<SourceImport>)> {
         let validate = || -> Result<(), ApplicationError> {
+            if !intent.permits_operation(operation) {
+                return Err(ApplicationError::InvalidCommand);
+            }
             let targets = intent.targets();
             let scope = targets
                 .iter()
@@ -355,6 +358,9 @@ where
     ) -> Result<Self, (ApplicationError, TransferIntent, A, P)> {
         let construct = || -> Result<Vec<u8>, ApplicationError> {
             inner.validate_group(group)?;
+            if !intent.permits_operation(operation) {
+                return Err(ApplicationError::InvalidCommand);
+            }
             let targets = intent.targets();
             let scope = targets
                 .iter()
@@ -798,6 +804,9 @@ where
                     }
                 } else if bytes.starts_with(b"VBTFRZ01") {
                     let (intent, export_bytes) = next.freeze_request(bytes)?;
+                    if !intent.permits_operation(*operation) {
+                        return Err(ApplicationError::InvalidCommand);
+                    }
                     if *operation == next.operation || next.inner.contains_operation(*operation) {
                         TargetOutcome::OperationConflict
                     } else {
@@ -1274,7 +1283,10 @@ where
             let (intent, export_bytes) = next.freeze_request(freeze_bytes)?;
             let operation =
                 OperationId::new(freeze_operation).ok_or(ApplicationError::InvalidCheckpoint)?;
-            if operation == next.operation || next.inner.contains_operation(operation) {
+            if operation == next.operation
+                || next.inner.contains_operation(operation)
+                || !intent.permits_operation(operation)
+            {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
             let fence = OwnershipFence {

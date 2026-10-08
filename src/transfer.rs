@@ -19,7 +19,7 @@ use std::{collections::BTreeSet, mem::size_of};
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;
-pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 1;
+pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 2;
 
 /// Exact before/after manifests for a conservative whole-responsibility split
 /// or compatible merge. Sources and targets are distinct concrete groups.
@@ -28,6 +28,7 @@ pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 1;
 pub struct TransferIntent {
     before: ResponsibilityManifest,
     after: ResponsibilityManifest,
+    delegation: Option<crate::delegation::DelegationBinding>,
 }
 impl TransferIntent {
     #[allow(clippy::result_large_err)]
@@ -35,22 +36,24 @@ impl TransferIntent {
         before: ResponsibilityManifest,
         after: ResponsibilityManifest,
     ) -> Result<Self, (RoutingError, ResponsibilityManifest, ResponsibilityManifest)> {
-        if let Err(error) = Self::validate(&before, &after) {
+        if before.input().parent.is_some() {
+            return Err((RoutingError::WrongParent, before, after));
+        }
+        if let Err(error) = Self::validate_shape(&before, &after) {
             return Err((error, before, after));
         }
-        Ok(Self { before, after })
+        Ok(Self {
+            before,
+            after,
+            delegation: None,
+        })
     }
-    fn validate(
+    pub(crate) fn validate_shape(
         before: &ResponsibilityManifest,
         after: &ResponsibilityManifest,
     ) -> Result<(), RoutingError> {
         let b = before.input();
         let a = after.input();
-        // Coordinating a delegated parent's child-epoch publication is a later
-        // lifecycle step; do not admit an intent this initial journal cannot bind.
-        if b.parent.is_some() {
-            return Err(RoutingError::WrongParent);
-        }
         if b.responsibility != a.responsibility
             || b.parent != a.parent
             || b.authority != a.authority
@@ -79,11 +82,11 @@ impl TransferIntent {
         ) {
             return Err(RoutingError::InvalidRange);
         }
-        if sources
-            .iter()
-            .chain(&targets)
-            .any(|e| e.target == RouteTarget::Group(b.authority))
-        {
+        if sources.iter().chain(&targets).any(|e| {
+            e.target == RouteTarget::Group(b.authority)
+                || b.parent
+                    .is_some_and(|p| e.target == RouteTarget::Group(p.group))
+        }) {
             return Err(RoutingError::WrongOwner);
         }
         if sources
@@ -123,6 +126,34 @@ impl TransferIntent {
     pub fn after(&self) -> &ResponsibilityManifest {
         &self.after
     }
+    pub fn delegation(&self) -> Option<&crate::delegation::DelegationBinding> {
+        self.delegation.as_ref()
+    }
+    pub fn permits_operation(&self, operation: OperationId) -> bool {
+        self.delegation
+            .as_ref()
+            .is_none_or(|b| b.child_operation == operation)
+    }
+    pub(crate) fn delegated(
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        binding: crate::delegation::DelegationBinding,
+    ) -> Result<Self, ApplicationError> {
+        Self::validate_shape(&before, &after).map_err(|_| ApplicationError::InvalidCommand)?;
+        if before.input().parent.is_none()
+            || binding.index == 0
+            || binding.index == u64::MAX
+            || binding.operation == binding.child_operation
+            || binding.plan_digest != binding.digest_for(&before, &after)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(Self {
+            before,
+            after,
+            delegation: Some(binding),
+        })
+    }
     pub fn sources(&self) -> Vec<RouteEntry> {
         Self::groups(&self.before).expect("checked intent")
     }
@@ -130,15 +161,25 @@ impl TransferIntent {
         Self::groups(&self.after).expect("checked intent")
     }
     pub fn encode(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
-        let len = 16 + manifest_len(&self.before) + manifest_len(&self.after);
+        let len = 16
+            + manifest_len(&self.before)
+            + manifest_len(&self.after)
+            + self.delegation.map_or(0, |_| 120);
         if len > max_bytes || len > MAX_TRANSFER_INTENT_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBTINT01");
+        bytes.extend(if self.delegation.is_some() {
+            b"VBTINT02"
+        } else {
+            b"VBTINT01"
+        });
         for m in [&self.before, &self.after] {
             bytes.extend((manifest_len(m) as u32).to_le_bytes());
             put_manifest(&mut bytes, m);
+        }
+        if let Some(binding) = self.delegation {
+            binding.write(&mut bytes);
         }
         Ok(bytes)
     }
@@ -147,17 +188,26 @@ impl TransferIntent {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut r = Reader::new(bytes);
-        if r.take(8)? != b"VBTINT01" {
+        let tag = r.take(8)?;
+        if tag != b"VBTINT01" && tag != b"VBTINT02" {
             return Err(ApplicationError::InvalidCommand);
         }
         let len = r.u32()? as usize;
         let before = read_manifest(r.take(len)?)?;
         let len = r.u32()? as usize;
         let after = read_manifest(r.take(len)?)?;
+        let delegation = if tag == b"VBTINT02" {
+            Some(crate::delegation::DelegationBinding::read(&mut r)?)
+        } else {
+            None
+        };
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);
         }
-        Self::new(before, after).map_err(|_| ApplicationError::InvalidCommand)
+        match delegation {
+            Some(binding) => Self::delegated(before, after, binding),
+            None => Self::new(before, after).map_err(|_| ApplicationError::InvalidCommand),
+        }
     }
     pub fn retained_bytes(&self) -> usize {
         size_of::<Self>() + self.before.retained_bytes() + self.after.retained_bytes()
@@ -178,6 +228,8 @@ pub enum DirectoryQuery {
     Manifest(ResponsibilityIdentity),
     Transfer(OperationId),
     Publication(OperationId),
+    DelegationReservation(OperationId),
+    DelegationPublication(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
@@ -185,6 +237,8 @@ pub enum DirectoryRead {
     Manifest(Option<ResponsibilityManifest>),
     Transfer(Option<TransferIntentStatus>),
     Publication(Option<TransferPublicationStatus>),
+    DelegationReservation(Option<crate::delegation::DelegationReservationStatus>),
+    DelegationPublication(Option<crate::delegation::DelegationPublicationStatus>),
 }
 
 /// Read view with lifecycle queries over the same directory state, log and
@@ -268,6 +322,14 @@ impl ReadableStateMachine for LifecycleDirectory {
                 .0
                 .transfer_publication_at(required, operation)
                 .map(DirectoryRead::Publication),
+            DirectoryQuery::DelegationReservation(operation) => self
+                .0
+                .delegation_reservation_at(required, operation)
+                .map(DirectoryRead::DelegationReservation),
+            DirectoryQuery::DelegationPublication(operation) => self
+                .0
+                .delegation_publication_at(required, operation)
+                .map(DirectoryRead::DelegationPublication),
         }
     }
 }
@@ -293,6 +355,19 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
                     .map_or(0, |s| {
                         s.publication.retained_bytes() - size_of::<TransferPublication>()
                     }),
+                DirectoryQuery::DelegationReservation(operation) => self
+                    .0
+                    .delegation_reservation_at(self.applied_index(), *operation)?
+                    .map_or(0, |s| {
+                        s.plan.retained_bytes() - size_of::<crate::delegation::DelegationPlan>()
+                    }),
+                DirectoryQuery::DelegationPublication(operation) => self
+                    .0
+                    .delegation_publication_at(self.applied_index(), *operation)?
+                    .map_or(0, |s| {
+                        s.completion.retained_bytes()
+                            - size_of::<crate::delegation::DelegationCompletion>()
+                    }),
             })
     }
     fn read_result_bytes(
@@ -309,6 +384,12 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
             }),
             DirectoryRead::Publication(s) => s.as_ref().map_or(0, |s| {
                 s.publication.retained_bytes() - size_of::<TransferPublication>()
+            }),
+            DirectoryRead::DelegationReservation(s) => s.as_ref().map_or(0, |s| {
+                s.plan.retained_bytes() - size_of::<crate::delegation::DelegationPlan>()
+            }),
+            DirectoryRead::DelegationPublication(s) => s.as_ref().map_or(0, |s| {
+                s.completion.retained_bytes() - size_of::<crate::delegation::DelegationCompletion>()
             }),
         };
         if bytes > limit {
