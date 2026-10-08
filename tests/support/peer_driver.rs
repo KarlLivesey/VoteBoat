@@ -74,6 +74,7 @@ struct ConnectControl {
     ready: bool,
     closed: bool,
     wrong: bool,
+    unsupported: bool,
     polls: usize,
     drops: Rc<Cell<usize>>,
 }
@@ -82,7 +83,9 @@ impl PeerConnector for Connector {
     type Endpoint = ();
     type Session = Session;
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
-        matches!(peer.node.get(), 2 | 3) && peer.store == local(peer.node.get()).store.identity
+        !self.0.borrow().unsupported
+            && matches!(peer.node.get(), 2 | 3)
+            && peer.store == local(peer.node.get()).store.identity
     }
     fn local(&self) -> LocalIdentity {
         local(1)
@@ -1118,6 +1121,87 @@ fn membership_removal_cancels_attempts_but_waits_for_obsolete_provider_receipts(
     assert_eq!(f.connect.borrow().submitted.len(), 2);
     assert!(!f.owner.is_failed());
     f.close(20);
+}
+
+pub(super) fn prospective_event(learners: &[u64]) -> Event {
+    use voteboat::membership::*;
+    let initial = bootstrap(1, 1);
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        initial.policy,
+        initial.voter_stores,
+        learners
+            .iter()
+            .map(|n| (node(*n), identity(*n as u128)))
+            .collect(),
+    )
+    .unwrap();
+    let mut m = message(2, 1);
+    m.rpc = Rpc::Append {
+        previous_index: 0,
+        previous_term: 0,
+        leader_commit: 0,
+        entries: vec![LogEntry {
+            index: 1,
+            term: 1,
+            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                operation: OperationId::new(800).unwrap(),
+                expected: ConfigurationId::new(1).unwrap(),
+                change: ConfigurationChange::Learners(next),
+            })),
+        }],
+    };
+    Event::Receive(m)
+}
+#[test]
+fn prospective_routes_check_credentials_and_capacity_without_changing_roster_or_clock() {
+    let mut f = Fixture::new();
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_membership(&f.owner, Default::default(), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let event = prospective_event(&[2, 3]);
+    let routes = [
+        (node(2), ConnectDirection::Accept),
+        (node(3), ConnectDirection::Dial(())),
+    ]
+    .into();
+    let d = f.driver.as_ref().unwrap();
+    assert_eq!(
+        d.preflight_event(&f.owner, group(1), &event, &routes, MonoTime(100)),
+        Ok(())
+    );
+    assert_eq!(d.roster().authorized_peers().count(), 0);
+    assert_eq!(
+        d.preflight_event(&f.owner, group(9), &event, &routes, MonoTime(0)),
+        Err(PeerDriverError::Assignments(
+            PeerAssignmentsError::UnknownGroup
+        ))
+    );
+    assert_eq!(
+        d.preflight_event(&f.owner, group(1), &event, &Default::default(), MonoTime(0)),
+        Err(PeerDriverError::WrongBinding)
+    );
+    f.connect.borrow_mut().unsupported = true;
+    assert_eq!(
+        d.preflight_event(&f.owner, group(1), &event, &routes, MonoTime(0)),
+        Err(PeerDriverError::WrongBinding)
+    );
+    f.connect.borrow_mut().unsupported = false;
+    let extra = prospective_event(&[2, 3, 4]);
+    assert!(matches!(
+        d.preflight_event(&f.owner, group(1), &extra, &routes, MonoTime(0)),
+        Err(PeerDriverError::Assignments(_))
+    ));
+    // Success at a later preview time does not advance clocks or authorize dials.
+    f.poll(0).unwrap();
+    assert!(f.connect.borrow().submitted.is_empty());
+    assert_eq!(
+        f.owner.core(group(1)).unwrap().membership().id(),
+        ConfigurationId::new(1).unwrap()
+    );
+    f.close(0);
 }
 
 #[test]

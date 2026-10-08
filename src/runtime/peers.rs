@@ -289,11 +289,99 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         .flatten()
         .min()
     }
+    /// Inspect prospective connection resources for one event across all hosted
+    /// groups. No state, routes, clock or ownership changes. Success is neither
+    /// protocol authority nor a retained reservation: recheck at execution.
+    pub fn preflight_event<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        group: GroupIdentity,
+        event: &Event,
+        routes: &BTreeMap<NodeId, ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerDriverError> {
+        self.check_assignment_owner(owner, now)?;
+        let assignments = PeerAssignments::for_event(
+            self.parts.roster.local(),
+            owner.groups().map(|group| owner.core(group).unwrap()),
+            group,
+            event,
+            self.parts.roster.limits().peers,
+        )
+        .map_err(PeerDriverError::Assignments)?;
+        self.check_assignment_routes(&assignments, routes, now)?;
+        Ok(())
+    }
+    fn check_assignment_owner<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        now: MonoTime,
+    ) -> Result<(), PeerDriverError> {
+        if self.failed.is_some() || owner.is_failed() {
+            return Err(PeerDriverError::Fenced);
+        }
+        if self.closed {
+            return Err(PeerDriverError::NotQuiescent);
+        }
+        if now < self.now {
+            return Err(PeerDriverError::TimeWentBack);
+        }
+        if owner.identity() != self.owner {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        Ok(())
+    }
+    fn check_assignment_routes(
+        &self,
+        assignments: &PeerAssignments,
+        routes: &BTreeMap<NodeId, ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<Vec<NodeId>, PeerDriverError> {
+        self.parts
+            .roster
+            .validate_assignments(assignments, now)
+            .map_err(PeerDriverError::Roster)?;
+        if routes.len() != assignments.peers().count()
+            || assignments.peers().any(|(node, store)| {
+                !routes.contains_key(&node)
+                    || !self
+                        .parts
+                        .connector
+                        .supports_peer(PeerIdentity { node, store })
+            })
+        {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        let peers = self
+            .parts
+            .roster
+            .tracked_peers()
+            .chain(assignments.peers().map(|(node, _)| node))
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>();
+        let metadata = peers
+            .len()
+            .checked_mul(size_of::<NodeId>())
+            .and_then(|n| {
+                n.checked_add(self.connector_limits.requests * size_of::<ConnectTicket>())
+            })
+            .and_then(|n| {
+                n.checked_add(
+                    self.limits
+                        .staged_batches
+                        .checked_mul(size_of::<OutboundBatch>())?,
+                )
+            });
+        if metadata.is_none_or(|n| n > self.limits.metadata_bytes) {
+            return Err(PeerDriverError::InvalidLimits);
+        }
+        Ok(peers)
+    }
     /// Recompute all hosted groups' required connection stores at this serialized
-    /// owner. Supplied routes are hints only; credential availability and every
-    /// resource ceiling are checked before roster mutation. Rejection returns
-    /// the supplied routes. Removed provider attempts retain their slots until
-    /// terminal poll; retired sends/ingress follow existing exact ownership rules.
+    /// owner. Routes, credentials and resource ceilings are checked before mutation.
+    /// Rejection returns owned routes; canceled attempts and accepted sends retain
+    /// their original resources until terminal provider receipts.
     pub fn reconcile_membership<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
         &mut self,
         owner: &EffectOwner<Q, T, E>,
@@ -301,18 +389,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         now: MonoTime,
     ) -> Result<(), PeerReconcileRejected<C::Endpoint>> {
         let prepared = (|| {
-            if self.failed.is_some() || owner.is_failed() {
-                return Err(PeerDriverError::Fenced);
-            }
-            if self.closed {
-                return Err(PeerDriverError::NotQuiescent);
-            }
-            if now < self.now {
-                return Err(PeerDriverError::TimeWentBack);
-            }
-            if owner.identity() != self.owner {
-                return Err(PeerDriverError::WrongBinding);
-            }
+            self.check_assignment_owner(owner, now)?;
             let cores = owner
                 .groups()
                 .map(|group| owner.core(group))
@@ -324,45 +401,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 self.parts.roster.limits().peers,
             )
             .map_err(PeerDriverError::Assignments)?;
-            self.parts
-                .roster
-                .validate_assignments(&assignments, now)
-                .map_err(PeerDriverError::Roster)?;
-            if routes.len() != assignments.peers().count()
-                || assignments.peers().any(|(node, store)| {
-                    !routes.contains_key(&node)
-                        || !self
-                            .parts
-                            .connector
-                            .supports_peer(PeerIdentity { node, store })
-                })
-            {
-                return Err(PeerDriverError::WrongBinding);
-            }
-            let peers = self
-                .parts
-                .roster
-                .tracked_peers()
-                .chain(assignments.peers().map(|(node, _)| node))
-                .collect::<BTreeSet<_>>()
-                .into_iter()
-                .collect::<Vec<_>>();
-            let metadata = peers
-                .len()
-                .checked_mul(size_of::<NodeId>())
-                .and_then(|n| {
-                    n.checked_add(self.connector_limits.requests * size_of::<ConnectTicket>())
-                })
-                .and_then(|n| {
-                    n.checked_add(
-                        self.limits
-                            .staged_batches
-                            .checked_mul(size_of::<OutboundBatch>())?,
-                    )
-                });
-            if metadata.is_none_or(|n| n > self.limits.metadata_bytes) {
-                return Err(PeerDriverError::InvalidLimits);
-            }
+            let peers = self.check_assignment_routes(&assignments, &routes, now)?;
             Ok((assignments, peers))
         })();
         let (assignments, peers) = match prepared {

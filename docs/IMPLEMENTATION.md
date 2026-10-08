@@ -2912,9 +2912,54 @@ current-view connection reconciliation, not prospective resource admission,
 readiness, distributed activation or complete fault coverage. Full P0–P7 remains
 active; Linux evidence does not establish macOS execution coverage.
 
+## Slice 49 — prospective connection preview and recovery admission
+
+Mini schema plan: inspect an incoming event's exact peer union before it executes,
+including intermediate learner/joint configurations and membership snapshots.
+Retain existing rollback/pending views and every other group's requirements.
+Check routes, provisioned credentials and fixed ceilings without mutation or
+clock advancement. Construction must also provision rollback-reachable peers.
+
+Raft::event_connection_replicas and PeerAssignments::for_event compute this
+bounded conservative union. PeerDriver::preflight_event and Node::preflight_peer_event
+borrow route hints and share the existing reconciliation preflight for exact
+stores, pins, retained history, metadata and lifecycle checks. Unknown groups and
+wrong message group/destination reject. A malformed protocol history may pass
+resource inspection and still fail protocol validation: previews cannot grant
+membership or voting authority. No new effect, durability token, persistent
+watermark, generation or network ownership is created.
+
+Node::from_parts now checks connection_replicas rather than only the latest
+accepted membership. A recovered uncommitted learner removal cannot omit a
+connection still needed by the committed predecessor. Rejection returns parts
+before external provider polling. The regression constructs two actual recovered
+cores with committed learner assignments and accepted removals; their accepted
+heads omit that learner but both rollback views retain it.
+
+Actual-core tests inspect learner appends, intermediate joint/final sequences,
+compacted joint snapshots, capacity, conflicting stores, wrong destination and
+fencing without mutation. A shared-group downstream test retains another group's
+peer while previewing an addition. Driver/Node tests verify missing routes/pins,
+capacity, unknown groups, shutdown and pure future-time preview. A fixture initially
+used Shard's default capacity with a smaller test scheduler; correcting that
+fixture to its supported 100-group capacity made the recovery check exercise the
+intended constructor path.
+
+QUIC-enabled library/effect-owner/peers/startup suites pass 41/99/18/8 (166 total).
+Core-only all-target build, all-feature/all-target Clippy, all-feature API docs and
+inventory checks pass. Native TCP/QUIC unchanged-roster commit/drain/recover
+histories remain green. No macOS execution or complete protocol claim is made.
+
+This is preview plus recovery admission, not a retained online event reservation.
+Success does not reserve capacity for several queued events. Serialized execution
+must recheck and retain resources through accepted/pending transitions; readiness
+and distributed activation/retirement histories remain required. Public online
+configuration ingress remains gated. The full P0–P7 goal stays active.
+
 ## Next slice
 
-Continue P4 prospective route/resource admission and readiness evidence before
-releasing online configuration ingress. Preserve the usable static TCP/QUIC
-service. Full P0–P7 retains recursive responsibilities, split/merge and broader
-P7 evidence.
+Integrate retained prospective connection admission with the serialized event
+owner, including queued competing changes, rejection/rollback release and shutdown.
+Then add readiness evidence and faulted activation histories before releasing
+online configuration ingress. Preserve the usable static TCP/QUIC service. Full
+P0–P7 retains recursive responsibilities, split/merge and broader P7 evidence.

@@ -1181,6 +1181,11 @@ fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress(
     );
     assert_eq!(leader.state(), &before);
     assert_eq!(leader.membership().id(), cid(1));
+    assert_eq!(
+        leader.event_connection_replicas(&event, 6).unwrap().len(),
+        6
+    );
+    assert!(leader.event_connection_replicas(&event, 5).is_err());
     assert_eq!(leader.event_effect_reservation(&event, usize::MAX), None);
     assert_eq!(leader.step(event), Err(RaftError::InvalidMessage));
     assert_eq!(leader.state(), &before);
@@ -1199,6 +1204,25 @@ fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress(
     assert_eq!(
         leader.event_effect_reservation(&event, 100),
         leader.reserve_effects(100, 5)
+    );
+    let Rpc::Snapshot { snapshot } = &match &event {
+        Event::Receive(m) => m,
+        _ => unreachable!(),
+    }
+    .rpc
+    else {
+        unreachable!()
+    };
+    let expected = snapshot
+        .metadata
+        .membership
+        .as_ref()
+        .unwrap()
+        .replicas()
+        .collect::<BTreeMap<_, _>>();
+    assert_eq!(
+        leader.event_connection_replicas(&event, 5).unwrap(),
+        expected
     );
     assert_eq!(leader.state(), &before);
 }
@@ -1247,6 +1271,73 @@ fn prospective_reservation_retains_intermediate_joint_fanout_after_final() {
         leader.reserve_effects(200, 10)
     );
     assert_eq!(leader.rollback_replicas(), 3);
+    assert_eq!(
+        leader
+            .event_connection_replicas(&event, 6)
+            .unwrap()
+            .keys()
+            .copied()
+            .collect::<Vec<_>>(),
+        (1..=6).map(node).collect::<Vec<_>>()
+    );
+    assert!(leader.event_connection_replicas(&event, 5).is_err());
+}
+
+#[test]
+fn prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation() {
+    let mut c = core();
+    let before = c.state().clone();
+    let mut next = configuration(2, &[1, 2, 3], &[4]);
+    next = Configuration::new(
+        next.id(),
+        next.policy().clone(),
+        [
+            (node(1), store(1)),
+            (node(2), store(22)),
+            (node(3), store(3)),
+        ]
+        .into(),
+        next.learners().clone(),
+    )
+    .unwrap();
+    let mut message = reply(
+        &c,
+        2,
+        RequestContext {
+            origin: c.binding,
+            sequence: 800,
+        },
+        Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            leader_commit: 0,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: operation(800),
+                    expected: cid(1),
+                    change: ConfigurationChange::Learners(next),
+                })),
+            }],
+        },
+    );
+    assert_eq!(
+        c.event_connection_replicas(&Event::Receive(message.clone()), 6),
+        Err(RaftError::WrongIdentity)
+    );
+    message.rpc = Rpc::ReadProbe;
+    message.to = node(3);
+    assert_eq!(
+        c.event_connection_replicas(&Event::Receive(message), 6),
+        Err(RaftError::WrongIdentity)
+    );
+    assert_eq!(c.state(), &before);
+    c.storage_failed();
+    assert_eq!(
+        c.event_connection_replicas(&Event::Heartbeat, 6),
+        Err(RaftError::Fenced)
+    );
 }
 
 fn retiring_leader(removed: bool) -> Raft {

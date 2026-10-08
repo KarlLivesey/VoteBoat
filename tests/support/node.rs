@@ -91,6 +91,21 @@ fn shutdown(n: &mut Boat) {
 fn membership_routes_are_preflighted_and_rejections_return_owned_routes() {
     use voteboat::{connect::ConnectDirection, runtime::PeerDriverError};
     let mut n = boat(parts(3, true));
+    let current = [
+        (node(2), ConnectDirection::Accept),
+        (node(3), ConnectDirection::Dial(())),
+    ]
+    .into();
+    assert_eq!(
+        n.preflight_peer_event(group(1), &Event::Heartbeat, &current, MonoTime(100)),
+        Ok(())
+    );
+    assert_eq!(
+        n.preflight_peer_event(group(8), &Event::Heartbeat, &current, MonoTime(0)),
+        Err(PeerDriverError::Assignments(
+            voteboat::transport::PeerAssignmentsError::UnknownGroup
+        ))
+    );
     let rejected = n
         .reconcile_membership(Default::default(), MonoTime(0))
         .err()
@@ -116,6 +131,10 @@ fn membership_routes_are_preflighted_and_rejections_return_owned_routes() {
         .unwrap_or_else(|r| panic!("{:?}", r.reason));
     assert!(!n.local().owner.is_failed());
     n.begin_shutdown();
+    assert_eq!(
+        n.preflight_peer_event(group(1), &Event::Heartbeat, &current, MonoTime(0)),
+        Err(PeerDriverError::NotQuiescent)
+    );
     assert_eq!(
         n.reconcile_membership(Default::default(), MonoTime(0))
             .err()
@@ -205,6 +224,86 @@ fn constructor_requires_voter_store_authorization_and_returns_original_parts_bef
     };
     assert_eq!(rejected.reason, NodeError::WrongPeerStore);
     assert!(rejected.parts.local.owner.is_drained());
+}
+#[test]
+fn constructor_requires_connections_for_rollback_reachable_recovered_learners() {
+    use voteboat::membership::*;
+    let mut p = parts(1, false);
+    let id = p.local.owner.identity();
+    let mut shard = Shard::new(
+        id,
+        ShardLimits {
+            max_groups: 100,
+            ..ShardLimits::default()
+        },
+        Ready(VecDeque::new()),
+    )
+    .unwrap();
+    for g in [group(1), group(2)] {
+        let mut state = p.local.owner.core(g).unwrap().state().clone();
+        let config = |number, learners| {
+            Configuration::new(
+                ConfigurationId::new(number).unwrap(),
+                state.bootstrap.policy.clone(),
+                state.bootstrap.voter_stores.clone(),
+                learners,
+            )
+            .unwrap()
+        };
+        state.entries = vec![
+            LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: OperationId::new(900).unwrap(),
+                    expected: ConfigurationId::new(1).unwrap(),
+                    change: ConfigurationChange::Learners(config(
+                        2,
+                        [(node(2), identity(2))].into(),
+                    )),
+                })),
+            },
+            LogEntry {
+                index: 2,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: OperationId::new(901).unwrap(),
+                    expected: ConfigurationId::new(2).unwrap(),
+                    change: ConfigurationChange::Learners(config(3, Default::default())),
+                })),
+            },
+        ];
+        state.hard_state.term = 1;
+        state.commit_index = 1;
+        let core = Raft::recover_member(node(1), id.store, state, LogLimits::default()).unwrap();
+        assert_eq!(core.membership().replica_store(node(2)), None);
+        assert!(core.connection_replicas(3).unwrap().contains_key(&node(2)));
+        shard.register(core).unwrap();
+    }
+    let runtime = TimedShard::new(
+        shard,
+        Timers {
+            owner: id,
+            sequence: 0,
+            entries: BTreeMap::new(),
+        },
+        Entropy(17),
+        TimerConfig::default(),
+        MonoTime(0),
+    )
+    .unwrap();
+    p.local.owner = EffectOwner::new(
+        runtime,
+        p.local.persistence.binding(),
+        EffectOwnerLimits::default(),
+    )
+    .unwrap();
+    let rejected = Boat::from_parts(p, NodeLimits::default(), MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(rejected.reason, NodeError::MissingPeers);
+    assert!(rejected.parts.local.owner.is_drained());
+    assert!(!rejected.parts.local.persistence.closed);
 }
 #[test]
 fn unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_io() {

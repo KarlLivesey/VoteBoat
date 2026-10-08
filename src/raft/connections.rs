@@ -64,4 +64,59 @@ impl Raft {
         }
         Ok(peers)
     }
+    /// Conservative required connection stores before an event is executed.
+    /// Includes intermediate incoming configurations even when a later final
+    /// record removes them. This is resource inspection, not message validation
+    /// or authorization; malformed protocol histories may still be rejected.
+    pub fn event_connection_replicas(
+        &self,
+        event: &Event,
+        limit: usize,
+    ) -> Result<BTreeMap<NodeId, StoreIdentity>, RaftError> {
+        let mut peers = self.connection_replicas(limit)?;
+        let mut add = |node, store| -> Result<(), RaftError> {
+            if peers.get(&node).is_some_and(|old| *old != store) {
+                return Err(RaftError::WrongIdentity);
+            }
+            if !peers.contains_key(&node) && peers.len() == limit {
+                return Err(StorageError::Rejected("connection peer budget").into());
+            }
+            peers.insert(node, store);
+            Ok(())
+        };
+        if let Event::Receive(message) = event {
+            if message.group != self.durable.bootstrap.group || message.to != self.node {
+                return Err(RaftError::WrongIdentity);
+            }
+            match &message.rpc {
+                Rpc::Append { entries, .. } => {
+                    for entry in entries {
+                        if let EntryPayload::Configuration(record) = &entry.payload {
+                            use crate::membership::ConfigurationChange;
+                            match &record.change {
+                                ConfigurationChange::Learners(next)
+                                | ConfigurationChange::Joint { next, .. } => {
+                                    for (&node, &store) in
+                                        next.voter_stores().iter().chain(next.learners())
+                                    {
+                                        add(node, store)?;
+                                    }
+                                }
+                                ConfigurationChange::Final { .. } => (),
+                            }
+                        }
+                    }
+                }
+                Rpc::Snapshot { snapshot } => {
+                    if let Some(membership) = &snapshot.metadata.membership {
+                        for (node, store) in membership.replicas() {
+                            add(node, store)?;
+                        }
+                    }
+                }
+                _ => (),
+            }
+        }
+        Ok(peers)
+    }
 }

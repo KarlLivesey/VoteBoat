@@ -208,7 +208,10 @@ where
                 if core.state().base_index() > 0 && parts.local.snapshots.is_none() {
                     return Err(NodeError::MissingSnapshots);
                 }
-                for (peer, store) in core.membership().replicas() {
+                let connection_peers = core
+                    .connection_replicas(65536)
+                    .map_err(|e| NodeError::Owner(EffectOwnerError::Consensus(e)))?;
+                for (peer, store) in connection_peers {
                     if peer == core.local_node() {
                         continue;
                     }
@@ -378,9 +381,29 @@ where
         self.now = now;
         Ok(())
     }
-    /// Reconcile connection assignments for every hosted core against explicitly
-    /// supplied routes and the connector's provisioned credentials. This changes
-    /// networking only; it cannot activate membership or create a replica.
+    /// Preview connection resources for one event across every hosted group.
+    /// Borrows routes and leaves clocks, providers and core state unchanged.
+    /// Success is not a reservation or protocol authority; recheck at execution.
+    pub fn preflight_peer_event(
+        &self,
+        group: GroupIdentity,
+        event: &crate::raft::Event,
+        routes: &BTreeMap<NodeId, crate::connect::ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerDriverError> {
+        if self.state != NodeState::Running || self.peers.is_none() {
+            return Err(PeerDriverError::NotQuiescent);
+        }
+        if now < self.now {
+            return Err(PeerDriverError::TimeWentBack);
+        }
+        self.peers
+            .as_ref()
+            .unwrap()
+            .preflight_event(&self.local.owner, group, event, routes, now)
+    }
+    /// Apply current-core connection assignments with owned route hints. This
+    /// cannot activate membership or provision credentials.
     pub fn reconcile_membership(
         &mut self,
         routes: BTreeMap<NodeId, crate::connect::ConnectDirection<C::Endpoint>>,

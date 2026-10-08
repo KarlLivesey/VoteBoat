@@ -51,3 +51,29 @@ capacity and identity rejection, and unchanged-roster reconciliation followed by
 committed writes and recovery over native TCP/TLS and QUIC formats 2/3.
 Prospective resource admission, distributed readiness and faulted activation
 remain separate work. Public online configuration ingress remains gated.
+
+## Prospective event inspection
+
+`Node::preflight_peer_event(group, event, &routes, now)` and
+`PeerDriver::preflight_event` inspect resources before an incoming event runs.
+`PeerAssignments::for_event` and `Raft::event_connection_replicas` provide the
+lower-level calculation. An incoming append contributes every intermediate
+learner/joint assignment, including peers a later final entry would remove.
+A membership snapshot contributes its full voter/learner union. Existing
+committed, rollback and pending views, plus other hosted groups, remain included.
+Unknown groups, wrong message group/destination, conflicting exact stores,
+missing routes/pins and exhausted retained-peer/metadata limits reject.
+
+These operations borrow input and leave clocks, providers, roster and cores
+unchanged. They are conservative resource previews: malformed histories can
+pass resource inspection and still fail protocol validation. Success retains no
+capacity and cannot authorize an event or a configuration. The eventual online
+admission path must recheck at serialized execution and retain its reservation
+through the accepted/pending state. Independent successful previews do not
+reserve capacity for a combination of queued events. That integration and
+readiness gates are still unfinished; configuration ingress stays closed.
+
+Node construction also checks the complete rollback-reachable connection set.
+Recovery with an accepted learner removal must still provision that learner when
+the removal is uncommitted. A missing route/store assignment rejects construction
+before provider polling and returns the original parts.

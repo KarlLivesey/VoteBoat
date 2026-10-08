@@ -16,7 +16,7 @@
 use super::*;
 use crate::{
     identity::*,
-    raft::{Raft, RaftError},
+    raft::{Event, Raft, RaftError},
 };
 use std::collections::BTreeMap;
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -26,6 +26,7 @@ pub enum PeerAssignmentsError {
     ConflictingStore,
     Overloaded,
     Core(RaftError),
+    UnknownGroup,
 }
 /// Ephemeral snapshot of required exact peers across all supplied hosted groups.
 /// Rebuild at the serialized owner before reconciliation; this is not a durable
@@ -40,18 +41,44 @@ impl PeerAssignments {
         cores: impl IntoIterator<Item = &'a Raft>,
         limit: usize,
     ) -> Result<Self, PeerAssignmentsError> {
+        Self::build(local, cores, None, limit)
+    }
+    /// Preview one event at its group while retaining every other hosted group's
+    /// required peers. No configuration validation, admission or mutation occurs.
+    pub fn for_event<'a>(
+        local: LocalIdentity,
+        cores: impl IntoIterator<Item = &'a Raft>,
+        group: GroupIdentity,
+        event: &Event,
+        limit: usize,
+    ) -> Result<Self, PeerAssignmentsError> {
+        Self::build(local, cores, Some((group, event)), limit)
+    }
+    fn build<'a>(
+        local: LocalIdentity,
+        cores: impl IntoIterator<Item = &'a Raft>,
+        prospective: Option<(GroupIdentity, &Event)>,
+        limit: usize,
+    ) -> Result<Self, PeerAssignmentsError> {
         if limit == 0 || limit > 65536 {
             return Err(PeerAssignmentsError::InvalidLimits);
         }
         let mut peers = BTreeMap::new();
+        let mut found = prospective.is_none();
         for core in cores {
             if core.local_node() != local.node || core.storage_binding() != local.store {
                 return Err(PeerAssignmentsError::WrongBinding);
             }
-            for (node, store) in core
-                .connection_replicas(limit.saturating_add(1))
-                .map_err(PeerAssignmentsError::Core)?
+            let required = if let Some((_, event)) =
+                prospective.filter(|(group, _)| *group == core.state().bootstrap.group)
             {
+                found = true;
+                core.event_connection_replicas(event, limit + 1)
+            } else {
+                core.connection_replicas(limit + 1)
+            }
+            .map_err(PeerAssignmentsError::Core)?;
+            for (node, store) in required {
                 if node == local.node {
                     continue;
                 }
@@ -63,6 +90,9 @@ impl PeerAssignments {
                 }
                 peers.insert(node, store);
             }
+        }
+        if !found {
+            return Err(PeerAssignmentsError::UnknownGroup);
         }
         Ok(Self { local, peers })
     }

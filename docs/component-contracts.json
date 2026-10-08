@@ -907,14 +907,18 @@
     },
     {
       "design_id": "C10/C15",
-      "public_contract": "Raft::connection_replicas / PeerAssignments / PeerRoster::reconcile / PeerDriver::reconcile_membership / Node::reconcile_membership",
+      "public_contract": "Raft::connection_replicas / PeerAssignments / PeerRoster::reconcile / PeerDriver::reconcile_membership / Node::reconcile_membership / Node::preflight_peer_event",
       "operations": [
         "connection_replicas",
         "from_cores",
         "validate_assignments",
         "reconcile",
         "supports_peer",
-        "reconcile_membership"
+        "reconcile_membership",
+        "event_connection_replicas",
+        "for_event",
+        "preflight_event",
+        "preflight_peer_event"
       ],
       "native": "Shared roster reconciliation with exact construction-provisioned TCP/TLS or QUIC credentials; caller-polled provider receipts and original queue credits.",
       "conformance": [
@@ -924,7 +928,7 @@
         "tests/support/node.rs",
         "tests/startup.rs"
       ],
-      "scope": "Ephemeral required connection union across all hosted groups, committed views, accepted suffix predecessors and pending storage transitions. No quorum or activation authority. Owned complete route hints and exact provider credential availability preflight before mutation. Revocation stops receive authority immediately; cancellation retains provider slots and accepted sends until terminal completion. Same-store re-enrollment retains remote session floors, with bounded inactive peer records. Distinct-node additions require spare roster capacity and preprovisioned credentials. Reusing a node ID with a different store requires drained roster/generation handoff; live credential rotation is unsupported. Not prospective membership admission or readiness; public online configuration ingress remains gated."
+      "scope": "Ephemeral required connection union across all hosted groups, committed views, accepted suffix predecessors and pending storage transitions. No quorum or activation authority. Owned complete route hints and exact provider credential availability preflight before mutation. Revocation stops receive authority immediately; cancellation retains provider slots and accepted sends until terminal completion. Same-store re-enrollment retains remote session floors, with bounded inactive peer records. Distinct-node additions require spare roster capacity and preprovisioned credentials. Reusing a node ID with a different store requires drained roster/generation handoff; live credential rotation is unsupported. Not prospective membership admission or readiness; public online configuration ingress remains gated. Prospective event preview includes every intermediate incoming append configuration or snapshot membership plus all existing rollback/pending views and other hosted groups. Borrowed route, exact credential, identity, retained-history and metadata checks are pure, with no clock advancement or capacity reservation. Preview success does not validate protocol history or admit input; serialized execution must recheck and reserve before opening configuration ingress. Node construction checks rollback-reachable connections, including removed accepted learners still required by the committed prefix."
     }
   ],
   "not_yet_implemented": [

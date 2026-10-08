@@ -726,6 +726,62 @@ fn assignments(voters: &[u64]) -> PeerAssignments {
     PeerAssignments::from_cores(local(), [&assignment_core(voters, None)], 4).unwrap()
 }
 #[test]
+fn prospective_assignments_keep_other_groups_without_admitting_input() {
+    use voteboat::{log::*, membership::*};
+    let a = assignment_core(&[1, 2], None);
+    let mut state = assignment_core(&[1, 3], None).state().clone();
+    state.bootstrap.group = group(2);
+    let b = Raft::recover(node(1), local().store, state, LogLimits::default()).unwrap();
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        a.state().bootstrap.policy.clone(),
+        a.state().bootstrap.voter_stores.clone(),
+        [(node(4), identity(4))].into(),
+    )
+    .unwrap();
+    let event = Event::Receive(Message {
+        group: group(1),
+        configuration: ConfigurationId::new(1).unwrap(),
+        from: node(2),
+        sender: StoreBinding {
+            identity: identity(2),
+            session: StoreSession::new(1).unwrap(),
+        },
+        to: node(1),
+        term: 1,
+        context: RequestContext {
+            origin: local().store,
+            sequence: 1,
+        },
+        rpc: Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            leader_commit: 0,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: OperationId::new(900).unwrap(),
+                    expected: ConfigurationId::new(1).unwrap(),
+                    change: ConfigurationChange::Learners(next),
+                })),
+            }],
+        },
+    });
+    let plan = PeerAssignments::for_event(local(), [&a, &b], group(1), &event, 3).unwrap();
+    assert_eq!(
+        plan.peers().map(|(n, _)| n).collect::<Vec<_>>(),
+        vec![node(2), node(3), node(4)]
+    );
+    assert_eq!(a.connection_replicas(2).unwrap().len(), 2);
+    assert_eq!(b.connection_replicas(2).unwrap().len(), 2);
+    assert!(PeerAssignments::for_event(local(), [&a, &b], group(1), &event, 2).is_err());
+    assert!(matches!(
+        PeerAssignments::for_event(local(), [&a, &b], group(9), &event, 3),
+        Err(PeerAssignmentsError::UnknownGroup)
+    ));
+}
+#[test]
 fn membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready() {
     let mut r = roster(limits());
     let tickets = r.due_connections(MonoTime(0), 4).unwrap();

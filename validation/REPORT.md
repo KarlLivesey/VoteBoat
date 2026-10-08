@@ -265,3 +265,21 @@ assertion uses a borrowed expected-message slice.
 - No live credential rotation, prospective membership resource admission,
   distributed readiness, public online configuration ingress, macOS execution,
   performance or complete protocol proof is claimed. Full P0–P7 remains active.
+
+## 2026-10-08: prospective connection preview and recovery admission (slice 49)
+
+- QUIC-enabled library/effect-owner/peers/startup suites pass 41/99/18/8 tests
+  (166 total), including actual recovered-core constructor rejection and native
+  TCP/TLS plus QUIC commit/drain/recover histories with wire formats 2/3.
+- Actual-core prospective resource checks cover learner append growth,
+  intermediate joint/final peers, compacted joint snapshot membership, limits,
+  conflicting stores, wrong scope and fencing. Downstream checks cover shared
+  group unions, route/pin availability, retained-history capacity and pure clocks.
+- Core-only all-target build, all-feature/all-target Clippy with warnings denied,
+  all-feature API docs and inventory shape/path checks pass. One test fixture's
+  scheduler capacity was corrected after SchedulerContract rejection; the actual
+  recovered rollback-peer construction test then passes.
+- A preview does not retain capacity or admit protocol state. Queued-event
+  reservations, readiness and complete distributed activation remain unfinished.
+  Online configuration ingress stays gated. No macOS, performance or full proof
+  claim; the complete P0–P7 objective remains active.
