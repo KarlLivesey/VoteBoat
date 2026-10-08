@@ -54,7 +54,8 @@ id64!(
     ReadRequestId,
     SnapshotGeneration,
     RuntimeGeneration,
-    StorageWorkerGeneration
+    StorageWorkerGeneration,
+    OutboundGeneration
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 

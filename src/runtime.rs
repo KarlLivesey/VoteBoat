@@ -15,7 +15,11 @@
 //! Shared, single-owner ingress scheduling. No threads, clocks, stores or
 //! transports are constructed. Effects transfer to host-owned bounded workers;
 //! these ingress credits are not an outbound or application memory budget.
-use crate::{identity::*, log::EntryPayload, quorum::Tree, raft::*};
+use crate::{
+    identity::*,
+    outbound::{message_cost, MessageClass},
+    raft::*,
+};
 use std::{
     collections::{BTreeMap, VecDeque},
     mem::size_of,
@@ -633,84 +637,24 @@ impl<Q: ReadyScheduler> Shard<Q> {
 }
 
 fn event_cost(event: &Event, limit: usize) -> Result<(Class, usize), RuntimeError> {
-    let mut bytes = size_of::<Event>();
-    let mut add = |n: usize| -> Result<(), RuntimeError> {
-        bytes = bytes
-            .checked_add(n)
-            .filter(|v| *v <= limit)
-            .ok_or(RuntimeError::EventTooLarge)?;
-        Ok(())
-    };
-    let class = match event {
-        Event::Read { .. } => Class::Data,
-        Event::Propose { bytes, .. } => {
-            add(bytes.capacity())?;
-            Class::Data
+    let (class, extra) = match event {
+        Event::Read { .. } => (Class::Data, 0),
+        Event::Propose { bytes, .. } => (Class::Data, bytes.capacity()),
+        Event::Receive(message) => {
+            let (class, cost) =
+                message_cost(message, limit).map_err(|_| RuntimeError::EventTooLarge)?;
+            let class = match class {
+                MessageClass::Control => Class::Control,
+                MessageClass::Data => Class::Data,
+                MessageClass::Background => Class::Background,
+            };
+            (class, cost - size_of::<Message>())
         }
-        Event::Receive(m) => match &m.rpc {
-            Rpc::Append { entries, .. } => {
-                add(entries
-                    .capacity()
-                    .checked_mul(size_of::<crate::log::LogEntry>())
-                    .ok_or(RuntimeError::EventTooLarge)?)?;
-                let mut class = Class::Control;
-                for entry in entries {
-                    if let EntryPayload::Command { bytes, .. } = &entry.payload {
-                        add(bytes.capacity())?;
-                        class = Class::Data;
-                    }
-                }
-                class
-            }
-            Rpc::Snapshot { snapshot } => {
-                add(size_of::<crate::snapshot::Snapshot>())?;
-                add(snapshot.application.capacity())?;
-                let b = &snapshot.metadata.bootstrap;
-                if b.voter_stores.len() > 4096 || b.policy.voters().len() > 4096 {
-                    return Err(RuntimeError::EventTooLarge);
-                }
-                // Conservative accounting units for both owned BTree indexes;
-                // allocator overhead/RSS is not represented as an exact claim.
-                add((b.voter_stores.len() + b.policy.voters().len()) * 128)?;
-                let mut stack = vec![(b.policy.tree(), 0)];
-                let mut count = 0;
-                while let Some((tree, depth)) = stack.pop() {
-                    count += 1;
-                    if count > 16384 || depth > 32 {
-                        return Err(RuntimeError::EventTooLarge);
-                    }
-                    match tree {
-                        Tree::Voter(_) => (),
-                        Tree::Majority(children) => {
-                            add(children
-                                .capacity()
-                                .checked_mul(size_of::<Tree>())
-                                .ok_or(RuntimeError::EventTooLarge)?)?;
-                            if children.len() > 16384 - count - stack.len() {
-                                return Err(RuntimeError::EventTooLarge);
-                            }
-                            stack.extend(children.iter().map(|t| (t, depth + 1)));
-                        }
-                        Tree::Weighted(children) => {
-                            add(children
-                                .capacity()
-                                .checked_mul(size_of::<crate::quorum::WeightedChild>())
-                                .ok_or(RuntimeError::EventTooLarge)?)?;
-                            if children.len() > 16384 - count - stack.len() {
-                                return Err(RuntimeError::EventTooLarge);
-                            }
-                            stack.extend(children.iter().map(|t| (&t.node, depth + 1)));
-                        }
-                    }
-                }
-                Class::Background
-            }
-            _ => Class::Control,
-        },
-        _ => Class::Control,
+        _ => (Class::Control, 0),
     };
-    if bytes > limit {
-        return Err(RuntimeError::EventTooLarge);
-    }
+    let bytes = size_of::<Event>()
+        .checked_add(extra)
+        .filter(|v| *v <= limit)
+        .ok_or(RuntimeError::EventTooLarge)?;
     Ok((class, bytes))
 }

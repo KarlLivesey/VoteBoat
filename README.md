@@ -109,6 +109,16 @@ The caller budgets effects after delivery. Close, drain and `try_reclaim` return
 the store; dropping observation cannot cancel accepted writes. Snapshot helpers
 currently require quiescent synchronous store access.
 
+Use `outbound::OutboundQueue` (native provider `NativeOutbound`) to retain
+same-peer batches of `Effect::Send` under node and peer budgets. Admission
+returns ownership on rejection. Poll hands accepted batches to the transport;
+credits remain charged until `complete` consumes them after buffer release.
+Control capacity is reserved, snapshots have a separate ceiling, and the native
+queue fairly visits peers and traffic classes. Local send success carries no
+Raft acknowledgement. The host drives polling and budgets retained rejected
+effects, encoded buffers and receive queues separately. This queue creates no
+sockets; authenticated transport and wire framing remain pending.
+
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
 Each group allows one outstanding read (including an unconsumed ready barrier).

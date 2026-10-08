@@ -19,6 +19,7 @@ pub mod identity;
 pub mod log;
 #[cfg(feature = "native")]
 pub mod native;
+pub mod outbound;
 pub mod quorum;
 pub mod raft;
 pub mod runtime;

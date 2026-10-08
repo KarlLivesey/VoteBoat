@@ -14,7 +14,12 @@
 // rights and limitations under the RPL.
 mod support;
 use std::collections::{BTreeMap, VecDeque};
+use support::outbound::HostOutbound;
 use support::*;
+use voteboat::outbound::{
+    LocalSendResult, OutboundBinding, OutboundBudget, OutboundError, OutboundLimits, OutboundQueue,
+    OutboundUsage,
+};
 use voteboat::{application::*, identity::*, log::*, raft::*, runtime::*, worker::*};
 
 struct Ready(VecDeque<GroupIdentity>);
@@ -291,6 +296,8 @@ struct WorkerNode<W: PersistenceWorker> {
     apps: BTreeMap<GroupIdentity, Counter>,
     pending: BTreeMap<GroupIdentity, PersistUnit>,
     messages: VecDeque<Message>,
+    outbound: Box<dyn OutboundQueue>,
+    rejected_sends: usize,
     held: Option<WorkerEvent>,
     hold: bool,
     results: Vec<CounterReceipt>,
@@ -298,7 +305,13 @@ struct WorkerNode<W: PersistenceWorker> {
     largest_batch: usize,
 }
 impl<W: PersistenceWorker> WorkerNode<W> {
-    fn new<L: LogStore>(id: u64, mut store: L, create: bool, worker: impl FnOnce(L) -> W) -> Self {
+    fn new<L: LogStore>(
+        id: u64,
+        mut store: L,
+        create: bool,
+        worker: impl FnOnce(L) -> W,
+        outbound: impl FnOnce(OutboundBinding) -> Box<dyn OutboundQueue>,
+    ) -> Self {
         if create {
             append(
                 &mut store,
@@ -333,12 +346,19 @@ impl<W: PersistenceWorker> WorkerNode<W> {
             apps.insert(group(g), app);
             shard.register(core).unwrap();
         }
+        let outbound = outbound(OutboundBinding {
+            node: node(id),
+            store: store.binding(),
+            generation: OutboundGeneration::new(1).unwrap(),
+        });
         Self {
             shard,
             worker: worker(store),
             apps,
             pending: BTreeMap::new(),
             messages: VecDeque::new(),
+            outbound,
+            rejected_sends: 0,
             held: None,
             hold: false,
             results: vec![],
@@ -455,6 +475,20 @@ impl<W: PersistenceWorker> WorkerNode<W> {
                 Err(e) => panic!("worker rejected valid persistence: {e:?}"),
             }
         }
+        // Keep rejected effects owned and bounded while admitted sends hold
+        // node/peer credits. Inspect each retained effect once, so bulk overload
+        // cannot hide a later control message from its reserved capacity.
+        for _ in 0..self.messages.len() {
+            let message = self.messages.pop_front().unwrap();
+            match self.outbound.submit(vec![message]) {
+                Ok(_) => progress = true,
+                Err(rejected) if rejected.reason == OutboundError::Overloaded => {
+                    self.rejected_sends += 1;
+                    self.messages.extend(rejected.messages);
+                }
+                Err(e) => panic!("outbound rejected valid effects: {e:?}"),
+            }
+        }
         progress
     }
     fn values(&self, expected: i64) {
@@ -475,8 +509,16 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
         let mut progress = false;
         for node in nodes.iter_mut() {
             progress |= node.progress();
-            assert!(network.len() + node.messages.len() <= 8192);
-            network.append(&mut node.messages);
+            for mut batch in node.outbound.poll(32) {
+                assert!(network.len() + batch.messages.len() <= 8192);
+                network.extend(batch.messages.drain(..));
+                // A local send can complete before remote delivery (or loss).
+                // Only actual received Raft messages can acknowledge a prefix.
+                node.outbound
+                    .complete(batch, LocalSendResult::Sent)
+                    .unwrap();
+                progress = true;
+            }
         }
         // Bound each network visit and redeliver some packets. Rejected ingress
         // stays owned by this bounded driver rather than disappearing.
@@ -513,9 +555,12 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
         }
         if !progress {
             if network.is_empty()
-                && nodes
-                    .iter()
-                    .all(|n| n.worker.is_drained() && n.pending.is_empty())
+                && nodes.iter().all(|n| {
+                    n.worker.is_drained()
+                        && n.pending.is_empty()
+                        && n.messages.is_empty()
+                        && n.outbound.is_drained()
+                })
             {
                 return;
             }
@@ -607,6 +652,7 @@ fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
     assert!(nodes[0].reads[1..].iter().all(|v| *v == 10));
     // An isolated old leader cannot complete a fresh read. The other two
     // workers continue and elect a new leader without sharing a storage lane.
+    nodes[0].shard.admit(group(100), propose(99, 1000)).unwrap();
     nodes[0]
         .shard
         .admit(
@@ -640,6 +686,7 @@ fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
     // must still persist, apply and serve a fresh read.
     nodes[0].shard.close_admission();
     nodes[0].worker.close();
+    nodes[0].outbound.close();
     nodes[1].shard.admit(group(100), propose(4, 1)).unwrap();
     worker_pump(nodes, Some(node(1)));
     nodes[1]
@@ -655,13 +702,56 @@ fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
     assert_eq!(nodes[1].reads, [16]);
     assert!(nodes
         .iter()
-        .all(|n| n.worker.is_drained() && n.pending.is_empty()));
+        .all(|n| n.worker.is_drained() && n.pending.is_empty() && n.outbound.is_drained()));
+    assert!(nodes.iter().any(|n| n.rejected_sends > 0));
+}
+
+fn outbound_limits() -> OutboundLimits {
+    let budget = OutboundBudget {
+        max: OutboundUsage {
+            batches: 16,
+            messages: 32,
+            bytes: 128 * 1024,
+        },
+        control: OutboundUsage {
+            batches: 4,
+            messages: 8,
+            bytes: 16 * 1024,
+        },
+        background: OutboundUsage {
+            batches: 2,
+            messages: 4,
+            bytes: 16 * 1024,
+        },
+    };
+    OutboundLimits {
+        max_peers: 2,
+        node: OutboundBudget {
+            max: OutboundUsage {
+                batches: 32,
+                messages: 64,
+                bytes: 256 * 1024,
+            },
+            ..budget
+        },
+        peer: budget,
+        batch_messages: 8,
+        batch_bytes: 16 * 1024,
+    }
 }
 
 #[test]
 fn public_host_workers_replicate_read_retry_replace_leader_and_close_independently() {
     let mut nodes = (1..=3)
-        .map(|id| WorkerNode::new(id, HostLogStore::new(id as u128), true, HostWorker::new))
+        .map(|id| {
+            WorkerNode::new(
+                id,
+                HostLogStore::new(id as u128),
+                true,
+                HostWorker::new,
+                |binding| Box::new(HostOutbound::new(binding, outbound_limits()).unwrap()),
+            )
+        })
         .collect::<Vec<_>>();
     worker_cluster_history(&mut nodes);
 }
@@ -678,7 +768,7 @@ mod native {
     };
     use voteboat::{
         contracts::{HardState, StorageError},
-        native::{log_store::*, worker::*},
+        native::{log_store::*, outbound::NativeOutbound, worker::*},
     };
     #[derive(Default)]
     struct Wake(AtomicUsize);
@@ -728,15 +818,21 @@ mod native {
                     LogLimits::default(),
                 )
                 .unwrap();
-                WorkerNode::new(id, store, true, |store| {
-                    NativeLogWorker::spawn(
-                        store,
-                        StorageWorkerGeneration::new(1).unwrap(),
-                        WorkerLimits::default(),
-                        wake.clone(),
-                    )
-                    .unwrap()
-                })
+                WorkerNode::new(
+                    id,
+                    store,
+                    true,
+                    |store| {
+                        NativeLogWorker::spawn(
+                            store,
+                            StorageWorkerGeneration::new(1).unwrap(),
+                            WorkerLimits::default(),
+                            wake.clone(),
+                        )
+                        .unwrap()
+                    },
+                    |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
+                )
             })
             .collect::<Vec<_>>();
         let old_bindings = nodes
@@ -758,15 +854,21 @@ mod native {
                 )
                 .unwrap();
                 assert_ne!(store.binding(), old_bindings[id as usize - 1]);
-                WorkerNode::new(id, store, false, |store| {
-                    NativeLogWorker::spawn(
-                        store,
-                        StorageWorkerGeneration::new(1).unwrap(),
-                        WorkerLimits::default(),
-                        wake.clone(),
-                    )
-                    .unwrap()
-                })
+                WorkerNode::new(
+                    id,
+                    store,
+                    false,
+                    |store| {
+                        NativeLogWorker::spawn(
+                            store,
+                            StorageWorkerGeneration::new(1).unwrap(),
+                            WorkerLimits::default(),
+                            wake.clone(),
+                        )
+                        .unwrap()
+                    },
+                    |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
+                )
             })
             .collect::<Vec<_>>();
         // The explicitly stopped follower missed operation 4; both surviving

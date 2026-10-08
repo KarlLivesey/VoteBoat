@@ -791,10 +791,74 @@ snapshot installation, full recursive-policy integration, power-cut behavior,
 production performance or macOS execution. Existing recursive quorum and crash
 histories remain separate evidence. The full P0–P7 goal remains active.
 
+## Slice 10: bounded outbound ownership and dispatch
+
+The version-1 public `OutboundQueue` contract admits owned same-peer batches,
+dispatches them to a caller-driven transport, and retains credits until a local
+completion consumes the batch after transport buffer release. Rejection returns
+all messages. Node and peer budgets bound batches, message counts and retained
+capacity bytes across queued and dispatched work. Command and snapshot traffic
+cannot consume control reserves; snapshots also have a separate ceiling. Mixed
+batches use the most restrictive payload class. Construction rejects reserves
+too small for a basic control/no-op batch.
+
+`NativeOutbound` constructs no sockets, threads or executors. It visits peers
+round-robin and each peer's control/data/background queues with two control
+turns, one data turn and one background turn. FIFO holds within a peer/class;
+priority scheduling may reorder different classes. Empty peers are removed
+after their final completion. Retained peer/class queue capacities have finite
+construction-time bounds; capacity-byte accounting is not an exact RSS promise.
+Ingress and outbound now share the same retained-message accounting, including
+command vector capacity and bounded snapshot policy/index traversal.
+
+Send tickets are local admissions, never durable prefixes. Their scope is a
+node, recovered store session and fresh construction-time outbound generation.
+The host must not reuse that generation within the session. Unknown, stale,
+wrong-peer or undispatched completions cannot release native queue credits.
+Local sent/failed/cancelled completion makes no claim about remote delivery or
+durable voter state and has no path into the core's quorum bookkeeping. Only
+received protocol acknowledgements count there. The native queue retains no
+application delivery log; after process loss, recovery and protocol retries use
+the authoritative Raft log.
+
+Close rejects admission while accepted work drains. Abandoning an in-flight
+batch leaves credits held; callers must resolve external I/O and return its
+terminal completion. A queue cannot shut down host networking resources.
+Caller-retained rejected effects, encoded buffers, remote receive queues and
+application results require separate budgets. Production effect staging before
+an owner step and authenticated transport assembly remain pending.
+
+### Slice 10 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native suite: 111 tests pass; core/host-only suite: 52 tests pass. Both builds
+  pass Clippy with warnings denied; formatting and documentation pass.
+- Public conformance runs with the native provider and an independent FIFO host
+  replacement. It covers peer saturation, control admission, byte reserves,
+  snapshot ceilings, retained vector capacities, complete-batch rejection,
+  retained in-flight credits, invalid construction and exact terminal scope.
+- Native dispatch exercises peer fairness and bulk service under a control
+  backlog. Sequential use of more peers than the roster ceiling verifies that
+  empty peer metadata is reclaimed. Closing one instance leaves another usable.
+- The three-node/100-group worker histories now inject host/native outbound
+  providers and deliberately saturate their budgets. Rejected sends remain
+  owned for retry. Local sends complete before bounded in-process delivery;
+  duplicate traffic, leader replacement and actual-file restart still preserve
+  acknowledged state and original retry outcomes.
+- An isolated leader locally sends an uncommitted command and read probe;
+  neither obtains quorum success. Healing replaces its uncommitted suffix and
+  brings it up to date from the surviving durable majority.
+
+This is outbound admission and scheduling, not a production network transport.
+Tests retain separately bounded effect/network queues. Socket/session security,
+wire decoding, asynchronous snapshot workers, recursive-policy assembly and
+macOS execution remain outstanding. Full P0–P7 remains active.
+
 ## Next slice
 
-Add bounded output admission, wire
-codec and authenticated-session transport seams. Extend virtual-time histories
+Add wire codec and authenticated-session transport seams, then assemble bounded
+effect staging and secure native transport. Extend virtual-time histories
 to leader loss, overload and message delay through the new assembly. Native
 sockets must use established secure
 sessions supplied by the host; production assembly cannot silently select an

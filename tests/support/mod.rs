@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![allow(dead_code)]
+pub mod outbound;
 use std::collections::BTreeMap;
 #[cfg(feature = "native")]
 use std::{cell::RefCell, io, rc::Rc};

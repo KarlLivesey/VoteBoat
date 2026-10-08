@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-asynchronous-wal-worker",
+  "status": "shared-runtime-with-bounded-wal-and-outbound-admission",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -256,6 +256,14 @@
       "scope": "Injected nonblocking completion hint, never durable evidence. Shared host resources remain host-owned."
     },
     {
+      "design_id": "C06/C15",
+      "public_contract": "OutboundQueue",
+      "operations": ["binding", "limits", "usage", "peer_usage", "submit", "poll", "complete", "close", "is_drained"],
+      "native": "NativeOutbound",
+      "conformance": ["tests/outbound.rs", "tests/worker.rs"],
+      "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. Local completion is not a Raft acknowledgement. No wire format, sockets, security or persistent delivery claim; transport remains pending."
+    },
+    {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
       "operations": ["sample"],
@@ -270,7 +278,6 @@
     "wire-codec",
     "secure-session",
     "asynchronous-snapshot-worker-assembly",
-    "outbound-admission",
     "buffers",
     "admission-policy",
     "routing",
