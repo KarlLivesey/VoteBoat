@@ -39,6 +39,32 @@ impl<C: WireCodec + Clone> NativeTransportFactory<C> {
 }
 impl<S: SecureSession, C: WireCodec + Clone> PeerTransportFactory<S> for NativeTransportFactory<C> {
     type Transport = NativePeerTransport<S, C>;
+    fn configuration_capacity(
+        &self,
+        required: &ConfigurationWireRequirements<'_>,
+    ) -> Result<ConfigurationWireCapacity, TransportError> {
+        let capacity = self
+            .codec
+            .configuration_capacity(required)
+            .map_err(TransportError::Wire)?;
+        if capacity.wire_version != self.codec.format_version() {
+            return Err(TransportError::ProviderViolation);
+        }
+        for footprint in [capacity.append, capacity.command, capacity.snapshot] {
+            if footprint.frame_bytes < self.codec.header_bytes()
+                || footprint.decoded_bytes < size_of::<crate::raft::Message>()
+            {
+                return Err(TransportError::ProviderViolation);
+            }
+            if footprint.frame_bytes > self.limits.send_frame_bytes
+                || footprint.frame_bytes > self.limits.receive_frame_bytes
+                || footprint.decoded_bytes > self.limits.decoded_bytes
+            {
+                return Err(TransportError::IncompatibleCodec);
+            }
+        }
+        Ok(capacity)
+    }
     fn build<O: OutboundQueue>(
         &mut self,
         session: S,

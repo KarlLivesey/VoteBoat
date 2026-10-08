@@ -214,8 +214,18 @@ impl Membership {
         record: &ConfigurationRecord,
         committed_prefix: u64,
     ) -> Result<(), MembershipError> {
+        self.preview_next(index, record, committed_prefix)
+            .map(|_| ())
+    }
+    pub(crate) fn preview_next(
+        &self,
+        index: u64,
+        record: &ConfigurationRecord,
+        committed_prefix: u64,
+    ) -> Result<Self, MembershipError> {
         let mut next = self.clone();
-        next.accept(index, record, committed_prefix)
+        next.accept(index, record, committed_prefix)?;
+        Ok(next)
     }
     fn accept(
         &mut self,

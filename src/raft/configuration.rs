@@ -39,6 +39,7 @@ pub enum ConfigurationProposalError {
     UnsupportedWireVersion(u16),
     MissingPeerTransport,
     Placement(crate::placement::PlacementError),
+    TransportCapacity(crate::transport::TransportError),
     Membership(MembershipError),
     MissingReadiness(NodeId),
     UnexpectedReadiness(NodeId),

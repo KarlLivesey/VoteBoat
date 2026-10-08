@@ -79,6 +79,7 @@ impl WireLimits {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum WireError {
+    UnsupportedConfigurationAdmission,
     InvalidLimits,
     UnsupportedVersion(u16),
     UnsupportedFlags,
@@ -87,6 +88,28 @@ pub enum WireError {
     Corrupt(&'static str),
     InvalidMessage(&'static str),
     WrongPeer,
+}
+/// Borrowed cold-path admission input. The index is the next local log position;
+/// requirements describe the command/checkpoint envelope to be supported.
+pub struct ConfigurationWireRequirements<'a> {
+    pub bootstrap: &'a crate::log::Bootstrap,
+    pub current: &'a crate::membership::Membership,
+    pub record: &'a crate::membership::ConfigurationRecord,
+    pub index: u64,
+    pub committed_index: u64,
+    pub application: crate::raft::ReadinessRequirements,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct WireFootprint {
+    pub frame_bytes: usize,
+    pub decoded_bytes: usize,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ConfigurationWireCapacity {
+    pub wire_version: u16,
+    pub append: WireFootprint,
+    pub command: WireFootprint,
+    pub snapshot: WireFootprint,
 }
 /// Pure bounded encoding/decoding; no I/O, queue, clock or cryptography owner.
 /// Providers name their wire version and fixed prefix size. The caller chooses
@@ -105,6 +128,15 @@ pub enum WireError {
 /// completion and separately budgets the encoded buffer. Decoded output moves
 /// into separately bounded ingress. No persistent/wire compatibility fallback.
 pub trait WireCodec {
+    /// Pure bounded sizing/validation, without accepting work or allocating
+    /// application-sized buffers. Includes the prospective membership base and
+    /// retained operation IDs. Success is capacity evidence, never commitment.
+    fn configuration_capacity(
+        &self,
+        _required: &ConfigurationWireRequirements<'_>,
+    ) -> Result<ConfigurationWireCapacity, WireError> {
+        Err(WireError::UnsupportedConfigurationAdmission)
+    }
     fn format_version(&self) -> u16;
     fn header_bytes(&self) -> usize;
     fn limits(&self) -> WireLimits;

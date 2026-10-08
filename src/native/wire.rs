@@ -35,6 +35,7 @@ const HEADER: usize = 24;
 const OVERHEAD: usize = HEADER + 4;
 const MIN_MESSAGE: usize = 129;
 const MAGIC: &[u8; 8] = b"VBWIRE01";
+mod capacity;
 #[derive(Clone, Copy, Debug)]
 pub struct NativeWireCodec {
     limits: WireLimits,
@@ -1076,6 +1077,12 @@ impl<'a> Decoder<'a> {
     }
 }
 impl WireCodec for NativeWireCodec {
+    fn configuration_capacity(
+        &self,
+        required: &ConfigurationWireRequirements<'_>,
+    ) -> Result<ConfigurationWireCapacity, WireError> {
+        capacity::check(self, required)
+    }
     fn format_version(&self) -> u16 {
         self.version
     }

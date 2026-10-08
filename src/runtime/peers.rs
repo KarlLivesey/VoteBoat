@@ -283,6 +283,28 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn roster(&self) -> &PeerRoster<F::Transport> {
         &self.parts.roster
     }
+    pub(super) fn configuration_capacity(
+        &self,
+        core: &Raft,
+        proposal: &ConfigurationProposal,
+    ) -> Result<crate::wire::ConfigurationWireCapacity, TransportError> {
+        let capacity = self.parts.factory.configuration_capacity(
+            &crate::wire::ConfigurationWireRequirements {
+                bootstrap: &core.state().bootstrap,
+                current: core.membership(),
+                record: &proposal.record,
+                index: core
+                    .state()
+                    .last_index()
+                    .checked_add(1)
+                    .ok_or(TransportError::ProviderViolation)?,
+                committed_index: core.state().commit_index,
+                application: proposal.requirements,
+            },
+        )?;
+        self.parts.roster.check_configuration_capacity(&capacity)?;
+        Ok(capacity)
+    }
     pub fn ingress(&self) -> &IngressRouter {
         &self.parts.ingress
     }

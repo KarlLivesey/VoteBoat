@@ -277,6 +277,28 @@ impl<P: PeerTransport> PeerRoster<P> {
     pub fn limits(&self) -> PeerRosterLimits {
         self.limits
     }
+    pub(crate) fn check_configuration_capacity(
+        &self,
+        capacity: &crate::wire::ConfigurationWireCapacity,
+    ) -> Result<(), TransportError> {
+        if capacity.wire_version != self.wire_version {
+            return Err(TransportError::IncompatibleCodec);
+        }
+        for footprint in [capacity.append, capacity.command, capacity.snapshot] {
+            if footprint.frame_bytes == 0
+                || footprint.decoded_bytes < std::mem::size_of::<Message>()
+            {
+                return Err(TransportError::ProviderViolation);
+            }
+            if footprint.frame_bytes > self.transport_limits.send_frame_bytes
+                || footprint.frame_bytes > self.transport_limits.receive_frame_bytes
+                || footprint.decoded_bytes > self.transport_limits.decoded_bytes
+            {
+                return Err(TransportError::IncompatibleCodec);
+            }
+        }
+        Ok(())
+    }
     pub fn wire_version(&self) -> u16 {
         self.wire_version
     }

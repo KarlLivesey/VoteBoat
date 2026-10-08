@@ -1284,3 +1284,112 @@ fn selected_host_placement_is_rechecked_at_execution_and_preserves_core_gates() 
     }
     panic!("placement-authorized request did not commit");
 }
+
+#[test]
+fn selected_transport_capacity_rechecks_version_and_roster_budgets_before_persistence() {
+    use voteboat::transport::*;
+    use voteboat::wire::*;
+    let footprint = WireFootprint {
+        frame_bytes: 1024,
+        decoded_bytes: 1024,
+    };
+    for (capacity, expected) in [
+        (
+            None,
+            Some(TransportError::UnsupportedConfigurationAdmission),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 3,
+                append: footprint,
+                command: footprint,
+                snapshot: footprint,
+            }),
+            Some(TransportError::IncompatibleCodec),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: footprint,
+                command: footprint,
+                snapshot: WireFootprint {
+                    frame_bytes: 4096,
+                    ..footprint
+                },
+            }),
+            Some(TransportError::IncompatibleCodec),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: WireFootprint {
+                    frame_bytes: 0,
+                    ..footprint
+                },
+                command: footprint,
+                snapshot: footprint,
+            }),
+            Some(TransportError::ProviderViolation),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: footprint,
+                command: footprint,
+                snapshot: footprint,
+            }),
+            None,
+        ),
+    ] {
+        let mut p = parts(1, true);
+        let net = p.peers.as_mut().unwrap();
+        net.factory.capacity = capacity;
+        net.roster = PeerRoster::new(
+            PeerRosterConfig {
+                local: net.roster.local(),
+                outbound: net.roster.outbound_binding(),
+                first_generation: SecureSessionGeneration::new(1).unwrap(),
+                last_generation: SecureSessionGeneration::new(100).unwrap(),
+                wire_version: 4,
+                limits: net.roster.limits(),
+                transport_limits: TransportLimits {
+                    send_frame_bytes: 2048,
+                    receive_frame_bytes: 2048,
+                    decoded_bytes: 4096,
+                },
+            },
+            BTreeMap::new(),
+            MonoTime(0),
+        )
+        .unwrap();
+        net.routes.clear();
+        let mut n = boat(p);
+        n.control(group(1), NodeControl::Campaign).unwrap();
+        settle(&mut n);
+        let before = n.local().owner.core(group(1)).unwrap().state().clone();
+        let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+        n.poll_with_configuration_authorization(MonoTime(0), NodePollBudget::default(), |_, _| {
+            Ok(())
+        })
+        .unwrap();
+        if let Some(error) = expected {
+            let result = n.poll_configuration().unwrap();
+            assert_eq!(result.ticket, ticket);
+            assert_eq!(
+                result.outcome,
+                ConfigurationOutcome::NotProposed(
+                    ConfigurationProposalError::TransportCapacity(error).into()
+                )
+            );
+            assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+            assert_eq!(n.state(), NodeState::Running);
+        } else {
+            admin_settle(&mut n);
+            assert!(matches!(
+                n.poll_configuration().unwrap().outcome,
+                ConfigurationOutcome::Committed(_)
+            ));
+        }
+        shutdown(&mut n);
+    }
+}

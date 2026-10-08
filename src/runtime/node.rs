@@ -630,8 +630,8 @@ where
         })
     }
     /// Apply the selected placement policy at execution, preserving all normal
-    /// core and authenticated binding checks. This does not certify provider
-    /// capacity or provision routes; those remain separate admission checks.
+    /// core, authenticated binding and selected transport envelope checks.
+    /// Does not provision routes or enforce future application-state growth.
     pub fn poll_with_placement_authorizer(
         &mut self,
         now: MonoTime,
@@ -749,6 +749,10 @@ where
                         }) {
                             return Err(ConfigurationProposalError::AuthenticationRequired.into());
                         }
+                    }
+                    if let Some(network) = network {
+                        network.configuration_capacity(core, proposal)
+                            .map_err(ConfigurationProposalError::TransportCapacity)?;
                     }
                     Ok(())
                 },

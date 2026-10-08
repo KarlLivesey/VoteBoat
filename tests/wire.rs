@@ -98,6 +98,33 @@ fn fixture_roundtrip(codec: impl WireCodec, message: Message) {
 #[test]
 fn host_fixture_uses_only_public_wire_contract_without_native_features() {
     let expected = message(Rpc::ReadProbe);
+    let bootstrap = bootstrap(1, 1);
+    let current = voteboat::membership::Membership::replay(&bootstrap, &[], 0).unwrap();
+    let record = voteboat::membership::ConfigurationRecord {
+        operation: OperationId::new(1).unwrap(),
+        expected: bootstrap.configuration,
+        change: voteboat::membership::ConfigurationChange::Final {
+            id: ConfigurationId::new(2).unwrap(),
+        },
+    };
+    assert_eq!(
+        FixtureCodec {
+            expected: expected.clone()
+        }
+        .configuration_capacity(&ConfigurationWireRequirements {
+            bootstrap: &bootstrap,
+            current: &current,
+            record: &record,
+            index: 1,
+            committed_index: 0,
+            application: ReadinessRequirements {
+                application_schema: 1,
+                command_bytes: 8,
+                snapshot_bytes: 4096,
+            },
+        }),
+        Err(WireError::UnsupportedConfigurationAdmission)
+    );
     assert!(FixtureCodec {
         expected: expected.clone()
     }

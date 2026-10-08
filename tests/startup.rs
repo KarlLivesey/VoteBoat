@@ -238,7 +238,7 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
             };
             ticket
         } else {
-            n.configure(ConfigurationRequest {
+            let request = ConfigurationRequest {
                 group: group(),
                 proposal: ConfigurationProposal {
                     record: ConfigurationRecord {
@@ -262,8 +262,31 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
                         snapshot_bytes: 4096,
                     },
                 },
-            })
-            .unwrap()
+            };
+            let before = n.local().owner.core(group()).unwrap().state().clone();
+            let mut oversized = ConfigurationRequest {
+                group: request.group,
+                proposal: request.proposal.clone(),
+            };
+            oversized.proposal.requirements.snapshot_bytes = usize::MAX;
+            let rejected = n.configure(oversized).unwrap();
+            n.poll_with_placement_authorizer(MonoTime(5000), NodePollBudget::default(), &placement)
+                .unwrap();
+            let outcome = n.poll_configuration().unwrap();
+            assert_eq!(outcome.ticket, rejected);
+            assert_eq!(
+                outcome.outcome,
+                ConfigurationOutcome::NotProposed(
+                    ConfigurationProposalError::TransportCapacity(
+                        voteboat::transport::TransportError::Wire(
+                            voteboat::wire::WireError::TooLarge
+                        )
+                    )
+                    .into()
+                )
+            );
+            assert_eq!(n.local().owner.core(group()).unwrap().state(), &before);
+            n.configure(request).unwrap()
         };
         let start = Instant::now();
         let result = loop {

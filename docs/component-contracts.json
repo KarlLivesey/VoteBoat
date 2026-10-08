@@ -76,14 +76,16 @@
       "design_id": "C06/C07/C15",
       "public_contract": "PeerTransportFactory<S: SecureSession>",
       "operations": [
-        "build"
+        "build",
+        "configuration_capacity"
       ],
       "native": "NativeTransportFactory<C: WireCodec + Clone> creates NativePeerTransport over explicitly selected codec/limits and authenticated session",
       "conformance": [
         "tests/support/peer_driver.rs",
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "tests/configuration_capacity.rs"
       ],
-      "scope": "Consumes one Ready authenticated session into one transport bound to the selected outbound queue. Failure closes/drops that owned session; no send/receive/durability completion is manufactured. Driver checks exact live local/peer/store/generation/wire scope before construction; roster revalidates attachment. Core-only host factory/session/transport injection and actual native TLS histories use the same seam."
+      "scope": "Consumes one Ready authenticated session into one transport bound to the selected outbound queue. Failure closes/drops that owned session; no send/receive/durability completion is manufactured. Driver checks exact live local/peer/store/generation/wire scope before construction; roster revalidates attachment. Core-only host factory/session/transport injection and actual native TLS histories use the same seam. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending."
     },
     {
       "design_id": "C06/C09/C10/C15",
@@ -727,15 +729,17 @@
         "limits",
         "frame_length",
         "encode_batch",
-        "decode_batch"
+        "decode_batch",
+        "configuration_capacity"
       ],
       "native": "NativeWireCodec",
       "conformance": [
         "tests/wire.rs",
         "tests/worker.rs",
-        "tests/snapshot.rs"
+        "tests/snapshot.rs",
+        "tests/configuration_capacity.rs"
       ],
-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection."
+      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending."
     },
     {
       "design_id": "C09",
@@ -1013,7 +1017,7 @@
         "tests/support/peer_driver.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Host-authorized local administrative proposals with current-term commitment, shared journal grammar, complete exact fresh promotion readiness and required capabilities. Missing/duplicate/extraneous/stale proofs reject before persistence. Final requires exact committed joint operation/target. Runtime charges retained proof capacity and prospective peer/fanout union; default stepping refuses promotion proofs without execution-time live-binding checks. New records emit only existing persistence-dependent effects, and application replay yields no command receipts. Native failed barrier fencing plus modeled unsynced-byte loss, actual file reopen and old/new recursive policy checks are covered. Native readiness exchange is implemented separately. No online administrator, placement policy or released network configuration ingress claim."
+      "scope": "Host-authorized local administrative proposals with current-term commitment, shared journal grammar, complete exact fresh promotion readiness and required capabilities. Missing/duplicate/extraneous/stale proofs reject before persistence. Final requires exact committed joint operation/target. Runtime charges retained proof capacity and prospective peer/fanout union; default stepping refuses promotion proofs without execution-time live-binding checks. New records emit only existing persistence-dependent effects, and application replay yields no command receipts. Native failed barrier fencing plus modeled unsynced-byte loss, actual file reopen and old/new recursive policy checks are covered. Native readiness exchange is implemented separately. Core proposal admission does not itself supply placement policy or release network configuration ingress; owned Node administration, native placement and selected transport envelope checks are separate contracts."
     },
     {
       "design_id": "C10/C15/C20",
@@ -1034,7 +1038,7 @@
         "tests/effect_owner.rs",
         "tests/startup.rs"
       ],
-      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence is a single-voter same-electorate joint/final journal, not remote add/promote/remove or released configuration ingress. Native placement authorizer, complete capacity validation, network lifecycle histories remain pending."
+      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence is a single-voter same-electorate joint/final journal, not remote add/promote/remove or released configuration ingress. Native service envelope enforcement, enrollment/endpoints and full faulted network lifecycle histories remain pending."
     },
     {
       "design_id": "C01/C04/C10/C15",
@@ -1090,6 +1094,22 @@
         "tests/startup.rs"
       ],
       "scope": "Exact group incarnation and replica store assignments, minimum voting domains excluding learners, optional survival of each single voting-domain loss evaluated using actual validated weighted/recursive policies. Current stable, accepted joint target and proposed configuration checked; final cannot skip old/new constraints. Trusted operator labels do not certify physical independence. Fixed 4096-replica/64-domain ceilings, unique exact stores and feasible nonzero domain minimum; constructor denial returns original assignments. Synchronous bounded checks retain no requests or receipts and create no durability effect/generation/watermark. Caller reconstructs policy on restart; queued requests recheck selected policy at execution. Placement cannot waive core journal/readiness or provider-capacity obligations. Native worker/file-reopen evidence is single-voter local finalization, not remote lifecycle. C18 authorization subset only: eligible-host planning, scoring and move proposals remain pending."
+    },
+    {
+      "design_id": "C06/C08/C10/C20",
+      "public_contract": "ConfigurationWireRequirements / ConfigurationWireCapacity / WireFootprint",
+      "operations": [
+        "WireCodec::configuration_capacity",
+        "PeerTransportFactory::configuration_capacity",
+        "Node::poll_with_configuration_authorization"
+      ],
+      "native": "NativeWireCodec formats 2–4 use the existing encoder count/validation pass; NativeTransportFactory and the selected PeerRoster enforce their actual format/frame/decoded limits.",
+      "conformance": [
+        "tests/configuration_capacity.rs",
+        "tests/support/node.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "Synchronous borrowed declared command/checkpoint envelope plus exact proposed journal record and index/commit context. Count actual configuration append, declared single command and prospective membership checkpoint including operation retention. Virtual opaque payload sizing without application-sized buffers. Unsupported providers deny; native malformed reports reject, and roster validates version/upper budgets before persistence even without connections. Exact real encode/decode boundaries and checkpoint history growth checked; host factory injection tests unsupported/mismatched/restrictive/malformed/positive cases. Native worker rejection/commit/reopen is one-voter local evidence. No format/token/generation/watermark or new durability effect. Does not enforce future application/dedup growth or arbitrary batching; service envelope integration and faulted remote activation remain pending."
     }
   ],
   "not_yet_implemented": [
@@ -1106,6 +1126,6 @@
     "scope-transfer",
     "transactions",
     "placement-planning-scoring-and-move-proposals",
-    "native-configuration-provider-capacity-admission"
+    "service-enforced-configuration-application-envelope"
   ]
 }

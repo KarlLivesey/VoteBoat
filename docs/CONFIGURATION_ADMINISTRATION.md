@@ -9,8 +9,8 @@ consensus and finalization, including expected configuration and operation IDs.
 Drive accepted requests through `Node::poll_with_configuration_authorization`.
 Its host callback receives the current core and proposal immediately before
 execution. It must be bounded and nonblocking, and authorize service scope,
-placement/failure domains and the
-selected providers' command, snapshot, wire and transport capacities. A callback
+placement/failure domains, application/storage capacities and the required size
+envelope. A callback
 cannot waive journal grammar, quorum validation, exact readiness or durability.
 The Node additionally rejects remote expansion without peer providers and static
 wire format 1, and rechecks every promotion
@@ -58,7 +58,7 @@ explicit member recovery. This does not enable dynamic recovery through the
 static startup convenience constructor.
 
 Remote configuration-bearing Append and membership Snapshot remain gated.
-Complete codec/transport capability admission, enrollment/service endpoints and
+Service-enforced application envelopes, enrollment/service endpoints and
 faulted multi-node add/promote/remove remain required. The supplied authorization
 callback is also available to host policy implementations. Existing TCP/QUIC
 readiness and static-service tests do not establish this complete path.
@@ -131,9 +131,32 @@ accept no asynchronous work and perform no I/O; no close/drain operation exists.
 The caller owns the plan and reconstructs it from trusted deployment input after
 restart. Queued requests consult the selected plan at execution, so replacing
 caller policy does not preserve earlier approval. No durable generation or receipt
-is introduced. Provisioned routes, credentials, readiness and complete selected
-codec/transport capacities remain separate obligations. Native placement is usable
-from Rust; service enrollment/endpoints and complete capacity admission remain work.
+is introduced. Provisioned routes, credentials, readiness and selected transport
+envelope admission remain separate checks. Native placement is usable from Rust;
+service enrollment/endpoints and application envelope enforcement remain work.
 
 This is the C18 placement authorization subset. Eligible-host planning, scoring
 and automatic move proposals remain pending under the broader placement roadmap.
+
+## Selected codec and transport capacity
+
+For a networked Node, all authorized configuration execution now asks the actual
+selected factory for configuration_capacity. Default unsupported providers deny;
+reported format must match the roster, and append/command/checkpoint footprints
+must fit both factory and roster transport budgets. Native sizing validates the
+journal preview and counts the exact record and prospective membership checkpoint,
+including retained operation IDs. Command/checkpoint bytes use the proposal's
+ReadinessRequirements envelope; no application-sized counting buffers are allocated.
+This creates no persistence effect, durability receipt or cached approval.
+
+The native worker test denies an oversized envelope without changing the durable
+log, then commits/resumes/reopens the valid local joint/final operation. Host Node
+injection checks unsupported capability, wrong format, restrictive roster budget,
+invalid footprints and successful explicit capacity. See the
+[transport contract](TRANSPORT.md) and [wire format](WIRE_FORMAT.md).
+
+The caller/service must keep the declared envelope consistent with its application
+schema, accepted command sizes, checkpoint/deduplication growth and storage limits.
+This query alone does not enforce future application growth or arbitrary batching.
+Service enrollment, dynamic startup recovery and complete faulted remote transitions
+remain pending; public configuration ingress is still gated.

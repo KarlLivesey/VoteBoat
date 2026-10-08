@@ -279,9 +279,18 @@ type Controls = Rc<RefCell<BTreeMap<NodeId, Rc<RefCell<TransportControl>>>>>;
 pub(super) struct Factory {
     controls: Controls,
     bad: bool,
+    pub(super) capacity: Option<voteboat::wire::ConfigurationWireCapacity>,
 }
 impl PeerTransportFactory<Session> for Factory {
     type Transport = Transport;
+    fn configuration_capacity(
+        &self,
+        required: &voteboat::wire::ConfigurationWireRequirements<'_>,
+    ) -> Result<voteboat::wire::ConfigurationWireCapacity, TransportError> {
+        assert!(required.index > required.committed_index);
+        self.capacity
+            .ok_or(TransportError::UnsupportedConfigurationAdmission)
+    }
     fn build<O: OutboundQueue>(
         &mut self,
         session: Session,
@@ -340,6 +349,7 @@ fn parts_with(
         factory: Factory {
             controls: transports,
             bad: false,
+            capacity: None,
         },
         roster: PeerRoster::new(
             PeerRosterConfig {

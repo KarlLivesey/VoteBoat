@@ -26,6 +26,14 @@ pub use membership::*;
 /// No implicit connector, reactor or alternate provider may be constructed.
 pub trait PeerTransportFactory<S: SecureSession> {
     type Transport: PeerTransport;
+    /// Check the selected codec and transport against the declared envelope.
+    /// The default refuses configuration admission; static traffic is unchanged.
+    fn configuration_capacity(
+        &self,
+        _required: &crate::wire::ConfigurationWireRequirements<'_>,
+    ) -> Result<crate::wire::ConfigurationWireCapacity, TransportError> {
+        Err(TransportError::UnsupportedConfigurationAdmission)
+    }
     fn build<O: OutboundQueue>(
         &mut self,
         session: S,
@@ -33,7 +41,7 @@ pub trait PeerTransportFactory<S: SecureSession> {
     ) -> Result<Self::Transport, TransportError>;
 }
 
-pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 2;
+pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 3;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransportState {
@@ -44,6 +52,7 @@ pub enum TransportState {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransportError {
+    UnsupportedConfigurationAdmission,
     InvalidLimits,
     IncompatibleCodec,
     WrongBinding,

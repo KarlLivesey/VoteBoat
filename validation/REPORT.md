@@ -550,3 +550,40 @@ assertion uses a borrowed expected-message slice.
 - Final all-feature API documentation, formatting/diff and inventory shape/path
   checks pass (55 contracts). C18 planning/scoring/move proposals remain pending;
   this implements its authorization subset. Inventory checks validate metadata.
+
+
+## Slice 59 — selected codec/transport configuration envelope admission
+
+- Public optional capacity queries default to unsupported. Native encoder counting
+  validates proposed append, declared command and prospective membership checkpoint
+  with retained operation IDs; opaque application sizes use virtual counts rather
+  than application-sized allocations. Native factory and roster independently
+  check selected wire version, valid footprints and frame/decoding budgets before
+  Node configuration persistence. Transport contract version is now 3; wire and
+  persistent bytes are unchanged.
+- Four downstream capacity cases pass: counts match actual encode/decode frames,
+  exact/one-byte-short boundaries, operation history growth, unsupported version,
+  policy limits, invalid envelope and selected native factory. Host Node injection
+  tests unsupported/mismatched/oversized/malformed and explicit positive capacity.
+- All-feature and core-only Node facade suites: 30 pass each. Native startup
+  pre-persistence oversized-envelope rejection, valid joint/final resumption and
+  actual WAL reopen: 1 pass. Shared membership suite: 32 all-feature and 18
+  core-only pass. Existing learner cases: 21 pass without sockets; TCP/QUIC
+  readiness histories: 2 pass with socket permission. Wire suite: 14 pass;
+  transport suite: 12 non-socket cases plus 1 TCP/TLS case pass. Socket checks
+  initially encountered sandbox PermissionDenied and were rerun with socket
+  permission; production behavior was not changed for those environment errors.
+- Test fixture fixes preserve semantics: retain connector-compatible roster limits
+  rather than generic defaults, explicitly copy owned proposal data, and compare
+  decoded messages by borrowed slices. Journal preview shares the existing clone
+  and accept grammar with validate_next; it does not create membership authority.
+- Declared-envelope checks do not enforce future schema/application/dedup growth,
+  arbitrary batching or remote enrollment. Service integration must bind/enforce
+  actual command/checkpoint bounds and support dynamic recovery/admin endpoints.
+  Partial-joint catch-up/election and full faulted remote add/promote/remove remain
+  release gates. Public configuration ingress stays gated; full P0–P7 stays active.
+  No macOS, physical failure, performance or full proof claim.
+- Final core-only host wire default-capability check passes (1). All-feature/
+  all-target Clippy with warnings denied, core-only all-target compilation,
+  all-feature API docs, formatting/diff and inventory shape/path checks pass
+  (56 contracts). Inventory checks metadata, not protocol conformance.

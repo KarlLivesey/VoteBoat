@@ -1,4 +1,4 @@
-# Peer transport, contract version 2
+# Peer transport, contract version 3
 
 `transport::PeerTransport` owns one authenticated peer connection and multiplexes
 Raft groups in bounded frames. `NativePeerTransport<S, C>` uses the same public
@@ -128,3 +128,30 @@ fresh connection generations and exact completion/input scopes. The native
 effect-owner histories use it, including a quiescent real TLS reconnection before
 further replicated work. Socket/TLS establishment and ingress/result admission
 remain explicit host assembly. See [the roster contract](PEER_ROSTER.md).
+
+## Configuration envelope admission
+
+PeerTransportFactory::configuration_capacity is a synchronous borrowed check
+against the selected codec and transport. Its default returns
+UnsupportedConfigurationAdmission; static send/receive behavior is unchanged.
+WireCodec supplies the same optional check using ConfigurationWireRequirements
+and returns ConfigurationWireCapacity with an exact selected wire version and
+append/command/checkpoint footprints. Providers must bound work and temporary
+memory without allocating application-sized payloads or accepting asynchronous
+requests. No durability, completion ticket, ownership transfer or cleanup follows.
+
+NativeTransportFactory asks its actual selected codec, checks the named version
+and transport frame/decoded budgets, and rejects malformed footprints. The peer
+roster independently checks its selected version and upper transport budgets,
+even before a connection exists. Node invokes this at configuration execution,
+after authorization/binding checks and before persistence; host approval cannot
+waive it. Host providers must explicitly implement the capability to administer
+networked membership. No fallback codec or transport is constructed.
+
+Admission covers one configuration append, one declared maximum command and
+one checkpoint with the prospective membership and retained operation IDs. It
+is not a promise about arbitrary multi-message batches, future configuration
+history growth or application state beyond the declared envelope. Existing queue,
+worker and output reservations still apply; service integration must enforce
+application command/checkpoint bounds and revalidate every later configuration.
+No frame format, store format, generation or durability token changes.

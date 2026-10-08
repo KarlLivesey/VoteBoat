@@ -245,3 +245,17 @@ downgrade. Neither request nor reply updates terms, ballots, reads or membership
 Successful verification uses the original owner visit and selected asynchronous
 snapshot worker; see [learner readiness](LEARNER_RECOVERY.md). Configuration
 delivery remains gated pending the online activation release checks.
+
+## Configuration capacity query
+
+WireCodec::configuration_capacity counts the proposed record, declared command
+and prospective checkpoint through the selected native encoder's validation/count
+pass. It includes bootstrap policy, stable/joint membership and retained operation
+identities in checkpoint framing and retained decoding budgets. Opaque command
+and application bytes are counted virtually, without allocating buffers of their
+declared size. Invalid journal/envelope, unsupported format, policy/retained limits
+or encoded frame overflow reject. Positive results name the selected format and
+three WireFootprints; they establish neither quorum nor commitment. Formats 2–4
+support this native query; format 1 refuses membership. Existing bytes are unchanged.
+Downstream tests compare actual encode/decode sizes and exact/one-byte-short
+boundaries, including growth of checkpoint operation history.
