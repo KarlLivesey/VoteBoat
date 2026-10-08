@@ -16,6 +16,8 @@
 use crate::{outbound::*, raft::Message, runtime::MonoTime, secure::*};
 mod peers;
 pub use peers::*;
+mod membership;
+pub use membership::*;
 
 /// Construction-selected conversion of one ready authenticated session into
 /// one multiplexed transport. The factory owns the session after this call;

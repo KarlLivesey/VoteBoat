@@ -116,6 +116,7 @@ struct Attempt {
 }
 struct Peer<P> {
     identity: PeerIdentity,
+    authorized: bool,
     next: MonoTime,
     failures: u32,
     attempt: Option<Attempt>,
@@ -202,6 +203,7 @@ impl<P: PeerTransport> PeerRoster<P> {
                         node,
                         Peer {
                             identity: PeerIdentity { node, store },
+                            authorized: true,
                             next: now,
                             failures: 0,
                             attempt: None,
@@ -237,7 +239,7 @@ impl<P: PeerTransport> PeerRoster<P> {
     }
     pub fn binding(&self, peer: NodeId) -> Option<SessionBinding> {
         let p = self.peers.get(&peer)?;
-        if p.retiring {
+        if p.retiring || !p.authorized {
             None
         } else {
             p.binding
@@ -253,16 +255,110 @@ impl<P: PeerTransport> PeerRoster<P> {
         self.outbound
     }
     pub fn authorized_peers(&self) -> impl Iterator<Item = NodeId> + '_ {
+        self.peers
+            .iter()
+            .filter(|(_, p)| p.authorized)
+            .map(|(&node, _)| node)
+    }
+    /// Includes bounded inactive identity/session records and retiring sends.
+    pub fn tracked_peers(&self) -> impl Iterator<Item = NodeId> + '_ {
         self.peers.keys().copied()
     }
     pub fn peer_identity(&self, peer: NodeId) -> Option<PeerIdentity> {
-        self.peers.get(&peer).map(|p| p.identity)
+        self.peers
+            .get(&peer)
+            .filter(|p| p.authorized)
+            .map(|p| p.identity)
     }
     pub fn limits(&self) -> PeerRosterLimits {
         self.limits
     }
     pub fn wire_version(&self) -> u16 {
         self.wire_version
+    }
+    /// Apply a freshly derived complete local connection assignment. Removed
+    /// attempts are returned for connector cancellation; their provider slots
+    /// remain owned until terminal poll. Accepted sends retain the old binding
+    /// through exact completion. Store replacement requires a drained handoff.
+    /// Inactive records retain same-store remote-session floors within peers cap.
+    pub fn reconcile(
+        &mut self,
+        assignments: &PeerAssignments,
+        now: MonoTime,
+    ) -> Result<Vec<ConnectTicket>, PeerRosterError> {
+        self.validate_assignments(assignments, now)?;
+        self.now = now;
+        let mut canceled = Vec::new();
+        for (&node, peer) in &mut self.peers {
+            let desired = assignments.store(node);
+            if desired == Some(peer.identity.store) {
+                if !peer.authorized {
+                    peer.next = now;
+                    peer.failures = 0;
+                }
+                peer.authorized = true;
+                continue;
+            }
+            if let Some(attempt) = peer.attempt.take() {
+                canceled.push(attempt.ticket);
+            }
+            Self::retire(peer);
+            Self::finish_retire(peer);
+            peer.authorized = false;
+        }
+        for (node, store) in assignments.peers() {
+            self.peers.entry(node).or_insert(Peer {
+                identity: PeerIdentity { node, store },
+                authorized: true,
+                next: now,
+                failures: 0,
+                attempt: None,
+                transport: None,
+                binding: None,
+                retiring: false,
+                accepted: None,
+                session: None,
+            });
+        }
+        Ok(canceled)
+    }
+    pub fn validate_assignments(
+        &self,
+        assignments: &PeerAssignments,
+        now: MonoTime,
+    ) -> Result<(), PeerRosterError> {
+        if self.fenced {
+            return Err(PeerRosterError::Fenced);
+        }
+        if self.closed {
+            return Err(PeerRosterError::Closed);
+        }
+        if now < self.now {
+            return Err(PeerRosterError::TimeWentBack);
+        }
+        if assignments.local() != self.local {
+            return Err(PeerRosterError::WrongBinding);
+        }
+        if assignments.peers().any(|(node, store)| {
+            self.peers
+                .get(&node)
+                .is_some_and(|peer| peer.identity.store != store)
+        }) {
+            return Err(PeerRosterError::WrongBinding);
+        }
+        let added = assignments
+            .peers()
+            .filter(|(node, _)| !self.peers.contains_key(node))
+            .count();
+        if self
+            .peers
+            .len()
+            .checked_add(added)
+            .is_none_or(|n| n > self.limits.peers)
+        {
+            return Err(PeerRosterError::Overloaded);
+        }
+        Ok(())
     }
     /// Inspect a retained receive without transferring it. The exact metadata
     /// must still match when take_received transfers the batch.
@@ -273,7 +369,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         let Some(p) = self.peers.get(&peer) else {
             return Ok(None);
         };
-        if p.retiring {
+        if p.retiring || !p.authorized {
             return Ok(None);
         }
         let Some(t) = &p.transport else {
@@ -331,7 +427,11 @@ impl<P: PeerTransport> PeerRoster<P> {
             .filter_map(|p| {
                 if let Some(a) = &p.attempt {
                     Some(a.expires)
-                } else if available && p.transport.is_none() && eligible(p.identity.node) {
+                } else if p.authorized
+                    && available
+                    && p.transport.is_none()
+                    && eligible(p.identity.node)
+                {
                     Some(p.next)
                 } else {
                     None
@@ -428,7 +528,12 @@ impl<P: PeerTransport> PeerRoster<P> {
         for id in self.keys_after(self.connect_cursor, limit) {
             self.connect_cursor = Some(id);
             let p = self.peers.get_mut(&id).unwrap();
-            if p.transport.is_some() || p.attempt.is_some() || now < p.next || !eligible(id) {
+            if !p.authorized
+                || p.transport.is_some()
+                || p.attempt.is_some()
+                || now < p.next
+                || !eligible(id)
+            {
                 continue;
             }
             if usage.connecting == self.limits.connecting
@@ -502,6 +607,9 @@ impl<P: PeerTransport> PeerRoster<P> {
                 .peers
                 .get(&ticket.peer.node)
                 .ok_or(PeerRosterError::UnknownPeer)?;
+            if !p.authorized {
+                return Err(PeerRosterError::UnknownPeer);
+            }
             if p.attempt
                 .as_ref()
                 .is_none_or(|a| a.ticket != ticket || now >= a.expires)
@@ -562,6 +670,9 @@ impl<P: PeerTransport> PeerRoster<P> {
                 .peers
                 .get(&batch.ticket.peer)
                 .ok_or(PeerRosterError::UnknownPeer)?;
+            if !p.authorized {
+                return Err(PeerRosterError::UnknownPeer);
+            }
             if p.retiring || p.transport.is_none() {
                 return Err(PeerRosterError::Overloaded);
             }
@@ -728,7 +839,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         let Some(p) = self.peers.get_mut(&peer) else {
             return Ok(None);
         };
-        if p.retiring {
+        if p.retiring || !p.authorized {
             return Ok(None);
         }
         let Some(t) = &mut p.transport else {

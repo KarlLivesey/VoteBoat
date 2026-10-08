@@ -378,6 +378,33 @@ where
         self.now = now;
         Ok(())
     }
+    /// Reconcile connection assignments for every hosted core against explicitly
+    /// supplied routes and the connector's provisioned credentials. This changes
+    /// networking only; it cannot activate membership or create a replica.
+    pub fn reconcile_membership(
+        &mut self,
+        routes: BTreeMap<NodeId, crate::connect::ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerReconcileRejected<C::Endpoint>> {
+        if self.state != NodeState::Running || self.peers.is_none() {
+            return Err(PeerReconcileRejected {
+                reason: PeerDriverError::NotQuiescent,
+                routes,
+            });
+        }
+        if now < self.now {
+            return Err(PeerReconcileRejected {
+                reason: PeerDriverError::TimeWentBack,
+                routes,
+            });
+        }
+        self.peers
+            .as_mut()
+            .unwrap()
+            .reconcile_membership(&self.local.owner, routes, now)?;
+        self.now = now;
+        Ok(())
+    }
     pub fn begin_shutdown(&mut self) {
         if self.state == NodeState::Running {
             self.local.clients.close();

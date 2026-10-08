@@ -67,25 +67,67 @@
     {
       "design_id": "C06/C07/C15",
       "public_contract": "PeerTransportFactory<S: SecureSession>",
-      "operations": ["build"],
+      "operations": [
+        "build"
+      ],
       "native": "NativeTransportFactory<C: WireCodec + Clone> creates NativePeerTransport over explicitly selected codec/limits and authenticated session",
-      "conformance": ["tests/support/peer_driver.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/support/peer_driver.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Consumes one Ready authenticated session into one transport bound to the selected outbound queue. Failure closes/drops that owned session; no send/receive/durability completion is manufactured. Driver checks exact live local/peer/store/generation/wire scope before construction; roster revalidates attachment. Core-only host factory/session/transport injection and actual native TLS histories use the same seam."
     },
     {
       "design_id": "C06/C09/C10/C15",
       "public_contract": "PeerDriver / PeerParts",
-      "operations": ["new", "limits", "usage", "roster", "ingress", "connector_usage", "next_deadline", "disconnect", "poll", "close", "drain", "is_drained", "is_failed", "into_parts", "into_recovery"],
+      "operations": [
+        "new",
+        "limits",
+        "usage",
+        "roster",
+        "ingress",
+        "connector_usage",
+        "next_deadline",
+        "disconnect",
+        "poll",
+        "close",
+        "drain",
+        "is_drained",
+        "is_failed",
+        "into_parts",
+        "into_recovery"
+      ],
       "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport",
-      "conformance": ["tests/support/peer_driver.rs", "tests/support/peer_fault.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/support/peer_driver.rs",
+        "tests/support/peer_fault.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Exact construction-time bindings and quiescence; complete authorized route coverage; bounded fair attempt/transport/send/ingress work. Canceled attempts retain provider slots until actual receipt and block replacement generation allocation; late sessions close without attachment. Preallocated staging covers the selected outbound node batch ceiling, with original payload count/byte/class credits retained through exact terminal completion. Wrong scopes/provider receipts fence the owner and preserve observed payloads, including oversized provider allocations quarantined whole for explicit recovery. Failed-core network drain cancels ingress without core access. Sixteen core/host tests and three-node/100-group real WAL/TLS/partition/reconnect/snapshot/recovery histories. No hidden runtime/I/O construction or new quorum/durability evidence; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
     },
     {
       "design_id": "C10/C15",
       "public_contract": "ReplicaDriver / ReplicaParts",
-      "operations": ["new", "binding", "limits", "usage", "poll", "close_intake", "discard_failed", "is_drained", "is_failed", "request_reclaim", "poll_reclaim", "failed_reclaim"],
+      "operations": [
+        "new",
+        "binding",
+        "limits",
+        "usage",
+        "poll",
+        "close_intake",
+        "discard_failed",
+        "is_drained",
+        "is_failed",
+        "request_reclaim",
+        "poll_reclaim",
+        "failed_reclaim"
+      ],
       "native": "Fixed bounded local assembly over selected public worker/outbound/application/service/snapshot providers; native histories use the same driver",
-      "conformance": ["tests/support/replica_driver.rs", "tests/effect_owner.rs", "tests/support/node.rs"],
+      "conformance": [
+        "tests/support/replica_driver.rs",
+        "tests/effect_owner.rs",
+        "tests/support/node.rs"
+      ],
       "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain remains the host responsibility; PeerDriver now supplies peer/ingress reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. One accepted maintenance ticket/budget and one matched result are separately bounded, scoped and included in drain accounting; unexpected receipts are retained for failed recovery and fatal results fence the owner."
     },
     {
@@ -139,9 +181,14 @@
     {
       "design_id": "C01/C03/C10",
       "public_contract": "Raft dynamic member recovery",
-      "operations": ["Raft::recover_member", "snapshot::recover_member_replica"],
+      "operations": [
+        "Raft::recover_member",
+        "snapshot::recover_member_replica"
+      ],
       "native": "Deterministic Raft with selected LogStore/SnapshotRetention/application providers",
-      "conformance": ["tests/member_recovery.rs"],
+      "conformance": [
+        "tests/member_recovery.rs"
+      ],
       "scope": "Explicit host-authorized committed/accepted exact-store assignment, accepted stable/joint/final predicate reconstruction, historical ballots and verified pinned application replay before exposing compacted cores. Eleven host/native tests include joint/final election differences, weighted final policy, rollback, learner exclusion, replacement stores, missing data, torn frames, failed barriers and actual-file reclaim/restart/dedup. No network bootstrap, transferable election proof or online configuration ingress."
     },
     {
@@ -244,17 +291,38 @@
     {
       "design_id": "C05/C15",
       "public_contract": "ProposalAdmission",
-      "operations": ["validate_proposal"],
+      "operations": [
+        "validate_proposal"
+      ],
       "native": "Counter",
-      "conformance": ["tests/effect_owner.rs"],
+      "conformance": [
+        "tests/effect_owner.rs"
+      ],
       "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract."
     },
     {
       "design_id": "C05/C10/C15",
       "public_contract": "ClientRouter<R: ApplicationReceipt>",
-      "operations": ["new", "binding", "limits", "usage", "submit", "advance", "deliver", "cancel_wait", "reconcile", "poll", "complete", "close", "abort", "is_drained"],
+      "operations": [
+        "new",
+        "binding",
+        "limits",
+        "usage",
+        "submit",
+        "advance",
+        "deliver",
+        "cancel_wait",
+        "reconcile",
+        "poll",
+        "complete",
+        "close",
+        "abort",
+        "is_drained"
+      ],
       "native": "Fixed ownership guard over ProposalAdmission, EffectOwner and ApplicationRouter; native Counter histories select it directly",
-      "conformance": ["tests/effect_owner.rs"],
+      "conformance": [
+        "tests/effect_owner.rs"
+      ],
       "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
     },
     {
@@ -354,19 +422,42 @@
     {
       "design_id": "C03",
       "public_contract": "SnapshotRetention",
-      "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
+      "operations": [
+        "latest_reference",
+        "pin_for_log",
+        "load_pinned",
+        "reconcile_log"
+      ],
       "native": "NativeSnapshotStore",
-      "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs",
-        "tests/membership.rs", "tests/learners.rs", "tests/member_recovery.rs"
+      "conformance": [
+        "tests/snapshot.rs",
+        "examples/replicated_counter.rs",
+        "tests/membership.rs",
+        "tests/learners.rs",
+        "tests/member_recovery.rs"
       ],
       "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission. Explicit recover_learner_replica verifies exact committed/accepted learner assignment plus pinned snapshot/application replay before returning a non-voting core. Host/native learner and dynamic-member histories cover compaction/reclaim and actual-file restart. recover_member_replica also verifies joint/final assignment and restores the accepted voter/learner role before exposure."
     },
     {
       "design_id": "C03/C04/C10",
       "public_contract": "SnapshotWorker",
-      "operations": ["binding", "limits", "usage", "load_reservation", "checkpoint_bytes", "submit", "poll", "close", "is_drained"],
+      "operations": [
+        "binding",
+        "limits",
+        "usage",
+        "load_reservation",
+        "checkpoint_bytes",
+        "submit",
+        "poll",
+        "close",
+        "is_drained"
+      ],
       "native": "NativeSnapshotWorker<S: SnapshotRetention + Send>",
-      "conformance": ["tests/snapshot_worker.rs", "tests/support/snapshot.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/snapshot_worker.rs",
+        "tests/support/snapshot.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification, pinned loads and verified retention reconciliation. Owner-side helpers preserve WAL and application dependencies. Local checkpoint publication precedes WAL compaction; exact durability precedes retention cleanup. Real-file receipt-loss recovery, native-storage fault model and repeated native 100-group network maintenance. Node now owns selected assembly/lifecycle, and physical WAL cleanup preserves existing pinned references; live WAL maintenance scheduling remains pending."
     },
     {
@@ -421,41 +512,92 @@
     {
       "design_id": "C05/C15",
       "public_contract": "BoundedStateMachine + ApplicationReceipt",
-      "operations": ["receipt_bytes_bound", "index", "operation", "nested_bytes"],
+      "operations": [
+        "receipt_bytes_bound",
+        "index",
+        "operation",
+        "nested_bytes"
+      ],
       "native": "Counter + CounterReceipt",
-      "conformance": ["tests/application.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/application.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery."
     },
     {
       "design_id": "C05/C10/C15",
       "public_contract": "ApplicationRouter<R: ApplicationReceipt>",
-      "operations": ["new", "binding", "limits", "usage", "is_fenced", "submit", "poll", "complete", "close", "is_drained"],
+      "operations": [
+        "new",
+        "binding",
+        "limits",
+        "usage",
+        "is_fenced",
+        "submit",
+        "poll",
+        "complete",
+        "close",
+        "is_drained"
+      ],
       "native": "Fixed bounded coordination over selected BoundedStateMachine and EffectOwner; native Counter histories use it directly",
-      "conformance": ["tests/effect_owner.rs"],
+      "conformance": [
+        "tests/effect_owner.rs"
+      ],
       "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits and original verified applied positions through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. ClientRouter now supplies proposal/dedup/outcome admission; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
     },
     {
       "design_id": "C10",
       "public_contract": "ReadyScheduler",
-      "operations": ["capacity", "enqueue", "pop", "cancel", "len"],
+      "operations": [
+        "capacity",
+        "enqueue",
+        "pop",
+        "cancel",
+        "len"
+      ],
       "native": "FairScheduler",
-      "conformance": ["tests/runtime.rs"],
+      "conformance": [
+        "tests/runtime.rs"
+      ],
       "scope": "Unique bounded readiness with fair requeue; Shard owns cores and enforces item/byte/time visits, ingress credits and scoped single-owner access. Caller-driven, no hidden threads."
     },
     {
       "design_id": "C11",
       "public_contract": "TimerService",
-      "operations": ["owner", "capacity", "register", "cancel", "poll", "len"],
+      "operations": [
+        "owner",
+        "capacity",
+        "register",
+        "cancel",
+        "poll",
+        "len"
+      ],
       "native": "DeadlineQueue",
-      "conformance": ["tests/runtime.rs"],
+      "conformance": [
+        "tests/runtime.rs"
+      ],
       "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down."
     },
     {
       "design_id": "C10/C11",
       "public_contract": "TimedShard",
-      "operations": ["register", "admit", "admit_tracked", "poll_timers", "poll", "step_next", "with_core", "finish", "stop_group", "close_admission"],
+      "operations": [
+        "register",
+        "admit",
+        "admit_tracked",
+        "poll_timers",
+        "poll",
+        "step_next",
+        "with_core",
+        "finish",
+        "stop_group",
+        "close_admission"
+      ],
       "native": "TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>",
-      "conformance": ["tests/runtime.rs"],
+      "conformance": [
+        "tests/runtime.rs"
+      ],
       "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority."
     },
     {
@@ -485,73 +627,185 @@
     {
       "design_id": "C10/C15",
       "public_contract": "SnapshotRouter",
-      "operations": ["new", "submit", "deliver", "usage", "is_drained", "discard_failed"],
+      "operations": [
+        "new",
+        "submit",
+        "deliver",
+        "usage",
+        "is_drained",
+        "discard_failed"
+      ],
       "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
-      "conformance": ["tests/effect_owner.rs"],
+      "conformance": [
+        "tests/effect_owner.rs"
+      ],
       "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
     },
     {
       "design_id": "C12",
       "public_contract": "Clock",
-      "operations": ["now"],
+      "operations": [
+        "now"
+      ],
       "native": "MonotonicClock",
-      "conformance": ["tests/runtime.rs"],
+      "conformance": [
+        "tests/runtime.rs"
+      ],
       "scope": "Local monotonic milliseconds with clone-shared epoch; virtual host clock injection. No core clock reads or diagnostic wall-clock API."
     },
     {
       "design_id": "C04/C10",
       "public_contract": "PersistenceWorker",
-      "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained", "submit_reclaim", "poll_reclaims"],
+      "operations": [
+        "binding",
+        "limits",
+        "usage",
+        "submit",
+        "poll",
+        "close",
+        "is_drained",
+        "submit_reclaim",
+        "poll_reclaims"
+      ],
       "native": "NativeLogWorker<L: LogStore + Send>",
-      "conformance": ["tests/worker.rs", "tests/maintenance.rs", "tests/support/native_node.rs"],
+      "conformance": [
+        "tests/worker.rs",
+        "tests/maintenance.rs",
+        "tests/support/native_node.rs"
+      ],
       "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store. Three-node/100-group integration covers replication, read barriers, retries, leader replacement and actual-file restart. Optional explicit physical maintenance uses the same bounded worker queue/checked sequence and ordinary data credits, preserving control reserves. At most one accepted request; separate exact terminals never certify Raft persistence. Execution follows complete barriers and retains the same store binding. Fatal/invalid results or panic fence queued writes; safe rejection continues. Five downstream gated host-store tests and actual 100-group native live-cleanup/restart coverage."
     },
     {
       "design_id": "C10",
       "public_contract": "WorkerWake",
-      "operations": ["wake"],
+      "operations": [
+        "wake"
+      ],
       "native": "ThreadWake",
-      "conformance": ["tests/worker.rs"],
+      "conformance": [
+        "tests/worker.rs"
+      ],
       "scope": "Injected nonblocking completion hint, never durable evidence. Shared host resources remain host-owned."
     },
     {
       "design_id": "C06/C15",
       "public_contract": "OutboundQueue",
-      "operations": ["binding", "limits", "usage", "peer_usage", "submit", "poll", "complete", "close", "is_drained"],
+      "operations": [
+        "binding",
+        "limits",
+        "usage",
+        "peer_usage",
+        "submit",
+        "poll",
+        "complete",
+        "close",
+        "is_drained"
+      ],
       "native": "NativeOutbound",
-      "conformance": ["tests/outbound.rs", "tests/worker.rs"],
+      "conformance": [
+        "tests/outbound.rs",
+        "tests/worker.rs"
+      ],
       "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. PeerTransport consumes dispatched batches and returns them for exact completion after buffer release. Local completion is not a Raft acknowledgement or persistent delivery claim."
     },
     {
       "design_id": "C08",
       "public_contract": "WireCodec",
-      "operations": ["format_version", "header_bytes", "limits", "frame_length", "encode_batch", "decode_batch"],
+      "operations": [
+        "format_version",
+        "header_bytes",
+        "limits",
+        "frame_length",
+        "encode_batch",
+        "decode_batch"
+      ],
       "native": "NativeWireCodec",
-      "conformance": ["tests/wire.rs", "tests/worker.rs", "tests/snapshot.rs"],
+      "conformance": [
+        "tests/wire.rs",
+        "tests/worker.rs",
+        "tests/snapshot.rs"
+      ],
       "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig."
     },
     {
       "design_id": "C09",
       "public_contract": "SecureSession",
-      "operations": ["security", "state", "binding", "limits", "poll", "read_plaintext", "write_plaintext", "is_flushed", "close", "revoke"],
+      "operations": [
+        "security",
+        "state",
+        "binding",
+        "limits",
+        "poll",
+        "read_plaintext",
+        "write_plaintext",
+        "is_flushed",
+        "close",
+        "revoke"
+      ],
       "native": "NativeTlsConfig with with_wire_version/wire_version selection; NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature); Box<S> forwarding",
-      "conformance": ["tests/secure.rs", "tests/quic.rs"],
+      "conformance": [
+        "tests/secure.rs",
+        "tests/quic.rs"
+      ],
       "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–3 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport."
     },
     {
       "design_id": "C06",
       "public_contract": "PeerTransport",
-      "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "received_info", "take_received", "close", "abort"],
+      "operations": [
+        "security",
+        "binding",
+        "state",
+        "limits",
+        "usage",
+        "submit",
+        "poll",
+        "take_send",
+        "received_info",
+        "take_received",
+        "close",
+        "abort"
+      ],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
-      "conformance": ["tests/transport.rs", "tests/worker.rs", "tests/peers.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/transport.rs",
+        "tests/worker.rs",
+        "tests/peers.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
     },
     {
       "design_id": "C06/C15",
       "public_contract": "PeerRoster<P: PeerTransport>",
-      "operations": ["new", "local", "usage", "binding", "received_info", "next_deadline", "attempt_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
+      "operations": [
+        "new",
+        "local",
+        "usage",
+        "binding",
+        "received_info",
+        "next_deadline",
+        "attempt_deadline",
+        "due_connections",
+        "connect_failed",
+        "attach",
+        "submit",
+        "poll",
+        "take_send",
+        "take_received",
+        "disconnect",
+        "close",
+        "abort",
+        "is_fenced",
+        "is_drained",
+        "discard_failed_send",
+        "reclaim_generation"
+      ],
       "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
-      "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
+      "conformance": [
+        "tests/peers.rs",
+        "tests/effect_owner.rs"
+      ],
       "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; PeerDriver now owns exact attempt deadlines and separate bounded ingress/staging resources. No membership or quorum authority."
     },
     {
@@ -626,9 +880,13 @@
     {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
-      "operations": ["sample"],
+      "operations": [
+        "sample"
+      ],
       "native": "JitterEntropy",
-      "conformance": ["tests/runtime.rs"],
+      "conformance": [
+        "tests/runtime.rs"
+      ],
       "scope": "Explicitly seeded reproducible election jitter; independent node seeds supplied by host. No cryptographic/identity use."
     },
     {
@@ -646,6 +904,27 @@
         "tests/wire.rs"
       ],
       "scope": "One pending request and one permit per core, exact trusted witness/candidate store, base head and fresh context. Witness grants only from durable committed membership or its reserved final target. No ballot/read/term/commit/timer authority from controls. Exact Append/Snapshot checks and durable completions remain mandatory. Cancellation, configuration change, fencing and recovery discard volatile authority. Authenticated non-Byzantine source premise; no transferable certificate. Public membership ingress and readiness/roster integration remain gated. Native TLS/QUIC format-3 witness exchange is now tested through real authenticated framed sessions; native startup can explicitly select that version."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "Raft::connection_replicas / PeerAssignments / PeerRoster::reconcile / PeerDriver::reconcile_membership / Node::reconcile_membership",
+      "operations": [
+        "connection_replicas",
+        "from_cores",
+        "validate_assignments",
+        "reconcile",
+        "supports_peer",
+        "reconcile_membership"
+      ],
+      "native": "Shared roster reconciliation with exact construction-provisioned TCP/TLS or QUIC credentials; caller-polled provider receipts and original queue credits.",
+      "conformance": [
+        "src/raft/membership_tests.rs",
+        "tests/peers.rs",
+        "tests/support/peer_driver.rs",
+        "tests/support/node.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "Ephemeral required connection union across all hosted groups, committed views, accepted suffix predecessors and pending storage transitions. No quorum or activation authority. Owned complete route hints and exact provider credential availability preflight before mutation. Revocation stops receive authority immediately; cancellation retains provider slots and accepted sends until terminal completion. Same-store re-enrollment retains remote session floors, with bounded inactive peer records. Distinct-node additions require spare roster capacity and preprovisioned credentials. Reusing a node ID with a different store requires drained roster/generation handoff; live credential rotation is unsupported. Not prospective membership admission or readiness; public online configuration ingress remains gated."
     }
   ],
   "not_yet_implemented": [

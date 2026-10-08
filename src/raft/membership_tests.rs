@@ -1897,3 +1897,80 @@ fn in_flight_promotion_cannot_emit_witness_evidence_before_completion() {
         Rpc::AuthorityReply { granted: false, .. }
     ));
 }
+
+#[test]
+fn connection_retention_includes_pending_and_rollback_views_until_exact_commit() {
+    let mut core = staged();
+    let initial = core.connection_replicas(6).unwrap();
+    let effects = accept(
+        &mut core,
+        200,
+        ConfigurationChange::Learners(configuration(3, &[1, 2, 3], &[4, 6])),
+    );
+    assert_eq!(core.state().membership().unwrap().id(), cid(2));
+    let pending = core.connection_replicas(6).unwrap();
+    assert_eq!(
+        pending.keys().copied().collect::<Vec<_>>(),
+        (1..=6).map(node).collect::<Vec<_>>()
+    );
+    assert!(core.connection_replicas(5).is_err());
+    durable(&mut core, effects);
+    assert_eq!(core.connection_replicas(6).unwrap(), pending);
+    // Roll back the accepted learner assignment through the actual suffix path.
+    let effects = core
+        .persist(
+            core.state().hard_state,
+            2,
+            Some(Suffix {
+                from: 3,
+                entries: vec![],
+            }),
+            After::Reply,
+            None,
+        )
+        .unwrap();
+    assert_eq!(core.connection_replicas(6).unwrap(), pending);
+    durable(&mut core, effects);
+    assert_eq!(core.connection_replicas(6).unwrap(), initial);
+    let effects = accept(
+        &mut core,
+        201,
+        ConfigurationChange::Learners(configuration(3, &[1, 2, 3], &[4, 6])),
+    );
+    durable(&mut core, effects);
+    let effects = core
+        .persist(core.state().hard_state, 3, None, After::Commit, None)
+        .unwrap();
+    // Commit intent is insufficient to revoke the old learner's connection.
+    assert_eq!(core.connection_replicas(6).unwrap(), pending);
+    durable(&mut core, effects);
+    let committed = core.connection_replicas(6).unwrap();
+    assert!(!committed.contains_key(&node(5)));
+    assert!(committed.contains_key(&node(6)));
+    core.storage_failed();
+    assert_eq!(core.connection_replicas(6), Err(RaftError::Fenced));
+}
+#[test]
+fn connection_retention_keeps_committed_joint_predecessor_until_final_is_durable() {
+    let mut core = staged();
+    let effects = accept(
+        &mut core,
+        202,
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: configuration(4, &[2, 3, 4], &[5]),
+        },
+    );
+    durable(&mut core, effects);
+    committed_fixture(&mut core, 3);
+    let effects = accept(&mut core, 202, ConfigurationChange::Final { id: cid(4) });
+    assert!(core.connection_replicas(6).unwrap().contains_key(&node(1)));
+    durable(&mut core, effects);
+    assert!(core.connection_replicas(6).unwrap().contains_key(&node(1)));
+    let effects = core
+        .persist(core.state().hard_state, 4, None, After::Commit, None)
+        .unwrap();
+    assert!(core.connection_replicas(6).unwrap().contains_key(&node(1)));
+    durable(&mut core, effects);
+    assert!(!core.connection_replicas(6).unwrap().contains_key(&node(1)));
+}

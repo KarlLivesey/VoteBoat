@@ -479,6 +479,11 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
     fn local(&self) -> LocalIdentity {
         self.config.local
     }
+    fn supports_peer(&self, peer: PeerIdentity) -> bool {
+        self.peers
+            .get(&peer.node)
+            .is_some_and(|p| p.pin.identity == peer)
+    }
     fn limits(&self) -> ConnectLimits {
         self.config.limits
     }
@@ -673,6 +678,13 @@ impl NativeServiceConnector {
 impl PeerConnector for NativeServiceConnector {
     type Endpoint = SocketAddr;
     type Session = Box<dyn SecureSession>;
+    fn supports_peer(&self, peer: PeerIdentity) -> bool {
+        match self {
+            Self::Tcp(c) => c.supports_peer(peer),
+            #[cfg(feature = "quic")]
+            Self::Quic(c) => c.supports_peer(peer),
+        }
+    }
     fn local(&self) -> LocalIdentity {
         match self {
             Self::Tcp(c) => c.local(),

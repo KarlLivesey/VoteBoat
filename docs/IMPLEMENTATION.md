@@ -2872,10 +2872,49 @@ config. Historical evidence retention, membership-aware roster/route admission,
 readiness and complete faulted activation/retirement remain required. Full P0–P7
 remains active; no macOS, formal proof or performance claim is made.
 
+## Slice 48 — membership-derived shared peer assignments
+
+Mini schema plan: derive a bounded exact peer/store union from all hosted cores,
+including committed, accepted rollback predecessors and pending storage states.
+Preflight routes, provisioned credentials and capacity before mutation. Withdraw
+receive authority immediately; retain canceled attempts and accepted sends until
+exact terminal receipts. Keep any peer still required by another hosted group.
+
+Raft::connection_replicas and PeerAssignments expose the local connection view.
+PeerRoster reconciles assignments; PeerDriver and Node derive all hosted groups
+at their serialized owner and return owned route hints on rejection. Native TCP
+and QUIC connectors implement the same public supports_peer contract over their
+construction pin maps. Default host connectors safely decline new reconciliation
+until they implement that check. Staged sends to removed peers fail locally while
+accepted sends retain their original tickets and queue credits. Held input is
+revalidated against the current roster and discarded after revocation.
+
+Two actual-core histories verify pending/accepted rollback retention and exact
+final-commit durability. Four downstream roster tests cover shared-group unions,
+stale Ready results, queue-credit retention, same-store session floors, capacity
+and identity rejection. Three driver/Node tests cover canceled provider receipts,
+held input, accepted/staged sends and owned route rejection. Existing native
+startup histories now reconcile the live roster before committed writes and
+recovery under both wire versions 2/3 and TCP/QUIC.
+
+A material edge-case check tightened the plan: different stores under the same
+node ID require a drained roster/generation handoff. Live identity replacement
+could erase session history across an ABA switch. Inactive same-store records
+remain under the peer ceiling; distinct-node churn can exhaust it and require a
+handoff. Rejection preserves existing connections and accepted work. No unbounded
+history or online credential rotation is introduced. See [peer membership
+contracts](PEER_MEMBERSHIP.md).
+
+QUIC-enabled library/effect-owner/peers/startup tests pass 40/97/17/8 (162 total).
+Core-only all-target build passes. Additional checks are recorded in the validation
+report. Public online configuration ingress remains gated: this slice provides
+current-view connection reconciliation, not prospective resource admission,
+readiness, distributed activation or complete fault coverage. Full P0–P7 remains
+active; Linux evidence does not establish macOS execution coverage.
+
 ## Next slice
 
-Continue P4 with membership-aware route/roster admission for promoted catch-up,
-readiness evidence and distributed activation/retirement fault histories before
+Continue P4 prospective route/resource admission and readiness evidence before
 releasing online configuration ingress. Preserve the usable static TCP/QUIC
 service. Full P0–P7 retains recursive responsibilities, split/merge and broader
 P7 evidence.

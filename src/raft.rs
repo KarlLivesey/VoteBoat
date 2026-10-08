@@ -2059,3 +2059,5 @@ mod membership_tests;
 
 #[path = "raft/authority.rs"]
 mod authority;
+#[path = "raft/connections.rs"]
+mod connections;

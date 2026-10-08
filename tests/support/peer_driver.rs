@@ -81,6 +81,9 @@ pub(super) struct Connector(Rc<RefCell<ConnectControl>>);
 impl PeerConnector for Connector {
     type Endpoint = ();
     type Session = Session;
+    fn supports_peer(&self, peer: PeerIdentity) -> bool {
+        matches!(peer.node.get(), 2 | 3) && peer.store == local(peer.node.get()).store.identity
+    }
     fn local(&self) -> LocalIdentity {
         local(1)
     }
@@ -1086,4 +1089,68 @@ impl Fixture {
             )
             .unwrap();
     }
+}
+
+#[test]
+fn membership_removal_cancels_attempts_but_waits_for_obsolete_provider_receipts() {
+    let mut f = Fixture::new();
+    f.poll(0).unwrap();
+    assert_eq!(f.connect.borrow().pending.len(), 2);
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_membership(&f.owner, Default::default(), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    assert_eq!(f.connect.borrow().cancelled.len(), 2);
+    assert_eq!(f.connect.borrow().pending.len(), 2);
+    f.connect.borrow_mut().ready = true;
+    f.poll(0).unwrap();
+    assert!(f.connect.borrow().pending.is_empty());
+    assert_eq!(f.connect.borrow().drops.get(), 2);
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .binding(node(2))
+        .is_none());
+    f.poll(20).unwrap();
+    assert_eq!(f.connect.borrow().submitted.len(), 2);
+    assert!(!f.owner.is_failed());
+    f.close(20);
+}
+
+#[test]
+fn membership_removal_discards_held_input_and_completes_accepted_and_staged_output() {
+    let mut f = Fixture::new();
+    f.attach();
+    f.transports.borrow()[&node(2)].borrow_mut().blocked = true;
+    let accepted = f.enqueue(2);
+    let staged = f.enqueue(2);
+    let control = f.transports.borrow()[&node(3)].clone();
+    let binding = control.borrow().binding;
+    control.borrow_mut().incoming = Some(ReceivedBatch {
+        connection: binding,
+        messages: vec![message(3, 1)],
+    });
+    f.poll_with_no_ingress();
+    assert_eq!(f.driver.as_ref().unwrap().ingress().usage().messages, 1);
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_membership(&f.owner, Default::default(), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    assert_eq!(f.outbound.usage().batches, 2);
+    let p = f.poll(0).unwrap();
+    for ticket in [accepted, staged] {
+        assert!(p
+            .completions
+            .iter()
+            .any(|c| c.ticket == ticket && c.result == LocalSendResult::Failed));
+    }
+    assert_eq!(p.ingress.admitted, 0);
+    assert_eq!(p.ingress.discarded, 1);
+    assert!(f.outbound.is_drained());
+    assert!(!f.owner.is_failed());
+    f.close(0);
 }

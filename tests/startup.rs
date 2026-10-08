@@ -536,6 +536,39 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
         nodes[0].local().owner.core(group()).unwrap().role(),
         Role::Leader
     );
+    // Both native connectors attest exact provisioned stores. Reconciliation
+    // of an unchanged shared roster must preserve its active bindings.
+    for (index, node) in nodes.iter_mut().enumerate() {
+        use voteboat::connect::ConnectDirection;
+        let before = stores
+            .keys()
+            .filter_map(|peer| {
+                node.peers()
+                    .unwrap()
+                    .roster()
+                    .binding(*peer)
+                    .map(|binding| (*peer, binding))
+            })
+            .collect::<BTreeMap<_, _>>();
+        let routes = (0..3)
+            .filter(|peer| *peer != index)
+            .map(|peer| {
+                (
+                    NodeId::new(peer as u64 + 1).unwrap(),
+                    if index < peer {
+                        ConnectDirection::Dial(addresses[peer])
+                    } else {
+                        ConnectDirection::Accept
+                    },
+                )
+            })
+            .collect();
+        node.reconcile_membership(routes, MonoTime(clock.elapsed().as_millis() as u64))
+            .unwrap_or_else(|r| panic!("{:?}", r.reason));
+        for (peer, binding) in before {
+            assert_eq!(node.peers().unwrap().roster().binding(peer), Some(binding));
+        }
+    }
     nodes[0]
         .propose(ClientRequest {
             group: group(),

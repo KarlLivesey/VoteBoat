@@ -147,6 +147,11 @@ pub trait PeerConnector {
     fn limits(&self) -> ConnectLimits;
     fn usage(&self) -> ConnectUsage;
     fn next_deadline(&self) -> Option<MonoTime>;
+    /// Exact construction-provisioned credential identity, for membership-driven
+    /// connection admission. False by default; hints never provision trust.
+    fn supports_peer(&self, _peer: PeerIdentity) -> bool {
+        false
+    }
     fn submit(
         &mut self,
         request: ConnectRequest<Self::Endpoint>,

@@ -242,3 +242,26 @@ Default TCP/TLS member/secure/startup suites independently pass 18/14/6 tests.
 Formatting, changed-document links, inventory shape/conformance paths and diff
 checks pass. The QUIC-enabled combined history also passes after the final
 assertion uses a borrowed expected-message slice.
+
+## 2026-10-08: membership-derived shared connection reconciliation (slice 48)
+
+- QUIC-enabled library, effect-owner, peers and startup suites pass 40, 97, 17
+  and 8 tests respectively (162 total). Startup uses real loopback TCP/TLS and
+  QUIC: reconcile unchanged assignments, commit writes, drain/join and recover
+  with exact selected wire formats 2 and 3.
+- Two actual-core tests retain pending/rollback peers and the committed joint
+  predecessor until exact final-commit durability. Four roster tests cover
+  shared-group requirements, cancellation/stale Ready, send ownership/session
+  floors and preflight rejection. Three driver/Node tests cover terminal provider
+  receipts, retained ingress, staged/accepted output and returned route ownership.
+- Core-only all-target check, all-feature/all-target Clippy with warnings denied,
+  all-feature API docs, formatting and diff checks pass. Inventory validator
+  passes with 47 implemented contract records; this is metadata evidence only.
+- During validation, a test assertion was corrected to inspect the existing
+  ConnectionRejected.reason rather than compare the owning rejection wrapper.
+  Store replacement was tightened to require drained handoff after identifying
+  session-floor loss across an ABA identity switch; its rejection and subsequent
+  same-store floor retention are tested.
+- No live credential rotation, prospective membership resource admission,
+  distributed readiness, public online configuration ingress, macOS execution,
+  performance or complete protocol proof is claimed. Full P0–P7 remains active.

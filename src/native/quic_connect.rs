@@ -201,6 +201,11 @@ impl PeerConnector for NativeQuicConnector {
     fn local(&self) -> LocalIdentity {
         self.config.local
     }
+    fn supports_peer(&self, peer: PeerIdentity) -> bool {
+        self.peers
+            .get(&peer.node)
+            .is_some_and(|p| p.pin.identity == peer)
+    }
     fn limits(&self) -> ConnectLimits {
         self.config.limits
     }

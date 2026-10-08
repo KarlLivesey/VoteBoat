@@ -15,6 +15,7 @@
 //! Bounded peer reactor over explicitly owned connector, roster and ingress.
 use super::*;
 use crate::{connect::*, outbound::*, secure::*, transport::*};
+use std::collections::BTreeSet;
 
 pub struct PeerParts<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     pub connector: C,
@@ -90,6 +91,11 @@ pub enum PeerDriverError {
     Transport(TransportError),
     Outbound(OutboundError),
     Ingress(IngressError),
+    Assignments(PeerAssignmentsError),
+}
+pub struct PeerReconcileRejected<E> {
+    pub reason: PeerDriverError,
+    pub routes: BTreeMap<NodeId, ConnectDirection<E>>,
 }
 pub struct PeerDriverRejected<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     pub reason: PeerDriverError,
@@ -282,6 +288,104 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         .into_iter()
         .flatten()
         .min()
+    }
+    /// Recompute all hosted groups' required connection stores at this serialized
+    /// owner. Supplied routes are hints only; credential availability and every
+    /// resource ceiling are checked before roster mutation. Rejection returns
+    /// the supplied routes. Removed provider attempts retain their slots until
+    /// terminal poll; retired sends/ingress follow existing exact ownership rules.
+    pub fn reconcile_membership<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &EffectOwner<Q, T, E>,
+        routes: BTreeMap<NodeId, ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerReconcileRejected<C::Endpoint>> {
+        let prepared = (|| {
+            if self.failed.is_some() || owner.is_failed() {
+                return Err(PeerDriverError::Fenced);
+            }
+            if self.closed {
+                return Err(PeerDriverError::NotQuiescent);
+            }
+            if now < self.now {
+                return Err(PeerDriverError::TimeWentBack);
+            }
+            if owner.identity() != self.owner {
+                return Err(PeerDriverError::WrongBinding);
+            }
+            let cores = owner
+                .groups()
+                .map(|group| owner.core(group))
+                .collect::<Option<Vec<_>>>()
+                .ok_or(PeerDriverError::WrongBinding)?;
+            let assignments = PeerAssignments::from_cores(
+                self.parts.roster.local(),
+                cores,
+                self.parts.roster.limits().peers,
+            )
+            .map_err(PeerDriverError::Assignments)?;
+            self.parts
+                .roster
+                .validate_assignments(&assignments, now)
+                .map_err(PeerDriverError::Roster)?;
+            if routes.len() != assignments.peers().count()
+                || assignments.peers().any(|(node, store)| {
+                    !routes.contains_key(&node)
+                        || !self
+                            .parts
+                            .connector
+                            .supports_peer(PeerIdentity { node, store })
+                })
+            {
+                return Err(PeerDriverError::WrongBinding);
+            }
+            let peers = self
+                .parts
+                .roster
+                .tracked_peers()
+                .chain(assignments.peers().map(|(node, _)| node))
+                .collect::<BTreeSet<_>>()
+                .into_iter()
+                .collect::<Vec<_>>();
+            let metadata = peers
+                .len()
+                .checked_mul(size_of::<NodeId>())
+                .and_then(|n| {
+                    n.checked_add(self.connector_limits.requests * size_of::<ConnectTicket>())
+                })
+                .and_then(|n| {
+                    n.checked_add(
+                        self.limits
+                            .staged_batches
+                            .checked_mul(size_of::<OutboundBatch>())?,
+                    )
+                });
+            if metadata.is_none_or(|n| n > self.limits.metadata_bytes) {
+                return Err(PeerDriverError::InvalidLimits);
+            }
+            Ok((assignments, peers))
+        })();
+        let (assignments, peers) = match prepared {
+            Ok(prepared) => prepared,
+            Err(reason) => return Err(PeerReconcileRejected { reason, routes }),
+        };
+        let canceled = match self.parts.roster.reconcile(&assignments, now) {
+            Ok(canceled) => canceled,
+            Err(reason) => {
+                return Err(PeerReconcileRejected {
+                    reason: PeerDriverError::Roster(reason),
+                    routes,
+                })
+            }
+        };
+        self.parts.routes = routes;
+        self.peers = peers;
+        self.cursor = 0;
+        self.now = now;
+        for ticket in canceled {
+            self.parts.connector.cancel(ticket);
+        }
+        Ok(())
     }
     pub fn is_drained(&self) -> bool {
         self.closed
@@ -600,7 +704,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         }
         for _ in 0..self.staged.len().min(b.sends) {
             let batch = self.staged.pop_front().unwrap();
-            if self.closed {
+            if self.closed || self.parts.roster.peer_identity(batch.ticket.peer).is_none() {
                 let ticket = batch.ticket;
                 match outbound.complete(batch, LocalSendResult::Failed) {
                     Ok(done) => {

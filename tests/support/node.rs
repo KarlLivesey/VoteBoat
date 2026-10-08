@@ -88,6 +88,44 @@ fn shutdown(n: &mut Boat) {
     panic!("not shut down");
 }
 #[test]
+fn membership_routes_are_preflighted_and_rejections_return_owned_routes() {
+    use voteboat::{connect::ConnectDirection, runtime::PeerDriverError};
+    let mut n = boat(parts(3, true));
+    let rejected = n
+        .reconcile_membership(Default::default(), MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(rejected.reason, PeerDriverError::WrongBinding);
+    assert!(rejected.routes.is_empty());
+    let wrong = [
+        (node(2), ConnectDirection::Accept),
+        (node(4), ConnectDirection::Dial(())),
+    ]
+    .into_iter()
+    .collect();
+    let rejected = n.reconcile_membership(wrong, MonoTime(0)).err().unwrap();
+    assert_eq!(rejected.reason, PeerDriverError::WrongBinding);
+    assert_eq!(rejected.routes.len(), 2);
+    let routes = [
+        (node(2), ConnectDirection::Accept),
+        (node(3), ConnectDirection::Dial(())),
+    ]
+    .into_iter()
+    .collect();
+    n.reconcile_membership(routes, MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    assert!(!n.local().owner.is_failed());
+    n.begin_shutdown();
+    assert_eq!(
+        n.reconcile_membership(Default::default(), MonoTime(0))
+            .err()
+            .unwrap()
+            .reason,
+        PeerDriverError::NotQuiescent
+    );
+    shutdown(&mut n);
+}
+#[test]
 fn facade_exact_client_and_read_outputs_hold_shutdown_until_consumer_completion() {
     let mut n = elected();
     let ticket = n.propose(request(1)).unwrap();

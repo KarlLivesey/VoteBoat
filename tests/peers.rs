@@ -696,3 +696,216 @@ fn generation_range_exhaustion_never_hides_partially_issued_tickets() {
     r.abort();
     assert_eq!(r.reclaim_generation(), Err(PeerRosterError::Exhausted));
 }
+
+fn assignment_core(voters: &[u64], replacement: Option<(u64, u128)>) -> Raft {
+    use voteboat::{log::*, quorum::*};
+    let mut log = HostLogStore::new(1);
+    let mut initial = bootstrap(1, 3);
+    initial.policy = Policy::new(
+        Tree::Majority(voters.iter().map(|n| Tree::Voter(node(*n))).collect()),
+        Limits::default(),
+    )
+    .unwrap();
+    initial.voter_stores = voters
+        .iter()
+        .map(|n| (node(*n), identity(*n as u128)))
+        .collect();
+    if let Some((n, store)) = replacement {
+        initial.voter_stores.insert(node(n), identity(store));
+    }
+    append(&mut log, vec![LogMutation::Create(initial)]);
+    Raft::recover(
+        node(1),
+        local().store,
+        log.state(group(1)).unwrap(),
+        log.limits(),
+    )
+    .unwrap()
+}
+fn assignments(voters: &[u64]) -> PeerAssignments {
+    PeerAssignments::from_cores(local(), [&assignment_core(voters, None)], 4).unwrap()
+}
+#[test]
+fn membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready() {
+    let mut r = roster(limits());
+    let tickets = r.due_connections(MonoTime(0), 4).unwrap();
+    let first = tickets
+        .iter()
+        .find(|t| t.peer.node == node(2))
+        .copied()
+        .unwrap();
+    let other = tickets
+        .iter()
+        .find(|t| t.peer.node == node(3))
+        .copied()
+        .unwrap();
+    let host = Host::new(first, 7);
+    let control = host.control.clone();
+    r.attach(first, host, MonoTime(0)).unwrap();
+    let a = assignment_core(&[1, 2], None);
+    let b = assignment_core(&[1, 2, 3], None);
+    let union = PeerAssignments::from_cores(local(), [&a, &b], 4).unwrap();
+    assert!(r.reconcile(&union, MonoTime(1)).unwrap().is_empty());
+    assert_eq!(r.binding(node(2)).unwrap().generation, first.generation);
+    assert_eq!(r.attempt_deadline(other), Some(MonoTime(10)));
+    let canceled = r.reconcile(&assignments(&[1, 2]), MonoTime(2)).unwrap();
+    assert_eq!(canceled, [other]);
+    assert_eq!(r.authorized_peers().collect::<Vec<_>>(), [node(2)]);
+    assert_eq!(r.attempt_deadline(other), None);
+    assert_eq!(
+        r.attach(other, Host::new(other, 1), MonoTime(2))
+            .unwrap_err()
+            .reason,
+        PeerRosterError::UnknownPeer
+    );
+    assert_eq!(control.lock().unwrap().state, TransportState::Open);
+    assert!(r
+        .reconcile(&assignments(&[1, 2, 3, 4]), MonoTime(3))
+        .unwrap()
+        .is_empty());
+    let fresh = r.due_connections(MonoTime(3), 4).unwrap();
+    assert_eq!(fresh.len(), 2);
+    assert!(fresh
+        .iter()
+        .all(|ticket| ticket.generation > other.generation));
+}
+#[test]
+fn revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor() {
+    let mut r = roster(limits());
+    let ticket = r.due_connections(MonoTime(0), 1).unwrap()[0];
+    let host = Host::new(ticket, 7);
+    let control = host.control.clone();
+    control.lock().unwrap().blocked = true;
+    r.attach(ticket, host, MonoTime(0)).unwrap();
+    let mut q = queue();
+    let batch = send(&mut q, node(2));
+    let original = batch.ticket;
+    r.submit(batch).unwrap();
+    r.reconcile(&assignments(&[1, 3]), MonoTime(1)).unwrap();
+    assert_eq!(r.binding(node(2)), None);
+    assert_eq!(r.peer_identity(node(2)), None);
+    assert!(r.received_info(node(2)).unwrap().is_none());
+    assert!(r.take_received(node(2)).unwrap().is_none());
+    assert_eq!(r.usage().connections, 1);
+    assert_eq!(q.usage().batches, 1);
+    assert_eq!(control.lock().unwrap().state, TransportState::Failed);
+    // Reenrollment cannot overwrite or release the old accepted send.
+    r.reconcile(&assignments(&[1, 2, 3]), MonoTime(2)).unwrap();
+    assert!(r
+        .due_connections(MonoTime(2), 4)
+        .unwrap()
+        .iter()
+        .all(|t| t.peer.node != node(2)));
+    let done = r.take_send(node(2)).unwrap().unwrap();
+    assert_eq!(done.batch.ticket, original);
+    assert_eq!(done.result, LocalSendResult::Failed);
+    q.complete(done.batch, done.result).unwrap();
+    assert!(q.is_drained());
+    let fresh = r
+        .due_connections(MonoTime(2), 4)
+        .unwrap()
+        .into_iter()
+        .find(|t| t.peer.node == node(2))
+        .unwrap();
+    assert!(fresh.generation > ticket.generation);
+    assert_eq!(
+        r.attach(fresh, Host::new(fresh, 6), MonoTime(2))
+            .unwrap_err()
+            .reason,
+        PeerRosterError::WrongBinding
+    );
+    r.attach(fresh, Host::new(fresh, 8), MonoTime(2)).unwrap();
+}
+#[test]
+fn store_replacement_requires_handoff_and_rejection_preserves_live_binding() {
+    let mut r = roster(limits());
+    let old = r.due_connections(MonoTime(0), 1).unwrap()[0];
+    r.attach(old, Host::new(old, 9), MonoTime(0)).unwrap();
+    let binding = r.binding(node(2));
+    let mut q = queue();
+    r.submit(send(&mut q, node(2))).unwrap();
+    let core = assignment_core(&[1, 2, 3], Some((2, 22)));
+    let changed = PeerAssignments::from_cores(local(), [&core], 4).unwrap();
+    assert_eq!(
+        r.reconcile(&changed, MonoTime(1)),
+        Err(PeerRosterError::WrongBinding)
+    );
+    assert_eq!(r.binding(node(2)), binding);
+    assert_eq!(r.peer_identity(node(2)).unwrap().store, identity(2));
+    assert_eq!(q.usage().batches, 1);
+    // Removal still retains the exact store/session history, so an ABA switch
+    // cannot erase the floor by first withdrawing the assignment.
+    r.reconcile(&assignments(&[1, 3]), MonoTime(1)).unwrap();
+    let done = r.take_send(node(2)).unwrap().unwrap();
+    assert_eq!(done.connection, binding.unwrap());
+    q.complete(done.batch, done.result).unwrap();
+    assert_eq!(
+        r.reconcile(&changed, MonoTime(2)),
+        Err(PeerRosterError::WrongBinding)
+    );
+    r.reconcile(&assignments(&[1, 2, 3]), MonoTime(2)).unwrap();
+    let next = r
+        .due_connections(MonoTime(2), 4)
+        .unwrap()
+        .into_iter()
+        .find(|ticket| ticket.peer.node == node(2))
+        .unwrap();
+    assert_eq!(
+        r.attach(next, Host::new(next, 8), MonoTime(2))
+            .err()
+            .unwrap()
+            .reason,
+        PeerRosterError::WrongBinding
+    );
+}
+
+#[test]
+fn assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation() {
+    let a = assignment_core(&[1, 2], None);
+    let b = assignment_core(&[1, 2], Some((2, 22)));
+    assert!(matches!(
+        PeerAssignments::from_cores(local(), [&a, &b], 4),
+        Err(PeerAssignmentsError::ConflictingStore)
+    ));
+    assert!(matches!(
+        PeerAssignments::from_cores(local(), [&a], 0),
+        Err(PeerAssignmentsError::InvalidLimits)
+    ));
+    let mut wrong = local();
+    wrong.store.session = StoreSession::new(2).unwrap();
+    assert!(matches!(
+        PeerAssignments::from_cores(wrong, [&a], 4),
+        Err(PeerAssignmentsError::WrongBinding)
+    ));
+    let mut r = roster(PeerRosterLimits {
+        peers: 2,
+        ..limits()
+    });
+    let tickets = r.due_connections(MonoTime(0), 2).unwrap();
+    let usage = r.usage();
+    assert_eq!(
+        r.reconcile(&assignments(&[1, 2, 3, 4]), MonoTime(1)),
+        Err(PeerRosterError::Overloaded)
+    );
+    assert_eq!(r.usage(), usage);
+    assert_eq!(r.authorized_peers().count(), 2);
+    for ticket in tickets {
+        assert_eq!(r.attempt_deadline(ticket), Some(MonoTime(10)));
+    }
+    r.reconcile(&assignments(&[1, 2]), MonoTime(2)).unwrap();
+    assert_eq!(
+        r.reconcile(&assignments(&[1, 2, 3]), MonoTime(1)),
+        Err(PeerRosterError::TimeWentBack)
+    );
+    assert_eq!(r.authorized_peers().collect::<Vec<_>>(), [node(2)]);
+    // Inactive exact-store session records are bounded too, not silently evicted.
+    assert_eq!(
+        r.reconcile(&assignments(&[1, 2, 4]), MonoTime(2)),
+        Err(PeerRosterError::Overloaded)
+    );
+    r.close();
+    assert_eq!(
+        r.reconcile(&assignments(&[1, 2]), MonoTime(2)),
+        Err(PeerRosterError::Closed)
+    );
+}
