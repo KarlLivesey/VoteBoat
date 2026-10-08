@@ -1646,9 +1646,58 @@ membership/policy changes, recursive responsibilities and safe split/merge remai
 unfinished. Full P0–P7 stays active; CI remains background feedback. Finite Linux
 checks do not establish macOS behavior, a full proof or performance.
 
+## Slice 24: bounded read execution and result ownership
+
+Optional application contract 1, `BoundedReadableStateMachine`, declares
+query allocation capacity, result retention bounds and actual nested output
+capacity. Counter and an independent downstream application implement the same
+public contract. No wire, checkpoint, WAL or consensus protocol changes.
+
+`ReadRouter` reserves node/per-group count and byte capacity before immutable
+read execution, validates the exact live ReadReady lease, and consumes its
+original one-use quorum barrier through the serialized EffectOwner immediately
+before the application callback. Wrong scopes/effects, overload and application
+catch-up return the original untouched query and lease. Invalid output bounds
+fence the owner without publishing success; an application query error consumes
+authority once and produces an owned error result. Defensive failures after
+callback execution fence and discard the failed lease rather than pretending
+the consumed query can be retried.
+
+Opaque results retain the original ticket, effect and consumed barrier. Polling
+does not release credits; only completion of the original envelope does.
+Foreign completions return the envelope intact. Close drains accepted results,
+and a valid read completed before a later owner failure remains consumable.
+Fresh host-reserved router/runtime/store lifetimes reject obsolete observations.
+Result sequences are volatile allocation identities, never protocol watermarks.
+The barrier remains the existing contiguous committed read boundary, not a
+clock lease or global timestamp. See [read result contracts](READ_RESULTS.md).
+
+Six downstream conformance tests exercise original allocation ownership,
+catch-up retry, node byte and per-group overload, unrelated group progress,
+query errors, provider fencing, wrong runtime/effects, one-use authority,
+foreign output ownership, consumer credit lifetime, close/drain and valid output
+after a later failure. The three-node/100-group native WAL/TLS and native-only
+histories now execute and consume their reads through this guard, including
+quorum loss, replacement, reconnection, snapshot/checkpoint and file recovery.
+
+Local validation passes 237 default/native/TLS tests, 216 native-only tests and
+123 core/host-only tests. The expanded valid-output-after-failure regression also
+passes. Clippy passes all three feature configurations with warnings denied;
+formatting, documentation, contract JSON, diff and new RPL header checks pass.
+Native socket histories ran with loopback access enabled.
+
+The host still owns, budgets and correlates original read invocations before
+ReadReady, handles read-step errors and cancels abandoned pending reads. A
+production invocation facade/reactor must own those lifetimes next; this result
+owner does not claim that missing integration. Physical WAL cleaning,
+membership/policy transitions, recursive responsibilities, split/merge and P7
+throughput evidence also remain unfinished. Full P0–P7 stays active. CI stays
+background feedback. Finite Linux tests do not prove macOS behavior or the full
+protocol across arbitrary schedules.
+
 ## Next slice
 
-Continue full native node assembly with read-result admission and
+Continue full native node assembly with pre-quorum read invocation ownership and
 reactor driving, then physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.

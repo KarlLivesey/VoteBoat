@@ -1617,6 +1617,7 @@ mod native {
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
         ingress: IngressRouter,
         results: ApplicationRouter<CounterReceipt>,
+        read_results: ReadRouter<i64>,
         clients: ClientRouter<CounterReceipt>,
         client_applied: usize,
         client_unknown: usize,
@@ -1837,6 +1838,14 @@ mod native {
             .unwrap(),
             client_applied: 0,
             client_unknown: 0,
+            read_results: ReadRouter::new(
+                ReadRouterBinding {
+                    owner: runtime_owner,
+                    generation: ReadRouterGeneration::new(1).unwrap(),
+                },
+                ReadRouterLimits::default(),
+            )
+            .unwrap(),
             results: ApplicationRouter::new(
                 ApplicationRouterBinding {
                     owner: runtime_owner,
@@ -2112,13 +2121,17 @@ mod native {
                         }
                         Effect::ReadReady(barrier) => {
                             let app = &n.apps[&lease.ticket.visit.group];
-                            let index = barrier.index();
-                            let value = n
-                                .owner
-                                .complete_effect(lease, app.applied_index(), now, |_| {
-                                    Ok((vec![], app.read_at(index, ()).unwrap()))
-                                })
+                            let request = barrier.request();
+                            let ticket = n
+                                .read_results
+                                .submit(&mut n.owner, lease, app, (), now)
                                 .unwrap();
+                            let output = n.read_results.poll().unwrap();
+                            assert_eq!(output.ticket(), ticket);
+                            assert_eq!(output.barrier().request(), request);
+                            assert_eq!(n.read_results.usage().results, 1);
+                            let value = n.read_results.complete(output).unwrap().unwrap();
+                            assert!(n.read_results.is_drained());
                             n.reads.push(value);
                         }
                         Effect::Send(_) => n.send_pending.push_back(lease),
@@ -2394,6 +2407,8 @@ mod native {
             assert!(n.ingress.is_drained());
             n.results.close();
             assert!(n.results.is_drained());
+            n.read_results.close();
+            assert!(n.read_results.is_drained());
             n.clients.close();
             assert!(
                 n.clients.is_drained(),
@@ -3823,5 +3838,363 @@ mod ingress {
         assert_eq!(second.dispatch(&roster, &mut owner, 1).unwrap().admitted, 1);
         assert!(!owner.is_drained());
         assert_eq!(second.usage(), IngressUsage::default());
+    }
+}
+
+mod read_results {
+    use super::*;
+    use std::cell::Cell;
+    struct App {
+        counter: Counter,
+        calls: Cell<usize>,
+        bound: usize,
+        invalid: bool,
+        fail_query: bool,
+    }
+    impl StateMachine for App {
+        type Receipt = CounterReceipt;
+        fn applied_index(&self) -> u64 {
+            self.counter.applied_index()
+        }
+        fn apply_batch(
+            &mut self,
+            entries: &[LogEntry],
+        ) -> Result<Vec<CounterReceipt>, ApplicationError> {
+            self.counter.apply_batch(entries)
+        }
+    }
+    impl ReadableStateMachine for App {
+        type Query = Vec<u8>;
+        type ReadResult = Vec<u8>;
+        fn read_at(&self, index: u64, query: Vec<u8>) -> Result<Vec<u8>, ApplicationError> {
+            self.calls.set(self.calls.get() + 1);
+            self.counter.read_applied(index)?;
+            if self.fail_query {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            Ok(query)
+        }
+    }
+    impl BoundedReadableStateMachine for App {
+        fn query_bytes(&self, q: &Vec<u8>, _: usize) -> Result<usize, ApplicationError> {
+            Ok(q.capacity())
+        }
+        fn read_result_bound(&self, _: &Vec<u8>) -> Result<usize, ApplicationError> {
+            Ok(self.bound)
+        }
+        fn read_result_bytes(&self, r: &Vec<u8>, _: usize) -> Result<usize, ApplicationError> {
+            Ok(if self.invalid {
+                usize::MAX
+            } else {
+                r.capacity()
+            })
+        }
+    }
+    fn setup(count: u128) -> (Owner, App) {
+        let (mut owner, mut worker) = single(count);
+        let mut apps = BTreeMap::new();
+        pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
+        (
+            owner,
+            App {
+                counter: apps.remove(&group(1)).unwrap(),
+                calls: Cell::new(0),
+                bound: 128,
+                invalid: false,
+                fail_query: false,
+            },
+        )
+    }
+    fn router<R>(owner: &Owner, generation: u64, limits: ReadRouterLimits) -> ReadRouter<R> {
+        ReadRouter::new(
+            ReadRouterBinding {
+                owner: owner.identity(),
+                generation: ReadRouterGeneration::new(generation).unwrap(),
+            },
+            limits,
+        )
+        .unwrap()
+    }
+    fn read(owner: &mut Owner, g: u128, request: u64) -> EffectLease {
+        owner
+            .admit(
+                group(g),
+                Event::Read {
+                    request: ReadRequestId::new(request).unwrap(),
+                },
+            )
+            .unwrap();
+        let steps = owner.advance(MonoTime(400), 1).unwrap();
+        assert_eq!(steps.len(), 1);
+        assert!(steps[0].error.is_none(), "{:?}", steps[0].error);
+        let lease = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(lease.effect, Effect::ReadReady(_)));
+        lease
+    }
+    fn rejected<Q>(error: ReadSubmitError<Q>) -> (ReadRouteError, EffectLease, Q) {
+        match error {
+            ReadSubmitError::Rejected {
+                reason,
+                lease,
+                query,
+            } => (reason, *lease, query),
+            ReadSubmitError::Failed { reason } => panic!("unexpected consumed failure: {reason:?}"),
+        }
+    }
+    #[test]
+    fn global_byte_backpressure_and_wrong_effect_do_not_run_application() {
+        let (mut owner, app) = setup(1);
+        let mut probe = router::<Vec<u8>>(&owner, 1, ReadRouterLimits::default());
+        let lease = read(&mut owner, 1, 1);
+        probe
+            .submit(&mut owner, lease, &app, vec![], MonoTime(400))
+            .unwrap();
+        let bytes = probe.usage().bytes;
+        let output = probe.poll().unwrap();
+        probe.complete(output).unwrap().unwrap();
+        let mut r = router::<Vec<u8>>(
+            &owner,
+            2,
+            ReadRouterLimits {
+                bytes,
+                result_bytes: 128,
+                ..Default::default()
+            },
+        );
+        let lease = read(&mut owner, 1, 2);
+        r.submit(&mut owner, lease, &app, vec![], MonoTime(400))
+            .unwrap();
+        let first = r.poll().unwrap();
+        let lease = read(&mut owner, 1, 3);
+        let (reason, lease, query) = rejected(
+            r.submit(&mut owner, lease, &app, vec![], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::Overloaded);
+        assert_eq!(app.calls.get(), 2);
+        assert_eq!(r.usage().bytes, bytes);
+        r.complete(first).unwrap().unwrap();
+        r.submit(&mut owner, lease, &app, query, MonoTime(400))
+            .unwrap();
+        let output = r.poll().unwrap();
+        r.complete(output).unwrap().unwrap();
+        assert_eq!(app.calls.get(), 3);
+
+        let (mut other, _worker) = single(1);
+        other.admit(group(1), Event::Campaign).unwrap();
+        other.advance(MonoTime(0), 1).unwrap();
+        let lease = other.take_effect().unwrap().unwrap();
+        let mut other_results = router::<Vec<u8>>(&other, 1, ReadRouterLimits::default());
+        let (reason, lease, _) = rejected(
+            other_results
+                .submit(&mut other, lease, &app, vec![], MonoTime(0))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::WrongEffect);
+        assert!(matches!(lease.effect, Effect::Persist(_)));
+        assert_eq!(app.calls.get(), 3);
+        assert!(other_results.is_drained());
+        assert!(!other.is_failed());
+    }
+    #[test]
+    fn original_read_is_one_use_and_poll_keeps_allocation_credits() {
+        let (mut owner, app) = setup(1);
+        let mut r = router::<Vec<u8>>(&owner, 1, ReadRouterLimits::default());
+        let lease = read(&mut owner, 1, 1);
+        let duplicate = EffectLease {
+            ticket: lease.ticket,
+            effect: lease.effect.clone(),
+        };
+        let ticket = r
+            .submit(&mut owner, lease, &app, vec![7; 48], MonoTime(400))
+            .unwrap();
+        assert_eq!(app.calls.get(), 1);
+        let used = r.usage();
+        assert!(used.bytes >= 48 + 128);
+        let output = r.poll().unwrap();
+        assert_eq!(output.ticket(), ticket);
+        assert_eq!(output.barrier().request().get(), 1);
+        assert_eq!(output.barrier().group(), group(1));
+        assert_eq!(output.result().as_ref().unwrap(), &vec![7; 48]);
+        assert_eq!(r.usage(), used);
+        let (reason, _, query) = rejected(
+            r.submit(&mut owner, duplicate, &app, vec![8], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::Owner(EffectOwnerError::StaleEffect));
+        assert_eq!(query, vec![8]);
+        assert_eq!(app.calls.get(), 1);
+        let mut foreign = router::<Vec<u8>>(&owner, 2, ReadRouterLimits::default());
+        let error = foreign.complete(output).unwrap_err();
+        assert_eq!(error.reason, ReadRouteError::StaleResult);
+        assert_eq!(r.usage(), used);
+        assert_eq!(r.complete(*error.results).unwrap().unwrap(), vec![7; 48]);
+        assert_eq!(r.usage(), ReadResultUsage::default());
+        assert!(r.is_drained());
+    }
+    #[test]
+    fn per_group_overload_retains_original_query_and_other_group_progresses() {
+        let (mut owner, app) = setup(2);
+        let mut r = router::<Vec<u8>>(
+            &owner,
+            1,
+            ReadRouterLimits {
+                results: 2,
+                group_results: 1,
+                ..Default::default()
+            },
+        );
+        let lease = read(&mut owner, 1, 1);
+        r.submit(&mut owner, lease, &app, vec![1], MonoTime(400))
+            .unwrap();
+        let first = r.poll().unwrap();
+        let lease = read(&mut owner, 1, 2);
+        let query = Vec::with_capacity(64);
+        let pointer = query.as_ptr();
+        let (reason, lease, query) = rejected(
+            r.submit(&mut owner, lease, &app, query, MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::Overloaded);
+        assert_eq!(pointer, query.as_ptr());
+        assert_eq!(app.calls.get(), 1);
+        let other = read(&mut owner, 2, 1);
+        r.submit(&mut owner, other, &app, vec![2], MonoTime(400))
+            .unwrap();
+        assert_eq!(app.calls.get(), 2);
+        r.complete(first).unwrap().unwrap();
+        r.submit(&mut owner, lease, &app, query, MonoTime(400))
+            .unwrap();
+        assert_eq!(app.calls.get(), 3);
+        r.close();
+        while let Some(output) = r.poll() {
+            r.complete(output).unwrap().unwrap();
+        }
+        assert!(r.is_drained());
+        let lease = read(&mut owner, 1, 3);
+        let (reason, lease, _) = rejected(
+            r.submit(&mut owner, lease, &app, vec![], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::Closed);
+        owner
+            .release(lease, app.applied_index(), MonoTime(400))
+            .unwrap();
+    }
+    #[test]
+    fn application_catchup_retries_without_consuming_query_or_barrier() {
+        let (mut owner, app) = setup(1);
+        let mut r = router::<Vec<u8>>(&owner, 1, ReadRouterLimits::default());
+        let lease = read(&mut owner, 1, 1);
+        let lagging = App {
+            counter: Counter::new(100).unwrap(),
+            ..app
+        };
+        let (reason, lease, query) = rejected(
+            r.submit(&mut owner, lease, &lagging, vec![4], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(
+            reason,
+            ReadRouteError::Owner(EffectOwnerError::Consensus(RaftError::NotApplied))
+        );
+        assert_eq!(lagging.calls.get(), 0);
+        assert_eq!(r.usage(), ReadResultUsage::default());
+        let mut caught_up = lagging;
+        caught_up
+            .counter
+            .apply_batch(owner.core(group(1)).unwrap().replay_committed())
+            .unwrap();
+        r.submit(&mut owner, lease, &caught_up, query, MonoTime(400))
+            .unwrap();
+        let output = r.poll().unwrap();
+        assert_eq!(r.complete(output).unwrap().unwrap(), vec![4]);
+        assert_eq!(caught_up.calls.get(), 1);
+    }
+    #[test]
+    fn nested_capacity_and_result_bound_reject_before_callback_and_wrong_runtime_is_intact() {
+        let (mut owner, mut app) = setup(1);
+        let mut r = router::<Vec<u8>>(
+            &owner,
+            1,
+            ReadRouterLimits {
+                query_bytes: 32,
+                result_bytes: 128,
+                ..Default::default()
+            },
+        );
+        let lease = read(&mut owner, 1, 1);
+        let query = Vec::with_capacity(64);
+        let pointer = query.as_ptr();
+        let (reason, lease, query) = rejected(
+            r.submit(&mut owner, lease, &app, query, MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::ResultTooLarge);
+        assert_eq!(pointer, query.as_ptr());
+        app.bound = 129;
+        let (reason, lease, _) = rejected(
+            r.submit(&mut owner, lease, &app, vec![], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::ResultTooLarge);
+        assert_eq!(app.calls.get(), 0);
+        let mut foreign = router::<Vec<u8>>(&owner, 2, ReadRouterLimits::default());
+        // A different runtime generation is not the same owner even at this store.
+        foreign = ReadRouter::new(
+            ReadRouterBinding {
+                owner: RuntimeOwner {
+                    generation: RuntimeGeneration::new(999).unwrap(),
+                    ..foreign.binding().owner
+                },
+                ..foreign.binding()
+            },
+            ReadRouterLimits::default(),
+        )
+        .unwrap();
+        let (reason, lease, _) = rejected(
+            foreign
+                .submit(&mut owner, lease, &app, vec![], MonoTime(400))
+                .unwrap_err(),
+        );
+        assert_eq!(reason, ReadRouteError::WrongBinding);
+        owner
+            .release(lease, app.applied_index(), MonoTime(400))
+            .unwrap();
+        assert!(!owner.is_failed());
+    }
+    #[test]
+    fn query_failure_consumes_authority_but_invalid_provider_fences_without_success() {
+        let (mut owner, mut app) = setup(1);
+        let mut r = router::<Vec<u8>>(&owner, 1, ReadRouterLimits::default());
+        app.fail_query = true;
+        let lease = read(&mut owner, 1, 1);
+        r.submit(&mut owner, lease, &app, vec![], MonoTime(400))
+            .unwrap();
+        let output = r.poll().unwrap();
+        assert_eq!(
+            r.complete(output).unwrap(),
+            Err(ApplicationError::InvalidCommand)
+        );
+        assert!(!owner.is_failed());
+        app.fail_query = false;
+        let lease = read(&mut owner, 1, 2);
+        r.submit(&mut owner, lease, &app, vec![9], MonoTime(400))
+            .unwrap();
+        let valid_before_failure = r.poll().unwrap();
+        app.invalid = true;
+        let lease = read(&mut owner, 1, 3);
+        assert!(matches!(
+            r.submit(&mut owner, lease, &app, vec![1], MonoTime(400)),
+            Err(ReadSubmitError::Failed {
+                reason: ReadRouteError::ProviderViolation
+            })
+        ));
+        assert!(owner.is_failed());
+        assert!(r.poll().is_none());
+        assert_eq!(r.usage().results, 1);
+        assert_eq!(r.complete(valid_before_failure).unwrap().unwrap(), vec![9]);
+        assert!(r.is_drained());
+        assert_eq!(app.calls.get(), 3);
     }
 }

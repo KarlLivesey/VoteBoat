@@ -180,6 +180,22 @@ pub trait ReadableStateMachine: StateMachine {
     ) -> Result<Self::ReadResult, ApplicationError>;
 }
 
+/// Optional bounded read execution contract, version 1. Byte counts include
+/// retained allocation capacity, not just logical length. Bounds include inline
+/// result storage; queries report nested storage only. Implementations must not
+/// perform I/O or mutate applied state during validation or read execution.
+pub trait BoundedReadableStateMachine: ReadableStateMachine {
+    fn query_bytes(&self, query: &Self::Query, limit: usize) -> Result<usize, ApplicationError>;
+    fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError>;
+    fn read_result_bytes(
+        &self,
+        result: &Self::ReadResult,
+        nested_limit: usize,
+    ) -> Result<usize, ApplicationError>;
+}
+
+pub const BOUNDED_READ_CONTRACT_VERSION: u32 = 1;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ReadError {
     Consensus(RaftError),
@@ -303,6 +319,17 @@ impl ReadableStateMachine for Counter {
     type ReadResult = i64;
     fn read_at(&self, required_index: u64, (): ()) -> Result<i64, ApplicationError> {
         self.read_applied(required_index)
+    }
+}
+impl BoundedReadableStateMachine for Counter {
+    fn query_bytes(&self, (): &(), _: usize) -> Result<usize, ApplicationError> {
+        Ok(0)
+    }
+    fn read_result_bound(&self, (): &()) -> Result<usize, ApplicationError> {
+        Ok(std::mem::size_of::<i64>())
+    }
+    fn read_result_bytes(&self, _: &i64, _: usize) -> Result<usize, ApplicationError> {
+        Ok(0)
     }
 }
 

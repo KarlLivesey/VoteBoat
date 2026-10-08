@@ -117,7 +117,9 @@ separate checkpoint/recovery contract.
 
 Committed application results now feed the separate [client router](CLIENTS.md),
 which supplies proposal correlation, pre-proposal dedup/capacity reservation and
-unknown outcomes. Read-result storage, reactor/facade assembly, physical WAL
+unknown outcomes. [ReadRouter](READ_RESULTS.md) supplies bounded read-result
+execution and consumer ownership. Pre-quorum read invocation ownership,
+reactor/facade assembly, physical WAL
 cleanup, membership changes, responsibilities and split/merge remain unfinished.
 Finite Linux checks do not establish macOS execution, a full liveness proof,
 device power-cut behavior or performance.

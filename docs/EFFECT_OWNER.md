@@ -81,6 +81,8 @@ result retention.
 
 For ReadReady, `complete_effect` consumes the original core barrier after
 checking application progress, then invokes the serialized completion callback.
+`ReadRouter` supplies the bounded query/result execution path over this method;
+see [read results](READ_RESULTS.md). Lower-level embeddings own those budgets.
 The callback can read immutable application state at that exact boundary and
 return its result. Insufficient application progress retains the lease and
 barrier for retry, without running the callback. A consumed lease cannot
@@ -138,7 +140,9 @@ and healing. Native-without-TLS uses bounded simulated delivery. Network isolati
 A bounded PeerRoster now coordinates the native connections in these histories,
 including real TLS reconnection. Asynchronous checkpoint creation and compaction
 also run through the selected workers. ClientRouter now supplies exact proposal
-admission/results and Unknown outcomes through the same owner. A full node facade,
-read-result admission, reactor execution and broader network fault schedules
+admission/results and Unknown outcomes through the same owner. ReadRouter now
+reserves read callback/result capacity and consumes original one-use barriers
+through this owner. A full node facade, pre-quorum read invocation ownership,
+reactor execution and broader network fault schedules
 remain. No complete deployable
 consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

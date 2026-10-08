@@ -154,8 +154,12 @@ again immediately before proposal execution. Scoped tracked inputs correlate
 each invocation with its exact applied group/index/term/operation result.
 Cancellation and leadership changes report Unknown without rolling back commands.
 The native 100-group histories use this path, including quorum loss and recovery.
-See [client ownership](docs/CLIENTS.md). Read-result storage and the production
-reactor/facade remain unfinished.
+See [client ownership](docs/CLIENTS.md). `runtime::ReadRouter` now reserves query
+and result capacity before consuming an original one-use read barrier, and holds
+opaque output credits until consumer completion. Counter and host applications
+share `BoundedReadableStateMachine`; native multi-group histories use this path.
+See [read result ownership](docs/READ_RESULTS.md). Pre-quorum read invocation
+ownership and the production reactor/facade remain unfinished.
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
@@ -251,7 +255,9 @@ dial workers. See [connection establishment](docs/CONNECTIONS.md). Complete node
 ingress/result admission and the production reactor/facade remain in progress.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
-messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
+messages, then consume `Effect::ReadReady` through `runtime::ReadRouter` for
+bounded execution/results. Lower-level embeddings can use
+`application::read_at_barrier` under their own query/result budget.
 Each group allows one outstanding read (including an unconsumed ready barrier).
 Request IDs increase within a store session; cancellation frees the slot. A
 barrier is for its original invocation only and cannot authorize a later read.
