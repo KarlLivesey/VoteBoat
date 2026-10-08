@@ -98,3 +98,17 @@ this state; explicitly selected [wire format 2](WIRE_FORMAT.md) can carry it.
 Live learner catch-up, all-quorum activation, stale-context handling, removed-node
 service fencing, the formal protocol model and faulted network histories remain
 next. Linux tests do not establish macOS execution or power-failure certification.
+
+## Operation status after compaction
+
+The durable status API uses the existing retained operation set and active joint
+metadata, without extending the checkpoint format. Journal grammar permits one
+active joint and requires its final before another transition. Consequently an
+operation identity in a validated committed base, outside its active joint, is
+completed. Status reports CompactedCompleted with that base boundary, rather
+than guessing the discarded phase, payload or exact record position. An active
+joint retains its operation, configuration, target and index and can supply a
+normal final proposal after commitment. Its original term is unavailable when
+its index lies below the snapshot boundary. These are historical local facts;
+they do not authorize appends or establish a fresh cluster-wide negative result.
+Actual-file reopen and modeled crash/reclaim histories exercise these cases.

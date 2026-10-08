@@ -76,41 +76,34 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Retained route/credential admission (slice 51), host-driven readiness evidence
-(slice 52), local configuration proposal admission (slice 53) and native readiness
-exchange (slice 54) are implemented. Slice 54 exercises real TCP/QUIC, the original
-owner/worker visit, capability denial and success, stale completion, another group
-running and accepted-work shutdown drain. The macro P4 exit is still usable,
-validated online add/promote/remove; these slices do not redefine that exit.
-Slice 55 repairs the reproduced partial-final election stall. Slice 56 connects
-owned Node requests, execution authorization, outcomes and cancellation; its
-native evidence is single-voter local joint/final commitment and file reopen.
-Remote configuration delivery and native policy/capacity admission remain work.
+Slices 51–56 establish retained routing/credentials, host and native readiness,
+local proposal admission, partial-final election recovery, and owned administration.
+Slice 57 adds durable status and safe local resumption. These are implemented
+foundations, not completion of online add/promote/remove.
 
-1. **Fault-tested online activation (current, P4).** Connect the administrator
-   entry point and placement authorization to those paths, validate distributed
-   activation modeling, and exercise actual multi-node add/promote/remove with
-   leader loss, restart, rollback and partial delivery. Open configuration ingress
-   only after those release checks pass. Depends on slices 51–54 and the existing
-   membership journal, joint quorum and recovery contracts. Validate selected
-   wire/transport capacities as well as application/storage readiness, and expose
-   outcomes/cancellation for administrative operations. This completes the
-   online-membership milestone and supplies safe replica placement changes.
-2. **First recursive responsibility/routing path (next, P5).** Define the
-   smallest manifest and request-resolution path that selects a concrete group,
-   then exercise it through the existing service and Rust embedding. Depends on
-   existing group identities/runtime and, when placement changes, item 1. Check
-   selective placement, stale manifest handling and cached child operation during
-   parent unavailability; ordinary child writes must not require an ancestor
-   commit. This begins the P5 milestone, rather than claiming all of P5 in one
-   slice. Sketch the concrete API and acceptance history at that milestone entry.
-3. **First safe split/ownership movement (following, P6).** After the P5 manifest
-   and routing milestone passes, connect real application export/import to source
-   fencing and durable target activation. Preserve operation IDs, deduplication,
-   outbox state and ownership lineage. Completion checks include receipt loss,
-   restart and partial-progress histories with no dual active owner. This begins
-   P6; compatible merge and the rest of its lifecycle remain required before P7
-   tuning. Readiness tokens from P4 do not replace durable import/activation proof.
+1. **Durable administration status/resumption (current slice 57, P4).** Finish
+   historical committed/accepted status and resume an interrupted committed joint
+   through normal authorization. Depends on the journal, retained checkpoint
+   identities and slice 56's owned admission. Completion checks: Written and
+   uncertain publication, rollback, lost observation, checkpoint/reclaim and real
+   file reopen; no invented discarded metadata or duplicate accepted final.
+   Supplies restart handling for the online-membership milestone. Implemented
+   evidence is recorded below; service endpoints remain a later integration.
+2. **Native placement and capacity admission (next, P4).** Supply the native
+   service's explicit placement/failure-domain and selected provider-capacity
+   checks through the existing execution-time authorization seam. Depends on
+   selected peer routes/credentials, codec/transport limits and readiness.
+   Completion checks: valid assemblies admitted; unsupported placement or
+   capacity rejected before persistence; queued changes rechecked at execution.
+   Makes membership administration usable without a host-written policy callback.
+3. **Remote enrollment and fault-tested transitions (following, P4).** Connect
+   native service enrollment and administrative endpoints, including durable
+   status/resumption, to add/catch-up/promote/remove. Depends on items 1–2 and
+   native readiness. Completion checks: TCP/QUIC histories with partial joint
+   and final delivery, weighted/recursive policies, leader loss, rollback,
+   snapshots and restart. Resolve activation/catch-up gaps before releasing
+   configuration ingress. Completes safe placement for P5 responsibility routing
+   and P6 ownership movement; P5–P7 remain the global sequence above.
 
 ### How the current work fits globally
 
@@ -119,7 +112,7 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Complete native administration admission and durable operation status | The Node now owns requests and checks execution authorization/bindings, but the native service still needs placement/provider-capacity policy and restart/resumption of unknown outcomes. | Reject unsupported assemblies before persistence; query exact durable operation/phase across restart, retries and lost receipts through the selected service and embedding. | Makes the P4 operation usable outside a host-managed owner loop. |
+| Complete native administration admission | Owned requests and durable status/resumption now exist locally; the native service needs placement/provider-capacity policy. | Reject unsupported assemblies before persistence, rechecking queued requests against current selected providers. | Makes the P4 operation usable without a host-written policy callback. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
@@ -3427,3 +3420,40 @@ Snapshot stay gated. In particular, broader partial-joint activation/catch-up
 histories still need validation; slice 55's partial-final history is not enough.
 This advances the current P4 milestone without changing its exit or the full
 P0–P7 goal; P5 routing, P6 split/merge and P7 measured tuning remain pending.
+
+## Slice 57 — durable operation status and safe resumption
+
+Mini schema plan: derive separate committed and durably accepted operation phases
+from the selected journal and existing checkpoint membership base. Preserve exact
+retained positions; report compacted completion without inventing phase/payload,
+and active compacted joint metadata without inventing its discarded term. Reuse
+existing operation IDs, commit/log boundaries and normal owned admission; add no
+format, generation, durability token or watermark. Pending/Written state cannot
+advance status, local absence is inconclusive, and only a committed joint with
+matching accepted joint produces a final planning hint. Queued work and failure
+remain subject to normal authorization, journal and persistence checks.
+
+GroupLog/Raft expose ConfigurationOperationStatus; Node exposes status and
+resume_configuration. A resumed final uses the existing joint operation/target
+with a fresh ticket and execution authorization. Accepted uncommitted final waits;
+completed operations return Completed; absent local identity does not reconstruct
+learner intent. RecoveryRequired/fenced owners refuse status. Existing retained
+results still occupy their group slot until consumed. See the
+[administration contract](CONFIGURATION_ADMINISTRATION.md).
+
+Shared host/native histories check durable versus committed phases, rollback,
+exact group scope, checkpoint compaction and discarded joint term. Native faults
+cover Written commit and uncertain sync/publication followed by modeled power
+loss. Actual files reopen a resumable joint and committed final, and existing
+checkpoint/reclaim reopen histories now inspect compacted completion. Node tests
+lose the original wait, deny resumption through default polling, then authorize
+a fresh final. Native startup uses resumption for its same-electorate one-voter
+final and inspects completion after actual WAL reopen. This is local evidence,
+not multi-node enrollment, distributed activation or dynamic NativeStartup recovery.
+
+Native policy/capacity admission is next, then enrollment/service endpoints and
+faulted remote transitions. Public configuration Append/membership Snapshot stay
+gated. Partial-joint catch-up/election histories remain a release requirement;
+the slice 55 partial-final check does not establish them. This advances P4's
+restart behavior without shrinking P0–P7 or claiming P5–P7 implementation.
+Validation is recorded in validation/REPORT.md.

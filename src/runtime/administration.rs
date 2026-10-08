@@ -84,6 +84,13 @@ pub struct ConfigurationCompletion {
     pub ticket: ConfigurationTicket,
     pub outcome: ConfigurationOutcome,
 }
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ConfigurationResumption {
+    Submitted(ConfigurationTicket),
+    Completed,
+    WaitForCommit,
+    NotFoundLocally,
+}
 struct Pending {
     ticket: ConfigurationTicket,
     record: ConfigurationRecord,

@@ -78,6 +78,195 @@ fn replay(entries: &[LogEntry], commit: u64) -> Result<Membership, MembershipErr
 fn set(nodes: &[u64]) -> BTreeSet<NodeId> {
     nodes.iter().map(|n| node(*n)).collect()
 }
+fn status_conformance<S: LogStore>(mut store: S) {
+    let operation = OperationId::new(101).unwrap();
+    append(
+        &mut store,
+        vec![
+            LogMutation::Create(bootstrap(1, 3)),
+            LogMutation::Create(bootstrap(2, 3)),
+        ],
+    );
+    let status = |store: &S| {
+        store
+            .state(group(1))
+            .unwrap()
+            .configuration_status(operation)
+            .unwrap()
+    };
+    assert_eq!(
+        status(&store).resume_action(),
+        ConfigurationResumeAction::NotFoundLocally
+    );
+    let initial = store.state(group(1)).unwrap();
+    append(
+        &mut store,
+        vec![update(
+            &initial,
+            1,
+            1,
+            Some(Suffix {
+                from: 1,
+                entries: vec![learners()],
+            }),
+        )],
+    );
+    let state = store.state(group(1)).unwrap();
+    let tickets = store
+        .append_batch(vec![update(
+            &state,
+            1,
+            1,
+            Some(Suffix {
+                from: 2,
+                entries: vec![joint()],
+            }),
+        )])
+        .unwrap();
+    // A submitted/Written joint is absent from the authoritative durable state.
+    assert_eq!(
+        status(&store).accepted,
+        ConfigurationProgress::NotFoundLocally
+    );
+    store.barrier(&tickets).unwrap();
+    let pending = status(&store);
+    assert_eq!(pending.committed, ConfigurationProgress::NotFoundLocally);
+    assert_eq!(
+        pending.accepted,
+        ConfigurationProgress::Joint {
+            configuration: cid(3),
+            target: cid(4),
+            index: 2,
+            term: Some(1)
+        }
+    );
+    assert_eq!(
+        pending.resume_action(),
+        ConfigurationResumeAction::WaitForCommit
+    );
+    let state = store.state(group(1)).unwrap();
+    append(&mut store, vec![update(&state, 1, 2, None)]);
+    assert_eq!(status(&store).committed, pending.accepted);
+    let EntryPayload::Configuration(final_record) = final_record().payload else {
+        panic!()
+    };
+    assert_eq!(
+        status(&store).resume_action(),
+        ConfigurationResumeAction::Finalize(*final_record)
+    );
+    let other = store
+        .state(group(2))
+        .unwrap()
+        .configuration_status(operation)
+        .unwrap();
+    assert_eq!(other.group, group(2));
+    assert_eq!(
+        other.resume_action(),
+        ConfigurationResumeAction::NotFoundLocally
+    );
+    let state = store.state(group(1)).unwrap();
+    append(
+        &mut store,
+        vec![update(
+            &state,
+            1,
+            2,
+            Some(Suffix {
+                from: 3,
+                entries: vec![self::final_record()],
+            }),
+        )],
+    );
+    let pending_final = status(&store);
+    assert_eq!(pending_final.committed, pending.accepted);
+    assert_eq!(
+        pending_final.accepted,
+        ConfigurationProgress::Final {
+            configuration: cid(4),
+            index: 3,
+            term: 1
+        }
+    );
+    assert_eq!(
+        pending_final.resume_action(),
+        ConfigurationResumeAction::WaitForCommit
+    );
+    // Rollback restores exactly the resumable committed joint phase.
+    let state = store.state(group(1)).unwrap();
+    append(
+        &mut store,
+        vec![update(
+            &state,
+            2,
+            2,
+            Some(Suffix {
+                from: 3,
+                entries: vec![],
+            }),
+        )],
+    );
+    assert!(matches!(
+        status(&store).resume_action(),
+        ConfigurationResumeAction::Finalize(_)
+    ));
+    let mut final_entry = self::final_record();
+    final_entry.term = 2;
+    let state = store.state(group(1)).unwrap();
+    append(
+        &mut store,
+        vec![update(
+            &state,
+            2,
+            3,
+            Some(Suffix {
+                from: 3,
+                entries: vec![final_entry],
+            }),
+        )],
+    );
+    let finished = status(&store);
+    assert_eq!(
+        finished.committed,
+        ConfigurationProgress::Final {
+            configuration: cid(4),
+            index: 3,
+            term: 2
+        }
+    );
+    assert_eq!(
+        finished.resume_action(),
+        ConfigurationResumeAction::Completed
+    );
+    let enrolled = store
+        .state(group(1))
+        .unwrap()
+        .configuration_status(OperationId::new(100).unwrap())
+        .unwrap();
+    assert_eq!(
+        enrolled.committed,
+        ConfigurationProgress::Learners {
+            configuration: cid(2),
+            index: 1,
+            term: 1
+        }
+    );
+    assert_eq!(
+        enrolled.resume_action(),
+        ConfigurationResumeAction::Completed
+    );
+}
+#[test]
+fn host_configuration_status_distinguishes_durable_and_committed_phases() {
+    status_conformance(HostLogStore::new(1));
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_configuration_status_distinguishes_durable_and_committed_phases() {
+    use voteboat::native::log_store::*;
+    status_conformance(
+        NativeLogStore::create(ModelIo::default(), identity(1), LogLimits::default()).unwrap(),
+    );
+}
 
 #[test]
 fn accepted_log_activation_uses_both_policies_before_joint_commit() {
@@ -801,6 +990,139 @@ mod crash {
         }
     }
     #[test]
+    fn final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply() {
+        let operation = OperationId::new(101).unwrap();
+        for fault in [Fault::Sync, Fault::PublishBefore, Fault::PublishAfter] {
+            let io = ModelIo::default();
+            let mut store = before_stage(3, io.clone());
+            let state = store.state(group(1)).unwrap();
+            let tickets = store
+                .append_batch(vec![update(&state, 1, 3, None)])
+                .unwrap();
+            assert_eq!(
+                store
+                    .state(group(1))
+                    .unwrap()
+                    .configuration_status(operation)
+                    .unwrap()
+                    .resume_action(),
+                ConfigurationResumeAction::WaitForCommit
+            );
+            io.0.borrow_mut().fault = fault;
+            assert!(matches!(
+                store.barrier(&tickets),
+                Err(StorageError::Uncertain(_))
+            ));
+            assert_eq!(store.state(group(1)), Err(StorageError::Fenced));
+            drop(store);
+            io.0.borrow_mut().power_loss();
+            let store = NativeLogStore::recover(io, identity(1), LogLimits::default()).unwrap();
+            let status = store
+                .state(group(1))
+                .unwrap()
+                .configuration_status(operation)
+                .unwrap();
+            assert_eq!(
+                status.accepted,
+                ConfigurationProgress::Final {
+                    configuration: cid(4),
+                    index: 3,
+                    term: 1
+                }
+            );
+            if matches!(fault, Fault::Sync) {
+                assert_eq!(
+                    status.resume_action(),
+                    ConfigurationResumeAction::WaitForCommit
+                );
+            } else {
+                assert_eq!(status.committed, status.accepted);
+                assert_eq!(status.resume_action(), ConfigurationResumeAction::Completed);
+            }
+        }
+    }
+    #[test]
+    fn actual_files_reopen_resumable_joint_then_committed_final_status() {
+        let path = std::env::temp_dir().join(format!(
+            "voteboat-configuration-status-{}",
+            std::process::id()
+        ));
+        let mut store = NativeLogStore::create(
+            FileLogIo::create(&path).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let state = store.state(group(1)).unwrap();
+        append(
+            &mut store,
+            vec![update(
+                &state,
+                1,
+                2,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![learners(), joint()],
+                }),
+            )],
+        );
+        drop(store);
+        let operation = OperationId::new(101).unwrap();
+        let mut store = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let state = store.state(group(1)).unwrap();
+        let core =
+            Raft::recover_member(node(1), store.binding(), state.clone(), store.limits()).unwrap();
+        assert_eq!(
+            core.configuration_status(operation)
+                .unwrap()
+                .resume_action(),
+            ConfigurationResumeAction::Finalize(ConfigurationRecord {
+                operation,
+                expected: cid(3),
+                change: ConfigurationChange::Final { id: cid(4) }
+            })
+        );
+        append(
+            &mut store,
+            vec![update(
+                &state,
+                1,
+                3,
+                Some(Suffix {
+                    from: 3,
+                    entries: vec![final_record()],
+                }),
+            )],
+        );
+        drop(store);
+        let store = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let state = store.state(group(1)).unwrap();
+        assert_eq!(
+            state
+                .configuration_status(operation)
+                .unwrap()
+                .resume_action(),
+            ConfigurationResumeAction::Completed
+        );
+        let mut core =
+            Raft::recover_member(node(1), store.binding(), state, store.limits()).unwrap();
+        core.storage_failed();
+        assert_eq!(core.configuration_status(operation), Err(RaftError::Fenced));
+        drop(store);
+        std::fs::remove_dir_all(path).unwrap();
+    }
+    #[test]
     fn physical_reclamation_preserves_joint_final_and_operation_reuse_guards() {
         for stage in [2, 3] {
             let io = ModelIo::default();
@@ -1019,6 +1341,29 @@ mod configuration_snapshots {
         );
         compact(&mut log, &mut snapshots, &receipt);
         let compacted = log.state(group(1)).unwrap();
+        let operation = OperationId::new(101).unwrap();
+        let status = compacted.configuration_status(operation).unwrap();
+        assert_eq!(
+            status.committed,
+            ConfigurationProgress::Joint {
+                configuration: cid(3),
+                target: cid(4),
+                index: 3,
+                term: Some(1)
+            }
+        );
+        assert_eq!(
+            status.accepted,
+            ConfigurationProgress::Final {
+                configuration: cid(4),
+                index: 4,
+                term: 1
+            }
+        );
+        assert_eq!(
+            status.resume_action(),
+            ConfigurationResumeAction::WaitForCommit
+        );
         assert_eq!(
             compacted.membership().unwrap(),
             original.membership().unwrap()
@@ -1044,6 +1389,13 @@ mod configuration_snapshots {
             )],
         );
         let rolled = log.state(group(1)).unwrap();
+        assert!(matches!(
+            rolled
+                .configuration_status(operation)
+                .unwrap()
+                .resume_action(),
+            ConfigurationResumeAction::Finalize(_)
+        ));
         assert_eq!(rolled.membership().unwrap().id(), cid(3));
         assert!(!rolled.membership().unwrap().is_satisfied(&set(&[4, 5])));
         let mut final_entry = final_record();
@@ -1075,6 +1427,18 @@ mod configuration_snapshots {
         let final_receipt = publish(&mut snapshots, metadata(&finished, 5), &final_bytes);
         assert_eq!(final_receipt.reference().configuration, cid(4));
         compact(&mut log, &mut snapshots, &final_receipt);
+        for operation in [100, 101] {
+            let status = log
+                .state(group(1))
+                .unwrap()
+                .configuration_status(OperationId::new(operation).unwrap())
+                .unwrap();
+            assert_eq!(
+                status.committed,
+                ConfigurationProgress::CompactedCompleted { through: 5 }
+            );
+            assert_eq!(status.resume_action(), ConfigurationResumeAction::Completed);
+        }
         let mut regression = receipt.metadata.clone();
         regression.index = 6;
         regression.term = 3;
@@ -1151,6 +1515,66 @@ mod configuration_snapshots {
         conformance(
             HostLogStore::new(1),
             support::snapshot::HostSnapshots::new(),
+        );
+    }
+    #[test]
+    fn compacted_joint_status_does_not_invent_the_discarded_entry_term() {
+        let mut log = HostLogStore::new(1);
+        let mut snapshots = support::snapshot::HostSnapshots::new();
+        append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        let state = log.state(group(1)).unwrap();
+        append(
+            &mut log,
+            vec![update(
+                &state,
+                2,
+                3,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![
+                        learners(),
+                        joint(),
+                        LogEntry {
+                            index: 3,
+                            term: 2,
+                            payload: EntryPayload::Noop,
+                        },
+                    ],
+                }),
+            )],
+        );
+        let state = log.state(group(1)).unwrap();
+        let mut app = Counter::new(10).unwrap();
+        app.apply_batch(&state.entries).unwrap();
+        let receipt = publish(
+            &mut snapshots,
+            metadata(&state, 3),
+            &app.checkpoint(16384).unwrap(),
+        );
+        compact(&mut log, &mut snapshots, &receipt);
+        let state = log.state(group(1)).unwrap();
+        let status = state
+            .configuration_status(OperationId::new(101).unwrap())
+            .unwrap();
+        assert_eq!(
+            status.committed,
+            ConfigurationProgress::Joint {
+                configuration: cid(3),
+                target: cid(4),
+                index: 2,
+                term: None
+            }
+        );
+        assert!(matches!(
+            status.resume_action(),
+            ConfigurationResumeAction::Finalize(_)
+        ));
+        assert_eq!(
+            state
+                .configuration_status(OperationId::new(100).unwrap())
+                .unwrap()
+                .committed,
+            ConfigurationProgress::CompactedCompleted { through: 3 }
         );
     }
     #[test]
@@ -1574,6 +1998,16 @@ mod configuration_snapshots {
             assert_eq!(log.state(group(1)).unwrap(), expected);
             let mut snapshots = recover(snapshots_io);
             let reference = expected.snapshot.unwrap();
+            assert_eq!(
+                log.state(group(1))
+                    .unwrap()
+                    .configuration_status(OperationId::new(101).unwrap())
+                    .unwrap()
+                    .committed,
+                ConfigurationProgress::CompactedCompleted {
+                    through: reference.index
+                }
+            );
             let snapshot = snapshots.load_pinned(reference).unwrap();
             assert!(reference.matches(&snapshot));
             assert_eq!(snapshot.metadata.membership, expected.snapshot_membership);
@@ -1630,6 +2064,14 @@ mod configuration_snapshots {
                 SnapshotLimits::default(),
             )
             .unwrap();
+            assert_eq!(
+                log.state(group(1))
+                    .unwrap()
+                    .configuration_status(OperationId::new(101).unwrap())
+                    .unwrap()
+                    .committed,
+                ConfigurationProgress::CompactedCompleted { through: 5 }
+            );
             assert_eq!(log.state(group(1)).unwrap(), expected);
             assert_eq!(
                 snapshots

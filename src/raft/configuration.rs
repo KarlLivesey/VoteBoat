@@ -50,6 +50,19 @@ impl From<ConfigurationProposalError> for RaftError {
     }
 }
 impl Raft {
+    /// Local durable journal status. Pending proposals do not advance it;
+    /// absence is not a linearizable cluster-wide negative result.
+    pub fn configuration_status(
+        &self,
+        operation: OperationId,
+    ) -> Result<crate::membership::ConfigurationOperationStatus, RaftError> {
+        if self.is_fenced() {
+            return Err(RaftError::Fenced);
+        }
+        self.durable
+            .configuration_status(operation)
+            .map_err(|e| ConfigurationProposalError::Membership(e).into())
+    }
     pub(super) fn configure(
         &mut self,
         proposal: ConfigurationProposal,

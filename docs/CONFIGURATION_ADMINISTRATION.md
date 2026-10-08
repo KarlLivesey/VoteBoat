@@ -59,7 +59,45 @@ static startup convenience constructor.
 
 Remote configuration-bearing Append and membership Snapshot remain gated. A
 native placement authorizer, complete codec/transport capability admission,
-durable operation-status/resumption, enrollment/service endpoints and faulted
+enrollment/service endpoints and faulted
 multi-node add/promote/remove remain required. The supplied authorization callback
 is a host composition seam, not an implemented native placement policy. Existing
 TCP/QUIC readiness and static-service tests do not establish this complete path.
+
+## Durable status and safe resumption
+
+Use Node::configuration_status(group, operation), or Raft::configuration_status,
+to inspect the selected authoritative durable log. The result separates committed
+progress from durably accepted progress, using existing commit/log boundaries.
+Pending proposals and Written completions cannot advance it. This is historical
+local evidence, without a fresh read barrier or remote certificate.
+
+| Observation | Resumption action |
+| --- | --- |
+| Committed learners, final, or compacted completed identity | Completed; this does not compare a new request payload. |
+| Committed joint with the same accepted joint and target | Propose its exact final record through ordinary admission. |
+| Accepted but uncommitted joint or final | WaitForCommit; do not append another final. |
+| NotFoundLocally | Inconclusive; do not infer cluster-wide absence or invent replacement intent. |
+
+Node::resume_configuration rederives this action from its current core. A final
+uses the original operation, joint configuration and target, and receives a fresh
+admission ticket. Drive it through poll_with_configuration_authorization;
+leadership, current-term commitment, journal grammar and authorization are checked
+again at execution. Ordinary polling still denies it. A retained earlier result
+occupies its group slot until consumed. Cancellation stops observation, so queued
+work may still commit before a later status query. No status API restores unknown
+learner intent or bypasses provider binding, authorization or durability.
+
+Existing snapshot operation identities preserve completion after compaction.
+An identity outside the snapshot's active joint proves that operation finished
+under the validated journal grammar; its discarded phase, payload and exact
+position are unavailable. An active joint retains its original index and target;
+its term is None if discarded below the snapshot boundary. No journal/checkpoint
+format, generation, durability token or watermark is added. See
+[configuration snapshots](CONFIGURATION_SNAPSHOTS.md).
+
+Shared host/native tests cover pending acceptance, rollback, checkpoint/reclaim,
+actual file reopen and uncertain commit publication. Node tests cover lost
+observation and fresh authorization; native startup uses resumption for local
+finalization before real WAL reopen. These establish local recovery behavior,
+not remote enrollment or a complete online membership lifecycle.

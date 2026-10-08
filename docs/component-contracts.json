@@ -59,7 +59,9 @@
         "configure",
         "poll_configuration",
         "cancel_configuration",
-        "poll_with_configuration_authorization"
+        "poll_with_configuration_authorization",
+        "configuration_status",
+        "resume_configuration"
       ],
       "native": "NativeNode<A, C=NativePeerConnector> / NativeNodeParts<A, C=NativePeerConnector> / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
       "conformance": [
@@ -1015,10 +1017,23 @@
     {
       "design_id": "C10/C15/C20",
       "public_contract": "ConfigurationRequests / ConfigurationTicket / ConfigurationOutcome / Node::configure",
-      "operations": ["new", "submit", "observe", "cancel_wait", "poll", "close", "is_drained", "Node::poll_with_configuration_authorization"],
+      "operations": [
+        "new",
+        "submit",
+        "observe",
+        "cancel_wait",
+        "poll",
+        "close",
+        "is_drained",
+        "Node::poll_with_configuration_authorization"
+      ],
       "native": "Bounded owner-ticket observer through existing Node/ReplicaDriver/ClientRouter/EffectOwner composition; native startup exercises selected WAL worker and real file reopen.",
-      "conformance": ["tests/support/node.rs", "tests/effect_owner.rs", "tests/startup.rs"],
-      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence is a single-voter same-electorate joint/final journal, not remote add/promote/remove or released configuration ingress. Native placement authorizer, complete capacity validation, durable operation-status API and network lifecycle histories remain pending."
+      "conformance": [
+        "tests/support/node.rs",
+        "tests/effect_owner.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence is a single-voter same-electorate joint/final journal, not remote add/promote/remove or released configuration ingress. Native placement authorizer, complete capacity validation, network lifecycle histories remain pending."
     },
     {
       "design_id": "C01/C04/C10/C15",
@@ -1040,6 +1055,24 @@
         "tests/quic_connect.rs"
       ],
       "scope": "One pending leader request, one volatile checked result and one suspended learner verification per group. Exact group/configuration/term/context/peer-store-session checks; no term/timer/vote/read authority. Existing durable core prefix and optional verified pin plus selected limits and bounded checkpoint/restore govern positive replies. Native recovery binds core limits/state to the authoritative log; custom hosts must honor that construction contract. Capability/application lag denies without fencing; accepted storage/output failure fences. Original worker tickets, effect leases, decoded/output credits and loaded-image/checkpoint reservations survive delay, stale observation and shutdown. Lost replies require explicit host cancellation/retry. Actual TCP/QUIC exchange uses native framing/worker with host snapshot stores and host-imported enrollment; separate tests cover native-file readiness/reopen. Wire/transport capacity and placement authorization remain administrator obligations. No native online enrollment/promotion endpoint or released configuration ingress; no new durable token, watermark or generation."
+    },
+    {
+      "design_id": "C01/C04/C10/C20",
+      "public_contract": "ConfigurationOperationStatus / ConfigurationResumeAction / ConfigurationResumption",
+      "operations": [
+        "GroupLog::configuration_status",
+        "Raft::configuration_status",
+        "ConfigurationOperationStatus::resume_action",
+        "Node::configuration_status",
+        "Node::resume_configuration"
+      ],
+      "native": "Selected authoritative NativeFileLog and existing checkpoint membership metadata; normal Node configuration admission and WAL worker for resumed finalization.",
+      "conformance": [
+        "tests/membership.rs",
+        "tests/support/node.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "Historical local committed versus durably accepted operation phases. Pending/Written do not advance status; absence is inconclusive. Committed snapshot operation IDs outside its active joint imply completion under validated journal grammar, without reconstructing discarded phase/payload/position; an active compacted joint retains its index/target and may lack the original term. Only a committed joint with matching accepted joint yields a final planning hint. Node rederives hints and submits through normal live authorization and journal/durability checks; accepted uncommitted final waits. No new schema/token/generation/watermark or fresh read authority. Shared host/native faults, rollback, compaction, actual-file reopen and Node lost-observation/authorization checks; native startup remains one-voter local finalization, not remote lifecycle."
     }
   ],
   "not_yet_implemented": [
@@ -1051,7 +1084,7 @@
     "discovery",
     "placement",
     "observability",
-    "native-configuration-admin-policy-status-and-endpoints",
+    "native-configuration-admin-policy-and-service-endpoints",
     "authorization",
     "compression",
     "scope-transfer",

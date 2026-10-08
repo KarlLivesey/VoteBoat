@@ -493,3 +493,32 @@ assertion uses a borrowed expected-message slice.
   All-feature/all-target Clippy with warnings denied, core-only all-target
   compilation, all-feature API docs, formatting/diff and inventory shape/path
   checks pass (53 contracts). Metadata validation is not protocol conformance.
+
+
+## Slice 57 — durable operation status and safe resumption
+
+- GroupLog/Raft/Node expose historical durable committed versus accepted phases;
+  Node resumption reconstructs only a committed joint final and uses fresh normal
+  admission/authorization. Written/pending state gives no advancement. Local
+  absence is inconclusive and completed identity is not new-payload equivalence.
+- All-feature membership suite: 32 pass, including shared host/native phase and
+  rollback conformance, snapshot/reclaim, missing compacted joint term, modeled
+  sync/publication failures and actual-file joint/final/checkpoint reopen.
+- All-feature focused Node configuration checks: 10 pass, including lost wait,
+  default-authorization denial, successful fresh resumption and recovery-required
+  status rejection. Native startup selected-worker local finalization/resumption
+  and actual WAL reopen: 1 pass. This is same-electorate one-voter evidence, not
+  remote enrollment or distributed membership delivery.
+- Final all-feature Node facade suite: 28 pass. Core-only membership suite: 18
+  pass; configuration-filtered owner checks: 13 pass.
+  All-feature/all-target Clippy with warnings denied, core-only all-target
+  compilation and all-feature API documentation pass. Formatting/diff and
+  inventory shape/path checks pass (54 contracts); metadata is not conformance.
+- No journal/checkpoint schema, durability token, generation or watermark was
+  introduced. Compacted IDs outside the active joint establish completed identity
+  under existing journal grammar, without discarded phase/payload/position.
+  Retained active joints may have no original term below the snapshot boundary.
+- Native policy/capacity admission, service endpoints, native enrollment and
+  faulted remote add/promote/remove remain pending. Configuration ingress stays
+  gated, including pending partial-joint activation/catch-up histories. No macOS,
+  physical power-failure, performance or full proof claim. Full P0–P7 stays active.

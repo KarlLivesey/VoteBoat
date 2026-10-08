@@ -329,6 +329,10 @@ fn configuration_written_storage_failure_retains_unknown_receipt_for_recovery() 
     }
     assert!(saw_written);
     assert_eq!(n.state(), NodeState::RecoveryRequired);
+    assert_eq!(
+        n.configuration_status(group(1), ticket.operation()),
+        Err(NodeError::RecoveryRequired)
+    );
     let mut recovery = n.into_recovery().unwrap_or_else(|_| panic!());
     let result = recovery.configuration.poll().unwrap();
     assert_eq!(result.ticket, ticket);
@@ -420,6 +424,76 @@ fn configuration_cannot_expand_a_local_only_node_without_peer_providers() {
         ConfigurationOutcome::NotProposed(ConfigurationProposalError::MissingPeerTransport.into())
     );
     assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization() {
+    use voteboat::membership::*;
+    let mut n = elected();
+    let request = admin_request(1, 100, false);
+    let operation = request.proposal.record.operation;
+    let requirements = request.proposal.requirements;
+    let ticket = n.configure(request).unwrap();
+    n.cancel_configuration(ticket).unwrap();
+    assert!(matches!(
+        n.poll_configuration().unwrap().outcome,
+        ConfigurationOutcome::Unknown(_)
+    ));
+    admin_settle(&mut n);
+    let status = n.configuration_status(group(1), operation).unwrap();
+    assert_eq!(
+        status.committed,
+        ConfigurationProgress::Joint {
+            configuration: ConfigurationId::new(2).unwrap(),
+            target: ConfigurationId::new(3).unwrap(),
+            index: 2,
+            term: Some(1)
+        }
+    );
+    let ConfigurationResumption::Submitted(final_ticket) = n
+        .resume_configuration(group(1), operation, requirements)
+        .unwrap()
+    else {
+        panic!()
+    };
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    let denied = n.poll_configuration().unwrap();
+    assert_eq!(denied.ticket, final_ticket);
+    assert!(matches!(
+        denied.outcome,
+        ConfigurationOutcome::NotProposed(RaftError::Configuration(_))
+    ));
+    assert_eq!(n.configuration_status(group(1), operation).unwrap(), status);
+    let ConfigurationResumption::Submitted(final_ticket) = n
+        .resume_configuration(group(1), operation, requirements)
+        .unwrap()
+    else {
+        panic!()
+    };
+    assert_ne!(ticket.admission(), final_ticket.admission());
+    assert_eq!(ticket.operation(), final_ticket.operation());
+    admin_settle(&mut n);
+    assert!(matches!(
+        n.poll_configuration().unwrap().outcome,
+        ConfigurationOutcome::Committed(_)
+    ));
+    let before = n.local().owner.core(group(1)).unwrap().state().clone();
+    assert_eq!(
+        n.resume_configuration(group(1), operation, requirements)
+            .unwrap(),
+        ConfigurationResumption::Completed
+    );
+    assert_eq!(
+        n.resume_configuration(group(1), OperationId::new(999).unwrap(), requirements)
+            .unwrap(),
+        ConfigurationResumption::NotFoundLocally
+    );
+    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    n.begin_shutdown();
+    assert_eq!(
+        n.resume_configuration(group(1), operation, requirements),
+        Err(NodeError::Closed)
+    );
     shutdown(&mut n);
 }
 fn request(op: u128) -> ClientRequest {

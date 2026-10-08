@@ -436,6 +436,57 @@ where
     pub fn poll_configuration(&mut self) -> Option<ConfigurationCompletion> {
         self.configuration.poll()
     }
+    /// Historical local durable status, without a fresh cluster read barrier.
+    /// Local absence does not establish non-execution or authorize a retry.
+    pub fn configuration_status(
+        &self,
+        group: GroupIdentity,
+        operation: OperationId,
+    ) -> Result<crate::membership::ConfigurationOperationStatus, NodeError> {
+        if self.state == NodeState::RecoveryRequired {
+            return Err(NodeError::RecoveryRequired);
+        }
+        self.local
+            .owner
+            .core(group)
+            .ok_or(NodeError::Owner(EffectOwnerError::Runtime(
+                RuntimeError::UnknownGroup,
+            )))?
+            .configuration_status(operation)
+            .map_err(|e| NodeError::Owner(EffectOwnerError::Consensus(e)))
+    }
+    /// Resume a recorded operation after lost observation/restart. Only a
+    /// committed joint generates a final proposal, and execution still needs
+    /// poll_with_configuration_authorization. No new learner intent is invented.
+    pub fn resume_configuration(
+        &mut self,
+        group: GroupIdentity,
+        operation: OperationId,
+        requirements: ReadinessRequirements,
+    ) -> Result<ConfigurationResumption, NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        use crate::membership::ConfigurationResumeAction;
+        match self.configuration_status(group, operation)?.resume_action() {
+            ConfigurationResumeAction::Completed => Ok(ConfigurationResumption::Completed),
+            ConfigurationResumeAction::WaitForCommit => Ok(ConfigurationResumption::WaitForCommit),
+            ConfigurationResumeAction::NotFoundLocally => {
+                Ok(ConfigurationResumption::NotFoundLocally)
+            }
+            ConfigurationResumeAction::Finalize(record) => self
+                .configure(ConfigurationRequest {
+                    group,
+                    proposal: ConfigurationProposal {
+                        record,
+                        readiness: vec![],
+                        requirements,
+                    },
+                })
+                .map(ConfigurationResumption::Submitted)
+                .map_err(|e| NodeError::Configuration(e.reason)),
+        }
+    }
     /// Stops observation only; queued or persisted configuration work can commit.
     pub fn cancel_configuration(
         &mut self,

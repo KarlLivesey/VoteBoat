@@ -20,6 +20,8 @@ use crate::{
     quorum::{Limits, Policy, Tree},
 };
 use std::collections::{BTreeMap, BTreeSet};
+mod status;
+pub use status::*;
 
 /// Retain operation identities across compaction without unbounded tombstones.
 /// Exhaustion rejects further transitions; identities are never silently evicted.

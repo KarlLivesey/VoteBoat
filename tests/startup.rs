@@ -204,28 +204,38 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
     });
     let operation = OperationId::new(700).unwrap();
     for (expected_index, finalizing) in (2..).zip([false, true]) {
-        let ticket = n
-            .configure(ConfigurationRequest {
+        let ticket = if finalizing {
+            let ConfigurationResumption::Submitted(ticket) = n
+                .resume_configuration(
+                    group(),
+                    operation,
+                    ReadinessRequirements {
+                        application_schema: 1,
+                        command_bytes: 8,
+                        snapshot_bytes: 4096,
+                    },
+                )
+                .unwrap()
+            else {
+                panic!("joint must be resumable")
+            };
+            ticket
+        } else {
+            n.configure(ConfigurationRequest {
                 group: group(),
                 proposal: ConfigurationProposal {
                     record: ConfigurationRecord {
                         operation,
-                        expected: ConfigurationId::new(if finalizing { 10 } else { 9 }).unwrap(),
-                        change: if finalizing {
-                            ConfigurationChange::Final {
-                                id: ConfigurationId::new(11).unwrap(),
-                            }
-                        } else {
-                            ConfigurationChange::Joint {
-                                id: ConfigurationId::new(10).unwrap(),
-                                next: Configuration::new(
-                                    ConfigurationId::new(11).unwrap(),
-                                    bootstrap.policy.clone(),
-                                    bootstrap.voter_stores.clone(),
-                                    BTreeMap::new(),
-                                )
-                                .unwrap(),
-                            }
+                        expected: ConfigurationId::new(9).unwrap(),
+                        change: ConfigurationChange::Joint {
+                            id: ConfigurationId::new(10).unwrap(),
+                            next: Configuration::new(
+                                ConfigurationId::new(11).unwrap(),
+                                bootstrap.policy.clone(),
+                                bootstrap.voter_stores.clone(),
+                                BTreeMap::new(),
+                            )
+                            .unwrap(),
                         },
                     },
                     readiness: vec![],
@@ -236,7 +246,8 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
                     },
                 },
             })
-            .unwrap();
+            .unwrap()
+        };
         let start = Instant::now();
         let result = loop {
             n.poll_with_configuration_authorization(
@@ -278,6 +289,13 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
         ConfigurationId::new(11).unwrap()
     );
     let recovered = Raft::recover_member(local, store.binding(), state, store.limits()).unwrap();
+    assert_eq!(
+        recovered
+            .configuration_status(operation)
+            .unwrap()
+            .resume_action(),
+        ConfigurationResumeAction::Completed
+    );
     assert_eq!(
         recovered.membership().id(),
         ConfigurationId::new(11).unwrap()
