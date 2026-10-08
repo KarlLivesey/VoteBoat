@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; abandoned pre-intent reservations and broader lifecycle recovery remain |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -103,16 +103,19 @@ after complete activation and explicit host retention release, with native-file
 interrupted-publication/reclamation checks for both source kinds and TCP/QUIC
 original-source recovery. These establish selected top-level handoff/cleanup paths;
 slice 94 adds checked parent reservation/completion and a selected deterministic
-delegated-child split. Native recursive phase/reopen, abandoned-reservation
-recovery, general retention and broader faults remain.
+delegated-child split. Slices 95–97 add native delegated split and repeated
+split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
+its selected native acceptance passes. General retention and broader faults remain.
 
 1. **Delegated-parent lifecycle coordination (current, P6).** Bind parent/child epoch
    changes to durable handoff decisions through the responsibility tree. Depends
    on reusable owners and existing routed/directory contracts; completion requires
    parent failure/recovery and recursive transfers without dual owners or an
    ancestor commit in ordinary child writes. Deterministic parent binding is now
-   implemented; next within this deliverable is native TCP/QUIC phase/reopen,
-   delegated merge/repeated moves and safe pre-fence conflict/cancellation handling.
+   implemented, with native TCP/QUIC split and repeated movement evidence.
+   Permanent before-intent refusal, parent cancellation and fresh compatible
+   replanning now have selected native restart recovery evidence. Broader
+   recursive fault schedules and general retention remain in the scope ledger.
    This connects P6 movement to P5 trees.
 2. **Committed/applied measurement baseline (next, P7).** Establish a
    reproducible committed/applied baseline with workload, durability and latency
@@ -5812,3 +5815,54 @@ the old wrapper) so the cancellation test can complete a fresh operation 202
 using actual imports/publication/activation instead of inventing a new decision.
 This is needed to prove safe usable replanning after cancellation, not merely
 that the parent lock can be removed.
+
+### Slice 98 native acceptance assembly — explicit fresh operation binding
+
+The preceding explanatory turn changed no authoritative implementation state;
+this continuation verified the existing core-only test handle completed successfully
+and proceeds with the native gate. Core-only affected suites pass: delegation 13,
+directory 20, retirement 5 and transfer_repeat 5. All-feature counterparts pass
+14/22/7/5 respectively, including six new cancellation conformance tests.
+
+Generalize the existing native delegated split rig with explicit transfer and
+reservation IDs (defaults remain 200/400). Its observed state, stage/import/fence/
+publication/activation and target recovery factories use those IDs consistently.
+This avoids another lifecycle implementation in the tests: after cancelling 400,
+use fresh 402/202 and the same compatible unchanged manifests. Targets 21/22 have
+never been staged under the old intent, so their fresh bindings are unambiguous.
+The operation selection is a test input, not a volatile phase cursor; resumption
+continues to use quorum-observed actual retained facts. Restart obtains actual
+reservation context before constructing fresh target applications.
+
+Native acceptance discards receipts/reopens after reservation, child refusal and
+parent cancellation; retries original commands, checks source continuity during
+parent outage, verifies unchanged manifests and permanent refusal of old intent
+200. It then exercises all eleven fresh transfer phases with reopen/status
+comparison, checks that committed new intent 202 cannot be declined even before
+fencing, and verifies final imported retries/new writes survive reopen. Selected
+TCP/TLS WAL and QUIC checkpoint histories are running; no result claimed yet.
+
+### Slice 98 result — recover abandoned reservations before child commitment
+
+Implemented permanent child refusal and parent cancellation with bounded public
+messages, quorum queries and journal/checkpoint replay. A successful child intent
+always wins against cancellation, including after its publication. Parent release
+uses the already reserved final control credit and changes no manifest generation.
+Same-group provenance is checked against actual retained facts; remote facts
+remain authenticated non-Byzantine host obligations. No source thaw or timeout
+revocation exists, and incompatible source grants still require independent repair.
+
+Six deterministic tests pass, with affected all-feature/native-only suites at
+14/22/7/5 and core-only at 13/20/5/5 (delegation/directory/retirement/repeat).
+Native cancellation tests pass 2/2 in 227.64 seconds: TCP/TLS WAL and QUIC
+checkpoint recovery. Receipt loss/reopen after refusal/cancellation, source
+continuity through parent outage, permanent old-intent rejection and all eleven
+fresh split phases use actual retained status. Fresh committed intent cannot be
+declined before its source fence. Final original retries and values 9/13 recover.
+This is a selected pair, not a full cross-product or arbitrary-fault proof.
+
+All-target/all-feature Clippy with warnings denied, formatting, diff checks and
+the 71-contract inventory pass. P7 committed/applied measurement is next, followed
+by measured tuning/broader validation. Remaining general ingress/envelope,
+retention, fault and Linux/macOS operational evidence stay in the full active
+P0–P7 objective; P8 remains deferred and CI remains background feedback.

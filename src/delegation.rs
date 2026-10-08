@@ -310,3 +310,191 @@ pub struct DelegationPublicationStatus {
     pub index: u64,
     pub completion: DelegationCompletion,
 }
+
+pub const MAX_DELEGATION_DECLINE_BYTES: usize = MAX_TRANSFER_INTENT_BYTES + 12;
+pub const MAX_DELEGATION_DECLINE_STATUS_BYTES: usize = MAX_DELEGATION_DECLINE_BYTES + 36;
+pub const MAX_DELEGATION_CANCEL_BYTES: usize = MAX_DELEGATION_DECLINE_STATUS_BYTES + 52;
+
+/// Request to permanently refuse one parent-bound child operation before any
+/// successful child intent exists. Encoding alone is not a committed refusal.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DelegationDecline {
+    intent: TransferIntent,
+}
+impl DelegationDecline {
+    pub fn new(intent: TransferIntent) -> Result<Self, ApplicationError> {
+        if intent.delegation().is_none() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(Self { intent })
+    }
+    pub fn intent(&self) -> &TransferIntent {
+        &self.intent
+    }
+    pub fn encode(&self, limit: usize) -> Result<Vec<u8>, ApplicationError> {
+        let body = self.intent.encode(MAX_TRANSFER_INTENT_BYTES)?;
+        let len = 12 + body.len();
+        if len > limit || len > MAX_DELEGATION_DECLINE_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut out = Vec::with_capacity(len);
+        out.extend(b"VBDDECL1");
+        out.extend((body.len() as u32).to_le_bytes());
+        out.extend(body);
+        Ok(out)
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, ApplicationError> {
+        if bytes.len() > MAX_DELEGATION_DECLINE_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut r = Reader::new(bytes);
+        if r.take(8)? != b"VBDDECL1" {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let len = r.u32()? as usize;
+        let intent = TransferIntent::decode(r.take(len)?)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Self::new(intent)
+    }
+    pub fn retained_bytes(&self) -> usize {
+        size_of::<Self>() + self.intent.retained_bytes() - size_of::<TransferIntent>()
+    }
+}
+/// Actual original committed/applied child refusal. Foreign provenance must be
+/// authenticated by the host; an arbitrary constructed value proves nothing.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DelegationDeclineStatus {
+    pub operation: OperationId,
+    pub index: u64,
+    pub decline: DelegationDecline,
+}
+impl DelegationDeclineStatus {
+    fn validate(&self) -> Result<(), ApplicationError> {
+        if self.index == 0
+            || self.index == u64::MAX
+            || self.operation
+                == self
+                    .decline
+                    .intent
+                    .delegation()
+                    .expect("validated decline")
+                    .child_operation
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(())
+    }
+    pub fn encode(&self, limit: usize) -> Result<Vec<u8>, ApplicationError> {
+        self.validate()?;
+        let body = self.decline.encode(MAX_DELEGATION_DECLINE_BYTES)?;
+        let len = 36 + body.len();
+        if len > limit || len > MAX_DELEGATION_DECLINE_STATUS_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut out = Vec::with_capacity(len);
+        out.extend(b"VBDREFS1");
+        out.extend(self.operation.get().to_le_bytes());
+        out.extend(self.index.to_le_bytes());
+        out.extend((body.len() as u32).to_le_bytes());
+        out.extend(body);
+        Ok(out)
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, ApplicationError> {
+        if bytes.len() > MAX_DELEGATION_DECLINE_STATUS_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut r = Reader::new(bytes);
+        if r.take(8)? != b"VBDREFS1" {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let operation = r.operation()?;
+        let index = r.u64()?;
+        let len = r.u32()? as usize;
+        let decline = DelegationDecline::decode(r.take(len)?)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let status = Self {
+            operation,
+            index,
+            decline,
+        };
+        status.validate()?;
+        Ok(status)
+    }
+    pub fn retained_bytes(&self) -> usize {
+        size_of::<Self>() + self.decline.retained_bytes() - size_of::<DelegationDecline>()
+    }
+}
+/// Parent release request. Only an exact retained reservation and an actual
+/// permanent child refusal can permit the ordered cancellation transition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DelegationCancellation {
+    pub reservation: OperationId,
+    pub reservation_index: u64,
+    pub parent_configuration: ConfigurationId,
+    pub child_configuration: ConfigurationId,
+    pub decline: DelegationDeclineStatus,
+}
+impl DelegationCancellation {
+    pub fn encode(&self, limit: usize) -> Result<Vec<u8>, ApplicationError> {
+        if self.reservation_index == 0 || self.reservation_index == u64::MAX {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let body = self.decline.encode(MAX_DELEGATION_DECLINE_STATUS_BYTES)?;
+        let len = 52 + body.len();
+        if len > limit || len > MAX_DELEGATION_CANCEL_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut out = Vec::with_capacity(len);
+        out.extend(b"VBDCANC1");
+        out.extend(self.reservation.get().to_le_bytes());
+        out.extend(self.reservation_index.to_le_bytes());
+        out.extend(self.parent_configuration.get().to_le_bytes());
+        out.extend(self.child_configuration.get().to_le_bytes());
+        out.extend((body.len() as u32).to_le_bytes());
+        out.extend(body);
+        Ok(out)
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, ApplicationError> {
+        if bytes.len() > MAX_DELEGATION_CANCEL_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut r = Reader::new(bytes);
+        if r.take(8)? != b"VBDCANC1" {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let reservation = r.operation()?;
+        let reservation_index = r.u64()?;
+        if reservation_index == 0 || reservation_index == u64::MAX {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let parent_configuration =
+            ConfigurationId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+        let child_configuration =
+            ConfigurationId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+        let len = r.u32()? as usize;
+        let decline = DelegationDeclineStatus::decode(r.take(len)?)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(Self {
+            reservation,
+            reservation_index,
+            parent_configuration,
+            child_configuration,
+            decline,
+        })
+    }
+    pub fn retained_bytes(&self) -> usize {
+        size_of::<Self>() + self.decline.retained_bytes() - size_of::<DelegationDeclineStatus>()
+    }
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DelegationCancellationStatus {
+    pub operation: OperationId,
+    pub index: u64,
+    pub cancellation: DelegationCancellation,
+}

@@ -148,9 +148,16 @@ pub fn fresh_target(
     g: u128,
     intent: &TransferIntent,
 ) -> TransferTarget<BucketCounter<base::Policy>, base::Policy> {
+    fresh_target_for(g, intent, 200)
+}
+pub fn fresh_target_for(
+    g: u128,
+    intent: &TransferIntent,
+    operation: u128,
+) -> TransferTarget<BucketCounter<base::Policy>, base::Policy> {
     TransferTarget::new(
         group(g),
-        op(200),
+        op(operation),
         intent.clone(),
         BucketCounter::new(
             if g == 21 {
@@ -215,8 +222,19 @@ pub fn completed_child(
     Vec<TransferTarget<BucketCounter<base::Policy>, base::Policy>>,
     TransferPublicationStatus,
 ) {
+    completed_child_for(intent, child, 200)
+}
+pub fn completed_child_for(
+    intent: &TransferIntent,
+    child: &mut LifecycleDirectory,
+    operation: u128,
+) -> (
+    base::Source,
+    Vec<TransferTarget<BucketCounter<base::Policy>, base::Policy>>,
+    TransferPublicationStatus,
+) {
     assert_eq!(
-        command(child, 200, intent.encode(65536).unwrap()).outcome,
+        command(child, operation, intent.encode(65536).unwrap()).outcome,
         DirectoryOutcome::TransferIntentRecorded
     );
     let mut source = fresh_source_for(intent.before().clone());
@@ -226,15 +244,15 @@ pub fn completed_child(
     command(&mut source, 2, base::data(200, 11));
     let mut targets = [21, 22]
         .into_iter()
-        .map(|g| fresh_target(g, intent))
+        .map(|g| fresh_target_for(g, intent, operation))
         .collect::<Vec<_>>();
     for target in &mut targets {
         let boot = target.bootstrap_command(65536).unwrap();
-        command(target, 200, boot);
+        command(target, operation, boot);
     }
     command(
         &mut source,
-        200,
+        operation,
         base::Source::freeze_command(intent, 65536).unwrap(),
     );
     let SourceRead::Freeze(Some(frozen)) = source
@@ -253,7 +271,7 @@ pub fn completed_child(
             .unwrap()
             .digest;
         let import = TargetImport::new(
-            op(200),
+            op(operation),
             intent.clone(),
             group(g),
             vec![SourceImport {
@@ -265,26 +283,26 @@ pub fn completed_child(
         )
         .unwrap_or_else(|e| panic!("{:?}", e.0));
         let bytes = target.import_command(&import, 65536).unwrap();
-        command(target, 200, bytes);
+        command(target, operation, bytes);
         ready.push(
             TargetReadyEvidence::from_status(cfg, target.status())
                 .unwrap_or_else(|e| panic!("{:?}", e.0)),
         );
     }
     let publication = TransferPublication::new(
-        op(200),
+        op(operation),
         intent.clone(),
         vec![SourceFenceEvidence::from_status(cfg, frozen).unwrap_or_else(|e| panic!("{:?}", e.0))],
         ready,
     )
     .unwrap_or_else(|e| panic!("{:?}", e.0));
     assert_eq!(
-        command(child, 201, publication.encode(65536).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
+        command(child, operation + 1, publication.encode(65536).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(intent.after().input().generation)
     );
     let decision = child
         .directory()
-        .transfer_publication_at(child.applied_index(), op(200))
+        .transfer_publication_at(child.applied_index(), op(operation))
         .unwrap()
         .unwrap();
     (source, targets, decision)

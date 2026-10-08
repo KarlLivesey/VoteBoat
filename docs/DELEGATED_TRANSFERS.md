@@ -58,10 +58,10 @@ readers cannot process the new request tags. No mixed-version deployment is clai
 
 Preflight parent and child ordinary/control history, target import/export limits
 and source admission before fencing. Parent reservation is a conservative lock
-with no timeout, cancellation or unfreeze shortcut. A concurrent remote child
+with no timeout or unfreeze shortcut. A concurrent remote child
 metadata edit can invalidate the reserved before manifest; detect that mismatch
-before fencing and report the conflict. A safe cancellation/replanning protocol
-for such abandoned pre-fence reservations remains outstanding. Never infer
+before fencing and report the conflict. Recovery before a successful child intent
+can use the permanent-refusal protocol below. Never infer
 permission to replace an unreachable child from timeout or parent liveness.
 
 Five downstream deterministic tests exercise real split images/imports/publication/
@@ -105,7 +105,46 @@ Final child-only resolved retries and new writes succeed with all metadata and
 old-owner workers stopped; final values 10/16 survive a further reopen. Immutable
 original decisions and the grandparent locator remain unchanged.
 
-This is selected native split and repeated-movement evidence, not pre-fence
-cancellation, arbitrary-fault liveness,
+This is selected native split and repeated-movement evidence, not arbitrary-fault liveness,
 mixed-version, macOS or separate-host validation. Those remain in the active P0–P7
 scope; ordinary top-level handoffs and the static service remain usable.
+
+## Abandoned reservation recovery
+
+A parent reservation can be released only before a successful child intent exists:
+
+1. Read the actual committed parent reservation and derive its bound child intent.
+   Before creating reservations, preflight ordinary child history credit for a
+   possible refusal as well as the normal lifecycle envelopes.
+2. Commit `DelegationDecline::new(intent)` at the child under a distinct operation
+   ID. The child permanently refuses that reserved child operation. The child log
+   orders any racing intent and decline: a successful intent first causes decline
+   to return `LifecycleBusy`; decline first prevents the old intent from succeeding.
+   A successful intent remains protected even after publication. Continue such
+   transfers forward; cancellation does not thaw any source.
+3. Obtain the original `DelegationDeclineStatus` through a quorum-backed
+   `DirectoryQuery::DelegationDecline(child_operation)`. Commit
+   `DelegationCancellation` at the parent, binding the exact reservation index,
+   parent/child configurations and that actual refusal. Same-group metadata checks
+   the locally retained refusal. For remote groups, the host must authenticate the
+   committed observations, as with existing handoff evidence; constructed status
+   bytes grant no authority.
+4. The parent releases the reservation using its reserved final control credit.
+   Every manifest, route generation and ownership epoch stays unchanged. Query
+   `DelegationCancellation(reservation_operation)` to recover a lost receipt.
+   Replan with fresh operation IDs and actual compatible grants. Cancellation
+   cannot repair an unrelated incompatible source application grant.
+
+Refusals, cancellations and original retry outcomes reconstruct from the bounded
+Directory replay journal and checkpoints. Child refusal requires ordinary history
+credit; parent release can finish with its ordinary history full. New `VBDDECL1`
+and `VBDCANC1` requests require the new reader; no mixed-version rollout is claimed.
+Six tests in `tests/delegation/cancellation.rs` cover the ordering race, local
+provenance, failed old intent, full history, competing final credit, query bounds,
+codec/checkpoint truncations and a complete fresh split with actual imported data.
+The selected native TCP/TLS WAL and QUIC checkpoint histories in
+`tests/routed/delegation_cancel.rs` pass: refusal/cancellation receipt loss and
+restart, source continuity during parent outage, permanent old-intent rejection,
+all eleven fresh split phases, and final target retry/data recovery. The full
+transport/storage cross-product was not run for cancellation. Execution results
+and broader limitations are recorded in validation/REPORT.md.

@@ -109,6 +109,8 @@ struct Delegated {
     clock: Instant,
     protocol: NativePeerProtocol,
     checkpoint: bool,
+    transfer_operation: u128,
+    reservation_operation: u128,
     grandparent: Vec<Node<LifecycleDirectory>>,
     parent: Vec<Node<LifecycleDirectory>>,
     child: Vec<Node<LifecycleDirectory>>,
@@ -159,6 +161,8 @@ impl Delegated {
             clock,
             protocol,
             checkpoint,
+            transfer_operation: 200,
+            reservation_operation: 400,
         };
         initialize(
             &mut rig.grandparent,
@@ -205,7 +209,9 @@ impl Delegated {
             &mut self.parent,
             &self.clock,
             100,
-            DirectoryQuery::DelegationReservation(OperationId::new(400).unwrap()),
+            DirectoryQuery::DelegationReservation(
+                OperationId::new(self.reservation_operation).unwrap(),
+            ),
         ) else {
             panic!("parent reservation")
         };
@@ -213,7 +219,9 @@ impl Delegated {
             &mut self.parent,
             &self.clock,
             100,
-            DirectoryQuery::DelegationPublication(OperationId::new(400).unwrap()),
+            DirectoryQuery::DelegationPublication(
+                OperationId::new(self.reservation_operation).unwrap(),
+            ),
         ) else {
             panic!("parent publication")
         };
@@ -221,7 +229,7 @@ impl Delegated {
             &mut self.child,
             &self.clock,
             1,
-            DirectoryQuery::Transfer(OperationId::new(200).unwrap()),
+            DirectoryQuery::Transfer(OperationId::new(self.transfer_operation).unwrap()),
         ) else {
             panic!("child intent")
         };
@@ -229,7 +237,7 @@ impl Delegated {
             &mut self.child,
             &self.clock,
             1,
-            DirectoryQuery::Publication(OperationId::new(200).unwrap()),
+            DirectoryQuery::Publication(OperationId::new(self.transfer_operation).unwrap()),
         ) else {
             panic!("child publication")
         };
@@ -272,8 +280,16 @@ impl Delegated {
                 &mut self.parent,
                 &self.clock,
                 100,
-                400,
-                fixture::plan().encode(65536).unwrap(),
+                self.reservation_operation,
+                DelegationPlan::new(
+                    fixture::parent(),
+                    fixture::before(),
+                    fixture::after(),
+                    OperationId::new(self.transfer_operation).unwrap(),
+                )
+                .unwrap()
+                .encode(65536)
+                .unwrap(),
             );
             return Phase::Reserve;
         }
@@ -293,7 +309,7 @@ impl Delegated {
                 &mut self.child,
                 &self.clock,
                 1,
-                200,
+                self.transfer_operation,
                 intent.encode(65536).unwrap(),
             );
             return Phase::Intent;
@@ -310,14 +326,20 @@ impl Delegated {
                         configuration(&self.root, g, &[1, 2, 3], NativeOpenMode::Create),
                         &self.clock,
                         self.protocol,
-                        || fixture::fresh_target(g, &intent),
+                        || fixture::fresh_target_for(g, &intent, self.transfer_operation),
                     );
                 }
                 let bytes = self.targets[i][0].local().applications[&group(g)]
                     .bootstrap_command(65536)
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
+                let _ = propose_recovering(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    self.transfer_operation,
+                    bytes,
+                );
                 return Phase::Stage(g);
             }
         }
@@ -327,7 +349,7 @@ impl Delegated {
                 &mut self.source,
                 &self.clock,
                 20,
-                200,
+                self.transfer_operation,
                 source_fixture::Source::freeze_command(&intent, 65536).unwrap(),
             );
             return Phase::Fence;
@@ -351,7 +373,7 @@ impl Delegated {
                     .unwrap()
                     .digest;
                 let import = TargetImport::new(
-                    OperationId::new(200).unwrap(),
+                    OperationId::new(self.transfer_operation).unwrap(),
                     intent.clone(),
                     group(g),
                     vec![SourceImport {
@@ -368,7 +390,13 @@ impl Delegated {
                     .import_command(&import, 65536)
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
+                let _ = propose_recovering(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    self.transfer_operation,
+                    bytes,
+                );
                 return Phase::Import(g);
             }
         }
@@ -391,7 +419,7 @@ impl Delegated {
                 })
                 .collect();
             let publication = TransferPublication::new(
-                OperationId::new(200).unwrap(),
+                OperationId::new(self.transfer_operation).unwrap(),
                 intent,
                 vec![SourceFenceEvidence::from_status(source_cfg, frozen)
                     .unwrap_or_else(|e| panic!("{:?}", e.0))],
@@ -403,7 +431,7 @@ impl Delegated {
                 &mut self.child,
                 &self.clock,
                 1,
-                201,
+                self.transfer_operation + 1,
                 publication.encode(65536).unwrap(),
             );
             return Phase::ChildPublication;
@@ -430,7 +458,7 @@ impl Delegated {
                 &mut self.parent,
                 &self.clock,
                 100,
-                401,
+                self.reservation_operation + 1,
                 completion.encode(MAX_DELEGATION_COMPLETION_BYTES).unwrap(),
             );
             return Phase::ParentPublication;
@@ -452,7 +480,13 @@ impl Delegated {
                     )
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
+                let _ = propose_recovering(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    self.transfer_operation,
+                    bytes,
+                );
                 return Phase::Activate(g);
             }
         }
@@ -670,7 +704,9 @@ impl Delegated {
             &mut self.parent,
             &self.clock,
             100,
-            DirectoryQuery::DelegationReservation(OperationId::new(400).unwrap()),
+            DirectoryQuery::DelegationReservation(
+                OperationId::new(self.reservation_operation).unwrap(),
+            ),
         ) else {
             panic!("recovered reservation")
         };
@@ -694,7 +730,7 @@ impl Delegated {
                     configuration(&self.root, g, &[1, 2, 3], NativeOpenMode::Recover),
                     &self.clock,
                     self.protocol,
-                    || fixture::fresh_target(g, &intent),
+                    || fixture::fresh_target_for(g, &intent, self.transfer_operation),
                 );
             }
         }
@@ -849,3 +885,6 @@ fn quic_delegated_split_recovers_every_phase_from_checkpoints() {
 
 #[path = "delegation_repeat.rs"]
 mod repeat;
+
+#[path = "delegation_cancel.rs"]
+mod cancellation;

@@ -230,6 +230,8 @@ pub enum DirectoryQuery {
     Publication(OperationId),
     DelegationReservation(OperationId),
     DelegationPublication(OperationId),
+    DelegationDecline(OperationId),
+    DelegationCancellation(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
@@ -239,6 +241,8 @@ pub enum DirectoryRead {
     Publication(Option<TransferPublicationStatus>),
     DelegationReservation(Option<crate::delegation::DelegationReservationStatus>),
     DelegationPublication(Option<crate::delegation::DelegationPublicationStatus>),
+    DelegationDecline(Option<crate::delegation::DelegationDeclineStatus>),
+    DelegationCancellation(Option<crate::delegation::DelegationCancellationStatus>),
 }
 
 /// Read view with lifecycle queries over the same directory state, log and
@@ -330,6 +334,14 @@ impl ReadableStateMachine for LifecycleDirectory {
                 .0
                 .delegation_publication_at(required, operation)
                 .map(DirectoryRead::DelegationPublication),
+            DirectoryQuery::DelegationDecline(operation) => self
+                .0
+                .delegation_decline_at(required, operation)
+                .map(DirectoryRead::DelegationDecline),
+            DirectoryQuery::DelegationCancellation(operation) => self
+                .0
+                .delegation_cancellation_at(required, operation)
+                .map(DirectoryRead::DelegationCancellation),
         }
     }
 }
@@ -368,6 +380,19 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
                         s.completion.retained_bytes()
                             - size_of::<crate::delegation::DelegationCompletion>()
                     }),
+                DirectoryQuery::DelegationDecline(operation) => self
+                    .0
+                    .delegation_decline_at(self.applied_index(), *operation)?
+                    .map_or(0, |s| {
+                        s.retained_bytes() - size_of::<crate::delegation::DelegationDeclineStatus>()
+                    }),
+                DirectoryQuery::DelegationCancellation(operation) => self
+                    .0
+                    .delegation_cancellation_at(self.applied_index(), *operation)?
+                    .map_or(0, |s| {
+                        s.cancellation.retained_bytes()
+                            - size_of::<crate::delegation::DelegationCancellation>()
+                    }),
             })
     }
     fn read_result_bytes(
@@ -390,6 +415,13 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
             }),
             DirectoryRead::DelegationPublication(s) => s.as_ref().map_or(0, |s| {
                 s.completion.retained_bytes() - size_of::<crate::delegation::DelegationCompletion>()
+            }),
+            DirectoryRead::DelegationDecline(s) => s.as_ref().map_or(0, |s| {
+                s.retained_bytes() - size_of::<crate::delegation::DelegationDeclineStatus>()
+            }),
+            DirectoryRead::DelegationCancellation(s) => s.as_ref().map_or(0, |s| {
+                s.cancellation.retained_bytes()
+                    - size_of::<crate::delegation::DelegationCancellation>()
             }),
         };
         if bytes > limit {

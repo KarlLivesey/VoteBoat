@@ -1958,3 +1958,37 @@ TCP/TLS WAL case: 1/1 passed in 225.92 seconds. All-target/all-feature Clippy,
 formatting, diff checks and the 71-contract inventory pass. The remaining TCP/TLS checkpoint and QUIC WAL/checkpoint cases passed 3/3 in 1106.42 seconds under the shared native-history serialization guard. Together with the separately run TCP/TLS WAL case, all four selected cases passed. No case was restarted on an observation timeout. These results predate slice-98 decline/cancellation protocol changes.
 Selected Linux process-reopen histories do not establish arbitrary power-loss/
 fault completeness, mixed-version behavior, macOS or separate-host operation.
+
+### Slice 98 — permanent child refusal and parent cancellation
+
+Six new deterministic public-contract tests in tests/delegation/cancellation.rs
+exercise both ordered intent/refusal races (including refusal after completed
+publication), same-group actual retained provenance and changed configuration/
+operation/index rejection, original receipt recovery, full ordinary parent history
+with reserved final credit and competing pending finals, child history exhaustion,
+failed old intent, bounded query accounting and every new codec/checkpoint
+truncation. A fresh compatible split 202 after cancelled 200 uses real source
+images/import/publication/activation and preserves original data retries and new
+writes. Cancellation never changes manifest generations or revokes a successful
+intent; authenticated foreign commitment remains a host obligation.
+
+Affected all-feature suites pass: delegation 14/14, directory 22/22, retirement
+7/7 and transfer_repeat 5/5. Core-only counterparts pass 13/13, 20/20, 5/5 and
+5/5. Native-only (without TLS/QUIC) counterparts also pass 14/22/7/5.
+All-target/all-feature Clippy with warnings denied passes after adding the
+native acceptance assembly. Inventory still contains 71 existing contracts; the
+new recovery messages extend the delegation contract rather than adding a provider.
+Native command:
+`cargo +stable test --locked --offline --all-features --test routed cancellation -- --nocapture`
+passes 2/2 in 227.64 seconds under the shared native-history guard: TCP/TLS with
+WAL-only recovery and QUIC with checkpoint recovery. Each uses actual three-replica
+parent/child/source/target groups, actual retained reservation/configuration facts,
+lost-receipt restart after refusal/cancellation and every fresh transfer phase.
+Parent outage before cancellation leaves the source serving; original intent 200
+stays refused; committed fresh intent 202 refuses cancellation even before source
+fencing. Parent outage after child publication keeps source fenced and targets
+inactive. Final imported retries and values 9/13 survive further reopen.
+
+This selected pair is not the full transport/storage cross-product, arbitrary
+fault liveness, macOS/separate-host or mixed-version evidence. Earlier slice-97
+native results used the preceding protocol revision; they were not rerun here.

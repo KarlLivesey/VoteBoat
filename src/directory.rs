@@ -251,6 +251,8 @@ pub enum DirectoryOutcome {
     TransferPublished(RouteGeneration),
     DelegationReserved,
     DelegationPublished(RouteGeneration),
+    DelegationDeclined,
+    DelegationCancelled,
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
@@ -260,6 +262,8 @@ enum Request {
     Publication(TransferPublication),
     Delegation(DelegationPlan),
     DelegationCompletion(DelegationCompletion),
+    DelegationDecline(DelegationDecline),
+    DelegationCancellation(DelegationCancellation),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryReceipt {
@@ -301,6 +305,8 @@ pub struct Directory {
     transfer_targets: BTreeSet<GroupIdentity>,
     delegations: BTreeMap<ResponsibilityIdentity, OperationId>,
     delegation_publications: BTreeMap<OperationId, OperationId>,
+    delegation_declines: BTreeMap<OperationId, OperationId>,
+    delegation_cancellations: BTreeMap<OperationId, OperationId>,
 }
 impl Directory {
     pub fn new(
@@ -328,6 +334,8 @@ impl Directory {
             transfer_targets: BTreeSet::new(),
             delegations: BTreeMap::new(),
             delegation_publications: BTreeMap::new(),
+            delegation_declines: BTreeMap::new(),
+            delegation_cancellations: BTreeMap::new(),
         })
     }
     /// Local applied diagnostic, not a distributed linearizable directory read.
@@ -342,7 +350,10 @@ impl Directory {
     }
     pub fn remaining_operations(&self) -> usize {
         self.limits.operations
-            - (self.history.len() - self.publications.len() - self.delegation_publications.len())
+            - (self.history.len()
+                - self.publications.len()
+                - self.delegation_publications.len()
+                - self.delegation_cancellations.len())
     }
     /// Extra bounded control pool; successful publications never use ordinary history.
     pub fn control_history_capacity(&self) -> usize {
@@ -396,6 +407,10 @@ impl Directory {
                 DelegationPlan::decode(bytes).map(Request::Delegation)
             } else if bytes.starts_with(b"VBDCOMP1") {
                 DelegationCompletion::decode(bytes).map(Request::DelegationCompletion)
+            } else if bytes.starts_with(b"VBDDECL1") {
+                DelegationDecline::decode(bytes).map(Request::DelegationDecline)
+            } else if bytes.starts_with(b"VBDCANC1") {
+                DelegationCancellation::decode(bytes).map(Request::DelegationCancellation)
             } else {
                 DirectoryCommand::decode(bytes).map(Request::Publish)
             }
@@ -468,6 +483,9 @@ impl Directory {
         operation: OperationId,
         intent: TransferIntent,
     ) -> DirectoryOutcome {
+        if self.delegation_declines.contains_key(&operation) {
+            return DirectoryOutcome::DelegationDeclined;
+        }
         let before = intent.before().input();
         if before.authority != self.plan.authority
             || !self.plan.manifests.contains_key(&before.responsibility)
@@ -672,6 +690,141 @@ impl Directory {
             plan: DelegationPlan::decode(&h.bytes)?,
         }))
     }
+    fn decline_delegation(
+        &mut self,
+        operation: OperationId,
+        decline: DelegationDecline,
+    ) -> DirectoryOutcome {
+        let intent = decline.intent();
+        let before = intent.before().input();
+        let binding = intent.delegation().expect("checked decline");
+        let Some(current) = self.manifests.get(&before.responsibility) else {
+            return DirectoryOutcome::UnknownResponsibility;
+        };
+        if before.authority != self.plan.authority || current.input().parent != before.parent {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        if operation == binding.child_operation
+            || self
+                .delegation_declines
+                .contains_key(&binding.child_operation)
+        {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        // Successful original intents remain queryable after completion. Never
+        // revoke one, even when the live transfer lock has already been removed.
+        if self
+            .transfer_intent_at(self.applied, binding.child_operation)
+            .ok()
+            .flatten()
+            .is_some()
+        {
+            return DirectoryOutcome::LifecycleBusy;
+        }
+        if before
+            .parent
+            .is_some_and(|p| p.group == self.plan.authority)
+            && self
+                .delegation_reservation_at(self.applied, binding.operation)
+                .ok()
+                .flatten()
+                .and_then(|s| s.child_intent(binding.configuration).ok())
+                .as_ref()
+                != Some(intent)
+        {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        self.delegation_declines
+            .insert(binding.child_operation, operation);
+        DirectoryOutcome::DelegationDeclined
+    }
+    pub fn delegation_decline_at(
+        &self,
+        required: u64,
+        child_operation: OperationId,
+    ) -> Result<Option<DelegationDeclineStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some(operation) = self.delegation_declines.get(&child_operation) else {
+            return Ok(None);
+        };
+        let h = self.history.get(operation).expect("retained decline");
+        Ok(Some(DelegationDeclineStatus {
+            operation: *operation,
+            index: h.index,
+            decline: DelegationDecline::decode(&h.bytes)?,
+        }))
+    }
+    fn cancellation_permitted(&self, cancellation: &DelegationCancellation) -> bool {
+        let Some(reservation) = self
+            .delegation_reservation_at(self.applied, cancellation.reservation)
+            .ok()
+            .flatten()
+        else {
+            return false;
+        };
+        let parent = reservation.plan.parent().input();
+        if self.delegations.get(&parent.responsibility) != Some(&reservation.operation)
+            || self.manifests.get(&parent.responsibility) != Some(reservation.plan.parent())
+            || reservation.index != cancellation.reservation_index
+            || reservation
+                .child_intent(cancellation.parent_configuration)
+                .ok()
+                .as_ref()
+                != Some(cancellation.decline.decline.intent())
+        {
+            return false;
+        }
+        if reservation.plan.before().input().authority == self.plan.authority
+            && (cancellation.child_configuration != cancellation.parent_configuration
+                || self
+                    .delegation_decline_at(self.applied, reservation.plan.child_operation())
+                    .ok()
+                    .flatten()
+                    .as_ref()
+                    != Some(&cancellation.decline))
+        {
+            return false;
+        }
+        true
+    }
+    fn cancel_delegation(
+        &mut self,
+        operation: OperationId,
+        cancellation: DelegationCancellation,
+    ) -> DirectoryOutcome {
+        if !self.cancellation_permitted(&cancellation) {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        let reservation = self
+            .delegation_reservation_at(self.applied, cancellation.reservation)
+            .expect("checked reservation")
+            .expect("checked reservation");
+        self.delegations
+            .remove(&reservation.plan.parent().input().responsibility);
+        self.delegation_cancellations
+            .insert(reservation.operation, operation);
+        DirectoryOutcome::DelegationCancelled
+    }
+    pub fn delegation_cancellation_at(
+        &self,
+        required: u64,
+        reservation: OperationId,
+    ) -> Result<Option<DelegationCancellationStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some(operation) = self.delegation_cancellations.get(&reservation) else {
+            return Ok(None);
+        };
+        let h = self.history.get(operation).expect("retained cancellation");
+        Ok(Some(DelegationCancellationStatus {
+            operation: *operation,
+            index: h.index,
+            cancellation: DelegationCancellation::decode(&h.bytes)?,
+        }))
+    }
     fn delegation_permitted(&self, completion: &DelegationCompletion) -> bool {
         let Some(status) = self
             .delegation_reservation_at(self.applied, completion.reservation)
@@ -768,7 +921,8 @@ impl Directory {
             )
         } else {
             let control = matches!(&command,Request::Publication(p) if self.publication_permitted(p))
-                || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c));
+                || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
+                || matches!(&command,Request::DelegationCancellation(c) if self.cancellation_permitted(c));
             if !control
                 && (self.remaining_operations() == 0
                     || self.history_bytes + bytes.len() > self.limits.history_bytes)
@@ -785,6 +939,10 @@ impl Directory {
                 Request::Delegation(plan) => self.begin_delegation(operation, plan),
                 Request::DelegationCompletion(completion) => {
                     self.complete_delegation(operation, completion)
+                }
+                Request::DelegationDecline(decline) => self.decline_delegation(operation, decline),
+                Request::DelegationCancellation(cancellation) => {
+                    self.cancel_delegation(operation, cancellation)
                 }
                 Request::Bootstrap => {
                     self.initialized = true;
@@ -878,6 +1036,9 @@ impl ProposalAdmission for Directory {
             let lifecycle = match request {
                 Request::Publication(p) if self.publication_permitted(&p) => Some(p.operation()),
                 Request::DelegationCompletion(c) if self.delegation_permitted(&c) => {
+                    Some(c.reservation)
+                }
+                Request::DelegationCancellation(c) if self.cancellation_permitted(&c) => {
                     Some(c.reservation)
                 }
                 _ => None,
