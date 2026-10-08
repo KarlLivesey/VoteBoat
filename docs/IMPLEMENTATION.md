@@ -111,8 +111,10 @@ P4 activation gate, not an additional global milestone.
    quorums, stale/forked history, lost replies, pending/Written durability,
    leader loss and restart. Replace the diagnostic stall expectation with a
    successful production-path recovery check (done for the exact-prefix case in
-   slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66).
-   Still check learners beyond that tail, compacted learners, candidate tails, promoted
+   slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66;
+   retained multi-batch recovery with explicit format 5 in slice 67).
+   Still check missing prefixes requiring snapshot transfer, conflicting learner
+   tails, candidate tails, promoted
    senders and recursive-policy histories before
    claiming the general release gate is complete. This removes a P4 release blocker
    needed by safe online placement.
@@ -3796,3 +3798,49 @@ broader protocol. Mini items 2–3 remain enrollment/admin integration and fault
 remote lifecycle release. P4 safe placement continues to feed P5 routing and P6
 split/merge; P7 and the full P0–P7 goal stay active. No general membership release,
 macOS execution, performance or full proof claim.
+
+## Slice 67 — explicit multi-batch learner repair through native format 5
+
+Mini schema plan: distinct LearnerRepair/LearnerRepaired RPCs carry one bounded
+range plus the durable joint assignment as context, without a commit field.
+Keep candidate-local repair requests separate from replication progress/votes.
+Begin after the retained stable configuration boundary, send at most 64 entries
+within byte bounds, advance only after an exact durable range reply, then resend
+an ordinary Vote after the joint range completes. Validate the exact committed
+stable learner, old-view sender/store, promotion grammar, terms/context, identical
+overlap and budgets before any term/role mutation. Refuse repair after promotion.
+Use ordinary atomic LogUpdate persistence and exact durable completion for replies;
+already durable overlap/checkpoint hints need no new write. Matching hints affect
+only the transfer cursor, never commit. Campaign, term/view changes, compaction,
+leadership and fencing clear cursors; restart reconstructs from retained history.
+The source may have the joint committed already; transfer still carries no
+commit claim. A separate actual-core history verifies this case and preserves
+the receiver's earlier commit boundary throughout all batches.
+
+`Raft::with_batched_joint_repair` opts in at assembly; native TLS/QUIC explicitly
+select format 5 and matching codec/roster before enabling it. Generic Node refuses
+the option without a format-5 peer roster and returns owned parts before service.
+Native wire tags 14/15 charge boxed assignment and range allocations symmetrically;
+formats 1–4 retain layouts and refuse the new messages. Formats 2–4 retain the
+existing bounded single-batch repair. Readiness remains available in formats 4/5.
+Connection reservation inspects prospective assignment metadata, and queue/ingress
+accounting charges it as data. Existing storage formats and durability tokens are
+unchanged; the cursor is volatile, not a durable matching-prefix watermark.
+
+Actual core histories repair 160 entries in three batches after lost cursor reply
+and restart, without a learner vote, premature commit or acknowledgement-as-ballot.
+Delayed traffic after promotion, malformed authority/ranges, stale/wrong replies,
+higher-term persistence and a matching compacted receiver hint are covered. Native
+wire/WAL faults recover complete old/new batches and retry through all ranges.
+TCP and QUIC native nodes repair the same tail, elect, commit/apply and reopen a
+write. Seeded initial membership remains a premise, not distributed enrollment
+evidence. See validation/REPORT.md for actual checks and bounded proof scope.
+
+This advances mini item 1 beyond the one-message window. Next is the missing-
+prefix/snapshot path, with explicit committed-image provenance and durable data
+dependencies; conflicting learner histories, promoted senders, candidate suffixes
+and recursive-policy failure histories remain. Mini items 2–3 stay native
+enrollment/admin integration and the faulted remote lifecycle release. This feeds
+P4 placement, then P5 responsibility routing and P6 ownership movement. P7 and full
+P0–P7 remain active; P8 is deferred. No general online configuration release,
+macOS execution or performance claim.

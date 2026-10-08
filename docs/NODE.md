@@ -102,8 +102,14 @@ execution, performance or online membership transitions.
 
 NativeStartup uses `tls.wire_version()` for its message codec, PeerRoster and
 TCP/TLS or QUIC connector. The default remains 1. Call
-`NativeTlsConfig::with_wire_version(2)` or `(3)` before opening to select an exact
+`NativeTlsConfig::with_wire_version` supports versions 1–5; call it before opening to select an exact
 matching version on every peer; mismatches fail the encrypted identity hello
 before a session becomes Ready. Unsupported values reject at configuration
 selection. This is independent of persistent formats and does not enable online
 configuration ingress. The counter executable retains its default version 1.
+
+Version 5 also selects the core's multi-batch learner repair during native
+assembly. A host using `Raft::with_batched_joint_repair` with the generic Node
+must supply a version-5 peer roster; construction refuses missing/older peer
+assemblies before service and returns all parts. Repair carries no commitment
+claim and never substitutes for a normal election. See WIRE_FORMAT.md.

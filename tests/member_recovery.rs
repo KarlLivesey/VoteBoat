@@ -1256,10 +1256,11 @@ mod joint_repair {
         message: Message,
     ) -> Result<Vec<Effect>, RaftError> {
         let effects = core.step(Event::Receive(message))?;
-        let [Effect::Persist(update)] = effects.as_slice() else {
-            panic!("joint repair persistence")
-        };
-        persist_effect(core, log, update.clone())
+        if let [Effect::Persist(update)] = effects.as_slice() {
+            persist_effect(core, log, update.clone())
+        } else {
+            Ok(effects)
+        }
     }
     #[test]
     fn public_repair_roundtrips_membership_wire_and_native_wal() {
@@ -1381,5 +1382,133 @@ mod joint_repair {
         assert_eq!(core.state().commit_index, 1);
         drop(log);
         std::fs::remove_dir_all(path).unwrap();
+    }
+
+    fn batched_source() -> (HostLogStore, Raft, Message) {
+        let (mut log, core, _) = source(160);
+        let mut core = core.with_batched_joint_repair();
+        let effects = core.step(Event::Campaign).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("campaign")
+        };
+        let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+        let request = effects
+            .into_iter()
+            .find_map(|e| match e {
+                Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+                _ => None,
+            })
+            .unwrap();
+        (log, core, request)
+    }
+    fn one(effects: Vec<Effect>) -> Message {
+        let [Effect::Send(message)] = effects.as_slice() else {
+            panic!("expected repair or vote: {effects:?}")
+        };
+        message.clone()
+    }
+    fn roundtrip(codec: &NativeWireCodec, message: &Message) -> Message {
+        let scope = WireScope {
+            from: message.from,
+            sender: message.sender,
+            to: message.to,
+        };
+        let frame = codec
+            .encode_batch(scope, std::slice::from_ref(message))
+            .unwrap();
+        let decoded = codec.decode_batch(scope, &frame).unwrap().remove(0);
+        assert_eq!(&decoded, message);
+        decoded
+    }
+    #[test]
+    fn wire_five_repair_is_explicit_bounded_and_rejects_every_truncation() {
+        let (_, _, message) = batched_source();
+        let scope = WireScope {
+            from: message.from,
+            sender: message.sender,
+            to: message.to,
+        };
+        let codec = NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap();
+        let frame = codec
+            .encode_batch(scope, std::slice::from_ref(&message))
+            .unwrap();
+        for end in 0..frame.len() {
+            assert!(codec.decode_batch(scope, &frame[..end]).is_err());
+        }
+        let old = NativeWireCodec::with_readiness(WireLimits::default()).unwrap();
+        assert!(old
+            .encode_batch(scope, std::slice::from_ref(&message))
+            .is_err());
+        assert!(old.decode_batch(scope, &frame).is_err());
+        for limits in [
+            WireLimits {
+                max_entries_per_message: 1,
+                ..WireLimits::default()
+            },
+            WireLimits {
+                max_decoded_bytes: 1024,
+                ..WireLimits::default()
+            },
+        ] {
+            let bounded = NativeWireCodec::with_learner_repair(limits).unwrap();
+            assert!(bounded
+                .encode_batch(scope, std::slice::from_ref(&message))
+                .is_err());
+            assert!(bounded.decode_batch(scope, &frame).is_err());
+        }
+        assert_eq!(roundtrip(&codec, &message), message);
+    }
+    #[test]
+    fn native_batched_repair_recovers_failed_barriers_and_advances_only_durable_cursors() {
+        let codec = NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap();
+        for fault in [
+            Fault::Append(0),
+            Fault::Append(64),
+            Fault::Sync,
+            Fault::PublishBefore,
+            Fault::PublishAfter,
+        ] {
+            let (_, mut sender, first) = batched_source();
+            let io = ModelIo::default();
+            let mut log =
+                NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+            let mut receiver = destination(&mut log);
+            io.0.borrow_mut().fault = fault;
+            assert!(install(&mut log, &mut receiver, roundtrip(&codec, &first)).is_err());
+            assert!(receiver.is_fenced());
+            drop(log);
+            io.0.borrow_mut().power_loss();
+            let mut log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+            let mut receiver = Raft::recover_member(
+                node(4),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            assert!([1, 65].contains(&receiver.state().last_index()));
+            assert!(!receiver.local_voter());
+            let mut request = first;
+            let mut count = 0;
+            loop {
+                let ack =
+                    one(install(&mut log, &mut receiver, roundtrip(&codec, &request)).unwrap());
+                assert_eq!(receiver.state().commit_index, 1);
+                let next = one(sender
+                    .step(Event::Receive(roundtrip(&codec, &ack)))
+                    .unwrap());
+                assert_eq!(sender.role(), Role::Candidate);
+                assert_eq!(sender.state().commit_index, 1);
+                count += 1;
+                if matches!(next.rpc, Rpc::Vote { .. }) {
+                    break;
+                }
+                request = next;
+                assert!(count < 4);
+            }
+            assert_eq!(count, 3);
+            assert!(receiver.local_voter());
+            assert_eq!(receiver.state().entries, sender.state().entries);
+        }
     }
 }

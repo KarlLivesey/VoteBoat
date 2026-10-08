@@ -1013,6 +1013,10 @@ mod native {
             },
         ] {
             fixture_roundtrip(codec, input.clone());
+            fixture_roundtrip(
+                NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap(),
+                input.clone(),
+            );
             let frame = codec
                 .encode_batch(scope(), std::slice::from_ref(&input))
                 .unwrap();

@@ -602,6 +602,10 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
     let (mut candidate, _hints3) = startup(&root.join("3"), 3, &[1, 2, 3]);
     learner.startup.bootstrap = initial.clone();
     candidate.startup.bootstrap = initial;
+    if missing_entries > 63 {
+        learner.startup.tls = learner.startup.tls.with_wire_version(5).unwrap();
+        candidate.startup.tls = candidate.startup.tls.with_wire_version(5).unwrap();
+    }
     learner.startup.listen = endpoint2.0;
     candidate.startup.listen = endpoint3.0;
     learner.startup.peers.get_mut(&node(3)).unwrap().address = endpoint3.0;
@@ -716,6 +720,15 @@ fn tcp_native_joint_repair_catches_up_retained_learner_prefix() {
 #[test]
 fn quic_native_joint_repair_catches_up_retained_learner_prefix() {
     remote_joint_repair(NativePeerProtocol::Quic, 32);
+}
+#[test]
+fn tcp_native_joint_repair_catches_up_multiple_batches() {
+    remote_joint_repair(NativePeerProtocol::TcpTls, 160);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_native_joint_repair_catches_up_multiple_batches() {
+    remote_joint_repair(NativePeerProtocol::Quic, 160);
 }
 #[cfg(feature = "quic")]
 #[test]

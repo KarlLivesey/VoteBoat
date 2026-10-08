@@ -1,11 +1,13 @@
-# Native wire formats 1–4
+# Native wire formats 1–5
 
 `NativeWireCodec::new` selects wire version 1 for existing static-configuration
 assemblies. `NativeWireCodec::with_membership` explicitly selects version 2,
 adding configuration entries and configuration-aware snapshots.
 `NativeWireCodec::with_authority` selects version 3, retaining format 2 payloads
 and adding direct witness authorization. `NativeWireCodec::with_readiness`
-selects version 4, adding learner readiness requests/replies. All implement
+selects version 4, adding learner readiness requests/replies.
+`NativeWireCodec::with_learner_repair` selects version 5 for pre-election
+multi-batch learner repair. All implement
 `WireCodec` with a fixed 24-byte prefix. A selected codec accepts only its own
 version; session/roster wire versions must match before transport admission.
 There is no automatic downgrade. Codec capability does not enable online Raft
@@ -28,7 +30,7 @@ choose that trusted scope. This codec does not authenticate a connection.
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | ASCII `VBWIRE01` |
-| 8 | 2 | Wire version, 1, 2, 3 or 4 as explicitly selected |
+| 8 | 2 | Wire version, 1–5 as explicitly selected |
 | 10 | 2 | Flags, 0 |
 | 12 | 4 | Total frame bytes, including prefix and final checksum |
 | 16 | 4 | Message count, positive |
@@ -255,7 +257,36 @@ identities in checkpoint framing and retained decoding budgets. Opaque command
 and application bytes are counted virtually, without allocating buffers of their
 declared size. Invalid journal/envelope, unsupported format, policy/retained limits
 or encoded frame overflow reject. Positive results name the selected format and
-three WireFootprints; they establish neither quorum nor commitment. Formats 2–4
+three WireFootprints; they establish neither quorum nor commitment. Formats 2–5
 support this native query; format 1 refuses membership. Existing bytes are unchanged.
 Downstream tests compare actual encode/decode sizes and exact/one-byte-short
 boundaries, including growth of checkpoint operation history.
+
+## Version 5: multi-batch learner repair
+
+Version 5 retains all prior payload layouts and adds tags 14 and 15. Tag 14 is
+`LearnerRepair`: one joint `LogEntry` in the normal entry encoding, `u64
+previous_index`, `u64 previous_term`, `u32 entry_count` and ordinary encoded entries.
+The joint is repeated as assignment context in every batch; it is installed only
+when its exact entry appears in the range. There is no leader_commit field.
+Tag 15 is `LearnerRepaired`: Boolean success, `u64 matching_index`, `u64
+matching_term`. Both the boxed joint and range allocations count against decoded
+budgets; entry/count/frame limits are symmetric. Older formats reject the tags.
+
+The core limits a range to 64 entries and its byte budget. Only an exact committed
+stable learner may accept it from an old-view voter, for an exact valid promotion.
+Retained overlap must be identical and accepted batches only extend the log.
+Acknowledgements wait for dependent term/prefix durability, or refer to an already
+durable prefix/checkpoint. Negative matching checkpoint hints can skip retained
+data only when the candidate has the same index/term. They never establish commit,
+read authority or votes. A final durable repair triggers a normal Vote request;
+the candidate still needs the ordinary old-and-new election predicate.
+
+NativeTlsConfig explicitly selects version 5 on every peer. Native startup uses
+the matching codec/roster and enables `Raft::with_batched_joint_repair`; format 2–4
+assemblies retain their bounded single-batch repair. Generic Node construction
+rejects batched repair without a version-5 peer roster, returning owned parts.
+Hosts selecting the core builder directly must supply compatible codecs and
+transport budgets; the flag is volatile and must be selected again after recovery.
+No WAL/snapshot format changes or automatic upgrade/downgrade. General online
+configuration delivery and pre-election snapshot transfer remain gated.

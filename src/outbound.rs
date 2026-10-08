@@ -303,12 +303,20 @@ pub fn message_cost(
             add(size_of::<crate::raft::LearnerReadinessRequest>())?;
             MessageClass::Control
         }
-        Rpc::Append { entries, .. } => {
+        Rpc::Append { entries, .. } | Rpc::LearnerRepair { entries, .. } => {
+            if let Rpc::LearnerRepair { joint, .. } = &message.rpc {
+                add(size_of::<crate::log::LogEntry>())?;
+                add(joint.retained_payload_bytes())?;
+            }
             add(entries
                 .capacity()
                 .checked_mul(size_of::<crate::log::LogEntry>())
                 .ok_or(OutboundError::BatchTooLarge)?)?;
-            let mut class = MessageClass::Control;
+            let mut class = if matches!(message.rpc, Rpc::LearnerRepair { .. }) {
+                MessageClass::Data
+            } else {
+                MessageClass::Control
+            };
             for entry in entries {
                 add(entry.retained_payload_bytes())?;
                 if !matches!(entry.payload, EntryPayload::Noop) {

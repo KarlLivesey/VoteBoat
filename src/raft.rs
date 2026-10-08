@@ -37,6 +37,19 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    /// Pre-election pure extension to an exact committed learner. No commit claim.
+    LearnerRepair {
+        joint: Box<LogEntry>,
+        previous_index: u64,
+        previous_term: u64,
+        entries: Vec<LogEntry>,
+    },
+    /// Durable repair cursor evidence; never a ballot or replication quorum ack.
+    LearnerRepaired {
+        success: bool,
+        matching_index: u64,
+        matching_term: u64,
+    },
     LearnerReadinessRequest(Box<LearnerReadinessRequest>),
     LearnerReadinessReply {
         request: Box<LearnerReadinessRequest>,
@@ -272,6 +285,9 @@ pub struct Raft {
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
     requests: BTreeMap<NodeId, Replication>,
+    // Candidate-only transfer cursors; never quorum replication or ballots.
+    repair_requests: BTreeMap<NodeId, Replication>,
+    batched_joint_repair: bool,
     request_sequence: u64,
     last_batch: u64,
     pending: Option<Pending>,
@@ -468,6 +484,8 @@ impl Raft {
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
             requests: BTreeMap::new(),
+            repair_requests: BTreeMap::new(),
+            batched_joint_repair: false,
             request_sequence: 0,
             last_batch: 0,
             pending: None,
@@ -851,6 +869,7 @@ impl Raft {
                 self.role = Role::Candidate;
                 self.votes.clear();
                 self.requests.clear();
+                self.repair_requests.clear();
                 self.vote_context = None;
                 let term = self
                     .durable
@@ -1002,6 +1021,7 @@ impl Raft {
             self.votes.clear();
             self.vote_context = None;
             self.requests.clear();
+            self.repair_requests.clear();
             self.progress.clear();
             self.next_index.clear();
         }
@@ -1022,7 +1042,11 @@ impl Raft {
                 if self.membership().is_satisfied(&self.votes) {
                     effects.extend(self.become_leader()?);
                 } else {
-                    effects.extend(self.joint_repair_messages()?);
+                    effects.extend(if self.batched_joint_repair {
+                        self.batched_joint_repair_messages()?
+                    } else {
+                        self.joint_repair_messages()?
+                    });
                     let context = self.context()?;
                     self.vote_context = Some(context);
                     for peer in self.voting_peers() {
@@ -1052,6 +1076,7 @@ impl Raft {
             After::Commit => (),
             After::Compact => {
                 self.requests.clear();
+                self.repair_requests.clear();
                 if self.role == Role::Leader {
                     effects.extend(self.broadcast()?);
                 }
@@ -1063,6 +1088,7 @@ impl Raft {
             }
             After::CheckpointCompact(reference) => {
                 self.requests.clear();
+                self.repair_requests.clear();
                 self.checkpoint_reconcile = Some(reference);
                 effects.push(Effect::CheckpointCompacted(reference));
             }
@@ -1167,6 +1193,7 @@ impl Raft {
         self.votes.clear();
         self.vote_context = None;
         self.requests.clear();
+        self.repair_requests.clear();
         self.progress.clear();
         self.next_index.clear();
         if self.role == Role::Candidate {
@@ -1229,6 +1256,7 @@ impl Raft {
         self.progress.clear();
         self.next_index.clear();
         self.requests.clear();
+        self.repair_requests.clear();
         let next = self
             .durable
             .last_index()
@@ -1461,6 +1489,12 @@ impl Raft {
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        if matches!(
+            m.rpc,
+            Rpc::LearnerRepair { .. } | Rpc::LearnerRepaired { .. }
+        ) {
+            return self.receive_learner_repair(m);
+        }
         // General configuration delivery stays closed. The append-only joint
         // repair exception targets exact committed learners and cannot replace
         // voting history or advance commitment; other transition fixtures use
@@ -1588,8 +1622,10 @@ impl Raft {
             self.role = Role::Follower;
             self.vote_context = None;
             self.requests.clear();
+            self.repair_requests.clear();
         }
         match &m.rpc {
+            Rpc::LearnerRepair { .. } | Rpc::LearnerRepaired { .. } => unreachable!(),
             Rpc::AuthorityRequest { .. }
             | Rpc::AuthorityReply { .. }
             | Rpc::LearnerReadinessRequest(_)
@@ -1679,6 +1715,7 @@ impl Raft {
                 self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
+                self.repair_requests.clear();
                 let mut previous = *previous_term;
                 for (i, e) in entries.iter().enumerate() {
                     if let EntryPayload::Configuration(record) = &e.payload {
@@ -1816,6 +1853,7 @@ impl Raft {
                 self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
+                self.repair_requests.clear();
                 let mut reply = self.reply(&m, Rpc::ReadAck);
                 reply.term = hard.term;
                 if hard != old {
@@ -1864,6 +1902,7 @@ impl Raft {
                 self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
+                self.repair_requests.clear();
                 if meta.index <= self.durable.commit_index {
                     if self
                         .durable
@@ -2162,6 +2201,7 @@ mod membership_tests;
 
 #[path = "raft/authority.rs"]
 mod authority;
+mod batched_repair;
 #[path = "raft/connections.rs"]
 mod connections;
 mod joint_repair;

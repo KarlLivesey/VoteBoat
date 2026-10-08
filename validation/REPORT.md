@@ -815,3 +815,52 @@ assertion uses a borrowed expected-message slice.
   closed. This advances P4 recovery toward native enrollment/admin integration,
   then faulted remote membership release; P5–P7 and full P0–P7 remain active.
   No macOS execution or performance claim; P8 remains deferred.
+
+## Slice 67 — native format-5 multi-batch retained learner repair
+
+- New separate repair request/reply messages transfer at most 64 entries per
+  range, with repeated durable joint assignment metadata and no commit claim.
+  Exact stable committed learner/old voter identity, journal/terms/context,
+  identical overlap and byte limits precede receive mutation. Ordinary atomic
+  LogUpdate plus its exact durable completion permits a dependent reply. Existing
+  durable overlap/checkpoint hints may reply without new storage; neither is
+  counted toward elections, read authority or replication commitment.
+- Actual core: 160-entry transfer after first-cursor reply loss and restart;
+  three bounded batches, no premature voting/commitment; duplicate/stale replies
+  cannot advance a new cursor. Final repair resends a normal Vote, rather than
+  electing. Delayed repair after promotion refuses without mutation. Ten malformed
+  authority/range cases, wrong reply end/context, higher-term persistence and a
+  matching compacted learner hint are covered. A candidate with an already-
+  committed joint also repairs three batches without exporting commit authority.
+  A compacted-away source joint skips transfer while preserving ordinary election
+  requests. Checkpoint inputs are host-verified fixtures, not new snapshot
+  publication/transfer evidence.
+- Native wire 5 explicitly selected; older wire rejects new tags, all truncated
+  repair frames and constrained entry/decoded budgets refuse. Request/reply
+  round-trips traverse all three ranges. Native WAL short append, sync and
+  manifest faults fence without reply. Model power loss recovers only the old
+  prefix or complete first batch, then exact retry completes the joint. Existing
+  modeled storage assumptions do not establish hardware power-failure behavior.
+- Native TCP/TLS and QUIC nodes missing 160 entries repair, elect, commit/apply
+  and reopen a client write. Existing 32-entry and exact-prefix cases still pass.
+  Initial membership records are seeded; distributed enrollment/initial joint
+  proposal commitment remains unproven by these fixtures.
+- Final affected runs: all-feature library 55 pass; core-only library 46 pass;
+  native member startup 16, member recovery 24, learners 23, activation model 4,
+  outbound 4, runtime 25, secure 14, startup 9, transport 13, wire 14 pass.
+  Owning-node/effect-owner suite: 125 pass, including wire-5 construction refusal.
+  Readiness also round-trips through wire 5 in its focused check. Socket suites
+  use local socket permission. Clippy all-feature/all-target with warnings denied
+  and all-feature docs pass; formatting/diff and inventory metadata checks pass.
+- Validation corrected the old TLS unsupported-version fixture (5 now supported,
+  6 refused) and the new node fixture's scheduler capacity. The final reruns above
+  pass. The independent activation model is unchanged and does not model the
+  whole new multi-batch protocol. Finite actual-core histories are not a full
+  fork/term/liveness proof. Generic direct core hosts must select compatible
+  codec/transport budgets; Node checks the advertised roster version, and native
+  startup selects matching default providers.
+- Missing source prefixes/snapshot transfer, conflicting learner tails, promoted
+  senders and broader recursive-policy histories remain release work. General
+  configuration ingress stays closed. Mini item 1 advances toward native
+  enrollment/admin integration, then faulted remote membership release; P5–P7
+  and full P0–P7 remain active. No macOS execution or performance claim.

@@ -667,6 +667,11 @@ where
         app,
     ))?
     .0;
+    let core = if config.tls.wire_version() >= 5 {
+        core.with_batched_joint_repair()
+    } else {
+        core
+    };
     let owner_id = RuntimeOwner {
         store: store.binding(),
         lane: ExecutionLaneId::new(1).unwrap(),
@@ -783,6 +788,7 @@ where
         2 => NativeWireCodec::with_membership(Default::default()),
         3 => NativeWireCodec::with_authority(Default::default()),
         4 => NativeWireCodec::with_readiness(Default::default()),
+        5 => NativeWireCodec::with_learner_repair(Default::default()),
         _ => return Err(error("wire version", "unsupported native format")),
     };
     let factory = checked(NativeTransportFactory::new(

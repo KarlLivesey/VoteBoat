@@ -231,3 +231,43 @@ that advance only a repair cursor. Ordinary Append backoff cannot be reused
 unrestrictedly: a later or competing accepted joint could otherwise have its
 voting history replaced by delayed pre-election traffic. Any new RPC requires
 explicit codec/session capability negotiation and matching native integration.
+
+## Multi-batch retained learner repair
+
+`Raft::with_batched_joint_repair` explicitly enables the format-5 protocol during
+assembly. Campaign's exact durable term/self-ballot completion starts at the
+retained stable configuration boundary and emits one LearnerRepair batch per
+promoted learner. Each carries the durable joint assignment as context and at
+most 64 entries within the byte budget. This context alone cannot activate it.
+Only the range containing the exact joint entry activates accepted membership.
+The source joint may be committed or uncommitted; neither case exports its
+commit boundary or changes the receiver's commitment rules.
+If the source has compacted away the joint entry, it skips retained repair while
+still emitting ordinary Vote requests; snapshot repair is a separate pending path.
+
+Every range checks the committed/accepted stable exact learner, trusted old
+voter/store, promotion journal, contiguous indices/terms, byte bounds and identical
+retained overlap before normal persistence. It cannot replace any suffix, assert
+commit or grant serving authority. Late repair after joint activation is refused.
+Dependent acknowledgements wait for the ordinary exact LogTicket/DurableLog
+completion. Existing durable matching ranges may acknowledge immediately; a
+compacted range returns a retained checkpoint hint. Hints require the candidate's
+matching index/term and can advance only the repair cursor.
+
+Candidate-local request contexts/cursors are separate from ballot and replication
+progress. Replies check group, exact store, origin session, term, configuration,
+context and expected end. They cannot count toward a quorum. Final acknowledgement
+resends an ordinary Vote; only real durable ballots can elect. Campaign, term/view
+changes, leader activation, compaction and fencing clear cursor state. Restart
+reselects the volatile capability and reconstructs from durable retained history;
+identical overlap makes a lost cursor reply retryable. No persisted cursor or new
+durability token/generation/watermark is introduced.
+
+Native TCP/QUIC format-5 nodes catch up a 160-entry tail in three batches, elect,
+commit/apply and reopen a write. Core histories cover lost reply/restart, delayed
+traffic after promotion, malformed authority/ranges, stale contexts, higher-term
+persistence and a matching compacted receiver hint. Native WAL faults fence with
+no reply and recover an old or complete batch. These are bounded histories, not
+a full fork/term/liveness proof. Missing source prefixes requiring snapshot
+transfer, conflicting learner tails, promoted senders and broader recursive
+policy histories remain release work. Service mutation ingress remains gated.

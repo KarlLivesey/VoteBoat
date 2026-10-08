@@ -259,7 +259,9 @@ pub(super) fn changes_connections(event: &Event) -> bool {
         || matches!(
             event,
             Event::Receive(Message {
-                rpc: Rpc::Snapshot { .. } | Rpc::AuthorityReply { granted: true, .. },
+                rpc: Rpc::Snapshot { .. }
+                    | Rpc::AuthorityReply { granted: true, .. }
+                    | Rpc::LearnerRepair { .. },
                 ..
             })
         )

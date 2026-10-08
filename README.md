@@ -255,11 +255,14 @@ effects, encoded buffers and receive queues separately. This queue creates no
 sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
 `wire::WireCodec` supplies a public bounded framing seam. The native
-`NativeWireCodec` implements [wire formats 1–3](docs/WIRE_FORMAT.md).
+`NativeWireCodec` implements [wire formats 1–5](docs/WIRE_FORMAT.md).
 The default constructor retains format 1 for current static-configuration peers;
 `with_membership` explicitly selects format 2 for configuration entries and
 membership-aware snapshots. `with_authority` selects format 3 for
 [direct promoted-replica witness authorization](docs/REPLICATION_AUTHORITY.md).
+`with_readiness` selects format 4; `with_learner_repair` selects format 5 for
+bounded multi-batch pre-election learner catch-up. These capabilities do not
+release general online configuration ingress.
 Native TLS/QUIC startup defaults to format 1; select an exact supported version
 with `NativeTlsConfig::with_wire_version` before constructing it. Startup uses
 that version for its codec, roster and authenticated sessions.

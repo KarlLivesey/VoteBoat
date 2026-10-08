@@ -213,6 +213,14 @@ where
             }
             for group in parts.local.owner.groups() {
                 let core = parts.local.owner.core(group).unwrap();
+                if core.uses_batched_joint_repair()
+                    && parts
+                        .peers
+                        .as_ref()
+                        .is_none_or(|p| p.roster.wire_version() != 5)
+                {
+                    return Err(NodeError::IncompatiblePeerProtocol);
+                }
                 if core.state().base_index() > 0 && parts.local.snapshots.is_none() {
                     return Err(NodeError::MissingSnapshots);
                 }
@@ -511,7 +519,7 @@ where
             .roster()
             .binding(learner)
             .ok_or(NodeError::WrongPeerStore)?;
-        if binding.wire_version != 4 {
+        if binding.wire_version < 4 {
             return Err(NodeError::IncompatiblePeerProtocol);
         }
         self.local
@@ -745,7 +753,7 @@ where
                         let binding =
                             network.and_then(|p| p.roster().binding(request.learner.node));
                         if !binding.is_some_and(|b| {
-                            b.wire_version == 4 && b.peer.store == proof.authenticated
+                            b.wire_version >= 4 && b.peer.store == proof.authenticated
                         }) {
                             return Err(ConfigurationProposalError::AuthenticationRequired.into());
                         }

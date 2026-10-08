@@ -60,6 +60,10 @@ impl NativeWireCodec {
     pub fn with_readiness(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 4)
     }
+    /// Explicit format 5 adds bounded pre-election learner repair.
+    pub fn with_learner_repair(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 5)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -109,6 +113,52 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
     match &m.rpc {
+        Rpc::LearnerRepair {
+            joint,
+            previous_index,
+            previous_term,
+            entries,
+        } => {
+            if version < 5
+                || m.context.origin != m.sender
+                || entries.is_empty()
+                || !matches!(&joint.payload, EntryPayload::Configuration(record)
+                    if matches!(&record.change, ConfigurationChange::Joint { id, .. } if *id == m.configuration))
+            {
+                return Err(WireError::InvalidMessage("learner repair scope/version"));
+            }
+            boundary(*previous_index, *previous_term, m.term)?;
+            if joint.index == 0 || joint.term == 0 || joint.term > m.term {
+                return Err(WireError::InvalidMessage("learner repair joint"));
+            }
+            let mut index = *previous_index;
+            let mut term = *previous_term;
+            for entry in entries {
+                index = index.checked_add(1).ok_or(WireError::TooLarge)?;
+                if entry.index != index
+                    || entry.index > joint.index
+                    || entry.term == 0
+                    || entry.term < term
+                    || entry.term > m.term
+                    || (matches!(entry.payload, EntryPayload::Configuration(_))
+                        && entry != joint.as_ref())
+                    || (entry.index == joint.index && entry != joint.as_ref())
+                {
+                    return Err(WireError::InvalidMessage("learner repair range"));
+                }
+                term = entry.term;
+            }
+        }
+        Rpc::LearnerRepaired {
+            matching_index,
+            matching_term,
+            ..
+        } => {
+            if version < 5 {
+                return Err(WireError::UnsupportedVersion(version));
+            }
+            boundary(*matching_index, *matching_term, m.term)?;
+        }
         Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
             let query = matches!(m.rpc, Rpc::LearnerReadinessRequest(_));
             if version < 4
@@ -407,10 +457,34 @@ impl Encoder {
         }
         Ok(())
     }
+    fn entry(&mut self, entry: &LogEntry) -> Result<(), WireError> {
+        self.u64(entry.index)?;
+        self.u64(entry.term)?;
+        match &entry.payload {
+            EntryPayload::Noop => self.u8(0)?,
+            EntryPayload::Configuration(record) => {
+                self.u8(2)?;
+                self.record(record)?;
+            }
+            EntryPayload::Command { operation, bytes } => {
+                if bytes.len() > self.limits.max_command_bytes {
+                    return Err(WireError::TooLarge);
+                }
+                self.budget.charge(bytes.len())?;
+                self.u8(1)?;
+                self.u128(operation.get())?;
+                self.u32(bytes.len() as u32)?;
+                self.put(bytes)?;
+            }
+        }
+        Ok(())
+    }
     fn message(&mut self, m: &Message) -> Result<(), WireError> {
         // Bound traversals as well as allocations before semantic validation.
         match &m.rpc {
-            Rpc::Append { entries, .. } if entries.len() > self.limits.max_entries_per_message => {
+            Rpc::Append { entries, .. } | Rpc::LearnerRepair { entries, .. }
+                if entries.len() > self.limits.max_entries_per_message =>
+            {
                 return Err(WireError::TooLarge)
             }
             Rpc::Snapshot { snapshot }
@@ -440,6 +514,34 @@ impl Encoder {
         self.binding(m.context.origin)?;
         self.u64(m.context.sequence)?;
         match &m.rpc {
+            Rpc::LearnerRepair {
+                joint,
+                previous_index,
+                previous_term,
+                entries,
+            } => {
+                self.u8(14)?;
+                self.budget.charge(size_of::<LogEntry>())?;
+                self.entry(joint)?;
+                self.u64(*previous_index)?;
+                self.u64(*previous_term)?;
+                self.budget.array::<LogEntry>(entries.len())?;
+                self.u32(entries.len() as u32)?;
+                for entry in entries {
+                    self.entry(entry)?;
+                }
+                Ok(())
+            }
+            Rpc::LearnerRepaired {
+                success,
+                matching_index,
+                matching_term,
+            } => {
+                self.u8(15)?;
+                self.u8(u8::from(*success))?;
+                self.u64(*matching_index)?;
+                self.u64(*matching_term)
+            }
             Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
                 self.budget.charge(size_of::<LearnerReadinessRequest>())?;
                 self.u8(if matches!(m.rpc, Rpc::LearnerReadinessRequest(_)) {
@@ -492,25 +594,7 @@ impl Encoder {
                 self.u64(*leader_commit)?;
                 self.u32(entries.len() as u32)?;
                 for entry in entries {
-                    self.u64(entry.index)?;
-                    self.u64(entry.term)?;
-                    match &entry.payload {
-                        EntryPayload::Noop => self.u8(0)?,
-                        EntryPayload::Configuration(record) => {
-                            self.u8(2)?;
-                            self.record(record)?;
-                        }
-                        EntryPayload::Command { operation, bytes } => {
-                            if bytes.len() > self.limits.max_command_bytes {
-                                return Err(WireError::TooLarge);
-                            }
-                            self.budget.charge(bytes.len())?;
-                            self.u8(1)?;
-                            self.u128(operation.get())?;
-                            self.u32(bytes.len() as u32)?;
-                            self.put(bytes)?;
-                        }
-                    }
+                    self.entry(entry)?;
                 }
                 Ok(())
             }
@@ -855,6 +939,41 @@ impl<'a> Decoder<'a> {
         Membership::from_checkpoint(stable, joint, last_index, operations, boundary)
             .map_err(|_| WireError::InvalidMessage("invalid membership checkpoint"))
     }
+    fn entry(
+        &mut self,
+        limits: WireLimits,
+        budget: &mut Budget,
+        version: u16,
+    ) -> Result<LogEntry, WireError> {
+        let index = self.u64()?;
+        let term = self.u64()?;
+        let payload = match self.u8()? {
+            0 => EntryPayload::Noop,
+            1 => {
+                let operation = OperationId::new(self.u128()?)
+                    .ok_or(WireError::InvalidMessage("zero operation"))?;
+                let len = self.u32()? as usize;
+                if len > limits.max_command_bytes {
+                    return Err(WireError::TooLarge);
+                }
+                let bytes = self.take(len)?;
+                budget.charge(len)?;
+                EntryPayload::Command {
+                    operation,
+                    bytes: bytes.to_vec(),
+                }
+            }
+            2 if version >= 2 => {
+                EntryPayload::Configuration(Box::new(self.record(limits, budget)?))
+            }
+            _ => return Err(WireError::InvalidMessage("entry kind")),
+        };
+        Ok(LogEntry {
+            index,
+            term,
+            payload,
+        })
+    }
     fn message(
         &mut self,
         scope: WireScope,
@@ -881,6 +1000,32 @@ impl<'a> Decoder<'a> {
             sequence: self.u64()?,
         };
         let rpc = match self.u8()? {
+            14 if version >= 5 => {
+                budget.charge(size_of::<LogEntry>())?;
+                let joint = Box::new(self.entry(limits, budget, version)?);
+                let previous_index = self.u64()?;
+                let previous_term = self.u64()?;
+                let count = self.u32()? as usize;
+                if count > limits.max_entries_per_message || count > self.remaining() / 17 {
+                    return Err(WireError::TooLarge);
+                }
+                budget.array::<LogEntry>(count)?;
+                let mut entries = Vec::with_capacity(count);
+                for _ in 0..count {
+                    entries.push(self.entry(limits, budget, version)?);
+                }
+                Rpc::LearnerRepair {
+                    joint,
+                    previous_index,
+                    previous_term,
+                    entries,
+                }
+            }
+            15 if version >= 5 => Rpc::LearnerRepaired {
+                success: bool_value(self.u8()?)?,
+                matching_index: self.u64()?,
+                matching_term: self.u64()?,
+            },
             0 => Rpc::Vote {
                 last_index: self.u64()?,
                 last_term: self.u64()?,
@@ -899,34 +1044,7 @@ impl<'a> Decoder<'a> {
                 budget.array::<LogEntry>(count)?;
                 let mut entries = Vec::with_capacity(count);
                 for _ in 0..count {
-                    let index = self.u64()?;
-                    let term = self.u64()?;
-                    let payload = match self.u8()? {
-                        0 => EntryPayload::Noop,
-                        1 => {
-                            let operation = OperationId::new(self.u128()?)
-                                .ok_or(WireError::InvalidMessage("zero operation"))?;
-                            let len = self.u32()? as usize;
-                            if len > limits.max_command_bytes {
-                                return Err(WireError::TooLarge);
-                            }
-                            let bytes = self.take(len)?;
-                            budget.charge(len)?;
-                            EntryPayload::Command {
-                                operation,
-                                bytes: bytes.to_vec(),
-                            }
-                        }
-                        2 if version >= 2 => {
-                            EntryPayload::Configuration(Box::new(self.record(limits, budget)?))
-                        }
-                        _ => return Err(WireError::InvalidMessage("entry kind")),
-                    };
-                    entries.push(LogEntry {
-                        index,
-                        term,
-                        payload,
-                    });
+                    entries.push(self.entry(limits, budget, version)?);
                 }
                 Rpc::Append {
                     previous_index,

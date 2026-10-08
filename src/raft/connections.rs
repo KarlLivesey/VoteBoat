@@ -117,6 +117,18 @@ impl Raft {
                 return Err(RaftError::WrongIdentity);
             }
             match &message.rpc {
+                Rpc::LearnerRepair { joint, .. } => {
+                    if let EntryPayload::Configuration(record) = &joint.payload {
+                        if let crate::membership::ConfigurationChange::Joint { next, .. } =
+                            &record.change
+                        {
+                            for (&node, &store) in next.voter_stores().iter().chain(next.learners())
+                            {
+                                add(node, store)?;
+                            }
+                        }
+                    }
+                }
                 Rpc::Append { entries, .. } => {
                     for entry in entries {
                         if let EntryPayload::Configuration(record) = &entry.payload {

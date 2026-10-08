@@ -890,6 +890,310 @@ fn joint_repair_trims_only_a_verified_compacted_overlap() {
 }
 
 #[test]
+fn batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion() {
+    let (source, mut receiver) = retained_repair_pair(160, 0);
+    let mut source = source.with_batched_joint_repair();
+    let campaign = source.step(Event::Campaign).unwrap();
+    let first = durable(&mut source, campaign)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let effects = receiver.step(Event::Receive(first.clone())).unwrap();
+    assert_eq!(receiver.state().last_index(), 2);
+    assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+    let lost_ack = one_reply(durable(&mut receiver, effects));
+    assert!(!receiver.local_voter());
+    assert_eq!(receiver.state().commit_index, 2);
+    // Lose the cursor acknowledgement and both volatile owners. Replaying the
+    // first range must compare overlap, not truncate or manufacture commitment.
+    source = Raft::recover_member(
+        node(2),
+        source.binding,
+        source.state().clone(),
+        source.limits,
+    )
+    .unwrap()
+    .with_batched_joint_repair();
+    receiver = Raft::recover_member(
+        node(4),
+        receiver.binding,
+        receiver.state().clone(),
+        receiver.limits,
+    )
+    .unwrap();
+    let effects = source.step(Event::Campaign).unwrap();
+    let mut repair = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    assert!(source.step(Event::Receive(lost_ack)).unwrap().is_empty());
+    let mut batches = 0;
+    loop {
+        let before = receiver.state().clone();
+        let effects = receiver.step(Event::Receive(repair)).unwrap();
+        let effects = if receiver.has_pending_dependency() {
+            assert_eq!(receiver.state(), &before);
+            durable(&mut receiver, effects)
+        } else {
+            effects
+        };
+        let ack = one_reply(effects);
+        let next = source.step(Event::Receive(ack.clone())).unwrap();
+        assert_eq!(source.role(), Role::Candidate);
+        assert_eq!(source.state().commit_index, 2);
+        assert!(source.step(Event::Receive(ack)).unwrap().is_empty());
+        batches += 1;
+        let next = one_reply(next);
+        if matches!(next.rpc, Rpc::Vote { .. }) {
+            assert!(receiver.local_voter());
+            assert_eq!(receiver.state().entries, source.state().entries);
+            let before = receiver.state().clone();
+            assert_eq!(
+                receiver.step(Event::Receive(first)),
+                Err(RaftError::InvalidMessage)
+            );
+            assert_eq!(receiver.state(), &before);
+            let effects = receiver.step(Event::Receive(next)).unwrap();
+            assert!(matches!(
+                one_reply(durable(&mut receiver, effects)).rpc,
+                Rpc::Voted { granted: true }
+            ));
+            break;
+        }
+        repair = next;
+        assert!(batches < 5);
+    }
+    assert_eq!(batches, 3);
+}
+
+#[test]
+fn batched_repair_checks_authority_ranges_and_ack_context_before_progress() {
+    for variant in 0..10 {
+        let (source, mut receiver) = retained_repair_pair(160, 1);
+        let mut source = source.with_batched_joint_repair();
+        let effects = source.step(Event::Campaign).unwrap();
+        let mut message = durable(&mut source, effects)
+            .into_iter()
+            .find_map(|e| match e {
+                Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+                _ => None,
+            })
+            .unwrap();
+        match variant {
+            0 => message.sender.identity = store(99),
+            1 => message.context.origin.identity = store(99),
+            2 => message.configuration = cid(4),
+            3 => message.term = 0,
+            4 => message.context.sequence = 0,
+            5 => receiver = follower(staged(), 3),
+            _ => {
+                let Rpc::LearnerRepair { entries, joint, .. } = &mut message.rpc else {
+                    unreachable!()
+                };
+                match variant {
+                    6 => entries[0].term = message.term + 1,
+                    7 => {
+                        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                            unreachable!()
+                        };
+                        bytes[0] ^= 1;
+                    }
+                    8 => entries[0].payload = joint.payload.clone(),
+                    9 => joint.index = 1,
+                    _ => unreachable!(),
+                }
+            }
+        }
+        let before = (
+            receiver.state().clone(),
+            receiver.role(),
+            receiver.election_reset_sequence(),
+        );
+        assert_eq!(
+            receiver.step(Event::Receive(message)),
+            Err(RaftError::InvalidMessage),
+            "variant {variant}"
+        );
+        assert_eq!(
+            (
+                receiver.state().clone(),
+                receiver.role(),
+                receiver.election_reset_sequence()
+            ),
+            before
+        );
+        assert!(!receiver.has_pending_dependency());
+    }
+    let (source, mut receiver) = retained_repair_pair(160, 0);
+    let mut source = source.with_batched_joint_repair();
+    let effects = source.step(Event::Campaign).unwrap();
+    let request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let effects = receiver.step(Event::Receive(request)).unwrap();
+    let ack = one_reply(durable(&mut receiver, effects));
+    let mut stale = ack.clone();
+    stale.context.sequence += 99;
+    assert!(source.step(Event::Receive(stale)).unwrap().is_empty());
+    let mut wrong = ack.clone();
+    if let Rpc::LearnerRepaired { matching_index, .. } = &mut wrong.rpc {
+        *matching_index += 1;
+    }
+    assert_eq!(
+        source.step(Event::Receive(wrong)),
+        Err(RaftError::InvalidMessage)
+    );
+    assert_eq!(source.repair_requests.len(), 1);
+    let mut higher = ack;
+    higher.term += 1;
+    let before = source.state().hard_state.term;
+    let effects = source.step(Event::Receive(higher)).unwrap();
+    assert_eq!(source.state().hard_state.term, before);
+    assert!(source.has_pending_dependency());
+    assert!(durable(&mut source, effects).is_empty());
+    assert_eq!(source.state().hard_state.term, before + 1);
+    assert_eq!(source.role(), Role::Follower);
+    assert!(source.repair_requests.is_empty());
+}
+
+#[test]
+fn batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority() {
+    let (source, mut receiver) = retained_repair_pair(160, 140);
+    let mut source = source.with_batched_joint_repair();
+    committed_fixture(&mut receiver, 142);
+    let reference = SnapshotRef {
+        store: store(4),
+        group: receiver.state().bootstrap.group,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: cid(2),
+        index: 142,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 128,
+        checksum: 7,
+    };
+    let effects = receiver.begin_compact(reference).unwrap();
+    durable(&mut receiver, effects);
+    let effects = source.step(Event::Campaign).unwrap();
+    let request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let effects = receiver.step(Event::Receive(request)).unwrap();
+    let ack = one_reply(durable(&mut receiver, effects));
+    assert!(matches!(
+        ack.rpc,
+        Rpc::LearnerRepaired {
+            success: false,
+            matching_index: 142,
+            matching_term: 1
+        }
+    ));
+    let next = one_reply(source.step(Event::Receive(ack)).unwrap());
+    assert!(matches!(
+        next.rpc,
+        Rpc::LearnerRepair {
+            previous_index: 142,
+            ..
+        }
+    ));
+    let effects = receiver.step(Event::Receive(next)).unwrap();
+    let ack = one_reply(durable(&mut receiver, effects));
+    assert!(matches!(
+        one_reply(source.step(Event::Receive(ack)).unwrap()).rpc,
+        Rpc::Vote { .. }
+    ));
+    assert_eq!(source.state().commit_index, 2);
+    assert_eq!(receiver.state().commit_index, 142);
+    assert_eq!(receiver.state().base_index(), 142);
+    assert!(receiver.local_voter());
+}
+
+#[test]
+fn committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority() {
+    let (mut source, mut receiver) = retained_repair_pair(130, 0);
+    committed_fixture(&mut source, 133);
+    let mut source = source.with_batched_joint_repair();
+    let effects = source.step(Event::Campaign).unwrap();
+    let mut request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::LearnerRepair { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let mut batches = 0;
+    loop {
+        let effects = receiver.step(Event::Receive(request)).unwrap();
+        let ack = one_reply(durable(&mut receiver, effects));
+        assert_eq!(receiver.state().commit_index, 2);
+        let next = one_reply(source.step(Event::Receive(ack)).unwrap());
+        assert_eq!(source.state().commit_index, 133);
+        assert_eq!(source.role(), Role::Candidate);
+        batches += 1;
+        if matches!(next.rpc, Rpc::Vote { .. }) {
+            break;
+        }
+        request = next;
+        assert!(batches < 4);
+    }
+    assert_eq!(batches, 3);
+    assert!(receiver.local_voter());
+    assert_eq!(receiver.state().entries, source.state().entries);
+}
+
+#[test]
+fn batched_repair_missing_compacted_joint_keeps_ordinary_election_available() {
+    let (mut source, _) = retained_repair_pair(3, 0);
+    committed_fixture(&mut source, 6);
+    let reference = SnapshotRef {
+        store: store(2),
+        group: source.state().bootstrap.group,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: cid(3),
+        index: 6,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 128,
+        checksum: 7,
+    };
+    let effects = source.begin_compact(reference).unwrap();
+    durable(&mut source, effects);
+    let mut source = source.with_batched_joint_repair();
+    let effects = source.step(Event::Campaign).unwrap();
+    let effects = durable(&mut source, effects);
+    assert!(effects.iter().any(|e| matches!(
+        e,
+        Effect::Send(Message {
+            rpc: Rpc::Vote { .. },
+            ..
+        })
+    )));
+    assert!(!effects.iter().any(|e| matches!(
+        e,
+        Effect::Send(Message {
+            rpc: Rpc::LearnerRepair { .. },
+            ..
+        })
+    )));
+    assert_eq!(source.role(), Role::Candidate);
+    assert_eq!(source.state().base_index(), 6);
+}
+
+#[test]
 fn pending_configuration_view_precedes_durability_without_releasing_effects() {
     let mut core = core();
     let initial = core.state().clone();
