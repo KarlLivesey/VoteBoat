@@ -2035,3 +2035,43 @@ P0–P7 stays active; P8 remains deferred.
 
 Core-only runtime tests also pass 18/18, and the benchmark compiles with TLS
 without QUIC. Formatting, diff checks and the 71-contract inventory validator pass.
+
+### Slice 100 — WAL barrier and native host attribution
+
+Added examples/wal_benchmark.rs through the existing public JournalIo seam. Its
+observer forwards real FileLogIo operations and times append, WAL synchronization
+and manifest publication separately, alongside complete native append/barrier time.
+Exclusive fresh roots, bounded inputs/history/samples, actual barrier tickets,
+exact acknowledged GroupLog reopen, fresh Counter replay and historical first/last
+retries gate every result. This is local B1 storage work, never quorum throughput.
+
+Two 64-batch runs (eight additional warm-up batches) pass: one entry/batch yields
+64 measured records, 1.950159 s and 32.818 local durable records/s; 32 entries/batch
+yields 2048 records, 2.354276 s and 869.907 local records/s. Total barriers are
+1948.316/2342.797 ms, WAL sync 692.377/726.713 ms, manifest publication
+1255.062/1612.872 ms, p99 barriers 69.309/89.405 ms. Publication dominates these
+local barrier costs, but remains required by the unchanged acknowledged-prefix
+corruption/recovery contract. No synchronization/publication was removed.
+
+Extended the existing native benchmark with measured-phase totals from NodeProgress:
+persistence batches, worker events, apply deliveries and host poll wall durations.
+Four sequential TCP/QUIC window-1/32 runs with 256 measured writes and unchanged
+50 ms heartbeat/1000–1999 ms elections pass full reopen/value/retry/worker joins,
+recovered value 320 and zero recovery retries. Applied ops/s are
+7.106/26.125/7.498/27.581; p99 ms are 615.773/2369.064/513.127/1780.343.
+Serial runs report 1534 persistence batches each, window-32 runs 350/353. Host
+poll time is about 11–14% of elapsed, with maximum individual rounds below 8 ms.
+These diagnostic totals support investigating durability batching; they neither
+reconstruct a parallel critical path nor prove improvement. The predeclared
+250 ms TCP serial next-tuning target is not met in this diagnostic run.
+
+Raw local/replicated samples, summaries, source/executable hashes and environment
+are in validation/performance/slice100. Independent CSV checks confirm per-stage
+arithmetic, bytes, percentiles, unique IDs/indices/values, rate summaries and
+host-count bounds. All-target/all-feature Clippy with warnings denied passes;
+no production consensus, storage, runtime, transport or dependency changed.
+Full P0–P7 remains active; sustainable/open-loop/multi-group/maintenance performance,
+fixed-p99 improvement, macOS/separate-host and broader phase gaps remain outstanding.
+
+Native-only WAL example and TLS-only replicated example compilation also pass.
+Final formatting, diff checks and the unchanged 71-contract inventory pass.

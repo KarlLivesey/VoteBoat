@@ -168,13 +168,26 @@ fn open(
     }
     Ok(replicas)
 }
-fn poll(replicas: &mut [Replica], clock: &Instant) -> Result<(), Failure> {
+#[derive(Default)]
+struct PollTotals {
+    rounds: usize,
+    host_ns: u128,
+    max_host_ns: u128,
+    persistence_batches: usize,
+    worker_events: usize,
+    application_deliveries: usize,
+}
+fn poll(replicas: &mut [Replica], clock: &Instant, totals: &mut PollTotals) -> Result<(), Failure> {
+    let start = Instant::now();
     for replica in replicas {
         let progress = checked(replica.poll(
             MonoTime(clock.elapsed().as_millis() as u64),
             NodePollBudget::default(),
         ))?;
         if let Some(p) = progress.replica {
+            totals.persistence_batches += p.persistence_batches;
+            totals.worker_events += p.worker_events;
+            totals.application_deliveries += p.applications;
             for step in p.steps {
                 if let Some(e) = step.error {
                     return Err(format!("runtime step failed: {e:?}").into());
@@ -182,18 +195,23 @@ fn poll(replicas: &mut [Replica], clock: &Instant) -> Result<(), Failure> {
             }
         }
     }
+    let elapsed = start.elapsed().as_nanos();
+    totals.rounds += 1;
+    totals.host_ns += elapsed;
+    totals.max_host_ns = totals.max_host_ns.max(elapsed);
     Ok(())
 }
 fn until(
     replicas: &mut [Replica],
     clock: &Instant,
     mut done: impl FnMut(&mut [Replica]) -> Result<bool, Failure>,
-) -> Result<(), Failure> {
+) -> Result<PollTotals, Failure> {
     let deadline = Instant::now() + Duration::from_secs(120);
+    let mut totals = PollTotals::default();
     loop {
-        poll(replicas, clock)?;
+        poll(replicas, clock, &mut totals)?;
         if done(replicas)? {
-            return Ok(());
+            return Ok(totals);
         }
         if Instant::now() > deadline {
             return Err("native progress timed out; retained run is invalid".into());
@@ -230,6 +248,7 @@ struct Measurement {
     elapsed: Duration,
     samples: Vec<Sample>,
     max_inflight: usize,
+    polls: PollTotals,
 }
 fn workload(
     replicas: &mut [Replica],
@@ -243,7 +262,7 @@ fn workload(
     let mut pending = BTreeMap::new();
     let mut samples = Vec::with_capacity(count);
     let mut max_inflight = 0;
-    until(replicas, clock, |ns| {
+    let polls = until(replicas, clock, |ns| {
         while sent < count && pending.len() < window {
             let operation = (first + sent) as u128;
             let submitted = start.elapsed().as_nanos();
@@ -302,6 +321,7 @@ fn workload(
         elapsed: start.elapsed(),
         samples,
         max_inflight,
+        polls,
     })
 }
 fn verify(
@@ -333,6 +353,7 @@ fn verify(
             other => Err(format!("quorum read verification failed: {other:?}").into()),
         }
     })
+    .map(|_| ())
 }
 fn retry_once(
     replicas: &mut [Replica],
@@ -517,8 +538,8 @@ fn main() -> Result<(), Failure> {
         .collect::<Vec<_>>();
     latency.sort_unstable();
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
-    let summary = format!("protocol={protocol:?} replicas=3 groups=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true\n",
-        measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000.);
+    let summary = format!("protocol={protocol:?} replicas=3 groups=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}\n",
+        measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;
     output.sync_all()?;

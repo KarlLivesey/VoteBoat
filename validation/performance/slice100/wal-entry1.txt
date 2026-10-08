@@ -1,0 +1,1 @@
+scope=local_wal groups=1 warmup_batches=8 batches=64 entries_per_batch=1 measured_records=64 elapsed_s=1.950159 durable_records_s=32.818 barrier_p99_ms=69.309 total_append_ms=1.438 file_append_ms=0.424 wal_sync_ms=692.377 manifest_publish_ms=1255.062 total_barrier_ms=1948.316 wal_bytes=10432 recovered_records=72 replay_retry_verified=true

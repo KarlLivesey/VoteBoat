@@ -49,3 +49,7 @@ required-features = ["tls"]
 [[example]]
 name = "native_benchmark"
 required-features = ["tls"]
+
+[[example]]
+name = "wal_benchmark"
+required-features = ["native"]

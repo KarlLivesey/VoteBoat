@@ -266,9 +266,10 @@
         "tests/log_store.rs",
         "tests/raft.rs",
         "tests/log_reclaim.rs",
-        "src/native/log_store/file.rs"
+        "src/native/log_store/file.rs",
+        "examples/wal_benchmark.rs"
       ],
-      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories."
+      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories. A downstream local WAL timing wrapper forwards real FileLogIo through this same seam, verifies exact reopen/replay/retry state and reports primitive barrier costs without changing durability or claiming quorum throughput."
     },
     {
       "design_id": "C08",

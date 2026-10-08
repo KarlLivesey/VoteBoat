@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Initial finite three-replica TCP/QUIC committed/applied baseline and raw latency/recovery evidence implemented; bottleneck attribution, sustainable/offered-load/multi-group/maintenance measurements and fixed-p99 tuning remain |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Initial finite three-replica TCP/QUIC applied baseline, raw recovery/latency evidence and local WAL/host-progress attribution implemented; deeper attribution, sustainable/offered-load/multi-group/maintenance measurements and fixed-p99 tuning remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
@@ -109,9 +109,10 @@ its selected native acceptance passes. General retention and broader faults rema
 
 1. **Measurement and latency attribution (current, P7).** Slice 99 supplies an
    initial finite native three-replica applied baseline, raw samples and durable
-   recovery checks. Explicit host timing is now available without changing defaults.
-   Next establish where time goes (WAL synchronization, queueing, host polling,
-   transport), then extend repeated/steady-state measurements. Depends on public
+   recovery checks. Slice 100 adds local WAL barrier and host-progress attribution.
+   Explicit host timing is available without changing defaults. Next measure
+   cross-group shared-barrier amortization and deepen queue/transport attribution,
+   then extend repeated/steady-state measurements. Depends on public
    native provider/runtime seams; completion needs attributable costs and stable
    bounded workload results, with all failures reported. Advances the macro
    measured-tuning milestone; current finite runs do not complete P7.
@@ -5972,3 +5973,79 @@ P8 deferred, macOS/separate-host unverified and CI background.
 Final feature checks: core-only runtime 18/18 and TLS-only benchmark compilation
 pass, plus formatting/diff/inventory. These are scoped checks, not a rerun of
 all earlier native lifecycle/fault histories after the additive startup API change.
+
+### Slice 100 mini schema — attribute native WAL barrier cost
+
+Previous goal turn was progress: 3e21294 pushed the first finite applied baseline,
+explicit startup timing, raw samples and recovery checks. Current work advances P7
+attribution, next measured tuning at a predeclared p99 budget, following broader
+load/maintenance/platform validation. The full P0–P7 ledger remains unchanged.
+
+Inspection finds each native barrier calls sync_log then publish_manifest; the
+file provider synchronizes WAL, temporary manifest and directory. Recovery uses
+the published length to distinguish torn unacknowledged tail from corruption in
+an established durable prefix. Do not remove publication as a speculative speedup.
+Neither strace nor perf is installed. Use the existing public JournalIo seam to
+observe the unchanged real FileLogIo calls in a local WAL benchmark; this avoids
+production instrumentation or a second storage implementation.
+
+Schema: fresh caller-owned root; bounded measured batch count and entries/batch,
+8 warm-up batches, one group and 8-byte +1 records. A borrowed shared observation
+cell records actual append, WAL sync and manifest-publication durations/bytes;
+per-batch CSV also records complete append/barrier/total time. Every observation
+wraps and forwards the exact real operation, including errors. No durability or
+recovery semantics change. Report this explicitly as local storage B1, not quorum
+or application throughput. Recovery must reconstruct the exact final GroupLog,
+and replay all stored committed commands into a fresh Counter with correct value
+and operation retry history. Preserve replica files and raw samples; no reuse or
+automatic deletion. Counts and observer storage are bounded.
+
+Acceptance: release runs with 1 and 32 entries per batch, same batch count/device,
+raw primitive timings and full reopen/replay verification. Compare how much barrier
+latency is WAL sync versus publication; do not assume their sum is the full replicated
+critical path. Further runtime/transport attribution follows through existing
+progress reports if storage measurements do not explain the observed latency.
+
+Initial WAL evidence: both 64-batch runs reopen/replay correctly. Single-entry
+barriers total 1.948 s: WAL sync 0.692 s, manifest publication 1.255 s. With 32
+entries per batch, barriers total 2.343 s: sync 0.727 s, publication 1.613 s.
+Appending/encoding is much smaller. These are local primitive timings, not
+replicated attribution or a sustainable throughput claim. Next extend the existing
+native benchmark's per-phase observations with aggregate host poll duration,
+persistence batches, worker events and application deliveries from NodeProgress.
+No production telemetry seam is required: consume existing reports in the host.
+Counters are diagnostic totals, never commitment watermarks; polls sum host wall
+intervals and exclude worker-thread execution/park time. Record them only for the
+measured phase, keeping existing success/recovery acceptance unchanged. Run TCP
+and QUIC at the same declared 256-operation/window settings; instrumentation
+results are diagnostic, not a controlled optimization comparison. The initial
+future tuning target is TCP/window-1, 256 writes, p99 <=250 ms with unchanged
+three-voter durability/timing; changing windows must not masquerade as meeting it.
+
+### Slice 100 result — storage barriers dominate local WAL cost
+
+Implemented a bounded public-seam WAL timing example and extended the existing
+native workload with existing progress counters, without production changes.
+Both 64-batch local runs recover exact acknowledged state, replay actual records
+and retain historical retries. Real manifest publication contributes 64–69% of
+observed local barrier time, WAL sync 31–36%; append/encoding is much smaller.
+The complete 32-record batch amortizes the barrier across more records. This is
+local storage evidence, not an improvement in quorum-durable applied throughput.
+
+All four diagnostic TCP/QUIC window-1/32 runs pass with actual WAL reopen, every
+replica at value 320, exact first/last retries, zero recovery retries and joined
+workers. Serial intervals report about six persistence batches per useful write
+across three replicas; window-32 reduces that count to about 1.37/1.38 per write.
+Host poll wall time is 11–14% of measured elapsed, with individual maxima below
+8 ms. These totals do not isolate a parallel critical path, and the predeclared
+250 ms next-tuning p99 target remains unmet. Raw samples/hashes/limitations are in
+validation/performance/slice100; see validation/REPORT.md for exact observations.
+
+Next within the P7 macro milestone is measured durability batching through the
+existing shared Multi-Raft/public provider path. The design's primary scaling
+path is independent groups sharing local barriers; assess that before inventing
+single-group ordering or a new persistent manifest format. Compare bounded useful
+applied throughput and p99 at fixed declared workload/resource settings, retaining
+recovery and overload isolation. Following work remains sustained/offered-load,
+maintenance/recovery and broader Linux/macOS/platform/fault evidence. All other
+unfinished P0–P7 scope remains active; P8 is deferred and CI stays background.

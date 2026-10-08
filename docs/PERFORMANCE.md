@@ -75,3 +75,39 @@ open-loop load, shared multi-group scaling, maintenance/recovery load and attrib
 batching/lane improvements remain required P7 work. No consensus protocol, default timer value or release performance threshold
 changed. The native startup API now exposes the existing TimerConfig capability
 so embeddings can declare timing appropriate to their deployment.
+
+## WAL barrier and host progress attribution
+
+The local WAL harness times the unchanged FileLogIo through the public JournalIo
+interface, without sockets, Raft workers or a consensus quorum:
+
+```sh
+cargo +stable build --locked --offline --release --example wal_benchmark
+./target/release/examples/wal_benchmark target/benchmark-runs/wal-single 64 1
+./target/release/examples/wal_benchmark target/benchmark-runs/wal-batched 64 32
+```
+
+Arguments are a fresh root, 1–512 measured batches and 1–32 entries per batch;
+warm-up adds eight batches and total retained entries must fit the native limit.
+A record is an 8-byte +1 command. Each batch appends one complete group transition
+and completes its actual native durability barrier. No commit index from this
+storage workload is evidence of a distributed Raft decision. After timing, the
+entire acknowledged GroupLog must reopen identically; a fresh Counter replays all
+records and first/last operation retries must preserve historical results/value.
+
+`samples.csv` separates complete append/barrier time from primitive file append,
+WAL sync and manifest publication time, plus encoded WAL bytes. The observer
+forwards each actual operation/result; publication includes the manifest file
+sync, rename and directory sync required by the existing format. `summary.txt`
+reports only local durable-record rate and stage totals. Batch size changes both
+records per barrier and retained history, so this is attribution, not a controlled
+replicated optimization result. See [slice 100](../validation/performance/slice100/README.md).
+
+The replicated harness additionally reports measured-phase totals from existing
+NodeProgress: persistence batches, worker events and application deliveries,
+alongside host poll rounds, total poll wall time and its maximum. Deliveries are
+batches, not useful operations; counts span three replicas and may include
+background work crossing interval boundaries. Host poll time excludes worker
+execution and parked/waiting time; it is not CPU time. These observations cannot
+be summed with parallel replica storage timings to reconstruct a critical path.
+They are diagnostics, never durable or committed-prefix watermarks.
