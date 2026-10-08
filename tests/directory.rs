@@ -17,6 +17,8 @@ use support::*;
 use voteboat::{
     application::*, directory::*, identity::*, log::*, placement::PlacementRequirements, routing::*,
 };
+#[path = "directory/transfer.rs"]
+mod transfer;
 fn id(value: u128) -> ResponsibilityIdentity {
     ResponsibilityIdentity {
         id: ResponsibilityId::new(value).unwrap(),
@@ -494,6 +496,8 @@ mod native {
         app: Directory,
         receipts: Vec<DirectoryReceipt>,
         read: Option<ResponsibilityManifest>,
+        lifecycle_operation: Option<OperationId>,
+        lifecycle_read: Option<voteboat::transfer::TransferIntentStatus>,
     }
     struct Cluster {
         replicas: BTreeMap<NodeId, Replica>,
@@ -502,6 +506,9 @@ mod native {
     }
     impl Cluster {
         fn open(root: &Path, recover: bool) -> Self {
+            Self::open_plan(root, recover, plan())
+        }
+        fn open_plan(root: &Path, recover: bool, plan: DirectoryPlan) -> Self {
             let mut replicas = BTreeMap::new();
             for n in 1..=3 {
                 let path = root.join(n.to_string());
@@ -542,7 +549,14 @@ mod native {
                     )
                     .unwrap()
                 };
-                let mut app = fresh_directory();
+                let mut app = Directory::new(
+                    plan.clone(),
+                    DirectoryLimits {
+                        operations: 20,
+                        history_bytes: 64 * 1024,
+                    },
+                )
+                .unwrap();
                 let (core, _) =
                     recover_replica(node(n), group(1), &log, &mut snapshots, &mut app).unwrap();
                 replicas.insert(
@@ -554,6 +568,8 @@ mod native {
                         app,
                         receipts: vec![],
                         read: None,
+                        lifecycle_operation: None,
+                        lifecycle_read: None,
                     },
                 );
             }
@@ -591,7 +607,22 @@ mod native {
                     }
                     Effect::ReadReady(barrier) => {
                         let r = self.replicas.get_mut(&n).unwrap();
-                        r.read = read_at_barrier(&mut r.core, &barrier, &r.app, id(1)).unwrap();
+                        if let Some(operation) = r.lifecycle_operation {
+                            use voteboat::transfer::*;
+                            let view = LifecycleDirectory::new(r.app.clone());
+                            let DirectoryRead::Transfer(status) = read_at_barrier(
+                                &mut r.core,
+                                &barrier,
+                                &view,
+                                DirectoryQuery::Transfer(operation),
+                            )
+                            .unwrap() else {
+                                panic!("wrong query result")
+                            };
+                            r.lifecycle_read = status;
+                        } else {
+                            r.read = read_at_barrier(&mut r.core, &barrier, &r.app, id(1)).unwrap();
+                        }
                     }
                     Effect::SnapshotRequired {
                         to,
@@ -653,6 +684,9 @@ mod native {
             expected: Option<u64>,
         ) -> DirectoryReceipt {
             let bytes = command(manifest, expected);
+            self.propose_bytes(n, op, bytes)
+        }
+        fn propose_bytes(&mut self, n: u64, op: u128, bytes: Vec<u8>) -> DirectoryReceipt {
             let operation = OperationId::new(op).unwrap();
             self.replicas[&node(n)]
                 .app
@@ -681,6 +715,95 @@ mod native {
             self.effects(node(n), effects);
             self.pump();
         }
+    }
+    #[test]
+    fn native_transfer_intent_survives_lost_observation_snapshot_catchup_and_reopen() {
+        use voteboat::transfer::*;
+        let root = std::env::temp_dir().join(format!(
+            "voteboat-intent-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        let intent = super::transfer::intent();
+        let plan = DirectoryPlan::new(group(1), vec![intent.before().clone()]).unwrap();
+        let mut cluster = Cluster::open_plan(&root, false, plan.clone());
+        cluster.act(1, Event::Campaign);
+        cluster.pump();
+        let bytes = cluster.replicas[&node(1)]
+            .app
+            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap();
+        cluster.propose_bytes(1, 1_000_000, bytes);
+        cluster.propose(1, 101, intent.before().clone(), None);
+        cluster.blocked.insert(node(2));
+        let bytes = intent.encode(MAX_TRANSFER_INTENT_BYTES).unwrap();
+        // Ignore the original success observation, then discard volatile state.
+        cluster.propose_bytes(1, 200, bytes.clone());
+        let status = cluster.replicas[&node(1)]
+            .app
+            .transfer_intent_at(0, OperationId::new(200).unwrap())
+            .unwrap()
+            .unwrap();
+        assert!(cluster.replicas[&node(2)]
+            .app
+            .transfer_intent_at(0, status.operation)
+            .unwrap()
+            .is_none());
+        for n in [1, 3] {
+            cluster.checkpoint(n);
+        }
+        drop(cluster);
+        let mut cluster = Cluster::open_plan(&root, true, plan.clone());
+        cluster.act(3, Event::Campaign);
+        cluster.pump();
+        let retry = cluster.propose_bytes(3, 200, bytes.clone());
+        assert!(retry.duplicate);
+        assert_eq!(retry.outcome, DirectoryOutcome::TransferIntentRecorded);
+        assert_eq!(
+            cluster.propose_bytes(3, 201, bytes).outcome,
+            DirectoryOutcome::LifecycleBusy
+        );
+        cluster
+            .replicas
+            .get_mut(&node(3))
+            .unwrap()
+            .lifecycle_operation = Some(status.operation);
+        cluster.act(
+            3,
+            Event::Read {
+                request: ReadRequestId::new(91).unwrap(),
+            },
+        );
+        cluster.pump();
+        assert_eq!(
+            cluster.replicas[&node(3)].lifecycle_read,
+            Some(status.clone())
+        );
+        for r in cluster.replicas.values() {
+            assert_eq!(
+                r.app.transfer_intent_at(0, status.operation).unwrap(),
+                Some(status.clone())
+            );
+            assert_eq!(
+                r.app.manifest(intent.before().input().responsibility),
+                Some(intent.before())
+            );
+        }
+        assert!(cluster.replicas[&node(2)].core.state().snapshot.is_some());
+        drop(cluster);
+        let cluster = Cluster::open_plan(&root, true, plan);
+        for r in cluster.replicas.values() {
+            assert_eq!(
+                r.app.transfer_intent_at(0, status.operation).unwrap(),
+                Some(status.clone())
+            );
+        }
+        drop(cluster);
+        std::fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn native_three_replica_directory_commits_replays_compacts_and_installs_retry_state() {

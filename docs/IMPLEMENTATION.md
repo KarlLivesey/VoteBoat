@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox implemented; durable lifecycle protocol remains pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; fence/import/publication/activation remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -97,7 +97,7 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
    routed application and tested P4 placement path with a genuinely splittable
    application adapter. Slice 84 supplies the public scope seam and native
    per-bucket counter with transferable retry results/outbox; ownership transfer
-   remains pending. Sketch bounded export/import records, source fencing,
+   remains pending. Slice 85 records bounded durable intents and local target reservations without changing ownership. Next commit source fencing and non-serving target imports, then verify publication/activation. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
    source/target/directory recovery across interrupted stages and lost receipts,
@@ -4723,3 +4723,57 @@ payloads. Then compatible multi-source merge and P7 measured tuning. The fixed
 local fence and in-memory scope imports do not satisfy the no-dual-owner exit
 condition. General public administration endpoints, macOS/separate-host evidence
 and the full P0–P7 scope remain outstanding; P8 stays deferred.
+
+## Slice 85 — durable transfer intent and lifecycle observation
+
+Mini schema: use the existing directory's replicated original-command history
+for one checked before/after intent, indexed by stable operation ID. Reserve the
+responsibility and locally fresh target groups after committed ordered application;
+leave the published owner unchanged. Restore reconstructs locks/reservations by
+replay. A lifecycle read wrapper delegates the same application and persistence
+contracts, exposing manifest/intent queries through existing quorum barriers.
+This record gives the next source-fence/import and publication/activation steps a
+recoverable identity. It advances P6 split/merge, without satisfying that milestone.
+
+TransferIntent contract 1 binds exact identity, adapter, scheme, scope, authority,
+consecutive epoch/generation and distinct concrete source/target groups. The first
+format permits top-level whole-responsibility split/merge shapes only; delegated
+parent epoch coordination and partial retained-source ownership remain outstanding.
+Targets already referenced by local grants/current manifests or other intents are
+refused atomically. These local reservations are not a global group allocator.
+Construction rejection returns both original manifests. Valid losing commands
+retain original outcomes; exact retry and checkpoint recovery preserve their first
+application index. Ordinary metadata publication cannot bypass a lifecycle lock.
+No cancellation/unlock or actual fence/import/publication/activation is implemented.
+
+New VBTINT01 commands fit the existing 32768-byte publication envelope. VBDIR001
+schema/layout stays unchanged and replay reconstructs the new records; old readers
+fail closed on unknown commands. No rolling-upgrade claim is made. Pending parsing
+is capped at 8192 entries, including duplicates. LifecycleDirectory creates no
+second owner/store and charges inline and nested result capacity. Local status is
+not a foreign commit certificate. Host authorization and quorum read barriers
+remain mandatory where appropriate. No new effect, durability token, watermark,
+wire format, dependency or thread is introduced.
+
+Seven downstream tests cover shape, identity, retries, competing local targets,
+atomic truncation/restore, original resources, pending and result bounds. A native
+three-replica history commits initialization/publication/intent, discards the
+success observation, compacts two replicas, reopens actual files, elects a survivor,
+catches up the lagging replica by snapshot, retries and reads through a quorum
+barrier, then reopens again. It verifies unchanged source ownership throughout.
+This uses in-process delivery and graceful reopen, not a new TCP/QUIC history or
+modeled power loss. See docs/TRANSFER_INTENTS.md for the contract and limitations.
+
+Validation: all-feature library 57, directory 22, scopes 8 and routed 10 pass
+(97 tests); core-only library 48 and directory 20 pass (68 tests). All-target/
+all-feature Clippy with warnings denied passes. Initial Clippy failures identified
+large bounded cold-path enums and a manual repeat pattern; inline enum storage is
+explicitly retained/charged and the iterator now uses repeat_n. Targeted directory
+checks also passed before the broader regression. Inventory now has 66 contracts.
+
+Current P6 remains the first full durable split. Next establish non-serving target
+bootstrap, exact source fence/export and recoverable imports; following that verify
+publication and activation with interrupted-stage/no-dual-owner histories. Compatible
+merge/retry lineage follows the completed split, then P7 measured tuning. Full P0–P7,
+recursive lifecycle, macOS/separate-host validation and other scope-ledger gaps stay
+active; P8 remains deferred. Static service use remains independent of these gates.

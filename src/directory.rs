@@ -19,6 +19,7 @@
 //! authorization remains required before proposal. Durable progress comes solely
 //! from the existing Raft/WAL/application/checkpoint contracts.
 use crate::routing::codec::*;
+use crate::transfer::{TransferIntent, TransferIntentStatus, MAX_TRANSFER_INTENT_BYTES};
 use crate::{application::*, identity::*, log::*, routing::*};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -31,6 +32,7 @@ pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_DIRECTORY_PUBLICATION_BYTES: usize = 32768;
 pub const MAX_DIRECTORY_COMMAND_BYTES: usize = 8 * 1024 * 1024;
+pub const MAX_DIRECTORY_PENDING: usize = 8192;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryLimits {
@@ -238,6 +240,15 @@ pub enum DirectoryOutcome {
     UnknownResponsibility,
     OwnershipChange,
     OperationConflict,
+    TransferIntentRecorded,
+    LifecycleBusy,
+    TransferGroupBusy,
+}
+#[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
+enum Request {
+    Bootstrap,
+    Publish(DirectoryCommand),
+    Transfer(TransferIntent),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryReceipt {
@@ -272,6 +283,9 @@ pub struct Directory {
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
     history_bytes: usize,
+    /// Locks reference existing bounded history rather than duplicate manifests.
+    transfers: BTreeMap<ResponsibilityIdentity, OperationId>,
+    transfer_targets: BTreeSet<GroupIdentity>,
 }
 impl Directory {
     pub fn new(
@@ -293,6 +307,8 @@ impl Directory {
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
             history_bytes: 0,
+            transfers: BTreeMap::new(),
+            transfer_targets: BTreeSet::new(),
         })
     }
     /// Local applied diagnostic, not a distributed linearizable directory read.
@@ -331,7 +347,7 @@ impl Directory {
     pub fn is_initialized(&self) -> bool {
         self.initialized
     }
-    fn request(&self, bytes: &[u8]) -> Result<Option<DirectoryCommand>, ApplicationError> {
+    fn request(&self, bytes: &[u8]) -> Result<Request, ApplicationError> {
         if bytes.len() > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -339,18 +355,22 @@ impl Directory {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
             }
-            Ok(None)
+            Ok(Request::Bootstrap)
         } else {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            DirectoryCommand::decode(bytes).map(Some)
+            if bytes.starts_with(b"VBTINT01") {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            } else {
+                DirectoryCommand::decode(bytes).map(Request::Publish)
+            }
         }
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: DIRECTORY_APPLICATION_SCHEMA,
-            command_bytes: MAX_DIRECTORY_PUBLICATION_BYTES.max(46 + self.plan.encoded_len()),
+            command_bytes: MAX_TRANSFER_INTENT_BYTES.max(46 + self.plan.encoded_len()),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
                 + 28 * self.limits.operations
@@ -360,6 +380,9 @@ impl Directory {
     fn publish(&mut self, command: DirectoryCommand) -> DirectoryOutcome {
         let input = command.manifest.input();
         let id = input.responsibility;
+        if self.transfers.contains_key(&id) {
+            return DirectoryOutcome::LifecycleBusy;
+        }
         let Some(grant) = self.plan.manifests.get(&id) else {
             return DirectoryOutcome::UnknownResponsibility;
         };
@@ -405,6 +428,84 @@ impl Directory {
         self.manifests.insert(id, command.manifest);
         DirectoryOutcome::Published(generation)
     }
+    fn begin_transfer(
+        &mut self,
+        operation: OperationId,
+        intent: TransferIntent,
+    ) -> DirectoryOutcome {
+        let before = intent.before().input();
+        if before.authority != self.plan.authority
+            || !self.plan.manifests.contains_key(&before.responsibility)
+        {
+            return DirectoryOutcome::UnknownResponsibility;
+        }
+        if self.transfers.contains_key(&before.responsibility) {
+            return DirectoryOutcome::LifecycleBusy;
+        }
+        if self.manifests.get(&before.responsibility) != Some(intent.before()) {
+            return DirectoryOutcome::GenerationMismatch;
+        }
+        let targets = intent.targets();
+        for target in &targets {
+            let RouteTarget::Group(group) = target.target else {
+                unreachable!("checked intent")
+            };
+            if self.transfer_targets.contains(&group)
+                || self
+                    .plan
+                    .manifests
+                    .values()
+                    .chain(self.manifests.values())
+                    .any(|m| {
+                        let input = m.input();
+                        input.authority == group
+                            || input.parent.is_some_and(|p| p.group == group)
+                            || match &input.execution {
+                                ExecutionMode::Single(g) => *g == group,
+                                ExecutionMode::Partitioned(routes)
+                                | ExecutionMode::Delegated(routes) => {
+                                    routes.iter().any(|r| match r.target {
+                                        RouteTarget::Group(g) => g == group,
+                                        RouteTarget::Child(c) => c.group == group,
+                                    })
+                                }
+                            }
+                    })
+            {
+                return DirectoryOutcome::TransferGroupBusy;
+            }
+        }
+        for target in targets {
+            let RouteTarget::Group(group) = target.target else {
+                unreachable!("checked intent")
+            };
+            self.transfer_targets.insert(group);
+        }
+        self.transfers.insert(before.responsibility, operation);
+        DirectoryOutcome::TransferIntentRecorded
+    }
+    /// Local diagnostic/read capability. Serving requires the same quorum-backed
+    /// read barrier as manifest reads; LifecycleDirectory exposes that query.
+    pub fn transfer_intent_at(
+        &self,
+        required: u64,
+        operation: OperationId,
+    ) -> Result<Option<TransferIntentStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some(record) = self.history.get(&operation) else {
+            return Ok(None);
+        };
+        if record.outcome != DirectoryOutcome::TransferIntentRecorded {
+            return Ok(None);
+        }
+        Ok(Some(TransferIntentStatus {
+            operation,
+            index: record.index,
+            intent: TransferIntent::decode(&record.bytes)?,
+        }))
+    }
     fn execute(
         &mut self,
         index: u64,
@@ -427,11 +528,13 @@ impl Directory {
             {
                 return Err(ApplicationError::DedupCapacity);
             }
-            let outcome = if let Some(command) = command {
-                self.publish(command)
-            } else {
-                self.initialized = true;
-                DirectoryOutcome::Initialized
+            let outcome = match command {
+                Request::Publish(command) => self.publish(command),
+                Request::Transfer(intent) => self.begin_transfer(operation, intent),
+                Request::Bootstrap => {
+                    self.initialized = true;
+                    DirectoryOutcome::Initialized
+                }
             };
             self.history.insert(
                 operation,
@@ -523,7 +626,10 @@ impl ProposalAdmission for Directory {
             }
             Ok(())
         };
-        for (id, request) in pending {
+        for (count, (id, request)) in pending.enumerate() {
+            if count == MAX_DIRECTORY_PENDING {
+                return Err(ApplicationError::DedupCapacity);
+            }
             reserve(id, request)?;
         }
         reserve(operation, bytes)?;

@@ -1533,3 +1533,30 @@ receipt-vector capacity accounting, original policy return on construction failu
 query spare-capacity limits and collision classification. P6 lifecycle and
 no-dual-owner histories remain pending; P7 and full P0–P7 stay active, with macOS
 and separate-host operational evidence outstanding and P8 deferred.
+
+## Slice 85 — intent journal recovery
+
+Seven new directory contract tests cover bounded checked top-level split/merge
+intents, exact source/generation matching, unchanged ownership, conflicting local
+target reservations, original retry outcomes, lock reconstruction, every command/
+checkpoint truncation, atomic rejection, read bounds and pending-iterator ceilings.
+The existing directory suite gains one native three-replica real-file history:
+commit intent, lose observation, leave one replica behind, checkpoint/compact,
+reopen, elect, snapshot-catch-up, retry, quorum-read and reopen again. Original
+intent index and source manifest survive. Message delivery is host-driven in
+process; this adds no TCP/QUIC or power-failure evidence.
+
+All-feature library 57 + directory 22 + scopes 8 + routed 10 = 97 passing tests.
+Core-only library 48 + directory 20 = 68 passing tests. All-target/all-feature
+Clippy with warnings denied passes. Initial Clippy failures were confined to
+bounded enum layout and repeat iterator style, corrected before the passing run.
+Inventory records 66 contracts. Formatting, inventory shape/path and diff checks
+are recorded separately from behavioral conformance.
+
+An intent is not a source fence, target import receipt or ownership certificate.
+No source data moves and no owner changes in these histories. Local target
+reservations do not establish global placement authority. Delegated-parent epoch
+coordination, lifecycle cancellation/resumption, data publication/activation and
+full no-dual-owner histories remain pending under P6. Old implementations reject
+the new application command; no mixed-version deployment is validated. Full P0–P7
+remains active, including macOS/separate-host evidence; P8 is deferred.

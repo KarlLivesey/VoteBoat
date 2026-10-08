@@ -101,6 +101,10 @@ export/import seam and a bounded per-bucket counter that preserves retry outcome
 and pending outbox instructions. It supplies the data path for P6; ownership
 fencing, publication and activation remain separate lifecycle work.
 
+The [durable transfer intent journal](docs/TRANSFER_INTENTS.md) records proposed
+splits/merges and reserves local targets across recovery. Source fencing, import
+and activation remain pending.
+
 ## Run
 
 For three independent networked processes, start with the

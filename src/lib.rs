@@ -35,6 +35,7 @@ pub mod scope;
 pub mod secure;
 pub mod snapshot;
 pub mod snapshot_worker;
+pub mod transfer;
 pub mod transport;
 pub mod vote;
 pub mod wire;

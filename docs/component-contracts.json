@@ -1330,6 +1330,25 @@
         "tests/scopes.rs"
       ],
       "scope": "Optional in-memory data capability, contract version 1. Immutable bounded provider images name schema, scheme, range and source applied boundary without certifying authority or durability. Empty staging import requires sorted disjoint complete target coverage, exact metadata/content agreement, next target index and bounded aggregate capacity; original retries/outbox survive target rebasing, checkpoint and restore. ID collisions refuse atomically. Constructor rejection returns original buffers/policy. 4096 operations, 256 imports, 64 MiB image/aggregate ceiling and configured semantic limits; bounded pending simulation/receipts/queries. Host provider uses its own schema/format through public trait. Actual native sealed-but-unpublished versus published/reopened snapshots checked. No lifecycle intent/fence certificate, committed Import, target-ready quorum, route publication, activation, lineage protocol, general split/merge or external delivery/acknowledgment worker."
+    },
+    {
+      "design_id": "C05/C15",
+      "public_contract": "TransferIntent / TransferIntentStatus / LifecycleDirectory / DirectoryQuery / DirectoryRead",
+      "operations": [
+        "new",
+        "encode",
+        "decode",
+        "transfer_intent_at",
+        "read_at",
+        "checkpoint",
+        "restore"
+      ],
+      "native": "Directory intent journal and owning lifecycle query view over existing application/read/checkpoint contracts.",
+      "conformance": [
+        "tests/directory/transfer.rs",
+        "tests/directory.rs"
+      ],
+      "scope": "Contract 1, bounded exact top-level whole-responsibility split/merge intent; unchanged source manifest, local responsibility/target reservations and original retry outcomes reconstructed through existing schema-1 checkpoint replay. Quorum-backed lifecycle reads use existing read barriers. Native three-replica WAL/snapshot catch-up/reopen history uses in-process delivery. No foreign certificate, source fence, data import, ownership publication, activation, delegated-parent coordination or mixed-version claim; full lifecycle remains pending."
     }
   ],
   "not_yet_implemented": [

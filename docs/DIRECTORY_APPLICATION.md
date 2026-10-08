@@ -50,8 +50,9 @@ requirements may change. Identity, parent, authority, adapter, partition scheme,
 scope, ownership epoch, lifecycle state and execution mapping must remain identical.
 Thus ordinary publication cannot change owner groups, revive/fence a responsibility
 or silently change a child's voting rules. Placement metadata is a declaration;
-actual replica/quorum changes still require the P4 protocol. P6 will need explicit
-lifecycle records and a compatible schema evolution before ownership edits exist.
+actual replica/quorum changes still require the P4 protocol. The [transfer intent journal](TRANSFER_INTENTS.md) now records a proposed top-level
+split/merge and locks conflicting publications without changing ownership.
+Source fencing, import, ownership publication and activation remain pending.
 
 There is one DirectoryReceipt per Command, including the initialization command. Published includes the resulting route
 generation. Valid commands that lose their compare-and-set race or violate the
@@ -108,6 +109,7 @@ Directory application schema is 1. Fixed little-endian format tags are:
 | `VBMAN001` | Checked manifest fields; half-open u16 bucket boundaries, strict boolean/mode tags and bounded route count. IDs/incarnations are checked nonzero values. |
 | `VBDINIT1` | Exact authority, operation/history capacities and the complete canonical initial plan. Its bounded maximum is 8 MiB; actual required size depends on the plan. |
 | `VBDCMD01` | Expected generation (u64, zero means initial publication), u32 manifest length and one manifest. Maximum complete command is 32768 bytes. |
+| `VBTINT01` | Exact checked before/after split or merge manifests; bounded by the same 32768-byte ceiling. |
 | `VBDIR001` | Applied boundary, exact configured capacities/authority/bootstrap plan, then every unique original command in first-application order with its original index and operation ID. |
 
 `DirectoryCommand::encode(max_bytes)` and `Directory::bootstrap_command(max_bytes)`
