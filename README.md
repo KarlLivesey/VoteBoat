@@ -34,6 +34,11 @@ through the same framed transport API. The service selects it with
 replication, leader loss and native-file recovery. See
 [QUIC construction and limits](docs/QUIC_TRANSPORT.md).
 
+A release-mode [native performance harness](docs/PERFORMANCE.md) measures
+committed/applied writes through three real TCP/TLS or QUIC replicas, retains raw
+latencies, and verifies WAL recovery and exact retries. Results are finite local
+baselines; measured tuning and broader P7 validation remain work.
+
 Shared runtime components now schedule many groups through bounded ready queues
 and explicit deadlines. The 100-group history uses one WAL per node, batches
 persistence across groups, and demonstrates progress while one group's durable

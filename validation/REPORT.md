@@ -1992,3 +1992,46 @@ inactive. Final imported retries and values 9/13 survive further reopen.
 This selected pair is not the full transport/storage cross-product, arbitrary
 fault liveness, macOS/separate-host or mixed-version evidence. Earlier slice-97
 native results used the preceding protocol revision; they were not rerun here.
+
+### Slice 99 — native performance harness and explicit startup timing
+
+Added release-mode examples/native_benchmark.rs through public native Node,
+Counter, WAL and TCP/TLS/QUIC startup contracts. It retains raw dispatch/completion
+CSV, useful-write receipts and summaries only after quorum read, all-replica
+applied/value verification, full worker joins, actual WAL reopen and exact original
+first/last retry outcomes with unchanged final data. Admission/unknown outcomes
+inside warm-up or measurement invalidate a run. Recovery-only identical retries
+are explicitly counted. Inputs/outstanding work/history are bounded.
+
+Default-timer attempts exposed uncertainty: first QUIC window-32 attempt had an
+insufficiently diagnosed non-applied outcome; the second completed measurement but
+failed recovery retry with leadership change; longer TCP serial failed measured
+operation 123 with leadership change. No result from those failed attempts is
+counted. Two successful preliminary default-timer window-32 CSVs are retained,
+with their distinct harness revisions identified, without controlled improvement
+claims.
+
+NativeStartup and NativeMemberStartup now expose open_with_protocol_and_timers
+using the existing TimerConfig contract. Pure validity is shared with TimedShard;
+initial election overflow rejects before binding/files. Existing wrappers keep
+their original defaults. No quorum/authority/storage dependency or protocol changes.
+The final four sequential equal-count runs declare 50 ms heartbeat, 1000–1999 ms
+elections and default queue/poll budgets: TCP windows 1/32, QUIC windows 1/32,
+64 warm-up plus 256 measured useful writes. All four verify recovered value 320,
+original retries and worker joins, with zero recovery retries. Applied ops/s are
+8.902/36.242/7.156/25.136 respectively; p99 milliseconds are
+227.608/1558.050/546.170/1942.021. Raw samples, exact commands, source/binary hashes,
+compiler/dependencies, machine, filesystem/device/firmware and limitations are in
+validation/performance/slice99 and docs/PERFORMANCE.md. Independent CSV checks
+confirm IDs, indices, values, latency arithmetic and summary agreement.
+
+All-feature startup 10/10 and runtime 25/25 pass, including explicit TCP/QUIC
+invalid timing/no-side-effect and host-relative deadline checks. Native member
+learner/joint/final/checkpoint recovery with explicit timing passes 2/2. Final
+all-target/all-feature Clippy with warnings denied passes. This is a finite
+single-host closed-loop baseline, not sustainable throughput, fixed-p99 tuning,
+maintenance/open-loop/multi-group scaling, macOS or separate-host evidence. Full
+P0–P7 stays active; P8 remains deferred.
+
+Core-only runtime tests also pass 18/18, and the benchmark compiles with TLS
+without QUIC. Formatting, diff checks and the 71-contract inventory validator pass.

@@ -1,0 +1,1 @@
+protocol=Quic replicas=3 groups=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup=64 operations=256 window=32 max_inflight=32 elapsed_s=10.184409 applied_ops_s=25.136 p50_us=1304719.473 p95_us=1682402.912 p99_us=1942020.932 max_us=1942022.255 recovered_value=320 recovery_retries=0 retry_verified=true workers_joined=true

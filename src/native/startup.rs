@@ -206,12 +206,30 @@ impl NativeMemberStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        self.open_with_protocol_and_timers(protocol, TimerConfig::default(), app, wake, now)
+    }
+    /// Recover a member with explicit host liveness timing; no membership authority is added.
+    pub fn open_with_protocol_and_timers<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
         self.startup.open_with_protocol_as(
             protocol,
             app,
             wake,
             now,
-            StartupAuthorization::Member(self.provisioned_stores),
+            (
+                StartupAuthorization::Member(self.provisioned_stores),
+                timers,
+            ),
         )
     }
 }
@@ -475,7 +493,7 @@ impl NativeStartup {
             let listener = TcpListener::bind(self.listen)?;
             build(
                 self,
-                StartupAuthorization::Static,
+                (StartupAuthorization::Static, TimerConfig::default()),
                 &mut application,
                 &mut cleanup,
                 wake,
@@ -506,7 +524,29 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.open_with_protocol_as(protocol, app, wake, now, StartupAuthorization::Static)
+        self.open_with_protocol_and_timers(protocol, TimerConfig::default(), app, wake, now)
+    }
+    /// Explicit host liveness timing, validated before binding or opening files.
+    /// Quorum, durable dependency ordering and authority gates are unchanged.
+    pub fn open_with_protocol_and_timers<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.open_with_protocol_as(
+            protocol,
+            app,
+            wake,
+            now,
+            (StartupAuthorization::Static, timers),
+        )
     }
     fn open_with_protocol_as<A>(
         self,
@@ -514,15 +554,25 @@ impl NativeStartup {
         app: A,
         wake: Arc<dyn WorkerWake>,
         now: MonoTime,
-        authorization: StartupAuthorization,
+        options: (StartupAuthorization, TimerConfig),
     ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
     where
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        let (authorization, timers) = options;
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
         let result = (|| {
+            checked(timers.validate())?;
+            if timers
+                .election_min_ms
+                .checked_add(timers.election_spread_ms - 1)
+                .and_then(|wait| now.0.checked_add(wait))
+                .is_none()
+            {
+                return Err(error("timers", "initial election deadline overflow"));
+            }
             authorization.validate(&self)?;
             application
                 .as_ref()
@@ -540,7 +590,7 @@ impl NativeStartup {
                     let listener = TcpListener::bind(self.listen)?;
                     build(
                         self,
-                        authorization,
+                        (authorization, timers),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -568,7 +618,7 @@ impl NativeStartup {
                     let socket = std::net::UdpSocket::bind(self.listen)?;
                     build(
                         self,
-                        authorization,
+                        (authorization, timers),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -607,7 +657,7 @@ impl NativeStartup {
 }
 fn build<A, C: StartupConnector>(
     config: NativeStartup,
-    authorization: StartupAuthorization,
+    options: (StartupAuthorization, TimerConfig),
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
@@ -624,6 +674,7 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
+    let (authorization, timers) = options;
     let create = config.mode == NativeOpenMode::Create;
     let store = if create {
         let mut store = checked(NativeLogStore::create(
@@ -743,7 +794,7 @@ where
         shard,
         checked(DeadlineQueue::new(owner_id, 1))?,
         JitterEntropy::new(config.entropy_seed),
-        TimerConfig::default(),
+        timers,
         now,
     ))?;
     let outbound = checked(NativeOutbound::new(

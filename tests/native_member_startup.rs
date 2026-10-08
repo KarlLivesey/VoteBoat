@@ -746,12 +746,25 @@ fn open(
     config: NativeMemberStartup,
     protocol: NativePeerProtocol,
 ) -> Result<NativeNode<Counter, NativeServiceConnector>, Box<NativeStartupRejected<Counter>>> {
-    config.open_with_protocol(
+    let opened = config.open_with_protocol_and_timers(
         protocol,
+        TimerConfig {
+            heartbeat_ms: 50,
+            election_min_ms: 1000,
+            election_spread_ms: 1000,
+            expirations_per_poll: 32,
+        },
         Counter::new(100).unwrap(),
         Arc::new(ThreadWake::current()),
         MonoTime(0),
-    )
+    );
+    if let Ok(n) = &opened {
+        if let Some(token) = n.local().owner.deadline(group()) {
+            assert_eq!(token.kind, TimerKind::Election);
+            assert!((1000..2000).contains(&token.deadline.0));
+        }
+    }
+    opened
 }
 fn cleanup(mut rejected: Box<NativeStartupRejected<Counter>>) {
     assert!(rejected.application.is_some());

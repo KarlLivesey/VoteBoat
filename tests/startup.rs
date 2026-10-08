@@ -868,3 +868,100 @@ fn quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two
         selected_wire_cluster(voteboat::native::connect::NativePeerProtocol::Quic, version);
     }
 }
+
+#[test]
+fn explicit_startup_timers_validate_before_files_and_use_host_deadlines() {
+    use voteboat::native::connect::NativePeerProtocol;
+    let protocols = [
+        NativePeerProtocol::TcpTls,
+        #[cfg(feature = "quic")]
+        NativePeerProtocol::Quic,
+    ];
+    for protocol in protocols {
+        let timers = TimerConfig {
+            heartbeat_ms: 50,
+            election_min_ms: 1000,
+            election_spread_ms: 1000,
+            expirations_per_poll: 32,
+        };
+        let mut invalid = Vec::new();
+        for variant in 0..5 {
+            let mut t = timers;
+            match variant {
+                0 => t.heartbeat_ms = 0,
+                1 => t.election_min_ms = 50,
+                2 => t.election_spread_ms = 0,
+                3 => t.expirations_per_poll = 0,
+                _ => t.expirations_per_poll = 65537,
+            }
+            invalid.push((t, MonoTime(1000)));
+        }
+        invalid.push((timers, MonoTime(u64::MAX - 100)));
+        for (t, now) in invalid {
+            let root = root();
+            let mut rejected = config(root.clone(), NativeOpenMode::Create)
+                .open_with_protocol_and_timers(
+                    protocol,
+                    t,
+                    app(),
+                    Arc::new(ThreadWake::current()),
+                    now,
+                )
+                .err()
+                .unwrap();
+            assert!(rejected.application.is_some());
+            assert!(rejected.try_cleanup().unwrap());
+            assert!(!root.exists());
+        }
+        let root = root();
+        let n = config(root.clone(), NativeOpenMode::Create)
+            .open_with_protocol_and_timers(
+                protocol,
+                timers,
+                app(),
+                Arc::new(ThreadWake::current()),
+                MonoTime(1000),
+            )
+            .unwrap();
+        let token = n.local().owner.deadline(group()).unwrap();
+        assert_eq!(token.kind, TimerKind::Election);
+        assert!((2000..3000).contains(&token.deadline.0));
+        // Consume the common Node shutdown path for either connector type.
+        let mut n = n;
+        n.begin_shutdown();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while !n.is_drained() {
+            n.poll(MonoTime(1000), NodePollBudget::default()).unwrap();
+            assert!(Instant::now() < deadline);
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        let mut parts = n.into_parts().unwrap_or_else(|_| panic!("not drained"));
+        let mut dialer = parts
+            .peers
+            .take()
+            .unwrap()
+            .connector
+            .into_dialer()
+            .unwrap_or_else(|_| panic!("connector"));
+        let mut snapshots = parts.local.snapshots.take().unwrap();
+        let (mut log, mut snap) = (false, false);
+        loop {
+            let dial = match &mut dialer {
+                Some(d) => d.try_finish().unwrap(),
+                None => true,
+            };
+            if !log {
+                log = parts.local.persistence.try_reclaim().unwrap().is_some();
+            }
+            if !snap {
+                snap = snapshots.worker.try_reclaim().unwrap().is_some();
+            }
+            if log && snap && dial {
+                break;
+            }
+            assert!(Instant::now() < deadline);
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}

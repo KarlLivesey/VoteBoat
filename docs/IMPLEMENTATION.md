@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Initial finite three-replica TCP/QUIC committed/applied baseline and raw latency/recovery evidence implemented; bottleneck attribution, sustainable/offered-load/multi-group/maintenance measurements and fixed-p99 tuning remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
@@ -107,29 +107,27 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Delegated-parent lifecycle coordination (current, P6).** Bind parent/child epoch
-   changes to durable handoff decisions through the responsibility tree. Depends
-   on reusable owners and existing routed/directory contracts; completion requires
-   parent failure/recovery and recursive transfers without dual owners or an
-   ancestor commit in ordinary child writes. Deterministic parent binding is now
-   implemented, with native TCP/QUIC split and repeated movement evidence.
-   Permanent before-intent refusal, parent cancellation and fresh compatible
-   replanning now have selected native restart recovery evidence. Broader
-   recursive fault schedules and general retention remain in the scope ledger.
-   This connects P6 movement to P5 trees.
-2. **Committed/applied measurement baseline (next, P7).** Establish a
-   reproducible committed/applied baseline with workload, durability and latency
-   budget before changing lanes, batching, reclamation or recovery throttling.
-   Depends on usable routed/lifecycle paths; independent baseline measurements can
-   start earlier. Completion requires reproducible workload commands, hardware,
-   transport, replication/durability settings and throughput/p99 evidence. This
-   supplies the macro measured-tuning milestone with an actual baseline.
-3. **Measured tuning and broader validation (following, P7).** Use that baseline
-   to select batching/lanes/recovery changes; require attributable improvement at
-   fixed correctness and latency bounds with relevant failure regressions. Extend
-   later-source native-network retirement and recursive fault coverage. Linux/macOS
-   remain targets; macOS/separate-host execution is still unverified. This advances
-   the macro performance/validation milestone; CI stays background feedback.
+1. **Measurement and latency attribution (current, P7).** Slice 99 supplies an
+   initial finite native three-replica applied baseline, raw samples and durable
+   recovery checks. Explicit host timing is now available without changing defaults.
+   Next establish where time goes (WAL synchronization, queueing, host polling,
+   transport), then extend repeated/steady-state measurements. Depends on public
+   native provider/runtime seams; completion needs attributable costs and stable
+   bounded workload results, with all failures reported. Advances the macro
+   measured-tuning milestone; current finite runs do not complete P7.
+2. **Measured tuning (next, P7).** Select batching, independent group/lane placement,
+   scheduling or recovery changes from those costs. Declare a p99 budget and fixed
+   workload before comparison; require useful applied throughput improvement at
+   unchanged durability/authority with corresponding failure regressions. Depends
+   on attribution and the existing shared-runtime contracts. This supplies the
+   macro performance milestone with evidence instead of a concurrency-only speedup.
+3. **Broader lifecycle, load and platform validation (following, P7/cross-cutting).**
+   Extend offered-load/multi-group/maintenance/recovery measurements and selected
+   recursive faults/later-source native retirement/general retention. Preserve
+   outstanding public mutation/envelope and deployment gaps in the phase ledger.
+   Depends on existing handoff/runtime contracts and workload harness; completion
+   needs scoped fault/overload evidence and Linux/macOS operational results.
+   macOS/separate-host execution remains unverified; CI remains background feedback.
 
 ### How the current work fits globally
 
@@ -5866,3 +5864,111 @@ the 71-contract inventory pass. P7 committed/applied measurement is next, follow
 by measured tuning/broader validation. Remaining general ingress/envelope,
 retention, fault and Linux/macOS operational evidence stay in the full active
 P0–P7 objective; P8 remains deferred and CI remains background feedback.
+
+### Slice 99 mini schema — reproducible native committed/applied baseline
+
+Previous goal turn was progress: tested recovery slice f514eb8 is pushed and the
+worktree starts clean. Macro work moves to P7 measurement while all outstanding
+P0–P7 gaps remain in the scope ledger. Current deliverable: a runnable native
+three-replica benchmark through public Node/application/storage/transport seams.
+Next: use measured bottlenecks to select batching/polling/shared-lane tuning at a
+fixed p99 budget; following: multi-group/offered-load and maintenance/fault/platform
+validation. Dependencies are existing native startup and durable Counter; no new
+provider or benchmark-only consensus/application bypass is needed.
+
+Data shape: bounded arguments (fresh root, TCP/QUIC, measured operation count,
+concurrency window); fixed 64-operation warm-up separated from measurement.
+One useful +1 counter operation per 8-byte command, unique IDs and retained retry
+history. Track bounded outstanding tickets and raw dispatch/completion times,
+receipt index and operation. Count only actual committed/applied success; refusal,
+unknown outcome, unexpected receipt or timeout invalidates the run without silent
+retry. Report measured elapsed time, throughput and nearest-rank p50/p95/p99/max;
+retain CSV samples and original replica data. This is closed-loop bounded load,
+not offered-load tail latency or a sustainable multi-host result.
+
+Ownership/failure: exclusively create a caller-selected fresh root; reserve local
+TCP/UDP addresses, open three explicit native startup bindings using repository
+loopback-only test TLS credentials. Default production durability and queue/poll
+limits remain unchanged. Timeout leaves data for inspection; success drains and
+joins native workers, reopens all replicas from actual WAL/snapshot state, verifies
+full applied values and retries first/last operations without incrementing data,
+then joins again. No automatic deletion or reuse of existing data.
+
+Acceptance: release-mode TCP and QUIC runs with raw samples and successful full
+reopen verification; bounded serial and pipelined windows exercise receipt/ticket
+accounting. Record revision/compiler/features, workload/bounds/polling, hardware,
+filesystem/device and loopback topology, separating warm-up, measurement and drain.
+No optimization or throughput-improvement claim until a comparison supports it.
+
+Initial acceptance finding: TCP serial smoke and window-32 measurements both
+recover correctly, but the first QUIC/window-32 attempt returned a non-applied
+client outcome and was correctly rejected. The harness's generic error omitted
+which outcome/operation and phase caused it. Add those diagnostics and rerun to
+identify the actual cause before changing production behavior or measurement
+semantics. Do not hide this failed run or add automatic leadership retries.
+
+Diagnostic finding: the second QUIC/window-32 run completed warm-up and all 256
+measured writes, then recovery retry verification received
+`Unknown(LeadershipChanged)`. This is outside the measured interval. Keep any
+unknown during warm-up/measurement fatal. Refine only post-recovery verification:
+explicitly recampaign and retry the identical original operation/payload up to
+four times on leadership uncertainty, as the existing host contract allows;
+record the number of additional recovery attempts in the summary. Verify its
+original historical outcome and unchanged final value after all replicas apply.
+Other failures remain fatal. This tests actual recovery semantics without hiding
+measured errors; retain/report both preceding failed attempts and no performance
+claim for them. The default 150–300 ms election range is close to observed TCP
+serial latency; that suggests timer/durability investigation, not a proved cause.
+
+### Slice 99 timing refinement schema — explicit host startup configuration
+
+A third default-timer run (TCP serial, 256 operations) lost leadership at measured
+operation 123. It remains invalid and no throughput is reported. NativeStartup
+currently hard-codes TimerConfig::default despite TimedShard already supporting
+explicit host timing. Expose `open_with_protocol_and_timers` for static/member
+startup, retaining the original wrappers/defaults. This is necessary to measure
+and use the same public assembly with timing appropriate to the observed host;
+it neither changes quorum/durability rules nor silently alters service defaults.
+
+Factor the existing pure TimerConfig validity check into its public validate
+method and reuse it in TimedShard/startup. Startup additionally rejects initial
+host-time deadline overflow before binding/files. Pass the timer choice beside
+existing startup authorization into the same build path; no second engine,
+provider or runtime. Host must choose compatible settings on all nodes/reopens;
+timers affect liveness, never membership or read/write authority. Test invalid
+configuration leaves files absent/host app returned, selected election deadline
+uses host initial time, and original startup/recovery tests still pass. Benchmark
+will declare heartbeat 50 ms, election 1000–1999 ms, default expiration budget;
+re-run equal 256-operation serial/pipelined TCP/QUIC workloads under those settings.
+These comparisons change timing explicitly and do not claim a production fix or
+attribute instability to storage without further evidence.
+
+### Slice 99 result — first reproducible applied baseline and host timing
+
+Implemented the bounded native_benchmark release example, raw samples and durable
+verification, documented in docs/PERFORMANCE.md and validation/performance/slice99.
+Warm-up, measured receipts, follower drain, quorum verification, joins and actual
+WAL reopen are separate. Original first/last retries preserve historical outcomes
+and final data. Native startup now exposes existing host TimerConfig explicitly
+for static/member recovery; pure validation and initial overflow reject before
+files, while existing wrappers retain defaults. This advances usability under
+slow deployments without changing quorum, authority or durability semantics.
+
+Initial default-timer failures remain recorded: QUIC non-applied/recovery
+leadership uncertainty and TCP serial leadership uncertainty during measurement.
+No failed attempt contributes a throughput result. Under declared heartbeat
+50 ms/elections 1000–1999 ms, all four sequential TCP/QUIC window-1/32 runs pass
+with 256 measured operations and recovered value 320, zero recovery retries and
+joined workers. TCP is 8.902/36.242 applied ops/s, QUIC 7.156/25.136; larger windows
+worsen p99. These finite single-host observations establish an initial baseline,
+not fixed-p99 improvement, sustainable capacity or a proved cause of instability.
+
+Startup/runtime all-feature tests pass 10/25, member recovery 2, and all-target
+all-feature Clippy passes. Independent checks validate six retained CSVs and their
+summaries. The macro plan remains P7 measurement/attribution, tuning, then broader
+validation alongside all unfinished phase requirements. Full P0–P7 remains active,
+P8 deferred, macOS/separate-host unverified and CI background.
+
+Final feature checks: core-only runtime 18/18 and TLS-only benchmark compilation
+pass, plus formatting/diff/inventory. These are scoped checks, not a rerun of
+all earlier native lifecycle/fault histories after the additive startup API change.

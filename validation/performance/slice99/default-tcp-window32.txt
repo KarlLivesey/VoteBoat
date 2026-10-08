@@ -1,0 +1,1 @@
+protocol=TcpTls replicas=3 groups=1 payload_bytes=8 warmup=64 operations=256 window=32 max_inflight=32 elapsed_s=13.067328 applied_ops_s=19.591 p50_us=1591351.352 p95_us=2348636.993 p99_us=2541794.186 max_us=2604672.695 recovered_value=320 retry_verified=true workers_joined=true

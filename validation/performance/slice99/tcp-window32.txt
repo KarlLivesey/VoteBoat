@@ -1,0 +1,1 @@
+protocol=TcpTls replicas=3 groups=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup=64 operations=256 window=32 max_inflight=32 elapsed_s=7.063670 applied_ops_s=36.242 p50_us=824037.483 p95_us=1283364.236 p99_us=1558050.330 max_us=1688695.819 recovered_value=320 recovery_retries=0 retry_verified=true workers_joined=true

@@ -1,0 +1,1 @@
+protocol=Quic replicas=3 groups=1 payload_bytes=8 warmup=64 operations=256 window=32 max_inflight=32 elapsed_s=11.043303 applied_ops_s=23.181 p50_us=1404588.629 p95_us=1875706.780 p99_us=1934461.520 max_us=2223332.796 recovered_value=320 recovery_retries=0 retry_verified=true workers_joined=true

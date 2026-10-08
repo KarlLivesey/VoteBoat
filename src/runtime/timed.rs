@@ -31,6 +31,20 @@ impl Default for TimerConfig {
         }
     }
 }
+impl TimerConfig {
+    /// Pure timing validation; changing timers grants no consensus authority.
+    pub fn validate(&self) -> Result<(), RuntimeError> {
+        if self.heartbeat_ms == 0
+            || self.election_min_ms <= self.heartbeat_ms
+            || self.election_spread_ms == 0
+            || self.expirations_per_poll == 0
+            || self.expirations_per_poll > 65536
+        {
+            return Err(RuntimeError::InvalidLimits);
+        }
+        Ok(())
+    }
+}
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct TimerProgress {
     pub expired: usize,
@@ -78,12 +92,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         config: TimerConfig,
         now: MonoTime,
     ) -> Result<Self, RuntimeError> {
-        if config.heartbeat_ms == 0
-            || config.election_min_ms <= config.heartbeat_ms
-            || config.election_spread_ms == 0
-            || config.expirations_per_poll == 0
-            || config.expirations_per_poll > 65536
-            || size_of::<Event>() + size_of::<TimerToken>() > shard.limits.max_event_bytes
+        config.validate()?;
+        if size_of::<Event>() + size_of::<TimerToken>() > shard.limits.max_event_bytes
             || size_of::<Event>() + size_of::<TimerToken>() > shard.limits.group_control_bytes
             || size_of::<Event>() + size_of::<TimerToken>() > shard.limits.control_bytes
         {
