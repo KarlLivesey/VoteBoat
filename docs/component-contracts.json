@@ -1110,6 +1110,20 @@
         "tests/startup.rs"
       ],
       "scope": "Synchronous borrowed declared command/checkpoint envelope plus exact proposed journal record and index/commit context. Count actual configuration append, declared single command and prospective membership checkpoint including operation retention. Virtual opaque payload sizing without application-sized buffers. Unsupported providers deny; native malformed reports reject, and roster validates version/upper budgets before persistence even without connections. Exact real encode/decode boundaries and checkpoint history growth checked; host factory injection tests unsupported/mismatched/restrictive/malformed/positive cases. Native worker rejection/commit/reopen is one-voter local evidence. No format/token/generation/watermark or new durability effect. Does not enforce future application/dedup growth or arbitrary batching; service envelope integration and faulted remote activation remain pending."
+    },
+    {
+      "design_id": "C01/C04/C06/C10/C15/C20",
+      "public_contract": "NativeMemberStartup",
+      "operations": [
+        "validate",
+        "open_with_protocol"
+      ],
+      "native": "Explicit native member recovery over the existing NativeStartup assembly, verified recover_member_replica, native WAL/snapshot workers and selected TCP/TLS or QUIC connector.",
+      "conformance": [
+        "tests/native_member_startup.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "Caller-owned bounded provisioned exact stores/credentials and immutable original bootstrap; Recover with membership wire only. Exact local store must exist in committed and accepted recovered membership. Active roster derives from committed/accepted/rollback-reachable cores; every required peer needs exact provisioned identity, including old peers behind an uncommitted final. Extra provisioned hints do not grant active roster membership or votes; committed retirement permits obsolete provisioning to disappear. Native TCP dial/TCP-QUIC pins use the same explicit map. Verified checkpoint/application replay precedes exposure; failed recovery can advance sessions/restore returned application and returns existing cleanup ownership without rollback. Late failure joins workers/releases sockets. Native fixture learner/joint/final/checkpoint histories test both protocols, non-voting learner campaign, durable status/resumption hints and restored retry state; fixtures do not prove online distributed creation/commit. Static NativeStartup still rejects dynamic journals. No new durability effect/token/generation/watermark/format, no implicit enrollment or serving authority. Counter CLI, enforced application envelope and faulted remote lifecycle integration remain pending."
     }
   ],
   "not_yet_implemented": [

@@ -587,3 +587,36 @@ assertion uses a borrowed expected-message slice.
   all-target Clippy with warnings denied, core-only all-target compilation,
   all-feature API docs, formatting/diff and inventory shape/path checks pass
   (56 contracts). Inventory checks metadata, not protocol conformance.
+
+
+## Slice 60 — explicit native member restart
+
+- NativeMemberStartup uses existing verified member/snapshot recovery and shared
+  native assembly, with explicit bounded exact provisioned store/credential input.
+  Recover and membership wire are required. Both committed and accepted local
+  assignment must match. Roster peers include rollback history and require exact
+  provisioning; future/retired hints grant neither active roster nor voter status.
+  TCP dial authorization and TCP/QUIC pins use the same map. No implicit creation,
+  enrollment, durability effect/token, generation, watermark or format change.
+- Eight downstream cases pass: seeded native learner/joint/accepted-final/final/
+  compacted histories reopen over TCP and QUIC, restore application retry state,
+  preserve non-voting campaign rejection without term advance, refuse uncommitted
+  local assignment, missing/wrong rollback-peer identity, removed local member
+  and missing checkpoint data. Static startup remains strict; obsolete peer
+  credentials can be omitted after final commitment. Pre-I/O mode/version denial
+  and TCP/QUIC late failure exercise original application/worker/socket cleanup.
+- Existing startup suite: 9 pass, including selected worker administration,
+  static three-node wire 2/3/4 TCP/QUIC histories, independent host wake and
+  construction failure cleanup. All-feature/all-target Clippy with warnings
+  denied and core-only all-target compilation pass. All-feature API docs pass.
+- Histories seed native durable journal fixtures; they do not show online remote
+  commit/enrollment of those configurations. Recovery may advance store sessions
+  and restore the returned application before a later rejection; cleanup is not
+  rollback. Native service enrollment/admin endpoints, enforced application
+  bounds and full faulted remote transitions remain required. Configuration
+  ingress stays gated; full P0–P7 remains active. No macOS, physical failure,
+  performance or full protocol proof claim.
+- Final eight-case restart rerun also verifies recovered joint finalization hints
+  and accepted-final WaitForCommit resumption. All-feature/all-target Clippy with
+  warnings denied, formatting, diff checks and inventory shape/path checks pass
+  (57 contracts). Inventory validation checks metadata, not protocol correctness.

@@ -158,5 +158,9 @@ invalid footprints and successful explicit capacity. See the
 The caller/service must keep the declared envelope consistent with its application
 schema, accepted command sizes, checkpoint/deduplication growth and storage limits.
 This query alone does not enforce future application growth or arbitrary batching.
-Service enrollment, dynamic startup recovery and complete faulted remote transitions
-remain pending; public configuration ingress is still gated.
+NativeMemberStartup now supplies explicit verified dynamic member restart for Rust
+hosts. Service enrollment, enforced application envelopes and complete faulted
+remote transitions remain pending; public configuration ingress is still gated.
+
+Explicit native member restart is documented in the [service/embedding guide](COUNTER_SERVICE.md).
+The original static NativeStartup entry points retain their rejection of dynamic journals.

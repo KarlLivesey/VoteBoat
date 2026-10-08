@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission implemented; service integration/envelope enforcement and faulted online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission and explicit native member restart implemented; service enrollment/envelope enforcement and faulted online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -76,33 +76,35 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Slices 51–58 establish routing/credentials, readiness, local proposals,
-partial-final recovery, owned administration, durable resumption and native
-placement. Slice 59 adds selected codec/transport envelope admission. These are
-implemented foundations, not completion of online add/promote/remove.
+Slices 51–59 establish routing/credentials, readiness, local proposals,
+partial-final recovery, owned administration, durable resumption, native placement
+and selected transport envelope checks. Slice 60 supplies explicit native member
+restart. These remain foundations for complete online add/promote/remove.
 
-1. **Selected provider envelope admission (current slice 59, P4).** Count the
-   proposed append, declared command and prospective membership checkpoint
-   through the actual codec, and check selected factory/roster limits and format
-   at execution. Depends on journal preview, codec count pass and Node authorization.
-   Completion checks: real encode/decode versus count, exact/one-byte-short
-   budgets, retained operation growth, host provider replacement and native
-   pre-persistence rejection/valid commit/reopen. Supplies transport admission
-   for the online-membership milestone without asserting arbitrary future growth.
-2. **Native enrollment and administrative service integration (next, P4).**
-   Connect provisioned peer enrollment, dynamic recovery and administration/status
-   endpoints to placement, readiness and capacity admission. Bind the declared
-   command/checkpoint envelope to actual application/schema/storage bounds and
-   enforce it as retry state grows. Depends on slices 51–59 and authenticated
-   service scope. Check denial before mutation, durable lost-reply resumption,
-   enrollment/restart and matching selected TCP/QUIC assemblies. This exposes a
-   usable native path for fault testing, not an early public configuration release.
-3. **Fault-tested remote membership release (following, P4).** Exercise actual
-   add/catch-up/promote/remove over TCP/QUIC, with partial joint/final delivery,
-   weighted/recursive policies, leader loss, rollback, snapshots and restart.
-   Depends on item 2. Resolve activation/catch-up gaps before releasing public
-   configuration ingress. Completes safe placement for P5 responsibility routing
-   and P6 ownership movement; P5–P7 remain the global sequence above.
+Slice 60 is verified: eight native TCP/QUIC restart cases cover learner/joint/final
+and compacted recovery, rollback provisioning, removed-local refusal and cleanup.
+Seeded recovery fixtures do not establish distributed enrollment or commitment.
+
+1. **Enrollment and administrative service integration (current, P4).** Connect
+   explicit durable enrollment and administration/status endpoints to placement,
+   readiness, capacity and member restart. Bind/enforce declared application
+   schema/command/checkpoint bounds as deduplication grows. Depends on slices
+   51–60 and authenticated service scope. Check exact committed assignments,
+   rejection before mutation, lost-reply resumption and matching TCP/QUIC
+   assemblies. Provides the native path for release testing, not an early opening
+   of public configuration ingress.
+2. **Fault-tested remote membership release (next, P4).** Exercise actual
+   add/catch-up/promote/remove with partial joint/final delivery, weighted and
+   recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
+   Depends on item 1. Resolve activation/catch-up gaps before releasing ingress.
+   Completes safe placement for P5 responsibility routing and P6 ownership movement;
+   P5–P7 remain the global capability chain above.
+3. **Responsibility manifests and routing (following, P5).** Implement the first
+   complete manifest-to-group request path with explicit responsibility identities,
+   validated placement and bounded routing. Depends on safe P4 placement changes
+   for moving replicas. Check stale manifests, wrong ownership and unavailable
+   parents; normal child writes must not require ancestor commits. This establishes
+   the routing foundation for P6 data movement, fencing and activation.
 
 ### How the current work fits globally
 
@@ -111,7 +113,7 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Integrate native enrollment and administration | Placement, durable resumption and selected transport envelope checks now exist; the native service must bind them to real enrollment, recovery and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
+| Integrate native enrollment and administration | Placement, durable resumption, selected transport envelope checks and explicit native member restart now exist; the native service must bind them to enrollment and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
@@ -3527,3 +3529,40 @@ and support dynamic recovery/admin endpoints. Faulted partial-joint and remote
 activation histories remain release gates. Configuration ingress stays closed;
 full P0–P7 remains active and no macOS/performance/formal completeness claim is made.
 See validation/REPORT.md for actual checks.
+
+## Slice 60 — explicit native member restart
+
+Mini schema plan: introduce NativeMemberStartup as explicit trusted deployment
+input containing original startup/bootstrap and a bounded exact provisioned-store
+map. Require Recover and membership wire selection; never create/enroll from
+incoming messages. Reuse verified recover_member_replica, existing store sessions
+and native assembly/cleanup. Derive active peers from recovered committed/accepted
+and rollback-reachable views; require exact provisioning for all of them. Retain
+extra provisioned hints without granting votes or active roster membership. Return
+the application and normal cleanup handle on failure; files/sessions are not rolled
+back. No new effects, durability token, generation, watermark or file/wire format.
+
+NativeMemberStartup::open_with_protocol reopens a locally committed and accepted
+exact member, including a node absent from the original bootstrap voter set.
+The common build path selects static or member verification explicitly. Native
+TCP dial authorizations and TCP/QUIC pins use the selected provisioned map. The
+roster uses the recovered required peers, retaining old peers behind uncommitted
+finals and allowing obsolete provisioning to disappear after final commitment.
+Existing static startup entry points continue to refuse dynamic journals.
+
+Eight downstream tests seed native durable journal fixtures and reopen learner,
+joint, accepted-final, committed-final and compacted state over TCP/QUIC. They
+check non-voting campaign rejection without term advance, restored application
+retry state, retained/future hints without active voting authority, exact rollback
+peer provisioning, uncommitted local assignment, removed-local refusal, missing
+checkpoint rejection, pre-I/O mode/version validation and late worker/socket
+cleanup. Existing startup histories still pass, including real three-node static
+wire/session selection. Seeded fixture recovery is not proof of distributed
+configuration commitment or native network enrollment. See the
+[service/embedding guide](COUNTER_SERVICE.md).
+
+Next is native enrollment/admin service integration and enforced application
+bounds, then full faulted remote transitions. Public configuration ingress stays
+gated, including partial-joint catch-up/election release checks. This advances
+P4 restart usability without changing its exit; P5–P7 remain active. Linux results
+are not macOS, physical failure, performance or full proof evidence.

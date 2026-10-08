@@ -250,3 +250,48 @@ Run the service acceptance tests with:
 ```sh
 cargo test --locked --offline --test counter_service --test startup
 ```
+
+## Explicit native member restart for Rust hosts
+
+NativeMemberStartup provides the native assembly for an already durably assigned
+learner or changed member. Wrap a NativeStartup in Recover mode with a bounded
+provisioned_stores map of exact node/store identities, then call
+open_with_protocol with TCP/TLS or QUIC, a fresh application and the explicit host
+wake/clock. Select membership wire format 2–4 (the tests here use 4). NativeStartup's
+original static open methods retain their existing rejection of dynamic journals.
+
+Keep the original bootstrap; it is immutable history, not the current voter map.
+The provisioned map includes the local store and exactly the peer entries whose
+addresses/pins/names you supply, with at most 1,024 total stores and 1 MiB of retained
+peer certificate/name allocation. It may include future/retired peer credentials.
+Only verified durable membership determines local voting status and active peers.
+The local exact store must exist in both committed and accepted membership.
+A learner stays non-voting; a removed local member is refused. Address hints cannot
+bootstrap, enroll or activate it. Member startup never falls back to Create.
+
+The active roster is derived from the recovered core's committed, accepted and
+rollback-reachable replica sets. Every required peer needs its exact provisioned
+store and TLS credentials, including an old voter absent from an uncommitted final
+head. After final commitment, obsolete provisioning may be omitted. Extra
+provisioned routes are retained for later admission but grant no votes or active
+roster membership. TCP dial authorization and QUIC pins use that same provisioning
+map; no identity is guessed from the original bootstrap voter set.
+
+Recovery uses recover_member_replica to verify checkpoint pins, restore the fresh
+application and replay committed history before returning the Node. It uses the
+same native WAL/snapshot workers, codec, runtime and cleanup contract as static
+startup. Recovery can advance store/snapshot sessions and restore the returned
+application before a later rejection; cleanup is not rollback. Poll the returned
+NativeStartupRejected::try_cleanup before reopening files. Successful shutdown
+must drain and reclaim/join the selected workers as usual. No new durable token,
+generation, wire/store format or serving authority is introduced.
+
+Eight downstream tests cover learner/joint/final and compacted restart over both
+protocols, restored retry state, rejected learner campaign, missing rollback peers,
+wrong peer incarnation, uncommitted local assignment, removed local membership,
+missing checkpoint data, pre-I/O mode/version rejection, and late worker/socket
+cleanup. These histories seed native durable journal fixtures; they do not prove
+online distributed creation/commit of those configurations. The counter CLI still
+uses static startup. Native enrollment, service administration/enforced application
+envelopes and full faulted remote transitions remain pending; public configuration
+ingress stays gated.

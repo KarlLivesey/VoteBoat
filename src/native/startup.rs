@@ -60,6 +60,61 @@ pub struct NativeStartup {
     pub entropy_seed: u64,
     pub limits: NodeLimits,
 }
+/// Explicit trusted deployment input for reopening a durably assigned member.
+/// Bootstrap remains the original group identity/history. Provisioned stores
+/// and peer credentials are not membership authority and may include future peers.
+pub struct NativeMemberStartup {
+    pub startup: NativeStartup,
+    pub provisioned_stores: BTreeMap<NodeId, StoreIdentity>,
+}
+enum StartupAuthorization {
+    Static,
+    Member(BTreeMap<NodeId, StoreIdentity>),
+}
+impl StartupAuthorization {
+    fn stores<'a>(&'a self, config: &'a NativeStartup) -> &'a BTreeMap<NodeId, StoreIdentity> {
+        match self {
+            Self::Static => &config.bootstrap.voter_stores,
+            Self::Member(stores) => stores,
+        }
+    }
+    fn validate(&self, config: &NativeStartup) -> Result<(), NativeStartupError> {
+        match self {
+            Self::Static => config.validate(),
+            Self::Member(stores) => config.validate_member_stores(stores),
+        }
+    }
+}
+impl NativeMemberStartup {
+    /// Pure provisioning validation; durable assignment and checkpoint data are
+    /// verified during open. Success here is not membership authority.
+    pub fn validate(&self) -> Result<(), NativeStartupError> {
+        self.startup
+            .validate_member_stores(&self.provisioned_stores)
+    }
+    /// Recover existing native files with explicit member semantics. Failure may
+    /// have advanced sessions/restored the returned application; poll cleanup
+    /// before reopening resources. No implicit creation or enrollment occurs.
+    pub fn open_with_protocol<A>(
+        self,
+        protocol: NativePeerProtocol,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.startup.open_with_protocol_as(
+            protocol,
+            app,
+            wake,
+            now,
+            StartupAuthorization::Member(self.provisioned_stores),
+        )
+    }
+}
 #[derive(Debug)]
 pub struct NativeStartupError {
     pub stage: &'static str,
@@ -167,7 +222,10 @@ impl StartupConnector for NativeServiceConnector {
         }
     }
 }
-fn pins(config: &NativeStartup) -> BTreeMap<NodeId, TlsPeer> {
+fn pins(
+    config: &NativeStartup,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+) -> BTreeMap<NodeId, TlsPeer> {
     config
         .peers
         .iter()
@@ -177,7 +235,7 @@ fn pins(config: &NativeStartup) -> BTreeMap<NodeId, TlsPeer> {
                 TlsPeer {
                     identity: PeerIdentity {
                         node: *n,
-                        store: config.bootstrap.voter_stores[n],
+                        store: stores[n],
                     },
                     certificate: p.certificate.clone(),
                     server_name: p.server_name.clone(),
@@ -188,6 +246,7 @@ fn pins(config: &NativeStartup) -> BTreeMap<NodeId, TlsPeer> {
 }
 fn tcp_connector(
     config: &NativeStartup,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
     local: LocalIdentity,
     listener: TcpListener,
     wake: Arc<dyn WorkerWake>,
@@ -196,9 +255,7 @@ fn tcp_connector(
 ) -> Result<NativePeerConnector, NativeStartupError> {
     cleanup.dialer = Some(checked(NativeTcpDialer::spawn(
         local,
-        config
-            .bootstrap
-            .voter_stores
+        stores
             .iter()
             .filter(|(n, _)| **n != config.node)
             .map(|(n, s)| (*n, *s))
@@ -213,7 +270,7 @@ fn tcp_connector(
             session: SessionLimits::default(),
         },
         config.tls.clone(),
-        pins(config),
+        pins(config, stores),
         cleanup.dialer.take().unwrap(),
         Some(listener),
         now,
@@ -228,15 +285,34 @@ fn tcp_connector(
 
 impl NativeStartup {
     pub fn validate(&self) -> Result<(), NativeStartupError> {
-        let voters = &self.bootstrap.voter_stores;
-        if voters.len() > 1024
-            || voters
+        self.validate_stores(&self.bootstrap.voter_stores)
+    }
+    fn validate_member_stores(
+        &self,
+        stores: &BTreeMap<NodeId, StoreIdentity>,
+    ) -> Result<(), NativeStartupError> {
+        if self.mode != NativeOpenMode::Recover || self.tls.wire_version() < 2 {
+            return Err(error(
+                "configuration",
+                "member recovery requires existing files and membership wire",
+            ));
+        }
+        self.validate_stores(stores)
+    }
+    fn validate_stores(
+        &self,
+        stores: &BTreeMap<NodeId, StoreIdentity>,
+    ) -> Result<(), NativeStartupError> {
+        if stores.len() > 1024
+            || self
+                .bootstrap
+                .voter_stores
                 .keys()
                 .copied()
                 .collect::<std::collections::BTreeSet<_>>()
                 != *self.bootstrap.policy.voters()
-            || voters.get(&self.node) != Some(&self.store)
-            || self.peers.len() + 1 != voters.len()
+            || stores.get(&self.node) != Some(&self.store)
+            || self.peers.len() + 1 != stores.len()
             || self.peers.contains_key(&self.node)
             || (self.listen.port() == 0 && !self.peers.is_empty())
         {
@@ -247,7 +323,7 @@ impl NativeStartup {
         }
         let mut retained = 0usize;
         for (id, peer) in &self.peers {
-            if !voters.contains_key(id)
+            if !stores.contains_key(id)
                 || peer.address.port() == 0
                 || peer.address.ip().is_unspecified()
                 || peer.certificate.is_empty()
@@ -294,12 +370,13 @@ impl NativeStartup {
             let listener = TcpListener::bind(self.listen)?;
             build(
                 self,
+                StartupAuthorization::Static,
                 &mut application,
                 &mut cleanup,
                 wake,
                 now,
-                |config, local, wake, cleanup| {
-                    tcp_connector(config, local, listener, wake, cleanup, now)
+                |config, stores, local, wake, cleanup| {
+                    tcp_connector(config, stores, local, listener, wake, cleanup, now)
                 },
             )
         })();
@@ -324,10 +401,24 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        self.open_with_protocol_as(protocol, app, wake, now, StartupAuthorization::Static)
+    }
+    fn open_with_protocol_as<A>(
+        self,
+        protocol: NativePeerProtocol,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+        authorization: StartupAuthorization,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
         let result = (|| {
-            self.validate()?;
+            authorization.validate(&self)?;
             if application.as_ref().unwrap().applied_index() != 0 {
                 return Err(error(
                     "application",
@@ -339,12 +430,13 @@ impl NativeStartup {
                     let listener = TcpListener::bind(self.listen)?;
                     build(
                         self,
+                        authorization,
                         &mut application,
                         &mut cleanup,
                         wake,
                         now,
-                        |config, local, wake, cleanup| {
-                            tcp_connector(config, local, listener, wake, cleanup, now)
+                        |config, stores, local, wake, cleanup| {
+                            tcp_connector(config, stores, local, listener, wake, cleanup, now)
                                 .map(|c| NativeServiceConnector::Tcp(Box::new(c)))
                         },
                     )
@@ -366,12 +458,13 @@ impl NativeStartup {
                     let socket = std::net::UdpSocket::bind(self.listen)?;
                     build(
                         self,
+                        authorization,
                         &mut application,
                         &mut cleanup,
                         wake,
                         now,
-                        |config, local, _, _| {
-                            let peers = pins(config)
+                        |config, stores, local, _, _| {
+                            let peers = pins(config, stores)
                                 .into_iter()
                                 .map(|(n, p)| (n, (config.peers[&n].address, p)))
                                 .collect();
@@ -404,12 +497,14 @@ impl NativeStartup {
 }
 fn build<A, C: StartupConnector>(
     config: NativeStartup,
+    authorization: StartupAuthorization,
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
     now: MonoTime,
     connector: impl FnOnce(
         &NativeStartup,
+        &BTreeMap<NodeId, StoreIdentity>,
         LocalIdentity,
         Arc<dyn WorkerWake>,
         &mut Cleanup,
@@ -464,7 +559,12 @@ where
         )?
     };
     let app = application.as_mut().unwrap();
-    let core = checked(recover_replica(
+    let recover = if matches!(authorization, StartupAuthorization::Member(_)) {
+        recover_member_replica
+    } else {
+        recover_replica
+    };
+    let core = checked(recover(
         config.node,
         config.bootstrap.group,
         &store,
@@ -491,6 +591,23 @@ where
         node: config.node,
         store: owner_id.store,
     };
+    let remote = checked(PeerAssignments::from_cores(
+        local,
+        [&core],
+        PeerRosterLimits::default().peers,
+    ))?
+    .peers()
+    .collect::<BTreeMap<_, _>>();
+    let stores = authorization.stores(&config);
+    if remote
+        .iter()
+        .any(|(node, store)| stores.get(node) != Some(store))
+    {
+        return Err(error(
+            "recovery",
+            "provision every retained/rollback peer with its exact store",
+        ));
+    }
     let mut shard = checked(Shard::new(
         owner_id,
         ShardLimits {
@@ -515,13 +632,6 @@ where
         },
         OutboundLimits::default(),
     ))?;
-    let remote = config
-        .bootstrap
-        .voter_stores
-        .clone()
-        .into_iter()
-        .filter(|(n, _)| *n != config.node)
-        .collect::<BTreeMap<_, _>>();
     let roster = checked(PeerRoster::new(
         PeerRosterConfig {
             local,
@@ -609,7 +719,7 @@ where
         cleanup.snapshots.as_ref().unwrap().binding(),
         SnapshotRouterLimits::default(),
     ))?;
-    let connector = connector(&config, local, wake.clone(), cleanup)?;
+    let connector = connector(&config, stores, local, wake.clone(), cleanup)?;
     let built = NativeNode::<A, C>::from_parts(
         NativeNodeParts {
             local: NativeLocalParts {
@@ -626,7 +736,27 @@ where
                 }),
             },
             peers: Some(PeerParts {
-                admission_routes: None,
+                admission_routes: matches!(authorization, StartupAuthorization::Member(_)).then(
+                    || {
+                        stores
+                            .iter()
+                            .filter(|(node, _)| **node != config.node)
+                            .map(|(node, store)| {
+                                (
+                                    *node,
+                                    PeerRoute {
+                                        store: *store,
+                                        direction: if config.node < *node {
+                                            ConnectDirection::Dial(config.peers[node].address)
+                                        } else {
+                                            ConnectDirection::Accept
+                                        },
+                                    },
+                                )
+                            })
+                            .collect()
+                    },
+                ),
                 connector,
                 roster,
                 factory,
