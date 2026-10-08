@@ -25,10 +25,12 @@ persistence across groups, and demonstrates progress while one group's durable
 completion is delayed. Public scheduler, timer, clock and election-jitter seams
 support host replacements. `TimedShard` automatically manages election and
 heartbeat deadlines, including stale queued expirations and overload retries.
-The asynchronous WAL worker is implemented; production transport and snapshot
-worker assembly remain caller-driven work in progress.
+The asynchronous WAL worker and authenticated framed peer driver are implemented.
+The native three-node/100-group durable history now runs through actual loopback
+TCP/TLS connections, including leader replacement and restart. Production effect
+staging, peer roster/reconnect management and snapshot workers remain in progress.
 
-Transport, physical WAL reclamation and online reconfiguration remain under
+Production node assembly, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run
@@ -125,7 +127,7 @@ Control capacity is reserved, snapshots have a separate ceiling, and the native
 queue fairly visits peers and traffic classes. Local send success carries no
 Raft acknowledgement. The host drives polling and budgets retained rejected
 effects, encoded buffers and receive queues separately. This queue creates no
-sockets; framed transport assembly remains pending.
+sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
 `wire::WireCodec` supplies a public bounded framing seam. The native
 `NativeWireCodec` implements [wire format 1](docs/WIRE_FORMAT.md), including all
@@ -144,9 +146,20 @@ No listener or executor is created implicitly. Polls limit external I/O calls
 and bytes, and handshake progress has byte and time ceilings. Production
 composition must use `require_authenticated` before delivering Raft traffic;
 simulator providers are rejected. See [the channel contract](docs/SECURE_SESSIONS.md)
-for lifecycle and buffer-accounting details. The native channel is tested over
-real loopback TCP; the three-node consensus histories still use simulated
-connections pending framed transport assembly.
+for lifecycle and buffer-accounting details.
+
+`transport::PeerTransport` supplies a bounded connection-level send/receive
+contract. Construct `native::transport::NativePeerTransport` with a ready
+authenticated session, selected codec, outbound queue and transport limits.
+Submit a dispatched outbound batch; rejection returns it. Drive `poll` with
+separate session-I/O and plaintext budgets. Short writes retain the original
+batch and encoded frame until local channel output drains. Consume `take_send`
+through the original queue's `complete` to release its retained credits. One
+completed receive batch blocks further frame reads until `take_received` moves
+it into separately bounded ingress. Neither event proves Raft durability.
+The host supplies a bounded peer roster, fair visits, ingress capacity and
+reconnect policy. See [the transport contract](docs/TRANSPORT.md) for ownership,
+failure and shutdown details.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

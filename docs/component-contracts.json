@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-authenticated-tls-sessions",
+  "status": "shared-runtime-with-authenticated-framed-peer-transport",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -265,7 +265,7 @@
       "operations": ["binding", "limits", "usage", "peer_usage", "submit", "poll", "complete", "close", "is_drained"],
       "native": "NativeOutbound",
       "conformance": ["tests/outbound.rs", "tests/worker.rs"],
-      "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. Local completion is not a Raft acknowledgement. No wire format, sockets, security or persistent delivery claim; transport remains pending."
+      "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. PeerTransport consumes dispatched batches and returns them for exact completion after buffer release. Local completion is not a Raft acknowledgement or persistent delivery claim."
     },
     {
       "design_id": "C08",
@@ -281,7 +281,15 @@
       "operations": ["security", "state", "binding", "limits", "poll", "read_plaintext", "write_plaintext", "is_flushed", "close", "revoke"],
       "native": "NativeTlsSession<I: Read + Write> (tls feature)",
       "conformance": ["tests/secure.rs"],
-      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. Real loopback TLS/wire tests plus partial-I/O, backpressure and failure tests. Simulator-only providers rejected. A complete framed transport/consensus network assembly remains pending."
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Simulator-only providers rejected."
+    },
+    {
+      "design_id": "C06",
+      "public_contract": "PeerTransport",
+      "operations": ["binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
+      "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
+      "conformance": ["tests/transport.rs", "tests/worker.rs"],
+      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress/effect staging and snapshot workers remain pending."
     },
     {
       "design_id": "C13",
@@ -294,7 +302,7 @@
   ],
   "not_yet_implemented": [
     "physical-wal-reclamation",
-    "transport",
+    "node-transport-roster-and-reconnect-assembly",
     "asynchronous-snapshot-worker-assembly",
     "buffers",
     "admission-policy",

@@ -92,7 +92,7 @@ its implementation.
 The native channel and codec are exercised together over a real loopback TCP
 connection. Partial reads/writes and channel backpressure are tested separately
 with real Rustls over bounded in-memory streams. The three-node/100-group durable
-histories still use simulated connections. A bounded framed receive/send driver,
-production effect staging, reconnect policy and asynchronous snapshot workers
-remain pending. Do not describe this channel provider as a complete networked
-Raft service.
+native WAL history now also traverses real TCP/TLS using the public
+`PeerTransport` frame driver. Production effect staging, peer roster/reconnect
+policy and asynchronous snapshot workers remain pending. Do not describe this
+channel provider as a complete networked Raft service.

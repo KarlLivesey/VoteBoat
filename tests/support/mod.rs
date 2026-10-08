@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #![allow(dead_code)]
 pub mod outbound;
+#[cfg(feature = "tls")]
+pub mod tls;
 use std::collections::BTreeMap;
 #[cfg(feature = "native")]
 use std::{cell::RefCell, io, rc::Rc};

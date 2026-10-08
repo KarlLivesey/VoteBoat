@@ -9,8 +9,8 @@ record claims that unimplemented phases already work.
 
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
-| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; production transport/runtime remain |
+| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; native WAL worker history traverses real TCP/TLS; production node/effect staging and asynchronous snapshots remain |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/outbound scheduling, asynchronous shared WAL batches and 100-group overload isolation implemented; production transport coalescing, effect staging and snapshot workers remain |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
@@ -978,11 +978,95 @@ simulated connections. Partial-frame transport, production effect staging,
 reconnect policy and asynchronous snapshot workers remain pending. macOS
 execution and hardware power cuts remain unobserved. Full P0–P7 remains active.
 
+## Slice 13: bounded authenticated peer transport
+
+The public `transport::PeerTransport` contract now owns one authenticated peer
+stream, multiplexing groups in each bounded frame. `NativePeerTransport<S, C>`
+uses the public session and codec contracts. Construction copies the selected
+outbound queue's exact binding and limits; it does not own or create another
+queue. Ready authenticated identity, wire version and resource compatibility
+are required before traffic. The full resource and lifecycle contract is in
+[TRANSPORT.md](TRANSPORT.md).
+
+One dispatched outbound batch occupies the send slot through its unobserved
+terminal completion. It retains original messages and vector capacity, together
+with a separately bounded encoded buffer. Short writes advance an exact offset.
+Only full acceptance and drained local channel output release that buffer and
+produce Sent. Failure first drops the channel and partial buffers, then returns
+the original batch as Failed with unknown remote delivery. The owner consumes
+that exact batch through the original outbound queue to release its credits.
+Neither event is a Raft acknowledgement or durable token. Existing persistence,
+quorum, term/configuration/incarnation and read-barrier checks still control
+protocol effects and application results.
+
+Receive reads only the fixed bounded codec prefix before reserving its declared
+frame. Complete decode validates the authenticated scope and retained-object
+ceiling before publishing one batch. A held receive blocks further frame reads
+while sends can continue. Complete receive/send slots remain available after a
+later failure; partial frames never escape. Session identity/generation changes
+fail the handle. Owners allocate fresh connection generations and reject
+obsolete bindings before ingress. No new persisted watermark or consensus
+generation is introduced by this driver.
+
+Session I/O and plaintext visits have separate call/byte budgets. Alternating
+read/write preference supports single-call visits; WouldBlock stops the blocked
+direction for that visit. Close rejects sends, finishes the accepted send and
+closes the owned channel, discarding partial receive work. Abort releases only
+this logical channel and conservatively fails an accepted send. Original
+outbound retention, TLS/socket memory, concurrent connections and ingress are
+separate budgets. The driver creates no hidden threads, runtime or listeners.
+
+### Slice 13 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full local suites pass: 141 default native/TLS tests, 130 native-without-TLS
+  tests and 56 core/host-only tests. All three builds pass Clippy with warnings
+  denied; formatting and documentation pass.
+- Injected trusted-host channels exercise seven-byte short I/O, separate poll
+  budgets, retained queue credits, exact terminal ownership, unobserved-result
+  backpressure, delayed channel flush and failed writes. Their authentication
+  capability is test attestation, not evidence of encryption.
+- Holding a decoded batch stops the next frame while opposite-direction sends
+  still complete. Zero-budget polling performs no plaintext I/O. Single-call
+  visits with simultaneous sends preserve progress in both directions.
+- Invalid prefixes, checksum corruption, partial-frame EOF, changed connection
+  generation, stale outbound binding, excessive original vector capacity,
+  insecure providers and incompatible buffer limits fail without partial
+  message delivery. Failed construction releases its owned logical channel.
+- Local close drains an accepted send; abort returns it once as Failed and
+  releases frame/channel buffers. Already decoded input survives later abort.
+  Queue credits remain charged until the owner consumes the returned batch.
+- Actual TCP/TLS exchanges simultaneous 100-group batches plus a bounded
+  snapshot carrying a nine-voter recursive policy. Snapshot installation
+  durability remains covered by its separate existing history.
+- The real-file three-node/100-group WAL-worker history now selects boxed
+  `PeerTransport` instances backed by native TLS sockets. It preserves delayed
+  durability isolation, overload retries, exact application retries, fresh
+  reads, an isolated old leader's uncommitted write/read, replacement, healing
+  and recovery with fresh persisted store sessions. A bounded staging queue
+  retains transport admission rejections; decoded ingress reserves a full batch
+  before transfer. Accepted/received frame accounting prevents the test driver
+  from treating locally drained sockets as remote quiescence.
+- Native-without-TLS and core-only histories retain their host/simulated paths.
+  A core-only fixture demonstrates object-safe transport selection, not a full
+  alternative production provider. An injected host queue and single-fixture
+  wire version 37 codec compose with the native driver, including frames whose
+  entire contents fit in their fixed prefix. No full alternative codec claim.
+
+Partition and duplicate faults in the worker history are injected after decode;
+this is not kernel-level network fault simulation. A production node owner,
+global peer roster/reconnect policy, shared effect/ingress staging, integrated
+automatic timers and asynchronous snapshot workers remain pending. The snapshot
+installation history still uses simulated connections. macOS execution and
+hardware power cuts remain unobserved. Full P0–P7 remains active.
+
 ## Next slice
 
-Assemble bounded framed send/receive transport over `SecureSession`, then
-production effect staging. Preserve complete batch ownership through short
-stream writes, bounded decoded ingress and connection failure. Integrate the
-durable histories with the assembled transport while retaining downstream
-substitution and simulator rejection. CI remains background feedback; relevant
-local checks guide continued direct commits without a remote gate.
+Build the bounded production owner around the existing timed shard, persistence
+worker, outbound queue and peer transports. Preserve owned effects across
+admission rejection, exact durable dependencies, fair connection visits and
+separately reserved decoded ingress. Add asynchronous snapshot work without
+bypassing log/application installation dependencies. CI remains background
+feedback; relevant local checks guide continued direct commits without a remote
+gate.

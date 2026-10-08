@@ -17,9 +17,10 @@ use std::collections::{BTreeMap, VecDeque};
 use support::outbound::HostOutbound;
 use support::*;
 use voteboat::outbound::{
-    LocalSendResult, OutboundBinding, OutboundBudget, OutboundError, OutboundLimits, OutboundQueue,
-    OutboundUsage,
+    LocalSendResult, OutboundBatch, OutboundBinding, OutboundBudget, OutboundError, OutboundLimits,
+    OutboundQueue, OutboundUsage,
 };
+use voteboat::transport::{PeerTransport, TransportError, TransportPollBudget};
 use voteboat::wire::{WireCodec, WireScope};
 use voteboat::{application::*, identity::*, log::*, raft::*, runtime::*, worker::*};
 
@@ -300,6 +301,10 @@ struct WorkerNode<W: PersistenceWorker> {
     outbound: Box<dyn OutboundQueue>,
     rejected_sends: usize,
     wire: Option<Box<dyn WireCodec>>,
+    transports: BTreeMap<NodeId, Box<dyn PeerTransport>>,
+    staged_sends: VecDeque<OutboundBatch>,
+    sent_frames: usize,
+    received_frames: usize,
     held: Option<WorkerEvent>,
     hold: bool,
     results: Vec<CounterReceipt>,
@@ -362,6 +367,10 @@ impl<W: PersistenceWorker> WorkerNode<W> {
             outbound,
             rejected_sends: 0,
             wire: None,
+            transports: BTreeMap::new(),
+            staged_sends: VecDeque::new(),
+            sent_frames: 0,
+            received_frames: 0,
             held: None,
             hold: false,
             results: vec![],
@@ -517,6 +526,54 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
         let mut progress = false;
         for node in nodes.iter_mut() {
             progress |= node.progress();
+            if !node.transports.is_empty() {
+                if node.staged_sends.is_empty() {
+                    node.staged_sends.extend(node.outbound.poll(32));
+                }
+                for _ in 0..node.staged_sends.len().min(32) {
+                    let batch = node.staged_sends.pop_front().unwrap();
+                    let transport = node.transports.get_mut(&batch.ticket.peer).unwrap();
+                    match transport.submit(batch) {
+                        Ok(()) => {
+                            node.sent_frames += 1;
+                            progress = true;
+                        }
+                        Err(rejected) if rejected.reason == TransportError::Overloaded => {
+                            node.staged_sends.push_back(*rejected.batch)
+                        }
+                        Err(e) => panic!("transport rejected a valid outbound batch: {e:?}"),
+                    }
+                }
+                assert!(node.staged_sends.len() <= 32);
+                for transport in node.transports.values_mut() {
+                    let p = transport
+                        .poll(MonoTime(0), TransportPollBudget::default())
+                        .unwrap();
+                    progress |= p.read_bytes > 0
+                        || p.written_bytes > 0
+                        || p.session.read_bytes > 0
+                        || p.session.written_bytes > 0
+                        || p.sent
+                        || p.received;
+                    if let Some(done) = transport.take_send() {
+                        assert_eq!(done.connection, transport.binding());
+                        node.outbound.complete(done.batch, done.result).unwrap();
+                        progress = true;
+                    }
+                    // Reserve a complete codec-sized batch in the bounded test
+                    // network before transferring receive ownership.
+                    if network.len() <= 8192 - 128 {
+                        if let Some(received) = transport.take_received() {
+                            assert_eq!(received.connection, transport.binding());
+                            assert!(received.messages.len() <= 128);
+                            network.extend(received.messages);
+                            node.received_frames += 1;
+                            progress = true;
+                        }
+                    }
+                }
+                continue;
+            }
             for mut batch in node.outbound.poll(32) {
                 assert!(network.len() + batch.messages.len() <= 8192);
                 if let Some(codec) = &node.wire {
@@ -580,11 +637,14 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
         }
         if !progress {
             if network.is_empty()
+                && nodes.iter().map(|n| n.sent_frames).sum::<usize>()
+                    == nodes.iter().map(|n| n.received_frames).sum::<usize>()
                 && nodes.iter().all(|n| {
                     n.worker.is_drained()
                         && n.pending.is_empty()
                         && n.messages.is_empty()
                         && n.outbound.is_drained()
+                        && n.staged_sends.is_empty()
                 })
             {
                 return;
@@ -828,6 +888,43 @@ mod native {
             }
         }
     }
+    #[cfg(feature = "tls")]
+    fn enable_tls_mesh<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
+        use voteboat::{
+            native::transport::NativePeerTransport, secure::LocalIdentity,
+            transport::TransportLimits, wire::WireLimits,
+        };
+        for a in 0..nodes.len() {
+            for b in a + 1..nodes.len() {
+                let local = |n: &WorkerNode<W>| LocalIdentity {
+                    node: n.outbound.binding().node,
+                    store: n.outbound.binding().store,
+                };
+                let (left, right) =
+                    support::tls::pair(local(&nodes[a]), local(&nodes[b]), (a * 3 + b + 1) as u64);
+                let left = NativePeerTransport::new(
+                    left,
+                    NativeWireCodec::new(WireLimits::default()).unwrap(),
+                    &*nodes[a].outbound,
+                    TransportLimits::default(),
+                )
+                .unwrap();
+                let right = NativePeerTransport::new(
+                    right,
+                    NativeWireCodec::new(WireLimits::default()).unwrap(),
+                    &*nodes[b].outbound,
+                    TransportLimits::default(),
+                )
+                .unwrap();
+                nodes[a]
+                    .transports
+                    .insert(node(b as u64 + 1), Box::new(left));
+                nodes[b]
+                    .transports
+                    .insert(node(a as u64 + 1), Box::new(right));
+            }
+        }
+    }
     #[test]
     fn three_native_wal_workers_replicate_and_recover_acknowledged_operations() {
         let root =
@@ -865,6 +962,8 @@ mod native {
             .iter()
             .map(|n| n.worker.binding().store)
             .collect::<Vec<_>>();
+        #[cfg(feature = "tls")]
+        enable_tls_mesh(&mut nodes);
         worker_cluster_history(&mut nodes);
         for node in &mut nodes {
             node.shard.close_admission();
@@ -900,6 +999,8 @@ mod native {
             .collect::<Vec<_>>();
         // The explicitly stopped follower missed operation 4; both surviving
         // durable voters recover its success before the follower catches up.
+        #[cfg(feature = "tls")]
+        enable_tls_mesh(&mut nodes);
         for (id, node) in nodes.iter().enumerate() {
             for g in 1..=100 {
                 let app = &node.apps[&group(g)];

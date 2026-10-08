@@ -25,6 +25,7 @@ pub mod raft;
 pub mod runtime;
 pub mod secure;
 pub mod snapshot;
+pub mod transport;
 pub mod vote;
 pub mod wire;
 pub mod worker;
