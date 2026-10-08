@@ -1863,9 +1863,56 @@ Full P0–P7 stays active. The native node facade and coordinated lifecycle,
 physical WAL cleaning, membership/policy transitions, recursive responsibilities,
 safe split/merge and P7 throughput evidence remain unfinished.
 
+## Slice 28: owning node facade and coordinated lifecycle
+
+`runtime::Node` now owns the selected local and peer provider assemblies and
+composes ReplicaDriver with PeerDriver. NativeNode/NativeNodeParts/NativeLocalParts
+aliases select the same public native implementations. Construction validates
+quiescence, local/service/provider scopes, required snapshot support and configured
+remote voter store coverage, returning all original parts on rejection. Hosts
+still explicitly create/recover files, restore/replay applications, assemble
+security/routing/resource configuration and start selected native workers.
+Construction creates no hidden I/O, runtime, clock or fallback log.
+
+The facade exposes original proposal/read admission, opaque reply polling and
+completion, cancellation, bounded polling and explicit campaign/heartbeat/checkpoint
+control. Both budgets and monotonic time prevalidate before either driver works.
+Existing tracked operation/read identities, committed/application validation and
+original capacity charges remain authoritative; no new durability token,
+watermark, protocol generation or consensus/storage/wire format is introduced.
+
+Healthy shutdown closes service intake first, waits for original accepted service
+work and consumer-held replies, then closes owner admission/timers and peers.
+Local/network/provider drain precedes closed handle reclamation. Explicit abort or
+driver failure fences the owner, preserves earlier replies and outstanding
+provider/driver ownership, and reports uncertain writes as Unknown. Failed nodes
+cannot resume polling or masquerade as healthy drained nodes; into_recovery
+returns original components for existing explicit drain/recovery contracts.
+Handle drain does not imply native thread join. See [node lifecycle](NODE.md).
+
+Nine independent host tests exercise exact held write/read outputs, constructor
+component return, missing peers/snapshots and wrong voter stores, time/budget
+prevalidation, unknown-group original input ownership, independent instances,
+Written-before-Durable abort, rejected accepted-work retention, provider failure,
+earlier outputs across abort and failed-core cleanup. A native three-node/100-group
+history selects NativeNode with real WAL files, native workers and actual loopback
+TCP/TLS. It exercises snapshot catch-up, writes, quorum reads, checkpoints, healthy
+shutdown and explicit worker joins, actual-file recovery with fresh store sessions,
+original dedup retries and further replication. Existing lower-driver histories
+continue to cover partition/election/reconnect/failure schedules.
+
+Local validation passes 279 default/native/TLS tests, 257 native-only tests and
+164 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL header
+checks pass. Socket histories ran with loopback access. These finite Linux runs
+do not establish macOS execution, arbitrary schedules or performance claims.
+
+Full P0–P7 stays active. Native filesystem/provider convenience assembly, physical
+WAL cleaning, membership/policy transitions, recursive responsibilities, safe
+split/merge and P7 throughput evidence remain unfinished.
+
 ## Next slice
 
-Compose the local and peer drivers into the native node facade with explicit
-construction/recovery and coordinated shutdown, then physical WAL cleaning with
-durable replacement/recovery dependencies. CI stays background feedback; relevant
-local checks guide direct commits.
+Implement physical WAL cleaning with durable replacement/recovery dependencies
+and crash tests. Native provider setup remains explicit. CI stays background
+feedback; relevant local checks guide direct commits.

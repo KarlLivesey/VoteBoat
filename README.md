@@ -31,12 +31,13 @@ TCP/TLS connections, including leader replacement and restart. The bounded
 `EffectOwner` now reserves output space before execution and retains exact effect
 leases through rejection, persistence, application and read completion. Peer
 connection coordination is now bounded by `transport::PeerRoster` and driven by
-`runtime::PeerDriver`; the full node facade remains in progress. An explicit
+`runtime::PeerDriver`; `runtime::Node` now owns both drivers and selected providers
+with coordinated shutdown and fenced recovery. An explicit
 asynchronous snapshot worker now preserves publication, WAL durability and
 application-installation dependencies, and supports local checkpoints and logical
 compaction while both storage workers retain their handles.
 
-Production node assembly, physical WAL reclamation and online reconfiguration remain under
+Native filesystem/provider assembly, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run
@@ -172,7 +173,11 @@ this library driver with PeerDriver for network coordination. See
 and ingress router, driving exact connection lifetimes, bounded rejected-send
 staging, local send completion and decoded ingress. The native histories use both
 library drivers; only test fault injection stays in the harness. See
-[peer reactor assembly](docs/PEER_DRIVER.md). The full node facade remains unfinished.
+[peer reactor assembly](docs/PEER_DRIVER.md). `runtime::Node` now owns both drivers,
+offers proposal/read/admin entry points and coordinates shutdown with original
+reply and worker ownership. Native aliases select the same public contracts;
+hosts explicitly open/recover providers and join reclaimed workers. See the
+[owning node facade](docs/NODE.md).
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
@@ -266,8 +271,8 @@ prefaces and handshakes, checks identity/generation before returning a session,
 and retains canceled/expired dialing until actual completion. Native 100-group
 histories use one long-lived connector per node and explicitly drain/join their
 dial workers. See [connection establishment](docs/CONNECTIONS.md). Local
-client/read/result admission and peer driving are implemented; the full native
-node facade and coordinated lifecycle remain in progress.
+client/read/result admission and peer driving are composed by the owning node
+facade. Native filesystem/provider setup remains explicit.
 
 Embedding hosts submit original queries through `runtime::ReadRequests`, feed
 shared owner steps back to it, drive ReadProbe/ReadAck messages, and dispatch

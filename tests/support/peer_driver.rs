@@ -28,7 +28,7 @@ fn local(id: u64) -> LocalIdentity {
         },
     }
 }
-struct Session {
+pub(super) struct Session {
     binding: SessionBinding,
     drops: Rc<Cell<usize>>,
 }
@@ -77,7 +77,7 @@ struct ConnectControl {
     polls: usize,
     drops: Rc<Cell<usize>>,
 }
-struct Connector(Rc<RefCell<ConnectControl>>);
+pub(super) struct Connector(Rc<RefCell<ConnectControl>>);
 impl PeerConnector for Connector {
     type Endpoint = ();
     type Session = Session;
@@ -175,7 +175,7 @@ struct TransportControl {
     wrong: bool,
     incoming: Option<ReceivedBatch>,
 }
-struct Transport {
+pub(super) struct Transport {
     session: Session,
     control: Rc<RefCell<TransportControl>>,
     sending: Option<OutboundBatch>,
@@ -267,7 +267,7 @@ impl PeerTransport for Transport {
     }
 }
 type Controls = Rc<RefCell<BTreeMap<NodeId, Rc<RefCell<TransportControl>>>>>;
-struct Factory {
+pub(super) struct Factory {
     controls: Controls,
     bad: bool,
 }
@@ -309,50 +309,73 @@ struct Fixture {
     connect: Rc<RefCell<ConnectControl>>,
     transports: Controls,
 }
+pub(super) fn parts_for(
+    owner: RuntimeOwner,
+    outbound: OutboundBinding,
+) -> PeerParts<Connector, Factory> {
+    let connect = Rc::new(RefCell::new(ConnectControl {
+        ready: true,
+        ..Default::default()
+    }));
+    parts_with(owner, outbound, connect, Default::default())
+}
+fn parts_with(
+    owner: RuntimeOwner,
+    outbound: OutboundBinding,
+    connect: Rc<RefCell<ConnectControl>>,
+    transports: Controls,
+) -> PeerParts<Connector, Factory> {
+    PeerParts {
+        connector: Connector(connect),
+        factory: Factory {
+            controls: transports,
+            bad: false,
+        },
+        roster: PeerRoster::new(
+            PeerRosterConfig {
+                local: local(1),
+                outbound,
+                first_generation: SecureSessionGeneration::new(1).unwrap(),
+                last_generation: SecureSessionGeneration::new(100).unwrap(),
+                wire_version: 1,
+                limits: PeerRosterLimits {
+                    peers: 2,
+                    connecting: 2,
+                    connect_timeout_ms: 10,
+                    retry_min_ms: 1,
+                    retry_max_ms: 4,
+                    ..Default::default()
+                },
+                transport_limits: TransportLimits::default(),
+            },
+            [(node(2), identity(2)), (node(3), identity(3))].into(),
+            MonoTime(0),
+        )
+        .unwrap(),
+        ingress: IngressRouter::new(
+            IngressBinding {
+                owner,
+                local: local(1),
+                generation: IngressGeneration::new(1).unwrap(),
+            },
+            IngressLimits::default(),
+        )
+        .unwrap(),
+        routes: [
+            (node(2), ConnectDirection::Accept),
+            (node(3), ConnectDirection::Dial(())),
+        ]
+        .into(),
+    }
+}
 impl Fixture {
     fn parts(&self) -> PeerParts<Connector, Factory> {
-        PeerParts {
-            connector: Connector(self.connect.clone()),
-            factory: Factory {
-                controls: self.transports.clone(),
-                bad: false,
-            },
-            roster: PeerRoster::new(
-                PeerRosterConfig {
-                    local: local(1),
-                    outbound: self.outbound.binding(),
-                    first_generation: SecureSessionGeneration::new(1).unwrap(),
-                    last_generation: SecureSessionGeneration::new(100).unwrap(),
-                    wire_version: 1,
-                    limits: PeerRosterLimits {
-                        peers: 2,
-                        connecting: 2,
-                        connect_timeout_ms: 10,
-                        retry_min_ms: 1,
-                        retry_max_ms: 4,
-                        ..Default::default()
-                    },
-                    transport_limits: TransportLimits::default(),
-                },
-                [(node(2), identity(2)), (node(3), identity(3))].into(),
-                MonoTime(0),
-            )
-            .unwrap(),
-            ingress: IngressRouter::new(
-                IngressBinding {
-                    owner: self.owner.identity(),
-                    local: local(1),
-                    generation: IngressGeneration::new(1).unwrap(),
-                },
-                IngressLimits::default(),
-            )
-            .unwrap(),
-            routes: [
-                (node(2), ConnectDirection::Accept),
-                (node(3), ConnectDirection::Dial(())),
-            ]
-            .into(),
-        }
+        parts_with(
+            self.owner.identity(),
+            self.outbound.binding(),
+            self.connect.clone(),
+            self.transports.clone(),
+        )
     }
     fn new() -> Self {
         let (owner, _) = single(1);

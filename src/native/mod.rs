@@ -16,6 +16,8 @@
 pub mod connect;
 pub mod dial;
 pub mod log_store;
+#[cfg(feature = "tls")]
+pub mod node;
 pub mod outbound;
 pub mod runtime;
 pub mod snapshot_store;

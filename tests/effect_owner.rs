@@ -1005,6 +1005,8 @@ mod client_admission {
         assert!(c.is_drained());
     }
 }
+#[path = "support/node.rs"]
+mod node_facade;
 #[path = "support/peer_driver.rs"]
 mod peer_driver;
 #[path = "support/replica_driver.rs"]
@@ -1590,6 +1592,8 @@ fn bulk_leases_leave_a_reserved_visit_for_control() {
 #[cfg(feature = "native")]
 mod native {
     use super::*;
+    #[cfg(feature = "tls")]
+    include!("support/native_node.rs");
     use std::{
         sync::Arc,
         time::{Duration, Instant},
@@ -1984,17 +1988,16 @@ mod native {
         }
     }
     #[cfg(feature = "tls")]
-    fn mesh(nodes: &mut [Node]) {
+    fn mesh_parts<F>(nodes: &mut [Node], mut make_factory: impl FnMut(&Node) -> F)
+        -> Vec<PeerParts<voteboat::native::connect::NativePeerConnector,F>>
+        where F: voteboat::transport::PeerTransportFactory<
+    <voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::Session>{
         use voteboat::{
             connect::*,
             dial::DialLimits,
-            native::{
-                connect::*, dial::NativeTcpDialer, transport::NativeTransportFactory,
-                wire::NativeWireCodec,
-            },
+            native::{connect::*, dial::NativeTcpDialer},
             secure::{LocalIdentity, SessionLimits},
             transport::{PeerRoster, PeerRosterConfig, PeerRosterLimits, TransportLimits},
-            wire::WireLimits,
         };
         let locals = nodes
             .iter()
@@ -2057,6 +2060,7 @@ mod native {
             .iter()
             .map(|(c, _)| (c.local().node, c.listener_addr().unwrap().unwrap()))
             .collect::<BTreeMap<_, _>>();
+        let mut parts = Vec::new();
         for (n, (connector, roster)) in nodes.iter_mut().zip(assemblies) {
             let local = n.outbound.binding().node;
             let routes = locals
@@ -2073,23 +2077,36 @@ mod native {
                     )
                 })
                 .collect();
-            let factory = support::peer_fault::Factory {
-                native: NativeTransportFactory::new(
-                    NativeWireCodec::new(WireLimits::default()).unwrap(),
-                    TransportLimits::default(),
-                )
-                .unwrap(),
-                faults: n.faults.clone(),
-            };
+            let factory = make_factory(n);
+            parts.push(PeerParts {
+                connector,
+                roster,
+                factory,
+                ingress: n.ingress.take().unwrap(),
+                routes,
+            });
+        }
+        parts
+    }
+    #[cfg(feature = "tls")]
+    fn mesh(nodes: &mut [Node]) {
+        use voteboat::{
+            native::{transport::NativeTransportFactory, wire::NativeWireCodec},
+            transport::TransportLimits,
+            wire::WireLimits,
+        };
+        let parts = mesh_parts(nodes, |n| support::peer_fault::Factory {
+            native: NativeTransportFactory::new(
+                NativeWireCodec::new(WireLimits::default()).unwrap(),
+                TransportLimits::default(),
+            )
+            .unwrap(),
+            faults: n.faults.clone(),
+        });
+        for (n, network) in nodes.iter_mut().zip(parts) {
             n.peer_driver = Some(
                 PeerDriver::new(
-                    PeerParts {
-                        connector,
-                        roster,
-                        factory,
-                        ingress: n.ingress.take().unwrap(),
-                        routes,
-                    },
+                    network,
                     n.owner.identity(),
                     &n.outbound,
                     PeerDriverLimits::default(),
@@ -2798,7 +2815,7 @@ fn closing_drains_accepted_work_and_disarms_automatic_timers() {
 mod snapshot_routes {
     use super::*;
     use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
-    struct Worker {
+    pub(super) struct Worker {
         binding: SnapshotWorkerBinding,
         sequence: u64,
         pending: VecDeque<(SnapshotWorkTicket, SnapshotWork)>,
@@ -2898,6 +2915,10 @@ mod snapshot_routes {
         let runtime = timed(2, &mut log, count, 3);
         let wal = HostWorker::new(log);
         let owner = EffectOwner::new(runtime, wal.binding(), EffectOwnerLimits::default()).unwrap();
+        let (worker, router) = for_owner(&owner, requests);
+        (owner, wal, worker, router)
+    }
+    pub(super) fn for_owner(owner: &Owner, requests: usize) -> (Worker, SnapshotRouter) {
         let binding = SnapshotWorkerBinding {
             store: owner.identity().store,
             generation: SnapshotWorkerGeneration::new(1).unwrap(),
@@ -2921,7 +2942,7 @@ mod snapshot_routes {
             },
         )
         .unwrap();
-        (owner, wal, worker, router)
+        (worker, router)
     }
     fn stage(owner: &mut Owner, g: u128) -> EffectLease {
         let mut app = Counter::new(20).unwrap();

@@ -17,6 +17,30 @@ use super::*;
 use support::outbound::HostOutbound;
 use voteboat::outbound::*;
 type Parts<'a> = ReplicaParts<'a, Ready, Timers, Entropy, Counter, HostWorker, HostOutbound>;
+pub(super) fn local_parts(
+    voters: u64,
+) -> NodeLocalParts<
+    Ready,
+    Timers,
+    Entropy,
+    Counter,
+    HostWorker,
+    HostOutbound,
+    super::snapshot_routes::Worker,
+> {
+    let f = Fixture::voters(2, voters);
+    let (worker, router) = super::snapshot_routes::for_owner(&f.owner, 16);
+    NodeLocalParts {
+        owner: f.owner,
+        persistence: f.worker,
+        applications: f.apps,
+        results: f.results,
+        clients: f.clients,
+        reads: f.reads,
+        outbound: f.outbound,
+        snapshots: Some(NodeSnapshots { worker, router }),
+    }
+}
 struct Fixture {
     owner: Owner,
     worker: HostWorker,

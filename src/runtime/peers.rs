@@ -60,7 +60,7 @@ impl Default for PeerDriverBudget {
     }
 }
 impl PeerDriverBudget {
-    fn validate(self) -> Result<(), PeerDriverError> {
+    pub(super) fn validate(self) -> Result<(), PeerDriverError> {
         if self.connection_visits > 4096
             || self.peer_visits > 4096
             || self.sends > 4096

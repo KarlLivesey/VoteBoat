@@ -216,6 +216,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn identity(&self) -> RuntimeOwner {
         self.runtime.owner()
     }
+    pub fn validate_quiescent(&self) -> Result<(), EffectOwnerError> {
+        self.check()?;
+        self.runtime
+            .validate_quiescent()
+            .map_err(EffectOwnerError::Runtime)
+    }
     pub fn limits(&self) -> EffectOwnerLimits {
         self.limits
     }

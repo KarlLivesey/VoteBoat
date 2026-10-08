@@ -255,6 +255,9 @@ impl<P: PeerTransport> PeerRoster<P> {
     pub fn authorized_peers(&self) -> impl Iterator<Item = NodeId> + '_ {
         self.peers.keys().copied()
     }
+    pub fn peer_identity(&self, peer: NodeId) -> Option<PeerIdentity> {
+        self.peers.get(&peer).map(|p| p.identity)
+    }
     pub fn limits(&self) -> PeerRosterLimits {
         self.limits
     }

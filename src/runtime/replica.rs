@@ -79,7 +79,7 @@ impl Default for ReplicaPollBudget {
     }
 }
 impl ReplicaPollBudget {
-    fn valid(self) -> bool {
+    pub(super) fn valid(self) -> bool {
         [
             self.worker_events,
             self.snapshot_events,
