@@ -48,8 +48,9 @@ wake handle; stopping one does not stop another or its host reactor.
 
 The default ceiling is 16 requests and a 1000 ms timeout per connect call; hard
 ceilings are 1024 requests and 10000 ms. The timeout excludes queue delay. A full
-serial queue can delay a request by preceding connect timeouts. The future
-connection owner must cancel on its end-to-end roster deadline; this dialer
+serial queue can delay a request by preceding connect timeouts. The
+connection owner must cancel on its end-to-end roster deadline; `PeerConnector`
+now performs this cancellation (see [connection establishment](CONNECTIONS.md)). This dialer
 does not replace that deadline with a wall-clock read in the deterministic core.
 Close cancels the whole queue, so shutdown waits for at most the active connect
 call plus OS scheduling, rather than running every queued connect. Metadata and
@@ -75,7 +76,8 @@ independent instance shutdown. Internal deterministic worker tests hold one
 active call to verify queued cancellation, retained credits, drop cleanup and
 panic completion accounting. The three-node/100-group TCP/TLS histories now
 dial through the same public contract before authentication, framing and actual
-WAL/snapshot work. Listener acceptance and TLS-driving still use fixture setup;
-a production listener/routing/handshake owner and full node admission remain
-unfinished. These tests are Linux evidence, not macOS execution or a complete
+WAL/snapshot work. The effect-owner histories now also use long-lived native
+connectors for listener acceptance/routing/TLS driving; direct low-level TLS
+fixtures remain for other transport tests. Full node admission and the production
+reactor/facade remain unfinished. These tests are Linux evidence, not macOS execution or a complete
 network-failure/liveness proof.

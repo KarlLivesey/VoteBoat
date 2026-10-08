@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-peer-reconnect-and-native-dialing",
+  "status": "shared-runtime-with-bounded-native-authenticated-connection-establishment",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -326,15 +326,15 @@
       "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": ["tests/transport.rs", "tests/worker.rs", "tests/peers.rs", "tests/effect_owner.rs"],
-      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. Complete listener/dial and ingress/result assembly remain pending."
+      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; complete ingress/result assembly remains pending."
     },
     {
       "design_id": "C06/C15",
       "public_contract": "PeerRoster<P: PeerTransport>",
-      "operations": ["new", "usage", "binding", "next_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
+      "operations": ["new", "usage", "binding", "next_deadline", "attempt_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
       "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
       "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
-      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Host owns socket/TLS establishment and separate ingress/staging resources. No membership or quorum authority."
+      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; the host binds exact attempt deadlines and owns separate ingress/staging resources. No membership or quorum authority."
     },
     {
       "design_id": "C06/C15",
@@ -359,6 +359,28 @@
       "scope": "Explicit bounded TCP dial worker, checked node/store/session/generation tickets, nonblocking connected streams, exact cancellation and terminal credit lifetime, failure/drain/join. Native TCP/TLS histories dial through this public contract. Channels are unauthenticated address results; production listener/routing/TLS handshake ownership and full node admission remain unfinished. Timeout bounds one connect call, excluding queue delay; roster deadlines require cancellation."
     },
     {
+      "design_id": "C06/C09/C15",
+      "public_contract": "PeerConnector",
+      "operations": [
+        "local",
+        "limits",
+        "usage",
+        "next_deadline",
+        "submit",
+        "cancel",
+        "poll",
+        "close",
+        "is_drained"
+      ],
+      "native": "NativePeerConnector<D: PeerDialer<Endpoint=SocketAddr, Channel=TcpStream>> (tls feature)",
+      "conformance": [
+        "tests/connect.rs",
+        "tests/peers.rs",
+        "tests/effect_owner.rs"
+      ],
+      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Full node ingress/result admission and production reactor remain pending."
+    },
+    {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
       "operations": ["sample"],
@@ -369,8 +391,7 @@
   ],
   "not_yet_implemented": [
     "physical-wal-reclamation",
-    "node-transport-roster-and-reconnect-assembly",
-    "asynchronous-checkpoint-creation-and-compaction",
+    "complete-node-ingress-result-and-reactor-assembly",
     "buffers",
     "admission-policy",
     "routing",

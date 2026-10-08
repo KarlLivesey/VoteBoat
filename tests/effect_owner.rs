@@ -622,6 +622,8 @@ mod native {
         reads: Vec<i64>,
         transports:
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
+        #[cfg(feature = "tls")]
+        connector: Option<voteboat::native::connect::NativePeerConnector>,
         staged: VecDeque<OutboundBatch>,
         sent: usize,
         received: usize,
@@ -827,6 +829,8 @@ mod native {
             pending: Vec::new(),
             reads: Vec::new(),
             transports: None,
+            #[cfg(feature = "tls")]
+            connector: None,
             staged: VecDeque::new(),
             sent: 0,
             received: 0,
@@ -839,12 +843,107 @@ mod native {
         }
     }
     #[cfg(feature = "tls")]
+    fn establish(
+        nodes: &mut [Node],
+        tickets: Vec<(usize, voteboat::transport::ConnectTicket)>,
+        now: MonoTime,
+    ) {
+        use voteboat::{
+            connect::*,
+            native::{transport::NativePeerTransport, wire::NativeWireCodec},
+            transport::TransportLimits,
+            wire::WireLimits,
+        };
+        let endpoints = nodes
+            .iter()
+            .map(|n| {
+                (
+                    n.outbound.binding().node,
+                    n.connector
+                        .as_ref()
+                        .unwrap()
+                        .listener_addr()
+                        .unwrap()
+                        .unwrap(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        for (i, ticket) in tickets {
+            let deadline = nodes[i]
+                .transports
+                .as_ref()
+                .unwrap()
+                .attempt_deadline(ticket)
+                .unwrap();
+            let direction = if ticket.local.node < ticket.peer.node {
+                ConnectDirection::Dial(endpoints[&ticket.peer.node])
+            } else {
+                ConnectDirection::Accept
+            };
+            nodes[i]
+                .connector
+                .as_mut()
+                .unwrap()
+                .submit(
+                    ConnectRequest {
+                        ticket,
+                        direction,
+                        deadline,
+                    },
+                    now,
+                )
+                .unwrap();
+        }
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while nodes
+            .iter()
+            .any(|n| n.connector.as_ref().unwrap().usage().requests != 0)
+        {
+            for n in nodes.iter_mut() {
+                let budget = ConnectPollBudget {
+                    visits: 1,
+                    socket_calls: 2,
+                    completions: 1,
+                    ..ConnectPollBudget::default()
+                };
+                for event in n.connector.as_mut().unwrap().poll(now, budget).unwrap() {
+                    let session = event.result.unwrap();
+                    let transport = NativePeerTransport::new(
+                        session,
+                        NativeWireCodec::new(WireLimits::default()).unwrap(),
+                        &n.outbound,
+                        TransportLimits::default(),
+                    )
+                    .unwrap();
+                    n.transports
+                        .as_mut()
+                        .unwrap()
+                        .attach(event.ticket, Box::new(transport), now)
+                        .unwrap_or_else(|r| panic!("connector attach: {:?}", r.reason));
+                    assert!(n
+                        .transports
+                        .as_ref()
+                        .unwrap()
+                        .attempt_deadline(event.ticket)
+                        .is_none());
+                }
+                assert!(n.connector.as_ref().unwrap().usage().anonymous <= 16);
+            }
+            assert!(
+                Instant::now() < deadline,
+                "native connections did not establish"
+            );
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+    #[cfg(feature = "tls")]
     fn mesh(nodes: &mut [Node]) {
         use voteboat::{
-            native::{transport::NativePeerTransport, wire::NativeWireCodec},
-            secure::LocalIdentity,
+            connect::ConnectLimits,
+            dial::DialLimits,
+            native::{connect::*, dial::NativeTcpDialer},
+            secure::{LocalIdentity, SessionLimits},
             transport::{PeerRoster, PeerRosterConfig, PeerRosterLimits, TransportLimits},
-            wire::WireLimits,
         };
         let locals = nodes
             .iter()
@@ -853,13 +952,43 @@ mod native {
                 store: n.outbound.binding().store,
             })
             .collect::<Vec<_>>();
-        let mut tickets = BTreeMap::new();
+        let mut tickets = Vec::new();
         for (i, n) in nodes.iter_mut().enumerate() {
             let peers = locals
                 .iter()
                 .filter(|l| l.node != locals[i].node)
                 .map(|l| (l.node, l.store.identity))
-                .collect();
+                .collect::<BTreeMap<_, _>>();
+            let dialer = NativeTcpDialer::spawn(
+                locals[i],
+                peers.clone(),
+                DialLimits::default(),
+                std::sync::Arc::new(ThreadWake::current()),
+            )
+            .unwrap();
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+            n.connector = Some(
+                NativePeerConnector::new(
+                    NativeConnectConfig {
+                        local: locals[i],
+                        limits: ConnectLimits::default(),
+                        session: SessionLimits {
+                            write_buffer_bytes: 256,
+                            ..SessionLimits::default()
+                        },
+                    },
+                    support::tls::configuration(locals[i].node.get()),
+                    locals
+                        .iter()
+                        .filter(|l| l.node != locals[i].node)
+                        .map(|l| (l.node, support::tls::peer(*l)))
+                        .collect(),
+                    dialer,
+                    Some(listener),
+                    MonoTime(0),
+                )
+                .unwrap_or_else(|r| panic!("connector construct: {:?}", r.reason)),
+            );
             let mut roster = PeerRoster::new(
                 PeerRosterConfig {
                     local: locals[i],
@@ -874,53 +1003,16 @@ mod native {
                 MonoTime(0),
             )
             .unwrap();
-            for ticket in roster.due_connections(MonoTime(0), 3).unwrap() {
-                tickets.insert((locals[i].node, ticket.peer.node), ticket);
-            }
+            tickets.extend(
+                roster
+                    .due_connections(MonoTime(0), 3)
+                    .unwrap()
+                    .into_iter()
+                    .map(|t| (i, t)),
+            );
             n.transports = Some(roster);
         }
-        for a in 0..3 {
-            for b in a + 1..3 {
-                let local = |n: &Node| LocalIdentity {
-                    node: n.outbound.binding().node,
-                    store: n.outbound.binding().store,
-                };
-                let lt = tickets[&(locals[a].node, locals[b].node)];
-                let rt = tickets[&(locals[b].node, locals[a].node)];
-                let (left, right) = support::tls::pair_generations(
-                    local(&nodes[a]),
-                    local(&nodes[b]),
-                    lt.generation.get(),
-                    rt.generation.get(),
-                );
-                let left = NativePeerTransport::new(
-                    left,
-                    NativeWireCodec::new(WireLimits::default()).unwrap(),
-                    &nodes[a].outbound,
-                    TransportLimits::default(),
-                )
-                .unwrap();
-                let right = NativePeerTransport::new(
-                    right,
-                    NativeWireCodec::new(WireLimits::default()).unwrap(),
-                    &nodes[b].outbound,
-                    TransportLimits::default(),
-                )
-                .unwrap();
-                nodes[a]
-                    .transports
-                    .as_mut()
-                    .unwrap()
-                    .attach(lt, Box::new(left), MonoTime(0))
-                    .unwrap_or_else(|r| panic!("left attach: {:?}", r.reason));
-                nodes[b]
-                    .transports
-                    .as_mut()
-                    .unwrap()
-                    .attach(rt, Box::new(right), MonoTime(0))
-                    .unwrap_or_else(|r| panic!("right attach: {:?}", r.reason));
-            }
-        }
+        establish(nodes, tickets, MonoTime(0));
     }
     fn drain(nodes: &mut [Node], isolated: Option<NodeId>, now: MonoTime) {
         let deadline = Instant::now() + Duration::from_secs(10);
@@ -1132,11 +1224,6 @@ mod native {
     }
     #[cfg(feature = "tls")]
     fn reconnect(nodes: &mut [Node], a: usize, b: usize, disconnected: MonoTime, ready: MonoTime) {
-        use voteboat::{
-            native::{transport::NativePeerTransport, wire::NativeWireCodec},
-            transport::TransportLimits,
-            wire::WireLimits,
-        };
         let old_left = nodes[a]
             .transports
             .as_ref()
@@ -1179,40 +1266,35 @@ mod native {
             .unwrap();
         assert!(left_ticket.generation > old_left.generation);
         assert!(right_ticket.generation > old_right.generation);
-        let (left, right) = support::tls::pair_generations(
-            left_ticket.local,
-            right_ticket.local,
-            left_ticket.generation.get(),
-            right_ticket.generation.get(),
-        );
-        let left = NativePeerTransport::new(
-            left,
-            NativeWireCodec::new(WireLimits::default()).unwrap(),
-            &nodes[a].outbound,
-            TransportLimits::default(),
-        )
-        .unwrap();
-        let right = NativePeerTransport::new(
-            right,
-            NativeWireCodec::new(WireLimits::default()).unwrap(),
-            &nodes[b].outbound,
-            TransportLimits::default(),
-        )
-        .unwrap();
-        nodes[a]
-            .transports
-            .as_mut()
-            .unwrap()
-            .attach(left_ticket, Box::new(left), ready)
-            .unwrap_or_else(|r| panic!("reconnect left: {:?}", r.reason));
-        nodes[b]
-            .transports
-            .as_mut()
-            .unwrap()
-            .attach(right_ticket, Box::new(right), ready)
-            .unwrap_or_else(|r| panic!("reconnect right: {:?}", r.reason));
+        establish(nodes, vec![(a, left_ticket), (b, right_ticket)], ready);
     }
     fn close(nodes: &mut [Node], now: MonoTime) {
+        #[cfg(feature = "tls")]
+        for n in nodes.iter_mut() {
+            use voteboat::{connect::*, dial::PeerDialer};
+            if let Some(mut connector) = n.connector.take() {
+                connector.close();
+                let deadline = Instant::now() + Duration::from_secs(5);
+                while !connector.is_drained() {
+                    for event in connector.poll(now, ConnectPollBudget::default()).unwrap() {
+                        assert!(event.result.is_err());
+                    }
+                    assert!(Instant::now() < deadline, "connector did not drain");
+                    std::thread::park_timeout(Duration::from_millis(1));
+                }
+                let mut dialer = connector
+                    .into_dialer()
+                    .unwrap_or_else(|_| panic!("connector not reclaimable"));
+                assert!(dialer.is_drained());
+                while !dialer.try_finish().unwrap() {
+                    assert!(
+                        Instant::now() < deadline,
+                        "connector dial worker did not finish"
+                    );
+                    std::thread::yield_now();
+                }
+            }
+        }
         for n in nodes.iter_mut() {
             if let Some(roster) = &mut n.transports {
                 roster.close();

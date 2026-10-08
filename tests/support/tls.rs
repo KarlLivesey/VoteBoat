@@ -34,7 +34,7 @@ fn certificate(n: u64) -> &'static [u8] {
         _ => panic!("unknown test node"),
     }
 }
-fn configuration(n: u64) -> NativeTlsConfig {
+pub fn configuration(n: u64) -> NativeTlsConfig {
     let key: &[u8] = match n {
         1 => include_bytes!("../fixtures/tls/node1-key.der"),
         2 => include_bytes!("../fixtures/tls/node2-key.der"),
@@ -48,7 +48,7 @@ fn configuration(n: u64) -> NativeTlsConfig {
     })
     .unwrap()
 }
-fn peer(identity: LocalIdentity) -> TlsPeer {
+pub fn peer(identity: LocalIdentity) -> TlsPeer {
     TlsPeer {
         identity: PeerIdentity {
             node: identity.node,

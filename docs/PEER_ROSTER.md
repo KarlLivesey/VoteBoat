@@ -133,8 +133,10 @@ delivery and test roster coordination separately. macOS execution remains
 unobserved. Native TCP dialing now uses the public `PeerDialer` contract and a
 bounded worker; see [dialing](DIALING.md). The host must cancel accepted dials
 when roster attempts expire and retain their separate credits until terminal
-completion. Listener/TLS handshake ownership, complete ingress/result admission
-and the full node facade remain in progress.
+completion. `PeerConnector` now owns bounded listener/preface/TLS establishment
+using exact `attempt_deadline(ticket)` values; the native histories keep one
+connector per node across reconnects. See [connection establishment](CONNECTIONS.md).
+Complete ingress/result admission and the full node facade remain in progress.
 
 The native histories also explicitly close every roster, poll TLS shutdown and
 check that all connection reservations are released before dropping the nodes.

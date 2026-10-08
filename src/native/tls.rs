@@ -107,6 +107,7 @@ impl NativeTlsConfig {
 /// Trusted construction-time certificate pin and stable node/store identity.
 /// Certificate bytes are public, not a private key. The server name is verified
 /// by Rustls on client connections in addition to the exact peer certificate pin.
+#[derive(Clone)]
 pub struct TlsPeer {
     pub identity: PeerIdentity,
     pub certificate: Vec<u8>,

@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Deterministic consensus components. See the README for implemented scope.
 pub mod application;
+pub mod connect;
 pub mod contracts;
 pub mod dial;
 pub mod identity;

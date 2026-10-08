@@ -1434,9 +1434,65 @@ physical WAL cleaning, membership/policy changes, recursive responsibilities
 and split/merge remain unfinished. macOS execution and power-cut evidence remain
 outstanding. Full P0–P7 stays active; CI remains background feedback.
 
+## Slice 20: bounded native listener/routing/TLS ownership
+
+`PeerConnector` now owns authenticated connection establishment over exact
+roster tickets, caller-supplied monotonic deadlines and separately bounded
+anonymous sockets. Its public associated endpoint/session types support host
+replacement. `NativePeerConnector<D>` consumes a selected public `PeerDialer`,
+optional caller-owned nonblocking listener, pinned TLS configuration and fixed
+authorized peer map. It creates no implicit thread, listener or shared runtime.
+Failed construction returns the live dialer/listener for explicit cleanup.
+
+The native connector writes a fixed 16-byte `VBCONN01`/node-ID routing preface.
+This untrusted hint can only select an existing authorized accept ticket;
+Rustls must still validate the exact peer certificate and authenticated
+node/store/session hello. No authority or durability token follows from the
+preface or TCP connect. Only Ready authenticated sessions with exact
+local/peer/store/generation/wire scopes can escape. The existing roster validates
+attachment and remote store-session floors independently.
+
+Attempt and anonymous expiry occur before I/O. Fair bounded polls separate
+socket/preface, TLS and completion budgets. Exact-ticket cancellation closes
+prefaces/handshakes and suppresses unpolled Ready outputs; an active dial retains
+its slot until the selected provider's actual receipt. Deadline cancellation
+includes dial queue time. The owner checks the injected provider's immutable
+binding/limits, outstanding count and exact completions. Alien receipts stop
+admission without releasing the real accepted ticket. Close drains outcomes and
+returns the selected dialer for explicit native worker join. See
+[connection establishment](CONNECTIONS.md) for caps, scheduling, compatibility
+and broken-provider limitations.
+
+The three-node/100-group effect-owner histories now keep one long-lived connector
+per node. They reserve roster attempts, pass exact `attempt_deadline(ticket)`
+values, choose a consistent dial/accept direction, poll native establishment and
+attach returned sessions through public transports. Reconnection uses these same
+live listeners/dialers with fresh generations, then continues actual
+WAL/snapshot/checkpoint/write/read/recovery histories. Shutdown closes/drains every
+connector and joins its dial thread before draining peer transports/workers.
+Blocking fixture-owned TCP/TLS setup is no longer used for those histories.
+
+New conformance tests cover an independent host connector/session type, native
+three-peer shared listeners with tiny fair budgets, fragmented/invalid routing,
+anonymous caps/expiry, a forged authorized hint with another trusted certificate,
+scope/time/generation rejection, cancellation of stalled and unpolled Ready
+sessions, retained active host-dial credits, returned failed-construction
+resources, and mis-scoped host receipts. These are finite Linux tests, not a
+complete kernel fault matrix or liveness proof.
+
+Local validation passes 207 default native/TLS tests, 186 native-only tests and
+93 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON and new RPL header
+checks pass.
+
+Complete decoded ingress/result admission, production reactor/facade, physical
+WAL cleaning, membership/policy changes, recursive responsibilities and safe
+split/merge remain unfinished. macOS execution and hardware power-cut evidence
+remain outstanding. Full P0–P7 stays active; CI remains background feedback.
+
 ## Next slice
 
-Continue full native node assembly with bounded socket establishment, decoded
-ingress and application result admission, then physical WAL cleaning with durable
+Continue full native node assembly with decoded ingress and application result
+admission and reactor driving, then physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.

@@ -233,6 +233,10 @@ fn bounded_attempts_timeout_backoff_and_stale_ready_connections() {
     });
     assert_eq!(r.next_deadline(), Some(MonoTime(0)));
     let first = r.due_connections(MonoTime(0), 2).unwrap()[0];
+    assert_eq!(r.attempt_deadline(first), Some(MonoTime(10)));
+    let mut stale = first;
+    stale.generation = SecureSessionGeneration::new(first.generation.get() + 1).unwrap();
+    assert_eq!(r.attempt_deadline(stale), None);
     assert_eq!(r.usage().connecting, 1);
     assert_eq!(r.next_deadline(), Some(MonoTime(10)));
     assert!(r.due_connections(MonoTime(0), 2).unwrap().is_empty());
@@ -242,6 +246,7 @@ fn bounded_attempts_timeout_backoff_and_stale_ready_connections() {
         vec![PeerPoll::ConnectExpired(first)]
     );
     assert_eq!(r.usage().reserved_bytes, 0);
+    assert_eq!(r.attempt_deadline(first), None);
     assert_eq!(
         r.attach(first, Host::new(first, 1), MonoTime(10))
             .unwrap_err()

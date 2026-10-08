@@ -203,8 +203,9 @@ it into separately bounded ingress. Neither event proves Raft durability.
 `transport::PeerRoster` coordinates construction-authorized peers, fair visits,
 bounded connection reservations, retry deadlines and fresh connection generations.
 It preserves accepted send ownership across failure and rejects obsolete input.
-The host supplies socket/TLS establishment, reactor readiness, ingress capacity
-and bounded rejected-send staging. The 100-group TCP/TLS checkpoint history now
+The host supplies connection establishment, reactor readiness, ingress capacity
+and bounded rejected-send staging. The native connection provider below now
+drives the 100-group TCP/TLS histories. The checkpoint history
 reconnects a peer pair before further replicated work. See the
 [transport](docs/TRANSPORT.md) and [peer-roster](docs/PEER_ROSTER.md) contracts for
 ownership, failure and shutdown details.
@@ -214,9 +215,17 @@ ownership, failure and shutdown details.
 tickets, returning nonblocking TCP streams. Queued, active and unpolled work
 retain slots; cancellation closes a late successful socket before releasing its
 slot. The TCP/TLS histories now use this provider for dialing. A dial result
-still needs TLS authentication; production listener/handshake ownership remains
-in progress. See [dialing](docs/DIALING.md) for timeout, cancellation and
+still needs TLS authentication. See [dialing](docs/DIALING.md) for timeout, cancellation and
 close/drain/join behavior.
+
+`connect::PeerConnector` supplies authenticated establishment over exact roster
+tickets and deadlines. `native::connect::NativePeerConnector` consumes an explicit
+dialer, optional listener and pinned TLS configuration. It bounds anonymous
+prefaces and handshakes, checks identity/generation before returning a session,
+and retains canceled/expired dialing until actual completion. Native 100-group
+histories use one long-lived connector per node and explicitly drain/join their
+dial workers. See [connection establishment](docs/CONNECTIONS.md). Complete node
+ingress/result admission and the production reactor/facade remain in progress.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

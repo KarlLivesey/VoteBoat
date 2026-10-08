@@ -269,6 +269,16 @@ impl<P: PeerTransport> PeerRoster<P> {
             })
             .min()
     }
+    /// Exact attempt deadline for a separately bounded connection provider.
+    /// A missing/stale ticket grants no authority to start or attach work.
+    pub fn attempt_deadline(&self, ticket: ConnectTicket) -> Option<MonoTime> {
+        self.peers
+            .get(&ticket.peer.node)?
+            .attempt
+            .as_ref()
+            .filter(|a| a.ticket == ticket)
+            .map(|a| a.expires)
+    }
     pub fn is_drained(&self) -> bool {
         self.closed
             && self
