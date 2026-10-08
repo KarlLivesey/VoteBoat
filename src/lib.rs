@@ -25,4 +25,5 @@ pub mod raft;
 pub mod runtime;
 pub mod snapshot;
 pub mod vote;
+pub mod wire;
 pub mod worker;

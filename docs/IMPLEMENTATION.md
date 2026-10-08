@@ -855,9 +855,69 @@ Tests retain separately bounded effect/network queues. Socket/session security,
 wire decoding, asynchronous snapshot workers, recursive-policy assembly and
 macOS execution remain outstanding. Full P0–P7 remains active.
 
+## Slice 11: bounded native peer frames
+
+The public `WireCodec` seam covers fixed-prefix inspection, bounded same-peer
+batch encoding and exact-frame decoding. `NativeWireCodec` supplies independent
+wire format 1 for every current RPC, including recursive snapshot policies.
+The complete layout is committed in [WIRE_FORMAT.md](WIRE_FORMAT.md); persistent
+WAL and snapshot-file codecs are not its serialization format dependencies.
+Unknown wire versions, flags and mandatory kinds fail explicitly.
+
+Encoding first measures and validates without a frame buffer, then requests
+exactly the final capacity. Decoding validates the fixed 24-byte prefix and its
+length/count ceilings before frame-buffer allocation by the caller. It then
+checks exact length and integrity, validates peer scope, and charges decoded
+arrays, payloads, snapshot objects and policy index units before allocating them.
+Counts also have minimum remaining-input checks. No partial message batch escapes.
+The retained-object budget is not an exact allocator/peak-RSS promise. The host
+separately budgets partial stream buffers, encoded output and decoded ingress.
+
+`WireScope` is supplied from an authenticated connection, not derived from
+untrusted decoded claims. Codec checks bind messages to that expected sender
+node/store session and recipient, but do not perform authentication themselves.
+The frame's CRC32C is integrity only. Wire decoding creates no durable prefix,
+read authority or new generation. Existing message term/configuration/context,
+group/store incarnations and recovered store sessions remain subject to core
+checks. Local snapshot installation still needs its original data, pin, log
+and application dependencies. Native frames transfer bounded complete snapshots;
+wire-level snapshot chunking remains a future extension.
+
+### Slice 11 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native suite: 117 tests pass; core/host-only suite: 53 tests pass. Both builds
+  pass Clippy with warnings denied; formatting and documentation pass.
+- Native round trips cover every RPC, mixed groups in one peer frame, command
+  and no-op entries, original remote request contexts, recursive weighted
+  snapshot policies and canonical re-encoding. A fixed 161-byte read-probe
+  layout anchors the prefix/envelope/RPC offsets.
+- Every single-bit mutation and truncation of that frame is rejected, together
+  with trailing input, unknown versions/flags/kinds and malformed booleans.
+  Independently recomputed checksums cannot hide oversized counts/lengths,
+  zero identities, wrong peer sessions, invalid entry order/terms, duplicate
+  voter leaves/store keys, overflowing weights or excessive policy depth.
+- Frame/message/entry/command/snapshot and decoded-retention ceilings are
+  exercised on encoding and decoding. Tiny valid limits still allow a probe;
+  unsupported construction limits fail before allocating a codec resource.
+- The real-file three-node/100-group asynchronous WAL/outbound history now
+  traverses encoded frames while preserving overload retries, fresh reads,
+  leader replacement, recovery and original operation results. Snapshot catch-up
+  histories traverse frames too, including the nine-voter recursive policy and
+  actual native snapshot/WAL files.
+- A host-only single-fixture codec demonstrates public selection with native
+  features disabled. It is explicitly not evidence of a second full wire codec.
+
+These remain in-process simulated connections with trusted scopes supplied by
+the driver. No secure socket, session authentication, wire negotiation handshake,
+partial-stream transport, production effect staging or asynchronous snapshot
+worker has been implemented. macOS execution and hardware power cuts remain
+unobserved. Full P0–P7 remains active.
+
 ## Next slice
 
-Add wire codec and authenticated-session transport seams, then assemble bounded
+Add authenticated-session transport seams, then assemble bounded
 effect staging and secure native transport. Extend virtual-time histories
 to leader loss, overload and message delay through the new assembly. Native
 sockets must use established secure

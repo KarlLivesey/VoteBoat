@@ -1,0 +1,727 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+//! Native VBWIRE01 frames, independent of the persistent WAL/snapshot formats.
+use super::vote_store::crc32c;
+use crate::{
+    identity::*,
+    log::*,
+    quorum::{Policy, Tree, WeightedChild},
+    raft::*,
+    snapshot::{Snapshot, SnapshotMetadata},
+    wire::*,
+};
+use std::{collections::BTreeMap, mem::size_of};
+
+const HEADER: usize = 24;
+const OVERHEAD: usize = HEADER + 4;
+const MIN_MESSAGE: usize = 129;
+const MAGIC: &[u8; 8] = b"VBWIRE01";
+#[derive(Clone, Copy, Debug)]
+pub struct NativeWireCodec {
+    limits: WireLimits,
+}
+impl NativeWireCodec {
+    pub fn new(limits: WireLimits) -> Result<Self, WireError> {
+        if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
+            return Err(WireError::InvalidLimits);
+        }
+        Ok(Self {
+            limits: limits.validate()?,
+        })
+    }
+}
+struct Budget {
+    used: usize,
+    max: usize,
+}
+impl Budget {
+    fn charge(&mut self, bytes: usize) -> Result<(), WireError> {
+        self.used = self
+            .used
+            .checked_add(bytes)
+            .filter(|v| *v <= self.max)
+            .ok_or(WireError::TooLarge)?;
+        Ok(())
+    }
+    fn array<T>(&mut self, count: usize) -> Result<(), WireError> {
+        self.charge(
+            count
+                .checked_mul(size_of::<T>())
+                .ok_or(WireError::TooLarge)?,
+        )
+    }
+}
+fn bool_value(value: u8) -> Result<bool, WireError> {
+    match value {
+        0 => Ok(false),
+        1 => Ok(true),
+        _ => Err(WireError::InvalidMessage("boolean")),
+    }
+}
+fn boundary(index: u64, term: u64, current: u64) -> Result<(), WireError> {
+    if (index == 0) != (term == 0) || term > current {
+        return Err(WireError::InvalidMessage("log boundary"));
+    }
+    Ok(())
+}
+fn validate_message(m: &Message) -> Result<(), WireError> {
+    if m.from == m.to || m.term == 0 || m.context.sequence == 0 {
+        return Err(WireError::InvalidMessage("message scope/term/context"));
+    }
+    match &m.rpc {
+        Rpc::Vote {
+            last_index,
+            last_term,
+        } => boundary(*last_index, *last_term, m.term)?,
+        Rpc::Append {
+            previous_index,
+            previous_term,
+            entries,
+            ..
+        } => {
+            boundary(*previous_index, *previous_term, m.term)?;
+            let mut index = *previous_index;
+            let mut term = *previous_term;
+            for entry in entries {
+                index = index
+                    .checked_add(1)
+                    .ok_or(WireError::InvalidMessage("entry index overflow"))?;
+                if entry.index != index
+                    || entry.term == 0
+                    || entry.term < term
+                    || entry.term > m.term
+                {
+                    return Err(WireError::InvalidMessage("entry ordering/term"));
+                }
+                term = entry.term;
+            }
+        }
+        Rpc::Snapshot { snapshot } => {
+            let meta = &snapshot.metadata;
+            if meta.bootstrap.group != m.group
+                || meta.bootstrap.configuration != m.configuration
+                || meta.index == 0
+                || meta.index == u64::MAX
+                || meta.term == 0
+                || meta.term > m.term
+                || meta.application_schema == 0
+                || snapshot.application.is_empty()
+                || !meta
+                    .bootstrap
+                    .voter_stores
+                    .keys()
+                    .eq(meta.bootstrap.policy.voters().iter())
+            {
+                return Err(WireError::InvalidMessage(
+                    "snapshot scope/boundary/membership",
+                ));
+            }
+        }
+        Rpc::SnapshotAck { index } if *index == 0 => {
+            return Err(WireError::InvalidMessage("snapshot ack boundary"))
+        }
+        Rpc::Compacted { index, term } => {
+            if *index == 0 {
+                return Err(WireError::InvalidMessage("compacted boundary"));
+            }
+            boundary(*index, *term, m.term)?;
+        }
+        _ => (),
+    }
+    Ok(())
+}
+struct Encoder {
+    data: Option<Vec<u8>>,
+    len: usize,
+    limits: WireLimits,
+    budget: Budget,
+}
+impl Encoder {
+    fn new(limits: WireLimits, capacity: Option<usize>) -> Self {
+        Self {
+            data: capacity.map(Vec::with_capacity),
+            len: 0,
+            limits,
+            budget: Budget {
+                used: 0,
+                max: limits.max_decoded_bytes,
+            },
+        }
+    }
+    fn put(&mut self, bytes: &[u8]) -> Result<(), WireError> {
+        self.len = self
+            .len
+            .checked_add(bytes.len())
+            .filter(|v| *v <= self.limits.max_frame_bytes)
+            .ok_or(WireError::TooLarge)?;
+        if let Some(data) = &mut self.data {
+            data.extend_from_slice(bytes);
+        }
+        Ok(())
+    }
+    fn u8(&mut self, v: u8) -> Result<(), WireError> {
+        self.put(&[v])
+    }
+    fn u32(&mut self, v: u32) -> Result<(), WireError> {
+        self.put(&v.to_le_bytes())
+    }
+    fn u64(&mut self, v: u64) -> Result<(), WireError> {
+        self.put(&v.to_le_bytes())
+    }
+    fn u128(&mut self, v: u128) -> Result<(), WireError> {
+        self.put(&v.to_le_bytes())
+    }
+    fn binding(&mut self, b: StoreBinding) -> Result<(), WireError> {
+        self.u128(b.identity.id.get())?;
+        self.u64(b.identity.incarnation.get())?;
+        self.u64(b.session.get())
+    }
+    fn tree(
+        &mut self,
+        tree: &Tree,
+        depth: usize,
+        nodes: &mut usize,
+        voters: &mut usize,
+    ) -> Result<(), WireError> {
+        *nodes += 1;
+        if depth > self.limits.policy.max_depth || *nodes > self.limits.policy.max_tree_nodes {
+            return Err(WireError::TooLarge);
+        }
+        match tree {
+            Tree::Voter(n) => {
+                *voters += 1;
+                if *voters > self.limits.policy.max_voters {
+                    return Err(WireError::TooLarge);
+                }
+                self.u8(0)?;
+                self.u64(n.get())
+            }
+            Tree::Majority(children) => {
+                self.budget.array::<Tree>(children.len())?;
+                self.u8(1)?;
+                self.u32(children.len() as u32)?;
+                for child in children {
+                    self.tree(child, depth + 1, nodes, voters)?;
+                }
+                Ok(())
+            }
+            Tree::Weighted(children) => {
+                self.budget.array::<WeightedChild>(children.len())?;
+                self.u8(2)?;
+                self.u32(children.len() as u32)?;
+                for child in children {
+                    self.u64(child.weight)?;
+                    self.tree(&child.node, depth + 1, nodes, voters)?;
+                }
+                Ok(())
+            }
+        }
+    }
+    fn message(&mut self, m: &Message) -> Result<(), WireError> {
+        // Bound traversals as well as allocations before semantic validation.
+        match &m.rpc {
+            Rpc::Append { entries, .. } if entries.len() > self.limits.max_entries_per_message => {
+                return Err(WireError::TooLarge)
+            }
+            Rpc::Snapshot { snapshot }
+                if snapshot.application.len() > self.limits.max_snapshot_bytes
+                    || snapshot.metadata.bootstrap.policy.voters().len()
+                        > self.limits.policy.max_voters
+                    || snapshot.metadata.bootstrap.voter_stores.len()
+                        > self.limits.policy.max_voters =>
+            {
+                return Err(WireError::TooLarge)
+            }
+            _ => (),
+        }
+        validate_message(m)?;
+        self.u128(m.group.id.get())?;
+        self.u64(m.group.incarnation.get())?;
+        self.u64(m.configuration.get())?;
+        self.u64(m.from.get())?;
+        self.binding(m.sender)?;
+        self.u64(m.to.get())?;
+        self.u64(m.term)?;
+        self.binding(m.context.origin)?;
+        self.u64(m.context.sequence)?;
+        match &m.rpc {
+            Rpc::Vote {
+                last_index,
+                last_term,
+            } => {
+                self.u8(0)?;
+                self.u64(*last_index)?;
+                self.u64(*last_term)
+            }
+            Rpc::Voted { granted } => {
+                self.u8(1)?;
+                self.u8(u8::from(*granted))
+            }
+            Rpc::Append {
+                previous_index,
+                previous_term,
+                entries,
+                leader_commit,
+            } => {
+                if entries.len() > self.limits.max_entries_per_message {
+                    return Err(WireError::TooLarge);
+                }
+                self.budget.array::<LogEntry>(entries.len())?;
+                self.u8(2)?;
+                self.u64(*previous_index)?;
+                self.u64(*previous_term)?;
+                self.u64(*leader_commit)?;
+                self.u32(entries.len() as u32)?;
+                for entry in entries {
+                    self.u64(entry.index)?;
+                    self.u64(entry.term)?;
+                    match &entry.payload {
+                        EntryPayload::Noop => self.u8(0)?,
+                        EntryPayload::Command { operation, bytes } => {
+                            if bytes.len() > self.limits.max_command_bytes {
+                                return Err(WireError::TooLarge);
+                            }
+                            self.budget.charge(bytes.len())?;
+                            self.u8(1)?;
+                            self.u128(operation.get())?;
+                            self.u32(bytes.len() as u32)?;
+                            self.put(bytes)?;
+                        }
+                    }
+                }
+                Ok(())
+            }
+            Rpc::Appended {
+                success,
+                matching_index,
+            } => {
+                self.u8(3)?;
+                self.u8(u8::from(*success))?;
+                self.u64(*matching_index)
+            }
+            Rpc::ReadProbe => self.u8(4),
+            Rpc::ReadAck => self.u8(5),
+            Rpc::Snapshot { snapshot } => {
+                if snapshot.application.len() > self.limits.max_snapshot_bytes {
+                    return Err(WireError::TooLarge);
+                }
+                self.budget.charge(size_of::<Snapshot>())?;
+                self.budget.charge(snapshot.application.len())?;
+                let meta = &snapshot.metadata;
+                self.u8(6)?;
+                self.u64(meta.index)?;
+                self.u64(meta.term)?;
+                self.u64(meta.application_schema)?;
+                self.tree(meta.bootstrap.policy.tree(), 0, &mut 0, &mut 0)?;
+                self.budget
+                    .charge(meta.bootstrap.policy.voters().len() * 128)?;
+                self.budget
+                    .charge(meta.bootstrap.voter_stores.len() * 128)?;
+                self.u32(meta.bootstrap.voter_stores.len() as u32)?;
+                for (node, store) in &meta.bootstrap.voter_stores {
+                    self.u64(node.get())?;
+                    self.u128(store.id.get())?;
+                    self.u64(store.incarnation.get())?;
+                }
+                self.u32(snapshot.application.len() as u32)?;
+                self.put(&snapshot.application)
+            }
+            Rpc::SnapshotAck { index } => {
+                self.u8(7)?;
+                self.u64(*index)
+            }
+            Rpc::Compacted { index, term } => {
+                self.u8(8)?;
+                self.u64(*index)?;
+                self.u64(*term)
+            }
+        }
+    }
+    fn batch(&mut self, scope: WireScope, messages: &[Message]) -> Result<(), WireError> {
+        if messages.is_empty() || messages.len() > self.limits.max_messages {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.array::<Message>(messages.len())?;
+        self.put(&[0; HEADER])?;
+        for message in messages {
+            if !scope.matches(message) || scope.from == scope.to {
+                return Err(WireError::WrongPeer);
+            }
+            let offset = self.len;
+            self.u32(0)?;
+            self.message(message)?;
+            let len = self.len - offset - 4;
+            if let Some(data) = &mut self.data {
+                data[offset..offset + 4].copy_from_slice(&(len as u32).to_le_bytes());
+            }
+        }
+        self.u32(0)
+    }
+}
+struct Decoder<'a> {
+    bytes: &'a [u8],
+    offset: usize,
+}
+impl<'a> Decoder<'a> {
+    fn new(bytes: &'a [u8]) -> Self {
+        Self { bytes, offset: 0 }
+    }
+    fn remaining(&self) -> usize {
+        self.bytes.len() - self.offset
+    }
+    fn take(&mut self, len: usize) -> Result<&'a [u8], WireError> {
+        if len > self.remaining() {
+            return Err(WireError::Truncated);
+        }
+        let result = &self.bytes[self.offset..self.offset + len];
+        self.offset += len;
+        Ok(result)
+    }
+    fn u8(&mut self) -> Result<u8, WireError> {
+        Ok(self.take(1)?[0])
+    }
+    fn u32(&mut self) -> Result<u32, WireError> {
+        Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
+    }
+    fn u64(&mut self) -> Result<u64, WireError> {
+        Ok(u64::from_le_bytes(self.take(8)?.try_into().unwrap()))
+    }
+    fn u128(&mut self) -> Result<u128, WireError> {
+        Ok(u128::from_le_bytes(self.take(16)?.try_into().unwrap()))
+    }
+    fn binding(&mut self) -> Result<StoreBinding, WireError> {
+        Ok(StoreBinding {
+            identity: StoreIdentity {
+                id: StoreId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero store"))?,
+                incarnation: StoreIncarnation::new(self.u64()?)
+                    .ok_or(WireError::InvalidMessage("zero store incarnation"))?,
+            },
+            session: StoreSession::new(self.u64()?)
+                .ok_or(WireError::InvalidMessage("zero store session"))?,
+        })
+    }
+    fn tree(
+        &mut self,
+        limits: WireLimits,
+        budget: &mut Budget,
+        depth: usize,
+        nodes: &mut usize,
+        voters: &mut usize,
+    ) -> Result<Tree, WireError> {
+        *nodes += 1;
+        if depth > limits.policy.max_depth || *nodes > limits.policy.max_tree_nodes {
+            return Err(WireError::TooLarge);
+        }
+        match self.u8()? {
+            0 => {
+                *voters += 1;
+                if *voters > limits.policy.max_voters {
+                    return Err(WireError::TooLarge);
+                }
+                Ok(Tree::Voter(
+                    NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero voter"))?,
+                ))
+            }
+            kind @ (1 | 2) => {
+                let count = self.u32()? as usize;
+                if count == 0 {
+                    return Err(WireError::InvalidMessage("empty policy branch"));
+                }
+                if count > limits.policy.max_tree_nodes - *nodes
+                    || count > self.remaining() / if kind == 1 { 9 } else { 17 }
+                {
+                    return Err(WireError::TooLarge);
+                }
+                if kind == 1 {
+                    budget.array::<Tree>(count)?;
+                    let mut children = Vec::with_capacity(count);
+                    for _ in 0..count {
+                        children.push(self.tree(limits, budget, depth + 1, nodes, voters)?);
+                    }
+                    Ok(Tree::Majority(children))
+                } else {
+                    budget.array::<WeightedChild>(count)?;
+                    let mut children = Vec::with_capacity(count);
+                    for _ in 0..count {
+                        let weight = self.u64()?;
+                        children.push(WeightedChild {
+                            weight,
+                            node: self.tree(limits, budget, depth + 1, nodes, voters)?,
+                        });
+                    }
+                    Ok(Tree::Weighted(children))
+                }
+            }
+            _ => Err(WireError::InvalidMessage("policy node kind")),
+        }
+    }
+    fn message(
+        &mut self,
+        scope: WireScope,
+        limits: WireLimits,
+        budget: &mut Budget,
+    ) -> Result<Message, WireError> {
+        let group = GroupIdentity {
+            id: GroupId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero group"))?,
+            incarnation: GroupIncarnation::new(self.u64()?)
+                .ok_or(WireError::InvalidMessage("zero group incarnation"))?,
+        };
+        let configuration = ConfigurationId::new(self.u64()?)
+            .ok_or(WireError::InvalidMessage("zero configuration"))?;
+        let from = NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero sender"))?;
+        let sender = self.binding()?;
+        let to = NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero recipient"))?;
+        if scope != (WireScope { from, sender, to }) || from == to {
+            return Err(WireError::WrongPeer);
+        }
+        let term = self.u64()?;
+        let context = RequestContext {
+            origin: self.binding()?,
+            sequence: self.u64()?,
+        };
+        let rpc = match self.u8()? {
+            0 => Rpc::Vote {
+                last_index: self.u64()?,
+                last_term: self.u64()?,
+            },
+            1 => Rpc::Voted {
+                granted: bool_value(self.u8()?)?,
+            },
+            2 => {
+                let previous_index = self.u64()?;
+                let previous_term = self.u64()?;
+                let leader_commit = self.u64()?;
+                let count = self.u32()? as usize;
+                if count > limits.max_entries_per_message || count > self.remaining() / 17 {
+                    return Err(WireError::TooLarge);
+                }
+                budget.array::<LogEntry>(count)?;
+                let mut entries = Vec::with_capacity(count);
+                for _ in 0..count {
+                    let index = self.u64()?;
+                    let term = self.u64()?;
+                    let payload = match self.u8()? {
+                        0 => EntryPayload::Noop,
+                        1 => {
+                            let operation = OperationId::new(self.u128()?)
+                                .ok_or(WireError::InvalidMessage("zero operation"))?;
+                            let len = self.u32()? as usize;
+                            if len > limits.max_command_bytes {
+                                return Err(WireError::TooLarge);
+                            }
+                            let bytes = self.take(len)?;
+                            budget.charge(len)?;
+                            EntryPayload::Command {
+                                operation,
+                                bytes: bytes.to_vec(),
+                            }
+                        }
+                        _ => return Err(WireError::InvalidMessage("entry kind")),
+                    };
+                    entries.push(LogEntry {
+                        index,
+                        term,
+                        payload,
+                    });
+                }
+                Rpc::Append {
+                    previous_index,
+                    previous_term,
+                    entries,
+                    leader_commit,
+                }
+            }
+            3 => Rpc::Appended {
+                success: bool_value(self.u8()?)?,
+                matching_index: self.u64()?,
+            },
+            4 => Rpc::ReadProbe,
+            5 => Rpc::ReadAck,
+            6 => {
+                let index = self.u64()?;
+                let term = self.u64()?;
+                let application_schema = self.u64()?;
+                budget.charge(size_of::<Snapshot>())?;
+                let mut voters = 0;
+                let tree = self.tree(limits, budget, 0, &mut 0, &mut voters)?;
+                budget.charge(voters * 128)?;
+                let policy = Policy::new(tree, limits.policy)
+                    .map_err(|_| WireError::InvalidMessage("invalid quorum policy"))?;
+                let count = self.u32()? as usize;
+                if count != policy.voters().len() {
+                    return Err(WireError::InvalidMessage("voter store count"));
+                }
+                if count > self.remaining() / 32 {
+                    return Err(WireError::Truncated);
+                }
+                budget.charge(count * 128)?;
+                let mut voter_stores = BTreeMap::new();
+                for _ in 0..count {
+                    let node =
+                        NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero voter"))?;
+                    let id = StoreId::new(self.u128()?)
+                        .ok_or(WireError::InvalidMessage("zero voter store"))?;
+                    let incarnation = StoreIncarnation::new(self.u64()?)
+                        .ok_or(WireError::InvalidMessage("zero voter store incarnation"))?;
+                    if voter_stores
+                        .insert(node, StoreIdentity { id, incarnation })
+                        .is_some()
+                    {
+                        return Err(WireError::InvalidMessage("duplicate voter store"));
+                    }
+                }
+                let len = self.u32()? as usize;
+                if len > limits.max_snapshot_bytes {
+                    return Err(WireError::TooLarge);
+                }
+                let bytes = self.take(len)?;
+                budget.charge(len)?;
+                Rpc::Snapshot {
+                    snapshot: Box::new(Snapshot {
+                        metadata: SnapshotMetadata {
+                            bootstrap: Bootstrap {
+                                group,
+                                configuration,
+                                policy,
+                                voter_stores,
+                            },
+                            index,
+                            term,
+                            application_schema,
+                        },
+                        application: bytes.to_vec(),
+                    }),
+                }
+            }
+            7 => Rpc::SnapshotAck { index: self.u64()? },
+            8 => Rpc::Compacted {
+                index: self.u64()?,
+                term: self.u64()?,
+            },
+            _ => return Err(WireError::InvalidMessage("RPC kind")),
+        };
+        let message = Message {
+            group,
+            configuration,
+            from,
+            sender,
+            to,
+            term,
+            context,
+            rpc,
+        };
+        validate_message(&message)?;
+        if self.remaining() != 0 {
+            return Err(WireError::Corrupt("trailing message bytes"));
+        }
+        Ok(message)
+    }
+}
+impl WireCodec for NativeWireCodec {
+    fn format_version(&self) -> u16 {
+        1
+    }
+    fn header_bytes(&self) -> usize {
+        HEADER
+    }
+    fn limits(&self) -> WireLimits {
+        self.limits
+    }
+    fn frame_length(&self, header: &[u8]) -> Result<usize, WireError> {
+        if header.len() != HEADER {
+            return Err(WireError::Truncated);
+        }
+        if &header[..8] != MAGIC {
+            return Err(WireError::Corrupt("frame magic"));
+        }
+        if crc32c(&header[..20]) != u32::from_le_bytes(header[20..24].try_into().unwrap()) {
+            return Err(WireError::Corrupt("header checksum"));
+        }
+        let version = u16::from_le_bytes(header[8..10].try_into().unwrap());
+        if version != 1 {
+            return Err(WireError::UnsupportedVersion(version));
+        }
+        if header[10..12] != [0, 0] {
+            return Err(WireError::UnsupportedFlags);
+        }
+        let length = u32::from_le_bytes(header[12..16].try_into().unwrap()) as usize;
+        let count = u32::from_le_bytes(header[16..20].try_into().unwrap()) as usize;
+        if length < OVERHEAD
+            || length > self.limits.max_frame_bytes
+            || count == 0
+            || count > self.limits.max_messages
+            || count > length.saturating_sub(OVERHEAD) / (MIN_MESSAGE + 4)
+        {
+            return Err(WireError::TooLarge);
+        }
+        Ok(length)
+    }
+    fn encode_batch(&self, scope: WireScope, messages: &[Message]) -> Result<Vec<u8>, WireError> {
+        // Count and validate first; malformed input allocates no frame buffer.
+        // The second pass allocates exactly the validated final byte count.
+        let mut count = Encoder::new(self.limits, None);
+        count.batch(scope, messages)?;
+        let mut encoder = Encoder::new(self.limits, Some(count.len));
+        encoder.batch(scope, messages)?;
+        let mut bytes = encoder.data.unwrap();
+        let len = bytes.len();
+        bytes[..8].copy_from_slice(MAGIC);
+        bytes[8..10].copy_from_slice(&1u16.to_le_bytes());
+        bytes[12..16].copy_from_slice(&(len as u32).to_le_bytes());
+        bytes[16..20].copy_from_slice(&(messages.len() as u32).to_le_bytes());
+        let crc = crc32c(&bytes[..20]);
+        bytes[20..24].copy_from_slice(&crc.to_le_bytes());
+        let crc = crc32c(&bytes[..len - 4]);
+        bytes[len - 4..].copy_from_slice(&crc.to_le_bytes());
+        Ok(bytes)
+    }
+    fn decode_batch(&self, scope: WireScope, frame: &[u8]) -> Result<Vec<Message>, WireError> {
+        if frame.len() < HEADER {
+            return Err(WireError::Truncated);
+        }
+        let length = self.frame_length(&frame[..HEADER])?;
+        if frame.len() < length {
+            return Err(WireError::Truncated);
+        }
+        if frame.len() != length {
+            return Err(WireError::Corrupt("trailing frame bytes"));
+        }
+        if crc32c(&frame[..length - 4])
+            != u32::from_le_bytes(frame[length - 4..].try_into().unwrap())
+        {
+            return Err(WireError::Corrupt("frame checksum"));
+        }
+        let count = u32::from_le_bytes(frame[16..20].try_into().unwrap()) as usize;
+        let mut budget = Budget {
+            used: 0,
+            max: self.limits.max_decoded_bytes,
+        };
+        budget.array::<Message>(count)?;
+        let mut result = Vec::with_capacity(count);
+        let mut decoder = Decoder::new(&frame[HEADER..length - 4]);
+        for _ in 0..count {
+            let len = decoder.u32()? as usize;
+            if len < MIN_MESSAGE {
+                return Err(WireError::InvalidMessage("message length"));
+            }
+            let bytes = decoder.take(len)?;
+            result.push(Decoder::new(bytes).message(scope, self.limits, &mut budget)?);
+        }
+        if decoder.remaining() != 0 {
+            return Err(WireError::Corrupt("trailing batch bytes"));
+        }
+        Ok(result)
+    }
+}

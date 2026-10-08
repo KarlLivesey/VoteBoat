@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-wal-and-outbound-admission",
+  "status": "shared-runtime-with-bounded-wire-framing",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -264,6 +264,14 @@
       "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. Local completion is not a Raft acknowledgement. No wire format, sockets, security or persistent delivery claim; transport remains pending."
     },
     {
+      "design_id": "C08",
+      "public_contract": "WireCodec",
+      "operations": ["format_version", "header_bytes", "limits", "frame_length", "encode_batch", "decode_batch"],
+      "native": "NativeWireCodec",
+      "conformance": ["tests/wire.rs", "tests/worker.rs", "tests/snapshot.rs"],
+      "scope": "Independent wire format 1 for all current static-configuration RPCs, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol."
+    },
+    {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
       "operations": ["sample"],
@@ -275,7 +283,6 @@
   "not_yet_implemented": [
     "physical-wal-reclamation",
     "transport",
-    "wire-codec",
     "secure-session",
     "asynchronous-snapshot-worker-assembly",
     "buffers",

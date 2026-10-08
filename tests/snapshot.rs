@@ -1221,6 +1221,7 @@ struct SnapshotCluster<L: LogStore, S: SnapshotRetention> {
     blocked: BTreeSet<(u64, u64)>,
     installs: usize,
     read_values: Vec<i64>,
+    wire: Option<Box<dyn voteboat::wire::WireCodec>>,
 }
 impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
     fn new(bootstrap: Bootstrap, mut factory: impl FnMut(u64) -> (L, S)) -> Self {
@@ -1252,6 +1253,7 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
             blocked: BTreeSet::new(),
             installs: 0,
             read_values: Vec::new(),
+            wire: None,
         }
     }
     fn act(&mut self, id: u64, event: voteboat::raft::Event) {
@@ -1322,6 +1324,17 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
             events += 1;
             assert!(events < 10000, "snapshot catchup did not converge");
             if !self.blocked.contains(&(m.from.get(), m.to.get())) {
+                let m = if let Some(codec) = &self.wire {
+                    let scope = voteboat::wire::WireScope {
+                        from: m.from,
+                        sender: self.replicas[&m.from.get()].log.binding(),
+                        to: m.to,
+                    };
+                    let encoded = codec.encode_batch(scope, &[m]).unwrap();
+                    codec.decode_batch(scope, &encoded).unwrap().pop().unwrap()
+                } else {
+                    m
+                };
                 self.act(m.to.get(), voteboat::raft::Event::Receive(m));
             }
         }
@@ -1368,6 +1381,13 @@ fn host_snapshots(id: u64) -> HostSnapshots {
 }
 fn snapshot_catchup_history<L: LogStore, S: SnapshotRetention>(mut cluster: SnapshotCluster<L, S>) {
     use voteboat::raft::*;
+    #[cfg(feature = "native")]
+    {
+        cluster.wire = Some(Box::new(
+            voteboat::native::wire::NativeWireCodec::new(voteboat::wire::WireLimits::default())
+                .unwrap(),
+        ));
+    }
     cluster.act(1, Event::Campaign);
     cluster.pump();
     cluster.isolate(3);
@@ -1456,6 +1476,13 @@ fn recursive_snapshot_catchup_keeps_the_persisted_policy() {
     let expected = b.clone();
     let mut cluster =
         SnapshotCluster::new(b, |id| (HostLogStore::new(id as u128), host_snapshots(id)));
+    #[cfg(feature = "native")]
+    {
+        cluster.wire = Some(Box::new(
+            voteboat::native::wire::NativeWireCodec::new(voteboat::wire::WireLimits::default())
+                .unwrap(),
+        ));
+    }
     use voteboat::raft::*;
     cluster.act(1, Event::Campaign);
     cluster.pump();

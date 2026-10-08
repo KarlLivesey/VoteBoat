@@ -117,7 +117,15 @@ Control capacity is reserved, snapshots have a separate ceiling, and the native
 queue fairly visits peers and traffic classes. Local send success carries no
 Raft acknowledgement. The host drives polling and budgets retained rejected
 effects, encoded buffers and receive queues separately. This queue creates no
-sockets; authenticated transport and wire framing remain pending.
+sockets; authenticated transport remains pending.
+
+`wire::WireCodec` supplies a public bounded framing seam. The native
+`NativeWireCodec` implements [wire format 1](docs/WIRE_FORMAT.md), including all
+current RPCs and recursive snapshot policies. Validate its fixed prefix before
+allocating a receive frame, then decode one exact frame with the connection's
+trusted `WireScope`. Size, shape and decoded retention checks precede payload
+allocations. Checksums provide integrity only; the transport must authenticate
+the peer and supply separate encoded-buffer and ingress budgets.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

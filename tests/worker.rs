@@ -20,6 +20,7 @@ use voteboat::outbound::{
     LocalSendResult, OutboundBinding, OutboundBudget, OutboundError, OutboundLimits, OutboundQueue,
     OutboundUsage,
 };
+use voteboat::wire::{WireCodec, WireScope};
 use voteboat::{application::*, identity::*, log::*, raft::*, runtime::*, worker::*};
 
 struct Ready(VecDeque<GroupIdentity>);
@@ -298,6 +299,7 @@ struct WorkerNode<W: PersistenceWorker> {
     messages: VecDeque<Message>,
     outbound: Box<dyn OutboundQueue>,
     rejected_sends: usize,
+    wire: Option<Box<dyn WireCodec>>,
     held: Option<WorkerEvent>,
     hold: bool,
     results: Vec<CounterReceipt>,
@@ -359,6 +361,7 @@ impl<W: PersistenceWorker> WorkerNode<W> {
             messages: VecDeque::new(),
             outbound,
             rejected_sends: 0,
+            wire: None,
             held: None,
             hold: false,
             results: vec![],
@@ -411,6 +414,11 @@ impl<W: PersistenceWorker> WorkerNode<W> {
         {
             self.shard.finish(visit).unwrap();
         }
+    }
+    #[cfg(feature = "native")]
+    fn with_wire(mut self, wire: impl WireCodec + 'static) -> Self {
+        self.wire = Some(Box::new(wire));
+        self
     }
     fn deliver(&mut self, mut event: WorkerEvent) {
         if self.hold {
@@ -511,7 +519,24 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
             progress |= node.progress();
             for mut batch in node.outbound.poll(32) {
                 assert!(network.len() + batch.messages.len() <= 8192);
-                network.extend(batch.messages.drain(..));
+                if let Some(codec) = &node.wire {
+                    let binding = node.outbound.binding();
+                    let scope = WireScope {
+                        from: binding.node,
+                        sender: binding.store,
+                        to: batch.ticket.peer,
+                    };
+                    let encoded = codec.encode_batch(scope, &batch.messages).unwrap();
+                    assert_eq!(
+                        codec.frame_length(&encoded[..codec.header_bytes()]),
+                        Ok(encoded.len())
+                    );
+                    // The simulator supplies the trusted scope. This exercises
+                    // frame handling, not authentication of a real connection.
+                    network.extend(codec.decode_batch(scope, &encoded).unwrap());
+                } else {
+                    network.extend(batch.messages.drain(..));
+                }
                 // A local send can complete before remote delivery (or loss).
                 // Only actual received Raft messages can acknowledge a prefix.
                 node.outbound
@@ -768,7 +793,7 @@ mod native {
     };
     use voteboat::{
         contracts::{HardState, StorageError},
-        native::{log_store::*, outbound::NativeOutbound, worker::*},
+        native::{log_store::*, outbound::NativeOutbound, wire::NativeWireCodec, worker::*},
     };
     #[derive(Default)]
     struct Wake(AtomicUsize);
@@ -833,6 +858,7 @@ mod native {
                     },
                     |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
                 )
+                .with_wire(NativeWireCodec::new(voteboat::wire::WireLimits::default()).unwrap())
             })
             .collect::<Vec<_>>();
         let old_bindings = nodes
@@ -869,6 +895,7 @@ mod native {
                     },
                     |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
                 )
+                .with_wire(NativeWireCodec::new(voteboat::wire::WireLimits::default()).unwrap())
             })
             .collect::<Vec<_>>();
         // The explicitly stopped follower missed operation 4; both surviving

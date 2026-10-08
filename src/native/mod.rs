@@ -17,4 +17,5 @@ pub mod outbound;
 pub mod runtime;
 pub mod snapshot_store;
 pub mod vote_store;
+pub mod wire;
 pub mod worker;
