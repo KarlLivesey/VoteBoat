@@ -1,7 +1,8 @@
 # Responsibility manifests and routing
 
-This is the P5 routing foundation, not a replicated directory or a source-transfer
-protocol. `routing::resolve` uses the public `ManifestCache` and `PartitionPolicy`
+This is the P5 routing/cache foundation. The separate
+[directory application](DIRECTORY_APPLICATION.md) supplies replicated metadata;
+source transfer remains P6 work. `routing::resolve` uses the public `ManifestCache` and `PartitionPolicy`
 contracts. Native implementations are `NativeManifestCache` and
 `NativeBytePartition`; hosts may supply either provider without private APIs.
 
@@ -25,8 +26,9 @@ versions/placement bounds reject. Indirect cycles fail during bounded traversal.
 A child binding specifies exact responsibility incarnation, authority group and
 ownership epoch. Resolution checks its parent binding and exact delegated scope.
 Manifests are not authenticated or certified as committed by their constructor.
-Full committed ancestry validation belongs to the forthcoming directory state
-machine; cross-parent movement has no implementation here.
+DirectoryPlan validates its local bootstrap ancestry; external ancestry still
+requires a verified trusted grant. Dynamic ancestry/lifecycle validation and
+cross-parent movement have no implementation here.
 
 Single has one group ordering boundary. Partitioned/delegated handles have
 ordering only within the concrete selected group. Directory ancestry, execution
@@ -74,7 +76,7 @@ ownership; P6 supplies that protocol. There is no API here that performs it.
 
 Both seams are synchronous, caller-driven and nonblocking; providers own their
 private resources explicitly. Contract version is `ROUTING_CONTRACT_VERSION = 1`.
-No persistent/wire format, durability token, asynchronous effect, watermark or
+These cache/policy contracts add no persistent/wire format, durability token, asynchronous effect, watermark or
 completion domain is introduced. Generations and epochs are explicit input from
 the committed source, never invented on cache restart. Drop releases cache hints;
 there is no accepted external work or shutdown drain. Inclusion creates nothing.
@@ -115,8 +117,9 @@ admission-before/apply-after fence checks, atomic update/invalidation and retain
 allocation/byte rejection. These are deterministic routing checks, not distributed
 ownership-transfer or parent-quorum-outage tests.
 
-Next P5 work is the replicated directory application with bounded command and
-checkpoint encoding, native replay/recovery, then routed application admission
-and apply through existing durable groups. Its acceptance includes a real durable
+The directory application now has bounded command/checkpoint encoding and native
+Raft replay/snapshot recovery for fixed trusted initial ownership. Next P5 work is
+routed application admission and apply through existing durable groups against
+their local committed ownership. Its acceptance includes a real durable
 child write while the parent cannot commit, unchanged parent logs, and stale owner
 refusal. Remaining P4 release faults and P6 split/merge remain on the macro plan.

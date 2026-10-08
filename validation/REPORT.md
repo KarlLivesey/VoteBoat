@@ -1281,3 +1281,59 @@ hints do not grant authority; local owner checks still need admission/apply wiri
 Those remain the current P5 deliverable, followed by the explicit remaining P4
 release-fault ledger and P6 split/merge. Full P0–P7 remains active, P8 deferred.
 No new macOS or separate-host execution evidence.
+
+## Slice 79 — replicated fixed-bootstrap directory application
+
+Directory now implements the existing public application/admission/read/checkpoint
+contracts. Fixed explicit grants plus bounded generation-CAS commands publish
+routing metadata; owner/epoch/scope/topology/adapter/lifecycle changes reject.
+A committed initialization command binds the whole plan and capacities before
+publication, including during WAL-only recovery. Publication/manifest format 1
+and checkpoint schema 1 retain complete original retry
+content and reconstruct outcomes in first-application order. Local ancestry is
+validated; external bootstrap grants require trusted source verification.
+
+Actual evidence:
+
+- All-feature directory target: 14 tests pass. Core-only target: 13 tests pass;
+  native-only target: 14 pass. Tests cover atomic application and restore, original
+  successful and failed outcomes after retries/replay, conflict retention, exact
+  plan/capacity recovery, operation and pending-byte limits, complete command and
+  checkpoint truncations, finite canonical byte mutations, maximum partition map,
+  malformed checkpoint order/IDs/counts/lengths, local cycles/bindings, repeated
+  external child delegation, foreign authority aliases, depth limits, independent
+  external-grant child directory and inline/nested read-result credits.
+- Native three-replica history commits through actual Raft and three filesystem
+  WALs with bounded host-driven delivery. It first commits initialization and
+  verifies pre-checkpoint recovery rejects altered child grants, altered capacities
+  and even an unused added grant. It reopens retained logs after losing
+  results, retries original publication, isolates the leader and verifies an
+  appended command is neither applied nor acknowledged, elects survivors and
+  publishes generation 2, checkpoints/compacts, reopens, installs a snapshot into
+  the older replica, serves a fresh quorum read and reopens again. Dedup counts
+  exclude the abandoned command; retry generation 1 is preserved alongside
+  current manifest generation 2. No directory commands or membership states are
+  fabricated as precommitted fixtures in that history.
+- All-feature application regression target: 9 passed; routing: 11 passed;
+  snapshot: 19 passed. All-feature/all-target warnings-denied Clippy, fmt/diff and
+  inventory checks pass (63 records). No added dependencies or runtime resources.
+
+The initial proposal admission compile failed on chaining references with
+unrelated lifetimes; one shared reservation closure now processes both inputs
+without changing their borrowing contract. The initial native harness omitted
+creation of its temporary root directory; it now creates that directory before
+opening stores. Both issues were corrected before the native history passed. Final schema review
+also exposed the missing WAL-only bootstrap-plan binding; committed initialization
+now fixes it and the native history exercises all three mismatch cases before any
+checkpoint. Initialization is bounded to 8 MiB, publication to 32768 bytes, and the
+actual whole-plan initialization size participates in the declared provider
+envelope. The constructor requires enough history space for that binding.
+
+These checks establish fixed-bootstrap replicated directory persistence and
+snapshot recovery, not a dynamic creation/ownership protocol. Existing provider
+crash/fault suites remain existing evidence; this slice did not run a new modeled
+directory power-failure schedule. Routed Node data-command ownership checks,
+actual durable child writes during parent quorum loss, TCP/QUIC directory ingress,
+cross-authority ancestry protocol and source fence/import/activation remain work.
+MacOS and separate-host execution are not established. The full P0–P7 goal remains
+active, with P4's explicit fault-release gates and P6 lifecycle still required.

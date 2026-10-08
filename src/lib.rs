@@ -17,6 +17,7 @@ pub mod application;
 pub mod connect;
 pub mod contracts;
 pub mod dial;
+pub mod directory;
 pub mod identity;
 pub mod log;
 pub mod membership;

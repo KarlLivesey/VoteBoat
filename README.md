@@ -88,9 +88,11 @@ delivery and repair fault checks; this is not a production membership release.
 The [responsibility routing foundation](docs/RESPONSIBILITY_ROUTING.md) now provides
 checked Single/Partitioned/Delegated manifests, bounded native/host cache and
 partition-policy seams, and local committed-owner checks. Cached child lookup
-works without a parent cache entry. Replicated directory state, routed Node
-commands and durable child writes during parent quorum loss remain P5 work;
-these cache hints do not activate or transfer ownership.
+works without a parent cache entry. The [replicated directory application](docs/DIRECTORY_APPLICATION.md)
+now publishes fixed-bootstrap manifests through ordinary Raft commands and
+recovers retry history through native WAL replay, checkpoints and snapshot install.
+Routed Node data commands and durable child writes during parent quorum loss remain
+P5 work; ordinary metadata publication cannot activate or transfer ownership.
 
 ## Run
 

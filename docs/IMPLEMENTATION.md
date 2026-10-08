@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; public mutation ingress, generic application envelopes and faulted online transitions remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests, bounded native/host cache/partition policy, local owner-context checks and fixed-bootstrap replicated directory with native WAL/checkpoint/snapshot recovery implemented; routed data admission/apply and durable child progress during parent quorum loss remain |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -166,8 +166,10 @@ before P6 ownership movement. This changes sequencing, not the full scope or gat
 
 1. **Responsibility manifests and routing (current, P5).** Slice 78 supplies
    checked manifests, bounded native/host cached resolution and local owner checks.
-   Next bind them to a replicated directory application with bounded command and
-   checkpoint encoding/replay, then routed command admission and ordered apply.
+   Slice 79 binds them to a replicated fixed-bootstrap directory application with
+   bounded command/checkpoint encoding and native replay/snapshot recovery.
+   Next implement routed command admission and ordered apply against durable local
+   ownership, then demonstrate actual child writes with an unavailable parent.
    These are required to establish actual durable child progress rather than
    merely a successful cache lookup. Implement the first
    usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
@@ -201,7 +203,7 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Resolve and route responsibility manifests (current P5) | Concrete groups need an explicit namespace/partition ownership view before safe data movement. Slice 78 establishes checked shape/cache/owner-check contracts; replicated directory and command integration are next within this item. | Native directory replay/checkpoints; actual durable child writes with parent unable to commit and unchanged parent logs; stale owner commands refuse at admission and apply. | Completes recursive routing and supplies P6 ownership lineage. Uses established groups independently of opening public membership ingress. |
+| Resolve and route responsibility manifests (current P5) | Concrete groups need an explicit namespace/partition ownership view before safe data movement. Slices 78–79 establish checked manifests/cache/owner checks and native replicated directory recovery; routed data admission/apply is next within this item. | Actual durable child writes with parent unable to commit and unchanged parent logs; stale owner commands refuse at admission and apply. | Completes recursive routing and supplies P6 ownership lineage. Uses established groups independently of opening public membership ingress. |
 | Finish fault-tested remote membership release (next P4) | Executable-created add/enroll/promote/retire and divergent learner repair now pass. Remaining interrupted schedules are enumerated in slice 77. | Held readiness replies across cancellation/session change; promoted-leader loss with unavailable/restored/compacted witness; broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block independent P5 foundation work. |
 | First durable split/merge (following P6) | Routing selects a destination but cannot revoke an old owner's service. Both P5 and the P4 release checks are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
 
@@ -4461,3 +4463,89 @@ The next two mini deliverables remain the finite P4 fault-gap ledger and P6 dura
 split/merge. Public membership ingress stays gated. P7 and full P0–P7 remain active;
 macOS and separate-host operational evidence are still missing. Detailed contract:
 [responsibility routing](RESPONSIBILITY_ROUTING.md).
+
+## Slice 79 — replicated fixed-bootstrap directory and recoverable retry history
+
+Schema plan: one exact metadata authority owns a bounded forest of immutable
+initial grants. DirectoryCommand carries one checked manifest plus an expected
+route generation; ordinary Raft Command entries supply operation identity and
+ordered durability. Application state contains applied manifests and every unique
+original command/outcome. Initial publication must match the grant; later CAS
+publication may change effective placement metadata but must not change ownership,
+epoch, scope, topology, adapter or lifecycle. This is the usable metadata path
+needed by P5, not an ownership-transfer shortcut. Constructor, malformed-batch
+and restore failure return/preserve original state before publication.
+
+Directory implements the existing public application, bounded receipt/admission,
+read and checkpoint contracts without a second infrastructure owner. Initial
+plans check local ancestry/bindings, exact authority, unique child edges and fixed
+depth/count budgets. External parent grants remain explicitly trusted verified
+bootstrap inputs; the local state machine does not invent remote ancestry evidence.
+No manifest creates or enrolls a group. Same-authority ordinary publication cannot
+reparent or move an owner; P6 must add its durable lifecycle before those edits.
+
+Command and manifest encodings are fixed little-endian format 1. Publication is
+bounded to 32768 bytes and the existing checked route ceilings. A separate
+initialization command binds the exact full plan and capacities before publication
+is allowed; it is bounded to 8 MiB, with its actual size in the public provider
+envelope. Initialization consumes ordinary operation/history credits. Directory checkpoint schema
+1 binds exact authority, capacities, initial plan and applied boundary, retaining
+unique original commands in their first-application order. Replay reconstructs
+views and original outcomes, including rejected CAS outcomes. Operation conflicts
+retain the original command/result. There is no retry eviction, content-hash
+substitution or new clock-derived generation. Restore validates the entire bounded
+replacement before publishing it; schema/plan/capacity/identity/order/length errors
+leave the original application unchanged. Read receipts separate inline value
+bytes from nested route capacity under the existing read-result contract.
+
+Lifetime ceilings are 256 initial manifests, 4096 unique operations and 64 MiB of
+retained command bytes. Pending admission reserves both count and maximum bytes
+per unique pending ID. Original commands, route-map allocations and map bookkeeping
+remain separately count/byte bounded. Atomic apply/restore uses temporary bounded
+copies; this is not an exact RSS claim. The whole-lifetime command/snapshot envelope
+is public through readiness_requirements; embeddings must select compatible
+provider budgets and bind the plan's metadata authority to the actual group.
+
+The native three-replica history uses three real WALs and the ordinary deterministic
+Raft core with bounded in-process delivery. It first commits the full-plan initialization, publishes a parent and locally
+authored child, drops volatile results, reopens retained logs and retries the original
+operation. It isolates the next leader, appends an uncommitted publication and
+checks no applied change/receipt, elects the survivors and commits a different
+publication. Native checkpoints and compaction then precede reopen and snapshot
+installation into the older replica. A fresh quorum read observes generation 2;
+retry still returns its original generation-1 publication outcome. Reopen and
+remaining-operation counts exclude abandoned operation 104. Applied views feed
+NativeManifestCache through the same public interface. This is real directory
+persistence/commitment, not yet a routed application data write or network endpoint.
+
+Deterministic checks cover canonical encoding, every-byte truncation, finite byte
+mutations, maximum 256-partition maps, malformed checkpoint indices/IDs/counts/
+lengths, atomic batch/restore failure, pending history credits, fixed-plan/capacity
+mismatch, original failure retries, forbidden ownership edits, exact local ancestry,
+multiple-parent/foreign-alias refusal, 32-level success/33-level refusal and read
+receipt accounting. A separate child directory consumes a host-verified external
+bootstrap grant without mirroring or depending on its parent's application state.
+Initial compile found a proposal-iterator lifetime mismatch, fixed by processing
+the original pending iterator and candidate through the same reservation closure.
+The first native test run lacked its temporary parent directory; construction was
+corrected in the harness, then the complete history passed.
+
+This slice introduces application encodings only; no Raft/WAL/peer format,
+consensus rule, asynchronous effect, durability token, completion domain or
+additional watermark changes. The applied boundary remains a contiguous prefix.
+Final schema review found that checkpoint plan equality alone did not bind WAL-only
+replay. The committed initialization command fixes that gap: native pre-checkpoint
+recovery now rejects changed child grants, changed capacities and an added unused
+grant. Publication before initialization and malformed initialization refuse.
+No acknowledged publication can replay under a different bootstrap plan.
+Published results and snapshot acknowledgements use the existing exact native
+barriers, quorum commitment and verified application restoration. Existing storage
+fault checks are not relabeled as new directory power-loss testing.
+
+Next in current mini item P5 is a routed command/application assembly with durable
+local ownership at admission and apply, then actual child quorum writes with
+unavailable parent and unchanged ancestor logs. The next two deliverables remain
+P4's finite remaining release-fault ledger and P6 source-fence/import/publish/
+activation/merge. P7 and full P0–P7 remain active. Native metadata tests use Linux
+filesystem I/O and in-process delivery; macOS, separate-host and TCP/QUIC directory
+endpoint evidence is absent. See [directory contract](DIRECTORY_APPLICATION.md).
