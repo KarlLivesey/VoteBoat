@@ -249,6 +249,18 @@ impl<P: PeerTransport> PeerRoster<P> {
     pub fn local(&self) -> LocalIdentity {
         self.local
     }
+    pub fn outbound_binding(&self) -> OutboundBinding {
+        self.outbound
+    }
+    pub fn authorized_peers(&self) -> impl Iterator<Item = NodeId> + '_ {
+        self.peers.keys().copied()
+    }
+    pub fn limits(&self) -> PeerRosterLimits {
+        self.limits
+    }
+    pub fn wire_version(&self) -> u16 {
+        self.wire_version
+    }
     /// Inspect a retained receive without transferring it. The exact metadata
     /// must still match when take_received transfers the batch.
     pub fn received_info(&mut self, peer: NodeId) -> Result<Option<ReceiveInfo>, PeerRosterError> {
@@ -298,6 +310,12 @@ impl<P: PeerTransport> PeerRoster<P> {
     /// Local scheduling hint only. A due waiting peer is omitted while no
     /// connection/handshake capacity is available, preventing a busy retry loop.
     pub fn next_deadline(&self) -> Option<MonoTime> {
+        self.next_deadline_filtered(|_| true)
+    }
+    pub fn next_deadline_filtered(
+        &self,
+        mut eligible: impl FnMut(NodeId) -> bool,
+    ) -> Option<MonoTime> {
         if self.closed || self.fenced {
             return None;
         }
@@ -310,7 +328,7 @@ impl<P: PeerTransport> PeerRoster<P> {
             .filter_map(|p| {
                 if let Some(a) = &p.attempt {
                     Some(a.expires)
-                } else if available && p.transport.is_none() {
+                } else if available && p.transport.is_none() && eligible(p.identity.node) {
                     Some(p.next)
                 } else {
                     None
@@ -374,6 +392,17 @@ impl<P: PeerTransport> PeerRoster<P> {
         now: MonoTime,
         limit: usize,
     ) -> Result<Vec<ConnectTicket>, PeerRosterError> {
+        self.due_connections_filtered(now, limit, |_| true)
+    }
+    /// Capacity filter only: eligibility cannot authorize an unknown peer.
+    /// Skipped peers spend no generation or attempt reservation. In particular,
+    /// canceled provider work can retain its slot until its terminal receipt.
+    pub fn due_connections_filtered(
+        &mut self,
+        now: MonoTime,
+        limit: usize,
+        mut eligible: impl FnMut(NodeId) -> bool,
+    ) -> Result<Vec<ConnectTicket>, PeerRosterError> {
         self.time(now)?;
         if self.fenced {
             return Err(PeerRosterError::Fenced);
@@ -396,7 +425,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         for id in self.keys_after(self.connect_cursor, limit) {
             self.connect_cursor = Some(id);
             let p = self.peers.get_mut(&id).unwrap();
-            if p.transport.is_some() || p.attempt.is_some() || now < p.next {
+            if p.transport.is_some() || p.attempt.is_some() || now < p.next || !eligible(id) {
                 continue;
             }
             if usage.connecting == self.limits.connecting

@@ -16,7 +16,7 @@
 //! cannot grant authority, and successful establishment is not Raft evidence.
 use crate::{dial::DialError, runtime::MonoTime, secure::*, transport::ConnectTicket};
 use std::io::ErrorKind;
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ConnectDirection<E> {
     Dial(E),
     Accept,

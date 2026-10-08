@@ -16,6 +16,38 @@
 use crate::{outbound::*, runtime::MonoTime, secure::*, transport::*, wire::*};
 use std::mem::size_of;
 
+/// Explicit codec/limit selection reused for each authenticated connection.
+pub struct NativeTransportFactory<C: WireCodec + Clone> {
+    codec: C,
+    limits: TransportLimits,
+}
+impl<C: WireCodec + Clone> NativeTransportFactory<C> {
+    pub fn new(codec: C, limits: TransportLimits) -> Result<Self, TransportError> {
+        let limits = limits.validate()?;
+        let wire = codec.limits().validate().map_err(TransportError::Wire)?;
+        if codec.format_version() == 0
+            || codec.header_bytes() == 0
+            || codec.header_bytes() > wire.max_frame_bytes
+            || wire.max_frame_bytes > limits.send_frame_bytes
+            || wire.max_frame_bytes > limits.receive_frame_bytes
+            || wire.max_decoded_bytes > limits.decoded_bytes
+        {
+            return Err(TransportError::IncompatibleCodec);
+        }
+        Ok(Self { codec, limits })
+    }
+}
+impl<S: SecureSession, C: WireCodec + Clone> PeerTransportFactory<S> for NativeTransportFactory<C> {
+    type Transport = NativePeerTransport<S, C>;
+    fn build<O: OutboundQueue>(
+        &mut self,
+        session: S,
+        outbound: &O,
+    ) -> Result<Self::Transport, TransportError> {
+        NativePeerTransport::new(session, self.codec.clone(), outbound, self.limits)
+    }
+}
+
 struct Sending {
     batch: OutboundBatch,
     frame: Vec<u8>,

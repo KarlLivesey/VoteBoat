@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-local-replica-driver",
+  "status": "shared-native-local-and-peer-drivers",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -9,12 +9,28 @@
   ],
   "contracts": [
     {
+      "design_id": "C06/C07/C15",
+      "public_contract": "PeerTransportFactory<S: SecureSession>",
+      "operations": ["build"],
+      "native": "NativeTransportFactory<C: WireCodec + Clone> creates NativePeerTransport over explicitly selected codec/limits and authenticated session",
+      "conformance": ["tests/support/peer_driver.rs", "tests/effect_owner.rs"],
+      "scope": "Consumes one Ready authenticated session into one transport bound to the selected outbound queue. Failure closes/drops that owned session; no send/receive/durability completion is manufactured. Driver checks exact live local/peer/store/generation/wire scope before construction; roster revalidates attachment. Core-only host factory/session/transport injection and actual native TLS histories use the same seam."
+    },
+    {
+      "design_id": "C06/C09/C10/C15",
+      "public_contract": "PeerDriver / PeerParts",
+      "operations": ["new", "limits", "usage", "roster", "ingress", "connector_usage", "next_deadline", "disconnect", "poll", "close", "drain", "is_drained", "is_failed", "into_parts", "into_recovery"],
+      "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport",
+      "conformance": ["tests/support/peer_driver.rs", "tests/support/peer_fault.rs", "tests/effect_owner.rs"],
+      "scope": "Exact construction-time bindings and quiescence; complete authorized route coverage; bounded fair attempt/transport/send/ingress work. Canceled attempts retain provider slots until actual receipt and block replacement generation allocation; late sessions close without attachment. Preallocated staging covers the selected outbound node batch ceiling, with original payload count/byte/class credits retained through exact terminal completion. Wrong scopes/provider receipts fence the owner and preserve observed payloads, including oversized provider allocations quarantined whole for explicit recovery. Failed-core network drain cancels ingress without core access. Sixteen core/host tests and three-node/100-group real WAL/TLS/partition/reconnect/snapshot/recovery histories. No hidden runtime/I/O construction or new quorum/durability evidence; full native node facade/lifecycle remains pending."
+    },
+    {
       "design_id": "C10/C15",
       "public_contract": "ReplicaDriver / ReplicaParts",
       "operations": ["new", "binding", "limits", "usage", "poll", "close_intake", "discard_failed", "is_drained", "is_failed"],
       "native": "Fixed bounded local assembly over selected public worker/outbound/application/service/snapshot providers; native histories use the same driver",
       "conformance": ["tests/support/replica_driver.rs", "tests/effect_owner.rs"],
-      "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain and peer/ingress reactor remain host responsibilities; full production facade remains pending."
+      "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain remains the host responsibility; PeerDriver now supplies peer/ingress reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C01/C02",
@@ -143,7 +159,7 @@
       "operations": ["new", "binding", "limits", "usage", "submit", "advance", "deliver", "cancel_wait", "reconcile", "poll", "complete", "close", "abort", "is_drained"],
       "native": "Fixed ownership guard over ProposalAdmission, EffectOwner and ApplicationRouter; native Counter histories select it directly",
       "conformance": ["tests/effect_owner.rs"],
-      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; production reactor/facade remains pending."
+      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C05",
@@ -190,7 +206,7 @@
       "conformance": [
         "tests/effect_owner.rs"
       ],
-      "scope": "Exact live ReadReady lease and one-use authority, query/result reservation before immutable application callback, node/per-group limits, original rejected query/lease ownership, catch-up retry, actual result capacity validation with provider failure fencing, opaque result identity and credits through consumer completion. Six downstream host tests plus native WAL/TLS/100-group read histories. ReadRequests now owns and budgets original pending read invocations before ReadReady; production reactor remains pending."
+      "scope": "Exact live ReadReady lease and one-use authority, query/result reservation before immutable application callback, node/per-group limits, original rejected query/lease ownership, catch-up retry, actual result capacity validation with provider failure fencing, opaque result identity and credits through consumer completion. Six downstream host tests plus native WAL/TLS/100-group read histories. ReadRequests now owns and budgets original pending read invocations before ReadReady; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C05/C10/C15",
@@ -215,7 +231,7 @@
       "conformance": [
         "tests/effect_owner.rs"
       ],
-      "scope": "Bounded original query/reply ownership before tracked Read admission; exact scoped step/request/ready/result correlation; checked IDs above live core allocation floor; original reservation revalidation; one unresolved protocol read per group and separate consumer-held reply limits; control cancellation only after original data Read step, exact ready-lease cancellation without catch-up, failure/leadership unavailable outcomes, original rejected query ownership, foreign consumer-envelope rejection, close/drain and failed-owner abort. Ten downstream host tests and actual three-node/100-group native WAL/TLS quorum-loss, replacement, healing, subsequent-read, snapshot/checkpoint/reconnect/recovery histories. Production reactor/facade still pending."
+      "scope": "Bounded original query/reply ownership before tracked Read admission; exact scoped step/request/ready/result correlation; checked IDs above live core allocation floor; original reservation revalidation; one unresolved protocol read per group and separate consumer-held reply limits; control cancellation only after original data Read step, exact ready-lease cancellation without catch-up, failure/leadership unavailable outcomes, original rejected query ownership, foreign consumer-envelope rejection, close/drain and failed-owner abort. Ten downstream host tests and actual three-node/100-group native WAL/TLS quorum-loss, replacement, healing, subsequent-read, snapshot/checkpoint/reconnect/recovery histories. PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C03",
@@ -316,7 +332,7 @@
       "operations": ["new", "binding", "limits", "usage", "is_fenced", "submit", "poll", "complete", "close", "is_drained"],
       "native": "Fixed bounded coordination over selected BoundedStateMachine and EffectOwner; native Counter histories use it directly",
       "conformance": ["tests/effect_owner.rs"],
-      "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits and original verified applied positions through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. ClientRouter now supplies proposal/dedup/outcome admission; ReadRequests supplies bounded original read invocation/result ownership; full reactor/facade remains pending."
+      "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits and original verified applied positions through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. ClientRouter now supplies proposal/dedup/outcome admission; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C10",
@@ -364,7 +380,7 @@
       "conformance": [
         "tests/effect_owner.rs"
       ],
-      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; full reactor/facade remains pending."
+      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C10/C15",
@@ -372,7 +388,7 @@
       "operations": ["new", "submit", "deliver", "usage", "is_drained", "discard_failed"],
       "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
       "conformance": ["tests/effect_owner.rs"],
-      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. Full client/result/reactor facade remains pending."
+      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; full native node facade remains pending."
     },
     {
       "design_id": "C12",
@@ -428,7 +444,7 @@
       "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "received_info", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": ["tests/transport.rs", "tests/worker.rs", "tests/peers.rs", "tests/effect_owner.rs"],
-      "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; reactor assembly remains pending."
+      "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C06/C15",
@@ -436,7 +452,7 @@
       "operations": ["new", "local", "usage", "binding", "received_info", "next_deadline", "attempt_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
       "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
       "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
-      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; the host binds exact attempt deadlines and owns separate ingress/staging resources. No membership or quorum authority."
+      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Construction-selected PeerConnector now owns native socket/TLS establishment; PeerDriver now owns exact attempt deadlines and separate bounded ingress/staging resources. No membership or quorum authority."
     },
     {
       "design_id": "C06/C15",
@@ -458,7 +474,7 @@
         "tests/effect_owner.rs",
         "tests/worker.rs"
       ],
-      "scope": "Explicit bounded TCP dial worker, checked node/store/session/generation tickets, nonblocking connected streams, exact cancellation and terminal credit lifetime, failure/drain/join. Native TCP/TLS histories dial through this public contract. Channels are unauthenticated address results; NativePeerConnector now supplies listener/routing/TLS establishment; production reactor/facade remains unfinished. Timeout bounds one connect call, excluding queue delay; roster deadlines require cancellation."
+      "scope": "Explicit bounded TCP dial worker, checked node/store/session/generation tickets, nonblocking connected streams, exact cancellation and terminal credit lifetime, failure/drain/join. Native TCP/TLS histories dial through this public contract. Channels are unauthenticated address results; NativePeerConnector now supplies listener/routing/TLS establishment; PeerDriver now supplies reactor coordination; full native node facade remains unfinished. Timeout bounds one connect call, excluding queue delay; roster deadlines require cancellation."
     },
     {
       "design_id": "C06/C09/C15",
@@ -480,7 +496,7 @@
         "tests/peers.rs",
         "tests/effect_owner.rs"
       ],
-      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; production reactor remains pending."
+      "scope": "Bounded listener/preface/dial/TLS owner over exact authorized ticket/store/generation/deadline scopes. Separate anonymous socket caps, fixed untrusted routing preface, certificate-pin and authenticated store-session enforcement, fair bounded polling, cancellation retains active dial slots until actual receipt, explicit close/drain/provider reclaim. One long-lived native connector per node in three-node/100-group histories including reconnect and explicit worker join. Injected host connector/session and held/mis-scoped dial provider tests. Decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C06/C10/C15",
@@ -502,7 +518,7 @@
         "tests/peers.rs",
         "tests/transport.rs"
       ],
-      "scope": "Transport contract 2 exact receive metadata permits class/count/capacity reservation before extraction. Bounded control reserve and background ceiling, full frame charge through partial admission, fair batch/message retries, current-connection/runtime generation checks, explicit stale/group rejection and close/abort accounting. Core-only host-provider tests and native three-node/100-group WAL/snapshot/reconnect/recovery histories. Admission is no execution, application, commitment or durability evidence. ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; production reactor/facade remains pending."
+      "scope": "Transport contract 2 exact receive metadata permits class/count/capacity reservation before extraction. Bounded control reserve and background ceiling, full frame charge through partial admission, fair batch/message retries, current-connection/runtime generation checks, explicit stale/group rejection and close/abort accounting. Core-only host-provider tests and native three-node/100-group WAL/snapshot/reconnect/recovery histories. Admission is no execution, application, commitment or durability evidence. ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; full native node facade remains pending."
     },
     {
       "design_id": "C13",
@@ -515,7 +531,7 @@
   ],
   "not_yet_implemented": [
     "physical-wal-reclamation",
-    "production-reactor-assembly",
+    "native-node-facade-and-coordinated-lifecycle",
     "buffers",
     "admission-policy",
     "routing",

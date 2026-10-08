@@ -36,7 +36,8 @@ selected components. Hosts may admit client/read/control requests through those
 owners and poll/complete client/read outputs. Keep selected identities and the
 application group set fixed. Drive connector/roster/transport/IngressRouter in
 the outer loop; this driver neither opens connections nor consumes incoming
-frames. Snapshot effects require selected snapshot components; omission returns
+frames. [PeerDriver](PEER_DRIVER.md) now supplies this outer coordination over
+selected connector, factory, roster and ingress instances. Snapshot effects require selected snapshot components; omission returns
 MissingSnapshots, retains the lease and fences the owner for recovery.
 
 Wrong bindings, backwards time and invalid budgets reject before provider
@@ -57,4 +58,4 @@ Independent host providers exercise this composition in
 `tests/support/replica_driver.rs`. Real-file three-node/100-group native histories
 in `tests/effect_owner.rs` use the same driver, with network faults and delivery
 controlled by the outer harness. These finite histories do not claim a complete
-production reactor, exhaustive proof, macOS execution or benchmark results.
+node facade, exhaustive proof, macOS execution or benchmark results.

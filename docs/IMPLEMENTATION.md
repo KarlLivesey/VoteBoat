@@ -11,7 +11,7 @@ record claims that unimplemented phases already work.
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers and real TCP/TLS histories; full node facade remains |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, local replica driver and native 100-group histories implemented; full peer reactor/facade assembly remains |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, local replica and peer reactor drivers, and native 100-group histories implemented; full node facade/lifecycle assembly remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -1804,9 +1804,68 @@ cleaning, membership/policy transitions, recursive responsibilities, safe
 split/merge and P7 performance evidence remain unfinished. Linux execution does
 not establish macOS execution or arbitrary-schedule/protocol/performance claims.
 
+## Slice 27: bounded public peer reactor
+
+`PeerDriver` now owns explicitly selected connector, transport factory, roster,
+ingress and route instances. Construction checks exact local/runtime/outbound
+bindings, authorized route coverage, compatible attempt timeouts and quiescent
+components; rejection returns all original parts. `PeerTransportFactory` supplies
+the session-to-transport assembly seam. NativeTransportFactory clones an
+explicitly selected codec and uses NativePeerTransport, while independent host
+factories use the same public contract. No hidden runtime, socket, clock, worker
+or fallback provider is created by the driver.
+
+The reactor fairly polls roster/transport progress and connector outcomes,
+cancels exact expired attempts, validates live authenticated session scopes before
+attachment, starts bounded attempts, completes local sends, preserves rejected
+batches and reserves ingress before transfer. Canceled provider work retains its
+driver slot until the actual terminal receipt, preventing replacement attempts
+and generation consumption for that peer in the meantime. Capacity-only roster
+filters preserve all existing authorization/deadline checks and omit blocked
+waiting peers from retry deadline hints. Late returned sessions close without
+attaching. Fresh persisted store sessions and existing disjoint roster generation
+ranges remain authoritative; no new watermark, durability token or ID allocator
+is introduced.
+
+Preallocated staging covers the selected outbound node batch ceiling, preventing
+a smaller local retry queue from allowing one stalled peer to block extraction of
+other peer/control work. Original outbound payload/class/count/capacity-byte
+charges survive rejection and retire only through exact local completion.
+Budgets bound scans, I/O, connection receipts, sends/retries and ingress dispatch.
+Provider/factory violations fence the owner and retain observed exceptional
+payloads for explicit recovery; oversized provider returns are quarantined whole
+after failure, not admitted as normally bounded work. Close drains accepted
+network work without closing the host queue. A separate drain path cancels held
+ingress and returns network buffers even after the local core has failed, without
+accessing or admitting to that core. Full node shutdown still checks external
+queues, local/service owners and workers, and joins owned native threads.
+
+The native three-node/100-group histories now select both library drivers for
+local and peer work, including automatic elections, partition/replacement/healing,
+fresh connections, snapshots/checkpoints and actual-file recovery. Partition
+injection lives solely in a test transport wrapper; the production reactor has
+no test fault policy. Sixteen independent host tests cover attachment, stalled
+peer isolation, original send credits, exact receipts, ingress admission,
+canceled/late connections, generation retention, wrong bindings/time/budgets,
+constructor resource return, provider/factory faults, quarantine and explicit
+payload recovery, outstanding-work shutdown and failed-core drain. See
+[peer reactor contracts](PEER_DRIVER.md).
+
+Local validation passes 269 default/native/TLS tests, 248 native-only tests and
+155 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL
+header checks pass. Native socket histories ran with loopback access enabled.
+No consensus/storage/wire/checkpoint format changes or performance claims are
+introduced. These finite Linux runs do not establish macOS execution or arbitrary
+schedules.
+
+Full P0–P7 stays active. The native node facade and coordinated lifecycle,
+physical WAL cleaning, membership/policy transitions, recursive responsibilities,
+safe split/merge and P7 throughput evidence remain unfinished.
+
 ## Next slice
 
-Continue full native node assembly with a public peer reactor over selected
-connector, roster, transport and ingress owners, then physical WAL cleaning with
+Compose the local and peer drivers into the native node facade with explicit
+construction/recovery and coordinated shutdown, then physical WAL cleaning with
 durable replacement/recovery dependencies. CI stays background feedback; relevant
 local checks guide direct commits.

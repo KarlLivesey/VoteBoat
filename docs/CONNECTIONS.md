@@ -120,8 +120,10 @@ histories now use a long-lived connector per node for initial mesh and fresh
 peer reconnection, then continue actual WAL/snapshot/replication/read/recovery
 work. Shutdown closes/drains connectors and joins each dial worker explicitly.
 
-Bounded decoded ingress is now supplied by [IngressRouter](INGRESS.md).
-Complete client/result admission, a production reactor/facade, physical
-WAL reclamation, membership/policy changes, recursive responsibilities and safe
+Bounded decoded ingress is now supplied by [IngressRouter](INGRESS.md), with
+connector/session/transport/ingress coordination in [PeerDriver](PEER_DRIVER.md).
+Client/read admission and local application/WAL driving use the service owners
+and ReplicaDriver. The full native node facade, physical WAL reclamation,
+membership/policy changes, recursive responsibilities and safe
 split/merge remain unfinished. These finite Linux tests are not a full kernel
 fault matrix, macOS execution, power-cut evidence or a liveness proof.

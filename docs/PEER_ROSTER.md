@@ -7,6 +7,10 @@ listener, socket, TLS instance, queue, thread or executor. The native path uses
 select their own `PeerTransport`, including boxed instances. This fixed
 identity/lifetime guard does not replace quorum validation or grant membership.
 
+[PeerDriver](PEER_DRIVER.md) now supplies a bounded library reactor that owns the
+selected roster, connector, transport factory and ingress instances. Its native
+histories use the same public roster methods as independent host providers.
+
 ## Construction and identities
 
 `PeerRosterConfig` binds the recovered local node/store session, exact outbound
@@ -36,6 +40,12 @@ be Open, have no accepted send/completion or decoded input, and fit the selected
 ceilings. Bounded preallocated frame buffers are allowed. Rejection
 returns the original provider without polling it or consuming the pending
 attempt. The host can correct the assembly, or call `connect_failed`.
+
+`due_connections_filtered` adds a capacity-only eligibility filter. It cannot
+authorize unknown peers or bypass existing identity/deadline/generation checks.
+PeerDriver excludes peers whose canceled connector operation still awaits its
+terminal receipt, without spending replacement generations. The corresponding
+`next_deadline_filtered` omits waiting peers blocked by that retained work.
 
 An authenticated remote store session may stay equal across reconnection or
 increase after remote recovery; it cannot regress below this roster's observed

@@ -9,8 +9,9 @@ histories now select this router instead of staging decoded messages in a shared
 fixture deque. Committed application results now use the separate
 [application-result router](APPLICATION_RESULTS.md), followed by the
 [client router](CLIENTS.md). The separate [read invocation owner](READ_REQUESTS.md)
-now supplies original query/reply ownership. The complete node facade/reactor
-remains unfinished.
+now supplies original query/reply ownership. [PeerDriver](PEER_DRIVER.md) now
+owns and drives the selected ingress router with the peer providers. The full
+node facade remains unfinished.
 
 ## Inspect before ownership transfer
 
@@ -130,4 +131,4 @@ the same receive/dispatch path through real connections, WAL and snapshot worker
 partitions, reconnection, application retries/reads and actual-file recovery.
 These are finite Linux checks, not macOS execution, a full proof or performance
 measurements. Physical WAL cleanup, reconfiguration, recursive responsibilities
-and safe split/merge remain unfinished alongside node result/reactor assembly.
+and safe split/merge remain unfinished alongside full node facade assembly.

@@ -17,6 +17,20 @@ use crate::{outbound::*, raft::Message, runtime::MonoTime, secure::*};
 mod peers;
 pub use peers::*;
 
+/// Construction-selected conversion of one ready authenticated session into
+/// one multiplexed transport. The factory owns the session after this call;
+/// failure closes/drops it and creates no send or receive completion. It must
+/// bind the selected outbound queue and preserve the authenticated session scope.
+/// No implicit connector, reactor or alternate provider may be constructed.
+pub trait PeerTransportFactory<S: SecureSession> {
+    type Transport: PeerTransport;
+    fn build<O: OutboundQueue>(
+        &mut self,
+        session: S,
+        outbound: &O,
+    ) -> Result<Self::Transport, TransportError>;
+}
+
 pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 2;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

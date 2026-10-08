@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #![allow(dead_code)]
 pub mod outbound;
+#[cfg(feature = "tls")]
+pub mod peer_fault;
 pub mod snapshot;
 #[cfg(feature = "tls")]
 pub mod tls;

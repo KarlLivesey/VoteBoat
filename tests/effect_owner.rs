@@ -1005,6 +1005,8 @@ mod client_admission {
         assert!(c.is_drained());
     }
 }
+#[path = "support/peer_driver.rs"]
+mod peer_driver;
 #[path = "support/replica_driver.rs"]
 mod replica_driver;
 mod support;
@@ -1615,9 +1617,7 @@ mod native {
         outbound: NativeOutbound,
         driver: Option<ReplicaDriver<CounterReceipt>>,
         reads: Vec<i64>,
-        transports:
-            Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
-        ingress: IngressRouter,
+        ingress: Option<IngressRouter>,
         results: ApplicationRouter<CounterReceipt>,
         read_requests: ReadRequests<(), i64>,
         read_unavailable: usize,
@@ -1625,8 +1625,14 @@ mod native {
         client_applied: usize,
         client_unknown: usize,
         #[cfg(feature = "tls")]
-        connector: Option<voteboat::native::connect::NativePeerConnector>,
-        staged: VecDeque<OutboundBatch>,
+        peer_driver: Option<
+            PeerDriver<
+                voteboat::native::connect::NativePeerConnector,
+                support::peer_fault::Factory,
+            >,
+        >,
+        #[cfg(feature = "tls")]
+        faults: std::rc::Rc<support::peer_fault::Faults>,
         sent: usize,
         received: usize,
         snapshots: Option<Snapshots>,
@@ -1644,6 +1650,13 @@ mod native {
         NativeOutbound,
     >;
     impl Node {
+        fn peer_work_drained(&self) -> bool {
+            #[cfg(feature = "tls")]
+            if let Some(d) = &self.peer_driver {
+                return d.usage() == PeerDriverUsage::default() && d.ingress().is_drained();
+            }
+            true
+        }
         fn with_replica<R>(
             &mut self,
             callback: impl FnOnce(&mut Option<ReplicaDriver<CounterReceipt>>, &mut Parts<'_>) -> R,
@@ -1860,7 +1873,6 @@ mod native {
             outbound,
             driver: None,
             reads: Vec::new(),
-            transports: None,
             clients: ClientRouter::new(
                 ClientRouterBinding {
                     owner: runtime_owner,
@@ -1896,21 +1908,24 @@ mod native {
                 ApplicationRouterLimits::default(),
             )
             .unwrap(),
-            ingress: IngressRouter::new(
-                IngressBinding {
-                    owner: runtime_owner,
-                    local: voteboat::secure::LocalIdentity {
-                        node: node(id),
-                        store: runtime_owner.store,
+            ingress: Some(
+                IngressRouter::new(
+                    IngressBinding {
+                        owner: runtime_owner,
+                        local: voteboat::secure::LocalIdentity {
+                            node: node(id),
+                            store: runtime_owner.store,
+                        },
+                        generation: IngressGeneration::new(1).unwrap(),
                     },
-                    generation: IngressGeneration::new(1).unwrap(),
-                },
-                IngressLimits::default(),
-            )
-            .unwrap(),
+                    IngressLimits::default(),
+                )
+                .unwrap(),
+            ),
             #[cfg(feature = "tls")]
-            connector: None,
-            staged: VecDeque::new(),
+            peer_driver: None,
+            #[cfg(feature = "tls")]
+            faults: Default::default(),
             sent: 0,
             received: 0,
             snapshots,
@@ -1926,91 +1941,40 @@ mod native {
         n
     }
     #[cfg(feature = "tls")]
-    fn establish(
-        nodes: &mut [Node],
-        tickets: Vec<(usize, voteboat::transport::ConnectTicket)>,
-        now: MonoTime,
-    ) {
-        use voteboat::{
-            connect::*,
-            native::{transport::NativePeerTransport, wire::NativeWireCodec},
-            transport::TransportLimits,
-            wire::WireLimits,
-        };
-        let endpoints = nodes
-            .iter()
-            .map(|n| {
-                (
-                    n.outbound.binding().node,
-                    n.connector
-                        .as_ref()
-                        .unwrap()
-                        .listener_addr()
-                        .unwrap()
-                        .unwrap(),
-                )
-            })
-            .collect::<BTreeMap<_, _>>();
-        for (i, ticket) in tickets {
-            let deadline = nodes[i]
-                .transports
-                .as_ref()
-                .unwrap()
-                .attempt_deadline(ticket)
-                .unwrap();
-            let direction = if ticket.local.node < ticket.peer.node {
-                ConnectDirection::Dial(endpoints[&ticket.peer.node])
-            } else {
-                ConnectDirection::Accept
-            };
-            nodes[i]
-                .connector
-                .as_mut()
-                .unwrap()
-                .submit(
-                    ConnectRequest {
-                        ticket,
-                        direction,
-                        deadline,
-                    },
-                    now,
-                )
-                .unwrap();
-        }
+    fn establish(nodes: &mut [Node], now: MonoTime) {
         let deadline = Instant::now() + Duration::from_secs(5);
-        while nodes
-            .iter()
-            .any(|n| n.connector.as_ref().unwrap().usage().requests != 0)
-        {
+        loop {
             for n in nodes.iter_mut() {
-                let budget = ConnectPollBudget {
-                    visits: 1,
-                    socket_calls: 2,
-                    completions: 1,
-                    ..ConnectPollBudget::default()
-                };
-                for event in n.connector.as_mut().unwrap().poll(now, budget).unwrap() {
-                    let session = event.result.unwrap();
-                    let transport = NativePeerTransport::new(
-                        session,
-                        NativeWireCodec::new(WireLimits::default()).unwrap(),
-                        &n.outbound,
-                        TransportLimits::default(),
+                let p = n
+                    .peer_driver
+                    .as_mut()
+                    .unwrap()
+                    .poll(
+                        &mut n.owner,
+                        &mut n.outbound,
+                        now,
+                        PeerDriverBudget {
+                            connector: voteboat::connect::ConnectPollBudget {
+                                visits: 1,
+                                socket_calls: 2,
+                                completions: 1,
+                                ..Default::default()
+                            },
+                            ..Default::default()
+                        },
                     )
                     .unwrap();
-                    n.transports
-                        .as_mut()
-                        .unwrap()
-                        .attach(event.ticket, Box::new(transport), now)
-                        .unwrap_or_else(|r| panic!("connector attach: {:?}", r.reason));
-                    assert!(n
-                        .transports
-                        .as_ref()
-                        .unwrap()
-                        .attempt_deadline(event.ticket)
-                        .is_none());
-                }
-                assert!(n.connector.as_ref().unwrap().usage().anonymous <= 16);
+                assert!(p.ingress.rejected.is_empty());
+                assert!(n.peer_driver.as_ref().unwrap().connector_usage().anonymous <= 16);
+            }
+            if nodes.iter().all(|n| {
+                let d = n.peer_driver.as_ref().unwrap();
+                (1..=3)
+                    .map(node)
+                    .filter(|p| *p != n.outbound.binding().node)
+                    .all(|p| d.roster().binding(p).is_some())
+            }) {
+                return;
             }
             assert!(
                 Instant::now() < deadline,
@@ -2022,11 +1986,15 @@ mod native {
     #[cfg(feature = "tls")]
     fn mesh(nodes: &mut [Node]) {
         use voteboat::{
-            connect::ConnectLimits,
+            connect::*,
             dial::DialLimits,
-            native::{connect::*, dial::NativeTcpDialer},
+            native::{
+                connect::*, dial::NativeTcpDialer, transport::NativeTransportFactory,
+                wire::NativeWireCodec,
+            },
             secure::{LocalIdentity, SessionLimits},
             transport::{PeerRoster, PeerRosterConfig, PeerRosterLimits, TransportLimits},
+            wire::WireLimits,
         };
         let locals = nodes
             .iter()
@@ -2035,8 +2003,8 @@ mod native {
                 store: n.outbound.binding().store,
             })
             .collect::<Vec<_>>();
-        let mut tickets = Vec::new();
-        for (i, n) in nodes.iter_mut().enumerate() {
+        let mut assemblies = Vec::new();
+        for (i, n) in nodes.iter().enumerate() {
             let peers = locals
                 .iter()
                 .filter(|l| l.node != locals[i].node)
@@ -2049,35 +2017,32 @@ mod native {
                 std::sync::Arc::new(ThreadWake::current()),
             )
             .unwrap();
-            let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-            n.connector = Some(
-                NativePeerConnector::new(
-                    NativeConnectConfig {
-                        local: locals[i],
-                        limits: ConnectLimits::default(),
-                        session: SessionLimits {
-                            write_buffer_bytes: 256,
-                            ..SessionLimits::default()
-                        },
+            let connector = NativePeerConnector::new(
+                NativeConnectConfig {
+                    local: locals[i],
+                    limits: ConnectLimits::default(),
+                    session: SessionLimits {
+                        write_buffer_bytes: 256,
+                        ..Default::default()
                     },
-                    support::tls::configuration(locals[i].node.get()),
-                    locals
-                        .iter()
-                        .filter(|l| l.node != locals[i].node)
-                        .map(|l| (l.node, support::tls::peer(*l)))
-                        .collect(),
-                    dialer,
-                    Some(listener),
-                    MonoTime(0),
-                )
-                .unwrap_or_else(|r| panic!("connector construct: {:?}", r.reason)),
-            );
-            let mut roster = PeerRoster::new(
+                },
+                support::tls::configuration(locals[i].node.get()),
+                locals
+                    .iter()
+                    .filter(|l| l.node != locals[i].node)
+                    .map(|l| (l.node, support::tls::peer(*l)))
+                    .collect(),
+                dialer,
+                Some(std::net::TcpListener::bind("127.0.0.1:0").unwrap()),
+                MonoTime(0),
+            )
+            .unwrap_or_else(|r| panic!("connector construct: {:?}", r.reason));
+            let roster = PeerRoster::new(
                 PeerRosterConfig {
                     local: locals[i],
                     outbound: n.outbound.binding(),
                     first_generation: SecureSessionGeneration::new(1).unwrap(),
-                    last_generation: SecureSessionGeneration::new(u64::MAX).unwrap(),
+                    last_generation: SecureSessionGeneration::new(10000).unwrap(),
                     wire_version: 1,
                     limits: PeerRosterLimits::default(),
                     transport_limits: TransportLimits::default(),
@@ -2086,16 +2051,54 @@ mod native {
                 MonoTime(0),
             )
             .unwrap();
-            tickets.extend(
-                roster
-                    .due_connections(MonoTime(0), 3)
-                    .unwrap()
-                    .into_iter()
-                    .map(|t| (i, t)),
-            );
-            n.transports = Some(roster);
+            assemblies.push((connector, roster));
         }
-        establish(nodes, tickets, MonoTime(0));
+        let endpoints = assemblies
+            .iter()
+            .map(|(c, _)| (c.local().node, c.listener_addr().unwrap().unwrap()))
+            .collect::<BTreeMap<_, _>>();
+        for (n, (connector, roster)) in nodes.iter_mut().zip(assemblies) {
+            let local = n.outbound.binding().node;
+            let routes = locals
+                .iter()
+                .filter(|l| l.node != local)
+                .map(|l| {
+                    (
+                        l.node,
+                        if local < l.node {
+                            ConnectDirection::Dial(endpoints[&l.node])
+                        } else {
+                            ConnectDirection::Accept
+                        },
+                    )
+                })
+                .collect();
+            let factory = support::peer_fault::Factory {
+                native: NativeTransportFactory::new(
+                    NativeWireCodec::new(WireLimits::default()).unwrap(),
+                    TransportLimits::default(),
+                )
+                .unwrap(),
+                faults: n.faults.clone(),
+            };
+            n.peer_driver = Some(
+                PeerDriver::new(
+                    PeerParts {
+                        connector,
+                        roster,
+                        factory,
+                        ingress: n.ingress.take().unwrap(),
+                        routes,
+                    },
+                    n.owner.identity(),
+                    &n.outbound,
+                    PeerDriverLimits::default(),
+                    MonoTime(0),
+                )
+                .unwrap_or_else(|r| panic!("peer construct: {:?}", r.reason)),
+            );
+        }
+        establish(nodes, MonoTime(0));
     }
     fn drain(nodes: &mut [Node], isolated: Option<NodeId>, now: MonoTime) {
         let deadline = Instant::now() + Duration::from_secs(10);
@@ -2147,70 +2150,38 @@ mod native {
                 }
                 n.clients.reconcile(&n.owner, 128).unwrap();
                 assert!(n.clients.usage().bytes <= ClientRouterLimits::default().bytes);
-                match &mut n.transports {
-                    None => {
-                        for mut batch in n.outbound.poll(32) {
-                            assert!(network.len() + batch.messages.len() <= 8192);
-                            network.extend(batch.messages.drain(..));
-                            n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
-                        }
+                #[cfg(feature = "tls")]
+                if let Some(driver) = &mut n.peer_driver {
+                    n.faults.isolated.set(isolated);
+                    let dropped = n.faults.dropped.get();
+                    let progress = driver
+                        .poll(
+                            &mut n.owner,
+                            &mut n.outbound,
+                            now,
+                            PeerDriverBudget {
+                                peer_visits: 3,
+                                ..Default::default()
+                            },
+                        )
+                        .unwrap();
+                    n.sent += progress.sends;
+                    n.received += progress.received + n.faults.dropped.get() - dropped;
+                    assert!(progress.ingress.rejected.is_empty());
+                    assert_eq!(progress.ingress.discarded, 0);
+                    assert!(driver.ingress().usage().bytes <= IngressLimits::default().bytes);
+                } else {
+                    for mut batch in n.outbound.poll(32) {
+                        assert!(network.len() + batch.messages.len() <= 8192);
+                        network.extend(batch.messages.drain(..));
+                        n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
                     }
-                    Some(roster) => {
-                        if n.staged.is_empty() {
-                            n.staged.extend(n.outbound.poll(32));
-                        }
-                        for _ in 0..n.staged.len().min(32) {
-                            let batch = n.staged.pop_front().unwrap();
-                            match roster.submit(batch) {
-                                Ok(()) => n.sent += 1,
-                                Err(rejected) => {
-                                    assert_eq!(
-                                        rejected.reason,
-                                        voteboat::transport::PeerRosterError::Overloaded
-                                    );
-                                    n.staged.push_back(*rejected.batch);
-                                }
-                            }
-                        }
-                        for event in roster
-                            .poll(now, 3, voteboat::transport::TransportPollBudget::default())
-                            .unwrap()
-                        {
-                            assert!(matches!(
-                                event,
-                                voteboat::transport::PeerPoll::Progress { .. }
-                            ));
-                        }
-                        let local_node = n.outbound.binding().node;
-                        for peer in (1..=3).map(node).filter(|id| *id != local_node) {
-                            if let Some(done) = roster.take_send(peer).unwrap() {
-                                n.outbound.complete(done.batch, done.result).unwrap();
-                            }
-                            if isolated.is_some_and(|id| id == peer || id == local_node) {
-                                // Fixture-owned partition injection after authentication.
-                                // Production ingress contains no test fault policy.
-                                if roster.take_received(peer).unwrap().is_some() {
-                                    n.received += 1;
-                                }
-                            } else {
-                                match n.ingress.receive(roster, peer) {
-                                    Ok(Some(_)) => n.received += 1,
-                                    Ok(None) => (),
-                                    Err(rejected) => {
-                                        assert_eq!(rejected.reason, IngressError::Overloaded);
-                                        assert!(
-                                            rejected.batch.is_none(),
-                                            "overload must leave the transport owning its frame"
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                        let progress = n.ingress.dispatch(roster, &mut n.owner, 32).unwrap();
-                        assert!(progress.rejected.is_empty());
-                        assert_eq!(progress.discarded, 0);
-                        assert!(n.ingress.usage().bytes <= IngressLimits::default().bytes);
-                    }
+                }
+                #[cfg(not(feature = "tls"))]
+                for mut batch in n.outbound.poll(32) {
+                    assert!(network.len() + batch.messages.len() <= 8192);
+                    network.extend(batch.messages.drain(..));
+                    n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
                 }
                 assert!(
                     n.owner.usage().reserved_bytes <= EffectOwnerLimits::default().reserved_bytes
@@ -2246,8 +2217,8 @@ mod native {
                         && n.worker.is_drained()
                         && n.outbound.is_drained()
                         && n.driver.as_ref().unwrap().is_drained()
-                        && n.staged.is_empty()
-                        && n.ingress.is_drained()
+                        && n.peer_work_drained()
+                        && n.ingress.as_ref().is_none_or(|i| i.is_drained())
                         && n.router.as_ref().is_none_or(|r| r.is_drained())
                         && n.snapshots.as_ref().is_none_or(|w| w.is_drained())
                 })
@@ -2262,105 +2233,97 @@ mod native {
     #[cfg(feature = "tls")]
     fn reconnect(nodes: &mut [Node], a: usize, b: usize, disconnected: MonoTime, ready: MonoTime) {
         let old_left = nodes[a]
-            .transports
+            .peer_driver
             .as_ref()
             .unwrap()
+            .roster()
             .binding(node(b as u64 + 1))
             .unwrap();
         let old_right = nodes[b]
-            .transports
+            .peer_driver
             .as_ref()
             .unwrap()
+            .roster()
             .binding(node(a as u64 + 1))
             .unwrap();
         nodes[a]
-            .transports
+            .peer_driver
             .as_mut()
             .unwrap()
             .disconnect(node(b as u64 + 1), disconnected)
             .unwrap();
         nodes[b]
-            .transports
+            .peer_driver
             .as_mut()
             .unwrap()
             .disconnect(node(a as u64 + 1), disconnected)
             .unwrap();
-        let left_ticket = nodes[a]
-            .transports
-            .as_mut()
-            .unwrap()
-            .due_connections(ready, 3)
-            .unwrap()
-            .pop()
-            .unwrap();
-        let right_ticket = nodes[b]
-            .transports
-            .as_mut()
-            .unwrap()
-            .due_connections(ready, 3)
-            .unwrap()
-            .pop()
-            .unwrap();
-        assert!(left_ticket.generation > old_left.generation);
-        assert!(right_ticket.generation > old_right.generation);
-        establish(nodes, vec![(a, left_ticket), (b, right_ticket)], ready);
+        establish(nodes, ready);
+        assert!(
+            nodes[a]
+                .peer_driver
+                .as_ref()
+                .unwrap()
+                .roster()
+                .binding(node(b as u64 + 1))
+                .unwrap()
+                .generation
+                > old_left.generation
+        );
+        assert!(
+            nodes[b]
+                .peer_driver
+                .as_ref()
+                .unwrap()
+                .roster()
+                .binding(node(a as u64 + 1))
+                .unwrap()
+                .generation
+                > old_right.generation
+        );
     }
     fn close(nodes: &mut [Node], now: MonoTime) {
+        let _ = now;
         #[cfg(feature = "tls")]
         for n in nodes.iter_mut() {
             use voteboat::{connect::*, dial::PeerDialer};
-            if let Some(mut connector) = n.connector.take() {
-                connector.close();
+            if let Some(mut driver) = n.peer_driver.take() {
+                driver.close();
                 let deadline = Instant::now() + Duration::from_secs(5);
-                while !connector.is_drained() {
-                    for event in connector.poll(now, ConnectPollBudget::default()).unwrap() {
-                        assert!(event.result.is_err());
-                    }
-                    assert!(Instant::now() < deadline, "connector did not drain");
+                while !driver.is_drained() {
+                    driver
+                        .poll(
+                            &mut n.owner,
+                            &mut n.outbound,
+                            now,
+                            PeerDriverBudget::default(),
+                        )
+                        .unwrap();
+                    assert!(Instant::now() < deadline, "peer driver did not drain");
                     std::thread::park_timeout(Duration::from_millis(1));
                 }
-                let mut dialer = connector
+                assert_eq!(driver.roster().usage().reserved_bytes, 0);
+                let mut parts = driver
+                    .into_parts()
+                    .unwrap_or_else(|_| panic!("peer driver not reclaimable"));
+                assert!(parts.connector.is_drained());
+                parts.connector.close();
+                let mut dialer = parts
+                    .connector
                     .into_dialer()
                     .unwrap_or_else(|_| panic!("connector not reclaimable"));
                 assert!(dialer.is_drained());
                 while !dialer.try_finish().unwrap() {
-                    assert!(
-                        Instant::now() < deadline,
-                        "connector dial worker did not finish"
-                    );
+                    assert!(Instant::now() < deadline, "dial worker did not finish");
                     std::thread::yield_now();
                 }
             }
         }
-        for n in nodes.iter_mut() {
-            if let Some(roster) = &mut n.transports {
-                roster.close();
-            }
-        }
-        let deadline = Instant::now() + Duration::from_secs(5);
-        while nodes
-            .iter()
-            .any(|n| n.transports.as_ref().is_some_and(|r| !r.is_drained()))
-        {
-            for n in nodes.iter_mut() {
-                if let Some(roster) = &mut n.transports {
-                    roster
-                        .poll(now, 3, voteboat::transport::TransportPollBudget::default())
-                        .unwrap();
-                    for peer in (1..=3).map(node) {
-                        assert!(roster.take_send(peer).unwrap().is_none());
-                    }
-                }
-            }
-            assert!(
-                Instant::now() < deadline,
-                "native peer roster did not close"
-            );
-            std::thread::park_timeout(Duration::from_millis(1));
-        }
         for n in nodes {
-            n.ingress.close();
-            assert!(n.ingress.is_drained());
+            if let Some(i) = &mut n.ingress {
+                i.close();
+                assert!(i.is_drained());
+            }
             n.results.close();
             assert!(n.results.is_drained());
             n.read_requests.close();
@@ -2370,10 +2333,6 @@ mod native {
                 n.clients.is_drained(),
                 "all client waits must resolve before healthy shutdown"
             );
-            assert!(n
-                .transports
-                .as_ref()
-                .is_none_or(|r| r.usage().reserved_bytes == 0));
             n.owner.close_admission().unwrap();
             assert!(n.owner.is_drained());
             assert!(n.driver.as_ref().unwrap().is_drained());

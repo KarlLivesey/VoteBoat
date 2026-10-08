@@ -30,8 +30,8 @@ The native three-node/100-group durable history now runs through actual loopback
 TCP/TLS connections, including leader replacement and restart. The bounded
 `EffectOwner` now reserves output space before execution and retains exact effect
 leases through rejection, persistence, application and read completion. Peer
-connection coordination is now bounded by `transport::PeerRoster`; the full node
-assembly remains in progress. An explicit
+connection coordination is now bounded by `transport::PeerRoster` and driven by
+`runtime::PeerDriver`; the full node facade remains in progress. An explicit
 asynchronous snapshot worker now preserves publication, WAL durability and
 application-installation dependencies, and supports local checkpoints and logical
 compaction while both storage workers retain their handles.
@@ -165,10 +165,14 @@ changes. It composes an explicitly selected ReadRouter; the native histories
 use both. See [read invocation ownership](docs/READ_REQUESTS.md).
 `runtime::ReplicaDriver` now coordinates local WAL/snapshot completions, tracked
 owner steps, application/client/read execution and bounded rejected-effect
-retries over explicitly selected public providers. The native histories use this
-library driver, with peer connection and ingress driving still composed by the
-host. See [local replica assembly](docs/REPLICA_DRIVER.md). The full production
-peer reactor/facade remains unfinished.
+retries over explicitly selected public providers. The native histories compose
+this library driver with PeerDriver for network coordination. See
+[local replica assembly](docs/REPLICA_DRIVER.md).
+`runtime::PeerDriver` now owns the selected connector, transport factory, roster
+and ingress router, driving exact connection lifetimes, bounded rejected-send
+staging, local send completion and decoded ingress. The native histories use both
+library drivers; only test fault injection stays in the harness. See
+[peer reactor assembly](docs/PEER_DRIVER.md). The full node facade remains unfinished.
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
@@ -239,9 +243,10 @@ Native 100-group TCP/TLS histories now use this path. See
 `transport::PeerRoster` coordinates construction-authorized peers, fair visits,
 bounded connection reservations, retry deadlines and fresh connection generations.
 It preserves accepted send ownership across failure and rejects obsolete input.
-The host supplies connection establishment, reactor readiness, ingress capacity
-and bounded rejected-send staging. The native connection provider below now
-drives the 100-group TCP/TLS histories. The checkpoint history
+`runtime::PeerDriver` now coordinates establishment, ingress and rejected-send
+staging over explicitly selected providers. The host supplies readiness/wakeups
+and monotonic time. The native connection provider below participates in the
+100-group TCP/TLS histories. The checkpoint history
 reconnects a peer pair before further replicated work. See the
 [transport](docs/TRANSPORT.md) and [peer-roster](docs/PEER_ROSTER.md) contracts for
 ownership, failure and shutdown details.
@@ -260,8 +265,9 @@ dialer, optional listener and pinned TLS configuration. It bounds anonymous
 prefaces and handshakes, checks identity/generation before returning a session,
 and retains canceled/expired dialing until actual completion. Native 100-group
 histories use one long-lived connector per node and explicitly drain/join their
-dial workers. See [connection establishment](docs/CONNECTIONS.md). Complete node
-ingress/result admission and the production reactor/facade remain in progress.
+dial workers. See [connection establishment](docs/CONNECTIONS.md). Local
+client/read/result admission and peer driving are implemented; the full native
+node facade and coordinated lifecycle remain in progress.
 
 Embedding hosts submit original queries through `runtime::ReadRequests`, feed
 shared owner steps back to it, drive ReadProbe/ReadAck messages, and dispatch
