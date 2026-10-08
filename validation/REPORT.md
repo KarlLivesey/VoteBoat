@@ -428,3 +428,31 @@ assertion uses a borrowed expected-message slice.
   Configuration-bearing public Append and membership Snapshot remain gated.
   No macOS execution, physical power-loss, benchmark or full protocol proof
   claim; online activation and P5–P7 remain outstanding under the active goal.
+
+## Slice 55 — mixed-head election recovery
+
+- Reproduced WrongIdentity when a final-view candidate requested ballots from
+  committed-joint survivors after retiring-leader loss. The actual-core regression
+  now elects, catches up, commits and reconstructs the final view on recovery.
+  Its journal fixtures and durability receipts are host assertions.
+- Independent activation model: 3 tests; 3,007 accepted-prefix placements,
+  20,029 certificates and 98,488 certificate pairs. Majority/weighted/nested
+  old/new policies and overlap/disjoint sets are covered. Negative controls find
+  new-only joint, premature-final, equal-scope stall and early-vote-reply failures.
+  Factored fixed-term linear-prefix/certificate enumeration and separate ballot
+  receipt checks do not establish arbitrary distributed traces or liveness.
+- Public replication-scope suite: 7 tests, including host/native vote promises,
+  stale candidate logs, exact completions, uncertain synchronization/publication,
+  modeled power loss and actual native-file reopen. Native wire round trips now
+  include differing-scope Vote requests. No persistent or wire schema changed.
+- All-feature affected library (44), activation/ballot models, ballots, learners,
+  member recovery (19), Raft (22), request scope (7) and runtime (25) pass.
+  Existing learner/witness TCP/QUIC checks remain green; these do not test the new
+  mixed-head election over sockets or full online configuration delivery.
+- Core-only library (35), activation model (3), ballot model (2) and public
+  request scope (2) pass. No macOS, physical power-loss, performance or full proof
+  claim. Configuration ingress stays gated and administrator integration remains
+  required; the full P0–P7 goal stays active.
+- Final all-feature/all-target Clippy with warnings denied, core-only all-target
+  compilation, formatting/diff and inventory shape/path checks pass (52 contracts).
+  Inventory validation checks metadata rather than protocol behavior.

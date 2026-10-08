@@ -80,7 +80,9 @@ cannot authorize another candidate or a replacement physical store in that term.
 Live ingress still rejects configuration entries and membership snapshots.
 Append/Snapshot from an exact locally authorized voter can now bridge differing
 accepted heads. Replies echo request scope and match the original outstanding
-request; elections/reads still require equal configurations. See
+request. Vote requests also bridge heads using the receiver's local electorate,
+log freshness and durable single-vote promise; Voted responses and reads retain
+exact current-scope checks. See
 [replication scopes](REPLICATION_SCOPES.md) for catch-up, rollback and snapshot
 evidence. A newly promoted sender that is only a learner or absent in the older
 receiver's view remains rejected pending its catch-up authorization protocol.

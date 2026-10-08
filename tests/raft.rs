@@ -339,7 +339,10 @@ fn stale_incarnations_configuration_and_old_session_responses_are_rejected() {
         match kind {
             0 => message.group.incarnation = GroupIncarnation::new(2).unwrap(),
             1 => message.sender.identity.incarnation = StoreIncarnation::new(2).unwrap(),
-            _ => message.configuration = ConfigurationId::new(2).unwrap(),
+            _ => {
+                message.configuration = ConfigurationId::new(2).unwrap();
+                message.rpc = Rpc::ReadProbe;
+            }
         };
         assert_eq!(
             cluster

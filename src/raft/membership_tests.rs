@@ -243,6 +243,123 @@ fn acknowledge(core: &mut Raft, from: u64) -> Vec<Effect> {
 }
 
 #[test]
+fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
+    fn to(effects: Vec<Effect>, id: u64) -> Message {
+        effects
+            .into_iter()
+            .find_map(|e| match e {
+                Effect::Send(m) if m.to == node(id) => Some(m),
+                _ => None,
+            })
+            .unwrap()
+    }
+    let mut old_leader = joint(false);
+    committed_fixture(&mut old_leader, 3);
+    let state = old_leader.state().clone();
+    let mut peers: BTreeMap<_, _> = [2, 3, 4]
+        .into_iter()
+        .map(|id| {
+            let binding = StoreBinding {
+                identity: store(id),
+                session: StoreSession::new(1).unwrap(),
+            };
+            (
+                id,
+                Raft::recover_member(node(id), binding, state.clone(), LogLimits::default())
+                    .unwrap(),
+            )
+        })
+        .collect();
+    let effects = accept(
+        &mut old_leader,
+        101,
+        ConfigurationChange::Final { id: cid(4) },
+    );
+    let effects = durable(&mut old_leader, effects);
+    let final_to_two = effects
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if m.to == node(2) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let candidate = peers.get_mut(&2).unwrap();
+    let effects = candidate.receive_inner(final_to_two).unwrap();
+    let [Effect::Send(failed_probe)] = effects.as_slice() else {
+        panic!("expected initial final-prefix probe")
+    };
+    assert!(matches!(
+        failed_probe.rpc,
+        Rpc::Appended { success: false, .. }
+    ));
+    let effects = old_leader
+        .step(Event::Receive(failed_probe.clone()))
+        .unwrap();
+    let final_to_two = effects
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if m.to == node(2) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let effects = candidate.receive_inner(final_to_two).unwrap();
+    durable(candidate, effects);
+    assert_eq!(candidate.membership().id(), cid(4));
+    assert_eq!(candidate.state().commit_index, 3);
+    // Node 1 is now unavailable. Nodes 2/3 are an old majority, and 2/3/4
+    // contain a new majority, but only node 2 received the final record.
+    let effects = candidate.step(Event::Campaign).unwrap();
+    let effects = durable(candidate, effects);
+    let vote_to_three = effects
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if m.to == node(3) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    let voter = peers.get_mut(&3).unwrap();
+    let effects = voter.step(Event::Receive(vote_to_three)).unwrap();
+    let effects = durable(voter, effects);
+    // The ballot origin records the voter's local accepted joint view, not
+    // the newer candidate scope echoed in its reply.
+    assert_eq!(voter.state().ballot_origin.unwrap().configuration, cid(3));
+    let reply = effects
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(m) if matches!(m.rpc, Rpc::Voted { granted: true }) => Some(m),
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(reply.configuration, cid(4));
+    let candidate = peers.get_mut(&2).unwrap();
+    let effects = candidate.step(Event::Receive(reply)).unwrap();
+    let effects = durable(candidate, effects);
+    assert_eq!(candidate.role(), Role::Leader);
+    let probe = to(effects, 3);
+    let voter = peers.get_mut(&3).unwrap();
+    let rejected = to(voter.receive_inner(probe).unwrap(), 2);
+    let candidate = peers.get_mut(&2).unwrap();
+    let suffix = to(candidate.step(Event::Receive(rejected)).unwrap(), 3);
+    let voter = peers.get_mut(&3).unwrap();
+    let effects = voter.receive_inner(suffix).unwrap();
+    let ack = to(durable(voter, effects), 2);
+    let candidate = peers.get_mut(&2).unwrap();
+    let effects = candidate.step(Event::Receive(ack)).unwrap();
+    let committed = durable(candidate, effects);
+    assert_eq!(candidate.state().commit_index, 5);
+    let announcement = to(committed, 3);
+    let voter = peers.get_mut(&3).unwrap();
+    let effects = voter.receive_inner(announcement).unwrap();
+    durable(voter, effects);
+    assert_eq!(voter.state().commit_index, 5);
+    assert_eq!(voter.membership().id(), cid(4));
+    assert_eq!(voter.state().ballot_origin.unwrap().configuration, cid(3));
+    let recovered =
+        Raft::recover_member(node(3), voter.binding, voter.state().clone(), voter.limits).unwrap();
+    assert_eq!(recovered.membership().id(), cid(4));
+}
+
+#[test]
 fn pending_configuration_view_precedes_durability_without_releasing_effects() {
     let mut core = core();
     let initial = core.state().clone();
@@ -978,7 +1095,7 @@ fn compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix() {
     ));
 }
 #[test]
-fn replication_scope_bridge_does_not_authorize_learners_or_reads_or_elections() {
+fn request_scope_bridge_does_not_authorize_learners_or_reads() {
     let mut core = staged();
     let context = RequestContext {
         origin: StoreBinding {
@@ -1004,22 +1121,22 @@ fn replication_scope_bridge_does_not_authorize_learners_or_reads_or_elections() 
         core.step(Event::Receive(message.clone())),
         Err(RaftError::WrongIdentity)
     );
+    message.rpc = Rpc::Vote {
+        last_index: 2,
+        last_term: 1,
+    };
+    assert_eq!(
+        core.step(Event::Receive(message.clone())),
+        Err(RaftError::WrongIdentity)
+    );
     message.from = node(2);
     message.sender.identity = store(2);
     message.context.origin = message.sender;
-    for rpc in [
-        Rpc::ReadProbe,
-        Rpc::Vote {
-            last_index: 2,
-            last_term: 1,
-        },
-    ] {
-        message.rpc = rpc;
-        assert_eq!(
-            core.step(Event::Receive(message.clone())),
-            Err(RaftError::WrongIdentity)
-        );
-    }
+    message.rpc = Rpc::ReadProbe;
+    assert_eq!(
+        core.step(Event::Receive(message.clone())),
+        Err(RaftError::WrongIdentity)
+    );
     assert_eq!(core.state(), &before);
     // Crossing configuration IDs does not permit an entry from beyond the
     // sender's declared accepted head, or an impossible newer snapshot base.

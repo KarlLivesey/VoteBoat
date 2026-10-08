@@ -29,7 +29,12 @@ Configuration changes clear old requests and matching progress before recollecti
 Relabeling a delayed response's configuration cannot reuse its context. Append
 and snapshot success prove only the exact sent end; a compacted hint must match
 the leader's checked log boundary. Learner progress remains absent from quorum
-predicates. Elections, ReadProbe and ReadAck still require equal configurations.
+predicates. Vote requests may also bridge heads, but only an exact locally
+authorized voter can request a vote from a local voter. Log freshness and one
+durable vote per term remain mandatory. The reply echoes the candidate's scope;
+the persisted ballot origin records the receiver's local accepted configuration.
+Voted responses still require the candidate's current scope and exact request
+context. ReadProbe and ReadAck still require equal configurations.
 
 A reply after a changed term, suffix or commit prefix waits for the exact admitted
 LogTicket in DurableLog. Written never releases it. A staged snapshot additionally
@@ -42,23 +47,34 @@ The pinned configuration is bounded inline per-peer state; output fanout is unch
 
 ## Evidence and remaining work
 
-Seven actual-core tests in `src/raft/membership_tests.rs` exercise lagging probes,
+Actual-core tests in `src/raft/membership_tests.rs` exercise lagging probes,
 joint receipt, final rollback, partial chunks, snapshot/application dependencies,
-compacted hints, stale scopes/contexts and learner/read/election exclusion.
+compacted hints, stale scopes/contexts and learner/read exclusion.
 Prepared committed fixtures and host-asserted completion tokens isolate these
 rules. They are not networked online-administration or physical-storage proof.
 The public gate still rejects configuration-bearing appends and membership
 snapshots; the tests call the actual private receive path behind that gate.
 
-Four downstream tests in `tests/replication_scope.rs` use the public core with
+Downstream tests in `tests/replication_scope.rs` use the public core with
 host/native storage: differing scopes on static log replication, missing exact
-completion, failure-probe replies, rejected read/election/foreign-store traffic,
+completion, failure-probe replies, rejected read/foreign-store traffic,
 failed sync/manifest publication followed by power-loss recovery, and native
 format-2 round trips preserving request, response and snapshot-base scopes.
 A timed-runtime test checks that valid retained-voter replication contact resets
 the election deadline without activating the echoed scope or changing its vote.
 These complement existing static TCP/TLS histories, which do not exercise online
 membership.
+
+The partial-final actual-core history delivers the final record to one survivor,
+loses the retiring leader, elects the survivor using joint-view ballots, catches
+up another voter, commits and recovers it. `tests/activation_model.rs` independently
+enumerates bounded durable prefix placements and election-certificate pairs for
+overlapping/disjoint three-voter sets and majority/weighted/nested policies.
+Mutants detect new-only joint quorums, premature final activation, equal-scope
+election stalls and replies before synchronization. This factored model does not
+prove arbitrary log forks, term traces, network liveness or full online activation.
+Public host/native vote conformance includes exact completion, second-candidate
+denial, uncertain sync/publication with power-loss recovery, and native-file reopen.
 
 An exact voter from the preceding joint configuration can now send a restricted
 commit-only notification for the receiver's already stored final record, even

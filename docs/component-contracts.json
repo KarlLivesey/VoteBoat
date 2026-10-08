@@ -228,6 +228,7 @@
         "tests/log_reclaim.rs",
         "tests/ballots.rs",
         "tests/replication_scope.rs",
+        "tests/activation_model.rs",
         "tests/learners.rs",
         "tests/member_recovery.rs"
       ],

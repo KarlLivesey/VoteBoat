@@ -1523,16 +1523,21 @@ impl Raft {
                 Ok(vec![Effect::Send(reply)])
             };
         }
-        // Replication from an exact locally authorized voter may bridge
-        // differing accepted heads. It still proves only the checked matching
-        // prefix. Election/read authority and every response require the local
-        // current scope; response handlers also match their admitted request.
+        // Replication and vote requests from an exact locally authorized voter
+        // may bridge differing accepted heads. Replication proves only its
+        // checked matching prefix. A vote uses the local electorate and freshness;
+        // the request scope is echoed, never installed as membership. Read
+        // authority and every response require the local current scope, and
+        // response handlers also match their admitted request.
         let replication_request = matches!(&m.rpc, Rpc::Append { .. } | Rpc::Snapshot { .. });
+        let election_request = matches!(&m.rpc, Rpc::Vote { .. });
         let permitted = self.permitted_replication(&m);
         if m.to != self.node
             || m.from == self.node
             || m.group != self.durable.bootstrap.group
-            || (!replication_request && m.configuration != self.membership().id())
+            || (!replication_request
+                && !election_request
+                && m.configuration != self.membership().id())
             || (!permitted && self.membership().replica_store(m.from) != Some(m.sender.identity))
         {
             return Err(RaftError::WrongIdentity);

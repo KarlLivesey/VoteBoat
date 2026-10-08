@@ -110,6 +110,19 @@ validated online add/promote/remove; these slices do not redefine that exit.
 
 ### How the current work fits globally
 
+For immediate implementation, distinguish the next two concrete changes from
+the capability milestones above:
+
+| Immediate change | Why it belongs now | Completion check | Global contribution |
+| --- | --- | --- | --- |
+| Validate and repair elections across partially delivered membership transitions | A leader can fail while peers retain different accepted configuration heads; online administration must not expose a transition that strands a surviving quorum. | Focused actual-core leader-loss/catch-up/recovery histories plus a bounded independent activation model; preserve local voter eligibility and durable votes. These checks remain in progress. | Makes P4 placement changes recoverable; later routing and movement rely on those groups remaining available. |
+| Connect the online administrator to readiness, placement authorization and joint/final transitions | Existing readiness and proposal helpers need one usable add/promote/remove path with observable outcomes and cancellation. | Multi-node TCP/QUIC transition histories covering restart, partial delivery and failure, plus the remaining activation release checks, before opening configuration ingress. | Completes the usable P4 path and enables changing replica placement for P5/P6. |
+
+The first change is an evidenced prerequisite of the second, not a new global
+milestone. Review this immediate pair after each completed slice. Keep the static
+service and embedding usable throughout; their remaining macOS and operational
+validation does not depend on finishing P4.
+
 The capability chain is **safe replica placement → responsibility routing →
 safe data/ownership movement → measured tuning**. Readiness establishes whether
 an exact learner/store/session can support the required application and retained
@@ -3321,3 +3334,45 @@ are recorded in validation/REPORT.md. Public configuration-bearing Append and
 membership Snapshot remain gated pending online administration, placement and
 distributed activation/fault checks. No macOS, physical power-loss, benchmark or
 full proof claim; the complete P0–P7 goal remains active.
+
+## Slice 55 — elections across partially delivered final membership
+
+Mini schema plan: retain existing message fields, local membership authority,
+ballot origin and exact LogTicket/DurableLog dependencies. Treat a Vote request's
+configuration as reply-correlation scope while validating the exact candidate
+store against the receiver's accepted electorate and log freshness. Keep Voted
+responses bound to the candidate's current configuration/context. Learners gain
+no election authority. No new format, token, watermark or generation is needed.
+This is a P4 activation prerequisite: without it, partial final delivery followed
+by old-leader loss strands an otherwise sufficient surviving quorum.
+
+The reproduced actual-core history starts with committed joint membership,
+delivers the final record only to one survivor, loses the retiring leader and
+previously failed with WrongIdentity on the survivor's Vote request. It now
+elects using joint-view ballots, repairs a follower, commits a current-term
+entry and recovers the follower while preserving its historical ballot origin.
+Prepared journal states and host-asserted durability tokens isolate the core;
+this history is not remote online enrollment or physical storage evidence.
+
+The independent activation model enumerates 3,007 durable prefix placements,
+20,029 election certificates and 98,488 certificate pairs across overlapping
+and disjoint sets with majority, weighted and nested policies. Mutants reproduce
+new-only joint-quorum and premature-final safety failures, the equal-scope
+election stall and written-before-synchronized ballot failures. This factored
+model checks fixed-term linear-prefix placements and receipt/restart behavior;
+it is not a proof of arbitrary forks, term traces or network liveness.
+
+Public host/native conformance checks exact completion, local ballot origin,
+repeat requests with changed scope, foreign-store and second-candidate rejection,
+and stale-log denial after durable higher-term observation. Native sync/manifest
+faults with power-loss recovery release no uncertain vote reply. Actual native
+files preserve the promise on reopen. Existing negative configuration tests now
+exercise ReadProbe; positive Vote bridging has dedicated assertions.
+
+Affected core, ballot, learner, member-recovery, Raft and runtime tests pass,
+including existing native TCP/QUIC histories. Those network histories do not
+establish the new mixed-head election path over sockets. Focused core-only checks
+also pass. See validation/REPORT.md for final checks. Online administrator,
+placement/capacity admission and broader activation failure histories remain
+next; public configuration-bearing Append and membership Snapshot stay gated.
+P5 routing, P6 split/merge and P7 tuning remain outstanding under the full goal.

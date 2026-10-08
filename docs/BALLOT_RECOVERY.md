@@ -21,6 +21,12 @@ The normal exact `LogTicket` / `DurableLog` dependency still gates vote replies;
 Written is insufficient. No additional escaping effect, generation or watermark
 is introduced. The origin occupies bounded inline per-group state.
 
+A Vote request can carry a different accepted configuration ID when its exact
+candidate store is already a voter in the receiver's local electorate. That ID
+is reply correlation, not the ballot origin or membership authority. The new
+promise records the receiver's predecessor configuration; repeat grants preserve
+it. Candidate-side responses still match the exact current scope and request.
+
 Ordinary format-2 WAL bytes are unchanged: replay derives origin at the original
 vote before applying later transitions. Full-image reclamation may discard that
 configuration history, so [VBLCPT02](WAL_RECLAMATION.md) persists origin explicitly.
