@@ -65,6 +65,8 @@ pub enum Rpc {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Message {
     pub group: GroupIdentity,
+    /// Requester's accepted configuration. Replies echo the request's scope;
+    /// this is not a claim about the responder's current membership.
     pub configuration: ConfigurationId,
     pub from: NodeId,
     pub sender: StoreBinding,
@@ -198,6 +200,7 @@ struct Pending {
 #[derive(Clone, Copy)]
 struct Replication {
     context: RequestContext,
+    configuration: ConfigurationId,
     start: u64,
     end: u64,
     snapshot: Option<SnapshotRef>,
@@ -855,9 +858,18 @@ impl Raft {
         })
     }
     fn message(&self, to: NodeId, context: RequestContext, rpc: Rpc) -> Message {
+        self.scoped_message(self.membership().id(), to, context, rpc)
+    }
+    fn scoped_message(
+        &self,
+        configuration: ConfigurationId,
+        to: NodeId,
+        context: RequestContext,
+        rpc: Rpc,
+    ) -> Message {
         Message {
             group: self.durable.bootstrap.group,
-            configuration: self.membership().id(),
+            configuration,
             from: self.node,
             sender: self.binding,
             to,
@@ -865,6 +877,9 @@ impl Raft {
             context,
             rpc,
         }
+    }
+    fn reply(&self, request: &Message, rpc: Rpc) -> Message {
+        self.scoped_message(request.configuration, request.from, request.context, rpc)
     }
     fn become_leader(&mut self) -> Result<Vec<Effect>, RaftError> {
         self.role = Role::Leader;
@@ -925,7 +940,8 @@ impl Raft {
                     .to_vec()
             };
             return Ok(Effect::Send(
-                self.message(
+                self.scoped_message(
+                    sent.configuration,
                     peer,
                     sent.context,
                     Rpc::Append {
@@ -950,6 +966,7 @@ impl Raft {
                 peer,
                 Replication {
                     context,
+                    configuration: self.membership().id(),
                     start: 0,
                     end: reference.index,
                     snapshot: Some(reference),
@@ -988,6 +1005,7 @@ impl Raft {
             peer,
             Replication {
                 context,
+                configuration: self.membership().id(),
                 start: next,
                 end,
                 snapshot: None,
@@ -1019,6 +1037,14 @@ impl Raft {
     }
 
     fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        // Keep public online activation closed while the remaining learner,
+        // prospective resource and distributed protocol gates are unfinished.
+        // Internal transition tests exercise receive_inner without this gate.
+        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some())
+        {
+            return Err(RaftError::InvalidMessage);
+        }
         let contact = m.term >= self.durable.hard_state.term
             && matches!(
                 &m.rpc,
@@ -1041,10 +1067,15 @@ impl Raft {
         Ok(effects)
     }
     fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        // Replication from an exact locally authorized voter may bridge
+        // differing accepted heads. It still proves only the checked matching
+        // prefix. Election/read authority and every response require the local
+        // current scope; response handlers also match their admitted request.
+        let replication_request = matches!(&m.rpc, Rpc::Append { .. } | Rpc::Snapshot { .. });
         if m.to != self.node
             || m.from == self.node
             || m.group != self.durable.bootstrap.group
-            || m.configuration != self.membership().id()
+            || (!replication_request && m.configuration != self.membership().id())
             || self.membership().replica_store(m.from) != Some(m.sender.identity)
         {
             return Err(RaftError::WrongIdentity);
@@ -1060,16 +1091,6 @@ impl Raft {
             return Err(RaftError::WrongIdentity);
         }
         if m.term == 0 || m.context.sequence == 0 {
-            return Err(RaftError::InvalidMessage);
-        }
-        // Configuration journal storage is available before online activation.
-        // Live ingress remains gated on catch-up, lagging-peer request scopes,
-        // ballot recovery and the formal activation model.
-        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
-        {
-            return Err(RaftError::InvalidMessage);
-        }
-        if matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()) {
             return Err(RaftError::InvalidMessage);
         }
         let request = matches!(
@@ -1123,7 +1144,7 @@ impl Raft {
                     },
                     ..hard
                 };
-                let mut reply = self.message(m.from, m.context, Rpc::Voted { granted });
+                let mut reply = self.reply(&m, Rpc::Voted { granted });
                 reply.term = next.term;
                 if next != old {
                     self.persist(
@@ -1171,9 +1192,8 @@ impl Raft {
                     return Err(RaftError::InvalidMessage);
                 }
                 if m.term < old.term {
-                    return Ok(vec![Effect::Send(self.message(
-                        m.from,
-                        m.context,
+                    return Ok(vec![Effect::Send(self.reply(
+                        &m,
                         Rpc::Appended {
                             success: false,
                             matching_index: self.durable.last_index(),
@@ -1186,6 +1206,16 @@ impl Raft {
                 self.requests.clear();
                 let mut previous = *previous_term;
                 for (i, e) in entries.iter().enumerate() {
+                    if let EntryPayload::Configuration(record) = &e.payload {
+                        let activated = match &record.change {
+                            crate::membership::ConfigurationChange::Learners(next) => next.id(),
+                            crate::membership::ConfigurationChange::Joint { id, .. }
+                            | crate::membership::ConfigurationChange::Final { id } => *id,
+                        };
+                        if activated > m.configuration {
+                            return Err(RaftError::InvalidMessage);
+                        }
+                    }
                     if previous_index.checked_add(i as u64 + 1) != Some(e.index)
                         || e.term == 0
                         || e.term < previous
@@ -1197,9 +1227,8 @@ impl Raft {
                     previous = e.term;
                 }
                 if self.durable.term_at(*previous_index) != Some(*previous_term) {
-                    let mut reply = self.message(
-                        m.from,
-                        m.context,
+                    let mut reply = self.reply(
+                        &m,
                         if *previous_index < self.durable.base_index() {
                             Rpc::Compacted {
                                 index: self.durable.base_index(),
@@ -1247,9 +1276,8 @@ impl Raft {
                     .durable
                     .commit_index
                     .max((*leader_commit).min(matching));
-                let mut reply = self.message(
-                    m.from,
-                    m.context,
+                let mut reply = self.reply(
+                    &m,
                     Rpc::Appended {
                         success: true,
                         matching_index: matching,
@@ -1275,7 +1303,7 @@ impl Raft {
                 let Some(sent) = self.requests.get(&m.from).copied() else {
                     return Ok(Vec::new());
                 };
-                if sent.context != m.context {
+                if sent.context != m.context || sent.configuration != m.configuration {
                     return Ok(Vec::new());
                 }
                 if sent.snapshot.is_some() {
@@ -1307,17 +1335,13 @@ impl Raft {
                 if m.term < old.term {
                     // The higher-term response makes the requester step down;
                     // its term cannot satisfy the request's read quorum.
-                    return Ok(vec![Effect::Send(self.message(
-                        m.from,
-                        m.context,
-                        Rpc::ReadAck,
-                    ))]);
+                    return Ok(vec![Effect::Send(self.reply(&m, Rpc::ReadAck))]);
                 }
                 self.role = Role::Follower;
                 self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
-                let mut reply = self.message(m.from, m.context, Rpc::ReadAck);
+                let mut reply = self.reply(&m, Rpc::ReadAck);
                 reply.term = hard.term;
                 if hard != old {
                     self.persist(
@@ -1351,16 +1375,15 @@ impl Raft {
                     || snapshot.application.len() > self.limits.max_snapshot_bytes
                     || meta.bootstrap != self.durable.bootstrap
                     || meta.validate().is_err()
+                    || meta.configuration() > m.configuration
                     || meta.term > m.term
                 {
                     return Err(RaftError::InvalidMessage);
                 }
                 if m.term < old.term {
-                    return Ok(vec![Effect::Send(self.message(
-                        m.from,
-                        m.context,
-                        Rpc::SnapshotAck { index: 0 },
-                    ))]);
+                    return Ok(vec![Effect::Send(
+                        self.reply(&m, Rpc::SnapshotAck { index: 0 }),
+                    )]);
                 }
                 self.role = Role::Follower;
                 self.clear_reads();
@@ -1374,8 +1397,7 @@ impl Raft {
                     {
                         return Err(RaftError::InvalidMessage);
                     }
-                    let mut reply =
-                        self.message(m.from, m.context, Rpc::SnapshotAck { index: meta.index });
+                    let mut reply = self.reply(&m, Rpc::SnapshotAck { index: meta.index });
                     reply.term = hard.term;
                     return if hard != old {
                         self.persist(
@@ -1402,7 +1424,10 @@ impl Raft {
                 let Some(sent) = self.requests.get(&m.from).copied() else {
                     return Ok(Vec::new());
                 };
-                if sent.context != m.context || sent.snapshot.is_none() {
+                if sent.context != m.context
+                    || sent.configuration != m.configuration
+                    || sent.snapshot.is_none()
+                {
                     return Ok(Vec::new());
                 }
                 if *index != sent.end {
@@ -1428,7 +1453,10 @@ impl Raft {
                 let Some(sent) = self.requests.get(&m.from) else {
                     return Ok(Vec::new());
                 };
-                if sent.context != m.context || sent.snapshot.is_some() {
+                if sent.context != m.context
+                    || sent.configuration != m.configuration
+                    || sent.snapshot.is_some()
+                {
                     return Ok(Vec::new());
                 }
                 if *index == 0
@@ -1548,7 +1576,8 @@ impl Raft {
         {
             return Err(RaftError::WrongCompletion);
         }
-        Ok(vec![Effect::Send(self.message(
+        Ok(vec![Effect::Send(self.scoped_message(
+            self.requests[&to].configuration,
             to,
             context,
             Rpc::Snapshot {
@@ -1582,9 +1611,8 @@ impl Raft {
                 None
             },
         };
-        let reply = self.message(
-            message.from,
-            message.context,
+        let reply = self.reply(
+            &message,
             Rpc::SnapshotAck {
                 index: reference.index,
             },

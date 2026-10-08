@@ -49,7 +49,7 @@ Raft's current-term rule; it is never the largest observed acknowledgement.
 | Read admission | Voting leader and current-term committed entry required. |
 | Read probes and readiness | Probes target voters; readiness requires the joint predicate and exact barrier configuration. |
 | Read consumption | One-use barrier checks the current membership ID, term, group, original context and applied prefix. |
-| Message envelope | Effective accepted membership ID, independently of immutable bootstrap or snapshot-base IDs. |
+| Message envelope | Requests use effective accepted membership ID; replies echo the request scope, independently of the responder head and snapshot-base IDs. Outstanding replication pins its admitted scope. |
 | Configuration change | Clear old read authority and recollect volatile ballots/progress under fresh contexts. |
 | Local removal/demotion | No new proposals/reads/campaigns after accepted final; finish final commitment, then step down and clear leadership state once the final record is durable and committed. |
 | Node construction | Roster compatibility checks every effective replication assignment, including learners. This check grants no new network authorization. |
@@ -70,12 +70,14 @@ now uses historical origin rather than the current electorate; see
 [ballot recovery](BALLOT_RECOVERY.md). A removed candidate's retained promise
 cannot authorize another candidate or a replacement physical store in that term.
 
-Live ingress still rejects configuration entries and membership snapshots. It
-also currently requires the sender's configuration to equal the local accepted
-configuration. That check needs protocol-aware handling for a lagging follower
-receiving a newer joint/final entry, without allowing old responses to count for
-new authority. Request/response configuration selection, a retiring leader's
-final propagation and snapshot catch-up need actual end-to-end histories.
+Live ingress still rejects configuration entries and membership snapshots.
+Append/Snapshot from an exact locally authorized voter can now bridge differing
+accepted heads. Replies echo request scope and match the original outstanding
+request; elections/reads still require equal configurations. See
+[replication scopes](REPLICATION_SCOPES.md) for catch-up, rollback and snapshot
+evidence. A newly promoted sender that is only a learner or absent in the older
+receiver's view remains rejected pending its catch-up authorization protocol.
+A retiring leader's final propagation also needs end-to-end histories.
 
 Other unfinished prerequisites are explicit learner assignment/recovery,
 application/storage compatibility and catch-up evidence, prospective fanout
@@ -86,7 +88,7 @@ The internal tests do not justify removing any of these gates.
 
 ## Evidence boundary
 
-Seven internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
+Fourteen internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
 completion, election, append-acknowledgement, read, compaction and rollback
 helpers. Their deliberately prepared committed boundaries and host-asserted
 completion tokens isolate the core rules being checked. They do not exercise
@@ -101,6 +103,8 @@ same-term new-store request and permits a fresh-term request only after durabili
 A downstream public-interface test checks exact replica/voter store views through
 learner/joint/final activation, rollback and checkpoint replay, including removed
 and demoted identities. Existing host/native/TCP/TLS histories continue exercising
-the static configuration supported by public recovery and ingress. Finite helper
-checks are not a formal membership model, complete joint Raft proof, macOS run,
+the static configuration supported by public recovery and ingress. The seven additional request-scope tests cover retained-leader catch-up, partial
+chunks, snapshot installation and rollback; their separate evidence boundary is
+documented in the scope audit. Finite helper checks are not a complete joint Raft
+proof, macOS run,
 power-failure certification or benchmark.

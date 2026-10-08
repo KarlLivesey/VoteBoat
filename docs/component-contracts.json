@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "historical-ballot-recovery",
+  "status": "request-scoped-membership-replication",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -136,9 +136,10 @@
         "tests/membership.rs",
         "tests/raft.rs",
         "tests/log_reclaim.rs",
-        "tests/ballots.rs"
+        "tests/ballots.rs",
+        "tests/replication_scope.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner, request-context and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner authorization/readiness, retirement, resource and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
     },
     {
       "design_id": "C04",

@@ -1329,6 +1329,7 @@ fn stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadline
     };
     let mut foreign = heartbeat(2);
     foreign.configuration = ConfigurationId::new(99).unwrap();
+    foreign.rpc = Rpc::ReadProbe; // Read authority still requires equal configurations.
     let mut ack = heartbeat(2);
     ack.context.origin = HostLogStore::new(1).binding();
     ack.rpc = Rpc::Appended {
@@ -1342,6 +1343,36 @@ fn stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadline
         runtime.finish(t).unwrap();
         assert_eq!(runtime.deadline(group(1)), initial);
     }
+}
+#[test]
+fn retained_voter_replication_contact_bridges_scope_without_activating_it() {
+    let (mut runtime, _) = host_timed(2, Some(node(3)));
+    let initial = runtime.deadline(group(1));
+    let mut contact = heartbeat(2);
+    contact.configuration = ConfigurationId::new(99).unwrap();
+    runtime
+        .admit(group(1), Event::Receive(contact.clone()))
+        .unwrap();
+    let visit = runtime.poll(MonoTime(10)).unwrap().unwrap();
+    let effects = runtime
+        .step_next(visit, MonoTime(10))
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    assert!(matches!(&effects[..], [Effect::Send(message)]
+        if message.configuration == contact.configuration
+        && matches!(message.rpc, Rpc::Appended { success: true, matching_index: 0 })));
+    runtime.finish(visit).unwrap();
+    assert_ne!(runtime.deadline(group(1)), initial);
+    assert_eq!(
+        runtime.core(group(1)).unwrap().membership().id(),
+        ConfigurationId::new(1).unwrap()
+    );
+    assert_eq!(
+        runtime.core(group(1)).unwrap().state().hard_state.voted_for,
+        Some(node(3))
+    );
 }
 #[test]
 fn delayed_durable_vote_completion_resets_and_fences_a_queued_expiration() {

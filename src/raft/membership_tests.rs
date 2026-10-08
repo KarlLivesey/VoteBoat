@@ -660,3 +660,442 @@ fn a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot() {
     );
     assert_eq!(core.durable.hard_state, before);
 }
+
+fn follower(mut core: Raft, id: u64) -> Raft {
+    core.node = node(id);
+    core.binding.identity = store(id);
+    core.role = Role::Follower;
+    core.requests.clear();
+    core.progress.clear();
+    core.next_index.clear();
+    core
+}
+fn sent(effect: Effect) -> Message {
+    let Effect::Send(message) = effect else {
+        panic!("expected peer message")
+    };
+    message
+}
+fn one_reply(effects: Vec<Effect>) -> Message {
+    assert_eq!(effects.len(), 1);
+    sent(effects.into_iter().next().unwrap())
+}
+#[test]
+fn lagging_follower_probes_and_joint_replication_echo_the_request_scope() {
+    let mut leader = joint(true);
+    let mut follower = follower(staged(), 2);
+    let probe = sent(leader.append_for(node(2)).unwrap());
+    assert_eq!(probe.configuration, cid(3));
+    let rejection = one_reply(follower.receive_inner(probe).unwrap());
+    assert_eq!(rejection.configuration, cid(3));
+    assert_eq!(follower.membership().id(), cid(2));
+    assert!(matches!(
+        rejection.rpc,
+        Rpc::Appended {
+            success: false,
+            matching_index: 2
+        }
+    ));
+    let append = one_reply(leader.step(Event::Receive(rejection)).unwrap());
+    let retry = sent(leader.append_for(node(2)).unwrap());
+    assert_eq!(retry, append);
+    assert!(matches!(&append.rpc, Rpc::Append { entries, .. } if entries.len() == 1));
+    // The public gate is retained. The actual private receive path is exercised
+    // with host-asserted exact completions, not an online administrator.
+    assert_eq!(
+        follower.step(Event::Receive(append.clone())),
+        Err(RaftError::InvalidMessage)
+    );
+    let effects = follower.receive_inner(append.clone()).unwrap();
+    assert_eq!(follower.membership().id(), cid(3));
+    assert_eq!(follower.state().membership().unwrap().id(), cid(2));
+    assert!(matches!(&effects[..], [Effect::Persist(_)]));
+    let reply = one_reply(durable(&mut follower, effects));
+    assert_eq!(reply.configuration, append.configuration);
+    assert!(matches!(
+        reply.rpc,
+        Rpc::Appended {
+            success: true,
+            matching_index: 3
+        }
+    ));
+    let context = leader.requests[&node(2)].context;
+    let mut stale = reply.clone();
+    stale.configuration = cid(2);
+    assert_eq!(
+        leader.step(Event::Receive(stale)),
+        Err(RaftError::WrongIdentity)
+    );
+    assert_eq!(leader.requests[&node(2)].context, context);
+    assert_eq!(leader.progress[&node(2)], 0);
+    assert!(leader
+        .step(Event::Receive(reply.clone()))
+        .unwrap()
+        .is_empty());
+    assert_eq!(leader.progress[&node(2)], 3);
+    assert_eq!(leader.state().commit_index, 2); // weighted new side still lacks node 3
+    assert!(leader.step(Event::Receive(reply)).unwrap().is_empty());
+    assert_eq!(leader.progress[&node(2)], 3);
+}
+#[test]
+fn older_request_scope_can_roll_back_uncommitted_final_without_early_reply() {
+    let mut leader = joint(true);
+    committed_fixture(&mut leader, 3);
+    let mut ahead = joint(true);
+    committed_fixture(&mut ahead, 3);
+    let effects = accept(&mut ahead, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut ahead, effects);
+    let mut follower = follower(ahead, 2);
+    assert_eq!(follower.membership().id(), cid(4));
+    let effects = leader
+        .persist(
+            HardState {
+                term: 2,
+                voted_for: None,
+            },
+            3,
+            Some(Suffix {
+                from: 4,
+                entries: vec![LogEntry {
+                    index: 4,
+                    term: 2,
+                    payload: EntryPayload::Noop,
+                }],
+            }),
+            After::LeaderAppend,
+            None,
+        )
+        .unwrap();
+    durable(&mut leader, effects);
+    leader.requests.remove(&node(2));
+    leader.next_index.insert(node(2), 4);
+    let append = sent(leader.append_for(node(2)).unwrap());
+    assert_eq!(append.configuration, cid(3));
+    let effects = follower.receive_inner(append).unwrap();
+    assert_eq!(follower.membership().id(), cid(3));
+    assert_eq!(follower.state().membership().unwrap().id(), cid(4));
+    let reply = one_reply(durable(&mut follower, effects));
+    assert_eq!(reply.configuration, cid(3));
+    assert_eq!(follower.state().hard_state.term, 2);
+    assert!(follower.membership().joint().is_some());
+    leader.step(Event::Receive(reply)).unwrap();
+    assert_eq!(leader.progress[&node(2)], 4);
+}
+#[test]
+fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation() {
+    let mut leader = joint(true);
+    committed_fixture(&mut leader, 3);
+    let effects = accept(&mut leader, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    let mut follower = follower(core(), 2);
+    let context = leader.context().unwrap();
+    // A bounded chunk can precede the configuration represented by the sender's
+    // accepted head. Prepare that chunk explicitly to isolate scope semantics.
+    leader.requests.insert(
+        node(2),
+        Replication {
+            context,
+            configuration: cid(4),
+            start: 2,
+            end: 2,
+            snapshot: None,
+        },
+    );
+    let append = leader.scoped_message(
+        cid(4),
+        node(2),
+        context,
+        Rpc::Append {
+            previous_index: 1,
+            previous_term: 1,
+            entries: vec![leader.state().entries[1].clone()],
+            leader_commit: 3,
+        },
+    );
+    let effects = follower.receive_inner(append).unwrap();
+    let reply = one_reply(
+        durable(&mut follower, effects)
+            .into_iter()
+            .filter(|e| matches!(e, Effect::Send(_)))
+            .collect(),
+    );
+    assert_eq!(follower.membership().id(), cid(2));
+    assert_eq!(reply.configuration, cid(4));
+    assert!(matches!(
+        reply.rpc,
+        Rpc::Appended {
+            matching_index: 2,
+            success: true
+        }
+    ));
+    let append = one_reply(leader.step(Event::Receive(reply)).unwrap());
+    assert_eq!(leader.progress[&node(2)], 2);
+    let effects = follower.receive_inner(append).unwrap();
+    let reply = one_reply(
+        durable(&mut follower, effects)
+            .into_iter()
+            .filter(|e| matches!(e, Effect::Send(_)))
+            .collect(),
+    );
+    assert_eq!(follower.membership().id(), cid(4));
+    assert_eq!(follower.state().commit_index, 3);
+    assert_eq!(reply.configuration, cid(4));
+    assert!(matches!(
+        reply.rpc,
+        Rpc::Appended {
+            matching_index: 4,
+            success: true
+        }
+    ));
+}
+
+fn compacted_joint() -> (Raft, SnapshotRef, Snapshot) {
+    let mut leader = joint(true);
+    committed_fixture(&mut leader, 3);
+    let snapshot = Snapshot {
+        metadata: crate::snapshot::SnapshotMetadata {
+            bootstrap: leader.state().bootstrap.clone(),
+            membership: leader.state().checkpoint_membership(3).unwrap(),
+            index: 3,
+            term: 1,
+            application_schema: 1,
+        },
+        application: vec![7],
+    };
+    // Host-asserted verified pin, not a snapshot publication/storage claim.
+    let reference = SnapshotRef {
+        store: store(1),
+        group: leader.state().bootstrap.group,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: cid(3),
+        index: 3,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 128,
+        checksum: 7,
+    };
+    let effects = leader.begin_compact(reference).unwrap();
+    durable(&mut leader, effects);
+    (leader, reference, snapshot)
+}
+#[test]
+fn snapshot_reply_keeps_head_scope_through_log_and_application_dependencies() {
+    let (mut leader, reference, snapshot) = compacted_joint();
+    let effects = accept(&mut leader, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    let mut follower = follower(staged(), 2);
+    leader.requests.remove(&node(2));
+    leader.next_index.insert(node(2), 2);
+    let Effect::SnapshotRequired {
+        to,
+        context,
+        reference: requested,
+    } = leader.append_for(node(2)).unwrap()
+    else {
+        panic!("expected snapshot dependency")
+    };
+    assert_eq!(requested, reference);
+    let message = one_reply(
+        leader
+            .snapshot_send(to, context, reference, snapshot)
+            .unwrap(),
+    );
+    assert_eq!(message.configuration, cid(4));
+    assert!(
+        matches!(&message.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.configuration() == cid(3))
+    );
+    assert_eq!(
+        follower.step(Event::Receive(message.clone())),
+        Err(RaftError::InvalidMessage)
+    );
+    let effects = follower.receive_inner(message.clone()).unwrap();
+    assert!(matches!(&effects[..], [Effect::StageSnapshot(m)] if m == &message));
+    let local_reference = SnapshotRef {
+        store: store(2),
+        ..reference
+    };
+    let effects = follower.snapshot_stored(local_reference).unwrap();
+    assert!(matches!(&effects[..], [Effect::Persist(_)]));
+    let effects = durable(&mut follower, effects);
+    assert!(matches!(&effects[..], [Effect::SnapshotInstalled(r)] if *r == local_reference));
+    assert_eq!(follower.membership().id(), cid(3));
+    assert!(follower.has_pending_dependency());
+    assert!(matches!(
+        follower.snapshot_applied(local_reference, 2),
+        Err(RaftError::WrongCompletion)
+    ));
+    let reply = one_reply(follower.snapshot_applied(local_reference, 3).unwrap());
+    assert_eq!(reply.configuration, cid(4));
+    assert_eq!(reply.context, context);
+    let mut stale = reply.clone();
+    stale.configuration = cid(3);
+    assert_eq!(
+        leader.step(Event::Receive(stale)),
+        Err(RaftError::WrongIdentity)
+    );
+    assert_eq!(leader.progress[&node(2)], 0);
+    let append = one_reply(leader.step(Event::Receive(reply)).unwrap());
+    assert_eq!(leader.progress[&node(2)], 3);
+    assert_eq!(append.configuration, cid(4));
+    assert!(
+        matches!(&append.rpc, Rpc::Append { previous_index: 3, entries, .. } if entries.len() == 1)
+    );
+    assert!(matches!(
+        leader.snapshot_send(
+            to,
+            context,
+            reference,
+            match message.rpc {
+                Rpc::Snapshot { snapshot } => *snapshot,
+                _ => unreachable!(),
+            }
+        ),
+        Err(RaftError::WrongCompletion)
+    ));
+}
+#[test]
+fn compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix() {
+    let (follower_core, _, _) = compacted_joint();
+    let mut follower = follower(follower_core, 2);
+    let mut leader = joint(true);
+    committed_fixture(&mut leader, 3);
+    let effects = accept(&mut leader, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    leader.requests.remove(&node(2));
+    leader.next_index.insert(node(2), 2);
+    let append = sent(leader.append_for(node(2)).unwrap());
+    let hint = one_reply(follower.receive_inner(append).unwrap());
+    assert_eq!(hint.configuration, cid(4));
+    assert!(matches!(hint.rpc, Rpc::Compacted { index: 3, term: 1 }));
+    let append = one_reply(leader.step(Event::Receive(hint)).unwrap());
+    assert_eq!(leader.progress[&node(2)], 3);
+    assert!(matches!(
+        append.rpc,
+        Rpc::Append {
+            previous_index: 3,
+            ..
+        }
+    ));
+}
+#[test]
+fn replication_scope_bridge_does_not_authorize_learners_or_reads_or_elections() {
+    let mut core = staged();
+    let context = RequestContext {
+        origin: StoreBinding {
+            identity: store(4),
+            session: StoreSession::new(1).unwrap(),
+        },
+        sequence: 1,
+    };
+    let mut message = reply(
+        &core,
+        4,
+        context,
+        Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 2,
+        },
+    );
+    message.configuration = cid(3);
+    let before = core.state().clone();
+    assert_eq!(
+        core.step(Event::Receive(message.clone())),
+        Err(RaftError::WrongIdentity)
+    );
+    message.from = node(2);
+    message.sender.identity = store(2);
+    message.context.origin = message.sender;
+    for rpc in [
+        Rpc::ReadProbe,
+        Rpc::Vote {
+            last_index: 2,
+            last_term: 1,
+        },
+    ] {
+        message.rpc = rpc;
+        assert_eq!(
+            core.step(Event::Receive(message.clone())),
+            Err(RaftError::WrongIdentity)
+        );
+    }
+    assert_eq!(core.state(), &before);
+    // Crossing configuration IDs does not permit an entry from beyond the
+    // sender's declared accepted head, or an impossible newer snapshot base.
+    let leader = joint(true);
+    message.configuration = cid(2);
+    message.rpc = Rpc::Append {
+        previous_index: 2,
+        previous_term: 1,
+        entries: vec![leader.state().entries[2].clone()],
+        leader_commit: 2,
+    };
+    assert_eq!(
+        core.receive_inner(message.clone()),
+        Err(RaftError::InvalidMessage)
+    );
+    let (_, _, snapshot) = compacted_joint();
+    message.rpc = Rpc::Snapshot {
+        snapshot: Box::new(snapshot),
+    };
+    assert_eq!(core.receive_inner(message), Err(RaftError::InvalidMessage));
+    assert_eq!(core.state(), &before);
+}
+
+#[test]
+fn configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix() {
+    let mut leader = joint(true);
+    let old = leader.requests[&node(2)];
+    let old_reply = reply(
+        &leader,
+        2,
+        old.context,
+        Rpc::Appended {
+            success: true,
+            matching_index: old.end,
+        },
+    );
+    committed_fixture(&mut leader, 3);
+    let effects = accept(&mut leader, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    let current = leader.requests[&node(2)];
+    assert_ne!(old.context, current.context);
+    assert_eq!(current.configuration, cid(4));
+    assert_eq!(leader.progress[&node(2)], 0);
+    assert_eq!(
+        leader.step(Event::Receive(old_reply.clone())),
+        Err(RaftError::WrongIdentity)
+    );
+    // Relabeling a stale reply's configuration cannot make its old context
+    // satisfy the newly admitted request, even with the right sender store.
+    let mut relabeled = old_reply;
+    relabeled.configuration = cid(4);
+    assert!(leader.step(Event::Receive(relabeled)).unwrap().is_empty());
+    assert_eq!(leader.progress[&node(2)], 0);
+    assert_eq!(leader.requests[&node(2)].context, current.context);
+    let ack = reply(
+        &leader,
+        2,
+        current.context,
+        Rpc::Appended {
+            success: true,
+            matching_index: current.end,
+        },
+    );
+    leader.step(Event::Receive(ack)).unwrap();
+    assert_eq!(leader.progress[&node(2)], current.end);
+
+    let (mut leader, reference, snapshot) = compacted_joint();
+    leader.requests.remove(&node(2));
+    leader.next_index.insert(node(2), 2);
+    let Effect::SnapshotRequired { context, .. } = leader.append_for(node(2)).unwrap() else {
+        panic!()
+    };
+    let effects = accept(&mut leader, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    assert!(matches!(
+        leader.snapshot_send(node(2), context, reference, snapshot),
+        Err(RaftError::WrongCompletion)
+    ));
+}

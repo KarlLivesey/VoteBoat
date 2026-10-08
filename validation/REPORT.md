@@ -39,3 +39,18 @@ Online reconfiguration stays gated pending its distributed model and faulted
 actual network histories. Linux local execution does not establish macOS or
 hardware power-failure behavior. CI is background feedback, never a required
 merge gate or a reason to stop local implementation.
+
+## Slice 36 — actual-core replication scope evidence
+
+Seven additional internal tests drive the real receive, persist, completion and
+snapshot-install paths behind the public configuration-data gate. They exercise
+retained-voter catch-up, matching-prefix bounds, joint/final rollback, request
+scope independent of snapshot base, compacted hints, exact application dependencies,
+and stale-context/learner/read/election rejection. Four public downstream tests
+exercise host/native static-log scope bridges, failed barriers/recovery and native
+wire format 2. See [scope rules and limitations](../docs/REPLICATION_SCOPES.md).
+
+The independent local ballot model above is unchanged. These finite core tests
+are not a distributed activation model, a refinement proof or online network
+membership evidence. Newly promoted sender authorization and the other listed
+release gates remain incomplete. CI remains background feedback.

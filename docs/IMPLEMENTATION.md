@@ -2309,10 +2309,50 @@ configurations with warnings denied; formatting, API docs, inventory JSON, RPL
 headers and diff checks pass. Linux only; macOS, hardware power-failure behavior
 and performance are not established. CI stays background feedback.
 
+## Slice 36 — replication request scopes across accepted heads
+
+Append/Snapshot requests from an exact locally authorized voter can now bridge
+differing accepted configuration IDs. Responses echo the requester's accepted
+head rather than the responder's membership. Outstanding leader replication pins
+scope with its original context/range; retries and deferred snapshot sends retain
+that scope. Response processing requires current configuration plus exact admitted
+request scope/context, term, store and origin session. Changing configuration
+clears old requests/progress, so relabeling a delayed reply cannot restore authority.
+Elections and reads still require equal configurations; learners cannot originate
+replication. Incoming records/bases cannot activate beyond the declared sender head.
+
+Partial chunks prove only their exact matching end, even if the follower has not
+reached the requester's configuration. An older joint leader can replace an
+uncommitted final suffix using higher-term log rules. Snapshot-base configuration
+remains distinct from request head; a deferred acknowledgement retains its original
+scope through snapshot persistence, log durability and application installation.
+No new effect/token/generation/watermark or wire/persistent format is introduced.
+Per-peer pinned scope is bounded inline state; output fanout does not increase.
+See [replication scopes](REPLICATION_SCOPES.md) for rules and limitations.
+
+Seven actual-core tests cover lagging probes/joint receipt, final rollback,
+partial chunks, snapshot/application dependencies, compacted hints, scope/context
+invalidation and learner/read/election exclusion. They use prepared committed
+fixtures and host-asserted completions behind the retained public configuration-data
+gate. Four downstream public tests use host/native storage for static-log scope
+bridges, exact completion refusal, failed sync/publication followed by recovery,
+and native wire-format-2 request/response/snapshot scope round trips. A runtime
+test verifies valid cross-scope retained-voter contact resets an election deadline
+without activating its scope or changing the durable vote; foreign-scope reads
+remain rejected. These are not online administrator/network membership histories.
+
+Local validation passes 366 default/native/TLS tests, 344 native-only tests and
+206 core/host-only tests. Clippy passes all three configurations with warnings
+denied. Formatting, API docs, inventory JSON, RPL headers and diff checks pass.
+The bounded local ballot model remains unchanged. Linux evidence does not
+establish macOS execution, physical power-failure certification, unbounded proof,
+liveness or performance. CI remains background feedback.
+
 ## Next slice
 
-Complete lagging-peer request scopes, learner assignment/recovery/readiness,
-prospective reservation and retiring-leader final propagation before enabling
+Authorize catch-up from newly promoted leaders without allowing a learner to
+self-authorize through a claimed head. Complete learner assignment/recovery/readiness,
+prospective fanout reservation and retiring-leader final propagation before enabling
 online changes. The distributed activation/ballot model and faulted actual-core
 network histories remain gates. Full P0–P7 stays active; recursive responsibilities,
 safe split/merge and P7 evidence remain outstanding.

@@ -50,7 +50,10 @@ no cryptographic provenance, authentication, replay defence or quorum evidence.
 Every record starts with this 128-byte envelope, followed by one RPC kind byte
 and its payload. Store identities are stable; store sessions scope recovered
 admissions. The request context's origin may differ from the current sender,
-as responses retain their request's original context.
+as responses retain their request's original context. Configuration IDs also
+identify the requester's accepted head and are echoed by responses. They do not
+claim responder activation or identify the snapshot base. See
+[replication scope rules](REPLICATION_SCOPES.md).
 
 | Bytes | Field |
 | --- | --- |
