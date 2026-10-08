@@ -138,15 +138,16 @@ remain required P6 work. The full P0–P7 goal stays active and P8 stays deferre
 
 Checked metadata ownership decisions are now available through
 [verified transfer publication](TRANSFER_PUBLICATION.md), including reserved control
-history and original-decision recovery. Targets remain non-serving; durable activation,
-complete interrupted split recovery and distributed merge are still pending.
+history and original-decision recovery. Publication alone leaves targets non-serving;
+local durable activation is required.
 
 [Durable target activation](TARGET_ACTIVATION.md) now verifies and retains the
 publication decision before serving imported data. Selected TCP/QUIC WAL/checkpoint
-histories serve with metadata offline and reopen the old source fenced. Complete
-interrupted split schedules, distributed merge and recursive lifecycle remain work.
+histories serve with metadata offline and reopen the old source fenced.
 
 The [selected complete split recovery ledger](SPLIT_RECOVERY.md) now checks
 all nine committed phase boundaries through whole-topology TCP/QUIC WAL/checkpoint
 reopen, both-target activation and status-driven trusted host resumption. These
-are graceful committed-boundary histories; merge and recursive lifecycle remain.
+are graceful committed-boundary histories. Selected [merge](MERGE_RECOVERY.md) and
+[repeated transfers](REPEATED_TRANSFERS.md) are also covered; recursive lifecycle and
+retirement remain.

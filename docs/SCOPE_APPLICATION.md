@@ -6,7 +6,11 @@ is the first native provider: one independent signed counter per logical bucket,
 with a host-selected deterministic partition policy. The original global Counter
 remains indivisible. No threads, sockets, file owners or dependencies are added.
 
-The contract is version 2. Providers declare `export_scope_bound(range)`, a
+The contract is version 3. Providers expose exact `contains_operation(id)` across
+their retained and imported data history. Lifecycle guards use it to reserve a
+control ID without hiding an original data retry. The native counter and host
+providers implement the same query; it performs no I/O or authority change.
+Providers also declare `export_scope_bound(range)`, a
 configured lifetime upper bound on exported payload capacity, stable under future
 writes/noops. Source fencing uses it to refuse oversized layouts before the cut.
 The native counter conservatively uses its whole configured checkpoint bound

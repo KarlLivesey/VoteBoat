@@ -95,12 +95,20 @@ struct Split {
     clock: Instant,
     protocol: NativePeerProtocol,
     checkpoint: bool,
+    metadata: fn() -> LifecycleDirectory,
     parent: Vec<Node<LifecycleDirectory>>,
     source: Vec<Node<source_fixture::Source>>,
     targets: [Vec<Node<target_fixture::Target>>; 2],
 }
 impl Split {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
+        Self::with_metadata(protocol, checkpoint, metadata)
+    }
+    fn with_metadata(
+        protocol: NativePeerProtocol,
+        checkpoint: bool,
+        metadata: fn() -> LifecycleDirectory,
+    ) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-split-resume-{}-{protocol:?}-{checkpoint}",
             std::process::id()
@@ -138,6 +146,7 @@ impl Split {
             clock,
             protocol,
             checkpoint,
+            metadata,
         };
         campaign(&mut result.parent, &result.clock, 1);
         propose_recovering(
@@ -380,7 +389,7 @@ impl Split {
             configuration(&self.root, 1, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            metadata,
+            self.metadata,
         );
         self.source = open(
             configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
@@ -456,6 +465,9 @@ impl Split {
         }
     }
 }
+
+#[path = "repeat.rs"]
+mod repeat;
 fn hint(key: u8) -> RouteHint {
     let mut h = source_fixture::hint(key);
     h.group = group(if key < 128 { 21 } else { 22 });

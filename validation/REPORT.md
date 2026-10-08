@@ -1771,3 +1771,49 @@ arbitrary-fault liveness, repeated movement of activated targets, recursive pare
 coordination, retirement, macOS or separate-host behavior. See
 docs/MERGE_RECOVERY.md. Reusable movement/retirement is current, delegated-parent
 coordination next, then P7 measured tuning. Full P0–P7 stays active; P8 deferred.
+
+## Slice 92 — activated targets reused as later sources
+
+Target guards now commit a later checked source freeze through the same application
+and authoritative log. The original import/activation remains immutable; the
+provider stays at F while the wrapper applies later no-ops/refusals. Actual bounded
+exports and quorum-readable source status feed the existing next import/publication/
+activation contracts. Scope contract 3 exposes retained/imported operation presence
+so control IDs cannot hide data retries. Import collisions refuse atomically.
+New VBTRGT03/application schema 2 checkpoints retain both boundaries and the later
+fence; schema-1 inactive VBTRGT01 and active VBTRGT02 remain readable, with explicit
+schema/tag mismatch refusal. No mixed-version claim.
+
+Five downstream tests pass: split -> merge -> split with original results/outbox,
+exact freeze retry, pending/same-batch transitions, full-history control capacity,
+ID/manifest/budget/binding refusal, all freeze/checkpoint truncations, corrupted
+boundary/ID/bootstrap refusal and checkpoint/replay. Legacy active/inactive and
+host-provider operation-presence/accounting tests also pass.
+
+Four final native histories pass (271.63 seconds), using TCP/TLS or QUIC and WAL
+or checkpoint recovery. After a real split and writes to both activated children,
+the same guards/logs become merge sources. All five three-replica groups reopen
+after each of seven later committed phases. Fresh quorum observations reconstruct
+the next action; discarded action receipts do not lose original import/activation,
+new F/export commitments, publication or activation. Frozen provider boundaries
+remain F through subsequent wrapper progress. The merged owner serves original
+retries and new writes with all old groups/metadata stopped; another reopen retains
+values/outbox while every old source refuses. Native composition is split -> merge;
+the further split is deterministic downstream evidence.
+
+Affected all-feature suites pass: library 57, scopes 8, target 9, activation 9,
+source 7, publication 7, merge 3, repeat 5. Core-only equivalents pass 48, 7, 9, 9,
+7, 7, 3, 5. All-target/all-feature Clippy with warnings denied, formatting,
+69-contract inventory and diff checks pass. The initial native matrix passed
+before the schema-label refinement (273.24 seconds); final code ran all four again,
+not eight unique histories. Stale schema/format assertions and test-only directory
+imports were corrected. The library's existing QUIC socket test initially lacked
+sandbox permission and passes with that permission. Unaffected native suites were
+not rerun. No consensus timer/quorum, store binding or dependency changed.
+
+Source data remains retained; retirement/reclamation and delegated-parent lifecycle
+remain unimplemented. These finite Linux ordinary-majority committed-boundary
+reopens are not power-loss, arbitrary-fault liveness, macOS or separate-host proof.
+Foreign provenance/configuration remains trusted authenticated host input. Current
+work is durable retirement, next recursive coordination, then measured P7 tuning.
+Full P0–P7 remains active; P8 deferred. See docs/REPEATED_TRANSFERS.md.

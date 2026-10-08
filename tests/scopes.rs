@@ -393,6 +393,9 @@ impl CheckpointStateMachine for HostScope {
     }
 }
 impl ScopeStateMachine for HostScope {
+    fn contains_operation(&self, operation: OperationId) -> bool {
+        self.0.contains_operation(operation)
+    }
     fn scope(&self) -> BucketRange {
         self.0.scope()
     }
@@ -454,17 +457,22 @@ impl ScopeStateMachine for HostScope {
 #[test]
 fn downstream_scope_provider_uses_public_contract_with_its_own_format() {
     fn transfer<A: ScopeStateMachine>(source: &A, target: &mut A) {
+        assert!(source.contains_operation(op(10)));
+        assert!(!target.contains_operation(op(10)));
         let image = source.export_scope(target.scope(), 10000).unwrap();
         assert_eq!(
             source.command_key(&bytes(1, 7, b"left-effect")).unwrap(),
             &[1]
         );
         target.import_scopes(&[image], 1).unwrap();
+        assert!(target.contains_operation(op(10)));
         assert_eq!(target.applied_index(), 1);
         let checkpoint = target.checkpoint(10000).unwrap();
         target
             .restore_checkpoint(target.schema_version(), 1, &checkpoint)
             .unwrap();
+        assert!(target.contains_operation(op(10)));
+        assert!(!target.contains_operation(op(999)));
     }
     let source = HostScope(source());
     let mut target = HostScope(fresh(range(0, 128)));

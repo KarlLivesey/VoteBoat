@@ -114,7 +114,9 @@ fn compatible_merge_combines_actual_data_original_results_and_outbox_through_rec
         .unwrap();
     let bytes = target.checkpoint(200000).unwrap();
     let mut restored = fixture::target();
-    restored.restore_checkpoint(1, 7, &bytes).unwrap();
+    restored
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 7, &bytes)
+        .unwrap();
     assert_eq!(restored.status(), target.status());
     assert_eq!(restored.application().value(&[1]), Ok(9));
     assert_eq!(restored.application().value(&[200]), Ok(13));

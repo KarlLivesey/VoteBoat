@@ -77,12 +77,13 @@ operations. There is no retry eviction, authority reclamation or unfreeze API.
 Drop releases application memory; native owners retain their existing drain/join
 and authoritative-store recovery duties.
 
-`VBTRGT02` preserves original stage/import state and adds first activation index,
-length and command before the provider checkpoint. Restore verifies phase ordering,
-exact binding, checked publication/local import and the provider applied boundary.
-It accepts inactive `VBTRGT01` records under application schema 1; old code refuses
-the new tag. This explicit reader compatibility is not a mixed-version deployment
-or alternate-provider migration claim. WAL replay uses the same checked command.
+`VBTRGT03` under target application schema 2 retains original stage/import/activation
+plus a later source fence and separate provider/wrapper boundaries. Restore verifies
+phase ordering, exact binding, checked publication/local import and provider state.
+The reader also accepts schema-1 inactive `VBTRGT01` and active `VBTRGT02` records;
+schema 1 cannot label the new format. This explicit reader compatibility is not a
+mixed-version deployment or alternate-provider migration claim. WAL replay uses
+the same checked commands. See [repeated transfers](REPEATED_TRANSFERS.md).
 No new durability token or consensus effect is introduced: only the existing
 durable matching quorum prefix, commitment and ordered apply permit service.
 
@@ -102,12 +103,13 @@ reopens fenced and refuses old-owner writes/reads while the activated target ser
 These selected graceful-reopen Linux histories are not power-loss, every interrupted
 phase, distributed merge, recursive ownership or macOS/separate-host evidence.
 
-Next exercise interrupted complete split stages and both-target resumption with
-lost observations. Following reuse that lifecycle for compatible merge and recursive
-coordination/retirement, then P7 measured tuning. Full P0–P7 remains active and P8
+Selected split, merge and repeated-transfer recovery now exercise that handoff.
+Recursive coordination/retirement remain, then P7 measured tuning. Full P0–P7 remains active and P8
 is deferred; static service availability remains independent of this work.
 
 The [selected complete split recovery ledger](SPLIT_RECOVERY.md) now checks
 all nine committed phase boundaries through whole-topology TCP/QUIC WAL/checkpoint
 reopen, both-target activation and status-driven trusted host resumption. These
-are graceful committed-boundary histories; merge and recursive lifecycle remain.
+are graceful committed-boundary histories. Selected [merge](MERGE_RECOVERY.md) and
+[repeated transfers](REPEATED_TRANSFERS.md) are also covered; recursive lifecycle and
+retirement remain.

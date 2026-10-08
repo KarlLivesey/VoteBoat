@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Staged scope imports and decision-bound durable target activation.
+//! Staged imports, decision-bound activation and later exact-boundary source fences.
 use crate::{
     application::*,
     identity::*,
@@ -25,12 +25,14 @@ use crate::{
     scope::*,
     transfer::*,
     transfer_publication::*,
+    transfer_source::{SourceExportCommitment, SourceFreezeStatus},
 };
 use std::mem::size_of;
 
-pub const TRANSFER_TARGET_SCHEMA: u64 = 1;
+pub const TRANSFER_TARGET_SCHEMA: u64 = 2;
 pub const MAX_TARGET_ACTIVATION_BYTES: usize = 64 * 1024;
 pub const MAX_INLINE_IMPORT_BYTES: usize = 8 * 1024 * 1024;
+pub const MAX_TARGET_FREEZE_BYTES: usize = 52 + MAX_TRANSFER_INTENT_BYTES;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SourceImport {
     pub fence: OwnershipFence,
@@ -253,11 +255,14 @@ pub struct TargetStatus {
     pub operation: OperationId,
     pub staged_index: Option<u64>,
     pub imported: Option<ImportStatus>,
+    /// Original activation, retained even after a later source freeze. This is
+    /// historical lineage, not current serving permission; query Freeze too.
     pub activated: Option<ActivationStatus>,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TargetOutcome<R = ()> {
     Activated(ActivationStatus),
+    Frozen(OwnershipFence),
     Applied(R),
     Rejected(RoutingError),
     Staged { index: u64 },
@@ -288,11 +293,14 @@ impl<R: ApplicationReceipt> ApplicationReceipt for TargetReceipt<R> {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TargetQuery<Q> {
     Status,
+    Freeze,
     Data(RoutedQuery<Q>),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[allow(clippy::large_enum_variant)] // Inline status is charged by read_result_bound.
 pub enum TargetRead<R> {
     Status(TargetStatus),
+    Freeze(Option<SourceFreezeStatus>),
     NotActive,
     Data(R),
     Rejected(RoutingError),
@@ -309,6 +317,13 @@ struct ActivationRecord {
     status: ActivationStatus,
 }
 #[derive(Clone)]
+struct FreezeRecord {
+    bytes: Vec<u8>,
+    intent: TransferIntent,
+    export_bytes: usize,
+    fence: OwnershipFence,
+}
+#[derive(Clone)]
 pub struct TransferTarget<A, P> {
     group: GroupIdentity,
     operation: OperationId,
@@ -320,6 +335,8 @@ pub struct TransferTarget<A, P> {
     staged: Option<u64>,
     imported: Option<ImportRecord>,
     activated: Option<ActivationRecord>,
+    frozen: Option<FreezeRecord>,
+    applied: u64,
 }
 impl<A, P> TransferTarget<A, P>
 where
@@ -389,6 +406,8 @@ where
             staged: None,
             imported: None,
             activated: None,
+            frozen: None,
+            applied: 0,
         })
     }
     pub fn application(&self) -> &A {
@@ -396,6 +415,148 @@ where
     }
     pub fn partition_policy(&self) -> &P {
         &self.policy
+    }
+    /// Encode a later source freeze bound to this target's original bootstrap.
+    /// The trusted host verifies the committed next intent and target staging.
+    /// The budget covers aggregate lifetime export capacity, not current bytes.
+    pub fn freeze_command(
+        &self,
+        intent: &TransferIntent,
+        export_bytes: usize,
+        max_bytes: usize,
+    ) -> Result<Vec<u8>, ApplicationError> {
+        self.check_freeze(intent, export_bytes)?;
+        let body = intent.encode(MAX_TRANSFER_INTENT_BYTES)?;
+        let len = 52 + body.len();
+        if len > max_bytes {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut bytes = Vec::with_capacity(len);
+        bytes.extend(b"VBTFRZ01");
+        bytes.extend(ContentDigest::sha256(&self.binding).0);
+        bytes.extend((export_bytes as u64).to_le_bytes());
+        bytes.extend((body.len() as u32).to_le_bytes());
+        bytes.extend(body);
+        Ok(bytes)
+    }
+    fn freeze_request(&self, bytes: &[u8]) -> Result<(TransferIntent, usize), ApplicationError> {
+        if bytes.len() > MAX_TARGET_FREEZE_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut r = Reader::new(bytes);
+        if r.take(8)? != b"VBTFRZ01" || r.take(32)? != ContentDigest::sha256(&self.binding).0 {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let budget = usize::try_from(r.u64()?).map_err(|_| ApplicationError::InvalidCommand)?;
+        let len = r.u32()? as usize;
+        let intent = TransferIntent::decode(r.take(len)?)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        self.check_freeze(&intent, budget)?;
+        Ok((intent, budget))
+    }
+    fn export_ranges(
+        &self,
+        intent: &TransferIntent,
+    ) -> Result<Vec<(GroupIdentity, BucketRange)>, ApplicationError> {
+        let scope = self.inner.scope();
+        let mut cursor = scope.start();
+        let mut ranges = Vec::new();
+        for target in intent.targets() {
+            let start = scope.start().max(target.scope.start());
+            let end = scope.end().min(target.scope.end());
+            if start >= end {
+                continue;
+            }
+            let RouteTarget::Group(group) = target.target else {
+                return Err(ApplicationError::InvalidCommand);
+            };
+            if start != cursor {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            ranges.push((
+                group,
+                BucketRange::new(start, end).map_err(|_| ApplicationError::InvalidCommand)?,
+            ));
+            cursor = end;
+        }
+        if cursor != scope.end() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(ranges)
+    }
+    fn check_freeze(&self, intent: &TransferIntent, budget: usize) -> Result<(), ApplicationError> {
+        if self.activated.is_none()
+            || intent.before() != self.intent.after()
+            || budget == 0
+            || budget > MAX_SCOPE_IMAGE_BYTES
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut total = 0usize;
+        for (_, range) in self.export_ranges(intent)? {
+            let bound = self.inner.export_scope_bound(range)?;
+            if bound == 0 || bound > MAX_SCOPE_IMAGE_BYTES {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            total = total
+                .checked_add(bound)
+                .ok_or(ApplicationError::InvalidCommand)?;
+        }
+        if total > budget {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(())
+    }
+    pub fn fence(&self) -> Option<OwnershipFence> {
+        self.frozen.as_ref().map(|r| r.fence)
+    }
+    /// Immutable exact-F data; its use by another group requires quorum status.
+    pub fn export_target(
+        &self,
+        target: GroupIdentity,
+        max_bytes: usize,
+    ) -> Result<ScopeImage, ApplicationError> {
+        let record = self.frozen.as_ref().ok_or(ApplicationError::NotApplied)?;
+        let scope = self
+            .export_ranges(&record.intent)?
+            .into_iter()
+            .find(|(g, _)| *g == target)
+            .ok_or(ApplicationError::InvalidCommand)?
+            .1;
+        let bound = self.inner.export_scope_bound(scope)?;
+        let image = self.inner.export_scope(scope, bound.min(max_bytes))?;
+        if image.scope() != scope
+            || image.scheme() != self.inner.scheme()
+            || image.schema() != self.inner.schema_version()
+            || image.source_applied() != record.fence.index
+            || image.payload_capacity() > bound
+            || image.payload_capacity() > max_bytes
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(image)
+    }
+    pub fn freeze_status(&self) -> Result<Option<SourceFreezeStatus>, ApplicationError> {
+        let Some(record) = &self.frozen else {
+            return Ok(None);
+        };
+        let ranges = self.export_ranges(&record.intent)?;
+        let mut exports = Vec::with_capacity(ranges.len());
+        for (target, scope) in ranges {
+            let image = self.export_target(target, record.export_bytes)?;
+            exports.push(SourceExportCommitment {
+                target,
+                scope,
+                digest: ContentDigest::scope_image(&image),
+            });
+        }
+        Ok(Some(SourceFreezeStatus {
+            fence: record.fence,
+            intent: record.intent.clone(),
+            exports,
+        }))
     }
     pub fn bootstrap_command(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         if self.binding.len() > max_bytes {
@@ -540,6 +701,9 @@ where
         } else if bytes.starts_with(b"VBTACT01") {
             self.activation(bytes)?;
             Ok(None)
+        } else if bytes.starts_with(b"VBTFRZ01") {
+            self.freeze_request(bytes)?;
+            Ok(None)
         } else {
             match decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)? {
                 Command::Data { key, payload, .. } if self.inner.command_key(payload)? == key => {
@@ -582,7 +746,8 @@ where
                 .len()
                 .max(44 + self.limits.import_bytes)
                 .max(MAX_TARGET_ACTIVATION_BYTES),
-            snapshot_bytes: 76
+            snapshot_bytes: 112
+                + MAX_TARGET_FREEZE_BYTES
                 + MAX_TARGET_ACTIVATION_BYTES
                 + self.binding.len()
                 + 44
@@ -605,7 +770,7 @@ where
         self.inner.validate_group(group)
     }
     fn applied_index(&self) -> u64 {
-        self.inner.applied_index()
+        self.applied
     }
     fn apply_batch(
         &mut self,
@@ -625,7 +790,47 @@ where
             let mut provider_advanced = false;
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
                 let import = next.request(bytes)?;
-                let outcome = if bytes == &next.binding {
+                let outcome = if let Some(record) = &next.frozen {
+                    if *operation == record.fence.operation && *bytes == record.bytes {
+                        TargetOutcome::Frozen(record.fence)
+                    } else {
+                        TargetOutcome::Rejected(RoutingError::Fenced)
+                    }
+                } else if bytes.starts_with(b"VBTFRZ01") {
+                    let (intent, export_bytes) = next.freeze_request(bytes)?;
+                    if *operation == next.operation || next.inner.contains_operation(*operation) {
+                        TargetOutcome::OperationConflict
+                    } else {
+                        if entry.index == u64::MAX {
+                            return Err(ApplicationError::IndexGap);
+                        }
+                        let fence = OwnershipFence {
+                            group: next.group,
+                            responsibility: intent.before().input().responsibility,
+                            epoch: intent.before().input().epoch,
+                            operation: *operation,
+                            index: entry.index,
+                        };
+                        let mut projected = entry.clone();
+                        projected.payload = EntryPayload::Noop;
+                        if !next.inner.apply_batch(&[projected])?.is_empty()
+                            || next.inner.applied_index() != entry.index
+                        {
+                            return Err(ApplicationError::InvalidCommand);
+                        }
+                        next.inner
+                            .checkpoint(next.limits.application_checkpoint_bytes)?;
+                        next.frozen = Some(FreezeRecord {
+                            bytes: bytes.clone(),
+                            intent,
+                            export_bytes,
+                            fence,
+                        });
+                        next.freeze_status()?; // Validate actual exports before publishing the fence.
+                        provider_advanced = true;
+                        TargetOutcome::Frozen(fence)
+                    }
+                } else if bytes == &next.binding {
                     if *operation != next.operation {
                         TargetOutcome::OperationConflict
                     } else {
@@ -655,7 +860,9 @@ where
                             .map(|s| s.image.clone())
                             .collect::<Vec<_>>();
                         next.inner.import_scopes(&images, entry.index)?;
-                        if next.inner.applied_index() != entry.index {
+                        if next.inner.applied_index() != entry.index
+                            || next.inner.contains_operation(next.operation)
+                        {
                             return Err(ApplicationError::InvalidCheckpoint);
                         }
                         // Validate recoverable provider envelope before accepting readiness.
@@ -737,7 +944,7 @@ where
                     outcome,
                 });
             }
-            if !provider_advanced {
+            if !provider_advanced && next.frozen.is_none() {
                 let mut projected = entry.clone();
                 if matches!(projected.payload, EntryPayload::Command { .. }) {
                     projected.payload = EntryPayload::Noop;
@@ -748,6 +955,7 @@ where
                     return Err(ApplicationError::InvalidCommand);
                 }
             }
+            next.applied = entry.index;
         }
         *self = next;
         Ok(receipts)
@@ -769,6 +977,7 @@ where
                 next.request(bytes)?;
                 let mut nested = 0usize;
                 if next.activated.is_some()
+                    && next.frozen.is_none()
                     && *operation != next.operation
                     && bytes.starts_with(b"VBRCMD01")
                 {
@@ -817,7 +1026,9 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        self.request(bytes)?;
+        if bytes.len() > self.readiness_requirements().command_bytes {
+            return Err(ApplicationError::InvalidCommand);
+        }
         let mut next = self.clone();
         for (position, (operation, bytes)) in pending.enumerate() {
             if position >= crate::routed::MAX_ROUTED_PENDING
@@ -825,7 +1036,6 @@ where
             {
                 return Err(ApplicationError::ReceiptBudget);
             }
-            self.request(bytes)?;
             let index = next
                 .applied_index()
                 .checked_add(1)
@@ -846,7 +1056,7 @@ where
             else {
                 return Err(ApplicationError::InvalidCommand);
             };
-            if next.activated.is_none() || operation == next.operation {
+            if next.activated.is_none() || next.frozen.is_some() || operation == next.operation {
                 return Err(ApplicationError::InvalidCommand);
             }
             check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
@@ -908,12 +1118,14 @@ where
             .activated
             .as_ref()
             .map_or(&[][..], |r| r.bytes.as_slice());
-        let len = 64 + self.binding.len() + import.len() + activation.len() + inner.len();
+        let freeze = self.frozen.as_ref().map_or(&[][..], |r| r.bytes.as_slice());
+        let len =
+            100 + self.binding.len() + import.len() + activation.len() + freeze.len() + inner.len();
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBTRGT02");
+        bytes.extend(b"VBTRGT03");
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -929,6 +1141,21 @@ where
         );
         bytes.extend((activation.len() as u32).to_le_bytes());
         bytes.extend(activation);
+        bytes.extend(self.inner.applied_index().to_le_bytes());
+        bytes.extend(
+            self.frozen
+                .as_ref()
+                .map_or(0, |r| r.fence.operation.get())
+                .to_le_bytes(),
+        );
+        bytes.extend(
+            self.frozen
+                .as_ref()
+                .map_or(0, |r| r.fence.index)
+                .to_le_bytes(),
+        );
+        bytes.extend((freeze.len() as u32).to_le_bytes());
+        bytes.extend(freeze);
         bytes.extend(self.inner.schema_version().to_le_bytes());
         bytes.extend((inner.len() as u32).to_le_bytes());
         bytes.extend(inner);
@@ -940,7 +1167,7 @@ where
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != TRANSFER_TARGET_SCHEMA {
+        if schema != TRANSFER_TARGET_SCHEMA && schema != 1 {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if bytes.len() > self.readiness_requirements().snapshot_bytes {
@@ -948,7 +1175,11 @@ where
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        let activated_format = tag == b"VBTRGT02";
+        let frozen_format = tag == b"VBTRGT03";
+        if (schema == TRANSFER_TARGET_SCHEMA) != frozen_format {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        let activated_format = frozen_format || tag == b"VBTRGT02";
         if (!activated_format && tag != b"VBTRGT01") || r.u64()? != applied {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -990,6 +1221,27 @@ where
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
+        let (inner_applied, freeze_operation, freeze_index, freeze_bytes) = if frozen_format {
+            let inner = r.u64()?;
+            let operation = r.u128()?;
+            let index = r.u64()?;
+            let len = r.u32()? as usize;
+            (inner, operation, index, r.take(len)?)
+        } else {
+            (applied, 0, 0, &[][..])
+        };
+        if inner_applied > applied
+            || (freeze_index == 0) != freeze_bytes.is_empty()
+            || (freeze_operation == 0) != freeze_bytes.is_empty()
+            || freeze_bytes.is_empty() && inner_applied != applied
+            || !freeze_bytes.is_empty()
+                && (activation_index == 0
+                    || freeze_index <= activation_index
+                    || freeze_index != inner_applied
+                    || freeze_index == u64::MAX)
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
         let inner_schema = r.u64()?;
         let len = r.u32()? as usize;
         if len > self.limits.application_checkpoint_bytes {
@@ -997,8 +1249,11 @@ where
         }
         let mut next = self.clone();
         next.inner
-            .restore_checkpoint(inner_schema, applied, r.take(len)?)?;
-        if !r.done() || next.inner.applied_index() != applied {
+            .restore_checkpoint(inner_schema, inner_applied, r.take(len)?)?;
+        if !r.done()
+            || next.inner.applied_index() != inner_applied
+            || next.inner.contains_operation(next.operation)
+        {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         next.staged = (staged != 0).then_some(staged);
@@ -1013,6 +1268,31 @@ where
                 status: Self::activation_status(activation_index, activation_bytes, &activation),
             })
         };
+        next.frozen = if freeze_bytes.is_empty() {
+            None
+        } else {
+            let (intent, export_bytes) = next.freeze_request(freeze_bytes)?;
+            let operation =
+                OperationId::new(freeze_operation).ok_or(ApplicationError::InvalidCheckpoint)?;
+            if operation == next.operation || next.inner.contains_operation(operation) {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            let fence = OwnershipFence {
+                group: next.group,
+                responsibility: intent.before().input().responsibility,
+                epoch: intent.before().input().epoch,
+                operation,
+                index: freeze_index,
+            };
+            Some(FreezeRecord {
+                bytes: freeze_bytes.to_vec(),
+                intent,
+                export_bytes,
+                fence,
+            })
+        };
+        next.applied = applied;
+        next.freeze_status()?;
         *self = next;
         Ok(())
     }
@@ -1035,7 +1315,11 @@ where
         }
         match query {
             TargetQuery::Status => Ok(TargetRead::Status(self.status())),
+            TargetQuery::Freeze => self.freeze_status().map(TargetRead::Freeze),
             TargetQuery::Data(query) => {
+                if self.frozen.is_some() {
+                    return Ok(TargetRead::Rejected(RoutingError::Fenced));
+                }
                 if self.activated.is_none() {
                     return Ok(TargetRead::NotActive);
                 }
@@ -1063,7 +1347,7 @@ where
 {
     fn query_bytes(&self, query: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match query {
-            TargetQuery::Status => Ok(0),
+            TargetQuery::Status | TargetQuery::Freeze => Ok(0),
             TargetQuery::Data(q) => {
                 if q.key.capacity() > MAX_ROUTING_KEY_BYTES || q.key.capacity() > limit {
                     return Err(ApplicationError::ReceiptBudget);
@@ -1078,6 +1362,14 @@ where
     }
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
+            TargetQuery::Freeze => self.frozen.as_ref().map_or(0, |r| {
+                r.intent.retained_bytes() - size_of::<TransferIntent>()
+                    + self
+                        .export_ranges(&r.intent)
+                        .expect("validated freeze")
+                        .len()
+                        * size_of::<SourceExportCommitment>()
+            }),
             TargetQuery::Status => self.imported.as_ref().map_or(0, |r| {
                 r.status.sources.capacity() * size_of::<ImportedSource>()
             }),
@@ -1097,6 +1389,10 @@ where
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            TargetRead::Freeze(status) => status.as_ref().map_or(0, |s| {
+                s.intent.retained_bytes() - size_of::<TransferIntent>()
+                    + s.exports.capacity() * size_of::<SourceExportCommitment>()
+            }),
             TargetRead::Status(s) => s
                 .imported
                 .as_ref()

@@ -70,6 +70,7 @@ cargo +stable test --locked --offline --all-features --test routed split_resumes
 
 Independent native histories serialize their worker/socket topologies inside the
 test binary; each history retains concurrent replicas/groups. CI is background
-feedback and does not gate further work. Compatible multi-source merge is next,
-then recursive lifecycle and retirement, followed by measured P7 tuning. The full
+feedback and does not gate further work. Compatible [merge](MERGE_RECOVERY.md) and
+selected [repeated transfers](REPEATED_TRANSFERS.md) are covered. Recursive lifecycle
+and retirement remain, followed by measured P7 tuning. The full
 P0–P7 objective stays active; P8 remains deferred.

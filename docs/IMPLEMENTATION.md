@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; repeated transfers, recursive lifecycle and retirement remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; recursive lifecycle and retirement remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -97,16 +97,20 @@ Slices 84–89 implement the public data adapter, intent, source fence, final im
 checked publication and durable activation. Slice 90 covers the selected complete
 split phase/reopen ledger over TCP/QUIC with both targets eventually serving.
 Slice 91 adds compatible two-source merge, partial-fence/offline-source recovery
-and atomic collision refusal. These establish selected top-level handoff paths;
-it does not finish all ownership movement or arbitrary-fault validation.
+and atomic collision refusal. Slice 92 makes activated targets reusable as later
+sources, with selected repeated transfer recovery. These establish selected
+top-level handoff paths; recursive coordination, retirement and broader faults
+remain.
 
-1. **Reusable activated-target movement and retirement (current, P6).** Permit a
-   previously activated target to become a durably fenced source for a later move,
-   preserving its original retry/outbox lineage in the same authoritative log.
-   Retain source tombstones through bounded reclamation. Depends on the checked
-   split/merge handoff. Completion requires repeated movement, receipt loss and
-   restart with no revived owner or lost lineage. This makes macro ownership
-   movement reusable rather than a one-time handoff.
+1. **Durable retirement and bounded reclamation (current, P6).** Repeated movement
+   now retains every old provider and original import. Bind permission to retire
+   transferred data to the complete committed publication, all required target
+   activations and explicit retention/recovery release conditions. Retain durable
+   source tombstones and lineage after dropping payloads; use verified checkpoint
+   publication before log reclamation. Depends on the checked reusable handoff.
+   Completion requires refusal before those gates, lost receipts, interrupted
+   cleanup/checkpoint and restart without old-owner revival or lost target retries.
+   This completes the cleanup part of macro reusable ownership movement.
 2. **Delegated-parent lifecycle coordination (next, P6).** Bind parent/child epoch
    changes to durable handoff decisions through the responsibility tree. Depends
    on reusable owners and existing routed/directory contracts; completion requires
@@ -137,7 +141,8 @@ advances P5 and supplies P6 with owner-context and retry-state foundations
 over the tested trusted P4 placement path.
 P6 now connects source-fence evidence, target import, checked publication and
 durable activation with selected split and compatible merge phase/reopen ledgers.
-Reusable recursive movement/retirement and broader fault validation remain.
+Activated targets can participate in selected later moves; recursive coordination,
+retirement and broader fault validation remain.
 The P5 fixed-assignment path remains usable while that work and remaining P4 public
 administration proceed.
 
@@ -5261,3 +5266,88 @@ retirement; next: delegated-parent coordination; following: P7 measured tuning a
 broader validation. General public membership mutation, macOS/separate-host
 evidence and other recorded P0–P7 gaps remain. Static service stays usable; the
 full goal remains active, P8 deferred and CI background feedback.
+
+### Slice 92 mini schema — activated targets become later sources
+
+Current deliverable: extend the existing target guard, without replacing its
+application or authoritative log, from Active to permanently Frozen for a later
+checked intent whose before manifest exactly equals its original after manifest.
+Keep original stage/import/activation immutable. A target-bound VBTFRZ01 command
+binds the original bootstrap digest, configured aggregate export budget and next
+intent. The new operation ID must differ from the first lifecycle ID and every
+retained provider data ID. Add an exact provider operation-presence query to the
+scope contract (version 3) so this check cannot silently consume a data retry;
+imports also reject a collision with their reserved lifecycle ID atomically.
+
+State/ownership sketch: local ordered apply commits the freeze at F, advances the
+provider through that entry as a no-op, validates every final bounded export and
+then fixes the provider at F. A separate contiguous wrapper applied prefix may
+advance through later no-ops/rejected queued commands. Frozen data reads/writes
+refuse; only the exact freeze retry returns its original fence. Reuse the public
+SourceFreezeStatus/SourceImport/Publication evidence shapes, with actual images
+and SHA-256 commitments. Authenticated foreign status/configuration remains host
+responsibility. No new worker, store or ancestor dependency is introduced.
+
+Recovery sketch: VBTRGT03 retains wrapper/provider boundaries, the freeze command,
+operation and F alongside the original import/activation. Restore validates the
+whole chain, export bounds and actual outputs atomically; still read inactive
+VBTRGT01 and VBTRGT02. Schema/readiness compatibility is explicit; no mixed-version
+claim. Configured source export budget is committed before it is used and remains
+bounded by the global scope limit. Receipt/read/query/snapshot accounting includes
+new state. Reject insufficient budgets before authority is fenced, and never thaw
+on timeout. Retain all data for now; reclamation needs a separate retirement gate.
+
+Acceptance: downstream actual split -> merge -> split applications, original
+results/outbox and repeated movement, provider fixed at F despite wrapper progress,
+exact freeze retry, conflicting IDs/bytes/manifest/budget rejection, same-batch
+freeze/data accounting, checkpoint/replay and legacy target restore. Native
+receipt-loss/reopen composition follows using the same public contracts. This
+advances reusable macro P6 movement; next durable retirement and delegated-parent
+coordination, following P7 measured tuning. Full P0–P7 remains active.
+
+Review refinement: advertise target application schema 2 for the new freeze and
+checkpoint capability. Restore accepts schema 2 only with VBTRGT03, and schema 1
+only with the prior VBTRGT01/VBTRGT02 tags. Keep the old active/inactive readers,
+but refuse a new record falsely labeled schema 1 before state publication. The
+first native matrix ran before this schema-label refinement; repeat it against
+final code. Existing version-negative tests must now use unknown schema 3.
+
+Slice 92 result: activated targets can become later sources through the same
+application and authoritative log. VBTFRZ01 commits an exact-F irreversible fence,
+validates bounded exports and retains original stage/import/activation. Wrapper
+applied progress can advance without moving the provider past F. Source status,
+actual images and content commitments compose through the existing publication
+and activation path. Scope contract 3 reserves lifecycle IDs without hiding data
+retries; import also refuses that collision atomically. Full provider history
+still permits the freeze control entry. VBTRGT03/schema 2 preserves both boundaries
+and the new fence, while explicitly reading schema-1 inactive/active formats.
+
+Five downstream tests pass, including actual split -> merge -> split, retained
+original results/outbox, pending/same-batch control, conflicting IDs/bytes/budgets,
+truncations and corrupted boundary/ID/bootstrap checkpoints. Four native TCP/QUIC
+WAL/checkpoint histories perform a real split, write to both activated children,
+then use those same guards/logs as merge sources. All five three-replica groups
+reopen after each of seven later committed phases; fresh quorum status resumes
+with discarded action receipts and identical original/new lifecycle facts.
+Merged service retries and writes with every old group/metadata stopped, then
+recovers again with all old sources fenced. See REPEATED_TRANSFERS.md.
+
+Validation: affected all-feature library/scope/target/activation/source/publication/
+merge/repeat suites pass (57/8/9/9/7/7/3/5); core-only equivalents pass
+(48/7/9/9/7/7/3/5). The final schema-2 native repeated-transfer matrix passes 4/4
+in 271.63 seconds. The initial matrix also passed 4/4 in 273.24 seconds before the
+schema-label refinement; these are four unique histories, not eight distinct cases.
+Host operation-presence assertions pass in both feature configurations. All-target/
+all-feature Clippy with warnings denied, formatting, 69-contract inventory and diff
+checks pass. Initial checks caught stale format/schema assertions and misnamed
+test-only directory imports; focused fixes pass. The existing QUIC socket unit test
+was refused by the default sandbox and passed with socket permission. Unaffected
+native suites were not repeated; no timers/quorum/store/dependency changed.
+
+Macro review: selected reusable top-level ownership movement now works, including
+native split -> merge and deterministic further split. Retirement/reclamation is
+current, delegated-parent lifecycle next, then P7 measured tuning and broader
+validation. All source payloads and lifecycle tombstones are still retained; no
+cleanup is implied by fencing. These are finite Linux ordinary-majority graceful
+committed-boundary histories, not power-loss/arbitrary-fault or macOS/separate-host
+proof. Full P0–P7 remains active; P8 deferred and CI background feedback.

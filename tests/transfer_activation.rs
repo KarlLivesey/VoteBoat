@@ -268,16 +268,18 @@ fn activation_checkpoint_truncations_and_wal_replay_preserve_original_authority(
     let activation = t.activation_command(&observation(), 65536).unwrap();
     t.apply_batch(&[entry(4, 3, data(1, 2)), noop(5)]).unwrap();
     let checkpoint = t.checkpoint(200000).unwrap();
-    assert_eq!(&checkpoint[..8], b"VBTRGT02");
+    assert_eq!(&checkpoint[..8], b"VBTRGT03");
     let mut recovered = fixture::fresh();
     let pristine = recovered.checkpoint(200000).unwrap();
     for end in 0..checkpoint.len() {
         assert!(recovered
-            .restore_checkpoint(1, 5, &checkpoint[..end])
+            .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &checkpoint[..end])
             .is_err());
         assert_eq!(recovered.checkpoint(200000).unwrap(), pristine);
     }
-    recovered.restore_checkpoint(1, 5, &checkpoint).unwrap();
+    recovered
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &checkpoint)
+        .unwrap();
     assert_eq!(recovered.status(), t.status());
     assert_eq!(recovered.read_at(5, query(1)).unwrap(), TargetRead::Data(9));
     assert_eq!(
@@ -320,6 +322,7 @@ fn old_inactive_checkpoint_format_restores_without_activation() {
     let load_len =
         u32::from_le_bytes(bytes[load_offset..load_offset + 4].try_into().unwrap()) as usize;
     let activation_offset = load_offset + 4 + load_len;
+    bytes.drain(activation_offset + 12..activation_offset + 12 + 36);
     bytes.drain(activation_offset..activation_offset + 12);
     bytes[..8].copy_from_slice(b"VBTRGT01");
     let mut restored = fixture::fresh();
@@ -337,6 +340,36 @@ fn old_inactive_checkpoint_format_restores_without_activation() {
         )])
         .unwrap();
     assert_eq!(restored.read_at(3, query(1)).unwrap(), TargetRead::Data(7));
+}
+
+#[test]
+fn old_active_checkpoint_format_retains_activation_and_can_continue_serving() {
+    let t = active();
+    let mut bytes = t.checkpoint(200000).unwrap();
+    let binding = u32::from_le_bytes(bytes[16..20].try_into().unwrap()) as usize;
+    let load_offset = 20 + binding + 16;
+    let load_len =
+        u32::from_le_bytes(bytes[load_offset..load_offset + 4].try_into().unwrap()) as usize;
+    let activation_offset = load_offset + 4 + load_len;
+    let activation_len = u32::from_le_bytes(
+        bytes[activation_offset + 8..activation_offset + 12]
+            .try_into()
+            .unwrap(),
+    ) as usize;
+    let boundary_offset = activation_offset + 12 + activation_len;
+    bytes.drain(boundary_offset..boundary_offset + 36);
+    bytes[..8].copy_from_slice(b"VBTRGT02");
+    let mut restored = fixture::fresh();
+    assert_eq!(
+        restored.restore_checkpoint(TRANSFER_TARGET_SCHEMA, 3, &bytes),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    restored.restore_checkpoint(1, 3, &bytes).unwrap();
+    assert_eq!(restored.status(), t.status());
+    assert_eq!(restored.fence(), None);
+    assert_eq!(restored.read_at(3, query(1)).unwrap(), TargetRead::Data(7));
+    restored.apply_batch(&[entry(4, 3, data(1, 2))]).unwrap();
+    assert_eq!(restored.read_at(4, query(1)).unwrap(), TargetRead::Data(9));
 }
 
 // Downstream provider exercises non-Copy nested receipts and read results whose
@@ -428,6 +461,9 @@ impl CheckpointStateMachine for Host {
     }
 }
 impl voteboat::scope::ScopeStateMachine for Host {
+    fn contains_operation(&self, operation: OperationId) -> bool {
+        voteboat::scope::ScopeStateMachine::contains_operation(&self.0, operation)
+    }
     fn scope(&self) -> BucketRange {
         voteboat::scope::ScopeStateMachine::scope(&self.0)
     }

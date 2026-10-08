@@ -92,7 +92,8 @@ ordinary three-voter configuration. Stopping all source replicas models a known
 offline group; it is not a packet-level quorum-partition or timeout experiment.
 They do not cut power, roll back uncommitted phase tails or prove arbitrary-fault
 liveness. The independently bootstrapped sources are not prior activated split
-targets, so merge-after-split/repeated movement remains unimplemented. Recursive
+targets. Separate [repeated-transfer tests](REPEATED_TRANSFERS.md) now cover actual
+activated split targets becoming later merge sources. Recursive
 parent coordination, retirement, autonomous resumption/operator endpoints,
 macOS and separate-host validation remain work. Earlier fault tests are separate
 evidence, not automatically a proof of this composition.
@@ -105,7 +106,7 @@ cargo +stable test --locked --offline --all-features --test routed merge_ -- --n
 ```
 
 Independent native histories serialize worker/socket topologies inside the test
-binary; replicas/groups remain concurrent within each history. Next make activated
-targets reusable as safe sources and retire transferred data with durable tombstones,
+binary; replicas/groups remain concurrent within each history. Activated targets
+are now reusable as safe sources. Next retire data with durable tombstones,
 then coordinate delegated-parent ownership changes and measure P7 performance.
 Full P0–P7 remains active; P8 is deferred and CI remains background feedback.

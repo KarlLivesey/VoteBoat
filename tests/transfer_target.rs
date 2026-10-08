@@ -187,7 +187,8 @@ fn checkpoint_and_wal_replay_restore_original_import_status_and_content() {
     assert_eq!(bytes.len(), t.checkpoint(bytes.len()).unwrap().len());
     assert!(t.checkpoint(bytes.len() - 1).is_err());
     let mut r = fresh();
-    r.restore_checkpoint(1, 5, &bytes).unwrap();
+    r.restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &bytes)
+        .unwrap();
     assert_eq!(r.checkpoint(100000).unwrap(), bytes);
     assert_eq!(r.status(), t.status());
     r.apply_batch(&[noop(6), entry(7, 200, load())]).unwrap();
@@ -199,14 +200,21 @@ fn checkpoint_and_wal_replay_restore_original_import_status_and_content() {
     for end in 0..bytes.len() {
         let mut r = fresh();
         let old = r.checkpoint(100000).unwrap();
-        assert!(r.restore_checkpoint(1, 5, &bytes[..end]).is_err());
+        assert!(r
+            .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &bytes[..end])
+            .is_err());
         assert_eq!(r.checkpoint(100000).unwrap(), old);
     }
     let mut trailing = bytes.clone();
     trailing.push(0);
-    assert!(fresh().restore_checkpoint(1, 5, &trailing).is_err());
-    assert!(fresh().restore_checkpoint(2, 5, &bytes).is_err());
-    assert!(fresh().restore_checkpoint(1, 4, &bytes).is_err());
+    assert!(fresh()
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &trailing)
+        .is_err());
+    assert!(fresh().restore_checkpoint(3, 5, &bytes).is_err());
+    assert!(fresh().restore_checkpoint(1, 5, &bytes).is_err());
+    assert!(fresh()
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 4, &bytes)
+        .is_err());
     let mut changed = TransferTarget::new(
         group(21),
         op(201),
@@ -216,7 +224,9 @@ fn checkpoint_and_wal_replay_restore_original_import_status_and_content() {
         limits(),
     )
     .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert!(changed.restore_checkpoint(1, 5, &bytes).is_err());
+    assert!(changed
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &bytes)
+        .is_err());
 }
 #[test]
 fn admission_and_failed_batches_refuse_missing_stage_bad_data_and_provider_capacity() {

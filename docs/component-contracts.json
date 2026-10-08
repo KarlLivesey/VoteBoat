@@ -1325,13 +1325,15 @@
         "restore_checkpoint",
         "outbox",
         "export_scope_bound",
-        "payload_capacity"
+        "payload_capacity",
+        "contains_operation"
       ],
       "native": "Bounded deterministic per-bucket counter with exact original command/outcome retries and pending outbox instructions over host-selected PartitionPolicy; ordinary application/snapshot contracts remain authoritative for persistence.",
       "conformance": [
-        "tests/scopes.rs"
+        "tests/scopes.rs",
+        "tests/transfer_repeat.rs"
       ],
-      "scope": "Optional in-memory data capability, contract version 2. Immutable bounded provider images name schema, scheme, range and source applied boundary without certifying authority or durability. Empty staging import requires sorted disjoint complete target coverage, exact metadata/content agreement, next target index and bounded aggregate capacity; original retries/outbox survive target rebasing, checkpoint and restore. ID collisions refuse atomically. Constructor rejection returns original buffers/policy. 4096 operations, 256 imports, 64 MiB image/aggregate ceiling and configured semantic limits; bounded pending simulation/receipts/queries. Host provider uses its own schema/format through public trait. Actual native sealed-but-unpublished versus published/reopened snapshots checked. No lifecycle intent/fence certificate, committed Import, target-ready quorum, route publication, activation, lineage protocol, general split/merge or external delivery/acknowledgment worker. Contract version 2 adds a configured lifetime payload-capacity bound per scope; native BucketCounter uses its complete configured checkpoint bound. Source wrapper validates aggregate bounds before fencing."
+      "scope": "Optional in-memory data capability, contract version 3. Immutable bounded provider images name schema, scheme, range and source applied boundary without certifying authority or durability. Empty staging import requires sorted disjoint complete target coverage, exact metadata/content agreement, next target index and bounded aggregate capacity; original retries/outbox survive target rebasing, checkpoint and restore. ID collisions refuse atomically. Constructor rejection returns original buffers/policy. 4096 operations, 256 imports, 64 MiB image/aggregate ceiling and configured semantic limits; bounded pending simulation/receipts/queries. Host provider uses its own schema/format through public trait. Actual native sealed-but-unpublished versus published/reopened snapshots checked. No lifecycle intent/fence certificate, committed Import, target-ready quorum, route publication, activation, lineage protocol, general split/merge or external delivery/acknowledgment worker. Contract version 2 adds a configured lifetime payload-capacity bound per scope; native BucketCounter uses its complete configured checkpoint bound. Source wrapper validates aggregate bounds before fencing. Contract version 3 adds exact retained/imported data-operation presence for lifecycle ID reservation; BucketCounter and host providers implement it. New target imports atomically refuse reserved lifecycle/data ID collisions."
     },
     {
       "design_id": "C05/C15",
@@ -1394,7 +1396,11 @@
         "restore_checkpoint",
         "encode",
         "decode",
-        "activation_command"
+        "activation_command",
+        "freeze_command",
+        "fence",
+        "freeze_status",
+        "export_target"
       ],
       "native": "Deterministic staging/import/activation guard over public ScopeStateMachine/application/checkpoint/read seams, native Node and the same authoritative WAL/snapshot providers; canonical SHA-256 uses pinned ring.",
       "conformance": [
@@ -1404,9 +1410,11 @@
         "tests/transfer_activation.rs",
         "tests/routed/split.rs",
         "tests/transfer_merge.rs",
-        "tests/routed/merge.rs"
+        "tests/routed/merge.rs",
+        "tests/transfer_repeat.rs",
+        "tests/routed/repeat.rs"
       ],
-      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, exact ordered import coverage and source-observed commitments. Target-bound activation checks complete metadata publication against original local stage/import, retains first command/index/decision/configuration and consumes no ordinary provider history. Active writes verify owner/epoch/scope/envelope-payload keys and preserve imported provider retries/outbox; ordinary writes/reads need no metadata access. Generic nested receipts/read bounds have downstream provider conformance. Native TCP/QUIC WAL/checkpoint reopen serves with metadata offline; old source reopens fenced while another target remains inactive. VBTRGT02 accepts old inactive VBTRGT01; no mixed-version claim. Selected graceful histories do not complete interrupted split schedules, distributed merge, recursive coordination, later-transfer/retirement or macOS evidence. Trusted authenticated host verifies foreign provenance/configuration; no new store/thread owner. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof. Selected compatible two-source merge composition covers partial fencing, offline-source pause, complete original retry/outbox import, conflicting-ID atomic refusal and TCP/QUIC committed-phase WAL/checkpoint recovery. Activation uses retained publication/import with old sources offline. This does not cover repeated activated-target movement, recursive coordination, retirement or arbitrary faults."
+      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, ordered complete actual imports and source commitments. Reserved lifecycle IDs cannot collide with retained provider data IDs. Decision-bound local activation retains original stage/import/decision/configuration and consumes no data slot. Active owner/epoch/scope/envelope-key checks preserve imported retries/outbox without ancestor access. Later VBTFRZ01 fixes the same provider/log at exact F, preserves original activation lineage, and permits only exact freeze retries while wrapper applied progress advances. Bounded quorum-readable source status/exports use existing publication evidence. VBTRGT03/application schema 2 reads old schema-1 VBTRGT01/VBTRGT02; schema/tag mismatches refuse. Selected deterministic split/merge/split and native TCP/QUIC split/merge WAL/checkpoint histories cover repeated activated sources and retained original operations/outbox. Host providers use the same scope contract; authenticated foreign provenance remains trusted host input. No new worker/store owner, retirement/reclamation, delegated-parent lifecycle, arbitrary-fault or macOS claim."
     },
     {
       "design_id": "C05/C15",
@@ -1425,9 +1433,11 @@
         "tests/routed/native.rs",
         "tests/routed/split.rs",
         "tests/transfer_merge.rs",
-        "tests/routed/merge.rs"
+        "tests/routed/merge.rs",
+        "tests/transfer_repeat.rs",
+        "tests/routed/repeat.rs"
       ],
-      "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Native TCP/QUIC WAL/checkpoint histories recover the original decision while targets stay NotActive. No activation, full split/no-dual-owner recovery, distributed merge, recursive coordination or mixed-version claim. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof. Selected compatible two-source merge composition covers partial fencing, offline-source pause, complete original retry/outbox import, conflicting-ID atomic refusal and TCP/QUIC committed-phase WAL/checkpoint recovery. Activation uses retained publication/import with old sources offline. This does not cover repeated activated-target movement, recursive coordination, retirement or arbitrary faults."
+      "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Selected complete top-level split, compatible multi-source merge and repeated activated-target transfer compositions recover original decisions over TCP/QUIC WAL/checkpoints. Source data and local activation remain guard obligations; structural publication alone grants no service. Native repeated split/merge preserves older decisions while newer fences/imports/publication/activation progress. No automatic resumer, reclamation, delegated-parent coordination, arbitrary-fault, mixed-version or macOS claim."
     }
   ],
   "not_yet_implemented": [

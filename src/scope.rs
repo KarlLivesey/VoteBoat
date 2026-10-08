@@ -13,9 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded application data movement. Images do not certify ownership or durability.
-use crate::{application::*, routing::*};
+use crate::{application::*, identity::OperationId, routing::*};
 
-pub const SCOPE_APPLICATION_CONTRACT_VERSION: u32 = 2;
+pub const SCOPE_APPLICATION_CONTRACT_VERSION: u32 = 3;
 pub const MAX_SCOPE_IMAGE_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_SCOPE_IMPORTS: usize = 256;
 
@@ -91,6 +91,10 @@ pub trait ScopeStateMachine: CheckpointStateMachine {
     fn scheme(&self) -> PartitionScheme;
     /// Exact application key, for checking a routed envelope against its payload.
     fn command_key<'a>(&self, command: &'a [u8]) -> Result<&'a [u8], ApplicationError>;
+    /// Whether an original data-operation identity is retained, including imports.
+    /// Lifecycle guards use this exact query to reserve a control ID without
+    /// hiding an existing retry. It must survive checkpoint/export/import.
+    fn contains_operation(&self, operation: OperationId) -> bool;
     /// Configured lifetime upper bound on exported payload capacity for this range.
     /// Must cover future writes and noops, not just current serialized data.
     /// A provider changing this bound after bootstrap violates the contract.
