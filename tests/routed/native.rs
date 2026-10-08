@@ -1630,3 +1630,6 @@ fn quic_target_activation_preserves_retries_through_checkpoint_reopen() {
 
 #[path = "split.rs"]
 mod split;
+
+#[path = "merge.rs"]
+mod merge;

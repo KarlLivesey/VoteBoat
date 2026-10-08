@@ -1737,3 +1737,37 @@ coverage remains separate. The selected first split recovery path is covered;
 compatible merge is current, then reusable recursive ownership and retirement,
 then P7 measured tuning. Full P0–P7 remains active and P8 deferred. CI is background
 feedback, never a required merge gate.
+
+## Slice 91 — compatible two-source merge recovery
+
+Three downstream merge tests pass with all features and core-only. Actual source
+images combine through target import, checked publication, activation and
+checkpoint recovery with original results/outbox. Missing source coverage refuses;
+conflicting source operation IDs reject atomically without target mutation or
+readiness.
+
+Six native TCP/TLS/QUIC histories pass (249.92 seconds): four complete WAL/checkpoint
+variants reopen all four three-replica groups after seven committed phases, and
+two conflicting-ID WAL variants remain safely inactive after refusal/reopen.
+The complete histories stop the second source after the first fence, distinguish
+Unavailable from an observed absent fence, preserve the first immutable export,
+and include an old-epoch write before the recovered second source freezes.
+
+Review found an unnecessary old-source availability dependency in the test host
+after publication. The production activation guard already accepts the retained
+decision and local import. After correcting host ordering, all four complete
+histories pass again (184.73 seconds) with both sources stopped before activation.
+Target reads/retries/new writes work with metadata/sources offline; another reopen
+retains publication/import/activation and both source fences. Collision histories
+were unchanged and not repeated. Three deterministic tests pass again in both
+feature configurations. All-target/all-feature Clippy, formatting, 69-contract
+inventory and diff checks pass. A test-only non-Copy array compilation error was
+corrected with an iterator assertion. No production protocol/format/dependency
+changed; unaffected suites were not rerun.
+
+These selected graceful committed-boundary Linux histories use ordinary three-voter
+quorums and trusted foreign provenance. They do not establish power-loss or
+arbitrary-fault liveness, repeated movement of activated targets, recursive parent
+coordination, retirement, macOS or separate-host behavior. See
+docs/MERGE_RECOVERY.md. Reusable movement/retirement is current, delegated-parent
+coordination next, then P7 measured tuning. Full P0–P7 stays active; P8 deferred.

@@ -402,10 +402,11 @@ Development proceeds using relevant local checks.
 
 The evolving split/merge path now includes [verified metadata publication](docs/TRANSFER_PUBLICATION.md)
 after source fencing and target imports, plus [durable target activation](docs/TARGET_ACTIVATION.md)
-that serves without metadata access and preserves retries across restart. Complete
-interrupted transfer, merge and recursive lifecycle recovery remain in progress;
+that serves without metadata access and preserves retries across restart. Repeated
+transfers, recursive lifecycle and retirement remain in progress;
 the static service is usable independently.
 
 The [split recovery guide](docs/SPLIT_RECOVERY.md) describes trusted host resumption
-and the tested TCP/QUIC phase/reopen ledger. Compatible merge and reusable recursive
-lifecycle/retirement remain under development.
+and the tested TCP/QUIC phase/reopen ledger. The [merge recovery guide](docs/MERGE_RECOVERY.md)
+covers compatible two-source merge, partial fencing, offline sources and collision
+refusal. Reusable recursive lifecycle/retirement remains under development.

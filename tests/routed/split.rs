@@ -49,7 +49,12 @@ fn metadata() -> LifecycleDirectory {
         .unwrap(),
     )
 }
-fn observe<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128, query: A::Query) -> A::ReadResult
+pub(super) fn observe<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    query: A::Query,
+) -> A::ReadResult
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
@@ -58,7 +63,7 @@ where
     campaign(nodes, clock, g);
     read_recovering(nodes, clock, g, query)
 }
-fn compact<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128)
+pub(super) fn compact<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128)
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
