@@ -73,7 +73,7 @@ impl Cluster {
         fs::create_dir(&root).unwrap();
         // Never recycle a fixture's block within this test process: accepted
         // TCP sockets can still be closing after its listeners/children drop.
-        // The finite suite uses fewer than 20 of the available 157 blocks.
+        // The finite suite uses fewer than 40 of the available 157 blocks.
         let (base, listeners, udp_sockets) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
             let (base, listeners, udp_sockets) = (10000u16..30000)
@@ -750,6 +750,14 @@ fn enrolled_state_for(
     local: u64,
     identity: voteboat::identity::StoreIdentity,
 ) -> voteboat::log::GroupLog {
+    recovered_state_for(root, local, identity, 42)
+}
+fn recovered_state_for(
+    root: &std::path::Path,
+    local: u64,
+    identity: voteboat::identity::StoreIdentity,
+    expected: i64,
+) -> voteboat::log::GroupLog {
     let _gate = fixture_gate();
     use voteboat::{
         application::*,
@@ -786,7 +794,10 @@ fn enrolled_state_for(
         &mut app,
     )
     .unwrap();
-    assert_eq!(app.read_applied(core.state().commit_index).unwrap(), 42);
+    assert_eq!(
+        app.read_applied(core.state().commit_index).unwrap(),
+        expected
+    );
     // Inspect the imported application's retry state directly, without treating
     // this local diagnostic as a distributed read or proposing to a learner.
     let retry = app
@@ -1147,6 +1158,306 @@ fn explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp() {
 #[test]
 fn explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic() {
     deployment_history(true);
+}
+/// Drive only the exact caller-owned zero-delta retry while leadership changes.
+/// One successful write per leader/term establishes the core administration
+/// prerequisite without continuously invalidating promotion readiness.
+fn finish_lifecycle_operation(cluster: &Cluster, ids: &[usize], operation: &str, write: &str) {
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let mut established = BTreeSet::new();
+    loop {
+        let mut complete = true;
+        for &id in ids {
+            let output = cluster.request(id, &["configuration-status", operation]);
+            complete &= output.status.success()
+                && String::from_utf8_lossy(&output.stdout).contains("action=completed");
+            let status = cluster.request(id, &["status"]);
+            let status = String::from_utf8_lossy(&status.stdout);
+            if status.contains("role=Leader") {
+                let term = status
+                    .split("term=")
+                    .nth(1)
+                    .unwrap()
+                    .split_whitespace()
+                    .next()
+                    .unwrap()
+                    .parse::<u64>()
+                    .unwrap();
+                if !established.contains(&(id, term)) {
+                    let output = cluster.request(id, &["add", write, "0"]);
+                    let text = String::from_utf8_lossy(&output.stdout);
+                    if output.status.success() {
+                        assert!(text.contains("Value(42)"));
+                        established.insert((id, term));
+                    } else {
+                        assert!(
+                            text.contains("UNKNOWN")
+                                || text.contains("NOT_LEADER")
+                                || text.contains("Busy"),
+                            "unexpected application rejection: {text} {}",
+                            String::from_utf8_lossy(&output.stderr)
+                        );
+                    }
+                }
+            }
+        }
+        if complete && !established.is_empty() {
+            return;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "operation {operation} did not complete; logs at {:?}",
+            cluster.root
+        );
+        std::thread::sleep(Duration::from_millis(25));
+    }
+}
+fn complete_executable_membership_history(quic: bool) {
+    use voteboat::identity::*;
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    cluster.children.push(None);
+    let store = |n: usize| StoreIdentity {
+        id: StoreId::new(if n == 4 { 404 } else { n as u128 }).unwrap(),
+        incarnation: StoreIncarnation::new(if n == 4 { 7 } else { 1 }).unwrap(),
+    };
+    let inspect = |cluster: &Cluster,
+                   ids: &[usize],
+                   configuration: u64,
+                   voters: &[u64],
+                   learners: &[u64],
+                   operations: &[u128],
+                   value: i64| {
+        for &id in ids {
+            let state = recovered_state_for(
+                &cluster.root.join(id.to_string()),
+                id as u64,
+                store(id),
+                value,
+            );
+            let membership = state.membership_at(state.commit_index).unwrap();
+            assert_eq!(membership.id().get(), configuration);
+            assert!(membership.joint().is_none());
+            assert_eq!(
+                membership
+                    .stable()
+                    .voter_stores()
+                    .keys()
+                    .map(|n| n.get())
+                    .collect::<Vec<_>>(),
+                voters
+            );
+            assert_eq!(
+                membership
+                    .stable()
+                    .learners()
+                    .keys()
+                    .map(|n| n.get())
+                    .collect::<Vec<_>>(),
+                learners
+            );
+            for &operation in operations {
+                assert!(membership
+                    .operations()
+                    .contains(&OperationId::new(operation).unwrap()));
+            }
+            if matches!(configuration, 5 | 10) {
+                assert!(state.snapshot.is_some() && state.base_index() > 0);
+                let checkpoint_membership = state.membership_at(state.base_index()).unwrap();
+                assert_eq!(checkpoint_membership.id().get(), configuration);
+                for &operation in operations {
+                    assert!(checkpoint_membership
+                        .operations()
+                        .contains(&OperationId::new(operation).unwrap()));
+                }
+            }
+        }
+    };
+    // All configuration history below comes from real executable proposals.
+    // Start only the original public bootstrap, then select member recovery.
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    cluster.leader();
+    assert!(cluster.routed(&["add", "700", "42"]).contains("Value(42)"));
+    cluster.stop();
+    let plan = cluster.root.join("lifecycle.plan");
+    let legacy =
+        "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\n";
+    fs::write(&plan, format!("{legacy}joint 1000 1 2 3 3 m:2 v:1 v:2\nfinal 1000 2 3\nlearners 1001 3 4 - m:2 v:1 v:2\n")).unwrap();
+    cluster.admin_plan = Some(plan.clone());
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    finish_lifecycle_operation(&cluster, &[1, 2], "1001", "701");
+    cluster.stop();
+    inspect(&cluster, &[1, 2], 4, &[1, 2], &[], &[1000, 1001], 42);
+
+    // Node 3 is retired before its public test credential is assigned to node 4.
+    // No two live peers share that credential. Store 4 has a distinct incarnation.
+    let tls = cluster.root.join("tls");
+    fs::create_dir(&tls).unwrap();
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    for name in [
+        "ca.der",
+        "node1.der",
+        "node1-key.der",
+        "node2.der",
+        "node2-key.der",
+    ] {
+        fs::copy(fixtures.join(name), tls.join(name)).unwrap();
+    }
+    fs::copy(fixtures.join("node3.der"), tls.join("node4.der")).unwrap();
+    fs::copy(fixtures.join("node3-key.der"), tls.join("node4-key.der")).unwrap();
+    cluster.tls = Some(tls);
+    let deployment = cluster.root.join("lifecycle.deployment");
+    let declaration = format!("voteboat-deployment-v1\n1 1 1 127.0.0.1:{} node1.voteboat.test\n2 2 1 127.0.0.1:{} node2.voteboat.test\n4 404 7 127.0.0.1:{} node3.voteboat.test\n", cluster.base+1, cluster.base+2, cluster.base+4);
+    fs::write(&deployment, &declaration).unwrap();
+    cluster.deployment = Some(deployment.clone());
+    let provisioned =
+        "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 4 4\n";
+    fs::write(
+        &plan,
+        format!("{provisioned}learners 1002 4 5 4 m:2 v:1 v:2\n"),
+    )
+    .unwrap();
+    for id in [1, 2] {
+        cluster.start(id, "recover-member");
+    }
+    finish_lifecycle_operation(&cluster, &[1, 2], "1002", "702");
+    for id in [1, 2] {
+        cluster.ok(id, &["checkpoint"]);
+    }
+    cluster.stop();
+    inspect(&cluster, &[1, 2], 5, &[1, 2], &[4], &[1000, 1001, 1002], 42);
+    let destination = cluster.root.join("4");
+    let enrolled = cluster.enroll("create", 4, &destination, 1);
+    assert!(
+        enrolled.status.success(),
+        "{}",
+        String::from_utf8_lossy(&enrolled.stderr)
+    );
+    let before = enrolled_state_for(&destination, 4, store(4));
+    assert!(before.snapshot.is_some());
+    assert!(cluster
+        .enroll("recover", 4, &destination, 1)
+        .status
+        .success());
+    assert_eq!(
+        enrolled_state_for(&destination, 4, store(4)),
+        before,
+        "lost enrollment receipt must not rewrite state"
+    );
+
+    let policy = if quic {
+        "m:1 w:3 2 v:1 1 v:2 2 v:4"
+    } else {
+        "m:3 v:1 v:2 v:4"
+    };
+    fs::write(
+        &plan,
+        format!("{provisioned}joint 1003 5 6 7 - {policy}\nfinal 1003 6 7\n"),
+    )
+    .unwrap();
+    for id in [1, 2] {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "703", "0"])
+        .contains("Value(42)"));
+    // Enrollment alone is not live promotion readiness. With 4 offline, the
+    // old voters can still write, but must not accept the promotion intent.
+    // This also leaves a real post-import command for learner catch-up.
+    let unavailable_until = Instant::now() + Duration::from_secs(1);
+    while Instant::now() < unavailable_until {
+        for id in [1, 2] {
+            assert!(cluster
+                .wait_configuration_status(id, "1003")
+                .contains("action=inconclusive_local_absence"));
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    cluster.start(4, "recover-member");
+    finish_lifecycle_operation(&cluster, &[1, 2, 4], "1003", "703");
+    // Lose original voter 1 abruptly, then keep it absent through retirement.
+    let mut failed = cluster.children[0].take().unwrap();
+    failed.kill().unwrap();
+    failed.wait().unwrap();
+    finish_lifecycle_operation(&cluster, &[2, 4], "1003", "704");
+    cluster.stop();
+    inspect(
+        &cluster,
+        &[2, 4],
+        7,
+        &[1, 2, 4],
+        &[],
+        &[1000, 1001, 1002, 1003],
+        42,
+    );
+
+    fs::write(&plan, format!("{provisioned}joint 1004 7 8 9 1 m:2 v:2 v:4\nfinal 1004 8 9\nlearners 1005 9 10 - m:2 v:2 v:4\n")).unwrap();
+    for id in [2, 4] {
+        cluster.start(id, "recover-member");
+    }
+    finish_lifecycle_operation(&cluster, &[2, 4], "1005", "705");
+    for id in [2, 4] {
+        cluster.ok(id, &["checkpoint"]);
+    }
+    cluster.stop();
+    inspect(
+        &cluster,
+        &[2, 4],
+        10,
+        &[2, 4],
+        &[],
+        &[1000, 1001, 1002, 1003, 1004, 1005],
+        42,
+    );
+    // The survivors can now omit both retired original routes. Reopen actual
+    // compacted state, preserve retries, and serve a fresh nonzero mutation.
+    cluster.admin_plan = None;
+    fs::write(
+        &deployment,
+        declaration
+            .lines()
+            .filter(|line| !line.starts_with("1 "))
+            .collect::<Vec<_>>()
+            .join("\n")
+            + "\n",
+    )
+    .unwrap();
+    for id in [2, 4] {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "700", "42"])
+        .contains("duplicate=true"));
+    assert!(cluster
+        .ok(leader, &["add", "706", "1"])
+        .contains("Value(43)"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
+    cluster.stop();
+    inspect(
+        &cluster,
+        &[2, 4],
+        10,
+        &[2, 4],
+        &[],
+        &[1000, 1001, 1002, 1003, 1004, 1005],
+        43,
+    );
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn executable_membership_add_enroll_promote_retire_and_restart_tcp() {
+    complete_executable_membership_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn executable_membership_add_enroll_promote_retire_and_restart_quic() {
+    complete_executable_membership_history(true);
 }
 #[test]
 fn invalid_deployment_is_rejected_before_store_creation() {

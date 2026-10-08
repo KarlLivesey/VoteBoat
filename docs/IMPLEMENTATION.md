@@ -149,6 +149,13 @@ deployment and counter bounds this supplies the native integration path. The
 mini plan advances to its fault-tested release; public configuration mutation
 ingress stays gated and the full P0–P7 objective is unchanged.
 
+Slice 76 adds an executable-created complete lifecycle from bootstrap through
+learner addition, offline checkpoint enrollment, authenticated promotion and
+retirement of an absent original voter. TCP/QUIC survivor-quorum writes and
+compacted native reopen are checked. The ordinary lifecycle is now evidenced;
+the current item's remaining work is interrupted delivery/repair and the stated
+broader fault schedules, not another prepared happy-path assembly.
+
 1. **Fault-tested remote membership release (current, P4).** Exercise actual
    add/catch-up/promote/remove with partial joint/final delivery, weighted and
    recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
@@ -4279,3 +4286,50 @@ cancel a checked result and repeat readiness through the real owner/exchange.
 The fault-tested remote membership release becomes the current mini objective,
 then P5 routing and P6 ownership movement. P7 and the full goal remain active;
 macOS and separate-host operational validation remain outstanding.
+
+## Slice 76 — complete executable membership lifecycle with failed-voter retirement
+
+Mini schema: start only from the original three-node bootstrap, then use bounded
+trusted plans for every membership record. The configuration chain is
+1 → joint 2/final 3 → learners 4 → learners 5 → joint 6/final 7 → joint 8/final 9
+→ learners 10. Bind learner 4 to store 404/incarnation 7 through checked deployment.
+Export only the real pinned committed source checkpoint after learner assignment;
+stop source/destination for import, then retry the identical image. Require live
+readiness plus catch-up of a post-import command before promotion. Kill original
+voter 1 after promotion, prove a new committed write on the surviving quorum,
+and keep it absent through demotion/removal. Inspect actual native recovered
+membership, application retry state and snapshots at stage boundaries. Reopen
+survivors without retired routes and commit a fresh application change.
+
+Two new executable TCP/QUIC tests implement this entire path without seeding any
+configuration record or directly mutating WAL history. All six operation identities
+are committed through existing service administration: 1000 demotes 3, 1001 removes
+learner 3, 1002 adds learner 4, 1003 promotes 4, 1004 demotes absent 1, and 1005
+removes learner 1. The source checkpoints and target import use real executable
+commands. Identical enrollment retry preserves destination durable state. An
+enrolled but offline target cannot cause promotion; once started, it catches up
+a real post-import command and supplies authenticated readiness. Ordinary
+application work supplies current-term commitment after elections, with one
+successful exact zero-delta retry per observed leader/term to avoid invalidating
+readiness continuously. An initial test-driver completion condition was tightened
+to require that new successful write as well as historical configuration
+completion, so killing voter 1 cannot pass without fresh quorum progress.
+
+Native recovery checks exact stable configurations, voter/learner lists, all
+operation IDs and application retry state throughout. Final survivor checkpoints
+retain membership and deduplication across omission of both retired routes.
+After reopening voters 2/4, operation 700 remains duplicate and a fresh operation
+706 changes 42 to 43. TCP uses a flat majority; QUIC promotion uses a majority
+wrapper over weights 2/1/2. No production protocol/provider/format changes or new
+effects/tokens/watermarks/generations were needed. The native test credential for
+retired node 3 is reassigned to test node 4 only after 3 has stopped; live peers
+never share it. This is test credential reuse, not production enrollment advice.
+
+This advances the current P4 fault-release objective from isolated prepared
+histories to an executable-created full lifecycle and a failed original voter
+schedule. Maintenance stops are explicit, including the offline import contract.
+Partial configuration delivery, promoted-leader failure, divergent retained-only
+learner tails, unavailable/compacted witnesses, dropped readiness reply schedules
+and broader recursive-policy faults remain release work. The mini plan stays
+fault-tested membership → P5 routing → P6 ownership movement; P7 and the full goal
+remain active. Linux evidence does not establish macOS or separate-host operation.

@@ -1139,3 +1139,53 @@ format and diff checks passed; inventory passed at 60 contracts. After the final
 retry classification change, both TCP/QUIC executable administration histories
 passed again. After adding the shutdown assertion, both native promotion histories
 passed again. All-feature docs and the TCP-only feature assembly passed as above.
+
+## Slice 76 — executable-created full membership lifecycle
+
+Two real-process histories start from the original three-node public bootstrap.
+No membership record is seeded and no test directly mutates WAL history. Trusted
+startup plans commit six operations: demote/remove node 3, add exact learner 4 at
+store 404/incarnation 7, promote it, then demote/remove absent original voter 1.
+The final stable configuration is 10 with voters 2/4 and no learners.
+
+The source checkpoint is produced by the executable after learner assignment.
+Stopped-source offline enrollment and identical-image retry preserve target state.
+A post-import application write succeeds while target 4 remains offline, with
+promotion still locally absent on the existing voters. Starting 4 then requires
+catch-up and authenticated readiness before joint/final commitment. Original
+voter 1 is killed abruptly after promotion and stays absent through retirement;
+a successful new exact zero-delta operation on the survivor quorum is required,
+so historical configuration completion alone cannot satisfy the failure check.
+Final snapshots/reopen preserve exact membership and all six operation IDs while
+both retired original routes are omitted. Application recovery and duplicate
+operation 700 are checked throughout; a fresh operation after final reopen changes
+Counter 42 to 43. QUIC promotion uses a majority-wrapped weighted 2/1/2 policy;
+TCP uses ordinary majority. This is that concrete policy/fault schedule.
+
+Validation: the all-feature counter_service suite passed all 20 tests. All-feature
+all-target Clippy passed with warnings denied. Inventory shape/conformance paths
+passed at 60 contracts. Stronger assertions that source configuration 5 and final
+configuration 10, including their operation IDs, reside in actual pinned compacted
+bases are verified in the final runs recorded below. TCP-only assembly validation
+and final formatting/diff checks are also recorded below when complete.
+
+The initial fixture completion condition was strengthened before final validation:
+a post-failure stage now requires a successful fresh survivor-quorum write even
+when its configuration operation was historically completed. An inventory-update
+script initially used a guessed contract prefix and aborted before writing; the
+actual inventory names were inspected and the corrected update passed validation.
+No production change or protocol weakening was required.
+
+Explicit maintenance stops remain part of offline enrollment and immutable plan
+selection. These histories do not prove continuous online enrollment, arbitrary
+partial joint/final delivery, dropped-readiness-reply recovery, divergent retained-
+only learner-tail repair, unavailable/compacted witness liveness or broader
+recursive-policy faults. Public mutation ingress remains gated. macOS/separate-
+host validation and P5–P7 remain outstanding under the active full goal.
+
+Final slice-76 runs: both all-feature TCP/QUIC lifecycle tests passed with the
+pinned-base assertions; the TCP-only lifecycle passed with
+`--no-default-features --features native,tls`. The full 20-test service suite
+passed before that assertion strengthening; final targeted runs cover the changed
+checks. Warnings-denied all-target Clippy, formatting, diff and inventory checks
+passed. No additional provider, core or storage implementation changed.

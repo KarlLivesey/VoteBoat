@@ -606,3 +606,39 @@ and final plus preserved counter deduplication. TCP uses an ordinary majority;
 QUIC also exercises a nested weighted policy. These are concrete promotion and
 restart histories, not full faulted add/enroll/promote/remove release evidence.
 macOS execution and separate-host validation remain outstanding.
+
+## Complete executable membership lifecycle evidence
+
+The service tests now exercise an entire lifecycle starting from the original
+three-node `create` bootstrap, with **no prepared configuration journal records**.
+Every assignment, joint transition and finalization is proposed by trusted startup
+plans and committed through real TCP/TLS or QUIC service processes:
+
+| Committed configuration | Result | Original operation IDs |
+| --- | --- | --- |
+| 1 | Original voters 1/2/3; write operation 700 adds 42. | Bootstrap |
+| 3, then 4 | Demote voter 3 to learner, then remove learner 3. | 1000 joint/final, 1001 learners |
+| 5 | Declare exact learner 4, store 404/incarnation 7, on voters 1/2. | 1002 learners |
+| 7 | Enroll 4 from the source's real pinned checkpoint; catch up and promote to voters 1/2/4. | 1003 joint/final |
+| 9, then 10 | With original voter 1 killed and kept absent, demote it to learner then remove it; voters 2/4 remain. | 1004 joint/final, 1005 learners |
+
+The test checkpoints the real source after learner assignment, stops source and
+destination for offline enrollment, retries enrollment with the identical image,
+and checks that retry does not rewrite the destination state. While the enrolled
+node remains offline, existing voters accept an application write but do not
+accept the promotion record. The learner must then receive that post-import
+command and establish live authenticated readiness before promotion.
+
+After promotion, abrupt loss of original voter 1 must still permit a committed
+application write through the surviving quorum before retirement proceeds.
+Survivors checkpoint and restart without either retired original route, retaining
+all six operation identities, exact voters/learners, Counter value and retry state.
+A fresh nonzero write then changes 42 to 43. TCP uses ordinary majority; QUIC's
+promotion uses a majority wrapper over weights 2/1/2 for voters 1/2/4. This covers
+that concrete policy and failed-voter schedule, not arbitrary recursive layouts.
+
+These histories require maintenance stops for the trusted offline handoff and for
+selecting the next immutable startup plan. They do not establish uninterrupted
+online enrollment, arbitrary partial joint/final delivery, dropped readiness
+reply recovery, divergent retained-only learner repair or unavailable witness
+liveness. The broader fault-release gates and public mutation-ingress gate remain.
