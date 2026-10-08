@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, core-predicate foundations, local proposals and native TCP/QUIC readiness implemented; distributed activation model and full online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration implemented; native policy/capacity admission and full faulted online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -82,6 +82,10 @@ exchange (slice 54) are implemented. Slice 54 exercises real TCP/QUIC, the origi
 owner/worker visit, capability denial and success, stale completion, another group
 running and accepted-work shutdown drain. The macro P4 exit is still usable,
 validated online add/promote/remove; these slices do not redefine that exit.
+Slice 55 repairs the reproduced partial-final election stall. Slice 56 connects
+owned Node requests, execution authorization, outcomes and cancellation; its
+native evidence is single-voter local joint/final commitment and file reopen.
+Remote configuration delivery and native policy/capacity admission remain work.
 
 1. **Fault-tested online activation (current, P4).** Connect the administrator
    entry point and placement authorization to those paths, validate distributed
@@ -115,10 +119,12 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Validate and repair elections across partially delivered membership transitions | A leader can fail while peers retain different accepted configuration heads; online administration must not expose a transition that strands a surviving quorum. | Focused actual-core leader-loss/catch-up/recovery histories plus a bounded independent activation model; preserve local voter eligibility and durable votes. These checks remain in progress. | Makes P4 placement changes recoverable; later routing and movement rely on those groups remaining available. |
-| Connect the online administrator to readiness, placement authorization and joint/final transitions | Existing readiness and proposal helpers need one usable add/promote/remove path with observable outcomes and cancellation. | Multi-node TCP/QUIC transition histories covering restart, partial delivery and failure, plus the remaining activation release checks, before opening configuration ingress. | Completes the usable P4 path and enables changing replica placement for P5/P6. |
+| Complete native administration admission and durable operation status | The Node now owns requests and checks execution authorization/bindings, but the native service still needs placement/provider-capacity policy and restart/resumption of unknown outcomes. | Reject unsupported assemblies before persistence; query exact durable operation/phase across restart, retries and lost receipts through the selected service and embedding. | Makes the P4 operation usable outside a host-managed owner loop. |
+| Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 
-The first change is an evidenced prerequisite of the second, not a new global
+The partial-final election fix is complete as slice 55, with its bounded model
+and actual-core limitations recorded below. The first change is a prerequisite
+of the second, not a new global
 milestone. Review this immediate pair after each completed slice. Keep the static
 service and embedding usable throughout; their remaining macOS and operational
 validation does not depend on finishing P4.
@@ -3376,3 +3382,48 @@ also pass. See validation/REPORT.md for final checks. Online administrator,
 placement/capacity admission and broader activation failure histories remain
 next; public configuration-bearing Append and membership Snapshot stay gated.
 P5 routing, P6 split/merge and P7 tuning remain outstanding under the full goal.
+
+## Slice 56 — owned Node administration and committed outcomes
+
+Mini schema plan: reuse exact owner AdmissionTicket and ProposalPosition for
+bounded configuration observation. Retain one record/result per group with
+global count/byte limits; keep the original proposal/proof allocation in the
+existing charged owner queue. Extend normal ClientRouter/ReplicaDriver advancement
+with execution authorization while preserving application admission. Node checks
+the selected wire version and exact live promotion sessions; host authorization
+covers service scope, failure domains and provider capacity. No direct membership
+mutation, new durable record/token, generation or watermark is introduced.
+
+The public ConfigurationRequests observer and Node configure/poll/cancel path
+now report exact-record committed receipts, pre-proposal errors or unknown
+outcomes. Configuration steps carry operation and proposed index/term. Only the
+exact record in the selected core's durable committed prefix yields success;
+Written, queue admission and prospective accepted membership do not. Queued
+requests use their actual execution term rather than admission-time leadership.
+Cancelled waits preserve queued work. Shutdown retains committed results and
+reports unresolved work unknown; recovery transfers results with original
+providers. Ordinary Node polling denies configuration execution, and explicit
+host-authorized polling retains existing application validation.
+
+Host Node histories cover joint/final sequencing, no receipt before persistence,
+authorization denial at execution, static-wire rejection, byte/count retention,
+cancellation followed by actual commitment, queued campaign, Written failure and
+shutdown/recovery. Native startup selects format 4, commits a same-electorate
+single-voter joint/final transition through its WAL worker, joins the workers,
+reopens actual files and reconstructs exact membership with explicit member
+recovery. Static NativeStartup recovery is not extended to dynamic journals.
+See [administration contract](CONFIGURATION_ADMINISTRATION.md).
+
+The existing queued-promotion test now expects configuration operation/position
+metadata instead of None. One fixture initially used an invalid zero-effect
+budget; a valid one-effect budget establishes the intended pre-durability check.
+An existing QUIC service run encountered AddrInUse; its isolated rerun passed.
+Validation and remaining evidence are recorded in validation/REPORT.md.
+
+Native placement/failure-domain and complete codec/transport-capacity admission,
+durable operation status/resumption, service enrollment and faulted remote
+add/promote/remove remain required. Public configuration Append and membership
+Snapshot stay gated. In particular, broader partial-joint activation/catch-up
+histories still need validation; slice 55's partial-final history is not enough.
+This advances the current P4 milestone without changing its exit or the full
+P0–P7 goal; P5 routing, P6 split/merge and P7 measured tuning remain pending.

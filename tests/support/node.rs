@@ -70,6 +70,358 @@ fn elected() -> Boat {
     settle(&mut n);
     n
 }
+fn admin_request(group_id: u128, operation: u128, finalizing: bool) -> ConfigurationRequest {
+    use voteboat::membership::*;
+    let b = bootstrap(group_id, 1);
+    ConfigurationRequest {
+        group: group(group_id),
+        proposal: ConfigurationProposal {
+            record: ConfigurationRecord {
+                operation: OperationId::new(operation).unwrap(),
+                expected: ConfigurationId::new(if finalizing { 2 } else { 1 }).unwrap(),
+                change: if finalizing {
+                    ConfigurationChange::Final {
+                        id: ConfigurationId::new(3).unwrap(),
+                    }
+                } else {
+                    ConfigurationChange::Joint {
+                        id: ConfigurationId::new(2).unwrap(),
+                        next: Configuration::new(
+                            ConfigurationId::new(3).unwrap(),
+                            b.policy,
+                            b.voter_stores,
+                            Default::default(),
+                        )
+                        .unwrap(),
+                    }
+                },
+            },
+            readiness: vec![],
+            requirements: ReadinessRequirements {
+                application_schema: 1,
+                command_bytes: 8,
+                snapshot_bytes: 4096,
+            },
+        },
+    }
+}
+fn admin_settle(n: &mut Boat) {
+    for _ in 0..100 {
+        let p = n
+            .poll_with_configuration_authorization(
+                MonoTime(0),
+                NodePollBudget::default(),
+                |_, _| Ok(()),
+            )
+            .unwrap();
+        for step in p.replica.unwrap().steps {
+            assert!(step.error.is_none(), "{:?}", step.error);
+        }
+        if n.local().owner.is_drained()
+            && n.local().persistence.is_drained()
+            && n.replica_usage().leases() == 0
+        {
+            return;
+        }
+    }
+    panic!("administration did not settle");
+}
+#[test]
+fn configuration_receipts_wait_for_durability_and_joint_then_final_commit() {
+    let mut n = elected();
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    let p = n
+        .poll_with_configuration_authorization(
+            MonoTime(0),
+            NodePollBudget {
+                replica: ReplicaPollBudget {
+                    effects: 1,
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            |_, _| Ok(()),
+        )
+        .unwrap();
+    let step = p
+        .replica
+        .unwrap()
+        .steps
+        .into_iter()
+        .find(|s| s.admission == Some(ticket.admission()))
+        .unwrap();
+    assert_eq!(step.operation, Some(ticket.operation()));
+    assert!(step.proposed.is_some());
+    assert!(n.poll_configuration().is_none());
+    assert_eq!(
+        n.local().owner.core(group(1)).unwrap().state().commit_index,
+        1
+    );
+    assert_eq!(
+        n.configure(admin_request(1, 100, true)).unwrap_err().reason,
+        ConfigurationRequestError::Overloaded
+    );
+    admin_settle(&mut n);
+    let committed = n.poll_configuration().unwrap();
+    assert_eq!(committed.ticket, ticket);
+    assert_eq!(
+        committed.outcome,
+        ConfigurationOutcome::Committed(ProposalPosition { index: 2, term: 1 })
+    );
+    let ticket = n.configure(admin_request(1, 100, true)).unwrap();
+    admin_settle(&mut n);
+    assert_eq!(n.poll_configuration().unwrap().ticket, ticket);
+    assert_eq!(
+        n.local().owner.core(group(1)).unwrap().membership().id(),
+        ConfigurationId::new(3).unwrap()
+    );
+    // Administration uses the same polling path as application admission.
+    n.propose(request(500)).unwrap();
+    admin_settle(&mut n);
+    let reply = n.poll_client().unwrap();
+    assert!(matches!(
+        n.complete_client(reply).unwrap(),
+        ClientOutcome::Applied { .. }
+    ));
+    shutdown(&mut n);
+}
+#[test]
+fn queued_configuration_rechecks_authorization_and_default_poll_denies_it() {
+    for default_poll in [false, true] {
+        let mut n = elected();
+        let before = n.local().owner.core(group(1)).unwrap().state().clone();
+        let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+        let mut checks = 0;
+        if default_poll {
+            n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+        } else {
+            n.poll_with_configuration_authorization(
+                MonoTime(0),
+                NodePollBudget::default(),
+                |core, proposal| {
+                    checks += 1;
+                    assert_eq!(core.state(), &before);
+                    assert_eq!(proposal.record.operation, ticket.operation());
+                    Err(ConfigurationProposalError::AuthenticationRequired)
+                },
+            )
+            .unwrap();
+        }
+        assert_eq!(checks, usize::from(!default_poll));
+        let result = n.poll_configuration().unwrap();
+        assert_eq!(result.ticket, ticket);
+        assert_eq!(
+            result.outcome,
+            ConfigurationOutcome::NotProposed(
+                ConfigurationProposalError::AuthenticationRequired.into()
+            )
+        );
+        assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+        assert_eq!(n.state(), NodeState::Running);
+        shutdown(&mut n);
+    }
+}
+#[test]
+fn configuration_cancellation_is_unknown_and_does_not_undo_queued_work() {
+    let mut n = elected();
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    n.cancel_configuration(ticket).unwrap();
+    assert_eq!(
+        n.poll_configuration().unwrap().outcome,
+        ConfigurationOutcome::Unknown(ConfigurationUnknown::CancelledWait)
+    );
+    assert_eq!(
+        n.cancel_configuration(ticket),
+        Err(ConfigurationRequestError::StaleTicket)
+    );
+    admin_settle(&mut n);
+    assert_eq!(
+        n.local().owner.core(group(1)).unwrap().state().commit_index,
+        2
+    );
+    assert!(n.poll_configuration().is_none());
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_shutdown_and_abort_preserve_unknown_outputs_and_ownership() {
+    for abort in [false, true] {
+        let mut n = elected();
+        let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+        if abort {
+            n.abort();
+        } else {
+            n.begin_shutdown();
+        }
+        assert_eq!(
+            n.configure(admin_request(2, 101, false))
+                .unwrap_err()
+                .reason,
+            ConfigurationRequestError::Closed
+        );
+        let result = n.poll_configuration().unwrap();
+        assert_eq!(result.ticket, ticket);
+        assert_eq!(
+            result.outcome,
+            ConfigurationOutcome::Unknown(if abort {
+                ConfigurationUnknown::OwnerFailed
+            } else {
+                ConfigurationUnknown::Shutdown
+            })
+        );
+        if abort {
+            let recovered = n.into_recovery().unwrap_or_else(|_| panic!());
+            assert!(recovered.configuration.is_drained());
+        } else {
+            shutdown(&mut n);
+        }
+    }
+}
+#[test]
+fn configuration_limits_reject_with_original_request_and_no_core_mutation() {
+    let p = parts(1, false);
+    let mut n = Boat::from_parts(
+        p,
+        NodeLimits {
+            configuration: ConfigurationRequestLimits {
+                requests: 1,
+                bytes: 1,
+            },
+            ..Default::default()
+        },
+        MonoTime(0),
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let before = n.local().owner.core(group(1)).unwrap().state().clone();
+    let request = admin_request(1, 100, false);
+    let record = request.proposal.record.clone();
+    let rejection = n.configure(request).unwrap_err();
+    assert_eq!(rejection.reason, ConfigurationRequestError::Overloaded);
+    assert_eq!(rejection.request.proposal.record, record);
+    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_written_storage_failure_retains_unknown_receipt_for_recovery() {
+    let mut p = parts(1, false);
+    p.local.owner.admit(group(1), Event::Campaign).unwrap();
+    pump(
+        &mut p.local.owner,
+        &mut p.local.persistence,
+        &mut p.local.applications,
+        MonoTime(0),
+    );
+    p.local.persistence.fail = true;
+    let mut n = boat(p);
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    let mut saw_written = false;
+    for _ in 0..100 {
+        match n.poll_with_configuration_authorization(
+            MonoTime(0),
+            NodePollBudget::default(),
+            |_, _| Ok(()),
+        ) {
+            Ok(p) => {
+                saw_written |= p.replica.unwrap().worker_events > 0;
+                assert!(n.poll_configuration().is_none());
+            }
+            Err(_) => break,
+        }
+    }
+    assert!(saw_written);
+    assert_eq!(n.state(), NodeState::RecoveryRequired);
+    let mut recovery = n.into_recovery().unwrap_or_else(|_| panic!());
+    let result = recovery.configuration.poll().unwrap();
+    assert_eq!(result.ticket, ticket);
+    assert_eq!(
+        result.outcome,
+        ConfigurationOutcome::Unknown(ConfigurationUnknown::OwnerFailed)
+    );
+    assert_eq!(
+        recovery
+            .local
+            .persistence
+            .store
+            .state(group(1))
+            .unwrap()
+            .commit_index,
+        1
+    );
+}
+#[test]
+fn configuration_committed_output_survives_shutdown_and_request_count_stays_bounded() {
+    let mut n = elected();
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    admin_settle(&mut n);
+    assert_eq!(
+        n.configure(admin_request(1, 100, true)).unwrap_err().reason,
+        ConfigurationRequestError::Overloaded
+    );
+    n.begin_shutdown();
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    assert_eq!(n.state(), NodeState::Quiescing);
+    let result = n.poll_configuration().unwrap();
+    assert_eq!(result.ticket, ticket);
+    assert!(matches!(result.outcome, ConfigurationOutcome::Committed(_)));
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_rejects_static_wire_before_persistence_even_with_host_authorization() {
+    let mut n = boat(parts(3, true));
+    let before = n.local().owner.core(group(1)).unwrap().state().clone();
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    n.poll_with_configuration_authorization(MonoTime(0), NodePollBudget::default(), |_, _| Ok(()))
+        .unwrap();
+    let result = n.poll_configuration().unwrap();
+    assert_eq!(result.ticket, ticket);
+    assert_eq!(
+        result.outcome,
+        ConfigurationOutcome::NotProposed(
+            ConfigurationProposalError::UnsupportedWireVersion(1).into()
+        )
+    );
+    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_queued_behind_campaign_uses_its_actual_proposal_term() {
+    let mut n = boat(parts(1, false));
+    n.control(group(1), NodeControl::Campaign).unwrap();
+    let ticket = n.configure(admin_request(1, 100, false)).unwrap();
+    admin_settle(&mut n);
+    let result = n.poll_configuration().unwrap();
+    assert_eq!(result.ticket, ticket);
+    assert_eq!(
+        result.outcome,
+        ConfigurationOutcome::Committed(ProposalPosition { index: 2, term: 1 })
+    );
+    shutdown(&mut n);
+}
+#[test]
+fn configuration_cannot_expand_a_local_only_node_without_peer_providers() {
+    use voteboat::membership::*;
+    let mut n = elected();
+    let before = n.local().owner.core(group(1)).unwrap().state().clone();
+    let mut request = admin_request(1, 100, false);
+    let b = bootstrap(1, 1);
+    request.proposal.record.change = ConfigurationChange::Learners(
+        Configuration::new(
+            ConfigurationId::new(2).unwrap(),
+            b.policy,
+            b.voter_stores,
+            [(node(2), identity(2))].into(),
+        )
+        .unwrap(),
+    );
+    n.configure(request).unwrap();
+    n.poll_with_configuration_authorization(MonoTime(0), NodePollBudget::default(), |_, _| Ok(()))
+        .unwrap();
+    assert_eq!(
+        n.poll_configuration().unwrap().outcome,
+        ConfigurationOutcome::NotProposed(ConfigurationProposalError::MissingPeerTransport.into())
+    );
+    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    shutdown(&mut n);
+}
 fn request(op: u128) -> ClientRequest {
     ClientRequest {
         group: group(1),

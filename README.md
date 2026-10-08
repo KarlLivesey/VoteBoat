@@ -74,6 +74,9 @@ not enable online promotion or administration. Explicit
 [dynamic member recovery](docs/MEMBER_RECOVERY.md) now restores a voter or learner
 from authorized durable joint/final state and verified application data, retaining
 the accepted predicate and historical ballot through restart/rollback.
+The [owned administration API](docs/CONFIGURATION_ADMINISTRATION.md) now connects
+typed proposals, execution-time host authorization, committed receipts and
+cancellation through Node. Remote configuration delivery remains gated.
 
 ## Run
 

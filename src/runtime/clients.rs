@@ -375,11 +375,30 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         limit: usize,
         application: impl Fn(GroupIdentity) -> Option<&'a A>,
     ) -> Result<Vec<OwnerStep>, ClientError> {
+        self.advance_authorized(owner, now, limit, application, |_, event| {
+            configuration_auth_required(event)
+        })
+    }
+    pub(super) fn advance_authorized<
+        'a,
+        A: ProposalAdmission<Receipt = R> + 'a,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        now: MonoTime,
+        limit: usize,
+        application: impl Fn(GroupIdentity) -> Option<&'a A>,
+        mut configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<Vec<OwnerStep>, ClientError> {
         if owner.identity() != self.binding.owner {
             return Err(ClientError::WrongBinding);
         }
         let steps = owner
-            .advance_checked(now, limit, |core, event| {
+            .advance_authorized(now, limit, |core, event| {
+                configuration(core, event)?;
                 let Event::Propose { operation, bytes } = event else {
                     return Ok(());
                 };

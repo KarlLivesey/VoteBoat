@@ -36,6 +36,8 @@ pub struct ConfigurationProposal {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ConfigurationProposalError {
     AuthenticationRequired,
+    UnsupportedWireVersion(u16),
+    MissingPeerTransport,
     Membership(MembershipError),
     MissingReadiness(NodeId),
     UnexpectedReadiness(NodeId),

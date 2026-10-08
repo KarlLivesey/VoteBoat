@@ -456,3 +456,40 @@ assertion uses a borrowed expected-message slice.
 - Final all-feature/all-target Clippy with warnings denied, core-only all-target
   compilation, formatting/diff and inventory shape/path checks pass (52 contracts).
   Inventory validation checks metadata rather than protocol behavior.
+
+## Slice 56 — owned administration requests
+
+- Node now composes configuration authorization through the existing client,
+  replica and owner path. The public bounded observer reports committed only
+  for an exact record/position in durable committed state; admission, Written
+  and pending membership produce no committed receipt.
+- Host Node tests cover joint/final sequencing, execution authorization denial,
+  static-wire/missing-network rejection, cancellation followed by actual commit,
+  queued campaign timing, byte/count retention, Written storage failure and
+  shutdown/recovery preserving earlier committed or unresolved outcomes.
+- Native startup commits a same-electorate single-voter joint/final journal via
+  the selected worker, joins it, reopens real files and reconstructs exact member
+  state. This is not multi-node configuration delivery, learner promotion or
+  dynamic recovery through the static startup convenience path.
+- Affected all-feature owner tests (118 at the broad run), learners (23), Raft
+  (22), runtime (25) and startup (9) passed. Later focused Node checks include
+  queued-term and selected-network preflight cases. Existing TCP/QUIC/100-group
+  histories remain green. A service QUIC case encountered AddrInUse during the
+  combined run; its isolated rerun passed. The other six service cases passed in
+  the original run. No production transport behavior was changed for that error.
+- A fixture's zero-effect budget was invalid and was replaced with one submitted
+  persistence effect, preserving the pre-durability assertion. The existing
+  queued-promotion check was updated from absent operation/position metadata to
+  exact operation 53 and position (3,2), without weakening its binding/persistence
+  assertions. A queued request no longer inherits an unrelated admission-time
+  election term; committed evidence uses its actual proposed term.
+- Native placement/failure-domain policy, complete selected codec/transport
+  capacity validation, durable operation status/resumption, service endpoints
+  and faulted remote add/promote/remove remain pending. Configuration-bearing
+  public Append and membership Snapshot remain gated. No macOS execution,
+  physical power-loss, performance or full protocol proof claim; P4–P7 remain
+  active within the full objective.
+- Final focused Node suite passes all 27 cases with all features and core-only.
+  All-feature/all-target Clippy with warnings denied, core-only all-target
+  compilation, all-feature API docs, formatting/diff and inventory shape/path
+  checks pass (53 contracts). Metadata validation is not protocol conformance.

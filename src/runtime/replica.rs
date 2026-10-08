@@ -384,6 +384,24 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         now: MonoTime,
         budget: ReplicaPollBudget,
     ) -> Result<ReplicaProgress, ReplicaError> {
+        self.poll_authorized(parts, now, budget, |_, event| {
+            configuration_auth_required(event)
+        })
+    }
+    pub(super) fn poll_authorized<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        parts: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        now: MonoTime,
+        budget: ReplicaPollBudget,
+        configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<ReplicaProgress, ReplicaError> {
         if Self::bindings(parts)? != self.binding {
             return Err(ReplicaError::WrongBinding);
         }
@@ -397,7 +415,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             return Err(ReplicaError::Fenced);
         }
         self.now = now;
-        let result = self.poll_inner(parts, now, budget);
+        let result = self.poll_inner(parts, now, budget, configuration);
         if let Err(reason) = &result {
             let _ = parts.owner.fail::<()>(EffectOwnerError::ProviderContract);
             self.failed = Some(reason.clone());
@@ -416,6 +434,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
         now: MonoTime,
         b: ReplicaPollBudget,
+        configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<ReplicaProgress, ReplicaError> {
         let mut out = ReplicaProgress::default();
         let reclaims = p.persistence.poll_reclaims(1);
@@ -489,7 +508,13 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         }
         out.steps = p
             .clients
-            .advance(p.owner, now, b.steps, |g| p.applications.get(&g))
+            .advance_authorized(
+                p.owner,
+                now,
+                b.steps,
+                |g| p.applications.get(&g),
+                configuration,
+            )
             .map_err(ReplicaError::Client)?;
         p.reads
             .observe_steps(p.owner, &out.steps)

@@ -432,7 +432,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             Ok(())
         })
     }
-    fn advance_authorized(
+    pub(super) fn advance_authorized(
         &mut self,
         now: MonoTime,
         limit: usize,

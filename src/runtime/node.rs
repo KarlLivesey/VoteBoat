@@ -93,6 +93,7 @@ pub struct NodeParts<
 pub struct NodeLimits {
     pub replica: ReplicaDriverLimits,
     pub peers: PeerDriverLimits,
+    pub configuration: ConfigurationRequestLimits,
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodePollBudget {
@@ -123,6 +124,7 @@ pub enum NodeError {
     Peer(PeerDriverError),
     Client(ClientError),
     Read(ReadInvocationError),
+    Configuration(ConfigurationRequestError),
 }
 pub struct NodeRejected<P> {
     pub reason: NodeError,
@@ -149,6 +151,7 @@ pub struct NodeRecovery<L, R, C: PeerConnector, F: PeerTransportFactory<C::Sessi
     pub replica: ReplicaDriver<R>,
     pub peers: Option<PeerDriver<C, F>>,
     pub reason: NodeError,
+    pub configuration: ConfigurationRequests,
 }
 /// One owner of selected component handles, not a process-wide service. Provider
 /// scoped close/drain contracts leave shared host executors and unrelated users
@@ -172,6 +175,7 @@ pub struct Node<
     state: NodeState,
     now: MonoTime,
     failure: Option<NodeError>,
+    configuration: ConfigurationRequests,
 }
 impl<
         S: ReadyScheduler,
@@ -196,6 +200,9 @@ where
         now: MonoTime,
     ) -> NodeBuild<Self, NodeParts<S, T, E, A, W, O, H, C, F>> {
         let checked = (|| {
+            let configuration =
+                ConfigurationRequests::new(parts.local.owner.identity(), limits.configuration)
+                    .map_err(NodeError::Configuration)?;
             parts
                 .local
                 .owner
@@ -262,9 +269,9 @@ where
                 .transpose()?;
             let replica = ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
                 .map_err(NodeError::Replica)?;
-            Ok((replica, budget))
+            Ok((replica, budget, configuration))
         })();
-        let (replica, budget) = match checked {
+        let (replica, budget, configuration) = match checked {
             Ok(driver) => driver,
             Err(reason) => {
                 return Err(NodeRejected {
@@ -304,6 +311,7 @@ where
             state: NodeState::Running,
             now,
             failure: None,
+            configuration,
         })
     }
     pub fn state(&self) -> NodeState {
@@ -409,6 +417,32 @@ where
             .admit(group, event)
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
     }
+    /// Submit an administrative intent. Admission is volatile, not commitment.
+    /// Drive it with poll_with_configuration_authorization; ordinary poll denies
+    /// configuration execution. Host authorization must cover service scope,
+    /// placement/failure domains and selected provider/wire capacities.
+    pub fn configure(
+        &mut self,
+        request: ConfigurationRequest,
+    ) -> Result<ConfigurationTicket, ConfigurationRejected> {
+        if self.state != NodeState::Running {
+            return Err(ConfigurationRejected {
+                reason: ConfigurationRequestError::Closed,
+                request: Box::new(request),
+            });
+        }
+        self.configuration.submit(&mut self.local.owner, request)
+    }
+    pub fn poll_configuration(&mut self) -> Option<ConfigurationCompletion> {
+        self.configuration.poll()
+    }
+    /// Stops observation only; queued or persisted configuration work can commit.
+    pub fn cancel_configuration(
+        &mut self,
+        ticket: ConfigurationTicket,
+    ) -> Result<(), ConfigurationRequestError> {
+        self.configuration.cancel_wait(ticket)
+    }
     /// Admit a readiness round using the current authenticated native peer
     /// binding. Results are volatile on Raft::ready_learner; they require a
     /// fresh binding check again when a later promotion executes.
@@ -507,6 +541,7 @@ where
         if self.state == NodeState::Running {
             self.local.clients.close();
             self.local.reads.close();
+            self.configuration.close(ConfigurationUnknown::Shutdown);
             self.state = NodeState::Quiescing;
         }
     }
@@ -539,6 +574,23 @@ where
         now: MonoTime,
         budget: NodePollBudget,
     ) -> Result<NodeProgress, NodeError> {
+        self.poll_with_configuration_authorization(now, budget, |_, _| {
+            Err(ConfigurationProposalError::AuthenticationRequired)
+        })
+    }
+    /// Rechecks host authorization and exact authenticated promotion bindings at
+    /// execution, after peer polling and before any configuration persistence.
+    /// The authorization callback must be bounded and nonblocking.
+    /// Application commands still pass the existing application admission path.
+    pub fn poll_with_configuration_authorization(
+        &mut self,
+        now: MonoTime,
+        budget: NodePollBudget,
+        mut authorize: impl FnMut(
+            &Raft,
+            &ConfigurationProposal,
+        ) -> Result<(), ConfigurationProposalError>,
+    ) -> Result<NodeProgress, NodeError> {
         if !budget.replica.valid() {
             return Err(NodeError::InvalidLimits);
         }
@@ -557,7 +609,7 @@ where
                 peers: None,
             });
         }
-        let result = self.poll_inner(now, budget);
+        let result = self.poll_inner(now, budget, &mut authorize);
         if let Err(reason) = &result {
             self.enter_recovery(reason.clone());
         }
@@ -567,6 +619,10 @@ where
         &mut self,
         now: MonoTime,
         budget: NodePollBudget,
+        authorize: &mut impl FnMut(
+            &Raft,
+            &ConfigurationProposal,
+        ) -> Result<(), ConfigurationProposalError>,
     ) -> Result<NodeProgress, NodeError> {
         if matches!(self.state, NodeState::Running | NodeState::Quiescing) {
             if let Some(peers) = &mut self.peers {
@@ -588,10 +644,49 @@ where
             })
             .transpose()
             .map_err(NodeError::Peer)?;
+        let network = self.peers.as_ref();
         let replica = self
             .replica
-            .poll(&mut self.local.as_parts(), now, budget.replica)
+            .poll_authorized(
+                &mut self.local.as_parts(),
+                now,
+                budget.replica,
+                |core, event| {
+                    let Event::Configure(proposal) = event else {
+                        return Ok(());
+                    };
+                    authorize(core, proposal).map_err(RaftError::from)?;
+                    if network.is_none() {
+                        use crate::membership::ConfigurationChange;
+                        if matches!(&proposal.record.change,
+                            ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. }
+                            if next.voter_stores().keys().chain(next.learners().keys()).any(|n| *n != core.local_node())) {
+                            return Err(ConfigurationProposalError::MissingPeerTransport.into());
+                        }
+                    }
+                    if network.is_some_and(|p| p.roster().wire_version() < 2) {
+                        return Err(ConfigurationProposalError::UnsupportedWireVersion(
+                            network.unwrap().roster().wire_version(),
+                        )
+                        .into());
+                    }
+                    for proof in &proposal.readiness {
+                        let request = proof.ready.request();
+                        let binding =
+                            network.and_then(|p| p.roster().binding(request.learner.node));
+                        if !binding.is_some_and(|b| {
+                            b.wire_version == 4 && b.peer.store == proof.authenticated
+                        }) {
+                            return Err(ConfigurationProposalError::AuthenticationRequired.into());
+                        }
+                    }
+                    Ok(())
+                },
+            )
             .map_err(NodeError::Replica)?;
+        self.configuration
+            .observe(&self.local.owner, &replica.steps)
+            .map_err(NodeError::Configuration)?;
         if matches!(self.state, NodeState::Running | NodeState::Quiescing) {
             if let Some(peers) = &mut self.peers {
                 peers
@@ -603,6 +698,7 @@ where
             && self.local.clients.is_drained()
             && self.local.reads.is_drained()
             && self.local.results.is_drained()
+            && self.configuration.is_drained()
         {
             if let Some(p) = &mut self.peers {
                 p.close();
@@ -644,6 +740,7 @@ where
         // unknown pending writes are never reported as rolled back.
         let _ = self.local.clients.abort(&mut self.local.owner);
         let _ = self.local.reads.abort(&mut self.local.owner);
+        self.configuration.close(ConfigurationUnknown::OwnerFailed);
         if let Some(p) = &mut self.peers {
             p.close();
         }
@@ -697,6 +794,7 @@ where
             replica: self.replica,
             peers: self.peers,
             reason: self.failure.unwrap(),
+            configuration: self.configuration,
         })
     }
 }

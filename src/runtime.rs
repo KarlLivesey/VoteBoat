@@ -24,6 +24,7 @@ use std::{
     collections::{BTreeMap, VecDeque},
     mem::size_of,
 };
+mod administration;
 mod applications;
 mod clients;
 mod connections;
@@ -36,6 +37,7 @@ mod reads;
 mod replica;
 mod snapshots;
 mod timed;
+pub use administration::*;
 pub use applications::*;
 pub use clients::*;
 pub use connections::ConnectionBudget;
@@ -718,6 +720,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         g.visit.as_mut().unwrap().used[class].add(q.cost);
         let operation = match &q.event {
             Event::Propose { operation, .. } => Some(*operation),
+            Event::Configure(proposal) => Some(proposal.record.operation),
             _ => None,
         };
         let read = match &q.event {
@@ -742,7 +745,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
         let proposed = operation.and_then(|operation| result.as_ref().ok()?.iter().find_map(|e| {
             let Effect::Persist(update) = e else { return None; };
             let entry = update.suffix.as_ref()?.entries.first()?;
-            matches!(entry.payload, crate::log::EntryPayload::Command { operation: id, .. } if id == operation)
+            (matches!(entry.payload, crate::log::EntryPayload::Command { operation: id, .. } if id == operation)
+                || matches!(&entry.payload, crate::log::EntryPayload::Configuration(record) if record.operation == operation))
                 .then_some(ProposalPosition { index: entry.index, term: entry.term })
         }));
         let stepped = Stepped {

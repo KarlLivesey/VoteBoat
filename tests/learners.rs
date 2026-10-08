@@ -2155,8 +2155,11 @@ fn queued_promotion_rechecks_live_bindings_and_defaults_to_rejection() {
         .unwrap();
     assert_eq!(checked, vec![node(4)]);
     assert_eq!(steps[0].error, None);
-    assert_eq!(steps[0].operation, None);
-    assert_eq!(steps[0].proposed, None);
+    assert_eq!(steps[0].operation, Some(OperationId::new(53).unwrap()));
+    assert_eq!(
+        steps[0].proposed,
+        Some(ProposalPosition { index: 3, term: 2 })
+    );
     let lease = owner.take_effect().unwrap().unwrap();
     assert!(matches!(lease.effect, Effect::Persist(_)));
     assert_eq!(owner.core(group(1)).unwrap().state(), &before);

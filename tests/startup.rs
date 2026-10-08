@@ -183,6 +183,110 @@ fn close(mut n: NativeNode<HostApplication>) {
     }
 }
 #[test]
+fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_history() {
+    use voteboat::{
+        membership::*,
+        native::log_store::{FileLogIo, NativeLogStore},
+        raft::*,
+    };
+    let root = root();
+    let mut startup = config(root.clone(), NativeOpenMode::Create);
+    startup.tls = startup.tls.with_wire_version(4).unwrap();
+    let bootstrap = startup.bootstrap.clone();
+    let identity = startup.store;
+    let local = startup.node;
+    let mut n = startup
+        .open(app(), Arc::new(ThreadWake::current()), MonoTime(0))
+        .unwrap();
+    n.control(group(), NodeControl::Campaign).unwrap();
+    drive(&mut n, |n| {
+        n.local().applications[&group()].applied_index() > 0
+    });
+    let operation = OperationId::new(700).unwrap();
+    for (expected_index, finalizing) in (2..).zip([false, true]) {
+        let ticket = n
+            .configure(ConfigurationRequest {
+                group: group(),
+                proposal: ConfigurationProposal {
+                    record: ConfigurationRecord {
+                        operation,
+                        expected: ConfigurationId::new(if finalizing { 10 } else { 9 }).unwrap(),
+                        change: if finalizing {
+                            ConfigurationChange::Final {
+                                id: ConfigurationId::new(11).unwrap(),
+                            }
+                        } else {
+                            ConfigurationChange::Joint {
+                                id: ConfigurationId::new(10).unwrap(),
+                                next: Configuration::new(
+                                    ConfigurationId::new(11).unwrap(),
+                                    bootstrap.policy.clone(),
+                                    bootstrap.voter_stores.clone(),
+                                    BTreeMap::new(),
+                                )
+                                .unwrap(),
+                            }
+                        },
+                    },
+                    readiness: vec![],
+                    requirements: ReadinessRequirements {
+                        application_schema: 1,
+                        command_bytes: 8,
+                        snapshot_bytes: 4096,
+                    },
+                },
+            })
+            .unwrap();
+        let start = Instant::now();
+        let result = loop {
+            n.poll_with_configuration_authorization(
+                MonoTime(5000),
+                NodePollBudget::default(),
+                |core, p| {
+                    assert_eq!(core.local_node(), local);
+                    assert_eq!(p.record.operation, operation);
+                    Ok(())
+                },
+            )
+            .unwrap();
+            if let Some(c) = n.poll_configuration() {
+                break c;
+            }
+            assert!(start.elapsed() < Duration::from_secs(5));
+            std::thread::park_timeout(Duration::from_millis(1));
+        };
+        assert_eq!(result.ticket, ticket);
+        assert_eq!(
+            result.outcome,
+            ConfigurationOutcome::Committed(ProposalPosition {
+                index: expected_index,
+                term: 1
+            })
+        );
+    }
+    close(n);
+    let store = NativeLogStore::recover(
+        FileLogIo::open(&root).unwrap(),
+        identity,
+        LogLimits::default(),
+    )
+    .unwrap();
+    let state = store.state(group()).unwrap();
+    assert_eq!(state.commit_index, 3);
+    assert_eq!(
+        state.membership().unwrap().id(),
+        ConfigurationId::new(11).unwrap()
+    );
+    let recovered = Raft::recover_member(local, store.binding(), state, store.limits()).unwrap();
+    assert_eq!(
+        recovered.membership().id(),
+        ConfigurationId::new(11).unwrap()
+    );
+    assert!(recovered.membership().operations().contains(&operation));
+    drop(store);
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
 fn host_application_and_non_demo_identities_write_and_recover_through_startup() {
     let root = root();
     let mut n = config(root.clone(), NativeOpenMode::Create)
