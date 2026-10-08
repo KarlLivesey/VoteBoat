@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-client-and-original-read-invocations",
+  "status": "shared-runtime-with-bounded-local-replica-driver",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -8,6 +8,14 @@
     "transitive versions pinned in Cargo.lock"
   ],
   "contracts": [
+    {
+      "design_id": "C10/C15",
+      "public_contract": "ReplicaDriver / ReplicaParts",
+      "operations": ["new", "binding", "limits", "usage", "poll", "close_intake", "discard_failed", "is_drained", "is_failed"],
+      "native": "Fixed bounded local assembly over selected public worker/outbound/application/service/snapshot providers; native histories use the same driver",
+      "conformance": ["tests/support/replica_driver.rs", "tests/effect_owner.rs"],
+      "scope": "Exact construction-time bindings, quiescent recovered application boundary, bounded completion/step/effect/retry work, separate capacity-charged control/data WAL batches, original rejected lease retention and explicit failed cleanup. No new durability evidence or hidden I/O. External provider drain and peer/ingress reactor remain host responsibilities; full production facade remains pending."
+    },
     {
       "design_id": "C01/C02",
       "public_contract": "VoteStore",

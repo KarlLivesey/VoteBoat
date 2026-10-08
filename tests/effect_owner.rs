@@ -1005,6 +1005,8 @@ mod client_admission {
         assert!(c.is_drained());
     }
 }
+#[path = "support/replica_driver.rs"]
+mod replica_driver;
 mod support;
 use std::collections::{BTreeMap, VecDeque};
 use support::*;
@@ -1611,7 +1613,7 @@ mod native {
         worker: Worker,
         apps: BTreeMap<GroupIdentity, Counter>,
         outbound: NativeOutbound,
-        pending: Vec<EffectLease>,
+        driver: Option<ReplicaDriver<CounterReceipt>>,
         reads: Vec<i64>,
         transports:
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
@@ -1629,10 +1631,40 @@ mod native {
         received: usize,
         snapshots: Option<Snapshots>,
         router: Option<SnapshotRouter>,
-        snapshot_pending: VecDeque<EffectLease>,
-        send_pending: VecDeque<EffectLease>,
         installed: usize,
         supplied: usize,
+    }
+    type Parts<'a> = ReplicaParts<
+        'a,
+        FairScheduler,
+        DeadlineQueue,
+        JitterEntropy,
+        Counter,
+        Worker,
+        NativeOutbound,
+    >;
+    impl Node {
+        fn with_replica<R>(
+            &mut self,
+            callback: impl FnOnce(&mut Option<ReplicaDriver<CounterReceipt>>, &mut Parts<'_>) -> R,
+        ) -> R {
+            let snapshots = match (&mut self.router, &mut self.snapshots) {
+                (Some(router), Some(worker)) => Some(ReplicaSnapshots { router, worker }),
+                (None, None) => None,
+                _ => panic!("snapshot assembly mismatch"),
+            };
+            let mut parts = ReplicaParts {
+                owner: &mut self.owner,
+                persistence: &mut self.worker,
+                applications: &mut self.apps,
+                results: &mut self.results,
+                clients: &mut self.clients,
+                reads: &mut self.read_requests,
+                outbound: &mut self.outbound,
+                snapshots,
+            };
+            callback(&mut self.driver, &mut parts)
+        }
     }
     fn make(id: u64, path: &std::path::Path, recover: bool) -> Node {
         make_snapshots(id, path, recover, false)
@@ -1821,12 +1853,12 @@ mod native {
             )
             .unwrap()
         });
-        Node {
+        let mut n = Node {
             owner,
             worker,
             apps,
             outbound,
-            pending: Vec::new(),
+            driver: None,
             reads: Vec::new(),
             transports: None,
             clients: ClientRouter::new(
@@ -1883,11 +1915,15 @@ mod native {
             received: 0,
             snapshots,
             router,
-            snapshot_pending: VecDeque::new(),
-            send_pending: VecDeque::new(),
             installed: 0,
             supplied: 0,
-        }
+        };
+        n.with_replica(|driver, parts| {
+            *driver = Some(
+                ReplicaDriver::new(parts, ReplicaDriverLimits::default(), MonoTime(0)).unwrap(),
+            );
+        });
+        n
     }
     #[cfg(feature = "tls")]
     fn establish(
@@ -2070,89 +2106,29 @@ mod native {
                 "effect-owner cluster did not drain"
             );
             for n in nodes.iter_mut() {
-                if let (Some(router), Some(worker)) = (&mut n.router, &mut n.snapshots) {
-                    for event in worker.poll(1) {
-                        let installed = matches!(
-                            &event.result,
-                            Ok(SnapshotOutput::Loaded {
-                                reconciled: true,
-                                ..
-                            })
-                        );
-                        let supplied = matches!(
-                            &event.result,
-                            Ok(SnapshotOutput::Loaded {
-                                reconciled: false,
-                                ..
-                            })
-                        );
-                        let app = n.apps.get_mut(&event.visit.group).unwrap();
-                        router.deliver(&mut n.owner, app, event, now).unwrap();
-                        n.installed += usize::from(installed);
-                        n.supplied += usize::from(supplied);
-                    }
-                    for _ in 0..n.snapshot_pending.len() {
-                        let lease = n.snapshot_pending.pop_front().unwrap();
-                        let app = &n.apps[&lease.ticket.visit.group];
-                        if let Err(rejected) = router.submit(&mut n.owner, worker, lease, app) {
-                            assert!(matches!(
-                                rejected.reason,
-                                SnapshotRouteError::Overloaded
-                                    | SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
-                                    | SnapshotRouteError::Owner(EffectOwnerError::Overloaded)
-                            ));
-                            n.snapshot_pending.push_back(*rejected.lease);
-                        }
-                    }
-                }
-                for event in n.worker.poll(1) {
-                    n.owner.deliver_worker(event, now).unwrap();
-                }
-                let steps = n
-                    .clients
-                    .advance(&mut n.owner, now, 100, |g| n.apps.get(&g))
+                let progress = n
+                    .with_replica(|driver, parts| {
+                        driver.as_mut().unwrap().poll(
+                            parts,
+                            now,
+                            ReplicaPollBudget {
+                                worker_events: 1,
+                                snapshot_events: 1,
+                                steps: 100,
+                                ..Default::default()
+                            },
+                        )
+                    })
                     .unwrap();
-                n.read_requests.observe_steps(&mut n.owner, &steps).unwrap();
-                for step in steps {
+                n.installed += progress.snapshot_installs;
+                n.supplied += progress.snapshot_supplies;
+                for step in progress.steps {
                     assert!(
                         step.error.is_none() || step.error == Some(RaftError::StaleRead),
                         "{:?}",
                         step.error
                     );
                 }
-                while let Some(lease) = n.owner.take_effect().unwrap() {
-                    match &lease.effect {
-                        Effect::Persist(_) => n.pending.push(lease),
-                        Effect::Committed(_) => {
-                            let app = n.apps.get_mut(&lease.ticket.visit.group).unwrap();
-                            let ticket = n.results.submit(&mut n.owner, lease, app, now).unwrap();
-                            let output = n.results.poll().unwrap();
-                            assert_eq!(output.ticket(), ticket);
-                            assert_eq!(output.through(), app.applied_index());
-                            n.clients
-                                .deliver(&mut n.owner, &mut n.results, output)
-                                .unwrap();
-                            assert!(n.results.is_drained());
-                        }
-                        Effect::ReadReady(_) => {
-                            let app = &n.apps[&lease.ticket.visit.group];
-                            n.read_requests
-                                .execute(&mut n.owner, lease, app, now)
-                                .unwrap();
-                        }
-                        Effect::Send(_) => n.send_pending.push_back(lease),
-                        Effect::StageSnapshot(_)
-                        | Effect::SnapshotRequired { .. }
-                        | Effect::SnapshotInstalled(_)
-                        | Effect::CheckpointRequired { .. }
-                        | Effect::CheckpointCompacted(_) => {
-                            assert!(n.router.is_some());
-                            n.snapshot_pending.push_back(lease);
-                        }
-                    }
-                }
-                n.clients.reconcile(&n.owner, 128).unwrap();
-                n.read_requests.reconcile(&mut n.owner, 128).unwrap();
                 while let Some(output) = n.read_requests.poll() {
                     match n.read_requests.complete(output).unwrap() {
                         ReadOutcome::Read { result, .. } => n.reads.push(result.unwrap()),
@@ -2171,36 +2147,6 @@ mod native {
                 }
                 n.clients.reconcile(&n.owner, 128).unwrap();
                 assert!(n.clients.usage().bytes <= ClientRouterLimits::default().bytes);
-                for _ in 0..n.send_pending.len() {
-                    let EffectLease {
-                        ticket,
-                        effect: Effect::Send(message),
-                    } = n.send_pending.pop_front().unwrap()
-                    else {
-                        unreachable!()
-                    };
-                    match n.outbound.submit(vec![message]) {
-                        Ok(_) => n.owner.release_transferred_send(ticket).unwrap(),
-                        Err(mut rejected) => {
-                            assert_eq!(rejected.reason, OutboundError::Overloaded);
-                            assert_eq!(rejected.messages.len(), 1);
-                            n.send_pending.push_back(EffectLease {
-                                ticket,
-                                effect: Effect::Send(rejected.messages.remove(0)),
-                            });
-                        }
-                    }
-                }
-                if !n.pending.is_empty() {
-                    let leases = std::mem::take(&mut n.pending);
-                    if let Err(rejected) = n.owner.submit_persists(&mut n.worker, leases, now) {
-                        assert_eq!(
-                            rejected.reason,
-                            EffectOwnerError::Worker(WorkerError::Overloaded)
-                        );
-                        n.pending = rejected.leases;
-                    }
-                }
                 match &mut n.transports {
                     None => {
                         for mut batch in n.outbound.poll(32) {
@@ -2271,9 +2217,7 @@ mod native {
                 );
                 assert_eq!(
                     n.owner.usage().leased,
-                    n.pending.len()
-                        + n.send_pending.len()
-                        + n.snapshot_pending.len()
+                    n.driver.as_ref().unwrap().usage().leases()
                         + n.router.as_ref().map_or(0, |r| r.usage().requests)
                 );
             }
@@ -2301,11 +2245,9 @@ mod native {
                     n.owner.is_drained()
                         && n.worker.is_drained()
                         && n.outbound.is_drained()
-                        && n.pending.is_empty()
+                        && n.driver.as_ref().unwrap().is_drained()
                         && n.staged.is_empty()
                         && n.ingress.is_drained()
-                        && n.send_pending.is_empty()
-                        && n.snapshot_pending.is_empty()
                         && n.router.as_ref().is_none_or(|r| r.is_drained())
                         && n.snapshots.as_ref().is_none_or(|w| w.is_drained())
                 })
@@ -2434,8 +2376,7 @@ mod native {
                 .is_none_or(|r| r.usage().reserved_bytes == 0));
             n.owner.close_admission().unwrap();
             assert!(n.owner.is_drained());
-            assert!(n.snapshot_pending.is_empty());
-            assert!(n.send_pending.is_empty());
+            assert!(n.driver.as_ref().unwrap().is_drained());
             assert!(n.router.as_ref().is_none_or(|r| r.is_drained()));
             if let Some(worker) = &mut n.snapshots {
                 worker.close();

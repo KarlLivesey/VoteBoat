@@ -30,6 +30,7 @@ mod effects;
 mod ingress;
 mod read_requests;
 mod reads;
+mod replica;
 mod snapshots;
 mod timed;
 pub use applications::*;
@@ -38,6 +39,7 @@ pub use effects::*;
 pub use ingress::*;
 pub use read_requests::*;
 pub use reads::*;
+pub use replica::*;
 pub use snapshots::*;
 pub use timed::{TimedShard, TimerConfig, TimerProgress};
 

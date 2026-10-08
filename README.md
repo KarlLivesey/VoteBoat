@@ -163,7 +163,12 @@ owns original queries and reply reservations before Read admission, correlates
 exact steps/barriers, and drains cancellation after quorum loss or leadership
 changes. It composes an explicitly selected ReadRouter; the native histories
 use both. See [read invocation ownership](docs/READ_REQUESTS.md).
-The production reactor/facade remains unfinished.
+`runtime::ReplicaDriver` now coordinates local WAL/snapshot completions, tracked
+owner steps, application/client/read execution and bounded rejected-effect
+retries over explicitly selected public providers. The native histories use this
+library driver, with peer connection and ingress driving still composed by the
+host. See [local replica assembly](docs/REPLICA_DRIVER.md). The full production
+peer reactor/facade remains unfinished.
 
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot

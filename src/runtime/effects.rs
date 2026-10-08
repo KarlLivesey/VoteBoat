@@ -216,6 +216,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn identity(&self) -> RuntimeOwner {
         self.runtime.owner()
     }
+    pub fn limits(&self) -> EffectOwnerLimits {
+        self.limits
+    }
+    pub fn worker_binding(&self) -> WorkerBinding {
+        self.worker
+    }
+    pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
+        self.runtime.groups()
+    }
     pub fn is_failed(&self) -> bool {
         self.failed.is_some()
     }
@@ -500,6 +509,22 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             });
         }
         let a = self.active.remove(&lease.ticket.visit.group).unwrap();
+        self.reserved -= a.reserved;
+        Ok(())
+    }
+    pub(super) fn discard_failed_transfer(
+        &mut self,
+        ticket: EffectTicket,
+    ) -> Result<(), EffectOwnerError> {
+        if self.failed.is_none()
+            || self
+                .active
+                .get(&ticket.visit.group)
+                .is_none_or(|a| a.visit != ticket.visit || a.leased != Some(ticket))
+        {
+            return Err(EffectOwnerError::StaleEffect);
+        }
+        let a = self.active.remove(&ticket.visit.group).unwrap();
         self.reserved -= a.reserved;
         Ok(())
     }

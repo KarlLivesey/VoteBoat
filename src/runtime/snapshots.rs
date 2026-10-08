@@ -106,6 +106,12 @@ impl SnapshotRouter {
             image_bytes: self.pending.values().map(|p| p.allowance).sum(),
         }
     }
+    pub fn owner(&self) -> RuntimeOwner {
+        self.owner
+    }
+    pub fn worker_binding(&self) -> SnapshotWorkerBinding {
+        self.worker
+    }
     pub fn is_drained(&self) -> bool {
         self.pending.is_empty()
     }

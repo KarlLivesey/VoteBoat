@@ -314,6 +314,9 @@ impl Raft {
     pub fn role(&self) -> Role {
         self.role
     }
+    pub fn local_node(&self) -> NodeId {
+        self.node
+    }
     /// Volatile local timer-reset sequence, not a term or quorum watermark.
     /// Changes on a campaign, valid leader contact, or a durable granted vote.
     pub fn election_reset_sequence(&self) -> u64 {

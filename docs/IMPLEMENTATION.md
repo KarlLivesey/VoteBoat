@@ -11,7 +11,7 @@ record claims that unimplemented phases already work.
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers and real TCP/TLS histories; full node facade remains |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, shared workers, timers, authorized peer roster/reconnect coordination and native 100-group histories implemented; listener/dial execution and full ingress/result admission remain |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, local replica driver and native 100-group histories implemented; full peer reactor/facade assembly remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -1758,10 +1758,55 @@ evidence remain unfinished. Full P0–P7 stays active; CI is background feedback
 Finite Linux histories do not establish macOS execution, arbitrary schedules or
 production protocol/performance claims.
 
+## Slice 26: bounded local replica driver
+
+`ReplicaDriver` moves the native fixture's local drive loop into the library.
+`ReplicaParts` borrows explicitly selected EffectOwner, PersistenceWorker,
+OutboundQueue, application map, application/client/read owners and optional
+SnapshotWorker/SnapshotRouter. Native and independent host providers use the
+same path. Construction checks exact owner/provider/router lifetimes, quiescence,
+local node, fixed group coverage and applications replayed to the recovered
+commit boundary. No hidden runtime, clock, thread or provider is constructed.
+
+Bounded polling delivers snapshot and Written/Durable completions, correlates
+tracked input steps before effects, executes committed applications and original
+reads, submits outgoing messages and snapshot work, and reconciles cancellation.
+Separate bounded control/data persistence queues preserve worker control reserves.
+Batch formation shares the worker's capacity-byte accounting and count/byte
+ceilings. Rejections retain original leases and their EffectOwner reservation;
+preallocated driver metadata and work budgets have separate limits. Consumer-held
+client/read outputs retain their existing credits. Wrong bindings, regressed time
+and invalid budgets reject before provider polling; fatal failures fence service.
+Explicit failed cleanup releases only driver/router-owned work, with external
+provider drain and authoritative recovery still the host's responsibility.
+
+No new durability token, watermark, generation allocator, consensus rule, WAL
+format or checkpoint schema is introduced. Exact durable barriers still permit
+dependent protocol effects; local submission, Written and successful owner steps
+cannot produce committed/application/read success. The three-node/100-group
+native histories now use the library local driver through elections, quorum
+loss, replacement connections, snapshot/checkpoint catch-up and file recovery.
+Six independent host-component tests exercise exact client/read outcomes and
+held credits, WAL overload and multi-group batching, Written-before-Durable,
+binding/time/budget rejection, startup replay checks and failure/retained-lease
+cleanup, including an invalid accepted outbound ticket whose transferred payload
+remains provider-owned through explicit drain. See [local replica assembly](REPLICA_DRIVER.md).
+
+Local validation passes the full matrix of 252 default/native/TLS tests, 231
+native-only tests and 138 core/host-only tests. A sixth host-driver test added
+after that matrix also passes in the focused six-test core run; the migrated
+native histories passed in the full matrix. Clippy passes all three feature
+configurations with warnings denied; formatting, documentation, contract JSON,
+diff and new RPL header checks pass. Native socket tests ran with loopback access.
+
+Full P0–P7 remains active. Peer network reactor/facade assembly, physical WAL
+cleaning, membership/policy transitions, recursive responsibilities, safe
+split/merge and P7 performance evidence remain unfinished. Linux execution does
+not establish macOS execution or arbitrary-schedule/protocol/performance claims.
+
 ## Next slice
 
-Continue full native node assembly with production reactor driving over the
-selected ingress, proposal, original read, worker and transport owners, then
-physical WAL cleaning with durable
-replacement/recovery dependencies. CI stays background feedback; relevant local
-checks guide direct commits.
+Continue full native node assembly with a public peer reactor over selected
+connector, roster, transport and ingress owners, then physical WAL cleaning with
+durable replacement/recovery dependencies. CI stays background feedback; relevant
+local checks guide direct commits.

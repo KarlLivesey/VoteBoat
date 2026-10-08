@@ -161,6 +161,34 @@ pub trait PersistenceWorker {
 /// Conservative retained-request accounting; store-internal buffers have the
 /// selected LogStore's separate budgets. Vector capacity is charged. Fixed
 /// completion/correlation metadata is reserved per unit before submission.
+pub(crate) const PERSIST_UNIT_METADATA: usize =
+    size_of::<PersistUnit>() + 3 * size_of::<VisitTicket>() + 2 * size_of::<LogTicket>();
+
+pub(crate) fn persist_payload_cost(update: &LogUpdate) -> Result<(usize, bool), WorkerError> {
+    let mut bytes = 0usize;
+    let mut control = true;
+    if let Some(suffix) = &update.suffix {
+        bytes = bytes
+            .checked_add(
+                suffix
+                    .entries
+                    .capacity()
+                    .checked_mul(size_of::<LogEntry>())
+                    .ok_or(WorkerError::BatchTooLarge)?,
+            )
+            .ok_or(WorkerError::BatchTooLarge)?;
+        for entry in &suffix.entries {
+            if let EntryPayload::Command { bytes: command, .. } = &entry.payload {
+                control = false;
+                bytes = bytes
+                    .checked_add(command.capacity())
+                    .ok_or(WorkerError::BatchTooLarge)?;
+            }
+        }
+    }
+    Ok((bytes, control))
+}
+
 pub fn batch_cost(
     units: &[PersistUnit],
     capacity: usize,
@@ -170,9 +198,7 @@ pub fn batch_cost(
         return Err(WorkerError::BatchTooLarge);
     }
     let mut bytes = capacity
-        .checked_mul(
-            size_of::<PersistUnit>() + 3 * size_of::<VisitTicket>() + 2 * size_of::<LogTicket>(),
-        )
+        .checked_mul(PERSIST_UNIT_METADATA)
         .ok_or(WorkerError::BatchTooLarge)?;
     let mut control = true;
     let mut groups = BTreeSet::new();
@@ -180,25 +206,11 @@ pub fn batch_cost(
         if unit.visit.group != unit.update.group || !groups.insert(unit.update.group) {
             return Err(WorkerError::WrongBinding);
         }
-        if let Some(suffix) = &unit.update.suffix {
-            bytes = bytes
-                .checked_add(
-                    suffix
-                        .entries
-                        .capacity()
-                        .checked_mul(size_of::<LogEntry>())
-                        .ok_or(WorkerError::BatchTooLarge)?,
-                )
-                .ok_or(WorkerError::BatchTooLarge)?;
-            for entry in &suffix.entries {
-                if let EntryPayload::Command { bytes: command, .. } = &entry.payload {
-                    control = false;
-                    bytes = bytes
-                        .checked_add(command.capacity())
-                        .ok_or(WorkerError::BatchTooLarge)?;
-                }
-            }
-        }
+        let (payload, is_control) = persist_payload_cost(&unit.update)?;
+        bytes = bytes
+            .checked_add(payload)
+            .ok_or(WorkerError::BatchTooLarge)?;
+        control &= is_control;
         if bytes > limits.batch_bytes {
             return Err(WorkerError::BatchTooLarge);
         }
