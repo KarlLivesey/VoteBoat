@@ -29,6 +29,12 @@ pub(super) struct ReplicationPermit {
     base: ConfigurationId,
 }
 impl Raft {
+    pub(super) fn connection_permit(&self) -> Option<PeerIdentity> {
+        self.replication_permit
+            .as_ref()
+            .filter(|p| p.base == self.membership().id())
+            .map(|p| p.candidate)
+    }
     pub(super) fn clear_replication_authority(&mut self) {
         self.authority_request = None;
         self.replication_permit = None;

@@ -225,10 +225,32 @@ where
                     }
                 }
             }
-            ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
-                .map_err(NodeError::Replica)
+            let budget = parts
+                .peers
+                .as_ref()
+                .map(|network| {
+                    let budget = ConnectionBudget::new(
+                        network.roster.local(),
+                        network.roster.limits().peers,
+                        network
+                            .roster
+                            .tracked_identities()
+                            .map(|peer| (peer.node, peer.store))
+                            .collect(),
+                    )
+                    .map_err(|e| NodeError::Owner(EffectOwnerError::Runtime(e)))?;
+                    parts
+                        .local
+                        .owner
+                        .prepare_connection_budget(budget)
+                        .map_err(NodeError::Owner)
+                })
+                .transpose()?;
+            let replica = ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
+                .map_err(NodeError::Replica)?;
+            Ok((replica, budget))
         })();
-        let replica = match checked {
+        let (replica, budget) = match checked {
             Ok(driver) => driver,
             Err(reason) => {
                 return Err(NodeRejected {
@@ -257,6 +279,9 @@ where
         } else {
             None
         };
+        if let Some(budget) = budget {
+            parts.local.owner.install_connection_budget(budget);
+        }
         Ok(Self {
             local: parts.local,
             replica,

@@ -62,6 +62,24 @@ impl Raft {
                 }
             }
         }
+        if let Some(Message {
+            rpc: Rpc::Snapshot { snapshot },
+            ..
+        }) = &self.staged_snapshot
+        {
+            if let Some(membership) = &snapshot.metadata.membership {
+                for (node, store) in membership.replicas() {
+                    add(node, store)?;
+                }
+            } else {
+                for (&node, &store) in &snapshot.metadata.bootstrap.voter_stores {
+                    add(node, store)?;
+                }
+            }
+        }
+        if let Some(peer) = self.connection_permit() {
+            add(peer.node, peer.store)?;
+        }
         Ok(peers)
     }
     /// Conservative required connection stores before an event is executed.
@@ -112,7 +130,18 @@ impl Raft {
                         for (node, store) in membership.replicas() {
                             add(node, store)?;
                         }
+                    } else {
+                        for (&node, &store) in &snapshot.metadata.bootstrap.voter_stores {
+                            add(node, store)?;
+                        }
                     }
+                }
+                Rpc::AuthorityReply {
+                    candidate,
+                    granted: true,
+                    ..
+                } => {
+                    add(candidate.node, candidate.store)?;
                 }
                 _ => (),
             }

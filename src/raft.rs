@@ -542,6 +542,8 @@ impl Raft {
                 Rpc::Snapshot { snapshot } => {
                     if let Some(base) = &snapshot.metadata.membership {
                         peers = peers.max(base.replicas().count());
+                    } else {
+                        peers = peers.max(snapshot.metadata.bootstrap.voter_stores.len());
                     }
                 }
                 _ => (),

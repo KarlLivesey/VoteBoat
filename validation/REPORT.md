@@ -283,3 +283,26 @@ assertion uses a borrowed expected-message slice.
   reservations, readiness and complete distributed activation remain unfinished.
   Online configuration ingress stays gated. No macOS, performance or full proof
   claim; the complete P0–P7 objective remains active.
+
+## 2026-10-08: retained connection capacity in the owner (slice 50)
+
+- QUIC-enabled library/effect-owner/peers/runtime/startup/counter-service suites
+  pass 43/104/18/25/8/7 tests (205 total). Native TCP/TLS and QUIC process histories
+  still commit, replace leaders and recover native files. Existing 100-group
+  callback/worker histories also pass with the networked Node budget installed.
+- Five downstream budget histories cover competing queued inputs, exact returned
+  events/tickets, shared-peer/store conflicts, protocol rejection, close/stop,
+  retained history, budget tightening, witness-reply reservations and registration
+  while a future peer already occupies capacity. The registration test explicitly
+  succeeds after releasing the queued reservation, avoiding a capacity assertion
+  that would fail even without the competing queued event.
+- Two actual-core histories cover pending/durable/rollback retention, fencing an
+  unreserved callback before effects escape, staged membership snapshots before
+  log persistence and witness-authorized connection to a promoted node absent
+  from the receiver's membership. No simulated token is claimed as device proof.
+- Core-only all-target build, all-feature/all-target Clippy with warnings denied,
+  all-feature API docs, formatting/diff and inventory shape/path checks pass.
+- Capacity union recomputation is bounded; no throughput or allocator claim.
+  Credential/route-plan admission and readiness remain incomplete, so online
+  configuration ingress remains gated. No macOS execution or full protocol proof
+  claim. The complete P0–P7 objective remains active.

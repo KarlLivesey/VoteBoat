@@ -2956,10 +2956,62 @@ must recheck and retain resources through accepted/pending transitions; readines
 and distributed activation/retirement histories remain required. Public online
 configuration ingress remains gated. The full P0–P7 goal stays active.
 
+## Slice 50 — retained owner connection capacity
+
+Mini schema plan: use the existing owned event queue as the reservation ledger,
+not a second asynchronous ticket table. Admission unions queued prospective peers
+with current/pending core views and exact retained identity history. Execution
+rechecks, then transfers capacity into core state or releases queue-only peers on
+rejection. Close retains queued work until drain; stop returns events/tickets.
+Seed a networked Node's budget from all tracked roster records only after assembly.
+
+ConnectionBudget is a fixed local identity, peer ceiling (1–65536) and bounded
+exact store history. Shard, TimedShard and EffectOwner expose installation and
+inspection. Queue/core union calculations are bounded by that peer ceiling and
+existing event/group/item/byte limits. Temporary maps and retained history are
+separate from output effect reservations; no throughput/allocation claim is made.
+A shared peer is charged once; conflicting physical stores cannot share a node ID.
+Budget tightening/replacement preserves history and validates the entire owned
+union before mutation. New group registration also checks capacity before insertion.
+
+Configuration append, snapshot and granted witness-reply admission checks run
+before queue ownership transfer or admission-ticket consumption. Rejection returns
+original input. Execution rechecks, while accepted/pending peers enter retained
+identity history; rollback cannot erase it. A serialized with_core mutation that
+exceeds its reservation stops/fences the group before returning its result/effects.
+Node construction prepares the budget before provider assembly and installs it only
+on success; rejected parts do not acquire this new owner state. Standalone hosts
+opt in and must seed all shared roster history and the actual provider limit.
+
+Handoff inspection found two volatile states beyond a pending log write:
+Snapshot staging and a verified promoted-peer replication permit. connection_replicas
+now includes both. Event preview includes granted witness candidates and snapshot
+bootstrap peers even when dynamic metadata is absent. The conservative output
+reservation also covers those snapshot bootstrap counts. Neither the preview nor
+this capacity guard grants protocol authority, credentials or quorum evidence.
+No new durable effect, watermark or generation is introduced; restart reconstructs
+from verified core state and explicitly supplied roster history under StoreSession.
+
+Five downstream owner tests cover competing queued changes, shared peers/store
+conflicts, untouched rejected tickets/payloads, protocol rejection, close/stop,
+budget tightening/history preservation, witness-reply reservations and registration
+with occupied capacity. Two actual-core tests exercise pending/durable/rollback
+handoffs, fail-closed unreserved callbacks, staged snapshots before log persistence
+and a verified permit for a candidate absent from the receiver's membership.
+Node construction tests verify automatic budget installation and rejection purity.
+QUIC-enabled library/effect-owner/peers/runtime/startup/service suites pass
+43/104/18/25/8/7 (205 tests). Core-only all-target build, all-feature/all-target
+Clippy, API docs and inventory validation pass. No macOS execution or performance
+claim is made; whole P0–P7 remains active.
+
+This completes capacity retention, not online configuration activation. Pins and
+owned route plans still need admission-time integration, followed by readiness
+and faulted distributed histories. Public configuration ingress stays gated.
+
 ## Next slice
 
-Integrate retained prospective connection admission with the serialized event
-owner, including queued competing changes, rejection/rollback release and shutdown.
-Then add readiness evidence and faulted activation histories before releasing
-online configuration ingress. Preserve the usable static TCP/QUIC service. Full
-P0–P7 retains recursive responsibilities, split/merge and broader P7 evidence.
+Integrate retained credential/route-plan admission with these queued reservations,
+then implement readiness evidence and faulted activation/retirement histories
+before releasing online configuration ingress. Preserve usable static TCP/QUIC
+service. Full P0–P7 retains recursive responsibilities, split/merge and broader
+P7 evidence.

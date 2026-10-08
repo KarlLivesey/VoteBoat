@@ -4758,3 +4758,6 @@ fn prospective_fanout_rejection_returns_input_without_ticket_or_fencing() {
     assert!(owner.advance(MonoTime(0), 1).unwrap().is_empty());
     assert!(matches!(held.effect, Effect::Persist(_)));
 }
+
+#[path = "support/connection_budget.rs"]
+mod connection_budget;

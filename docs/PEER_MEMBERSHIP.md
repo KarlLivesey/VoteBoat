@@ -70,10 +70,53 @@ pass resource inspection and still fail protocol validation. Success retains no
 capacity and cannot authorize an event or a configuration. The eventual online
 admission path must recheck at serialized execution and retain its reservation
 through the accepted/pending state. Independent successful previews do not
-reserve capacity for a combination of queued events. That integration and
-readiness gates are still unfinished; configuration ingress stays closed.
+reserve capacity for a combination of queued events. The capacity ledger below now provides retained owner-side accounting. Retained
+credential/route-plan admission and readiness gates are still unfinished;
+configuration ingress stays closed.
 
 Node construction also checks the complete rollback-reachable connection set.
 Recovery with an accepted learner removal must still provision that learner when
 the removal is uncommitted. A missing route/store assignment rejects construction
 before provider polling and returns the original parts.
+
+## Retained owner capacity
+
+`ConnectionBudget` fixes one local identity and a peer ceiling, seeded with every
+tracked roster store, including inactive history. `Shard`, `TimedShard` and
+`EffectOwner` expose `set_connection_budget`, `connection_budget` and
+`reserved_connection_peers`. A networked `Node::from_parts` prepares this budget
+from its roster and installs it only after successful assembly. Host-only owners
+opt in and must seed all shared roster records and use the actual selected
+provider ceiling. The budget validates capacity and exact stores; it does not
+provision credentials or retain endpoint hints.
+
+The existing owned event queue is the reservation ledger. Before transferring
+configuration append, snapshot or granted witness-reply input, admission unions
+its prospective stores with all queued prospective stores, live core views and
+retained history. Shared peers count once across groups; different stores under
+the same node ID conflict. Rejection returns the original event without spending
+an admission ticket. Ordinary ingress uses this same path through EffectOwner.
+
+Execution rechecks the union. A rejected protocol event releases its queue-only
+peers. Stopping a group returns its queued events and tickets, releasing those
+reservations. Closing admission retains queued reservations until they drain.
+Accepted/pending peers move into bounded identity history. Staged snapshots and
+verified promoted-peer replication permits participate even before a log storage
+transition exists. Accepted identity history survives rollback and budget
+replacement, matching the roster's inactive-history ceiling. A full drained owner
+replacement is needed to discard it. No remote session floor is inferred from
+this store-only map; the roster retains its existing session checks.
+
+Budget installation/tightening validates all owned queue/core requirements before
+mutation and preserves prior history. Group registration also checks the shared
+union. A serialized `with_core` callback exceeding its reservation stops/fences
+the group before its result/effects can escape. The ledger creates no new
+persistence effect, durable receipt, watermark or generation. Restart rebuilds
+from recovered core views plus explicitly supplied roster history under the
+existing fresh local StoreSession contract.
+
+This implementation recomputes a bounded union rather than maintaining a second
+asynchronous ticket table. No throughput or allocation claim is made. Pins and
+route-plan retention still need integration with event admission, followed by
+readiness and full distributed transition histories. The protocol ingress gate
+remains closed while those requirements are unfinished.

@@ -268,6 +268,36 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             persistence_requests: self.requests.len(),
         }
     }
+    pub fn set_connection_budget(
+        &mut self,
+        budget: ConnectionBudget,
+    ) -> Result<(), EffectOwnerError> {
+        self.check()?;
+        self.runtime
+            .set_connection_budget(budget)
+            .map_err(EffectOwnerError::Runtime)
+    }
+    pub fn connection_budget(&self) -> Option<&ConnectionBudget> {
+        self.runtime.connection_budget()
+    }
+    pub(super) fn prepare_connection_budget(
+        &self,
+        budget: ConnectionBudget,
+    ) -> Result<ConnectionBudget, EffectOwnerError> {
+        self.check()?;
+        self.runtime
+            .prepare_connection_budget(budget)
+            .map_err(EffectOwnerError::Runtime)
+    }
+    pub(super) fn install_connection_budget(&mut self, budget: ConnectionBudget) {
+        self.runtime.install_connection_budget(budget);
+    }
+    pub fn reserved_connection_peers(&self) -> Result<Option<usize>, EffectOwnerError> {
+        self.check()?;
+        self.runtime
+            .reserved_connection_peers()
+            .map_err(EffectOwnerError::Runtime)
+    }
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
         if let Err(reason) = self.check_input_reservation(group, &event) {
             return Err(Rejected {

@@ -26,6 +26,7 @@ use std::{
 };
 mod applications;
 mod clients;
+mod connections;
 mod effects;
 mod ingress;
 mod node;
@@ -37,6 +38,7 @@ mod snapshots;
 mod timed;
 pub use applications::*;
 pub use clients::*;
+pub use connections::ConnectionBudget;
 pub use effects::*;
 pub use ingress::*;
 pub use node::*;
@@ -108,6 +110,8 @@ pub struct ProposalPosition {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RuntimeError {
+    PeerCapacity,
+    PeerStoreConflict,
     InvalidLimits,
     Overloaded,
     EventTooLarge,
@@ -361,6 +365,7 @@ pub struct Shard<Q: ReadyScheduler> {
     usage: [Usage; 3],
     sequence: u64,
     admission_sequence: u64,
+    connection_budget: Option<ConnectionBudget>,
     now: MonoTime,
     closed: bool,
 }
@@ -382,6 +387,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             usage: [Usage::default(); 3],
             sequence: 0,
             admission_sequence: 0,
+            connection_budget: None,
             now: MonoTime(0),
             closed: false,
         })
@@ -403,6 +409,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
         }
+        if let Some(budget) = &self.connection_budget {
+            self.reserved_connections(budget, None, Some(&core))?;
+        }
         self.groups.insert(
             group,
             Group {
@@ -415,6 +424,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 timer: None,
             },
         );
+        self.retain_connection_history(group)?;
         Ok(())
     }
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
@@ -461,6 +471,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         tracked: bool,
     ) -> Result<(Class, usize), RuntimeError> {
         let (class, mut cost) = self.admission_shape(group, event)?;
+        if connections::changes_connections(event) {
+            self.check_connection_event(group, event)?;
+        }
         let g = self.groups.get(&group).unwrap();
         if tracked {
             cost = cost
@@ -690,6 +703,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Option<Stepped>, RuntimeError> {
         self.observe(now)?;
+        self.reserved_connection_peers()?;
         let limits = self.limits;
         let g = self.live(ticket)?;
         if g.core.has_pending_dependency() {
@@ -730,14 +744,18 @@ impl<Q: ReadyScheduler> Shard<Q> {
             matches!(entry.payload, crate::log::EntryPayload::Command { operation: id, .. } if id == operation)
                 .then_some(ProposalPosition { index: entry.index, term: entry.term })
         }));
-        Ok(Some(Stepped {
+        let stepped = Stepped {
             admission: q.admission,
             proposed,
             operation,
             read,
             timer,
             result,
-        }))
+        };
+        if stepped.result.is_ok() {
+            self.retain_connection_history(ticket.group)?;
+        }
+        Ok(Some(stepped))
     }
     /// Serialized owner access for the existing public durability, snapshot and
     /// read helpers. Do not block this call on I/O; submit work, retain the ticket
@@ -747,7 +765,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
         ticket: VisitTicket,
         f: impl FnOnce(&mut Raft) -> R,
     ) -> Result<R, RuntimeError> {
-        Ok(f(&mut self.live(ticket)?.core))
+        let result = f(&mut self.live(ticket)?.core);
+        if let Err(error) = self
+            .reserved_connection_peers()
+            .and_then(|_| self.retain_connection_history(ticket.group))
+        {
+            let _ = self.stop_group(ticket.group);
+            return Err(error);
+        }
+        Ok(result)
     }
     pub fn finish(&mut self, ticket: VisitTicket) -> Result<(), RuntimeError> {
         let g = self.live(ticket)?;

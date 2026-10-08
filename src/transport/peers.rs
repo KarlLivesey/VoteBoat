@@ -264,6 +264,10 @@ impl<P: PeerTransport> PeerRoster<P> {
     pub fn tracked_peers(&self) -> impl Iterator<Item = NodeId> + '_ {
         self.peers.keys().copied()
     }
+    /// Exact retained stores, including inactive records with session floors.
+    pub fn tracked_identities(&self) -> impl Iterator<Item = PeerIdentity> + '_ {
+        self.peers.values().map(|peer| peer.identity)
+    }
     pub fn peer_identity(&self, peer: NodeId) -> Option<PeerIdentity> {
         self.peers
             .get(&peer)

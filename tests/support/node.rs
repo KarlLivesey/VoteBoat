@@ -189,6 +189,7 @@ fn constructor_requires_voter_store_authorization_and_returns_original_parts_bef
         Ok(_) => panic!("missing network"),
     };
     assert_eq!(rejected.reason, NodeError::MissingPeers);
+    assert!(rejected.parts.local.owner.connection_budget().is_none());
     assert!(!rejected.parts.local.persistence.closed);
     let mut p = *rejected.parts;
     p.peers = Some(parts_for(
@@ -197,6 +198,14 @@ fn constructor_requires_voter_store_authorization_and_returns_original_parts_bef
     ));
     let n = boat(p);
     assert_eq!(n.state(), NodeState::Running);
+    assert_eq!(
+        n.local().owner.connection_budget().unwrap().limit(),
+        n.peers().unwrap().roster().limits().peers
+    );
+    assert_eq!(
+        n.local().owner.reserved_connection_peers().unwrap(),
+        Some(2)
+    );
     assert_eq!(n.peers().unwrap().usage().attempts, 0);
     let mut p = parts(3, true);
     let net = p.peers.as_mut().unwrap();

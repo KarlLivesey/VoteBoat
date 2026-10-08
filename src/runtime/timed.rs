@@ -246,6 +246,26 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn usage(&self) -> Usage {
         self.shard.usage()
     }
+    pub fn set_connection_budget(&mut self, budget: ConnectionBudget) -> Result<(), RuntimeError> {
+        self.check()?;
+        self.shard.set_connection_budget(budget)
+    }
+    pub fn connection_budget(&self) -> Option<&ConnectionBudget> {
+        self.shard.connection_budget()
+    }
+    pub(super) fn prepare_connection_budget(
+        &self,
+        budget: ConnectionBudget,
+    ) -> Result<ConnectionBudget, RuntimeError> {
+        self.check()?;
+        self.shard.prepare_connection_budget(budget)
+    }
+    pub(super) fn install_connection_budget(&mut self, budget: ConnectionBudget) {
+        self.shard.install_connection_budget(budget);
+    }
+    pub fn reserved_connection_peers(&self) -> Result<Option<usize>, RuntimeError> {
+        self.shard.reserved_connection_peers()
+    }
     pub fn group_usage(&self, group: GroupIdentity) -> Option<Usage> {
         self.shard.group_usage(group)
     }

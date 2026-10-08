@@ -2065,3 +2065,176 @@ fn connection_retention_keeps_committed_joint_predecessor_until_final_is_durable
     durable(&mut core, effects);
     assert!(!core.connection_replicas(6).unwrap().contains_key(&node(1)));
 }
+
+#[test]
+fn owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation() {
+    use crate::runtime::{
+        ConnectionBudget, MonoTime, ReadyScheduler, RuntimeError, RuntimeOwner, Shard, ShardLimits,
+    };
+    use crate::secure::LocalIdentity;
+    #[derive(Default)]
+    struct Ready(BTreeSet<GroupIdentity>);
+    impl ReadyScheduler for Ready {
+        fn capacity(&self) -> usize {
+            16
+        }
+        fn enqueue(&mut self, group: GroupIdentity) -> Result<(), RuntimeError> {
+            self.0.insert(group);
+            Ok(())
+        }
+        fn pop(&mut self) -> Option<GroupIdentity> {
+            self.0.pop_first()
+        }
+        fn cancel(&mut self, group: GroupIdentity) {
+            self.0.remove(&group);
+        }
+        fn len(&self) -> usize {
+            self.0.len()
+        }
+    }
+    let c = staged();
+    let group = c.state().bootstrap.group;
+    let binding = c.storage_binding();
+    let mut shard = Shard::new(
+        RuntimeOwner {
+            store: binding,
+            lane: ExecutionLaneId::new(1).unwrap(),
+            generation: RuntimeGeneration::new(1).unwrap(),
+        },
+        ShardLimits {
+            max_groups: 16,
+            ..ShardLimits::default()
+        },
+        Ready::default(),
+    )
+    .unwrap();
+    shard.register(c).unwrap();
+    shard
+        .set_connection_budget(
+            ConnectionBudget::new(
+                LocalIdentity {
+                    node: node(1),
+                    store: binding,
+                },
+                5,
+                BTreeMap::new(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    assert_eq!(shard.reserved_connection_peers(), Ok(Some(4)));
+    shard.admit(group, Event::Heartbeat).unwrap();
+    let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
+    let effects = shard
+        .with_core(visit, |core| {
+            accept(
+                core,
+                300,
+                ConfigurationChange::Learners(configuration(3, &[1, 2, 3], &[4, 6])),
+            )
+        })
+        .unwrap();
+    assert!(shard.core(group).unwrap().has_pending_dependency());
+    assert_eq!(shard.reserved_connection_peers(), Ok(Some(5)));
+    shard
+        .with_core(visit, |core| durable(core, effects))
+        .unwrap();
+    let effects = shard
+        .with_core(visit, |core| {
+            core.persist(
+                core.state().hard_state,
+                2,
+                Some(Suffix {
+                    from: 3,
+                    entries: vec![],
+                }),
+                After::Reply,
+                None,
+            )
+            .unwrap()
+        })
+        .unwrap();
+    shard
+        .with_core(visit, |core| durable(core, effects))
+        .unwrap();
+    assert!(!shard
+        .core(group)
+        .unwrap()
+        .connection_replicas(6)
+        .unwrap()
+        .contains_key(&node(6)));
+    // The accepted connection identity remains a bounded inactive history record.
+    assert_eq!(shard.reserved_connection_peers(), Ok(Some(5)));
+    let result = shard.with_core(visit, |core| {
+        accept(
+            core,
+            301,
+            ConfigurationChange::Learners(configuration(3, &[1, 2, 3], &[4, 7])),
+        )
+    });
+    assert_eq!(result, Err(RuntimeError::PeerCapacity));
+    assert!(shard.core(group).unwrap().is_fenced());
+    assert_eq!(shard.reserved_connection_peers(), Ok(Some(5)));
+}
+
+#[test]
+fn connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit() {
+    let mut receiver = follower(core(), 2);
+    let (leader, _, snapshot) = compacted_joint();
+    let mut message = reply(
+        &receiver,
+        1,
+        RequestContext {
+            origin: leader.binding,
+            sequence: 900,
+        },
+        Rpc::Snapshot {
+            snapshot: Box::new(snapshot),
+        },
+    );
+    message.configuration = cid(3);
+    assert_eq!(receiver.connection_replicas(6).unwrap().len(), 3);
+    assert_eq!(
+        receiver
+            .event_connection_replicas(&Event::Receive(message.clone()), 6)
+            .unwrap()
+            .len(),
+        5
+    );
+    let effects = receiver.receive_inner(message).unwrap();
+    assert!(matches!(&effects[..], [Effect::StageSnapshot(_)]));
+    assert!(receiver.staged_snapshot.is_some());
+    assert!(receiver.pending.is_none());
+    assert_eq!(receiver.connection_replicas(6).unwrap().len(), 5);
+    assert!(receiver.connection_replicas(4).is_err());
+
+    let mut receiver = follower(core(), 2);
+    let mut witness = authority_witness();
+    let query = authority_query(&mut receiver, 3);
+    assert!(!receiver
+        .connection_replicas(4)
+        .unwrap()
+        .contains_key(&node(4)));
+    let reply = one_reply(witness.step(Event::Receive(query)).unwrap());
+    assert!(matches!(
+        reply.rpc,
+        Rpc::AuthorityReply { granted: true, .. }
+    ));
+    assert_eq!(
+        receiver
+            .event_connection_replicas(&Event::Receive(reply.clone()), 4)
+            .unwrap()
+            .len(),
+        4
+    );
+    receiver.step(Event::Receive(reply)).unwrap();
+    assert_eq!(receiver.membership().id(), cid(1));
+    assert_eq!(receiver.connection_replicas(4).unwrap()[&node(4)], store(4));
+    receiver
+        .step(Event::CancelReplicationAuthorization)
+        .unwrap();
+    assert!(!receiver
+        .connection_replicas(4)
+        .unwrap()
+        .contains_key(&node(4)));
+}
