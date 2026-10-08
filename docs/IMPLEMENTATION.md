@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; complete interrupted split, compatible merge, recursive lifecycle and retirement remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split phase/reopen ledger covered; compatible merge, recursive lifecycle and retirement remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -93,30 +93,27 @@ trusted Node/executable administration path supplies placement for P6. Adding a
 new public endpoint is not a prerequisite for using those existing contracts.
 The full P0–P7 objective and outstanding scope ledger remain unchanged.
 
-1. **First durable split lifecycle (current, P6).** Use the P5 owner manifests,
-   routed application and tested P4 placement path with a genuinely splittable
-   application adapter. Slice 84 supplies the public scope seam and native
-   per-bucket counter with transferable retry results/outbox; ownership transfer
-   remains pending. Slice 85 records durable intents/local target reservations.
-   Slice 86 supplies intent-bound source fencing and immutable exports. Slice 87
-   adds non-serving target staging, committed inline imports and source-observed
-   content commitments. Slice 88 adds checked complete evidence and reserved durable
-   directory publication. Slice 89 adds matching durable target activation and native
-   service without metadata, with original retries and old-source fenced restart.
-   Next exercise all named end-to-end interruption/no-dual-owner
-   histories. Sketch bounded export/import records, source fencing,
-   metadata publication and activation before editing. Preserve application data,
-   operation results/digests, outbox and lineage. Completion requires actual
-   source/target/directory recovery across interrupted stages and lost receipts,
-   with no dual active owners. A local fence alone is insufficient. This advances
-   the macro ownership-movement milestone.
-2. **Compatible merge and retry lineage (next, also P6).** Reuse split's durable
-   handoff records for compatible owners, with checked disjoint scopes and
-   adapter/schema/lineage compatibility. Preserve retries/results and outbox
-   state without ID collisions or duplicate effects; refuse incompatible input.
-   Completion requires restart and receipt-loss histories demonstrating one
-   active merged owner and recoverable fenced sources. This completes the first
-   split/merge capability, rather than creating a separate infrastructure phase.
+Slices 84–89 implement the public data adapter, intent, source fence, final import,
+checked publication and durable activation. Slice 90 covers the selected complete
+split phase/reopen ledger over TCP/QUIC with both targets eventually serving.
+This establishes the first top-level split composition and selected recovery path;
+it does not finish all ownership movement or arbitrary-fault validation.
+
+1. **Compatible merge and retry lineage (current, P6).** Reuse the existing
+   checked handoff for multiple disjoint source scopes and one target. Verify
+   adapter/schema/lineage compatibility, preserved retries/results/outbox and
+   collision refusal. Exercise one source fenced while another remains serving,
+   unavailable-source pauses, restart and lost-observation resumption, then one
+   active merged owner with both sources permanently fenced. Depends on the
+   implemented scope/import/publication/activation contracts and tested placement.
+   This advances the macro split/merge ownership-movement capability.
+2. **Recursive lifecycle, later transfers and retirement (next, P6).** Bind
+   delegated-parent/child epoch coordination and permit a previously activated
+   target to participate safely in a later move. Retain durable source tombstones
+   through bounded data reclamation. Depends on the complete split/merge handoff;
+   completion requires repeated/recursive transfers, parent failure and recovery
+   with no revived old owner or lost retry/outbox lineage. This makes ownership
+   movement reusable within the P5 responsibility tree, rather than a one-time demo.
 3. **Measured tuning and broader validation (following, P7).** Establish a
    reproducible committed/applied baseline with workload, durability and latency
    budget before changing lanes, batching, reclamation or recovery throttling.
@@ -140,10 +137,11 @@ Native durable child writes and retries now pass while the parent cannot commit,
 with unchanged parent logs, recovery and stale-owner rejection. This
 advances P5 and supplies P6 with owner-context and retry-state foundations
 over the tested trusted P4 placement path.
-The local fence does not itself implement ownership transfer: P6 still needs
-source-fence evidence, target import, publication and activation with recovery
-that prevents two active owners. The P5 fixed-assignment path remains usable
-while P6 ownership movement and remaining P4 public administration work proceed.
+P6 now connects source-fence evidence, target import, checked publication and
+durable activation with a selected full split phase/reopen ledger. Compatible
+merge, reusable recursive movement/retirement and broader fault validation remain.
+The P5 fixed-assignment path remains usable while that work and remaining P4 public
+administration proceed.
 
 For immediate implementation, distinguish the concrete dependency chain from
 the capability milestones above:
@@ -5137,3 +5135,64 @@ fencing, collision refusal and restart/resumption, then recursive coordination a
 later transfer/retirement. (3) P7 measured committed/applied tuning and broader
 validation. The macro plan remains usable static library/service first, then safe
 ownership movement, then measured tuning. Full P0–P7 stays active and P8 deferred.
+
+### Slice 90 mini schema — interrupted split resumption
+
+Current deliverable: exercise the complete existing split protocol through a
+stateless trusted test host. Its next action is reconstructed from fresh quorum
+reads of directory intent/publication, source freeze and both target statuses;
+there is no remembered phase flag or new production coordinator/store. Close and
+reopen all four three-replica native groups after each committed intent, individual
+stage, fence, individual import, publication and individual activation. Run TCP
+and QUIC with WAL-only and checkpoint recovery. Retained expected statuses are
+only test oracles, not input to resumption. Deliberately discard action receipts;
+original IDs/bytes and immutable exports reconstruct the next phase.
+
+State/failure sketch: before the fence, source serves and both targets refuse;
+after the fence, source stays fenced through every restart. Imported targets
+remain inactive until metadata publication and their local activation. Partial
+activation may serve one disjoint target while the other pauses. Exact original
+fence/import/publication/activation records must survive all reopens. After both
+activate, stop metadata/source, retry original operations and write/read both
+children without ancestor progress. Recover again and verify data/outbox/authority.
+Bounded existing helpers drive real workers and authenticate quorum reads; no
+provider callback or serializable observation bypasses trusted host checks.
+
+Acceptance: the observed phase trace contains every named boundary exactly once;
+reopening never regresses it or duplicates an owner. Both targets eventually serve
+correct scopes with preserved operation results/outbox, old routes refuse, and
+post-fence source restart cannot resume writes/reads. These selected graceful phase
+interruptions do not claim arbitrary power-loss or network-partition coverage.
+This completes the first selected split recovery path in macro P6. Next compatible
+merge with partial fencing and restart/collision checks; following recursive
+coordination and later-transfer/retirement, then P7 measured tuning. Full P0–P7
+remains active and P8 deferred; static service stays usable independently.
+
+Slice 90 result: four selected complete split histories pass over TCP/TLS and QUIC,
+with WAL-only or checkpoint recovery at all nine committed boundaries. Each
+history reopens metadata/source/both three-replica targets after intent, individual
+staging, source fence, individual imports, publication and individual activations.
+Fresh quorum status reconstructs the next action; retained expected records are
+only oracles. Original intent/fence/import/publication/activation facts remain
+identical through every reopen. Before fencing the source serves; afterward it
+stays fenced while inactive targets pause and activated targets serve only their
+disjoint scopes. Both targets finally preserve original retries and new writes/
+outbox with metadata/source stopped, then recover again without phase regression.
+See SPLIT_RECOVERY.md for the trusted host recipe and finite evidence boundary.
+
+Validation: `cargo +stable test --locked --offline --all-features --test routed
+split_resumes -- --nocapture` passes all four new native histories (202.19 seconds
+for the selected run). Core-only routed tests pass 7/7. All-target/all-feature
+Clippy with warnings denied, formatting, 69-contract inventory and diff checks
+pass. Existing unaffected suites were not repeated. No production protocol,
+persistent format, timeout or dependency changed. Per-phase diagnostic printing
+was added after the passing native run; all assertions/behavior are unchanged.
+These are graceful committed-boundary reopens, not OS power cuts, uncommitted-tail
+rollback, dropped phase replication, quorum partition or arbitrary-fault liveness.
+
+Macro review: the first top-level split composition and selected recovery ledger
+are established. Compatible multi-source merge is now current; reusable recursive
+lifecycle, later transfer/retirement are next, then measured P7 tuning and broader
+validation. An autonomous resumer/operator endpoint is not implemented by this
+test host. Remaining P0–P7 scope, macOS/separate-host evidence and P4 public mutation
+gates stay explicit; P8 remains deferred and CI remains background feedback.

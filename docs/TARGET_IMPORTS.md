@@ -145,3 +145,8 @@ complete interrupted split recovery and distributed merge are still pending.
 publication decision before serving imported data. Selected TCP/QUIC WAL/checkpoint
 histories serve with metadata offline and reopen the old source fenced. Complete
 interrupted split schedules, distributed merge and recursive lifecycle remain work.
+
+The [selected complete split recovery ledger](SPLIT_RECOVERY.md) now checks
+all nine committed phase boundaries through whole-topology TCP/QUIC WAL/checkpoint
+reopen, both-target activation and status-driven trusted host resumption. These
+are graceful committed-boundary histories; merge and recursive lifecycle remain.

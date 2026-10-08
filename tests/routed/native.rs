@@ -1627,3 +1627,6 @@ fn quic_target_activation_serves_without_metadata_and_survives_wal_reopen() {
 fn quic_target_activation_preserves_retries_through_checkpoint_reopen() {
     publication_recovery(NativePeerProtocol::Quic, true, true);
 }
+
+#[path = "split.rs"]
+mod split;

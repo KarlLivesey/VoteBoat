@@ -405,3 +405,7 @@ after source fencing and target imports, plus [durable target activation](docs/T
 that serves without metadata access and preserves retries across restart. Complete
 interrupted transfer, merge and recursive lifecycle recovery remain in progress;
 the static service is usable independently.
+
+The [split recovery guide](docs/SPLIT_RECOVERY.md) describes trusted host resumption
+and the tested TCP/QUIC phase/reopen ledger. Compatible merge and reusable recursive
+lifecycle/retirement remain under development.

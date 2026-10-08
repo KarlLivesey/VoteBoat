@@ -106,3 +106,8 @@ Next exercise interrupted complete split stages and both-target resumption with
 lost observations. Following reuse that lifecycle for compatible merge and recursive
 coordination/retirement, then P7 measured tuning. Full P0–P7 remains active and P8
 is deferred; static service availability remains independent of this work.
+
+The [selected complete split recovery ledger](SPLIT_RECOVERY.md) now checks
+all nine committed phase boundaries through whole-topology TCP/QUIC WAL/checkpoint
+reopen, both-target activation and status-driven trusted host resumption. These
+are graceful committed-boundary histories; merge and recursive lifecycle remain.

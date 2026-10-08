@@ -1699,3 +1699,41 @@ service. Selected graceful Linux reopen schedules do not prove power-loss,
 every interrupted split stage, distributed merge, recursive lifecycle/retirement,
 macOS or separate-host operation. Those remain in the active P0–P7 scope; P8 is
 deferred and CI remains background feedback.
+
+## Slice 90 — every committed split phase reopened and resumed
+
+Four new native histories compose actual three-replica metadata, source and two
+target groups over TCP/TLS or QUIC. Each closes/joins and reopens all groups after
+nine individual committed boundaries: intent, each target's stage, source fence,
+each target's import, metadata publication and each target's activation. WAL-only
+and checkpoint variants use the same public application/storage/read contracts.
+The stateless trusted test host reconstructs one next action from fresh quorum
+observations on each invocation. Action receipts are discarded; expected retained
+statuses are comparison oracles only, not the input to resumption.
+
+At every phase before/after reopen, source/target quorum reads check serving rights
+and inactive/fenced data admission refuses. A partially activated split serves one
+disjoint scope while the other remains inactive; source never thaws after fencing.
+The original intent, fence/export commitments, import lineage, publication decision
+and activation facts remain identical through restart. After both targets activate,
+metadata/source workers stop before original-operation retries and new child
+writes. Another reopen preserves values, retry behavior, outbox and original phase
+identities; old source/routes stay fenced/rejected. The exact phase trace ends in
+Done without executing any phase twice. See docs/SPLIT_RECOVERY.md.
+
+Executed: all four `split_resumes` all-feature native tests pass (202.19 seconds
+in the selected run); core-only routed tests pass 7/7; all-target/all-feature
+Clippy with warnings denied, formatting, 69-contract inventory and diff checks
+pass. Existing unaffected tests were not repeated. Phase diagnostic printing was
+added afterward without changing assertions or behavior. No production protocol,
+format, dependency, timer or quorum changed.
+
+These finite histories interrupt after commitment and graceful owner drain. They
+do not cut power, roll back uncommitted phase tails, drop partial replication,
+partition a quorum or establish arbitrary-fault liveness. They do not implement
+an autonomous resumer, delegated-parent lifecycle, later-transfer/retirement,
+distributed merge or macOS/separate-host evidence. Existing storage/core fault
+coverage remains separate. The selected first split recovery path is covered;
+compatible merge is current, then reusable recursive ownership and retirement,
+then P7 measured tuning. Full P0–P7 remains active and P8 deferred. CI is background
+feedback, never a required merge gate.

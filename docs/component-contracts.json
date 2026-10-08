@@ -1372,9 +1372,10 @@
       "conformance": [
         "tests/transfer_source.rs",
         "tests/transfer_source/fixtures.rs",
-        "tests/routed/native.rs"
+        "tests/routed/native.rs",
+        "tests/routed/split.rs"
       ],
-      "scope": "Bootstrap-bound aggregate lifetime export budget, exact payload/envelope key check, committed irreversible local source fence, routed state frozen at F while wrapper applied prefix progresses. Immutable exact-boundary exports and quorum-readable local status survive WAL-only/checkpoint recovery through real three-node TCP/QUIC histories. Trusted host verifies foreign directory intent and target staging; no cryptographic certificate, committed target import, directory publication/activation, delegated-parent coordination or complete transfer proof. No new worker/store owner. Quorum-readable status now derives per-target SHA-256 commitments from immutable scope images, binding schema/scheme/range/F/length/content; bounded status metadata is charged without changing source checkpoint format."
+      "scope": "Bootstrap-bound aggregate lifetime export budget, exact payload/envelope key check, committed irreversible local source fence, routed state frozen at F while wrapper applied prefix progresses. Immutable exact-boundary exports and quorum-readable local status survive WAL-only/checkpoint recovery through real three-node TCP/QUIC histories. Trusted host verifies foreign directory intent and target staging; no cryptographic certificate, committed target import, directory publication/activation, delegated-parent coordination or complete transfer proof. No new worker/store owner. Quorum-readable status now derives per-target SHA-256 commitments from immutable scope images, binding schema/scheme/range/F/length/content; bounded status metadata is charged without changing source checkpoint format. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof."
     },
     {
       "design_id": "C05/C15",
@@ -1398,9 +1399,10 @@
         "tests/transfer_target.rs",
         "tests/transfer_target/fixtures.rs",
         "tests/routed/native.rs",
-        "tests/transfer_activation.rs"
+        "tests/transfer_activation.rs",
+        "tests/routed/split.rs"
       ],
-      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, exact ordered import coverage and source-observed commitments. Target-bound activation checks complete metadata publication against original local stage/import, retains first command/index/decision/configuration and consumes no ordinary provider history. Active writes verify owner/epoch/scope/envelope-payload keys and preserve imported provider retries/outbox; ordinary writes/reads need no metadata access. Generic nested receipts/read bounds have downstream provider conformance. Native TCP/QUIC WAL/checkpoint reopen serves with metadata offline; old source reopens fenced while another target remains inactive. VBTRGT02 accepts old inactive VBTRGT01; no mixed-version claim. Selected graceful histories do not complete interrupted split schedules, distributed merge, recursive coordination, later-transfer/retirement or macOS evidence. Trusted authenticated host verifies foreign provenance/configuration; no new store/thread owner."
+      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, exact ordered import coverage and source-observed commitments. Target-bound activation checks complete metadata publication against original local stage/import, retains first command/index/decision/configuration and consumes no ordinary provider history. Active writes verify owner/epoch/scope/envelope-payload keys and preserve imported provider retries/outbox; ordinary writes/reads need no metadata access. Generic nested receipts/read bounds have downstream provider conformance. Native TCP/QUIC WAL/checkpoint reopen serves with metadata offline; old source reopens fenced while another target remains inactive. VBTRGT02 accepts old inactive VBTRGT01; no mixed-version claim. Selected graceful histories do not complete interrupted split schedules, distributed merge, recursive coordination, later-transfer/retirement or macOS evidence. Trusted authenticated host verifies foreign provenance/configuration; no new store/thread owner. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof."
     },
     {
       "design_id": "C05/C15",
@@ -1416,9 +1418,10 @@
       "native": "Checked metadata publication over the existing Directory journal, LifecycleDirectory quorum-read view and authoritative native log/checkpoint providers.",
       "conformance": [
         "tests/transfer_publication.rs",
-        "tests/routed/native.rs"
+        "tests/routed/native.rs",
+        "tests/routed/split.rs"
       ],
-      "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Native TCP/QUIC WAL/checkpoint histories recover the original decision while targets stay NotActive. No activation, full split/no-dual-owner recovery, distributed merge, recursive coordination or mixed-version claim."
+      "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Native TCP/QUIC WAL/checkpoint histories recover the original decision while targets stay NotActive. No activation, full split/no-dual-owner recovery, distributed merge, recursive coordination or mixed-version claim. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof."
     }
   ],
   "not_yet_implemented": [

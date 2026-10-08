@@ -80,3 +80,8 @@ split recovery, distributed merge, recursive coordination or later retirement.
 Durable target activation now consumes the verified decision and serves without
 metadata access. Next exercise interrupted end-to-end splits and preserved retries. Compatible merge
 and recursive lifecycle follow before P7 measured tuning. Full P0–P7 remains active.
+
+The [selected complete split recovery ledger](SPLIT_RECOVERY.md) now checks
+all nine committed phase boundaries through whole-topology TCP/QUIC WAL/checkpoint
+reopen, both-target activation and status-driven trusted host resumption. These
+are graceful committed-boundary histories; merge and recursive lifecycle remain.
