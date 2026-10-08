@@ -65,8 +65,16 @@ claim that this first cleaner is incremental or throttled against live traffic.
 
 ## Checkpoint encoding and compatibility
 
-The rewritten journal begins with a version-1 VBLCPT01 live-state image, followed
-by unchanged format-2 WAL batches. It uses bounded counts/lengths, header and whole
+The rewritten journal begins with a VBLCPT01 or VBLCPT02 live-state image,
+followed by unchanged format-2 WAL batches. VBLCPT01 remains byte-compatible for
+ballots representable by bootstrap configuration/store identity. If any group
+needs historical origin beyond that bootstrap scope, VBLCPT02 adds an origin
+field to every group after its revision/generation and before its snapshot flag:
+a one-byte 0/1 presence flag, then configuration u64, store u128 and incarnation
+u64 (little endian). Both canonical updates retain the exact original hard state.
+Recovery masks only the candidate during canonical log validation, then restores
+and validates the historical promise; snapshot/suffix hard states must agree.
+Missing/malformed origins and unsupported versions fail closed. It uses bounded counts/lengths, header and whole
 image CRC32C and a complete trailer. Canonical bootstrap/snapshot/suffix transitions
 pass the same mandatory validation as ordinary replay; recovery independently
 validates host codec output as well. Exact stored revision and
@@ -75,8 +83,8 @@ must fit the selected journal budget. It must lie entirely inside the manifest's
 durable byte boundary. Corruption is rejected, never skipped.
 
 This is an explicit persistent-format extension. Existing uncleaned stores remain
-readable; old binaries/codecs that do not implement checkpoint images cannot read
-cleaned journals. Unsupported codecs reject maintenance before publication and
+readable; older readers without VBLCPT02 support cannot read extended cleaned
+journals. Readers without checkpoint support cannot read either cleaned format. Unsupported codecs reject maintenance before publication and
 reject checkpoint recovery. Do not use binary rollback as a format migration.
 The baseline rewrites the full bounded live image; segmented incremental cleaning
 and automatic scheduling/throttling remain future work.

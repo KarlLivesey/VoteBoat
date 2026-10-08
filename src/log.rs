@@ -65,12 +65,20 @@ pub struct Bootstrap {
     /// Durable voter-to-store binding; disk loss needs explicit reconfiguration.
     pub voter_stores: BTreeMap<NodeId, StoreIdentity>,
 }
+/// Historical scope of the promise in hard_state. It grants no present voting
+/// authority and survives suffix rollback, removal and snapshot compaction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct BallotOrigin {
+    pub configuration: ConfigurationId,
+    pub candidate_store: StoreIdentity,
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct GroupLog {
     pub bootstrap: Bootstrap,
     pub revision: LogRevision,
     pub generation: LogGeneration,
     pub hard_state: HardState,
+    pub ballot_origin: Option<BallotOrigin>,
     /// Contiguous committed prefix, never a largest completed index.
     pub commit_index: u64,
     pub snapshot: Option<SnapshotRef>,
@@ -78,6 +86,27 @@ pub struct GroupLog {
     pub entries: Vec<LogEntry>,
 }
 impl GroupLog {
+    /// Structural recovery validation of a historical promise, not proof that
+    /// the candidate belongs to the current configuration. The selected store
+    /// supplies the verified history; new promises are checked on admission.
+    pub fn validate_ballot(&self) -> Result<(), StorageError> {
+        if !self.hard_state.follows(HardState::default()) {
+            return Err(StorageError::Rejected("invalid ballot term"));
+        }
+        match (self.hard_state.voted_for, self.ballot_origin) {
+            (None, None) => Ok(()),
+            (Some(candidate), Some(origin))
+                if origin.configuration >= self.bootstrap.configuration
+                    && (origin.configuration != self.bootstrap.configuration
+                        || self.bootstrap.voter_stores.get(&candidate)
+                            == Some(&origin.candidate_store)) =>
+            {
+                Ok(())
+            }
+            _ => Err(StorageError::Rejected("invalid ballot origin")),
+        }
+    }
+
     /// Accepted-log activation, independent of application execution. Snapshot
     /// suffix records replay from the configuration at the snapshot boundary.
     pub fn membership(
@@ -335,6 +364,7 @@ pub fn apply_batch(
                         revision: LogRevision::new(1).unwrap(),
                         generation: LogGeneration::new(1).unwrap(),
                         hard_state: HardState::default(),
+                        ballot_origin: None,
                         commit_index: 0,
                         snapshot: None,
                         entries: Vec::new(),
@@ -347,13 +377,31 @@ pub fn apply_batch(
                     .ok_or(StorageError::Rejected("group not bootstrapped"))?;
                 if update.expected_revision != current.revision
                     || !update.hard_state.follows(current.hard_state)
-                    || update
-                        .hard_state
-                        .voted_for
-                        .is_some_and(|n| !current.bootstrap.policy.voters().contains(&n))
                 {
                     return Err(StorageError::Rejected("stale revision or invalid ballot"));
                 }
+                current.validate_ballot()?;
+                // A retained promise is independent of the surviving electorate.
+                // Only a genuinely new ballot consults the predecessor accepted
+                // configuration; a suffix/snapshot cannot authorize itself.
+                let ballot_origin = if let Some(candidate) = update.hard_state.voted_for {
+                    if update.hard_state == current.hard_state {
+                        current.ballot_origin
+                    } else {
+                        let membership = current
+                            .membership()
+                            .map_err(|_| StorageError::Rejected("invalid ballot membership"))?;
+                        let candidate_store = membership
+                            .voter_store(candidate)
+                            .ok_or(StorageError::Rejected("candidate is not an accepted voter"))?;
+                        Some(BallotOrigin {
+                            configuration: membership.id(),
+                            candidate_store,
+                        })
+                    }
+                } else {
+                    None
+                };
                 if update.snapshot.is_none() && update.snapshot_membership.is_some() {
                     return Err(StorageError::Rejected("membership base without snapshot"));
                 }
@@ -488,6 +536,7 @@ pub fn apply_batch(
                     ));
                 }
                 current.hard_state = update.hard_state;
+                current.ballot_origin = ballot_origin;
                 current.commit_index = update.commit_index;
                 if current.snapshot_membership.is_some()
                     || current

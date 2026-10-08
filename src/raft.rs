@@ -272,10 +272,7 @@ impl Raft {
             })
             || state.last_term() > state.hard_state.term
             || !state.hard_state.follows(HardState::default())
-            || state
-                .hard_state
-                .voted_for
-                .is_some_and(|n| !state.bootstrap.policy.voters().contains(&n))
+            || state.validate_ballot().is_err()
             || state.entries.len() > limits.max_entries_per_group
             || state.snapshot_membership.is_some()
             || state
@@ -456,7 +453,7 @@ impl Raft {
     }
 
     fn begin_read(&mut self, request: ReadRequestId) -> Result<Vec<Effect>, RaftError> {
-        if self.role != Role::Leader || !self.membership().is_voter(self.node) {
+        if self.role != Role::Leader || !self.local_voter() {
             return Err(RaftError::NotLeader);
         }
         if self.read.is_some() || self.ready_read.is_some() {
@@ -529,7 +526,7 @@ impl Raft {
                 Ok(vec![Effect::CheckpointRequired { context }])
             }
             Event::Campaign => {
-                if !self.membership().is_voter(self.node) {
+                if !self.local_voter() {
                     return Err(RaftError::NotVoter);
                 }
                 self.reset_election()?;
@@ -565,7 +562,7 @@ impl Raft {
                 }
             }
             Event::Propose { operation, bytes } => {
-                if self.role != Role::Leader || !self.membership().is_voter(self.node) {
+                if self.role != Role::Leader || !self.local_voter() {
                     return Err(RaftError::NotLeader);
                 }
                 if bytes.len() > self.limits.max_command_bytes {
@@ -668,7 +665,7 @@ impl Raft {
         if configuration_changed {
             self.configuration_changed()?;
         }
-        if !self.membership.is_voter(self.node)
+        if !self.local_voter()
             && self.membership.last_configuration_index() <= self.durable.commit_index
         {
             self.role = Role::Follower;
@@ -798,6 +795,9 @@ impl Raft {
             reply,
         });
         Ok(vec![Effect::Persist(update)])
+    }
+    fn local_voter(&self) -> bool {
+        self.membership().voter_store(self.node) == Some(self.binding.identity)
     }
     fn peers(&self) -> Vec<NodeId> {
         self.membership()
@@ -1105,10 +1105,14 @@ impl Raft {
                 if *last_term > m.term || ((*last_index == 0) != (*last_term == 0)) {
                     return Err(RaftError::InvalidMessage);
                 }
-                let granted = self.membership().is_voter(self.node)
+                let granted = self.local_voter()
                     && self.membership().is_voter(m.from)
                     && m.term == hard.term
-                    && (hard.voted_for.is_none() || hard.voted_for == Some(m.from))
+                    && (hard.voted_for.is_none()
+                        || (hard.voted_for == Some(m.from)
+                            && self.durable.ballot_origin.is_some_and(|origin| {
+                                origin.candidate_store == m.sender.identity
+                            })))
                     && (*last_term, *last_index)
                         >= (self.durable.last_term(), self.durable.last_index());
                 let next = HardState {

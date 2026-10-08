@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "accepted-log-core-membership-view",
+  "status": "historical-ballot-recovery",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -135,9 +135,10 @@
         "tests/log_store.rs",
         "tests/membership.rs",
         "tests/raft.rs",
-        "tests/log_reclaim.rs"
+        "tests/log_reclaim.rs",
+        "tests/ballots.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner, ballot-recovery, request-context and formal protocol validation. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner, request-context and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. General retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -179,7 +180,7 @@
         "tests/log_reclaim.rs",
         "tests/membership.rs"
       ],
-      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. Version-1 VBLCPT01 full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records."
+      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. VBLCPT01 preserves bootstrap-representable ballots; VBLCPT02 adds historical configuration/store ballot origin. Both full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records."
     },
     {
       "design_id": "C05",

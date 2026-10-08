@@ -15,6 +15,55 @@
 //! Self-contained live-state image. Normal format-2 batches follow unchanged.
 use super::*;
 pub(super) const MAGIC: &[u8; 8] = b"VBLCPT01";
+const BALLOT_MAGIC: &[u8; 8] = b"VBLCPT02";
+pub(super) fn is_checkpoint(bytes: &[u8]) -> bool {
+    bytes.starts_with(MAGIC) || bytes.starts_with(BALLOT_MAGIC)
+}
+fn legacy_ballot(state: &GroupLog) -> bool {
+    match (state.hard_state.voted_for, state.ballot_origin) {
+        (None, None) => true,
+        (Some(candidate), Some(origin)) => {
+            origin.configuration == state.bootstrap.configuration
+                && state.bootstrap.voter_stores.get(&candidate) == Some(&origin.candidate_store)
+        }
+        _ => false,
+    }
+}
+fn encode_origin(e: &mut Encoder, origin: Option<BallotOrigin>) -> Result<(), StorageError> {
+    e.u8(u8::from(origin.is_some()))?;
+    if let Some(origin) = origin {
+        e.u64(origin.configuration.get())?;
+        e.u128(origin.candidate_store.id.get())?;
+        e.u64(origin.candidate_store.incarnation.get())?;
+    }
+    Ok(())
+}
+fn decode_origin(d: &mut Decoder<'_>) -> Result<Option<BallotOrigin>, StorageError> {
+    match d.u8()? {
+        0 => Ok(None),
+        1 => Ok(Some(BallotOrigin {
+            configuration: ConfigurationId::new(d.u64()?)
+                .ok_or(StorageError::Corrupt("zero ballot configuration"))?,
+            candidate_store: StoreIdentity {
+                id: StoreId::new(d.u128()?).ok_or(StorageError::Corrupt("zero ballot store"))?,
+                incarnation: StoreIncarnation::new(d.u64()?)
+                    .ok_or(StorageError::Corrupt("zero ballot incarnation"))?,
+            },
+        })),
+        _ => Err(StorageError::Corrupt("ballot origin flag")),
+    }
+}
+// A checkpoint restores an already durable promise; it does not cast a new
+// ballot under its reconstructed current electorate. Preserve hard-state term
+// for canonical log validation and restore the exact historical promise later.
+fn mask_ballot(mutation: &mut LogMutation) -> Result<crate::contracts::HardState, StorageError> {
+    let LogMutation::Update(update) = mutation else {
+        return Err(StorageError::Corrupt("checkpoint expected update"));
+    };
+    let hard = update.hard_state;
+    update.hard_state.voted_for = None;
+    Ok(hard)
+}
 
 pub(super) fn encode(
     sequence: u64,
@@ -29,6 +78,7 @@ pub(super) fn encode(
     if state.len() > limits.max_groups || state.len() > u32::MAX as usize {
         return Err(StorageError::Rejected("checkpoint group budget"));
     }
+    let extended = state.values().any(|s| !legacy_ballot(s));
     let mut e = Encoder {
         b: Vec::new(),
         limit: max_bytes.saturating_sub(HEADER + TRAILER),
@@ -37,6 +87,9 @@ pub(super) fn encode(
         e.mutation(&LogMutation::Create(s.bootstrap.clone()))?;
         e.u64(s.revision.get())?;
         e.u64(s.generation.get())?;
+        if extended {
+            encode_origin(&mut e, s.ballot_origin)?;
+        }
         e.u8(u8::from(s.snapshot.is_some()))?;
         if let Some(reference) = s.snapshot {
             e.mutation(&LogMutation::Update(LogUpdate {
@@ -65,7 +118,7 @@ pub(super) fn encode(
             snapshot: None,
         }))?;
     }
-    let mut b = MAGIC.to_vec();
+    let mut b = if extended { BALLOT_MAGIC } else { MAGIC }.to_vec();
     b.extend(sequence.to_le_bytes());
     b.extend((state.len() as u32).to_le_bytes());
     b.extend((e.b.len() as u32).to_le_bytes());
@@ -85,12 +138,13 @@ pub(super) fn decode(
 ) -> Result<(u64, BTreeMap<GroupIdentity, GroupLog>, usize), StorageError> {
     let limits = limits.validate()?;
     if bytes.len() < HEADER + TRAILER
-        || &bytes[..8] != MAGIC
+        || !is_checkpoint(bytes)
         || crc32c(&bytes[..24]) != u32::from_le_bytes(bytes[24..28].try_into().unwrap())
         || bytes[28..32] != [0; 4]
     {
         return Err(StorageError::Corrupt("checkpoint header/version/checksum"));
     }
+    let extended = bytes.starts_with(BALLOT_MAGIC);
     let count = u32::from_le_bytes(bytes[16..20].try_into().unwrap()) as usize;
     let payload = u32::from_le_bytes(bytes[20..24].try_into().unwrap()) as usize;
     let size = HEADER
@@ -132,6 +186,11 @@ pub(super) fn decode(
         if generation.get() > revision.get() || revision.get() > sequence {
             return Err(StorageError::Corrupt("checkpoint generation/revision"));
         }
+        let origin = if extended {
+            decode_origin(&mut d)?
+        } else {
+            None
+        };
         let mut one = BTreeMap::new();
         apply_batch(&mut one, &[create], limits)
             .map_err(|_| StorageError::Corrupt("checkpoint bootstrap validation"))?;
@@ -140,23 +199,41 @@ pub(super) fn decode(
             1 => true,
             _ => return Err(StorageError::Corrupt("checkpoint snapshot flag")),
         };
+        let mut snapshot_hard = None;
         if has_snapshot {
-            let snapshot = d.mutation(limits)?;
+            let mut snapshot = d.mutation(limits)?;
             if !matches!(&snapshot, LogMutation::Update(u) if u.group == group && u.snapshot.is_some())
             {
                 return Err(StorageError::Corrupt("checkpoint snapshot record"));
             }
+            if extended {
+                snapshot_hard = Some(mask_ballot(&mut snapshot)?);
+            }
             apply_batch(&mut one, &[snapshot], limits)
                 .map_err(|_| StorageError::Corrupt("checkpoint snapshot validation"))?;
         }
-        let suffix = d.mutation(limits)?;
+        let mut suffix = d.mutation(limits)?;
         if !matches!(&suffix, LogMutation::Update(u) if u.group == group && u.snapshot.is_none() && u.suffix.as_ref().is_some_and(|s| s.from == one[&group].base_index() + 1))
         {
             return Err(StorageError::Corrupt("checkpoint suffix record"));
         }
+        let hard = if extended {
+            Some(mask_ballot(&mut suffix)?)
+        } else {
+            None
+        };
         apply_batch(&mut one, &[suffix], limits)
             .map_err(|_| StorageError::Corrupt("checkpoint suffix validation"))?;
         let mut s = one.remove(&group).unwrap();
+        if let Some(hard) = hard {
+            if snapshot_hard.is_some_and(|previous| previous != hard) {
+                return Err(StorageError::Corrupt("checkpoint hard-state mismatch"));
+            }
+            s.hard_state = hard;
+            s.ballot_origin = origin;
+            s.validate_ballot()
+                .map_err(|_| StorageError::Corrupt("checkpoint historical ballot"))?;
+        }
         if revision.get() == 1
             && (has_snapshot
                 || s.hard_state
@@ -206,6 +283,8 @@ pub(super) fn validate_state(
         {
             return Err(StorageError::Corrupt("checkpoint identity/counters"));
         }
+        s.validate_ballot()
+            .map_err(|_| StorageError::Corrupt("checkpoint ballot origin invariant"))?;
         let mut one = BTreeMap::new();
         apply_batch(
             &mut one,
@@ -221,7 +300,10 @@ pub(super) fn validate_state(
                     snapshot_membership: s.snapshot_membership.clone(),
                     group: *group,
                     expected_revision: initial.revision,
-                    hard_state: s.hard_state,
+                    hard_state: crate::contracts::HardState {
+                        term: s.hard_state.term,
+                        voted_for: None,
+                    },
                     commit_index: reference.index,
                     suffix: None,
                     snapshot: Some(reference),
@@ -241,7 +323,10 @@ pub(super) fn validate_state(
                 snapshot_membership: None,
                 group: *group,
                 expected_revision: revision,
-                hard_state: s.hard_state,
+                hard_state: crate::contracts::HardState {
+                    term: s.hard_state.term,
+                    voted_for: None,
+                },
                 commit_index: s.commit_index,
                 suffix: Some(Suffix {
                     from,
@@ -253,6 +338,8 @@ pub(super) fn validate_state(
         )
         .map_err(|_| StorageError::Corrupt("checkpoint suffix/ballot/commit invariant"))?;
         let mut checked = one.remove(group).unwrap();
+        checked.hard_state = s.hard_state;
+        checked.ballot_origin = s.ballot_origin;
         checked.revision = s.revision;
         checked.generation = s.generation;
         if checked != *s || (s.revision.get() == 1 && *s != initial) {

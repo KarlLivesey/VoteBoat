@@ -180,7 +180,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
         let mut offset = 0usize;
         let mut sequence = 0u64;
         let mut state = BTreeMap::new();
-        if bytes.starts_with(checkpoint::MAGIC) {
+        if checkpoint::is_checkpoint(&bytes) {
             (sequence, state, offset) = codec.decode_checkpoint(&bytes, limits)?;
             if offset < HEADER + TRAILER || offset > bytes.len() || offset > boundary as usize {
                 return Err(StorageError::Corrupt("checkpoint outside durable prefix"));

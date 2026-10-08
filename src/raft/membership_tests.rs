@@ -513,3 +513,150 @@ fn removed_or_demoted_local_replica_stops_service_and_campaigning() {
         })]
     ));
 }
+
+#[test]
+fn a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot() {
+    let mut core = staged();
+    core.role = Role::Follower;
+    let sender = StoreBinding {
+        identity: store(2),
+        session: StoreSession::new(1).unwrap(),
+    };
+    let context = RequestContext {
+        origin: sender,
+        sequence: 50,
+    };
+    let vote = reply(
+        &core,
+        2,
+        context,
+        Rpc::Vote {
+            last_index: 2,
+            last_term: 1,
+        },
+    );
+    let effects = core.step(Event::Receive(vote)).unwrap();
+    let effects = durable(&mut core, effects);
+    assert!(matches!(
+        &effects[..],
+        [Effect::Send(Message {
+            rpc: Rpc::Voted { granted: true },
+            ..
+        })]
+    ));
+    let original = core.durable.ballot_origin.unwrap();
+    core.role = Role::Leader;
+    let effects = accept(
+        &mut core,
+        101,
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: configuration(4, &[1, 3], &[2, 4, 5]),
+        },
+    );
+    durable(&mut core, effects);
+    committed_fixture(&mut core, 3);
+    let effects = accept(&mut core, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut core, effects);
+    committed_fixture(&mut core, 4);
+    let replacement = StoreIdentity {
+        id: StoreId::new(20).unwrap(),
+        incarnation: StoreIncarnation::new(2).unwrap(),
+    };
+    let next = configuration(5, &[1, 3], &[2, 4, 5]);
+    let mut learners = next.learners().clone();
+    learners.insert(node(2), replacement);
+    let next = Configuration::new(
+        cid(5),
+        next.policy().clone(),
+        next.voter_stores().clone(),
+        learners,
+    )
+    .unwrap();
+    let effects = accept(&mut core, 102, ConfigurationChange::Learners(next));
+    durable(&mut core, effects);
+    committed_fixture(&mut core, 5);
+    let next = configuration(7, &[1, 2, 3], &[4, 5]);
+    let mut voters = next.voter_stores().clone();
+    voters.insert(node(2), replacement);
+    let next = Configuration::new(
+        cid(7),
+        next.policy().clone(),
+        voters,
+        next.learners().clone(),
+    )
+    .unwrap();
+    let effects = accept(
+        &mut core,
+        103,
+        ConfigurationChange::Joint { id: cid(6), next },
+    );
+    durable(&mut core, effects);
+    assert_eq!(core.durable.ballot_origin, Some(original));
+    core.role = Role::Follower;
+    let sender = StoreBinding {
+        identity: replacement,
+        session: StoreSession::new(1).unwrap(),
+    };
+    let mut vote = reply(
+        &core,
+        2,
+        RequestContext {
+            origin: sender,
+            sequence: 51,
+        },
+        Rpc::Vote {
+            last_index: 6,
+            last_term: 1,
+        },
+    );
+    vote.sender = sender;
+    let effects = core.step(Event::Receive(vote.clone())).unwrap();
+    assert!(matches!(
+        &effects[..],
+        [Effect::Send(Message {
+            rpc: Rpc::Voted { granted: false },
+            ..
+        })]
+    ));
+    assert_eq!(core.durable.ballot_origin, Some(original));
+    vote.term = 2;
+    let effects = core.step(Event::Receive(vote)).unwrap();
+    assert_eq!(core.durable.ballot_origin, Some(original));
+    let effects = durable(&mut core, effects);
+    assert!(matches!(
+        &effects[..],
+        [Effect::Send(Message {
+            rpc: Rpc::Voted { granted: true },
+            ..
+        })]
+    ));
+    assert_eq!(
+        core.durable.ballot_origin,
+        Some(BallotOrigin {
+            configuration: cid(6),
+            candidate_store: replacement
+        })
+    );
+    // The replaced physical replica cannot campaign as the new store merely
+    // because it still has the same NodeId in its recovered local assignment.
+    core.node = node(2);
+    core.binding.identity = store(2);
+    core.role = Role::Leader;
+    let before = core.durable.hard_state;
+    assert_eq!(core.step(Event::Campaign), Err(RaftError::NotVoter));
+    assert_eq!(
+        core.step(Event::Propose {
+            operation: operation(200),
+            bytes: vec![1]
+        }),
+        Err(RaftError::NotLeader)
+    );
+    assert_eq!(
+        core.step(Event::Read {
+            request: ReadRequestId::new(2).unwrap()
+        }),
+        Err(RaftError::NotLeader)
+    );
+    assert_eq!(core.durable.hard_state, before);
+}

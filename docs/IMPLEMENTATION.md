@@ -2266,9 +2266,53 @@ propagation, route/roster admission and faulted native/host transition histories
 remain unfinished. Full P0–P7 stays active; recursive responsibilities, safe
 split/merge and P7 evidence remain outstanding.
 
+## Slice 35 — durable historical ballot origin
+
+GroupLog now retains the configuration and exact candidate store identity of a
+hard-state vote. New promises validate against predecessor accepted membership;
+a suffix or snapshot cannot authorize its own candidate in the same update.
+Unchanged promises survive rollback, removal and compaction without requiring
+current electorate membership. Single-vote/term guards remain mandatory. Raft
+local service/campaign/grant checks use exact store assignment, and same-term
+repeat grants cannot transfer a ballot to a replacement store with the same NodeId.
+Exact admitted durability completion still gates replies; Written remains insufficient.
+
+Normal WAL bytes remain unchanged and derive origin during replay. Reclaimed
+images use VBLCPT02 when bootstrap scope cannot represent the historical promise;
+VBLCPT01 remains available for representable state. Recovery validates canonical
+log structure separately from restoring historical promises and rejects mismatched
+snapshot/suffix hard states. Host decoder output receives mandatory structural
+validation before publishing a recovery session. Selected stores remain trusted
+for history provenance; metadata/CRC is not authentication. No ballot is imported
+from remote application snapshot metadata. See [ballot recovery](BALLOT_RECOVERY.md).
+
+Ten downstream ballot tests cover shared host/native eligibility and rollback,
+removal/compaction, torn vote frames, failed barriers and replacement, actual-file
+restart, every extended-image truncation and bit corruption, resealed semantic
+corruption and invalid host-decoder recovery. A seventh actual-core membership
+test retains an old-store vote through removal, learner-store replacement and
+promotion, rejects a same-term replacement-store vote, then permits a new term
+only after exact completion. Prepared fixtures do not prove online administration.
+
+The independent bounded local model checks 237,556 reachable states and 665,097
+edges without invariant violation. Three deliberately broken variants produce
+counterexamples for erased rollback promises, early replies and ignored store
+identity. Bounds, oracle assumptions, actions and exclusions are recorded in
+[validation/REPORT.md](../validation/REPORT.md). This is not the distributed joint
+Raft model or a full proof and does not justify enabling online reconfiguration.
+
+Local validation passes 353 default/native/TLS tests and 331 native-only tests
+before the final host-decoder test was added; the final focused ballot suites
+pass all 10 tests in both configurations (354 and 332 total distinct tests).
+The core/host-only full suite passes 197 tests. Clippy passes all three feature
+configurations with warnings denied; formatting, API docs, inventory JSON, RPL
+headers and diff checks pass. Linux only; macOS, hardware power-failure behavior
+and performance are not established. CI stays background feedback.
+
 ## Next slice
 
-Specify and model durable ballot provenance through configuration activation,
-rollback, compaction and recovery; implement the corresponding recovery contract.
-Then complete lagging-peer request scopes, learner readiness and prospective
-reservation before enabling online changes and their faulted actual-core histories.
+Complete lagging-peer request scopes, learner assignment/recovery/readiness,
+prospective reservation and retiring-leader final propagation before enabling
+online changes. The distributed activation/ballot model and faulted actual-core
+network histories remain gates. Full P0–P7 stays active; recursive responsibilities,
+safe split/merge and P7 evidence remain outstanding.

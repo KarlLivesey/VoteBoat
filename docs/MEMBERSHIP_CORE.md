@@ -39,10 +39,10 @@ Raft's current-term rule; it is never the largest observed acknowledgement.
 
 | Site | Membership rule now used |
 | --- | --- |
-| Campaign admission | Local node must be a voter; learners/removed nodes return `NotVoter` before term or timer changes. |
+| Campaign admission | Exact local node/store assignment must be a voter; learners/removed nodes return `NotVoter` before term or timer changes. |
 | Durable self-vote completion and received ballots | Both policies must be satisfied in joint state; election messages target voting peers only. |
 | Incoming sender identity | Exact active union store identity; learners can return replication replies but cannot supply Vote/Voted/ReadProbe/ReadAck or lead replication. |
-| Vote grant | Local replica and candidate must both be voters, in addition to durable single-vote and log-freshness rules. |
+| Vote grant | Exact local replica and candidate must both be voters. Same-term repeat grants retain the candidate store identity from the durable ballot origin, alongside single-vote and log-freshness rules. |
 | Leader replication | Voters and learners from both sides of a joint configuration, each replica exactly once. |
 | Append/snapshot/compacted acknowledgements | Existing term, request, sender and matching-prefix checks; learner progress may be recorded but is absent from quorum predicates. |
 | Commit frontier | `Membership::frontier`, requiring old and new policies jointly, then local-prefix/current-term restrictions. |
@@ -64,13 +64,11 @@ second election path inside `Raft`.
 ## Remaining gates
 
 The remaining bootstrap checks in `Raft::recover_verified` deliberately authorize
-only the existing static protocol: local voter identity, initial policy/map,
-snapshot scope and recovered ballot. Dynamic entries/bases are refused before
-membership reconstruction. `log::apply_batch` also still validates ballots against
-the bootstrap electorate. Enabling a newly promoted candidate requires a durable
-ballot-history/recovery design that preserves earlier ballots when their candidate
-is subsequently removed or the surrounding suffix is rolled back. Accepting only
-the current voter set at recovery would be incorrect.
+only the existing static protocol: local voter identity, initial policy/map and
+snapshot scope. Dynamic entries/bases remain refused. Durable ballot validation
+now uses historical origin rather than the current electorate; see
+[ballot recovery](BALLOT_RECOVERY.md). A removed candidate's retained promise
+cannot authorize another candidate or a replacement physical store in that term.
 
 Live ingress still rejects configuration entries and membership snapshots. It
 also currently requires the sender's configuration to equal the local accepted
@@ -81,13 +79,14 @@ final propagation and snapshot catch-up need actual end-to-end histories.
 
 Other unfinished prerequisites are explicit learner assignment/recovery,
 application/storage compatibility and catch-up evidence, prospective fanout
-reservation before an expanding event, route/roster admission, the formal
+reservation before an expanding event, route/roster admission, the distributed
 activation/ballot state-machine model and faulted native/host network histories.
+The bounded local ballot model is one prerequisite, not that complete model.
 The internal tests do not justify removing any of these gates.
 
 ## Evidence boundary
 
-Six internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
+Seven internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
 completion, election, append-acknowledgement, read, compaction and rollback
 helpers. Their deliberately prepared committed boundaries and host-asserted
 completion tokens isolate the core rules being checked. They do not exercise
@@ -95,7 +94,9 @@ an online administrator or prove that their asserted durability occurred on disk
 They cover accepted-but-not-durable visibility/storage failure, learner identity
 and exclusion, promoted voters in joint commit, same-voter weighted election/read
 changes, stale configuration responses, final rollback into a compacted joint
-base and local demotion/removal service fencing.
+base and local demotion/removal service fencing. The seventh retains an old-store
+ballot through removal, learner-store replacement and promotion; it denies a
+same-term new-store request and permits a fresh-term request only after durability.
 
 A downstream public-interface test checks exact replica/voter store views through
 learner/joint/final activation, rollback and checkpoint replay, including removed
