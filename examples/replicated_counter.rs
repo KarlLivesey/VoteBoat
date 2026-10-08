@@ -47,7 +47,9 @@ impl Demo {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             match effect {
-                Effect::CheckpointRequired { .. } | Effect::CheckpointCompacted(_) => {
+                Effect::VerifyLearnerReadiness(_)
+                | Effect::CheckpointRequired { .. }
+                | Effect::CheckpointCompacted(_) => {
                     return Err("synchronous demo does not request asynchronous checkpoints".into())
                 }
                 Effect::SnapshotRequired {

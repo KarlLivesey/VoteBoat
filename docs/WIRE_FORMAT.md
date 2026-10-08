@@ -1,10 +1,11 @@
-# Native wire formats 1–3
+# Native wire formats 1–4
 
 `NativeWireCodec::new` selects wire version 1 for existing static-configuration
 assemblies. `NativeWireCodec::with_membership` explicitly selects version 2,
 adding configuration entries and configuration-aware snapshots.
 `NativeWireCodec::with_authority` selects version 3, retaining format 2 payloads
-and adding direct witness authorization. All implement
+and adding direct witness authorization. `NativeWireCodec::with_readiness`
+selects version 4, adding learner readiness requests/replies. All implement
 `WireCodec` with a fixed 24-byte prefix. A selected codec accepts only its own
 version; session/roster wire versions must match before transport admission.
 There is no automatic downgrade. Codec capability does not enable online Raft
@@ -27,7 +28,7 @@ choose that trusted scope. This codec does not authenticate a connection.
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | ASCII `VBWIRE01` |
-| 8 | 2 | Wire version, 1, 2 or 3 as explicitly selected |
+| 8 | 2 | Wire version, 1, 2, 3 or 4 as explicitly selected |
 | 10 | 2 | Flags, 0 |
 | 12 | 4 | Total frame bytes, including prefix and final checksum |
 | 16 | 4 | Message count, positive |
@@ -220,3 +221,27 @@ Formats 1/2 reject these tags even in relabelled, resealed frames. Format 3 keep
 existing membership snapshot tag 9. These are membership control assertions,
 not ballots, read probes or term updates. See
 [replication authorization](REPLICATION_AUTHORITY.md) for provenance and limits.
+
+## Format 4 learner readiness
+
+Format 4 retains format 3 and adds tags 12/13. Both carry learner node (`u64`),
+store ID (16 bytes), store incarnation (`u64`), learner store session (`u64`),
+required committed index (`u64`), its term (`u64`), application schema (`u64`),
+required command bytes (`u64`) and snapshot bytes (`u64`). Tag 13 appends one
+Boolean readiness byte. Byte counts convert to `usize` with checked conversion.
+They are capability requirements, not payload lengths or allocation requests.
+
+Group/configuration/term/context come from the envelope. For tag 12 the leader
+is the sender and learner is the recipient; context origin equals sender binding.
+For tag 13 the leader is the recipient and learner is the sender; the learner
+store/session must equal the authenticated sender binding. Required index/term
+and all requirements are positive; required term is at most the envelope term.
+The full reconstructed request must match the leader's pending request.
+
+The fixed-size request is boxed in memory and charged separately to decoded and
+outbound retention. Older selected formats reject these tags even when relabelled
+with valid checksums. TLS and QUIC select exact format 4 explicitly, with no
+downgrade. Neither request nor reply updates terms, ballots, reads or membership.
+Successful verification uses the original owner visit and selected asynchronous
+snapshot worker; see [learner readiness](LEARNER_RECOVERY.md). Configuration
+delivery remains gated pending the online activation release checks.

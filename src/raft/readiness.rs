@@ -103,7 +103,7 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced.into());
         }
-        if self.has_pending_dependency() {
+        if self.has_persistence_dependency() {
             return Err(RaftError::Busy.into());
         }
         if self.membership.joint().is_some()
@@ -123,6 +123,9 @@ impl Raft {
         requirements: ReadinessRequirements,
     ) -> Result<LearnerReadinessRequest, ReadinessError> {
         self.readiness_idle()?;
+        if self.readiness_check.is_some() {
+            return Err(RaftError::Busy.into());
+        }
         if self.role != Role::Leader || !self.local_voter() {
             return Err(RaftError::NotLeader.into());
         }
@@ -159,10 +162,165 @@ impl Raft {
             requirements,
         };
         self.learner_readiness = Some(request);
+        self.ready_learner = None;
         Ok(request)
     }
     pub fn cancel_learner_readiness(&mut self) {
         self.learner_readiness = None;
+        self.ready_learner = None;
+    }
+    /// Volatile native-exchange result. Promotion must still recheck its scope
+    /// and current authenticated peer binding at execution.
+    pub fn ready_learner(&self) -> Option<&ReadyLearner> {
+        self.ready_learner.as_ref()
+    }
+    pub(crate) fn readiness_check_matches(&self, message: &Message) -> bool {
+        self.readiness_check.as_ref() == Some(message)
+    }
+    pub(crate) fn receive_readiness(&mut self, message: Message) -> Result<Vec<Effect>, RaftError> {
+        let request = match &message.rpc {
+            Rpc::LearnerReadinessRequest(request) | Rpc::LearnerReadinessReply { request, .. } => {
+                **request
+            }
+            _ => return Err(RaftError::InvalidMessage),
+        };
+        if message.group != request.group
+            || message.configuration != request.configuration
+            || message.term != request.term
+            || message.context != request.context
+            || message.to != self.node
+            || message.from == self.node
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        match message.rpc {
+            Rpc::LearnerReadinessRequest(_) => {
+                if message.from != request.leader || message.sender != request.context.origin {
+                    return Err(RaftError::WrongIdentity);
+                }
+                // Readiness cannot advance a term, reset election timers or
+                // authorize a peer from a different configuration.
+                if self
+                    .check_readiness_request(request, message.sender)
+                    .is_err()
+                {
+                    return Ok(Vec::new());
+                }
+                if request.index > self.durable.commit_index
+                    || self.durable.term_at(request.index) != Some(request.index_term)
+                {
+                    return Ok(vec![Effect::Send(self.reply(
+                        &message,
+                        Rpc::LearnerReadinessReply {
+                            request: Box::new(request),
+                            ready: false,
+                        },
+                    ))]);
+                }
+                self.readiness_check = Some(message.clone());
+                Ok(vec![Effect::VerifyLearnerReadiness(message)])
+            }
+            Rpc::LearnerReadinessReply { ready, .. } => {
+                if message.from != request.learner.node
+                    || message.to != request.leader
+                    || message.sender.identity != request.learner.store
+                    || message.sender.session != request.session
+                {
+                    return Err(RaftError::WrongIdentity);
+                }
+                let receipt = LearnerReadinessReceipt {
+                    request,
+                    binding: message.sender,
+                };
+                if self.learner_readiness != Some(request)
+                    || self.check_ready_scope(&receipt, message.sender).is_err()
+                {
+                    return Ok(Vec::new());
+                }
+                if ready {
+                    self.ready_learner = Some(
+                        self.accept_learner_readiness(receipt, message.sender)
+                            .map_err(|_| RaftError::InvalidMessage)?,
+                    );
+                } else {
+                    self.cancel_learner_readiness();
+                }
+                Ok(Vec::new())
+            }
+            _ => unreachable!(),
+        }
+    }
+    fn check_readiness_request(
+        &self,
+        request: LearnerReadinessRequest,
+        authenticated_leader: StoreBinding,
+    ) -> Result<(), ReadinessError> {
+        self.readiness_idle()?;
+        let state = self.state();
+        if authenticated_leader != request.context.origin
+            || self.membership.voter_store(request.leader) != Some(authenticated_leader.identity)
+            || request.learner.node != self.node
+            || request.learner.store != self.binding.identity
+            || request.session != self.binding.session
+        {
+            return Err(ReadinessError::WrongBinding);
+        }
+        if request.context.sequence == 0
+            || request.index == 0
+            || request.index_term == 0
+            || request.group != state.bootstrap.group
+            || request.configuration != self.membership.id()
+            || request.term != state.hard_state.term
+            || self.role != Role::Follower
+            || self.membership.stable().learners().get(&self.node) != Some(&self.binding.identity)
+        {
+            return Err(ReadinessError::Stale);
+        }
+        Ok(())
+    }
+
+    /// Complete only the staged read-only verification. No new durability or
+    /// application state is created; the worker checks the existing pinned anchor.
+    pub(crate) fn finish_readiness_check<A: CheckpointStateMachine>(
+        &mut self,
+        message: &Message,
+        application: &A,
+        snapshot: Option<crate::snapshot::Snapshot>,
+        limits: crate::snapshot::SnapshotLimits,
+    ) -> Result<Vec<Effect>, ReadinessError> {
+        if !self.readiness_check_matches(message) {
+            return Err(RaftError::WrongCompletion.into());
+        }
+        let Rpc::LearnerReadinessRequest(request) = &message.rpc else {
+            return Err(RaftError::WrongCompletion.into());
+        };
+        let request = **request;
+        // The owner remained suspended until this exact completion.
+        self.check_readiness_request(request, message.sender)?;
+        let ready = match verify_readiness_evidence(
+            self,
+            application,
+            request,
+            limits,
+            snapshot.as_ref(),
+        ) {
+            Ok(()) => true,
+            Err(
+                ReadinessError::Capability
+                | ReadinessError::NotCaughtUp
+                | ReadinessError::Application(_)
+                | ReadinessError::InvalidRequirements,
+            ) => false,
+            Err(e) => return Err(e),
+        };
+        self.readiness_check = None;
+        Ok(vec![Effect::Send(self.reply(
+            message,
+            Rpc::LearnerReadinessReply {
+                request: Box::new(request),
+                ready,
+            },
+        ))])
     }
     fn check_ready_scope(
         &self,
@@ -232,14 +390,9 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
     request: LearnerReadinessRequest,
     authenticated_leader: StoreBinding,
 ) -> Result<LearnerReadinessReceipt, ReadinessError> {
-    raft.readiness_idle()?;
+    raft.check_readiness_request(request, authenticated_leader)?;
     let state = raft.state();
-    if authenticated_leader != request.context.origin
-        || raft.membership.voter_store(request.leader) != Some(authenticated_leader.identity)
-        || request.learner.node != raft.node
-        || request.learner.store != raft.binding.identity
-        || request.session != raft.binding.session
-        || log.binding() != raft.binding
+    if log.binding() != raft.binding
         || snapshots.identity()
             != (SnapshotIdentity {
                 store: raft.binding.identity,
@@ -249,17 +402,39 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
     {
         return Err(ReadinessError::WrongBinding);
     }
-    if request.context.sequence == 0
-        || request.index == 0
-        || request.index_term == 0
-        || request.group != state.bootstrap.group
-        || request.configuration != raft.membership.id()
-        || request.term != state.hard_state.term
-        || raft.role != Role::Follower
-        || raft.membership.stable().learners().get(&raft.node) != Some(&raft.binding.identity)
+    check_readiness_progress(raft, application, request)?;
+    log.limits().validate()?;
+    if log.limits().max_command_bytes < request.requirements.command_bytes
+        || log.limits().max_snapshot_bytes < request.requirements.snapshot_bytes
     {
-        return Err(ReadinessError::Stale);
+        return Err(ReadinessError::Capability);
     }
+    if log.state(request.group)? != *state {
+        return Err(ReadinessError::NotCaughtUp);
+    }
+    let snapshot = state
+        .snapshot
+        .map(|r| snapshots.load_pinned(r))
+        .transpose()?;
+    verify_readiness_evidence(
+        raft,
+        application,
+        request,
+        snapshots.limits(),
+        snapshot.as_ref(),
+    )?;
+    Ok(LearnerReadinessReceipt {
+        request,
+        binding: raft.binding,
+    })
+}
+
+fn check_readiness_progress<A: CheckpointStateMachine>(
+    raft: &Raft,
+    application: &A,
+    request: LearnerReadinessRequest,
+) -> Result<(), ReadinessError> {
+    let state = raft.state();
     if request.index > state.commit_index
         || state.term_at(request.index) != Some(request.index_term)
         || application.applied_index() < request.index
@@ -267,9 +442,20 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
     {
         return Err(ReadinessError::NotCaughtUp);
     }
+    Ok(())
+}
+
+fn verify_readiness_evidence<A: CheckpointStateMachine>(
+    raft: &Raft,
+    application: &A,
+    request: LearnerReadinessRequest,
+    snapshot_limits: crate::snapshot::SnapshotLimits,
+    snapshot: Option<&crate::snapshot::Snapshot>,
+) -> Result<(), ReadinessError> {
+    let state = raft.state();
     let required = request.requirements;
-    let snapshot_limits = snapshots.limits().validate()?;
-    log.limits().validate()?;
+    let snapshot_limits = snapshot_limits.validate()?;
+    check_readiness_progress(raft, application, request)?;
     if required.application_schema == 0
         || required.command_bytes == 0
         || required.snapshot_bytes == 0
@@ -277,27 +463,29 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
         return Err(ReadinessError::InvalidRequirements);
     }
     if application.schema_version() != required.application_schema
-        || log.limits().max_command_bytes < required.command_bytes
-        || log.limits().max_snapshot_bytes < required.snapshot_bytes
+        || raft.limits.max_command_bytes < required.command_bytes
+        || raft.limits.max_snapshot_bytes < required.snapshot_bytes
         || snapshot_limits.max_application_bytes < required.snapshot_bytes
     {
         return Err(ReadinessError::Capability);
     }
-    // Core durable state must agree with the selected provider, rather than a
-    // second log binding or an uncompleted provider suffix.
-    if log.state(request.group)? != *state {
-        return Err(ReadinessError::NotCaughtUp);
+    if state.snapshot.is_some() != snapshot.is_some() {
+        return Err(ReadinessError::Storage(StorageError::Rejected(
+            "readiness anchor",
+        )));
     }
     if let Some(reference) = state.snapshot {
-        let snapshot = snapshots.load_pinned(reference)?;
-        if !reference.matches(&snapshot)
+        let snapshot = snapshot.ok_or(ReadinessError::NotCaughtUp)?;
+        if !reference.matches(snapshot)
             || snapshot.metadata.bootstrap != state.bootstrap
             || snapshot.metadata.membership
                 != state
                     .checkpoint_membership(reference.index)
                     .map_err(|_| ReadinessError::Stale)?
         {
-            return Err(ReadinessError::NotCaughtUp);
+            return Err(ReadinessError::Storage(StorageError::Rejected(
+                "readiness snapshot",
+            )));
         }
         let mut restored = application.clone();
         restored.restore_checkpoint(
@@ -313,7 +501,7 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
     // caller-supplied version number. No new snapshot is published or pinned.
     let index = application.applied_index();
     let bytes = application.checkpoint(snapshot_limits.max_application_bytes)?;
-    if bytes.is_empty() || bytes.len() > snapshot_limits.max_application_bytes {
+    if bytes.is_empty() || bytes.capacity() > snapshot_limits.max_application_bytes {
         return Err(ReadinessError::Capability);
     }
     let mut restored = application.clone();
@@ -321,8 +509,5 @@ pub fn verify_learner_readiness<A: CheckpointStateMachine, L: LogStore, S: Snaps
     if restored.applied_index() != index {
         return Err(ReadinessError::NotCaughtUp);
     }
-    Ok(LearnerReadinessReceipt {
-        request,
-        binding: raft.binding,
-    })
+    Ok(())
 }

@@ -36,6 +36,8 @@ pub struct SnapshotWorkTicket {
 }
 #[derive(Debug)]
 pub enum SnapshotJob {
+    /// Inspect selected capabilities and load the existing pin without changing retention.
+    Readiness { reference: Option<SnapshotRef> },
     /// Reconcile only against the owner's exact durable log anchor. Publish,
     /// pin and verify the new image before returning its reference.
     Publish {
@@ -58,6 +60,10 @@ pub struct SnapshotWork {
 }
 #[derive(Debug)]
 pub enum SnapshotOutput {
+    Readiness {
+        snapshot: Option<Snapshot>,
+        limits: SnapshotLimits,
+    },
     Published(SnapshotRef),
     Reconciled(SnapshotRef),
     Loaded {
@@ -172,6 +178,11 @@ pub fn prepare_snapshot_work<A: CheckpointStateMachine>(
         return Err(CheckpointError::InvalidBinding);
     }
     let job = match effect {
+        Effect::VerifyLearnerReadiness(message) if raft.readiness_check_matches(message) => {
+            SnapshotJob::Readiness {
+                reference: raft.state().snapshot,
+            }
+        }
         Effect::StageSnapshot(message) if raft.staged_matches(message) => {
             let Rpc::Snapshot { snapshot } = &message.rpc else {
                 return Err(CheckpointError::InvalidBoundary);
@@ -293,6 +304,15 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
     let result = (|| {
         let output = event.result?;
         match (effect, output) {
+            (
+                Effect::VerifyLearnerReadiness(message),
+                SnapshotOutput::Readiness { snapshot, limits },
+            ) => raft
+                .finish_readiness_check(message, application, snapshot, limits)
+                .map_err(|e| match e {
+                    crate::raft::ReadinessError::Storage(e) => CheckpointError::Storage(e),
+                    _ => CheckpointError::Consensus(RaftError::WrongCompletion),
+                }),
             (Effect::CheckpointRequired { context }, SnapshotOutput::Published(reference)) => {
                 if reference.store != raft.storage_binding().identity
                     || reference.group != raft.state().bootstrap.group

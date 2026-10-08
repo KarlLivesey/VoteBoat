@@ -143,6 +143,12 @@ impl<S: SnapshotRetention + Send + 'static> NativeSnapshotWorker<S> {
         let check_ref =
             |r: SnapshotRef| r.store == self.binding.store.identity && r.group == work.visit.group;
         let (input, control) = match &work.job {
+            SnapshotJob::Readiness { reference } => {
+                if reference.is_some_and(|r| !check_ref(r)) {
+                    return Err(SnapshotWorkError::WrongBinding);
+                }
+                (0, false)
+            }
             SnapshotJob::Publish { snapshot, durable } => {
                 if snapshot.metadata.bootstrap.group != work.visit.group
                     || durable.is_some_and(|r| !check_ref(r))
@@ -348,6 +354,25 @@ fn perform<S: SnapshotRetention>(
     let allowance = snapshot_load_reservation(store.limits())
         .ok_or(StorageError::Rejected("snapshot worker limits"))?;
     match job {
+        SnapshotJob::Readiness { reference } => {
+            let snapshot = reference
+                .map(|r| {
+                    let snapshot = store.load_pinned(r)?;
+                    if !r.matches(&snapshot)
+                        || snapshot_image_bytes(&snapshot).is_none_or(|n| n > allowance)
+                    {
+                        return Err(StorageError::Corrupt(
+                            "readiness snapshot verification/budget",
+                        ));
+                    }
+                    Ok(snapshot)
+                })
+                .transpose()?;
+            Ok(SnapshotOutput::Readiness {
+                snapshot,
+                limits: store.limits(),
+            })
+        }
         SnapshotJob::Publish { snapshot, durable } => {
             store.reconcile_log(durable)?;
             let ticket = store.begin(snapshot.metadata.clone(), snapshot.application.len())?;

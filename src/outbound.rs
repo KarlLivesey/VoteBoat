@@ -299,6 +299,10 @@ pub fn message_cost(
         Ok(())
     };
     let class = match &message.rpc {
+        Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. } => {
+            add(size_of::<crate::raft::LearnerReadinessRequest>())?;
+            MessageClass::Control
+        }
         Rpc::Append { entries, .. } => {
             add(entries
                 .capacity()

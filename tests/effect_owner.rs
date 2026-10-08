@@ -2920,6 +2920,10 @@ mod snapshot_routes {
                 .filter_map(|_| self.pending.pop_front())
                 .map(|(request, work)| {
                     let result = match work.job {
+                        SnapshotJob::Readiness { reference } => SnapshotOutput::Readiness {
+                            snapshot: reference.map(|_| self.images[&work.visit.group].clone()),
+                            limits: voteboat::snapshot::SnapshotLimits::default(),
+                        },
                         SnapshotJob::Reconcile { reference } => {
                             SnapshotOutput::Reconciled(reference)
                         }

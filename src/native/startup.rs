@@ -577,6 +577,7 @@ where
         1 => NativeWireCodec::new(Default::default()),
         2 => NativeWireCodec::with_membership(Default::default()),
         3 => NativeWireCodec::with_authority(Default::default()),
+        4 => NativeWireCodec::with_readiness(Default::default()),
         _ => return Err(error("wire version", "unsupported native format")),
     };
     let factory = checked(NativeTransportFactory::new(

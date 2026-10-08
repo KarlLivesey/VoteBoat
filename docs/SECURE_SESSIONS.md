@@ -22,7 +22,7 @@ After TLS authentication, both sides exchange a 52-byte encrypted hello:
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | `VBSESS01` |
-| 8 | 2 | little-endian selected wire version, 1–3 |
+| 8 | 2 | little-endian selected wire version, 1–4 |
 | 10 | 2 | zero reserved flags |
 | 12 | 8 | node ID |
 | 20 | 16 | store ID |
@@ -35,7 +35,7 @@ not evidence that any remote log index is durable. The hello must finish and
 its local ciphertext must drain before `binding` and `Ready` become visible.
 No application plaintext can be written or read before this transition.
 Unknown hello versions and flags fail closed. `NativeTlsConfig::new` selects
-wire version 1. `config.with_wire_version(2)` or `(3)` selects one exact native
+wire version 1. `config.with_wire_version(2)`, `(3)` or `(4)` selects one exact native
 format for future sessions; other versions are rejected before constructing a
 session. `wire_version()` reports that choice. Cloned configs can select different
 versions without mutating shared credentials or existing sessions. Both peers

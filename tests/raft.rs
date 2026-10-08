@@ -72,6 +72,7 @@ impl<S: LogStore> Cluster<S> {
                 Effect::SnapshotRequired { .. }
                 | Effect::CheckpointRequired { .. }
                 | Effect::CheckpointCompacted(_)
+                | Effect::VerifyLearnerReadiness(_)
                 | Effect::StageSnapshot(_)
                 | Effect::SnapshotInstalled(_) => {
                     panic!("baseline history has no compacted groups")

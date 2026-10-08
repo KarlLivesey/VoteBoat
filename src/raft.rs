@@ -37,6 +37,11 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    LearnerReadinessRequest(Box<LearnerReadinessRequest>),
+    LearnerReadinessReply {
+        request: Box<LearnerReadinessRequest>,
+        ready: bool,
+    },
     Vote {
         last_index: u64,
         last_term: u64,
@@ -108,6 +113,12 @@ pub(crate) enum RecoveryMode {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Event {
+    CheckLearnerReadiness {
+        learner: PeerIdentity,
+        session: StoreSession,
+        requirements: ReadinessRequirements,
+    },
+    CancelLearnerReadiness,
     /// Host-authorized administrative input; public network configuration
     /// ingress remains independently gated. This is not an application command.
     Configure(Box<ConfigurationProposal>),
@@ -168,6 +179,8 @@ impl ReadBarrier {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Effect {
+    /// Read-only maintenance, suspended under the original owner visit.
+    VerifyLearnerReadiness(Message),
     Persist(LogUpdate),
     Send(Message),
     /// Ordered committed entries. Not a client success: application must apply
@@ -274,6 +287,8 @@ pub struct Raft {
     authority_request: Option<authority::PendingAuthority>,
     replication_permit: Option<authority::ReplicationPermit>,
     learner_readiness: Option<LearnerReadinessRequest>,
+    ready_learner: Option<ReadyLearner>,
+    readiness_check: Option<Message>,
 }
 
 impl Raft {
@@ -468,6 +483,8 @@ impl Raft {
             authority_request: None,
             replication_permit: None,
             learner_readiness: None,
+            ready_learner: None,
+            readiness_check: None,
         })
     }
     pub fn role(&self) -> Role {
@@ -648,6 +665,9 @@ impl Raft {
     /// A suspended runtime visit cannot be released while these dependencies
     /// are unresolved. Outstanding reads still accept their protocol messages.
     pub fn has_pending_dependency(&self) -> bool {
+        self.readiness_check.is_some() || self.has_persistence_dependency()
+    }
+    fn has_persistence_dependency(&self) -> bool {
         self.pending.is_some()
             || self.staged_snapshot.is_some()
             || self.application_install.is_some()
@@ -659,6 +679,7 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.readiness_check = None;
         self.cancel_learner_readiness();
         self.clear_replication_authority();
         self.fenced = true;
@@ -777,6 +798,32 @@ impl Raft {
             return Err(RaftError::Busy);
         }
         match event {
+            Event::CheckLearnerReadiness {
+                learner,
+                session,
+                requirements,
+            } => {
+                let request = self
+                    .begin_learner_readiness(learner, session, requirements)
+                    .map_err(|e| match e {
+                        ReadinessError::Consensus(e) => e,
+                        _ => RaftError::InvalidMessage,
+                    })?;
+                Ok(vec![Effect::Send(Message {
+                    group: request.group,
+                    configuration: request.configuration,
+                    from: self.node,
+                    sender: self.binding,
+                    to: learner.node,
+                    term: request.term,
+                    context: request.context,
+                    rpc: Rpc::LearnerReadinessRequest(Box::new(request)),
+                })])
+            }
+            Event::CancelLearnerReadiness => {
+                self.cancel_learner_readiness();
+                Ok(Vec::new())
+            }
             Event::Configure(proposal) => self.configure(*proposal),
             Event::AuthorizeReplication {
                 witness,
@@ -1066,11 +1113,16 @@ impl Raft {
         )?;
         let next = state.remove(&update.group).unwrap();
         let membership = next.membership().map_err(|_| RaftError::InvalidRecovery)?;
-        if self.learner_readiness.is_some_and(|r| {
-            r.term != next.hard_state.term
-                || r.configuration != membership.id()
-                || r.index < next.commit_index
-        }) {
+        if self
+            .learner_readiness
+            .as_ref()
+            .or_else(|| self.ready_learner.as_ref().map(|r| r.request()))
+            .is_some_and(|r| {
+                r.term != next.hard_state.term
+                    || r.configuration != membership.id()
+                    || r.index < next.commit_index
+            })
+        {
             self.cancel_learner_readiness();
         }
         if membership.id() != self.membership().id() {
@@ -1441,6 +1493,12 @@ impl Raft {
     fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
         if matches!(
             m.rpc,
+            Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. }
+        ) {
+            return self.receive_readiness(m);
+        }
+        if matches!(
+            m.rpc,
             Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. }
         ) {
             return self.receive_authority(m);
@@ -1522,7 +1580,10 @@ impl Raft {
             self.requests.clear();
         }
         match &m.rpc {
-            Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. } => unreachable!(),
+            Rpc::AuthorityRequest { .. }
+            | Rpc::AuthorityReply { .. }
+            | Rpc::LearnerReadinessRequest(_)
+            | Rpc::LearnerReadinessReply { .. } => unreachable!(),
             Rpc::Vote {
                 last_index,
                 last_term,

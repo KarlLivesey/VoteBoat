@@ -382,3 +382,49 @@ assertion uses a borrowed expected-message slice.
   activation modeling and faulted online transitions remain required. Public
   configuration ingress remains gated; no macOS, physical power-loss, benchmark
   or full protocol proof claim. The complete P0–P7 goal stays active.
+
+## 2026-10-08: native readiness exchange (slice 54)
+
+- Four new learner histories and one wire history pass. Learners/wire/outbound/
+  snapshot-worker suites pass 23/14/4/14 tests. Core-only learner histories pass
+  13 tests and core-only all-target builds pass. Final focused runs cover the
+  shared scope/progress checks, boxed memory accounting and local promotion use.
+- Actual TCP/TLS and QUIC histories carry fresh requests and denial/positive
+  replies through native framing, the native snapshot worker over a host-selected
+  pinned snapshot provider, and the original EffectOwner/SnapshotRouter. They
+  verify a compacted learner, another group progressing while completion is
+  withheld, stale ticket rejection, accepted-work shutdown drain, exact original
+  send credits and checked evidence feeding local joint-journal persistence.
+  Initial learner assignment and peer-2 quorum replies remain host assertions;
+  these do not claim remote online enrollment or configuration delivery.
+- Core histories cover future-term inertness, missing-prefix denial before I/O,
+  wrong sessions, duplicate responses, capability denial without fencing,
+  storage failure fencing without a reply and recovery dropping volatile state.
+  Existing native-file readiness/reopen histories remain green separately.
+- Format-4 tests cover every truncation, valid-checksum old-version relabeling,
+  invalid envelope/capability/Boolean fields and exact decoded/outbound memory
+  ceilings. TLS, dedicated/shared QUIC and three-node TCP/QUIC startup histories
+  now exercise exact versions 2/3/4 plus mismatches with no downgrade; startup
+  writes, drains/joins and recovers native files.
+- The affected library/effect-owner/runtime/Raft/snapshot/secure/QUIC/connector/
+  startup/service suites pass, including existing native 100-group histories and
+  seven static-service tests. After boxing, owner/runtime/learners/wire/outbound
+  checks were repeated; after shared-check changes, focused learner/wire/worker
+  checks were repeated. No unrelated unchanged test loop was used.
+- An unrelated-group fixture initially canceled a nonexistent read; its corrected
+  inert event verifies scheduling without that semantic error. Clippy identified
+  excessive Event size from an inline request; the request is now boxed and its
+  allocation is explicitly charged before native decoding/encoding. A focused
+  core-only test then caught premature pinned-snapshot I/O for an unmatchable
+  prefix during shared-helper extraction; prefix checks were restored before I/O.
+- All-feature/all-target Clippy with warnings denied, API docs, formatting/diff
+  and inventory shape/path checks pass (52 contracts). Metadata validation is
+  not protocol conformance. No new durable token, watermark or generation.
+- Readiness uses authoritative recovered core log limits/state and selected
+  snapshot/application capabilities. Custom hosts must honor that provider
+  binding; online administration must additionally validate wire/transport
+  capacities and placement. Lost replies require explicit host cancellation and
+  retry. The service CLI has no online administrator or automatic readiness loop.
+  Configuration-bearing public Append and membership Snapshot remain gated.
+  No macOS execution, physical power-loss, benchmark or full protocol proof
+  claim; online activation and P5–P7 remain outstanding under the active goal.

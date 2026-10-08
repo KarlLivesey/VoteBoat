@@ -615,6 +615,589 @@ fn learner_peer() -> voteboat::secure::PeerIdentity {
         store: identity(4),
     }
 }
+
+fn readiness_visit(learner: &Raft) -> voteboat::runtime::VisitTicket {
+    use voteboat::runtime::*;
+    VisitTicket {
+        owner: RuntimeOwner {
+            store: learner.storage_binding(),
+            lane: ExecutionLaneId::new(1).unwrap(),
+            generation: RuntimeGeneration::new(1).unwrap(),
+        },
+        group: group(1),
+        sequence: 1,
+    }
+}
+
+#[test]
+fn readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_capability() {
+    use voteboat::snapshot_worker::*;
+    let mut log = HostLogStore::new(4);
+    let (mut leader, mut learner, mut app, _) = readiness_cluster(&mut log);
+    for capable in [false, true] {
+        let requirements = if capable {
+            readiness_requirements()
+        } else {
+            ReadinessRequirements {
+                application_schema: 99,
+                ..readiness_requirements()
+            }
+        };
+        let effects = leader
+            .step(Event::CheckLearnerReadiness {
+                learner: learner_peer(),
+                session: log.binding().session,
+                requirements,
+            })
+            .unwrap();
+        let query = sent(&effects, 4);
+        let before = learner.state().clone();
+        let mut future = query.clone();
+        future.term += 10;
+        if let Rpc::LearnerReadinessRequest(r) = &mut future.rpc {
+            r.term = future.term;
+        }
+        assert!(learner.step(Event::Receive(future)).unwrap().is_empty());
+        assert_eq!(learner.state(), &before);
+        assert!(!learner.has_pending_dependency());
+        let mut ahead = query.clone();
+        if let Rpc::LearnerReadinessRequest(r) = &mut ahead.rpc {
+            r.index += 1;
+        }
+        let denied = sent(&learner.step(Event::Receive(ahead)).unwrap(), 1);
+        assert!(matches!(
+            denied.rpc,
+            Rpc::LearnerReadinessReply { ready: false, .. }
+        ));
+        assert!(!learner.has_pending_dependency());
+        let effects = learner.step(Event::Receive(query.clone())).unwrap();
+        let [effect @ Effect::VerifyLearnerReadiness(_)] = effects.as_slice() else {
+            panic!()
+        };
+        assert!(learner.has_pending_dependency());
+        assert_eq!(learner.step(Event::Heartbeat), Err(RaftError::Busy));
+        let visit = readiness_visit(&learner);
+        let binding = SnapshotWorkerBinding {
+            store: log.binding(),
+            generation: SnapshotWorkerGeneration::new(1).unwrap(),
+        };
+        let work = prepare_snapshot_work(&learner, &app, visit, effect, binding).unwrap();
+        assert!(matches!(
+            work.job,
+            SnapshotJob::Readiness { reference: None }
+        ));
+        let ticket = SnapshotWorkTicket {
+            binding,
+            sequence: 1,
+        };
+        let event = |sequence| SnapshotWorkEvent {
+            request: SnapshotWorkTicket { sequence, ..ticket },
+            visit,
+            result: Ok(SnapshotOutput::Readiness {
+                snapshot: None,
+                limits: SnapshotLimits::default(),
+            }),
+        };
+        assert_eq!(
+            complete_snapshot_work(&mut learner, &mut app, effect, ticket, visit, event(2)),
+            Err(CheckpointError::InvalidBinding)
+        );
+        assert!(learner.has_pending_dependency());
+        assert!(!learner.is_fenced());
+        let replies =
+            complete_snapshot_work(&mut learner, &mut app, effect, ticket, visit, event(1))
+                .unwrap();
+        assert!(!learner.has_pending_dependency());
+        assert_eq!(learner.state(), &before);
+        let reply = sent(&replies, 1);
+        assert!(matches!(reply.rpc, Rpc::LearnerReadinessReply { ready, .. } if ready == capable));
+        let mut foreign = reply.clone();
+        foreign.sender.session = StoreSession::new(99).unwrap();
+        assert_eq!(
+            leader.step(Event::Receive(foreign)),
+            Err(RaftError::WrongIdentity)
+        );
+        leader.step(Event::Receive(reply.clone())).unwrap();
+        assert_eq!(leader.ready_learner().is_some(), capable);
+        leader.step(Event::Receive(reply)).unwrap(); // duplicate is inert
+        if capable {
+            let ready = leader.ready_learner().unwrap().clone();
+            leader
+                .check_learner_readiness(&ready, log.binding())
+                .unwrap();
+            leader.step(Event::CancelLearnerReadiness).unwrap();
+            assert!(leader.ready_learner().is_none());
+            // Caller-held tokens remain subject to explicit freshness checks.
+            leader
+                .check_learner_readiness(&ready, log.binding())
+                .unwrap();
+        }
+    }
+}
+
+#[test]
+fn readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_exchange() {
+    use voteboat::{contracts::StorageError, snapshot_worker::*};
+    let mut log = HostLogStore::new(4);
+    let (mut leader, mut learner, mut app, leader_log) = readiness_cluster(&mut log);
+    let query = sent(
+        &leader
+            .step(Event::CheckLearnerReadiness {
+                learner: learner_peer(),
+                session: log.binding().session,
+                requirements: readiness_requirements(),
+            })
+            .unwrap(),
+        4,
+    );
+    let effects = learner.step(Event::Receive(query)).unwrap();
+    let visit = readiness_visit(&learner);
+    let ticket = SnapshotWorkTicket {
+        binding: SnapshotWorkerBinding {
+            store: log.binding(),
+            generation: SnapshotWorkerGeneration::new(1).unwrap(),
+        },
+        sequence: 1,
+    };
+    assert!(complete_snapshot_work(
+        &mut learner,
+        &mut app,
+        &effects[0],
+        ticket,
+        visit,
+        SnapshotWorkEvent {
+            request: ticket,
+            visit,
+            result: Err(StorageError::Corrupt("lost readiness pin"))
+        }
+    )
+    .is_err());
+    assert!(learner.is_fenced());
+    assert_eq!(learner.step(Event::Heartbeat), Err(RaftError::Fenced));
+    let recovered = Raft::recover_member(
+        node(1),
+        leader_log.binding(),
+        leader_log.state(group(1)).unwrap(),
+        leader_log.limits(),
+    )
+    .unwrap();
+    assert!(recovered.ready_learner().is_none());
+    assert!(!core(&log).has_pending_dependency());
+}
+
+#[cfg(feature = "tls")]
+mod native_exchange {
+    use super::*;
+    use std::{
+        net::{TcpListener, TcpStream},
+        sync::Arc,
+        time::{Duration, Instant},
+    };
+    use voteboat::{
+        native::{
+            outbound::NativeOutbound, runtime::*, snapshot_worker::NativeSnapshotWorker, tls::*,
+            transport::NativePeerTransport, wire::NativeWireCodec, worker::ThreadWake,
+        },
+        outbound::*,
+        runtime::*,
+        secure::*,
+        snapshot_worker::*,
+        transport::*,
+        worker::WorkerBinding,
+    };
+    type Channel = NativePeerTransport<Box<dyn SecureSession>, NativeWireCodec>;
+    fn peer(local: LocalIdentity) -> TlsPeer {
+        // Node 4 uses certificate 2 under explicit test-host pin authorization.
+        // Certificate names and consensus node/store identities are separate.
+        let certificate = if local.node == node(1) {
+            include_bytes!("fixtures/tls/node1.der").as_slice()
+        } else {
+            include_bytes!("fixtures/tls/node2.der").as_slice()
+        };
+        TlsPeer {
+            identity: PeerIdentity {
+                node: local.node,
+                store: local.store.identity,
+            },
+            certificate: certificate.to_vec(),
+            server_name: if local.node == node(1) {
+                "node1.voteboat.test"
+            } else {
+                "node2.voteboat.test"
+            }
+            .into(),
+        }
+    }
+    fn channels(
+        a: LocalIdentity,
+        b: LocalIdentity,
+        quic: bool,
+    ) -> (Channel, Channel, NativeOutbound, NativeOutbound) {
+        let ca = support::tls::configuration(1).with_wire_version(4).unwrap();
+        let cb = support::tls::configuration(2).with_wire_version(4).unwrap();
+        let generation = SecureSessionGeneration::new(1).unwrap();
+        let limits = SessionLimits {
+            write_buffer_bytes: 256,
+            ..SessionLimits::default()
+        };
+        let (mut sa, mut sb): (Box<dyn SecureSession>, Box<dyn SecureSession>) = if quic {
+            #[cfg(feature = "quic")]
+            {
+                use voteboat::native::quic::*;
+                let ua = std::net::UdpSocket::bind("127.0.0.1:0").unwrap();
+                let ub = std::net::UdpSocket::bind("127.0.0.1:0").unwrap();
+                let aa = ua.local_addr().unwrap();
+                let ba = ub.local_addr().unwrap();
+                (
+                    Box::new(
+                        NativeQuicSession::client(
+                            ua,
+                            &ca,
+                            QuicSessionOptions {
+                                local: a,
+                                peer: peer(b),
+                                remote: ba,
+                                generation,
+                                limits,
+                            },
+                            MonoTime(0),
+                        )
+                        .unwrap(),
+                    ),
+                    Box::new(
+                        NativeQuicSession::server(
+                            ub,
+                            &cb,
+                            QuicSessionOptions {
+                                local: b,
+                                peer: peer(a),
+                                remote: aa,
+                                generation,
+                                limits,
+                            },
+                            MonoTime(0),
+                        )
+                        .unwrap(),
+                    ),
+                )
+            }
+            #[cfg(not(feature = "quic"))]
+            {
+                panic!("QUIC feature required")
+            }
+        } else {
+            let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+            let stream = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+            let other = listener.accept().unwrap().0;
+            (
+                Box::new(
+                    NativeTlsSession::client_tcp(
+                        stream,
+                        &ca,
+                        a,
+                        peer(b),
+                        generation,
+                        limits,
+                        MonoTime(0),
+                    )
+                    .unwrap(),
+                ),
+                Box::new(
+                    NativeTlsSession::server_tcp(
+                        other,
+                        &cb,
+                        b,
+                        peer(a),
+                        generation,
+                        limits,
+                        MonoTime(0),
+                    )
+                    .unwrap(),
+                ),
+            )
+        };
+        let clock = Instant::now();
+        while sa.state() != SessionState::Ready || sb.state() != SessionState::Ready {
+            let now = MonoTime(clock.elapsed().as_millis() as u64);
+            sa.poll(now, SessionPollBudget::default()).unwrap();
+            sb.poll(now, SessionPollBudget::default()).unwrap();
+            assert!(clock.elapsed() < Duration::from_secs(5));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        assert_eq!(sa.binding().unwrap().peer, b);
+        assert_eq!(sb.binding().unwrap().peer, a);
+        let queue = |local: LocalIdentity| {
+            NativeOutbound::new(
+                OutboundBinding {
+                    node: local.node,
+                    store: local.store,
+                    generation: OutboundGeneration::new(1).unwrap(),
+                },
+                OutboundLimits::default(),
+            )
+            .unwrap()
+        };
+        let qa = queue(a);
+        let qb = queue(b);
+        (
+            NativePeerTransport::new(
+                sa,
+                NativeWireCodec::with_readiness(Default::default()).unwrap(),
+                &qa,
+                TransportLimits::default(),
+            )
+            .unwrap(),
+            NativePeerTransport::new(
+                sb,
+                NativeWireCodec::with_readiness(Default::default()).unwrap(),
+                &qb,
+                TransportLimits::default(),
+            )
+            .unwrap(),
+            qa,
+            qb,
+        )
+    }
+    fn transfer(
+        a: &mut Channel,
+        b: &mut Channel,
+        queue: &mut NativeOutbound,
+        message: Message,
+        timeline: &Instant,
+    ) -> Message {
+        queue.submit(vec![message.clone()]).unwrap();
+        a.submit(queue.poll(1).pop().unwrap()).unwrap();
+        let clock = Instant::now();
+        let budget = TransportPollBudget {
+            plaintext_calls: 2,
+            read_bytes: 31,
+            write_bytes: 29,
+            ..Default::default()
+        };
+        loop {
+            let now = MonoTime(1000 + timeline.elapsed().as_millis() as u64);
+            a.poll(now, budget).unwrap();
+            b.poll(now, budget).unwrap();
+            if a.usage().completion && b.received_info().is_some() {
+                break;
+            }
+            assert!(clock.elapsed() < Duration::from_secs(5));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        let received = b.take_received().unwrap();
+        assert_eq!(received.connection, b.binding());
+        assert_eq!(received.messages, [message]);
+        let done = a.take_send().unwrap();
+        assert_eq!(queue.usage().batches, 1);
+        queue.complete(done.batch, done.result).unwrap();
+        assert!(queue.is_drained());
+        received.messages.into_iter().next().unwrap()
+    }
+    fn run(quic: bool) {
+        let mut log = HostLogStore::new(4);
+        let (mut leader, mut learner, mut app, mut leader_log) = readiness_cluster(&mut log);
+        let mut snapshots = super::snapshots();
+        let receipt = checkpoint_application(&learner, &app, &mut snapshots).unwrap();
+        compact_replica(
+            &mut learner,
+            &mut log,
+            &mut snapshots,
+            &app,
+            receipt.reference(),
+        )
+        .unwrap();
+        let identity = readiness_visit(&learner).owner;
+        let worker_binding = SnapshotWorkerBinding {
+            store: log.binding(),
+            generation: SnapshotWorkerGeneration::new(54).unwrap(),
+        };
+        let mut worker = NativeSnapshotWorker::spawn(
+            [(group(1), snapshots)].into(),
+            worker_binding,
+            SnapshotWorkLimits::default(),
+            Arc::new(ThreadWake::current()),
+        )
+        .unwrap();
+        let mut shard = Shard::new(
+            identity,
+            ShardLimits {
+                max_groups: 2,
+                ..Default::default()
+            },
+            FairScheduler::new(2).unwrap(),
+        )
+        .unwrap();
+        shard.register(learner).unwrap();
+        let mut other_log = HostLogStore::new(4);
+        append(&mut other_log, vec![LogMutation::Create(bootstrap(2, 4))]);
+        shard
+            .register(
+                Raft::recover(
+                    node(4),
+                    other_log.binding(),
+                    other_log.state(group(2)).unwrap(),
+                    other_log.limits(),
+                )
+                .unwrap(),
+            )
+            .unwrap();
+        let runtime = TimedShard::new(
+            shard,
+            DeadlineQueue::new(identity, 2).unwrap(),
+            JitterEntropy::new(54),
+            TimerConfig::default(),
+            MonoTime(0),
+        )
+        .unwrap();
+        let mut owner = EffectOwner::new(
+            runtime,
+            WorkerBinding {
+                store: log.binding(),
+                generation: StorageWorkerGeneration::new(1).unwrap(),
+            },
+            EffectOwnerLimits::default(),
+        )
+        .unwrap();
+        let mut router =
+            SnapshotRouter::new(identity, worker_binding, SnapshotRouterLimits::default()).unwrap();
+        let (mut a, mut b, mut qa, mut qb) = channels(
+            LocalIdentity {
+                node: node(1),
+                store: leader.storage_binding(),
+            },
+            LocalIdentity {
+                node: node(4),
+                store: log.binding(),
+            },
+            quic,
+        );
+        let timeline = Instant::now();
+        for (capable, closing) in [(false, false), (true, false), (true, true)] {
+            let requirements = if capable {
+                readiness_requirements()
+            } else {
+                ReadinessRequirements {
+                    application_schema: 88,
+                    ..readiness_requirements()
+                }
+            };
+            let query = sent(
+                &leader
+                    .step(Event::CheckLearnerReadiness {
+                        learner: learner_peer(),
+                        session: log.binding().session,
+                        requirements,
+                    })
+                    .unwrap(),
+                4,
+            );
+            let query = transfer(&mut a, &mut b, &mut qa, query, &timeline);
+            owner.admit(group(1), Event::Receive(query)).unwrap();
+            assert!(owner.advance(MonoTime(0), 1).unwrap()[0].error.is_none());
+            let lease = owner.take_effect().unwrap().unwrap();
+            assert!(matches!(lease.effect, Effect::VerifyLearnerReadiness(_)));
+            let visit = lease.ticket.visit;
+            let ticket = router.submit(&mut owner, &mut worker, lease, &app).unwrap();
+            assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+            // Polling is deliberately withheld. Provider completion cannot release
+            // the original visit or its credits, and another group still runs.
+            assert_eq!(worker.usage().requests, 1);
+            assert_eq!(
+                router.deliver(
+                    &mut owner,
+                    &mut app,
+                    SnapshotWorkEvent {
+                        request: SnapshotWorkTicket {
+                            sequence: ticket.sequence + 1,
+                            ..ticket
+                        },
+                        visit,
+                        result: Err(voteboat::contracts::StorageError::Fenced),
+                    },
+                    MonoTime(0)
+                ),
+                Err(SnapshotRouteError::StaleCompletion)
+            );
+            assert!(!owner.is_failed());
+            if closing {
+                owner.close_admission().unwrap();
+                worker.close();
+                assert!(!owner.is_drained());
+                assert!(!worker.is_drained());
+            } else {
+                owner
+                    .admit(group(2), Event::CancelReplicationAuthorization)
+                    .unwrap();
+                let steps = owner.advance(MonoTime(0), 1).unwrap();
+                assert_eq!(steps.len(), 1);
+                assert!(steps[0].error.is_none());
+            }
+            assert_eq!(worker.usage().requests, 1);
+            let clock = Instant::now();
+            let event = loop {
+                if let Some(event) = worker.poll(1).pop() {
+                    break event;
+                }
+                assert!(clock.elapsed() < Duration::from_secs(5));
+                std::thread::park_timeout(Duration::from_millis(1));
+            };
+            assert_eq!(event.request, ticket);
+            router
+                .deliver(&mut owner, &mut app, event, MonoTime(0))
+                .unwrap();
+            assert_eq!(router.usage().requests, 0);
+            assert!(!owner.core(group(1)).unwrap().has_pending_dependency());
+            let lease = owner.take_effect().unwrap().unwrap();
+            let Effect::Send(reply) = lease.effect else {
+                panic!()
+            };
+            owner.release_transferred_send(lease.ticket).unwrap();
+            let reply = transfer(&mut b, &mut a, &mut qb, reply, &timeline);
+            assert!(
+                matches!(reply.rpc, Rpc::LearnerReadinessReply { ready, .. } if ready == capable)
+            );
+            leader.step(Event::Receive(reply)).unwrap();
+            assert_eq!(leader.ready_learner().is_some(), capable);
+            assert_eq!(worker.usage(), SnapshotWorkUsage::default());
+        }
+        leader
+            .check_learner_readiness(leader.ready_learner().unwrap(), log.binding())
+            .unwrap();
+        let proof = PromotionReadiness {
+            ready: leader.ready_learner().unwrap().clone(),
+            authenticated: a.binding().peer.store,
+        };
+        // Network-derived evidence now feeds the same local journal admission.
+        // Configuration delivery to other nodes remains independently gated.
+        let effects = leader
+            .step(Event::Configure(Box::new(proposal(
+                &[1, 2, 4],
+                vec![proof],
+            ))))
+            .unwrap();
+        assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+        assert!(leader.ready_learner().is_none());
+        persist(&mut leader, &mut leader_log, effects);
+        assert!(leader.membership().joint().is_some());
+        assert_eq!(owner.usage().active_visits, 0);
+        assert!(owner.is_drained());
+        worker.close();
+        let clock = Instant::now();
+        while worker.try_reclaim().unwrap().is_none() {
+            assert!(clock.elapsed() < Duration::from_secs(5));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+    #[test]
+    fn tcp_readiness_checks_compacted_learner_through_worker_and_original_owner() {
+        run(false);
+    }
+    #[cfg(feature = "quic")]
+    #[test]
+    fn quic_readiness_checks_compacted_learner_through_worker_and_original_owner() {
+        run(true);
+    }
+}
 #[test]
 fn readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix() {
     let mut log = HostLogStore::new(4);

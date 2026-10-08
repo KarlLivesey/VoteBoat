@@ -55,6 +55,10 @@ impl NativeWireCodec {
     pub fn with_authority(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 3)
     }
+    /// Explicit format 4 adds learner readiness; sessions still default to 1.
+    pub fn with_readiness(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 4)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -104,6 +108,30 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
     match &m.rpc {
+        Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
+            let query = matches!(m.rpc, Rpc::LearnerReadinessRequest(_));
+            if version < 4
+                || r.group != m.group
+                || r.configuration != m.configuration
+                || r.context != m.context
+                || r.term != m.term
+                || r.leader != if query { m.from } else { m.to }
+                || r.learner.node != if query { m.to } else { m.from }
+                || (query && r.context.origin != m.sender)
+                || (!query
+                    && (r.learner.store != m.sender.identity || r.session != m.sender.session))
+                || r.index == 0
+                || r.index_term == 0
+                || r.requirements.application_schema == 0
+                || r.requirements.command_bytes == 0
+                || r.requirements.snapshot_bytes == 0
+            {
+                return Err(WireError::InvalidMessage(
+                    "readiness scope/version/capabilities",
+                ));
+            }
+            boundary(r.index, r.index_term, r.term)?;
+        }
         Rpc::AuthorityRequest {
             candidate,
             configuration,
@@ -411,6 +439,30 @@ impl Encoder {
         self.binding(m.context.origin)?;
         self.u64(m.context.sequence)?;
         match &m.rpc {
+            Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
+                self.budget.charge(size_of::<LearnerReadinessRequest>())?;
+                self.u8(if matches!(m.rpc, Rpc::LearnerReadinessRequest(_)) {
+                    12
+                } else {
+                    13
+                })?;
+                self.peer(r.learner)?;
+                self.u64(r.session.get())?;
+                self.u64(r.index)?;
+                self.u64(r.index_term)?;
+                self.u64(r.requirements.application_schema)?;
+                self.u64(
+                    u64::try_from(r.requirements.command_bytes).map_err(|_| WireError::TooLarge)?,
+                )?;
+                self.u64(
+                    u64::try_from(r.requirements.snapshot_bytes)
+                        .map_err(|_| WireError::TooLarge)?,
+                )?;
+                if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
+                    self.u8(u8::from(*ready))?;
+                }
+                Ok(())
+            }
             Rpc::Vote {
                 last_index,
                 last_term,
@@ -963,6 +1015,36 @@ impl<'a> Decoder<'a> {
                 index: self.u64()?,
                 term: self.u64()?,
             },
+            kind @ (12 | 13) if version >= 4 => {
+                budget.charge(size_of::<LearnerReadinessRequest>())?;
+                let request = LearnerReadinessRequest {
+                    group,
+                    configuration,
+                    leader: if kind == 12 { from } else { to },
+                    context,
+                    term,
+                    learner: self.peer()?,
+                    session: StoreSession::new(self.u64()?)
+                        .ok_or(WireError::InvalidMessage("zero readiness session"))?,
+                    index: self.u64()?,
+                    index_term: self.u64()?,
+                    requirements: ReadinessRequirements {
+                        application_schema: self.u64()?,
+                        command_bytes: usize::try_from(self.u64()?)
+                            .map_err(|_| WireError::TooLarge)?,
+                        snapshot_bytes: usize::try_from(self.u64()?)
+                            .map_err(|_| WireError::TooLarge)?,
+                    },
+                };
+                if kind == 12 {
+                    Rpc::LearnerReadinessRequest(Box::new(request))
+                } else {
+                    Rpc::LearnerReadinessReply {
+                        request: Box::new(request),
+                        ready: bool_value(self.u8()?)?,
+                    }
+                }
+            }
             10 if version >= 3 => Rpc::AuthorityRequest {
                 candidate: self.peer()?,
                 configuration: self.configuration_id()?,

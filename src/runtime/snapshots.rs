@@ -140,7 +140,8 @@ impl SnapshotRouter {
                 .map_err(SnapshotRouteError::Owner)?;
             if !matches!(
                 lease.effect,
-                Effect::StageSnapshot(_)
+                Effect::VerifyLearnerReadiness(_)
+                    | Effect::StageSnapshot(_)
                     | Effect::SnapshotRequired { .. }
                     | Effect::SnapshotInstalled(_)
                     | Effect::CheckpointRequired { .. }
@@ -173,7 +174,17 @@ impl SnapshotRouter {
             }
             // Reserve before cloning a Publish image or polling a Load result.
             // The minimum avoids repeatedly charging a rejected lease on retry.
+            // Readiness can retain the loaded anchor and a live application
+            // checkpoint simultaneously during deterministic owner validation.
             let extra = allowance
+                .checked_mul(
+                    if matches!(lease.effect, Effect::VerifyLearnerReadiness(_)) {
+                        2
+                    } else {
+                        1
+                    },
+                )
+                .ok_or(SnapshotRouteError::TooLarge)?
                 .checked_add(4096)
                 .ok_or(SnapshotRouteError::TooLarge)?;
             owner
@@ -276,7 +287,25 @@ impl SnapshotRouter {
             .validate_lease(&p.lease)
             .map_err(SnapshotRouteError::Owner)?;
         let p = self.pending.remove(&event.request.sequence).unwrap();
-        if let Ok(SnapshotOutput::Loaded { snapshot, .. }) = &event.result {
+        if let Ok(SnapshotOutput::Readiness { limits, .. }) = &event.result {
+            if crate::snapshot_worker::snapshot_load_reservation(*limits)
+                .is_none_or(|n| n > p.allowance)
+            {
+                let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+                owner
+                    .discard_failed(p.lease)
+                    .map_err(|e| SnapshotRouteError::Owner(e.reason))?;
+                return Err(SnapshotRouteError::ProviderContract);
+            }
+        }
+        if let Ok(
+            SnapshotOutput::Loaded { snapshot, .. }
+            | SnapshotOutput::Readiness {
+                snapshot: Some(snapshot),
+                ..
+            },
+        ) = &event.result
+        {
             if snapshot_image_bytes(snapshot).is_none_or(|n| n > p.allowance) {
                 let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
                 owner

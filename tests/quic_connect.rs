@@ -322,7 +322,7 @@ fn failed_construction_returns_socket_without_starting_protocol_work() {
 
 #[test]
 fn shared_quic_connector_preserves_selected_versions_and_rejects_mismatches() {
-    for version in [2, 3] {
+    for version in [2, 3, 4] {
         let mut connectors = versioned_connectors([version; 3]);
         let (mut sessions, now) = establish(&mut connectors, 0, 1);
         assert!(sessions

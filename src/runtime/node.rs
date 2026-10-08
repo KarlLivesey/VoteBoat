@@ -115,6 +115,7 @@ pub enum NodeError {
     RecoveryRequired,
     MissingPeers,
     WrongPeerStore,
+    IncompatiblePeerProtocol,
     MissingSnapshots,
     Aborted,
     Owner(EffectOwnerError),
@@ -406,6 +407,41 @@ where
         self.local
             .owner
             .admit(group, event)
+            .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
+    }
+    /// Admit a readiness round using the current authenticated native peer
+    /// binding. Results are volatile on Raft::ready_learner; they require a
+    /// fresh binding check again when a later promotion executes.
+    pub fn request_learner_readiness(
+        &mut self,
+        group: GroupIdentity,
+        learner: NodeId,
+        requirements: crate::raft::ReadinessRequirements,
+    ) -> Result<(), NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        let network = self.peers.as_ref().ok_or(NodeError::MissingPeers)?;
+        let binding = network
+            .roster()
+            .binding(learner)
+            .ok_or(NodeError::WrongPeerStore)?;
+        if binding.wire_version != 4 {
+            return Err(NodeError::IncompatiblePeerProtocol);
+        }
+        self.local
+            .owner
+            .admit(
+                group,
+                Event::CheckLearnerReadiness {
+                    learner: crate::secure::PeerIdentity {
+                        node: learner,
+                        store: binding.peer.store.identity,
+                    },
+                    session: binding.peer.store.session,
+                    requirements,
+                },
+            )
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
     }
     pub fn disconnect(&mut self, peer: NodeId, now: MonoTime) -> Result<(), NodeError> {

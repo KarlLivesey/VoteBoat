@@ -957,9 +957,9 @@ fn effect_bytes(effects: &[Effect], capacity: usize) -> Option<usize> {
     let mut bytes = capacity.checked_mul(4 * size_of::<Effect>())?;
     for effect in effects {
         let extra = match effect {
-            Effect::Send(message) | Effect::StageSnapshot(message) => {
-                message_cost(message, usize::MAX).ok()?.1
-            }
+            Effect::Send(message)
+            | Effect::StageSnapshot(message)
+            | Effect::VerifyLearnerReadiness(message) => message_cost(message, usize::MAX).ok()?.1,
             Effect::Committed(entries) => entries
                 .capacity()
                 .checked_mul(size_of::<LogEntry>())?

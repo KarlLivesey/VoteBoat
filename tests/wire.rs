@@ -926,6 +926,166 @@ mod native {
     }
 
     #[test]
+    fn readiness_format_checks_envelope_capabilities_and_explicit_version() {
+        let codec = NativeWireCodec::with_readiness(WireLimits::default()).unwrap();
+        assert_eq!(codec.format_version(), 4);
+        let mut query = message(Rpc::ReadProbe);
+        query.context.origin = query.sender;
+        let request = LearnerReadinessRequest {
+            group: query.group,
+            configuration: query.configuration,
+            leader: query.from,
+            context: query.context,
+            term: query.term,
+            learner: voteboat::secure::PeerIdentity {
+                node: query.to,
+                store: identity(2),
+            },
+            session: StoreSession::new(1).unwrap(),
+            index: 2,
+            index_term: 2,
+            requirements: ReadinessRequirements {
+                application_schema: 1,
+                command_bytes: 8,
+                snapshot_bytes: 4096,
+            },
+        };
+        query.rpc = Rpc::LearnerReadinessRequest(Box::new(request));
+        // This fixture's common outbound scope is 1 -> 2. Reverse the logical
+        // leader/learner for reply fixtures while preserving that transport scope.
+        let reply_request = LearnerReadinessRequest {
+            leader: query.to,
+            context: RequestContext {
+                origin: HostLogStore::new(2).binding,
+                sequence: 11,
+            },
+            learner: voteboat::secure::PeerIdentity {
+                node: query.from,
+                store: query.sender.identity,
+            },
+            session: query.sender.session,
+            ..request
+        };
+        let reply = Message {
+            context: reply_request.context,
+            rpc: Rpc::LearnerReadinessReply {
+                request: Box::new(reply_request),
+                ready: true,
+            },
+            ..query.clone()
+        };
+        for input in [
+            query.clone(),
+            reply.clone(),
+            Message {
+                rpc: Rpc::LearnerReadinessReply {
+                    request: Box::new(reply_request),
+                    ready: false,
+                },
+                ..reply.clone()
+            },
+        ] {
+            fixture_roundtrip(codec, input.clone());
+            let frame = codec
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            for old in [
+                super::native::codec(),
+                membership_codec(),
+                NativeWireCodec::with_authority(WireLimits::default()).unwrap(),
+            ] {
+                assert!(old
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .is_err());
+                assert!(old.decode_batch(scope(), &frame).is_err());
+                assert!(old
+                    .decode_batch(
+                        scope(),
+                        &change(&frame, 8, &old.format_version().to_le_bytes())
+                    )
+                    .is_err());
+            }
+            for cut in 0..frame.len() {
+                assert!(codec.decode_batch(scope(), &frame[..cut]).is_err());
+            }
+        }
+        let frame = codec
+            .encode_batch(scope(), std::slice::from_ref(&reply))
+            .unwrap();
+        let retained =
+            std::mem::size_of::<Message>() + std::mem::size_of::<LearnerReadinessRequest>();
+        assert_eq!(
+            voteboat::outbound::message_cost(&reply, retained)
+                .unwrap()
+                .1,
+            retained
+        );
+        assert!(voteboat::outbound::message_cost(&reply, retained - 1).is_err());
+        let exact = NativeWireCodec::with_readiness(WireLimits {
+            max_decoded_bytes: retained,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        fixture_roundtrip(exact, reply.clone());
+        let narrow = NativeWireCodec::with_readiness(WireLimits {
+            max_decoded_bytes: retained - 1,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        assert!(narrow
+            .encode_batch(scope(), std::slice::from_ref(&reply))
+            .is_err());
+        assert!(narrow.decode_batch(scope(), &frame).is_err());
+        assert!(codec
+            .decode_batch(scope(), &change(&frame, frame.len() - 5, &[2]))
+            .is_err());
+        for bad in [
+            LearnerReadinessRequest {
+                index: 0,
+                ..request
+            },
+            LearnerReadinessRequest {
+                index_term: 4,
+                ..request
+            },
+            LearnerReadinessRequest {
+                leader: query.to,
+                ..request
+            },
+            LearnerReadinessRequest {
+                session: StoreSession::new(2).unwrap(),
+                ..reply_request
+            },
+            LearnerReadinessRequest {
+                requirements: ReadinessRequirements {
+                    command_bytes: 0,
+                    ..request.requirements
+                },
+                ..request
+            },
+        ] {
+            let rpc = if bad.leader == query.to && bad.learner.node == query.from {
+                Rpc::LearnerReadinessReply {
+                    request: Box::new(bad),
+                    ready: true,
+                }
+            } else {
+                Rpc::LearnerReadinessRequest(Box::new(bad))
+            };
+            assert!(codec
+                .encode_batch(
+                    scope(),
+                    &[Message {
+                        rpc,
+                        ..query.clone()
+                    }]
+                )
+                .is_err());
+        }
+        fixture_roundtrip(codec, membership_snapshot(true));
+    }
+
+    #[test]
     fn authority_format_is_explicit_bounded_and_preserves_membership_payloads() {
         use voteboat::secure::PeerIdentity;
         let codec = NativeWireCodec::with_authority(WireLimits::default()).unwrap();

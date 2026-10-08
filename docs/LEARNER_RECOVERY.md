@@ -71,10 +71,60 @@ protocol proof.
 A promoted leader that an older receiver still sees as a learner remains rejected.
 Transport authentication is separate from group authority. Promotion/catch-up
 provenance and retiring-leader final propagation now have separate core checks.
-Readiness has the host-driven contract below; native wire/worker integration,
-placement authorization, distributed activation modeling and faulted actual
+Readiness has the host-driven and native contracts below. Placement
+authorization, distributed activation modeling and faulted actual
 network membership histories remain release gates. Public configuration-bearing
 Append and membership Snapshot ingress remain disabled.
+
+## Native readiness exchange
+
+`Event::CheckLearnerReadiness` starts the same fresh core request and emits a
+format-4 RPC. `Node::request_learner_readiness` captures the current authenticated
+roster binding and refuses incompatible protocol selection. An assigned learner
+checks request scope without changing its term or election timer, then emits
+`Effect::VerifyLearnerReadiness` and suspends that group's owner visit.
+
+The existing SnapshotRouter submits `SnapshotJob::Readiness` to the selected
+SnapshotWorker. Native work inspects validated provider limits and loads/verifies
+the existing pin without publishing, reconciling retention or changing the WAL.
+It consumes bulk capacity, preserving the worker's control/recovery reserve.
+Original visit, effect lease and exact worker ticket remain live until completion;
+another group can run while the result is withheld. Stale completions cannot
+release those credits. Closing admission/provider drains accepted work normally.
+
+After exact completion, the owner checks the captured prefix, applied boundary,
+schema and a bounded live checkpoint/restore using the shared readiness checks.
+Its LogLimits and durable state come from the authoritative log binding established
+at recovery and exact WAL completions; custom hosts must bind the core to the
+selected provider's actual limits/state. The direct synchronous helper additionally
+reads and compares LogStore state/limits. Snapshot limits returned by work must
+fit the allowance reserved before submission. The owner reserves space for both
+the loaded pin and live checkpoint; application cloning/scratch obeys the host
+application contract.
+
+Capability/application mismatch or applied lag returns a negative reply without
+fencing. Storage failure or malformed accepted output fences without readiness.
+No new durable token, watermark or generation is introduced: the request refers
+to an existing contiguous durable committed prefix, and the worker only verifies
+its existing pin. A positive reply is a non-Byzantine authenticated assertion,
+not a ballot, read acknowledgement, activation or new durability certificate.
+
+The leader retains at most one checked `ReadyLearner`, exposed by
+`Raft::ready_learner`. A new round/cancellation clears that retained result;
+term/configuration/commit advancement invalidates it. Promotion still checks
+the current authenticated session at execution, including caller-held tokens.
+Lost replies require host cancellation/retry; no automatic readiness retry loop
+or service CLI administrator is provided here. NativeStartup still bootstraps
+static groups; enrolled learners use the public member/learner assembly contracts.
+
+Real loopback TCP/TLS and QUIC histories exercise compacted learners through
+native framing, the native worker over a host-selected snapshot provider and the
+original EffectOwner/SnapshotRouter. They cover denial, success, delayed/stale
+completion, other-group progress, original send credits and shutdown drain.
+Separate existing native-file tests cover compacted checkpoint/reopen verification.
+These are not yet a remote online enrollment/promotion history. Readiness checks
+application/log/snapshot capabilities; the online administrator must also validate
+selected wire/transport capacities and placement policy before promotion.
 
 ## Fresh readiness before promotion
 

@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire and core-predicate foundations plus host-driven readiness implemented; native readiness integration, formal activation model and full online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, core-predicate foundations, local proposals and native TCP/QUIC readiness implemented; distributed activation model and full online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -77,33 +77,36 @@ the count of remaining milestones.
 ### Mini plan: current deliverable and next two
 
 Retained route/credential admission (slice 51), host-driven readiness evidence
-(slice 52) and local configuration proposal admission (slice 53) are implemented.
-The remaining P4 path connects these to native exchange and distributed release
-checks. The macro P4 exit is still usable, validated online add/promote/remove;
-these slices do not redefine that exit.
+(slice 52), local configuration proposal admission (slice 53) and native readiness
+exchange (slice 54) are implemented. Slice 54 exercises real TCP/QUIC, the original
+owner/worker visit, capability denial and success, stale completion, another group
+running and accepted-work shutdown drain. The macro P4 exit is still usable,
+validated online add/promote/remove; these slices do not redefine that exit.
 
-1. **Native readiness exchange (current, P4).** Carry fresh readiness requests and
-   replies through the selected native wire/session and asynchronous maintenance
-   paths. Bind returned evidence to the exact suspended owner/application state
-   and current peer session. Depends on slices 51–53 and existing snapshot workers.
-   Completion means real TCP/QUIC exchange produces checked readiness without
-   blocking unrelated groups; rejected/canceled/stale work preserves its original
-   ownership and credits through drain/recovery.
-2. **Fault-tested online activation (next, P4).** Connect the administrator
+1. **Fault-tested online activation (current, P4).** Connect the administrator
    entry point and placement authorization to those paths, validate distributed
    activation modeling, and exercise actual multi-node add/promote/remove with
    leader loss, restart, rollback and partial delivery. Open configuration ingress
-   only after those release checks pass. Depends on item 1 and the existing
-   membership journal, joint quorum and recovery contracts. This completes the
+   only after those release checks pass. Depends on slices 51–54 and the existing
+   membership journal, joint quorum and recovery contracts. Validate selected
+   wire/transport capacities as well as application/storage readiness, and expose
+   outcomes/cancellation for administrative operations. This completes the
    online-membership milestone and supplies safe replica placement changes.
-3. **First recursive responsibility/routing path (following, P5).** Define the
+2. **First recursive responsibility/routing path (next, P5).** Define the
    smallest manifest and request-resolution path that selects a concrete group,
    then exercise it through the existing service and Rust embedding. Depends on
-   existing group identities/runtime and, when placement changes, item 2. Check
+   existing group identities/runtime and, when placement changes, item 1. Check
    selective placement, stale manifest handling and cached child operation during
    parent unavailability; ordinary child writes must not require an ancestor
    commit. This begins the P5 milestone, rather than claiming all of P5 in one
    slice. Sketch the concrete API and acceptance history at that milestone entry.
+3. **First safe split/ownership movement (following, P6).** After the P5 manifest
+   and routing milestone passes, connect real application export/import to source
+   fencing and durable target activation. Preserve operation IDs, deduplication,
+   outbox state and ownership lineage. Completion checks include receipt loss,
+   restart and partial-progress histories with no dual active owner. This begins
+   P6; compatible merge and the rest of its lifecycle remain required before P7
+   tuning. Readiness tokens from P4 do not replace durable import/activation proof.
 
 ### How the current work fits globally
 
@@ -3251,3 +3254,70 @@ Clippy, API docs and inventory validation pass. Public configuration-bearing
 Append and membership Snapshot ingress remain gated pending native readiness
 exchange, placement authorization, activation modeling and faulted network
 histories. No macOS, hardware power-loss, performance or full proof claim.
+
+## Slice 54 — native learner readiness exchange
+
+Mini schema plan: one pending leader request/result and one suspended learner
+verification per group. Carry the full fresh context in explicitly selected wire
+4 over authenticated TCP/TLS or QUIC. Retain the original owner effect/visit while
+selected snapshot work verifies its existing pin and limits; finish application
+checkpoint/restore checks on that owner. Capability mismatch denies without a
+fence; storage/output failure fences. Completion checks cover exact sessions,
+stale tickets, other-group progress, retained budgets and accepted-work shutdown.
+This advances P4 toward the online administrator and fault-tested activation;
+P5 routing, P6 split/merge and P7 tuning remain the global capability chain.
+
+Event::CheckLearnerReadiness emits Rpc::LearnerReadinessRequest. The learner
+validates exact scope without term/timer/vote/read authority, then suspends on
+Effect::VerifyLearnerReadiness. SnapshotJob::Readiness loads the existing pin and
+returns validated snapshot limits; it does not publish/reconcile retention or
+change WAL state. Native work uses bulk credits, preserving control/recovery
+reserves. SnapshotRouter keeps the exact effect lease, worker ticket and owner
+visit, reserves loaded-image plus live-checkpoint capacity, and rejects oversized
+limits/images before application work. Other groups remain schedulable.
+
+Exact completion uses shared scope/application/snapshot checks. Application or
+capability mismatch returns ready=false; storage failure fences without a reply.
+A positive authenticated reply matching the full pending request yields one
+volatile ReadyLearner exposed through Raft::ready_learner. Commit/term/config
+advancement, cancellation or a new round clears the retained result. Promotion
+still rechecks scope and the current authenticated peer session at execution.
+Node::request_learner_readiness captures the current roster binding and requires
+format 4. Lost replies need explicit host cancellation/retry; no automatic retry
+loop or service CLI administrator is introduced.
+
+No new persistent record, watermark, generation or durability certificate.
+Existing exact WAL completions establish the core's contiguous durable prefix;
+read-only snapshot work verifies its existing anchor. Native recovery takes core
+limits from the authoritative log provider. Custom hosts must honor that binding
+and limits contract; the synchronous helper also compares live LogStore state.
+Readiness covers application/log/snapshot capabilities; wire/transport capacity
+and placement authorization remain administrator obligations before promotion.
+
+Wire 4 uses tags 12/13 with checked capability-size conversions and exact
+reconstructed envelope scope. The request is boxed to bound Event size, with
+symmetric decoded/outbound heap accounting and exact-budget tests. TLS/QUIC,
+connector handoff and startup preserve exact format selection with no downgrade;
+formats 1–3 retain their layouts and refuse readiness tags.
+
+Four new learner histories and one wire history cover suspended verification,
+future/stale scope, wrong sessions, duplicate replies, capability denial, storage
+failure fencing and recovery, every wire truncation, invalid fields/Boolean,
+older-version refusal and exact memory limits. Real TCP/QUIC compacted-learner
+histories use native framing/worker and original EffectOwner/SnapshotRouter with
+a host-selected snapshot provider; initial enrollment and peer-2 quorum replies
+are host assertions. Separate existing tests verify actual native-file readiness
+and compacted reopen. This is not yet remote online enrollment/promotion.
+
+Affected library, effect-owner, learners, wire, outbound, runtime, Raft, snapshot,
+snapshot-worker, secure sessions, QUIC, QUIC connector, startup and service suites
+pass. Native histories additionally verify delayed/stale completion, other-group
+progress, original send credits and closing with accepted work pending. Static
+three-node TCP/QUIC startup commits/drains/recovers under formats 2/3/4. A fixture
+initially canceled a nonexistent read in the unrelated group; replacing that
+with an inert authority cancellation corrected the test. No production failure
+semantics were weakened. Core-only checks, Clippy/API docs and inventory checks
+are recorded in validation/REPORT.md. Public configuration-bearing Append and
+membership Snapshot remain gated pending online administration, placement and
+distributed activation/fault checks. No macOS, physical power-loss, benchmark or
+full proof claim; the complete P0–P7 goal remains active.

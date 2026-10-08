@@ -697,8 +697,8 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
     std::fs::remove_dir_all(directory).unwrap();
 }
 #[test]
-fn tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_and_three() {
-    for version in [2, 3] {
+fn tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four() {
+    for version in [2, 3, 4] {
         selected_wire_cluster(
             voteboat::native::connect::NativePeerProtocol::TcpTls,
             version,
@@ -707,8 +707,8 @@ fn tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_
 }
 #[cfg(feature = "quic")]
 #[test]
-fn quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_and_three() {
-    for version in [2, 3] {
+fn quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four() {
+    for version in [2, 3, 4] {
         selected_wire_cluster(voteboat::native::connect::NativePeerProtocol::Quic, version);
     }
 }

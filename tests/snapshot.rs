@@ -1138,6 +1138,9 @@ impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
                     )
                     .unwrap(),
                 ),
+                Effect::VerifyLearnerReadiness(_) => {
+                    panic!("static snapshot fixture has no learner")
+                }
                 Effect::SnapshotInstalled(reference) => {
                     self.installs += 1;
                     queue.extend(
