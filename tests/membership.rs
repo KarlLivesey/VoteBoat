@@ -544,7 +544,7 @@ fn static_core_refuses_journal_recovery_and_host_injected_configuration_rpc() {
 }
 #[cfg(feature = "native")]
 #[test]
-fn native_wire_refuses_configuration_records_until_online_activation_is_integrated() {
+fn wire_capability_does_not_bypass_live_core_configuration_refusal() {
     use voteboat::{native::wire::NativeWireCodec, wire::*};
     let sender = HostLogStore::new(1).binding();
     let scope = WireScope {
@@ -572,8 +572,22 @@ fn native_wire_refuses_configuration_records_until_online_activation_is_integrat
     };
     assert!(NativeWireCodec::new(WireLimits::default())
         .unwrap()
-        .encode_batch(scope, &[message])
+        .encode_batch(scope, std::slice::from_ref(&message))
         .is_err());
+    let codec = NativeWireCodec::with_membership(WireLimits::default()).unwrap();
+    let frame = codec.encode_batch(scope, &[message]).unwrap();
+    let decoded = codec.decode_batch(scope, &frame).unwrap().pop().unwrap();
+    let mut store = HostLogStore::new(2);
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let initial = store.state(group(1)).unwrap();
+    let mut core =
+        Raft::recover(node(2), store.binding(), initial.clone(), store.limits()).unwrap();
+    assert_eq!(
+        core.step(Event::Receive(decoded)),
+        Err(RaftError::InvalidMessage)
+    );
+    assert_eq!(core.state(), &initial);
+    assert!(!core.has_pending_dependency());
 }
 #[test]
 fn replay_rejects_index_overflow_without_panicking() {

@@ -2153,9 +2153,64 @@ model and faulted network histories remain unfinished. Native convenience
 assembly, incremental cleanup, recursive responsibilities, safe split/merge and
 P7 evidence remain outstanding.
 
+## Slice 33 — explicit membership-aware wire format
+
+The native codec now carries learner, joint and final configuration records and
+configuration-aware snapshots through explicitly selected wire format 2.
+The default constructor retains static-configuration format 1. Each selected
+codec accepts only its own frame version, and native transport rejects a
+codec/session-version mismatch before accepting work. There is no silent
+compatibility fallback or persistent-format dependency. The existing host codec
+contract is unchanged; its public selector/capabilities expose the new choice.
+
+Configuration payloads carry versioned records, validated recursive policies,
+exact voter/store maps and disjoint learner maps. Snapshot metadata preserves
+original bootstrap separately from the accepted stable/joint membership base,
+including all configuration operation identities. Format 2 can also send a
+checkpoint predating the first change: its original bootstrap configuration is
+explicit even when the sender's accepted head has advanced. The envelope's
+configuration and checkpoint base remain distinct; the core must establish
+provenance rather than treating decoded metadata as authority.
+
+Lengths, tree depth/node counts, combined replica counts, map/set allocations,
+record retention and snapshot data remain bounded. The membership operation set
+retains its 16,384 hard cap. Encoding measures before frame allocation; decoding
+charges bounded objects before their allocations. Semantic validation may use
+bounded temporary clones; these retained-object ceilings are not exact peak-RSS
+claims. See [wire formats](WIRE_FORMAT.md) for the complete independent layout.
+
+No new consensus effect, durability token, watermark or generation is introduced.
+A decoded record cannot authorize a ballot, quorum, application result or snapshot
+installation. Existing snapshot publication/pinning and authoritative WAL
+completions remain mandatory dependencies. The live Raft core still rejects
+configuration-bearing ingress and recovery before state/term mutation. A
+successful format-2 decode is tested against that explicit core refusal.
+
+Six new wire tests cover all transition records, recursive weighted targets,
+joint/final snapshots, original bootstrap checkpoints behind a newer sender,
+strict versions/mandatory tags, every frame truncation and bit flip, valid-CRC
+hostile fields, operation-set bounds and exact decoded-memory thresholds. The
+full 16,384-operation checkpoint roundtrips without identity loss. A new native
+transport test carries configuration Append and membership Snapshot through
+short host-channel I/O, retaining outbound credits until exact terminal release
+and rejecting mismatched session versions. These channels use host test
+attestations; they do not establish new authenticated dynamic-Raft histories.
+
+Local validation passes 334 default/native/TLS tests, 312 native-only tests and
+184 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied. Formatting, generated API docs, contract JSON, unchanged RPL
+source headers and diff checks pass. Existing actual TCP/TLS regression histories
+ran on Linux. No macOS execution, power-loss certification, throughput claim or
+joint-consensus proof follows from these finite codec/transport checks.
+
+Full P0–P7 remains active. Accepted-log activation at every live quorum site,
+learner readiness/admission, configuration-scoped requests, removed-replica
+service fencing and the formal activation/ballot model remain unfinished.
+Recursive responsibilities, safe split/merge and P7 evidence remain outstanding.
+
 ## Next slice
 
-Wire the accepted-log predicate through every core quorum/context use with
-learner catch-up and bounded prospective replication fanout. Validate the live
-protocol with its activation/ballot model and crash/network histories before
-enabling administration. CI remains background feedback.
+Integrate the accepted-log membership view into all Raft quorum/context paths,
+including bounded learner replication and recovery, then validate activation,
+elections, rollback and removal with the formal model and faulted actual-core
+histories before enabling online administration. CI remains background feedback.

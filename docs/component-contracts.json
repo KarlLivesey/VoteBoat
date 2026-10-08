@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "configuration-aware-snapshot-bases",
+  "status": "membership-aware-wire-format",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -482,7 +482,7 @@
       "operations": ["format_version", "header_bytes", "limits", "frame_length", "encode_batch", "decode_batch"],
       "native": "NativeWireCodec",
       "conformance": ["tests/wire.rs", "tests/worker.rs", "tests/snapshot.rs"],
-      "scope": "Independent wire format 1 for all current static-configuration RPCs, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol."
+      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol."
     },
     {
       "design_id": "C09",

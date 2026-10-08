@@ -1,7 +1,12 @@
-# Native wire format 1
+# Native wire formats 1 and 2
 
-`NativeWireCodec` implements `WireCodec` with wire version 1 and a fixed
-24-byte prefix. It serializes the current static-configuration Raft RPCs.
+`NativeWireCodec::new` selects wire version 1 for existing static-configuration
+assemblies. `NativeWireCodec::with_membership` explicitly selects version 2,
+adding configuration entries and configuration-aware snapshots. Both implement
+`WireCodec` with a fixed 24-byte prefix. A selected codec accepts only its own
+version; session/roster wire versions must match before transport admission.
+There is no automatic downgrade. Codec capability does not enable online Raft
+reconfiguration, which remains disabled pending live protocol validation.
 It has no persistent-format dependency: WAL and snapshot-file changes do not
 silently change peer bytes. Future incompatible messages require a named wire
 version and construction-time compatibility selection. Unknown versions, flags,
@@ -20,7 +25,7 @@ choose that trusted scope. This codec does not authenticate a connection.
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | ASCII `VBWIRE01` |
-| 8 | 2 | Wire version, 1 |
+| 8 | 2 | Wire version, 1 or 2 as explicitly selected |
 | 10 | 2 | Flags, 0 |
 | 12 | 4 | Total frame bytes, including prefix and final checksum |
 | 16 | 4 | Message count, positive |
@@ -101,6 +106,72 @@ keys must equal the policy's leaves. Finally, `u32 application_byte_count`
 precedes the application bytes. A snapshot-file checksum/footer is not embedded;
 the enclosing wire frame has its own integrity checks. Local installation still
 requires the separate snapshot stage/seal/pin and authoritative log dependencies.
+
+
+## Format 2 membership extensions
+
+Format 2 retains the framing family magic, envelope, CRCs and existing RPC/entry
+layouts. Format 1 refuses the new mandatory tags even if a frame is relabelled
+and its checksums recomputed. Persistent-format compatibility is separate.
+
+Append entry kind 2 contains configuration subformat byte 1, a 16-byte operation
+ID, an 8-byte expected configuration ID and one change kind:
+
+- Kind 0 (learners): one complete configuration.
+- Kind 1 (joint): an 8-byte joint configuration ID and the complete final target.
+- Kind 2 (final): an 8-byte final configuration ID.
+
+A complete configuration is its 8-byte ID, validated recursive policy tree,
+voter-store map and learner-store map. Each map uses the store tuple/count layout
+above. Keys are unique, voter keys exactly match the policy, learner keys are
+disjoint, and their combined count fits the configured policy voter limit.
+Record retained size also fits `max_command_bytes`. The decoder checks bounded
+shape/IDs/policies; journal ordering, expected-configuration comparisons,
+learner readiness and commitment are the log/core's obligations.
+
+Snapshot RPC kind 9 contains an explicit 8-byte original bootstrap configuration
+ID, followed by index/term/schema and bootstrap policy/store map as in kind 6.
+Next is a boolean membership-base-present flag. If true, it carries:
+
+1. Mandatory membership subformat byte 1 and the complete stable configuration.
+2. An 8-byte last configuration-record index, bounded by the snapshot index.
+3. A boolean joint flag; if true, joint operation ID (16 bytes), joint ID and
+   joint record index (8 bytes each), then the complete target configuration.
+4. A `u32` operation count followed by 16-byte configuration operation IDs.
+
+The operation set is unique, nonzero and bounded to 16,384. Structural checkpoint
+validation checks the joint record, staged store identities, reserved IDs,
+operation retention and original bootstrap binding. Then a `u32` application
+length precedes the application bytes. A false base-present flag represents the
+original bootstrap state, including a checkpoint predating the first transition.
+Kind 6 remains available when no membership base is needed and the bootstrap
+configuration equals the envelope configuration.
+
+The sender's current configuration in the envelope may differ from the
+checkpoint's base configuration. The codec preserves both; the live protocol
+must establish the sender's authority and bind the incoming base to the local
+history. Decoding metadata never supplies that provenance. Installation still
+requires durable snapshot publication/pinning and exact authoritative WAL
+completion before dependent effects escape.
+
+Configuration trees, voter indices, store maps, boxed records/bases and retained
+operation sets are charged to the decoded-object budget before their respective
+allocations. The 192-byte map/set-unit charges conservatively include B-tree
+metadata. Counts are checked against limits and remaining bytes before traversal.
+Snapshot-base retained size is checked before encoder semantic validation.
+Validation may use bounded temporary clones; the limit is retained decoded
+objects, not an exact peak allocator/RSS bound. Encoding and decoding enforce
+matching retained-object ceilings.
+
+Tests in `tests/wire.rs` cover learner/joint/final roundtrips, recursive weighted
+targets, stable/joint checkpoint bases, original bootstrap checkpoints behind a
+newer sender, strict version selection, every frame truncation/bit flip,
+valid-checksum hostile IDs/counts/maps/operation sets and exact memory limits.
+`tests/transport.rs` drives configuration Append and membership Snapshot through
+native framed transport with short host-channel I/O, exact queue credit release
+and session-version rejection. `tests/membership.rs` verifies successful format-2
+decode cannot bypass the core's online-change refusal. These are codec/transport
+checks, not dynamic-membership Raft safety or authenticated network histories.
 
 ## Resource and evidence limits
 

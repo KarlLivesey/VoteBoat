@@ -545,4 +545,383 @@ mod native {
             .encode_batch(scope(), &[message(Rpc::ReadProbe)])
             .is_ok());
     }
+
+    fn membership_codec() -> NativeWireCodec {
+        NativeWireCodec::with_membership(WireLimits::default()).unwrap()
+    }
+    fn configuration(
+        id: u64,
+        voters: &[u64],
+        learners: &[u64],
+    ) -> voteboat::membership::Configuration {
+        voteboat::membership::Configuration::new(
+            ConfigurationId::new(id).unwrap(),
+            Policy::new(
+                Tree::Majority(voters.iter().map(|n| Tree::Voter(node(*n))).collect()),
+                Limits::default(),
+            )
+            .unwrap(),
+            voters
+                .iter()
+                .map(|n| (node(*n), identity(*n as u128)))
+                .collect(),
+            learners
+                .iter()
+                .map(|n| (node(*n), identity(*n as u128)))
+                .collect(),
+        )
+        .unwrap()
+    }
+    fn configuration_entries() -> Vec<LogEntry> {
+        use voteboat::membership::*;
+        [
+            (
+                100,
+                1,
+                ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4])),
+            ),
+            (
+                101,
+                2,
+                ConfigurationChange::Joint {
+                    id: ConfigurationId::new(3).unwrap(),
+                    next: configuration(4, &[2, 3, 4], &[1]),
+                },
+            ),
+            (
+                101,
+                3,
+                ConfigurationChange::Final {
+                    id: ConfigurationId::new(4).unwrap(),
+                },
+            ),
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, (operation, expected, change))| LogEntry {
+            index: i as u64 + 1,
+            term: 2,
+            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                operation: OperationId::new(operation).unwrap(),
+                expected: ConfigurationId::new(expected).unwrap(),
+                change,
+            })),
+        })
+        .collect()
+    }
+    fn membership_append() -> Message {
+        message(Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            entries: configuration_entries(),
+            leader_commit: 2,
+        })
+    }
+    fn membership_snapshot(finalized: bool) -> Message {
+        let entries = configuration_entries();
+        let index = if finalized { 3 } else { 2 };
+        let membership =
+            voteboat::membership::Membership::replay(&bootstrap(1, 3), &entries[..index], 2)
+                .unwrap();
+        let mut result = message(Rpc::Snapshot {
+            snapshot: Box::new(Snapshot {
+                metadata: SnapshotMetadata {
+                    bootstrap: bootstrap(1, 3),
+                    membership: Some(Box::new(membership)),
+                    index: index as u64,
+                    term: 2,
+                    application_schema: 1,
+                },
+                application: vec![9; 32],
+            }),
+        });
+        // The sender's accepted head can be newer than the checkpoint base.
+        result.configuration = ConfigurationId::new(4).unwrap();
+        result
+    }
+    #[test]
+    fn explicit_wire_two_roundtrips_all_configuration_phases_and_joint_final_snapshots() {
+        let c = membership_codec();
+        assert_eq!(c.format_version(), 2);
+        let mut messages = vec![
+            membership_append(),
+            membership_snapshot(false),
+            membership_snapshot(true),
+            snapshot(),
+            message(Rpc::ReadProbe),
+            Message {
+                configuration: ConfigurationId::new(4).unwrap(),
+                ..snapshot()
+            },
+        ];
+        messages[4].group = group(2);
+        let bytes = c.encode_batch(scope(), &messages).unwrap();
+        assert_eq!(bytes.capacity(), bytes.len());
+        assert_eq!(c.decode_batch(scope(), &bytes).unwrap(), messages);
+        assert_eq!(
+            c.encode_batch(scope(), &c.decode_batch(scope(), &bytes).unwrap())
+                .unwrap(),
+            bytes
+        );
+        assert_eq!(
+            codec().frame_length(&bytes[..24]),
+            Err(WireError::UnsupportedVersion(2))
+        );
+        assert_eq!(
+            c.frame_length(&frame(message(Rpc::ReadProbe))[..24]),
+            Err(WireError::UnsupportedVersion(1))
+        );
+        for input in [
+            membership_append(),
+            membership_snapshot(false),
+            membership_snapshot(true),
+        ] {
+            assert!(codec()
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .is_err());
+            let bytes = c.encode_batch(scope(), &[input]).unwrap();
+            // Re-labelling a v2 frame does not make mandatory extensions valid v1.
+            let old = change(&bytes, 8, &1u16.to_le_bytes());
+            assert!(codec().decode_batch(scope(), &old).is_err());
+        }
+    }
+    #[test]
+    fn wire_two_recursive_weighted_policy_survives_without_changing_bootstrap() {
+        use voteboat::membership::*;
+        let target = Configuration::new(
+            ConfigurationId::new(4).unwrap(),
+            Policy::new(
+                Tree::Majority(vec![
+                    Tree::Voter(node(2)),
+                    Tree::Weighted(vec![
+                        WeightedChild {
+                            weight: 2,
+                            node: Tree::Voter(node(3)),
+                        },
+                        WeightedChild {
+                            weight: 1,
+                            node: Tree::Voter(node(4)),
+                        },
+                    ]),
+                ]),
+                Limits::default(),
+            )
+            .unwrap(),
+            configuration(4, &[2, 3, 4], &[]).voter_stores().clone(),
+            Default::default(),
+        )
+        .unwrap();
+        let mut entries = configuration_entries();
+        let EntryPayload::Configuration(record) = &mut entries[1].payload else {
+            panic!()
+        };
+        record.change = ConfigurationChange::Joint {
+            id: ConfigurationId::new(3).unwrap(),
+            next: target,
+        };
+        let base = Membership::replay(&bootstrap(1, 3), &entries[..2], 1).unwrap();
+        let mut input = membership_snapshot(false);
+        let Rpc::Snapshot { snapshot } = &mut input.rpc else {
+            panic!()
+        };
+        snapshot.metadata.membership = Some(Box::new(base));
+        fixture_roundtrip(membership_codec(), input);
+    }
+    #[test]
+    fn wire_two_integrity_truncation_and_valid_crc_hostile_configuration_fields_fail_closed() {
+        let c = membership_codec();
+        for input in [
+            membership_append(),
+            membership_snapshot(false),
+            membership_snapshot(true),
+        ] {
+            let bytes = c.encode_batch(scope(), &[input]).unwrap();
+            for cut in 0..bytes.len() {
+                assert!(c.decode_batch(scope(), &bytes[..cut]).is_err(), "cut {cut}");
+            }
+            for bit in 0..bytes.len() * 8 {
+                let mut corrupt = bytes.clone();
+                corrupt[bit / 8] ^= 1 << (bit % 8);
+                assert!(c.decode_batch(scope(), &corrupt).is_err(), "bit {bit}");
+            }
+        }
+        let bytes = c.encode_batch(scope(), &[membership_append()]).unwrap();
+        // First entry's subformat, operation, expected ID, change kind, next ID,
+        // majority child count, voter-store count, learner-store count.
+        for (offset, field) in [
+            (202, vec![2]),
+            (203, vec![0; 16]),
+            (219, vec![0; 8]),
+            (227, vec![255]),
+            (228, vec![0; 8]),
+            (237, u32::MAX.to_le_bytes().to_vec()),
+            (268, u32::MAX.to_le_bytes().to_vec()),
+            (368, u32::MAX.to_le_bytes().to_vec()),
+        ] {
+            assert!(
+                c.decode_batch(scope(), &change(&bytes, offset, &field))
+                    .is_err(),
+                "field {offset}"
+            );
+        }
+        // Duplicate voter leaf, voter-map key, and overlap learner/voter maps.
+        for offset in [250, 304, 372] {
+            assert!(
+                c.decode_batch(scope(), &change(&bytes, offset, &1u64.to_le_bytes()))
+                    .is_err(),
+                "duplicate/overlap {offset}"
+            );
+        }
+    }
+    #[test]
+    fn wire_two_membership_base_rejects_invalid_history_and_operation_sets() {
+        let c = membership_codec();
+        let bytes = c
+            .encode_batch(scope(), &[membership_snapshot(false)])
+            .unwrap();
+        // Snapshot tag9, original bootstrap config, index/term/schema,
+        // bootstrap tree+map, then membership subformat at322. Stable config
+        // ends499; last config index at499, joint flag507. Joint target ends716;
+        // operation count716, operation IDs720 and736.
+        assert_eq!(bytes[156], 9);
+        assert_eq!(bytes[322], 1);
+        assert_eq!(bytes[507], 1);
+        assert_eq!(u32::from_le_bytes(bytes[716..720].try_into().unwrap()), 2);
+        for (offset, field) in [
+            (157, vec![0; 8]),
+            (321, vec![2]),
+            (322, vec![2]),
+            (499, 3u64.to_le_bytes().to_vec()),
+            (507, vec![2]),
+            (508, vec![0; 16]),
+            (524, 2u64.to_le_bytes().to_vec()),
+            (532, 1u64.to_le_bytes().to_vec()),
+            (716, u32::MAX.to_le_bytes().to_vec()),
+            (736, 100u128.to_le_bytes().to_vec()),
+            (736, 102u128.to_le_bytes().to_vec()),
+        ] {
+            assert!(
+                c.decode_batch(scope(), &change(&bytes, offset, &field))
+                    .is_err(),
+                "checkpoint field {offset}"
+            );
+        }
+        // A coherent checkpoint still cannot rewrite the immutable bootstrap.
+        assert!(c
+            .decode_batch(scope(), &change(&bytes, 157, &5u64.to_le_bytes()))
+            .is_err());
+    }
+    #[test]
+    fn wire_two_resource_limits_include_configurations_and_checkpoint_operation_history() {
+        let c = membership_codec();
+        let inputs = [
+            membership_append(),
+            membership_snapshot(false),
+            membership_snapshot(true),
+        ];
+        for input in inputs {
+            let bytes = c
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            for limits in [
+                WireLimits {
+                    max_decoded_bytes: std::mem::size_of::<Message>() + 128,
+                    ..WireLimits::default()
+                },
+                WireLimits {
+                    policy: Limits {
+                        max_voters: 3,
+                        ..Limits::default()
+                    },
+                    ..WireLimits::default()
+                },
+                WireLimits {
+                    max_frame_bytes: 512,
+                    max_snapshot_bytes: 128,
+                    max_command_bytes: 128,
+                    ..WireLimits::default()
+                },
+            ] {
+                let narrow = NativeWireCodec::with_membership(limits).unwrap();
+                assert!(narrow
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .is_err());
+                assert!(narrow.decode_batch(scope(), &bytes).is_err());
+            }
+        }
+        let bytes = c.encode_batch(scope(), &[membership_append()]).unwrap();
+        let narrow = NativeWireCodec::with_membership(WireLimits {
+            max_command_bytes: 32,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        assert_eq!(
+            narrow.decode_batch(scope(), &bytes),
+            Err(WireError::TooLarge)
+        );
+        assert_eq!(
+            narrow.encode_batch(scope(), &[membership_append()]),
+            Err(WireError::TooLarge)
+        );
+        // Search the actual symmetric retained-object bound, rather than assume
+        // that a compact wire representation accounts for decoded B-tree state.
+        let input = membership_snapshot(false);
+        let bytes = c
+            .encode_batch(scope(), std::slice::from_ref(&input))
+            .unwrap();
+        let mut low = std::mem::size_of::<Message>();
+        let mut high = WireLimits::default().max_decoded_bytes;
+        while low < high {
+            let mid = low + (high - low) / 2;
+            let narrow = NativeWireCodec::with_membership(WireLimits {
+                max_decoded_bytes: mid,
+                ..WireLimits::default()
+            })
+            .unwrap();
+            if narrow.decode_batch(scope(), &bytes).is_ok() {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+        assert!(low > bytes.len());
+        for (max_decoded_bytes, expected) in [(low - 1, false), (low, true)] {
+            let narrow = NativeWireCodec::with_membership(WireLimits {
+                max_decoded_bytes,
+                ..WireLimits::default()
+            })
+            .unwrap();
+            assert_eq!(narrow.decode_batch(scope(), &bytes).is_ok(), expected);
+            assert_eq!(
+                narrow
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .is_ok(),
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn wire_two_maximum_checkpoint_operation_set_remains_bounded_and_lossless() {
+        use voteboat::membership::*;
+        let boundary = MAX_CONFIGURATION_OPERATIONS as u64;
+        let operations = (1..=MAX_CONFIGURATION_OPERATIONS)
+            .map(|n| OperationId::new(n as u128).unwrap())
+            .collect();
+        let base = Membership::from_checkpoint(
+            configuration(2, &[1, 2, 3], &[4]),
+            None,
+            boundary,
+            operations,
+            boundary,
+        )
+        .unwrap();
+        let mut input = membership_snapshot(true);
+        let Rpc::Snapshot { snapshot } = &mut input.rpc else {
+            panic!()
+        };
+        snapshot.metadata.index = boundary;
+        snapshot.metadata.membership = Some(Box::new(base));
+        fixture_roundtrip(membership_codec(), input);
+    }
 }

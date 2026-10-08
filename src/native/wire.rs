@@ -17,12 +17,19 @@ use super::vote_store::crc32c;
 use crate::{
     identity::*,
     log::*,
+    membership::{
+        Configuration, ConfigurationChange, ConfigurationRecord, JointConfiguration, Membership,
+        MAX_CONFIGURATION_OPERATIONS,
+    },
     quorum::{Policy, Tree, WeightedChild},
     raft::*,
     snapshot::{Snapshot, SnapshotMetadata},
     wire::*,
 };
-use std::{collections::BTreeMap, mem::size_of};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    mem::size_of,
+};
 
 const HEADER: usize = 24;
 const OVERHEAD: usize = HEADER + 4;
@@ -31,14 +38,25 @@ const MAGIC: &[u8; 8] = b"VBWIRE01";
 #[derive(Clone, Copy, Debug)]
 pub struct NativeWireCodec {
     limits: WireLimits,
+    version: u16,
 }
 impl NativeWireCodec {
+    /// Static-configuration format 1, retained for existing peer assemblies.
     pub fn new(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 1)
+    }
+    /// Explicit format 2 selection: configuration records and membership bases.
+    /// This codec capability does not enable online changes in the Raft core.
+    pub fn with_membership(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 2)
+    }
+    fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
         }
         Ok(Self {
             limits: limits.validate()?,
+            version,
         })
     }
 }
@@ -76,7 +94,7 @@ fn boundary(index: u64, term: u64, current: u64) -> Result<(), WireError> {
     }
     Ok(())
 }
-fn validate_message(m: &Message) -> Result<(), WireError> {
+fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
     if m.from == m.to || m.term == 0 || m.context.sequence == 0 {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
@@ -110,13 +128,9 @@ fn validate_message(m: &Message) -> Result<(), WireError> {
         }
         Rpc::Snapshot { snapshot } => {
             let meta = &snapshot.metadata;
-            if meta.membership.is_some() {
-                return Err(WireError::InvalidMessage(
-                    "online reconfiguration not enabled",
-                ));
-            }
             if meta.bootstrap.group != m.group
-                || meta.bootstrap.configuration != m.configuration
+                || (version == 1 && meta.bootstrap.configuration != m.configuration)
+                || meta.validate().is_err()
                 || meta.index == 0
                 || meta.index == u64::MAX
                 || meta.term == 0
@@ -152,11 +166,13 @@ struct Encoder {
     len: usize,
     limits: WireLimits,
     budget: Budget,
+    version: u16,
 }
 impl Encoder {
-    fn new(limits: WireLimits, capacity: Option<usize>) -> Self {
+    fn new(limits: WireLimits, capacity: Option<usize>, version: u16) -> Self {
         Self {
             data: capacity.map(Vec::with_capacity),
+            version,
             len: 0,
             limits,
             budget: Budget {
@@ -234,6 +250,89 @@ impl Encoder {
             }
         }
     }
+    fn stores(&mut self, stores: &BTreeMap<NodeId, StoreIdentity>) -> Result<(), WireError> {
+        if stores.len() > self.limits.policy.max_voters {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.charge(stores.len() * 192)?;
+        self.u32(stores.len() as u32)?;
+        for (node, store) in stores {
+            self.u64(node.get())?;
+            self.u128(store.id.get())?;
+            self.u64(store.incarnation.get())?;
+        }
+        Ok(())
+    }
+    fn configuration(&mut self, configuration: &Configuration) -> Result<(), WireError> {
+        if configuration
+            .voter_stores()
+            .len()
+            .saturating_add(configuration.learners().len())
+            > self.limits.policy.max_voters
+        {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.charge(size_of::<Configuration>())?;
+        self.u64(configuration.id().get())?;
+        self.tree(configuration.policy().tree(), 0, &mut 0, &mut 0)?;
+        self.budget
+            .charge(configuration.policy().voters().len() * 128)?;
+        self.stores(configuration.voter_stores())?;
+        self.stores(configuration.learners())
+    }
+    fn record(&mut self, record: &ConfigurationRecord) -> Result<(), WireError> {
+        if self.version != 2 {
+            return Err(WireError::InvalidMessage(
+                "configuration requires wire format 2",
+            ));
+        }
+        if record.retained_bytes() > self.limits.max_command_bytes {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.charge(size_of::<ConfigurationRecord>())?;
+        self.u8(1)?; // mandatory configuration subformat
+        self.u128(record.operation.get())?;
+        self.u64(record.expected.get())?;
+        match &record.change {
+            ConfigurationChange::Learners(next) => {
+                self.u8(0)?;
+                self.configuration(next)
+            }
+            ConfigurationChange::Joint { id, next } => {
+                self.u8(1)?;
+                self.u64(id.get())?;
+                self.configuration(next)
+            }
+            ConfigurationChange::Final { id } => {
+                self.u8(2)?;
+                self.u64(id.get())
+            }
+        }
+    }
+    fn membership(&mut self, membership: &Membership) -> Result<(), WireError> {
+        self.budget.charge(size_of::<Membership>())?;
+        self.u8(1)?; // mandatory membership subformat
+        self.configuration(membership.stable())?;
+        self.u64(membership.last_configuration_index())?;
+        if let Some(joint) = membership.joint() {
+            self.u8(1)?;
+            self.u128(joint.operation.get())?;
+            self.u64(joint.id.get())?;
+            self.u64(joint.index)?;
+            self.configuration(&joint.next)?;
+        } else {
+            self.u8(0)?;
+        }
+        if membership.operations().len() > MAX_CONFIGURATION_OPERATIONS {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.charge(membership.operations().len() * 192)?;
+        self.u32(membership.operations().len() as u32)?;
+        for operation in membership.operations() {
+            self.u128(operation.get())?;
+        }
+        Ok(())
+    }
     fn message(&mut self, m: &Message) -> Result<(), WireError> {
         // Bound traversals as well as allocations before semantic validation.
         match &m.rpc {
@@ -245,13 +344,18 @@ impl Encoder {
                     || snapshot.metadata.bootstrap.policy.voters().len()
                         > self.limits.policy.max_voters
                     || snapshot.metadata.bootstrap.voter_stores.len()
-                        > self.limits.policy.max_voters =>
+                        > self.limits.policy.max_voters
+                    || snapshot
+                        .metadata
+                        .membership
+                        .as_ref()
+                        .is_some_and(|m| m.retained_bytes() > self.limits.max_decoded_bytes) =>
             {
                 return Err(WireError::TooLarge)
             }
             _ => (),
         }
-        validate_message(m)?;
+        validate_message(m, self.version)?;
         self.u128(m.group.id.get())?;
         self.u64(m.group.incarnation.get())?;
         self.u64(m.configuration.get())?;
@@ -294,10 +398,9 @@ impl Encoder {
                     self.u64(entry.term)?;
                     match &entry.payload {
                         EntryPayload::Noop => self.u8(0)?,
-                        EntryPayload::Configuration(_) => {
-                            return Err(WireError::InvalidMessage(
-                                "online reconfiguration not enabled",
-                            ))
+                        EntryPayload::Configuration(record) => {
+                            self.u8(2)?;
+                            self.record(record)?;
                         }
                         EntryPayload::Command { operation, bytes } => {
                             if bytes.len() > self.limits.max_command_bytes {
@@ -330,7 +433,17 @@ impl Encoder {
                 self.budget.charge(size_of::<Snapshot>())?;
                 self.budget.charge(snapshot.application.len())?;
                 let meta = &snapshot.metadata;
-                self.u8(6)?;
+                if meta.membership.is_some() && self.version != 2 {
+                    return Err(WireError::InvalidMessage(
+                        "membership requires wire format 2",
+                    ));
+                }
+                let explicit_base =
+                    meta.membership.is_some() || meta.bootstrap.configuration != m.configuration;
+                self.u8(if explicit_base { 9 } else { 6 })?;
+                if explicit_base {
+                    self.u64(meta.bootstrap.configuration.get())?;
+                }
                 self.u64(meta.index)?;
                 self.u64(meta.term)?;
                 self.u64(meta.application_schema)?;
@@ -344,6 +457,12 @@ impl Encoder {
                     self.u64(node.get())?;
                     self.u128(store.id.get())?;
                     self.u64(store.incarnation.get())?;
+                }
+                if explicit_base {
+                    self.u8(u8::from(meta.membership.is_some()))?;
+                    if let Some(membership) = &meta.membership {
+                        self.membership(membership)?;
+                    }
                 }
                 self.u32(snapshot.application.len() as u32)?;
                 self.put(&snapshot.application)
@@ -477,11 +596,141 @@ impl<'a> Decoder<'a> {
             _ => Err(WireError::InvalidMessage("policy node kind")),
         }
     }
+    fn configuration_id(&mut self) -> Result<ConfigurationId, WireError> {
+        ConfigurationId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero configuration"))
+    }
+    fn operation(&mut self) -> Result<OperationId, WireError> {
+        OperationId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero operation"))
+    }
+    fn stores(
+        &mut self,
+        limits: WireLimits,
+        budget: &mut Budget,
+    ) -> Result<BTreeMap<NodeId, StoreIdentity>, WireError> {
+        let count = self.u32()? as usize;
+        if count > limits.policy.max_voters {
+            return Err(WireError::TooLarge);
+        }
+        if count > self.remaining() / 32 {
+            return Err(WireError::Truncated);
+        }
+        budget.charge(count * 192)?;
+        let mut stores = BTreeMap::new();
+        for _ in 0..count {
+            let node = NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero voter"))?;
+            let id =
+                StoreId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero voter store"))?;
+            let incarnation = StoreIncarnation::new(self.u64()?)
+                .ok_or(WireError::InvalidMessage("zero voter store incarnation"))?;
+            if stores
+                .insert(node, StoreIdentity { id, incarnation })
+                .is_some()
+            {
+                return Err(WireError::InvalidMessage("duplicate voter store"));
+            }
+        }
+        Ok(stores)
+    }
+    fn configuration(
+        &mut self,
+        limits: WireLimits,
+        budget: &mut Budget,
+    ) -> Result<Configuration, WireError> {
+        budget.charge(size_of::<Configuration>())?;
+        let id = self.configuration_id()?;
+        let mut voters = 0;
+        let tree = self.tree(limits, budget, 0, &mut 0, &mut voters)?;
+        budget.charge(voters * 128)?;
+        let policy = Policy::new(tree, limits.policy)
+            .map_err(|_| WireError::InvalidMessage("invalid quorum policy"))?;
+        let voter_stores = self.stores(limits, budget)?;
+        let learners = self.stores(limits, budget)?;
+        if voter_stores.len().saturating_add(learners.len()) > limits.policy.max_voters {
+            return Err(WireError::TooLarge);
+        }
+        Configuration::new(id, policy, voter_stores, learners)
+            .map_err(|_| WireError::InvalidMessage("invalid configuration"))
+    }
+    fn record(
+        &mut self,
+        limits: WireLimits,
+        budget: &mut Budget,
+    ) -> Result<ConfigurationRecord, WireError> {
+        budget.charge(size_of::<ConfigurationRecord>())?;
+        if self.u8()? != 1 {
+            return Err(WireError::InvalidMessage("configuration subformat"));
+        }
+        let operation = self.operation()?;
+        let expected = self.configuration_id()?;
+        let change = match self.u8()? {
+            0 => ConfigurationChange::Learners(self.configuration(limits, budget)?),
+            1 => ConfigurationChange::Joint {
+                id: self.configuration_id()?,
+                next: self.configuration(limits, budget)?,
+            },
+            2 => ConfigurationChange::Final {
+                id: self.configuration_id()?,
+            },
+            _ => return Err(WireError::InvalidMessage("configuration change kind")),
+        };
+        let record = ConfigurationRecord {
+            operation,
+            expected,
+            change,
+        };
+        if record.retained_bytes() > limits.max_command_bytes {
+            return Err(WireError::TooLarge);
+        }
+        Ok(record)
+    }
+    fn membership(
+        &mut self,
+        boundary: u64,
+        limits: WireLimits,
+        budget: &mut Budget,
+    ) -> Result<Membership, WireError> {
+        budget.charge(size_of::<Membership>())?;
+        if self.u8()? != 1 {
+            return Err(WireError::InvalidMessage("membership subformat"));
+        }
+        let stable = self.configuration(limits, budget)?;
+        let last_index = self.u64()?;
+        let joint = match self.u8()? {
+            0 => None,
+            1 => Some(JointConfiguration {
+                operation: self.operation()?,
+                id: self.configuration_id()?,
+                index: self.u64()?,
+                next: self.configuration(limits, budget)?,
+            }),
+            _ => return Err(WireError::InvalidMessage("membership joint flag")),
+        };
+        let count = self.u32()? as usize;
+        if count > MAX_CONFIGURATION_OPERATIONS {
+            return Err(WireError::TooLarge);
+        }
+        if count > self.remaining() / 16 {
+            return Err(WireError::Truncated);
+        }
+        budget.charge(count * 192)?;
+        let mut operations = BTreeSet::new();
+        for _ in 0..count {
+            let operation = self.operation()?;
+            if !operations.insert(operation) {
+                return Err(WireError::InvalidMessage(
+                    "duplicate configuration operation",
+                ));
+            }
+        }
+        Membership::from_checkpoint(stable, joint, last_index, operations, boundary)
+            .map_err(|_| WireError::InvalidMessage("invalid membership checkpoint"))
+    }
     fn message(
         &mut self,
         scope: WireScope,
         limits: WireLimits,
         budget: &mut Budget,
+        version: u16,
     ) -> Result<Message, WireError> {
         let group = GroupIdentity {
             id: GroupId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero group"))?,
@@ -538,6 +787,9 @@ impl<'a> Decoder<'a> {
                                 bytes: bytes.to_vec(),
                             }
                         }
+                        2 if version == 2 => {
+                            EntryPayload::Configuration(Box::new(self.record(limits, budget)?))
+                        }
                         _ => return Err(WireError::InvalidMessage("entry kind")),
                     };
                     entries.push(LogEntry {
@@ -559,7 +811,15 @@ impl<'a> Decoder<'a> {
             },
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
-            6 => {
+            kind @ (6 | 9) => {
+                if kind == 9 && version != 2 {
+                    return Err(WireError::InvalidMessage("RPC kind"));
+                }
+                let bootstrap_configuration = if kind == 9 {
+                    self.configuration_id()?
+                } else {
+                    configuration
+                };
                 let index = self.u64()?;
                 let term = self.u64()?;
                 let application_schema = self.u64()?;
@@ -592,6 +852,11 @@ impl<'a> Decoder<'a> {
                         return Err(WireError::InvalidMessage("duplicate voter store"));
                     }
                 }
+                let membership = if kind == 9 && bool_value(self.u8()?)? {
+                    Some(Box::new(self.membership(index, limits, budget)?))
+                } else {
+                    None
+                };
                 let len = self.u32()? as usize;
                 if len > limits.max_snapshot_bytes {
                     return Err(WireError::TooLarge);
@@ -601,10 +866,10 @@ impl<'a> Decoder<'a> {
                 Rpc::Snapshot {
                     snapshot: Box::new(Snapshot {
                         metadata: SnapshotMetadata {
-                            membership: None,
+                            membership,
                             bootstrap: Bootstrap {
                                 group,
-                                configuration,
+                                configuration: bootstrap_configuration,
                                 policy,
                                 voter_stores,
                             },
@@ -633,7 +898,7 @@ impl<'a> Decoder<'a> {
             context,
             rpc,
         };
-        validate_message(&message)?;
+        validate_message(&message, version)?;
         if self.remaining() != 0 {
             return Err(WireError::Corrupt("trailing message bytes"));
         }
@@ -642,7 +907,7 @@ impl<'a> Decoder<'a> {
 }
 impl WireCodec for NativeWireCodec {
     fn format_version(&self) -> u16 {
-        1
+        self.version
     }
     fn header_bytes(&self) -> usize {
         HEADER
@@ -661,7 +926,7 @@ impl WireCodec for NativeWireCodec {
             return Err(WireError::Corrupt("header checksum"));
         }
         let version = u16::from_le_bytes(header[8..10].try_into().unwrap());
-        if version != 1 {
+        if version != self.version {
             return Err(WireError::UnsupportedVersion(version));
         }
         if header[10..12] != [0, 0] {
@@ -682,14 +947,14 @@ impl WireCodec for NativeWireCodec {
     fn encode_batch(&self, scope: WireScope, messages: &[Message]) -> Result<Vec<u8>, WireError> {
         // Count and validate first; malformed input allocates no frame buffer.
         // The second pass allocates exactly the validated final byte count.
-        let mut count = Encoder::new(self.limits, None);
+        let mut count = Encoder::new(self.limits, None, self.version);
         count.batch(scope, messages)?;
-        let mut encoder = Encoder::new(self.limits, Some(count.len));
+        let mut encoder = Encoder::new(self.limits, Some(count.len), self.version);
         encoder.batch(scope, messages)?;
         let mut bytes = encoder.data.unwrap();
         let len = bytes.len();
         bytes[..8].copy_from_slice(MAGIC);
-        bytes[8..10].copy_from_slice(&1u16.to_le_bytes());
+        bytes[8..10].copy_from_slice(&self.version.to_le_bytes());
         bytes[12..16].copy_from_slice(&(len as u32).to_le_bytes());
         bytes[16..20].copy_from_slice(&(messages.len() as u32).to_le_bytes());
         let crc = crc32c(&bytes[..20]);
@@ -728,7 +993,12 @@ impl WireCodec for NativeWireCodec {
                 return Err(WireError::InvalidMessage("message length"));
             }
             let bytes = decoder.take(len)?;
-            result.push(Decoder::new(bytes).message(scope, self.limits, &mut budget)?);
+            result.push(Decoder::new(bytes).message(
+                scope,
+                self.limits,
+                &mut budget,
+                self.version,
+            )?);
         }
         if decoder.remaining() != 0 {
             return Err(WireError::Corrupt("trailing batch bytes"));

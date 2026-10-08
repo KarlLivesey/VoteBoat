@@ -2,9 +2,10 @@
 
 `EntryPayload::Configuration` now stores membership intent and accepted-log
 activation state in the same atomic log transitions as entries, hard state and
-commit boundaries. This is groundwork for P3. The live Raft core and native wire
-codec deliberately refuse these entries until every quorum use, snapshot path,
-learner catch-up gate and service-removal rule is integrated. There is no online
+commit boundaries. This is groundwork for P3. The live Raft core
+deliberately refuses these entries until every quorum use, snapshot path, learner
+catch-up gate and service-removal rule is integrated. The explicitly selected
+[native wire format 2](WIRE_FORMAT.md) carries them; default format 1 refuses them. There is no online
 administration API yet. The full P0–P7 objective remains unchanged.
 
 `membership::Configuration` validates a recursive policy, its exact voter/store
@@ -74,7 +75,7 @@ Tests in `tests/membership.rs` use independent host storage and the native WAL.
 They cover stage ordering, identity/store mismatch, same-voter recursive weighted
 policy changes, exhaustive joint frontiers for 3,125 prefix assignments, rollback,
 atomic multi-group rejection, Written/Durable separation, bounded ingress/ranges,
-snapshot refusal and live-core/wire refusal. Native tests cut every byte of all
+snapshot refusal and live-core/default-wire refusal. Native tests cut every byte of all
 four transition/replacement frames, inject failed sync/manifest publication, and
 reclaim/reopen joint and final histories. Native codec tests check every truncated
 record, unknown tags, zero IDs, count limits, duplicates and overlapping maps.

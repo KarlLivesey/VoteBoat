@@ -776,4 +776,89 @@ mod native {
             assert!(std::time::Instant::now() < deadline);
         }
     }
+
+    #[test]
+    fn explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing() {
+        use voteboat::{log::*, membership::*, snapshot::*};
+        let c = || NativeWireCodec::with_membership(WireLimits::default()).unwrap();
+        let old = support::bootstrap(1, 3);
+        let next = Configuration::new(
+            ConfigurationId::new(2).unwrap(),
+            old.policy.clone(),
+            old.voter_stores.clone(),
+            [(node(4), support::identity(4))].into_iter().collect(),
+        )
+        .unwrap();
+        let entry = LogEntry {
+            index: 1,
+            term: 1,
+            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                operation: OperationId::new(100).unwrap(),
+                expected: old.configuration,
+                change: ConfigurationChange::Learners(next),
+            })),
+        };
+        let membership = Membership::replay(&old, std::slice::from_ref(&entry), 0).unwrap();
+        let append = Message {
+            rpc: Rpc::Append {
+                previous_index: 0,
+                previous_term: 0,
+                entries: vec![entry],
+                leader_commit: 0,
+            },
+            ..message(1, 2, 1)
+        };
+        let snapshot = Message {
+            configuration: membership.id(),
+            rpc: Rpc::Snapshot {
+                snapshot: Box::new(Snapshot {
+                    metadata: SnapshotMetadata {
+                        bootstrap: old,
+                        membership: Some(Box::new(membership)),
+                        index: 1,
+                        term: 1,
+                        application_schema: 1,
+                    },
+                    application: vec![7; 32],
+                }),
+            },
+            ..message(1, 2, 1)
+        };
+        for input in [append, snapshot] {
+            let (mut sender, mut receiver) = sessions(7);
+            let mut q = queue(1);
+            let qb = queue(2);
+            // The existing construction guard refuses a codec/session mismatch.
+            assert!(matches!(
+                NativePeerTransport::new(sessions(7).0, c(), &q, TransportLimits::default()),
+                Err(TransportError::IncompatibleCodec)
+            ));
+            sender.binding.wire_version = 2;
+            receiver.binding.wire_version = 2;
+            let mut a =
+                NativePeerTransport::new(sender, c(), &q, TransportLimits::default()).unwrap();
+            let mut b =
+                NativePeerTransport::new(receiver, c(), &qb, TransportLimits::default()).unwrap();
+            a.submit(batch(&mut q, vec![input.clone()])).unwrap();
+            for _ in 0..2000 {
+                poll(&mut a);
+                poll(&mut b);
+                if a.usage().completion && b.received_info().is_some() {
+                    break;
+                }
+            }
+            assert_eq!(q.usage().batches, 1);
+            let received = b.take_received().unwrap();
+            assert_eq!(received.messages, vec![input]);
+            assert_eq!(received.connection.wire_version, 2);
+            received
+                .info(TransportLimits::default().decoded_bytes)
+                .unwrap();
+            let done = a.take_send().unwrap();
+            assert_eq!(done.result, LocalSendResult::Sent);
+            q.complete(done.batch, done.result).unwrap();
+            assert!(q.is_drained());
+            assert_eq!(b.usage().decoded_bytes, 0);
+        }
+    }
 }

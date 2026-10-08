@@ -93,7 +93,8 @@ flags, oversized counts, changed operation identity, boundary and trailing bytes
 These tests exercise storage, codecs, application replay and dependency ordering.
 They do not enable or prove joint Raft elections/commit/read behavior. The static
 core explicitly refuses configuration-bearing Append, Snapshot, and recovery
-state, including compacted membership bases; native wire encoding does likewise.
+state, including compacted membership bases. Default wire format 1 also refuses
+this state; explicitly selected [wire format 2](WIRE_FORMAT.md) can carry it.
 Live learner catch-up, all-quorum activation, stale-context handling, removed-node
 service fencing, the formal protocol model and faulted network histories remain
 next. Linux tests do not establish macOS execution or power-failure certification.
