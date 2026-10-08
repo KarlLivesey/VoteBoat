@@ -23,6 +23,7 @@ pub mod membership;
 #[cfg(feature = "native")]
 pub mod native;
 pub mod outbound;
+pub mod placement;
 pub mod quorum;
 pub mod raft;
 pub mod runtime;

@@ -61,7 +61,8 @@
         "cancel_configuration",
         "poll_with_configuration_authorization",
         "configuration_status",
-        "resume_configuration"
+        "resume_configuration",
+        "poll_with_placement_authorizer"
       ],
       "native": "NativeNode<A, C=NativePeerConnector> / NativeNodeParts<A, C=NativePeerConnector> / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
       "conformance": [
@@ -1073,6 +1074,22 @@
         "tests/startup.rs"
       ],
       "scope": "Historical local committed versus durably accepted operation phases. Pending/Written do not advance status; absence is inconclusive. Committed snapshot operation IDs outside its active joint imply completion under validated journal grammar, without reconstructing discarded phase/payload/position; an active compacted joint retains its index/target and may lack the original term. Only a committed joint with matching accepted joint yields a final planning hint. Node rederives hints and submits through normal live authorization and journal/durability checks; accepted uncommitted final waits. No new schema/token/generation/watermark or fresh read authority. Shared host/native faults, rollback, compaction, actual-file reopen and Node lost-observation/authorization checks; native startup remains one-voter local finalization, not remote lifecycle."
+    },
+    {
+      "design_id": "C18/C20",
+      "public_contract": "PlacementAuthorizer / ReplicaPlacement / PlacementRequirements",
+      "operations": [
+        "authorize",
+        "NativePlacementAuthorizer::new",
+        "Node::poll_with_placement_authorizer"
+      ],
+      "native": "NativePlacementAuthorizer: caller-owned immutable deployment plan, no I/O, selected through the same Node execution-time authorization path as host implementations.",
+      "conformance": [
+        "tests/placement.rs",
+        "tests/support/node.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "Exact group incarnation and replica store assignments, minimum voting domains excluding learners, optional survival of each single voting-domain loss evaluated using actual validated weighted/recursive policies. Current stable, accepted joint target and proposed configuration checked; final cannot skip old/new constraints. Trusted operator labels do not certify physical independence. Fixed 4096-replica/64-domain ceilings, unique exact stores and feasible nonzero domain minimum; constructor denial returns original assignments. Synchronous bounded checks retain no requests or receipts and create no durability effect/generation/watermark. Caller reconstructs policy on restart; queued requests recheck selected policy at execution. Placement cannot waive core journal/readiness or provider-capacity obligations. Native worker/file-reopen evidence is single-voter local finalization, not remote lifecycle. C18 authorization subset only: eligible-host planning, scoring and move proposals remain pending."
     }
   ],
   "not_yet_implemented": [
@@ -1082,12 +1099,13 @@
     "admission-policy",
     "routing",
     "discovery",
-    "placement",
     "observability",
-    "native-configuration-admin-policy-and-service-endpoints",
+    "native-configuration-service-endpoints",
     "authorization",
     "compression",
     "scope-transfer",
-    "transactions"
+    "transactions",
+    "placement-planning-scoring-and-move-proposals",
+    "native-configuration-provider-capacity-admission"
   ]
 }

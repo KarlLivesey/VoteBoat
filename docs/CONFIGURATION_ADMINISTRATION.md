@@ -57,12 +57,11 @@ the selected worker, reopens the actual WAL and reconstructs membership through
 explicit member recovery. This does not enable dynamic recovery through the
 static startup convenience constructor.
 
-Remote configuration-bearing Append and membership Snapshot remain gated. A
-native placement authorizer, complete codec/transport capability admission,
-enrollment/service endpoints and faulted
-multi-node add/promote/remove remain required. The supplied authorization callback
-is a host composition seam, not an implemented native placement policy. Existing
-TCP/QUIC readiness and static-service tests do not establish this complete path.
+Remote configuration-bearing Append and membership Snapshot remain gated.
+Complete codec/transport capability admission, enrollment/service endpoints and
+faulted multi-node add/promote/remove remain required. The supplied authorization
+callback is also available to host policy implementations. Existing TCP/QUIC
+readiness and static-service tests do not establish this complete path.
 
 ## Durable status and safe resumption
 
@@ -101,3 +100,40 @@ actual file reopen and uncertain commit publication. Node tests cover lost
 observation and fresh authorization; native startup uses resumption for local
 finalization before real WAL reopen. These establish local recovery behavior,
 not remote enrollment or a complete online membership lifecycle.
+
+## Native placement policy
+
+PlacementAuthorizer is the public execution-time contract (version 1). Pass a selected
+implementation to Node::poll_with_placement_authorizer, or combine its authorize
+method with other checks in poll_with_configuration_authorization. Ordinary Node
+polling still denies administration. Permission cannot waive journal grammar,
+learner readiness, exact authenticated bindings or durability.
+
+NativePlacementAuthorizer owns an immutable plan for one exact group incarnation.
+ReplicaPlacement binds each node to its exact store identity/incarnation and a
+typed FailureDomainId. Domain labels are trusted deployment assertions; the
+provider cannot discover or certify physical independence. PlacementRequirements
+sets minimum voting domains and optionally requires continued quorum after loss
+of any one voting domain. Learners count toward neither rule. The provider uses
+the validated recursive policy to evaluate each surviving voter set, including
+weights and nested branches; counting domain labels alone is insufficient.
+
+The current accepted stable configuration, active joint target and proposed
+configuration must all satisfy the plan. Retain assignments for retiring replicas
+until they are absent from those sets. An operator cannot apply stricter rules
+that the old side violates and use finalization to bypass them. Placement approval
+of a proposed new voter still does not establish committed learner preparation.
+
+Plans retain at most 4,096 replicas and 64 domains, with unique exact store
+identities and nonzero feasible minimum-domain requirements. Rejected construction
+returns the original assignment map. Checks allocate only bounded temporary sets,
+accept no asynchronous work and perform no I/O; no close/drain operation exists.
+The caller owns the plan and reconstructs it from trusted deployment input after
+restart. Queued requests consult the selected plan at execution, so replacing
+caller policy does not preserve earlier approval. No durable generation or receipt
+is introduced. Provisioned routes, credentials, readiness and complete selected
+codec/transport capacities remain separate obligations. Native placement is usable
+from Rust; service enrollment/endpoints and complete capacity admission remain work.
+
+This is the C18 placement authorization subset. Eligible-host planning, scoring
+and automatic move proposals remain pending under the broader placement roadmap.

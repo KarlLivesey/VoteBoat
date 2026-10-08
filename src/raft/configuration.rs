@@ -38,6 +38,7 @@ pub enum ConfigurationProposalError {
     AuthenticationRequired,
     UnsupportedWireVersion(u16),
     MissingPeerTransport,
+    Placement(crate::placement::PlacementError),
     Membership(MembershipError),
     MissingReadiness(NodeId),
     UnexpectedReadiness(NodeId),

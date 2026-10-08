@@ -629,6 +629,25 @@ where
             Err(ConfigurationProposalError::AuthenticationRequired)
         })
     }
+    /// Apply the selected placement policy at execution, preserving all normal
+    /// core and authenticated binding checks. This does not certify provider
+    /// capacity or provision routes; those remain separate admission checks.
+    pub fn poll_with_placement_authorizer(
+        &mut self,
+        now: MonoTime,
+        budget: NodePollBudget,
+        authorizer: &(impl crate::placement::PlacementAuthorizer + ?Sized),
+    ) -> Result<NodeProgress, NodeError> {
+        self.poll_with_configuration_authorization(now, budget, |core, proposal| {
+            authorizer
+                .authorize(
+                    core.state().bootstrap.group,
+                    core.membership(),
+                    &proposal.record,
+                )
+                .map_err(ConfigurationProposalError::Placement)
+        })
+    }
     /// Rechecks host authorization and exact authenticated promotion bindings at
     /// execution, after peer polling and before any configuration persistence.
     /// The authorization callback must be bounded and nonblocking.

@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration implemented; native policy/capacity admission and full faulted online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; complete provider-capacity admission and faulted online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -76,34 +76,35 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Slices 51–56 establish retained routing/credentials, host and native readiness,
-local proposal admission, partial-final election recovery, and owned administration.
-Slice 57 adds durable status and safe local resumption. These are implemented
-foundations, not completion of online add/promote/remove.
+Slices 51–57 establish routing/credentials, readiness, local proposals,
+partial-final recovery, owned administration and durable status/resumption.
+Slice 58 adds native placement authorization through the public host contract.
+These remain foundations for complete online add/promote/remove.
 
-1. **Durable administration status/resumption (current slice 57, P4).** Finish
-   historical committed/accepted status and resume an interrupted committed joint
-   through normal authorization. Depends on the journal, retained checkpoint
-   identities and slice 56's owned admission. Completion checks: Written and
-   uncertain publication, rollback, lost observation, checkpoint/reclaim and real
-   file reopen; no invented discarded metadata or duplicate accepted final.
-   Supplies restart handling for the online-membership milestone. Implemented
-   evidence is recorded below; service endpoints remain a later integration.
-2. **Native placement and capacity admission (next, P4).** Supply the native
-   service's explicit placement/failure-domain and selected provider-capacity
-   checks through the existing execution-time authorization seam. Depends on
-   selected peer routes/credentials, codec/transport limits and readiness.
-   Completion checks: valid assemblies admitted; unsupported placement or
-   capacity rejected before persistence; queued changes rechecked at execution.
-   Makes membership administration usable without a host-written policy callback.
+1. **Native placement authorization (current slice 58, P4).** Check exact
+   group/store assignments, minimum voting domains and optional single-domain
+   loss tolerance using real quorum predicates. Depends on accepted membership,
+   validated policies and execution-time Node authorization. Completion checks:
+   unknown/stale assignments, learners excluded from voting, weighted/recursive
+   concentration, accepted joint finalization, queued-policy replacement and
+   selected native worker commitment/reopen. Supplies placement policy for the
+   online-membership milestone; service endpoints remain a later integration.
+2. **Selected provider-capacity admission (next, P4).** Check actual selected
+   codec/transport capacity for configuration append, subsequent application
+   commands and membership-bearing checkpoint/catch-up. Depends on native codec
+   sizing, selected factory/provider limits and existing readiness requirements.
+   Completion checks: exact boundary rejection before persistence, retained
+   operation-history growth, restrictive policy/decoded budgets and queued
+   execution against current selected providers. This prevents accepting changes
+   that selected networking cannot carry; placement approval alone cannot do so.
 3. **Remote enrollment and fault-tested transitions (following, P4).** Connect
-   native service enrollment and administrative endpoints, including durable
-   status/resumption, to add/catch-up/promote/remove. Depends on items 1–2 and
-   native readiness. Completion checks: TCP/QUIC histories with partial joint
-   and final delivery, weighted/recursive policies, leader loss, rollback,
-   snapshots and restart. Resolve activation/catch-up gaps before releasing
-   configuration ingress. Completes safe placement for P5 responsibility routing
-   and P6 ownership movement; P5–P7 remain the global sequence above.
+   service enrollment and administrative endpoints, including durable status,
+   to add/catch-up/promote/remove. Depends on items 1–2 and native readiness.
+   Completion checks: TCP/QUIC with partial joint/final delivery, weighted and
+   recursive policies, leader loss, rollback, snapshots and restart. Resolve
+   activation/catch-up gaps before releasing configuration ingress. Completes
+   safe placement for P5 routing and P6 ownership movement; P5–P7 remain the
+   global sequence above.
 
 ### How the current work fits globally
 
@@ -112,7 +113,7 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Complete native administration admission | Owned requests and durable status/resumption now exist locally; the native service needs placement/provider-capacity policy. | Reject unsupported assemblies before persistence, rechecking queued requests against current selected providers. | Makes the P4 operation usable without a host-written policy callback. |
+| Complete selected provider-capacity admission | Native placement and local durable status/resumption now exist; selected networking must carry the proposed configuration and its later checkpoint. | Reject unsupported append/command/checkpoint envelopes before persistence; recheck queued requests. | Completes native admission for P4 service integration. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
@@ -3457,3 +3458,38 @@ gated. Partial-joint catch-up/election histories remain a release requirement;
 the slice 55 partial-final check does not establish them. This advances P4's
 restart behavior without shrinking P0–P7 or claiming P5–P7 implementation.
 Validation is recorded in validation/REPORT.md.
+
+## Slice 58 — native placement authorization
+
+Mini schema plan: add a synchronous public PlacementAuthorizer contract and
+native bounded group-scoped assignment plan. Separate FailureDomainId from
+quorum and responsibility identities. Exact store assignments cover voters and
+learners; minimum voting domains and optional any-single-domain-loss tolerance
+apply to each old/new predicate using validated recursive quorum evaluation.
+The caller owns/reconstructs immutable policy; Node borrows it at execution.
+Construction failure returns original assignments, denial accepts no persistence
+work, and no receipt/generation/watermark or asynchronous cleanup is introduced.
+
+NativePlacementAuthorizer implements that contract; Node's selected-authorizer
+polling path composes it through existing execution authorization and all normal
+core/binding checks. Bounded plans retain at most 4,096 replicas and 64 domains.
+The policy checks accepted stable/joint and proposed configurations, including
+finalization. Learners supply no voting domains. Store identity uniqueness is
+checked in the plan; deployment labels remain trusted assertions, not physical
+failure-independence evidence. See the [administration contract](CONFIGURATION_ADMINISTRATION.md).
+
+Six downstream native-policy tests cover group incarnation, store incarnation,
+unknown learners, count versus actual weighted/recursive survival, valid weighted
+and nested policies, accepted joint target during finalization, journal rejection
+of unprepared voters and owned constructor rejection. Host Node injection checks
+policy revocation after queue admission and fresh retry commitment; native startup
+uses the selected native placement policy for local joint/final resumption and
+actual WAL reopen. This does not claim remote membership delivery or full native
+capacity admission. A test initially called a private journal helper; it now
+checks the same unprepared-voter rejection through public Membership replay.
+
+Complete selected codec/transport admission is next, then service enrollment and
+faulted remote transitions. This division follows the distinct existing placement
+and transport contracts; both are required by the same P4 milestone. Public
+configuration ingress remains gated. P5–P7 and remaining Linux/macOS operational
+validation stay active; no new global milestone or reduced exit criterion.

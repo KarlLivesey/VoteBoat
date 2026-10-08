@@ -189,12 +189,29 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
         native::log_store::{FileLogIo, NativeLogStore},
         raft::*,
     };
+    use voteboat::{native::placement::NativePlacementAuthorizer, placement::*};
     let root = root();
     let mut startup = config(root.clone(), NativeOpenMode::Create);
     startup.tls = startup.tls.with_wire_version(4).unwrap();
     let bootstrap = startup.bootstrap.clone();
     let identity = startup.store;
     let local = startup.node;
+    let placement = NativePlacementAuthorizer::new(
+        group(),
+        [(
+            local,
+            ReplicaPlacement {
+                store: identity,
+                domain: FailureDomainId::new(1).unwrap(),
+            },
+        )]
+        .into(),
+        PlacementRequirements {
+            minimum_voting_domains: 1,
+            survive_any_single_domain_loss: false,
+        },
+    )
+    .unwrap();
     let mut n = startup
         .open(app(), Arc::new(ThreadWake::current()), MonoTime(0))
         .unwrap();
@@ -250,16 +267,10 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
         };
         let start = Instant::now();
         let result = loop {
-            n.poll_with_configuration_authorization(
-                MonoTime(5000),
-                NodePollBudget::default(),
-                |core, p| {
-                    assert_eq!(core.local_node(), local);
-                    assert_eq!(p.record.operation, operation);
-                    Ok(())
-                },
-            )
-            .unwrap();
+            assert_eq!(n.local().owner.core(group()).unwrap().local_node(), local);
+            assert_eq!(ticket.operation(), operation);
+            n.poll_with_placement_authorizer(MonoTime(5000), NodePollBudget::default(), &placement)
+                .unwrap();
             if let Some(c) = n.poll_configuration() {
                 break c;
             }

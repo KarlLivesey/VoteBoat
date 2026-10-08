@@ -522,3 +522,31 @@ assertion uses a borrowed expected-message slice.
   faulted remote add/promote/remove remain pending. Configuration ingress stays
   gated, including pending partial-joint activation/catch-up histories. No macOS,
   physical power-failure, performance or full proof claim. Full P0–P7 stays active.
+
+
+## Slice 58 — native placement authorization
+
+- Public PlacementAuthorizer, exact ReplicaPlacement and typed FailureDomainId
+  compose through Node execution authorization. NativePlacementAuthorizer checks
+  current stable/joint and proposed configurations; no persistence effects or
+  durability evidence come from placement approval. No quorum callback replaces
+  mandatory consensus rules.
+- Six downstream native-policy tests pass: exact group/store incarnation,
+  unknown assignments, learners excluded from voting-domain count/survival,
+  concentrated and valid weighted/recursive policies, colocated domains,
+  accepted joint finalization, unprepared-voter journal rejection and bounded
+  constructor failure returning original assignments. The initially private
+  validator call was corrected to public Membership replay, not exposed publicly.
+- All-feature Node facade: 29 pass, including selected host policy revocation
+  after queued admission, no persistence/state mutation on denial and fresh
+  allowed retry. The new host check also passes core-only. Native startup
+  selected placement, joint/final resumption and actual WAL reopen: 1 pass.
+- All-feature/all-target Clippy with warnings denied and core-only all-target
+  compilation pass. No remote configuration delivery, physical failure-domain
+  independence, multi-domain-loss guarantee, macOS execution or full proof claim.
+  Domain labels are deployment assertions. Full selected codec/transport capacity
+  admission, service enrollment/endpoints and faulted multi-node activation remain
+  required. Public configuration ingress stays gated; P0–P7 remains active.
+- Final all-feature API documentation, formatting/diff and inventory shape/path
+  checks pass (55 contracts). C18 planning/scoring/move proposals remain pending;
+  this implements its authorization subset. Inventory checks validate metadata.

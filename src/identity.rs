@@ -41,6 +41,7 @@ macro_rules! id128 {
 }
 id64!(
     NodeId,
+    FailureDomainId,
     GroupIncarnation,
     StoreIncarnation,
     StoreSession,

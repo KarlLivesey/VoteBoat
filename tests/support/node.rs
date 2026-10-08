@@ -1219,3 +1219,68 @@ fn route_plan_constructor_failure_returns_hints_and_leaves_owner_policy_uninstal
         2
     );
 }
+
+#[test]
+fn selected_host_placement_is_rechecked_at_execution_and_preserves_core_gates() {
+    use voteboat::{membership::*, placement::*};
+    struct HostPlacement {
+        allow: bool,
+    }
+    impl PlacementAuthorizer for HostPlacement {
+        fn authorize(
+            &self,
+            selected: GroupIdentity,
+            current: &Membership,
+            record: &ConfigurationRecord,
+        ) -> Result<(), PlacementError> {
+            assert_eq!(selected, group(1));
+            assert_eq!(current.id(), record.expected);
+            if self.allow {
+                Ok(())
+            } else {
+                Err(PlacementError::UnknownReplica(node(1)))
+            }
+        }
+    }
+    let mut n = elected();
+    let before = n.local().owner.core(group(1)).unwrap().state().clone();
+    let mut policy = HostPlacement { allow: true };
+    let request = admin_request(1, 100, false);
+    policy
+        .authorize(
+            group(1),
+            n.local().owner.core(group(1)).unwrap().membership(),
+            &request.proposal.record,
+        )
+        .unwrap();
+    let ticket = n.configure(request).unwrap();
+    policy.allow = false;
+    n.poll_with_placement_authorizer(
+        MonoTime(0),
+        NodePollBudget::default(),
+        &policy as &dyn PlacementAuthorizer,
+    )
+    .unwrap();
+    let rejected = n.poll_configuration().unwrap();
+    assert_eq!(rejected.ticket, ticket);
+    assert_eq!(
+        rejected.outcome,
+        ConfigurationOutcome::NotProposed(
+            ConfigurationProposalError::Placement(PlacementError::UnknownReplica(node(1))).into()
+        )
+    );
+    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+    assert_eq!(n.state(), NodeState::Running);
+    policy.allow = true;
+    n.configure(admin_request(1, 100, false)).unwrap();
+    for _ in 0..100 {
+        n.poll_with_placement_authorizer(MonoTime(0), NodePollBudget::default(), &policy)
+            .unwrap();
+        if let Some(result) = n.poll_configuration() {
+            assert!(matches!(result.outcome, ConfigurationOutcome::Committed(_)));
+            shutdown(&mut n);
+            return;
+        }
+    }
+    panic!("placement-authorized request did not commit");
+}
