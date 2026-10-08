@@ -754,3 +754,25 @@ assertion uses a borrowed expected-message slice.
   histories and actual remote repair still require work. No general P4 release,
   macOS execution or performance claim. Service mutations remain gated and full
   P0–P7 stays active; P8 remains deferred.
+
+## Slice 65 — authenticated TCP/QUIC joint repair through native nodes
+
+- Two new native histories start from persisted partial-joint fixtures with
+  different required weighted old/new voters and the former leader unavailable.
+  Normal native polling, TLS-authenticated TCP or QUIC sessions and WAL workers
+  deliver the production repair, elect the surviving candidate and commit/apply
+  an application command on both replicas. No test-injected receive or election
+  is used in the live portion. The seeded starting records do not establish
+  distributed enrollment or initial configuration commitment.
+- The test drains nodes and joins worker ownership, then reopens actual native
+  WAL/snapshot files. Both replicas recover their joint membership, voting status
+  and the application value at the actual applied client completion position.
+- Focused remote repair: 2 pass. Full all-feature native_member_startup: 12 pass
+  with local socket permission. All-feature/all-target Clippy with warnings
+  denied passes. Formatting and diff checks pass; inventory shape/path validation
+  passes for 60 contracts (metadata evidence, not protocol conformance).
+- This adds native remote evidence for the strict matching-prefix repair only.
+  Behind/compacted prefixes, candidate tails, promoted senders, recursive-policy
+  recovery and full remote membership lifecycle remain unvalidated. No general
+  P4 release, macOS, performance or complete protocol proof claim. Full P0–P7
+  stays active; P8 is deferred.

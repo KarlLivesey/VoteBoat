@@ -1167,13 +1167,14 @@
         "admitted",
         "complete"
       ],
-      "native": "Deterministic candidate repair over existing Append/Vote messages and LogStore; native wire formats 2–4 and native WAL conformance.",
+      "native": "Deterministic candidate repair over existing Append/Vote messages and LogStore; native wire formats 2–4, native WAL conformance and authenticated TCP/QUIC native-node repair/election/committed-write recovery.",
       "conformance": [
         "src/raft/membership_tests.rs",
         "tests/member_recovery.rs",
-        "tests/activation_model.rs"
+        "tests/activation_model.rs",
+        "tests/native_member_startup.rs"
       ],
-      "scope": "Campaign term/self-ballot durability precedes sending one accepted uncommitted joint entry to exact promoted learners. Old-view sender only. Receiver requires stable committed/accepted exact learner agreement, exact old voter/store, promoted exact store, matching log-end index/term, valid journal/term/context and byte budgets. Pure append, leader_commit zero: no voting-log replacement, new commitment or leader/service authority. Pending dependency blocks Vote/Campaign; repair ack never counts as ballot. Weighted public-core history survives dropped repair and restart, then elects after normal durable votes. Fourteen refusal variants and lost-ack restart covered; native wire/WAL fault and actual-file cases included. No new token/generation/watermark/format. Behind/compacted prefixes, candidate suffixes, promoted senders, broader recursive histories and remote TCP/QUIC repair delivery remain gates; general online configuration delivery remains closed."
+      "scope": "Campaign term/self-ballot durability precedes sending one accepted uncommitted joint entry to exact promoted learners. Old-view sender only. Receiver requires stable committed/accepted exact learner agreement, exact old voter/store, promoted exact store, matching log-end index/term, valid journal/term/context and byte budgets. Pure append, leader_commit zero: no voting-log replacement, new commitment or leader/service authority. Pending dependency blocks Vote/Campaign; repair ack never counts as ballot. Weighted public-core history survives dropped repair and restart, then elects after normal durable votes. Fourteen refusal variants and lost-ack restart covered; native wire/WAL fault and actual-file cases included. No new token/generation/watermark/format. Native TCP/QUIC nodes deliver matching-prefix repair, elect and durably apply a write, then recover from files; seeded starting records do not prove enrollment or initial configuration commitment. Behind/compacted prefixes, candidate suffixes, promoted senders and broader recursive histories remain gates; general online configuration delivery remains closed."
     }
   ],
   "not_yet_implemented": [

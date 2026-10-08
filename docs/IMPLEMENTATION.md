@@ -97,7 +97,9 @@ elect because the required promoted replica remains a learner. The internal
 delivery fixture restores election eligibility only after its exact durability
 completion. Slice 64 adds a production append-only repair for exact matching
 learner prefixes, replacing the injected-delivery portion of that regression.
-Broader recovery cases remain below. Resolve these before
+Slice 65 validates that exact-prefix repair through authenticated native TCP and
+QUIC nodes, followed by election, replicated application commitment and file
+recovery. Broader recovery cases remain below. Resolve these before
 exposing service mutations that could strand a group; it is part of the existing
 P4 activation gate, not an additional global milestone.
 
@@ -110,7 +112,7 @@ P4 activation gate, not an additional global milestone.
    leader loss and restart. Replace the diagnostic stall expectation with a
    successful production-path recovery check (done for the exact-prefix case in
    slice 64). Still check behind/compacted learners, candidate tails, promoted
-   senders, recursive-policy histories and actual remote repair delivery before
+   senders and recursive-policy histories before
    claiming the general release gate is complete. This removes a P4 release blocker
    needed by safe online placement.
 2. **Enrollment and administrative service integration (next, P4).** Connect
@@ -3728,3 +3730,31 @@ suffixes, promoted senders, broader recursive policies and remote socket deliver
 General configuration ingress and service mutations stay gated. The protocol
 rationale and limits are recorded in MEMBERSHIP_CORE.md. P4 still feeds P5 routing,
 P6 split/merge and P7 validation; full P0–P7 stays active.
+
+## Slice 65 — native remote joint repair and committed application recovery
+
+Mini schema plan: seed only the persisted starting condition: the required old
+weighted voter has an uncommitted joint entry, the required new voter has the
+committed learner prefix, and the former leader is absent. Run ordinary native
+polling, authenticated connections and persistence workers for TCP and QUIC.
+Require production repair to activate the learner, election under both weighted
+views, an applied client completion and application catch-up. Drain and join all
+owned workers before reopening both native WAL/snapshot stores. Check the actual
+client completion's log position rather than assuming a fixed number of election
+entries. This introduces no production API, state, effect or persistent format.
+
+Both transport histories pass, including committed application replay after file
+recovery; all 12 native member startup tests pass. All-feature/all-target Clippy
+with warnings denied passes. See validation/REPORT.md for the validation scope.
+The starting configuration history is fixture input, not evidence of distributed
+enrollment or configuration proposal commitment. The live portion does establish
+remote repair delivery, election and a committed write through the native assembly.
+
+This closes the remote exact-prefix check in current mini item 1. Next within that
+item is recovery when the learner is behind: specify how it obtains a safe prefix
+without allowing an unelected candidate to replace voting history or claim commit.
+Compacted learners, candidate tails, promoted senders and recursive-policy cases
+remain open. Mini item 2 is still service enrollment/admin integration and item 3
+the complete faulted remote lifecycle. These feed P4 safe placement, then P5
+responsibility routing and P6 ownership movement; P7 tuning and full P0–P7 remain
+active. No general membership release or macOS execution claim.

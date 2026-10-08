@@ -474,6 +474,226 @@ fn native_snapshot_enrollment_retries_and_reopens_quic_learner() {
 fn tcp_member_startup_recovers_learner_joint_final_and_checkpoint() {
     member_histories(NativePeerProtocol::TcpTls);
 }
+
+fn remote_joint_repair(protocol: NativePeerProtocol) {
+    let root = root();
+    std::fs::create_dir(&root).unwrap();
+    let policy = |required| {
+        Policy::new(
+            Tree::Weighted(
+                [1, 3]
+                    .into_iter()
+                    .map(|id| WeightedChild {
+                        weight: if id == required { 3 } else { 1 },
+                        node: Tree::Voter(node(id)),
+                    })
+                    .collect(),
+            ),
+            Limits::default(),
+        )
+        .unwrap()
+    };
+    let mut initial = bootstrap();
+    initial.policy = policy(3);
+    let learners = Configuration::new(
+        cid(10),
+        initial.policy.clone(),
+        initial.voter_stores.clone(),
+        [(node(2), identity(2))].into(),
+    )
+    .unwrap();
+    let target = Configuration::new(
+        cid(12),
+        Policy::new(
+            Tree::Weighted(
+                [2, 3]
+                    .into_iter()
+                    .map(|id| WeightedChild {
+                        weight: if id == 2 { 3 } else { 1 },
+                        node: Tree::Voter(node(id)),
+                    })
+                    .collect(),
+            ),
+            Limits::default(),
+        )
+        .unwrap(),
+        [(node(2), identity(2)), (node(3), identity(3))].into(),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    let history = [
+        ConfigurationRecord {
+            operation: OperationId::new(100).unwrap(),
+            expected: cid(9),
+            change: ConfigurationChange::Learners(learners),
+        },
+        ConfigurationRecord {
+            operation: OperationId::new(101).unwrap(),
+            expected: cid(10),
+            change: ConfigurationChange::Joint {
+                id: cid(11),
+                next: target,
+            },
+        },
+    ]
+    .into_iter()
+    .enumerate()
+    .map(|(index, record)| LogEntry {
+        index: index as u64 + 1,
+        term: 1,
+        payload: EntryPayload::Configuration(Box::new(record)),
+    })
+    .collect::<Vec<_>>();
+    for (local, count) in [(2, 1), (3, 2)] {
+        let path = root.join(local.to_string());
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let tickets = log
+            .append_batch(vec![LogMutation::Create(initial.clone())])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        let state = log.state(group()).unwrap();
+        let tickets = log
+            .append_batch(vec![LogMutation::Update(LogUpdate {
+                group: group(),
+                expected_revision: state.revision,
+                hard_state: HardState {
+                    term: 1,
+                    voted_for: None,
+                },
+                commit_index: 1,
+                suffix: Some(Suffix {
+                    from: 1,
+                    entries: history[..count].to_vec(),
+                }),
+                snapshot: None,
+                snapshot_membership: None,
+            })])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    }
+    let endpoint2 = reservation();
+    let endpoint3 = reservation();
+    let (mut learner, _hints2) = startup(&root.join("2"), 2, &[1, 2, 3]);
+    let (mut candidate, _hints3) = startup(&root.join("3"), 3, &[1, 2, 3]);
+    learner.startup.bootstrap = initial.clone();
+    candidate.startup.bootstrap = initial;
+    learner.startup.listen = endpoint2.0;
+    candidate.startup.listen = endpoint3.0;
+    learner.startup.peers.get_mut(&node(3)).unwrap().address = endpoint3.0;
+    candidate.startup.peers.get_mut(&node(2)).unwrap().address = endpoint2.0;
+    drop(endpoint2);
+    drop(endpoint3);
+    let mut learner = open(learner, protocol).unwrap();
+    let mut candidate = open(candidate, protocol).unwrap();
+    assert!(!learner.local().owner.core(group()).unwrap().local_voter());
+    let start = Instant::now();
+    let mut ticket = None;
+    let mut applied_index = None;
+    loop {
+        let now = MonoTime(start.elapsed().as_millis() as u64);
+        for n in [&mut learner, &mut candidate] {
+            let p = n.poll(now, NodePollBudget::default()).unwrap();
+            if let Some(replica) = p.replica {
+                for step in replica.steps {
+                    assert!(step.error.is_none(), "protocol={protocol:?} step={step:?}");
+                }
+            }
+        }
+        let core = candidate.local().owner.core(group()).unwrap();
+        if core.role() == Role::Leader && core.state().commit_index >= 3 && ticket.is_none() {
+            ticket = Some(
+                candidate
+                    .propose(ClientRequest {
+                        group: group(),
+                        operation: OperationId::new(900).unwrap(),
+                        bytes: 7i64.to_le_bytes().to_vec(),
+                    })
+                    .unwrap_or_else(|r| panic!("{:?}", r.reason)),
+            );
+        }
+        while let Some(output) = candidate.poll_client() {
+            assert_eq!(Some(output.ticket()), ticket);
+            let outcome = candidate
+                .complete_client(output)
+                .unwrap_or_else(|r| panic!("{:?}", r.reason));
+            match outcome {
+                ClientOutcome::Applied { position, .. } => applied_index = Some(position.index),
+                other => panic!("{other:?}"),
+            }
+        }
+        if applied_index.is_some_and(|index| {
+            learner.local().applications[&group()].read_applied(index) == Ok(7)
+        }) {
+            break;
+        }
+        assert!(start.elapsed() < Duration::from_secs(15),
+            "protocol={protocol:?} source={:?} learner={:?} source_failure={:?} learner_failure={:?}",
+            candidate.local().owner.core(group()).unwrap().state(), learner.local().owner.core(group()).unwrap().state(),
+            candidate.failure(), learner.failure());
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    assert!(learner.local().owner.core(group()).unwrap().local_voter());
+    assert_eq!(
+        candidate
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .membership()
+            .id(),
+        cid(11)
+    );
+    close(candidate);
+    close(learner);
+    for local in [2, 3] {
+        let path = root.join(local.to_string());
+        let log = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut snapshots = NativeSnapshotStore::recover(
+            FileSnapshotIo::open(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        let mut app = Counter::new(100).unwrap();
+        let (core, _) =
+            recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app).unwrap();
+        assert!(core.local_voter());
+        assert_eq!(core.membership().id(), cid(11));
+        assert_eq!(app.read_applied(applied_index.unwrap()), Ok(7));
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_native_joint_repair_elects_and_commits_after_old_leader_loss() {
+    remote_joint_repair(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_native_joint_repair_elects_and_commits_after_old_leader_loss() {
+    remote_joint_repair(NativePeerProtocol::Quic);
+}
 #[cfg(feature = "quic")]
 #[test]
 fn quic_member_startup_recovers_learner_joint_final_and_checkpoint() {
