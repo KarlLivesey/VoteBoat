@@ -130,3 +130,8 @@ Checked metadata ownership decisions are now available through
 [verified transfer publication](TRANSFER_PUBLICATION.md), including reserved control
 history and original-decision recovery. Targets remain non-serving; durable activation,
 complete interrupted split recovery and distributed merge are still pending.
+
+[Durable target activation](TARGET_ACTIVATION.md) now verifies and retains the
+publication decision before serving imported data. Selected TCP/QUIC WAL/checkpoint
+histories serve with metadata offline and reopen the old source fenced. Complete
+interrupted split schedules, distributed merge and recursive lifecycle remain work.

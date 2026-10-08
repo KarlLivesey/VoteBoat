@@ -1663,3 +1663,39 @@ unchanged production deadlines. The final full routed run passes all 22 tests.
 These selected graceful-reopen Linux schedules are not power-cut, macOS,
 separate-host, activation, distributed merge or complete protocol proofs. P0–P7
 remains active and P8 deferred. CI remains background feedback.
+
+## Slice 89 — durable target activation and independent service
+
+Eight deterministic downstream activation tests cover exact local import/decision
+matching, inactive/new-epoch refusal, reserved lifecycle identity, original
+activation retries and conflicting bytes/configuration, preserved imported data
+results/outbox, routes and payload/envelope keys, ordered pending phases, atomic
+activation/checkpoint truncation refusal, WAL replay and old inactive checkpoint
+compatibility. A downstream host provider has non-Copy receipts and nested read
+results whose receipt bound changes after import; same-batch import/activate/data
+accounting charges those buffers. Full 32-operation imported history permits
+activation and an original retry while refusing new data IDs.
+
+Four additional real TCP/TLS/QUIC histories activate one imported three-replica
+target against the actual recovered metadata publication. Another target remains
+inactive. Metadata stops before ordinary writes. WAL-only or checkpoint reopen
+preserves first activation identity, values, imported/new operation retries and
+outbox. The old source reopens from its WAL and refuses old-owner writes/quorum
+reads while the activated target serves. Independent native histories use the
+existing test mutex; replicas/groups remain concurrent within each history.
+
+Final affected all-feature suites pass: library 57, directory 22, scopes 8,
+source 7, target 9, publication 7, activation 8 and routed 26 (144). Core-only
+library 48, directory 20, scopes 7, source 7, target 9, publication 7 and activation
+8 pass (106). All-target/all-feature Clippy with warnings denied, formatting,
+69-contract inventory and diff checks pass. A clarity rename typo was rejected
+by compilation; focused target/activation/publication checks pass after correction.
+
+Activation uses bounded VBTACT01 records and VBTRGT02 checkpoints, explicitly
+reading old inactive VBTRGT01. There is no mixed-version deployment claim. Foreign
+quorum provenance/configuration remains authenticated trusted host input; structural
+evidence alone grants no authority. Only committed ordered local activation enables
+service. Selected graceful Linux reopen schedules do not prove power-loss,
+every interrupted split stage, distributed merge, recursive lifecycle/retirement,
+macOS or separate-host operation. Those remain in the active P0–P7 scope; P8 is
+deferred and CI remains background feedback.

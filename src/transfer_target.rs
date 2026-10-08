@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Non-serving target bootstrap and inline, durably replayable scope imports.
+//! Staged scope imports and decision-bound durable target activation.
 use crate::{
     application::*,
     identity::*,
@@ -24,10 +24,12 @@ use crate::{
     routing::{codec::*, *},
     scope::*,
     transfer::*,
+    transfer_publication::*,
 };
 use std::mem::size_of;
 
 pub const TRANSFER_TARGET_SCHEMA: u64 = 1;
+pub const MAX_TARGET_ACTIVATION_BYTES: usize = 64 * 1024;
 pub const MAX_INLINE_IMPORT_BYTES: usize = 8 * 1024 * 1024;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SourceImport {
@@ -232,34 +234,55 @@ pub struct ImportStatus {
     pub sources: Vec<ImportedSource>,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TargetActivation {
+    /// Authenticated directory configuration, verified by the trusted host.
+    pub metadata_configuration: ConfigurationId,
+    pub decision: TransferPublicationStatus,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ActivationStatus {
+    pub index: u64,
+    pub digest: ContentDigest,
+    pub metadata_configuration: ConfigurationId,
+    pub publication_operation: OperationId,
+    pub publication_index: u64,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TargetStatus {
     pub group: GroupIdentity,
     pub operation: OperationId,
     pub staged_index: Option<u64>,
     pub imported: Option<ImportStatus>,
+    pub activated: Option<ActivationStatus>,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum TargetOutcome {
+pub enum TargetOutcome<R = ()> {
+    Activated(ActivationStatus),
+    Applied(R),
+    Rejected(RoutingError),
     Staged { index: u64 },
     Imported { index: u64, digest: ContentDigest },
     NotActive,
     OperationConflict,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct TargetReceipt {
+pub struct TargetReceipt<R = ()> {
     pub index: u64,
     pub operation: OperationId,
-    pub outcome: TargetOutcome,
+    pub outcome: TargetOutcome<R>,
 }
-impl ApplicationReceipt for TargetReceipt {
+impl<R: ApplicationReceipt> ApplicationReceipt for TargetReceipt<R> {
     fn index(&self) -> u64 {
         self.index
     }
     fn operation(&self) -> OperationId {
         self.operation
     }
-    fn nested_bytes(&self, _: usize) -> Result<usize, ApplicationError> {
-        Ok(0)
+    fn nested_bytes(&self, limit: usize) -> Result<usize, ApplicationError> {
+        match &self.outcome {
+            TargetOutcome::Applied(r) => r.nested_bytes(limit),
+            _ => Ok(0),
+        }
     }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -272,12 +295,18 @@ pub enum TargetRead<R> {
     Status(TargetStatus),
     NotActive,
     Data(R),
+    Rejected(RoutingError),
 }
 #[derive(Clone)]
 struct ImportRecord {
     index: u64,
     bytes: Vec<u8>,
     status: ImportStatus,
+}
+#[derive(Clone)]
+struct ActivationRecord {
+    bytes: Vec<u8>,
+    status: ActivationStatus,
 }
 #[derive(Clone)]
 pub struct TransferTarget<A, P> {
@@ -290,6 +319,7 @@ pub struct TransferTarget<A, P> {
     binding: Vec<u8>,
     staged: Option<u64>,
     imported: Option<ImportRecord>,
+    activated: Option<ActivationRecord>,
 }
 impl<A, P> TransferTarget<A, P>
 where
@@ -358,6 +388,7 @@ where
             binding,
             staged: None,
             imported: None,
+            activated: None,
         })
     }
     pub fn application(&self) -> &A {
@@ -418,6 +449,86 @@ where
         }
         Ok(import)
     }
+    /// Encode a target-bound activation after verifying the committed local import.
+    /// Foreign quorum provenance/configuration must be authenticated by the host.
+    pub fn activation_command(
+        &self,
+        activation: &TargetActivation,
+        max_bytes: usize,
+    ) -> Result<Vec<u8>, ApplicationError> {
+        self.check_activation(activation)?;
+        let body = activation
+            .decision
+            .encode(MAX_TARGET_ACTIVATION_BYTES - 52)?;
+        let len = 52 + body.len();
+        if len > max_bytes || len > MAX_TARGET_ACTIVATION_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut bytes = Vec::with_capacity(len);
+        bytes.extend(b"VBTACT01");
+        bytes.extend(ContentDigest::sha256(&self.binding).0);
+        bytes.extend(activation.metadata_configuration.get().to_le_bytes());
+        bytes.extend((body.len() as u32).to_le_bytes());
+        bytes.extend(body);
+        Ok(bytes)
+    }
+    fn activation(&self, bytes: &[u8]) -> Result<TargetActivation, ApplicationError> {
+        if bytes.len() > MAX_TARGET_ACTIVATION_BYTES {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut r = Reader::new(bytes);
+        if r.take(8)? != b"VBTACT01" || r.take(32)? != ContentDigest::sha256(&self.binding).0 {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let metadata_configuration =
+            ConfigurationId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+        let len = r.u32()? as usize;
+        let decision = TransferPublicationStatus::decode(r.take(len)?)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(TargetActivation {
+            metadata_configuration,
+            decision,
+        })
+    }
+    fn check_activation(&self, activation: &TargetActivation) -> Result<(), ApplicationError> {
+        let publication = &activation.decision.publication;
+        // Validate the public status's index and operation as well as the checked body.
+        activation
+            .decision
+            .encode(MAX_TARGET_ACTIVATION_BYTES - 52)?;
+        if publication.operation() != self.operation || publication.intent() != &self.intent {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let evidence = publication
+            .targets()
+            .iter()
+            .find(|t| t.group == self.group)
+            .ok_or(ApplicationError::InvalidCommand)?;
+        if Some(evidence.staged_index) != self.staged
+            || self
+                .imported
+                .as_ref()
+                .is_none_or(|r| r.status != evidence.imported)
+        {
+            return Err(ApplicationError::NotApplied);
+        }
+        Ok(())
+    }
+    fn activation_status(
+        index: u64,
+        bytes: &[u8],
+        activation: &TargetActivation,
+    ) -> ActivationStatus {
+        ActivationStatus {
+            index,
+            digest: ContentDigest::sha256(bytes),
+            metadata_configuration: activation.metadata_configuration,
+            publication_operation: activation.decision.publication_operation,
+            publication_index: activation.decision.index,
+        }
+    }
     fn request(&self, bytes: &[u8]) -> Result<Option<TargetImport>, ApplicationError> {
         if bytes.len() > self.readiness_requirements().command_bytes {
             return Err(ApplicationError::InvalidCommand);
@@ -426,9 +537,14 @@ where
             Ok(None)
         } else if bytes.starts_with(b"VBTLOAD1") {
             self.load(bytes).map(Some)
+        } else if bytes.starts_with(b"VBTACT01") {
+            self.activation(bytes)?;
+            Ok(None)
         } else {
             match decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)? {
-                Command::Data { .. } => Ok(None),
+                Command::Data { key, payload, .. } if self.inner.command_key(payload)? == key => {
+                    Ok(None)
+                }
                 _ => Err(ApplicationError::InvalidCommand),
             }
         }
@@ -455,13 +571,19 @@ where
             operation: self.operation,
             staged_index: self.staged,
             imported: self.imported.as_ref().map(|r| r.status.clone()),
+            activated: self.activated.as_ref().map(|r| r.status),
         }
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: TRANSFER_TARGET_SCHEMA,
-            command_bytes: self.binding.len().max(44 + self.limits.import_bytes),
-            snapshot_bytes: 64
+            command_bytes: self
+                .binding
+                .len()
+                .max(44 + self.limits.import_bytes)
+                .max(MAX_TARGET_ACTIVATION_BYTES),
+            snapshot_bytes: 76
+                + MAX_TARGET_ACTIVATION_BYTES
                 + self.binding.len()
                 + 44
                 + self.limits.import_bytes
@@ -475,7 +597,7 @@ where
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
 {
-    type Receipt = TargetReceipt;
+    type Receipt = TargetReceipt<A::Receipt>;
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         if group != self.group {
             return Err(ApplicationError::InvalidCommand);
@@ -488,7 +610,7 @@ where
     fn apply_batch(
         &mut self,
         entries: &[LogEntry],
-    ) -> Result<Vec<TargetReceipt>, ApplicationError> {
+    ) -> Result<Vec<Self::Receipt>, ApplicationError> {
         let mut next = self.clone();
         let mut receipts = Vec::with_capacity(
             entries
@@ -500,7 +622,7 @@ where
             if next.applied_index().checked_add(1) != Some(entry.index) {
                 return Err(ApplicationError::IndexGap);
             }
-            let mut imported = false;
+            let mut provider_advanced = false;
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
                 let import = next.request(bytes)?;
                 let outcome = if bytes == &next.binding {
@@ -549,13 +671,65 @@ where
                             bytes: bytes.clone(),
                             status,
                         });
-                        imported = true;
+                        provider_advanced = true;
                         outcome
+                    }
+                } else if bytes.starts_with(b"VBTACT01") {
+                    if *operation != next.operation {
+                        TargetOutcome::OperationConflict
+                    } else if let Some(record) = &next.activated {
+                        if record.bytes == *bytes {
+                            TargetOutcome::Activated(record.status)
+                        } else {
+                            TargetOutcome::OperationConflict
+                        }
+                    } else {
+                        let activation = next.activation(bytes)?;
+                        next.check_activation(&activation)?;
+                        let status = Self::activation_status(entry.index, bytes, &activation);
+                        next.activated = Some(ActivationRecord {
+                            bytes: bytes.clone(),
+                            status,
+                        });
+                        TargetOutcome::Activated(status)
                     }
                 } else if *operation == next.operation {
                     TargetOutcome::OperationConflict
-                } else {
+                } else if next.activated.is_none() {
                     TargetOutcome::NotActive
+                } else {
+                    let Command::Data { hint, key, payload } =
+                        decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)?
+                    else {
+                        return Err(ApplicationError::InvalidCommand);
+                    };
+                    if let Err(error) =
+                        check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
+                    {
+                        TargetOutcome::Rejected(error)
+                    } else {
+                        let projected = LogEntry {
+                            index: entry.index,
+                            term: entry.term,
+                            payload: EntryPayload::Command {
+                                operation: *operation,
+                                bytes: payload.to_vec(),
+                            },
+                        };
+                        let mut result = next.inner.apply_batch(&[projected])?.into_iter();
+                        let receipt = result.next().ok_or(ApplicationError::InvalidCommand)?;
+                        if result.next().is_some()
+                            || receipt.index() != entry.index
+                            || receipt.operation() != *operation
+                            || next.inner.applied_index() != entry.index
+                        {
+                            return Err(ApplicationError::InvalidCommand);
+                        }
+                        next.inner
+                            .checkpoint(next.limits.application_checkpoint_bytes)?;
+                        provider_advanced = true;
+                        TargetOutcome::Applied(receipt)
+                    }
                 };
                 receipts.push(TargetReceipt {
                     index: entry.index,
@@ -563,7 +737,7 @@ where
                     outcome,
                 });
             }
-            if !imported {
+            if !provider_advanced {
                 let mut projected = entry.clone();
                 if matches!(projected.payload, EntryPayload::Command { .. }) {
                     projected.payload = EntryPayload::Noop;
@@ -586,22 +760,54 @@ where
     P: PartitionPolicy + Clone,
 {
     fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+        // Advance the staged copy across imports/activation before asking the
+        // selected provider for each active data receipt's bound.
+        let mut next = self.clone();
+        let mut bound = 0usize;
         for entry in entries {
-            if let EntryPayload::Command { bytes, .. } = &entry.payload {
-                self.request(bytes)?;
+            if let EntryPayload::Command { operation, bytes } = &entry.payload {
+                next.request(bytes)?;
+                let mut nested = 0usize;
+                if next.activated.is_some()
+                    && *operation != next.operation
+                    && bytes.starts_with(b"VBRCMD01")
+                {
+                    let Command::Data { hint, key, payload } =
+                        decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)?
+                    else {
+                        return Err(ApplicationError::InvalidCommand);
+                    };
+                    if check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
+                        .is_ok()
+                    {
+                        let projected = LogEntry {
+                            index: entry.index,
+                            term: entry.term,
+                            payload: EntryPayload::Command {
+                                operation: *operation,
+                                bytes: payload.to_vec(),
+                            },
+                        };
+                        nested = next
+                            .inner
+                            .receipt_bytes_bound(&[projected])?
+                            .checked_sub(size_of::<A::Receipt>())
+                            .ok_or(ApplicationError::ReceiptBudget)?;
+                    }
+                }
+                bound = bound
+                    .checked_add(size_of::<Self::Receipt>())
+                    .and_then(|n| n.checked_add(nested))
+                    .ok_or(ApplicationError::ReceiptBudget)?;
             }
+            next.apply_batch(std::slice::from_ref(entry))?;
         }
-        entries
-            .iter()
-            .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
-            .count()
-            .checked_mul(size_of::<TargetReceipt>())
-            .ok_or(ApplicationError::ReceiptBudget)
+        Ok(bound)
     }
 }
 impl<A, P> ProposalAdmission for TransferTarget<A, P>
 where
-    A: ScopeStateMachine + BoundedStateMachine,
+    A: ScopeStateMachine + BoundedStateMachine + ProposalAdmission,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
 {
@@ -611,11 +817,7 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        if bytes != self.binding && !bytes.starts_with(b"VBTLOAD1")
-            || bytes.len() > self.readiness_requirements().command_bytes
-        {
-            return Err(ApplicationError::InvalidCommand);
-        }
+        self.request(bytes)?;
         let mut next = self.clone();
         for (position, (operation, bytes)) in pending.enumerate() {
             if position >= crate::routed::MAX_ROUTED_PENDING
@@ -637,6 +839,29 @@ where
                 },
             }])?;
         }
+        let mut bound = size_of::<Self::Receipt>();
+        if bytes.starts_with(b"VBRCMD01") {
+            let Command::Data { hint, key, payload } =
+                decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)?
+            else {
+                return Err(ApplicationError::InvalidCommand);
+            };
+            if next.activated.is_none() || operation == next.operation {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
+                .map_err(|_| ApplicationError::InvalidCommand)?;
+            let inner = next
+                .inner
+                .validate_proposal(operation, payload, std::iter::empty())?;
+            bound = bound
+                .checked_add(
+                    inner
+                        .checked_sub(size_of::<A::Receipt>())
+                        .ok_or(ApplicationError::ReceiptBudget)?,
+                )
+                .ok_or(ApplicationError::ReceiptBudget)?;
+        }
         let index = next
             .applied_index()
             .checked_add(1)
@@ -653,11 +878,13 @@ where
             .remove(0);
         if matches!(
             receipt.outcome,
-            TargetOutcome::NotActive | TargetOutcome::OperationConflict
+            TargetOutcome::NotActive
+                | TargetOutcome::OperationConflict
+                | TargetOutcome::Rejected(_)
         ) {
             return Err(ApplicationError::InvalidCommand);
         }
-        Ok(size_of::<TargetReceipt>())
+        Ok(bound)
     }
 }
 impl<A, P> CheckpointStateMachine for TransferTarget<A, P>
@@ -677,12 +904,16 @@ where
             .imported
             .as_ref()
             .map_or(&[][..], |r| r.bytes.as_slice());
-        let len = 52 + self.binding.len() + import.len() + inner.len();
+        let activation = self
+            .activated
+            .as_ref()
+            .map_or(&[][..], |r| r.bytes.as_slice());
+        let len = 64 + self.binding.len() + import.len() + activation.len() + inner.len();
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBTRGT01");
+        bytes.extend(b"VBTRGT02");
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -690,6 +921,14 @@ where
         bytes.extend(self.imported.as_ref().map_or(0, |r| r.index).to_le_bytes());
         bytes.extend((import.len() as u32).to_le_bytes());
         bytes.extend(import);
+        bytes.extend(
+            self.activated
+                .as_ref()
+                .map_or(0, |r| r.status.index)
+                .to_le_bytes(),
+        );
+        bytes.extend((activation.len() as u32).to_le_bytes());
+        bytes.extend(activation);
         bytes.extend(self.inner.schema_version().to_le_bytes());
         bytes.extend((inner.len() as u32).to_le_bytes());
         bytes.extend(inner);
@@ -708,7 +947,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut r = Reader::new(bytes);
-        if r.take(8)? != b"VBTRGT01" || r.u64()? != applied {
+        let tag = r.take(8)?;
+        let activated_format = tag == b"VBTRGT02";
+        if (!activated_format && tag != b"VBTRGT01") || r.u64()? != applied {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let len = r.u32()? as usize;
@@ -736,6 +977,19 @@ where
                 status: Self::status_for(index, import_bytes, &import),
             })
         };
+        let (activation_index, activation_bytes) = if activated_format {
+            let index = r.u64()?;
+            let len = r.u32()? as usize;
+            (index, r.take(len)?)
+        } else {
+            (0, &[][..])
+        };
+        if activation_index > applied
+            || (activation_index == 0) != activation_bytes.is_empty()
+            || activation_index != 0 && (index == 0 || activation_index <= index)
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
         let inner_schema = r.u64()?;
         let len = r.u32()? as usize;
         if len > self.limits.application_checkpoint_bytes {
@@ -749,6 +1003,16 @@ where
         }
         next.staged = (staged != 0).then_some(staged);
         next.imported = imported;
+        next.activated = if activation_bytes.is_empty() {
+            None
+        } else {
+            let activation = next.activation(activation_bytes)?;
+            next.check_activation(&activation)?;
+            Some(ActivationRecord {
+                bytes: activation_bytes.to_vec(),
+                status: Self::activation_status(activation_index, activation_bytes, &activation),
+            })
+        };
         *self = next;
         Ok(())
     }
@@ -771,7 +1035,23 @@ where
         }
         match query {
             TargetQuery::Status => Ok(TargetRead::Status(self.status())),
-            TargetQuery::Data(_) => Ok(TargetRead::NotActive),
+            TargetQuery::Data(query) => {
+                if self.activated.is_none() {
+                    return Ok(TargetRead::NotActive);
+                }
+                if let Err(error) = check_owner(
+                    self.intent.after(),
+                    self.group,
+                    &query.hint,
+                    &query.key,
+                    &self.policy,
+                ) {
+                    return Ok(TargetRead::Rejected(error));
+                }
+                self.inner
+                    .read_at(required, query.query)
+                    .map(TargetRead::Data)
+            }
         }
     }
 }
@@ -801,7 +1081,11 @@ where
             TargetQuery::Status => self.imported.as_ref().map_or(0, |r| {
                 r.status.sources.capacity() * size_of::<ImportedSource>()
             }),
-            TargetQuery::Data(_) => 0,
+            TargetQuery::Data(q) => self
+                .inner
+                .read_result_bound(&q.query)?
+                .checked_sub(size_of::<A::ReadResult>())
+                .ok_or(ApplicationError::ReceiptBudget)?,
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -817,7 +1101,7 @@ where
                 .imported
                 .as_ref()
                 .map_or(0, |i| i.sources.capacity() * size_of::<ImportedSource>()),
-            TargetRead::NotActive => 0,
+            TargetRead::NotActive | TargetRead::Rejected(_) => 0,
             TargetRead::Data(r) => self.inner.read_result_bytes(r, limit)?,
         };
         if bytes > limit {

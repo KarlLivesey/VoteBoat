@@ -1131,12 +1131,12 @@ fn quic_target_staging_and_inline_import_survive_checkpoint_reopen() {
     target_import_recovery(NativePeerProtocol::Quic, true);
 }
 
-fn publication_recovery(protocol: NativePeerProtocol, compact: bool) {
+fn publication_recovery(protocol: NativePeerProtocol, compact: bool, activate: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     use voteboat::{transfer::*, transfer_publication::*, transfer_source::*, transfer_target::*};
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
-        "voteboat-publication-{}-{protocol:?}-{compact}",
+        "voteboat-publication-{}-{protocol:?}-{compact}-{activate}",
         std::process::id()
     ));
     std::fs::create_dir_all(&root).unwrap();
@@ -1388,6 +1388,179 @@ fn publication_recovery(protocol: NativePeerProtocol, compact: bool) {
             TargetRead::NotActive
         );
     }
+    if activate {
+        use voteboat::bucket_counter::{encode_add, BucketOutcome};
+        let activation = TargetActivation {
+            metadata_configuration: parents[0]
+                .local()
+                .owner
+                .core(group(1))
+                .unwrap()
+                .state()
+                .bootstrap
+                .configuration,
+            decision: original.clone(),
+        };
+        let command = left[0].local().applications[&group(21)]
+            .activation_command(&activation, 65536)
+            .unwrap();
+        campaign(&mut left, &clock, 21);
+        let receipt = propose_recovering(&mut left, &clock, 21, 200, command.clone());
+        let TargetOutcome::Activated(activated) = receipt.outcome else {
+            panic!("activation receipt")
+        };
+        // Right remains inactive while left has durable independent authority.
+        campaign(&mut right, &clock, 22);
+        assert_eq!(
+            read_recovering(
+                &mut right,
+                &clock,
+                22,
+                TargetQuery::Data(RoutedQuery {
+                    hint: source_fixture::hint(200),
+                    key: vec![200],
+                    query: vec![200]
+                })
+            ),
+            TargetRead::NotActive
+        );
+        close(parents, &clock, 1, || {
+            drive(&mut left, &clock, |_| true);
+            drive(&mut right, &clock, |_| true);
+        });
+        let mut hint = source_fixture::hint(1);
+        hint.group = group(21);
+        hint.scope = source_fixture::range(0, 128);
+        hint.epoch = OwnershipEpoch::new(2).unwrap();
+        hint.generation = RouteGeneration::new(2).unwrap();
+        let data = |delta| {
+            voteboat::routed::encode_routed(
+                hint,
+                &[1],
+                &encode_add(&[1], delta, b"effect", 1024).unwrap(),
+                4096,
+            )
+            .unwrap()
+        };
+        campaign(&mut left, &clock, 21);
+        let TargetOutcome::Applied(retry) =
+            propose_recovering(&mut left, &clock, 21, 1, data(7)).outcome
+        else {
+            panic!("imported retry")
+        };
+        assert!(retry.duplicate);
+        assert_eq!(retry.outcome, BucketOutcome::Value(7));
+        let TargetOutcome::Applied(write) =
+            propose_recovering(&mut left, &clock, 21, 3, data(2)).outcome
+        else {
+            panic!("new write")
+        };
+        assert_eq!(write.outcome, BucketOutcome::Value(9));
+        if compact {
+            for node in &mut left {
+                node.control(group(21), NodeControl::Checkpoint).unwrap();
+            }
+            drive(&mut left, &clock, |ns| {
+                ns.iter().all(|n| {
+                    n.local()
+                        .owner
+                        .core(group(21))
+                        .unwrap()
+                        .state()
+                        .base_index()
+                        == n.local().applications[&group(21)].applied_index()
+                })
+            });
+        }
+        close(left, &clock, 21, || {
+            drive(&mut right, &clock, |_| true);
+        });
+        close(right, &clock, 22, || {});
+        let mut left = open(
+            configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover),
+            &clock,
+            protocol,
+            target_fixture::fresh,
+        );
+        campaign(&mut left, &clock, 21);
+        assert_eq!(
+            propose_recovering(&mut left, &clock, 21, 200, command).outcome,
+            TargetOutcome::Activated(activated)
+        );
+        assert_eq!(
+            read_recovering(
+                &mut left,
+                &clock,
+                21,
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![1],
+                    query: vec![1]
+                })
+            ),
+            TargetRead::Data(9)
+        );
+        let TargetOutcome::Applied(retry) =
+            propose_recovering(&mut left, &clock, 21, 3, data(2)).outcome
+        else {
+            panic!("recovered write retry")
+        };
+        assert!(retry.duplicate);
+        assert_eq!(retry.outcome, BucketOutcome::Value(9));
+        assert!(left.iter().all(|n| n.local().applications[&group(21)]
+            .application()
+            .outbox()
+            .count()
+            == 2));
+        // Reopening the old source cannot restore its old serving authority.
+        let mut sources = open(
+            configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Recover),
+            &clock,
+            protocol,
+            source_fixture::fresh,
+        );
+        campaign(&mut sources, &clock, 20);
+        assert_eq!(
+            read_recovering(
+                &mut sources,
+                &clock,
+                20,
+                SourceQuery::Data(RoutedQuery {
+                    hint: source_fixture::hint(1),
+                    key: vec![1],
+                    query: vec![1]
+                })
+            ),
+            SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+        );
+        assert!(sources[0]
+            .propose(ClientRequest {
+                group: group(20),
+                operation: OperationId::new(4).unwrap(),
+                bytes: source_fixture::data(1, 1)
+            })
+            .is_err());
+        close(sources, &clock, 20, || {
+            drive(&mut left, &clock, |_| true);
+        });
+        campaign(&mut left, &clock, 21);
+        assert_eq!(
+            read_recovering(
+                &mut left,
+                &clock,
+                21,
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![1],
+                    query: vec![1]
+                })
+            ),
+            TargetRead::Data(9)
+        );
+        close(left, &clock, 21, || {});
+        std::fs::remove_dir_all(root).unwrap();
+        return;
+    }
     close(left, &clock, 21, || {
         drive(&mut parents, &clock, |_| true);
         drive(&mut right, &clock, |_| true);
@@ -1419,19 +1592,38 @@ fn publication_recovery(protocol: NativePeerProtocol, compact: bool) {
 }
 #[test]
 fn tcp_transfer_publication_survives_full_history_and_wal_reopen() {
-    publication_recovery(NativePeerProtocol::TcpTls, false);
+    publication_recovery(NativePeerProtocol::TcpTls, false, false);
 }
 #[test]
 fn tcp_transfer_publication_survives_checkpoint_and_lost_observation() {
-    publication_recovery(NativePeerProtocol::TcpTls, true);
+    publication_recovery(NativePeerProtocol::TcpTls, true, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_transfer_publication_survives_full_history_and_wal_reopen() {
-    publication_recovery(NativePeerProtocol::Quic, false);
+    publication_recovery(NativePeerProtocol::Quic, false, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_transfer_publication_survives_checkpoint_and_lost_observation() {
-    publication_recovery(NativePeerProtocol::Quic, true);
+    publication_recovery(NativePeerProtocol::Quic, true, false);
+}
+
+#[test]
+fn tcp_target_activation_serves_without_metadata_and_survives_wal_reopen() {
+    publication_recovery(NativePeerProtocol::TcpTls, false, true);
+}
+#[test]
+fn tcp_target_activation_preserves_retries_through_checkpoint_reopen() {
+    publication_recovery(NativePeerProtocol::TcpTls, true, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_target_activation_serves_without_metadata_and_survives_wal_reopen() {
+    publication_recovery(NativePeerProtocol::Quic, false, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_target_activation_preserves_retries_through_checkpoint_reopen() {
+    publication_recovery(NativePeerProtocol::Quic, true, true);
 }

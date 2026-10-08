@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication implemented; target activation and complete split/merge recovery remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; complete interrupted split, compatible merge, recursive lifecycle and retirement remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -101,8 +101,9 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
    Slice 86 supplies intent-bound source fencing and immutable exports. Slice 87
    adds non-serving target staging, committed inline imports and source-observed
    content commitments. Slice 88 adds checked complete evidence and reserved durable
-   directory publication. Next implement durable target activation consuming that
-   decision, then exercise end-to-end interruption/no-dual-owner
+   directory publication. Slice 89 adds matching durable target activation and native
+   service without metadata, with original retries and old-source fenced restart.
+   Next exercise all named end-to-end interruption/no-dual-owner
    histories. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
@@ -5069,3 +5070,70 @@ split histories with source restart, receipt loss and no dual serving, unlocking
 the macro first usable ownership-movement milestone. Compatible merge and
 recursive lifecycle/retirement remain P6 work before P7 measured tuning; full
 P0–P7 stays active, with macOS/separate-host validation still outstanding.
+
+### Slice 89 mini schema — durable target activation
+
+Current deliverable: TargetActivation carries the checked original metadata
+publication status and its authenticated metadata configuration. The target-bound
+command binds the staging bootstrap digest, exact intent/lifecycle, local original
+stage/import status and complete publication. Trusted hosts verify foreign quorum
+provenance and configuration before proposal. Staged -> imported -> active is
+ordered locally; a hint, import or uncommitted activation cannot serve data.
+Retain the first activation command/index/digest and original decision identity;
+retries cannot replace that authority. Its fixed bounded control record consumes
+no ordinary application operation slot, so exhausted imported retry history cannot
+block activation. No additional worker, store or durability token is introduced.
+
+Active writes validate current owner/epoch/scope/identity and payload/envelope key
+agreement before the scope provider receives the original operation/payload. The
+provider preserves imported semantic retry results and outbox. Rejected writes
+advance only the applied prefix. Generic receipts delegate nested accounting;
+reads require local activation plus the existing quorum barrier. Both ordinary
+paths run without metadata access. Pending admission simulates bounded ordered
+phases and delegates provider admission after projecting active data.
+
+Recovery: VBTRGT02 extends the checkpoint with original activation bytes/index;
+restore also accepts inactive VBTRGT01 and reconstructs authority from checked
+publication/local import, never a volatile flag. Provider state/applied index and
+phase ordering must agree; failed restore/apply is atomic. Bound activation,
+command, snapshot and nested results before retaining copies. Acceptance checks:
+pre-import/mismatched decisions refuse, same-byte retries preserve first authority,
+old-route/key/ID conflicts cannot mutate data, imported retries remain unchanged,
+WAL/checkpoint reopen serves after metadata/source shutdown, and all truncations
+refuse atomically. Next: interrupted complete split/no-dual-owner recovery with
+old source restart and lost receipts. Following: compatible merge/resumption and
+recursive lifecycle/retirement. These advance P6 usable ownership movement, then
+P7 measured tuning; full P0–P7 remains active and P8 deferred.
+
+Slice 89 result: target activation now binds the exact original directory decision
+and local stage/import; the first activation command/index/configuration survives
+retries and recovery. Active target writes/read guards use the published ownership
+context and imported provider state without metadata access. Receipt/read accounting
+supports downstream providers with nested buffers and post-import bounds. Old
+inactive VBTRGT01 checkpoints restore; newly written VBTRGT02 checkpoints retain
+activation. A full 32-operation imported history still permits control activation
+and existing retries while refusing new data IDs. No new persistence owner/effect
+or hot configuration path was added. See TARGET_ACTIVATION.md.
+
+Validation: affected all-feature library 57, directory 22, scopes 8, source 7,
+target 9, publication 7, activation 8 and routed 26 pass (144). Core-only library
+48, directory 20, scopes 7, source 7, target 9, publication 7 and activation 8
+pass (106). Four native activation histories use actual TCP/TLS/QUIC metadata,
+source and target groups: only one target activates, the other stays inactive,
+metadata stops before writes, WAL/checkpoint reopen preserves authority/data/retries/
+outbox, and the old source reopens fenced. All-target/all-feature Clippy with
+warnings denied, formatting, 69-contract inventory and diff checks pass. A final
+local-variable clarity rename left one old assignment spelling; compilation caught
+it and the focused target/activation/publication checks pass after correction.
+These finite graceful-reopen Linux histories are not power-loss or complete
+interrupted-stage, distributed merge, recursive or macOS/separate-host evidence.
+
+Next mini plan: (1) exercise the named interruption boundaries and both-target
+resumption, recovering intent/fence/import/publication/activation from durable
+status after lost observations; source remains fenced through every post-fence
+pause. This completes the first selected end-to-end split recovery path in P6.
+(2) Extend that handoff to compatible multi-source merge with partial source
+fencing, collision refusal and restart/resumption, then recursive coordination and
+later transfer/retirement. (3) P7 measured committed/applied tuning and broader
+validation. The macro plan remains usable static library/service first, then safe
+ownership movement, then measured tuning. Full P0–P7 stays active and P8 deferred.

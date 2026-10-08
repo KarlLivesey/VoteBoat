@@ -1378,7 +1378,7 @@
     },
     {
       "design_id": "C05/C15",
-      "public_contract": "TransferTarget<A,P> / TargetImport / SourceImport / TargetLimits / TargetStatus / ImportStatus / TargetReceipt / TargetQuery / TargetRead",
+      "public_contract": "TransferTarget<A,P> / TargetImport / SourceImport / TargetLimits / TargetStatus / ImportStatus / TargetReceipt / TargetQuery / TargetRead / TargetActivation / ActivationStatus",
       "operations": [
         "new",
         "bootstrap_command",
@@ -1390,15 +1390,17 @@
         "checkpoint",
         "restore_checkpoint",
         "encode",
-        "decode"
+        "decode",
+        "activation_command"
       ],
-      "native": "Non-serving deterministic target guard over existing ScopeStateMachine/application/checkpoint/read seams, native Node and the same authoritative WAL/snapshot providers; canonical SHA-256 uses pinned ring.",
+      "native": "Deterministic staging/import/activation guard over public ScopeStateMachine/application/checkpoint/read seams, native Node and the same authoritative WAL/snapshot providers; canonical SHA-256 uses pinned ring.",
       "conformance": [
         "tests/transfer_target.rs",
         "tests/transfer_target/fixtures.rs",
-        "tests/routed/native.rs"
+        "tests/routed/native.rs",
+        "tests/transfer_activation.rs"
       ],
-      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, complete ordered source coverage and source-observed content commitments. Inline committed load carries actual data and source fence/configuration lineage; source F is separate from target I. Exact phase retries/status survive native three-node TCP/QUIC WAL/checkpoint recovery while data remains NotActive. 8 MiB import body, 256 sources, bounded pending/read/result/state. Multi-source collision/coverage adapter tests do not prove distributed merge. Trusted authenticated host verifies foreign provenance/staging/envelopes. No metadata publication, activation, recursive coordination, later-transfer/retirement or complete transfer proof; no new store/thread owner."
+      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, exact ordered import coverage and source-observed commitments. Target-bound activation checks complete metadata publication against original local stage/import, retains first command/index/decision/configuration and consumes no ordinary provider history. Active writes verify owner/epoch/scope/envelope-payload keys and preserve imported provider retries/outbox; ordinary writes/reads need no metadata access. Generic nested receipts/read bounds have downstream provider conformance. Native TCP/QUIC WAL/checkpoint reopen serves with metadata offline; old source reopens fenced while another target remains inactive. VBTRGT02 accepts old inactive VBTRGT01; no mixed-version claim. Selected graceful histories do not complete interrupted split schedules, distributed merge, recursive coordination, later-transfer/retirement or macOS evidence. Trusted authenticated host verifies foreign provenance/configuration; no new store/thread owner."
     },
     {
       "design_id": "C05/C15",
@@ -1429,10 +1431,10 @@
     "native-configuration-service-endpoints",
     "authorization",
     "compression",
-    "scope-transfer-fence-import-publication-activation-protocol",
+    "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",
     "placement-planning-scoring-and-move-proposals",
     "service-enforced-configuration-application-envelope",
-    "dynamic-directory-ownership-lifecycle"
+    "recursive-directory-ownership-lifecycle"
   ]
 }

@@ -2,7 +2,7 @@
 
 `TransferPublication` connects the source fence and target imports to a committed
 metadata ownership decision. It implements the publication step of P6; targets
-remain non-serving until a separate durable activation protocol is implemented.
+remain non-serving until [durable target activation](TARGET_ACTIVATION.md) commits.
 The existing static service is usable independently of this protocol.
 
 The authenticated trusted host obtains quorum-backed source `SourceFreezeStatus`
@@ -77,6 +77,6 @@ Targets still refuse data after publication. These selected graceful-reopen
 histories do not establish power-loss safety, activation, complete no-dual-owner
 split recovery, distributed merge, recursive coordination or later retirement.
 
-Next implement durable target activation consuming the verified decision, then
-exercise interrupted end-to-end splits and preserved retries. Compatible merge
+Durable target activation now consumes the verified decision and serves without
+metadata access. Next exercise interrupted end-to-end splits and preserved retries. Compatible merge
 and recursive lifecycle follow before P7 measured tuning. Full P0–P7 remains active.

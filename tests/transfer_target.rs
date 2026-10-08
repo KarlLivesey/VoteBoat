@@ -35,7 +35,7 @@ fn stage_import_and_retries_keep_target_nonserving_and_source_lineage() {
     let receipts = t.apply_batch(&log).unwrap();
     assert_eq!(
         bound,
-        receipts.capacity() * std::mem::size_of::<TargetReceipt>()
+        receipts.capacity() * std::mem::size_of::<TargetReceipt<BucketReceipt>>()
     );
     assert_eq!(receipts[0].outcome, TargetOutcome::Staged { index: 2 });
     let expected = TargetOutcome::Imported {
