@@ -601,6 +601,17 @@ mod native {
         native::{log_store::*, outbound::NativeOutbound, worker::*},
         outbound::*,
     };
+    use voteboat::{
+        native::{
+            runtime::{DeadlineQueue, FairScheduler, JitterEntropy},
+            snapshot_store::*,
+            snapshot_worker::NativeSnapshotWorker,
+        },
+        snapshot::*,
+        snapshot_worker::*,
+    };
+    type Owner = EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>;
+    type Snapshots = NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>;
     type Worker = NativeLogWorker<NativeLogStore<FileLogIo>>;
     struct Node {
         owner: Owner,
@@ -613,8 +624,22 @@ mod native {
         staged: VecDeque<OutboundBatch>,
         sent: usize,
         received: usize,
+        snapshots: Option<Snapshots>,
+        router: Option<SnapshotRouter>,
+        snapshot_pending: VecDeque<EffectLease>,
+        send_pending: VecDeque<EffectLease>,
+        installed: usize,
+        supplied: usize,
     }
     fn make(id: u64, path: &std::path::Path, recover: bool) -> Node {
+        make_snapshots(id, path, recover, false)
+    }
+    fn make_snapshots(
+        id: u64,
+        path: &std::path::Path,
+        recover: bool,
+        with_snapshots: bool,
+    ) -> Node {
         let mut store = if recover {
             NativeLogStore::recover(
                 FileLogIo::open(path).unwrap(),
@@ -651,31 +676,103 @@ mod native {
                 visit_items: 1,
                 ..ShardLimits::default()
             },
-            Ready(VecDeque::new()),
+            FairScheduler::new(100).unwrap(),
         )
         .unwrap();
+        if with_snapshots && !recover && id <= 2 {
+            let mutations = (1..=100)
+                .map(|g| {
+                    let state = store.state(group(g)).unwrap();
+                    update(
+                        &state,
+                        1,
+                        1,
+                        Some(Suffix {
+                            from: 1,
+                            entries: vec![LogEntry {
+                                index: 1,
+                                term: 1,
+                                payload: EntryPayload::Command {
+                                    operation: OperationId::new(1).unwrap(),
+                                    bytes: 7i64.to_le_bytes().to_vec(),
+                                },
+                            }],
+                        }),
+                    )
+                })
+                .collect();
+            append(&mut store, mutations);
+        }
         let mut apps = BTreeMap::new();
+        let mut snapshot_stores = BTreeMap::new();
+        if with_snapshots && !recover {
+            std::fs::create_dir(path.join("snapshots")).unwrap();
+        }
         for g in 1..=100 {
-            let core = Raft::recover(
-                node(id),
-                store.binding(),
-                store.state(group(g)).unwrap(),
-                store.limits(),
-            )
-            .unwrap();
             let mut app = Counter::new(100).unwrap();
-            app.apply_batch(core.replay_committed()).unwrap();
+            let mut snap = with_snapshots.then(|| {
+                let directory = path.join("snapshots").join(g.to_string());
+                let identity = SnapshotIdentity {
+                    store: store.binding().identity,
+                    group: group(g),
+                };
+                let limits = SnapshotLimits {
+                    max_application_bytes: 65536,
+                    max_metadata_bytes: 4096,
+                    max_chunk_bytes: 1024,
+                };
+                if recover {
+                    NativeSnapshotStore::recover(
+                        FileSnapshotIo::open(directory).unwrap(),
+                        identity,
+                        limits,
+                    )
+                    .unwrap()
+                } else {
+                    NativeSnapshotStore::create(
+                        FileSnapshotIo::create(directory).unwrap(),
+                        identity,
+                        limits,
+                    )
+                    .unwrap()
+                }
+            });
+            let mut core = if recover && with_snapshots {
+                recover_replica(node(id), group(g), &store, snap.as_mut().unwrap(), &mut app)
+                    .unwrap()
+                    .0
+            } else {
+                let core = Raft::recover(
+                    node(id),
+                    store.binding(),
+                    store.state(group(g)).unwrap(),
+                    store.limits(),
+                )
+                .unwrap();
+                app.apply_batch(core.replay_committed()).unwrap();
+                core
+            };
+            if with_snapshots && !recover && id <= 2 {
+                let receipt = checkpoint_application(&core, &app, snap.as_mut().unwrap()).unwrap();
+                compact_replica(
+                    &mut core,
+                    &mut store,
+                    snap.as_mut().unwrap(),
+                    &app,
+                    receipt.reference(),
+                )
+                .unwrap();
+            }
+            if let Some(snap) = snap {
+                snapshot_stores.insert(group(g), snap);
+            }
             apps.insert(group(g), app);
             shard.register(core).unwrap();
         }
         let runtime = TimedShard::new(
             shard,
-            Timers {
-                owner: runtime_owner,
-                sequence: 0,
-                entries: BTreeMap::new(),
-            },
-            Entropy(id * 17),
+            DeadlineQueue::new(runtime_owner, 100).unwrap(),
+            JitterEntropy::new(id * 17),
             TimerConfig::default(),
             MonoTime(0),
         )
@@ -698,6 +795,29 @@ mod native {
             OutboundLimits::default(),
         )
         .unwrap();
+        let snapshots = with_snapshots.then(|| {
+            NativeSnapshotWorker::spawn(
+                snapshot_stores,
+                SnapshotWorkerBinding {
+                    store: runtime_owner.store,
+                    generation: SnapshotWorkerGeneration::new(1).unwrap(),
+                },
+                SnapshotWorkLimits {
+                    max_groups: 100,
+                    ..SnapshotWorkLimits::default()
+                },
+                Arc::new(ThreadWake::current()),
+            )
+            .unwrap()
+        });
+        let router = snapshots.as_ref().map(|worker| {
+            SnapshotRouter::new(
+                owner.identity(),
+                worker.binding(),
+                SnapshotRouterLimits::default(),
+            )
+            .unwrap()
+        });
         Node {
             owner,
             worker,
@@ -709,6 +829,12 @@ mod native {
             staged: VecDeque::new(),
             sent: 0,
             received: 0,
+            snapshots,
+            router,
+            snapshot_pending: VecDeque::new(),
+            send_pending: VecDeque::new(),
+            installed: 0,
+            supplied: 0,
         }
     }
     #[cfg(feature = "tls")]
@@ -759,6 +885,41 @@ mod native {
                 "effect-owner cluster did not drain"
             );
             for n in nodes.iter_mut() {
+                if let (Some(router), Some(worker)) = (&mut n.router, &mut n.snapshots) {
+                    for event in worker.poll(1) {
+                        let installed = matches!(
+                            &event.result,
+                            Ok(SnapshotOutput::Loaded {
+                                reconciled: true,
+                                ..
+                            })
+                        );
+                        let supplied = matches!(
+                            &event.result,
+                            Ok(SnapshotOutput::Loaded {
+                                reconciled: false,
+                                ..
+                            })
+                        );
+                        let app = n.apps.get_mut(&event.visit.group).unwrap();
+                        router.deliver(&mut n.owner, app, event, now).unwrap();
+                        n.installed += usize::from(installed);
+                        n.supplied += usize::from(supplied);
+                    }
+                    for _ in 0..n.snapshot_pending.len() {
+                        let lease = n.snapshot_pending.pop_front().unwrap();
+                        let app = &n.apps[&lease.ticket.visit.group];
+                        if let Err(rejected) = router.submit(&mut n.owner, worker, lease, app) {
+                            assert!(matches!(
+                                rejected.reason,
+                                SnapshotRouteError::Overloaded
+                                    | SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
+                                    | SnapshotRouteError::Owner(EffectOwnerError::Overloaded)
+                            ));
+                            n.snapshot_pending.push_back(*rejected.lease);
+                        }
+                    }
+                }
                 for event in n.worker.poll(1) {
                     n.owner.deliver_worker(event, now).unwrap();
                 }
@@ -784,18 +945,33 @@ mod native {
                                 .unwrap();
                             n.reads.push(value);
                         }
-                        Effect::Send(_) => {
-                            let EffectLease {
-                                ticket,
-                                effect: Effect::Send(message),
-                            } = lease
-                            else {
-                                unreachable!()
-                            };
-                            n.outbound.submit(vec![message]).unwrap();
-                            n.owner.release_transferred_send(ticket).unwrap();
+                        Effect::Send(_) => n.send_pending.push_back(lease),
+                        Effect::StageSnapshot(_)
+                        | Effect::SnapshotRequired { .. }
+                        | Effect::SnapshotInstalled(_) => {
+                            assert!(n.router.is_some());
+                            n.snapshot_pending.push_back(lease);
                         }
-                        _ => panic!("snapshot is outside this owner history"),
+                    }
+                }
+                for _ in 0..n.send_pending.len() {
+                    let EffectLease {
+                        ticket,
+                        effect: Effect::Send(message),
+                    } = n.send_pending.pop_front().unwrap()
+                    else {
+                        unreachable!()
+                    };
+                    match n.outbound.submit(vec![message]) {
+                        Ok(_) => n.owner.release_transferred_send(ticket).unwrap(),
+                        Err(mut rejected) => {
+                            assert_eq!(rejected.reason, OutboundError::Overloaded);
+                            assert_eq!(rejected.messages.len(), 1);
+                            n.send_pending.push_back(EffectLease {
+                                ticket,
+                                effect: Effect::Send(rejected.messages.remove(0)),
+                            });
+                        }
                     }
                 }
                 if !n.pending.is_empty() {
@@ -853,6 +1029,13 @@ mod native {
                 assert!(
                     n.owner.usage().reserved_bytes <= EffectOwnerLimits::default().reserved_bytes
                 );
+                assert_eq!(
+                    n.owner.usage().leased,
+                    n.pending.len()
+                        + n.send_pending.len()
+                        + n.snapshot_pending.len()
+                        + n.router.as_ref().map_or(0, |r| r.usage().requests)
+                );
             }
             for _ in 0..32 {
                 let Some(message) = network.pop_front() else {
@@ -880,6 +1063,10 @@ mod native {
                         && n.outbound.is_drained()
                         && n.pending.is_empty()
                         && n.staged.is_empty()
+                        && n.send_pending.is_empty()
+                        && n.snapshot_pending.is_empty()
+                        && n.router.as_ref().is_none_or(|r| r.is_drained())
+                        && n.snapshots.as_ref().is_none_or(|w| w.is_drained())
                 })
                 && nodes.iter().map(|n| n.sent).sum::<usize>()
                     == nodes.iter().map(|n| n.received).sum::<usize>()
@@ -893,6 +1080,21 @@ mod native {
         for n in nodes {
             n.owner.close_admission().unwrap();
             assert!(n.owner.is_drained());
+            assert!(n.snapshot_pending.is_empty());
+            assert!(n.send_pending.is_empty());
+            assert!(n.router.as_ref().is_none_or(|r| r.is_drained()));
+            if let Some(worker) = &mut n.snapshots {
+                worker.close();
+                let deadline = Instant::now() + Duration::from_secs(5);
+                loop {
+                    if let Some(stores) = worker.try_reclaim().unwrap() {
+                        drop(stores);
+                        break;
+                    }
+                    assert!(Instant::now() < deadline);
+                    std::thread::park_timeout(Duration::from_millis(1));
+                }
+            }
             n.worker.close();
             let deadline = Instant::now() + Duration::from_secs(5);
             loop {
@@ -926,6 +1128,208 @@ mod native {
                 .unwrap();
         }
         drain(nodes, isolated, now);
+    }
+    #[test]
+    fn hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport() {
+        let root =
+            std::env::temp_dir().join(format!("voteboat-snapshot-router-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        let mut nodes = (1..=3)
+            .map(|id| make_snapshots(id, &root.join(id.to_string()), false, true))
+            .collect::<Vec<_>>();
+        #[cfg(feature = "tls")]
+        mesh(&mut nodes);
+        for g in 1..=100 {
+            nodes[0].owner.admit(group(g), Event::Campaign).unwrap();
+        }
+        drain(&mut nodes, None, MonoTime(0));
+        assert_eq!(nodes[2].installed, 100);
+        assert!(nodes[0].supplied >= 100);
+        for n in &nodes {
+            for g in 1..=100 {
+                assert!(n.owner.core(group(g)).unwrap().state().snapshot.is_some());
+                let app = &n.apps[&group(g)];
+                assert_eq!(app.read_applied(app.applied_index()), Ok(7));
+            }
+        }
+        // No explicit heartbeat: the native timer provider drives these sends.
+        #[cfg(feature = "tls")]
+        let before_heartbeat = nodes[0].sent;
+        let before_deadline = nodes[0].owner.deadline(group(1)).unwrap().deadline;
+        drain(&mut nodes, None, MonoTime(100));
+        assert!(nodes[0].owner.deadline(group(1)).unwrap().deadline > before_deadline);
+        #[cfg(feature = "tls")]
+        assert!(nodes[0].sent > before_heartbeat);
+        proposals(&mut nodes, 0, 1, 7, None, MonoTime(101));
+        proposals(&mut nodes, 0, 2, 3, None, MonoTime(101));
+        for g in 1..=100 {
+            nodes[0]
+                .owner
+                .admit(
+                    group(g),
+                    Event::Read {
+                        request: ReadRequestId::new(1).unwrap(),
+                    },
+                )
+                .unwrap();
+        }
+        drain(&mut nodes, None, MonoTime(101));
+        assert_eq!(nodes[0].reads, vec![10; 100]);
+        let bindings = nodes
+            .iter()
+            .map(|n| n.owner.identity().store)
+            .collect::<Vec<_>>();
+        close(&mut nodes);
+        drop(nodes);
+        let mut nodes = (1..=3)
+            .map(|id| make_snapshots(id, &root.join(id.to_string()), true, true))
+            .collect::<Vec<_>>();
+        #[cfg(feature = "tls")]
+        mesh(&mut nodes);
+        for (i, n) in nodes.iter().enumerate() {
+            assert_ne!(n.owner.identity().store, bindings[i]);
+            for app in n.apps.values() {
+                assert_eq!(app.read_applied(app.applied_index()), Ok(10));
+            }
+        }
+        for g in 1..=100 {
+            nodes[1].owner.admit(group(g), Event::Campaign).unwrap();
+        }
+        drain(&mut nodes, None, MonoTime(0));
+        proposals(&mut nodes, 1, 1, 7, None, MonoTime(0));
+        proposals(&mut nodes, 1, 3, 5, None, MonoTime(0));
+        for n in &nodes {
+            for app in n.apps.values() {
+                assert_eq!(app.read_applied(app.applied_index()), Ok(15));
+            }
+        }
+        close(&mut nodes);
+        drop(nodes);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+    fn leaders(nodes: &[Node], isolated: Option<NodeId>) -> Option<Vec<usize>> {
+        (1..=100)
+            .map(|g| {
+                let leaders = nodes
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, n)| {
+                        Some(n.outbound.binding().node) != isolated
+                            && n.owner.core(group(g)).unwrap().role() == Role::Leader
+                    })
+                    .map(|(i, _)| i)
+                    .collect::<Vec<_>>();
+                (leaders.len() == 1).then(|| leaders[0])
+            })
+            .collect()
+    }
+    fn elect_automatically(
+        nodes: &mut [Node],
+        isolated: Option<NodeId>,
+        start: u64,
+        value: Option<i64>,
+    ) -> (Vec<usize>, MonoTime) {
+        for tick in 0..=60 {
+            let now = MonoTime(start + tick * 25);
+            drain(nodes, isolated, now);
+            if let Some(leaders) = leaders(nodes, isolated) {
+                let caught_up = nodes
+                    .iter()
+                    .filter(|n| Some(n.outbound.binding().node) != isolated)
+                    .all(|n| {
+                        n.apps.values().all(|a| {
+                            value.is_none_or(|v| a.read_applied(a.applied_index()) == Ok(v))
+                        })
+                    });
+                if caught_up {
+                    return (leaders, now);
+                }
+            }
+        }
+        panic!("automatic elections/catch-up did not converge");
+    }
+    fn routed_proposals(
+        nodes: &mut [Node],
+        leaders: &[usize],
+        operation: u128,
+        delta: i64,
+        isolated: Option<NodeId>,
+        now: MonoTime,
+    ) {
+        for (g, leader) in leaders.iter().enumerate() {
+            nodes[*leader]
+                .owner
+                .admit(
+                    group(g as u128 + 1),
+                    Event::Propose {
+                        operation: OperationId::new(operation).unwrap(),
+                        bytes: delta.to_le_bytes().to_vec(),
+                    },
+                )
+                .unwrap();
+        }
+        drain(nodes, isolated, now);
+    }
+    #[test]
+    fn automatic_elections_and_partition_replacement_preserve_hundred_group_history() {
+        let root =
+            std::env::temp_dir().join(format!("voteboat-automatic-network-{}", std::process::id()));
+        std::fs::create_dir_all(&root).unwrap();
+        let mut nodes = (1..=3)
+            .map(|id| make(id, &root.join(id.to_string()), false))
+            .collect::<Vec<_>>();
+        #[cfg(feature = "tls")]
+        mesh(&mut nodes);
+        let (initial, now) = elect_automatically(&mut nodes, None, 150, Some(0));
+        routed_proposals(&mut nodes, &initial, 1, 7, None, now);
+        let isolated_index = (0..3)
+            .max_by_key(|i| initial.iter().filter(|l| **l == *i).count())
+            .unwrap();
+        let isolated = Some(node(isolated_index as u64 + 1));
+        for (g, leader) in initial
+            .iter()
+            .enumerate()
+            .filter(|(_, l)| **l == isolated_index)
+        {
+            nodes[*leader]
+                .owner
+                .admit(
+                    group(g as u128 + 1),
+                    Event::Propose {
+                        operation: OperationId::new(99).unwrap(),
+                        bytes: 100i64.to_le_bytes().to_vec(),
+                    },
+                )
+                .unwrap();
+        }
+        drain(&mut nodes, isolated, MonoTime(now.0 + 1));
+        let (replacement, now) = elect_automatically(&mut nodes, isolated, now.0 + 25, Some(7));
+        assert!(replacement.iter().all(|i| *i != isolated_index));
+        routed_proposals(&mut nodes, &replacement, 2, 3, isolated, now);
+        let (healed, now) = elect_automatically(&mut nodes, None, now.0 + 25, Some(10));
+        routed_proposals(&mut nodes, &healed, 1, 7, None, now);
+        for (g, leader) in healed.iter().enumerate() {
+            nodes[*leader]
+                .owner
+                .admit(
+                    group(g as u128 + 1),
+                    Event::Read {
+                        request: ReadRequestId::new(1).unwrap(),
+                    },
+                )
+                .unwrap();
+        }
+        drain(&mut nodes, None, now);
+        assert_eq!(nodes.iter().map(|n| n.reads.len()).sum::<usize>(), 100);
+        assert!(nodes.iter().all(|n| n.reads.iter().all(|v| *v == 10)));
+        for n in &nodes {
+            for app in n.apps.values() {
+                assert_eq!(app.read_applied(app.applied_index()), Ok(10));
+            }
+        }
+        close(&mut nodes);
+        drop(nodes);
+        std::fs::remove_dir_all(root).unwrap();
     }
     #[test]
     fn hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport() {
@@ -1079,4 +1483,471 @@ fn closing_drains_accepted_work_and_disarms_automatic_timers() {
     assert!(owner.is_drained());
     assert!(owner.deadline(group(1)).is_none());
     assert_eq!(apps[&group(1)].applied_index(), 1);
+}
+
+mod snapshot_routes {
+    use super::*;
+    use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
+    struct Worker {
+        binding: SnapshotWorkerBinding,
+        sequence: u64,
+        pending: VecDeque<(SnapshotWorkTicket, SnapshotWork)>,
+        reject: bool,
+        bad_ticket: bool,
+        closed: bool,
+        allowance: usize,
+        images: BTreeMap<GroupIdentity, Snapshot>,
+    }
+    impl SnapshotWorker for Worker {
+        fn binding(&self) -> SnapshotWorkerBinding {
+            self.binding
+        }
+        fn limits(&self) -> SnapshotWorkLimits {
+            SnapshotWorkLimits::default()
+        }
+        fn usage(&self) -> SnapshotWorkUsage {
+            SnapshotWorkUsage {
+                requests: self.pending.len(),
+                bytes: self.pending.len() * self.allowance,
+            }
+        }
+        fn load_reservation(&self, _: GroupIdentity) -> Option<usize> {
+            Some(self.allowance)
+        }
+        fn submit(
+            &mut self,
+            work: SnapshotWork,
+        ) -> Result<SnapshotWorkTicket, SnapshotWorkRejected> {
+            if self.reject || self.closed {
+                return Err(SnapshotWorkRejected {
+                    reason: if self.closed {
+                        SnapshotWorkError::Closed
+                    } else {
+                        SnapshotWorkError::Overloaded
+                    },
+                    work: Box::new(work),
+                });
+            }
+            self.sequence += 1;
+            let ticket = SnapshotWorkTicket {
+                binding: self.binding,
+                sequence: if self.bad_ticket { 0 } else { self.sequence },
+            };
+            self.pending.push_back((ticket, work));
+            Ok(ticket)
+        }
+        fn poll(&mut self, limit: usize) -> Vec<SnapshotWorkEvent> {
+            (0..limit)
+                .filter_map(|_| self.pending.pop_front())
+                .map(|(request, work)| {
+                    let result = match work.job {
+                        SnapshotJob::Publish { snapshot, .. } => {
+                            let reference = reference(&snapshot);
+                            self.images.insert(work.visit.group, snapshot);
+                            SnapshotOutput::Published(reference)
+                        }
+                        SnapshotJob::Load { reference, install } => SnapshotOutput::Loaded {
+                            reference,
+                            snapshot: self.images[&work.visit.group].clone(),
+                            reconciled: install,
+                        },
+                    };
+                    SnapshotWorkEvent {
+                        request,
+                        visit: work.visit,
+                        result: Ok(result),
+                    }
+                })
+                .collect()
+        }
+        fn close(&mut self) {
+            self.closed = true;
+        }
+    }
+    fn reference(snapshot: &Snapshot) -> SnapshotRef {
+        SnapshotRef {
+            store: identity(2),
+            group: snapshot.metadata.bootstrap.group,
+            generation: SnapshotGeneration::new(1).unwrap(),
+            configuration: snapshot.metadata.bootstrap.configuration,
+            index: snapshot.metadata.index,
+            term: snapshot.metadata.term,
+            application_schema: snapshot.metadata.application_schema,
+            file_bytes: snapshot.application.len() as u64,
+            checksum: 7,
+        }
+    }
+    fn setup(count: u128, requests: usize) -> (Owner, HostWorker, Worker, SnapshotRouter) {
+        let mut log = HostLogStore::new(2);
+        let runtime = timed(2, &mut log, count, 3);
+        let wal = HostWorker::new(log);
+        let owner = EffectOwner::new(runtime, wal.binding(), EffectOwnerLimits::default()).unwrap();
+        let binding = SnapshotWorkerBinding {
+            store: owner.identity().store,
+            generation: SnapshotWorkerGeneration::new(1).unwrap(),
+        };
+        let worker = Worker {
+            binding,
+            sequence: 0,
+            pending: VecDeque::new(),
+            reject: false,
+            bad_ticket: false,
+            closed: false,
+            allowance: 65536,
+            images: BTreeMap::new(),
+        };
+        let router = SnapshotRouter::new(
+            owner.identity(),
+            binding,
+            SnapshotRouterLimits {
+                requests,
+                ..SnapshotRouterLimits::default()
+            },
+        )
+        .unwrap();
+        (owner, wal, worker, router)
+    }
+    fn stage(owner: &mut Owner, g: u128) -> EffectLease {
+        let mut app = Counter::new(20).unwrap();
+        app.apply_batch(&[LogEntry {
+            index: 1,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(1).unwrap(),
+                bytes: 7i64.to_le_bytes().to_vec(),
+            },
+        }])
+        .unwrap();
+        let snapshot = Snapshot {
+            metadata: SnapshotMetadata {
+                bootstrap: bootstrap(g, 3),
+                index: 1,
+                term: 1,
+                application_schema: app.schema_version(),
+            },
+            application: app.checkpoint(65536).unwrap(),
+        };
+        let sender = StoreBinding {
+            identity: identity(1),
+            session: StoreSession::new(1).unwrap(),
+        };
+        let message = Message {
+            group: group(g),
+            configuration: ConfigurationId::new(1).unwrap(),
+            from: node(1),
+            sender,
+            to: node(2),
+            term: 1,
+            context: RequestContext {
+                origin: sender,
+                sequence: 1,
+            },
+            rpc: Rpc::Snapshot {
+                snapshot: Box::new(snapshot),
+            },
+        };
+        owner.admit(group(g), Event::Receive(message)).unwrap();
+        owner.advance(MonoTime(0), 1).unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(lease.effect, Effect::StageSnapshot(_)));
+        lease
+    }
+    #[test]
+    fn rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it() {
+        let (mut owner, mut wal, mut worker, mut router) = setup(1, 1);
+        let lease = stage(&mut owner, 1);
+        let ticket = lease.ticket;
+        let mut app = Counter::new(20).unwrap();
+        worker.reject = true;
+        let rejected = router
+            .submit(&mut owner, &mut worker, lease, &app)
+            .unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
+        );
+        assert_eq!(rejected.lease.ticket, ticket);
+        let charged = owner.usage().reserved_bytes;
+        let rejected = router
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap_err();
+        assert_eq!(owner.usage().reserved_bytes, charged);
+        assert!(router.is_drained());
+        worker.reject = false;
+        let request = router
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap();
+        assert_eq!(router.usage().requests, 1);
+        assert_eq!(owner.usage().leased, 1);
+        assert!(owner.take_effect().unwrap().is_none());
+        let stale = SnapshotWorkEvent {
+            request: SnapshotWorkTicket {
+                binding: SnapshotWorkerBinding {
+                    generation: SnapshotWorkerGeneration::new(2).unwrap(),
+                    ..request.binding
+                },
+                ..request
+            },
+            visit: ticket.visit,
+            result: Err(StorageError::Fenced),
+        };
+        assert_eq!(
+            router.deliver(&mut owner, &mut app, stale, MonoTime(0)),
+            Err(SnapshotRouteError::StaleCompletion)
+        );
+        let mut wrong = ticket.visit;
+        wrong.owner.generation = RuntimeGeneration::new(2).unwrap();
+        let stale = SnapshotWorkEvent {
+            request,
+            visit: wrong,
+            result: Err(StorageError::Fenced),
+        };
+        assert_eq!(
+            router.deliver(&mut owner, &mut app, stale, MonoTime(0)),
+            Err(SnapshotRouteError::StaleCompletion)
+        );
+        assert!(!owner.is_failed());
+        assert_eq!(router.usage().requests, 1);
+        let event = worker.poll(1).pop().unwrap();
+        router
+            .deliver(&mut owner, &mut app, event, MonoTime(0))
+            .unwrap();
+        assert!(router.is_drained());
+        let duplicate = SnapshotWorkEvent {
+            request,
+            visit: ticket.visit,
+            result: Err(StorageError::Fenced),
+        };
+        assert_eq!(
+            router.deliver(&mut owner, &mut app, duplicate, MonoTime(0)),
+            Err(SnapshotRouteError::StaleCompletion)
+        );
+        assert!(!owner.is_failed());
+        let persist = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(persist.effect, Effect::Persist(_)));
+        owner
+            .submit_persists(&mut wal, vec![persist], MonoTime(0))
+            .unwrap();
+        owner
+            .deliver_worker(wal.poll(1).pop().unwrap(), MonoTime(0))
+            .unwrap();
+        assert!(owner.take_effect().unwrap().is_none());
+        owner
+            .deliver_worker(wal.poll(1).pop().unwrap(), MonoTime(0))
+            .unwrap();
+        let installed = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(installed.effect, Effect::SnapshotInstalled(_)));
+        assert_eq!(app.applied_index(), 0);
+    }
+    #[test]
+    fn accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard() {
+        let (mut owner, _, mut worker, mut router) = setup(2, 2);
+        let mut app = Counter::new(20).unwrap();
+        let first = stage(&mut owner, 1);
+        let first_visit = first.ticket.visit;
+        let request = router.submit(&mut owner, &mut worker, first, &app).unwrap();
+        let second = stage(&mut owner, 2);
+        router
+            .submit(&mut owner, &mut worker, second, &app)
+            .unwrap();
+        assert!(router.discard_failed(&mut owner).is_err());
+        assert_eq!(router.usage().requests, 2);
+        let event = SnapshotWorkEvent {
+            request,
+            visit: first_visit,
+            result: Err(StorageError::Uncertain("lost publication".into())),
+        };
+        assert!(matches!(
+            router.deliver(&mut owner, &mut app, event, MonoTime(0)),
+            Err(SnapshotRouteError::Checkpoint(_))
+        ));
+        assert!(owner.is_failed());
+        assert_eq!(owner.usage().leased, 1);
+        assert!(owner.usage().reserved_bytes > 0);
+        assert_eq!(router.usage().requests, 1);
+        router.discard_failed(&mut owner).unwrap();
+        assert_eq!(owner.usage().reserved_bytes, 0);
+        assert!(router.is_drained());
+        // Dropping leases does not undo accepted provider work.
+        assert_eq!(worker.usage().requests, 2);
+        worker.close();
+        worker.poll(2);
+        assert!(worker.is_drained());
+    }
+    #[test]
+    fn bounded_routing_and_wrong_binding_reject_before_transfer() {
+        let (mut owner, _, mut worker, mut router) = setup(2, 1);
+        let app = Counter::new(20).unwrap();
+        let first = stage(&mut owner, 1);
+        router.submit(&mut owner, &mut worker, first, &app).unwrap();
+        let second = stage(&mut owner, 2);
+        let rejected = router
+            .submit(&mut owner, &mut worker, second, &app)
+            .unwrap_err();
+        assert_eq!(rejected.reason, SnapshotRouteError::Overloaded);
+        assert_eq!(worker.usage().requests, 1);
+        let mut other = SnapshotRouter::new(
+            owner.identity(),
+            SnapshotWorkerBinding {
+                generation: SnapshotWorkerGeneration::new(2).unwrap(),
+                ..worker.binding
+            },
+            SnapshotRouterLimits::default(),
+        )
+        .unwrap();
+        let rejected = other
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap_err();
+        assert_eq!(rejected.reason, SnapshotRouteError::WrongWorker);
+        let mut obsolete = SnapshotRouter::new(
+            RuntimeOwner {
+                generation: RuntimeGeneration::new(2).unwrap(),
+                ..owner.identity()
+            },
+            worker.binding(),
+            SnapshotRouterLimits::default(),
+        )
+        .unwrap();
+        let rejected = obsolete
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap_err();
+        assert_eq!(rejected.reason, SnapshotRouteError::WrongOwner);
+        worker.allowance = 240 * 1024 * 1024;
+        let mut excessive = SnapshotRouter::new(
+            owner.identity(),
+            worker.binding(),
+            SnapshotRouterLimits {
+                requests: 1,
+                max_image_bytes: 300 * 1024 * 1024,
+            },
+        )
+        .unwrap();
+        let rejected = excessive
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap_err();
+        assert_eq!(
+            rejected.reason,
+            SnapshotRouteError::Owner(EffectOwnerError::ReservationTooLarge)
+        );
+        worker.allowance = usize::MAX;
+        let mut roomy = SnapshotRouter::new(
+            owner.identity(),
+            worker.binding(),
+            SnapshotRouterLimits::default(),
+        )
+        .unwrap();
+        let rejected = roomy
+            .submit(&mut owner, &mut worker, *rejected.lease, &app)
+            .unwrap_err();
+        assert_eq!(rejected.reason, SnapshotRouteError::TooLarge);
+        assert!(!owner.is_failed());
+    }
+    #[test]
+    fn invalid_accepted_ticket_fences_but_returns_original_lease_for_discard() {
+        let (mut owner, _, mut worker, mut router) = setup(1, 1);
+        let app = Counter::new(20).unwrap();
+        let lease = stage(&mut owner, 1);
+        worker.bad_ticket = true;
+        let rejected = router
+            .submit(&mut owner, &mut worker, lease, &app)
+            .unwrap_err();
+        assert_eq!(rejected.reason, SnapshotRouteError::ProviderContract);
+        assert!(owner.is_failed());
+        assert_eq!(owner.usage().leased, 1);
+        assert_eq!(worker.usage().requests, 1);
+        owner.discard_failed(*rejected.lease).unwrap();
+        assert_eq!(owner.usage().reserved_bytes, 0);
+        worker.close();
+        worker.poll(1);
+    }
+    #[test]
+    fn closing_owner_drains_snapshot_wal_and_application_dependencies() {
+        let (mut owner, mut wal, mut worker, mut router) = setup(1, 1);
+        let mut app = Counter::new(20).unwrap();
+        let lease = stage(&mut owner, 1);
+        router.submit(&mut owner, &mut worker, lease, &app).unwrap();
+        owner.close_admission().unwrap();
+        assert!(!owner.is_drained());
+        router
+            .deliver(
+                &mut owner,
+                &mut app,
+                worker.poll(1).pop().unwrap(),
+                MonoTime(0),
+            )
+            .unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        owner
+            .submit_persists(&mut wal, vec![lease], MonoTime(0))
+            .unwrap();
+        owner
+            .deliver_worker(wal.poll(1).pop().unwrap(), MonoTime(0))
+            .unwrap();
+        owner
+            .deliver_worker(wal.poll(1).pop().unwrap(), MonoTime(0))
+            .unwrap();
+        let installed = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(installed.effect, Effect::SnapshotInstalled(_)));
+        // Closing ingress must still permit this dependency of accepted work.
+        router
+            .submit(&mut owner, &mut worker, installed, &app)
+            .unwrap();
+        router
+            .deliver(
+                &mut owner,
+                &mut app,
+                worker.poll(1).pop().unwrap(),
+                MonoTime(0),
+            )
+            .unwrap();
+        let ack = owner.take_effect().unwrap().unwrap();
+        assert!(matches!(
+            &ack.effect,
+            Effect::Send(Message {
+                rpc: Rpc::SnapshotAck { index: 1 },
+                ..
+            })
+        ));
+        assert_eq!(app.read_applied(1), Ok(7));
+        owner
+            .release(ack, app.applied_index(), MonoTime(0))
+            .unwrap();
+        assert!(owner.is_drained());
+        assert!(router.is_drained());
+        assert!(worker.is_drained());
+        worker.close();
+    }
+    #[test]
+    fn oversized_provider_result_fences_and_releases_only_router_owned_payload() {
+        let (mut owner, _, mut worker, mut router) = setup(1, 1);
+        let mut app = Counter::new(20).unwrap();
+        let lease = stage(&mut owner, 1);
+        let visit = lease.ticket.visit;
+        let request = router.submit(&mut owner, &mut worker, lease, &app).unwrap();
+        let SnapshotJob::Publish { snapshot, .. } = &worker.pending.front().unwrap().1.job else {
+            panic!()
+        };
+        let mut snapshot = snapshot.clone();
+        snapshot.application.reserve(worker.allowance * 2);
+        let event = SnapshotWorkEvent {
+            request,
+            visit,
+            result: Ok(SnapshotOutput::Loaded {
+                reference: reference(&snapshot),
+                snapshot,
+                reconciled: true,
+            }),
+        };
+        assert_eq!(
+            router.deliver(&mut owner, &mut app, event, MonoTime(0)),
+            Err(SnapshotRouteError::ProviderContract)
+        );
+        assert!(owner.is_failed());
+        assert_eq!(owner.usage().reserved_bytes, 0);
+        assert!(router.is_drained());
+        assert_eq!(app.applied_index(), 0);
+        assert_eq!(worker.usage().requests, 1);
+        worker.close();
+        worker.poll(1);
+    }
 }

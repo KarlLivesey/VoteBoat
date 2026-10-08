@@ -19,7 +19,7 @@ store identities and group keys rather than requiring
 their sessions to equal the WAL's. No new durable watermark is introduced.
 
 A work item owns one scoped runtime `VisitTicket` and one Publish or Load job.
-Admission returns a checked worker-local sequence or returns the original work
+Admission returns a checked, strictly increasing worker-local sequence or returns the original work
 on rejection. One request per group can remain accepted, including an unpolled
 terminal event. Request/byte credits are retained until terminal polling transfers
 its output to the owner. Close rejects new work and drains accepted work.
@@ -51,8 +51,9 @@ must also fit their allowance. An excessive original vector capacity rejects
 before transfer. Provider file/codec scratch, core/application clones and other
 runtime memory remain separately budgeted; this is not a process RSS guarantee.
 
-The caller must reserve space for a returned image before submitting/polling a
-Load. With `EffectOwner`, keep the original lease and use `extend_reservation`
+`load_reservation(group)` exposes this stable capacity allowance to owner-side
+coordination. The caller must reserve space for a returned image before
+submitting/polling a Load. With `EffectOwner`, keep the original lease and use `extend_reservation`
 before work that needs additional output space. A rejected prepared Publish
 still owns its cloned image; keep it under a host request budget or drop it before
 retrying. Worker credits cannot account for host-owned rejected or polled data.
@@ -95,14 +96,13 @@ calls `snapshot_send` against the original leader request context. The resulting
 owned Send enters the separately bounded outbound path. Snapshot load success
 is neither network delivery nor a remote durable acknowledgement.
 
-`EffectOwner::complete_effect_with` passes the original leased effect into a
-serialized callback, avoiding a snapshot clone just to inspect it. Hosts record
-successful snapshot admissions in a bounded map tied to original lease tickets,
-reject unknown/repeated/obsolete events, and remove each mapping once. The
-completion helper validates the supplied expected envelope; it does not own that
-map or authorize a caller to reuse an old expected ticket. Map errors into the
-owner's failure path and drain/recover accepted worker requests. Provider
-attestations assume the selected public storage contract, not Byzantine proof.
+`runtime::SnapshotRouter` now supplies the bounded one-use admission-to-lease
+map and pre-admission reservations. It rejects unknown, repeated and obsolete
+completions before core access and calls these helpers on the serialized effect
+owner. `EffectOwner::complete_effect_with` exposes the original leased effect
+without cloning its image. Hosts may use the helpers directly if they implement
+the same routing and lifetime obligations. See [snapshot routing](SNAPSHOT_ROUTER.md).
+Provider attestations still assume the selected public storage contract.
 
 ## Evidence and remaining assembly
 
@@ -125,7 +125,7 @@ without a durable WAL anchor. Earlier snapshot histories retain their broader
 synchronous corruption and durability coverage.
 
 Native checkpoint creation/compaction still require quiescent synchronous store
-access. Full node admission/lease routing, network snapshot catch-up through the
-new worker, peer reconnect handling and broader automatic-timer histories remain
-pending. macOS execution and hardware power-cut testing remain unobserved. The
+access. The new router and native 100-group TCP/TLS catch-up history cover lease
+routing and network installation. Full node admission/facade, peer reconnect
+handling and broader automatic-election network histories remain pending. macOS execution and hardware power-cut testing remain unobserved. The
 full P0–P7 goal remains active.

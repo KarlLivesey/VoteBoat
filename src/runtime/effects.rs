@@ -130,9 +130,9 @@ struct Request {
 /// after ordered application. ReadReady is consumed on the core before its
 /// completion callback. Persist leases use submit_persists, never generic release.
 /// Callbacks run on the serialized owner and must not perform blocking I/O.
-/// Snapshot effects can remain leased for host work; native asynchronous
-/// snapshot completion integration is separate. Extend a reservation before
-/// starting host work whose result can exceed the original bound.
+/// SnapshotRouter retains snapshot leases through asynchronous work and
+/// delivers exact completions through the same serialized callback path. Extend
+/// a reservation before starting host work whose result can exceed the original bound.
 pub struct EffectOwner<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
     runtime: TimedShard<Q, T, E>,
     worker: WorkerBinding,
@@ -192,7 +192,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     fn check(&self) -> Result<(), EffectOwnerError> {
         self.failed.clone().map_or(Ok(()), Err)
     }
-    fn fail<R>(&mut self, error: EffectOwnerError) -> Result<R, EffectOwnerError> {
+    pub(super) fn fail<R>(&mut self, error: EffectOwnerError) -> Result<R, EffectOwnerError> {
         let groups = self.runtime.groups().collect::<Vec<_>>();
         for group in groups {
             let _ = self.runtime.stop_group(group);
@@ -210,6 +210,35 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         self.ready.clear();
         self.failed = Some(error.clone());
         Err(error)
+    }
+    pub fn identity(&self) -> RuntimeOwner {
+        self.runtime.owner()
+    }
+    pub fn is_failed(&self) -> bool {
+        self.failed.is_some()
+    }
+    pub(super) fn reserve_snapshot(
+        &mut self,
+        lease: &EffectLease,
+        extra: usize,
+    ) -> Result<(), EffectOwnerError> {
+        self.validate_lease(lease)?;
+        let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+        let capacity = a.effects.capacity();
+        let needed = effect_bytes(a.effects.make_contiguous(), capacity)
+            .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
+            .and_then(|n| n.checked_add(extra))
+            .ok_or(EffectOwnerError::ReservationTooLarge)?;
+        let ceiling = if a.control {
+            self.limits.reserved_bytes
+        } else {
+            self.limits.reserved_bytes - self.limits.control_bytes
+        };
+        if needed > ceiling {
+            return Err(EffectOwnerError::ReservationTooLarge);
+        }
+        let additional = needed.saturating_sub(a.reserved);
+        self.extend_reservation(lease.ticket, additional)
     }
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.runtime.core(group)
@@ -423,7 +452,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         Ok(())
     }
-    fn validate_lease(&self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
+    pub(super) fn validate_lease(&self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
         self.live(lease.ticket)?;
         if self.active[&lease.ticket.visit.group].kind != Some(kind(&lease.effect)) {
             return Err(EffectOwnerError::StaleEffect);

@@ -99,10 +99,15 @@ The native three-node/100-group history uses this public transport with actual
 TLS sockets and WAL workers, including delayed durability, overload, fresh
 reads, old-leader isolation, replacement, healing and recovered store sessions.
 Its partition/duplicate faults are injected after receive decoding; they are
-not kernel-level network fault simulation. Snapshot installation has its
-separate durable history, which still uses simulated connections.
+not kernel-level network fault simulation. The SnapshotRouter history also installs snapshots for 100 compacted groups
+through native snapshot/WAL workers and these authenticated connections, then
+recovers actual files and continues replicated writes. Native timers generate
+heartbeat traffic; campaigns are explicit. See [snapshot routing](SNAPSHOT_ROUTER.md).
 
-A production node owner, peer roster and reconnect policy, fully bounded shared
-effect staging, asynchronous snapshot workers and integrated automatic timers
-remain work in progress. This connection driver does not by itself constitute
+A separate 100-group history uses native timers for initial elections,
+partition-driven replacement and healing over these sockets, checking retries
+and fresh reads. This seeded post-decode partition schedule is bounded evidence;
+a complete node facade, peer reconnect policy, application result admission and
+the broader network fault matrix remain in progress. Bounded effect ownership and asynchronous snapshot routing are
+implemented as separate composable runtime components. This connection driver does not by itself constitute
 a complete deployable Raft service. macOS execution remains unobserved.

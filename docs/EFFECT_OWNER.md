@@ -94,9 +94,10 @@ result; bulk extensions cannot consume the control reserve. An oversized result
 or a callback consensus failure fences service. The explicit
 [snapshot worker](SNAPSHOT_WORKER.md) now drives publication and
 installation through these callbacks. `complete_effect_with` exposes the
-original leased effect without cloning its image. The host retains a bounded
-admission-to-lease map and reserves loaded-image space before polling. Full node
-routing and network snapshot catch-up through this worker remain pending.
+original leased effect without cloning its image. `SnapshotRouter` now retains the bounded admission-to-lease map and reserves
+loaded-image space before submission. Its 100-group TCP/TLS history covers
+network snapshot catch-up; full node admission and reconnect assembly remain
+pending.
 
 ## Failure and drain
 
@@ -125,10 +126,11 @@ A three-node/100-group history combines this production effect owner with real
 native WAL workers, outbound queues and, with the default TLS feature, actual
 framed TCP/TLS connections. It preserves operation retries, fresh reads,
 leader replacement, healing and actual-file restart with new store sessions.
-That history uses injected host scheduler/timer providers and explicit campaigns;
-automatic election behavior is tested separately. The native scheduler/timer
-providers retain their earlier conformance histories. Native-without-TLS uses
-bounded simulated delivery. Network isolation is injected after decode.
+That history now selects native scheduler/timer/entropy providers and explicit
+campaigns; automatic election behavior is tested separately. Host runtime
+providers retain their separate injection/conformance histories. A separate
+native network history now covers timer-driven election, partition replacement
+and healing. Native-without-TLS uses bounded simulated delivery. Network isolation is injected after decode.
 
 A full node facade, bounded peer roster/reconnect handling, asynchronous
 checkpoint creation/compaction, administrative/application result admission and

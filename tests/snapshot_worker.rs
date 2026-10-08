@@ -113,6 +113,10 @@ impl SnapshotWorker for HostWorker {
             bytes: usize::from(self.pending.is_some()) * 1024,
         }
     }
+    fn load_reservation(&self, group: GroupIdentity) -> Option<usize> {
+        (group == support::group(1))
+            .then(|| snapshot_load_reservation(SnapshotLimits::default()).unwrap())
+    }
     fn submit(&mut self, work: SnapshotWork) -> Result<SnapshotWorkTicket, SnapshotWorkRejected> {
         if self.closed || self.pending.is_some() {
             return Err(SnapshotWorkRejected {

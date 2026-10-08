@@ -232,6 +232,9 @@ impl<S: SnapshotRetention + Send + 'static> SnapshotWorker for NativeSnapshotWor
     fn usage(&self) -> SnapshotWorkUsage {
         self.usage
     }
+    fn load_reservation(&self, group: GroupIdentity) -> Option<usize> {
+        snapshot_load_reservation(*self.stores.get(&group)?)
+    }
     fn submit(&mut self, work: SnapshotWork) -> Result<SnapshotWorkTicket, SnapshotWorkRejected> {
         let (bytes, control) = match self.admission(&work) {
             Ok(v) => v,

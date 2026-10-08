@@ -145,9 +145,16 @@ Owner-side helpers validate the original effect and exact admission envelope.
 Installation produces Persist after snapshot publication, SnapshotInstalled after
 WAL durability, and SnapshotAck after verified application restore. The real-file
 history composes both native workers with the effect owner and checks recovery
-before WAL submission and after lost application completion. See [the snapshot-worker contract](docs/SNAPSHOT_WORKER.md).
-Native asynchronous checkpoint creation and full node/network assembly remain
-in progress.
+before WAL submission and after lost application completion.
+`runtime::SnapshotRouter` now retains accepted effect leases, reserves loaded-image
+space and rejects duplicate/stale completions. The three-node/100-group TCP/TLS
+history installs snapshots into a fresh follower, checks retries and fresh reads,
+and recovers actual files before further replicated writes. Native timers drive
+heartbeat traffic; elections remain explicit in that history. See the
+[snapshot-worker](docs/SNAPSHOT_WORKER.md) and [snapshot-routing](docs/SNAPSHOT_ROUTER.md)
+contracts. A separate native 100-group network history uses timer-driven
+elections, partition replacement and healing. Asynchronous checkpoint creation
+and full node assembly remain in progress.
 
 Use `outbound::OutboundQueue` (native provider `NativeOutbound`) to retain
 same-peer batches of `Effect::Send` under node and peer budgets. Admission

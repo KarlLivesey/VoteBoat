@@ -21,6 +21,10 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 use voteboat::{contracts::*, identity::*, native::vote_store::*, quorum::*, vote::*};
+// Process creation can briefly inherit another thread's locked descriptor
+// before exec closes it. Keep these file/reopen fixtures out of that window;
+// the production nonblocking exclusive-lock behavior must remain unchanged.
+static FILE_TESTS: std::sync::Mutex<()> = std::sync::Mutex::new(());
 fn n(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
@@ -485,6 +489,7 @@ fn child_process_votes() {
 
 #[test]
 fn acknowledged_vote_survives_abrupt_child_process_exit() {
+    let _files = FILE_TESTS.lock().unwrap();
     let directory = Temp::new();
     let status = std::process::Command::new(std::env::current_exe().unwrap())
         .args(["--exact", "child_process_votes", "--nocapture"])
@@ -508,6 +513,7 @@ fn acknowledged_vote_survives_abrupt_child_process_exit() {
 
 #[test]
 fn native_files_recover_ballot_and_exclude_concurrent_writers() {
+    let _files = FILE_TESTS.lock().unwrap();
     let directory = Temp::new();
     let mut store = NativeVoteStore::create(
         FileVoteIo::create(&directory.0).unwrap(),
@@ -544,6 +550,7 @@ fn native_files_recover_ballot_and_exclude_concurrent_writers() {
 }
 #[test]
 fn missing_wal_and_wrong_identity_are_not_empty_success() {
+    let _files = FILE_TESTS.lock().unwrap();
     let directory = Temp::new();
     let store = NativeVoteStore::create(
         FileVoteIo::create(&directory.0).unwrap(),

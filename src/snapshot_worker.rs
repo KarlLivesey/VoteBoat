@@ -130,12 +130,17 @@ impl SnapshotWorkLimits {
 /// group. Credits cover request retention and the maximum completion image and
 /// remain charged until terminal poll. Provider scratch/codec/file memory is
 /// separate. Poll transfers outputs into a separately reserved owner budget.
-/// Rejection returns original ownership; dropping observation is not rollback.
+/// Admissions use the fixed binding and checked, strictly increasing nonzero
+/// sequences; shared owners may observe gaps. Rejection returns original
+/// ownership; dropping observation is not rollback.
 /// Close drains accepted work and never closes a host-owned shared executor.
 pub trait SnapshotWorker {
     fn binding(&self) -> SnapshotWorkerBinding;
     fn limits(&self) -> SnapshotWorkLimits;
     fn usage(&self) -> SnapshotWorkUsage;
+    /// Maximum capacity-costed loaded image for this selected group. None
+    /// rejects an unassigned group before I/O. Must remain stable while live.
+    fn load_reservation(&self, group: GroupIdentity) -> Option<usize>;
     fn submit(&mut self, work: SnapshotWork) -> Result<SnapshotWorkTicket, SnapshotWorkRejected>;
     fn poll(&mut self, limit: usize) -> Vec<SnapshotWorkEvent>;
     fn close(&mut self);

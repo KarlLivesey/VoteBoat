@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-asynchronous-snapshot-workers",
+  "status": "shared-runtime-with-bounded-snapshot-routing",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -166,10 +166,10 @@
     {
       "design_id": "C03/C04/C10",
       "public_contract": "SnapshotWorker",
-      "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained"],
+      "operations": ["binding", "limits", "usage", "load_reservation", "submit", "poll", "close", "is_drained"],
       "native": "NativeSnapshotWorker<S: SnapshotRetention + Send>",
-      "conformance": ["tests/snapshot_worker.rs", "tests/support/snapshot.rs"],
-      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification and pinned loads. Owner-side helpers preserve separate WAL and application dependencies. Real-file effect-owner/WAL-worker installation and receipt-loss recovery; thread-safe native-storage fault model. Host admission-to-lease routing, network catch-up and asynchronous checkpoint creation/compaction remain pending."
+      "conformance": ["tests/snapshot_worker.rs", "tests/support/snapshot.rs", "tests/effect_owner.rs"],
+      "scope": "Explicit shared snapshot thread, scoped WAL-session/worker-generation/visit envelopes, bounded request and capacity-byte retention, control reserves, publish/pin verification and pinned loads. Owner-side helpers preserve separate WAL and application dependencies. Real-file effect-owner/WAL-worker installation and receipt-loss recovery; thread-safe native-storage fault model. SnapshotRouter supplies bounded admission-to-lease routing; native 100-group TCP/TLS catch-up also passes. Asynchronous checkpoint creation/compaction and full node assembly remain pending."
     },
     {
       "design_id": "C04",
@@ -262,7 +262,15 @@
       "conformance": [
         "tests/effect_owner.rs"
       ],
-      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Three-node/100-group native-WAL/TCP/TLS history with host scheduler/timer providers. Full node facade, result admission and asynchronous checkpoint creation remain pending."
+      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers. Full node facade, result admission and asynchronous checkpoint creation remain pending."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "SnapshotRouter",
+      "operations": ["new", "submit", "deliver", "usage", "is_drained", "discard_failed"],
+      "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
+      "conformance": ["tests/effect_owner.rs"],
+      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. Full node facade and reconnect/result assembly remain pending."
     },
     {
       "design_id": "C12",
@@ -318,7 +326,7 @@
       "operations": ["binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": ["tests/transport.rs", "tests/worker.rs"],
-      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress and snapshot-routing assembly remain pending."
+      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress assembly remain pending. Native timer-driven election/partition/healing history also passes."
     },
     {
       "design_id": "C13",
@@ -332,7 +340,7 @@
   "not_yet_implemented": [
     "physical-wal-reclamation",
     "node-transport-roster-and-reconnect-assembly",
-    "node-snapshot-routing-and-checkpoint-assembly",
+    "asynchronous-checkpoint-creation-and-compaction",
     "buffers",
     "admission-policy",
     "routing",

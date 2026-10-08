@@ -1187,11 +1187,89 @@ Full node admission, reconnect/result routing, physical WAL cleaning, membership
 and later lifecycle protocols remain pending. macOS execution and hardware power
 cuts remain unobserved. Full P0–P7 remains active.
 
+## Slice 16: bounded snapshot lease routing and native network histories
+
+`runtime::SnapshotRouter` now owns a bounded one-use map between accepted
+snapshot requests and original effect leases. It selects one exact runtime owner
+and snapshot-worker binding at construction and creates no I/O resources.
+`SnapshotWorker::load_reservation(group)` exposes a stable selected-group output
+allowance. The router validates live leases, worker identity and image ceilings,
+then reserves queued/original effects plus image/envelope space before preparing
+or submitting work. Retries reserve a minimum rather than repeatedly charging
+the same rejected lease. Permanently incompatible reservations return a size
+error; temporary shared saturation returns overload. See [the contract](SNAPSHOT_ROUTER.md).
+
+Worker rejection returns the original lease. Accepted tickets must use the exact
+binding and strictly increasing nonzero sequence, allowing gaps for shared owners.
+Unknown, repeated, old-generation or wrong-visit completions are rejected before
+core access. The saved allowance bounds returned image capacities. Delivery uses
+the existing snapshot helper and serialized effect-owner completion; publication,
+WAL durability and application restore remain separate dependencies. No persisted
+format, consensus generation, quorum rule, effect or watermark changes.
+
+Invalid accepted tickets fence service but return the original effect lease for
+explicit discard; accepted prepared work can still have an unknown outcome.
+Storage/install failure drops and discards the current router-owned lease after
+fencing the owner. Other accepted leases remain charged until explicit failed
+owner discard. Closing ingress still permits accepted publication's subsequent
+WAL and application-installation work; providers close only after this chain drains.
+
+### Slice 16 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full local suites pass: 169 default native/TLS tests, 158 native-without-TLS
+  tests and 74 core/host-only tests. All three feature sets pass Clippy with
+  warnings denied; formatting and documentation pass.
+- Core-only routing cases cover original rejection ownership, unchanged reservation
+  on retry, bounded request maps, selected image limits, permanently excessive
+  effect-owner reservations, wrong worker/runtime owner, stale generation/visit,
+  duplicate terminal delivery, invalid accepted tickets, oversized provider output,
+  failure discard and healthy shutdown through publication, WAL and application.
+- The three-node/100-group snapshot history now uses native ready/timer/entropy
+  providers, the effect owner/router, actual shared WAL and snapshot threads,
+  bounded outbound queues and actual TCP/TLS transports with default features.
+  Two replicas start from explicitly pre-seeded committed counter checkpoints
+  and pinned logical compaction; a fresh third installs all 100 snapshots through
+  the worker/router/network before ordinary replication. It checks retries,
+  fresh reads, native timer-triggered heartbeat traffic, actual-file restart with
+  fresh store sessions, restored deduplication and further replicated writes.
+  Its elections remain explicit campaigns. Pre-seeding is fixture setup, not
+  evidence that those initial commands were committed over the network.
+- This history initially exposed outbound snapshot overload. The driver now
+  retains original rejected Send messages under their original effect tickets,
+  preserving the configured limits. It also bounds rejected snapshot staging by
+  live leases, reserves decoded ingress and accounts for every external lease's
+  bounded holder. Accepted/received frame counts prevent false network quiescence.
+- A separate native three-node/100-group history uses timer-driven initial
+  elections, isolates the node with the most leaders, replaces those leaders
+  through the surviving quorum, then heals. Isolated uncommitted writes never
+  enter the final applied history. It verifies exact retries and fresh reads
+  after healing. Default features use actual TCP/TLS; partition injection happens
+  after receive decoding. This is one bounded seeded schedule, not the full
+  network/storage fault matrix or a formal proof.
+- Final full-suite runs exposed a filesystem-fixture race in the existing
+  abrupt-exit ballot test: process creation can temporarily inherit another
+  test thread's locked descriptor before exec. The three filesystem ballot
+  fixtures now coordinate around process creation/reopen. Native nonblocking
+  exclusive locking is unchanged; this does not serialize unrelated tests.
+- The earlier 100-group partition/replacement/file-recovery history now also
+  selects native runtime providers. Host provider conformance remains separate.
+  Native-without-TLS uses bounded simulated message delivery in these histories;
+  core-only builds exercise injected providers without native threads or sockets.
+
+The assembly drivers above are integration harnesses, not a shipped full node
+facade. Peer roster/reconnect policy, application/result admission and broader
+fault schedules remain pending. Checkpoint creation and compaction still require
+quiescent synchronous store access; long-lived asynchronous maintenance remains
+necessary. Physical WAL cleaning, membership, recursive responsibilities and
+split/merge protocols remain unfinished. macOS execution and hardware power cuts
+remain unobserved. Full P0–P7 remains active.
+
 ## Next slice
 
-Assemble bounded snapshot admission-to-lease routing and exercise catch-up through
-the shared native WAL, snapshot workers and authenticated network driver. Extend
-node assembly with peer roster/reconnect handling, decoded ingress and application
-result admission; include automatic-timer network histories. Asynchronous
-checkpoint creation/compaction must preserve the same log-anchor dependencies.
-CI remains background feedback; local verification guides direct commits.
+Implement asynchronous checkpoint creation and compaction using the selected
+snapshot and authoritative WAL workers, preserving publication/pin dependencies
+and safe retention reconciliation. Continue native node assembly with bounded
+peer roster/reconnect handling, decoded ingress and application result admission.
+CI stays background feedback; relevant local checks guide direct commits.
