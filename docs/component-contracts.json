@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "request-scoped-membership-replication",
+  "status": "explicit-learner-enrollment-recovery",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -137,9 +137,10 @@
         "tests/raft.rs",
         "tests/log_reclaim.rs",
         "tests/ballots.rs",
-        "tests/replication_scope.rs"
+        "tests/replication_scope.rs",
+        "tests/learners.rs"
       ],
-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view, while public dynamic ingress/recovery remain disabled pending learner authorization/readiness, retirement, resource and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
+      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery verifies committed/accepted exact-store assignment with unchanged bootstrap electorate, while public dynamic voting ingress/recovery remain disabled pending learner authorization/readiness, retirement, resource and distributed formal protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; newly promoted sender authorization remains gated. General retention policies remain pending."
     },
     {
       "design_id": "C04",
@@ -313,9 +314,9 @@
       "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
       "native": "NativeSnapshotStore",
       "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs",
-        "tests/membership.rs"
+        "tests/membership.rs", "tests/learners.rs"
       ],
-      "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission."
+      "scope": "Durable pin/load/reconcile contract with at most two anchors. Data and membership base publication/pin precede the authoritative WAL snapshot/base barrier; reconciliation releases only superseded roots. Every torn WAL switch, failed publication and actual file restart retain the selected membership and data. Publication alone is never deletion permission. Explicit recover_learner_replica verifies exact committed/accepted learner assignment plus pinned snapshot/application replay before returning a non-voting core. Host/native learner histories cover compaction/reclaim and actual-file restart."
     },
     {
       "design_id": "C03/C04/C10",
@@ -404,7 +405,7 @@
       "operations": ["owner", "capacity", "register", "cancel", "poll", "len"],
       "native": "DeadlineQueue",
       "conformance": ["tests/runtime.rs"],
-      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam."
+      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down."
     },
     {
       "design_id": "C10/C11",

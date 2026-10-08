@@ -248,14 +248,47 @@ impl Raft {
         }
         Self::recover_verified(node, binding, state, limits)
     }
+    /// Explicit host-authorized enrollment/restart of a non-voting learner.
+    /// Its exact store must appear in both committed and accepted membership.
+    /// Only learner-assignment changes retaining the bootstrap electorate are
+    /// currently supported. Network traffic cannot create or enroll a replica.
+    /// Compacted replicas require snapshot::recover_learner_replica instead.
+    pub fn recover_learner(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        if state.snapshot.is_some() {
+            return Err(RaftError::InvalidRecovery);
+        }
+        Self::recover_learner_verified(node, binding, state, limits)
+    }
     pub(crate) fn recover_verified(
         node: NodeId,
         binding: StoreBinding,
         state: GroupLog,
         limits: LogLimits,
     ) -> Result<Self, RaftError> {
+        Self::recover_checked(node, binding, state, limits, false)
+    }
+    pub(crate) fn recover_learner_verified(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        Self::recover_checked(node, binding, state, limits, true)
+    }
+    fn recover_checked(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+        learner: bool,
+    ) -> Result<Self, RaftError> {
         let limits = limits.validate()?;
-        if state.bootstrap.voter_stores.get(&node) != Some(&binding.identity)
+        if (!learner && state.bootstrap.voter_stores.get(&node) != Some(&binding.identity))
             || state
                 .bootstrap
                 .voter_stores
@@ -269,7 +302,11 @@ impl Raft {
             || state.snapshot.is_some_and(|s| {
                 s.store != binding.identity
                     || s.group != state.bootstrap.group
-                    || s.configuration != state.bootstrap.configuration
+                    || s.configuration
+                        != state
+                            .snapshot_membership
+                            .as_ref()
+                            .map_or(state.bootstrap.configuration, |m| m.id())
                     || s.term == 0
                     || s.application_schema == 0
             })
@@ -277,11 +314,16 @@ impl Raft {
             || !state.hard_state.follows(HardState::default())
             || state.validate_ballot().is_err()
             || state.entries.len() > limits.max_entries_per_group
-            || state.snapshot_membership.is_some()
             || state
-                .entries
-                .iter()
-                .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
+                .snapshot_membership
+                .as_ref()
+                .is_some_and(|m| m.retained_bytes() > limits.max_batch_bytes)
+            || (!learner && state.snapshot_membership.is_some())
+            || (!learner
+                && state
+                    .entries
+                    .iter()
+                    .any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
         {
             return Err(RaftError::InvalidRecovery);
         }
@@ -297,6 +339,33 @@ impl Raft {
             previous_term = e.term;
         }
         let membership = state.membership().map_err(|_| RaftError::InvalidRecovery)?;
+        if learner {
+            let committed = state
+                .membership_at(state.commit_index)
+                .map_err(|_| RaftError::InvalidRecovery)?;
+            let assignment_only = |m: &Membership| {
+                m.joint().is_none()
+                    && m.stable().policy() == &state.bootstrap.policy
+                    && m.stable().voter_stores() == &state.bootstrap.voter_stores
+            };
+            if !assignment_only(&membership)
+                || !assignment_only(&committed)
+                || membership.stable().learners().get(&node) != Some(&binding.identity)
+                || committed.stable().learners().get(&node) != Some(&binding.identity)
+                || state.hard_state.voted_for.is_some()
+                || state
+                    .snapshot_membership
+                    .as_ref()
+                    .is_some_and(|m| !assignment_only(m))
+                || state.entries.iter().any(|e| {
+                    matches!(&e.payload,
+                    EntryPayload::Configuration(record) if !matches!(record.change,
+                        crate::membership::ConfigurationChange::Learners(_)))
+                })
+            {
+                return Err(RaftError::InvalidRecovery);
+            }
+        }
         Ok(Self {
             node,
             binding,
@@ -799,7 +868,9 @@ impl Raft {
         });
         Ok(vec![Effect::Persist(update)])
     }
-    fn local_voter(&self) -> bool {
+    /// Exact accepted node/store voting assignment, never durability evidence.
+    /// Learners and replaced/removed physical replicas return false.
+    pub fn local_voter(&self) -> bool {
         self.membership().voter_store(self.node) == Some(self.binding.identity)
     }
     fn peers(&self) -> Vec<NodeId> {
@@ -1101,6 +1172,9 @@ impl Raft {
             return Err(RaftError::WrongIdentity);
         }
         if !request && m.context.origin != self.binding {
+            return Err(RaftError::WrongIdentity);
+        }
+        if matches!(m.rpc, Rpc::ReadProbe) && !self.local_voter() {
             return Err(RaftError::WrongIdentity);
         }
         let old = self.durable.hard_state;

@@ -54,3 +54,19 @@ The independent local ballot model above is unchanged. These finite core tests
 are not a distributed activation model, a refinement proof or online network
 membership evidence. Newly promoted sender authorization and the other listed
 release gates remain incomplete. CI remains background feedback.
+
+## Slice 37 — learner enrollment/recovery evidence
+
+Eight downstream learner tests use public contracts with explicit host-authorized
+assignment import. Host/native histories check exact committed and accepted local
+store assignment, service/vote/read exclusion, completion ordering, snapshot/data
+verification, application replay and refusal of joint/policy recovery. Native
+histories cut every assignment-frame byte and inject failed barriers. An actual
+log/snapshot-file history closes and reopens a compacted, physically reclaimed
+learner and verifies its exact state. One timed-runtime test checks durable
+replication with no learner election timer. See [learner recovery](../docs/LEARNER_RECOVERY.md).
+
+The assignment import is a trusted host action, not proof of an online remote
+commit. Promoted-sender authorization, learner readiness, dynamic recovery and
+the distributed model/network membership gates remain unfinished. The local
+ballot model above is unchanged; no full proof or macOS/hardware claim is made.

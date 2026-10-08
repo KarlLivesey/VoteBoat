@@ -51,7 +51,11 @@ The [durable configuration journal](docs/CONFIGURATION_JOURNAL.md) now validates
 learner, joint and final records through host/native storage, recovery and suffix
 rollback. [Configuration-aware snapshots](docs/CONFIGURATION_SNAPSHOTS.md) now
 preserve membership and operation identities across compaction and recovery.
-Live admission remains disabled pending complete quorum and learner integration.
+Live configuration admission remains disabled pending complete quorum and learner
+integration. Explicit [learner enrollment/recovery](docs/LEARNER_RECOVERY.md) now
+accepts a committed exact-store learner assignment with unchanged bootstrap
+voters, restores verified checkpoints, and runs without election timers. It does
+not enable online promotion or administration.
 
 ## Run
 

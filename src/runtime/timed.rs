@@ -154,7 +154,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
             return Ok(());
         }
         let core = self.shard.core(group).ok_or(RuntimeError::UnknownGroup)?;
-        if core.is_fenced() {
+        if core.is_fenced() || (core.role() != Role::Leader && !core.local_voter()) {
             return self.cancel_managed(group);
         }
         let kind = if core.role() == Role::Leader {

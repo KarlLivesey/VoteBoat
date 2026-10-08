@@ -3,8 +3,10 @@
 Raft now derives its voting predicate and replication identities from one
 `Membership` value rather than consulting the immutable bootstrap at each
 quorum site. This is integration groundwork for the full online protocol.
-**Public recovery and ingress still refuse configuration-bearing state.** There
-is no online reconfiguration API. The internal transition tests described below
+**Voter recovery and public online configuration ingress remain gated.**
+Explicit [learner recovery](LEARNER_RECOVERY.md) supports committed exact-store
+assignments with an unchanged bootstrap electorate. There is no online
+reconfiguration API. The internal transition tests described below
 exercise these core paths without removing the release gate.
 
 ## State and dependency ordering
@@ -65,7 +67,8 @@ second election path inside `Raft`.
 
 The remaining bootstrap checks in `Raft::recover_verified` deliberately authorize
 only the existing static protocol: local voter identity, initial policy/map and
-snapshot scope. Dynamic entries/bases remain refused. Durable ballot validation
+snapshot scope. That voter path still refuses dynamic entries/bases. The explicit learner path
+accepts assignment-only state while preserving voter/promotion gates. Durable ballot validation
 now uses historical origin rather than the current electorate; see
 [ballot recovery](BALLOT_RECOVERY.md). A removed candidate's retained promise
 cannot authorize another candidate or a replacement physical store in that term.
@@ -79,8 +82,10 @@ evidence. A newly promoted sender that is only a learner or absent in the older
 receiver's view remains rejected pending its catch-up authorization protocol.
 A retiring leader's final propagation also needs end-to-end histories.
 
-Other unfinished prerequisites are explicit learner assignment/recovery,
-application/storage compatibility and catch-up evidence, prospective fanout
+Initial learner-only enrollment/restart now uses committed exact-store
+assignments and verified application recovery. Remaining prerequisites include
+dynamic-electorate recovery, application/storage compatibility and caught-up
+evidence, prospective fanout
 reservation before an expanding event, route/roster admission, the distributed
 activation/ballot state-machine model and faulted native/host network histories.
 The bounded local ballot model is one prerequisite, not that complete model.

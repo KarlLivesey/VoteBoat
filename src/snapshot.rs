@@ -393,8 +393,34 @@ pub fn recover_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
     store: &mut S,
     application: &mut A,
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
+    recover_replica_as(node, group, log, store, application, false)
+}
+/// Explicit host-authorized learner recovery verifies the committed exact-store
+/// assignment, pinned application data and replay before exposing a core. This
+/// does not authorize promotion or bypass the online reconfiguration gate.
+pub fn recover_learner_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    node: NodeId,
+    group: GroupIdentity,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
+    recover_replica_as(node, group, log, store, application, true)
+}
+fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    node: NodeId,
+    group: GroupIdentity,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+    learner: bool,
+) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
     let state = log.state(group)?;
-    let core = Raft::recover_verified(node, log.binding(), state, log.limits())?;
+    let core = if learner {
+        Raft::recover_learner_verified(node, log.binding(), state, log.limits())?
+    } else {
+        Raft::recover_verified(node, log.binding(), state, log.limits())?
+    };
     check_binding(&core, store)?;
     if core.state().snapshot.is_none() {
         if let Some(snapshot) = store.load()? {

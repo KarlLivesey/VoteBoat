@@ -2348,11 +2348,60 @@ The bounded local ballot model remains unchanged. Linux evidence does not
 establish macOS execution, physical power-failure certification, unbounded proof,
 liveness or performance. CI remains background feedback.
 
+## Slice 37 — explicit learner enrollment and verified restart
+
+The promoted-sender audit exposed a prior missing capability: the core could not
+start any learner, because all recovery required an initial voter store. This
+slice supplies that prerequisite without treating transport authentication or a
+claimed newer head as group authority. The full online authorization objective
+remains unchanged and unfinished.
+
+Raft::recover_learner explicitly enrolls a host-authorized non-voting local replica
+from selected durable state. Both committed and accepted membership must contain
+the exact local learner store. An initial uncommitted assignment, absent/replaced
+store, initial voter, recovered vote or retained joint/final transition is refused.
+The supported electorate stays the bootstrap policy/store map; unrelated pending
+learner changes may survive if both views retain the committed local assignment.
+The original voter recovery and public configuration ingress gates remain closed.
+Snapshot bases must retain that same electorate and fit the selected log budget.
+
+snapshot::recover_learner_replica verifies the exact pinned data, membership,
+index/term/schema and application replay before exposing a compacted learner core.
+Checkpoint, verified pin, logical compaction and physical reclaim reuse the existing
+contracts. No new record/format, token, effect, generation or watermark is introduced.
+Learners replicate ordinary commands durably but cannot campaign, propose, read,
+grant ballots or return read-probe authority. A higher-term denied vote persists
+its term before replying. Public local_voter exposes the exact accepted assignment
+for runtime coordination, not durability evidence. TimedShard has no election
+timer for a non-voting follower; retiring leaders retain heartbeat scheduling
+until their existing final-commitment step-down dependency is satisfied.
+
+Eight downstream learner tests cover host/native recovery and replication,
+exact completion ordering, committed/accepted identity checks, removal/replacement,
+joint/policy refusal, missing pinned data and checkpoint/application recovery.
+Every native assignment-frame byte cut and failed synchronization/manifest barrier
+recover old or complete new assignment state. An actual native log/snapshot-file
+history compacts and reclaims a learner, closes/reopens both stores and verifies
+its exact assignment/application. A timed-runtime test processes durable learner
+replication with no election timer, even after a large virtual-time advance.
+The imported assignment is an explicitly authorized host action, not evidence
+that an online administrator committed it on remote voters. See
+[learner recovery](LEARNER_RECOVERY.md) for the complete evidence boundary.
+
+Local validation passes 375 default/native/TLS tests, 353 native-only tests and
+211 core/host-only tests. Clippy passes all three configurations with warnings
+denied. Formatting, API docs, inventory JSON, RPL headers and diff checks pass.
+The local ballot model is unchanged. Linux evidence does not establish macOS,
+hardware power-failure behavior, a distributed membership proof or performance.
+CI remains background feedback and did not gate this slice.
+
 ## Next slice
 
-Authorize catch-up from newly promoted leaders without allowing a learner to
-self-authorize through a claimed head. Complete learner assignment/recovery/readiness,
-prospective fanout reservation and retiring-leader final propagation before enabling
-online changes. The distributed activation/ballot model and faulted actual-core
-network histories remain gates. Full P0–P7 stays active; recursive responsibilities,
+Complete the promoted-leader authorization protocol with replay-resistant group,
+configuration, term, store and committed/election provenance; a claimed head or
+well-formed learner-supplied configuration alone is insufficient. Complete voter
+and learner dynamic recovery, readiness evidence, prospective fanout reservation
+and retiring-leader final propagation before opening online configuration ingress.
+The distributed activation/ballot model and faulted actual network membership
+histories remain gates. Full P0–P7 stays active; recursive responsibilities,
 safe split/merge and P7 evidence remain outstanding.

@@ -2092,3 +2092,117 @@ fn native_timer_replication_progress_survives_multiple_heartbeat_retries() {
         .collect::<Vec<_>>();
     delayed_auto_history(&mut nodes);
 }
+
+#[test]
+fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replication() {
+    use voteboat::membership::*;
+    let mut log = HostLogStore::new(4);
+    let b = bootstrap(1, 3);
+    append(&mut log, vec![LogMutation::Create(b.clone())]);
+    let state = log.state(group(1)).unwrap();
+    append(
+        &mut log,
+        vec![update(
+            &state,
+            1,
+            1,
+            Some(Suffix {
+                from: 1,
+                entries: vec![LogEntry {
+                    index: 1,
+                    term: 1,
+                    payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                        operation: OperationId::new(100).unwrap(),
+                        expected: b.configuration,
+                        change: ConfigurationChange::Learners(
+                            Configuration::new(
+                                ConfigurationId::new(2).unwrap(),
+                                b.policy.clone(),
+                                b.voter_stores.clone(),
+                                [(node(4), identity(4))].into(),
+                            )
+                            .unwrap(),
+                        ),
+                    })),
+                }],
+            }),
+        )],
+    );
+    let core = Raft::recover_learner(
+        node(4),
+        log.binding(),
+        log.state(group(1)).unwrap(),
+        log.limits(),
+    )
+    .unwrap();
+    let mut shard = Shard::new(owner(log.binding()), small_limits(), HostReady::new(3)).unwrap();
+    shard.register(core).unwrap();
+    let timers = HostTimers::new(owner(log.binding()), 3);
+    let mut runtime =
+        TimedShard::new(shard, timers, FixedEntropy(0), timer_config(), MonoTime(0)).unwrap();
+    assert!(runtime.deadline(group(1)).is_none());
+    assert_eq!(runtime.poll_timers(MonoTime(100)).unwrap().admitted, 0);
+    let sender = HostLogStore::new(1).binding();
+    let message = Message {
+        group: group(1),
+        configuration: ConfigurationId::new(2).unwrap(),
+        from: node(1),
+        sender,
+        to: node(4),
+        term: 1,
+        context: RequestContext {
+            origin: sender,
+            sequence: 1,
+        },
+        rpc: Rpc::Append {
+            previous_index: 1,
+            previous_term: 1,
+            entries: vec![LogEntry {
+                index: 2,
+                term: 1,
+                payload: EntryPayload::Noop,
+            }],
+            leader_commit: 2,
+        },
+    };
+    runtime.admit(group(1), Event::Receive(message)).unwrap();
+    let visit = runtime.poll(MonoTime(100)).unwrap().unwrap();
+    let effects = runtime
+        .step_next(visit, MonoTime(100))
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    runtime
+        .with_core(visit, MonoTime(100), |core| {
+            core.admit_effect(update, tickets[0])
+        })
+        .unwrap()
+        .unwrap();
+    let completion = log.barrier(&tickets).unwrap();
+    let effects = runtime
+        .with_core(visit, MonoTime(100), |core| core.complete(&completion))
+        .unwrap()
+        .unwrap();
+    assert!(effects.iter().any(|e| matches!(
+        e,
+        Effect::Send(Message {
+            rpc: Rpc::Appended {
+                success: true,
+                matching_index: 2
+            },
+            ..
+        })
+    )));
+    runtime.finish(visit).unwrap();
+    assert!(runtime.deadline(group(1)).is_none());
+    assert_eq!(runtime.poll_timers(MonoTime(10000)).unwrap().admitted, 0);
+    assert_eq!(runtime.core(group(1)).unwrap().state().commit_index, 2);
+    assert!(!runtime.core(group(1)).unwrap().local_voter());
+}
