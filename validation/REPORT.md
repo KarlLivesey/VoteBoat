@@ -1037,3 +1037,36 @@ assertion uses a borrowed expected-message slice.
 - Final default-build counter_service target passes 10 tests. Formatting/diff and
   inventory metadata checks pass (60 contracts); no new production dependency or
   provider seam. No consensus/storage design change required broader protocol runs.
+
+## Slice 73 — explicit service deployment identities
+
+- Versioned --deployment input supplies exact provisioned node/store/incarnation,
+  numeric address and TLS name within the preserved original bootstrap. Header,
+  shape, 64 KiB/1,024-entry limits, duplicate node/store-pair/socket, ID/incarnation,
+  endpoint/name and local-entry checks run before store mutation. Native metadata
+  loading enforces the 1 MiB retention bound incrementally. Static modes refuse
+  the flag; legacy three-node defaults and exact member checks remain in use.
+- TCP/TLS and QUIC executable histories enroll node 4/store 404/incarnation 7,
+  directly verify imported counter/retry outcomes, repeat exact imports, reject
+  changed incarnation without WAL rewrite, commit/observe new replication at the
+  learner, reject its write and restart. The fixture's public alternative cert
+  is assigned to node 4 only; retired node 3 is not provisioned. A valid declaration
+  cannot recover a missing member. Source membership is prepared, not online
+  distributed configuration proposal evidence or physical-domain validation.
+- Initial full run passed all deployment cases but an existing reconnect test
+  encountered Unknown LeadershipChanged after sampling a role. Its explicit caller
+  retry now preserves operation 2/payload 3 within a deadline; exact value 10 and
+  duplicate outcome remain required. Automatic client Unknown handling is unchanged.
+  Corrected all-feature counter_service passes 15 tests; Clippy warnings-denied
+  all-feature/all-target passes. Final checks below cover the last added missing-
+  member negative case and default build.
+- No new provider seam, core effect, wire/checkpoint/WAL format or production dependency.
+  Placement-policy/service authorization and admin outcomes remain current work,
+  before fault-tested remote membership release, P5 routing/P6 ownership movement
+  and P7 tuning. Full goal active; no macOS, throughput or general proof claim.
+- Final all-feature counter_service passes 15 tests, including missing-member
+  refusal with valid credentials/declaration; default build passes 12. Inventory
+  metadata checks pass (60 contracts), formatting/diff checks pass, and no protocol
+  or storage design change required broader core test runs.
+- Final focused invalid-deployment rerun also passes independent malformed TLS
+  name and missing-field cases added after the full target run.

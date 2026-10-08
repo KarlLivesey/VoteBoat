@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, offline CLI enrollment and enforced counter bounds implemented; arbitrary service deployment inputs, authorized mutation endpoints, generic application envelopes and faulted online transitions remain |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment and enforced counter bounds implemented; service placement-policy/authorized mutation endpoints, generic application envelopes and faulted online transitions remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -127,11 +127,18 @@ assignment cannot provision a removed learner. Provisioning remains 1..3; arbitr
 deployment inputs and authorized administration remain current item 1. The next
 two deliverables stay fault-tested membership release and P5 manifests/routing.
 
+Slice 73 adds bounded explicit deployment declarations for additional exact
+identities/routes while preserving the original bootstrap. Native TCP/QUIC service
+histories enroll and catch up node 4/store 404/incarnation 7, retain retries and
+restart. Provisioning itself grants no assignment. Current item 1 now focuses on
+service placement-policy and execution authorization, readiness and durable admin
+outcomes; fault-tested release and P5 routing remain the next two deliverables.
+
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
    schema/command/checkpoint bounds as deduplication grows. Depends on slices
-   51–70 and authenticated service scope. Check exact committed assignments,
+   51–73 and authenticated service scope. Check exact committed assignments,
    rejection before mutation, lost-reply resumption and matching TCP/QUIC
    assemblies. Provides the native path for release testing, not an early opening
    of public configuration ingress.
@@ -4104,3 +4111,52 @@ deployment inputs and authorized administration remain in that item, followed by
 fault-tested remote release and P5 manifest/routing. The full P0–P7 goal remains
 active; public configuration mutation ingress stays gated, P8 deferred, and no
 macOS execution, performance or general protocol proof is claimed.
+
+## Slice 73 — explicit service deployment identities
+
+Mini schema plan: a versioned, 64 KiB/1,024-entry declaration carries exact
+node/store/incarnation, numeric endpoint and TLS name. Keep the original group 1,
+configuration 1, three-voter bootstrap fixed. Separate explicit provisioning from
+authoritative membership; pass the declared map to NativeMemberStartup for
+recovery/enrollment and use it for trusted source identity verification. Local
+command ports retain BASE+100+NODE with checked arithmetic and node IDs 1..4096.
+Version/shape, duplicate identity/endpoint, bounds and credential metadata refuse
+before native store mutation. No new protocol/storage effect, receipt, watermark,
+generation, provider seam or production dependency. Stop/recovery ownership and
+partial-import limitations remain unchanged.
+
+`--deployment FILE` now selects that input for recover-member and offline enroll,
+mutually exclusive with legacy PEERS_FILE. All native membership/rollback/route
+checks remain authoritative; a declaration cannot create assignment or missing
+member files. Original bootstrap nodes may be omitted only when verified current
+history no longer requires them. The application envelope and exact wire format
+6 remain shared. Incremental certificate/name loading enforces the native 1 MiB
+metadata bound. Static create/recover retain legacy semantics and refuse the flag.
+Explicit clients support additional IDs; automatic routing still searches demo
+nodes 1..3, so later leaders must be addressed explicitly.
+
+Actual TCP/TLS and QUIC CLI histories prepare committed learner-4 assignment at
+store 404/incarnation 7, import a real checkpoint, directly inspect counter/retry
+state, repeat exact enrollment and reject a changed incarnation without rewriting
+WAL state. They observe node 4's newly committed replicated prefix, require its
+non-voter write refusal, drain/checkpoint and reopen all participating files.
+The public alternative fixture certificate belongs to node 4 only in this
+deployment, with its matching DNS name; retired node 3 is absent. This tests
+exact TLS/store binding and provisioning beyond bootstrap, not distributed
+configuration commitment or independent physical failure domains.
+
+Malformed version/shape, file/count/ID limits, duplicate nodes/store pairs/socket
+addresses, missing local entry, invalid endpoint/name and unsupported static
+mode are refused without creating target stores. A valid declaration also cannot
+recover a missing member. Full-suite testing exposed an existing reconnect-test
+assumption that a sampled leader role persists through the write. The CLI correctly
+returned Unknown LeadershipChanged; that test now explicitly retries the same
+operation/payload within a deadline before checking exact value/deduplication.
+Automatic client handling of Unknown is unchanged and separately tested.
+
+All-feature executable suite passes 15 tests after that fixture correction;
+final/default/metadata checks are recorded in validation/REPORT.md. Current mini
+item 1 proceeds to authorized service administration and placement-policy inputs,
+then fault-tested membership release and P5 routing. Full P0–P7 remains active;
+public mutation ingress remains gated. No macOS execution, throughput or complete
+protocol-proof claim; P8 remains deferred.

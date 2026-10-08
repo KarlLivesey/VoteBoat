@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Three independent native TCP/TLS or optional QUIC nodes, with a bounded local control endpoint.
+//! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/counter_setup.rs"]
@@ -29,7 +29,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
-voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE]\n\
+voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
@@ -39,6 +39,7 @@ recover-member explicitly verifies existing membership journals and selects wire
 enroll is an offline trusted handoff; stop source and destination before use and preserve files on failure.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
+recover-member also accepts --deployment FILE instead of PEERS_FILE; use it before --transport.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -69,7 +70,10 @@ fn now(start: Instant) -> MonoTime {
 fn ports(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
-    if !(1..=3).contains(&id) || base == 0 || base > 65432 {
+    if !(1..=setup::MAX_NODE).contains(&id)
+        || base == 0
+        || u64::from(base) + 100 + id > u64::from(u16::MAX)
+    {
         return Err("invalid base port or node ID".into());
     }
     Ok((base, id))
@@ -191,7 +195,7 @@ fn serve(
     id: u64,
     base: u16,
     tls: &Path,
-    endpoints: Option<&Path>,
+    input: setup::PeerInput<'_>,
     protocol: NativePeerProtocol,
 ) -> Result<(), Failure> {
     let create = match mode {
@@ -199,10 +203,16 @@ fn serve(
         "recover" | "recover-member" => false,
         _ => return Err("expected create, recover or recover-member".into()),
     };
+    if matches!(input, setup::PeerInput::Deployment(_)) && mode != "recover-member" {
+        return Err(
+            "explicit deployment requires recover-member; enrollment uses enroll create|recover"
+                .into(),
+        );
+    }
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
     listener.set_nonblocking(true)?;
-    let config = setup::configuration(root, id, base, tls, create, endpoints)?;
-    let peer_address = config.listen;
+    let config = setup::configuration(root, id, base, tls, create, input)?;
+    let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     let start = Instant::now();
     println!(
@@ -331,6 +341,16 @@ fn main() -> Result<(), Failure> {
     } else {
         NativePeerProtocol::TcpTls
     };
+    let deployment = if args.first().is_some_and(|a| a == "serve" || a == "enroll")
+        && args.len() >= 3
+        && args[args.len() - 2] == "--deployment"
+    {
+        let path = args.pop().unwrap();
+        args.pop();
+        Some(std::path::PathBuf::from(path))
+    } else {
+        None
+    };
     match args.as_slice() {
         [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
             if enroll_arg == "enroll" && rest.len() <= 1 =>
@@ -341,14 +361,13 @@ fn main() -> Result<(), Failure> {
                 "recover" => false,
                 _ => return Err("expected enrollment create or recover".into()),
             };
-            let config = setup::configuration(
-                Path::new(root),
-                id,
-                base,
-                Path::new(tls),
-                create,
-                rest.first().map(Path::new),
-            )?;
+            let input = match (deployment.as_deref(), rest.first()) {
+                (Some(path), None) => setup::PeerInput::Deployment(path),
+                (None, legacy) => setup::PeerInput::Legacy(legacy.map(Path::new)),
+                _ => return Err("select either PEERS_FILE or --deployment".into()),
+            };
+            let config =
+                setup::configuration(Path::new(root), id, base, Path::new(tls), create, input)?;
             let (index, term) = setup::enroll(config, Path::new(source), source_id.parse()?)?;
             println!("OK enrolled node={id} checkpoint={index} term={term} evidence=trusted_local_source");
             Ok(())
@@ -357,27 +376,22 @@ fn main() -> Result<(), Failure> {
             println!("{HELP}");
             Ok(())
         }
-        [serve_arg, mode, root, id, base, tls] if serve_arg == "serve" => {
+        [serve_arg, mode, root, id, base, tls, rest @ ..]
+            if serve_arg == "serve" && rest.len() <= 1 =>
+        {
             let (base, id) = ports(base, id)?;
+            let input = match (deployment.as_deref(), rest.first()) {
+                (Some(path), None) => setup::PeerInput::Deployment(path),
+                (None, legacy) => setup::PeerInput::Legacy(legacy.map(Path::new)),
+                _ => return Err("select either PEERS_FILE or --deployment".into()),
+            };
             serve(
                 mode,
                 Path::new(root),
                 id,
                 base,
                 Path::new(tls),
-                None,
-                protocol,
-            )
-        }
-        [serve_arg, mode, root, id, base, tls, endpoints] if serve_arg == "serve" => {
-            let (base, id) = ports(base, id)?;
-            serve(
-                mode,
-                Path::new(root),
-                id,
-                base,
-                Path::new(tls),
-                Some(Path::new(endpoints)),
+                input,
                 protocol,
             )
         }

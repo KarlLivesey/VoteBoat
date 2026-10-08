@@ -137,7 +137,7 @@ restart. Queued requests consult the selected plan at execution, so replacing
 caller policy does not preserve earlier approval. No durable generation or receipt
 is introduced. Provisioned routes, credentials, readiness and selected transport
 envelope admission remain separate checks. Native placement is usable from Rust;
-arbitrary deployment inputs, authorized service endpoints and generic application
+service placement-policy inputs, authorized service endpoints and generic application
 envelope enforcement remain work. Counter bounds and offline enrollment exist.
 
 This is the C18 placement authorization subset. Eligible-host planning, scoring
@@ -164,7 +164,7 @@ The caller/service must keep the declared envelope consistent with its applicati
 schema, accepted command sizes, checkpoint/deduplication growth and storage limits.
 This query alone does not enforce future application growth or arbitrary batching.
 NativeMemberStartup now supplies explicit verified dynamic member restart for Rust
-hosts. Arbitrary service deployment inputs, generic enforced application envelopes
+hosts. Service placement-policy inputs, generic enforced application envelopes
 and complete faulted remote transitions remain pending; public service mutation
 endpoints stay gated. Counter bounds and offline learner enrollment are implemented.
 Explicit member assemblies now select validated receive-side configuration
@@ -172,11 +172,11 @@ replication, which supplies the native integration path for those transitions.
 
 Explicit native member restart is documented in the [service/embedding guide](COUNTER_SERVICE.md).
 The counter executable now exposes `serve recover-member` for existing dynamic
-histories among its fixed three provisioned identities, selecting wire format 6
+histories among explicitly provisioned identities, selecting wire format 6
 on all participants. This reuses verified member recovery and enforced counter
 bounds; ordinary service polling continues to deny configuration mutation.
 Prepared TCP/QUIC service histories cover joint/final reopening, real checkpoint
-drain and retry deduplication after restart. Arbitrary deployment inputs and
+drain and retry deduplication after restart. Service placement-policy inputs and
 authorized mutation endpoints remain integration work; these fixtures do not
 prove online proposal delivery.
 The original static NativeStartup entry points retain their rejection of dynamic journals.
@@ -186,5 +186,8 @@ handoff from a stopped native source's authoritative pinned checkpoint. It verif
 source recovery and current committed membership before destination import, then
 uses NativeMemberStartup::enroll_snapshot with the same enforced counter envelope.
 Exact retries preserve WAL state; missing/corrupt/incompatible inputs do not imply
-permission to reset stores. The CLI still fixes provisioning to identities 1..3.
+permission to reset stores. `--deployment FILE` declares additional exact stores
+and routes within the original three-voter bootstrap; it grants no membership or
+configuration execution authority. Versioned/size-bounded input, exact-identity
+refusal, fourth-learner enrollment/catch-up and TCP/QUIC restart are exercised.
 See the service guide for command syntax and partial-initialization limitations.

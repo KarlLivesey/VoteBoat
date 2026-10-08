@@ -52,6 +52,8 @@ struct Cluster {
     base: u16,
     children: Vec<Option<Child>>,
     endpoints: Option<PathBuf>,
+    deployment: Option<PathBuf>,
+    tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
     quic: bool,
@@ -79,7 +81,7 @@ impl Cluster {
                     if blocks.contains(&base) {
                         return None;
                     }
-                    [1, 2, 3, 11, 12, 13, 101, 102, 103]
+                    [1, 2, 3, 4, 11, 12, 13, 101, 102, 103, 104]
                         .into_iter()
                         .map(|offset| {
                             TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset))
@@ -88,7 +90,7 @@ impl Cluster {
                         .collect::<Result<BTreeMap<_, _>, _>>()
                         .ok()
                         .and_then(|listeners| {
-                            [1, 2, 3, 11, 12, 13]
+                            [1, 2, 3, 4, 11, 12, 13]
                                 .into_iter()
                                 .map(|n| UdpSocket::bind((Ipv4Addr::LOCALHOST, base + n)))
                                 .collect::<Result<Vec<_>, _>>()
@@ -105,6 +107,8 @@ impl Cluster {
             base,
             children: (0..3).map(|_| None).collect(),
             endpoints: None,
+            deployment: None,
+            tls: None,
             listeners,
             udp_sockets,
             quic: false,
@@ -123,7 +127,9 @@ impl Cluster {
         self.listeners.clear();
         self.udp_sockets.clear();
         let log = fs::File::create(self.root.join(format!("{id}-{mode}.log"))).unwrap();
-        let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let tls = self.tls.clone().unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
+        });
         let mut command = Command::new(BIN);
         command
             .args(["serve", mode])
@@ -133,6 +139,9 @@ impl Cluster {
             .arg(tls);
         if let Some(path) = &self.endpoints {
             command.arg(path);
+        }
+        if let Some(path) = &self.deployment {
+            command.arg("--deployment").arg(path);
         }
         if self.quic {
             command.args(["--transport", "quic"]);
@@ -157,14 +166,21 @@ impl Cluster {
         target: &std::path::Path,
         source: u64,
     ) -> std::process::Output {
-        run(Command::new(BIN)
+        let mut command = Command::new(BIN);
+        command
             .args(["enroll", mode])
             .arg(target)
             .arg(id.to_string())
             .arg(self.base.to_string())
-            .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
+            .arg(self.tls.clone().unwrap_or_else(|| {
+                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
+            }))
             .arg(self.root.join(source.to_string()))
-            .arg(source.to_string()))
+            .arg(source.to_string());
+        if let Some(path) = &self.deployment {
+            command.arg("--deployment").arg(path);
+        }
+        run(&mut command)
     }
     fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
         run(Command::new(BIN)
@@ -208,7 +224,7 @@ impl Cluster {
     fn leader(&mut self) -> usize {
         let deadline = Instant::now() + Duration::from_secs(20);
         loop {
-            for id in 1..=3 {
+            for id in 1..=self.children.len() {
                 if let Some(child) = &mut self.children[id - 1] {
                     assert!(
                         child.try_wait().unwrap().is_none(),
@@ -234,7 +250,7 @@ impl Cluster {
     }
     fn stop(&mut self) {
         // Intake closes independently; each node must drain and join its workers.
-        for id in 1..=3 {
+        for id in 1..=self.children.len() {
             if self.children[id - 1].is_some() {
                 self.ok(id, &["quit"]);
             }
@@ -557,6 +573,21 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
     .unwrap();
 }
 fn enrolled_state(root: &std::path::Path) -> voteboat::log::GroupLog {
+    use voteboat::identity::*;
+    enrolled_state_for(
+        root,
+        3,
+        StoreIdentity {
+            id: StoreId::new(3).unwrap(),
+            incarnation: StoreIncarnation::new(1).unwrap(),
+        },
+    )
+}
+fn enrolled_state_for(
+    root: &std::path::Path,
+    local: u64,
+    identity: voteboat::identity::StoreIdentity,
+) -> voteboat::log::GroupLog {
     let _gate = fixture_gate();
     use voteboat::{
         application::*,
@@ -564,10 +595,6 @@ fn enrolled_state(root: &std::path::Path) -> voteboat::log::GroupLog {
         log::*,
         native::{log_store::*, snapshot_store::*},
         snapshot::*,
-    };
-    let identity = StoreIdentity {
-        id: StoreId::new(3).unwrap(),
-        incarnation: StoreIncarnation::new(1).unwrap(),
     };
     let log = NativeLogStore::recover(
         FileLogIo::open(root).unwrap(),
@@ -590,7 +617,7 @@ fn enrolled_state(root: &std::path::Path) -> voteboat::log::GroupLog {
     .unwrap();
     let mut app = Counter::new(10000).unwrap();
     let (core, _) = recover_member_replica(
-        NodeId::new(3).unwrap(),
+        NodeId::new(local).unwrap(),
         group,
         &log,
         &mut snapshots,
@@ -776,6 +803,270 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
         }
         fs::remove_dir_all(&cluster.root).unwrap();
     }
+}
+fn deployment_history(quic: bool) {
+    use voteboat::{identity::*, log::*, membership::*, native::log_store::*};
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    cluster.children.push(None); // Nodes 1, 2 and 4; node 3 has retired.
+    seed_member_service(&cluster.root, true, false);
+    let fourth = StoreIdentity {
+        id: StoreId::new(404).unwrap(),
+        incarnation: StoreIncarnation::new(7).unwrap(),
+    };
+    {
+        let _gate = fixture_gate();
+        for local in 1..=2 {
+            let mut log = NativeLogStore::recover(
+                FileLogIo::open(cluster.root.join(local.to_string())).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(local).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                LogLimits::default(),
+            )
+            .unwrap();
+            let group = GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            };
+            let state = log.state(group).unwrap();
+            let membership = state.membership_at(state.commit_index).unwrap();
+            let next = Configuration::new(
+                ConfigurationId::new(4).unwrap(),
+                membership.stable().policy().clone(),
+                membership.stable().voter_stores().clone(),
+                [(NodeId::new(4).unwrap(), fourth)].into(),
+            )
+            .unwrap();
+            let tickets = log
+                .append_batch(vec![LogMutation::Update(LogUpdate {
+                    group,
+                    expected_revision: state.revision,
+                    hard_state: state.hard_state,
+                    commit_index: 3,
+                    suffix: Some(Suffix {
+                        from: 3,
+                        entries: vec![LogEntry {
+                            index: 3,
+                            term: 1,
+                            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                                operation: OperationId::new(502).unwrap(),
+                                expected: ConfigurationId::new(3).unwrap(),
+                                change: ConfigurationChange::Learners(next),
+                            })),
+                        }],
+                    }),
+                    snapshot: None,
+                    snapshot_membership: None,
+                })])
+                .unwrap();
+            log.barrier(&tickets).unwrap();
+        }
+    }
+    checkpoint_source(&cluster.root, 1, 700, 42);
+    let tls = cluster.root.join("tls");
+    fs::create_dir(&tls).unwrap();
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    for name in [
+        "ca.der",
+        "node1.der",
+        "node1-key.der",
+        "node2.der",
+        "node2-key.der",
+    ] {
+        fs::copy(fixtures.join(name), tls.join(name)).unwrap();
+    }
+    // This deployment assigns the public alternative certificate to node 4 only;
+    // node 3 is absent. DNS names and Raft node IDs are independently checked.
+    fs::copy(fixtures.join("node3.der"), tls.join("node4.der")).unwrap();
+    fs::copy(fixtures.join("node3-key.der"), tls.join("node4-key.der")).unwrap();
+    cluster.tls = Some(tls);
+    let declaration = format!("voteboat-deployment-v1\n1 1 1 127.0.0.1:{} node1.voteboat.test\n2 2 1 127.0.0.1:{} node2.voteboat.test\n4 404 7 127.0.0.1:{} node3.voteboat.test\n",
+        cluster.base + 1, cluster.base + 2, cluster.base + 4);
+    let path = cluster.root.join("deployment.txt");
+    fs::write(&path, &declaration).unwrap();
+    cluster.deployment = Some(path.clone());
+    let destination = cluster.root.join("4");
+    cluster.listeners.clear();
+    cluster.udp_sockets.clear();
+    let unassigned = cluster.root.join("unassigned-4");
+    let refused = run(Command::new(BIN)
+        .args(["serve", "recover-member"])
+        .arg(&unassigned)
+        .arg("4")
+        .arg(cluster.base.to_string())
+        .arg(cluster.tls.as_ref().unwrap())
+        .arg("--deployment")
+        .arg(&path));
+    assert!(
+        !refused.status.success(),
+        "provisioning must not create member history"
+    );
+    assert!(!unassigned.exists());
+    let created = cluster.enroll("create", 4, &destination, 1);
+    assert!(
+        created.status.success(),
+        "{}",
+        String::from_utf8_lossy(&created.stderr)
+    );
+    let before = enrolled_state_for(&destination, 4, fourth);
+    assert_eq!(before.commit_index, 4);
+    assert!(cluster
+        .enroll("recover", 4, &destination, 1)
+        .status
+        .success());
+    assert_eq!(enrolled_state_for(&destination, 4, fourth), before);
+    fs::write(&path, declaration.replace("4 404 7", "4 404 8")).unwrap();
+    assert!(!cluster
+        .enroll("recover", 4, &destination, 1)
+        .status
+        .success());
+    assert_eq!(enrolled_state_for(&destination, 4, fourth), before);
+    fs::write(&path, declaration).unwrap();
+    for id in [1, 2, 4] {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(leader == 1 || leader == 2);
+    assert!(cluster
+        .ok(leader, &["add", "700", "42"])
+        .contains("duplicate=true"));
+    assert!(cluster
+        .ok(leader, &["add", "701", "1"])
+        .contains("Value(43)"));
+    // Observe node 4 after the new write, rather than counting a provisioned route
+    // as evidence of catch-up. Its exact store must durably receive replication.
+    let boundary = cluster
+        .ok(leader, &["status"])
+        .trim()
+        .split("committed=")
+        .nth(1)
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let status = cluster.ok(4, &["status"]);
+        if status
+            .trim()
+            .split("committed=")
+            .nth(1)
+            .unwrap()
+            .parse::<u64>()
+            .unwrap()
+            >= boundary
+        {
+            break;
+        }
+        assert!(Instant::now() < deadline, "new learner did not catch up");
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    assert!(!cluster.request(4, &["add", "702", "1"]).status.success());
+    cluster.ok(leader, &["checkpoint"]);
+    cluster.stop();
+    for id in [1, 2, 4] {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "701", "1"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
+    assert!(cluster.ok(4, &["status"]).contains("role=Follower"));
+    cluster.stop();
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp() {
+    deployment_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic() {
+    deployment_history(true);
+}
+#[test]
+fn invalid_deployment_is_rejected_before_store_creation() {
+    let mut cluster = Cluster::new();
+    cluster.listeners.clear();
+    cluster.udp_sockets.clear();
+    let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    let path = cluster.root.join("deployment.txt");
+    let line = format!(
+        "4 404 7 127.0.0.1:{} node4.voteboat.test\n",
+        cluster.base + 4
+    );
+    let cases = [
+        format!("unknown-version\n{line}"),
+        format!("voteboat-deployment-v1\n{line}{line}"),
+        format!(
+            "voteboat-deployment-v1\n{line}1 404 7 127.0.0.1:{} node1.voteboat.test\n",
+            cluster.base + 1
+        ),
+        format!(
+            "voteboat-deployment-v1\n{line}1 1 1 127.0.0.1:{} node1.voteboat.test\n",
+            cluster.base + 4
+        ),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            line.replace("4 404 7", "0 404 7")
+        ),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            line.replace("4 404 7", "4097 404 7")
+        ),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            line.replace("4 404 7", "4 0 7")
+        ),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            line.replace("4 404 7", "4 404 0")
+        ),
+        "voteboat-deployment-v1\n4 404 7 0.0.0.0:0 invalid/name\n".to_owned(),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            line.replace("node4.voteboat.test", "invalid/name")
+        ),
+        "voteboat-deployment-v1\n4 404 7\n".to_owned(),
+        "voteboat-deployment-v1\n1 1 1 127.0.0.1:1234 node1.voteboat.test\n".to_owned(),
+        "x".repeat(65537),
+        format!(
+            "voteboat-deployment-v1\n{}",
+            (1..=1025)
+                .map(|n| format!("{n} {n} 1 127.0.0.1:{} node1.voteboat.test\n", n + 1000))
+                .collect::<String>()
+        ),
+    ];
+    for (i, declaration) in cases.iter().enumerate() {
+        fs::write(&path, declaration).unwrap();
+        let target = cluster.root.join(format!("bad-{i}"));
+        let output = run(Command::new(BIN)
+            .args(["serve", "recover-member"])
+            .arg(&target)
+            .arg("4")
+            .arg(cluster.base.to_string())
+            .arg(&tls)
+            .arg("--deployment")
+            .arg(&path));
+        assert!(!output.status.success(), "invalid declaration {i}");
+        assert!(!target.exists());
+    }
+    fs::write(&path, format!("voteboat-deployment-v1\n{line}")).unwrap();
+    let target = cluster.root.join("no-assignment");
+    let output = run(Command::new(BIN)
+        .args(["serve", "create"])
+        .arg(&target)
+        .arg("4")
+        .arg(cluster.base.to_string())
+        .arg(&tls)
+        .arg("--deployment")
+        .arg(&path));
+    assert!(!output.status.success());
+    assert!(!target.exists());
+    assert!(!cluster.target("4097", &["status"]).status.success());
+    fs::remove_dir_all(&cluster.root).unwrap();
 }
 fn replicated_history(quic: bool) {
     let mut cluster = Cluster::new();
@@ -1020,8 +1311,27 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
             cluster.start(id, "recover");
         }
     }
-    let leader = cluster.leader();
-    assert!(cluster.ok(leader, &["add", "2", "3"]).contains("Value(10)"));
+    // A sampled role can change during reconnect/election. Model an explicit
+    // caller retry of the original intent; the CLI must still stop on Unknown.
+    let deadline = Instant::now() + Duration::from_secs(30);
+    let leader = loop {
+        let candidate = cluster.leader();
+        let output = cluster.request(candidate, &["add", "2", "3"]);
+        let reply = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            assert!(reply.contains("Value(10)"));
+            break candidate;
+        }
+        assert!(
+            reply.starts_with("UNKNOWN ") || reply == "ERR NOT_LEADER\n",
+            "{reply}"
+        );
+        assert!(
+            Instant::now() < deadline,
+            "explicit retry did not resolve: {reply}"
+        );
+        std::thread::sleep(Duration::from_millis(20));
+    };
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=10\n");
     assert!(cluster
         .ok(leader, &["add", "2", "3"])

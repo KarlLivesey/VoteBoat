@@ -113,11 +113,11 @@ peer sessions. Stop the participating processes before switching their mode.
 Member recovery verifies the existing WAL, pinned checkpoint and exact local
 assignment through `NativeMemberStartup`. It neither creates missing files nor
 infers assignment from peer routes. Removed local stores are rejected. The CLI
-still fixes the original bootstrap, provisioned node/store identities and routes
-to 1..3; this mode supports changes among those identities, including learners
-and joint/final views. Arbitrary new deployment identities and service
-configuration mutation endpoints remain integration work. Offline enrollment
-among these provisioned identities is available as described below.
+retains the original bootstrap of voters/stores 1..3, group/configuration 1 and
+initial incarnations. Default/legacy provisioning covers identities 1..3;
+`--deployment` declares additional exact stores/routes as described below. This
+does not rewrite bootstrap or assign a replica. Service configuration mutation
+endpoints remain integration work. Offline enrollment is available below.
 Rust hosts can already supply explicit provisioning and trusted enrollment images.
 
 The same enforced counter envelope, local commands, durable configuration-status
@@ -131,6 +131,62 @@ views, commit/read a counter write, drain a real checkpoint and reopen all three
 processes. They preserve retry deduplication and configuration observation; the
 final-view learner cannot lead or accept a write. These seeded histories validate
 service recovery, not online enrollment or the distributed proposal lifecycle.
+
+## Explicit member deployment
+
+Use `--deployment FILE` instead of PEERS_FILE with member recovery or offline
+enrollment. Put it before a final `--transport tcp|quic` on serve commands:
+
+```sh
+target/debug/voteboat-counter serve recover-member /your/data/node4 4 43000 /your/tls --deployment deployment.txt --transport quic
+target/debug/voteboat-counter enroll create /your/data/node4 4 43000 /your/tls /your/data/node1 1 --deployment deployment.txt
+```
+
+The UTF-8 file starts with an exact version header, then five whitespace-separated
+fields per line: NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME.
+For example, after the original node 3 has been durably retired:
+
+```text
+voteboat-deployment-v1
+1 1 1 10.0.0.11:43001 node1.voteboat.test
+2 2 1 10.0.0.12:43002 node2.voteboat.test
+4 404 7 10.0.0.14:43004 node4.voteboat.test
+```
+
+Node IDs are 1..4096. Store IDs are nonzero u128 values; incarnations are nonzero
+u64 values. No blank/comment lines or additional fields are accepted. The file
+is limited to 64 KiB and 1,024 entries; duplicate nodes, exact store identities
+and socket addresses are refused. Addresses must be numeric, non-unspecified and
+have nonzero ports. Names must be valid TLS server names. The local node must
+appear. Provider/roster capacities can impose lower deployment limits.
+
+Supply `ca.der`, every declared peer's `nodeN.der`, and the local node's
+`nodeN.der`/`nodeN-key.der` in TLS_DIRECTORY. Only the local private key is loaded.
+Peer certificate/name retention is checked incrementally against the native
+1 MiB budget. Declared store identities must match the exact durable assignment;
+certificate pins and names are verified during the TLS handshake. A source's declared identity is verified
+against its authoritative files during enrollment; IDs are not inferred from
+the node number.
+
+The declaration supplies provisioned credentials/routes only. Every accepted,
+committed or rollback-required member must still be provisioned; a retired peer
+may be omitted after final commitment permits it. Extra provisioned peers receive
+no membership, votes or serving authority from this file. Missing member files
+remain an error. Static create/recover refuse this option; the original bootstrap
+is preserved even when its retired nodes are absent from current provisioning.
+Other groups/bootstrap configurations use explicit Rust assembly.
+
+The local command port remains BASE+100+NODE; reject any base/node combination
+that exceeds 65535. Explicit `client BASE NODE ...` supports these node IDs.
+`auto` still searches only demo nodes 1..3 and is not general membership routing;
+address a later leader explicitly. Runtime configuration mutation remains gated.
+
+TCP/TLS and QUIC executable histories enroll node 4 at store 404/incarnation 7,
+verify its imported counter/retry state, reject changed identity, observe its new
+committed replication, drain and restart. The fixture assigns the public node-3
+alternative certificate to node 4 alone with its matching DNS name, while node 3
+is absent. Source membership is prepared; this is not online configuration
+proposal commitment or physical failure-domain validation.
 
 ## Write, retry and read
 
@@ -419,8 +475,9 @@ source, repeat exact imports without changing its WAL state, verify the imported
 counter and retry outcome directly, then start/restart the TCP/QUIC service and
 commit further writes. They also reject voter/joint/stale-membership imports,
 missing pinned checkpoints, source/destination aliasing and changed images.
-The source membership is seeded; online configuration commitment, arbitrary
-deployment identities and authorized service mutation endpoints remain work.
+The source membership is seeded; online configuration commitment and authorized
+service mutation endpoints remain work. Explicit declarations above support
+additional node/store identities within the service's original bootstrap.
 
 ## Local configuration operation status and counter envelope
 

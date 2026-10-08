@@ -24,6 +24,11 @@ use voteboat::{
 };
 pub type Failure = Box<dyn std::error::Error>;
 pub type Service = NativeNode<Counter, NativeServiceConnector>;
+pub const MAX_NODE: u64 = 4096;
+pub enum PeerInput<'a> {
+    Legacy(Option<&'a Path>),
+    Deployment(&'a Path),
+}
 pub fn checked<T, E: std::fmt::Debug>(value: Result<T, E>) -> Result<T, Failure> {
     value.map_err(|e| format!("{e:?}").into())
 }
@@ -53,16 +58,22 @@ fn material(path: &Path, limit: u64) -> Result<Vec<u8>, Failure> {
     }
     Ok(bytes)
 }
-/// Optional endpoint file has exactly three lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.
+/// Legacy endpoints cover three bootstrap identities. Explicit deployment
+/// declares exact provisioned stores/routes, independently of membership.
 pub fn configuration(
     root: &Path,
     id: u64,
     base: u16,
     tls: &Path,
     create: bool,
-    endpoints: Option<&Path>,
-) -> Result<NativeStartup, Failure> {
-    if !(1..=3).contains(&id) || base == 0 || base > 65432 {
+    input: PeerInput<'_>,
+) -> Result<NativeMemberStartup, Failure> {
+    let explicit = matches!(input, PeerInput::Deployment(_));
+    if !(1..=MAX_NODE).contains(&id)
+        || base == 0
+        || u64::from(base) + 100 + id > u64::from(u16::MAX)
+        || (!explicit && (id > 3 || base > 65432))
+    {
         return Err("invalid node or base port".into());
     }
     let mut addresses = (1..=3)
@@ -76,7 +87,10 @@ pub fn configuration(
             )
         })
         .collect::<BTreeMap<NodeId, (SocketAddr, String)>>();
-    if let Some(path) = endpoints {
+    let mut stores = (1..=3)
+        .map(|n| (node(n), store_id(n)))
+        .collect::<BTreeMap<_, _>>();
+    if let PeerInput::Legacy(Some(path)) = input {
         addresses.clear();
         let data = material(path, 4096)?;
         for line in std::str::from_utf8(&data)?.lines() {
@@ -97,23 +111,68 @@ pub fn configuration(
             return Err("exactly three peer endpoints required".into());
         }
     }
+    if let PeerInput::Deployment(path) = input {
+        addresses.clear();
+        stores.clear();
+        let data = material(path, 65536)?;
+        let mut lines = std::str::from_utf8(&data)?.lines();
+        if lines.next() != Some("voteboat-deployment-v1") {
+            return Err("expected voteboat-deployment-v1 header".into());
+        }
+        let mut identities = std::collections::BTreeSet::new();
+        let mut sockets = std::collections::BTreeSet::new();
+        for line in lines {
+            if stores.len() >= 1024 {
+                return Err("deployment exceeds 1024 replicas".into());
+            }
+            let words = line.split_whitespace().collect::<Vec<_>>();
+            let [number, store, incarnation, address, name] = words.as_slice() else {
+                return Err(
+                    "expected NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME"
+                        .into(),
+                );
+            };
+            let number: u64 = number.parse()?;
+            let store = StoreIdentity {
+                id: StoreId::new(store.parse()?).ok_or("invalid store ID")?,
+                incarnation: StoreIncarnation::new(incarnation.parse()?)
+                    .ok_or("invalid store incarnation")?,
+            };
+            let address: SocketAddr = address.parse()?;
+            if !(1..=MAX_NODE).contains(&number)
+                || address.port() == 0
+                || address.ip().is_unspecified()
+                || name.len() > 253
+                || rustls::pki_types::ServerName::try_from(*name).is_err()
+                || !identities.insert((store.id, store.incarnation))
+                || !sockets.insert(address)
+                || stores.insert(node(number), store).is_some()
+            {
+                return Err("invalid or duplicate deployment identity/endpoint".into());
+            }
+            addresses.insert(node(number), (address, name.to_string()));
+        }
+        if !stores.contains_key(&node(id)) {
+            return Err("local node missing from deployment".into());
+        }
+    }
     let voters = (1..=3)
         .map(|n| (node(n), store_id(n)))
         .collect::<BTreeMap<_, _>>();
-    let credentials = checked(NativeTlsConfig::new(TlsCredentials {
+    let mut credentials = checked(NativeTlsConfig::new(TlsCredentials {
         roots: vec![material(&tls.join("ca.der"), 65536)?],
         certificate_chain: vec![material(&tls.join(format!("node{id}.der")), 65536)?],
         private_key: material(&tls.join(format!("node{id}-key.der")), 65536)?,
     }))?;
+    if explicit {
+        credentials = checked(credentials.with_wire_version(6))?;
+    }
+    let mut retained_peer_bytes = 0usize;
     let config = NativeStartup {
         directory: root.to_owned(),
-        mode: if create {
-            NativeOpenMode::Create
-        } else {
-            NativeOpenMode::Recover
-        },
+        mode: NativeOpenMode::Recover,
         node: node(id),
-        store: store_id(id),
+        store: stores[&node(id)],
         bootstrap: Bootstrap {
             group: group(),
             configuration: ConfigurationId::new(1).unwrap(),
@@ -128,12 +187,20 @@ pub fn configuration(
             .into_iter()
             .filter(|(n, _)| *n != node(id))
             .map(|(n, (address, server_name))| {
+                let certificate = material(&tls.join(format!("node{}.der", n.get())), 65536)?;
+                retained_peer_bytes = retained_peer_bytes
+                    .checked_add(certificate.capacity())
+                    .and_then(|bytes| bytes.checked_add(server_name.capacity()))
+                    .ok_or("peer metadata overflow")?;
+                if retained_peer_bytes > 1024 * 1024 {
+                    return Err("peer metadata limit".into());
+                }
                 Ok((
                     n,
                     NativeStartupPeer {
                         address,
                         server_name,
-                        certificate: material(&tls.join(format!("node{}.der", n.get())), 65536)?,
+                        certificate,
                     },
                 ))
             })
@@ -142,7 +209,18 @@ pub fn configuration(
         entropy_seed: id * 17,
         limits: NodeLimits::default(),
     };
-    config.validate()?;
+    let mut config = NativeMemberStartup {
+        startup: config,
+        provisioned_stores: stores,
+    };
+    if explicit {
+        config.validate()?;
+    } else {
+        config.startup.validate()?;
+    }
+    if create {
+        config.startup.mode = NativeOpenMode::Create;
+    }
     Ok(config)
 }
 fn application() -> Result<Counter, Failure> {
@@ -170,7 +248,7 @@ fn application() -> Result<Counter, Failure> {
 /// Offline trusted handoff. Both stores must be stopped; recovery can advance
 /// provider sessions even when enrollment subsequently fails.
 pub fn enroll(
-    mut config: NativeStartup,
+    mut config: NativeMemberStartup,
     source: &Path,
     source_node: u64,
 ) -> Result<(u64, u64), Failure> {
@@ -178,23 +256,28 @@ pub fn enroll(
         native::{log_store::*, snapshot_store::*},
         snapshot::*,
     };
-    if !(1..=3).contains(&source_node) || node(source_node) == config.node {
+    if !(1..=MAX_NODE).contains(&source_node) || node(source_node) == config.startup.node {
         return Err("expected a distinct provisioned source voter".into());
     }
     let source_path = source.canonicalize()?;
-    if config.directory.exists() && config.directory.canonicalize()? == source_path {
+    if config.startup.directory.exists() && config.startup.directory.canonicalize()? == source_path
+    {
         return Err("source and destination must be distinct stores".into());
     }
-    config.tls = checked(config.tls.with_wire_version(6))?;
+    let source_store = *config
+        .provisioned_stores
+        .get(&node(source_node))
+        .ok_or("source node missing from deployment")?;
+    config.startup.tls = checked(config.startup.tls.with_wire_version(6))?;
     let mut destination_app = application()?;
     let mut source_app = application()?;
     let log = checked(NativeLogStore::recover(
         FileLogIo::open(&source_path)?,
-        store_id(source_node),
+        source_store,
         LogLimits::default(),
     ))?;
     let state = checked(log.state(group()))?;
-    if state.bootstrap != config.bootstrap {
+    if state.bootstrap != config.startup.bootstrap {
         return Err("source bootstrap does not match deployment".into());
     }
     let reference = state
@@ -203,7 +286,7 @@ pub fn enroll(
     let mut snapshots = checked(NativeSnapshotStore::recover(
         FileSnapshotIo::open(source_path.join("snapshots"))?,
         SnapshotIdentity {
-            store: store_id(source_node),
+            store: source_store,
             group: group(),
         },
         SnapshotLimits::default(),
@@ -227,22 +310,16 @@ pub fn enroll(
         .as_ref()
         .is_some_and(|membership| {
             membership.joint().is_none()
-                && membership.stable().voter_stores().get(&node(source_node))
-                    == Some(&store_id(source_node))
+                && membership.stable().voter_stores().get(&node(source_node)) == Some(&source_store)
         })
     {
         return Err("source checkpoint must contain a stable exact voter assignment".into());
     }
-    let provisioned_stores = config.bootstrap.voter_stores.clone();
-    NativeMemberStartup {
-        startup: config,
-        provisioned_stores,
-    }
-    .enroll_snapshot(&image, &mut destination_app)?;
+    config.enroll_snapshot(&image, &mut destination_app)?;
     Ok((image.metadata.index, image.metadata.term))
 }
 pub fn open(
-    mut config: NativeStartup,
+    mut config: NativeMemberStartup,
     protocol: NativePeerProtocol,
     member: bool,
 ) -> Result<Service, Failure> {
@@ -251,15 +328,12 @@ pub fn open(
     let opened = if member {
         // Explicit recovery only: provisioned routes do not establish assignment.
         // The native member constructor verifies the authoritative WAL/checkpoint.
-        config.tls = checked(config.tls.with_wire_version(6))?;
-        let provisioned_stores = config.bootstrap.voter_stores.clone();
-        NativeMemberStartup {
-            startup: config,
-            provisioned_stores,
-        }
-        .open_with_protocol(protocol, app, wake, MonoTime(0))
-    } else {
+        config.startup.tls = checked(config.startup.tls.with_wire_version(6))?;
         config.open_with_protocol(protocol, app, wake, MonoTime(0))
+    } else {
+        config
+            .startup
+            .open_with_protocol(protocol, app, wake, MonoTime(0))
     };
     match opened {
         Ok(node) => Ok(node),
