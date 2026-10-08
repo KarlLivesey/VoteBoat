@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-authenticated-connection-and-decoded-ingress",
+  "status": "shared-runtime-with-bounded-decoded-ingress-and-committed-application-results",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -218,6 +218,22 @@
         "examples/replicated_counter.rs"
       ],
       "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable."
+    },
+    {
+      "design_id": "C05/C15",
+      "public_contract": "BoundedStateMachine + ApplicationReceipt",
+      "operations": ["receipt_bytes_bound", "index", "operation", "nested_bytes"],
+      "native": "Counter + CounterReceipt",
+      "conformance": ["tests/application.rs", "tests/effect_owner.rs"],
+      "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery."
+    },
+    {
+      "design_id": "C05/C10/C15",
+      "public_contract": "ApplicationRouter<R: ApplicationReceipt>",
+      "operations": ["new", "binding", "limits", "usage", "is_fenced", "submit", "poll", "complete", "close", "is_drained"],
+      "native": "Fixed bounded coordination over selected BoundedStateMachine and EffectOwner; native Counter histories use it directly",
+      "conformance": ["tests/effect_owner.rs"],
+      "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. Client/dedup/read-result admission and full reactor/facade remain pending."
     },
     {
       "design_id": "C10",

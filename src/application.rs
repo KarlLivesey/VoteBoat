@@ -20,6 +20,9 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
+/// Optional bounded receipt capability; wire and checkpoint schemas are separate.
+pub const BOUNDED_APPLICATION_CONTRACT_VERSION: u32 = 1;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CounterOutcome {
     Value(i64),
@@ -52,6 +55,52 @@ pub trait StateMachine {
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
+}
+
+/// One ordered command outcome. Nested retained capacity excludes the inline
+/// receipt itself, which the result router charges through vector capacity.
+/// Host implementations are trusted to report their actual allocations.
+pub trait ApplicationReceipt {
+    fn index(&self) -> u64;
+    fn operation(&self) -> OperationId;
+    fn nested_bytes(&self, limit: usize) -> Result<usize, ApplicationError>;
+}
+
+/// Optional bounded result capability over the ordinary application seam.
+/// Exactly one receipt per Command, in input order; no receipt for other entries.
+/// The bound includes vector spare capacity and all nested retained allocations.
+/// Computing it must not mutate the application or perform blocking I/O.
+/// Successful apply advances exactly through the batch's last index. Failure
+/// must leave state unchanged; the router nevertheless fences the owner on an
+/// application failure because a generic host cannot prove partial progress away.
+pub trait BoundedStateMachine: StateMachine
+where
+    Self::Receipt: ApplicationReceipt,
+{
+    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError>;
+}
+
+impl ApplicationReceipt for CounterReceipt {
+    fn index(&self) -> u64 {
+        self.index
+    }
+    fn operation(&self) -> OperationId {
+        self.operation
+    }
+    fn nested_bytes(&self, _: usize) -> Result<usize, ApplicationError> {
+        Ok(0)
+    }
+}
+
+impl BoundedStateMachine for Counter {
+    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+        entries
+            .iter()
+            .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+            .count()
+            .checked_mul(std::mem::size_of::<CounterReceipt>())
+            .ok_or(ApplicationError::InvalidCommand)
+    }
 }
 
 /// A checkpoint contains every piece of state needed for deterministic replay,
@@ -144,9 +193,14 @@ impl StateMachine for Counter {
         entries: &[LogEntry],
     ) -> Result<Vec<Self::Receipt>, ApplicationError> {
         // A bounded clone keeps a malformed/gapped batch from partly advancing
-        // the applied state. The future checkpoint contract records both parts.
+        // the applied state. Checkpoints preserve both state and dedup outcomes.
         let mut next = self.clone();
-        let mut receipts = Vec::new();
+        let mut receipts = Vec::with_capacity(
+            entries
+                .iter()
+                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                .count(),
+        );
         for entry in entries {
             if next.applied.checked_add(1) != Some(entry.index) {
                 return Err(ApplicationError::IndexGap);

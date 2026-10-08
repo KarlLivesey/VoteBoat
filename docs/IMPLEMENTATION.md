@@ -1544,9 +1544,56 @@ Complete client/dedup/result admission, production reactor/facade, physical WAL
 cleanup, membership/policy changes, recursive responsibilities and safe split/merge
 remain unfinished. Full P0–P7 stays active; CI remains background feedback.
 
+## Slice 22: bounded committed application results
+
+Optional application receipt contract 1 introduces `BoundedStateMachine` and
+`ApplicationReceipt` over the existing application seam. Native Counter and host
+applications declare output bounds and receipt identity/nested capacity through
+the same public contract. Counter preallocates its exact command receipt vector;
+its application/dedup/checkpoint semantics and persistent formats are unchanged.
+
+`runtime::ApplicationRouter` binds one runtime and a fresh host-reserved router
+generation. It validates live Committed leases, exact durable log entries, their
+contiguous interval and the application's previous applied boundary. Count and
+capacity credits are checked before calling apply on the serialized owner. Bulk
+cannot consume command-free control reserves. Overload and other preflight
+rejections return the original lease without invoking application. The native
+three-node/100-group histories now route every live committed application batch
+through this guard; startup checkpoint/replay uses its existing recovery contract.
+
+Successful output must preserve command index/operation order, exact applied
+boundary, declared vector capacity and nested capacity. Only then does the owner
+release its Committed lease and the router publish an opaque result envelope.
+Polling retains credits until the original envelope is consumed once. Wrong
+router/runtime envelopes return intact. Application error, malformed output or
+post-application release failure fences both intake and owner; partial state may
+exist, so checkpoint/replay recovery resolves it. Invalid results never escape.
+This creates no new effect/durability token, no proposal success, no client-delivery
+evidence and no node-wide watermark. Tickets are allocation sequences scoped to
+fresh router/runtime/store lifetimes. See [application results](APPLICATION_RESULTS.md).
+
+Six host-only tests cover Written vs Durable, runtime/effect/log mismatch,
+consumer-held charges, overload before apply, control reserve/unrelated-group
+progress, exact cross-router ownership, retries/content conflicts, custom nested
+receipts, malformed results, partial apply failure, byte ceilings and close/drain
+over a shared application. A separate Counter test applies a full default maximum
+log-sized commit and verifies its output fits the router defaults without growth.
+Finite Linux tests do not establish macOS execution,
+power-cut durability, liveness or performance.
+
+Local validation passes 221 default native/TLS tests, 200 native-only tests and
+107 core/host-only tests. Clippy passes all three feature configurations with
+warnings denied; formatting, documentation, contract JSON, diff and new RPL
+header checks pass. Socket histories ran with local loopback access enabled.
+
+Client proposal correlation and dedup capacity reservation before commitment,
+unknown outcomes, read-result admission, production reactor/facade, physical WAL
+cleanup, membership/policy changes, recursive responsibilities and safe split/merge
+remain unfinished. Full P0–P7 stays active; CI remains background feedback.
+
 ## Next slice
 
-Continue full native node assembly with client/application result admission and
+Continue full native node assembly with client/dedup/read-result admission and
 reactor driving, then physical WAL cleaning with durable
 replacement/recovery dependencies. CI stays background feedback; relevant local
 checks guide direct commits.

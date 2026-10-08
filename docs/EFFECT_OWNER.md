@@ -69,7 +69,10 @@ without cloning the message. If admission rejects it, retain the returned
 message and its live effect ticket for retry. Outbound ownership and credits
 then follow the queue and peer-transport contracts through local completion.
 
-Apply Committed entries in order through the selected application. `release`
+Apply Committed entries in order through the selected application.
+`ApplicationRouter` now reserves receipt space before apply and holds its output
+through consumer release; see [application results](APPLICATION_RESULTS.md).
+The lower-level `release`
 requires an applied index covering their original last index. The host supplies
 the application's truthful boundary; an application provider remains obliged
 to implement its state-machine contract. It must not acknowledge a client from
@@ -134,7 +137,7 @@ and healing. Native-without-TLS uses bounded simulated delivery. Network isolati
 
 A bounded PeerRoster now coordinates the native connections in these histories,
 including real TLS reconnection. Asynchronous checkpoint creation and compaction
-also run through the selected workers. A full node facade, listener/dial execution,
-administrative/application result admission and broader network fault schedules
+also run through the selected workers. A full node facade, client/dedup/read-result
+admission, reactor execution and broader network fault schedules
 remain. No complete deployable
 consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

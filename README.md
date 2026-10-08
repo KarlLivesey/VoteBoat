@@ -140,6 +140,14 @@ also uses native WAL workers and actual TCP/TLS connections:
 cargo test --locked --offline --test effect_owner
 ```
 
+`runtime::ApplicationRouter` now reserves bounded committed receipt capacity before
+application and retains it through consumer completion. Native `Counter` and host
+applications implement the public `BoundedStateMachine`/`ApplicationReceipt`
+capability. Exact lease/log/boundary checks precede application; malformed output
+fences the owner for recovery. The native 100-group histories use this same path.
+See [application results](docs/APPLICATION_RESULTS.md). Client proposal/dedup
+admission and read-result storage remain unfinished.
+
 `snapshot_worker::SnapshotWorker` supplies asynchronous publication and pinned
 loads. `native::snapshot_worker::NativeSnapshotWorker` owns selected snapshot
 handles on one explicit thread, with request/byte limits and control reserves.
@@ -205,7 +213,7 @@ Transport contract 2 exposes immutable `received_info` so
 decoded frame. It retains full charges through partial admission, rotates past
 overloaded groups, and discards still-held input from retired connections.
 Native 100-group TCP/TLS histories now use this path. See
-[decoded ingress](docs/INGRESS.md); application-result admission remains in progress.
+[decoded ingress](docs/INGRESS.md); committed application results use the router above.
 `transport::PeerRoster` coordinates construction-authorized peers, fair visits,
 bounded connection reservations, retry deadlines and fresh connection generations.
 It preserves accepted send ownership across failure and rejects obsolete input.

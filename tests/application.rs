@@ -23,6 +23,28 @@ fn command(index: u64, id: u128, delta: i64) -> LogEntry {
         },
     }
 }
+
+#[test]
+fn bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth() {
+    let count = LogLimits::default().max_entries_per_group;
+    let limits = voteboat::runtime::ApplicationRouterLimits::default();
+    let entries = (1..=count)
+        .map(|index| command(index as u64, 1, 7))
+        .collect::<Vec<_>>();
+    let mut counter = Counter::new(1).unwrap();
+    let bound = counter.receipt_bytes_bound(&entries).unwrap();
+    assert!(count <= limits.batch_receipts);
+    assert!(bound <= limits.batch_bytes);
+    let receipts = counter.apply_batch(&entries).unwrap();
+    assert_eq!(receipts.len(), count);
+    assert!(receipts.capacity() * std::mem::size_of::<CounterReceipt>() <= bound);
+    assert!(receipts
+        .iter()
+        .all(|r| r.outcome == CounterOutcome::Value(7)));
+    assert!(receipts.iter().skip(1).all(|r| r.duplicate));
+    assert_eq!(counter.applied_index(), count as u64);
+    assert_eq!(counter.read_applied(count as u64), Ok(7));
+}
 #[test]
 fn retries_return_the_original_result_without_reapplying() {
     let mut counter = Counter::new(10).unwrap();

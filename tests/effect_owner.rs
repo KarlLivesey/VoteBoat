@@ -12,6 +12,356 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+mod application_results {
+    use super::*;
+    fn router<R: ApplicationReceipt>(
+        owner: &Owner,
+        generation: u64,
+        limits: ApplicationRouterLimits,
+    ) -> ApplicationRouter<R> {
+        ApplicationRouter::new(
+            ApplicationRouterBinding {
+                owner: owner.identity(),
+                generation: ApplicationRouterGeneration::new(generation).unwrap(),
+            },
+            limits,
+        )
+        .unwrap()
+    }
+    fn committed(owner: &mut Owner, worker: &mut HostWorker, g: u128, event: Event) -> EffectLease {
+        owner.admit(group(g), event).unwrap();
+        for _ in 0..100 {
+            for event in worker.poll(1) {
+                owner.deliver_worker(event, MonoTime(0)).unwrap();
+            }
+            for step in owner.advance(MonoTime(0), 3).unwrap() {
+                assert!(step.error.is_none(), "{:?}", step.error);
+            }
+            while let Some(lease) = owner.take_effect().unwrap() {
+                match lease.effect {
+                    Effect::Persist(_) => {
+                        owner
+                            .submit_persists(worker, vec![lease], MonoTime(0))
+                            .unwrap();
+                    }
+                    Effect::Committed(_) => return lease,
+                    _ => panic!("unexpected single-voter output"),
+                }
+            }
+        }
+        panic!("no committed output")
+    }
+    fn propose(id: u128, value: i64) -> Event {
+        Event::Propose {
+            operation: OperationId::new(id).unwrap(),
+            bytes: value.to_le_bytes().to_vec(),
+        }
+    }
+    fn start(owner: &mut Owner, worker: &mut HostWorker, g: u128, app: &mut Counter) {
+        let lease = committed(owner, worker, g, Event::Campaign);
+        let mut r = router(owner, 99, ApplicationRouterLimits::default());
+        r.submit(owner, lease, app, MonoTime(0)).unwrap();
+        let output = r.poll().unwrap();
+        assert!(r.complete(output).unwrap().is_empty());
+    }
+    #[test]
+    fn written_and_wrong_effect_never_apply_or_publish_and_durable_application_is_ordered() {
+        let (mut owner, mut worker) = single(1);
+        let mut app = Counter::new(10).unwrap();
+        let mut r = router(&owner, 1, ApplicationRouterLimits::default());
+        owner.admit(group(1), Event::Campaign).unwrap();
+        owner.advance(MonoTime(0), 1).unwrap();
+        let lease = owner.take_effect().unwrap().unwrap();
+        let rejected = r
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::WrongEffect);
+        assert_eq!(app.applied_index(), 0);
+        assert!(r.poll().is_none());
+        owner
+            .submit_persists(&mut worker, vec![*rejected.lease], MonoTime(0))
+            .unwrap();
+        let written = worker.poll(1).pop().unwrap();
+        assert!(matches!(written, WorkerEvent::Written { .. }));
+        owner.deliver_worker(written, MonoTime(0)).unwrap();
+        assert!(owner.take_effect().unwrap().is_none());
+        assert!(r.poll().is_none());
+        // Complete the election and its durable no-op through the ordinary pump.
+        let mut apps = BTreeMap::new();
+        pump(&mut owner, &mut worker, &mut apps, MonoTime(0));
+        app = apps.remove(&group(1)).unwrap();
+        let lease = committed(&mut owner, &mut worker, 1, propose(5, 7));
+        let effect = lease.ticket;
+        let t = r.submit(&mut owner, lease, &mut app, MonoTime(0)).unwrap();
+        let charge = r.usage();
+        let output = r.poll().unwrap();
+        assert_eq!(output.ticket(), t);
+        assert_eq!(output.effect(), effect);
+        assert_eq!(output.through(), 2);
+        assert_eq!(output.receipts()[0].outcome, CounterOutcome::Value(7));
+        assert_eq!(
+            r.usage(),
+            charge,
+            "polling cannot release consumer-owned storage"
+        );
+        assert!(!r.is_drained());
+        let receipts = r.complete(output).unwrap();
+        assert_eq!(receipts[0].operation, OperationId::new(5).unwrap());
+        assert_eq!(r.usage(), ApplicationResultUsage::default());
+        assert!(r.is_drained());
+    }
+    #[test]
+    fn held_results_backpressure_before_apply_control_reserve_and_retry_after_release() {
+        let (mut owner, mut worker) = single(2);
+        let mut app = Counter::new(10).unwrap();
+        start(&mut owner, &mut worker, 1, &mut app);
+        let mut r = router(
+            &owner,
+            1,
+            ApplicationRouterLimits {
+                batches: 2,
+                control_batches: 1,
+                ..ApplicationRouterLimits::default()
+            },
+        );
+        let lease = committed(&mut owner, &mut worker, 1, propose(1, 4));
+        r.submit(&mut owner, lease, &mut app, MonoTime(0)).unwrap();
+        let held = r.poll().unwrap();
+        let lease = committed(&mut owner, &mut worker, 1, propose(2, 3));
+        let ticket = lease.ticket;
+        let rejected = r
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::Overloaded);
+        assert_eq!(rejected.lease.ticket, ticket);
+        assert_eq!(app.applied_index(), 2);
+        assert_eq!(app.read_applied(2), Ok(4));
+        // Group 1's blocked command lease does not prevent another group's
+        // election no-op from using reserved application-result capacity.
+        let control = committed(&mut owner, &mut worker, 2, Event::Campaign);
+        let mut second = Counter::new(10).unwrap();
+        r.submit(&mut owner, control, &mut second, MonoTime(0))
+            .unwrap();
+        assert_eq!(r.usage().batches, 2);
+        let control = r.poll().unwrap();
+        assert!(control.receipts().is_empty());
+        r.complete(control).unwrap();
+        let mut other = router::<CounterReceipt>(&owner, 2, ApplicationRouterLimits::default());
+        let wrong = other.complete(held).unwrap_err();
+        assert_eq!(wrong.reason, ApplicationRouteError::StaleResult);
+        assert_eq!(r.usage().batches, 1);
+        r.complete(*wrong.results).unwrap();
+        r.submit(&mut owner, *rejected.lease, &mut app, MonoTime(0))
+            .unwrap();
+        assert_eq!(app.read_applied(3), Ok(7));
+        let output = r.poll().unwrap();
+        assert_eq!(
+            r.complete(output).unwrap()[0].outcome,
+            CounterOutcome::Value(7)
+        );
+        assert!(r.is_drained());
+    }
+    #[test]
+    fn retries_and_conflicting_content_emit_original_application_outcomes() {
+        let (mut owner, mut worker) = single(1);
+        let mut app = Counter::new(10).unwrap();
+        start(&mut owner, &mut worker, 1, &mut app);
+        let mut r = router(&owner, 1, ApplicationRouterLimits::default());
+        for (delta, expected, duplicate) in [
+            (7, CounterOutcome::Value(7), false),
+            (7, CounterOutcome::Value(7), true),
+            (9, CounterOutcome::OperationConflict, true),
+        ] {
+            let lease = committed(&mut owner, &mut worker, 1, propose(1, delta));
+            r.submit(&mut owner, lease, &mut app, MonoTime(0)).unwrap();
+            let output = r.poll().unwrap();
+            assert_eq!(output.receipts()[0].outcome, expected);
+            assert_eq!(output.receipts()[0].duplicate, duplicate);
+            r.complete(output).unwrap();
+        }
+        assert_eq!(app.read_applied(4), Ok(7));
+    }
+    #[test]
+    fn wrong_runtime_and_modified_committed_content_reject_before_application() {
+        let (mut owner, mut worker) = single(1);
+        let mut app = Counter::new(10).unwrap();
+        start(&mut owner, &mut worker, 1, &mut app);
+        let lease = committed(&mut owner, &mut worker, 1, propose(1, 4));
+        let mut binding = ApplicationRouterBinding {
+            owner: owner.identity(),
+            generation: ApplicationRouterGeneration::new(1).unwrap(),
+        };
+        binding.owner.generation = RuntimeGeneration::new(2).unwrap();
+        let mut wrong =
+            ApplicationRouter::new(binding, ApplicationRouterLimits::default()).unwrap();
+        let rejected = wrong
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::WrongBinding);
+        assert_eq!(app.applied_index(), 1);
+        let mut lease = *rejected.lease;
+        if let Effect::Committed(entries) = &mut lease.effect {
+            entries[0].payload = EntryPayload::Noop;
+        }
+        let mut r = router(&owner, 1, ApplicationRouterLimits::default());
+        let rejected = r
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::WrongEffect);
+        assert_eq!(app.applied_index(), 1);
+        assert!(!owner.is_failed());
+    }
+    #[derive(Debug)]
+    struct Receipt {
+        index: u64,
+        operation: OperationId,
+        data: Vec<u8>,
+    }
+    impl ApplicationReceipt for Receipt {
+        fn index(&self) -> u64 {
+            self.index
+        }
+        fn operation(&self) -> OperationId {
+            self.operation
+        }
+        fn nested_bytes(&self, limit: usize) -> Result<usize, ApplicationError> {
+            if self.data.capacity() > limit {
+                Err(ApplicationError::InvalidCommand)
+            } else {
+                Ok(self.data.capacity())
+            }
+        }
+    }
+    struct HostApp {
+        counter: Counter,
+        mode: u8,
+        calls: usize,
+    }
+    impl StateMachine for HostApp {
+        type Receipt = Receipt;
+        fn applied_index(&self) -> u64 {
+            self.counter.applied_index() - u64::from(self.mode == 4 && self.calls > 0)
+        }
+        fn apply_batch(&mut self, entries: &[LogEntry]) -> Result<Vec<Receipt>, ApplicationError> {
+            self.calls += 1;
+            let applied = self.counter.apply_batch(entries)?;
+            if self.mode == 3 {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            if self.mode == 5 {
+                return Ok(vec![]);
+            }
+            let mut receipts =
+                Vec::with_capacity(applied.len() + if self.mode == 6 { 64 } else { 0 });
+            for receipt in applied {
+                receipts.push(Receipt {
+                    index: receipt.index + u64::from(self.mode == 1),
+                    operation: receipt.operation,
+                    data: Vec::with_capacity(if self.mode == 2 { 2048 } else { 8 }),
+                });
+            }
+            Ok(receipts)
+        }
+    }
+    impl BoundedStateMachine for HostApp {
+        fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+            Ok(entries
+                .iter()
+                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                .count()
+                * (std::mem::size_of::<Receipt>() + 8))
+        }
+    }
+    #[test]
+    fn host_receipts_nested_capacity_wrong_identity_and_partial_application_fail_closed() {
+        for mode in 0..=6 {
+            let (mut owner, mut worker) = single(1);
+            let mut counter = Counter::new(10).unwrap();
+            start(&mut owner, &mut worker, 1, &mut counter);
+            let mut app = HostApp {
+                counter,
+                mode,
+                calls: 0,
+            };
+            let mut r = router(&owner, 1, ApplicationRouterLimits::default());
+            let lease = committed(&mut owner, &mut worker, 1, propose(1, 4));
+            let result = r.submit(&mut owner, lease, &mut app, MonoTime(0));
+            assert_eq!(app.calls, 1);
+            if mode == 0 {
+                result.unwrap();
+                let charged = r.usage();
+                let output = r.poll().unwrap();
+                assert_eq!(output.receipts()[0].data.capacity(), 8);
+                assert_eq!(r.usage(), charged);
+                r.complete(output).unwrap();
+                assert!(!owner.is_failed());
+            } else {
+                let rejected = result.unwrap_err();
+                assert!(matches!(
+                    rejected.reason,
+                    ApplicationRouteError::ProviderViolation
+                        | ApplicationRouteError::Application(ApplicationError::InvalidCommand)
+                ));
+                assert!(r.poll().is_none());
+                assert!(r.is_fenced());
+                assert!(owner.is_failed());
+                assert_eq!(
+                    app.counter.applied_index(),
+                    2,
+                    "unknown partial apply must be recovered"
+                );
+                owner.discard_failed(*rejected.lease).unwrap();
+            }
+        }
+    }
+    #[test]
+    fn byte_ceiling_prevents_application_and_close_drains_without_closing_shared_app() {
+        let (mut owner, mut worker) = single(1);
+        let mut counter = Counter::new(10).unwrap();
+        start(&mut owner, &mut worker, 1, &mut counter);
+        let mut app = HostApp {
+            counter,
+            mode: 0,
+            calls: 0,
+        };
+        let lease = committed(&mut owner, &mut worker, 1, propose(1, 4));
+        let mut tiny = router(
+            &owner,
+            1,
+            ApplicationRouterLimits {
+                batch_bytes: 1,
+                ..ApplicationRouterLimits::default()
+            },
+        );
+        let rejected = tiny
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::ResultTooLarge);
+        assert_eq!(app.calls, 0);
+        let mut r = router(&owner, 2, ApplicationRouterLimits::default());
+        r.submit(&mut owner, *rejected.lease, &mut app, MonoTime(0))
+            .unwrap();
+        r.close();
+        assert!(!r.is_drained());
+        let output = r.poll().unwrap();
+        r.complete(output).unwrap();
+        assert!(r.is_drained());
+        let lease = committed(&mut owner, &mut worker, 1, propose(2, 3));
+        let rejected = r
+            .submit(&mut owner, lease, &mut app, MonoTime(0))
+            .unwrap_err();
+        assert_eq!(rejected.reason, ApplicationRouteError::Closed);
+        assert_eq!(app.calls, 1);
+        let mut replacement = router(&owner, 3, ApplicationRouterLimits::default());
+        replacement
+            .submit(&mut owner, *rejected.lease, &mut app, MonoTime(0))
+            .unwrap();
+        assert_eq!(app.calls, 2);
+        assert_eq!(app.counter.read_applied(3), Ok(7));
+        let output = replacement.poll().unwrap();
+        replacement.complete(output).unwrap();
+    }
+}
 mod support;
 use std::collections::{BTreeMap, VecDeque};
 use support::*;
@@ -623,6 +973,7 @@ mod native {
         transports:
             Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
         ingress: IngressRouter,
+        results: ApplicationRouter<CounterReceipt>,
         #[cfg(feature = "tls")]
         connector: Option<voteboat::native::connect::NativePeerConnector>,
         staged: VecDeque<OutboundBatch>,
@@ -830,6 +1181,14 @@ mod native {
             pending: Vec::new(),
             reads: Vec::new(),
             transports: None,
+            results: ApplicationRouter::new(
+                ApplicationRouterBinding {
+                    owner: runtime_owner,
+                    generation: ApplicationRouterGeneration::new(1).unwrap(),
+                },
+                ApplicationRouterLimits::default(),
+            )
+            .unwrap(),
             ingress: IngressRouter::new(
                 IngressBinding {
                     owner: runtime_owner,
@@ -1080,10 +1439,14 @@ mod native {
                 while let Some(lease) = n.owner.take_effect().unwrap() {
                     match &lease.effect {
                         Effect::Persist(_) => n.pending.push(lease),
-                        Effect::Committed(entries) => {
+                        Effect::Committed(_) => {
                             let app = n.apps.get_mut(&lease.ticket.visit.group).unwrap();
-                            app.apply_batch(entries).unwrap();
-                            n.owner.release(lease, app.applied_index(), now).unwrap();
+                            let ticket = n.results.submit(&mut n.owner, lease, app, now).unwrap();
+                            let output = n.results.poll().unwrap();
+                            assert_eq!(output.ticket(), ticket);
+                            assert_eq!(output.through(), app.applied_index());
+                            n.results.complete(output).unwrap();
+                            assert!(n.results.is_drained());
                         }
                         Effect::ReadReady(barrier) => {
                             let app = &n.apps[&lease.ticket.visit.group];
@@ -1355,6 +1718,8 @@ mod native {
         for n in nodes {
             n.ingress.close();
             assert!(n.ingress.is_drained());
+            n.results.close();
+            assert!(n.results.is_drained());
             assert!(n
                 .transports
                 .as_ref()

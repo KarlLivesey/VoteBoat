@@ -58,7 +58,8 @@ id64!(
     SnapshotWorkerGeneration,
     OutboundGeneration,
     SecureSessionGeneration,
-    IngressGeneration
+    IngressGeneration,
+    ApplicationRouterGeneration
 );
 id128!(GroupId, StoreId, ResponsibilityId, OperationId);
 
