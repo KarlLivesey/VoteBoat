@@ -27,8 +27,10 @@ support host replacements. `TimedShard` automatically manages election and
 heartbeat deadlines, including stale queued expirations and overload retries.
 The asynchronous WAL worker and authenticated framed peer driver are implemented.
 The native three-node/100-group durable history now runs through actual loopback
-TCP/TLS connections, including leader replacement and restart. Production effect
-staging, peer roster/reconnect management and snapshot workers remain in progress.
+TCP/TLS connections, including leader replacement and restart. The bounded
+`EffectOwner` now reserves output space before execution and retains exact effect
+leases through rejection, persistence, application and read completion. Peer
+roster/reconnect management and asynchronous snapshot workers remain in progress.
 
 Production node assembly, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
@@ -118,6 +120,20 @@ credits include reserved control space and remain charged until terminal deliver
 The caller budgets effects after delivery. Close, drain and `try_reclaim` return
 the store; dropping observation cannot cancel accepted writes. Snapshot helpers
 currently require quiescent synchronous store access.
+
+For bounded output coordination, wrap a quiescent `TimedShard` in
+`runtime::EffectOwner`. It reserves effect capacity before each event, holds one
+external lease per group, preserves rejected persistence batches and checks exact
+written/durable delivery. Control work has reserved visit and byte capacity.
+Application and one-use read completions stay on the serialized owner; transferred
+sends move into separately bounded outbound queues. Failure fences service while
+external leases remain charged until returned. See [the effect-owner contract](docs/EFFECT_OWNER.md)
+for budgets, shutdown and remaining node assembly. Its real-file 100-group history
+also uses native WAL workers and actual TCP/TLS connections:
+
+```sh
+cargo test --locked --offline --test effect_owner
+```
 
 Use `outbound::OutboundQueue` (native provider `NativeOutbound`) to retain
 same-peer batches of `Effect::Send` under node and peer budgets. Admission

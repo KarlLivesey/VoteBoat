@@ -320,6 +320,35 @@ impl Raft {
     pub fn storage_binding(&self) -> StoreBinding {
         self.binding
     }
+    /// Conservative output reservation for one event and its dependent durable
+    /// completions. The owner must bound input retention by `input_bytes`, drain
+    /// each output batch before another completion, and run only one event in
+    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
+    pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
+        use std::mem::size_of;
+        let mut log = self
+            .durable
+            .entries
+            .len()
+            .checked_mul(size_of::<LogEntry>())?;
+        for entry in &self.durable.entries {
+            if let EntryPayload::Command { bytes, .. } = &entry.payload {
+                log = log.checked_add(bytes.capacity())?;
+            }
+        }
+        // A heartbeat can produce append and read probes for every peer. Each
+        // append contains at most 64 entries and max_batch_bytes payload/framing.
+        // Other paths add bounded persist/commit/snapshot-reference metadata.
+        let peers = self.durable.bootstrap.policy.voters().len();
+        let message = self
+            .limits
+            .max_batch_bytes
+            .checked_add(64 * size_of::<LogEntry>())?
+            .checked_add(size_of::<Message>() + 4 * size_of::<Effect>())?;
+        log.checked_add(input_bytes.checked_mul(4)?)?
+            .checked_add(peers.checked_add(2)?.checked_mul(2)?.checked_mul(message)?)?
+            .checked_add(65536)
+    }
     /// A suspended runtime visit cannot be released while these dependencies
     /// are unresolved. Outstanding reads still accept their protocol messages.
     pub fn has_pending_dependency(&self) -> bool {

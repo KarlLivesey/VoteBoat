@@ -24,7 +24,9 @@ use std::{
     collections::{BTreeMap, VecDeque},
     mem::size_of,
 };
+mod effects;
 mod timed;
+pub use effects::*;
 pub use timed::{TimedShard, TimerConfig, TimerProgress};
 
 /// Milliseconds on one local monotonic clock domain, never a lease or term.
@@ -521,6 +523,38 @@ impl<Q: ReadyScheduler> Shard<Q> {
             return Err(RuntimeError::StaleTicket);
         }
         Ok(g)
+    }
+    /// Inspect the same priority choice used by step_next without consuming it.
+    /// A serialized owner can reserve output capacity for that traffic class.
+    pub fn next_class(
+        &mut self,
+        ticket: VisitTicket,
+        now: MonoTime,
+    ) -> Result<Option<MessageClass>, RuntimeError> {
+        self.observe(now)?;
+        let limits = self.limits;
+        let g = self.live(ticket)?;
+        if g.core.has_pending_dependency() {
+            return Err(RuntimeError::DependencyPending);
+        }
+        let visit = g.visit.as_ref().unwrap();
+        let used = sum(&visit.used);
+        if now >= visit.deadline || used.items >= limits.visit_items {
+            return Ok(None);
+        }
+        const ORDER: [usize; 4] = [0, 0, 1, 2];
+        Ok((0..4)
+            .map(|offset| ORDER[(g.turn + offset) % 4])
+            .find(|c| {
+                g.queues[*c]
+                    .front()
+                    .is_some_and(|q| q.cost <= limits.visit_bytes.saturating_sub(used.bytes))
+            })
+            .map(|c| match c {
+                0 => MessageClass::Control,
+                1 => MessageClass::Data,
+                _ => MessageClass::Background,
+            }))
     }
     /// Effects become the host worker's owned responsibility. Host bounds its
     /// output queues and applies committed entries before client success. A

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-authenticated-framed-peer-transport",
+  "status": "shared-runtime-with-reserved-effect-owner",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -236,6 +236,27 @@
       "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority."
     },
     {
+      "design_id": "C10/C15",
+      "public_contract": "EffectOwner<Q, T, E>",
+      "operations": [
+        "new",
+        "advance",
+        "take_effect",
+        "submit_persists",
+        "deliver_worker",
+        "complete_effect",
+        "release_transferred_send",
+        "extend_reservation",
+        "close_admission",
+        "discard_failed"
+      ],
+      "native": "Fixed coordination over selected public runtime and worker providers",
+      "conformance": [
+        "tests/effect_owner.rs"
+      ],
+      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Three-node/100-group native-WAL/TCP/TLS history with host scheduler/timer providers. Full node facade, result admission and asynchronous snapshots remain pending."
+    },
+    {
       "design_id": "C12",
       "public_contract": "Clock",
       "operations": ["now"],
@@ -289,7 +310,7 @@
       "operations": ["binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": ["tests/transport.rs", "tests/worker.rs"],
-      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress/effect staging and snapshot workers remain pending."
+      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress assembly and snapshot workers remain pending."
     },
     {
       "design_id": "C13",

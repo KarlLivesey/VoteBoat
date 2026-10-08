@@ -1061,12 +1061,63 @@ automatic timers and asynchronous snapshot workers remain pending. The snapshot
 installation history still uses simulated connections. macOS execution and
 hardware power cuts remain unobserved. Full P0–P7 remains active.
 
+## Slice 14: reserved effect ownership
+
+`runtime::EffectOwner<Q, T, E>` now owns a quiescent timed shard and coordinates
+bounded effect lifetimes through selected public scheduler/timer/entropy and
+persistence-worker seams. This fixed coordination layer creates no hidden
+runtime or I/O resources. Its worker binding includes the exact store session
+and worker generation. See [the contract](EFFECT_OWNER.md).
+
+Each visit reserves a conservative capacity bound before executing one event.
+The bound includes retained log payload capacities, bounded replication fan-out,
+input and metadata slack; core, application, worker and transport memory remain
+separately budgeted. Bulk visits and extensions cannot consume control reserves.
+One lease per group preserves ingress and output credits until completion or
+accepted transfer. Rejection returns original persistence leases. Worker request
+metadata validates the exact visit set and Written-before-Durable order before
+core delivery. Only existing validated durable tokens release dependent effects;
+no quorum rule, consensus generation or persisted watermark changes.
+
+Committed output requires application catch-up; ReadReady consumes its original
+one-use core barrier before the completion callback. Callbacks run serialized and
+must be nonblocking. Oversized retained output, provider failures and invalid
+completion order fence the owner. External leases remain charged until explicit
+failed-owner discard; accepted storage still requires worker drain/recovery.
+Closing stops ingress and timers while accepted healthy work drains.
+
+### Slice 14 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full local suites pass: 151 default native/TLS tests, 140 native-without-TLS
+  tests and 65 core/host-only tests. All three feature sets pass Clippy with
+  warnings denied; formatting and documentation pass.
+- Host-provider cases cover automatic election, rejection ownership, exact
+  written/durable stages, duplicate and stale completions, delayed-group
+  isolation, application catch-up, one-use reads, reserved control visits,
+  reservation extension, oversized callback capacity, failure discard and drain.
+- The three-node/100-group owner history uses actual native WAL workers and,
+  with default features, native framed TCP/TLS connections. It checks exact
+  operation retries, fresh reads, an isolated old leader's uncommitted write,
+  replacement, healing and actual-file restart with fresh store sessions.
+- This history selects injected host scheduler/timer/entropy providers and
+  explicit campaigns; automatic election is tested separately. Native runtime
+  providers retain their earlier conformance tests. The no-TLS history uses
+  bounded simulated delivery. Network isolation is injected after decode.
+
+This is a production coordination component, not a complete node facade.
+Snapshot effects can remain leased, but asynchronous native snapshot work and
+installation remain pending. Application assertions depend on the selected
+state-machine contract; host result admission is separate. macOS execution,
+hardware power cuts, physical WAL cleaning and the later P0–P7 protocols remain
+unobserved or unimplemented. Full P0–P7 remains active.
+
 ## Next slice
 
-Build the bounded production owner around the existing timed shard, persistence
-worker, outbound queue and peer transports. Preserve owned effects across
-admission rejection, exact durable dependencies, fair connection visits and
-separately reserved decoded ingress. Add asynchronous snapshot work without
-bypassing log/application installation dependencies. CI remains background
-feedback; relevant local checks guide continued direct commits without a remote
+Add asynchronous snapshot request/completion ownership without bypassing native
+log persistence and application installation dependencies. Continue bounded node
+assembly with peer roster/reconnect management, decoded ingress, application
+result admission and integrated automatic-timer network histories. CI remains
+background feedback; relevant local checks guide direct commits without a remote
 gate.

@@ -224,6 +224,25 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.shard.core(group)
     }
+    pub fn owner(&self) -> RuntimeOwner {
+        self.shard.owner
+    }
+    pub fn limits(&self) -> ShardLimits {
+        self.shard.limits
+    }
+    pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
+        self.shard.groups.keys().copied()
+    }
+    pub fn validate_quiescent(&self) -> Result<(), RuntimeError> {
+        self.check()?;
+        if self.closed {
+            return Err(RuntimeError::Closed);
+        }
+        if !self.is_drained() {
+            return Err(RuntimeError::DependencyPending);
+        }
+        Ok(())
+    }
     pub fn usage(&self) -> Usage {
         self.shard.usage()
     }
@@ -336,6 +355,14 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
             self.refresh(visit.group, now, s.timer.is_some())?;
         }
         Ok(step)
+    }
+    pub fn next_class(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+    ) -> Result<Option<MessageClass>, RuntimeError> {
+        self.check()?;
+        self.shard.next_class(visit, now)
     }
     pub fn with_core<R>(
         &mut self,
