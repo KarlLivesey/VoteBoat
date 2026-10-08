@@ -9,8 +9,12 @@ repository = "https://github.com/KarlLivesey/VoteBoat"
 publish = false
 
 [features]
-default = ["native"]
+default = ["native", "tls"]
 native = []
+tls = ["native", "dep:rustls"]
+
+[dependencies]
+rustls = { version = "=0.23.45", optional = true, default-features = false, features = ["std", "ring"] }
 
 [[example]]
 name = "durable_vote"

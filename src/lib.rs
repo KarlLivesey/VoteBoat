@@ -23,6 +23,7 @@ pub mod outbound;
 pub mod quorum;
 pub mod raft;
 pub mod runtime;
+pub mod secure;
 pub mod snapshot;
 pub mod vote;
 pub mod wire;

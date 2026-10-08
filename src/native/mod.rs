@@ -16,6 +16,8 @@ pub mod log_store;
 pub mod outbound;
 pub mod runtime;
 pub mod snapshot_store;
+#[cfg(feature = "tls")]
+pub mod tls;
 pub mod vote_store;
 pub mod wire;
 pub mod worker;

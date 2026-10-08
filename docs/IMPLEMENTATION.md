@@ -9,9 +9,9 @@ record claims that unimplemented phases already work.
 
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
-| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
+| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; production transport/runtime remain |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded single-owner ingress scheduling, shared WAL batches and 100-group overload isolation implemented; transport coalescing, worker assembly and output admission remain |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/outbound scheduling, asynchronous shared WAL batches and 100-group overload isolation implemented; production transport coalescing, effect staging and snapshot workers remain |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -915,12 +915,74 @@ partial-stream transport, production effect staging or asynchronous snapshot
 worker has been implemented. macOS execution and hardware power cuts remain
 unobserved. Full P0–P7 remains active.
 
+## Slice 12: authenticated native TLS sessions
+
+The public `secure::SecureSession` seam now separates nonblocking authenticated
+channel I/O from Raft framing and delivery. `NativeTlsSession` uses exactly
+pinned Rustls 0.23.45 with its explicit ring provider, TLS 1.3, strict mutual
+certificate authentication, DNS verification on clients and exact peer leaf
+certificate pins. No global provider, runtime, listener or pool is installed.
+The optional default `tls` feature implies `native`; core/host-only and
+native-without-TLS builds retain no third-party runtime dependencies. This is a
+deliberate dependency exception for established cryptography, not a homemade
+security protocol. Cargo.lock pins the selected provider dependency closure.
+
+The host supplies credentials and trusted certificate-to-node/store mappings.
+A fixed authenticated hello binds the peer's recovered store session before
+any application plaintext escapes. The owner supplies fresh connection
+generations within its recovered local store session. These are connection
+identities, not durable log evidence. No session completion permits a Raft
+acknowledgement, committed operation or read result; those retain their existing
+exact log/barrier/quorum dependencies. The full identity, lifecycle and resource
+contract is in [SECURE_SESSIONS.md](SECURE_SESSIONS.md).
+
+Poll limits external I/O calls and each direction's byte progress. Handshake
+byte/time ceilings, fixed hello buffers and finite credential inputs bound
+admission work. Rustls' application write buffer ceiling is not a total TLS
+memory cap; its separate parser bounds and plaintext backpressure remain part
+of the resource model. Hosts must separately budget concurrent channels, socket
+buffers, partial frames, encoded output and ingress retention. Short I/O and
+WouldBlock retain ownership. Clean close drains accepted channel output and
+preserves decrypted input; truncated EOF, identity mismatch, backward time and
+revocation latch failure. Rotation creates another authenticated connection.
+`require_authenticated` supports trait objects and rejects simulator-only or
+not-ready providers. Host replacements attest their security capability.
+
+### Slice 12 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full local suites pass: 129 tests with default native/TLS features, 119 with
+  native storage but no TLS, and 55 core/host-only tests. All three builds pass
+  Clippy with warnings denied. Formatting and documentation pass.
+- Actual mutual TLS over bounded memory streams exercises seven-byte I/O,
+  Interrupted/WouldBlock, per-poll budgets, a 128-byte application send buffer,
+  backpressure and exact 8192-byte plaintext transfer without hello leakage.
+- A real loopback TCP/TLS connection carries twenty groups in one native wire
+  frame. Reconnection uses fresh connection generations and a changed recovered
+  peer store session. Closing that connection leaves a second live connection
+  on the same configurations/listener usable.
+- Negative tests cover missing client certificates, an untrusted root, wrong
+  DNS name, a different otherwise trusted certificate pin, wrong node/store
+  incarnation claims, premature plaintext access, malformed credentials,
+  invalid limits and owned-handle cleanup on failed construction.
+- An incomplete fragmented ClientHello consumes exactly its 1024-byte
+  configured ciphertext allowance before failure. Virtual handshake timeout,
+  backward time, zero poll budget, clean close with pending data, truncated
+  disconnect and latched revocation are exercised. Terminal I/O reclamation is
+  one-use. The host-only simulator fixture is rejected by production admission.
+
+These tests validate channel authentication and lifecycle, not a complete
+networked consensus service. Three-node/100-group durable histories still use
+simulated connections. Partial-frame transport, production effect staging,
+reconnect policy and asynchronous snapshot workers remain pending. macOS
+execution and hardware power cuts remain unobserved. Full P0–P7 remains active.
+
 ## Next slice
 
-Add authenticated-session transport seams, then assemble bounded
-effect staging and secure native transport. Extend virtual-time histories
-to leader loss, overload and message delay through the new assembly. Native
-sockets must use established secure
-sessions supplied by the host; production assembly cannot silently select an
-insecure simulation transport. Preserve downstream substitution and durable
-histories as these providers enter the assembly.
+Assemble bounded framed send/receive transport over `SecureSession`, then
+production effect staging. Preserve complete batch ownership through short
+stream writes, bounded decoded ingress and connection failure. Integrate the
+durable histories with the assembled transport while retaining downstream
+substitution and simulator rejection. CI remains background feedback; relevant
+local checks guide continued direct commits without a remote gate.

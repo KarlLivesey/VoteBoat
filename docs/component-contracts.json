@@ -1,8 +1,12 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-bounded-wire-framing",
+  "status": "shared-runtime-with-authenticated-tls-sessions",
   "selection": "construction-time",
-  "third_party_runtime_dependencies": [],
+  "third_party_runtime_dependencies": [
+    "rustls =0.23.45 (optional tls feature; std/ring)",
+    "ring 0.17.14 (Cargo.lock; Rustls crypto provider)",
+    "transitive versions pinned in Cargo.lock"
+  ],
   "contracts": [
     {
       "design_id": "C01/C02",
@@ -272,6 +276,14 @@
       "scope": "Independent wire format 1 for all current static-configuration RPCs, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol."
     },
     {
+      "design_id": "C09",
+      "public_contract": "SecureSession",
+      "operations": ["security", "state", "binding", "limits", "poll", "read_plaintext", "write_plaintext", "is_flushed", "close", "revoke"],
+      "native": "NativeTlsSession<I: Read + Write> (tls feature)",
+      "conformance": ["tests/secure.rs"],
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. Real loopback TLS/wire tests plus partial-I/O, backpressure and failure tests. Simulator-only providers rejected. A complete framed transport/consensus network assembly remains pending."
+    },
+    {
       "design_id": "C13",
       "public_contract": "ElectionEntropy",
       "operations": ["sample"],
@@ -283,7 +295,6 @@
   "not_yet_implemented": [
     "physical-wal-reclamation",
     "transport",
-    "secure-session",
     "asynchronous-snapshot-worker-assembly",
     "buffers",
     "admission-policy",

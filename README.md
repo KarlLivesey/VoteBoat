@@ -14,8 +14,10 @@ application checkpoints, pinned logical compaction and follower snapshot catch-u
 Group configuration and voter store identities are
 persisted with the native WAL. Operation retries return the original application
 result without repeating their effect. Restart, partition, corruption and
-storage-failure tests exercise native providers and host replacements. There
-are no third-party runtime dependencies.
+storage-failure tests exercise native providers and host replacements. The
+default `tls` feature adds pinned Rustls/ring for authenticated channels. Native
+storage without TLS and the core/host-only build have no third-party runtime
+dependencies.
 
 Shared runtime components now schedule many groups through bounded ready queues
 and explicit deadlines. The 100-group history uses one WAL per node, batches
@@ -23,8 +25,8 @@ persistence across groups, and demonstrates progress while one group's durable
 completion is delayed. Public scheduler, timer, clock and election-jitter seams
 support host replacements. `TimedShard` automatically manages election and
 heartbeat deadlines, including stale queued expirations and overload retries.
-This is a caller-driven integration boundary; background workers and transport
-assembly remain.
+The asynchronous WAL worker is implemented; production transport and snapshot
+worker assembly remain caller-driven work in progress.
 
 Transport, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
@@ -34,10 +36,16 @@ development; this is not a production consensus release.
 Install Rust 1.98.1 (pinned in `rust-toolchain.toml`), then:
 
 ```sh
+cargo fetch --locked
 cargo test --locked --offline
 cargo test --locked --offline --no-default-features
+cargo test --locked --offline --no-default-features --features native
 cargo clippy --locked --offline --all-targets -- -D warnings
 ```
+
+The first fetch needs network access. TLS uses ring's native build toolchain;
+Linux/macOS need their normal C compiler and build tools. The TLS integration
+test opens a local loopback TCP listener.
 
 Run the shared-runtime histories, including three actual WAL files:
 
@@ -80,7 +88,7 @@ platform I/O, encoding and application serialization through public contracts.
 Compacted replicas recover through `snapshot::recover_replica`, which verifies
 the pinned image and restores application state before returning a usable core.
 Snapshot transfers currently own one bounded image in the in-process transport;
-network framing and shared outbound buffer/admission assembly remain to be implemented.
+wire snapshot chunking and shared transport assembly remain to be implemented.
 
 `runtime::Shard` owns its registered cores. Admit an owned event, poll a scoped
 visit, then call `step_next`. Drive returned effects through bounded host workers,
@@ -117,7 +125,7 @@ Control capacity is reserved, snapshots have a separate ceiling, and the native
 queue fairly visits peers and traffic classes. Local send success carries no
 Raft acknowledgement. The host drives polling and budgets retained rejected
 effects, encoded buffers and receive queues separately. This queue creates no
-sockets; authenticated transport remains pending.
+sockets; framed transport assembly remains pending.
 
 `wire::WireCodec` supplies a public bounded framing seam. The native
 `NativeWireCodec` implements [wire format 1](docs/WIRE_FORMAT.md), including all
@@ -126,6 +134,19 @@ allocating a receive frame, then decode one exact frame with the connection's
 trusted `WireScope`. Size, shape and decoded retention checks precede payload
 allocations. Checksums provide integrity only; the transport must authenticate
 the peer and supply separate encoded-buffer and ingress budgets.
+
+`secure::SecureSession` supplies the authenticated channel seam. With the default
+`tls` feature, `native::tls::NativeTlsSession` uses TLS 1.3 mutual certificate
+authentication, exact peer certificate pins, and an authenticated node/store
+session hello. The host supplies credentials, trusted node/store mappings,
+nonblocking streams, connection generations, monotonic time and reactor wakeups.
+No listener or executor is created implicitly. Polls limit external I/O calls
+and bytes, and handshake progress has byte and time ceilings. Production
+composition must use `require_authenticated` before delivering Raft traffic;
+simulator providers are rejected. See [the channel contract](docs/SECURE_SESSIONS.md)
+for lifecycle and buffer-accounting details. The native channel is tested over
+real loopback TCP; the three-node consensus histories still use simulated
+connections pending framed transport assembly.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.
