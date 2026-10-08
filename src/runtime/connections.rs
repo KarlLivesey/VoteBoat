@@ -260,6 +260,7 @@ pub(super) fn changes_connections(event: &Event) -> bool {
             event,
             Event::Receive(Message {
                 rpc: Rpc::Snapshot { .. }
+                    | Rpc::LearnerRepairSnapshot { .. }
                     | Rpc::AuthorityReply { granted: true, .. }
                     | Rpc::LearnerRepair { .. },
                 ..

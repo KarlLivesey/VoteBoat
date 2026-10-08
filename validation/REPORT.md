@@ -864,3 +864,42 @@ assertion uses a borrowed expected-message slice.
   configuration ingress stays closed. Mini item 1 advances toward native
   enrollment/admin integration, then faulted remote membership release; P5–P7
   and full P0–P7 remain active. No macOS execution or performance claim.
+
+## Slice 68 — committed snapshot learner repair through native format 6
+
+- Historical committed source checkpoints use existing SnapshotRequired/load
+  ownership and exact current reference/context checks. Exact old-view voter to
+  committed stable learner only; bootstrap, stable assignment, promotion, retained
+  operation IDs, scope, terms and application bounds precede installation. This
+  trusts authenticated non-Byzantine Raft providers exporting locally verified
+  committed images; no independent commitment certificate is added.
+- Host providers demonstrate stable and joint images, no reply before WAL plus
+  application restoration, Busy election boundaries and restart after lost restore
+  completion. Existing voters, wrong store/scope/history and missing/empty images
+  reject. Invalid application schema fences before image publication/WAL. A
+  committed checkpoint supersedes a divergent uncommitted learner tail; after
+  joint activation late snapshot repair rejects without mutation.
+- Native WAL: every byte of the exact snapshot binding record is torn, with sync
+  and manifest faults. No successful reply escapes; model power loss and public
+  member recovery yield old learner/application or complete checkpoint/joint.
+  Existing shared snapshot/worker suites cover publication/pin faults and retained
+  ownership; these checks do not prove real hardware power-loss semantics.
+- Native TCP/TLS and QUIC nodes load actual pinned source files, repair via a
+  stable pre-joint checkpoint or compacted committed joint, elect, commit/apply
+  a client write, drain/join and reopen native files. Four new native histories
+  pass. Initial membership is seeded, not distributed enrollment evidence.
+- Explicit format 6 round-trip, every truncation, old-format refusal and narrow
+  snapshot budgets pass. TLS versions 1–6 authenticate exact selections; 7 and
+  5/6 mismatches refuse. Owning Node rejects missing/wrong selected rosters for
+  both repair options before work. Existing bounded snapshot queues/connections
+  are used; no new public provider seam (60 inventory contracts).
+- Affected all-feature library, member_recovery, native_member_startup, snapshot,
+  snapshot_worker, effect_owner, wire, secure, transport, startup, learners,
+  outbound and runtime suites pass. Core-only library: 46 pass. Final
+  member_recovery rerun: 29 pass, including divergent-tail recovery. Final
+  all-feature/all-target Clippy with warnings denied, all-feature docs,
+  formatting/diff and inventory metadata checks pass (60 contracts).
+- Broader recursive/fork/candidate-tail/promoted-sender histories and the complete
+  remote membership lifecycle remain open. General mutation ingress stays gated;
+  P4 advances toward service integration and release, then P5 routing/P6 ownership
+  movement/P7 tuning. Full P0–P7 remains active. No macOS/performance claim.

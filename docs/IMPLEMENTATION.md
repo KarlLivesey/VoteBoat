@@ -112,8 +112,9 @@ P4 activation gate, not an additional global milestone.
    leader loss and restart. Replace the diagnostic stall expectation with a
    successful production-path recovery check (done for the exact-prefix case in
    slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66;
-   retained multi-batch recovery with explicit format 5 in slice 67).
-   Still check missing prefixes requiring snapshot transfer, conflicting learner
+   retained multi-batch recovery with explicit format 5 in slice 67; historical
+   committed snapshot repair with explicit format 6 in slice 68).
+   Still check conflicting learner
    tails, candidate tails, promoted
    senders and recursive-policy histories before
    claiming the general release gate is complete. This removes a P4 release blocker
@@ -3844,3 +3845,58 @@ enrollment/admin integration and the faulted remote lifecycle release. This feed
 P4 placement, then P5 responsibility routing and P6 ownership movement. P7 and full
 P0–P7 remain active; P8 is deferred. No general online configuration release,
 macOS execution or performance claim.
+
+## Slice 68 — historical committed learner snapshot repair, native format 6
+
+Mini schema plan: reuse the snapshot provider/worker and publication → pin → WAL
+binding → application restoration dependencies, with a distinct recovery RPC and
+candidate-only cursor. Source data must be an existing committed checkpoint with
+the same old stable configuration, optionally the exact current joint. Receivers
+are exact committed stable learners and senders exact old-view voters. A reply
+can advance only recovery or request an ordinary ballot. Failures fence and
+restart reconstructs from the existing verified image/WAL; no new durability
+receipt, generation or persisted cursor is needed.
+
+`Raft::with_snapshot_joint_repair` selects historical checkpoint transfer ahead
+of retained format-5 repair. SnapshotRequired loads the source's exact pinned
+image and rechecks the request/context, current reference, bootstrap and membership.
+`LearnerRepairSnapshot` is tag 16 in explicit native format 6. Native startup
+selects the matching core, codec, roster and TLS/QUIC sessions; generic Node
+rejects incompatible/missing rosters before work. Snapshot queue accounting and
+connection reservations use the existing bounded snapshot path.
+
+The receiving learner validates old-view authority and its exact assignment,
+then converts to the ordinary snapshot pipeline. The atomic snapshot/membership/
+commit WAL binding can install a historically committed joint. The dependent
+LearnerRepaired reply waits for application restoration, rather than escaping on
+publication or WAL completion. Stable checkpoint repair continues with retained
+batches through the joint; joint checkpoint repair requests a normal Vote. Neither
+reply grants leadership, read authority or quorum progress. The source is a
+correct authenticated Raft voter exporting its verified committed image; this
+protocol supplies no Byzantine/portable commitment certificate.
+
+Public host-provider tests check both checkpoint kinds, storage/application Busy
+boundaries, lost application completion with restart, invalid stores/scope/history,
+application-schema refusal before publication, existing-voter refusal and delayed
+traffic after joint activation. A committed joint checkpoint supersedes a tested
+divergent uncommitted learner tail while preserving committed history. Every byte
+of the native snapshot-binding WAL record is torn, plus sync/manifest faults;
+recovery yields either the old learner or complete checkpoint/joint and application.
+New codec frames round-trip, reject every truncation, older versions and narrow
+snapshot budgets. Existing snapshot-worker tests exercise publication/pin failures
+through the shared pipeline; these are not a new independent protocol model.
+
+Actual native TCP and QUIC nodes cover pre-joint stable checkpoints followed by
+retained joint repair, and compacted committed-joint checkpoints. Both elect,
+commit/apply a client write and reopen the native files. Initial membership/history
+is seeded: these checks do not establish distributed enrollment or proposal
+commitment. General configuration ingress remains gated. See validation/REPORT.md.
+
+This advances mini item 1's missing-prefix recovery path toward mini item 2,
+native enrollment/admin integration, then mini item 3, faulted remote lifecycle
+release. Remaining histories include broader recursive policies, candidate tails,
+promoted senders and divergent retained-only repair. Final/new-only checkpoint
+images cannot supply old-view learner authority. P4 safe placement enables P5
+responsibility routing and P6 ownership movement; P7 and the full P0–P7 goal remain
+active. Static service/embedding usability is independent of those later phases.
+No macOS execution, performance or complete protocol-proof claim; P8 is deferred.

@@ -213,12 +213,12 @@ where
             }
             for group in parts.local.owner.groups() {
                 let core = parts.local.owner.core(group).unwrap();
-                if core.uses_batched_joint_repair()
-                    && parts
+                if core.learner_repair_wire_version().is_some_and(|version| {
+                    parts
                         .peers
                         .as_ref()
-                        .is_none_or(|p| p.roster.wire_version() != 5)
-                {
+                        .is_none_or(|p| p.roster.wire_version() != version)
+                }) {
                     return Err(NodeError::IncompatiblePeerProtocol);
                 }
                 if core.state().base_index() > 0 && parts.local.snapshots.is_none() {

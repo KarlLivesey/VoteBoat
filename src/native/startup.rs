@@ -667,7 +667,9 @@ where
         app,
     ))?
     .0;
-    let core = if config.tls.wire_version() >= 5 {
+    let core = if config.tls.wire_version() >= 6 {
+        core.with_snapshot_joint_repair()
+    } else if config.tls.wire_version() >= 5 {
         core.with_batched_joint_repair()
     } else {
         core
@@ -789,6 +791,7 @@ where
         3 => NativeWireCodec::with_authority(Default::default()),
         4 => NativeWireCodec::with_readiness(Default::default()),
         5 => NativeWireCodec::with_learner_repair(Default::default()),
+        6 => NativeWireCodec::with_snapshot_repair(Default::default()),
         _ => return Err(error("wire version", "unsupported native format")),
     };
     let factory = checked(NativeTransportFactory::new(

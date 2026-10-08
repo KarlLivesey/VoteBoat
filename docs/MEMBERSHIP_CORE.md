@@ -243,7 +243,8 @@ Only the range containing the exact joint entry activates accepted membership.
 The source joint may be committed or uncommitted; neither case exports its
 commit boundary or changes the receiver's commitment rules.
 If the source has compacted away the joint entry, it skips retained repair while
-still emitting ordinary Vote requests; snapshot repair is a separate pending path.
+still emitting ordinary Vote requests; explicit format 6 supplies the committed
+checkpoint path described below.
 
 Every range checks the committed/accepted stable exact learner, trusted old
 voter/store, promotion journal, contiguous indices/terms, byte bounds and identical
@@ -268,6 +269,41 @@ commit/apply and reopen a write. Core histories cover lost reply/restart, delaye
 traffic after promotion, malformed authority/ranges, stale contexts, higher-term
 persistence and a matching compacted receiver hint. Native WAL faults fence with
 no reply and recover an old or complete batch. These are bounded histories, not
-a full fork/term/liveness proof. Missing source prefixes requiring snapshot
-transfer, conflicting learner tails, promoted senders and broader recursive
+a full fork/term/liveness proof. Conflicting learner tails, promoted senders and broader recursive
 policy histories remain release work. Service mutation ingress remains gated.
+
+### Historical committed snapshot repair (native format 6)
+
+`Raft::with_snapshot_joint_repair` selects format 6 and includes retained
+format-5 repair. An old-view candidate can supply its own already committed,
+pinned checkpoint to an exact learner being promoted by its accepted joint.
+The image's stable configuration must equal the candidate's old configuration;
+any included joint must equal its accepted joint. `SnapshotRequired` uses the
+existing owned snapshot load and checks exact context, current reference,
+metadata and membership before sending `LearnerRepairSnapshot`. A current
+candidate cannot assert an arbitrary commit boundary through this path.
+
+The receiver must still be an exact committed stable learner. It authenticates
+the sender as an old-view voter/store, checks bootstrap, stable configuration,
+retained operation IDs, terms, scope and exact promotion assignment. New-only
+senders, existing voters, receivers already in a joint, and final/new-only images
+are refused. This uses the authenticated, non-Byzantine Raft trust model: native
+senders export their locally verified committed checkpoint. It adds no portable
+commit certificate for untrusted images or Byzantine senders.
+
+The image passes application validation, publication, pinning and an atomic
+snapshot/membership/commit WAL binding before installation. The exact ordinary
+durability completion permits `SnapshotInstalled`, not a repair reply. Application
+restoration releases `LearnerRepaired`; pending storage or restoration blocks
+votes and service work. A committed joint checkpoint may activate the joint
+through that binding. A stable checkpoint is followed by retained repair through
+the joint. The reply advances only the candidate's separate recovery cursor;
+completion triggers an ordinary Vote request, never fabricated ballot evidence.
+
+Restart reconstructs membership and application from the verified pinned image
+and WAL without needing a repair receipt. Cursors and the assembly option remain
+volatile. Existing snapshot generations/tickets and store sessions fence stale
+work; no new durability token or quorum watermark is introduced. Queue budgeting
+and connection reservation treat these images as ordinary bounded snapshots.
+Native format 6 is explicit and exact across codec, roster and TLS/QUIC sessions;
+older formats refuse it. General configuration ingress remains closed.

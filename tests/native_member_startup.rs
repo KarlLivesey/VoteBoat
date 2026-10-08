@@ -475,7 +475,11 @@ fn tcp_member_startup_recovers_learner_joint_final_and_checkpoint() {
     member_histories(NativePeerProtocol::TcpTls);
 }
 
-fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
+fn remote_joint_repair(
+    protocol: NativePeerProtocol,
+    missing_entries: u64,
+    checkpoint_mode: Option<bool>,
+) {
     let root = root();
     std::fs::create_dir(&root).unwrap();
     let policy = |required| {
@@ -576,7 +580,11 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
                     term: 1,
                     voted_for: None,
                 },
-                commit_index: 1,
+                commit_index: if local == 3 && checkpoint_mode.is_some() {
+                    history.len() as u64 - u64::from(checkpoint_mode == Some(false))
+                } else {
+                    1
+                },
                 suffix: Some(Suffix {
                     from: 1,
                     entries: history[..count].to_vec(),
@@ -586,7 +594,7 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
             })])
             .unwrap();
         log.barrier(&tickets).unwrap();
-        NativeSnapshotStore::create(
+        let mut snapshots = NativeSnapshotStore::create(
             FileSnapshotIo::create(path.join("snapshots")).unwrap(),
             SnapshotIdentity {
                 store: identity(local),
@@ -595,6 +603,21 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
             SnapshotLimits::default(),
         )
         .unwrap();
+        if local == 3 && checkpoint_mode.is_some() {
+            let mut app = Counter::new(100).unwrap();
+            let (mut core, _) =
+                recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app)
+                    .unwrap();
+            let receipt = checkpoint_application(&core, &app, &mut snapshots).unwrap();
+            compact_replica(
+                &mut core,
+                &mut log,
+                &mut snapshots,
+                &app,
+                receipt.reference(),
+            )
+            .unwrap();
+        }
     }
     let endpoint2 = reservation();
     let endpoint3 = reservation();
@@ -602,9 +625,10 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
     let (mut candidate, _hints3) = startup(&root.join("3"), 3, &[1, 2, 3]);
     learner.startup.bootstrap = initial.clone();
     candidate.startup.bootstrap = initial;
-    if missing_entries > 63 {
-        learner.startup.tls = learner.startup.tls.with_wire_version(5).unwrap();
-        candidate.startup.tls = candidate.startup.tls.with_wire_version(5).unwrap();
+    if checkpoint_mode.is_some() || missing_entries > 63 {
+        let version = if checkpoint_mode.is_some() { 6 } else { 5 };
+        learner.startup.tls = learner.startup.tls.with_wire_version(version).unwrap();
+        candidate.startup.tls = candidate.startup.tls.with_wire_version(version).unwrap();
     }
     learner.startup.listen = endpoint2.0;
     candidate.startup.listen = endpoint3.0;
@@ -705,30 +729,30 @@ fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
 }
 #[test]
 fn tcp_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 0);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 0, None);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::Quic, 0);
+    remote_joint_repair(NativePeerProtocol::Quic, 0, None);
 }
 #[test]
 fn tcp_native_joint_repair_catches_up_retained_learner_prefix() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 32);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 32, None);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_catches_up_retained_learner_prefix() {
-    remote_joint_repair(NativePeerProtocol::Quic, 32);
+    remote_joint_repair(NativePeerProtocol::Quic, 32, None);
 }
 #[test]
 fn tcp_native_joint_repair_catches_up_multiple_batches() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 160);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 160, None);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_catches_up_multiple_batches() {
-    remote_joint_repair(NativePeerProtocol::Quic, 160);
+    remote_joint_repair(NativePeerProtocol::Quic, 160, None);
 }
 #[cfg(feature = "quic")]
 #[test]
@@ -876,4 +900,23 @@ fn committed_retirement_releases_old_peer_requirements_without_weakening_static_
     );
     close(n);
     std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn tcp_native_snapshot_repair_catches_up_then_installs_joint() {
+    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(false));
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_native_snapshot_repair_catches_up_then_installs_joint() {
+    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(false));
+}
+#[test]
+fn tcp_native_snapshot_repair_recovers_compacted_joint() {
+    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(true));
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_native_snapshot_repair_recovers_compacted_joint() {
+    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(true));
 }

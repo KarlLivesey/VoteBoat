@@ -742,50 +742,55 @@ fn constructor_requires_connections_for_rollback_reachable_recovered_learners() 
 }
 
 #[test]
-fn batched_repair_requires_wire_five_before_node_service_or_persistence() {
-    for networking in [false, true] {
-        let mut p = parts(1, networking);
-        let id = p.local.owner.identity();
-        let mut shard = Shard::new(
-            id,
-            ShardLimits {
-                max_groups: 100,
-                ..ShardLimits::default()
-            },
-            Ready(VecDeque::new()),
-        )
-        .unwrap();
-        for g in [group(1), group(2)] {
-            let state = p.local.owner.core(g).unwrap().state().clone();
-            let core = Raft::recover(node(1), id.store, state, LogLimits::default())
-                .unwrap()
-                .with_batched_joint_repair();
-            shard.register(core).unwrap();
-        }
-        let runtime = TimedShard::new(
-            shard,
-            Timers {
-                owner: id,
-                sequence: 0,
-                entries: BTreeMap::new(),
-            },
-            Entropy(17),
-            TimerConfig::default(),
-            MonoTime(0),
-        )
-        .unwrap();
-        p.local.owner = EffectOwner::new(
-            runtime,
-            p.local.persistence.binding(),
-            EffectOwnerLimits::default(),
-        )
-        .unwrap();
-        let rejected = Boat::from_parts(p, NodeLimits::default(), MonoTime(0))
-            .err()
+fn learner_repair_requires_selected_wire_before_node_service_or_persistence() {
+    for snapshot in [false, true] {
+        for networking in [false, true] {
+            let mut p = parts(1, networking);
+            let id = p.local.owner.identity();
+            let mut shard = Shard::new(
+                id,
+                ShardLimits {
+                    max_groups: 100,
+                    ..ShardLimits::default()
+                },
+                Ready(VecDeque::new()),
+            )
             .unwrap();
-        assert_eq!(rejected.reason, NodeError::IncompatiblePeerProtocol);
-        assert!(rejected.parts.local.owner.is_drained());
-        assert!(!rejected.parts.local.persistence.closed);
+            for g in [group(1), group(2)] {
+                let state = p.local.owner.core(g).unwrap().state().clone();
+                let core = Raft::recover(node(1), id.store, state, LogLimits::default()).unwrap();
+                let core = if snapshot {
+                    core.with_snapshot_joint_repair()
+                } else {
+                    core.with_batched_joint_repair()
+                };
+                shard.register(core).unwrap();
+            }
+            let runtime = TimedShard::new(
+                shard,
+                Timers {
+                    owner: id,
+                    sequence: 0,
+                    entries: BTreeMap::new(),
+                },
+                Entropy(17),
+                TimerConfig::default(),
+                MonoTime(0),
+            )
+            .unwrap();
+            p.local.owner = EffectOwner::new(
+                runtime,
+                p.local.persistence.binding(),
+                EffectOwnerLimits::default(),
+            )
+            .unwrap();
+            let rejected = Boat::from_parts(p, NodeLimits::default(), MonoTime(0))
+                .err()
+                .unwrap();
+            assert_eq!(rejected.reason, NodeError::IncompatiblePeerProtocol);
+            assert!(rejected.parts.local.owner.is_drained());
+            assert!(!rejected.parts.local.persistence.closed);
+        }
     }
 }
 #[test]

@@ -25,11 +25,22 @@ impl Raft {
         self.repair_requests.clear();
         self
     }
-    pub(crate) fn uses_batched_joint_repair(&self) -> bool {
-        self.batched_joint_repair
+    pub(crate) fn learner_repair_wire_version(&self) -> Option<u16> {
+        if self.snapshot_joint_repair {
+            Some(6)
+        } else if self.batched_joint_repair {
+            Some(5)
+        } else {
+            None
+        }
     }
 
     pub(super) fn batched_joint_repair_messages(&mut self) -> Result<Vec<Effect>, RaftError> {
+        if self.snapshot_joint_repair {
+            if let Some(effects) = self.repair_snapshot_messages()? {
+                return Ok(effects);
+            }
+        }
         let Some(joint) = self.membership().joint() else {
             return Ok(Vec::new());
         };
@@ -168,7 +179,7 @@ impl Raft {
                 return Err(RaftError::InvalidMessage);
             }
             self.repair_requests.remove(&message.from);
-            if success && matching_index == joint_index {
+            if success && matching_index >= joint_index {
                 let Some(context) = self.vote_context else {
                     return Ok(Vec::new());
                 };

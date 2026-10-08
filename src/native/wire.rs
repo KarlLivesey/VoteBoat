@@ -64,6 +64,10 @@ impl NativeWireCodec {
     pub fn with_learner_repair(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 5)
     }
+    /// Explicit format 6 adds historical committed checkpoint learner repair.
+    pub fn with_snapshot_repair(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 6)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -245,7 +249,14 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
                 term = entry.term;
             }
         }
-        Rpc::Snapshot { snapshot } => {
+        Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
+            if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. })
+                && (version < 6
+                    || snapshot.metadata.membership.is_none()
+                    || m.context.origin != m.sender)
+            {
+                return Err(WireError::InvalidMessage("snapshot repair version/context"));
+            }
             let meta = &snapshot.metadata;
             if meta.bootstrap.group != m.group
                 || (version == 1 && meta.bootstrap.configuration != m.configuration)
@@ -487,7 +498,7 @@ impl Encoder {
             {
                 return Err(WireError::TooLarge)
             }
-            Rpc::Snapshot { snapshot }
+            Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot }
                 if snapshot.application.len() > self.limits.max_snapshot_bytes
                     || snapshot.metadata.bootstrap.policy.voters().len()
                         > self.limits.policy.max_voters
@@ -608,7 +619,7 @@ impl Encoder {
             }
             Rpc::ReadProbe => self.u8(4),
             Rpc::ReadAck => self.u8(5),
-            Rpc::Snapshot { snapshot } => {
+            Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
                 if snapshot.application.len() > self.limits.max_snapshot_bytes {
                     return Err(WireError::TooLarge);
                 }
@@ -622,7 +633,13 @@ impl Encoder {
                 }
                 let explicit_base =
                     meta.membership.is_some() || meta.bootstrap.configuration != m.configuration;
-                self.u8(if explicit_base { 9 } else { 6 })?;
+                self.u8(if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
+                    16
+                } else if explicit_base {
+                    9
+                } else {
+                    6
+                })?;
                 if explicit_base {
                     self.u64(meta.bootstrap.configuration.get())?;
                 }
@@ -1059,11 +1076,11 @@ impl<'a> Decoder<'a> {
             },
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
-            kind @ (6 | 9) => {
-                if kind == 9 && version < 2 {
+            kind @ (6 | 9 | 16) => {
+                if (kind == 9 && version < 2) || (kind == 16 && version < 6) {
                     return Err(WireError::InvalidMessage("RPC kind"));
                 }
-                let bootstrap_configuration = if kind == 9 {
+                let bootstrap_configuration = if kind != 6 {
                     self.configuration_id()?
                 } else {
                     configuration
@@ -1100,7 +1117,7 @@ impl<'a> Decoder<'a> {
                         return Err(WireError::InvalidMessage("duplicate voter store"));
                     }
                 }
-                let membership = if kind == 9 && bool_value(self.u8()?)? {
+                let membership = if kind != 6 && bool_value(self.u8()?)? {
                     Some(Box::new(self.membership(index, limits, budget)?))
                 } else {
                     None
@@ -1111,22 +1128,25 @@ impl<'a> Decoder<'a> {
                 }
                 let bytes = self.take(len)?;
                 budget.charge(len)?;
-                Rpc::Snapshot {
-                    snapshot: Box::new(Snapshot {
-                        metadata: SnapshotMetadata {
-                            membership,
-                            bootstrap: Bootstrap {
-                                group,
-                                configuration: bootstrap_configuration,
-                                policy,
-                                voter_stores,
-                            },
-                            index,
-                            term,
-                            application_schema,
+                let snapshot = Box::new(Snapshot {
+                    metadata: SnapshotMetadata {
+                        membership,
+                        bootstrap: Bootstrap {
+                            group,
+                            configuration: bootstrap_configuration,
+                            policy,
+                            voter_stores,
                         },
-                        application: bytes.to_vec(),
-                    }),
+                        index,
+                        term,
+                        application_schema,
+                    },
+                    application: bytes.to_vec(),
+                });
+                if kind == 16 {
+                    Rpc::LearnerRepairSnapshot { snapshot }
+                } else {
+                    Rpc::Snapshot { snapshot }
                 }
             }
             7 => Rpc::SnapshotAck { index: self.u64()? },

@@ -37,6 +37,10 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    /// Historical committed checkpoint repair to an exact old-view learner.
+    LearnerRepairSnapshot {
+        snapshot: Box<Snapshot>,
+    },
     /// Pre-election pure extension to an exact committed learner. No commit claim.
     LearnerRepair {
         joint: Box<LogEntry>,
@@ -288,6 +292,7 @@ pub struct Raft {
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
+    snapshot_joint_repair: bool,
     request_sequence: u64,
     last_batch: u64,
     pending: Option<Pending>,
@@ -296,6 +301,7 @@ pub struct Raft {
     last_read_request: u64,
     fenced: bool,
     staged_snapshot: Option<Message>,
+    staged_snapshot_repair: bool,
     application_install: Option<(SnapshotRef, Message)>,
     checkpoint_requested: Option<RequestContext>,
     checkpoint_reconcile: Option<SnapshotRef>,
@@ -486,6 +492,7 @@ impl Raft {
             requests: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
+            snapshot_joint_repair: false,
             request_sequence: 0,
             last_batch: 0,
             pending: None,
@@ -494,6 +501,7 @@ impl Raft {
             last_read_request: 0,
             fenced: false,
             staged_snapshot: None,
+            staged_snapshot_repair: false,
             application_install: None,
             checkpoint_requested: None,
             checkpoint_reconcile: None,
@@ -703,6 +711,7 @@ impl Raft {
         self.fenced = true;
         self.pending = None;
         self.staged_snapshot = None;
+        self.staged_snapshot_repair = false;
         self.application_install = None;
         self.checkpoint_requested = None;
         self.checkpoint_reconcile = None;
@@ -1489,6 +1498,9 @@ impl Raft {
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
+            return self.receive_repair_snapshot(m);
+        }
         if matches!(
             m.rpc,
             Rpc::LearnerRepair { .. } | Rpc::LearnerRepaired { .. }
@@ -1625,7 +1637,9 @@ impl Raft {
             self.repair_requests.clear();
         }
         match &m.rpc {
-            Rpc::LearnerRepair { .. } | Rpc::LearnerRepaired { .. } => unreachable!(),
+            Rpc::LearnerRepair { .. }
+            | Rpc::LearnerRepaired { .. }
+            | Rpc::LearnerRepairSnapshot { .. } => unreachable!(),
             Rpc::AuthorityRequest { .. }
             | Rpc::AuthorityReply { .. }
             | Rpc::LearnerReadinessRequest(_)
@@ -1926,6 +1940,7 @@ impl Raft {
                     };
                 }
                 self.staged_snapshot = Some(m.clone());
+                self.staged_snapshot_repair = false;
                 Ok(vec![Effect::StageSnapshot(m)])
             }
             Rpc::SnapshotAck { index } => {
@@ -2076,6 +2091,9 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
+        if self.role == Role::Candidate && self.snapshot_joint_repair {
+            return self.repair_snapshot_send(to, context, reference, snapshot);
+        }
         if self.role != Role::Leader {
             return Err(RaftError::NotLeader);
         }
@@ -2125,10 +2143,19 @@ impl Raft {
                 None
             },
         };
+        let repair = std::mem::take(&mut self.staged_snapshot_repair);
         let reply = self.reply(
             &message,
-            Rpc::SnapshotAck {
-                index: reference.index,
+            if repair {
+                Rpc::LearnerRepaired {
+                    success: true,
+                    matching_index: reference.index,
+                    matching_term: reference.term,
+                }
+            } else {
+                Rpc::SnapshotAck {
+                    index: reference.index,
+                }
             },
         );
         self.persist_update(
@@ -2205,3 +2232,4 @@ mod batched_repair;
 #[path = "raft/connections.rs"]
 mod connections;
 mod joint_repair;
+mod snapshot_repair;
