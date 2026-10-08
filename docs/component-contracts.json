@@ -1124,6 +1124,23 @@
         "tests/startup.rs"
       ],
       "scope": "Caller-owned bounded provisioned exact stores/credentials and immutable original bootstrap; Recover with membership wire only. Exact local store must exist in committed and accepted recovered membership. Active roster derives from committed/accepted/rollback-reachable cores; every required peer needs exact provisioned identity, including old peers behind an uncommitted final. Extra provisioned hints do not grant active roster membership or votes; committed retirement permits obsolete provisioning to disappear. Native TCP dial/TCP-QUIC pins use the same explicit map. Verified checkpoint/application replay precedes exposure; failed recovery can advance sessions/restore returned application and returns existing cleanup ownership without rollback. Late failure joins workers/releases sockets. Native fixture learner/joint/final/checkpoint histories test both protocols, non-voting learner campaign, durable status/resumption hints and restored retry state; fixtures do not prove online distributed creation/commit. Static NativeStartup still rejects dynamic journals. No new durability effect/token/generation/watermark/format, no implicit enrollment or serving authority. Counter CLI, enforced application envelope and faulted remote lifecycle integration remain pending."
+    },
+    {
+      "design_id": "C01/C04/C10/C15/C20",
+      "public_contract": "enroll_learner_snapshot / NativeMemberStartup::enroll_snapshot",
+      "operations": [
+        "validate committed trusted learner image",
+        "publish and pin checkpoint",
+        "persist imported contiguous prefix",
+        "retry exact import",
+        "recover member"
+      ],
+      "native": "Shared public LogStore/SnapshotRetention composition and explicit native file provisioning through NativeMemberStartup; no sockets or workers during import.",
+      "conformance": [
+        "tests/learner_enrollment.rs",
+        "tests/native_member_startup.rs"
+      ],
+      "scope": "Host authenticates source commitment; stable exact learner/store only, no voter or joint import. Original bootstrap, application schema/data, retained allocation and provider budgets checked. Clone validation precedes mutation; durable snapshot publication and pin precede log barrier and verified combined recovery. Exact completed import or exact published image can resume after lost receipts; progressed or different images refuse. Host and native WAL fault injection covers publication/pin/log failures and same-image retry; native files reopen over TCP/QUIC. Initialization across fresh WAL/bootstrap/snapshot stores is not atomic and incomplete creation requires explicit inspection; Recover never creates missing stores. Application may be restored after durable import; errors never imply rollback. No new token, generation, watermark or format. No network commitment certificate or released remote membership; service endpoints/enforced envelopes and faulted lifecycle remain pending."
     }
   ],
   "not_yet_implemented": [

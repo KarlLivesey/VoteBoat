@@ -84,6 +84,9 @@ restart. These remain foundations for complete online add/promote/remove.
 Slice 60 is verified: eight native TCP/QUIC restart cases cover learner/joint/final
 and compacted recovery, rollback provisioning, removed-local refusal and cleanup.
 Seeded recovery fixtures do not establish distributed enrollment or commitment.
+Slice 61 adds trusted checkpoint enrollment through public storage contracts and
+native files, with exact-image retry and TCP/QUIC member startup. Administration
+endpoints and enforced bounds remain within the current deliverable.
 
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
@@ -3566,3 +3569,35 @@ bounds, then full faulted remote transitions. Public configuration ingress stays
 gated, including partial-joint catch-up/election release checks. This advances
 P4 restart usability without changing its exit; P5–P7 remain active. Linux results
 are not macOS, physical failure, performance or full proof evidence.
+
+## Slice 61 — explicit checkpoint enrollment for native learners
+
+Mini schema plan: complete the trusted handoff portion of the current enrollment
+and administration deliverable, rather than seeding native files in test-only
+code. Accept an original-bootstrap-bound committed Snapshot, exact learner/store,
+selected log/snapshot providers and a fresh application. Validate stable learner
+assignment and restore on a clone before import. Publish, pin, persist the log
+boundary and verify recovery in that order. Reuse exact publications/completed
+imports on retry; reject different images and progressed stores. Caller establishes
+source commitment. No source ballot is copied, no network message grants assignment,
+and no new durability token, generation or watermark is introduced. Existing
+snapshot publication, pin and log barrier establish their respective dependencies;
+the commit index remains a contiguous imported prefix.
+
+The public snapshot::enroll_learner_snapshot uses existing public storage seams;
+NativeMemberStartup::enroll_snapshot creates or reopens selected native files with
+bounded explicit provisioning. No workers/listeners start during import. The
+result can reopen through the existing member startup over TCP/QUIC. Failed initial
+creation may leave incomplete bootstrap/snapshot-store setup; Recover refuses it
+rather than creating missing files or replacing uncertain state. This limitation
+is separate from publication/pin/log transition recovery once both stores exist.
+
+Host-provider conformance preserves application retry state, non-voting status
+and exact completed retry. Snapshot boundary faults and native WAL short-write,
+sync and manifest faults check non-exposure of partial assignment and same-image
+retry after recovery. Native filesystem imports reopen through TCP and QUIC.
+These trusted fixture sources do not establish a remote commitment certificate,
+network enrollment, fault-tested joint activation or online service release.
+Current mini item remains enrollment/admin integration and enforced application
+bounds; next is fault-tested remote membership, then P5 routing. Full P0–P7 stays
+active; P8 remains deferred. See validation/REPORT.md for executed checks.

@@ -295,3 +295,36 @@ online distributed creation/commit of those configurations. The counter CLI stil
 uses static startup. Native enrollment, service administration/enforced application
 envelopes and full faulted remote transitions remain pending; public configuration
 ingress stays gated.
+
+## Explicit learner enrollment from a trusted checkpoint
+
+Rust hosts can provision a new learner with
+`NativeMemberStartup::enroll_snapshot(&image, &mut fresh_application)`. Select
+`NativeOpenMode::Create` for new native files. Supply the original bootstrap,
+exact provisioned stores/credentials and a committed application snapshot whose
+stable membership assigns this exact node/store as a learner. The host must
+establish the source's authority and commitment; a checksum is not evidence of
+remote consensus. Joint membership and voter imports are refused by this path.
+
+Enrollment opens no listener and starts no workers. It validates the application
+on a clone, publishes the bounded checkpoint, durably pins it, then persists its
+log boundary and verifies combined recovery before returning. It preserves retry
+state carried by the application's checkpoint. Set the mode to Recover and call
+`open_with_protocol` to start the resulting member over TCP/TLS or QUIC.
+
+A lost completed-enrollment reply can be resolved with Recover and the same
+image and a fresh application. Exact completed imports leave the log unchanged;
+a different image or an already active/progressed store is refused. Interrupted
+publication/pin/log transitions are resolved through provider recovery and the
+same image. Errors do not roll back files. If initial file creation stopped before
+both the bootstrap and snapshot store were initialized, normal Recover refuses
+that incomplete setup: inspect it explicitly; there is no implicit creation or
+replacement of a possibly enrolled store. Native file initialization is not a
+cross-store transaction.
+
+The shared `snapshot::enroll_learner_snapshot` composition also works with host
+LogStore and SnapshotRetention implementations. It requires an explicitly
+bootstrapped, otherwise empty destination or the exact completed import. This
+is an offline trusted handoff for embedding; counter command endpoints and remote
+configuration delivery are still gated pending administration/envelope integration
+and fault-tested online transitions.

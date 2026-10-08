@@ -415,6 +415,61 @@ fn member_histories(protocol: NativePeerProtocol) {
         std::fs::remove_dir_all(directory).unwrap();
     }
 }
+fn enrollment_history(protocol: NativePeerProtocol) {
+    let directory = root();
+    let (mut selected, _peers) = startup(&directory, 2, &[1, 2, 3]);
+    selected.startup.mode = NativeOpenMode::Create;
+    let mut history = entries(1);
+    history.push(LogEntry {
+        index: 2,
+        term: 1,
+        payload: EntryPayload::Command {
+            operation: OperationId::new(900).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        },
+    });
+    let mut source = Counter::new(100).unwrap();
+    source.apply_batch(&history).unwrap();
+    let image = Snapshot {
+        metadata: SnapshotMetadata {
+            bootstrap: bootstrap(),
+            membership: Some(Box::new(
+                Membership::replay(&bootstrap(), &history, 2).unwrap(),
+            )),
+            index: 2,
+            term: 1,
+            application_schema: 1,
+        },
+        application: source.checkpoint(4096).unwrap(),
+    };
+    let mut bad = image.clone();
+    bad.metadata.application_schema = 2;
+    assert!(selected
+        .enroll_snapshot(&bad, &mut Counter::new(100).unwrap())
+        .is_err());
+    assert!(!directory.exists());
+    let mut app = Counter::new(100).unwrap();
+    selected.enroll_snapshot(&image, &mut app).unwrap();
+    assert_eq!(app.read_applied(2).unwrap(), 7);
+    selected.startup.mode = NativeOpenMode::Recover;
+    selected
+        .enroll_snapshot(&image, &mut Counter::new(100).unwrap())
+        .unwrap();
+    let n = open(selected, protocol).unwrap();
+    assert!(!n.local().owner.core(group()).unwrap().local_voter());
+    assert_eq!(n.local().applications[&group()].read_applied(2).unwrap(), 7);
+    close(n);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+#[test]
+fn native_snapshot_enrollment_retries_and_reopens_tcp_learner() {
+    enrollment_history(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn native_snapshot_enrollment_retries_and_reopens_quic_learner() {
+    enrollment_history(NativePeerProtocol::Quic);
+}
 #[test]
 fn tcp_member_startup_recovers_learner_joint_final_and_checkpoint() {
     member_histories(NativePeerProtocol::TcpTls);

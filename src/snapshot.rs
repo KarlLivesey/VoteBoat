@@ -433,6 +433,140 @@ pub fn recover_member_replica<A: CheckpointStateMachine, L: LogStore, S: Snapsho
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
     recover_replica_as(node, group, log, store, application, RecoveryMode::Member)
 }
+/// Import a host-authorized committed checkpoint into a new learner's explicitly
+/// bootstrapped store. The host authenticates the source and its commitment;
+/// snapshot checksums and this API do not prove remote consensus commitment.
+/// Only an empty bootstrap or the exact completed import is accepted. Publish
+/// and durable pin precede the log barrier; errors require provider recovery
+/// before retry. Run blocking providers outside the consensus owner loop.
+pub fn enroll_learner_snapshot<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    node: NodeId,
+    log: &mut L,
+    snapshots: &mut S,
+    application: &mut A,
+    incoming: &Snapshot,
+) -> Result<Raft, CheckpointError> {
+    use crate::{
+        contracts::HardState,
+        log::{LogMutation, LogUpdate},
+    };
+    incoming.metadata.validate()?;
+    let group = incoming.metadata.bootstrap.group;
+    let state = log.state(group)?;
+    let limits = snapshots.limits().validate()?;
+    let membership = incoming
+        .metadata
+        .membership
+        .as_ref()
+        .ok_or(CheckpointError::InvalidBoundary)?;
+    if snapshots.identity()
+        != (SnapshotIdentity {
+            store: log.binding().identity,
+            group,
+        })
+        || snapshots.binding().identity != log.binding().identity
+        || membership.joint().is_some()
+        || membership.stable().learners().get(&node) != Some(&log.binding().identity)
+        || state.bootstrap != incoming.metadata.bootstrap
+        || application.applied_index() != 0
+        || incoming.application.is_empty()
+        || incoming.application.len() > limits.max_application_bytes
+        || incoming.application.capacity() > limits.max_application_bytes
+        || incoming.application.len() > log.limits().max_snapshot_bytes
+        || membership.retained_bytes() > log.limits().max_batch_bytes
+    {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let mut restored = application.clone();
+    restored.restore_checkpoint(
+        incoming.metadata.application_schema,
+        incoming.metadata.index,
+        &incoming.application,
+    )?;
+    if restored.applied_index() != incoming.metadata.index {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    if let Some(reference) = state.snapshot {
+        if state.commit_index != incoming.metadata.index
+            || !state.entries.is_empty()
+            || state.hard_state
+                != (HardState {
+                    term: incoming.metadata.term,
+                    voted_for: None,
+                })
+            || state.snapshot_membership != incoming.metadata.membership
+            || snapshots.load_pinned(reference)? != *incoming
+        {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let core = recover_member_replica(node, group, log, snapshots, application)?.0;
+        return Ok(core);
+    }
+    if state.commit_index != 0
+        || !state.entries.is_empty()
+        || state.hard_state != HardState::default()
+        || state.snapshot_membership.is_some()
+    {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    // Reuse an exact publication after a lost receipt, rather than creating a
+    // conflicting same-index image. Other publications are never overwritten.
+    let reference = if let Some(published) = snapshots.load()? {
+        if published != *incoming {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        snapshots
+            .latest_reference()?
+            .ok_or(CheckpointError::InvalidBoundary)?
+    } else {
+        let ticket = snapshots.begin(incoming.metadata.clone(), incoming.application.len())?;
+        if ticket.binding != snapshots.binding() || ticket.group != group {
+            return Err(StorageError::StaleTicket.into());
+        }
+        for (i, chunk) in incoming
+            .application
+            .chunks(limits.max_chunk_bytes)
+            .enumerate()
+        {
+            snapshots.write_chunk(ticket, i * limits.max_chunk_bytes, chunk)?;
+        }
+        let sealed = snapshots.seal(ticket)?;
+        if sealed.ticket != ticket {
+            return Err(StorageError::StaleTicket.into());
+        }
+        let receipt = snapshots.publish(sealed)?;
+        if receipt.sealed != sealed || receipt.metadata != incoming.metadata {
+            return Err(StorageError::StaleTicket.into());
+        }
+        receipt.reference()
+    };
+    if reference.store != log.binding().identity || !reference.matches(incoming) {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    snapshots.pin_for_log(reference)?;
+    if snapshots.load_pinned(reference)? != *incoming {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let tickets = log.append_batch(vec![LogMutation::Update(LogUpdate {
+        group,
+        expected_revision: state.revision,
+        hard_state: HardState {
+            term: incoming.metadata.term,
+            voted_for: None,
+        },
+        commit_index: incoming.metadata.index,
+        suffix: None,
+        snapshot: Some(reference),
+        snapshot_membership: incoming.metadata.membership.clone(),
+    })])?;
+    let durable = log.barrier(&tickets)?;
+    if durable.tickets != tickets {
+        return Err(StorageError::StaleTicket.into());
+    }
+    // Verify the selected durable log/data together, not just the receipt.
+    let core = recover_member_replica(node, group, log, snapshots, application)?.0;
+    Ok(core)
+}
 fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
     node: NodeId,
     group: GroupIdentity,

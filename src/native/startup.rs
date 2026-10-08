@@ -86,6 +86,101 @@ impl StartupAuthorization {
     }
 }
 impl NativeMemberStartup {
+    /// Offline, explicitly host-authorized learner provisioning. Create selects
+    /// fresh files; Recover retries existing bootstrap/snapshot stores. This does
+    /// not open sockets or start workers. Source commitment is a host obligation.
+    /// On error files may exist and must be inspected/recovered; never delete a
+    /// possibly completed import merely because its receipt was lost.
+    pub fn enroll_snapshot<A: CheckpointStateMachine>(
+        &self,
+        incoming: &Snapshot,
+        application: &mut A,
+    ) -> Result<(), NativeStartupError> {
+        self.startup.validate_stores(&self.provisioned_stores)?;
+        if self.startup.tls.wire_version() < 2
+            || incoming.metadata.bootstrap != self.startup.bootstrap
+        {
+            return Err(error("enrollment", "incompatible bootstrap or wire"));
+        }
+        // Validate application and exact learner assignment before file creation.
+        incoming.metadata.validate()?;
+        let membership = incoming
+            .metadata
+            .membership
+            .as_ref()
+            .ok_or_else(|| error("enrollment", "missing learner assignment"))?;
+        if membership.joint().is_some()
+            || membership.stable().learners().get(&self.startup.node) != Some(&self.startup.store)
+            || incoming.application.is_empty()
+            || incoming.application.capacity() > SnapshotLimits::default().max_application_bytes
+            || application.applied_index() != 0
+            || membership.retained_bytes() > LogLimits::default().max_batch_bytes
+            || membership
+                .stable()
+                .voter_stores()
+                .iter()
+                .chain(membership.stable().learners().iter())
+                .any(|(node, store)| self.provisioned_stores.get(node) != Some(store))
+        {
+            return Err(error(
+                "enrollment",
+                "invalid learner or application envelope",
+            ));
+        }
+        let mut check = application.clone();
+        checked(check.restore_checkpoint(
+            incoming.metadata.application_schema,
+            incoming.metadata.index,
+            &incoming.application,
+        ))?;
+        if check.applied_index() != incoming.metadata.index {
+            return Err(error("enrollment", "application restored wrong boundary"));
+        }
+        let create = self.startup.mode == NativeOpenMode::Create;
+        let mut log = if create {
+            let mut log = NativeLogStore::create(
+                FileLogIo::create(&self.startup.directory)?,
+                self.startup.store,
+                LogLimits::default(),
+            )?;
+            let tickets =
+                log.append_batch(vec![LogMutation::Create(self.startup.bootstrap.clone())])?;
+            log.barrier(&tickets)?;
+            log
+        } else {
+            NativeLogStore::recover(
+                FileLogIo::open(&self.startup.directory)?,
+                self.startup.store,
+                LogLimits::default(),
+            )?
+        };
+        let identity = SnapshotIdentity {
+            store: self.startup.store,
+            group: self.startup.bootstrap.group,
+        };
+        let directory = self.startup.directory.join("snapshots");
+        let mut snapshots = if create {
+            NativeSnapshotStore::create(
+                FileSnapshotIo::create(directory)?,
+                identity,
+                SnapshotLimits::default(),
+            )?
+        } else {
+            NativeSnapshotStore::recover(
+                FileSnapshotIo::open(directory)?,
+                identity,
+                SnapshotLimits::default(),
+            )?
+        };
+        checked(enroll_learner_snapshot(
+            self.startup.node,
+            &mut log,
+            &mut snapshots,
+            application,
+            incoming,
+        ))?;
+        Ok(())
+    }
     /// Pure provisioning validation; durable assignment and checkpoint data are
     /// verified during open. Success here is not membership authority.
     pub fn validate(&self) -> Result<(), NativeStartupError> {

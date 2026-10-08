@@ -620,3 +620,36 @@ assertion uses a borrowed expected-message slice.
   and accepted-final WaitForCommit resumption. All-feature/all-target Clippy with
   warnings denied, formatting, diff checks and inventory shape/path checks pass
   (57 contracts). Inventory validation checks metadata, not protocol correctness.
+
+## Slice 61 — trusted learner checkpoint enrollment
+
+- Shared enroll_learner_snapshot uses public log/snapshot/application contracts;
+  NativeMemberStartup::enroll_snapshot provisions selected native files without
+  opening sockets or starting workers. Exact stable learner assignment, original
+  bootstrap, schema/data, restored boundary and bounded envelopes precede import.
+  Publication and durable pin precede log barrier and verified member recovery.
+  Source commitment remains explicit host authority, not checksum evidence.
+- Five all-feature enrollment cases pass; three core-only host cases pass. These
+  cover native/host import, retry/dedup, identity/schema/data/budget refusal, seven
+  snapshot stage/publication/pin failure points, and five native WAL append/sync/
+  manifest failures with power-loss recovery and same-image retry. Changed images
+  and progressed stores refuse replacement. Snapshot faults use a host recovery
+  model; the native snapshot suite separately exercises real provider failures.
+- Native member startup suite: 10 pass, including two new filesystem enrollment,
+  exact retry and TCP/QUIC reopen cases. Existing member recovery: 17 non-socket
+  cases pass, then 2 authenticated TCP/QUIC cases pass with socket permission.
+  The first socket invocation encountered sandbox PermissionDenied; no production
+  change was made for it. Existing snapshot suite: 19 pass, including interrupted
+  chunk/seal/publication, pin recovery and snapshot/log crash histories.
+- All-feature/all-target Clippy with warnings denied, API documentation and
+  core-only all-target compilation pass. Formatting/diff and inventory shape/path
+  checks pass (58 contracts); inventory is metadata validation only.
+- Native initial WAL/bootstrap/snapshot-store creation is not one transaction;
+  interruption before both stores exist requires explicit inspection and Recover
+  refuses missing state. Once initialized, exact publication/pin/log retries
+  recover through existing contracts. No rollback, automatic store replacement,
+  copied source ballot, new durability token/generation/watermark or format.
+  Fixture source snapshots assume trusted commitment; they do not demonstrate
+  distributed configuration commitment, online enrollment, macOS or performance.
+  Service administration/enforced bounds and faulted remote membership release
+  remain pending. Full P0–P7 remains active; public configuration ingress is gated.
