@@ -52,6 +52,20 @@ impl From<ConfigurationProposalError> for RaftError {
     }
 }
 impl Raft {
+    /// Select receive-side configuration replication during member assembly.
+    /// Requires a membership-capable authenticated codec/transport (native >=2)
+    /// and host admission for exact stores, fanout and application capacity.
+    /// This enables the ordinary validated journal/snapshot receive path; it
+    /// grants no sender identity, promotion readiness or administrative authority.
+    /// Restart must explicitly repeat the selection.
+    pub fn with_configuration_replication(mut self) -> Self {
+        self.configuration_replication = true;
+        self
+    }
+    pub(crate) fn configuration_replication_enabled(&self) -> bool {
+        self.configuration_replication
+    }
+
     /// Local durable journal status. Pending proposals do not advance it;
     /// absence is not a linearizable cluster-wide negative result.
     pub fn configuration_status(

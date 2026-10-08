@@ -213,6 +213,14 @@ where
             }
             for group in parts.local.owner.groups() {
                 let core = parts.local.owner.core(group).unwrap();
+                if core.configuration_replication_enabled()
+                    && parts
+                        .peers
+                        .as_ref()
+                        .is_none_or(|p| p.roster.wire_version() < 2)
+                {
+                    return Err(NodeError::IncompatiblePeerProtocol);
+                }
                 if core.learner_repair_wire_version().is_some_and(|version| {
                     parts
                         .peers

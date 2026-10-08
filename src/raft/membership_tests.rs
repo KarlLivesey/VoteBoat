@@ -576,6 +576,184 @@ fn partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes
 }
 
 #[test]
+fn recursive_joint_recovery_catches_up_old_voter_and_commits_after_election() {
+    fn nested(optional: u64, required: [u64; 2]) -> Policy {
+        Policy::new(
+            Tree::Weighted(vec![
+                WeightedChild {
+                    weight: 1,
+                    node: Tree::Voter(node(optional)),
+                },
+                WeightedChild {
+                    weight: 3,
+                    node: Tree::Majority(required.map(|id| Tree::Voter(node(id))).to_vec()),
+                },
+            ]),
+            Limits::default(),
+        )
+        .unwrap()
+    }
+    let mut base = core().state().clone();
+    base.bootstrap.policy = nested(1, [2, 3]);
+    let mut leader = Raft::recover_member(
+        node(1),
+        StoreBinding {
+            identity: store(1),
+            session: StoreSession::new(1).unwrap(),
+        },
+        base,
+        LogLimits::default(),
+    )
+    .unwrap();
+    leader.role = Role::Leader;
+    leader.initialize_replication().unwrap();
+    let learners = Configuration::new(
+        cid(2),
+        leader.state().bootstrap.policy.clone(),
+        leader.state().bootstrap.voter_stores.clone(),
+        [(node(5), store(5))].into(),
+    )
+    .unwrap();
+    let effects = accept(&mut leader, 100, ConfigurationChange::Learners(learners));
+    durable(&mut leader, effects);
+    committed_fixture(&mut leader, 2);
+    let old = leader.state().clone();
+    let target = Configuration::new(
+        cid(4),
+        nested(2, [3, 5]),
+        [2, 3, 5].map(|id| (node(id), store(id))).into(),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    let effects = accept(
+        &mut leader,
+        101,
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: target,
+        },
+    );
+    durable(&mut leader, effects);
+    let joint = leader.state().clone();
+    let mut peers: BTreeMap<_, _> = [(2, joint), (3, old.clone()), (5, old)]
+        .into_iter()
+        .map(|(id, state)| {
+            let core = Raft::recover_member(
+                node(id),
+                StoreBinding {
+                    identity: store(id),
+                    session: StoreSession::new(2).unwrap(),
+                },
+                state,
+                LogLimits::default(),
+            )
+            .unwrap()
+            .with_batched_joint_repair()
+            .with_configuration_replication();
+            (id, core)
+        })
+        .collect();
+    assert!(!peers[&2]
+        .membership()
+        .is_satisfied(&[node(2), node(5)].into()));
+    assert!(!peers[&2]
+        .membership()
+        .is_satisfied(&[node(2), node(3)].into()));
+    assert!(peers[&2]
+        .membership()
+        .is_satisfied(&[node(2), node(3), node(5)].into()));
+    let source = peers.get_mut(&2).unwrap();
+    let effects = source.step(Event::Campaign).unwrap();
+    let mut queue: std::collections::VecDeque<_> = durable(source, effects).into();
+    let mut ready = Vec::new();
+    let mut delivered = 0;
+    loop {
+        while let Some(effect) = queue.pop_front() {
+            delivered += 1;
+            assert!(delivered < 1000);
+            match effect {
+                Effect::Send(message) => {
+                    let Some(peer) = peers.get_mut(&message.to.get()) else {
+                        continue;
+                    };
+                    let effects = peer.step(Event::Receive(message)).unwrap();
+                    queue.extend(if peer.has_pending_dependency() {
+                        durable(peer, effects)
+                    } else {
+                        effects
+                    });
+                }
+                Effect::ReadReady(barrier) => ready.push(barrier),
+                Effect::Committed { .. } => (),
+                other => panic!("unexpected effect {other:?}"),
+            }
+        }
+        if peers[&2].state().commit_index >= 4 {
+            break;
+        }
+        assert!(delivered < 500, "no commitment after recursive election");
+        queue.extend(peers.get_mut(&2).unwrap().step(Event::Heartbeat).unwrap());
+    }
+    assert_eq!(peers[&2].role(), Role::Leader);
+    assert_eq!(peers[&3].membership().id(), cid(3));
+    assert_eq!(peers[&5].membership().id(), cid(3));
+    let leader = peers.get_mut(&2).unwrap();
+    let effects = leader
+        .step(Event::Propose {
+            operation: operation(900),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    queue.extend(durable(leader, effects));
+    // The same queue driver now checks a real write and a read barrier through
+    // the joint recursive policies, including the lagging old voter.
+    let mut reads_started = false;
+    for _ in 0..1000 {
+        if let Some(effect) = queue.pop_front() {
+            match effect {
+                Effect::Send(message) => {
+                    let Some(peer) = peers.get_mut(&message.to.get()) else {
+                        continue;
+                    };
+                    let effects = peer.step(Event::Receive(message)).unwrap();
+                    queue.extend(if peer.has_pending_dependency() {
+                        durable(peer, effects)
+                    } else {
+                        effects
+                    });
+                }
+                Effect::ReadReady(barrier) => ready.push(barrier),
+                Effect::Committed { .. } => (),
+                other => panic!("unexpected effect {other:?}"),
+            }
+        } else if peers.values().all(|p| p.state().commit_index >= 5) && !reads_started {
+            queue.extend(
+                peers
+                    .get_mut(&2)
+                    .unwrap()
+                    .step(Event::Read {
+                        request: ReadRequestId::new(1).unwrap(),
+                    })
+                    .unwrap(),
+            );
+            reads_started = true;
+        } else if !ready.is_empty() {
+            break;
+        } else {
+            queue.extend(peers.get_mut(&2).unwrap().step(Event::Heartbeat).unwrap());
+        }
+    }
+    assert_eq!(ready.len(), 1);
+    assert_eq!(ready[0].index, 5);
+    for peer in peers.values() {
+        let mut app = crate::application::Counter::new(100).unwrap();
+        use crate::application::StateMachine;
+        app.apply_batch(peer.replay_committed()).unwrap();
+        assert_eq!(app.read_applied(5), Ok(7));
+    }
+}
+
+#[test]
 fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation() {
     let mut source = follower(joint(false), 2);
     let effects = source.step(Event::Campaign).unwrap();

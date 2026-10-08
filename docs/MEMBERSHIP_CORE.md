@@ -3,12 +3,15 @@
 Raft now derives its voting predicate and replication identities from one
 `Membership` value rather than consulting the immutable bootstrap at each
 quorum site. This is integration groundwork for the full online protocol.
-**Voter recovery and public online configuration ingress remain gated.**
+**Public service mutation endpoints remain gated.**
 Explicit [learner recovery](LEARNER_RECOVERY.md) supports committed exact-store
 assignments with an unchanged bootstrap electorate. A host-authorized local
-configuration proposal path now exists (below); the native online administrator
-and network ingress remain gated. The internal transition tests described below
-exercise these core paths without removing the release gate.
+configuration proposal path now exists (below). Explicit dynamic member recovery
+and receive-side configuration replication are available; static/default cores
+retain their ingress gate. NativeMemberStartup selects the receiving mode, with
+authenticated routes and matching codecs. The native online administrator and
+complete remote lifecycle release remain unfinished. Historical internal tests
+below do not by themselves establish that release.
 
 ## State and dependency ordering
 
@@ -77,7 +80,7 @@ now uses historical origin rather than the current electorate; see
 [ballot recovery](BALLOT_RECOVERY.md). A removed candidate's retained promise
 cannot authorize another candidate or a replacement physical store in that term.
 
-Live ingress still rejects configuration entries and membership snapshots.
+Default/static ingress still rejects configuration entries and membership snapshots.
 Append/Snapshot from an exact locally authorized voter can now bridge differing
 accepted heads. Replies echo request scope and match the original outstanding
 request. Vote requests also bridge heads using the receiver's local electorate,
@@ -97,7 +100,7 @@ application/storage compatibility and caught-up
 evidence, route/roster admission, the distributed
 activation/ballot state-machine model and faulted native/host network histories.
 The bounded local ballot model is one prerequisite, not that complete model.
-The internal tests do not justify removing any of these gates.
+The internal tests alone do not justify releasing online service mutations.
 
 Output reservation now covers prospective fanout before an expanding event and
 rollback through an uncommitted shrink, including snapshot membership bases.
@@ -307,3 +310,41 @@ work; no new durability token or quorum watermark is introduced. Queue budgeting
 and connection reservation treat these images as ordinary bounded snapshots.
 Native format 6 is explicit and exact across codec, roster and TLS/QUIC sessions;
 older formats refuse it. General configuration ingress remains closed.
+
+### Explicit receive-side configuration replication
+
+`Raft::with_configuration_replication` selects ordinary configuration-bearing
+Append and membership Snapshot reception at construction. It changes the default
+release gate, not sender authentication, journal grammar, quorum predicates,
+log matching, committed-prefix protection, size/fanout limits or storage/application
+dependencies. Static cores keep their strict repair-only gate. Restart must repeat
+the volatile selection. NativeMemberStartup selects it with explicit provisioned
+stores and membership-capable wire versions; generic Node rejects missing peers
+or a roster older than format 2 before any work. Direct core hosts supply the same
+compatible authenticated transport and admission obligations.
+
+A recursive recovery regression exposed why this is necessary: after repairing
+and electing a retained old voter, another required old voter still lacks the
+joint entry. Refusing that leader's normal catch-up prevents current-term commit.
+The explicit path allows that old voter to catch up. Accepted membership, pending
+WAL completion and commitment remain distinct; Written alone releases no reply.
+New-only/promoted senders still require the existing witness permit when the
+receiver's view cannot authorize them. Declaring a newer scope grants no authority.
+
+Actual-core coverage uses nontrivial weighted/nested old and new policies whose
+quorums require different two-leaf subtrees, then commits/applies a write and
+obtains a joint read barrier. Native TCP/QUIC coverage uses three active stores,
+a lagging old voter, an 80-entry missing learner prefix and an uncommitted
+candidate command beyond the joint. Election, current-term commitment, application
+and file reopen preserve that command plus the new write. The native policy's
+nested single-leaf branch is structurally recursive but Boolean-equivalent to a
+two-voter majority; the distinct nested predicate is exercised by the actual-core
+history. Initial assignments are seeded, not distributed enrollment evidence.
+
+The native history permits intentional ingress refusals from competing campaigns
+(late learner repair and an unauthorized promoted candidate); it still requires
+end-to-end progress and recovery and permits no storage/fencing errors. Distinct
+per-node election entropy avoids the fixture's previous lockstep campaigns.
+Finite histories are not a general fork/term/liveness proof. Service mutations,
+promoted-leader/witness lifecycle integration and broader fault histories remain
+release work.

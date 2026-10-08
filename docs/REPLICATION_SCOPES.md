@@ -52,8 +52,11 @@ joint receipt, final rollback, partial chunks, snapshot/application dependencies
 compacted hints, stale scopes/contexts and learner/read exclusion.
 Prepared committed fixtures and host-asserted completion tokens isolate these
 rules. They are not networked online-administration or physical-storage proof.
-The public gate still rejects configuration-bearing appends and membership
-snapshots; the tests call the actual private receive path behind that gate.
+Default/static cores still reject configuration-bearing appends and membership
+snapshots. Explicit member assemblies can now select
+`Raft::with_configuration_replication`; the recursive activation history exercises
+the ordinary public receive path. Historical tests below use the private path
+to isolate scope rules independently of that assembly choice.
 
 Downstream tests in `tests/replication_scope.rs` use the public core with
 host/native storage: differing scopes on static log replication, missing exact
@@ -83,7 +86,9 @@ timers. See [retiring leader commitment](RETIRING_LEADERS.md); this is separate
 from ongoing replication authority.
 
 A newly promoted leader that is only a learner or absent in an older receiver's
-current view remains rejected. That path needs validated catch-up authorization;
+current view remains rejected unless the existing validated witness exchange
+installs an exact replication permit. Full promoted-leader lifecycle integration
+remains pending;
 blindly trusting the declared head would let a learner self-authorize. Initial learner-only
 assignment recovery is available through an explicit host entry point; see
 [learner recovery](LEARNER_RECOVERY.md). Explicit

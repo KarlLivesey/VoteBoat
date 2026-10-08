@@ -1262,6 +1262,142 @@ mod joint_repair {
             Ok(effects)
         }
     }
+
+    fn old_voter_destination<L: LogStore>(log: &mut L) -> Raft {
+        append(log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        record(
+            log,
+            2,
+            ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
+            1,
+        );
+        Raft::recover_member(
+            node(3),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn configuration_replication_is_opt_in_and_retains_sender_and_journal_checks() {
+        let (_, _, mut request) = source(0);
+        request.to = node(3);
+        let mut log = HostLogStore::new(3);
+        let mut receiver = old_voter_destination(&mut log);
+        let before = receiver.state().clone();
+        assert!(receiver.step(Event::Receive(request.clone())).is_err());
+        assert_eq!(receiver.state(), &before);
+        for defect in 0..6 {
+            let mut log = HostLogStore::new(3);
+            let mut receiver = old_voter_destination(&mut log).with_configuration_replication();
+            let before = log.state(group(1)).unwrap();
+            let mut bad = request.clone();
+            match defect {
+                0 => {
+                    bad.from = node(4);
+                    bad.sender.identity = identity(4);
+                    bad.context.origin = bad.sender;
+                }
+                1 => bad.sender.identity = identity(99),
+                2 => bad.context.origin.session = StoreSession::new(99).unwrap(),
+                3 => bad.configuration = cid(2),
+                _ => {
+                    let Rpc::Append { entries, .. } = &mut bad.rpc else {
+                        unreachable!()
+                    };
+                    let EntryPayload::Configuration(record) = &mut entries[0].payload else {
+                        unreachable!()
+                    };
+                    if defect == 4 {
+                        record.expected = cid(99);
+                    } else {
+                        record.operation = OperationId::new(2).unwrap();
+                    }
+                }
+            }
+            assert!(
+                receiver.step(Event::Receive(bad)).is_err(),
+                "defect {defect}"
+            );
+            assert_eq!(receiver.state(), &before);
+            assert_eq!(log.state(group(1)).unwrap(), before);
+        }
+        let mut log = HostLogStore::new(3);
+        let mut receiver = old_voter_destination(&mut log).with_configuration_replication();
+        let effects = receiver.step(Event::Receive(request)).unwrap();
+        assert_eq!(receiver.state().last_index(), 1);
+        assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+        let ack = one(persist(&mut receiver, &mut log, effects));
+        assert!(matches!(
+            ack.rpc,
+            Rpc::Appended {
+                success: true,
+                matching_index: 2
+            }
+        ));
+        assert_eq!(receiver.membership().id(), cid(3));
+        assert_eq!(receiver.state().commit_index, 1);
+    }
+
+    #[test]
+    fn configuration_replication_wal_faults_recover_old_or_complete_joint() {
+        let (_, _, mut request) = source(0);
+        request.to = node(3);
+        let mut baseline = HostLogStore::new(3);
+        let mut receiver = old_voter_destination(&mut baseline).with_configuration_replication();
+        let effects = receiver.step(Event::Receive(request.clone())).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("persistence dependency")
+        };
+        let frame = NativeLogCodec
+            .encode_batch(
+                1,
+                &[LogMutation::Update(update.clone())],
+                LogLimits::default(),
+            )
+            .unwrap();
+        for fault in (0..=frame.len()).map(Fault::Append).chain([
+            Fault::Sync,
+            Fault::PublishBefore,
+            Fault::PublishAfter,
+        ]) {
+            let io = ModelIo::default();
+            let mut log =
+                NativeLogStore::create(io.clone(), identity(3), LogLimits::default()).unwrap();
+            let mut receiver = old_voter_destination(&mut log).with_configuration_replication();
+            let effects = receiver.step(Event::Receive(request.clone())).unwrap();
+            let [Effect::Persist(update)] = effects.as_slice() else {
+                panic!("persistence dependency")
+            };
+            io.0.borrow_mut().fault = fault;
+            assert!(persist_effect(&mut receiver, &mut log, update.clone()).is_err());
+            assert!(receiver.is_fenced());
+            drop(log);
+            io.0.borrow_mut().power_loss();
+            let mut log = NativeLogStore::recover(io, identity(3), LogLimits::default()).unwrap();
+            let mut receiver = Raft::recover_member(
+                node(3),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap()
+            .with_configuration_replication();
+            assert!([1, 2].contains(&receiver.state().last_index()));
+            assert_eq!(receiver.state().commit_index, 1);
+            let ack = one(install(&mut log, &mut receiver, request.clone()).unwrap());
+            assert!(matches!(
+                ack.rpc,
+                Rpc::Appended {
+                    success: true,
+                    matching_index: 2
+                }
+            ));
+            assert_eq!(receiver.membership().id(), cid(3));
+        }
+    }
     #[test]
     fn public_repair_roundtrips_membership_wire_and_native_wal() {
         let (_, _, message) = source(32);
@@ -1548,6 +1684,55 @@ mod joint_repair {
         let request =
             one(supply_snapshot(&core, &mut snapshots, node(4), context, reference).unwrap());
         (log, core, request)
+    }
+
+    #[test]
+    fn configuration_replication_snapshot_waits_for_application_before_normal_ack() {
+        let (_, _, mut request) = snapshot_source(true);
+        let Rpc::LearnerRepairSnapshot { snapshot } = request.rpc else {
+            unreachable!()
+        };
+        request.rpc = Rpc::Snapshot { snapshot };
+        request.to = node(3);
+        let mut log = HostLogStore::new(3);
+        let mut receiver = old_voter_destination(&mut log);
+        assert!(receiver.step(Event::Receive(request.clone())).is_err());
+        receiver = receiver.with_configuration_replication();
+        let mut images = support::snapshot::HostSnapshots::new();
+        images.identity.store = identity(3);
+        images.binding = log.binding();
+        let mut application = Counter::new(100).unwrap();
+        application
+            .apply_batch(receiver.replay_committed())
+            .unwrap();
+        let effects = receiver.step(Event::Receive(request)).unwrap();
+        let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
+            panic!("stage")
+        };
+        let effects = stage_snapshot_effect(
+            &mut receiver,
+            &mut log,
+            &mut images,
+            &application,
+            stage.clone(),
+        )
+        .unwrap();
+        let [Effect::SnapshotInstalled(reference)] = effects.as_slice() else {
+            panic!("restore")
+        };
+        assert_eq!(application.applied_index(), 1);
+        assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+        let ack = one(finish_snapshot_install(
+            &mut receiver,
+            &log,
+            &mut images,
+            &mut application,
+            *reference,
+        )
+        .unwrap());
+        assert!(matches!(ack.rpc, Rpc::SnapshotAck { index: 34 }));
+        assert_eq!(application.applied_index(), 34);
+        assert_eq!(receiver.membership().id(), cid(3));
     }
 
     #[test]

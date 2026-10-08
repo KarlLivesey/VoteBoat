@@ -63,6 +63,11 @@ without restoring the sender's leadership or changing local voting authority.
 Promoted-leader authorization at lagging receivers, readiness/capability evidence,
 faulted retirement propagation, route/roster admission, distributed activation modeling
 and faulted network membership histories remain prerequisites for online changes.
-Public configuration-bearing Append and membership Snapshot ingress remain gated.
+Default cores retain the configuration-bearing Append and membership Snapshot
+gate. `Raft::with_configuration_replication` explicitly selects ordinary validated
+receive-side replication for member assemblies; NativeMemberStartup selects it
+after exact member/store, codec and route admission. This grants no administrative
+authority, sender identity or promotion readiness. Public service mutation
+endpoints and the complete remote lifecycle release remain gated.
 An attached configuration or newer scope alone cannot self-authorize a learner.
 Linux checks do not establish macOS execution or performance.

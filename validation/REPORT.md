@@ -903,3 +903,47 @@ assertion uses a borrowed expected-message slice.
   remote membership lifecycle remain open. General mutation ingress stays gated;
   P4 advances toward service integration and release, then P5 routing/P6 ownership
   movement/P7 tuning. Full P0–P7 remains active. No macOS/performance claim.
+
+## Slice 69 — explicit member replication and recursive activation recovery
+
+- The new actual-core recursive history failed at the default configuration
+  receive gate after election. An explicit construction-time receiving mode
+  resolves old-voter catch-up while preserving ordinary sender/journal/log and
+  durable completion rules. Static/default gate tests remain. NativeMemberStartup
+  selects the mode after exact member/route checks; Node refuses missing/old
+  rosters before work. No new format, token, generation or provider seam.
+- Actual-core nontrivial weighted/nested old/new policies require different nested
+  two-voter subtrees. Learner repair, election, lagging old-voter catch-up,
+  application commitment and joint read barrier pass through public step calls.
+  Completion receipts in this fixture are host-asserted, not hardware evidence.
+- Native TCP/TLS and QUIC three-store histories repair an 80-entry prefix, catch
+  up another old voter, commit an uncommitted candidate command beyond the joint
+  plus a new write, drain/join and reopen exact native state (application 18).
+  This native nested one-leaf branch has ordinary two-voter Boolean semantics;
+  nontrivial recursive semantics are exercised by the core history. Initial
+  journal assignments are seeded; enrollment/proposal delivery is not proved.
+- The fixture's identical election seeds initially caused lockstep elections;
+  independent per-node seeds and an explicit initial campaign resolve it. Competing
+  campaigns may produce intentional InvalidMessage/WrongIdentity ingress refusals
+  for late repair/promoted candidates; these are allowed, but the test still
+  requires eventual correct commitment/application/recovery and no storage/fencing
+  error. A full target run exposed sequential shutdown closing an owned reply
+  channel. Coordinated cluster quiescence/drain fixes that fixture cleanup race.
+- Host/public tests cover old-voter default refusal, opted-in acceptance only after
+  durable completion, foreign/new-only sender, store/context/scope and malformed
+  journal rejection without durable mutation. Every byte of a native joint record
+  is torn, plus sync/manifest faults; model power loss recovers old or complete
+  joint, and retry completes. Membership snapshot reception releases normal ack
+  only after application restoration, preserving Busy boundaries.
+- Affected all-feature library 56, activation model 4, effect_owner 125, learners
+  23 pass; final member_recovery rerun 32 pass including membership snapshots.
+  Native member startup final rerun 22, replication_scope 7, snapshot 19,
+  snapshot_worker 14 and startup 9 pass. Core-only library 47 pass. The independent
+  activation model remains factored fixed-prefix evidence, not a complete model
+  of this receiving mode or repair protocol.
+- Promoted-leader/witness integration, divergent retained-only learner histories,
+  broader failures and full remote lifecycle remain open. Public service mutation
+  endpoints stay gated. P4 → P5 routing → P6 ownership movement → P7 and full P0–P7
+  remain active. No macOS execution/performance or general protocol-proof claim.
+- Final all-feature/all-target Clippy with warnings denied, all-feature docs,
+  formatting/diff checks and inventory metadata verification pass (60 contracts).

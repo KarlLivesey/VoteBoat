@@ -293,6 +293,7 @@ pub struct Raft {
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
     snapshot_joint_repair: bool,
+    configuration_replication: bool,
     request_sequence: u64,
     last_batch: u64,
     pending: Option<Pending>,
@@ -493,6 +494,7 @@ impl Raft {
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
+            configuration_replication: false,
             request_sequence: 0,
             last_batch: 0,
             pending: None,
@@ -1507,12 +1509,12 @@ impl Raft {
         ) {
             return self.receive_learner_repair(m);
         }
-        // General configuration delivery stays closed. The append-only joint
-        // repair exception targets exact committed learners and cannot replace
-        // voting history or advance commitment; other transition fixtures use
-        // receive_inner while distributed release gates remain unfinished.
-        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
-            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some())
+        // Static/default assemblies retain the strict learner-repair exception.
+        // Explicit member assemblies use ordinary authorized replication and
+        // the same validated journal, log matching and durability dependencies.
+        if !self.configuration_replication
+            && (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+                || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
         {
             if !self.permits_joint_repair(&m) {
                 return Err(RaftError::InvalidMessage);

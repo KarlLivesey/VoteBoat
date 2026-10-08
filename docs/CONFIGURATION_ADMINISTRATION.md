@@ -57,7 +57,10 @@ the selected worker, reopens the actual WAL and reconstructs membership through
 explicit member recovery. This does not enable dynamic recovery through the
 static startup convenience constructor.
 
-Remote configuration-bearing Append and membership Snapshot remain gated.
+Remote configuration-bearing Append and membership Snapshot remain gated by
+default. Explicit member assemblies can select receive-side configuration
+replication; native member startup does so after its exact-store/codec/route checks.
+This is distinct from releasing public service mutation endpoints.
 Service-enforced application envelopes, enrollment/service endpoints and
 faulted multi-node add/promote/remove remain required. The supplied authorization
 callback is also available to host policy implementations. Existing TCP/QUIC
@@ -160,7 +163,9 @@ schema, accepted command sizes, checkpoint/deduplication growth and storage limi
 This query alone does not enforce future application growth or arbitrary batching.
 NativeMemberStartup now supplies explicit verified dynamic member restart for Rust
 hosts. Service enrollment, enforced application envelopes and complete faulted
-remote transitions remain pending; public configuration ingress is still gated.
+remote transitions remain pending; public service mutation endpoints stay gated.
+Explicit member assemblies now select validated receive-side configuration
+replication, which supplies the native integration path for those transitions.
 
 Explicit native member restart is documented in the [service/embedding guide](COUNTER_SERVICE.md).
 The original static NativeStartup entry points retain their rejection of dynamic journals.

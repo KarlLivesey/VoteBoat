@@ -245,7 +245,7 @@ fn startup(
         .unwrap()
         .with_wire_version(4)
         .unwrap(),
-        entropy_seed: 60,
+        entropy_seed: 60 + local,
         limits: NodeLimits::default(),
     };
     (
@@ -479,6 +479,7 @@ fn remote_joint_repair(
     protocol: NativePeerProtocol,
     missing_entries: u64,
     checkpoint_mode: Option<bool>,
+    recursive: bool,
 ) {
     let root = root();
     std::fs::create_dir(&root).unwrap();
@@ -498,7 +499,18 @@ fn remote_joint_repair(
         .unwrap()
     };
     let mut initial = bootstrap();
-    initial.policy = policy(3);
+    initial.policy = if recursive {
+        Policy::new(
+            Tree::Majority(vec![
+                Tree::Voter(node(1)),
+                Tree::Majority(vec![Tree::Voter(node(3))]),
+            ]),
+            Limits::default(),
+        )
+        .unwrap()
+    } else {
+        policy(3)
+    };
     let learners = Configuration::new(
         cid(10),
         initial.policy.clone(),
@@ -506,8 +518,16 @@ fn remote_joint_repair(
         [(node(2), identity(2))].into(),
     )
     .unwrap();
-    let target = Configuration::new(
-        cid(12),
+    let target_policy = if recursive {
+        Policy::new(
+            Tree::Majority(vec![
+                Tree::Voter(node(2)),
+                Tree::Majority(vec![Tree::Voter(node(3))]),
+            ]),
+            Limits::default(),
+        )
+        .unwrap()
+    } else {
         Policy::new(
             Tree::Weighted(
                 [2, 3]
@@ -520,7 +540,11 @@ fn remote_joint_repair(
             ),
             Limits::default(),
         )
-        .unwrap(),
+        .unwrap()
+    };
+    let target = Configuration::new(
+        cid(12),
+        target_policy,
         [(node(2), identity(2)), (node(3), identity(3))].into(),
         BTreeMap::new(),
     )
@@ -558,8 +582,21 @@ fn remote_joint_repair(
     }
     joint.index += missing_entries;
     history.push(joint);
+    if recursive {
+        history.push(LogEntry {
+            index: history.len() as u64 + 1,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(901).unwrap(),
+                bytes: 11i64.to_le_bytes().to_vec(),
+            },
+        });
+    }
+    let expected_value = if recursive { 18 } else { 7 };
+    let locals: &[u64] = if recursive { &[1, 2, 3] } else { &[2, 3] };
     let election_commit = history.len() as u64 + 1;
-    for (local, count) in [(2, 1), (3, history.len())] {
+    for &local in locals {
+        let count = if local == 3 { history.len() } else { 1 };
         let path = root.join(local.to_string());
         let mut log = NativeLogStore::create(
             FileLogIo::create(&path).unwrap(),
@@ -619,12 +656,13 @@ fn remote_joint_repair(
             .unwrap();
         }
     }
+    let endpoint1 = recursive.then(reservation);
     let endpoint2 = reservation();
     let endpoint3 = reservation();
     let (mut learner, _hints2) = startup(&root.join("2"), 2, &[1, 2, 3]);
     let (mut candidate, _hints3) = startup(&root.join("3"), 3, &[1, 2, 3]);
     learner.startup.bootstrap = initial.clone();
-    candidate.startup.bootstrap = initial;
+    candidate.startup.bootstrap = initial.clone();
     if checkpoint_mode.is_some() || missing_entries > 63 {
         let version = if checkpoint_mode.is_some() { 6 } else { 5 };
         learner.startup.tls = learner.startup.tls.with_wire_version(version).unwrap();
@@ -634,21 +672,54 @@ fn remote_joint_repair(
     candidate.startup.listen = endpoint3.0;
     learner.startup.peers.get_mut(&node(3)).unwrap().address = endpoint3.0;
     candidate.startup.peers.get_mut(&node(2)).unwrap().address = endpoint2.0;
+    let mut old_config = endpoint1.as_ref().map(|endpoint| {
+        let (mut c, _hints) = startup(&root.join("1"), 1, &[1, 2, 3]);
+        c.startup.bootstrap = initial;
+        c.startup.tls = c.startup.tls.with_wire_version(6).unwrap();
+        c.startup.listen = endpoint.0;
+        c.startup.peers.get_mut(&node(2)).unwrap().address = endpoint2.0;
+        c.startup.peers.get_mut(&node(3)).unwrap().address = endpoint3.0;
+        learner.startup.peers.get_mut(&node(1)).unwrap().address = endpoint.0;
+        candidate.startup.peers.get_mut(&node(1)).unwrap().address = endpoint.0;
+        c
+    });
+    if recursive {
+        learner.startup.tls = learner.startup.tls.with_wire_version(6).unwrap();
+        candidate.startup.tls = candidate.startup.tls.with_wire_version(6).unwrap();
+    }
+    drop(endpoint1);
     drop(endpoint2);
     drop(endpoint3);
+    let mut old_voter = old_config.take().map(|c| open(c, protocol).unwrap());
     let mut learner = open(learner, protocol).unwrap();
     let mut candidate = open(candidate, protocol).unwrap();
+    if recursive {
+        candidate.control(group(), NodeControl::Campaign).unwrap();
+    }
     assert!(!learner.local().owner.core(group()).unwrap().local_voter());
     let start = Instant::now();
     let mut ticket = None;
     let mut applied_index = None;
     loop {
         let now = MonoTime(start.elapsed().as_millis() as u64);
-        for n in [&mut learner, &mut candidate] {
+        for n in old_voter.iter_mut().chain([&mut learner, &mut candidate]) {
             let p = n.poll(now, NodePollBudget::default()).unwrap();
             if let Some(replica) = p.replica {
                 for step in replica.steps {
-                    assert!(step.error.is_none(), "protocol={protocol:?} step={step:?}");
+                    // Competing campaigns repeat repair after promotion and
+                    // request ballots from older views that cannot authorize
+                    // the promoted candidate. These ingress refusals are
+                    // expected; the history still requires eventual election,
+                    // exact commitment/application and native-file recovery.
+                    let ingress_refusal = recursive
+                        && matches!(
+                            step.error,
+                            Some(RaftError::InvalidMessage | RaftError::WrongIdentity)
+                        );
+                    assert!(
+                        step.error.is_none() || ingress_refusal,
+                        "protocol={protocol:?} step={step:?}"
+                    );
                 }
             }
         }
@@ -678,7 +749,10 @@ fn remote_joint_repair(
             }
         }
         if applied_index.is_some_and(|index| {
-            learner.local().applications[&group()].read_applied(index) == Ok(7)
+            learner.local().applications[&group()].read_applied(index) == Ok(expected_value)
+                && old_voter.as_ref().is_none_or(|v| {
+                    v.local().applications[&group()].read_applied(index) == Ok(expected_value)
+                })
         }) {
             break;
         }
@@ -699,9 +773,29 @@ fn remote_joint_repair(
             .id(),
         cid(11)
     );
+    // Quiesce the cluster together so one joined node cannot close a peer's
+    // connection while that peer still owns admitted reply work.
+    for n in old_voter.iter_mut().chain([&mut learner, &mut candidate]) {
+        n.begin_shutdown();
+    }
+    let shutdown = Instant::now();
+    while !learner.is_drained()
+        || !candidate.is_drained()
+        || old_voter.as_ref().is_some_and(|n| !n.is_drained())
+    {
+        let now = MonoTime(10000 + start.elapsed().as_millis() as u64);
+        for n in old_voter.iter_mut().chain([&mut learner, &mut candidate]) {
+            n.poll(now, NodePollBudget::default()).unwrap();
+        }
+        assert!(shutdown.elapsed() < Duration::from_secs(5));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
     close(candidate);
     close(learner);
-    for local in [2, 3] {
+    if let Some(voter) = old_voter {
+        close(voter);
+    }
+    for &local in locals {
         let path = root.join(local.to_string());
         let log = NativeLogStore::recover(
             FileLogIo::open(&path).unwrap(),
@@ -723,36 +817,36 @@ fn remote_joint_repair(
             recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app).unwrap();
         assert!(core.local_voter());
         assert_eq!(core.membership().id(), cid(11));
-        assert_eq!(app.read_applied(applied_index.unwrap()), Ok(7));
+        assert_eq!(app.read_applied(applied_index.unwrap()), Ok(expected_value));
     }
     std::fs::remove_dir_all(root).unwrap();
 }
 #[test]
 fn tcp_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 0, None);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 0, None, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::Quic, 0, None);
+    remote_joint_repair(NativePeerProtocol::Quic, 0, None, false);
 }
 #[test]
 fn tcp_native_joint_repair_catches_up_retained_learner_prefix() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 32, None);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 32, None, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_catches_up_retained_learner_prefix() {
-    remote_joint_repair(NativePeerProtocol::Quic, 32, None);
+    remote_joint_repair(NativePeerProtocol::Quic, 32, None, false);
 }
 #[test]
 fn tcp_native_joint_repair_catches_up_multiple_batches() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 160, None);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 160, None, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_catches_up_multiple_batches() {
-    remote_joint_repair(NativePeerProtocol::Quic, 160, None);
+    remote_joint_repair(NativePeerProtocol::Quic, 160, None, false);
 }
 #[cfg(feature = "quic")]
 #[test]
@@ -904,19 +998,29 @@ fn committed_retirement_releases_old_peer_requirements_without_weakening_static_
 
 #[test]
 fn tcp_native_snapshot_repair_catches_up_then_installs_joint() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(false));
+    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(false), false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_snapshot_repair_catches_up_then_installs_joint() {
-    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(false));
+    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(false), false);
 }
 #[test]
 fn tcp_native_snapshot_repair_recovers_compacted_joint() {
-    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(true));
+    remote_joint_repair(NativePeerProtocol::TcpTls, 80, Some(true), false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_snapshot_repair_recovers_compacted_joint() {
-    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(true));
+    remote_joint_repair(NativePeerProtocol::Quic, 80, Some(true), false);
+}
+
+#[test]
+fn tcp_recursive_repair_catches_up_old_voter_and_candidate_tail() {
+    remote_joint_repair(NativePeerProtocol::TcpTls, 80, None, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_recursive_repair_catches_up_old_voter_and_candidate_tail() {
+    remote_joint_repair(NativePeerProtocol::Quic, 80, None, true);
 }

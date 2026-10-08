@@ -63,6 +63,8 @@ pub struct NativeStartup {
 /// Explicit trusted deployment input for reopening a durably assigned member.
 /// Bootstrap remains the original group identity/history. Provisioned stores
 /// and peer credentials are not membership authority and may include future peers.
+/// Selects validated receive-side configuration replication after member,
+/// membership-capable codec and exact route admission; static startup does not.
 pub struct NativeMemberStartup {
     pub startup: NativeStartup,
     pub provisioned_stores: BTreeMap<NodeId, StoreIdentity>,
@@ -671,6 +673,11 @@ where
         core.with_snapshot_joint_repair()
     } else if config.tls.wire_version() >= 5 {
         core.with_batched_joint_repair()
+    } else {
+        core
+    };
+    let core = if matches!(authorization, StartupAuthorization::Member(_)) {
+        core.with_configuration_replication()
     } else {
         core
     };

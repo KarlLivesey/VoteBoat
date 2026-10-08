@@ -113,10 +113,12 @@ P4 activation gate, not an additional global milestone.
    successful production-path recovery check (done for the exact-prefix case in
    slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66;
    retained multi-batch recovery with explicit format 5 in slice 67; historical
-   committed snapshot repair with explicit format 6 in slice 68).
-   Still check conflicting learner
-   tails, candidate tails, promoted
-   senders and recursive-policy histories before
+   committed snapshot repair with explicit format 6 in slice 68; recursive
+   election/write/read and native old-voter catch-up plus retained candidate
+   suffix in slice 69). Explicit member assemblies now receive ordinary validated
+   configuration replication; default/static assemblies retain their gate.
+   Still check divergent retained-only learner tails, promoted-leader/witness
+   lifecycle integration and broader recursive-policy failure histories before
    claiming the general release gate is complete. This removes a P4 release blocker
    needed by safe online placement.
 2. **Enrollment and administrative service integration (next, P4).** Connect
@@ -3900,3 +3902,59 @@ images cannot supply old-view learner authority. P4 safe placement enables P5
 responsibility routing and P6 ownership movement; P7 and the full P0–P7 goal remain
 active. Static service/embedding usability is independent of those later phases.
 No macOS execution, performance or complete protocol-proof claim; P8 is deferred.
+
+## Slice 69 — explicit member replication and recursive activation recovery
+
+Mini schema plan: select receive-side configuration replication explicitly at
+assembly; preserve the existing authenticated sender, accepted journal, log-match,
+committed-prefix, bounded fanout and storage/application dependency checks. Keep
+static/default gates and service mutations closed. No new RPC, wire/storage
+format, durability token or persisted flag. Node checks a membership-capable
+roster before work; NativeMemberStartup selects the mode after its existing exact
+store/route checks. Restore the selection explicitly on restart.
+
+An actual-core recursive history reproduced a remaining blocker after learner
+repair/election: an old voter required by the recursive quorum lacked the joint
+entry, and the general receive gate refused its elected leader's catch-up. The
+new `Raft::with_configuration_replication` selects that ordinary receive path.
+This changes the release gate only; it does not grant sender authority or bypass
+promotion readiness, placement, journal validation, committed-prefix protection,
+quorum rules, transport admission or exact durable/application completions.
+Default/static cores retain strict repair-only ingress. Generic Node refuses
+missing peers or roster versions below 2 before work. Native member startup
+selects the mode with its explicit member authorization; static startup does not.
+
+The nontrivial recursive actual-core case requires different nested two-leaf
+subtrees under weighted old/new policies. It repairs a learner, elects, catches
+up an old voter, commits/applies a write and produces a joint read barrier. Native
+TCP/QUIC three-store histories repair an 80-entry learner prefix while another
+old voter is behind; the candidate also has an uncommitted command beyond the
+joint. Current-term commitment preserves that command and a new write (18 total),
+then all stores reopen with the exact joint and application. The native tree has
+a nested one-leaf branch and is Boolean-equivalent to a two-voter majority; the
+actual-core case exercises the distinct recursive predicate. Initial assignments
+remain seeded, not a distributed enrollment demonstration.
+
+Public host/native tests check default refusal, opted-in durable old-voter receipt,
+foreign/new-only sender, store/context/scope and malformed journal rejection.
+Every byte of the native joint binding is torn, with sync/manifest faults; recovery
+is old or complete joint, and exact retry completes. Membership snapshot reception
+waits for publication/pinning/WAL plus application restoration before SnapshotAck.
+No new provider seam: existing core/recovery, Node and startup contracts are updated.
+
+The native fixture initially used identical election entropy across stores,
+causing lockstep campaigns; it now uses distinct per-node seeds and an explicit
+initial campaign. Intentional late learner-repair and promoted-candidate identity
+refusals remain permissible ingress results, but storage/fencing errors are not.
+A full affected run exposed sequential shutdown closing another node's pending
+reply channel; the fixture now quiesces/drains all nodes together before joining
+workers. The complete native target passes after that cleanup correction.
+
+This advances mini item 1 toward enrollment/admin service integration (item 2),
+then faulted remote lifecycle release (item 3). Remaining work includes promoted
+leader/witness lifecycle integration, divergent retained-only learner histories,
+and broader fault schedules. Public service mutations remain gated. P4 safe
+placement supplies P5 responsibility routing and P6 ownership movement; P7 and the
+full P0–P7 goal remain active. Static service usability remains independent of
+later milestones. No macOS, performance, complete online lifecycle or general
+fork/term/liveness proof claim. P8 remains deferred.
