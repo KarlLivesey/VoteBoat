@@ -1175,3 +1175,182 @@ mod authenticated_witness {
         run(&mut log, a, b);
     }
 }
+
+#[cfg(feature = "native")]
+mod joint_repair {
+    use super::*;
+    use voteboat::{
+        native::{log_store::*, wire::NativeWireCodec},
+        wire::*,
+    };
+    fn source() -> (HostLogStore, Raft, Message) {
+        let mut log = HostLogStore::new(2);
+        prepare(&mut log, false, false);
+        let mut core = Raft::recover_member(
+            node(2),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        let effects = core.step(Event::Campaign).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("campaign persistence")
+        };
+        let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+        let request = effects
+            .into_iter()
+            .find_map(|e| match e {
+                Effect::Send(m) if m.to == node(4) && matches!(m.rpc, Rpc::Append { .. }) => {
+                    Some(m)
+                }
+                _ => None,
+            })
+            .unwrap();
+        (log, core, request)
+    }
+    fn destination<L: LogStore>(log: &mut L) -> Raft {
+        append(log, vec![LogMutation::Create(bootstrap(1, 3))]);
+        record(
+            log,
+            2,
+            ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
+            1,
+        );
+        Raft::recover_member(
+            node(4),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap()
+    }
+    fn install<L: LogStore>(
+        log: &mut L,
+        core: &mut Raft,
+        message: Message,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let effects = core.step(Event::Receive(message))?;
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("joint repair persistence")
+        };
+        persist_effect(core, log, update.clone())
+    }
+    #[test]
+    fn public_repair_roundtrips_membership_wire_and_native_wal() {
+        let (_, _, message) = source();
+        let scope = WireScope {
+            from: message.from,
+            sender: message.sender,
+            to: message.to,
+        };
+        for codec in [
+            NativeWireCodec::with_membership(WireLimits::default()).unwrap(),
+            NativeWireCodec::with_authority(WireLimits::default()).unwrap(),
+            NativeWireCodec::with_readiness(WireLimits::default()).unwrap(),
+        ] {
+            let bytes = codec
+                .encode_batch(scope, std::slice::from_ref(&message))
+                .unwrap();
+            let decoded = codec.decode_batch(scope, &bytes).unwrap().remove(0);
+            let io = ModelIo::default();
+            let mut log =
+                NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+            let mut core = destination(&mut log);
+            let effects = install(&mut log, &mut core, decoded).unwrap();
+            assert!(matches!(
+                &effects[..],
+                [Effect::Send(Message {
+                    rpc: Rpc::Appended { success: true, .. },
+                    ..
+                })]
+            ));
+            assert_eq!(core.state().commit_index, 1);
+            assert!(core.local_voter());
+            drop(log);
+            io.0.borrow_mut().power_loss();
+            let log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+            assert!(Raft::recover_member(
+                node(4),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits()
+            )
+            .unwrap()
+            .local_voter());
+        }
+    }
+    #[test]
+    fn failed_native_repair_barriers_release_no_ack_and_recover_whole_assignment() {
+        let (_, _, message) = source();
+        for fault in [
+            Fault::Append(0),
+            Fault::Append(64),
+            Fault::Sync,
+            Fault::PublishBefore,
+            Fault::PublishAfter,
+        ] {
+            let io = ModelIo::default();
+            let mut log =
+                NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+            let mut core = destination(&mut log);
+            io.0.borrow_mut().fault = fault;
+            assert!(install(&mut log, &mut core, message.clone()).is_err());
+            assert!(core.is_fenced());
+            drop(log);
+            io.0.borrow_mut().power_loss();
+            let mut log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+            let mut core = Raft::recover_member(
+                node(4),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            assert_eq!(core.state().commit_index, 1);
+            assert_eq!(core.local_voter(), core.state().last_index() == 2);
+            if !core.local_voter() {
+                install(&mut log, &mut core, message.clone()).unwrap();
+            }
+            assert!(core.local_voter());
+        }
+    }
+    #[test]
+    fn actual_files_keep_joint_repair_after_lost_ack_and_reopen() {
+        let (_, _, message) = source();
+        let path = std::env::temp_dir().join(format!(
+            "voteboat-joint-repair-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&path).unwrap(),
+            identity(4),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut core = destination(&mut log);
+        let _lost_ack = install(&mut log, &mut core, message).unwrap();
+        drop(log);
+        let log = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(4),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let core = Raft::recover_member(
+            node(4),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        assert!(core.local_voter());
+        assert_eq!(core.state().commit_index, 1);
+        drop(log);
+        std::fs::remove_dir_all(path).unwrap();
+    }
+}

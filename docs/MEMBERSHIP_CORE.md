@@ -173,3 +173,45 @@ chunks, snapshot installation and rollback; their separate evidence boundary is
 documented in the scope audit. Finite helper checks are not a complete joint Raft
 proof, macOS run,
 power-failure certification or benchmark.
+
+## Append-only joint repair during election
+
+An old-view voter campaigning with a durably accepted, uncommitted joint entry
+sends one existing-format Append to each exact learner promoted by that entry,
+then sends its ordinary Vote requests. The transfer contains only the joint
+entry and its preceding index/term; leader_commit is zero. Sends wait for the
+campaign's exact persisted term/self-ballot completion. Repair acknowledgements
+are ordinary Appended messages and cannot satisfy the candidate's vote set.
+
+The receiver's public configuration gate allows this one shape only when its
+committed and accepted membership agree on a stable exact local learner, the
+sender is an exact voter of that view, the incoming joint promotes this learner,
+the journal grammar is valid, and the preceding boundary equals its local log
+end. Term, group/store/context and byte limits must also pass. It is a pure
+extension: no existing entry can be overwritten and commitment cannot advance.
+An existing voter or joint-view replica refuses this exception. Duplicate repair
+after durable acceptance is refused; normal voting can proceed with the retained
+joint after restart. General configuration Append and membership Snapshot remain
+gated. Normal storage uncertainty fences the replica.
+
+This is a deliberate protocol addition needed for partial joint delivery. Under
+the authenticated non-Byzantine model, it distributes a configuration already in
+a candidate's durable history, without permitting a candidate to rewrite another
+voter's log or assert commitment. That restriction matters: letting unelected
+candidates replace arbitrary voting histories could erase evidence needed by
+log-freshness election checks. Accepted activation follows the existing journal
+rules, but the common pending-dependency guard blocks voting/campaigning until
+exact durability completion. Receiving the transfer does not make either side a
+leader or authorize application writes or reads; a subsequent ordinary election
+must collect the actual old-and-new predicate's durable votes.
+
+The weighted actual-core regression drops repair traffic through four election/
+restart rounds, then delivers the production transfer and Vote through public
+entry points. Native provider checks cover wire versions 2–4, torn append/sync/
+manifest failures and actual file reopen after a lost acknowledgement. These are
+bounded evidence, not a proof over arbitrary forks or a complete remote release.
+This path deliberately refuses behind/compacted prefixes, transferred snapshots,
+uncommitted learner assignments, existing joint heads and promoted senders that
+are not trusted voters in the learner's current view. Candidate suffixes beyond
+the joint may still require additional catch-up before log freshness permits a
+vote. Those cases and remote TCP/QUIC repair delivery remain release work.

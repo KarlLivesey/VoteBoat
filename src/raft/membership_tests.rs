@@ -359,10 +359,10 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
     assert_eq!(recovered.membership().id(), cid(4));
 }
 
-/// Release-gate regression: this deliberately records the unresolved liveness
-/// gap rather than blessing it as a successful online membership transition.
+/// Lost repair traffic reproduces the stall; eventual production repair fixes
+/// the exact-prefix case without voting from a learner or treating acks as votes.
 #[test]
-fn partial_joint_with_required_promoted_learner_stalls_despite_available_quorums() {
+fn partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes() {
     fn weighted(voters: &[u64], required: u64) -> Policy {
         Policy::new(
             Tree::Weighted(
@@ -451,6 +451,10 @@ fn partial_joint_with_required_promoted_learner_stalls_despite_available_quorums
                 let Effect::Send(request) = request else {
                     panic!("campaign must send votes only")
                 };
+                if matches!(request.rpc, Rpc::Append { .. }) {
+                    assert_eq!(request.to, node(5));
+                    continue; // Lose repair traffic during these rounds.
+                }
                 assert!(matches!(request.rpc, Rpc::Vote { .. }));
                 let target = request.to.get();
                 let Some(receiver) = survivors.get_mut(&target) else {
@@ -498,51 +502,68 @@ fn partial_joint_with_required_promoted_learner_stalls_despite_available_quorums
     }
     assert_eq!(denied_learner_votes, 4);
     assert_eq!(denied_stale_votes, 4);
-    // An internal delivery fixture identifies the missing transition. No
-    // production candidate sends this append and public ingress remains closed.
-    let candidate = &survivors[&2];
-    let transfer = candidate.message(
-        node(5),
-        RequestContext {
-            origin: candidate.binding,
-            sequence: 500,
-        },
-        Rpc::Append {
-            previous_index: 2,
-            previous_term: 1,
-            entries: vec![candidate.state().entry_at(3).unwrap().clone()],
-            leader_commit: 2,
-        },
+    let candidate = survivors.get_mut(&2).unwrap();
+    let effects = candidate.step(Event::Campaign).unwrap();
+    let requests = durable(candidate, effects);
+    let transfer = requests
+        .iter()
+        .find_map(|e| match e {
+            Effect::Send(message)
+                if message.to == node(5) && matches!(message.rpc, Rpc::Append { .. }) =>
+            {
+                Some(message.clone())
+            }
+            _ => None,
+        })
+        .unwrap();
+    let request = requests
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(message)
+                if message.to == node(5) && matches!(message.rpc, Rpc::Vote { .. }) =>
+            {
+                Some(message)
+            }
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(candidate.role(), Role::Candidate);
+    assert_eq!(
+        candidate.step(Event::Propose {
+            operation: operation(999),
+            bytes: vec![0; 8]
+        }),
+        Err(RaftError::NotLeader)
     );
     let learner = survivors.get_mut(&5).unwrap();
-    assert_eq!(
-        learner.step(Event::Receive(transfer.clone())),
-        Err(RaftError::InvalidMessage)
-    );
-    let effects = learner.receive_inner(transfer.clone()).unwrap();
+    // Network reordering can deliver the Vote before its repair. No vote
+    // escapes from the old learner view, even in this campaign's term.
+    let effects = learner.step(Event::Receive(request.clone())).unwrap();
+    let denied = one_reply(durable(learner, effects));
+    assert!(matches!(denied.rpc, Rpc::Voted { granted: false }));
+    let candidate = survivors.get_mut(&2).unwrap();
+    assert!(candidate.step(Event::Receive(denied)).unwrap().is_empty());
+    let learner = survivors.get_mut(&5).unwrap();
+    let effects = learner.step(Event::Receive(transfer.clone())).unwrap();
     assert!(learner.has_pending_dependency());
     assert_eq!(learner.step(Event::Campaign), Err(RaftError::Busy));
-    let mut vote = transfer;
-    vote.rpc = Rpc::Vote {
-        last_index: 3,
-        last_term: 1,
-    };
-    assert_eq!(learner.step(Event::Receive(vote)), Err(RaftError::Busy));
+    assert_eq!(
+        learner.step(Event::Receive(request.clone())),
+        Err(RaftError::Busy)
+    );
     assert_eq!(learner.state().last_index(), 2);
-    durable(learner, effects);
+    let response = one_reply(durable(learner, effects));
+    assert!(matches!(response.rpc, Rpc::Appended { success: true, .. }));
     assert!(learner.local_voter());
     assert_eq!(learner.state().last_index(), 3);
     assert_eq!(learner.state().commit_index, 2);
     let candidate = survivors.get_mut(&2).unwrap();
-    let effects = candidate.step(Event::Campaign).unwrap();
-    let requests = durable(candidate, effects);
-    let request = requests
-        .into_iter()
-        .find_map(|e| match e {
-            Effect::Send(message) if message.to == node(5) => Some(message),
-            _ => None,
-        })
-        .unwrap();
+    assert!(candidate.step(Event::Receive(response)).unwrap().is_empty());
+    assert_eq!(
+        candidate.role(),
+        Role::Candidate,
+        "repair acknowledgements are not votes"
+    );
     let voter = survivors.get_mut(&5).unwrap();
     let effects = voter.step(Event::Receive(request)).unwrap();
     assert_eq!(voter.state().hard_state.voted_for, None);
@@ -552,6 +573,112 @@ fn partial_joint_with_required_promoted_learner_stalls_despite_available_quorums
     let effects = candidate.step(Event::Receive(response)).unwrap();
     durable(candidate, effects);
     assert_eq!(candidate.role(), Role::Leader);
+}
+
+#[test]
+fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation() {
+    let mut source = follower(joint(false), 2);
+    let effects = source.step(Event::Campaign).unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    let requests = durable(&mut source, effects);
+    let valid = requests
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(message)
+                if message.to == node(4) && matches!(message.rpc, Rpc::Append { .. }) =>
+            {
+                Some(message)
+            }
+            _ => None,
+        })
+        .unwrap();
+    for variant in 0..14 {
+        let mut receiver = follower(staged(), 4);
+        let mut message = valid.clone();
+        match variant {
+            0 => message.sender.identity = store(99),
+            1 => message.context.origin.identity = store(99),
+            2 => message.context.sequence = 0,
+            3 => message.term = 0,
+            4 => message.configuration = cid(4),
+            5 => {
+                if let Rpc::Append { leader_commit, .. } = &mut message.rpc {
+                    *leader_commit = 2;
+                }
+            }
+            6 => {
+                if let Rpc::Append { previous_index, .. } = &mut message.rpc {
+                    *previous_index = 1;
+                }
+            }
+            7 => {
+                if let Rpc::Append { previous_term, .. } = &mut message.rpc {
+                    *previous_term = 99;
+                }
+            }
+            8 => {
+                if let Rpc::Append { entries, .. } = &mut message.rpc {
+                    entries.push(LogEntry {
+                        index: 4,
+                        term: 1,
+                        payload: EntryPayload::Noop,
+                    });
+                }
+            }
+            9 => {
+                receiver = follower(staged(), 3);
+                message.to = node(3);
+            }
+            10 => receiver = follower(joint(false), 4),
+            11 => {
+                receiver.durable.commit_index = 1;
+            }
+            12 => receiver.limits.max_command_bytes = 1,
+            13 => {
+                if let Rpc::Append { entries, .. } = &mut message.rpc {
+                    let EntryPayload::Configuration(record) = &mut entries[0].payload else {
+                        unreachable!()
+                    };
+                    record.expected = cid(1);
+                }
+            }
+            _ => unreachable!(),
+        }
+        let state = receiver.state().clone();
+        let role = receiver.role();
+        let reset = receiver.election_reset_sequence();
+        assert_eq!(
+            receiver.step(Event::Receive(message)),
+            Err(RaftError::InvalidMessage),
+            "variant {variant}"
+        );
+        assert_eq!(receiver.state(), &state);
+        assert_eq!(receiver.role(), role);
+        assert_eq!(receiver.election_reset_sequence(), reset);
+        assert!(!receiver.has_pending_dependency());
+    }
+    let mut receiver = follower(staged(), 4);
+    let effects = receiver.step(Event::Receive(valid.clone())).unwrap();
+    durable(&mut receiver, effects);
+    // A lost repair ack is harmless: restart keeps the joint and its new voting
+    // assignment; a duplicate cannot append again or reset its ballot/history.
+    let mut restarted = Raft::recover_member(
+        node(4),
+        StoreBinding {
+            identity: store(4),
+            session: StoreSession::new(2).unwrap(),
+        },
+        receiver.state().clone(),
+        LogLimits::default(),
+    )
+    .unwrap();
+    let before = restarted.state().clone();
+    assert_eq!(
+        restarted.step(Event::Receive(valid)),
+        Err(RaftError::InvalidMessage)
+    );
+    assert_eq!(restarted.state(), &before);
+    assert!(restarted.local_voter());
 }
 
 #[test]

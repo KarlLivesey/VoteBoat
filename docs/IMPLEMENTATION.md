@@ -95,7 +95,9 @@ Slice 63 confirms a release prerequisite using the actual core: after partial
 joint delivery and old-leader loss, available weighted quorums can still fail to
 elect because the required promoted replica remains a learner. The internal
 delivery fixture restores election eligibility only after its exact durability
-completion. No production pre-election transfer exists. Resolve this before
+completion. Slice 64 adds a production append-only repair for exact matching
+learner prefixes, replacing the injected-delivery portion of that regression.
+Broader recovery cases remain below. Resolve these before
 exposing service mutations that could strand a group; it is part of the existing
 P4 activation gate, not an additional global milestone.
 
@@ -106,7 +108,10 @@ P4 activation gate, not an additional global milestone.
    and the reproduced slice 63 history. Check available weighted/recursive
    quorums, stale/forked history, lost replies, pending/Written durability,
    leader loss and restart. Replace the diagnostic stall expectation with a
-   successful production-path recovery check. This removes a P4 release blocker
+   successful production-path recovery check (done for the exact-prefix case in
+   slice 64). Still check behind/compacted learners, candidate tails, promoted
+   senders, recursive-policy histories and actual remote repair delivery before
+   claiming the general release gate is complete. This removes a P4 release blocker
    needed by safe online placement.
 2. **Enrollment and administrative service integration (next, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
@@ -3688,3 +3693,38 @@ The mini plan moves this already-required gate ahead of service mutation exposur
 the macro P4 → P5 routing → P6 split/merge → P7 chain is unchanged. Full P0–P7
 remains active. These fixture completions do not validate physical durability,
 network delivery, arbitrary forks or a full liveness proof.
+
+## Slice 64 — bounded production joint repair before election
+
+Mini schema plan: reuse the existing Append wire shape for a narrowly recognized
+pure extension to an exact committed learner. Campaign completion sends one durable
+joint entry before ordinary Vote requests, only from an old-view voter and only
+to exact learners promoted by that joint. Set leader_commit to zero; do not send
+application data, replace suffixes, transfer snapshots or assert leader authority.
+The receiver checks stable committed/accepted learner agreement, exact sender/store,
+matching local log end, promotion assignment, term/context/grammar and byte bounds
+before the ordinary persistence path. Shared accepted membership timing remains;
+Busy prevents any vote/campaign until its exact LogTicket/DurableLog completion.
+No new token, generation, watermark or wire/persistent format is introduced.
+
+The slice 63 diagnostic is now a production-path recovery regression. Dropping
+repair traffic still reproduces the stall; after four campaign/restart rounds,
+delivering the emitted repair permits a subsequent durable Vote to elect the
+survivor. A repair acknowledgement alone leaves it Candidate, and application
+proposal remains NotLeader beforehand. Fourteen malformed/unauthorized shapes
+refuse before term/role/timer/history changes. Lost acknowledgement and restart
+retain the joint; duplicate repair cannot mutate an already activated view.
+
+Three native-provider cases cover membership wire formats 2–4, native WAL barrier
+failures/power loss and actual files after lost acknowledgement. Existing learner,
+member recovery, wire and activation-model suites remain green; the independent
+model establishes fixed-prefix feasibility after delivery, not a full repair trace
+or arbitrary fork proof. See validation/REPORT.md for actual runs.
+
+This resolves the reproduced exact-prefix weighted case and changes the prior
+blanket public gate into a restricted joint-repair exception. The mini plan's
+general recovery gate remains active for behind/compacted learners, candidate
+suffixes, promoted senders, broader recursive policies and remote socket delivery.
+General configuration ingress and service mutations stay gated. The protocol
+rationale and limits are recorded in MEMBERSHIP_CORE.md. P4 still feeds P5 routing,
+P6 split/merge and P7 validation; full P0–P7 stays active.

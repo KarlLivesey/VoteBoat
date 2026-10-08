@@ -717,3 +717,40 @@ assertion uses a borrowed expected-message slice.
   network, fork, macOS, performance or full proof evidence. Service mutation
   integration stays behind the partial-joint repair and remote lifecycle gates.
   Full P0–P7 remains active; P8 is deferred.
+
+## Slice 64 — append-only production joint election repair
+
+- Campaign's exact durable term/self-ballot completion precedes sending the
+  accepted uncommitted joint entry to exact promoted learners, before ordinary
+  Vote requests. Existing Append shape, one entry, leader_commit zero. Sender
+  must be an old-view voter. Receiver must be an exact committed/accepted stable
+  learner with a matching log end, trusted sender/store, valid promotion/grammar,
+  term/context and byte budget. No voting history replacement or commit advance.
+- Actual-core weighted history uses public Campaign/Receive after four dropped-
+  repair/restart rounds. Vote-before-repair is denied; pending joint persistence
+  blocks Campaign/Vote. A repair acknowledgement leaves the sender Candidate;
+  only a subsequent durable ballot elects it. Application proposal is NotLeader
+  before election. Fourteen refusal variants preserve term/role/timer/log state;
+  lost ack and restart preserve activation and duplicate repair cannot mutate it.
+- New native provider tests: 3 pass. Existing wire versions 2–4 round-trip repair
+  into the native WAL; injected short append, sync and manifest failures fence
+  without acknowledgement and recover old or whole joint assignment; actual
+  filesystem reopen preserves the joint after losing its acknowledgement.
+- Library tests: 46 all-feature pass with socket permission; 37 core-only pass.
+  Affected suites: learners 23, member recovery 22, wire 14 and independent
+  activation model 4 pass. Existing learner/readiness and witness TCP/QUIC
+  histories pass; they do not exercise this repair over network sockets.
+  Clippy all-feature/all-target with warnings denied, all-feature docs and
+  core-only all-target compilation pass. Formatting/diff and inventory shape/path
+  checks pass (60 contracts); inventory is metadata, not protocol conformance.
+- Protocol behavior changes only through a strict public joint-repair exception;
+  general configuration Append and membership Snapshot remain gated. Existing
+  accepted activation and exact LogTicket/DurableLog dependencies are reused;
+  no new token/generation/watermark or format. Safety rationale is documented in
+  MEMBERSHIP_CORE.md, including why arbitrary candidate suffix replacement is
+  forbidden. This is bounded evidence, not a full fork/term/liveness proof.
+- Reproduced exact-prefix weighted stall is repaired. Behind/compacted learners,
+  candidate suffixes after the joint, promoted senders, broader recursive-policy
+  histories and actual remote repair still require work. No general P4 release,
+  macOS execution or performance claim. Service mutations remain gated and full
+  P0–P7 stays active; P8 remains deferred.

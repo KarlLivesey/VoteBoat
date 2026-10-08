@@ -1022,6 +1022,7 @@ impl Raft {
                 if self.membership().is_satisfied(&self.votes) {
                     effects.extend(self.become_leader()?);
                 } else {
+                    effects.extend(self.joint_repair_messages()?);
                     let context = self.context()?;
                     self.vote_context = Some(context);
                     for peer in self.voting_peers() {
@@ -1460,11 +1461,13 @@ impl Raft {
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
     fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
-        // Keep public online activation closed while the remaining learner,
-        // prospective resource and distributed protocol gates are unfinished.
-        // Internal transition tests exercise receive_inner without this gate.
-        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
-            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some())
+        // General configuration delivery stays closed. The append-only joint
+        // repair exception targets exact committed learners and cannot replace
+        // voting history or advance commitment; other transition fixtures use
+        // receive_inner while distributed release gates remain unfinished.
+        if (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
+            && !self.permits_joint_repair(&m)
         {
             return Err(RaftError::InvalidMessage);
         }
@@ -2159,3 +2162,4 @@ mod membership_tests;
 mod authority;
 #[path = "raft/connections.rs"]
 mod connections;
+mod joint_repair;

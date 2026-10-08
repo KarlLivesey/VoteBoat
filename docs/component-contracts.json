@@ -1157,6 +1157,23 @@
         "tests/counter_service.rs"
       ],
       "scope": "Counter envelope covers fixed eight-byte commands and 32+33*configured operation capacity checkpoint bytes independent of occupancy. Existing pending proposal admission/application/restore enforce capacity without retry eviction; service validates schema and payload limits before opening resources. Full 10000-operation checkpoint round-trips through wire versions 1–4. Configuration-status parses nonzero operation IDs and returns local durable committed/accepted phases and planning hints; local absence is inconclusive and follower observations are not quorum reads. No mutation or unbounded policy payload, new token/generation/watermark/format. Real TCP/QUIC service process histories query static local absence and restart; dynamic observer semantics are separately tested through Node. Growing membership metadata still needs selected configuration-capacity checks. Generic host envelope enforcement, service mutations and faulted remote lifecycle release remain pending."
+    },
+    {
+      "design_id": "C01/C03/C06",
+      "public_contract": "Raft append-only joint election repair",
+      "operations": [
+        "step(Event::Campaign)",
+        "step(Event::Receive)",
+        "admitted",
+        "complete"
+      ],
+      "native": "Deterministic candidate repair over existing Append/Vote messages and LogStore; native wire formats 2–4 and native WAL conformance.",
+      "conformance": [
+        "src/raft/membership_tests.rs",
+        "tests/member_recovery.rs",
+        "tests/activation_model.rs"
+      ],
+      "scope": "Campaign term/self-ballot durability precedes sending one accepted uncommitted joint entry to exact promoted learners. Old-view sender only. Receiver requires stable committed/accepted exact learner agreement, exact old voter/store, promoted exact store, matching log-end index/term, valid journal/term/context and byte budgets. Pure append, leader_commit zero: no voting-log replacement, new commitment or leader/service authority. Pending dependency blocks Vote/Campaign; repair ack never counts as ballot. Weighted public-core history survives dropped repair and restart, then elects after normal durable votes. Fourteen refusal variants and lost-ack restart covered; native wire/WAL fault and actual-file cases included. No new token/generation/watermark/format. Behind/compacted prefixes, candidate suffixes, promoted senders, broader recursive histories and remote TCP/QUIC repair delivery remain gates; general online configuration delivery remains closed."
     }
   ],
   "not_yet_implemented": [
