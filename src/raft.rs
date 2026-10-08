@@ -183,6 +183,7 @@ struct Pending {
 #[derive(Clone, Copy)]
 struct Replication {
     context: RequestContext,
+    start: u64,
     end: u64,
     snapshot: Option<SnapshotRef>,
 }
@@ -211,6 +212,7 @@ pub struct Raft {
     fenced: bool,
     staged_snapshot: Option<Message>,
     application_install: Option<(SnapshotRef, Message)>,
+    election_reset: u64,
 }
 
 impl Raft {
@@ -291,10 +293,26 @@ impl Raft {
             fenced: false,
             staged_snapshot: None,
             application_install: None,
+            election_reset: 0,
         })
     }
     pub fn role(&self) -> Role {
         self.role
+    }
+    /// Volatile local timer-reset sequence, not a term or quorum watermark.
+    /// Changes on a campaign, valid leader contact, or a durable granted vote.
+    pub fn election_reset_sequence(&self) -> u64 {
+        self.election_reset
+    }
+    pub fn is_fenced(&self) -> bool {
+        self.fenced
+    }
+    fn reset_election(&mut self) -> Result<(), RaftError> {
+        self.election_reset = self
+            .election_reset
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        Ok(())
     }
     pub fn state(&self) -> &GroupLog {
         &self.durable
@@ -428,6 +446,7 @@ impl Raft {
         }
         match event {
             Event::Campaign => {
+                self.reset_election()?;
                 self.clear_reads();
                 self.role = Role::Candidate;
                 self.votes.clear();
@@ -599,6 +618,17 @@ impl Raft {
                 effects.push(Effect::SnapshotInstalled(reference));
             }
         }
+        if effects.iter().any(|e| {
+            matches!(
+                e,
+                Effect::Send(Message {
+                    rpc: Rpc::Voted { granted: true },
+                    ..
+                })
+            )
+        }) {
+            self.reset_election()?;
+        }
         Ok(effects)
     }
 
@@ -712,6 +742,45 @@ impl Raft {
         Ok(effects)
     }
     fn append_for(&mut self, peer: NodeId) -> Result<Effect, RaftError> {
+        // Keep an outstanding request's range/context across heartbeat retries.
+        // Replacing it every tick can starve all acknowledgements when the
+        // network round trip exceeds the heartbeat interval. Term changes and
+        // compaction clear requests; responses retire them before new work.
+        if let Some(sent) = self.requests.get(&peer).copied() {
+            if let Some(reference) = sent.snapshot {
+                return Ok(Effect::SnapshotRequired {
+                    to: peer,
+                    context: sent.context,
+                    reference,
+                });
+            }
+            let entries = if sent.start > sent.end {
+                Vec::new()
+            } else {
+                let start = (sent.start - self.durable.base_index() - 1) as usize;
+                let end = (sent.end - self.durable.base_index()) as usize;
+                self.durable
+                    .entries
+                    .get(start..end)
+                    .ok_or(RaftError::WrongCompletion)?
+                    .to_vec()
+            };
+            return Ok(Effect::Send(
+                self.message(
+                    peer,
+                    sent.context,
+                    Rpc::Append {
+                        previous_index: sent.start - 1,
+                        previous_term: self
+                            .durable
+                            .term_at(sent.start - 1)
+                            .ok_or(RaftError::WrongCompletion)?,
+                        entries,
+                        leader_commit: self.durable.commit_index,
+                    },
+                ),
+            ));
+        }
         let next = self.next_index[&peer]
             .min(self.durable.last_index() + 1)
             .max(1);
@@ -722,6 +791,7 @@ impl Raft {
                 peer,
                 Replication {
                     context,
+                    start: 0,
                     end: reference.index,
                     snapshot: Some(reference),
                 },
@@ -759,6 +829,7 @@ impl Raft {
             peer,
             Replication {
                 context,
+                start: next,
                 end,
                 snapshot: None,
             },
@@ -791,6 +862,28 @@ impl Raft {
     }
 
     fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        let contact = m.term >= self.durable.hard_state.term
+            && matches!(
+                &m.rpc,
+                Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
+            );
+        let effects = self.receive_inner(m)?;
+        if contact
+            || effects.iter().any(|e| {
+                matches!(
+                    e,
+                    Effect::Send(Message {
+                        rpc: Rpc::Voted { granted: true },
+                        ..
+                    })
+                )
+            })
+        {
+            self.reset_election()?;
+        }
+        Ok(effects)
+    }
+    fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
         if m.to != self.node
             || m.from == self.node
             || m.group != self.durable.bootstrap.group
@@ -886,7 +979,9 @@ impl Raft {
                 entries,
                 leader_commit,
             } => {
-                if entries.len() > 64
+                if *previous_term > m.term
+                    || ((*previous_index == 0) != (*previous_term == 0))
+                    || entries.len() > 64
                     || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
                         > self.limits.max_batch_bytes
                 {
@@ -906,6 +1001,18 @@ impl Raft {
                 self.clear_reads();
                 self.vote_context = None;
                 self.requests.clear();
+                let mut previous = *previous_term;
+                for (i, e) in entries.iter().enumerate() {
+                    if previous_index.checked_add(i as u64 + 1) != Some(e.index)
+                        || e.term == 0
+                        || e.term < previous
+                        || e.term > m.term
+                        || e.payload_bytes() > self.limits.max_command_bytes
+                    {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                    previous = e.term;
+                }
                 if self.durable.term_at(*previous_index) != Some(*previous_term) {
                     let mut reply = self.message(
                         m.from,
@@ -934,18 +1041,6 @@ impl Raft {
                     } else {
                         Ok(vec![Effect::Send(reply)])
                     };
-                }
-                let mut previous = *previous_term;
-                for (i, e) in entries.iter().enumerate() {
-                    if previous_index.checked_add(i as u64 + 1) != Some(e.index)
-                        || e.term == 0
-                        || e.term < previous
-                        || e.term > m.term
-                        || e.payload_bytes() > self.limits.max_command_bytes
-                    {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                    previous = e.term;
                 }
                 let mut suffix = None;
                 for (offset, entry) in entries.iter().enumerate() {

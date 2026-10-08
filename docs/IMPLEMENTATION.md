@@ -612,9 +612,81 @@ automatic failure detection, a complete asynchronous runtime or node-wide bounds
 on all output/application resources. macOS execution and hardware power-cut
 testing remain outstanding. P0–P7 remains active.
 
+## Slice 7: automatic consensus timers and stable replication retries
+
+`TimedShard` composes the existing shared owner with any public `TimerService`
+and `ElectionEntropy` providers. Registration arms a randomized election
+deadline. Leadership arms periodic heartbeats; returning to follower service
+restores election timing. The host supplies monotonic time explicitly when
+polling, stepping or delivering storage/application completions. Timer periods
+are construction-time local runtime settings, not mutable quorum policy.
+Construction checks owner/capacity compatibility, a quiescent shard, positive
+intervals and enough control byte reserve for a tagged expiration.
+
+The core now exposes a volatile election-reset sequence for campaigns, valid
+leader contact and durable granted votes. Denied votes, stale-term requests,
+unrelated acknowledgements and rejected identity/format checks do not reset that
+sequence. Append entry structure is validated even when the local prefix does
+not match, so malformed suffixes cannot masquerade as leader contact. A pending
+vote does not reset on preparation; its durable completion or an already durable
+repeat grant does. Recovery starts the volatile sequence at zero under a fresh
+runtime owner. It is neither a persisted prefix nor authority to serve a read.
+
+Every managed expiration retains its exact owner/group/kind/deadline token.
+Admission tags the queued timer with that token. Leader contact, role changes,
+vote completion and shutdown invalidate old queued tokens before dispatch can
+campaign. This prevents an expiration queued behind a valid heartbeat or delayed
+vote from starting an unnecessary new term. The controller retains at most one
+pending expiration per group under overload and retries in bounded fair polls;
+late heartbeats coalesce instead of replaying every missed tick. Timer progress
+reports maximum lateness, not a quorum watermark. Closing admission cancels
+future deadlines and makes queued timers inert while admitted work drains.
+Provider errors latch an explicit failure; stopping groups remains available
+to return queued work and resolve already submitted work through recovery.
+
+Automatic heartbeats exposed a liveness defect in the earlier replication
+driver: each tick replaced an outstanding request context, so a round trip
+longer than the heartbeat interval could prevent any acknowledgement from
+counting. A failing 12 ms round-trip/4 ms heartbeat regression reproduced it.
+Retries now preserve the outstanding context and exact entry range (or pinned
+snapshot reference). A response retires the request before another range is
+sent; term changes and compaction invalidate it. Retries reconstruct bounded
+entries from the authoritative log without retaining an extra payload per peer.
+The advertised commit index may advance, but the correlated matching prefix
+cannot expand. Read probes still use their independent invocation context.
+The shared test transport now explicitly retains rejected messages in a bounded
+deferred queue, exercising the ingress backpressure contract under retries.
+
+### Slice 7 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native suite: 98 tests pass; core/host-only suite: 46 tests pass. Both builds
+  pass Clippy with warnings denied; formatting and documentation pass.
+- Shared virtual-time histories automatically elect leaders, maintain healthy
+  leadership, replace a partitioned leader and continue an unrelated group.
+  The isolated old leader cannot complete its quorum-backed read. Restart,
+  delayed/duplicate old-session traffic and healing preserve committed values
+  and exact retry results. These histories run with host replacements, native
+  simulated I/O and three actual native WAL files.
+- Queued expiration after leader contact, vote preparation versus delayed durable
+  completion, stale/denied/malformed/unrelated traffic, saturation, lateness,
+  retained expiration retry, shutdown and timer-provider failure are exercised.
+- Host and native histories sustain commitments and quorum reads when the
+  network round trip exceeds several heartbeat intervals. The same tests failed
+  before the stable-context fix. Existing recursive quorum, snapshot catch-up,
+  crash-recovery and 100-group overload histories still pass.
+
+Timer automation does not add leases or check-quorum leadership withdrawal.
+An isolated leader still needs fresh quorum evidence for reads and writes.
+Native blocking worker assembly, output/buffer admission, wire framing and
+authenticated transport remain pending. This is finite regression evidence,
+not a full liveness proof or production performance claim. macOS and hardware
+power-cut execution remain outstanding; P0–P7 remains active.
+
 ## Next slice
 
-Add automatic group timer management, bounded worker/output admission, wire
+Add bounded worker/output admission, wire
 codec and authenticated-session transport seams. Extend virtual-time histories
 to leader loss, overload and message delay through the new assembly. Native
 sockets must use established secure

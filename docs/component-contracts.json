@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "bounded-shared-ingress-runtime-with-explicit-deadlines",
+  "status": "shared-runtime-with-automatic-consensus-timers",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -221,7 +221,15 @@
       "operations": ["owner", "capacity", "register", "cancel", "poll", "len"],
       "native": "DeadlineQueue",
       "conformance": ["tests/runtime.rs"],
-      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. Consumer retains expected tokens and rearms explicitly; automatic consensus timer management remains pending."
+      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam."
+    },
+    {
+      "design_id": "C10/C11",
+      "public_contract": "TimedShard",
+      "operations": ["register", "admit", "poll_timers", "poll", "step_next", "with_core", "finish", "stop_group", "close_admission"],
+      "native": "TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>",
+      "conformance": ["tests/runtime.rs"],
+      "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority."
     },
     {
       "design_id": "C12",
@@ -245,7 +253,6 @@
     "transport",
     "wire-codec",
     "secure-session",
-    "automatic-consensus-timers",
     "background-worker-assembly",
     "outbound-admission",
     "buffers",

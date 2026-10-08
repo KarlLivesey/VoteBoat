@@ -20,6 +20,8 @@ use std::{
     collections::{BTreeMap, VecDeque},
     mem::size_of,
 };
+mod timed;
+pub use timed::{TimedShard, TimerConfig, TimerProgress};
 
 /// Milliseconds on one local monotonic clock domain, never a lease or term.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -242,6 +244,7 @@ enum Class {
 struct Queued {
     event: Event,
     cost: usize,
+    timer: Option<TimerToken>,
 }
 struct Visit {
     ticket: VisitTicket,
@@ -255,6 +258,7 @@ struct Group {
     visit: Option<Visit>,
     turn: usize,
     fenced: bool,
+    timer: Option<TimerToken>,
 }
 impl Group {
     fn ready(&self) -> bool {
@@ -277,6 +281,8 @@ pub struct Rejected {
 pub struct Stepped {
     pub operation: Option<OperationId>,
     pub read: Option<ReadRequestId>,
+    /// A consumed live expiration. Stale queued timers produce no core effects.
+    pub timer: Option<TimerToken>,
     pub result: Result<Vec<Effect>, RaftError>,
 }
 pub struct Stopped {
@@ -346,6 +352,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 visit: None,
                 turn: 0,
                 fenced: false,
+                timer: None,
             },
         );
         Ok(())
@@ -373,6 +380,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         &mut self,
         group: GroupIdentity,
         event: &Event,
+        timer: Option<TimerToken>,
     ) -> Result<(Class, usize), RuntimeError> {
         if self.closed {
             return Err(RuntimeError::Closed);
@@ -384,7 +392,13 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if matches!(event, Event::Receive(m) if m.group != group) {
             return Err(RuntimeError::WrongOwner);
         }
-        let (class, cost) = event_cost(event, self.limits.max_event_bytes)?;
+        let (class, mut cost) = event_cost(event, self.limits.max_event_bytes)?;
+        if timer.is_some() {
+            cost = cost
+                .checked_add(size_of::<TimerToken>())
+                .filter(|n| *n <= self.limits.max_event_bytes)
+                .ok_or(RuntimeError::EventTooLarge)?;
+        }
         let all = sum(&self.usage);
         let local = sum(&g.usage);
         let l = self.limits;
@@ -425,10 +439,18 @@ impl<Q: ReadyScheduler> Shard<Q> {
         Ok((class, cost))
     }
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
-        match self.admit_inner(group, &event) {
+        self.admit_tagged(group, event, None)
+    }
+    fn admit_tagged(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+        timer: Option<TimerToken>,
+    ) -> Result<(), Rejected> {
+        match self.admit_inner(group, &event, timer) {
             Ok((class, cost)) => {
                 let g = self.groups.get_mut(&group).unwrap();
-                g.queues[class as usize].push_back(Queued { event, cost });
+                g.queues[class as usize].push_back(Queued { event, cost, timer });
                 g.usage[class as usize].add(cost);
                 self.usage[class as usize].add(cost);
                 Ok(())
@@ -539,10 +561,20 @@ impl<Q: ReadyScheduler> Shard<Q> {
             Event::Read { request } => Some(*request),
             _ => None,
         };
+        let timer = q.timer.filter(|token| g.timer == Some(*token));
+        let stale_timer = q.timer.is_some() && timer.is_none();
+        if timer.is_some() {
+            g.timer = None;
+        }
         Ok(Some(Stepped {
             operation,
             read,
-            result: g.core.step(q.event),
+            timer,
+            result: if stale_timer {
+                Ok(Vec::new())
+            } else {
+                g.core.step(q.event)
+            },
         }))
     }
     /// Serialized owner access for the existing public durability, snapshot and
@@ -583,6 +615,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         let had_active_visit = g.visit.take().is_some();
         g.core.storage_failed();
         g.fenced = true;
+        g.timer = None;
         let queued = g
             .queues
             .iter_mut()

@@ -21,8 +21,10 @@ Shared runtime components now schedule many groups through bounded ready queues
 and explicit deadlines. The 100-group history uses one WAL per node, batches
 persistence across groups, and demonstrates progress while one group's durable
 completion is delayed. Public scheduler, timer, clock and election-jitter seams
-support host replacements. This is a caller-driven integration boundary;
-automatic timer management, background workers and transport assembly remain.
+support host replacements. `TimedShard` automatically manages election and
+heartbeat deadlines, including stale queued expirations and overload retries.
+This is a caller-driven integration boundary; background workers and transport
+assembly remain.
 
 Transport, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
@@ -88,6 +90,12 @@ can run while it is suspended. Rejected admission returns the original event.
 Input credits remain charged until the visit finishes. These limits cover
 ingress retention; the host still supplies separate outbound and application
 budgets. The runtime creates no threads or stores.
+
+Wrap a quiescent shard with `runtime::TimedShard`, a timer service, seeded
+election entropy and `TimerConfig` to manage deadlines automatically. Pass local
+monotonic time when polling, stepping and delivering completions. Its visit
+access updates timers after valid leader contact, durable vote grants and role
+changes. Deadlines trigger protocol work; reads still require a fresh quorum.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

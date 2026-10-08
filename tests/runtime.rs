@@ -624,6 +624,7 @@ struct MultiNode<L: LogStore, Q: ReadyScheduler> {
     delayed: BTreeSet<GroupIdentity>,
     waiting: BTreeMap<GroupIdentity, (VisitTicket, DurableLog)>,
     messages: VecDeque<Message>,
+    deferred: VecDeque<Message>,
     results: Vec<CounterReceipt>,
     reads: Vec<i64>,
     largest_batch: usize,
@@ -664,6 +665,7 @@ impl<L: LogStore, Q: ReadyScheduler> MultiNode<L, Q> {
             delayed: BTreeSet::new(),
             waiting: BTreeMap::new(),
             messages: VecDeque::new(),
+            deferred: VecDeque::new(),
             results: Vec::new(),
             reads: Vec::new(),
             largest_batch: 0,
@@ -786,16 +788,24 @@ fn pump_multi<L: LogStore, Q: ReadyScheduler>(nodes: &mut [MultiNode<L, Q>], now
         }
         let mut messages = VecDeque::new();
         for n in nodes.iter_mut() {
+            messages.append(&mut n.deferred);
             messages.append(&mut n.messages);
         }
         assert!(messages.len() <= 8192);
         while let Some(m) = messages.pop_front() {
-            nodes[m.to.get() as usize - 1]
-                .shard
-                .admit(m.group, Event::Receive(m))
-                .unwrap();
-            progress = true;
+            let target = m.to.get() as usize - 1;
+            match nodes[target].shard.admit(m.group, Event::Receive(m)) {
+                Ok(()) => progress = true,
+                Err(rejected) if rejected.reason == RuntimeError::Overloaded => {
+                    let Event::Receive(message) = *rejected.event else {
+                        panic!()
+                    };
+                    nodes[target].deferred.push_back(message);
+                }
+                Err(rejected) => panic!("unexpected network rejection: {rejected:?}"),
+            }
         }
+        assert!(nodes.iter().map(|n| n.deferred.len()).sum::<usize>() <= 8192);
         if !progress {
             return;
         }
@@ -1204,4 +1214,849 @@ fn dropping_one_shard_leaves_the_host_store_and_other_owner_live() {
     b.finish(visit).unwrap();
     assert_eq!(log.state(group(2)).unwrap().hard_state.term, 1);
     assert_eq!(log.state(group(1)).unwrap().hard_state.term, 0);
+}
+
+fn timer_config() -> TimerConfig {
+    TimerConfig {
+        heartbeat_ms: 4,
+        election_min_ms: 20,
+        election_spread_ms: 20,
+        expirations_per_poll: 3,
+    }
+}
+fn heartbeat(term: u64) -> Message {
+    Message {
+        group: group(1),
+        configuration: ConfigurationId::new(1).unwrap(),
+        from: node(2),
+        to: node(1),
+        sender: HostLogStore::new(2).binding(),
+        term,
+        context: RequestContext {
+            origin: HostLogStore::new(2).binding(),
+            sequence: 1,
+        },
+        rpc: Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            entries: vec![],
+            leader_commit: 0,
+        },
+    }
+}
+fn host_timed(
+    term: u64,
+    vote: Option<NodeId>,
+) -> (
+    TimedShard<HostReady, HostTimers, FixedEntropy>,
+    HostLogStore,
+) {
+    let mut log = HostLogStore::new(1);
+    append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+    if term > 0 {
+        let state = log.state(group(1)).unwrap();
+        let mut mutation = update(&state, term, 0, None);
+        if let LogMutation::Update(u) = &mut mutation {
+            u.hard_state.voted_for = vote;
+        }
+        append(&mut log, vec![mutation]);
+    }
+    let mut shard = Shard::new(owner(log.binding()), small_limits(), HostReady::new(3)).unwrap();
+    shard
+        .register(
+            Raft::recover(
+                node(1),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    let timers = HostTimers::new(owner(log.binding()), 3);
+    (
+        TimedShard::new(shard, timers, FixedEntropy(0), timer_config(), MonoTime(0)).unwrap(),
+        log,
+    )
+}
+#[test]
+fn leader_contact_invalidates_an_election_already_queued_for_dispatch() {
+    let (mut runtime, _) = host_timed(1, None);
+    let initial = runtime.deadline(group(1)).unwrap();
+    runtime
+        .admit(group(1), Event::Receive(heartbeat(1)))
+        .unwrap();
+    let now = MonoTime(initial.deadline.0 + 1);
+    assert_eq!(runtime.poll_timers(now).unwrap().admitted, 1);
+    let visit = runtime.poll(now).unwrap().unwrap();
+    let step = runtime.step_next(visit, now).unwrap().unwrap();
+    assert!(step
+        .result
+        .unwrap()
+        .iter()
+        .all(|e| matches!(e, Effect::Send(_))));
+    runtime.finish(visit).unwrap();
+    let fresh = runtime.deadline(group(1)).unwrap();
+    assert_ne!(fresh, initial);
+    let visit = runtime.poll(now).unwrap().unwrap();
+    let stale = runtime.step_next(visit, now).unwrap().unwrap();
+    assert!(stale.timer.is_none());
+    assert!(stale.result.unwrap().is_empty());
+    runtime.finish(visit).unwrap();
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 1);
+    assert_eq!(runtime.core(group(1)).unwrap().role(), Role::Follower);
+    assert_eq!(runtime.deadline(group(1)), Some(fresh));
+    runtime.close_admission().unwrap();
+    assert!(runtime.deadline(group(1)).is_none());
+    assert!(runtime.poll(MonoTime(1000)).unwrap().is_none());
+}
+#[test]
+fn stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines() {
+    let (mut runtime, _) = host_timed(2, Some(node(3)));
+    let initial = runtime.deadline(group(1));
+    let mut vote = heartbeat(2);
+    vote.rpc = Rpc::Vote {
+        last_index: 0,
+        last_term: 0,
+    };
+    let mut malformed = heartbeat(2);
+    malformed.rpc = Rpc::Append {
+        previous_index: 99,
+        previous_term: 1,
+        entries: vec![entry(150, 1, 7)],
+        leader_commit: 0,
+    };
+    let mut foreign = heartbeat(2);
+    foreign.configuration = ConfigurationId::new(99).unwrap();
+    let mut ack = heartbeat(2);
+    ack.context.origin = HostLogStore::new(1).binding();
+    ack.rpc = Rpc::Appended {
+        success: true,
+        matching_index: 0,
+    };
+    for message in [heartbeat(1), vote, malformed, foreign, ack] {
+        runtime.admit(group(1), Event::Receive(message)).unwrap();
+        let t = runtime.poll(MonoTime(10)).unwrap().unwrap();
+        let _ = runtime.step_next(t, MonoTime(10)).unwrap().unwrap().result;
+        runtime.finish(t).unwrap();
+        assert_eq!(runtime.deadline(group(1)), initial);
+    }
+}
+#[test]
+fn delayed_durable_vote_completion_resets_and_fences_a_queued_expiration() {
+    let (mut runtime, mut log) = host_timed(2, None);
+    let old = runtime.deadline(group(1)).unwrap();
+    let mut vote = heartbeat(2);
+    vote.rpc = Rpc::Vote {
+        last_index: 0,
+        last_term: 0,
+    };
+    runtime.admit(group(1), Event::Receive(vote)).unwrap();
+    let t = runtime.poll(MonoTime(10)).unwrap().unwrap();
+    let effects = runtime
+        .step_next(t, MonoTime(10))
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    assert_eq!(runtime.deadline(group(1)), Some(old));
+    let now = MonoTime(old.deadline.0 + 2);
+    assert_eq!(runtime.poll_timers(now).unwrap().admitted, 1);
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    runtime
+        .with_core(t, now, |core| core.admit_effect(update, tickets[0]))
+        .unwrap()
+        .unwrap();
+    let completion = log.barrier(&tickets).unwrap();
+    let effects = runtime
+        .with_core(t, now, |core| core.complete(&completion))
+        .unwrap()
+        .unwrap();
+    assert!(matches!(
+        effects.as_slice(),
+        [Effect::Send(Message {
+            rpc: Rpc::Voted { granted: true },
+            ..
+        })]
+    ));
+    assert_ne!(runtime.deadline(group(1)), Some(old));
+    runtime.finish(t).unwrap();
+    let stale = runtime.poll(now).unwrap().unwrap();
+    assert!(runtime
+        .step_next(stale, now)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap()
+        .is_empty());
+    runtime.finish(stale).unwrap();
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 2);
+}
+#[test]
+fn expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns() {
+    let (mut runtime, _) = host_timed(0, None);
+    let old = runtime.deadline(group(1)).unwrap();
+    for _ in 0..8 {
+        runtime.admit(group(1), Event::Heartbeat).unwrap();
+    }
+    let now = MonoTime(old.deadline.0 + 1);
+    let p = runtime.poll_timers(now).unwrap();
+    assert_eq!(p.blocked, 1);
+    assert_eq!(p.max_lateness_ms, 1);
+    for _ in 0..100 {
+        assert_eq!(runtime.poll_timers(now).unwrap().blocked, 1);
+        assert_eq!(runtime.pending_expirations(), 1);
+    }
+    let visit = runtime.poll(now).unwrap().unwrap();
+    runtime
+        .step_next(visit, now)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    runtime.finish(visit).unwrap();
+    assert_eq!(
+        runtime.poll_timers(MonoTime(now.0 + 3)).unwrap().admitted,
+        1
+    );
+    assert_eq!(runtime.pending_expirations(), 0);
+    runtime.close_admission().unwrap();
+    while let Some(visit) = runtime.poll(MonoTime(now.0 + 3)).unwrap() {
+        assert!(runtime
+            .step_next(visit, MonoTime(now.0 + 3))
+            .unwrap()
+            .unwrap()
+            .result
+            .unwrap()
+            .is_empty());
+        runtime.finish(visit).unwrap();
+    }
+    assert!(runtime.is_drained());
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 0);
+}
+
+struct AutoNode<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
+    runtime: TimedShard<Q, T, E>,
+    log: L,
+    apps: BTreeMap<GroupIdentity, Counter>,
+    messages: VecDeque<Message>,
+    reads: Vec<i64>,
+}
+impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNode<L, Q, T, E> {
+    fn new(
+        id: u64,
+        mut log: L,
+        ready: Q,
+        make_timers: impl FnOnce(RuntimeOwner) -> T,
+        entropy: E,
+        now: MonoTime,
+        create: bool,
+    ) -> Self {
+        if create {
+            append(
+                &mut log,
+                (1..=2)
+                    .map(|g| LogMutation::Create(bootstrap(g, 3)))
+                    .collect(),
+            );
+        }
+        let mut shard = Shard::new(owner(log.binding()), small_limits(), ready).unwrap();
+        let mut apps = BTreeMap::new();
+        for g in 1..=2 {
+            let core = Raft::recover(
+                node(id),
+                log.binding(),
+                log.state(group(g)).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            let mut app = Counter::new(10).unwrap();
+            app.apply_batch(core.replay_committed()).unwrap();
+            shard.register(core).unwrap();
+            apps.insert(group(g), app);
+        }
+        let runtime = TimedShard::new(
+            shard,
+            make_timers(owner(log.binding())),
+            entropy,
+            timer_config(),
+            now,
+        )
+        .unwrap();
+        Self {
+            runtime,
+            log,
+            apps,
+            messages: VecDeque::new(),
+            reads: Vec::new(),
+        }
+    }
+    fn drain(&mut self, now: MonoTime) -> bool {
+        let mut progress = false;
+        for _ in 0..16 {
+            let Some(visit) = self.runtime.poll(now).unwrap() else {
+                break;
+            };
+            let step = self.runtime.step_next(visit, now).unwrap().unwrap();
+            let effects = match step.result {
+                Ok(e) => e,
+                Err(RaftError::WrongIdentity | RaftError::InvalidMessage) => vec![],
+                Err(e) => panic!("unexpected event failure: {e:?}"),
+            };
+            let mut effects = VecDeque::from(effects);
+            while let Some(effect) = effects.pop_front() {
+                assert!(effects.len() < 128);
+                match effect {
+                    Effect::Persist(update) => effects.extend(
+                        self.runtime
+                            .with_core(visit, now, |core| {
+                                persist_effect(core, &mut self.log, update)
+                            })
+                            .unwrap()
+                            .unwrap(),
+                    ),
+                    Effect::Send(m) => {
+                        assert!(self.messages.len() < 512);
+                        self.messages.push_back(m);
+                    }
+                    Effect::Committed(entries) => {
+                        self.apps
+                            .get_mut(&visit.group)
+                            .unwrap()
+                            .apply_batch(&entries)
+                            .unwrap();
+                    }
+                    Effect::ReadReady(barrier) => {
+                        let app = &self.apps[&visit.group];
+                        self.reads.push(
+                            self.runtime
+                                .with_core(visit, now, |core| {
+                                    read_at_barrier(core, &barrier, app, ())
+                                })
+                                .unwrap()
+                                .unwrap(),
+                        );
+                    }
+                    _ => panic!("this timer history does not compact"),
+                }
+            }
+            self.runtime.finish(visit).unwrap();
+            progress = true;
+        }
+        progress
+    }
+}
+fn pump_auto<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut [AutoNode<L, Q, T, E>],
+    now: MonoTime,
+    partition: Option<usize>,
+    delayed: &mut Vec<Message>,
+) {
+    for _ in 0..10000 {
+        let mut progress = false;
+        for n in nodes.iter_mut() {
+            progress |= n.drain(now);
+        }
+        let mut messages = VecDeque::new();
+        for n in nodes.iter_mut() {
+            messages.append(&mut n.messages);
+        }
+        assert!(messages.len() < 512);
+        while let Some(m) = messages.pop_front() {
+            if m.group == group(1)
+                && partition
+                    .is_some_and(|p| m.from.get() as usize == p + 1 || m.to.get() as usize == p + 1)
+            {
+                if delayed.len() < 512 {
+                    delayed.push(m);
+                }
+                continue;
+            }
+            nodes[m.to.get() as usize - 1]
+                .runtime
+                .admit(m.group, Event::Receive(m))
+                .unwrap();
+            progress = true;
+        }
+        if !progress {
+            return;
+        }
+    }
+    panic!("automatic timer history failed to converge");
+}
+fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut Vec<AutoNode<L, Q, T, E>>,
+    restart: impl FnOnce(usize, AutoNode<L, Q, T, E>, MonoTime) -> AutoNode<L, Q, T, E>,
+) {
+    let mut delayed = Vec::new();
+    for ms in 0..=100 {
+        pump_auto(nodes, MonoTime(ms), None, &mut delayed);
+    }
+    let leader = nodes
+        .iter()
+        .position(|n| n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+        .unwrap();
+    assert_eq!(
+        nodes
+            .iter()
+            .filter(|n| n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+            .count(),
+        1
+    );
+    let other = nodes
+        .iter()
+        .position(|n| n.runtime.core(group(2)).unwrap().role() == Role::Leader)
+        .unwrap();
+    let healthy_term = nodes[other]
+        .runtime
+        .core(group(2))
+        .unwrap()
+        .state()
+        .hard_state
+        .term;
+    nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
+    pump_auto(nodes, MonoTime(100), None, &mut delayed);
+    for n in nodes.iter() {
+        assert_eq!(n.apps[&group(1)].read_applied(2), Ok(7));
+    }
+    for ms in 101..=250 {
+        pump_auto(nodes, MonoTime(ms), Some(leader), &mut delayed);
+    }
+    let replacement = nodes
+        .iter()
+        .enumerate()
+        .position(|(i, n)| i != leader && n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+        .unwrap();
+    assert!(
+        nodes[replacement]
+            .runtime
+            .core(group(1))
+            .unwrap()
+            .state()
+            .hard_state
+            .term
+            > nodes[leader]
+                .runtime
+                .core(group(1))
+                .unwrap()
+                .state()
+                .hard_state
+                .term
+    );
+    assert_eq!(
+        nodes[other]
+            .runtime
+            .core(group(2))
+            .unwrap()
+            .state()
+            .hard_state
+            .term,
+        healthy_term
+    );
+    nodes[leader]
+        .runtime
+        .admit(
+            group(1),
+            Event::Read {
+                request: ReadRequestId::new(1).unwrap(),
+            },
+        )
+        .unwrap();
+    nodes[replacement]
+        .runtime
+        .admit(
+            group(1),
+            Event::Propose {
+                operation: OperationId::new(2).unwrap(),
+                bytes: 3i64.to_le_bytes().to_vec(),
+            },
+        )
+        .unwrap();
+    nodes[other].runtime.admit(group(2), proposal(1)).unwrap();
+    pump_auto(nodes, MonoTime(250), Some(leader), &mut delayed);
+    assert!(nodes[leader].reads.is_empty());
+    for (i, n) in nodes.iter().enumerate() {
+        if i != leader {
+            assert_eq!(
+                n.apps[&group(1)]
+                    .read_applied(n.runtime.core(group(1)).unwrap().state().commit_index),
+                Ok(10)
+            );
+        }
+        assert_eq!(
+            n.apps[&group(2)].read_applied(n.runtime.core(group(2)).unwrap().state().commit_index),
+            Ok(7)
+        );
+    }
+    let old = nodes.remove(leader);
+    nodes.insert(leader, restart(leader, old, MonoTime(250)));
+    // Delayed old requests and replies cross recovery; some refer to the old
+    // store session and none can replace a current-term authority check.
+    for message in delayed.drain(..).take(8) {
+        for _ in 0..2 {
+            nodes[message.to.get() as usize - 1]
+                .runtime
+                .admit(message.group, Event::Receive(message.clone()))
+                .unwrap();
+        }
+        pump_auto(nodes, MonoTime(250), None, &mut vec![]);
+    }
+    for ms in 251..=400 {
+        pump_auto(nodes, MonoTime(ms), None, &mut delayed);
+    }
+    assert_eq!(
+        nodes
+            .iter()
+            .filter(|n| n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+            .count(),
+        1
+    );
+    let current = nodes
+        .iter()
+        .position(|n| n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+        .unwrap();
+    nodes[current].runtime.admit(group(1), proposal(1)).unwrap();
+    nodes[current]
+        .runtime
+        .admit(
+            group(1),
+            Event::Read {
+                request: ReadRequestId::new(2).unwrap(),
+            },
+        )
+        .unwrap();
+    pump_auto(nodes, MonoTime(400), None, &mut delayed);
+    assert_eq!(nodes[current].reads.last(), Some(&10));
+    for n in nodes.iter() {
+        assert_eq!(
+            n.apps[&group(1)].read_applied(n.runtime.core(group(1)).unwrap().state().commit_index),
+            Ok(10)
+        );
+    }
+}
+#[test]
+fn virtual_time_elects_replaces_and_recovers_leaders_with_host_providers() {
+    let mut nodes = (1..=3)
+        .map(|id| {
+            AutoNode::new(
+                id,
+                HostLogStore::new(id as u128),
+                HostReady::new(3),
+                |owner| HostTimers::new(owner, 3),
+                FixedEntropy((id - 1) * 8),
+                MonoTime(0),
+                true,
+            )
+        })
+        .collect::<Vec<_>>();
+    automatic_history(&mut nodes, |id, old, now| {
+        let mut log = old.log;
+        log.binding.session = StoreSession::new(2).unwrap();
+        log.accepted = log.durable.clone();
+        log.pending.clear();
+        AutoNode::new(
+            id as u64 + 1,
+            log,
+            HostReady::new(3),
+            |owner| HostTimers::new(owner, 3),
+            FixedEntropy(id as u64 * 8),
+            now,
+            false,
+        )
+    });
+}
+#[cfg(feature = "native")]
+#[test]
+fn virtual_time_leader_loss_and_recovery_use_native_timers_and_wals() {
+    use voteboat::native::{log_store::*, runtime::*};
+    let images = (1..=3).map(|_| ModelIo::default()).collect::<Vec<_>>();
+    let mut nodes = (1..=3)
+        .map(|id| {
+            AutoNode::new(
+                id,
+                NativeLogStore::create(
+                    images[id as usize - 1].clone(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                FairScheduler::new(3).unwrap(),
+                |owner| DeadlineQueue::new(owner, 3).unwrap(),
+                JitterEntropy::new(id),
+                MonoTime(0),
+                true,
+            )
+        })
+        .collect::<Vec<_>>();
+    automatic_history(&mut nodes, |id, old, now| {
+        drop(old);
+        images[id].0.borrow_mut().power_loss();
+        let log = NativeLogStore::recover(
+            images[id].clone(),
+            identity(id as u128 + 1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        AutoNode::new(
+            id as u64 + 1,
+            log,
+            FairScheduler::new(3).unwrap(),
+            |owner| DeadlineQueue::new(owner, 3).unwrap(),
+            JitterEntropy::new(id as u64 + 1),
+            now,
+            false,
+        )
+    });
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn automatic_timer_history_reopens_three_actual_native_files() {
+    use voteboat::native::{log_store::*, runtime::*};
+    let root = std::env::temp_dir().join(format!("voteboat-auto-runtime-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let mut nodes = (1..=3)
+        .map(|id| {
+            AutoNode::new(
+                id,
+                NativeLogStore::create(
+                    FileLogIo::create(root.join(id.to_string())).unwrap(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                FairScheduler::new(3).unwrap(),
+                |owner| DeadlineQueue::new(owner, 3).unwrap(),
+                JitterEntropy::new(id),
+                MonoTime(0),
+                true,
+            )
+        })
+        .collect::<Vec<_>>();
+    automatic_history(&mut nodes, |id, old, now| {
+        drop(old);
+        let log = NativeLogStore::recover(
+            FileLogIo::open(root.join((id + 1).to_string())).unwrap(),
+            identity(id as u128 + 1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        AutoNode::new(
+            id as u64 + 1,
+            log,
+            FairScheduler::new(3).unwrap(),
+            |owner| DeadlineQueue::new(owner, 3).unwrap(),
+            JitterEntropy::new(id as u64 + 1),
+            now,
+            false,
+        )
+    });
+    drop(nodes);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+struct FailingTimers {
+    inner: HostTimers,
+    fail: Rc<Cell<bool>>,
+}
+impl TimerService for FailingTimers {
+    fn owner(&self) -> RuntimeOwner {
+        self.inner.owner()
+    }
+    fn capacity(&self) -> usize {
+        self.inner.capacity()
+    }
+    fn register(
+        &mut self,
+        g: GroupIdentity,
+        k: TimerKind,
+        d: MonoTime,
+    ) -> Result<TimerToken, RuntimeError> {
+        if self.fail.get() {
+            Err(RuntimeError::SchedulerContract)
+        } else {
+            self.inner.register(g, k, d)
+        }
+    }
+    fn cancel(&mut self, t: TimerToken) -> Result<(), RuntimeError> {
+        self.inner.cancel(t)
+    }
+    fn poll(&mut self, n: MonoTime, l: usize) -> Result<Vec<Expiration>, RuntimeError> {
+        self.inner.poll(n, l)
+    }
+    fn len(&self) -> usize {
+        self.inner.len()
+    }
+}
+#[test]
+fn timer_provider_failure_latches_and_still_allows_explicit_stop() {
+    let mut log = HostLogStore::new(1);
+    append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let mut shard = Shard::new(owner(log.binding()), small_limits(), HostReady::new(3)).unwrap();
+    shard
+        .register(
+            Raft::recover(
+                node(1),
+                log.binding(),
+                log.state(group(1)).unwrap(),
+                log.limits(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    let fail = Rc::new(Cell::new(false));
+    let timers = FailingTimers {
+        inner: HostTimers::new(owner(log.binding()), 3),
+        fail: fail.clone(),
+    };
+    let mut runtime =
+        TimedShard::new(shard, timers, FixedEntropy(0), timer_config(), MonoTime(0)).unwrap();
+    let mut message = heartbeat(0);
+    message.term = 1;
+    runtime.admit(group(1), Event::Receive(message)).unwrap();
+    let visit = runtime.poll(MonoTime(10)).unwrap().unwrap();
+    fail.set(true);
+    assert!(matches!(
+        runtime.step_next(visit, MonoTime(10)),
+        Err(RuntimeError::SchedulerContract)
+    ));
+    // No dependent effect escaped when its timer replacement failed. The core
+    // may have accepted work; the host resolves it by explicit stop/recovery.
+    assert_eq!(
+        runtime.admit(group(1), proposal(1)).unwrap_err().reason,
+        RuntimeError::SchedulerContract
+    );
+    assert_eq!(
+        runtime.poll(MonoTime(100)),
+        Err(RuntimeError::SchedulerContract)
+    );
+    let stopped = runtime.stop_group(group(1)).unwrap();
+    assert!(stopped.had_active_visit);
+    assert!(runtime.core(group(1)).unwrap().is_fenced());
+    assert!(runtime.is_drained());
+    assert!(runtime.deadline(group(1)).is_none());
+}
+
+fn delayed_auto_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut [AutoNode<L, Q, T, E>],
+) {
+    let mut network = VecDeque::<(u64, Message)>::new();
+    let mut chosen = None;
+    for ms in 0..=1000 {
+        if ms == 500 {
+            let leader = nodes
+                .iter()
+                .position(|n| n.runtime.core(group(1)).unwrap().role() == Role::Leader)
+                .unwrap();
+            assert!(
+                nodes[leader]
+                    .runtime
+                    .core(group(1))
+                    .unwrap()
+                    .state()
+                    .commit_index
+                    > 0,
+                "heartbeat retries must not invalidate slower acknowledgements"
+            );
+            let term = nodes[leader]
+                .runtime
+                .core(group(1))
+                .unwrap()
+                .state()
+                .hard_state
+                .term;
+            chosen = Some((leader, term));
+            nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
+        }
+        if ms == 800 {
+            nodes[chosen.unwrap().0]
+                .runtime
+                .admit(
+                    group(1),
+                    Event::Read {
+                        request: ReadRequestId::new(1).unwrap(),
+                    },
+                )
+                .unwrap();
+        }
+        while network.front().is_some_and(|(due, _)| *due <= ms) {
+            let (_, message) = network.pop_front().unwrap();
+            nodes[message.to.get() as usize - 1]
+                .runtime
+                .admit(message.group, Event::Receive(message))
+                .unwrap();
+        }
+        for n in nodes.iter_mut() {
+            n.drain(MonoTime(ms));
+            while let Some(message) = n.messages.pop_front() {
+                assert!(network.len() < 512);
+                network.push_back((ms + 6, message));
+            }
+        }
+    }
+    let (leader, term) = chosen.unwrap();
+    assert_eq!(
+        nodes[leader]
+            .runtime
+            .core(group(1))
+            .unwrap()
+            .state()
+            .hard_state
+            .term,
+        term
+    );
+    assert_eq!(nodes[leader].reads, [7]);
+    for n in nodes.iter() {
+        assert_eq!(
+            n.apps[&group(1)].read_applied(n.runtime.core(group(1)).unwrap().state().commit_index),
+            Ok(7)
+        );
+    }
+}
+#[test]
+fn network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads() {
+    let mut nodes = (1..=3)
+        .map(|id| {
+            AutoNode::new(
+                id,
+                HostLogStore::new(id as u128),
+                HostReady::new(3),
+                |owner| HostTimers::new(owner, 3),
+                FixedEntropy((id - 1) * 8),
+                MonoTime(0),
+                true,
+            )
+        })
+        .collect::<Vec<_>>();
+    delayed_auto_history(&mut nodes);
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_timer_replication_progress_survives_multiple_heartbeat_retries() {
+    use voteboat::native::{log_store::*, runtime::*};
+    let mut nodes = (1..=3)
+        .map(|id| {
+            AutoNode::new(
+                id,
+                NativeLogStore::create(
+                    ModelIo::default(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                FairScheduler::new(3).unwrap(),
+                |owner| DeadlineQueue::new(owner, 3).unwrap(),
+                JitterEntropy::new(id),
+                MonoTime(0),
+                true,
+            )
+        })
+        .collect::<Vec<_>>();
+    delayed_auto_history(&mut nodes);
 }
