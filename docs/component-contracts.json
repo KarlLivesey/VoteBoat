@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "static-replication-reads-pinned-compaction-and-snapshot-installation",
+  "status": "bounded-shared-ingress-runtime-with-explicit-deadlines",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -206,6 +206,38 @@
         "examples/replicated_counter.rs"
       ],
       "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable."
+    },
+    {
+      "design_id": "C10",
+      "public_contract": "ReadyScheduler",
+      "operations": ["capacity", "enqueue", "pop", "cancel", "len"],
+      "native": "FairScheduler",
+      "conformance": ["tests/runtime.rs"],
+      "scope": "Unique bounded readiness with fair requeue; Shard owns cores and enforces item/byte/time visits, ingress credits and scoped single-owner access. Caller-driven, no hidden threads."
+    },
+    {
+      "design_id": "C11",
+      "public_contract": "TimerService",
+      "operations": ["owner", "capacity", "register", "cancel", "poll", "len"],
+      "native": "DeadlineQueue",
+      "conformance": ["tests/runtime.rs"],
+      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. Consumer retains expected tokens and rearms explicitly; automatic consensus timer management remains pending."
+    },
+    {
+      "design_id": "C12",
+      "public_contract": "Clock",
+      "operations": ["now"],
+      "native": "MonotonicClock",
+      "conformance": ["tests/runtime.rs"],
+      "scope": "Local monotonic milliseconds with clone-shared epoch; virtual host clock injection. No core clock reads or diagnostic wall-clock API."
+    },
+    {
+      "design_id": "C13",
+      "public_contract": "ElectionEntropy",
+      "operations": ["sample"],
+      "native": "JitterEntropy",
+      "conformance": ["tests/runtime.rs"],
+      "scope": "Explicitly seeded reproducible election jitter; independent node seeds supplied by host. No cryptographic/identity use."
     }
   ],
   "not_yet_implemented": [
@@ -213,10 +245,9 @@
     "transport",
     "wire-codec",
     "secure-session",
-    "scheduler",
-    "timers",
-    "clock",
-    "entropy",
+    "automatic-consensus-timers",
+    "background-worker-assembly",
+    "outbound-admission",
     "buffers",
     "admission-policy",
     "routing",

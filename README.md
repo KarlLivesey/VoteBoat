@@ -17,6 +17,13 @@ result without repeating their effect. Restart, partition, corruption and
 storage-failure tests exercise native providers and host replacements. There
 are no third-party runtime dependencies.
 
+Shared runtime components now schedule many groups through bounded ready queues
+and explicit deadlines. The 100-group history uses one WAL per node, batches
+persistence across groups, and demonstrates progress while one group's durable
+completion is delayed. Public scheduler, timer, clock and election-jitter seams
+support host replacements. This is a caller-driven integration boundary;
+automatic timer management, background workers and transport assembly remain.
+
 Transport, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
 
@@ -28,6 +35,12 @@ Install Rust 1.98.1 (pinned in `rust-toolchain.toml`), then:
 cargo test --locked --offline
 cargo test --locked --offline --no-default-features
 cargo clippy --locked --offline --all-targets -- -D warnings
+```
+
+Run the shared-runtime histories, including three actual WAL files:
+
+```sh
+cargo test --locked --offline --test runtime
 ```
 
 Try the three-replica counter in a fresh directory:
@@ -65,7 +78,16 @@ platform I/O, encoding and application serialization through public contracts.
 Compacted replicas recover through `snapshot::recover_replica`, which verifies
 the pinned image and restores application state before returning a usable core.
 Snapshot transfers currently own one bounded image in the in-process transport;
-network framing and shared runtime admission remain to be implemented.
+network framing and shared outbound buffer/admission assembly remain to be implemented.
+
+`runtime::Shard` owns its registered cores. Admit an owned event, poll a scoped
+visit, then call `step_next`. Drive returned effects through bounded host workers,
+using `with_core` to deliver exact admissions/completions and existing snapshot
+or read helpers. Finish the visit once its dependencies resolve; other groups
+can run while it is suspended. Rejected admission returns the original event.
+Input credits remain charged until the visit finishes. These limits cover
+ingress retention; the host still supplies separate outbound and application
+budgets. The runtime creates no threads or stores.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

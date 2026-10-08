@@ -9,9 +9,9 @@ record claims that unimplemented phases already work.
 
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
-| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
+| P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; production transport/runtime remain |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Pending |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded single-owner ingress scheduling, shared WAL batches and 100-group overload isolation implemented; transport coalescing, worker assembly and output admission remain |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -520,11 +520,104 @@ budgets, production transport, physical WAL cleaning and online configuration
 are still pending. Finite crash histories are regression evidence; real hardware
 power-cut and macOS execution remain outstanding. The P0–P7 goal remains active.
 
+## Slice 6: shared ingress scheduling and explicit deadlines
+
+`Shard<ReadyScheduler>` owns registered Raft cores and bounded event queues. The
+native `FairScheduler` maintains unique readiness and round-robin service;
+continuing work returns to the tail. A registered group has one mutable owner
+and at most one active visit. Every visit has item, retained-byte and elapsed
+time budgets, checked between core steps; these cannot preempt an individual
+step or callback. The public scheduler carries readiness only, never consensus
+state. No group scan is needed to select ready work.
+
+Mandatory admission checks group ownership and node/group item and byte ceilings
+before retaining an event. User proposals and read admissions cannot consume the
+control reserve; replication acknowledgements, term/vote work, read protocol
+messages and timer events can. Snapshot inputs also consume an explicit shared
+background ceiling. Retained vector capacities are charged rather than only
+payload lengths, with bounded policy-tree and membership accounting. These
+accounting units bound retained ingress structures, not exact allocator RSS.
+Bounded class priority retains a cursor across visits, so repeated control
+arrivals cannot starve data merely because the visit limit is one event.
+`Overloaded` is a capacity rejection; `EventTooLarge` requires reducing or
+renegotiating the event's retained representation. Rejection returns the exact
+owned event and implies no successful admission or client result.
+
+`VisitTicket` binds store identity/session, execution lane, runtime generation,
+group incarnation and visit sequence. A fresh store session fences restart-era
+work; replacing an owner requires a fresh host-supplied runtime generation.
+Sequence numbers identify visits, not durable prefixes. One shard and timer
+service lifetime share that owner; resetting either sequence under a reused
+owner is forbidden. Only an exact live visit permits mutable core access.
+Inputs remain charged through a suspended visit. `finish` refuses outstanding
+storage or snapshot dependencies, while unrelated groups remain schedulable.
+`Raft::admit_effect` correlates the complete submitted update before accepting
+its storage ticket, enabling batched workers to deliver later durable evidence.
+The existing exact durability tokens still gate all dependent Raft effects.
+
+`TimerService` exposes bounded register/replace/cancel/poll operations and exact
+generation-scoped tokens. Native `DeadlineQueue` uses ordered deadlines with
+O(log timer count) updates, physically removing replaced/canceled entries rather
+than accumulating tombstones. It is a deliberate initial alternative to the
+pack's proposed timer wheel; no constant-time or throughput claim is made.
+Expiration reports lateness separately. The consumer compares its expected
+token, retains/retries expiration on queue overload and explicitly rearms it.
+The native monotonic `Clock` uses a shared cloneable epoch; virtual clocks are
+injected in tests. `ElectionEntropy` supplies jitter, with an explicitly seeded,
+reproducible native generator. Independent node seeds are a host responsibility;
+this generator has no cryptographic or identity role. Clock regression and
+deadline arithmetic overflow fail explicitly. The core reads no clock.
+
+Closing admission allows bounded draining. Stopping a group fences its core,
+invalidates its visit and returns unprocessed inputs. Already submitted external
+work has an unknown outcome until recovery; cancellation is not rollback.
+Dropping a shard does not close a host-owned WAL, clock or executor. Effects
+transfer to host-owned workers; this slice does not budget their outbound or
+application buffers. Synchronous native storage remains a mechanism to run on
+the later bounded blocking worker, not inside an indefinitely blocking scheduler
+callback. Automatic leader-contact/election timer management, background worker
+assembly, per-peer/tenant admission, wire framing and secure transport remain.
+
+### Slice 6 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native tests: 88 pass; core/host-only tests: 39 pass. Both builds pass Clippy
+  with warnings denied, formatting and documentation checks.
+- Independent downstream scheduler, timer, clock and entropy providers exercise
+  the same contracts without native features. Readiness deduplication, fair
+  requeue, bounded expiration polling, cancellation, replacement, stale tokens,
+  timer lateness and clock regression are covered.
+- A shared history hosts 100 groups on each of three nodes with one log store
+  per node. Elections use virtual deadlines polled in bounded batches. WAL
+  transitions coalesce into batches of 100 groups. Delaying one group's durable
+  completion retains its charged input while the other 99 commit and complete
+  quorum-backed reads. Group overload leaves control credits available.
+- The history runs with independent host storage/scheduling/timers, native
+  simulated I/O and actual native files. Every group's counter reaches 10,
+  duplicate operation IDs retain their original result, and reopening the three
+  WALs restores all 100 counters. Old-session visits cannot access recovered
+  owners. This is in-process delivery, not a network or throughput benchmark.
+- Independent node item and group byte ceilings, oversized retained capacities,
+  background quotas, elapsed visit limits and bounded control priority are
+  exercised. A suspended storage visit refuses premature finish and unrelated
+  completions; another group remains serviceable.
+- Failed shared sync/root publication produces no vote messages. The host fences
+  all submitted visits and recovery resolves the atomic batch. Stopping returns
+  queued inputs, invalidates tickets and makes unresolved outcomes explicit.
+  Dropping one shard leaves another owner and their host-supplied store live.
+
+These checks establish the bounded ingress scheduling slice. They do not claim
+automatic failure detection, a complete asynchronous runtime or node-wide bounds
+on all output/application resources. macOS execution and hardware power-cut
+testing remain outstanding. P0–P7 remains active.
+
 ## Next slice
 
-Introduce the bounded shared scheduler, timers, wire codec and authenticated-session
-transport seams. Extend the simulator to explicit virtual time and independently
-delayed storage completion events. Native sockets must use established secure
+Add automatic group timer management, bounded worker/output admission, wire
+codec and authenticated-session transport seams. Extend virtual-time histories
+to leader loss, overload and message delay through the new assembly. Native
+sockets must use established secure
 sessions supplied by the host; production assembly cannot silently select an
 insecure simulation transport. Preserve downstream substitution and durable
 histories as these providers enter the assembly.

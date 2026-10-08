@@ -302,6 +302,13 @@ impl Raft {
     pub fn storage_binding(&self) -> StoreBinding {
         self.binding
     }
+    /// A suspended runtime visit cannot be released while these dependencies
+    /// are unresolved. Outstanding reads still accept their protocol messages.
+    pub fn has_pending_dependency(&self) -> bool {
+        self.pending.is_some()
+            || self.staged_snapshot.is_some()
+            || self.application_install.is_some()
+    }
     /// Host replays these through its application checkpoint/dedup contract.
     pub fn replay_committed(&self) -> &[LogEntry] {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
@@ -498,6 +505,14 @@ impl Raft {
         }
     }
 
+    /// Async/batched workers must correlate the full submitted effect as well
+    /// as its scoped ticket before delivering a later durable completion.
+    pub fn admit_effect(&mut self, update: &LogUpdate, ticket: LogTicket) -> Result<(), RaftError> {
+        if self.pending.as_ref().is_none_or(|p| &p.update != update) {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.admitted(ticket)
+    }
     pub fn admitted(&mut self, ticket: LogTicket) -> Result<(), RaftError> {
         if self.fenced {
             return Err(RaftError::Fenced);
@@ -1310,6 +1325,7 @@ pub fn persist_effect<S: LogStore>(
         if tickets.len() != 1 {
             return Err(RaftError::WrongCompletion);
         }
+        // The exact update was checked before submission above.
         raft.admitted(tickets[0])?;
         let completion = store.barrier(&tickets)?;
         raft.complete(&completion)
