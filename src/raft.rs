@@ -25,6 +25,9 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+mod readiness;
+pub use readiness::*;
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RequestContext {
     pub origin: StoreBinding,
@@ -264,6 +267,7 @@ pub struct Raft {
     election_reset: u64,
     authority_request: Option<authority::PendingAuthority>,
     replication_permit: Option<authority::ReplicationPermit>,
+    learner_readiness: Option<LearnerReadinessRequest>,
 }
 
 impl Raft {
@@ -457,6 +461,7 @@ impl Raft {
             election_reset: 0,
             authority_request: None,
             replication_permit: None,
+            learner_readiness: None,
         })
     }
     pub fn role(&self) -> Role {
@@ -638,6 +643,7 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.cancel_learner_readiness();
         self.clear_replication_authority();
         self.fenced = true;
         self.pending = None;
@@ -1043,6 +1049,13 @@ impl Raft {
         )?;
         let next = state.remove(&update.group).unwrap();
         let membership = next.membership().map_err(|_| RaftError::InvalidRecovery)?;
+        if self.learner_readiness.is_some_and(|r| {
+            r.term != next.hard_state.term
+                || r.configuration != membership.id()
+                || r.index < next.commit_index
+        }) {
+            self.cancel_learner_readiness();
+        }
         if membership.id() != self.membership().id() {
             self.clear_reads();
         }

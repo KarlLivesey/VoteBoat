@@ -70,8 +70,59 @@ protocol proof.
 
 A promoted leader that an older receiver still sees as a learner remains rejected.
 Transport authentication is separate from group authority. Promotion/catch-up
-provenance, readiness evidence (storage/application capability
-and a durable caught-up prefix), retiring-leader
-final propagation, distributed activation modeling and faulted actual network
-membership histories remain release gates. Public configuration-bearing Append
-and membership Snapshot ingress remain disabled.
+provenance and retiring-leader final propagation now have separate core checks.
+Readiness has the host-driven contract below; native wire/worker integration,
+placement authorization, distributed activation modeling and faulted actual
+network membership histories remain release gates. Public configuration-bearing
+Append and membership Snapshot ingress remain disabled.
+
+## Fresh readiness before promotion
+
+`Raft::begin_learner_readiness` captures a committed configuration and a
+current-term committed prefix for an assigned exact-store learner. The host
+supplies its current authenticated StoreSession and explicit application schema,
+command-size and snapshot-size requirements. At most one request is pending per
+group; `cancel_learner_readiness` releases it without provider work. Freshness
+uses the existing RequestContext, including the leader StoreBinding. An
+uncommitted assignment or active joint transition cannot start a round.
+
+`verify_learner_readiness` runs on the serialized learner owner with the selected
+LogStore, SnapshotRetention and bound CheckpointStateMachine. It checks the
+authenticated leader, exact local identity/session, group/configuration/term,
+committed matching prefix and applied boundary. Pending persistence or snapshot
+work refuses verification, so Written cannot establish readiness. Selected log
+state must equal the core's durable state. Provider limits must cover the requested
+capacity and the application must expose the requested checkpoint schema.
+
+For compacted state, the helper loads the exact pinned image and checks
+application restoration at its boundary. It also creates a bounded in-memory
+application checkpoint and validates restoration on a clone, without publishing
+a new image or changing the live application. Provider/application allocation
+and Clone behavior retain their existing host contracts. These potentially
+blocking checks belong on host-controlled maintenance work with core/application
+serialization. Provider faults follow existing owner fencing/recovery policy;
+an error never produces a successful readiness assertion.
+
+`accept_learner_readiness` checks the complete pending request and authenticated
+learner binding before creating a `ReadyLearner`. Invalid replies leave the
+request pending; success consumes it, rejecting duplicate or old replies.
+`check_learner_readiness` revalidates immediately before promotion. Commitment
+advancing beyond the captured prefix, term/configuration changes, fencing or a
+changed learner session requires a new round. Pending requests are conservatively
+canceled when a valid staged update changes term/configuration or advances
+commitment; restart retains none.
+
+The receipt is constructible for host wire adapters, like durability completions.
+It is trusted under the authenticated non-Byzantine provider/peer contract, not
+as a cryptographic certificate. This implements the host-driven exchange, not
+native RPC encoding, asynchronous Node maintenance integration or an online
+administrator endpoint. A token is not a vote, replication acknowledgement,
+membership commitment or service activation. Placement/failure-domain policy
+remains a separate administration obligation. No new durable effect, watermark
+or generation is added: the prefix is an existing contiguous committed boundary.
+
+Five downstream histories exercise actual core election/replication, application
+lag, pending/Written state, capability rejection, replay, changed bindings,
+commit/term/configuration invalidation, missing compacted data and native file
+checkpoint/reopen under a fresh session. Initial assignments are explicitly
+host-imported; these tests do not prove online assignment.

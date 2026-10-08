@@ -124,7 +124,9 @@ impl SnapshotStore for HostSnapshots {
         }
         let sealed = SealedSnapshot {
             ticket,
-            file_bytes: p.2 as u64,
+            // Include the contract's minimum snapshot envelope even when an
+            // empty application's checkpoint payload is smaller than 48 bytes.
+            file_bytes: 48 + p.2 as u64,
             checksum: ticket.generation.get() as u32,
         };
         p.4 = Some(sealed);

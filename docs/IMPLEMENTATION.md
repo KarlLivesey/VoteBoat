@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, snapshot/wire and core-predicate foundations implemented; learner recovery/readiness, formal activation model and full online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire and core-predicate foundations plus host-driven readiness implemented; native readiness integration, formal activation model and full online transitions remain gated |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -76,31 +76,33 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-1. **Finish retained route and credential admission (current, P4).** Bind
-   accepted queued/core peer requirements to owned routes and preprovisioned
-   exact-store credentials. Reconcile connections as core requirements change;
-   retain retiring peers until their pending sends and original outbound credits
-   clear. Depends on the completed witness, roster and owner-capacity work.
-   Completion means rejection preserves ownership, route withdrawal cannot
-   strand accepted work, stale plans cannot restore withdrawn authority, and
-   focused owner/node plus native TCP/QUIC checks pass. Slice 51 now passes those
-   checks. An earlier run hit `AddrInUse`; the fixture releases reserved ports
-   before child processes bind, leaving a race window. A subsequent full run
-   passes; collision-free process startup is not claimed.
-2. **Implement learner readiness evidence (next, P4).** Define and validate the
-   evidence required to promote a caught-up replica, tied to exact store/session,
-   configuration and replicated position, including application/snapshot
-   capability. Depends on retained transport admission and existing learner
-   recovery. Completion means stale, restarted, insufficient and mismatched
-   evidence cannot authorize promotion; a valid caught-up learner can proceed.
-   Connection liveness alone is not readiness.
-3. **Complete and expose the online membership path (following, P4).** Connect
-   readiness to the replicated joint/final configuration lifecycle and an
-   actionable host/service entry point. Depends on both items above and existing
-   journal/snapshot recovery. Completion means actual multi-node add/promote/
-   remove histories, including leader loss, restart, rollback and partial
-   delivery, preserve quorum and retirement rules. Open public configuration
-   ingress only after those checks pass; then advance to the P5 milestone.
+Retained route/credential admission is complete in slice 51. It checks queued
+requirements against owned exact-store hints and provisioned pins and drains
+per-peer sends before retirement. The earlier service-test port race remains a
+validation limitation, not a membership protocol change.
+
+1. **Learner readiness evidence (current, P4).** Slice 52 implements the
+   host-driven request/verification/acceptance contract over actual selected log,
+   snapshot and application providers. Completion checks cover stale requests,
+   exact sessions, pending/Written state, applied lag, incompatible capabilities,
+   missing pinned data and native checkpoint/reopen. This depends on learner
+   recovery and retained transport admission. Native exchange integration is
+   explicitly part of the next deliverable; connection liveness is not readiness.
+2. **Complete and expose online membership (next, P4).** Integrate readiness
+   into native wire/worker maintenance and joint/final promotion admission, with
+   an actionable host/service entry point and placement authorization. Depends
+   on item 1 and existing journal/snapshot recovery. Completion means actual
+   multi-node add/promote/remove histories, including leader loss, restart,
+   rollback and partial delivery, preserve quorum and retirement rules. Validate
+   activation modeling and open public configuration ingress only after its
+   release checks pass.
+3. **Recursive responsibility manifests and routing (following, P5).** Establish
+   validated responsibility/group/epoch mappings and selective assignment, then
+   resolve/cache routes to existing groups. This advances the macro responsibility
+   milestone after P4's release gates. Completion requires disjoint declared
+   ownership/order boundaries and healthy established child operation during
+   parent unavailability, without an ancestor commit in normal writes. Split/
+   merge follows this foundation under P6's durable fencing/import rules.
 
 Before editing each item, sketch its data/API shape, transitions, ownership,
 failure cleanup and focused checks. If that sketch reveals another dependency,
@@ -3117,3 +3119,55 @@ Implement exact learner readiness evidence, then the faulted online membership
 path described in the linked mini plan. Preserve the usable static TCP/QUIC
 service; recursive responsibilities, split/merge and measured tuning remain in
 the full P0–P7 goal.
+
+## Slice 52 — fresh host-driven learner readiness
+
+Mini schema plan: keep one fixed-size pending request on the core; bind it to
+leader context, stable committed configuration, learner store/session and a
+current-term committed prefix. Verify through selected log/snapshot/application
+providers, then match the exact authenticated reply before issuing a checked
+token. Recheck at promotion; changes to commit, term, configuration or peer
+session require another round. Failure leaves no new persistent state and
+invalid responses do not consume the pending request. This advances P4 and feeds
+the next online membership integration, followed by P5 responsibilities.
+
+ReadinessRequirements carries checkpoint schema and minimum command/snapshot
+capacities. The learner helper rejects pending dependencies and applied lag,
+compares selected durable log state, checks provider limits, verifies any exact
+pinned compacted image and exercises bounded checkpoint restoration on a clone.
+A fresh request context uses the existing shared allocation floor and leader
+StoreSession. Receipt assertions are constructible for authenticated host wire
+adapters under the same non-Byzantine trust model as storage completions; they
+are not cryptographic certificates. ReadyLearner itself is core-issued.
+
+No new durability token permits an effect to escape: there are no new protocol
+Send/Persist effects in this host-driven seam. The readiness prefix is the
+existing contiguous committed boundary supported by exact prior DurableLog
+completions (or verified recovery and pinned snapshot data), not an index maximum.
+No new generation is persisted. Restart loses pending requests, uses fresh
+StoreSessions and requires another round. The host serializes maintenance against
+the core/application and handles provider faults with existing fencing/recovery.
+
+Five downstream histories use actual election/replication and selected providers
+to test rejection and freshness, including pending/Written work, changed schema
+or limits, wrong bindings, complete request matching, duplicate/old replies,
+advancing commitment/term/configuration, missing compacted data and native file
+checkpoint/reopen. Assignments are explicitly host-imported. A fixture failure
+identified a missing minimum snapshot envelope in HostSnapshots; its file-size
+accounting now includes 48 bytes, and snapshot conformance is rerun. Another
+fixture correction preserves the durable ballot and completes an existing
+heartbeat before acknowledging a newly appended index.
+
+The host-driven contract is implemented; native readiness RPC encoding and
+asynchronous Node maintenance, placement authorization and consumption by online
+promotion remain next work. Configuration-bearing public ingress stays gated.
+No production online membership, macOS execution, benchmark or proof claim.
+
+Validation: QUIC-enabled library/effect-owner/learners/peers/runtime/snapshot/
+snapshot-worker/startup/service suites pass 43/109/13/18/25/19/14/8/7 tests (256).
+Core-only all-target check, all-feature/all-target Clippy with warnings denied,
+API docs, formatting/diff and inventory shape/path validation pass (50 records).
+
+Next deliverable: integrate this readiness exchange into native wire/maintenance
+and joint/final promotion admission; complete the faulted online membership
+release checks before moving to recursive responsibility manifests and routing.

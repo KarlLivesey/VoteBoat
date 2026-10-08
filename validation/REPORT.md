@@ -328,3 +328,28 @@ assertion uses a borrowed expected-message slice.
   Live credential rotation, learner readiness and full faulted online membership
   histories remain unfinished. Public configuration ingress remains gated.
   No macOS execution, performance or full protocol proof claim. P0–P7 stays active.
+
+## 2026-10-08: fresh host-driven learner readiness (slice 52)
+
+- QUIC-enabled library/effect-owner/learners/peers/runtime/snapshot/snapshot-worker/
+  startup/counter-service suites pass 43/109/13/18/25/19/14/8/7 tests (256 total).
+  Static TCP/QUIC service leader-loss/recovery and existing native 100-group
+  histories remain green alongside readiness and snapshot conformance.
+- Five new downstream readiness histories use actual core election/replication,
+  exact selected providers and application checks. Coverage includes pending and
+  Written work, applied lag, schema/size requirements, wrong authenticated store
+  sessions, altered complete requests, duplicate/old replies, commit/term/config
+  invalidation, missing compacted data and native file checkpoint/reopen with
+  fresh peer session. Initial assignments are explicitly host-imported.
+- HostSnapshots was corrected to include the 48-byte minimum file envelope for
+  small checkpoints. Two readiness fixtures were corrected to preserve a durable
+  ballot and finish an existing heartbeat before acknowledging a newer index;
+  the production storage and request-scope checks were retained.
+- Core-only all-target check, all-feature/all-target Clippy with warnings denied,
+  API docs, formatting/diff and inventory shape/path checks pass (50 contracts).
+- This is the host-driven readiness contract, not native readiness RPC/worker
+  integration or a released promotion endpoint. Placement authorization and
+  faulted online membership histories remain required. Receipts use the existing
+  authenticated non-Byzantine provider model; no new persistent record,
+  watermark or generation, macOS execution, benchmark or protocol proof claim.
+  Public configuration ingress remains gated and P0–P7 remains active.

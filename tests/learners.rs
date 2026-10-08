@@ -528,3 +528,653 @@ fn joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting
         ));
     }
 }
+
+fn readiness_requirements() -> ReadinessRequirements {
+    ReadinessRequirements {
+        application_schema: 1,
+        command_bytes: 8,
+        snapshot_bytes: 4096,
+    }
+}
+fn response(request: &Message, from: u64, rpc: Rpc) -> Message {
+    Message {
+        from: node(from),
+        sender: HostLogStore::new(from as u128).binding(),
+        to: request.from,
+        rpc,
+        ..request.clone()
+    }
+}
+fn sent(effects: &[Effect], to: u64) -> Message {
+    effects
+        .iter()
+        .find_map(|effect| match effect {
+            Effect::Send(message) if message.to == node(to) => Some(message.clone()),
+            _ => None,
+        })
+        .expect("request for replica")
+}
+/// Actual core election/replication; only initial enrollment is host-imported.
+fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogStore) {
+    let mut leader_log = HostLogStore::new(1);
+    enroll(&mut leader_log);
+    enroll(log);
+    let mut leader = Raft::recover_member(
+        node(1),
+        leader_log.binding(),
+        leader_log.state(group(1)).unwrap(),
+        leader_log.limits(),
+    )
+    .unwrap();
+    let effects = leader.step(Event::Campaign).unwrap();
+    let effects = persist(&mut leader, &mut leader_log, effects);
+    let vote = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &vote,
+            2,
+            Rpc::Voted { granted: true },
+        )))
+        .unwrap();
+    let effects = persist(&mut leader, &mut leader_log, effects);
+    let append_two = sent(&effects, 2);
+    let append_learner = sent(&effects, 4);
+    let mut learner = core(log);
+    let effects = learner.step(Event::Receive(append_learner)).unwrap();
+    persist(&mut learner, log, effects);
+    let effects = leader
+        .step(Event::Receive(response(
+            &append_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 2,
+            },
+        )))
+        .unwrap();
+    persist(&mut leader, &mut leader_log, effects);
+    let effects = leader.step(Event::Heartbeat).unwrap();
+    let effects = learner.step(Event::Receive(sent(&effects, 4))).unwrap();
+    persist(&mut learner, log, effects);
+    assert_eq!(leader.state().commit_index, 2);
+    assert_eq!(learner.state().commit_index, 2);
+    let mut application = Counter::new(16).unwrap();
+    application.apply_batch(learner.replay_committed()).unwrap();
+    (leader, learner, application, leader_log)
+}
+fn learner_peer() -> voteboat::secure::PeerIdentity {
+    voteboat::secure::PeerIdentity {
+        node: node(4),
+        store: identity(4),
+    }
+}
+#[test]
+fn readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    assert_eq!(
+        leader.begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements()
+        ),
+        Err(ReadinessError::Consensus(RaftError::Busy))
+    );
+    let unapplied = Counter::new(16).unwrap();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &unapplied,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::NotCaughtUp)
+    );
+    let receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    for changed in [
+        LearnerReadinessRequest {
+            index: request.index + 1,
+            ..request
+        },
+        LearnerReadinessRequest {
+            term: request.term + 1,
+            ..request
+        },
+        LearnerReadinessRequest {
+            configuration: cid(99),
+            ..request
+        },
+        LearnerReadinessRequest {
+            requirements: ReadinessRequirements {
+                application_schema: 99,
+                ..request.requirements
+            },
+            ..request
+        },
+    ] {
+        assert_eq!(
+            leader.accept_learner_readiness(
+                LearnerReadinessReceipt {
+                    request: changed,
+                    binding: log.binding(),
+                },
+                log.binding()
+            ),
+            Err(ReadinessError::Stale)
+        );
+    }
+    let mut wrong_session = log.binding();
+    wrong_session.session = StoreSession::new(99).unwrap();
+    assert_eq!(
+        leader.accept_learner_readiness(receipt.clone(), wrong_session),
+        Err(ReadinessError::WrongBinding)
+    );
+    let ready = leader
+        .accept_learner_readiness(receipt.clone(), log.binding())
+        .unwrap();
+    leader
+        .check_learner_readiness(&ready, log.binding())
+        .unwrap();
+    assert_eq!(
+        leader.check_learner_readiness(&ready, wrong_session),
+        Err(ReadinessError::WrongBinding)
+    );
+    assert_eq!(
+        leader.accept_learner_readiness(receipt.clone(), log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    let fresh = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    assert_ne!(fresh.context, request.context);
+    assert_eq!(
+        leader.accept_learner_readiness(receipt, log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    let receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        fresh,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    leader
+        .accept_learner_readiness(receipt, log.binding())
+        .unwrap();
+    leader.storage_failed();
+    assert_eq!(
+        leader.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::Consensus(RaftError::Fenced))
+    );
+}
+#[test]
+fn readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, mut learner, app, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    for requirements in [
+        ReadinessRequirements {
+            application_schema: 99,
+            ..request.requirements
+        },
+        ReadinessRequirements {
+            command_bytes: usize::MAX,
+            ..request.requirements
+        },
+        ReadinessRequirements {
+            snapshot_bytes: usize::MAX,
+            ..request.requirements
+        },
+    ] {
+        assert_eq!(
+            verify_learner_readiness(
+                &learner,
+                &app,
+                &log,
+                &mut snapshots,
+                LearnerReadinessRequest {
+                    requirements,
+                    ..request
+                },
+                leader.storage_binding()
+            ),
+            Err(ReadinessError::Capability)
+        );
+    }
+    let mut wrong = leader.storage_binding();
+    wrong.session = StoreSession::new(99).unwrap();
+    assert_eq!(
+        verify_learner_readiness(&learner, &app, &log, &mut snapshots, request, wrong),
+        Err(ReadinessError::WrongBinding)
+    );
+    snapshots.identity.store = identity(99);
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::WrongBinding)
+    );
+    snapshots.identity.store = identity(4);
+    let mut append = message(
+        Rpc::Append {
+            previous_index: 2,
+            previous_term: 2,
+            entries: vec![LogEntry {
+                index: 3,
+                term: 2,
+                payload: EntryPayload::Noop,
+            }],
+            leader_commit: 2,
+        },
+        2,
+    );
+    append.context.sequence = 999;
+    let effects = learner.step(Event::Receive(append)).unwrap();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Consensus(RaftError::Busy))
+    );
+    // Written is not a completion: the dependency and readiness rejection remain.
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!("pending append")
+    };
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    learner.admitted(tickets[0]).unwrap();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Consensus(RaftError::Busy))
+    );
+    let durable = log.barrier(&tickets).unwrap();
+    learner.complete(&durable).unwrap();
+    verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commit() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, mut learner, app, _leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let receipt = checkpoint_application(&learner, &app, &mut snapshots).unwrap();
+    compact_replica(
+        &mut learner,
+        &mut log,
+        &mut snapshots,
+        &app,
+        receipt.reference(),
+    )
+    .unwrap();
+    let ready_receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    let ready = leader
+        .accept_learner_readiness(ready_receipt, log.binding())
+        .unwrap();
+    snapshots.pins.clear();
+    assert!(matches!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Storage(_))
+    ));
+    // A new accepted configuration is not proof of a committed learner assignment.
+    let mut state = leader.state().clone();
+    let mut changed = assignment(&state, 3, &[(4, 4), (5, 5)]);
+    changed.term = state.hard_state.term;
+    let mut leader_log = HostLogStore::new(1);
+    leader_log.durable.insert(group(1), state.clone());
+    leader_log.accepted.insert(group(1), state.clone());
+    let mut mutation = update(
+        &state,
+        2,
+        2,
+        Some(Suffix {
+            from: 3,
+            entries: vec![changed],
+        }),
+    );
+    if let LogMutation::Update(update) = &mut mutation {
+        update.hard_state = state.hard_state;
+    }
+    append(&mut leader_log, vec![mutation]);
+    state = leader_log.state(group(1)).unwrap();
+    let mut restored = Raft::recover_member(
+        node(1),
+        leader.storage_binding(),
+        state,
+        leader_log.limits(),
+    )
+    .unwrap();
+    assert_eq!(
+        restored.begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements()
+        ),
+        Err(ReadinessError::Stale)
+    );
+    assert_eq!(
+        restored.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    // Compaction below a requested boundary cannot establish a missing match.
+    let mut old = request;
+    old.index = 1;
+    old.index_term = 1;
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            old,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::NotCaughtUp)
+    );
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn native_readiness_reopens_compacted_files_and_requires_fresh_peer_session() {
+    use voteboat::native::{log_store::*, snapshot_store::*};
+    let root = std::env::temp_dir().join(format!("voteboat-readiness52-{}", std::process::id()));
+    std::fs::create_dir(&root).unwrap();
+    let mut log = NativeLogStore::create(
+        FileLogIo::create(root.join("log")).unwrap(),
+        identity(4),
+        LogLimits::default(),
+    )
+    .unwrap();
+    let si = SnapshotIdentity {
+        store: identity(4),
+        group: group(1),
+    };
+    let mut snapshots = NativeSnapshotStore::create(
+        FileSnapshotIo::create(root.join("snapshot")).unwrap(),
+        si,
+        SnapshotLimits::default(),
+    )
+    .unwrap();
+    let (mut leader, mut learner, app, _leader_log) = readiness_cluster(&mut log);
+    let old_binding = log.binding();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            old_binding.session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let checkpoint = checkpoint_application(&learner, &app, &mut snapshots).unwrap();
+    compact_replica(
+        &mut learner,
+        &mut log,
+        &mut snapshots,
+        &app,
+        checkpoint.reference(),
+    )
+    .unwrap();
+    let receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    let ready = leader
+        .accept_learner_readiness(receipt, old_binding)
+        .unwrap();
+    drop(learner);
+    drop(log);
+    drop(snapshots);
+    let log = NativeLogStore::recover(
+        FileLogIo::open(root.join("log")).unwrap(),
+        identity(4),
+        LogLimits::default(),
+    )
+    .unwrap();
+    let mut snapshots = NativeSnapshotStore::recover(
+        FileSnapshotIo::open(root.join("snapshot")).unwrap(),
+        si,
+        SnapshotLimits::default(),
+    )
+    .unwrap();
+    let mut app = Counter::new(16).unwrap();
+    let (learner, restored) =
+        recover_learner_replica(node(4), group(1), &log, &mut snapshots, &mut app).unwrap();
+    assert_eq!(restored.checkpoint_index, 2);
+    assert_ne!(log.binding().session, old_binding.session);
+    assert_eq!(
+        leader.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::WrongBinding)
+    );
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::WrongBinding)
+    );
+    let fresh = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        fresh,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    leader
+        .accept_learner_readiness(receipt, log.binding())
+        .unwrap();
+    drop(log);
+    drop(snapshots);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn readiness_expires_when_commit_advances_or_leader_changes_term() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, mut leader_log) = readiness_cluster(&mut log);
+    let mut snapshots = snapshots();
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let receipt = verify_learner_readiness(
+        &learner,
+        &app,
+        &log,
+        &mut snapshots,
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    let ready = leader
+        .accept_learner_readiness(receipt, log.binding())
+        .unwrap();
+    leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let effects = leader
+        .step(Event::Propose {
+            operation: OperationId::new(99).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    assert_eq!(
+        leader.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::Consensus(RaftError::Busy))
+    );
+    let effects = persist(&mut leader, &mut leader_log, effects);
+    let append_two = sent(&effects, 2);
+    // Complete the heartbeat already in flight before acknowledging the new
+    // command; a reply cannot exceed the original request's matching end.
+    let effects = leader
+        .step(Event::Receive(response(
+            &append_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 2,
+            },
+        )))
+        .unwrap();
+    let append_two = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &append_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 3,
+            },
+        )))
+        .unwrap();
+    persist(&mut leader, &mut leader_log, effects);
+    assert_eq!(
+        leader.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    // The stale pending request was canceled, rather than blocking a fresh round.
+    let next = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    assert_eq!(next.index, 3);
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            next,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::NotCaughtUp)
+    );
+    let effects = leader.step(Event::Campaign).unwrap();
+    let effects = persist(&mut leader, &mut leader_log, effects);
+    let vote = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &vote,
+            2,
+            Rpc::Voted { granted: true },
+        )))
+        .unwrap();
+    persist(&mut leader, &mut leader_log, effects);
+    assert_eq!(leader.role(), Role::Leader);
+    assert_eq!(
+        leader.check_learner_readiness(&ready, log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    assert_eq!(
+        leader.begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements()
+        ),
+        Err(ReadinessError::NotCaughtUp)
+    );
+}

@@ -971,6 +971,22 @@
         "tests/effect_owner.rs"
       ],
       "scope": "Bounded future hints and owner provisioned identities retained through failed construction, drain and recovery. Replacement covers authorized roster and queued/core requirements, returning the whole proposed map on rejection without clock mutation. Queue-only peers do not authorize connection. Actual core requirements trigger connections; per-peer pending Send leases and original outbound credits delay retirement without a global barrier. Unchanged assignments preserve bindings and fairness. Host endpoint heap/cloning must be bounded by the connector contract. No live credential rotation, new durability evidence or online activation/readiness claim."
+    },
+    {
+      "design_id": "C01/C04/C15",
+      "public_contract": "ReadinessRequirements / LearnerReadinessRequest / LearnerReadinessReceipt / ReadyLearner",
+      "operations": [
+        "Raft::begin_learner_readiness",
+        "Raft::cancel_learner_readiness",
+        "verify_learner_readiness",
+        "Raft::accept_learner_readiness",
+        "Raft::check_learner_readiness"
+      ],
+      "native": "Selected native log and snapshot files use the same host-driven application/checkpoint verification contract; native file reopen requires a fresh learner session round.",
+      "conformance": [
+        "tests/learners.rs"
+      ],
+      "scope": "One bounded pending request per core, binding leader context/session, committed stable configuration, learner exact store/session, term and contiguous committed prefix. Verification rejects pending/Written work, applied lag, unsupported schema/capacity, provider disagreement and missing pinned compacted data; bounded checkpoint restore checks application compatibility. Replies match the entire request and current authenticated peer binding; accepted tokens become stale after commit/term/configuration/session changes. Provider/peer assertions use the existing authenticated non-Byzantine trust model. No new durable record, watermark or generation. Native wire/worker integration and promotion admission remain next work; no online membership or placement policy claim."
     }
   ],
   "not_yet_implemented": [
