@@ -557,7 +557,14 @@ fn sent(effects: &[Effect], to: u64) -> Message {
 /// Actual core election/replication; only initial enrollment is host-imported.
 fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogStore) {
     let mut leader_log = HostLogStore::new(1);
-    enroll(&mut leader_log);
+    let (leader, learner, application) = readiness_cluster_with_stores(log, &mut leader_log);
+    (leader, learner, application, leader_log)
+}
+fn readiness_cluster_with_stores<L: LogStore, M: LogStore>(
+    log: &mut L,
+    leader_log: &mut M,
+) -> (Raft, Raft, Counter) {
+    enroll(leader_log);
     enroll(log);
     let mut leader = Raft::recover_member(
         node(1),
@@ -567,7 +574,7 @@ fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogS
     )
     .unwrap();
     let effects = leader.step(Event::Campaign).unwrap();
-    let effects = persist(&mut leader, &mut leader_log, effects);
+    let effects = persist(&mut leader, leader_log, effects);
     let vote = sent(&effects, 2);
     let effects = leader
         .step(Event::Receive(response(
@@ -576,7 +583,7 @@ fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogS
             Rpc::Voted { granted: true },
         )))
         .unwrap();
-    let effects = persist(&mut leader, &mut leader_log, effects);
+    let effects = persist(&mut leader, leader_log, effects);
     let append_two = sent(&effects, 2);
     let append_learner = sent(&effects, 4);
     let mut learner = core(log);
@@ -592,7 +599,7 @@ fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogS
             },
         )))
         .unwrap();
-    persist(&mut leader, &mut leader_log, effects);
+    persist(&mut leader, leader_log, effects);
     let effects = leader.step(Event::Heartbeat).unwrap();
     let effects = learner.step(Event::Receive(sent(&effects, 4))).unwrap();
     persist(&mut learner, log, effects);
@@ -600,7 +607,7 @@ fn readiness_cluster<L: LogStore>(log: &mut L) -> (Raft, Raft, Counter, HostLogS
     assert_eq!(learner.state().commit_index, 2);
     let mut application = Counter::new(16).unwrap();
     application.apply_batch(learner.replay_committed()).unwrap();
-    (leader, learner, application, leader_log)
+    (leader, learner, application)
 }
 fn learner_peer() -> voteboat::secure::PeerIdentity {
     voteboat::secure::PeerIdentity {
@@ -1177,4 +1184,513 @@ fn readiness_expires_when_commit_advances_or_leader_changes_term() {
         ),
         Err(ReadinessError::NotCaughtUp)
     );
+}
+
+fn proposal(voters: &[u64], readiness: Vec<PromotionReadiness>) -> ConfigurationProposal {
+    let target = Configuration::new(
+        cid(4),
+        voteboat::quorum::Policy::new(
+            voteboat::quorum::Tree::Majority(
+                voters
+                    .iter()
+                    .map(|n| voteboat::quorum::Tree::Voter(node(*n)))
+                    .collect(),
+            ),
+            voteboat::quorum::Limits::default(),
+        )
+        .unwrap(),
+        voters
+            .iter()
+            .map(|n| (node(*n), identity(*n as u128)))
+            .collect(),
+        [(node(5), identity(5))].into(),
+    )
+    .unwrap();
+    ConfigurationProposal {
+        record: ConfigurationRecord {
+            operation: OperationId::new(53).unwrap(),
+            expected: cid(2),
+            change: ConfigurationChange::Joint {
+                id: cid(3),
+                next: target,
+            },
+        },
+        readiness,
+        requirements: readiness_requirements(),
+    }
+}
+fn ready_proof<L: LogStore>(
+    leader: &mut Raft,
+    learner: &Raft,
+    log: &L,
+    app: &Counter,
+) -> PromotionReadiness {
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            readiness_requirements(),
+        )
+        .unwrap();
+    let receipt = verify_learner_readiness(
+        learner,
+        app,
+        log,
+        &mut snapshots(),
+        request,
+        leader.storage_binding(),
+    )
+    .unwrap();
+    PromotionReadiness {
+        ready: leader
+            .accept_learner_readiness(receipt, log.binding())
+            .unwrap(),
+        authenticated: log.binding(),
+    }
+}
+fn configuration_error(error: ConfigurationProposalError) -> RaftError {
+    RaftError::Configuration(Box::new(error))
+}
+#[test]
+fn local_configuration_promotion_checks_all_proofs_before_mutating_journal() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let proof = ready_proof(&mut leader, &learner, &log, &app);
+    let before = leader.state().clone();
+    let cases = [
+        (
+            proposal(&[1, 2, 4], vec![]),
+            ConfigurationProposalError::MissingReadiness(node(4)),
+        ),
+        (
+            proposal(&[1, 2, 4], vec![proof.clone(), proof.clone()]),
+            ConfigurationProposalError::UnexpectedReadiness(node(4)),
+        ),
+        (
+            proposal(&[1, 2, 3], vec![proof.clone()]),
+            ConfigurationProposalError::UnexpectedReadiness(node(4)),
+        ),
+    ];
+    for (p, error) in cases {
+        assert_eq!(
+            leader.step(Event::Configure(Box::new(p))),
+            Err(configuration_error(error))
+        );
+        assert_eq!(leader.state(), &before);
+        assert_eq!(leader.membership().id(), cid(2));
+        assert!(!leader.has_pending_dependency());
+    }
+    let mut wrong = proposal(&[1, 2, 4], vec![proof.clone()]);
+    wrong.requirements.application_schema = 99;
+    assert_eq!(
+        leader.step(Event::Configure(Box::new(wrong))),
+        Err(configuration_error(
+            ConfigurationProposalError::WrongRequirements(node(4))
+        ))
+    );
+    let mut wrong = proposal(&[1, 2, 4], vec![proof.clone()]);
+    wrong.readiness[0].authenticated.session = StoreSession::new(99).unwrap();
+    assert_eq!(
+        leader.step(Event::Configure(Box::new(wrong))),
+        Err(configuration_error(ConfigurationProposalError::Readiness(
+            ReadinessError::WrongBinding
+        )))
+    );
+    let mut wrong = proposal(&[1, 2, 4], vec![proof.clone()]);
+    wrong.record.expected = cid(1);
+    assert_eq!(
+        leader.step(Event::Configure(Box::new(wrong))),
+        Err(configuration_error(ConfigurationProposalError::Membership(
+            MembershipError::StaleConfiguration
+        )))
+    );
+    let effects = leader
+        .step(Event::Configure(Box::new(proposal(
+            &[1, 2, 4],
+            vec![proof],
+        ))))
+        .unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert_eq!(leader.state(), &before);
+    assert_eq!(leader.membership().id(), cid(3));
+    assert!(leader.has_pending_dependency());
+}
+
+fn configuration_conformance<L: LogStore>(leader_log: &mut L) -> (Raft, u64) {
+    let mut learner_log = HostLogStore::new(4);
+    let (mut leader, learner, app) = readiness_cluster_with_stores(&mut learner_log, leader_log);
+    let proof = ready_proof(&mut leader, &learner, &learner_log, &app);
+    let effects = leader
+        .step(Event::Configure(Box::new(proposal(
+            &[1, 2, 4],
+            vec![proof.clone()],
+        ))))
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!("configuration persistence")
+    };
+    let tickets = leader_log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    leader.admitted(tickets[0]).unwrap();
+    assert_eq!(leader.state().commit_index, 2);
+    assert_eq!(leader.membership().id(), cid(3));
+    assert_eq!(leader.step(Event::Heartbeat), Err(RaftError::Busy));
+    let durable = leader_log.barrier(&tickets).unwrap();
+    let effects = leader.complete(&durable).unwrap();
+    let joint_index = leader.state().last_index();
+    assert_eq!(joint_index, 3);
+    let final_event = || {
+        Event::Configure(Box::new(ConfigurationProposal {
+            record: ConfigurationRecord {
+                operation: OperationId::new(53).unwrap(),
+                expected: cid(3),
+                change: ConfigurationChange::Final { id: cid(4) },
+            },
+            readiness: vec![],
+            requirements: readiness_requirements(),
+        }))
+    };
+    assert_eq!(
+        leader.step(final_event()),
+        Err(configuration_error(ConfigurationProposalError::Membership(
+            MembershipError::JointNotCommitted
+        )))
+    );
+    let request = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &request,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: joint_index,
+            },
+        )))
+        .unwrap();
+    persist(&mut leader, leader_log, effects);
+    assert_eq!(leader.state().commit_index, joint_index);
+    let effects = leader.step(final_event()).unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert_eq!(leader.membership().id(), cid(4));
+    assert_eq!(leader.state().membership().unwrap().id(), cid(3));
+    let effects = persist(&mut leader, leader_log, effects);
+    let request = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &request,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 4,
+            },
+        )))
+        .unwrap();
+    persist(&mut leader, leader_log, effects);
+    assert_eq!(leader.state().commit_index, 4);
+    assert_eq!(leader.membership().id(), cid(4));
+    assert!(leader.membership().joint().is_none());
+    assert!(leader.membership().is_voter(node(4)));
+    assert!(!leader.membership().is_voter(node(3)));
+    let mut application = Counter::new(16).unwrap();
+    let receipts = application.apply_batch(leader.replay_committed()).unwrap();
+    assert!(receipts.is_empty());
+    assert_eq!(application.applied_index(), 4);
+    assert_eq!(
+        leader.check_learner_readiness(&proof.ready, learner_log.binding()),
+        Err(ReadinessError::Stale)
+    );
+    // Deliberately only local proposal/quorum-reply checks: peer 2 acknowledgements
+    // are host assertions, not faulted remote configuration delivery evidence.
+    (leader, joint_index)
+}
+#[test]
+fn host_configuration_proposal_requires_joint_commit_before_final_and_recovery_replays_it() {
+    let mut log = HostLogStore::new(1);
+    let (leader, _) = configuration_conformance(&mut log);
+    let recovered = Raft::recover_member(
+        node(1),
+        log.binding(),
+        log.state(group(1)).unwrap(),
+        log.limits(),
+    )
+    .unwrap();
+    assert_eq!(recovered.membership(), leader.membership());
+    assert_eq!(recovered.state(), leader.state());
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_configuration_proposals_reopen_committed_joint_and_final_journal() {
+    use voteboat::native::log_store::*;
+    let root = std::env::temp_dir().join(format!("voteboat-config53-{}", std::process::id()));
+    std::fs::create_dir(&root).unwrap();
+    let mut log = NativeLogStore::create(
+        FileLogIo::create(&root).unwrap(),
+        identity(1),
+        LogLimits::default(),
+    )
+    .unwrap();
+    let (leader, _) = configuration_conformance(&mut log);
+    let expected = leader.state().clone();
+    let old = log.binding();
+    drop(log);
+    let log = NativeLogStore::recover(
+        FileLogIo::open(&root).unwrap(),
+        identity(1),
+        LogLimits::default(),
+    )
+    .unwrap();
+    assert_ne!(log.binding().session, old.session);
+    let recovered = Raft::recover_member(
+        node(1),
+        log.binding(),
+        log.state(group(1)).unwrap(),
+        log.limits(),
+    )
+    .unwrap();
+    assert_eq!(recovered.state(), &expected);
+    assert_eq!(recovered.membership().id(), cid(4));
+    drop(log);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn queued_promotion_rechecks_live_bindings_and_defaults_to_rejection() {
+    use voteboat::{native::runtime::*, runtime::*, worker::*};
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let proof = ready_proof(&mut leader, &learner, &log, &app);
+    let proposed = proposal(&[1, 2, 4], vec![proof.clone()]);
+    let identity = RuntimeOwner {
+        store: leader.storage_binding(),
+        lane: ExecutionLaneId::new(1).unwrap(),
+        generation: RuntimeGeneration::new(1).unwrap(),
+    };
+    let mut shard = Shard::new(
+        identity,
+        ShardLimits {
+            max_groups: 1,
+            max_event_bytes: 32 * 1024,
+            ..ShardLimits::default()
+        },
+        FairScheduler::new(1).unwrap(),
+    )
+    .unwrap();
+    shard.register(leader).unwrap();
+    let timed = TimedShard::new(
+        shard,
+        DeadlineQueue::new(identity, 1).unwrap(),
+        JitterEntropy::new(53),
+        TimerConfig::default(),
+        MonoTime(0),
+    )
+    .unwrap();
+    let mut owner = EffectOwner::new(
+        timed,
+        WorkerBinding {
+            store: identity.store,
+            generation: StorageWorkerGeneration::new(1).unwrap(),
+        },
+        EffectOwnerLimits::default(),
+    )
+    .unwrap();
+    owner
+        .set_connection_budget(
+            ConnectionBudget::new(
+                voteboat::secure::LocalIdentity {
+                    node: node(1),
+                    store: identity.store,
+                },
+                4,
+                (2..=5)
+                    .map(|n| (node(n), support::identity(n as u128)))
+                    .collect(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    let before = owner.core(group(1)).unwrap().state().clone();
+    let mut oversized = proposed.clone();
+    oversized.readiness.reserve_exact(50000);
+    let retained_capacity = oversized.readiness.capacity();
+    let oversized = Event::Configure(Box::new(oversized));
+    let rejected = owner.admit(group(1), oversized).unwrap_err();
+    assert_eq!(rejected.reason, RuntimeError::EventTooLarge);
+    let Event::Configure(returned) = *rejected.event else {
+        panic!("original event")
+    };
+    assert_eq!(returned.readiness.capacity(), retained_capacity);
+    assert_eq!(*returned, proposed);
+    owner
+        .admit(group(1), Event::Configure(Box::new(proposed.clone())))
+        .unwrap();
+    let steps = owner.advance(MonoTime(0), 1).unwrap();
+    assert_eq!(
+        steps[0].error,
+        Some(configuration_error(
+            ConfigurationProposalError::AuthenticationRequired
+        ))
+    );
+    assert_eq!(owner.core(group(1)).unwrap().state(), &before);
+    owner
+        .admit(group(1), Event::Configure(Box::new(proposed.clone())))
+        .unwrap();
+    let steps = owner
+        .advance_with_configuration_bindings(MonoTime(0), 1, |_| None)
+        .unwrap();
+    assert_eq!(
+        steps[0].error,
+        Some(configuration_error(
+            ConfigurationProposalError::AuthenticationRequired
+        ))
+    );
+    owner
+        .admit(group(1), Event::Configure(Box::new(proposed.clone())))
+        .unwrap();
+    let mut restarted = proof.authenticated;
+    restarted.session = StoreSession::new(99).unwrap();
+    let steps = owner
+        .advance_with_configuration_bindings(MonoTime(0), 1, |_| Some(restarted))
+        .unwrap();
+    assert_eq!(
+        steps[0].error,
+        Some(configuration_error(
+            ConfigurationProposalError::AuthenticationRequired
+        ))
+    );
+    assert_eq!(owner.core(group(1)).unwrap().state(), &before);
+    owner
+        .admit(group(1), Event::Configure(Box::new(proposed)))
+        .unwrap();
+    let mut checked = Vec::new();
+    let steps = owner
+        .advance_with_configuration_bindings(MonoTime(0), 1, |node| {
+            checked.push(node);
+            Some(proof.authenticated)
+        })
+        .unwrap();
+    assert_eq!(checked, vec![node(4)]);
+    assert_eq!(steps[0].error, None);
+    assert_eq!(steps[0].operation, None);
+    assert_eq!(steps[0].proposed, None);
+    let lease = owner.take_effect().unwrap().unwrap();
+    assert!(matches!(lease.effect, Effect::Persist(_)));
+    assert_eq!(owner.core(group(1)).unwrap().state(), &before);
+    assert_eq!(owner.core(group(1)).unwrap().membership().id(), cid(3));
+    assert!(!owner.is_failed());
+}
+
+#[test]
+fn local_policy_change_commits_only_with_old_and_new_recursive_predicates() {
+    use voteboat::quorum::*;
+    let mut log = HostLogStore::new(4);
+    let (mut leader, _learner, _app, mut leader_log) = readiness_cluster(&mut log);
+    let mut proposed = proposal(&[1, 2, 3], vec![]);
+    let ConfigurationChange::Joint { next, .. } = &mut proposed.record.change else {
+        unreachable!()
+    };
+    *next = Configuration::new(
+        next.id(),
+        Policy::new(
+            Tree::Weighted(vec![
+                WeightedChild {
+                    weight: 1,
+                    node: Tree::Majority(vec![Tree::Voter(node(1)), Tree::Voter(node(2))]),
+                },
+                WeightedChild {
+                    weight: 5,
+                    node: Tree::Voter(node(3)),
+                },
+            ]),
+            Limits::default(),
+        )
+        .unwrap(),
+        next.voter_stores().clone(),
+        next.learners().clone(),
+    )
+    .unwrap();
+    let effects = leader.step(Event::Configure(Box::new(proposed))).unwrap();
+    let effects = persist(&mut leader, &mut leader_log, effects);
+    let request_two = sent(&effects, 2);
+    let request_three = sent(&effects, 3);
+    let effects = leader
+        .step(Event::Receive(response(
+            &request_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 3,
+            },
+        )))
+        .unwrap();
+    assert!(!effects.iter().any(|e| matches!(e, Effect::Persist(_))));
+    assert_eq!(leader.state().commit_index, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &request_three,
+            3,
+            Rpc::Appended {
+                success: true,
+                matching_index: 3,
+            },
+        )))
+        .unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    persist(&mut leader, &mut leader_log, effects);
+    assert_eq!(leader.state().commit_index, 3);
+    assert!(leader.membership().joint().is_some());
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn failed_native_joint_barrier_fences_and_power_loss_recovers_prior_configuration() {
+    use voteboat::native::log_store::*;
+    let io = ModelIo::default();
+    let disk = io.0.clone();
+    let mut leader_log = NativeLogStore::create(io, identity(1), LogLimits::default()).unwrap();
+    let mut learner_log = HostLogStore::new(4);
+    let (mut leader, learner, app) =
+        readiness_cluster_with_stores(&mut learner_log, &mut leader_log);
+    let proof = ready_proof(&mut leader, &learner, &learner_log, &app);
+    let effects = leader
+        .step(Event::Configure(Box::new(proposal(
+            &[1, 2, 4],
+            vec![proof],
+        ))))
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!("only persistence")
+    };
+    let tickets = leader_log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    leader.admitted(tickets[0]).unwrap();
+    assert_eq!(leader.state().membership().unwrap().id(), cid(2));
+    assert_eq!(leader.membership().id(), cid(3));
+    disk.borrow_mut().fault = Fault::Sync;
+    assert!(leader_log.barrier(&tickets).is_err());
+    leader.storage_failed();
+    assert!(leader.is_fenced());
+    assert_eq!(leader.step(Event::Heartbeat), Err(RaftError::Fenced));
+    drop(leader_log);
+    // Simulated power-loss model discards bytes not covered by the last sync;
+    // this is not a claim about physical hardware power-loss behavior.
+    {
+        let mut d = disk.borrow_mut();
+        d.log = d.synced.clone();
+        d.fault = Fault::None;
+    }
+    let recovered_log =
+        NativeLogStore::recover(ModelIo(disk), identity(1), LogLimits::default()).unwrap();
+    let recovered = Raft::recover_member(
+        node(1),
+        recovered_log.binding(),
+        recovered_log.state(group(1)).unwrap(),
+        recovered_log.limits(),
+    )
+    .unwrap();
+    assert_eq!(recovered.membership().id(), cid(2));
+    assert_eq!(recovered.state().last_index(), 2);
+    assert_eq!(recovered.state().commit_index, 2);
 }

@@ -353,3 +353,32 @@ assertion uses a borrowed expected-message slice.
   authenticated non-Byzantine provider model; no new persistent record,
   watermark or generation, macOS execution, benchmark or protocol proof claim.
   Public configuration ingress remains gated and P0–P7 remains active.
+
+## 2026-10-08: host-authorized local configuration proposals (slice 53)
+
+- QUIC-enabled library/effect-owner/learners/membership/peers/runtime/snapshot/
+  snapshot-worker/startup/counter-service suites pass
+  43/111/19/27/18/25/19/14/8/7 tests (291 total). Static service TCP/QUIC
+  leader-loss/recovery and native 100-group histories remain green.
+- Six new learner/proposal histories cover missing/duplicate/extraneous and
+  mismatched proofs, journal rejection purity, exact persistence before dependent
+  output, committed joint before final, native file reopen, old/new recursive
+  weighted commitment, failed native barrier fencing and modeled unsynced-byte
+  loss, plus queued execution-time authentication and retained-capacity rejection.
+  Application replay emits no command receipts for configuration entries;
+  administrative events produce no ordinary client operation/position.
+- Two new owner/peer-driver histories cover prospective local configuration
+  fanout, queued shared peer/store/capacity union, exact returned rejected inputs,
+  retained credential/route admission and refusal of queued route withdrawal.
+- The oversized-vector test initially cloned away its spare capacity. It now
+  moves the original input and checks the returned retained capacity. This was a
+  fixture correction, not a production relaxation. Clippy's redundant closure
+  was also corrected; all-feature/all-target Clippy with warnings denied passes.
+- Core-only all-target check, API docs, formatting/diff and inventory shape/path
+  checks pass (51 records). Inventory validation is metadata checking only.
+- These are local administrative and storage histories. Initial assignments and
+  peer-2 replies are host assertions, not proof of remote configuration delivery.
+  Native readiness RPC/worker integration, placement authorization, distributed
+  activation modeling and faulted online transitions remain required. Public
+  configuration ingress remains gated; no macOS, physical power-loss, benchmark
+  or full protocol proof claim. The complete P0–P7 goal stays active.

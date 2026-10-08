@@ -1555,3 +1555,66 @@ fn planned_retirement_waits_for_only_that_peers_original_outbound_credits() {
     assert!(!f.owner.is_failed());
     f.close(0);
 }
+
+#[test]
+fn local_configuration_admission_uses_retained_pins_and_prevents_queued_route_withdrawal() {
+    let mut f = Fixture::with_peer_capacity(4);
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let Event::Receive(Message {
+        rpc: Rpc::Append { mut entries, .. },
+        ..
+    }) = prospective_event(&[4])
+    else {
+        unreachable!()
+    };
+    let EntryPayload::Configuration(record) = entries.remove(0).payload else {
+        unreachable!()
+    };
+    let event = Event::Configure(Box::new(ConfigurationProposal {
+        record: *record,
+        readiness: vec![],
+        requirements: ReadinessRequirements {
+            application_schema: 1,
+            command_bytes: 8,
+            snapshot_bytes: 4096,
+        },
+    }));
+    let rejected = f.owner.admit_tracked(group(1), event.clone()).unwrap_err();
+    assert_eq!(rejected.reason, RuntimeError::PeerUnavailable);
+    assert_eq!(*rejected.event, event);
+    f.connect
+        .borrow_mut()
+        .extra_pins
+        .insert(node(4), identity(4));
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3, 4]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let ticket = f.owner.admit_tracked(group(1), *rejected.event).unwrap();
+    let rejected = f
+        .driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3]), MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(
+        rejected.reason,
+        PeerDriverError::Owner(EffectOwnerError::Runtime(RuntimeError::PeerUnavailable))
+    );
+    let steps = f.owner.advance(MonoTime(0), 1).unwrap();
+    assert_eq!(steps[0].admission, Some(ticket));
+    assert_eq!(steps[0].error, Some(RaftError::NotLeader));
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, rejected.routes, MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    assert!(f.connect.borrow().submitted.is_empty());
+    f.close(0);
+}

@@ -5,8 +5,9 @@ Raft now derives its voting predicate and replication identities from one
 quorum site. This is integration groundwork for the full online protocol.
 **Voter recovery and public online configuration ingress remain gated.**
 Explicit [learner recovery](LEARNER_RECOVERY.md) supports committed exact-store
-assignments with an unchanged bootstrap electorate. There is no online
-reconfiguration API. The internal transition tests described below
+assignments with an unchanged bootstrap electorate. A host-authorized local
+configuration proposal path now exists (below); the native online administrator
+and network ingress remain gated. The internal transition tests described below
 exercise these core paths without removing the release gate.
 
 ## State and dependency ordering
@@ -103,6 +104,50 @@ counts conservatively bound intermediate joint unions without cloning or
 validating untrusted history; actual core membership validation remains mandatory.
 Any future administrative event must also describe its prospective fanout before
 its ingress gate can open.
+
+## Host-authorized local proposals
+
+`Event::Configure(Box<ConfigurationProposal>)` is explicit administrative input,
+separate from an application command. The host authorizes placement/failure
+domains and supplies the group's ReadinessRequirements. A voting leader must
+have established a committed prefix in its current term before proposing.
+The existing journal grammar validates the expected configuration, operation
+identity, learner assignments, joint/final ordering and exact stores.
+
+Every voter newly introduced by a joint proposal needs one `PromotionReadiness`:
+a core-issued ReadyLearner and its current authenticated peer StoreBinding.
+The token must cover the current committed prefix and exact required capabilities.
+Missing, duplicate, extraneous, stale, wrong-store or mismatched-capability proofs
+reject before mutation. Existing voters need no new readiness; same-voter quorum
+policy changes still go through joint consensus. Finalization needs the exact
+joint operation/target and committed joint index, and takes no learner proofs.
+
+Success produces only the existing Persist effect. Accepted pending membership
+is visible, but durable state and dependent sends wait for the exact LogTicket
+in DurableLog. Written is insufficient. The record uses the existing WAL codec,
+snapshot journal and recovery path; volatile readiness is not persisted.
+Configuration records advance application replay but emit no command receipts
+or ordinary client proposal position. Query the durable/committed journal to
+resolve an uncertain administration outcome; retrying an operation ID is not
+authority to append another transition.
+
+Runtime admission charges owned record metadata and the proof vector's retained
+capacity, reserves all prospective exact peers and output fanout, and checks
+retained routes/pins through the existing owner policy. Queue-only requirements
+remain reserved until execution/rejection/stop. Default Shard, TimedShard and
+EffectOwner stepping refuses promotion proofs with AuthenticationRequired.
+ClientRouter/Node advancement also retains that default. Hosts explicitly use
+`EffectOwner::advance_with_configuration_bindings` to check each current peer
+binding immediately before execution. A disconnect/restart cannot be hidden by
+the binding captured in a queued proposal. Direct Raft::step hosts perform the
+same authentication check themselves under the trusted host contract.
+
+This path enables tested local proposal admission, not public online configuration
+delivery. Native readiness RPC/worker integration, placement authorization,
+distributed activation modeling and faulted network transition histories remain
+required. Public configuration-bearing Append and membership Snapshot ingress
+stay closed. Local proposal tests use host-asserted peer-2 acknowledgement messages;
+they do not demonstrate that remote voters received configuration records.
 
 ## Evidence boundary
 

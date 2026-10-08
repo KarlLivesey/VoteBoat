@@ -253,7 +253,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
     }
 }
 pub(super) fn changes_connections(event: &Event) -> bool {
-    matches!(event, Event::Receive(Message { rpc: Rpc::Append { entries, .. }, .. })
+    matches!(event, Event::Configure(_))
+        || matches!(event, Event::Receive(Message { rpc: Rpc::Append { entries, .. }, .. })
         if entries.iter().any(|e| matches!(e.payload, crate::log::EntryPayload::Configuration(_))))
         || matches!(
             event,

@@ -987,6 +987,22 @@
         "tests/learners.rs"
       ],
       "scope": "One bounded pending request per core, binding leader context/session, committed stable configuration, learner exact store/session, term and contiguous committed prefix. Verification rejects pending/Written work, applied lag, unsupported schema/capacity, provider disagreement and missing pinned compacted data; bounded checkpoint restore checks application compatibility. Replies match the entire request and current authenticated peer binding; accepted tokens become stale after commit/term/configuration/session changes. Provider/peer assertions use the existing authenticated non-Byzantine trust model. No new durable record, watermark or generation. Native wire/worker integration and promotion admission remain next work; no online membership or placement policy claim."
+    },
+    {
+      "design_id": "C01/C04/C10/C15",
+      "public_contract": "ConfigurationProposal / PromotionReadiness / ConfigurationProposalError / Event::Configure",
+      "operations": [
+        "Raft::step(Event::Configure)",
+        "EffectOwner::advance_with_configuration_bindings"
+      ],
+      "native": "Existing native WAL configuration record codec, exact DurableLog dependencies and explicit member recovery; native files reopen the local joint/final journal.",
+      "conformance": [
+        "tests/learners.rs",
+        "tests/support/connection_budget.rs",
+        "tests/support/peer_driver.rs",
+        "tests/effect_owner.rs"
+      ],
+      "scope": "Host-authorized local administrative proposals with current-term commitment, shared journal grammar, complete exact fresh promotion readiness and required capabilities. Missing/duplicate/extraneous/stale proofs reject before persistence. Final requires exact committed joint operation/target. Runtime charges retained proof capacity and prospective peer/fanout union; default stepping refuses promotion proofs without execution-time live-binding checks. New records emit only existing persistence-dependent effects, and application replay yields no command receipts. Native failed barrier fencing plus modeled unsynced-byte loss, actual file reopen and old/new recursive policy checks are covered. No native readiness RPC/worker integration, online administrator, placement policy or released network configuration ingress claim."
     }
   ],
   "not_yet_implemented": [

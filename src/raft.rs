@@ -27,6 +27,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 mod readiness;
 pub use readiness::*;
+mod configuration;
+pub use configuration::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RequestContext {
@@ -106,6 +108,9 @@ pub(crate) enum RecoveryMode {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Event {
+    /// Host-authorized administrative input; public network configuration
+    /// ingress remains independently gated. This is not an application command.
+    Configure(Box<ConfigurationProposal>),
     Campaign,
     Heartbeat,
     /// Request a local application checkpoint; never establishes quorum evidence.
@@ -185,6 +190,7 @@ pub enum Effect {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
+    Configuration(Box<ConfigurationProposalError>),
     /// Owner-side deterministic application validation rejected this invocation
     /// before the core proposed it. This is not a replicated outcome.
     Admission(crate::application::ApplicationError),
@@ -514,6 +520,16 @@ impl Raft {
     pub fn event_effect_reservation(&self, event: &Event, input_bytes: usize) -> Option<usize> {
         use crate::membership::ConfigurationChange;
         let mut peers = self.rollback_replicas();
+        if let Event::Configure(proposal) = event {
+            if let crate::membership::ConfigurationChange::Learners(next)
+            | crate::membership::ConfigurationChange::Joint { next, .. } =
+                &proposal.record.change
+            {
+                peers = peers
+                    .saturating_add(next.voter_stores().len() + next.learners().len())
+                    .min(crate::quorum::Limits::default().max_voters);
+            }
+        }
         if let Event::Receive(message) = event {
             match &message.rpc {
                 Rpc::Append { entries, .. } => {
@@ -761,6 +777,7 @@ impl Raft {
             return Err(RaftError::Busy);
         }
         match event {
+            Event::Configure(proposal) => self.configure(*proposal),
             Event::AuthorizeReplication {
                 witness,
                 candidate,

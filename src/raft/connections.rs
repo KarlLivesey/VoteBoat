@@ -102,6 +102,16 @@ impl Raft {
             peers.insert(node, store);
             Ok(())
         };
+        if let Event::Configure(proposal) = event {
+            use crate::membership::ConfigurationChange;
+            if let ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. } =
+                &proposal.record.change
+            {
+                for (&node, &store) in next.voter_stores().iter().chain(next.learners()) {
+                    add(node, store)?;
+                }
+            }
+        }
         if let Event::Receive(message) = event {
             if message.group != self.durable.bootstrap.group || message.to != self.node {
                 return Err(RaftError::WrongIdentity);

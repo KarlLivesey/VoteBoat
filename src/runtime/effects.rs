@@ -404,6 +404,38 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
+        mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+    ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+        self.advance_authorized(now, limit, |core, event| {
+            configuration_auth_required(event)?;
+            check(core, event)
+        })
+    }
+    /// Low-level host advancement with live promotion bindings checked at
+    /// execution, not queue admission. Ordinary application/service validation
+    /// remains the host's responsibility, as with advance. A missing or changed
+    /// authenticated binding rejects the event before configuration persistence.
+    pub fn advance_with_configuration_bindings(
+        &mut self,
+        now: MonoTime,
+        limit: usize,
+        mut binding: impl FnMut(NodeId) -> Option<StoreBinding>,
+    ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+        self.advance_authorized(now, limit, |_, event| {
+            if let Event::Configure(proposal) = event {
+                for proof in &proposal.readiness {
+                    if binding(proof.ready.request().learner.node) != Some(proof.authenticated) {
+                        return Err(ConfigurationProposalError::AuthenticationRequired.into());
+                    }
+                }
+            }
+            Ok(())
+        })
+    }
+    fn advance_authorized(
+        &mut self,
+        now: MonoTime,
+        limit: usize,
         check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         let result = self.advance_inner(now, limit, check);

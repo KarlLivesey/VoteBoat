@@ -388,7 +388,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         visit: VisitTicket,
         now: MonoTime,
     ) -> Result<Option<Stepped>, RuntimeError> {
-        self.step_next_checked(visit, now, |_, _| Ok(()))
+        self.step_next_checked(visit, now, |_, event| configuration_auth_required(event))
     }
     pub(super) fn step_next_checked(
         &mut self,

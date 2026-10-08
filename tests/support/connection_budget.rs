@@ -269,3 +269,66 @@ fn stopping_a_group_returns_queued_reservation_and_registration_cannot_overbook_
         vec![(node(3), identity(3))]
     );
 }
+
+fn local_configuration(group_id: u128, peer: u64, physical: u128) -> Event {
+    let Event::Receive(Message {
+        rpc: Rpc::Append { mut entries, .. },
+        ..
+    }) = incoming(group_id, peer, physical)
+    else {
+        unreachable!()
+    };
+    let EntryPayload::Configuration(record) = entries.remove(0).payload else {
+        unreachable!()
+    };
+    Event::Configure(Box::new(ConfigurationProposal {
+        record: *record,
+        readiness: vec![],
+        requirements: ReadinessRequirements {
+            application_schema: 1,
+            command_bytes: 8,
+            snapshot_bytes: 4096,
+        },
+    }))
+}
+#[test]
+fn local_configuration_events_reserve_peer_union_before_ownership_and_release_on_rejection() {
+    let (mut owner, _) = single(2);
+    owner
+        .set_connection_budget(budget(&owner, 1, Default::default()))
+        .unwrap();
+    let event = local_configuration(1, 2, 2);
+    let existing = owner
+        .core(group(1))
+        .unwrap()
+        .effect_reservation(1024)
+        .unwrap();
+    let prospective = owner
+        .core(group(1))
+        .unwrap()
+        .event_effect_reservation(&event, 1024)
+        .unwrap();
+    assert!(prospective > existing);
+    let first = owner.admit_tracked(group(1), event).unwrap();
+    assert_eq!(owner.reserved_connection_peers().unwrap(), Some(1));
+    let rejected = owner
+        .admit_tracked(group(2), local_configuration(2, 3, 3))
+        .unwrap_err();
+    assert_eq!(rejected.reason, RuntimeError::PeerCapacity);
+    assert_eq!(*rejected.event, local_configuration(2, 3, 3));
+    assert_eq!(
+        owner
+            .admit(group(2), local_configuration(2, 2, 22))
+            .unwrap_err()
+            .reason,
+        RuntimeError::PeerStoreConflict
+    );
+    let steps = owner.advance(MonoTime(0), 1).unwrap();
+    assert_eq!(steps[0].admission, Some(first));
+    assert_eq!(steps[0].error, Some(RaftError::NotLeader));
+    assert_eq!(owner.reserved_connection_peers().unwrap(), Some(0));
+    let second = owner.admit_tracked(group(2), *rejected.event).unwrap();
+    assert_eq!(second.sequence, first.sequence + 1);
+    owner.advance(MonoTime(0), 1).unwrap();
+    assert!(owner.is_drained());
+}

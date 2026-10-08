@@ -695,7 +695,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         ticket: VisitTicket,
         now: MonoTime,
     ) -> Result<Option<Stepped>, RuntimeError> {
-        self.step_next_checked(ticket, now, |_, _| Ok(()))
+        self.step_next_checked(ticket, now, |_, event| configuration_auth_required(event))
     }
     pub(super) fn step_next_checked(
         &mut self,
@@ -732,7 +732,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         let result = if stale_timer {
             Ok(Vec::new())
         } else {
-            if matches!(q.event, Event::Propose { .. }) {
+            if matches!(q.event, Event::Propose { .. } | Event::Configure(_)) {
                 check(&g.core, &q.event)
             } else {
                 Ok(())
@@ -829,8 +829,34 @@ impl<Q: ReadyScheduler> Shard<Q> {
     }
 }
 
+fn configuration_auth_required(event: &Event) -> Result<(), RaftError> {
+    if matches!(event, Event::Configure(p) if !p.readiness.is_empty()) {
+        Err(ConfigurationProposalError::AuthenticationRequired.into())
+    } else {
+        Ok(())
+    }
+}
 fn event_cost(event: &Event, limit: usize) -> Result<(Class, usize), RuntimeError> {
     let (class, extra) = match event {
+        Event::Configure(proposal) => {
+            if proposal.readiness.len() > crate::quorum::Limits::default().max_voters {
+                return Err(RuntimeError::EventTooLarge);
+            }
+            let extra = proposal
+                .record
+                .retained_bytes()
+                .checked_add(size_of::<ConfigurationProposal>())
+                .and_then(|n| {
+                    n.checked_add(
+                        proposal
+                            .readiness
+                            .capacity()
+                            .checked_mul(size_of::<PromotionReadiness>())?,
+                    )
+                })
+                .ok_or(RuntimeError::EventTooLarge)?;
+            (Class::Control, extra)
+        }
         Event::Checkpoint => (Class::Background, 0),
         Event::Read { .. } => (Class::Data, 0),
         Event::Propose { bytes, .. } => (Class::Data, bytes.capacity()),

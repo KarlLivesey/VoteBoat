@@ -206,6 +206,15 @@ impl Membership {
         }
         Ok(result)
     }
+    pub(crate) fn validate_next(
+        &self,
+        index: u64,
+        record: &ConfigurationRecord,
+        committed_prefix: u64,
+    ) -> Result<(), MembershipError> {
+        let mut next = self.clone();
+        next.accept(index, record, committed_prefix)
+    }
     fn accept(
         &mut self,
         index: u64,

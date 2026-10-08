@@ -76,33 +76,30 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Retained route/credential admission is complete in slice 51. It checks queued
-requirements against owned exact-store hints and provisioned pins and drains
-per-peer sends before retirement. The earlier service-test port race remains a
-validation limitation, not a membership protocol change.
+Retained route/credential admission (slice 51) and host-driven readiness evidence
+(slice 52) are implemented. They feed local proposal admission, then the native
+exchange and distributed release checks. The macro P4 exit is still usable,
+validated online add/promote/remove; these slices do not redefine that exit.
 
-1. **Learner readiness evidence (current, P4).** Slice 52 implements the
-   host-driven request/verification/acceptance contract over actual selected log,
-   snapshot and application providers. Completion checks cover stale requests,
-   exact sessions, pending/Written state, applied lag, incompatible capabilities,
-   missing pinned data and native checkpoint/reopen. This depends on learner
-   recovery and retained transport admission. Native exchange integration is
-   explicitly part of the next deliverable; connection liveness is not readiness.
-2. **Complete and expose online membership (next, P4).** Integrate readiness
-   into native wire/worker maintenance and joint/final promotion admission, with
-   an actionable host/service entry point and placement authorization. Depends
-   on item 1 and existing journal/snapshot recovery. Completion means actual
-   multi-node add/promote/remove histories, including leader loss, restart,
-   rollback and partial delivery, preserve quorum and retirement rules. Validate
-   activation modeling and open public configuration ingress only after its
-   release checks pass.
-3. **Recursive responsibility manifests and routing (following, P5).** Establish
-   validated responsibility/group/epoch mappings and selective assignment, then
-   resolve/cache routes to existing groups. This advances the macro responsibility
-   milestone after P4's release gates. Completion requires disjoint declared
-   ownership/order boundaries and healthy established child operation during
-   parent unavailability, without an ancestor commit in normal writes. Split/
-   merge follows this foundation under P6's durable fencing/import rules.
+1. **Local configuration proposal admission (current, P4).** Slice 53 connects
+   readiness to explicit learner/joint/final administrative events and the existing
+   journal/persistence path. Depends on slices 51–52. Completion checks cover
+   complete fresh promotion evidence, joint-before-final commitment, exact
+   durability, native recovery/failure, old/new recursive predicates, and queued
+   route/capacity retention with execution-time authenticated session checks.
+2. **Native readiness exchange (next, P4).** Carry fresh readiness requests and
+   replies through the selected native wire/session and asynchronous maintenance
+   paths. Bind returned evidence to the exact suspended owner/application state
+   and current peer session. Depends on item 1 and existing snapshot workers.
+   Completion means real TCP/QUIC exchange produces checked readiness without
+   blocking unrelated groups; rejected/canceled/stale work preserves its original
+   ownership and credits through drain/recovery.
+3. **Fault-tested online activation (following, P4).** Connect the administrator
+   entry point and placement authorization to those paths, validate distributed
+   activation modeling, and exercise actual multi-node add/promote/remove with
+   leader loss, restart, rollback and partial delivery. Open configuration ingress
+   only after those release checks pass. Then advance to P5's selective recursive
+   responsibility manifests/routing, followed by P6 split/merge and P7 tuning.
 
 Before editing each item, sketch its data/API shape, transitions, ownership,
 failure cleanup and focused checks. If that sketch reveals another dependency,
@@ -3171,3 +3168,57 @@ API docs, formatting/diff and inventory shape/path validation pass (50 records).
 Next deliverable: integrate this readiness exchange into native wire/maintenance
 and joint/final promotion admission; complete the faulted online membership
 release checks before moving to recursive responsibility manifests and routing.
+
+## Slice 53 — local configuration proposals consume readiness
+
+Mini schema plan: introduce an explicit owned administrative event containing
+one journal record, bounded promotion proofs and host-authorized capability
+requirements. Validate the shared transition grammar and each promoted learner
+before persistence. Reserve prospective peers/fanout through the same queued
+owner ledger. Recheck live authenticated sessions at execution; default runtime
+stepping rejects proofs without that check. This advances P4 toward native
+readiness exchange, then faulted online activation; P5–P7 remain the macro scope.
+
+Event::Configure uses ConfigurationProposal, PromotionReadiness and typed
+ConfigurationProposalError. A voting leader needs a committed current-term
+prefix. Every newly promoted exact-store voter needs fresh core-checked readiness
+covering that prefix and the exact required schema/capacities. Missing, duplicate,
+extraneous or mismatched proofs reject before mutation. Existing voters need no
+new readiness; same-voter policy changes still enter joint consensus. The shared
+journal validates expected configuration, operation reuse, assignment and final
+ordering. Final requires the committed joint and its exact operation/target.
+
+Successful admission emits only the existing Persist transition. No new durable
+effect, token, watermark or generation is introduced. Exact LogTicket/DurableLog
+completion permits dependent sends; Written cannot release them. Restart uses
+the existing journal/snapshot replay and fresh store session; readiness remains
+volatile. Configuration replay advances application progress without ordinary
+command receipts, client operation tracking or a client proposal position.
+
+Runtime input accounting includes record metadata and proof vector capacity.
+Prospective connection/output reservations include learner and joint targets
+before queue ownership transfer. Protocol rejection releases queue-only peers;
+retained owned route plans cannot withdraw queued requirements. Default Shard,
+TimedShard and EffectOwner stepping (including ClientRouter/Node advancement)
+refuses promotion proofs without authentication. Low-level hosts explicitly use
+advance_with_configuration_bindings to compare current sessions at execution;
+direct core hosts authenticate adjacent to Raft::step. Native Node integration
+with its actual roster is still next work, not implied by this callback seam.
+
+Eight new downstream histories cover proof admission, joint-before-final,
+native file reopen, old/new recursive weighted commitment, failed native sync
+and modeled loss of unsynchronized bytes, execution-time session checks, retained
+proof-capacity rejection, shared queued peer budgets and pin/route withdrawal.
+Assignments and peer-2 acknowledgement messages in local proposal fixtures are
+host assertions; no remote configuration-delivery claim is made. A test fixture
+was corrected to move its original oversized vector rather than cloning it and
+losing spare capacity before admission. No production accounting was weakened.
+
+QUIC-enabled library/effect-owner/learners/membership/peers/runtime/snapshot/
+snapshot-worker/startup/service suites pass 43/111/19/27/18/25/19/14/8/7 tests
+(291 total). Updated learner assertions additionally verify no command receipts
+or client proposal position. Core-only all-target check, all-feature/all-target
+Clippy, API docs and inventory validation pass. Public configuration-bearing
+Append and membership Snapshot ingress remain gated pending native readiness
+exchange, placement authorization, activation modeling and faulted network
+histories. No macOS, hardware power-loss, performance or full proof claim.
