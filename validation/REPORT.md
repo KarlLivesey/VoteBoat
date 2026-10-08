@@ -653,3 +653,40 @@ assertion uses a borrowed expected-message slice.
   distributed configuration commitment, online enrollment, macOS or performance.
   Service administration/enforced bounds and faulted remote membership release
   remain pending. Full P0–P7 remains active; public configuration ingress is gated.
+
+## Slice 62 — service configuration status and counter lifetime envelope
+
+- Native local configuration-status OPERATION_ID reads the existing Node durable
+  observer, separating committed and accepted phases, contiguous committed prefix
+  and durable log end. Reply labels local evidence and inconclusive absence;
+  finalization is only a planning hint. Nonzero ID parsing and fixed scalar phase
+  output retain no mutation request or configuration policy payload.
+- Counter readiness_requirements covers schema 1, eight-byte commands and every
+  retained operation outcome: 32+33*configured capacity checkpoint bytes. Declaration
+  validation rejects smaller bounds/wrong schema. Existing admission, application
+  and restore enforce capacity, including pending IDs and no implicit retry eviction.
+  Service startup binds its 10000-operation, 330032-byte declaration to those
+  bounds and selected native command/checkpoint payload limits before resources.
+- Application suite: 9 pass all-feature and 9 core-only. New full-capacity case
+  checks exact/one-byte-short checkpoint size, overflow/retry retention, no new
+  operation beyond capacity, stable envelope across restore, undersized/wrong
+  schema declarations and changed-capacity restore refusal.
+- Configuration capacity suite: 5 pass. New service-size case fills all 10000
+  identities, round-trips the 330032-byte checkpoint through actual native wire
+  formats 1–4 and restores full retry history and applied value. This is a single
+  checkpoint with small fixture membership, not arbitrary metadata growth/batching.
+- Actual executable service suite: 7 pass with socket permission. TCP/QUIC process
+  histories query local absence on leaders/followers and after leader restart,
+  reject operation zero, and retain write/read/retry/leader-loss/checkpoint/shutdown
+  checks. These CLI histories have static membership; dynamic journal observation
+  semantics are covered by existing Node administration tests rather than these
+  process fixtures. Read-only fixture polling waits for the reopened command port.
+- All-feature/all-target Clippy with warnings denied, all-feature API docs,
+  core-only all-target compilation, formatting/diff and inventory checks pass
+  (59 contracts). Inventory checks metadata, not protocol correctness.
+- Counter-specific enforced bounds and local status do not release remote mutation
+  ingress or establish generic host application envelopes. Growing membership
+  metadata still requires selected codec/transport configuration checks. Mutation
+  endpoints, provisioning/readiness integration and faulted online transitions
+  remain pending; P0–P7 stays active. No new token/generation/watermark/format,
+  macOS execution, performance or full protocol proof claim.

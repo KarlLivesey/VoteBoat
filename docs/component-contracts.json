@@ -1141,6 +1141,22 @@
         "tests/native_member_startup.rs"
       ],
       "scope": "Host authenticates source commitment; stable exact learner/store only, no voter or joint import. Original bootstrap, application schema/data, retained allocation and provider budgets checked. Clone validation precedes mutation; durable snapshot publication and pin precede log barrier and verified combined recovery. Exact completed import or exact published image can resume after lost receipts; progressed or different images refuse. Host and native WAL fault injection covers publication/pin/log failures and same-image retry; native files reopen over TCP/QUIC. Initialization across fresh WAL/bootstrap/snapshot stores is not atomic and incomplete creation requires explicit inspection; Recover never creates missing stores. Application may be restored after durable import; errors never imply rollback. No new token, generation, watermark or format. No network commitment certificate or released remote membership; service endpoints/enforced envelopes and faulted lifecycle remain pending."
+    },
+    {
+      "design_id": "C05/C10/C20",
+      "public_contract": "Counter::readiness_requirements / Counter::validate_readiness_requirements / voteboat-counter configuration-status",
+      "operations": [
+        "report configured lifetime application envelope",
+        "validate declared schema and bounds",
+        "query local durable configuration status"
+      ],
+      "native": "Counter enforced retry capacity and existing Node durable observer exposed by the native local command endpoint.",
+      "conformance": [
+        "tests/application.rs",
+        "tests/configuration_capacity.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Counter envelope covers fixed eight-byte commands and 32+33*configured operation capacity checkpoint bytes independent of occupancy. Existing pending proposal admission/application/restore enforce capacity without retry eviction; service validates schema and payload limits before opening resources. Full 10000-operation checkpoint round-trips through wire versions 1–4. Configuration-status parses nonzero operation IDs and returns local durable committed/accepted phases and planning hints; local absence is inconclusive and follower observations are not quorum reads. No mutation or unbounded policy payload, new token/generation/watermark/format. Real TCP/QUIC service process histories query static local absence and restart; dynamic observer semantics are separately tested through Node. Growing membership metadata still needs selected configuration-capacity checks. Generic host envelope enforcement, service mutations and faulted remote lifecycle release remain pending."
     }
   ],
   "not_yet_implemented": [

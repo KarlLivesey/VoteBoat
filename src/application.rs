@@ -248,6 +248,33 @@ impl Counter {
     pub fn remaining_operations(&self) -> usize {
         self.max_operations - self.dedup.len()
     }
+    /// Whole configured lifetime envelope, including every retained retry
+    /// outcome. Admission and restore enforce this capacity; it is independent
+    /// of current occupancy and must not shrink when the application is empty.
+    pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
+        crate::raft::ReadinessRequirements {
+            application_schema: self.schema_version(),
+            command_bytes: 8,
+            snapshot_bytes: 32 + 33 * self.max_operations,
+        }
+    }
+    /// Check an administrator's declaration against enforced application bounds.
+    /// Larger byte envelopes are allowed; the schema must match exactly.
+    pub fn validate_readiness_requirements(
+        &self,
+        declared: crate::raft::ReadinessRequirements,
+    ) -> Result<(), ApplicationError> {
+        let actual = self.readiness_requirements();
+        if declared.application_schema != actual.application_schema {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        if declared.command_bytes < actual.command_bytes
+            || declared.snapshot_bytes < actual.snapshot_bytes
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
 }
 impl StateMachine for Counter {
     type Receipt = CounterReceipt;

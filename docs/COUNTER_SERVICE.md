@@ -328,3 +328,35 @@ bootstrapped, otherwise empty destination or the exact completed import. This
 is an offline trusted handoff for embedding; counter command endpoints and remote
 configuration delivery are still gated pending administration/envelope integration
 and fault-tested online transitions.
+
+## Local configuration operation status and counter envelope
+
+Query an exact nonzero configuration operation ID on a specific local node:
+
+```sh
+target/debug/voteboat-counter client 43000 1 configuration-status 42
+```
+
+The reply labels its evidence `local_durable`, separates the committed prefix
+from the durable log end, and reports committed and accepted phases separately.
+`inconclusive_local_absence` cannot establish cluster-wide absence or authorize a
+replacement operation. `finalize_requires_authorization` is a planning hint;
+this endpoint submits no final record. It is available on followers as historical
+local evidence, without claiming a fresh quorum-backed read. Automatic client
+routing remains restricted to application add/read commands.
+
+The service binds schema 1, eight-byte commands and a 330,032-byte application
+checkpoint envelope to Counter's configured 10,000 retained operation IDs. Counter
+admission reserves pending IDs, application refuses further distinct IDs at
+capacity, and restore requires the identical configured capacity. Retries keep
+their original outcomes. `Counter::readiness_requirements` reports the whole
+configured lifetime envelope (32 + 33 * maximum operations), including when the
+counter is empty; `validate_readiness_requirements` rejects a smaller declaration
+or a different schema. Service startup compares this declaration with its selected
+native command/checkpoint payload limits before opening resources.
+
+A full counter checkpoint round-trips through native wire versions 1–4 in tests.
+This is the application payload bound; growing membership metadata and retained
+configuration operation IDs still require the selected codec/transport checks
+before each configuration mutation. General host application envelope enforcement,
+service mutation endpoints and remote lifecycle release remain work.

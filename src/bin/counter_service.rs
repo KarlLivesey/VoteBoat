@@ -24,11 +24,12 @@ use std::{
     path::Path,
     time::{Duration, Instant},
 };
+use voteboat::membership::ConfigurationResumeAction;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
     "voteboat-counter serve create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
-voteboat-counter client BASE_PORT NODE status|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
@@ -73,6 +74,21 @@ fn ports(base: &str, id: &str) -> Result<(u16, u64), Failure> {
 fn command(service: &mut Service, command: &str, quit: &mut bool) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
+        ["configuration-status", operation] => {
+            let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
+                .ok_or("invalid operation ID")?;
+            let status = service.configuration_status(group(), operation)
+                .map_err(|e| format!("{e:?}"))?;
+            let action = match status.resume_action() {
+                ConfigurationResumeAction::Completed => "completed",
+                ConfigurationResumeAction::WaitForCommit => "wait_for_commit",
+                ConfigurationResumeAction::Finalize(_) => "finalize_requires_authorization",
+                ConfigurationResumeAction::NotFoundLocally => "inconclusive_local_absence",
+            };
+            format!("OK evidence=local_durable operation={} committed_prefix={} durable_last={} committed={:?} accepted={:?} action={}",
+                operation.get(), status.committed_index, status.durable_last_index,
+                status.committed, status.accepted, action)
+        }
         ["status"] => {
             let core = service.local().owner.core(group()).ok_or("missing group")?;
             format!(
@@ -119,7 +135,7 @@ fn command(service: &mut Service, command: &str, quit: &mut bool) -> Result<Phas
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {

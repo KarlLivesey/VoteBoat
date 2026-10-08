@@ -87,12 +87,15 @@ Seeded recovery fixtures do not establish distributed enrollment or commitment.
 Slice 61 adds trusted checkpoint enrollment through public storage contracts and
 native files, with exact-image retry and TCP/QUIC member startup. Administration
 endpoints and enforced bounds remain within the current deliverable.
+Slice 62 adds local service configuration observation and the counter's enforced
+lifetime envelope. Mutation endpoints and binding their declarations to placement,
+readiness and transport admission remain within the same current deliverable.
 
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
    schema/command/checkpoint bounds as deduplication grows. Depends on slices
-   51–60 and authenticated service scope. Check exact committed assignments,
+   51–62 and authenticated service scope. Check exact committed assignments,
    rejection before mutation, lost-reply resumption and matching TCP/QUIC
    assemblies. Provides the native path for release testing, not an early opening
    of public configuration ingress.
@@ -3601,3 +3604,37 @@ network enrollment, fault-tested joint activation or online service release.
 Current mini item remains enrollment/admin integration and enforced application
 bounds; next is fault-tested remote membership, then P5 routing. Full P0–P7 stays
 active; P8 remains deferred. See validation/REPORT.md for executed checks.
+
+## Slice 62 — service configuration observation and enforced counter envelope
+
+Mini schema plan: add a bounded local configuration-status command using the
+existing Node durable observer, with explicit evidence scope, committed/accepted
+phases and non-authoritative resumption hints. Parse one nonzero operation ID;
+retain no operation request or mutation ticket. Reply contains fixed-size scalar
+phase data, never configuration policy payload. Missing local history is
+inconclusive; follower observation grants no read or mutation authority.
+
+Bind the counter service's declaration to its actual configured capacity using
+Counter::readiness_requirements/validate_readiness_requirements. Schema is fixed,
+commands are eight bytes and the maximum checkpoint includes all retained retry
+outcomes, independent of current occupancy. Existing proposal admission accounts
+for pending identities, application checks capacity and restore rejects a capacity
+change. Compare declared bounds with selected native payload limits before open.
+No new durability effect, generation, watermark, protocol or format is introduced.
+
+Real TCP/QUIC process histories query local absence on all nodes and after restart,
+reject operation zero and retain application write/read/retry/leader-loss behavior.
+Application tests fill retry capacity, preserve overflow/duplicate state through
+restore, reject undersized/wrong-schema declarations and forbid capacity-changing
+restore. A full 10,000-operation service checkpoint round-trips through native
+wire formats 1–4 with its exact 330,032-byte payload.
+
+This completes service observation and the counter-specific application bound,
+not a generic host envelope capability or service mutation API. Dynamic phase
+semantics remain supplied by the existing Node observer tests; the CLI process
+fixtures have static membership and observe local absence only. Growing membership
+metadata still uses selected configuration-capacity admission. Current mini item
+remains enrollment/admin integration: connect mutations and readiness to these
+bounds, placement and provisioning, then exercise faulted remote transitions before
+release. P5 routing and P6 split/merge remain subsequent global milestones; P0–P7
+is active. See validation/REPORT.md for executed checks and limits.

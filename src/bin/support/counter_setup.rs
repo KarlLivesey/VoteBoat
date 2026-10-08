@@ -146,12 +146,26 @@ pub fn configuration(
     Ok(config)
 }
 pub fn open(config: NativeStartup, protocol: NativePeerProtocol) -> Result<Service, Failure> {
-    match config.open_with_protocol(
-        protocol,
-        checked(Counter::new(10000))?,
-        Arc::new(ThreadWake::current()),
-        MonoTime(0),
-    ) {
+    let app = checked(Counter::new(10000))?;
+    // Bind the service declaration to the same capacity enforced by admission,
+    // application and restore, including future retry history growth.
+    let requirements = voteboat::raft::ReadinessRequirements {
+        application_schema: 1,
+        command_bytes: 8,
+        snapshot_bytes: 330032,
+    };
+    checked(app.validate_readiness_requirements(requirements))?;
+    let wire = voteboat::wire::WireLimits::default();
+    if requirements.command_bytes > wire.max_command_bytes
+        || requirements.command_bytes > LogLimits::default().max_command_bytes
+        || requirements.snapshot_bytes > wire.max_snapshot_bytes
+        || requirements.snapshot_bytes > LogLimits::default().max_snapshot_bytes
+        || requirements.snapshot_bytes
+            > voteboat::snapshot::SnapshotLimits::default().max_application_bytes
+    {
+        return Err("counter application envelope exceeds selected native payload limits".into());
+    }
+    match config.open_with_protocol(protocol, app, Arc::new(ThreadWake::current()), MonoTime(0)) {
         Ok(node) => Ok(node),
         Err(mut rejected) => {
             let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);

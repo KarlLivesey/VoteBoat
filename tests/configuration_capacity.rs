@@ -43,6 +43,69 @@ fn app() -> ReadinessRequirements {
         snapshot_bytes: 4096,
     }
 }
+#[test]
+fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
+    use voteboat::application::*;
+    let mut counter = Counter::new(10000).unwrap();
+    let entries = (1..=10000)
+        .map(|index| LogEntry {
+            index,
+            term: 7,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(index as u128).unwrap(),
+                bytes: 1i64.to_le_bytes().to_vec(),
+            },
+        })
+        .collect::<Vec<_>>();
+    counter.apply_batch(&entries).unwrap();
+    let required = counter.readiness_requirements();
+    let image = counter.checkpoint(required.snapshot_bytes).unwrap();
+    assert_eq!(image.len(), 330032);
+    let bootstrap = bootstrap(1, 3);
+    let membership = Membership::replay(&bootstrap, &[], 0).unwrap();
+    let record = record(1);
+    let input = request(&bootstrap, &membership, &record, 1);
+    let scope = WireScope {
+        from: node(1),
+        sender: HostLogStore::new(1).binding(),
+        to: node(2),
+    };
+    for codec in [
+        NativeWireCodec::new(WireLimits::default()).unwrap(),
+        NativeWireCodec::with_membership(WireLimits::default()).unwrap(),
+        NativeWireCodec::with_authority(WireLimits::default()).unwrap(),
+        NativeWireCodec::with_readiness(WireLimits::default()).unwrap(),
+    ] {
+        let mut message = messages(&input)[2].clone();
+        let Rpc::Snapshot { snapshot } = &mut message.rpc else {
+            unreachable!()
+        };
+        snapshot.metadata.index = 10000;
+        snapshot.application = image.clone();
+        if codec.format_version() == 1 {
+            snapshot.metadata.membership = None;
+            message.configuration = bootstrap.configuration;
+        }
+        let encoded = codec
+            .encode_batch(scope, std::slice::from_ref(&message))
+            .unwrap();
+        assert!(encoded.len() <= codec.limits().max_frame_bytes);
+        let decoded = codec.decode_batch(scope, &encoded).unwrap();
+        let Rpc::Snapshot { snapshot } = &decoded[0].rpc else {
+            unreachable!()
+        };
+        let mut restored = Counter::new(10000).unwrap();
+        restored
+            .restore_checkpoint(
+                snapshot.metadata.application_schema,
+                snapshot.metadata.index,
+                &snapshot.application,
+            )
+            .unwrap();
+        assert_eq!(restored.remaining_operations(), 0);
+        assert_eq!(restored.read_applied(10000).unwrap(), 10000);
+    }
+}
 fn request<'a>(
     b: &'a Bootstrap,
     m: &'a Membership,

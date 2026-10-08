@@ -143,6 +143,20 @@ impl Cluster {
         );
         String::from_utf8(output.stdout).unwrap()
     }
+    fn wait_configuration_status(&self, id: usize, operation: &str) -> String {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            let output = self.request(id, &["configuration-status", operation]);
+            if output.status.success() {
+                return String::from_utf8(output.stdout).unwrap();
+            }
+            assert!(
+                Instant::now() < deadline,
+                "node {id} configuration status unavailable"
+            );
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
     fn routed(&self, args: &[&str]) -> String {
         let output = self.target("auto", args);
         assert!(
@@ -240,6 +254,20 @@ fn replicated_history(quic: bool) {
         cluster.start(id, "create");
     }
     let leader = cluster.leader();
+    let query = [
+        "configuration-status",
+        "340282366920938463463374607431768211455",
+    ];
+    for id in 1..=3 {
+        let status = cluster.wait_configuration_status(id, query[1]);
+        assert!(status.contains("evidence=local_durable"));
+        assert!(status.contains("committed=NotFoundLocally accepted=NotFoundLocally"));
+        assert!(status.contains("action=inconclusive_local_absence"));
+        assert!(!cluster
+            .request(id, &["configuration-status", "0"])
+            .status
+            .success());
+    }
     assert!(cluster.routed(&["add", "1", "7"]).contains("Value(7)"));
     let retry = cluster.routed(&["add", "1", "7"]);
     assert!(retry.contains("Value(7)") && retry.contains("duplicate=true"));
@@ -260,6 +288,9 @@ fn replicated_history(quic: bool) {
     assert_ne!(replacement, leader);
     assert_eq!(cluster.routed(&["read"]), "OK value=10\n");
     cluster.start(leader, "recover");
+    assert!(cluster
+        .wait_configuration_status(leader, query[1])
+        .contains("action=inconclusive_local_absence"));
     if quic {
         // Wait for the surviving peers' idle detection and fresh session lease,
         // then prove the recovered former leader receives newly committed work.

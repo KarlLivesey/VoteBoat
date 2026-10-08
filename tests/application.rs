@@ -25,6 +25,64 @@ fn command(index: u64, id: u128, delta: i64) -> LogEntry {
 }
 
 #[test]
+fn counter_envelope_covers_full_retry_history_and_survives_restore() {
+    let mut counter = Counter::new(3).unwrap();
+    let required = counter.readiness_requirements();
+    assert_eq!(required.application_schema, 1);
+    assert_eq!(required.command_bytes, 8);
+    assert_eq!(required.snapshot_bytes, 131);
+    counter
+        .apply_batch(&[command(1, 1, i64::MAX), command(2, 2, 1), command(3, 3, -1)])
+        .unwrap();
+    assert_eq!(counter.readiness_requirements(), required);
+    let image = counter.checkpoint(required.snapshot_bytes).unwrap();
+    assert_eq!(image.len(), required.snapshot_bytes);
+    assert!(counter.checkpoint(required.snapshot_bytes - 1).is_err());
+    assert_eq!(
+        counter.validate_proposal(
+            OperationId::new(4).unwrap(),
+            &1i64.to_le_bytes(),
+            std::iter::empty()
+        ),
+        Err(ApplicationError::DedupCapacity)
+    );
+    assert!(counter
+        .validate_proposal(
+            OperationId::new(1).unwrap(),
+            &i64::MAX.to_le_bytes(),
+            std::iter::empty()
+        )
+        .is_ok());
+    let mut restored = Counter::new(3).unwrap();
+    restored
+        .restore_checkpoint(required.application_schema, 3, &image)
+        .unwrap();
+    assert_eq!(restored.readiness_requirements(), required);
+    assert_eq!(restored.remaining_operations(), 0);
+    for invalid in [
+        voteboat::raft::ReadinessRequirements {
+            application_schema: 2,
+            ..required
+        },
+        voteboat::raft::ReadinessRequirements {
+            command_bytes: 7,
+            ..required
+        },
+        voteboat::raft::ReadinessRequirements {
+            snapshot_bytes: 130,
+            ..required
+        },
+    ] {
+        assert!(restored.validate_readiness_requirements(invalid).is_err());
+    }
+    assert!(restored.validate_readiness_requirements(required).is_ok());
+    assert!(Counter::new(4)
+        .unwrap()
+        .restore_checkpoint(1, 3, &image)
+        .is_err());
+}
+
+#[test]
 fn bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth() {
     let count = LogLimits::default().max_entries_per_group;
     let limits = voteboat::runtime::ApplicationRouterLimits::default();
