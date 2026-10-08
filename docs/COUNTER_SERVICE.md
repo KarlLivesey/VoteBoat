@@ -115,8 +115,9 @@ assignment through `NativeMemberStartup`. It neither creates missing files nor
 infers assignment from peer routes. Removed local stores are rejected. The CLI
 still fixes the original bootstrap, provisioned node/store identities and routes
 to 1..3; this mode supports changes among those identities, including learners
-and joint/final views. Arbitrary new deployment identities, offline enrollment
-commands and service configuration mutation endpoints remain integration work.
+and joint/final views. Arbitrary new deployment identities and service
+configuration mutation endpoints remain integration work. Offline enrollment
+among these provisioned identities is available as described below.
 Rust hosts can already supply explicit provisioning and trusted enrollment images.
 
 The same enforced counter envelope, local commands, durable configuration-status
@@ -329,9 +330,9 @@ protocols, restored retry state, rejected learner campaign, missing rollback pee
 wrong peer incarnation, uncommitted local assignment, removed local membership,
 missing checkpoint data, pre-I/O mode/version rejection, and late worker/socket
 cleanup. These histories seed native durable journal fixtures; they do not prove
-online distributed creation/commit of those configurations. The counter CLI still
-uses static startup. Trusted checkpoint enrollment and enforced counter envelopes
-are implemented below. Service administration, generic application-envelope
+online distributed creation/commit of those configurations. The counter CLI now
+offers explicit `recover-member` startup and offline enrollment. Enforced counter
+envelopes are implemented below. Service administration, generic application-envelope
 integration and full faulted remote transitions remain pending; public service
 mutation endpoints stay gated. Explicit member assemblies receive validated
 configuration replication.
@@ -385,9 +386,41 @@ cross-store transaction.
 The shared `snapshot::enroll_learner_snapshot` composition also works with host
 LogStore and SnapshotRetention implementations. It requires an explicitly
 bootstrapped, otherwise empty destination or the exact completed import. This
-is an offline trusted handoff for embedding; counter command endpoints and remote
-configuration delivery are still gated pending administration/envelope integration
-and fault-tested online transitions.
+is an offline trusted handoff for embedding. The CLI exposes the same handoff
+for its provisioned identities:
+
+```sh
+target/debug/voteboat-counter enroll create /your/data/node3 3 43000 /your/tls /your/data/node1 1 peers.txt
+```
+
+Stop both source and destination before use; provider locks refuse concurrent
+owners. The source is explicitly trusted deployment input. The command verifies
+its exact store identity, original bootstrap, authoritative WAL boundary, pinned
+checkpoint and counter restoration/replay. The checkpoint must contain a stable
+voter assignment for the source and an exact learner assignment for the target.
+Its membership must match the source's current committed membership; after a
+membership change, checkpoint that committed view first. Application commands
+after the checkpoint may be caught up by normal member replication. This is
+local durable evidence from a trusted source, not a remotely signed certificate
+or a fresh cluster read barrier. Never duplicate a live store or reuse a retired
+identity without the deployment's explicit identity/lifetime authorization.
+
+The command opens no sockets and starts no workers. BASE_PORT, TLS_DIRECTORY and
+optional PEERS_FILE describe the same checked deployment used by subsequent
+`serve recover-member`; no transport flag is needed for offline enrollment.
+To resolve a lost completed reply, replace `create` with `recover` and use the
+same source image. A changed image is refused instead of overwriting an import.
+Missing files are not created in Recover mode. Source recovery may advance its
+provider sessions even if destination enrollment later fails. Preserve files on
+any error and follow the partial-initialization limitations above.
+
+Executable tests enroll an absent learner directory from a prepared committed
+source, repeat exact imports without changing its WAL state, verify the imported
+counter and retry outcome directly, then start/restart the TCP/QUIC service and
+commit further writes. They also reject voter/joint/stale-membership imports,
+missing pinned checkpoints, source/destination aliasing and changed images.
+The source membership is seeded; online configuration commitment, arbitrary
+deployment identities and authorized service mutation endpoints remain work.
 
 ## Local configuration operation status and counter envelope
 

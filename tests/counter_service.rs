@@ -19,7 +19,7 @@ use std::{
     fs,
     net::{Ipv4Addr, TcpListener, UdpSocket},
     path::PathBuf,
-    process::{Child, Command},
+    process::{Child, Command, Output, Stdio},
     sync::{
         atomic::{AtomicU64, Ordering},
         Mutex,
@@ -29,6 +29,24 @@ use std::{
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-counter");
 static PORT_BLOCKS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
 static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
+// Coordinate only parent-held native store handles and process creation. A
+// concurrent fork can briefly inherit an exclusive lock until exec closes it.
+// Child execution and waiting stay outside this gate and remain parallel.
+static STORE_SPAWN: Mutex<()> = Mutex::new(());
+fn fixture_gate() -> std::sync::MutexGuard<'static, ()> {
+    STORE_SPAWN.lock().unwrap_or_else(|e| e.into_inner())
+}
+fn run(command: &mut Command) -> Output {
+    let child = {
+        let _gate = fixture_gate();
+        command
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap()
+    };
+    child.wait_with_output().unwrap()
+}
 struct Cluster {
     root: PathBuf,
     base: u16,
@@ -119,6 +137,7 @@ impl Cluster {
         if self.quic {
             command.args(["--transport", "quic"]);
         }
+        let _gate = fixture_gate();
         self.children[id - 1] = Some(
             command
                 .stdout(log.try_clone().unwrap())
@@ -131,12 +150,26 @@ impl Cluster {
     fn request(&self, id: usize, args: &[&str]) -> std::process::Output {
         self.target(&id.to_string(), args)
     }
+    fn enroll(
+        &self,
+        mode: &str,
+        id: u64,
+        target: &std::path::Path,
+        source: u64,
+    ) -> std::process::Output {
+        run(Command::new(BIN)
+            .args(["enroll", mode])
+            .arg(target)
+            .arg(id.to_string())
+            .arg(self.base.to_string())
+            .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
+            .arg(self.root.join(source.to_string()))
+            .arg(source.to_string()))
+    }
     fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
-        Command::new(BIN)
+        run(Command::new(BIN)
             .args(["client", &self.base.to_string(), target])
-            .args(args)
-            .output()
-            .unwrap()
+            .args(args))
     }
     fn ok(&self, id: usize, args: &[&str]) -> String {
         let output = self.request(id, args);
@@ -240,7 +273,8 @@ fn three_quic_service_processes_retry_replace_leader_and_recover_native_files() 
     replicated_history(true);
 }
 /// Prepared durable assignment tests service recovery, not online proposal delivery.
-fn seed_member_service(root: &std::path::Path, final_view: bool) {
+fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner: bool) {
+    let _gate = fixture_gate();
     use voteboat::{
         contracts::HardState,
         identity::*,
@@ -292,7 +326,7 @@ fn seed_member_service(root: &std::path::Path, final_view: bool) {
             change: ConfigurationChange::Final { id: cid(3) },
         },
     ];
-    for local in 1..=3 {
+    for local in 1..=if include_learner { 3 } else { 2 } {
         let path = root.join(local.to_string());
         let mut log = NativeLogStore::create(
             FileLogIo::create(&path).unwrap(),
@@ -345,19 +379,17 @@ fn member_service_history(quic: bool) {
     for final_view in [false, true] {
         let mut cluster = Cluster::new();
         cluster.quic = quic;
-        seed_member_service(&cluster.root, final_view);
+        seed_member_service(&cluster.root, final_view, true);
         // Selecting ordinary recovery must not silently opt into a dynamic view.
         cluster.listeners.clear();
         cluster.udp_sockets.clear();
         let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-        let refused = Command::new(BIN)
+        let refused = run(Command::new(BIN)
             .args(["serve", "recover"])
             .arg(cluster.root.join("1"))
             .arg("1")
             .arg(cluster.base.to_string())
-            .arg(tls)
-            .output()
-            .unwrap();
+            .arg(tls));
         assert!(
             !refused.status.success(),
             "static recovery must refuse the journal"
@@ -391,6 +423,7 @@ fn member_service_history(quic: bool) {
         cluster.ok(leader, &["checkpoint"]);
         cluster.stop();
         {
+            let _gate = fixture_gate();
             use voteboat::{identity::*, log::*, native::log_store::*};
             let log = NativeLogStore::recover(
                 FileLogIo::open(cluster.root.join(leader.to_string())).unwrap(),
@@ -446,6 +479,303 @@ fn member_service_recovers_joint_and_final_histories_and_checkpoint_retries() {
 #[test]
 fn quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries() {
     member_service_history(true);
+}
+fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i64) {
+    let _gate = fixture_gate();
+    use voteboat::{
+        application::*,
+        identity::*,
+        log::*,
+        native::{log_store::*, snapshot_store::*},
+        snapshot::*,
+    };
+    let identity = StoreIdentity {
+        id: StoreId::new(id as u128).unwrap(),
+        incarnation: StoreIncarnation::new(1).unwrap(),
+    };
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let path = root.join(id.to_string());
+    let mut log = NativeLogStore::recover(
+        FileLogIo::open(&path).unwrap(),
+        identity,
+        LogLimits::default(),
+    )
+    .unwrap();
+    let state = log.state(group).unwrap();
+    let index = state.last_index() + 1;
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(LogUpdate {
+            group,
+            expected_revision: state.revision,
+            hard_state: state.hard_state,
+            commit_index: index,
+            suffix: Some(Suffix {
+                from: index,
+                entries: vec![LogEntry {
+                    index,
+                    term: state.hard_state.term,
+                    payload: EntryPayload::Command {
+                        operation: OperationId::new(operation).unwrap(),
+                        bytes: delta.to_le_bytes().to_vec(),
+                    },
+                }],
+            }),
+            snapshot: None,
+            snapshot_membership: None,
+        })])
+        .unwrap();
+    log.barrier(&tickets).unwrap();
+    let mut snapshots = NativeSnapshotStore::recover(
+        FileSnapshotIo::open(path.join("snapshots")).unwrap(),
+        SnapshotIdentity {
+            store: identity,
+            group,
+        },
+        SnapshotLimits::default(),
+    )
+    .unwrap();
+    let mut app = Counter::new(10000).unwrap();
+    let (mut core, _) = recover_member_replica(
+        NodeId::new(id).unwrap(),
+        group,
+        &log,
+        &mut snapshots,
+        &mut app,
+    )
+    .unwrap();
+    let receipt = checkpoint_application(&core, &app, &mut snapshots).unwrap();
+    compact_replica(
+        &mut core,
+        &mut log,
+        &mut snapshots,
+        &app,
+        receipt.reference(),
+    )
+    .unwrap();
+}
+fn enrolled_state(root: &std::path::Path) -> voteboat::log::GroupLog {
+    let _gate = fixture_gate();
+    use voteboat::{
+        application::*,
+        identity::*,
+        log::*,
+        native::{log_store::*, snapshot_store::*},
+        snapshot::*,
+    };
+    let identity = StoreIdentity {
+        id: StoreId::new(3).unwrap(),
+        incarnation: StoreIncarnation::new(1).unwrap(),
+    };
+    let log = NativeLogStore::recover(
+        FileLogIo::open(root).unwrap(),
+        identity,
+        LogLimits::default(),
+    )
+    .unwrap();
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let mut snapshots = NativeSnapshotStore::recover(
+        FileSnapshotIo::open(root.join("snapshots")).unwrap(),
+        SnapshotIdentity {
+            group,
+            store: identity,
+        },
+        SnapshotLimits::default(),
+    )
+    .unwrap();
+    let mut app = Counter::new(10000).unwrap();
+    let (core, _) = recover_member_replica(
+        NodeId::new(3).unwrap(),
+        group,
+        &log,
+        &mut snapshots,
+        &mut app,
+    )
+    .unwrap();
+    assert_eq!(app.read_applied(core.state().commit_index).unwrap(), 42);
+    // Inspect the imported application's retry state directly, without treating
+    // this local diagnostic as a distributed read or proposing to a learner.
+    let retry = app
+        .apply_batch(&[LogEntry {
+            index: app.applied_index() + 1,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(700).unwrap(),
+                bytes: 42i64.to_le_bytes().to_vec(),
+            },
+        }])
+        .unwrap();
+    assert!(retry[0].duplicate);
+    assert_eq!(retry[0].outcome, CounterOutcome::Value(42));
+    log.state(group).unwrap()
+}
+fn enrolled_service_history(quic: bool) {
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    seed_member_service(&cluster.root, true, false);
+    checkpoint_source(&cluster.root, 1, 700, 42);
+    let destination = cluster.root.join("3");
+    let created = cluster.enroll("create", 3, &destination, 1);
+    assert!(
+        created.status.success(),
+        "{}",
+        String::from_utf8_lossy(&created.stderr)
+    );
+    assert!(String::from_utf8_lossy(&created.stdout).contains("checkpoint=3 term=1"));
+    let before = enrolled_state(&destination);
+    assert_eq!(before.commit_index, 3);
+    assert!(before.entries.is_empty());
+    for _ in 0..2 {
+        assert!(cluster
+            .enroll("recover", 3, &destination, 1)
+            .status
+            .success());
+        assert_eq!(
+            enrolled_state(&destination),
+            before,
+            "lost-reply retry must not rewrite history"
+        );
+    }
+    assert!(!cluster
+        .enroll("create", 3, &destination, 1)
+        .status
+        .success());
+    assert_eq!(enrolled_state(&destination), before);
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert_ne!(leader, 3);
+    assert!(cluster
+        .ok(leader, &["add", "700", "42"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    assert!(cluster
+        .ok(leader, &["add", "701", "1"])
+        .contains("Value(43)"));
+    cluster.ok(leader, &["checkpoint"]);
+    cluster.stop();
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "701", "1"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
+    cluster.stop();
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn offline_enrollment_retries_then_runs_and_recovers_tcp_service() {
+    enrolled_service_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn offline_enrollment_retries_then_runs_and_recovers_quic_service() {
+    enrolled_service_history(true);
+}
+#[test]
+fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation() {
+    for joint in [false, true] {
+        let cluster = Cluster::new();
+        seed_member_service(&cluster.root, !joint, false);
+        let target = cluster.root.join("3");
+        assert!(!cluster.enroll("create", 3, &target, 1).status.success());
+        assert!(
+            !target.exists(),
+            "no pinned source must not create destination"
+        );
+        checkpoint_source(&cluster.root, 1, 700, 42);
+        let voter = cluster.root.join("voter-import");
+        assert!(!cluster.enroll("create", 2, &voter, 1).status.success());
+        assert!(!voter.exists());
+        assert!(!cluster.enroll("recover", 3, &target, 1).status.success());
+        assert!(
+            !target.exists(),
+            "recovery must never provision missing files"
+        );
+        if joint {
+            assert!(!cluster.enroll("create", 3, &target, 1).status.success());
+            assert!(!target.exists(), "joint image must not create destination");
+        } else {
+            assert!(cluster.enroll("create", 3, &target, 1).status.success());
+            let before = enrolled_state(&target);
+            checkpoint_source(&cluster.root, 1, 701, 1);
+            assert!(!cluster.enroll("recover", 3, &target, 1).status.success());
+            assert_eq!(
+                enrolled_state(&target),
+                before,
+                "different image must not replace enrollment"
+            );
+            // Keep the old checkpoint but commit removal of its learner.
+            let gate = fixture_gate();
+            use voteboat::{identity::*, log::*, membership::*, native::log_store::*};
+            let mut log = NativeLogStore::recover(
+                FileLogIo::open(cluster.root.join("1")).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(1).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                LogLimits::default(),
+            )
+            .unwrap();
+            let group = GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            };
+            let state = log.state(group).unwrap();
+            let membership = state.membership_at(state.commit_index).unwrap();
+            let next = Configuration::new(
+                ConfigurationId::new(4).unwrap(),
+                membership.stable().policy().clone(),
+                membership.stable().voter_stores().clone(),
+                BTreeMap::new(),
+            )
+            .unwrap();
+            let index = state.last_index() + 1;
+            let tickets = log
+                .append_batch(vec![LogMutation::Update(LogUpdate {
+                    group,
+                    expected_revision: state.revision,
+                    hard_state: state.hard_state,
+                    commit_index: index,
+                    suffix: Some(Suffix {
+                        from: index,
+                        entries: vec![LogEntry {
+                            index,
+                            term: state.hard_state.term,
+                            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                                operation: OperationId::new(502).unwrap(),
+                                expected: ConfigurationId::new(3).unwrap(),
+                                change: ConfigurationChange::Learners(next),
+                            })),
+                        }],
+                    }),
+                    snapshot: None,
+                    snapshot_membership: None,
+                })])
+                .unwrap();
+            log.barrier(&tickets).unwrap();
+            drop(log);
+            drop(gate);
+            let stale = cluster.root.join("stale-target");
+            let rejected = cluster.enroll("create", 3, &stale, 1);
+            assert!(!rejected.status.success());
+            assert!(String::from_utf8_lossy(&rejected.stderr).contains("membership is stale"));
+            assert!(!stale.exists());
+            assert!(!cluster
+                .enroll("create", 3, &cluster.root.join("1"), 1)
+                .status
+                .success());
+        }
+        fs::remove_dir_all(&cluster.root).unwrap();
+    }
 }
 fn replicated_history(quic: bool) {
     let mut cluster = Cluster::new();
@@ -537,6 +867,7 @@ fn replicated_history(quic: bool) {
     cluster.ok(replacement, &["checkpoint"]);
     cluster.stop();
     {
+        let _gate = fixture_gate();
         use voteboat::{identity::*, log::*, native::log_store::*};
         let store = NativeLogStore::recover(
             FileLogIo::open(cluster.root.join(replacement.to_string())).unwrap(),
@@ -557,14 +888,12 @@ fn replicated_history(quic: bool) {
         );
     }
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-    let refused = Command::new(BIN)
+    let refused = run(Command::new(BIN)
         .args(["serve", "create"])
         .arg(cluster.root.join("1"))
         .arg("1")
         .arg(cluster.base.to_string())
-        .arg(tls)
-        .output()
-        .unwrap();
+        .arg(tls));
     assert!(
         !refused.status.success(),
         "create must not reset existing state"
@@ -595,28 +924,24 @@ fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
     let root = cluster.root.join("missing");
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
     for (mode, id) in [("recover", "1"), ("recover-member", "1"), ("create", "4")] {
-        let output = Command::new(BIN)
+        let output = run(Command::new(BIN)
             .args(["serve", mode])
             .arg(&root)
             .arg(id)
             .arg(cluster.base.to_string())
-            .arg(&tls)
-            .output()
-            .unwrap();
+            .arg(&tls));
         assert!(!output.status.success());
         assert!(!root.exists());
     }
     let oversized = cluster.root.join("oversized-credentials");
     fs::create_dir(&oversized).unwrap();
     fs::write(oversized.join("ca.der"), vec![0; 65537]).unwrap();
-    let output = Command::new(BIN)
+    let output = run(Command::new(BIN)
         .args(["serve", "create"])
         .arg(&root)
         .arg("1")
         .arg(cluster.base.to_string())
-        .arg(oversized)
-        .output()
-        .unwrap();
+        .arg(oversized));
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("invalid TLS material size"));
     assert!(!root.exists());
@@ -628,15 +953,13 @@ fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
 fn unavailable_quic_selection_rejects_before_creating_a_store() {
     let cluster = Cluster::new();
     let directory = cluster.root.join("unsupported-quic");
-    let output = Command::new(BIN)
+    let output = run(Command::new(BIN)
         .args(["serve", "create"])
         .arg(&directory)
         .arg("1")
         .arg(cluster.base.to_string())
         .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
-        .args(["--transport", "quic"])
-        .output()
-        .unwrap();
+        .args(["--transport", "quic"]));
     assert!(!output.status.success());
     assert!(String::from_utf8_lossy(&output.stderr).contains("--features quic"));
     assert!(!directory.exists());

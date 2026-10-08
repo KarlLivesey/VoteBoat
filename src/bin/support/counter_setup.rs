@@ -145,11 +145,7 @@ pub fn configuration(
     config.validate()?;
     Ok(config)
 }
-pub fn open(
-    mut config: NativeStartup,
-    protocol: NativePeerProtocol,
-    member: bool,
-) -> Result<Service, Failure> {
+fn application() -> Result<Counter, Failure> {
     let app = checked(Counter::new(10000))?;
     // Bind the service declaration to the same capacity enforced by admission,
     // application and restore, including future retry history growth.
@@ -169,6 +165,88 @@ pub fn open(
     {
         return Err("counter application envelope exceeds selected native payload limits".into());
     }
+    Ok(app)
+}
+/// Offline trusted handoff. Both stores must be stopped; recovery can advance
+/// provider sessions even when enrollment subsequently fails.
+pub fn enroll(
+    mut config: NativeStartup,
+    source: &Path,
+    source_node: u64,
+) -> Result<(u64, u64), Failure> {
+    use voteboat::{
+        native::{log_store::*, snapshot_store::*},
+        snapshot::*,
+    };
+    if !(1..=3).contains(&source_node) || node(source_node) == config.node {
+        return Err("expected a distinct provisioned source voter".into());
+    }
+    let source_path = source.canonicalize()?;
+    if config.directory.exists() && config.directory.canonicalize()? == source_path {
+        return Err("source and destination must be distinct stores".into());
+    }
+    config.tls = checked(config.tls.with_wire_version(6))?;
+    let mut destination_app = application()?;
+    let mut source_app = application()?;
+    let log = checked(NativeLogStore::recover(
+        FileLogIo::open(&source_path)?,
+        store_id(source_node),
+        LogLimits::default(),
+    ))?;
+    let state = checked(log.state(group()))?;
+    if state.bootstrap != config.bootstrap {
+        return Err("source bootstrap does not match deployment".into());
+    }
+    let reference = state
+        .snapshot
+        .ok_or("source requires a pinned committed checkpoint")?;
+    let mut snapshots = checked(NativeSnapshotStore::recover(
+        FileSnapshotIo::open(source_path.join("snapshots"))?,
+        SnapshotIdentity {
+            store: store_id(source_node),
+            group: group(),
+        },
+        SnapshotLimits::default(),
+    ))?;
+    // Verify authoritative boundary, exact source membership and application,
+    // including any committed tail. A latest unpinned publication is insufficient.
+    checked(recover_member_replica(
+        node(source_node),
+        group(),
+        &log,
+        &mut snapshots,
+        &mut source_app,
+    ))?;
+    let image = checked(snapshots.load_pinned(reference))?;
+    if image.metadata.membership != checked(state.checkpoint_membership(state.commit_index))? {
+        return Err("source checkpoint membership is stale; checkpoint the committed view".into());
+    }
+    if !image
+        .metadata
+        .membership
+        .as_ref()
+        .is_some_and(|membership| {
+            membership.joint().is_none()
+                && membership.stable().voter_stores().get(&node(source_node))
+                    == Some(&store_id(source_node))
+        })
+    {
+        return Err("source checkpoint must contain a stable exact voter assignment".into());
+    }
+    let provisioned_stores = config.bootstrap.voter_stores.clone();
+    NativeMemberStartup {
+        startup: config,
+        provisioned_stores,
+    }
+    .enroll_snapshot(&image, &mut destination_app)?;
+    Ok((image.metadata.index, image.metadata.term))
+}
+pub fn open(
+    mut config: NativeStartup,
+    protocol: NativePeerProtocol,
+    member: bool,
+) -> Result<Service, Failure> {
+    let app = application()?;
     let wake = Arc::new(ThreadWake::current());
     let opened = if member {
         // Explicit recovery only: provisioned routes do not establish assignment.

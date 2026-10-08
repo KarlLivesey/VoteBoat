@@ -61,8 +61,9 @@ Remote configuration-bearing Append and membership Snapshot remain gated by
 default. Explicit member assemblies can select receive-side configuration
 replication; native member startup does so after its exact-store/codec/route checks.
 This is distinct from releasing public service mutation endpoints.
-Service-enforced application envelopes, enrollment/service endpoints and
-faulted multi-node add/promote/remove remain required. The supplied authorization
+Generic application-envelope integration, authorized service mutation endpoints
+and faulted multi-node add/promote/remove remain required. Counter bounds and
+offline executable enrollment are implemented as described below. The supplied authorization
 callback is also available to host policy implementations. Existing TCP/QUIC
 readiness and static-service tests do not establish this complete path.
 
@@ -136,7 +137,8 @@ restart. Queued requests consult the selected plan at execution, so replacing
 caller policy does not preserve earlier approval. No durable generation or receipt
 is introduced. Provisioned routes, credentials, readiness and selected transport
 envelope admission remain separate checks. Native placement is usable from Rust;
-service enrollment/endpoints and application envelope enforcement remain work.
+arbitrary deployment inputs, authorized service endpoints and generic application
+envelope enforcement remain work. Counter bounds and offline enrollment exist.
 
 This is the C18 placement authorization subset. Eligible-host planning, scoring
 and automatic move proposals remain pending under the broader placement roadmap.
@@ -162,8 +164,9 @@ The caller/service must keep the declared envelope consistent with its applicati
 schema, accepted command sizes, checkpoint/deduplication growth and storage limits.
 This query alone does not enforce future application growth or arbitrary batching.
 NativeMemberStartup now supplies explicit verified dynamic member restart for Rust
-hosts. Service enrollment, enforced application envelopes and complete faulted
-remote transitions remain pending; public service mutation endpoints stay gated.
+hosts. Arbitrary service deployment inputs, generic enforced application envelopes
+and complete faulted remote transitions remain pending; public service mutation
+endpoints stay gated. Counter bounds and offline learner enrollment are implemented.
 Explicit member assemblies now select validated receive-side configuration
 replication, which supplies the native integration path for those transitions.
 
@@ -173,7 +176,15 @@ histories among its fixed three provisioned identities, selecting wire format 6
 on all participants. This reuses verified member recovery and enforced counter
 bounds; ordinary service polling continues to deny configuration mutation.
 Prepared TCP/QUIC service histories cover joint/final reopening, real checkpoint
-drain and retry deduplication after restart. Deployment/enrollment inputs and
+drain and retry deduplication after restart. Arbitrary deployment inputs and
 authorized mutation endpoints remain integration work; these fixtures do not
 prove online proposal delivery.
 The original static NativeStartup entry points retain their rejection of dynamic journals.
+
+`voteboat-counter enroll create|recover` now performs the offline trusted learner
+handoff from a stopped native source's authoritative pinned checkpoint. It verifies
+source recovery and current committed membership before destination import, then
+uses NativeMemberStartup::enroll_snapshot with the same enforced counter envelope.
+Exact retries preserve WAL state; missing/corrupt/incompatible inputs do not imply
+permission to reset stores. The CLI still fixes provisioning to identities 1..3.
+See the service guide for command syntax and partial-initialization limitations.

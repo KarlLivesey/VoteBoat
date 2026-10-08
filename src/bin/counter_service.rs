@@ -29,12 +29,14 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
+voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE]\n\
 voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
 recover-member explicitly verifies existing membership journals and selects wire format 6 on all peers.\n\
+enroll is an offline trusted handoff; stop source and destination before use and preserve files on failure.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 Use the same operation ID and delta when retrying an unknown write.";
@@ -330,6 +332,27 @@ fn main() -> Result<(), Failure> {
         NativePeerProtocol::TcpTls
     };
     match args.as_slice() {
+        [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
+            if enroll_arg == "enroll" && rest.len() <= 1 =>
+        {
+            let (base, id) = ports(base, id)?;
+            let create = match mode.as_str() {
+                "create" => true,
+                "recover" => false,
+                _ => return Err("expected enrollment create or recover".into()),
+            };
+            let config = setup::configuration(
+                Path::new(root),
+                id,
+                base,
+                Path::new(tls),
+                create,
+                rest.first().map(Path::new),
+            )?;
+            let (index, term) = setup::enroll(config, Path::new(source), source_id.parse()?)?;
+            println!("OK enrolled node={id} checkpoint={index} term={term} evidence=trusted_local_source");
+            Ok(())
+        }
         [help] if help == "--help" || help == "-h" => {
             println!("{HELP}");
             Ok(())

@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission and explicit native member restart implemented; service enrollment/envelope enforcement and faulted online transitions remain gated |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, offline CLI enrollment and enforced counter bounds implemented; arbitrary service deployment inputs, authorized mutation endpoints, generic application envelopes and faulted online transitions remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -119,6 +119,13 @@ the real CLI, application envelope, checkpoint drain and second process restart.
 The original bootstrap/provisioned identities remain 1..3. Explicit enrollment
 inputs and authorized administration still belong to current item 1; this is
 its service recovery path, not completion of enrollment or online membership.
+
+Slice 72 supplies offline executable enrollment from a stopped, explicitly trusted
+source's authoritative pinned checkpoint, with exact retry and subsequent TCP/QUIC
+member startup. It checks the source's current committed membership so stale
+assignment cannot provision a removed learner. Provisioning remains 1..3; arbitrary
+deployment inputs and authorized administration remain current item 1. The next
+two deliverables stay fault-tested membership release and P5 manifests/routing.
 
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
@@ -4050,3 +4057,50 @@ parallel run exposed colliding clock-derived fixture directory names before QUIC
 startup; a per-process atomic sequence makes directory allocation distinct. The
 corrected histories pass. See validation/REPORT.md for final checks. Linux was
 exercised; macOS execution, broader fault schedules and performance remain unclaimed.
+
+## Slice 72 — offline executable learner enrollment
+
+Mini schema plan: expose `enroll create|recover` with the same checked deployment
+arguments plus an explicitly trusted stopped source directory/node. Read its
+authoritative WAL snapshot reference, verify original bootstrap, exact source
+assignment, counter checkpoint/replay and current committed membership. Import
+only a stable checkpoint that assigns the exact destination as a learner through
+the existing NativeMemberStartup::enroll_snapshot contract. Keep one checked
+counter-envelope constructor for serving, source validation and destination
+restore. No socket, worker, new provider seam, format, effect, token, watermark or
+generation is introduced. Source provider recovery can advance sessions; target
+failures preserve partial files for explicit recovery, never automatic reset.
+
+The executable now performs that offline handoff among its provisioned identities
+1..3. A pinned checkpoint with stale committed membership is refused, preventing
+an earlier learner assignment from authorizing enrollment after committed removal.
+Commands after a checkpoint can still be caught up normally when its membership
+matches the source's committed view. Existing checks refuse voter/joint imports
+and exact-store/schema/envelope mismatches before destination creation. Recover
+does not create missing target files, and exact completed retries preserve WAL
+state; changed images refuse instead of replacing an earlier import.
+
+Actual CLI histories seed committed source membership, publish/compact a real
+counter checkpoint, enroll an absent learner and repeat the exact import twice.
+Direct destination recovery confirms counter 42 and retained operation-700 retry
+outcome; this local inspection is not a distributed read. Both TCP/TLS and QUIC
+then start all three service processes, retain deduplication, commit/read value
+43, drain a checkpoint and restart for another exact retry. Negative histories
+refuse absent pins, missing recovery targets, voter and joint images, changed
+images, source/destination aliasing and an old image after committed learner
+removal. Prepared source assignment is not online proposal-commit evidence.
+
+A full parallel test run exposed exclusive-lock WouldBlock immediately after
+parent-process fixture setup while other tests spawned children. The fixture now
+coordinates parent-held native handles with process creation, keeping child
+execution and waits parallel and leaving production locks unchanged. The final
+all-feature executable suite passes 12 tests; all-feature/all-target Clippy with
+warnings denied passes. Final default/build metadata checks are recorded in
+validation/REPORT.md. Existing publication/pin/WAL crash behavior remains that of
+the tested enrollment API; CLI integration adds no cross-store atomic initialization.
+
+This advances current mini item 1's executable enrollment/recovery path. Arbitrary
+deployment inputs and authorized administration remain in that item, followed by
+fault-tested remote release and P5 manifest/routing. The full P0–P7 goal remains
+active; public configuration mutation ingress stays gated, P8 deferred, and no
+macOS execution, performance or general protocol proof is claimed.

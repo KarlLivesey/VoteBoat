@@ -1007,3 +1007,33 @@ assertion uses a borrowed expected-message slice.
 - Default-build counter_service passes 8 tests, including rejection of unavailable
   QUIC before store creation. Formatting/diff and inventory metadata checks pass
   (60 contracts). No consensus/storage changes required broader protocol tests.
+
+## Slice 72 — offline executable enrollment
+
+- CLI `enroll create|recover` reuses the native learner import from an explicitly
+  trusted stopped source. It verifies source identity/bootstrap, authoritative
+  pinned image, application recovery/replay and current committed membership.
+  Old membership snapshots cannot provision a learner removed in committed tail.
+  Serving/source/destination use the same enforced counter-envelope constructor.
+- TCP/TLS and QUIC process histories enroll an absent directory, repeat exact
+  imports twice without changing WAL state, directly reopen the destination and
+  verify counter 42 plus operation-700 duplicate outcome. They then start all three
+  members, commit/read 43, checkpoint/drain, restart and retry operation 701.
+- Negative CLI histories reject absent pins, missing target recovery files,
+  voter/joint imports, changed-image replacement, same-directory source/target
+  and stale snapshot assignment after durable learner removal. Create retries
+  cannot reset an existing import. Existing checkpoint/pin/WAL durability and
+  partial-initialization limitations remain; no new storage protocol is added.
+- Isolated enrollment tests passed. The initial full parallel suite saw two
+  fixture WouldBlock lock refusals immediately after parent-side seeding. Test
+  native-handle lifetimes and process creation now share a short gate; child
+  waits/execution remain parallel. The corrected final all-feature counter_service
+  target passes 12 tests. All-feature/all-target Clippy with warnings denied passes.
+- Source assignments are prepared committed histories, not distributed online
+  configuration proposal proof. Provisioning stays fixed to the service's three
+  identities; arbitrary deployment inputs and authorized administration remain
+  current work before remote release, P5 routing, P6 ownership movement and P7.
+  Full goal active, P8 deferred; no macOS/performance/general proof claim.
+- Final default-build counter_service target passes 10 tests. Formatting/diff and
+  inventory metadata checks pass (60 contracts); no new production dependency or
+  provider seam. No consensus/storage design change required broader protocol runs.
