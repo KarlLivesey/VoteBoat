@@ -1306,6 +1306,30 @@
         "tests/routed/native.rs"
       ],
       "scope": "One trusted fixed responsibility grant/local group; exact committed bootstrap binding, admission/apply ownership rechecks, key/payload semantic retries, bounded pending/history and nested receipt/read accounting. One-way applied source fence refuses queued data and reads and survives checkpoint/replay; it is not a P6 transfer certificate. Native three-level directory/child histories use distinct child replica sets, remove ancestor caches and stop all parent replicas, then write/read/retry and recover WAL-only/compacted children with unchanged parent WAL state. Changed grants/limits reject recovery. Host injection covers allocated receipt/query/result storage and inner group constraints. No dynamic ownership activation/import/merge, group multiplexing, general authorization service or directory wire endpoint; Linux loopback evidence only."
+    },
+    {
+      "design_id": "C01/C20",
+      "public_contract": "ScopeStateMachine / ScopeImage / BucketCounter<P>",
+      "operations": [
+        "scope",
+        "scheme",
+        "command_key",
+        "export_scope",
+        "import_scopes",
+        "BucketCounter::new",
+        "encode_add",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "outbox"
+      ],
+      "native": "Bounded deterministic per-bucket counter with exact original command/outcome retries and pending outbox instructions over host-selected PartitionPolicy; ordinary application/snapshot contracts remain authoritative for persistence.",
+      "conformance": [
+        "tests/scopes.rs"
+      ],
+      "scope": "Optional in-memory data capability, contract version 1. Immutable bounded provider images name schema, scheme, range and source applied boundary without certifying authority or durability. Empty staging import requires sorted disjoint complete target coverage, exact metadata/content agreement, next target index and bounded aggregate capacity; original retries/outbox survive target rebasing, checkpoint and restore. ID collisions refuse atomically. Constructor rejection returns original buffers/policy. 4096 operations, 256 imports, 64 MiB image/aggregate ceiling and configured semantic limits; bounded pending simulation/receipts/queries. Host provider uses its own schema/format through public trait. Actual native sealed-but-unpublished versus published/reopened snapshots checked. No lifecycle intent/fence certificate, committed Import, target-ready quorum, route publication, activation, lineage protocol, general split/merge or external delivery/acknowledgment worker."
     }
   ],
   "not_yet_implemented": [
@@ -1318,7 +1342,7 @@
     "native-configuration-service-endpoints",
     "authorization",
     "compression",
-    "scope-transfer",
+    "scope-transfer-fence-import-publication-activation-protocol",
     "transactions",
     "placement-planning-scoring-and-move-proposals",
     "service-enforced-configuration-application-envelope",

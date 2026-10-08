@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Deterministic consensus components. See the README for implemented scope.
 pub mod application;
+pub mod bucket_counter;
 pub mod connect;
 pub mod contracts;
 pub mod dial;
@@ -30,6 +31,7 @@ pub mod raft;
 pub mod routed;
 pub mod routing;
 pub mod runtime;
+pub mod scope;
 pub mod secure;
 pub mod snapshot;
 pub mod snapshot_worker;

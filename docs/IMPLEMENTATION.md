@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox implemented; durable lifecycle protocol remains pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -95,7 +95,9 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
 
 1. **First durable split lifecycle (current, P6).** Use the P5 owner manifests,
    routed application and tested P4 placement path with a genuinely splittable
-   application adapter. Sketch bounded export/import records, source fencing,
+   application adapter. Slice 84 supplies the public scope seam and native
+   per-bucket counter with transferable retry results/outbox; ownership transfer
+   remains pending. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
    source/target/directory recovery across interrupted stages and lost receipts,
@@ -4670,3 +4672,54 @@ membership 32 and native member startup 44 tests pass (170 total). All-target/
 all-feature Clippy with warnings denied, formatting, inventory and diff checks
 pass. The new downstream test module uses existing public provider contracts;
 inventory remains 64 with no new production seam.
+
+## Slice 84 — splittable application data and public scope contract
+
+Mini schema: the existing global Counter cannot be partitioned without changing
+its meaning. Add optional ScopeStateMachine over application/checkpoint contracts,
+with immutable bounded ScopeImage (schema, scheme, range, source applied boundary,
+provider bytes) and exact payload-key access. Implement a native per-bucket counter
+with canonical Add(key, delta, optional outbox), original request/result history
+and independent values. Export selects data/retries/outbox by range. Import requires
+empty staging data, sorted disjoint complete coverage, exact image metadata and
+next target index; collision/capacity/parse failure is atomic. The source boundary
+is lineage metadata, not the new group's applied boundary. The P6 lifecycle wrapper
+must retain source identities/fences/lineage and control publication/activation.
+This adapter supplies real transferable application state for the current split
+objective and compatible merge; it creates no authority or new consensus effects.
+
+The public seam and BucketCounter<P> now implement that data path. Exact canonical
+command bytes bind operation content. Successful additions retain original values
+and stable-ID outbox instructions; overflow retains its result without an item.
+Retries after import, later additions and checkpoint restore return their original
+outcomes without repeating effects. Configured finite history has no silent
+retirement. Checkpoints bind scheme, scope, limits and applied state. Rejected
+construction returns original policies/buffers; command/query/image/import/history
+ceilings are enforced. A downstream adapter supplies its own schema/format through
+the same public trait, backed by the native deterministic application primitive.
+
+Native file snapshot evidence distinguishes seal-only staging from published
+recoverable state. Imported source boundary 100 is checkpointed/restored at target
+index 1 with preserved retries/outbox. This is provider publication evidence, not
+a committed Import, quorum-ready receipt or source-fence/activation proof. No WAL,
+wire, Raft configuration or persistence token format changes. New application
+formats are VBBCMD01 and VBBCP001. Initial compilation exposed attempts to access
+private image fields; the provider now uses only public getters, as a replacement
+provider must. A later review tightened rejected-resource return, receipt-vector
+capacity, hard query capacity and collision error classification before freezing
+the contract.
+
+Validation: scope conformance 8 all-feature / 7 core-only tests; all-feature core
+57, application 9, directory 14 and routed 10 tests pass (98 all-feature checks
+including scopes). Core-only library 48 plus scope 7 pass. All-target/all-feature
+Clippy denies warnings; formatting, diff and inventory checks pass. Inventory now
+has 65 implemented contracts; the remaining lifecycle protocol is named explicitly.
+No new dependency, thread, socket or hidden store owner is introduced.
+
+P6 stays current: commit lifecycle intent, establish non-serving target bootstrap,
+commit source fence, bind actual recoverable import data and exact readiness,
+publish and activate, preserving lineage and matching routed keys to application
+payloads. Then compatible multi-source merge and P7 measured tuning. The fixed
+local fence and in-memory scope imports do not satisfy the no-dual-owner exit
+condition. General public administration endpoints, macOS/separate-host evidence
+and the full P0–P7 scope remain outstanding; P8 stays deferred.

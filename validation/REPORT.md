@@ -1492,3 +1492,44 @@ and graceful drain/reopen is distinct from the existing storage-fault histories.
 General public mutation endpoints remain gated. Work advances through the existing
 trusted administration path to P6 durable split/merge; P7 and the full P0–P7 goal
 remain active, with macOS/separate-host evidence outstanding and P8 deferred.
+
+## Slice 84 — scope application data adapter
+
+New ScopeStateMachine/ScopeImage public contract and native BucketCounter<P>
+provide deterministic bounded data export/import. Per-bucket counters avoid
+pretending that the original indivisible global counter is splittable. Canonical
+requests include key/delta/outbox; exact operation content and original outcomes
+survive subrange export, target rebasing, later writes and checkpoints. Outbox
+instructions have stable operation IDs, are never externally delivered in replay,
+and are retained under explicit finite lifetime capacity.
+
+Eight all-feature downstream tests cover split data partitioning, compatible scope
+combination, history longer than target log, original retry outcomes, overflow,
+outbox preservation, content conflicts, complete disjoint coverage, collision and
+capacity refusal, atomic failed batches/imports, pending reservations, every
+command/checkpoint truncation, changed metadata/scope/schema/boundaries, returned
+policy/buffer allocations, query spare-capacity bounds and a host adapter with its
+own schema/format. The host adapter uses the native application primitive but
+implements the public scope/checkpoint seam without private access. This is
+substitutability evidence, not an independent application algorithm comparison.
+
+The native snapshot test imports data from source applied 100 at target index 1,
+seals but does not publish, and reopens with no published snapshot. A subsequent
+published image reopens and restores values/retries/outbox at target boundary 1.
+This exercises actual data/manifest persistence. It does not establish a committed
+Import, quorum receipt, source fence, ownership activation or power-failure model.
+The lifecycle layer must persist source lineage and keep imported data non-serving.
+
+Final validation:
+
+- All-feature scope 8 + core 57 + application 9 + directory 14 + routed 10 = 98 passing tests.
+- Core-only library 48 and scope 7 pass without native/TLS dependencies.
+- All-target/all-feature Clippy with warnings denied, formatting, diff checks and inventory validation pass; inventory now contains 65 implemented contracts.
+
+No Raft/WAL/wire format, durability token, generation, consensus effect or dependency
+changed. New application formats are VBBCMD01/VBBCP001. Initial private-field
+compile failures were corrected to public image getters. Review also corrected
+receipt-vector capacity accounting, original policy return on construction failure,
+query spare-capacity limits and collision classification. P6 lifecycle and
+no-dual-owner histories remain pending; P7 and full P0–P7 stay active, with macOS
+and separate-host operational evidence outstanding and P8 deferred.

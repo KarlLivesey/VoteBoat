@@ -82,8 +82,8 @@ enrollment and validated configuration replication over TCP or QUIC. Executable
 tests start from bootstrap, add/enroll/promote a new store, retire an absent voter,
 and recover survivor checkpoints with preserved retries. See
 [trusted plans and lifecycle evidence](docs/COUNTER_SERVICE.md#trusted-startup-administration-plan).
-Public configuration mutation ingress remains gated on the remaining interrupted
-delivery and repair fault checks; this is not a production membership release.
+Selected interrupted-delivery and repair histories now pass. General public
+configuration mutation endpoints remain gated; this is not a production certification.
 
 The [responsibility routing foundation](docs/RESPONSIBILITY_ROUTING.md) now provides
 checked Single/Partitioned/Delegated manifests, bounded native/host cache and
@@ -96,6 +96,10 @@ at admission and apply, preserves semantic retries and enforces a durable local
 fence. Native TCP/QUIC child writes and recovery work with every parent replica
 stopped and unchanged ancestor logs. Ordinary metadata publication cannot activate
 or transfer ownership; split/merge remains lifecycle work.
+The [scope data adapter](docs/SCOPE_APPLICATION.md) now supplies a public optional
+export/import seam and a bounded per-bucket counter that preserves retry outcomes
+and pending outbox instructions. It supplies the data path for P6; ownership
+fencing, publication and activation remain separate lifecycle work.
 
 ## Run
 
