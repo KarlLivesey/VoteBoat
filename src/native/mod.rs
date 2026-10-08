@@ -19,6 +19,8 @@ pub mod log_store;
 #[cfg(feature = "tls")]
 pub mod node;
 pub mod outbound;
+#[cfg(feature = "quic")]
+pub mod quic;
 pub mod runtime;
 pub mod snapshot_store;
 pub mod snapshot_worker;

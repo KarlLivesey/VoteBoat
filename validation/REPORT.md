@@ -106,3 +106,21 @@ the first child. Earlier fixture bind failures are not counted as passing runs.
 No persistent/wire format or finite ballot model changed. These Linux checks do
 not establish promoted-leader network authorization, online membership,
 distributed activation proof, macOS execution or performance.
+
+## Slice 43 QUIC evidence
+
+The optional QUIC backend passes nine Linux loopback tests using actual
+quinn-proto/Rustls encrypted UDP. They exercise partial ordered plaintext,
+authentication pins/names/exact store assignment, revocation, clocks/deadlines,
+foreign datagrams, handshake byte limits, one-call poll fairness, clean close
+with unread data, timeout with unacknowledged closing output, framed outbound
+credit lifetime and retransmission after deliberate UDP loss. A three-replica
+history elects a leader, commits its no-op and a counter command, and applies
+the same value everywhere using host log tickets and native QUIC framing.
+
+The final combined run passes QUIC/secure/transport/startup/counter-service suites
+9/12/13/5/6 tests. All-feature all-target Clippy passes with warnings denied.
+Earlier hello-FIN flow-control and closing-peer-loss failures were repaired and
+their focused checks plus this final run passed. These are finite checks, not
+formal protocol, native-file QUIC crash, macOS, remote deployment or performance
+evidence. The shared listener/connector and counter CLI remain TCP/TLS.

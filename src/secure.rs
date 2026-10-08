@@ -154,14 +154,17 @@ pub struct SessionProgress {
 ///
 /// Poll owns bounded external I/O progress. `WouldBlock` retains state and never
 /// means rollback. Plaintext writes may accept a short prefix; the transport
-/// retains the rest. `is_flushed` means local ciphertext buffers are empty, never
-/// remote receipt. Read returns zero only on clean channel EOF; unclean EOF is
+/// retains the rest. `is_flushed` means local ciphertext buffers are empty; it
+/// does not guarantee remote receipt. Read returns zero only on clean channel EOF; unclean EOF is
 /// `Truncated`. Caller-supplied monotonic time drives handshake deadlines.
 ///
 /// The owner serializes calls, supplies reactor wakeups, and budgets plaintext
-/// frames/outputs separately. Clean peer closure stops new writes; already
-/// decrypted plaintext remains readable after closure. Close stops new writes and flushes accepted channel
-/// output; dropping observation cannot undo external progress. Revocation latches
+/// frames/outputs separately. Providers may conservatively wait for transport
+/// acknowledgements before reporting flushed; this still promises no remote
+/// application consumption or Raft durability. Clean peer closure stops new
+/// writes; already decrypted plaintext remains readable after closure. Close
+/// stops new writes and flushes accepted channel output; dropping observation
+/// cannot undo external progress. Revocation latches
 /// failure and prevents further plaintext I/O. Key/certificate rotation creates
 /// a new authenticated connection. No method shuts down shared host resources.
 pub trait SecureSession {

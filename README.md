@@ -28,6 +28,11 @@ default `tls` feature adds pinned Rustls/ring for authenticated channels. Native
 storage without TLS and the core/host-only build have no third-party runtime
 dependencies.
 
+The optional `quic` feature adds a caller-polled authenticated UDP session backend
+through the same framed transport API. A three-replica QUIC test elects, commits
+and applies a write. Service startup/CLI QUIC selection is still pending; see
+[QUIC construction and current scope](docs/QUIC_TRANSPORT.md).
+
 Shared runtime components now schedule many groups through bounded ready queues
 and explicit deadlines. The 100-group history uses one WAL per node, batches
 persistence across groups, and demonstrates progress while one group's durable

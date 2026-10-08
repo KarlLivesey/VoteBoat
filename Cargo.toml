@@ -12,9 +12,12 @@ publish = false
 default = ["native", "tls"]
 native = []
 tls = ["native", "dep:rustls"]
+quic = ["tls", "dep:quinn-proto", "dep:bytes"]
 
 [dependencies]
 rustls = { version = "=0.23.45", optional = true, default-features = false, features = ["std", "ring"] }
+quinn-proto = { version = "=0.11.19", optional = true, default-features = false, features = ["rustls-ring"] }
+bytes = { version = "=1.12.1", optional = true }
 
 [[example]]
 name = "durable_vote"

@@ -2636,11 +2636,52 @@ existing six service/routing and five startup tests pass after the final fixture
 repair, including parallel fake peers, actual processes and native TLS restart.
 No new macOS, remote deployment, formal protocol or performance claim is made.
 
+## Slice 43 — optional caller-polled QUIC sessions
+
+Mini schema plan: put Quinn's protocol engine behind the existing SecureSession
+contract, supplied with a dedicated UDP socket and exact authorized peer. Reuse
+the authenticated identity hello and frame codec. Bound packets, handshakes and
+stream ownership; drive all progress and deadlines from host polls. Test partial
+progress, loss, authentication, close/failure and actual replicated application
+before exposing service startup selection.
+
+The optional quic feature adds NativeQuicSession and QuicSessionOptions, using
+pinned quinn-proto/bytes and existing Rustls/ring. TCP/TLS remains the default.
+The native framed transport already accepts the new provider. No hidden runtime,
+reactor, worker or socket binding is added. Client/server constructors consume
+explicit dedicated sockets; only polling performs I/O. Mutual certificate
+authentication, exact pins, distinct ALPN and the existing node/store/session
+hello precede Ready. Message format, store generations and durability tokens are
+unchanged. Reliable stream chunks are ordered into the existing byte channel;
+QUIC ACKs permit local buffer release, never a Raft durable acknowledgement.
+
+Polls bound calls/bytes and protocol visits. One retained encrypted datagram
+survives send backpressure; separate receive scratch prevents overwrite. Packet
+MTU is fixed at 1200 bytes, with bounded stream/connection windows and one active
+incoming/outgoing chunk. Foreign sources are discarded before admission. Migration,
+early data, bidirectional streams and unreliable application datagrams are disabled.
+Handshake byte/time limits, monotonic deadlines, revocation and truncated close
+fail closed. Clean close permits draining retained input. A one-call budget
+alternates read/write across polls. Completing the identity hello also consumes
+its stream FIN so flow-control credit can reach the first application write.
+Accepted output lost during close fails on timeout rather than hanging Closing.
+
+Nine QUIC tests pass, including UDP loss/retransmission, exact pin/name/store
+rejection, partial ordered plaintext, budget fairness, handshake limits, foreign
+datagrams, clocks, revocation, clean close, unacknowledged close failure, framed
+outbound ownership and a three-replica election/commit/apply history. The latter
+uses host log tickets with actual encrypted UDP, not native file durability.
+The combined final Linux QUIC/secure/transport/startup/service run passes
+9/12/13/5/6 tests. All-feature all-target Clippy with warnings denied passes.
+Core-only and native-only all-target compilation and all-feature API docs pass.
+See QUIC_TRANSPORT.md for construction and integration scope.
+
 ## Next slice
 
-Add optional QUIC transport alongside TCP/TLS, as requested, preserving selected
-provider composition, authenticated exact identities, bounded ownership and
-existing message/durability semantics. Continue P4 with promoted-leader catch-up
+Add bounded QUIC establishment and service startup/CLI selection. The first
+session provider requires dedicated peer sockets; independently polling a shared
+UDP socket would consume another peer's packets, so shared listener ownership
+must be designed explicitly. Continue P4 with promoted-leader catch-up
 authorization, readiness/capability evidence, retiring-leader final propagation,
 route/roster admission, distributed activation modeling and faulted network
 membership histories before releasing online configuration ingress. Explicit

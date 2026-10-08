@@ -25,7 +25,7 @@ use std::{
     sync::Arc,
 };
 
-const HELLO: usize = 52;
+pub(crate) const HELLO: usize = 52;
 const ALPN: &[u8] = b"voteboat/1";
 /// Public DER material; private keys are consumed and never printed by this API.
 pub struct TlsCredentials {
@@ -35,8 +35,8 @@ pub struct TlsCredentials {
 }
 #[derive(Clone)]
 pub struct NativeTlsConfig {
-    client: Arc<ClientConfig>,
-    server: Arc<ServerConfig>,
+    pub(crate) client: Arc<ClientConfig>,
+    pub(crate) server: Arc<ServerConfig>,
 }
 impl NativeTlsConfig {
     pub fn new(material: TlsCredentials) -> Result<Self, SessionError> {
@@ -191,13 +191,7 @@ impl<I: Read + Write> NativeTlsSession<I> {
                 .ok_or(SessionError::InvalidLimits)?,
         );
         connection.set_buffer_limit(Some(limits.write_buffer_bytes));
-        let mut hello = [0; HELLO];
-        hello[..8].copy_from_slice(b"VBSESS01");
-        hello[8..10].copy_from_slice(&1u16.to_le_bytes());
-        hello[12..20].copy_from_slice(&local.node.get().to_le_bytes());
-        hello[20..36].copy_from_slice(&local.store.identity.id.get().to_le_bytes());
-        hello[36..44].copy_from_slice(&local.store.identity.incarnation.get().to_le_bytes());
-        hello[44..52].copy_from_slice(&local.store.session.get().to_le_bytes());
+        let hello = encode_hello(local);
         Ok(Self {
             io: Some(io),
             connection,
@@ -276,37 +270,12 @@ impl<I: Read + Write> NativeTlsSession<I> {
             }
         }
         if self.read == HELLO && self.written == HELLO && !self.connection.wants_write() {
-            let h = &self.hello_in;
-            if &h[..8] != b"VBSESS01" || h[8..12] != [1, 0, 0, 0] {
-                return Err(SessionError::IncompatibleProtocol);
-            }
-            let node = NodeId::new(u64::from_le_bytes(h[12..20].try_into().unwrap()))
-                .ok_or(SessionError::WrongPeer)?;
-            let store = StoreIdentity {
-                id: StoreId::new(u128::from_le_bytes(h[20..36].try_into().unwrap()))
-                    .ok_or(SessionError::WrongPeer)?,
-                incarnation: StoreIncarnation::new(u64::from_le_bytes(
-                    h[36..44].try_into().unwrap(),
-                ))
-                .ok_or(SessionError::WrongPeer)?,
-            };
-            if self.peer.identity != (PeerIdentity { node, store }) {
-                return Err(SessionError::WrongPeer);
-            }
-            let session = StoreSession::new(u64::from_le_bytes(h[44..52].try_into().unwrap()))
-                .ok_or(SessionError::WrongPeer)?;
-            self.binding = Some(SessionBinding {
-                local: self.local,
-                peer: LocalIdentity {
-                    node,
-                    store: StoreBinding {
-                        identity: store,
-                        session,
-                    },
-                },
-                generation: self.generation,
-                wire_version: 1,
-            });
+            self.binding = Some(decode_hello(
+                &self.hello_in,
+                self.local,
+                self.peer.identity,
+                self.generation,
+            )?);
             self.state = SessionState::Ready;
             progress = true;
         }
@@ -584,4 +553,51 @@ impl<I: Read + Write> SecureSession for NativeTlsSession<I> {
         self.state = SessionState::Failed;
         self.failure = Some(SessionError::Revoked);
     }
+}
+
+pub(crate) fn encode_hello(local: LocalIdentity) -> [u8; HELLO] {
+    let mut hello = [0; HELLO];
+    hello[..8].copy_from_slice(b"VBSESS01");
+    hello[8..10].copy_from_slice(&1u16.to_le_bytes());
+    hello[12..20].copy_from_slice(&local.node.get().to_le_bytes());
+    hello[20..36].copy_from_slice(&local.store.identity.id.get().to_le_bytes());
+    hello[36..44].copy_from_slice(&local.store.identity.incarnation.get().to_le_bytes());
+    hello[44..52].copy_from_slice(&local.store.session.get().to_le_bytes());
+    hello
+}
+
+pub(crate) fn decode_hello(
+    h: &[u8; HELLO],
+    local: LocalIdentity,
+    peer: PeerIdentity,
+    generation: SecureSessionGeneration,
+) -> Result<SessionBinding, SessionError> {
+    if &h[..8] != b"VBSESS01" || h[8..12] != [1, 0, 0, 0] {
+        return Err(SessionError::IncompatibleProtocol);
+    }
+    let node = NodeId::new(u64::from_le_bytes(h[12..20].try_into().unwrap()))
+        .ok_or(SessionError::WrongPeer)?;
+    let store = StoreIdentity {
+        id: StoreId::new(u128::from_le_bytes(h[20..36].try_into().unwrap()))
+            .ok_or(SessionError::WrongPeer)?,
+        incarnation: StoreIncarnation::new(u64::from_le_bytes(h[36..44].try_into().unwrap()))
+            .ok_or(SessionError::WrongPeer)?,
+    };
+    if peer != (PeerIdentity { node, store }) {
+        return Err(SessionError::WrongPeer);
+    }
+    let session = StoreSession::new(u64::from_le_bytes(h[44..52].try_into().unwrap()))
+        .ok_or(SessionError::WrongPeer)?;
+    Ok(SessionBinding {
+        local,
+        peer: LocalIdentity {
+            node,
+            store: StoreBinding {
+                identity: store,
+                session,
+            },
+        },
+        generation,
+        wire_version: 1,
+    })
 }
