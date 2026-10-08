@@ -76,30 +76,59 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Retained route/credential admission (slice 51) and host-driven readiness evidence
-(slice 52) are implemented. They feed local proposal admission, then the native
-exchange and distributed release checks. The macro P4 exit is still usable,
-validated online add/promote/remove; these slices do not redefine that exit.
+Retained route/credential admission (slice 51), host-driven readiness evidence
+(slice 52) and local configuration proposal admission (slice 53) are implemented.
+The remaining P4 path connects these to native exchange and distributed release
+checks. The macro P4 exit is still usable, validated online add/promote/remove;
+these slices do not redefine that exit.
 
-1. **Local configuration proposal admission (current, P4).** Slice 53 connects
-   readiness to explicit learner/joint/final administrative events and the existing
-   journal/persistence path. Depends on slices 51–52. Completion checks cover
-   complete fresh promotion evidence, joint-before-final commitment, exact
-   durability, native recovery/failure, old/new recursive predicates, and queued
-   route/capacity retention with execution-time authenticated session checks.
-2. **Native readiness exchange (next, P4).** Carry fresh readiness requests and
+1. **Native readiness exchange (current, P4).** Carry fresh readiness requests and
    replies through the selected native wire/session and asynchronous maintenance
    paths. Bind returned evidence to the exact suspended owner/application state
-   and current peer session. Depends on item 1 and existing snapshot workers.
+   and current peer session. Depends on slices 51–53 and existing snapshot workers.
    Completion means real TCP/QUIC exchange produces checked readiness without
    blocking unrelated groups; rejected/canceled/stale work preserves its original
    ownership and credits through drain/recovery.
-3. **Fault-tested online activation (following, P4).** Connect the administrator
+2. **Fault-tested online activation (next, P4).** Connect the administrator
    entry point and placement authorization to those paths, validate distributed
    activation modeling, and exercise actual multi-node add/promote/remove with
    leader loss, restart, rollback and partial delivery. Open configuration ingress
-   only after those release checks pass. Then advance to P5's selective recursive
-   responsibility manifests/routing, followed by P6 split/merge and P7 tuning.
+   only after those release checks pass. Depends on item 1 and the existing
+   membership journal, joint quorum and recovery contracts. This completes the
+   online-membership milestone and supplies safe replica placement changes.
+3. **First recursive responsibility/routing path (following, P5).** Define the
+   smallest manifest and request-resolution path that selects a concrete group,
+   then exercise it through the existing service and Rust embedding. Depends on
+   existing group identities/runtime and, when placement changes, item 2. Check
+   selective placement, stale manifest handling and cached child operation during
+   parent unavailability; ordinary child writes must not require an ancestor
+   commit. This begins the P5 milestone, rather than claiming all of P5 in one
+   slice. Sketch the concrete API and acceptance history at that milestone entry.
+
+### How the current work fits globally
+
+The capability chain is **safe replica placement → responsibility routing →
+safe data/ownership movement → measured tuning**. Readiness establishes whether
+an exact learner/store/session can support the required application and retained
+history. Joint consensus uses that evidence to change a group's voter set. P5
+uses concrete groups and placement to resolve which group serves a responsibility.
+P6 adds movement of application data and ownership, with source fencing before
+target activation and preserved retry lineage. P7 measures the resulting paths
+before changing batching or resource layout. Readiness alone does not certify
+P6 imports or ownership activation; those require their own durable receipts.
+
+TCP and optional QUIC carry the same protocol across this chain. Transport work
+should therefore serve the current exchange and later routing/movement without
+introducing a separate consensus path. Shared bounded scheduling, authoritative
+storage bindings and restart/session checks remain cross-cutting contracts.
+
+There are two delivery horizons: keep improving the already usable static service
+and Rust embedding, while completing the broader P4–P7 design. macOS execution
+and separate-host operational validation remain first-delivery gaps and can
+proceed independently of online membership. P5/P6 are not prerequisites for
+using a static group. At each mini-plan review, state both the immediate result
+and the capability it unlocks globally; add a prerequisite only when an explicit
+acceptance check needs it.
 
 Before editing each item, sketch its data/API shape, transitions, ownership,
 failure cleanup and focused checks. If that sketch reveals another dependency,
