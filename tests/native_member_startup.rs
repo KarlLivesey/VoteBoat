@@ -1557,10 +1557,11 @@ fn quic_recursive_repair_catches_up_old_voter_and_candidate_tail() {
     remote_joint_repair(NativePeerProtocol::Quic, 80, None, true);
 }
 
-fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool) {
-    use voteboat::secure::PeerIdentity;
-    let root = root();
-    std::fs::create_dir(&root).unwrap();
+fn seed_promoted_witness(
+    root: &Path,
+    compacted_leader: bool,
+    compacted_witness: bool,
+) -> Bootstrap {
     let weighted = |voters: &[u64], required| {
         Policy::new(
             Tree::Weighted(
@@ -1658,9 +1659,10 @@ fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool
             SnapshotLimits::default(),
         )
         .unwrap();
-        // The promoted leader may have compacted its old history. A different
-        // old-view voter retains the committed base needed to witness it.
-        if local == 2 && compacted {
+        // Compact either source independently: a promoted leader can use a
+        // separate retained-history witness, but a compacted witness cannot
+        // reconstruct the old base needed to authenticate its requester.
+        if (local == 2 && compacted_leader) || (local == 3 && compacted_witness) {
             let mut app = Counter::new(100).unwrap();
             let (mut core, _) =
                 recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app)
@@ -1671,6 +1673,14 @@ fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool
             compact_replica(&mut core, &mut log, &mut snapshots, &app, reference).unwrap();
         }
     }
+    initial
+}
+
+fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool) {
+    use voteboat::secure::PeerIdentity;
+    let root = root();
+    std::fs::create_dir(&root).unwrap();
+    let initial = seed_promoted_witness(&root, compacted, false);
     let endpoints: Vec<_> = (0..3).map(|_| reservation()).collect();
     let configs: Vec<_> = (1..=3)
         .map(|local| {
@@ -1932,4 +1942,405 @@ fn tcp_promoted_leader_witness_installs_compacted_final_snapshot() {
 #[test]
 fn quic_promoted_leader_witness_installs_compacted_final_snapshot() {
     promoted_leader_witness_catchup(NativePeerProtocol::Quic, true);
+}
+
+fn promoted_leader_loss_and_witness_outage(protocol: NativePeerProtocol, compacted_witness: bool) {
+    use voteboat::secure::PeerIdentity;
+    type Service = NativeNode<Counter, NativeServiceConnector>;
+    fn assert_old_view(n: &Service, expected: &GroupLog) {
+        let state = n.local().owner.core(group()).unwrap().state();
+        // Election retries may durably advance a ballot. They cannot invent
+        // membership records, application entries, a snapshot or commitment.
+        assert_eq!(state.bootstrap, expected.bootstrap);
+        assert_eq!(state.entries, expected.entries);
+        assert_eq!(state.commit_index, expected.commit_index);
+        assert_eq!(state.snapshot, expected.snapshot);
+        assert_eq!(state.snapshot_membership, expected.snapshot_membership);
+    }
+    fn poll(nodes: &mut [Service], now: u64) -> Vec<usize> {
+        let mut refusals = Vec::with_capacity(nodes.len());
+        for n in nodes {
+            let mut refused = 0;
+            let progress = n.poll(MonoTime(now), NodePollBudget::default()).unwrap();
+            if let Some(replica) = progress.replica {
+                for step in replica.steps {
+                    // Old-view ingress and superseded authority replies can be
+                    // refused. No application/admin/provider error is excused.
+                    assert!(
+                        step.error.is_none()
+                            || (step.error == Some(RaftError::WrongIdentity)
+                                && step.admission.is_none()
+                                && step.operation.is_none()
+                                && step.proposed.is_none()),
+                        "{step:?}"
+                    );
+                    refused += usize::from(step.error == Some(RaftError::WrongIdentity));
+                }
+            }
+            refusals.push(refused);
+        }
+        refusals
+    }
+    fn drive(nodes: &mut [Service], clock: &Instant, mut done: impl FnMut(&mut [Service]) -> bool) {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            poll(nodes, clock.elapsed().as_millis() as u64);
+            if done(nodes) {
+                return;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "promoted leader/witness fault timed out"
+            );
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+    fn write(
+        nodes: &mut [Service],
+        clock: &Instant,
+        leader: usize,
+        operation: u128,
+        delta: i64,
+        expected: i64,
+    ) -> u64 {
+        let ticket = nodes[leader]
+            .propose(ClientRequest {
+                group: group(),
+                operation: OperationId::new(operation).unwrap(),
+                bytes: delta.to_le_bytes().to_vec(),
+            })
+            .unwrap();
+        let mut index = None;
+        drive(nodes, clock, |ns| {
+            while let Some(reply) = ns[leader].poll_client() {
+                assert_eq!(reply.ticket(), ticket);
+                let ClientOutcome::Applied { position, receipt } =
+                    ns[leader].complete_client(reply).unwrap()
+                else {
+                    panic!("acknowledged write failed")
+                };
+                assert_eq!(receipt.outcome, CounterOutcome::Value(expected));
+                index = Some(position.index);
+            }
+            index.is_some()
+        });
+        index.unwrap()
+    }
+    let clock = Instant::now();
+    let root = root();
+    std::fs::create_dir(&root).unwrap();
+    let initial = seed_promoted_witness(&root, true, compacted_witness);
+    let reservations: Vec<_> = (0..3).map(|_| reservation()).collect();
+    let addresses = reservations.iter().map(|r| r.0).collect::<Vec<_>>();
+    let config = |local: u64| {
+        let (mut c, _hints) = startup(&root.join(local.to_string()), local, &[1, 2, 3]);
+        c.startup.bootstrap = initial.clone();
+        c.startup.tls = c.startup.tls.with_wire_version(6).unwrap();
+        c.startup.listen = addresses[local as usize - 1];
+        for (peer, hint) in &mut c.startup.peers {
+            hint.address = addresses[peer.get() as usize - 1];
+        }
+        c
+    };
+    drop(reservations);
+    let open_node = |local| {
+        config(local)
+            .open_with_protocol(
+                protocol,
+                Counter::new(100).unwrap(),
+                Arc::new(ThreadWake::current()),
+                MonoTime(clock.elapsed().as_millis() as u64),
+            )
+            .unwrap()
+    };
+    // The committed new policy gives node 2 sufficient weight to commit alone.
+    // First acknowledge real data, then lose that promoted leader before the
+    // old-view replica has learned either the promotion or the data.
+    let mut promoted = vec![open_node(2)];
+    promoted[0].control(group(), NodeControl::Campaign).unwrap();
+    drive(&mut promoted, &clock, |ns| {
+        ns[0].local().owner.core(group()).unwrap().role() == Role::Leader
+    });
+    let acknowledged = write(&mut promoted, &clock, 0, 900, 7, 7);
+    close(promoted.remove(0));
+    let mut older = vec![open_node(1)];
+    older[0].control(group(), NodeControl::Campaign).unwrap();
+    drive(&mut older, &clock, |ns| {
+        let core = ns[0].local().owner.core(group()).unwrap();
+        core.role() == Role::Candidate
+            && core.state().hard_state.term == 2
+            && core.state().hard_state.voted_for == Some(node(1))
+    });
+    let request = ClientRequest {
+        group: group(),
+        operation: OperationId::new(901).unwrap(),
+        bytes: 100i64.to_le_bytes().to_vec(),
+    };
+    let allocation = request.bytes.as_ptr();
+    let rejected = older[0].propose(request).unwrap_err();
+    assert_eq!(
+        rejected.reason,
+        ClientError::Consensus(RaftError::NotLeader)
+    );
+    assert_eq!(rejected.request.group, group());
+    assert_eq!(rejected.request.operation, OperationId::new(901).unwrap());
+    assert_eq!(rejected.request.bytes, 100i64.to_le_bytes());
+    assert_eq!(rejected.request.bytes.as_ptr(), allocation);
+    let baseline = older[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .state()
+        .clone();
+    let candidate = PeerIdentity {
+        node: node(2),
+        store: identity(2),
+    };
+    let query = NodeControl::AuthorizeReplication {
+        witness: PeerIdentity {
+            node: node(3),
+            store: identity(3),
+        },
+        candidate,
+        configuration: cid(12),
+    };
+    let status = |n: &Service| {
+        n.local()
+            .owner
+            .core(group())
+            .unwrap()
+            .replication_authorization_status()
+    };
+    older[0].control(group(), query).unwrap();
+    drive(&mut older, &clock, |ns| {
+        matches!(
+            status(&ns[0]),
+            ReplicationAuthorizationStatus::Pending { .. }
+        )
+    });
+    let ReplicationAuthorizationStatus::Pending {
+        context: unavailable,
+        ..
+    } = status(&older[0])
+    else {
+        unreachable!()
+    };
+    // Witness and promoted leader are both unavailable. Repeated bounded polls
+    // cannot turn a routing hint or pending query into authority or a commit.
+    for _ in 0..50 {
+        poll(&mut older, clock.elapsed().as_millis() as u64);
+        assert!(!matches!(
+            status(&older[0]),
+            ReplicationAuthorizationStatus::Granted { .. }
+        ));
+        assert_old_view(&older[0], &baseline);
+        assert_eq!(
+            older[0].local().applications[&group()].read_applied(1),
+            Ok(0)
+        );
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    older[0]
+        .control(group(), NodeControl::CancelReplicationAuthorization)
+        .unwrap();
+    drive(&mut older, &clock, |ns| {
+        status(&ns[0]) == ReplicationAuthorizationStatus::None
+    });
+    older[0].control(group(), query).unwrap();
+    drive(&mut older, &clock, |ns| {
+        matches!(
+            status(&ns[0]),
+            ReplicationAuthorizationStatus::Pending { .. }
+        )
+    });
+    let ReplicationAuthorizationStatus::Pending { context: fresh, .. } = status(&older[0]) else {
+        unreachable!()
+    };
+    assert_ne!(unavailable, fresh);
+    // Restore the actual witness store, never a reset/empty replacement. The
+    // promoted leader remains down while the witness answers the fresh query.
+    older.push(open_node(3));
+    if compacted_witness {
+        // Missing historical membership prevents authenticating the request;
+        // it yields WrongIdentity, not an authenticated negative reply. Poll
+        // both actual nodes until the restored witness refuses ingress, then
+        // continue transport progress without treating silence as authority.
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            let refusals = poll(&mut older, clock.elapsed().as_millis() as u64);
+            assert!(!matches!(
+                status(&older[0]),
+                ReplicationAuthorizationStatus::Granted { .. }
+            ));
+            assert_old_view(&older[0], &baseline);
+            if refusals[1] > 0 {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "compacted witness received no refused ingress"
+            );
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        for _ in 0..50 {
+            poll(&mut older, clock.elapsed().as_millis() as u64);
+            assert!(!matches!(
+                status(&older[0]),
+                ReplicationAuthorizationStatus::Granted { .. }
+            ));
+            assert_old_view(&older[0], &baseline);
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        older[0]
+            .control(group(), NodeControl::CancelReplicationAuthorization)
+            .unwrap();
+        drive(&mut older, &clock, |ns| {
+            status(&ns[0]) == ReplicationAuthorizationStatus::None
+        });
+    } else {
+        drive(&mut older, &clock, |ns| {
+            matches!(
+                status(&ns[0]),
+                ReplicationAuthorizationStatus::Granted { .. }
+            )
+        });
+        assert_eq!(
+            status(&older[0]),
+            ReplicationAuthorizationStatus::Granted {
+                candidate,
+                configuration: cid(12),
+                base: cid(10)
+            }
+        );
+    }
+    assert_old_view(&older[0], &baseline);
+    // Reopen the failed promoted store. Its acknowledged write survives, while
+    // only a retained-history witness can authorize the old view's catch-up.
+    older.push(open_node(2));
+    assert_eq!(
+        older[2].local().applications[&group()].read_applied(acknowledged),
+        Ok(7)
+    );
+    older[2].control(group(), NodeControl::Campaign).unwrap();
+    drive(&mut older, &clock, |ns| {
+        ns[2].local().owner.core(group()).unwrap().role() == Role::Leader
+    });
+    // Wait for recovery/elections to settle before admitting the new client write.
+    drive(&mut older, &clock, |ns| {
+        ns[2].local().owner.core(group()).unwrap().role() == Role::Leader
+            && ns[1].local().applications[&group()].read_applied(acknowledged) == Ok(7)
+            && (compacted_witness
+                || ns[0].local().applications[&group()].read_applied(acknowledged) == Ok(7))
+    });
+    let final_index = write(&mut older, &clock, 2, 902, 2, 9);
+    drive(&mut older, &clock, |ns| {
+        ns[1..]
+            .iter()
+            .all(|n| n.local().applications[&group()].read_applied(final_index) == Ok(9))
+            && (compacted_witness
+                || ns[0].local().applications[&group()].read_applied(final_index) == Ok(9))
+    });
+    assert_eq!(status(&older[0]), ReplicationAuthorizationStatus::None);
+    if compacted_witness {
+        assert_old_view(&older[0], &baseline);
+        assert_eq!(
+            older[0].local().applications[&group()].read_applied(1),
+            Ok(0)
+        );
+        assert_eq!(
+            older[0]
+                .local()
+                .owner
+                .core(group())
+                .unwrap()
+                .membership()
+                .id(),
+            cid(10)
+        );
+    } else {
+        assert_eq!(
+            older[0]
+                .local()
+                .owner
+                .core(group())
+                .unwrap()
+                .membership()
+                .id(),
+            cid(12)
+        );
+        assert!(!older[0].local().owner.core(group()).unwrap().local_voter());
+        assert!(older[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .state()
+            .snapshot
+            .is_some());
+    }
+    for n in &mut older {
+        n.begin_shutdown();
+    }
+    let shutdown = Instant::now();
+    while older.iter().any(|n| !n.is_drained()) {
+        poll(&mut older, 10000 + shutdown.elapsed().as_millis() as u64);
+        assert!(shutdown.elapsed() < Duration::from_secs(5));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    for n in older {
+        close(n);
+    }
+    for local in 1..=3 {
+        let path = root.join(local.to_string());
+        let log = NativeLogStore::recover(
+            FileLogIo::open(&path).unwrap(),
+            identity(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut snapshots = NativeSnapshotStore::recover(
+            FileSnapshotIo::open(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: identity(local),
+                group: group(),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        let mut app = Counter::new(100).unwrap();
+        let (core, _) =
+            recover_member_replica(node(local), group(), &log, &mut snapshots, &mut app).unwrap();
+        if local == 1 && compacted_witness {
+            assert_eq!(core.membership().id(), cid(10));
+            assert_eq!(core.state().commit_index, 1);
+            assert_eq!(app.read_applied(1), Ok(0));
+        } else {
+            assert_eq!(core.membership().id(), cid(12));
+            assert_eq!(app.read_applied(final_index), Ok(9));
+        }
+        assert_eq!(
+            core.replication_authorization_status(),
+            ReplicationAuthorizationStatus::None
+        );
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_promoted_leader_loss_requires_retained_restored_witness() {
+    promoted_leader_loss_and_witness_outage(NativePeerProtocol::TcpTls, false);
+}
+#[test]
+fn tcp_promoted_leader_loss_refuses_compacted_witness() {
+    promoted_leader_loss_and_witness_outage(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_promoted_leader_loss_requires_retained_restored_witness() {
+    promoted_leader_loss_and_witness_outage(NativePeerProtocol::Quic, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_promoted_leader_loss_refuses_compacted_witness() {
+    promoted_leader_loss_and_witness_outage(NativePeerProtocol::Quic, true);
 }

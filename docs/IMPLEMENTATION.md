@@ -94,9 +94,10 @@ P0–P7 objective finished or activate transferred ownership.
 1. **Fault-tested remote membership release (current, P4).** Finish the finite
    remaining schedules from slice 77. Slice 81 now checks held readiness across
    cancellation and changed-session promotion through owning assembly, including
-   native TCP/QUIC cancellation. Next is promoted-leader loss with older
-   views and unavailable/restored/compacted witnesses; broader recursive partial
-   joint/final delivery and restart. Depends on the existing executable lifecycle,
+   native TCP/QUIC cancellation. Slice 82 adds promoted-leader loss with older
+   views and unavailable/restored/compacted witnesses over both transports.
+   Remaining: broader recursive partial joint/final delivery and restart.
+   Depends on the existing executable lifecycle,
    authorization and recovery paths. Completion requires safe rejection/recovery
    in those actual histories before opening public mutation ingress. This supplies
    safe replica placement for the next ownership-movement milestone.
@@ -141,7 +142,7 @@ the capability milestones above:
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
 | Routed responsibility foundation (completed slices 78–80, P5) | Namespace and local ownership checks are necessary before safe data movement. | TCP/QUIC child writes, quorum reads and WAL/checkpoint recovery pass with all parents stopped and unchanged parent logs; stale contexts refuse at admission/apply. | Supplies routing and retry foundations for P6; remains usable independently of public membership ingress. |
-| Finish fault-tested remote membership release (current P4) | Executable-created lifecycle, divergent learner repair and slice 81 held-readiness checks now pass. | Remaining: promoted-leader loss with unavailable/restored/compacted witness; broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block the usable P5 path. |
+| Finish fault-tested remote membership release (current P4) | Executable-created lifecycle, divergent learner repair, slice 81 held-readiness and slice 82 promoted-leader/witness-outage checks now pass. | Remaining: broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block the usable P5 path. |
 | First durable split/merge (next P6) | Routing selects a destination but cannot revoke an old owner's service. Both P5 and the P4 release checks are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
@@ -4583,3 +4584,41 @@ final delivery and restart. This closes the stated held-readiness assembly case,
 not the full membership release or all possible failure schedules. Public mutation
 ingress stays gated. P6 split/merge and P7 tuning remain the next two macro-linked
 deliverables; the routed P5 path stays usable and the full P0–P7 goal remains active.
+
+## Slice 82 — promoted leader loss and restored witness history
+
+Schema plan: reuse the weighted committed learner/joint/final native fixture,
+keeping node 1 at the old base and node 2 at a compacted final snapshot. Toggle
+whether witness node 3 retains that base. Record a client acknowledgment before
+stopping node 2; expose only owning Node controls, exact native stores and real
+TCP/QUIC sessions. While both peers are absent, node 1 cannot accept a write or
+invent authority. Cancel the unavailable query, use a distinct fresh context,
+restore witness 3, then reopen leader 2. Retained witness history must authorize
+snapshot catch-up; compacted witness history must leave node 1's data/membership
+prefix unchanged while the current group resumes. Drain/join all workers and
+reopen all files to check acknowledgment survival and loss of volatile permits.
+
+All four histories pass. The retained variants recover the acknowledged value 7
+and then replicate value 9 to the demoted learner. The compacted-witness variants
+observe refused witness ingress and no grant, explicitly cancel, and keep node 1
+at its original configuration/commit/value while nodes 2 and 3 reach value 9.
+Election retry ballots may advance; this cannot change the old-view application
+prefix, snapshot, membership or commitment. Exact authority-request rejection on
+missing retained base is separately checked by the actual-core compaction test.
+Initial membership records are seeded; these tests do not demonstrate distributed
+creation of that transition or arbitrary fault schedules.
+
+The harness now waits for persisted candidate ballots rather than role changes,
+uses advancing monotonic time for reconnect deadlines, checks original ownership
+of admission-rejected requests, and cancels explicitly when missing history
+prevents any authenticated authority reply. No production behavior was changed.
+
+Validation: all-feature native startup 36, membership 32, core library 57 and
+member recovery 33 tests pass (158 total). All-target/all-feature Clippy with
+warnings denied, formatting, diff and inventory checks pass; inventory stays 64.
+This closes the named weighted promoted-leader/witness-outage schedules. The
+current P4 mini plan retains broader recursive partial joint/final delivery and
+restart before public mutation ingress. Next is durable P6 split/import/fence/
+publish/activate and compatible merge, then measured P7 tuning. Static/routed
+service use remains independent; macOS and separate-host evidence are outstanding.
+The complete P0–P7 goal remains active and P8 remains deferred.

@@ -71,6 +71,11 @@ exchange cannot authorize catch-up. Retaining historical evidence, authenticated
 route/roster admission, readiness capabilities, faulted full activation/retirement
 histories and administrative integration remain required.
 No fallback accepts a candidate's self-reported configuration as authority.
+When the witness cannot reconstruct the requester's historical membership base,
+it refuses the request with `WrongIdentity` and emits no authority reply. It
+cannot authenticate a negative reply from that missing base either. A host may
+still observe Pending and must drive cancellation/retry explicitly; silence is
+never a grant.
 
 ## Evidence
 
@@ -123,3 +128,17 @@ All three native file stores reopen with the write and no volatile permit. A
 separate old-view voter retains the historical base needed to witness the compacted
 leader; if every witness loses it, the existing fail-closed limit still applies.
 Initial membership records are seeded, not distributed enrollment/proposal evidence.
+
+Four additional owning native TCP/QUIC histories acknowledge a write on the
+promoted leader, stop it, and campaign the old-view replica with both leader and
+witness unavailable. It cannot accept a client write or invent catch-up authority.
+Restoring a retained-history witness grants a fresh-context query; reopening the
+compacted promoted leader preserves its acknowledged write and permits snapshot
+catch-up. With a compacted witness, restored ingress is refused and no grant is
+installed; the host cancels explicitly. The old view stays unchanged while the
+current weighted group resumes and commits another write. All actual file stores
+reopen with their respective membership/data and no volatile permit. Ballots may
+legitimately advance during election retries; the old-view data/configuration
+prefix, snapshot and commitment cannot. Initial memberships are seeded, and this
+finite weighted schedule does not replace broader recursive partial-delivery
+release checks or establish arbitrary availability after losing witness history.

@@ -1419,3 +1419,38 @@ witnesses, plus broader recursive partial joint/final delivery/restart, remain P
 release requirements. Public mutation ingress remains gated; P6 lifecycle, P7
 measurements and macOS/separate-host operational evidence remain outstanding.
 The full P0–P7 goal remains active; P8 remains deferred.
+
+## Slice 82 — native promoted leader loss and witness outage
+
+Four owning native TCP/QUIC histories reuse seeded weighted membership records.
+The promoted final-view leader acknowledges value 7 and closes before the old
+view learns the transition. With both peers unavailable, the old view campaigns
+but rejects a client write at admission, preserving the original request allocation;
+its query never grants authority or changes the durable data/configuration prefix.
+Cancellation and a fresh context precede restoration of the actual witness store.
+
+A retained witness authorizes catch-up from the reopened compacted leader; its
+acknowledged write survives and snapshot recovery plus a subsequent write reaches
+value 9 on all replicas. A compacted witness refuses ingress without a grant;
+missing historical base means no authenticated negative reply is emitted. Explicit
+host cancellation clears the query, and the old view remains at configuration 10,
+commit 1/value 0 while the current weighted group reaches configuration 12/value 9.
+Every native file store is reopened after coordinated drain/join, preserving its
+expected application/membership state and no volatile authorization. The existing
+actual-core witness-compaction test separately identifies the exact request's
+WrongIdentity refusal; native steps observe ingress refusal without exposing RPCs.
+
+Initial harness failures revealed admission-time NotLeader rejection, candidate
+role preceding ballot persistence, frozen time preventing reconnect, and an
+incorrect expectation of a negative reply when historical authentication is
+impossible. The harness was corrected to the existing contracts; no production
+checks or quorum requirements changed.
+
+Final verification:
+
+- All-feature native startup 36 + membership 32 + core library 57 + member recovery 33 = 158 passing tests.
+- All-target/all-feature Clippy with warnings denied, formatting, diff checks and contract inventory validation pass (64 contracts).
+
+Coverage is finite and weighted. Broader recursive partial joint/final delivery
+and restart remain the P4 release gate; public mutation ingress remains closed.
+P6 lifecycle, P7 measurement and macOS/separate-host validation remain outstanding.
