@@ -1,8 +1,9 @@
 # Public test-only TLS material
 
 These generated ECDSA P-256 keys and certificates are deliberately public test
-fixtures. They are not deployment credentials. Tests load them only with
-`include_bytes!`; production constructors require host-supplied credentials.
+fixtures. They are not deployment credentials. Tests load them with `include_bytes!`; the local counter-service quickstart
+explicitly selects this fixture directory. Production constructors require
+host-supplied credentials.
 
 The test CA and node leaves were generated with OpenSSL 3.6.5. The CA and leaves
 have fixed validity from 2020-01-01 through 2050-01-01, so fixture validity does

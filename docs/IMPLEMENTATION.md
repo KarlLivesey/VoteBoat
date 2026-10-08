@@ -45,8 +45,9 @@ were checked on 8 October: operation 1 adds 7; restart/retry of operation 1 keep
 7; operation 2 adds 3 and reaches 10 on all three replicas. Each invocation
 completed a quorum-backed read and durable checkpoint/compaction. This verifies
 that example, not a standalone network service or macOS execution. Actual
-TCP/TLS and Node-facade histories already exist in the integration suite; making
-that assembly straightforward for users is the next implementation priority.
+TCP/TLS and Node-facade histories already exist in the integration suite; the
+first three-process executable now exposes that assembly. Generic startup
+configuration and remote deployment remain work; see Slice 38 below.
 
 ## Safety rules carried forward
 
@@ -2420,11 +2421,50 @@ The local ballot model is unchanged. Linux evidence does not establish macOS,
 hardware power-failure behavior, a distributed membership proof or performance.
 CI remains background feedback and did not gate this slice.
 
+## Slice 38 — runnable native three-process counter service
+
+The usable-service priority now has an executable, `voteboat-counter`, with
+explicit create/recover startup, three independent processes over native mutual
+TLS, automatic elections, ticket-correlated write/read outputs, checkpoint
+admission and draining shutdown with explicit worker joins. Its setup reference
+uses the existing public NativeNode/NodeParts and selected providers. No new
+consensus effect, durability token, watermark, protocol generation or public
+provider seam is introduced. Each recovered store session reserves a disjoint
+10,000-generation range for its peer roster; exhausted ranges fail closed.
+
+The local command protocol has one active connection, a 256-byte command limit,
+a five-second observation deadline and nonblocking partial I/O. Timeout cancels
+observation and exact tickets keep late outputs separate from later connections.
+Peer authentication remains independent of group membership. Credentials are
+explicit host-supplied files, bounded before allocation; the loopback quickstart
+selects the deliberately public test fixtures. This sample is fixed to one group,
+three voters, fixed identities and loopback addresses. It is not yet a generic
+configuration loader or a remote deployment package. See
+[service and embedding](COUNTER_SERVICE.md) for commands and current limits.
+
+Three executable-process tests exercise native files and TCP/TLS: operation retry,
+quorum-backed reads, follower rejection, abrupt leader death and replacement,
+checkpoint/restart/retry, quorum loss with uncertain writes followed by healing,
+bounded commands, oversized-credential refusal, missing-store/invalid-ID refusal,
+refusal to overwrite existing data and drained worker joins. Recovery separately
+confirms that the checkpoint advanced the durable log base before process restart.
+These exercise the shipped binary, not an in-process delivery substitute.
+
+Local validation passes all three service-process tests on Linux, default-feature
+Clippy across all targets with warnings denied, and all-target compilation for
+native-only and core/host-only builds. Targeted Clippy passes again after the final
+test additions. Formatting, document links, new Rust RPL headers and diff checks
+pass. The unchanged core/storage suites were not repeated for this executable-only
+slice. No macOS run, production certification or performance claim is established.
+CI remains background feedback.
+
 ## Next slice
 
-Prioritize the first usable milestone above: native provider setup and a runnable
-static-membership network service with an embedding example. Resume the remaining
-membership work after that service path works end to end.
+Continue the first usable milestone with reusable typed Rust startup configuration,
+configurable remote peer addresses/TLS names and a library-startup example sharing
+the service's provider assembly. Keep the executable-process acceptance tests on
+that shared path. Resume the remaining membership work after the usable service
+and embedding milestone.
 
 Then complete the promoted-leader authorization protocol with replay-resistant group,
 configuration, term, store and committed/election provenance; a claimed head or

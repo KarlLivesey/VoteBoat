@@ -8,8 +8,9 @@ public interfaces that host applications can implement themselves.
 Initial target platforms are **Linux and macOS**. Windows is deferred.
 
 The immediate milestone is an **embeddable Rust library and a runnable networked
-service**, starting with static membership. The library and local counter demo
-already run; standalone network-service setup is the next priority. Online
+service**, starting with static membership. The library, local counter demo and
+initial three-process TCP/TLS counter service now run. See the
+[service quickstart and embedding guide](docs/COUNTER_SERVICE.md). Online
 reconfiguration, recursive responsibilities and split/merge follow that milestone.
 See the [first usable milestone](docs/IMPLEMENTATION.md#first-usable-milestone--priority-updated-8-october-2026).
 
@@ -64,6 +65,11 @@ voters, restores verified checkpoints, and runs without election timers. It does
 not enable online promotion or administration.
 
 ## Run
+
+For three independent networked processes, start with the
+[native service quickstart](docs/COUNTER_SERVICE.md). Each process runs the same
+embeddable Node facade, with durable files, quorum reads and automatic elections.
+
 
 Install Rust 1.98.1 (pinned in `rust-toolchain.toml`), then:
 

@@ -32,3 +32,8 @@ unsafe_code = "forbid"
 
 [lints.clippy]
 all = "warn"
+
+[[bin]]
+name = "voteboat-counter"
+path = "src/bin/counter_service.rs"
+required-features = ["tls"]
