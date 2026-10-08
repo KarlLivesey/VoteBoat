@@ -58,6 +58,7 @@ pub fn update(state: &GroupLog, term: u64, commit: u64, suffix: Option<Suffix>) 
         },
         commit_index: commit,
         suffix,
+        snapshot: None,
     })
 }
 pub fn entry(index: u64, term: u64, value: u8) -> LogEntry {
@@ -195,6 +196,7 @@ impl LogStore for HostLogStore {
         mutations: Vec<LogMutation>,
     ) -> Result<Vec<LogTicket>, StorageError> {
         let limits = self.limits();
+        if mutations.iter().any(|m|matches!(m,LogMutation::Update(u) if u.snapshot.is_some_and(|r|r.store!=self.binding.identity))) {return Err(StorageError::WrongIdentity);}
         apply_batch(&mut self.accepted, &mutations, limits)?;
         self.sequence += 1;
         let tickets = mutations
@@ -246,9 +248,19 @@ impl LogStore for HostLogStore {
         if from == 0 || from > s.last_index() + 1 || count == 0 || bytes == 0 {
             return Err(StorageError::Rejected("range"));
         }
+        if from <= s.base_index() {
+            return Err(StorageError::Compacted {
+                first_index: s.base_index() + 1,
+            });
+        }
         let mut total = 0;
         let mut result = Vec::new();
-        for e in s.entries.iter().skip((from - 1) as usize).take(count) {
+        for e in s
+            .entries
+            .iter()
+            .skip((from - s.base_index() - 1) as usize)
+            .take(count)
+        {
             let size = 37 + e.payload_bytes();
             if total + size > bytes {
                 if result.is_empty() {

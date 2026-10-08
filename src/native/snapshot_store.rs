@@ -25,6 +25,7 @@ use crate::{
     snapshot::*,
 };
 use std::{
+    collections::BTreeMap,
     fs::{self, File, OpenOptions},
     io::{self, Read, Write},
     path::{Path, PathBuf},
@@ -116,7 +117,7 @@ impl FileSnapshotIo {
 }
 impl SnapshotIo for FileSnapshotIo {
     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
-        Self::read_bounded(&self.directory.join("MANIFEST"), 90)
+        Self::read_bounded(&self.directory.join("MANIFEST"), 133)
     }
     fn read_slot(&mut self, slot: u8, limit: usize) -> io::Result<Vec<u8>> {
         Self::read_bounded(&self.slot_path(slot)?, limit)
@@ -294,6 +295,7 @@ pub struct NativeSnapshotStore<I: SnapshotIo, C: SnapshotCodec = NativeSnapshotC
     binding: StoreBinding,
     limits: SnapshotLimits,
     root: Option<Root>,
+    pins: BTreeMap<SnapshotGeneration, Root>,
     stage: Option<Stage>,
     next_generation: u64,
     fenced: bool,
@@ -345,7 +347,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             identity: identity.store,
             session: StoreSession::new(1).unwrap(),
         };
-        io.publish_manifest(&manifest(identity, binding, None))
+        io.publish_manifest(&manifest(identity, binding, None, &BTreeMap::new()))
             .map_err(uncertain)?;
         Ok(Self {
             io,
@@ -354,6 +356,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             binding,
             limits,
             root: None,
+            pins: BTreeMap::new(),
             stage: None,
             next_generation: 0,
             fenced: false,
@@ -370,31 +373,33 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             return Err(StorageError::Rejected("snapshot codec format incompatible"));
         }
         let bytes = io.read_manifest().map_err(uncertain)?;
-        let (old, descriptor) = read_manifest(&bytes, identity, limits)?;
-        let root = if let Some((slot, generation, length, checksum)) = descriptor {
-            let bytes = io
-                .read_slot(slot, limits.max_file_bytes())
-                .map_err(uncertain)?;
-            if bytes.len() as u64 != length
-                || bytes.len() < 4
-                || u32::from_le_bytes(bytes[bytes.len() - 4..].try_into().unwrap()) != checksum
-            {
-                return Err(StorageError::Corrupt("snapshot root/data mismatch"));
+        let (old, descriptor, pin_descriptors) = read_manifest(&bytes, identity, limits)?;
+        let root = descriptor
+            .map(|d| recover_root(&mut io, &codec, identity, limits, d))
+            .transpose()?;
+        let mut pins = BTreeMap::new();
+        for d in pin_descriptors {
+            let pin = recover_root(&mut io, &codec, identity, limits, d)?;
+            if pins.insert(pin.generation, pin).is_some() {
+                return Err(StorageError::Corrupt("duplicate snapshot pin"));
             }
-            let snapshot = codec.decode(&bytes, limits)?;
-            if snapshot.metadata.bootstrap.group != identity.group {
-                return Err(StorageError::WrongIdentity);
+        }
+        if let Some(r) = &root {
+            for p in pins.values() {
+                if p.slot == r.slot && p.descriptor() != r.descriptor() {
+                    return Err(StorageError::Corrupt("snapshot slot aliases"));
+                }
             }
-            Some(Root {
-                slot,
-                generation,
-                length,
-                checksum,
-                metadata: snapshot.metadata,
-            })
-        } else {
-            None
-        };
+        }
+        if pins
+            .values()
+            .map(|p| p.slot)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            != pins.len()
+        {
+            return Err(StorageError::Corrupt("pin slots alias"));
+        }
         let session = old
             .session
             .get()
@@ -402,9 +407,12 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             .and_then(StoreSession::new)
             .ok_or(StorageError::Rejected("snapshot session exhausted"))?;
         let binding = StoreBinding { session, ..old };
-        io.publish_manifest(&manifest(identity, binding, root.as_ref()))
+        io.publish_manifest(&manifest(identity, binding, root.as_ref(), &pins))
             .map_err(uncertain)?;
-        let next_generation = root.as_ref().map_or(0, |r| r.generation.get());
+        let next_generation = root
+            .as_ref()
+            .map_or(0, |r| r.generation.get())
+            .max(pins.keys().map(|g| g.get()).max().unwrap_or(0));
         Ok(Self {
             io,
             codec,
@@ -412,6 +420,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> NativeSnapshotStore<I, C> {
             binding,
             limits,
             root,
+            pins,
             stage: None,
             next_generation,
             fenced: false,
@@ -488,6 +497,9 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
             generation: SnapshotGeneration::new(next).unwrap(),
         };
         let slot = self.root.as_ref().map_or(0, |r| 1 - r.slot);
+        if self.pins.values().any(|p| p.slot == slot) {
+            return Err(StorageError::Rejected("inactive snapshot slot is pinned"));
+        }
         if let Err(e) = self.io.begin_slot(slot, &prefix) {
             return Err(self.failed(e));
         }
@@ -599,10 +611,12 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
             checksum: sealed.checksum,
             metadata: stage.metadata.clone(),
         };
-        if let Err(e) =
-            self.io
-                .publish_manifest(&manifest(self.identity, self.binding, Some(&root)))
-        {
+        if let Err(e) = self.io.publish_manifest(&manifest(
+            self.identity,
+            self.binding,
+            Some(&root),
+            &self.pins,
+        )) {
             return Err(self.failed(e));
         }
         let receipt = SnapshotReceipt {
@@ -655,8 +669,160 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
 fn uncertain(e: io::Error) -> StorageError {
     StorageError::Uncertain(e.to_string())
 }
-fn manifest(identity: SnapshotIdentity, binding: StoreBinding, root: Option<&Root>) -> Vec<u8> {
-    let mut b = b"VBSSTR01".to_vec();
+impl Root {
+    fn descriptor(&self) -> RootDescriptor {
+        (self.slot, self.generation, self.length, self.checksum)
+    }
+    fn reference(&self, identity: SnapshotIdentity) -> SnapshotRef {
+        SnapshotRef {
+            store: identity.store,
+            group: identity.group,
+            generation: self.generation,
+            configuration: self.metadata.bootstrap.configuration,
+            index: self.metadata.index,
+            term: self.metadata.term,
+            application_schema: self.metadata.application_schema,
+            file_bytes: self.length,
+            checksum: self.checksum,
+        }
+    }
+}
+fn recover_root<I: SnapshotIo, C: SnapshotCodec>(
+    io: &mut I,
+    codec: &C,
+    identity: SnapshotIdentity,
+    limits: SnapshotLimits,
+    d: RootDescriptor,
+) -> Result<Root, StorageError> {
+    let (slot, generation, length, checksum) = d;
+    let bytes = io
+        .read_slot(slot, limits.max_file_bytes())
+        .map_err(uncertain)?;
+    if bytes.len() as u64 != length
+        || bytes.len() < 4
+        || u32::from_le_bytes(bytes[bytes.len() - 4..].try_into().unwrap()) != checksum
+    {
+        return Err(StorageError::Corrupt("snapshot root/data mismatch"));
+    }
+    let snapshot = codec.decode(&bytes, limits)?;
+    if snapshot.metadata.bootstrap.group != identity.group {
+        return Err(StorageError::WrongIdentity);
+    }
+    Ok(Root {
+        slot,
+        generation,
+        length,
+        checksum,
+        metadata: snapshot.metadata,
+    })
+}
+impl<I: SnapshotIo, C: SnapshotCodec> SnapshotRetention for NativeSnapshotStore<I, C> {
+    fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError> {
+        self.live()?;
+        Ok(self.root.as_ref().map(|r| r.reference(self.identity)))
+    }
+    fn pin_for_log(&mut self, reference: SnapshotRef) -> Result<(), StorageError> {
+        self.live()?;
+        if self
+            .pins
+            .get(&reference.generation)
+            .is_some_and(|p| p.reference(self.identity) == reference)
+        {
+            self.load_pinned(reference)?;
+            return Ok(());
+        }
+        let root = self
+            .root
+            .as_ref()
+            .filter(|r| r.reference(self.identity) == reference)
+            .cloned()
+            .ok_or(StorageError::StaleTicket)?;
+        if self.pins.len() >= 2 {
+            return Err(StorageError::Rejected("snapshot pin budget"));
+        }
+        // Validate the published bytes before promising a durable log anchor.
+        self.load()?;
+        let mut pins = self.pins.clone();
+        pins.insert(root.generation, root);
+        if let Err(e) = self.io.publish_manifest(&manifest(
+            self.identity,
+            self.binding,
+            self.root.as_ref(),
+            &pins,
+        )) {
+            return Err(self.failed(e));
+        }
+        self.pins = pins;
+        Ok(())
+    }
+    fn load_pinned(&mut self, reference: SnapshotRef) -> Result<Snapshot, StorageError> {
+        self.live()?;
+        let root = self
+            .pins
+            .get(&reference.generation)
+            .filter(|p| p.reference(self.identity) == reference)
+            .cloned()
+            .ok_or(StorageError::StaleTicket)?;
+        let bytes = match self.io.read_slot(root.slot, self.limits.max_file_bytes()) {
+            Ok(v) => v,
+            Err(e) => return Err(self.failed(e)),
+        };
+        if bytes.len() as u64 != root.length
+            || bytes.len() < 4
+            || u32::from_le_bytes(bytes[bytes.len() - 4..].try_into().unwrap()) != root.checksum
+        {
+            self.fenced = true;
+            return Err(StorageError::Corrupt("pinned snapshot length/checksum"));
+        }
+        let snapshot = match self.codec.decode(&bytes, self.limits) {
+            Ok(s) => s,
+            Err(e) => {
+                self.fenced = true;
+                return Err(e);
+            }
+        };
+        if snapshot.metadata != root.metadata {
+            self.fenced = true;
+            return Err(StorageError::Corrupt("pinned metadata mismatch"));
+        }
+        Ok(snapshot)
+    }
+    fn reconcile_log(&mut self, reference: Option<SnapshotRef>) -> Result<(), StorageError> {
+        self.live()?;
+        if self.stage.is_some() {
+            return Err(StorageError::Rejected("snapshot stage pending"));
+        }
+        let root = reference
+            .map(|r| {
+                self.pins
+                    .get(&r.generation)
+                    .filter(|p| p.reference(self.identity) == r)
+                    .cloned()
+                    .ok_or(StorageError::StaleTicket)
+            })
+            .transpose()?;
+        let pins = root
+            .as_ref()
+            .map(|r| BTreeMap::from([(r.generation, r.clone())]))
+            .unwrap_or_default();
+        if let Err(e) =
+            self.io
+                .publish_manifest(&manifest(self.identity, self.binding, root.as_ref(), &pins))
+        {
+            return Err(self.failed(e));
+        }
+        self.root = root;
+        self.pins = pins;
+        Ok(())
+    }
+}
+fn manifest(
+    identity: SnapshotIdentity,
+    binding: StoreBinding,
+    root: Option<&Root>,
+    pins: &BTreeMap<SnapshotGeneration, Root>,
+) -> Vec<u8> {
+    let mut b = b"VBSSTR02".to_vec();
     b.extend(binding.identity.id.get().to_le_bytes());
     b.extend(binding.identity.incarnation.get().to_le_bytes());
     b.extend(binding.session.get().to_le_bytes());
@@ -666,23 +832,51 @@ fn manifest(identity: SnapshotIdentity, binding: StoreBinding, root: Option<&Roo
         None => b.push(0),
         Some(r) => {
             b.push(1);
-            b.push(r.slot);
-            b.extend(r.generation.get().to_le_bytes());
-            b.extend(r.length.to_le_bytes());
-            b.extend(r.checksum.to_le_bytes());
+            put_descriptor(&mut b, r.descriptor());
         }
+    }
+    b.push(pins.len() as u8);
+    for p in pins.values() {
+        put_descriptor(&mut b, p.descriptor());
     }
     b.extend(crc32c(&b).to_le_bytes());
     b
 }
 type RootDescriptor = (u8, SnapshotGeneration, u64, u32);
+fn put_descriptor(b: &mut Vec<u8>, d: RootDescriptor) {
+    b.push(d.0);
+    b.extend(d.1.get().to_le_bytes());
+    b.extend(d.2.to_le_bytes());
+    b.extend(d.3.to_le_bytes());
+}
+fn read_descriptor(
+    b: &[u8],
+    cursor: &mut usize,
+    limits: SnapshotLimits,
+) -> Result<RootDescriptor, StorageError> {
+    if b.len().saturating_sub(*cursor) < 21 {
+        return Err(StorageError::Corrupt("truncated snapshot descriptor"));
+    }
+    let p = &b[*cursor..*cursor + 21];
+    *cursor += 21;
+    let generation = SnapshotGeneration::new(u64::from_le_bytes(p[1..9].try_into().unwrap()))
+        .ok_or(StorageError::Corrupt("zero snapshot generation"))?;
+    let length = u64::from_le_bytes(p[9..17].try_into().unwrap());
+    let checksum = u32::from_le_bytes(p[17..21].try_into().unwrap());
+    if p[0] > 1 || length < 48 || length > limits.max_file_bytes() as u64 {
+        return Err(StorageError::Corrupt("snapshot descriptor limits"));
+    }
+    Ok((p[0], generation, length, checksum))
+}
+type ManifestState = (StoreBinding, Option<RootDescriptor>, Vec<RootDescriptor>);
 fn read_manifest(
     b: &[u8],
     identity: SnapshotIdentity,
     limits: SnapshotLimits,
-) -> Result<(StoreBinding, Option<RootDescriptor>), StorageError> {
-    if !matches!(b.len(), 69 | 90)
-        || &b[..8] != b"VBSSTR01"
+) -> Result<ManifestState, StorageError> {
+    if b.len() < 69
+        || b.len() > 133
+        || (&b[..8] != b"VBSSTR01" && &b[..8] != b"VBSSTR02")
         || crc32c(&b[..b.len() - 4]) != u32::from_le_bytes(b[b.len() - 4..].try_into().unwrap())
     {
         return Err(StorageError::Corrupt("snapshot manifest format/checksum"));
@@ -710,21 +904,28 @@ fn read_manifest(
     {
         return Err(StorageError::WrongIdentity);
     }
+    let payload = &b[..b.len() - 4];
+    let mut cursor = 65;
     let root = match b[64] {
-        0 if b.len() == 69 => None,
-        1 if b.len() == 90 => {
-            let slot = b[65];
-            let generation =
-                SnapshotGeneration::new(u64::from_le_bytes(b[66..74].try_into().unwrap()))
-                    .ok_or(StorageError::Corrupt("zero snapshot generation"))?;
-            let length = u64::from_le_bytes(b[74..82].try_into().unwrap());
-            let checksum = u32::from_le_bytes(b[82..86].try_into().unwrap());
-            if slot > 1 || length > limits.max_file_bytes() as u64 || length < (HEADER + 4) as u64 {
-                return Err(StorageError::Corrupt("snapshot root limits"));
-            }
-            Some((slot, generation, length, checksum))
-        }
+        0 => None,
+        1 => Some(read_descriptor(payload, &mut cursor, limits)?),
         _ => return Err(StorageError::Corrupt("snapshot root flags")),
     };
-    Ok((binding, root))
+    let mut pins = Vec::new();
+    if &b[..8] == b"VBSSTR02" {
+        let count = *payload
+            .get(cursor)
+            .ok_or(StorageError::Corrupt("snapshot pin count"))?;
+        cursor += 1;
+        if count > 2 || (root.is_none() && count > 0) {
+            return Err(StorageError::Corrupt("snapshot pin limit"));
+        }
+        for _ in 0..count {
+            pins.push(read_descriptor(payload, &mut cursor, limits)?);
+        }
+    }
+    if cursor != payload.len() {
+        return Err(StorageError::Corrupt("snapshot manifest trailing bytes"));
+    }
+    Ok((binding, root, pins))
 }

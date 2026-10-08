@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "static-replication-reads-and-local-checkpoints",
+  "status": "static-replication-reads-pinned-compaction-and-snapshot-installation",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [],
   "contracts": [
@@ -149,7 +149,15 @@
         "tests/snapshot.rs",
         "examples/replicated_counter.rs"
       ],
-      "scope": "One local group per logical handle, bounded stage/seal and atomic publication. No peer installation, permanent pins or log deletion yet."
+      "scope": "One local group per logical handle, bounded stage/seal and atomic publication. Shared drivers compose peer installation with authoritative log persistence and application restore."
+    },
+    {
+      "design_id": "C03",
+      "public_contract": "SnapshotRetention",
+      "operations": ["latest_reference", "pin_for_log", "load_pinned", "reconcile_log"],
+      "native": "NativeSnapshotStore",
+      "conformance": ["tests/snapshot.rs", "examples/replicated_counter.rs"],
+      "scope": "Durable local log anchors and atomic two-slot pin switches. Logical compaction and verified recovery; physical WAL cleaning and general backup retention remain pending."
     },
     {
       "design_id": "C04",
@@ -201,8 +209,7 @@
     }
   ],
   "not_yet_implemented": [
-    "peer-snapshot-installation",
-    "snapshot-pins-and-log-reclamation",
+    "physical-wal-reclamation",
     "transport",
     "wire-codec",
     "secure-session",

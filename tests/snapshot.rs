@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 mod support;
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use support::*;
 use voteboat::{application::*, contracts::*, identity::*, log::*, raft::Raft, snapshot::*};
 
@@ -87,6 +88,8 @@ struct HostSnapshots {
     generation: u64,
     current: Option<Snapshot>,
     pending: Option<HostStage>,
+    reference: Option<SnapshotRef>,
+    pins: BTreeMap<SnapshotGeneration, (SnapshotRef, Snapshot)>,
 }
 impl HostSnapshots {
     fn new() -> Self {
@@ -103,6 +106,8 @@ impl HostSnapshots {
             generation: 0,
             current: None,
             pending: None,
+            reference: None,
+            pins: BTreeMap::new(),
         }
     }
 }
@@ -122,6 +127,7 @@ impl SnapshotStore for HostSnapshots {
             return Err(StorageError::WrongIdentity);
         }
         if self.pending.is_some()
+            || self.pins.values().any(|(r, _)| Some(*r) != self.reference)
             || n == 0
             || n > self.limits.max_application_bytes
             || self.current.as_ref().is_some_and(|s| {
@@ -190,7 +196,9 @@ impl SnapshotStore for HostSnapshots {
             metadata: metadata.clone(),
             application,
         });
-        Ok(SnapshotReceipt { sealed, metadata })
+        let receipt = SnapshotReceipt { sealed, metadata };
+        self.reference = Some(receipt.reference());
+        Ok(receipt)
     }
     fn abort(&mut self, ticket: SnapshotTicket) -> Result<(), StorageError> {
         if self.pending.as_ref().is_none_or(|p| p.0 != ticket) {
@@ -201,6 +209,38 @@ impl SnapshotStore for HostSnapshots {
     }
     fn load(&mut self) -> Result<Option<Snapshot>, StorageError> {
         Ok(self.current.clone())
+    }
+}
+impl SnapshotRetention for HostSnapshots {
+    fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError> {
+        Ok(self.reference)
+    }
+    fn pin_for_log(&mut self, r: SnapshotRef) -> Result<(), StorageError> {
+        if self.pins.get(&r.generation).is_some_and(|(p, _)| *p == r) {
+            return Ok(());
+        }
+        if self.reference != Some(r) || self.pins.len() >= 2 {
+            return Err(StorageError::StaleTicket);
+        }
+        self.pins
+            .insert(r.generation, (r, self.current.clone().unwrap()));
+        Ok(())
+    }
+    fn load_pinned(&mut self, r: SnapshotRef) -> Result<Snapshot, StorageError> {
+        self.pins
+            .get(&r.generation)
+            .filter(|(p, _)| *p == r)
+            .map(|(_, s)| s.clone())
+            .ok_or(StorageError::StaleTicket)
+    }
+    fn reconcile_log(&mut self, r: Option<SnapshotRef>) -> Result<(), StorageError> {
+        if self.pending.is_some() {
+            return Err(StorageError::Rejected("stage pending"));
+        }
+        self.current = r.map(|p| self.load_pinned(p)).transpose()?;
+        self.reference = r;
+        self.pins.retain(|_, (p, _)| Some(*p) == r);
+        Ok(())
     }
 }
 fn publish<S: SnapshotStore>(store: &mut S, m: SnapshotMetadata, bytes: &[u8]) -> SnapshotReceipt {
@@ -954,4 +994,572 @@ mod native {
             assert_eq!(core.state().hard_state.term, 1);
         }
     }
+    #[test]
+    fn native_snapshot_catchup_history_and_actual_files() {
+        use voteboat::native::log_store::{FileLogIo, NativeLogStore};
+        snapshot_catchup_history(SnapshotCluster::new(bootstrap(1, 3), |id| {
+            (
+                NativeLogStore::create(
+                    ModelIo::default(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                NativeSnapshotStore::create(
+                    MemoryIo::default(),
+                    SnapshotIdentity {
+                        store: identity(id as u128),
+                        group: group(1),
+                    },
+                    SnapshotLimits::default(),
+                )
+                .unwrap(),
+            )
+        }));
+        let root =
+            std::env::temp_dir().join(format!("voteboat-snapshot-catchup-{}", std::process::id()));
+        std::fs::create_dir(&root).unwrap();
+        snapshot_catchup_history(SnapshotCluster::new(bootstrap(1, 3), |id| {
+            let directory = root.join(id.to_string());
+            let log = NativeLogStore::create(
+                FileLogIo::create(&directory).unwrap(),
+                identity(id as u128),
+                LogLimits::default(),
+            )
+            .unwrap();
+            let snapshots = NativeSnapshotStore::create(
+                FileSnapshotIo::create(directory.join("snapshots")).unwrap(),
+                SnapshotIdentity {
+                    store: identity(id as u128),
+                    group: group(1),
+                },
+                SnapshotLimits::default(),
+            )
+            .unwrap();
+            (log, snapshots)
+        }));
+        std::fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn pins_survive_restart_and_legacy_manifest_upgrade() {
+        let io = MemoryIo::default();
+        let mut store = create(io.clone());
+        retention_history(&mut store);
+        drop(store);
+        io.0.borrow_mut().power_loss();
+        let mut store = recover(io.clone());
+        let latest = store.latest_reference().unwrap().unwrap();
+        assert_eq!(latest.index, 3);
+        let old = {
+            let root = io.0.borrow().manifest.clone().unwrap();
+            assert_eq!(&root[..8], b"VBSSTR02");
+            root
+        };
+        assert!(old.len() > 91); // A distinct older pin is retained beside latest.
+        let mut pin = latest;
+        pin.generation = SnapshotGeneration::new(2).unwrap();
+        pin.index = 2;
+        // Exact loaded reference is required, so a guessed checksum cannot read it.
+        assert!(store.load_pinned(pin).is_err());
+        drop(store);
+        let io = MemoryIo::default();
+        let mut store = create(io.clone());
+        publish(&mut store, metadata(1), &[7; 4]);
+        drop(store);
+        let mut legacy = io.0.borrow().manifest.clone().unwrap();
+        legacy[..8].copy_from_slice(b"VBSSTR01");
+        legacy.remove(86);
+        legacy.truncate(86);
+        let checksum = crc(&legacy);
+        legacy.extend(checksum.to_le_bytes());
+        io.0.borrow_mut().manifest = Some(legacy);
+        let mut store = recover(io.clone());
+        assert_eq!(store.load().unwrap().unwrap().application, [7; 4]);
+        assert_eq!(&io.0.borrow().manifest.as_ref().unwrap()[..8], b"VBSSTR02");
+    }
+    #[test]
+    fn snapshot_log_failure_and_lost_application_completion_recover_without_false_ack() {
+        use voteboat::{
+            native::log_store::{LogCodec, NativeLogCodec, NativeLogStore},
+            raft::*,
+        };
+        let reference = publish(&mut HostSnapshots::new(), metadata(4), &[7; 4]).reference();
+        let state = committed_core().state().clone();
+        let frame = NativeLogCodec
+            .encode_batch(
+                1,
+                &[LogMutation::Update(LogUpdate {
+                    group: group(1),
+                    expected_revision: state.revision,
+                    hard_state: state.hard_state,
+                    commit_index: 4,
+                    suffix: None,
+                    snapshot: Some(reference),
+                })],
+                LogLimits::default(),
+            )
+            .unwrap();
+        // Every byte of the mandatory snapshot-binding record, including a
+        // complete write with lost completion, must recover without a false ack.
+        let faults = (0..=frame.len())
+            .map(|cut| Some(Fault::Append(cut)))
+            .chain([
+                Some(Fault::Sync),
+                Some(Fault::PublishBefore),
+                Some(Fault::PublishAfter),
+                None,
+            ]);
+        for fault in faults {
+            let logs: BTreeMap<_, _> = (1..=3).map(|id| (id, ModelIo::default())).collect();
+            let images: BTreeMap<_, _> = (1..=3).map(|id| (id, MemoryIo::default())).collect();
+            let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
+                (
+                    NativeLogStore::create(
+                        logs[&id].clone(),
+                        identity(id as u128),
+                        LogLimits::default(),
+                    )
+                    .unwrap(),
+                    NativeSnapshotStore::create(
+                        images[&id].clone(),
+                        SnapshotIdentity {
+                            store: identity(id as u128),
+                            group: group(1),
+                        },
+                        SnapshotLimits::default(),
+                    )
+                    .unwrap(),
+                )
+            });
+            cluster.act(1, Event::Campaign);
+            cluster.pump();
+            cluster.isolate(3);
+            cluster.propose(1, 1, 7);
+            cluster.compact(1);
+            cluster.pump();
+            cluster.propose(1, 2, 3);
+            cluster.blocked.clear();
+            cluster.act(1, Event::Heartbeat);
+            let pos = cluster
+                .messages
+                .iter()
+                .position(|m| m.to == node(3) && matches!(m.rpc, Rpc::Snapshot { .. }))
+                .unwrap();
+            let message = cluster.messages.remove(pos).unwrap();
+            let r = cluster.replicas.get_mut(&3).unwrap();
+            let effects = r.core.step(Event::Receive(message.clone())).unwrap();
+            assert!(matches!(effects.as_slice(), [Effect::StageSnapshot(_)]));
+            if let Some(fault) = fault {
+                logs[&3].0.borrow_mut().fault = fault;
+            }
+            let result = stage_snapshot_effect(
+                &mut r.core,
+                &mut r.log,
+                &mut r.snapshots,
+                &r.application,
+                message,
+            );
+            if fault.is_some() {
+                assert!(result.is_err());
+                assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Fenced));
+            } else {
+                let effects = result.unwrap();
+                assert!(matches!(effects.as_slice(), [Effect::SnapshotInstalled(_)]));
+                assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Busy));
+                assert_eq!(r.application.applied_index(), 1);
+            }
+            drop(cluster.replicas.remove(&3).unwrap());
+            logs[&3].0.borrow_mut().power_loss();
+            images[&3].0.borrow_mut().power_loss();
+            let log = NativeLogStore::recover(logs[&3].clone(), identity(3), LogLimits::default())
+                .unwrap();
+            let mut snapshots = NativeSnapshotStore::recover(
+                images[&3].clone(),
+                SnapshotIdentity {
+                    store: identity(3),
+                    group: group(1),
+                },
+                SnapshotLimits::default(),
+            )
+            .unwrap();
+            let mut application = Counter::new(100).unwrap();
+            let (core, _) =
+                recover_replica(node(3), group(1), &log, &mut snapshots, &mut application).unwrap();
+            cluster.replicas.insert(
+                3,
+                SnapshotReplica {
+                    core,
+                    log,
+                    snapshots,
+                    application,
+                    receipts: Vec::new(),
+                },
+            );
+            cluster.act(1, Event::Heartbeat);
+            cluster.pump();
+            assert_eq!(cluster.replicas[&3].application.read_applied(3), Ok(10));
+            cluster.propose(1, 1, 7);
+            assert_eq!(
+                cluster.replicas[&3].receipts.last().unwrap().outcome,
+                CounterOutcome::Value(7)
+            );
+            assert_eq!(cluster.replicas[&3].application.read_applied(4), Ok(10));
+        }
+    }
+}
+
+struct SnapshotReplica<L: LogStore, S: SnapshotRetention> {
+    core: Raft,
+    log: L,
+    snapshots: S,
+    application: Counter,
+    receipts: Vec<CounterReceipt>,
+}
+struct SnapshotCluster<L: LogStore, S: SnapshotRetention> {
+    replicas: BTreeMap<u64, SnapshotReplica<L, S>>,
+    messages: VecDeque<voteboat::raft::Message>,
+    blocked: BTreeSet<(u64, u64)>,
+    installs: usize,
+    read_values: Vec<i64>,
+}
+impl<L: LogStore, S: SnapshotRetention> SnapshotCluster<L, S> {
+    fn new(bootstrap: Bootstrap, mut factory: impl FnMut(u64) -> (L, S)) -> Self {
+        let mut replicas = BTreeMap::new();
+        for id in bootstrap.policy.voters() {
+            let (mut log, snapshots) = factory(id.get());
+            append(&mut log, vec![LogMutation::Create(bootstrap.clone())]);
+            let core = Raft::recover(
+                *id,
+                log.binding(),
+                log.state(bootstrap.group).unwrap(),
+                log.limits(),
+            )
+            .unwrap();
+            replicas.insert(
+                id.get(),
+                SnapshotReplica {
+                    core,
+                    log,
+                    snapshots,
+                    application: Counter::new(100).unwrap(),
+                    receipts: Vec::new(),
+                },
+            );
+        }
+        Self {
+            replicas,
+            messages: VecDeque::new(),
+            blocked: BTreeSet::new(),
+            installs: 0,
+            read_values: Vec::new(),
+        }
+    }
+    fn act(&mut self, id: u64, event: voteboat::raft::Event) {
+        let effects = self
+            .replicas
+            .get_mut(&id)
+            .unwrap()
+            .core
+            .step(event)
+            .unwrap();
+        self.effects(id, effects);
+    }
+    fn effects(&mut self, id: u64, effects: Vec<voteboat::raft::Effect>) {
+        use voteboat::raft::*;
+        let mut queue = VecDeque::from(effects);
+        while let Some(effect) = queue.pop_front() {
+            let r = self.replicas.get_mut(&id).unwrap();
+            match effect {
+                Effect::Persist(u) => {
+                    queue.extend(persist_effect(&mut r.core, &mut r.log, u).unwrap())
+                }
+                Effect::Send(m) => {
+                    assert!(self.messages.len() < 4096);
+                    self.messages.push_back(m);
+                }
+                Effect::Committed(entries) => r
+                    .receipts
+                    .extend(r.application.apply_batch(&entries).unwrap()),
+                Effect::ReadReady(barrier) => self
+                    .read_values
+                    .push(read_at_barrier(&mut r.core, &barrier, &r.application, ()).unwrap()),
+                Effect::SnapshotRequired {
+                    to,
+                    context,
+                    reference,
+                } => queue.extend(
+                    supply_snapshot(&r.core, &mut r.snapshots, to, context, reference).unwrap(),
+                ),
+                Effect::StageSnapshot(m) => queue.extend(
+                    stage_snapshot_effect(
+                        &mut r.core,
+                        &mut r.log,
+                        &mut r.snapshots,
+                        &r.application,
+                        m,
+                    )
+                    .unwrap(),
+                ),
+                Effect::SnapshotInstalled(reference) => {
+                    self.installs += 1;
+                    queue.extend(
+                        finish_snapshot_install(
+                            &mut r.core,
+                            &r.log,
+                            &mut r.snapshots,
+                            &mut r.application,
+                            reference,
+                        )
+                        .unwrap(),
+                    );
+                }
+            }
+        }
+    }
+    fn pump(&mut self) {
+        let mut events = 0;
+        while let Some(m) = self.messages.pop_front() {
+            events += 1;
+            assert!(events < 10000, "snapshot catchup did not converge");
+            if !self.blocked.contains(&(m.from.get(), m.to.get())) {
+                self.act(m.to.get(), voteboat::raft::Event::Receive(m));
+            }
+        }
+    }
+    fn isolate(&mut self, node: u64) {
+        self.blocked.clear();
+        for a in self.replicas.keys() {
+            for b in self.replicas.keys() {
+                if (*a == node) != (*b == node) {
+                    self.blocked.insert((*a, *b));
+                }
+            }
+        }
+    }
+    fn propose(&mut self, id: u64, operation: u128, delta: i64) {
+        self.act(
+            id,
+            voteboat::raft::Event::Propose {
+                operation: OperationId::new(operation).unwrap(),
+                bytes: delta.to_le_bytes().to_vec(),
+            },
+        );
+        self.pump();
+    }
+    fn compact(&mut self, id: u64) {
+        let r = self.replicas.get_mut(&id).unwrap();
+        let receipt = checkpoint_application(&r.core, &r.application, &mut r.snapshots).unwrap();
+        let effects = compact_replica(
+            &mut r.core,
+            &mut r.log,
+            &mut r.snapshots,
+            &r.application,
+            receipt.reference(),
+        )
+        .unwrap();
+        self.effects(id, effects);
+    }
+}
+fn host_snapshots(id: u64) -> HostSnapshots {
+    let mut s = HostSnapshots::new();
+    s.identity.store = identity(id as u128);
+    s.binding.identity = s.identity.store;
+    s
+}
+fn snapshot_catchup_history<L: LogStore, S: SnapshotRetention>(mut cluster: SnapshotCluster<L, S>) {
+    use voteboat::raft::*;
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.isolate(3);
+    cluster.propose(1, 1, 7);
+    cluster.compact(1);
+    cluster.pump();
+    assert_eq!(cluster.replicas[&1].core.state().base_index(), 2);
+    assert!(cluster.replicas[&1].core.state().entries.is_empty());
+    assert_eq!(cluster.replicas[&3].application.applied_index(), 1);
+    cluster.propose(1, 2, 3);
+    cluster.blocked.clear();
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert!(cluster.installs > 0);
+    assert_eq!(cluster.replicas[&3].core.state().base_index(), 2);
+    for r in cluster.replicas.values() {
+        assert_eq!(r.application.read_applied(3), Ok(10));
+    }
+    cluster.propose(1, 1, 7);
+    for r in cluster.replicas.values() {
+        let receipt = r.receipts.last().unwrap();
+        assert!(receipt.duplicate);
+        assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+        assert_eq!(r.application.read_applied(4), Ok(10));
+    }
+    cluster.act(
+        1,
+        Event::Read {
+            request: ReadRequestId::new(1).unwrap(),
+        },
+    );
+    cluster.pump();
+    assert_eq!(cluster.read_values, [10]);
+    cluster.compact(3);
+    cluster.pump();
+    let r = cluster.replicas.get_mut(&3).unwrap();
+    assert!(Raft::recover(
+        node(3),
+        r.log.binding(),
+        r.log.state(group(1)).unwrap(),
+        r.log.limits()
+    )
+    .is_err());
+    let mut application = Counter::new(100).unwrap();
+    let (core, restored) = recover_replica(
+        node(3),
+        group(1),
+        &r.log,
+        &mut r.snapshots,
+        &mut application,
+    )
+    .unwrap();
+    assert_eq!(restored.checkpoint_index, 4);
+    assert!(restored.replay_receipts.is_empty());
+    r.core = core;
+    r.application = application;
+    cluster.act(3, Event::Campaign);
+    cluster.pump();
+    cluster.propose(3, 3, 2);
+    for r in cluster.replicas.values() {
+        assert_eq!(r.application.read_applied(6), Ok(12));
+    }
+}
+#[test]
+fn compacted_three_node_snapshot_catchup_and_election_with_host_providers() {
+    snapshot_catchup_history(SnapshotCluster::new(bootstrap(1, 3), |id| {
+        (HostLogStore::new(id as u128), host_snapshots(id))
+    }));
+}
+
+#[test]
+fn recursive_snapshot_catchup_keeps_the_persisted_policy() {
+    use voteboat::quorum::{Limits, Policy, Tree};
+    let mut b = bootstrap(1, 9);
+    b.policy = Policy::new(
+        Tree::Majority(
+            (0..3)
+                .map(|site| {
+                    Tree::Majority((1..=3).map(|n| Tree::Voter(node(site * 3 + n))).collect())
+                })
+                .collect(),
+        ),
+        Limits::default(),
+    )
+    .unwrap();
+    let expected = b.clone();
+    let mut cluster =
+        SnapshotCluster::new(b, |id| (HostLogStore::new(id as u128), host_snapshots(id)));
+    use voteboat::raft::*;
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.isolate(9);
+    cluster.propose(1, 1, 7);
+    cluster.compact(1);
+    cluster.pump();
+    cluster.blocked.clear();
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(cluster.replicas[&9].core.state().bootstrap, expected);
+    assert_eq!(cluster.replicas[&9].core.state().base_index(), 2);
+    // Five reachable voters form a flat majority, but only one site majority.
+    for a in 1..=9 {
+        for b in 1..=9 {
+            if [1, 2, 3, 4, 7].contains(&a) != [1, 2, 3, 4, 7].contains(&b) {
+                cluster.blocked.insert((a, b));
+            }
+        }
+    }
+    cluster.propose(1, 2, 3);
+    assert_eq!(cluster.replicas[&1].core.state().commit_index, 2);
+    cluster.blocked.clear();
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    for r in cluster.replicas.values() {
+        assert_eq!(r.application.read_applied(3), Ok(10));
+    }
+}
+
+#[test]
+fn missing_anchor_refuses_recovery_and_swapped_stage_cannot_install() {
+    use voteboat::raft::*;
+    let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
+        (HostLogStore::new(id as u128), host_snapshots(id))
+    });
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.isolate(3);
+    cluster.propose(1, 1, 7);
+    cluster.compact(1);
+    cluster.pump();
+    let r = cluster.replicas.get_mut(&1).unwrap();
+    let mut lost = r.snapshots.clone();
+    lost.pins.clear();
+    let mut fresh = Counter::new(100).unwrap();
+    assert!(recover_replica(node(1), group(1), &r.log, &mut lost, &mut fresh).is_err());
+    assert_eq!(fresh.applied_index(), 0);
+    assert_eq!(
+        r.log
+            .fetch_range(group(1), r.core.state().generation, 1, 1, 1024),
+        Err(StorageError::Compacted { first_index: 3 })
+    );
+    cluster.blocked.clear();
+    cluster.act(1, Event::Heartbeat);
+    let pos = cluster
+        .messages
+        .iter()
+        .position(|m| m.to == node(3) && matches!(m.rpc, Rpc::Snapshot { .. }))
+        .unwrap();
+    let message = cluster.messages.remove(pos).unwrap();
+    let r = cluster.replicas.get_mut(&3).unwrap();
+    assert!(matches!(
+        r.core
+            .step(Event::Receive(message.clone()))
+            .unwrap()
+            .as_slice(),
+        [Effect::StageSnapshot(_)]
+    ));
+    let before = r.log.state(group(1)).unwrap();
+    let mut changed = message;
+    if let Rpc::Snapshot { snapshot } = &mut changed.rpc {
+        snapshot.application[0] ^= 1;
+    }
+    assert!(stage_snapshot_effect(
+        &mut r.core,
+        &mut r.log,
+        &mut r.snapshots,
+        &r.application,
+        changed
+    )
+    .is_err());
+    assert_eq!(r.log.state(group(1)).unwrap(), before);
+    assert!(r.snapshots.load().unwrap().is_none());
+    assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Fenced));
+}
+
+fn retention_history<S: SnapshotRetention>(store: &mut S) {
+    let first = publish(store, metadata(1), &[7; 4]).reference();
+    store.pin_for_log(first).unwrap();
+    let second = publish(store, metadata(2), &[9; 4]).reference();
+    assert_eq!(store.load_pinned(first).unwrap().application, [7; 4]);
+    assert!(
+        store.begin(metadata(3), 4).is_err(),
+        "the other slot is still a durable log anchor"
+    );
+    store.pin_for_log(second).unwrap();
+    assert_eq!(store.load_pinned(second).unwrap().application, [9; 4]);
+    store.reconcile_log(Some(second)).unwrap();
+    assert!(store.load_pinned(first).is_err());
+    publish(store, metadata(3), &[11; 4]);
+    assert_eq!(store.load_pinned(second).unwrap().application, [9; 4]);
+}
+#[test]
+fn durable_pin_switch_conformance_with_host_provider() {
+    retention_history(&mut HostSnapshots::new());
 }

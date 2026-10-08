@@ -17,6 +17,7 @@ use crate::{
     contracts::{HardState, StorageError},
     identity::*,
     quorum::{Limits as PolicyLimits, Policy},
+    snapshot::SnapshotRef,
 };
 use std::collections::BTreeMap;
 
@@ -61,23 +62,32 @@ pub struct GroupLog {
     pub hard_state: HardState,
     /// Contiguous committed prefix, never a largest completed index.
     pub commit_index: u64,
+    pub snapshot: Option<SnapshotRef>,
     pub entries: Vec<LogEntry>,
 }
 impl GroupLog {
+    pub fn base_index(&self) -> u64 {
+        self.snapshot.map_or(0, |s| s.index)
+    }
+    pub fn base_term(&self) -> u64 {
+        self.snapshot.map_or(0, |s| s.term)
+    }
     pub fn last_index(&self) -> u64 {
-        self.entries.last().map_or(0, |e| e.index)
+        self.entries.last().map_or(self.base_index(), |e| e.index)
     }
     pub fn last_term(&self) -> u64 {
-        self.entries.last().map_or(0, |e| e.term)
+        self.entries.last().map_or(self.base_term(), |e| e.term)
     }
     pub fn term_at(&self, index: u64) -> Option<u64> {
-        if index == 0 {
-            Some(0)
+        if index == self.base_index() {
+            Some(self.base_term())
         } else {
-            self.entries
-                .get(usize::try_from(index - 1).ok()?)
-                .map(|e| e.term)
+            self.entry_at(index).map(|e| e.term)
         }
+    }
+    pub fn entry_at(&self, index: u64) -> Option<&LogEntry> {
+        self.entries
+            .get(usize::try_from(index.checked_sub(self.base_index())?.checked_sub(1)?).ok()?)
     }
 }
 
@@ -94,6 +104,9 @@ pub struct LogUpdate {
     pub hard_state: HardState,
     pub commit_index: u64,
     pub suffix: Option<Suffix>,
+    /// Requires a durable snapshot pin before submission. The core/storage
+    /// driver controls this dependency; a publication receipt alone is insufficient.
+    pub snapshot: Option<SnapshotRef>,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum LogMutation {
@@ -122,6 +135,7 @@ pub struct LogLimits {
     pub max_groups: usize,
     pub max_entries_per_group: usize,
     pub max_command_bytes: usize,
+    pub max_snapshot_bytes: usize,
     pub max_batch_bytes: usize,
     pub max_batch_units: usize,
     pub max_pending_units: usize,
@@ -135,6 +149,7 @@ impl Default for LogLimits {
             max_groups: 4096,
             max_entries_per_group: 16384,
             max_command_bytes: 64 * 1024,
+            max_snapshot_bytes: 64 * 1024 * 1024,
             max_batch_bytes: 1024 * 1024,
             max_batch_units: 256,
             max_pending_units: 1024,
@@ -149,6 +164,8 @@ impl LogLimits {
             || self.max_entries_per_group == 0
             || self.max_entries_per_group > u32::MAX as usize
             || self.max_command_bytes == 0
+            || self.max_snapshot_bytes == 0
+            || self.max_snapshot_bytes > 256 * 1024 * 1024
             || self.max_batch_bytes < 256
             || self.max_command_bytes > self.max_batch_bytes
             || self.max_batch_bytes > u32::MAX as usize
@@ -243,6 +260,7 @@ pub fn apply_batch(
                         generation: LogGeneration::new(1).unwrap(),
                         hard_state: HardState::default(),
                         commit_index: 0,
+                        snapshot: None,
                         entries: Vec::new(),
                     },
                 );
@@ -260,6 +278,43 @@ pub fn apply_batch(
                 {
                     return Err(StorageError::Rejected("stale revision or invalid ballot"));
                 }
+                if let Some(reference) = update.snapshot {
+                    if update.suffix.is_some()
+                        || reference.group != group
+                        || reference.configuration != current.bootstrap.configuration
+                        || reference.index <= current.base_index()
+                        || reference.index == u64::MAX
+                        || reference.term == 0
+                        || reference.term > update.hard_state.term
+                        || reference.application_schema == 0
+                        || reference.file_bytes < 48
+                        || reference.file_bytes
+                            > limits.max_snapshot_bytes as u64 + 4 * 1024 * 1024 + 48
+                        || update.commit_index < reference.index
+                    {
+                        return Err(StorageError::Rejected("invalid snapshot boundary/scope"));
+                    }
+                    let matching = current.term_at(reference.index) == Some(reference.term);
+                    if reference.index <= current.commit_index && !matching {
+                        return Err(StorageError::Rejected(
+                            "snapshot conflicts with committed history",
+                        ));
+                    }
+                    if matching {
+                        let removed = usize::try_from(reference.index - current.base_index())
+                            .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
+                        current.entries.drain(..removed);
+                    } else {
+                        current.entries.clear();
+                    }
+                    current.snapshot = Some(reference);
+                    current.generation = current
+                        .generation
+                        .get()
+                        .checked_add(1)
+                        .and_then(LogGeneration::new)
+                        .ok_or(StorageError::Rejected("generation exhausted"))?;
+                }
                 if let Some(suffix) = &update.suffix {
                     if suffix.from == 0
                         || suffix.from
@@ -273,7 +328,7 @@ pub fn apply_batch(
                             "replacement crosses committed prefix or log gap",
                         ));
                     }
-                    let start = usize::try_from(suffix.from - 1)
+                    let start = usize::try_from(suffix.from - current.base_index() - 1)
                         .map_err(|_| StorageError::Rejected("index overflow"))?;
                     if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
                         return Err(StorageError::Rejected("group entry limit"));

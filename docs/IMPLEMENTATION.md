@@ -10,7 +10,7 @@ record claims that unimplemented phases already work.
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint seams and reproducible fault schedules implemented; virtual-time runtime and other subsystem contracts remain |
-| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers and checkpoint/replay counter demo implemented; transport and peer snapshot installation remain |
+| P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, read barriers, pinned compaction and follower snapshot catch-up implemented; production transport/runtime remain |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Pending |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
@@ -435,7 +435,7 @@ Linux, Rust 1.98.1, 8 October 2026:
   publication. Three real-WAL replicas restore checkpoint indices 3 then 6 in
   repeated CLI runs, retain value 7 on retry, and reach 10 after a new operation.
 
-These local checkpoints do not install a remote leader's snapshot, reclaim any
+At the end of slice 4, these local checkpoints did not install a remote leader's snapshot, reclaim any
 Raft prefix, or provide permanent pin/retention handles. A publication receipt
 is superseded by later publication and is deliberately not log-deletion
 permission. Local images must not be reused as imported voter state without
@@ -443,10 +443,86 @@ the future snapshot-install protocol. Failed/corrupt recovery does not silently
 fall back to an empty application. Hardware power-cut and macOS execution remain
 outstanding; the finite failure model is regression evidence. P0–P7 remains active.
 
+## Slice 5: pinned compaction and follower snapshot installation
+
+`SnapshotRetention` extends the public snapshot seam with stable `SnapshotRef`
+anchors, durable pins, exact pinned loads and reconciliation against the single
+authoritative log. A reference binds store/group/configuration, generation,
+index/term, schema, file length and checksum. Pins protect the current log anchor
+and a replacement during a switch. The two-slot provider refuses an overwrite
+while the inactive slot remains pinned. After the new log binding is durable,
+reconciliation selects that image and releases obsolete pins atomically. These
+are log retention anchors, not general backup or consumer reference counts.
+Transfers own their loaded image, so releasing an obsolete log pin cannot
+invalidate an in-flight message buffer.
+
+`compact_replica` verifies the actual log/core binding, application boundary and
+checkpoint contents, then durably pins the image before persisting the new log
+base. The base index is a contiguous covered prefix, never a maximum observed
+index. Matching suffix entries remain; fetches below the retained range return
+`Compacted`. Compaction advances the logical generation and invalidates old
+suffix tickets. The native WAL still retains old physical records; no disk-space
+reclamation or segment cleaner is claimed. Snapshot binding is mandatory record
+kind 2 inside the existing version-2 WAL framing; old kind-0/1 records remain
+readable, while older readers reject the unknown mandatory kind. The snapshot
+root is now `VBSSTR02` with at most two pinned descriptors. Recovery validates
+every retained image and upgrades a valid version-1 root atomically. Snapshot
+data framing remains `VBSNAP01`.
+
+A leader emits `SnapshotRequired` when a follower needs a compacted prefix.
+`supply_snapshot` checks the exact live request and loads its pinned image. A
+follower emits `StageSnapshot` only for an identity/configuration/term-valid
+request ahead of its committed prefix. `stage_snapshot_effect` checks the exact
+effect and application image, publishes and pins it, then persists its log
+binding and hard state through the authoritative store. This emits only
+`SnapshotInstalled`; the group remains busy and no remote acknowledgement can
+escape. `finish_snapshot_install` restores the application, reconciles pins and
+then permits `SnapshotAck`. A lost receipt is resolved by recovery. Higher terms
+still require durable term transitions, and stale contexts cannot establish
+replication progress. A compacted-range response lets a leader move forward
+when its outstanding append precedes the follower's base.
+
+`recover_replica` verifies the exact log anchor, restores its application and
+committed tail, and reconciles interrupted switches before returning a voter.
+Basic `Raft::recover` refuses compacted state without this verification. A
+published remote image with no durable log binding is discarded and the old log
+is replayed. Missing or corrupt anchored data refuses recovery. Term/vote and
+configuration remain owned by the log; application retry outcomes survive both
+installation and restart.
+
+### Slice 5 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Full native suite: 76 tests pass; core/host-only suite: 31 tests pass. Both
+  builds pass Clippy with warnings denied; formatting and documentation pass.
+- A shared three-node history runs with independent host providers, injected
+  native I/O and actual files. A partitioned follower installs a compacted
+  snapshot, replays the tail, preserves original retry outcomes, serves a read
+  through quorum evidence, recovers and subsequently wins an election.
+- A nine-voter recursive history preserves its persisted policy through snapshot
+  catch-up and refuses commitment by a flat majority lacking the tree quorum.
+- Every interrupted byte of a snapshot-binding WAL record, plus sync and
+  publication failures, recovers the old or complete new binding without an
+  early acknowledgement. Lost application completion recovers before the voter
+  resumes. Pin switches survive restart; blocked slot reuse and version-1 root
+  migration are exercised. Missing anchors and swapped stage effects fail closed.
+- Shared native/host log conformance rejects committed-prefix conflicts,
+  foreign snapshot owners and regressed bases; retained suffix repair and
+  generation-guarded range fetch continue after compaction.
+- Repeated CLI runs with three real WALs compact through indices 3, 6 and 9,
+  restore the previous image, preserve value 7 on retry and reach 10 after a
+  new operation.
+
+Transfers currently retain a whole owned image bounded to 64 MiB by default;
+disk writes use bounded chunks. Wire fragmentation, shared buffer/admission
+budgets, production transport, physical WAL cleaning and online configuration
+are still pending. Finite crash histories are regression evidence; real hardware
+power-cut and macOS execution remain outstanding. The P0–P7 goal remains active.
+
 ## Next slice
 
-Add pinned snapshot installation and the dependent logical compaction boundary,
-then introduce the bounded shared scheduler, timers, wire codec and authenticated-session
+Introduce the bounded shared scheduler, timers, wire codec and authenticated-session
 transport seams. Extend the simulator to explicit virtual time and independently
 delayed storage completion events. Native sockets must use established secure
 sessions supplied by the host; production assembly cannot silently select an

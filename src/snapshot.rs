@@ -18,8 +18,8 @@ use crate::{
     application::{ApplicationError, CheckpointStateMachine},
     contracts::StorageError,
     identity::*,
-    log::Bootstrap,
-    raft::Raft,
+    log::{Bootstrap, LogStore},
+    raft::{persist_effect, Effect, Message, Raft, RaftError, RequestContext, Rpc},
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -73,6 +73,43 @@ pub struct SealedSnapshot {
 pub struct SnapshotReceipt {
     pub sealed: SealedSnapshot,
     pub metadata: SnapshotMetadata,
+}
+/// Stable persisted reference; sessions scope admissions, not durable roots.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SnapshotRef {
+    pub store: StoreIdentity,
+    pub group: GroupIdentity,
+    pub generation: SnapshotGeneration,
+    pub configuration: ConfigurationId,
+    pub index: u64,
+    pub term: u64,
+    pub application_schema: u64,
+    pub file_bytes: u64,
+    pub checksum: u32,
+}
+impl SnapshotReceipt {
+    pub fn reference(&self) -> SnapshotRef {
+        SnapshotRef {
+            store: self.sealed.ticket.binding.identity,
+            group: self.metadata.bootstrap.group,
+            generation: self.sealed.ticket.generation,
+            configuration: self.metadata.bootstrap.configuration,
+            index: self.metadata.index,
+            term: self.metadata.term,
+            application_schema: self.metadata.application_schema,
+            file_bytes: self.sealed.file_bytes,
+            checksum: self.sealed.checksum,
+        }
+    }
+}
+impl SnapshotRef {
+    pub fn matches(&self, snapshot: &Snapshot) -> bool {
+        self.group == snapshot.metadata.bootstrap.group
+            && self.configuration == snapshot.metadata.bootstrap.configuration
+            && self.index == snapshot.metadata.index
+            && self.term == snapshot.metadata.term
+            && self.application_schema == snapshot.metadata.application_schema
+    }
 }
 #[derive(Clone, Copy, Debug)]
 pub struct SnapshotLimits {
@@ -138,12 +175,31 @@ pub trait SnapshotStore {
     fn load(&mut self) -> Result<Option<Snapshot>, StorageError>;
 }
 
+/// Durable log anchors, distinct from temporary transport-buffer ownership.
+/// Pin before recording a log boundary. Release only after a verified durable
+/// log no longer references it. At most two anchors cover one in-flight switch.
+/// A published image may be replaced; an anchored image must not be overwritten.
+pub trait SnapshotRetention: SnapshotStore {
+    fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError>;
+    fn pin_for_log(&mut self, reference: SnapshotRef) -> Result<(), StorageError>;
+    fn load_pinned(&mut self, reference: SnapshotRef) -> Result<Snapshot, StorageError>;
+    /// Caller supplies the one authoritative durable log reference. Select it
+    /// as root and release all other log anchors; owned transport images are separate.
+    fn reconcile_log(&mut self, reference: Option<SnapshotRef>) -> Result<(), StorageError>;
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum CheckpointError {
     Storage(StorageError),
     Application(ApplicationError),
     InvalidBinding,
     InvalidBoundary,
+    Consensus(RaftError),
+}
+impl From<RaftError> for CheckpointError {
+    fn from(e: RaftError) -> Self {
+        Self::Consensus(e)
+    }
 }
 impl From<StorageError> for CheckpointError {
     fn from(e: StorageError) -> Self {
@@ -222,7 +278,7 @@ pub struct Restored<R> {
 
 /// Restore a fresh application atomically from a verified checkpoint plus the
 /// retained committed tail. This does not reset hard state, commit or log history.
-pub fn restore_application<A: CheckpointStateMachine, S: SnapshotStore>(
+pub fn restore_application<A: CheckpointStateMachine, S: SnapshotRetention>(
     raft: &Raft,
     application: &mut A,
     store: &mut S,
@@ -234,13 +290,19 @@ pub fn restore_application<A: CheckpointStateMachine, S: SnapshotStore>(
     let limits = store.limits().validate()?;
     let mut next = application.clone();
     let mut floor = 0;
-    if let Some(snapshot) = store.load()? {
+    let snapshot = if let Some(reference) = raft.state().snapshot {
+        Some(store.load_pinned(reference)?)
+    } else {
+        store.load()?
+    };
+    if let Some(snapshot) = snapshot {
         let m = &snapshot.metadata;
         if m.bootstrap != raft.state().bootstrap
             || m.index > raft.state().commit_index
             || raft.state().term_at(m.index) != Some(m.term)
             || m.application_schema != next.schema_version()
             || snapshot.application.len() > limits.max_application_bytes
+            || raft.state().snapshot.is_some_and(|r| !r.matches(&snapshot))
         {
             return Err(CheckpointError::InvalidBoundary);
         }
@@ -251,10 +313,194 @@ pub fn restore_application<A: CheckpointStateMachine, S: SnapshotStore>(
         }
         floor = m.index;
     }
-    let replay_receipts = next.apply_batch(&raft.replay_committed()[floor as usize..])?;
+    if floor < raft.state().base_index() {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let replay_receipts =
+        next.apply_batch(&raft.replay_committed()[(floor - raft.state().base_index()) as usize..])?;
     *application = next;
     Ok(Restored {
         checkpoint_index: floor,
         replay_receipts,
     })
+}
+
+fn verify_log<L: LogStore>(raft: &Raft, log: &L) -> Result<(), CheckpointError> {
+    if log.binding() != raft.storage_binding()
+        || log.state(raft.state().bootstrap.group)? != *raft.state()
+    {
+        return Err(CheckpointError::InvalidBinding);
+    }
+    Ok(())
+}
+/// Recovery of a compacted voter verifies retained data and restores application
+/// before returning a core that can participate in elections or acknowledge data.
+pub fn recover_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    node: NodeId,
+    group: GroupIdentity,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
+    let state = log.state(group)?;
+    let core = Raft::recover_verified(node, log.binding(), state, log.limits())?;
+    check_binding(&core, store)?;
+    if core.state().snapshot.is_none() {
+        if let Some(snapshot) = store.load()? {
+            if snapshot.metadata.index > core.state().commit_index {
+                if snapshot.metadata.bootstrap != core.state().bootstrap {
+                    return Err(CheckpointError::InvalidBoundary);
+                }
+                let mut check = application.clone();
+                check.restore_checkpoint(
+                    snapshot.metadata.application_schema,
+                    snapshot.metadata.index,
+                    &snapshot.application,
+                )?;
+                store.reconcile_log(None)?;
+            }
+        }
+    }
+    let restored = restore_application(&core, application, store)?;
+    store.reconcile_log(core.state().snapshot)?;
+    Ok((core, restored))
+}
+pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &mut L,
+    store: &mut S,
+    application: &A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    verify_log(raft, log)?;
+    check_binding(raft, store)?;
+    if application.applied_index() < reference.index {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    store.pin_for_log(reference)?;
+    let snapshot = store.load_pinned(reference)?;
+    if !reference.matches(&snapshot) || snapshot.metadata.bootstrap != raft.state().bootstrap {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let mut check = application.clone();
+    check.restore_checkpoint(
+        reference.application_schema,
+        reference.index,
+        &snapshot.application,
+    )?;
+    let effects = raft.begin_compact(reference)?;
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        return Err(CheckpointError::InvalidBoundary);
+    };
+    let effects = persist_effect(raft, log, update.clone())?;
+    if let Err(e) = store.reconcile_log(Some(reference)) {
+        raft.storage_failed();
+        return Err(e.into());
+    }
+    Ok(effects)
+}
+/// A snapshot message owns its bounded image; no pin is released while a read
+/// is outstanding. A later compaction invalidates the old request context.
+pub fn supply_snapshot<S: SnapshotRetention>(
+    raft: &Raft,
+    store: &mut S,
+    to: NodeId,
+    context: RequestContext,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    check_binding(raft, store)?;
+    let snapshot = store.load_pinned(reference)?;
+    Ok(raft.snapshot_send(to, context, reference, snapshot)?)
+}
+/// Selected snapshot and log providers certify separate dependencies. No remote
+/// acknowledgement escapes until pin, log binding and application restore finish.
+pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &mut L,
+    store: &mut S,
+    application: &A,
+    message: Message,
+) -> Result<Vec<Effect>, CheckpointError> {
+    let result = (|| {
+        verify_log(raft, log)?;
+        check_binding(raft, store)?;
+        if !raft.staged_matches(&message) {
+            return Err(CheckpointError::Consensus(RaftError::WrongCompletion));
+        }
+        let Rpc::Snapshot { snapshot } = &message.rpc else {
+            return Err(CheckpointError::InvalidBoundary);
+        };
+        let mut check = application.clone();
+        check.restore_checkpoint(
+            snapshot.metadata.application_schema,
+            snapshot.metadata.index,
+            &snapshot.application,
+        )?;
+        store.reconcile_log(raft.state().snapshot)?;
+        let ticket = store.begin(snapshot.metadata.clone(), snapshot.application.len())?;
+        if ticket.binding != store.binding() || ticket.group != snapshot.metadata.bootstrap.group {
+            return Err(StorageError::StaleTicket.into());
+        }
+        let size = store.limits().validate()?.max_chunk_bytes;
+        for (i, chunk) in snapshot.application.chunks(size).enumerate() {
+            store.write_chunk(ticket, i * size, chunk)?;
+        }
+        let sealed = store.seal(ticket)?;
+        if sealed.ticket != ticket {
+            return Err(StorageError::StaleTicket.into());
+        }
+        let receipt = store.publish(sealed)?;
+        if receipt.sealed != sealed || receipt.metadata != snapshot.metadata {
+            return Err(StorageError::StaleTicket.into());
+        }
+        let reference = receipt.reference();
+        store.pin_for_log(reference)?;
+        if store.load_pinned(reference)? != **snapshot {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let effects = raft.snapshot_stored(reference)?;
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            return Err(CheckpointError::InvalidBoundary);
+        };
+        Ok(persist_effect(raft, log, update.clone())?)
+    })();
+    if result.is_err() {
+        raft.storage_failed();
+    }
+    result
+}
+pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
+    raft: &mut Raft,
+    log: &L,
+    store: &mut S,
+    application: &mut A,
+    reference: SnapshotRef,
+) -> Result<Vec<Effect>, CheckpointError> {
+    let result = (|| {
+        verify_log(raft, log)?;
+        check_binding(raft, store)?;
+        if raft.state().snapshot != Some(reference) || application.applied_index() > reference.index
+        {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let snapshot = store.load_pinned(reference)?;
+        if !reference.matches(&snapshot) || snapshot.metadata.bootstrap != raft.state().bootstrap {
+            return Err(CheckpointError::InvalidBoundary);
+        }
+        let mut next = application.clone();
+        next.restore_checkpoint(
+            reference.application_schema,
+            reference.index,
+            &snapshot.application,
+        )?;
+        next.apply_batch(raft.replay_committed())?;
+        store.reconcile_log(Some(reference))?;
+        let effects = raft.snapshot_applied(reference, next.applied_index())?;
+        *application = next;
+        Ok(effects)
+    })();
+    if result.is_err() {
+        raft.storage_failed();
+    }
+    result
 }

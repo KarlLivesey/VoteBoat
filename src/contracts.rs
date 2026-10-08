@@ -62,6 +62,9 @@ pub enum StorageError {
     Corrupt(&'static str),
     WrongIdentity,
     StaleTicket,
+    Compacted {
+        first_index: u64,
+    },
     Fenced,
 }
 impl std::fmt::Display for StorageError {

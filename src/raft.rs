@@ -19,6 +19,7 @@ use crate::{
     contracts::{HardState, StorageError},
     identity::*,
     log::*,
+    snapshot::{Snapshot, SnapshotRef},
 };
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -49,6 +50,16 @@ pub enum Rpc {
     /// A fresh authority check for one admitted read, independent of log acks.
     ReadProbe,
     ReadAck,
+    Snapshot {
+        snapshot: Box<Snapshot>,
+    },
+    SnapshotAck {
+        index: u64,
+    },
+    Compacted {
+        index: u64,
+        term: u64,
+    },
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Message {
@@ -123,6 +134,13 @@ pub enum Effect {
     Committed(Vec<LogEntry>),
     /// Quorum authority is established; application may still lag this index.
     ReadReady(ReadBarrier),
+    SnapshotRequired {
+        to: NodeId,
+        context: RequestContext,
+        reference: SnapshotRef,
+    },
+    StageSnapshot(Message),
+    SnapshotInstalled(SnapshotRef),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RaftError {
@@ -152,6 +170,8 @@ enum After {
     Reply,
     LeaderAppend,
     Commit,
+    Compact,
+    SnapshotInstall(SnapshotRef),
 }
 struct Pending {
     update: LogUpdate,
@@ -164,6 +184,7 @@ struct Pending {
 struct Replication {
     context: RequestContext,
     end: u64,
+    snapshot: Option<SnapshotRef>,
 }
 struct PendingRead {
     barrier: ReadBarrier,
@@ -188,10 +209,23 @@ pub struct Raft {
     ready_read: Option<ReadBarrier>,
     last_read_request: u64,
     fenced: bool,
+    staged_snapshot: Option<Message>,
+    application_install: Option<(SnapshotRef, Message)>,
 }
 
 impl Raft {
     pub fn recover(
+        node: NodeId,
+        binding: StoreBinding,
+        state: GroupLog,
+        limits: LogLimits,
+    ) -> Result<Self, RaftError> {
+        if state.snapshot.is_some() {
+            return Err(RaftError::InvalidRecovery);
+        }
+        Self::recover_verified(node, binding, state, limits)
+    }
+    pub(crate) fn recover_verified(
         node: NodeId,
         binding: StoreBinding,
         state: GroupLog,
@@ -207,6 +241,15 @@ impl Raft {
                 .collect::<BTreeSet<_>>()
                 != *state.bootstrap.policy.voters()
             || state.commit_index > state.last_index()
+            || state.commit_index < state.base_index()
+            || state.last_index() == u64::MAX
+            || state.snapshot.is_some_and(|s| {
+                s.store != binding.identity
+                    || s.group != state.bootstrap.group
+                    || s.configuration != state.bootstrap.configuration
+                    || s.term == 0
+                    || s.application_schema == 0
+            })
             || state.last_term() > state.hard_state.term
             || !state.hard_state.follows(HardState::default())
             || state
@@ -217,9 +260,9 @@ impl Raft {
         {
             return Err(RaftError::InvalidRecovery);
         }
-        let mut previous_term = 0;
+        let mut previous_term = state.base_term();
         for (i, e) in state.entries.iter().enumerate() {
-            if e.index != i as u64 + 1
+            if state.base_index().checked_add(i as u64 + 1) != Some(e.index)
                 || e.term == 0
                 || e.term < previous_term
                 || e.payload_bytes() > limits.max_command_bytes
@@ -246,6 +289,8 @@ impl Raft {
             ready_read: None,
             last_read_request: 0,
             fenced: false,
+            staged_snapshot: None,
+            application_install: None,
         })
     }
     pub fn role(&self) -> Role {
@@ -259,11 +304,13 @@ impl Raft {
     }
     /// Host replays these through its application checkpoint/dedup contract.
     pub fn replay_committed(&self) -> &[LogEntry] {
-        &self.durable.entries[..self.durable.commit_index as usize]
+        &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
         self.fenced = true;
         self.pending = None;
+        self.staged_snapshot = None;
+        self.application_install = None;
         self.role = Role::Follower;
         self.clear_reads();
     }
@@ -366,7 +413,10 @@ impl Raft {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
-        if self.pending.is_some() {
+        if self.pending.is_some()
+            || self.staged_snapshot.is_some()
+            || self.application_install.is_some()
+        {
             return Err(RaftError::Busy);
         }
         match event {
@@ -481,9 +531,12 @@ impl Raft {
         let previous_commit = self.durable.commit_index;
         self.durable = p.next;
         let mut effects = Vec::new();
-        if self.durable.commit_index > previous_commit {
+        if self.durable.commit_index > previous_commit
+            && !matches!(p.after, After::SnapshotInstall(_))
+        {
             effects.push(Effect::Committed(
-                self.durable.entries[previous_commit as usize..self.durable.commit_index as usize]
+                self.durable.entries[(previous_commit - self.durable.base_index()) as usize
+                    ..(self.durable.commit_index - self.durable.base_index()) as usize]
                     .to_vec(),
             ));
         }
@@ -519,6 +572,17 @@ impl Raft {
                 effects.extend(self.maybe_commit()?);
             }
             After::Commit => effects.extend(self.broadcast()?),
+            After::Compact => {
+                self.requests.clear();
+                if self.role == Role::Leader {
+                    effects.extend(self.broadcast()?);
+                }
+            }
+            After::SnapshotInstall(reference) => {
+                self.application_install =
+                    Some((reference, p.reply.ok_or(RaftError::WrongCompletion)?));
+                effects.push(Effect::SnapshotInstalled(reference));
+            }
         }
         Ok(effects)
     }
@@ -537,7 +601,16 @@ impl Raft {
             hard_state,
             commit_index,
             suffix,
+            snapshot: None,
         };
+        self.persist_update(update, after, reply)
+    }
+    fn persist_update(
+        &mut self,
+        update: LogUpdate,
+        after: After,
+        reply: Option<Message>,
+    ) -> Result<Vec<Effect>, RaftError> {
         let mut state = BTreeMap::from([(update.group, self.durable.clone())]);
         apply_batch(
             &mut state,
@@ -627,6 +700,23 @@ impl Raft {
         let next = self.next_index[&peer]
             .min(self.durable.last_index() + 1)
             .max(1);
+        if next <= self.durable.base_index() {
+            let reference = self.durable.snapshot.ok_or(RaftError::InvalidRecovery)?;
+            let context = self.context()?;
+            self.requests.insert(
+                peer,
+                Replication {
+                    context,
+                    end: reference.index,
+                    snapshot: Some(reference),
+                },
+            );
+            return Ok(Effect::SnapshotRequired {
+                to: peer,
+                context,
+                reference,
+            });
+        }
         let mut entries = Vec::new();
         let mut bytes = 0usize;
         // One bounded RPC can carry several entries; outer wire limits are
@@ -635,7 +725,7 @@ impl Raft {
             .durable
             .entries
             .iter()
-            .skip((next - 1) as usize)
+            .skip((next - self.durable.base_index() - 1) as usize)
             .take(64)
         {
             let size = 37 + entry.payload_bytes();
@@ -650,7 +740,14 @@ impl Raft {
         }
         let end = entries.last().map_or(next - 1, |e| e.index);
         let context = self.context()?;
-        self.requests.insert(peer, Replication { context, end });
+        self.requests.insert(
+            peer,
+            Replication {
+                context,
+                end,
+                snapshot: None,
+            },
+        );
         Ok(Effect::Send(self.message(
             peer,
             context,
@@ -692,7 +789,7 @@ impl Raft {
         }
         let request = matches!(
             &m.rpc,
-            Rpc::Vote { .. } | Rpc::Append { .. } | Rpc::ReadProbe
+            Rpc::Vote { .. } | Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
         );
         if request && m.context.origin != m.sender {
             return Err(RaftError::WrongIdentity);
@@ -798,9 +895,16 @@ impl Raft {
                     let mut reply = self.message(
                         m.from,
                         m.context,
-                        Rpc::Appended {
-                            success: false,
-                            matching_index: self.durable.last_index(),
+                        if *previous_index < self.durable.base_index() {
+                            Rpc::Compacted {
+                                index: self.durable.base_index(),
+                                term: self.durable.base_term(),
+                            }
+                        } else {
+                            Rpc::Appended {
+                                success: false,
+                                matching_index: self.durable.last_index(),
+                            }
                         },
                     );
                     reply.term = hard.term;
@@ -830,7 +934,7 @@ impl Raft {
                 }
                 let mut suffix = None;
                 for (offset, entry) in entries.iter().enumerate() {
-                    match self.durable.entries.get((entry.index - 1) as usize) {
+                    match self.durable.entry_at(entry.index) {
                         Some(old_entry) if old_entry.term == entry.term => {
                             if old_entry != entry {
                                 return Err(RaftError::InvalidMessage);
@@ -879,6 +983,9 @@ impl Raft {
                     return Ok(Vec::new());
                 };
                 if sent.context != m.context {
+                    return Ok(Vec::new());
+                }
+                if sent.snapshot.is_some() {
                     return Ok(Vec::new());
                 }
                 self.requests.remove(&m.from);
@@ -945,7 +1052,243 @@ impl Raft {
                 }
                 Ok(self.maybe_read_ready())
             }
+            Rpc::Snapshot { snapshot } => {
+                let meta = &snapshot.metadata;
+                if snapshot.application.is_empty()
+                    || snapshot.application.len() > self.limits.max_snapshot_bytes
+                    || meta.bootstrap != self.durable.bootstrap
+                    || meta.validate().is_err()
+                    || meta.term > m.term
+                {
+                    return Err(RaftError::InvalidMessage);
+                }
+                if m.term < old.term {
+                    return Ok(vec![Effect::Send(self.message(
+                        m.from,
+                        m.context,
+                        Rpc::SnapshotAck { index: 0 },
+                    ))]);
+                }
+                self.role = Role::Follower;
+                self.clear_reads();
+                self.vote_context = None;
+                self.requests.clear();
+                if meta.index <= self.durable.commit_index {
+                    if self
+                        .durable
+                        .term_at(meta.index)
+                        .is_some_and(|t| t != meta.term)
+                    {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                    let mut reply =
+                        self.message(m.from, m.context, Rpc::SnapshotAck { index: meta.index });
+                    reply.term = hard.term;
+                    return if hard != old {
+                        self.persist(
+                            hard,
+                            self.durable.commit_index,
+                            None,
+                            After::Reply,
+                            Some(reply),
+                        )
+                    } else {
+                        Ok(vec![Effect::Send(reply)])
+                    };
+                }
+                self.staged_snapshot = Some(m.clone());
+                Ok(vec![Effect::StageSnapshot(m)])
+            }
+            Rpc::SnapshotAck { index } => {
+                if hard != old {
+                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+                }
+                if self.role != Role::Leader || m.term != old.term {
+                    return Ok(Vec::new());
+                }
+                let Some(sent) = self.requests.get(&m.from).copied() else {
+                    return Ok(Vec::new());
+                };
+                if sent.context != m.context || sent.snapshot.is_none() {
+                    return Ok(Vec::new());
+                }
+                if *index != sent.end {
+                    return Err(RaftError::InvalidMessage);
+                }
+                self.requests.remove(&m.from);
+                let prefix = self.progress[&m.from].max(*index);
+                self.progress.insert(m.from, prefix);
+                self.next_index.insert(m.from, prefix + 1);
+                let mut effects = self.maybe_commit()?;
+                if self.pending.is_none() {
+                    effects.push(self.append_for(m.from)?);
+                }
+                Ok(effects)
+            }
+            Rpc::Compacted { index, term } => {
+                if hard != old {
+                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
+                }
+                if self.role != Role::Leader || m.term != old.term {
+                    return Ok(Vec::new());
+                }
+                let Some(sent) = self.requests.get(&m.from) else {
+                    return Ok(Vec::new());
+                };
+                if sent.context != m.context || sent.snapshot.is_some() {
+                    return Ok(Vec::new());
+                }
+                if *index == 0
+                    || *term == 0
+                    || *index > self.durable.last_index()
+                    || self.durable.term_at(*index).is_some_and(|t| t != *term)
+                {
+                    return Err(RaftError::InvalidMessage);
+                }
+                self.requests.remove(&m.from);
+                if *index < self.durable.base_index() {
+                    self.next_index.insert(m.from, self.durable.base_index());
+                } else {
+                    self.progress
+                        .insert(m.from, self.progress[&m.from].max(*index));
+                    self.next_index.insert(m.from, index + 1);
+                }
+                let mut effects = self.maybe_commit()?;
+                if self.pending.is_none() {
+                    effects.push(self.append_for(m.from)?);
+                }
+                Ok(effects)
+            }
         }
+    }
+
+    pub(crate) fn begin_compact(
+        &mut self,
+        reference: SnapshotRef,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if self.pending.is_some()
+            || self.staged_snapshot.is_some()
+            || self.application_install.is_some()
+        {
+            return Err(RaftError::Busy);
+        }
+        if reference.store != self.binding.identity
+            || reference.index > self.durable.commit_index
+            || self.durable.term_at(reference.index) != Some(reference.term)
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        self.persist_update(
+            LogUpdate {
+                group: self.durable.bootstrap.group,
+                expected_revision: self.durable.revision,
+                hard_state: self.durable.hard_state,
+                commit_index: self.durable.commit_index,
+                suffix: None,
+                snapshot: Some(reference),
+            },
+            After::Compact,
+            None,
+        )
+    }
+    pub(crate) fn snapshot_send(
+        &self,
+        to: NodeId,
+        context: RequestContext,
+        reference: SnapshotRef,
+        snapshot: Snapshot,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        if self.role != Role::Leader {
+            return Err(RaftError::NotLeader);
+        }
+        if self
+            .requests
+            .get(&to)
+            .is_none_or(|r| r.context != context || r.snapshot != Some(reference))
+            || !reference.matches(&snapshot)
+            || snapshot.metadata.bootstrap != self.durable.bootstrap
+            || snapshot.application.len() > self.limits.max_snapshot_bytes
+        {
+            return Err(RaftError::WrongCompletion);
+        }
+        Ok(vec![Effect::Send(self.message(
+            to,
+            context,
+            Rpc::Snapshot {
+                snapshot: Box::new(snapshot),
+            },
+        ))])
+    }
+    pub(crate) fn staged_matches(&self, message: &Message) -> bool {
+        self.staged_snapshot.as_ref() == Some(message) && !self.fenced
+    }
+    pub(crate) fn snapshot_stored(
+        &mut self,
+        reference: SnapshotRef,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let message = self
+            .staged_snapshot
+            .take()
+            .ok_or(RaftError::WrongCompletion)?;
+        let Rpc::Snapshot { snapshot } = &message.rpc else {
+            return Err(RaftError::WrongCompletion);
+        };
+        if reference.store != self.binding.identity || !reference.matches(snapshot) {
+            self.storage_failed();
+            return Err(RaftError::WrongCompletion);
+        }
+        let hard = HardState {
+            term: message.term,
+            voted_for: if message.term == self.durable.hard_state.term {
+                self.durable.hard_state.voted_for
+            } else {
+                None
+            },
+        };
+        let reply = self.message(
+            message.from,
+            message.context,
+            Rpc::SnapshotAck {
+                index: reference.index,
+            },
+        );
+        self.persist_update(
+            LogUpdate {
+                group: self.durable.bootstrap.group,
+                expected_revision: self.durable.revision,
+                hard_state: hard,
+                commit_index: reference.index,
+                suffix: None,
+                snapshot: Some(reference),
+            },
+            After::SnapshotInstall(reference),
+            Some(reply),
+        )
+    }
+    pub(crate) fn snapshot_applied(
+        &mut self,
+        reference: SnapshotRef,
+        index: u64,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if self.fenced {
+            return Err(RaftError::Fenced);
+        }
+        let (expected, mut reply) = self
+            .application_install
+            .clone()
+            .ok_or(RaftError::WrongCompletion)?;
+        if expected != reference || index < reference.index || index > self.durable.commit_index {
+            return Err(RaftError::WrongCompletion);
+        }
+        self.application_install = None;
+        reply.term = self.durable.hard_state.term;
+        Ok(vec![Effect::Send(reply)])
     }
 }
 

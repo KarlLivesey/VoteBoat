@@ -47,6 +47,43 @@ impl Demo {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             match effect {
+                Effect::SnapshotRequired {
+                    to,
+                    context,
+                    reference,
+                } => {
+                    let r = self.replicas.get_mut(&id).unwrap();
+                    effects.extend(
+                        supply_snapshot(&r.core, &mut r.snapshots, to, context, reference)
+                            .map_err(|e| format!("{e:?}"))?,
+                    );
+                }
+                Effect::StageSnapshot(message) => {
+                    let r = self.replicas.get_mut(&id).unwrap();
+                    effects.extend(
+                        stage_snapshot_effect(
+                            &mut r.core,
+                            &mut r.store,
+                            &mut r.snapshots,
+                            &r.application,
+                            message,
+                        )
+                        .map_err(|e| format!("{e:?}"))?,
+                    );
+                }
+                Effect::SnapshotInstalled(reference) => {
+                    let r = self.replicas.get_mut(&id).unwrap();
+                    effects.extend(
+                        finish_snapshot_install(
+                            &mut r.core,
+                            &r.store,
+                            &mut r.snapshots,
+                            &mut r.application,
+                            reference,
+                        )
+                        .map_err(|e| format!("{e:?}"))?,
+                    );
+                }
                 Effect::ReadReady(barrier) => {
                     let r = self.replicas.get_mut(&id).unwrap();
                     r.read_value = Some(
@@ -159,8 +196,6 @@ fn main() -> Result<(), Failure> {
         if state.bootstrap != bootstrap {
             return Err("demo configuration differs from recovered configuration".into());
         }
-        let core = Raft::recover(node, store.binding(), state, store.limits())
-            .map_err(|e| format!("{e:?}"))?;
         let mut application = Counter::new(10000).map_err(|e| format!("{e:?}"))?;
         let checkpoint_directory = directory.join("checkpoints");
         let checkpoint_identity = SnapshotIdentity {
@@ -180,8 +215,9 @@ fn main() -> Result<(), Failure> {
                 SnapshotLimits::default(),
             )?
         };
-        let restored = restore_application(&core, &mut application, &mut snapshots)
-            .map_err(|e| format!("{e:?}"))?;
+        let (core, restored) =
+            recover_replica(node, group, &store, &mut snapshots, &mut application)
+                .map_err(|e| format!("{e:?}"))?;
         demo.replicas.insert(
             node,
             Replica {
@@ -229,11 +265,23 @@ fn main() -> Result<(), Failure> {
             .read_value
             .ok_or("read did not reach quorum")?
     );
+    let mut compaction_effects = Vec::new();
     for (node, r) in &mut demo.replicas {
         let checkpoint = checkpoint_application(&r.core, &r.application, &mut r.snapshots)
             .map_err(|e| format!("{e:?}"))?;
+        compaction_effects.push((
+            *node,
+            compact_replica(
+                &mut r.core,
+                &mut r.store,
+                &mut r.snapshots,
+                &r.application,
+                checkpoint.reference(),
+            )
+            .map_err(|e| format!("{e:?}"))?,
+        ));
         println!(
-            "replica={} committed={} applied={} value={} restored_checkpoint={} checkpoint={}",
+            "replica={} committed={} applied={} value={} restored_checkpoint={} checkpoint={} compacted_through={}",
             node.get(),
             r.core.state().commit_index,
             r.application.applied_index(),
@@ -242,7 +290,12 @@ fn main() -> Result<(), Failure> {
                 .map_err(|e| format!("{e:?}"))?,
             r.restored_checkpoint,
             checkpoint.metadata.index,
+            r.core.state().base_index(),
         );
     }
+    for (node, effects) in compaction_effects {
+        demo.effects(node, effects)?;
+    }
+    demo.pump()?;
     Ok(())
 }

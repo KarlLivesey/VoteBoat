@@ -69,6 +69,11 @@ impl<S: LogStore> Cluster<S> {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             match effect {
+                Effect::SnapshotRequired { .. }
+                | Effect::StageSnapshot(_)
+                | Effect::SnapshotInstalled(_) => {
+                    panic!("baseline history has no compacted groups")
+                }
                 Effect::ReadReady(barrier) => self.reads.entry(id).or_default().push(barrier),
                 Effect::Send(message) => {
                     assert!(self.messages.len() < 10000);

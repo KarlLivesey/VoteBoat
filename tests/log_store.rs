@@ -17,6 +17,119 @@ mod support;
 use support::*;
 use voteboat::{contracts::*, log::*, native::log_store::*};
 
+fn compacted_log_conformance<S: LogStore>(mut store: S) {
+    use voteboat::{identity::SnapshotGeneration, snapshot::SnapshotRef};
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let state = store.state(group(1)).unwrap();
+    append(
+        &mut store,
+        vec![update(
+            &state,
+            1,
+            3,
+            Some(Suffix {
+                from: 1,
+                entries: (1..=4).map(|i| entry(i, 1, i as u8)).collect(),
+            }),
+        )],
+    );
+    let old = store.state(group(1)).unwrap();
+    let reference = SnapshotRef {
+        store: store.binding().identity,
+        group: group(1),
+        configuration: old.bootstrap.configuration,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        index: 2,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 100,
+        checksum: 7,
+    };
+    let compact = LogUpdate {
+        group: group(1),
+        expected_revision: old.revision,
+        hard_state: old.hard_state,
+        commit_index: 3,
+        suffix: None,
+        snapshot: Some(reference),
+    };
+    // Storage validates transitions; the common driver separately supplies the
+    // durable snapshot pin before submitting this raw log mutation.
+    append(&mut store, vec![LogMutation::Update(compact)]);
+    let base = store.state(group(1)).unwrap();
+    assert_eq!(base.entries, vec![entry(3, 1, 3), entry(4, 1, 4)]);
+    assert_eq!(base.term_at(2), Some(1));
+    assert_eq!(base.term_at(1), None);
+    assert_eq!(
+        store.fetch_range(group(1), old.generation, 3, 2, 1024),
+        Err(StorageError::StaleTicket)
+    );
+    assert_eq!(
+        store.fetch_range(group(1), base.generation, 2, 2, 1024),
+        Err(StorageError::Compacted { first_index: 3 })
+    );
+    for (index, term, owner) in [(1, 1, 1), (3, 2, 1), (3, 1, 2)] {
+        let mut bad = reference;
+        bad.index = index;
+        bad.term = term;
+        bad.store = identity(owner);
+        let mutation = LogUpdate {
+            group: group(1),
+            expected_revision: base.revision,
+            hard_state: HardState {
+                term: 2,
+                voted_for: None,
+            },
+            commit_index: 3,
+            suffix: None,
+            snapshot: Some(bad),
+        };
+        assert!(store
+            .append_batch(vec![LogMutation::Update(mutation)])
+            .is_err());
+        assert_eq!(store.state(group(1)).unwrap(), base);
+    }
+    assert!(store
+        .append_batch(vec![update(
+            &base,
+            2,
+            3,
+            Some(Suffix {
+                from: 3,
+                entries: vec![]
+            })
+        )])
+        .is_err());
+    append(
+        &mut store,
+        vec![update(
+            &base,
+            2,
+            3,
+            Some(Suffix {
+                from: 4,
+                entries: vec![entry(4, 2, 9)],
+            }),
+        )],
+    );
+    let repaired = store.state(group(1)).unwrap();
+    assert_eq!(repaired.snapshot, Some(reference));
+    assert_eq!(
+        store
+            .fetch_range(group(1), repaired.generation, 3, 2, 1024)
+            .unwrap(),
+        vec![entry(3, 1, 3), entry(4, 2, 9)]
+    );
+}
+
+#[test]
+fn compacted_log_ranges_and_committed_prefix_protection_with_native_and_host() {
+    compacted_log_conformance(HostLogStore::new(1));
+    compacted_log_conformance(
+        NativeLogStore::create(ModelIo::default(), identity(1), LogLimits::default()).unwrap(),
+    );
+}
+
 fn conformance<S: LogStore>(mut store: S) {
     assert!(store.state(group(1)).is_err());
     let tickets = store
@@ -179,6 +292,7 @@ fn suffix_fence_invalidates_uncompleted_old_generation() {
     // The accepted revision is carried by the ticket. A host driving more than
     // one unit supplies that revision; the durable range remains unchanged.
     let replacement = LogMutation::Update(LogUpdate {
+        snapshot: None,
         group: group(1),
         expected_revision: old[0].revision,
         hard_state: HardState {
@@ -346,6 +460,7 @@ fn valid_checksums_cannot_hide_unbounded_policy_or_command_lengths() {
         Err(StorageError::Corrupt("policy child limit"))
     ));
     let mutation = LogMutation::Update(LogUpdate {
+        snapshot: None,
         group: group(1),
         expected_revision: voteboat::identity::LogRevision::new(1).unwrap(),
         hard_state: HardState {

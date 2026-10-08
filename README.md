@@ -10,13 +10,14 @@ Initial target platforms are **Linux and macOS**. Windows is deferred.
 The working baseline now includes a **static-configuration Raft core** with
 durable elections, replication, ordered commitment, conflict repair and
 quorum-backed read barriers, plus a three-replica counter demo with durable
-application checkpoints. Group configuration and voter store identities are
+application checkpoints, pinned logical compaction and follower snapshot catch-up.
+Group configuration and voter store identities are
 persisted with the native WAL. Operation retries return the original application
 result without repeating their effect. Restart, partition, corruption and
 storage-failure tests exercise native providers and host replacements. There
 are no third-party runtime dependencies.
 
-Transport, peer snapshot installation, log reclamation and online reconfiguration remain under
+Transport, physical WAL reclamation and online reconfiguration remain under
 development; this is not a production consensus release.
 
 ## Run
@@ -36,7 +37,7 @@ cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
 # operation=1 outcome=Value(7) retry_duplicate=true
 # linearizable_value=7
 # All three replicas report value=7, with committed/applied boundaries matching.
-# Each replica publishes checkpoint=3.
+# Each replica publishes checkpoint=3 and compacted_through=3.
 cargo run --example replicated_counter -- /tmp/voteboat-counter 1 7
 # Restore checkpoint 3 and retry operation 1: value remains 7.
 cargo run --example replicated_counter -- /tmp/voteboat-counter 2 3
@@ -54,10 +55,17 @@ bounded; the later service admission layer must reserve capacity before commits.
 Each replica publishes a checkpoint containing the full counter and retry state.
 Recovery verifies its configuration and index/term against the durable Raft log,
 then restores the application and replays only the committed tail. Publication
-uses two alternating files and a synchronized atomic manifest. The Raft log is
-retained; these local checkpoints do not yet enable prefix deletion or catch-up
-of a follower through snapshot transfer. Hosts can replace snapshot storage,
+uses two alternating files and a synchronized atomic manifest. Each demo replica
+pins its checkpoint before durably removing the covered logical log prefix.
+Lagging followers can install a leader's snapshot and replay its later entries;
+acknowledgements wait for durable storage and application restore. Physical WAL
+bytes remain until the later cleaner is implemented. Hosts can replace snapshot storage,
 platform I/O, encoding and application serialization through public contracts.
+
+Compacted replicas recover through `snapshot::recover_replica`, which verifies
+the pinned image and restores application state before returning a usable core.
+Snapshot transfers currently own one bounded image in the in-process transport;
+network framing and shared runtime admission remain to be implemented.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

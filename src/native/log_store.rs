@@ -186,6 +186,9 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
                 break;
             }
             let (seq, mutations) = codec.decode_batch(&remaining[..size], limits)?;
+            if mutations.iter().any(|m| matches!(m, LogMutation::Update(u) if u.snapshot.is_some_and(|r| r.store != identity))) {
+                return Err(StorageError::Corrupt("foreign snapshot store identity"));
+            }
             if sequence.checked_add(1) != Some(seq) {
                 return Err(StorageError::Corrupt("batch sequence discontinuity"));
             }
@@ -250,6 +253,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
     ) -> Result<Vec<LogTicket>, StorageError> {
         if self.fenced {
             return Err(StorageError::Fenced);
+        }
+        if mutations.iter().any(|m|matches!(m,LogMutation::Update(u) if u.snapshot.is_some_and(|r|r.store!=self.binding.identity))) {
+            return Err(StorageError::WrongIdentity);
         }
         if mutations.len()
             > self
@@ -373,12 +379,17 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         {
             return Err(StorageError::Rejected("range budget or boundary"));
         }
+        if from <= state.base_index() {
+            return Err(StorageError::Compacted {
+                first_index: state.base_index() + 1,
+            });
+        }
         let mut bytes = 0usize;
         let mut result = Vec::new();
         for entry in state
             .entries
             .iter()
-            .skip((from - 1) as usize)
+            .skip((from - state.base_index() - 1) as usize)
             .take(max_entries)
         {
             let size = 37 + entry.payload_bytes();
@@ -501,12 +512,27 @@ impl Encoder {
                 Ok(())
             }
             LogMutation::Update(u) => {
-                self.u8(1)?;
+                self.u8(if u.snapshot.is_some() { 2 } else { 1 })?;
                 self.group(u.group)?;
                 self.u64(u.expected_revision.get())?;
                 self.u64(u.hard_state.term)?;
                 self.u64(u.hard_state.voted_for.map_or(0, NodeId::get))?;
                 self.u64(u.commit_index)?;
+                if let Some(r) = u.snapshot {
+                    if u.suffix.is_some() {
+                        return Err(StorageError::Rejected("snapshot/suffix conflict"));
+                    }
+                    self.u128(r.store.id.get())?;
+                    self.u64(r.store.incarnation.get())?;
+                    self.group(r.group)?;
+                    self.u64(r.generation.get())?;
+                    self.u64(r.configuration.get())?;
+                    self.u64(r.index)?;
+                    self.u64(r.term)?;
+                    self.u64(r.application_schema)?;
+                    self.u64(r.file_bytes)?;
+                    return self.u32(r.checksum);
+                }
                 match &u.suffix {
                     None => self.u8(0),
                     Some(s) => {
@@ -643,7 +669,7 @@ impl<'a> Decoder<'a> {
                     voter_stores,
                 }))
             }
-            1 => {
+            1 | 2 => {
                 let expected_revision =
                     LogRevision::new(self.u64()?).ok_or(StorageError::Corrupt("zero revision"))?;
                 let hard_state = crate::contracts::HardState {
@@ -651,6 +677,35 @@ impl<'a> Decoder<'a> {
                     voted_for: NodeId::new(self.u64()?),
                 };
                 let commit_index = self.u64()?;
+                if kind == 2 {
+                    let store = StoreIdentity {
+                        id: StoreId::new(self.u128()?)
+                            .ok_or(StorageError::Corrupt("zero snapshot store"))?,
+                        incarnation: StoreIncarnation::new(self.u64()?)
+                            .ok_or(StorageError::Corrupt("zero snapshot store incarnation"))?,
+                    };
+                    let reference = crate::snapshot::SnapshotRef {
+                        store,
+                        group: self.group()?,
+                        generation: SnapshotGeneration::new(self.u64()?)
+                            .ok_or(StorageError::Corrupt("zero snapshot generation"))?,
+                        configuration: ConfigurationId::new(self.u64()?)
+                            .ok_or(StorageError::Corrupt("zero snapshot configuration"))?,
+                        index: self.u64()?,
+                        term: self.u64()?,
+                        application_schema: self.u64()?,
+                        file_bytes: self.u64()?,
+                        checksum: self.u32()?,
+                    };
+                    return Ok(LogMutation::Update(LogUpdate {
+                        group,
+                        expected_revision,
+                        hard_state,
+                        commit_index,
+                        suffix: None,
+                        snapshot: Some(reference),
+                    }));
+                }
                 let suffix = match self.u8()? {
                     0 => None,
                     1 => {
@@ -697,6 +752,7 @@ impl<'a> Decoder<'a> {
                     hard_state,
                     commit_index,
                     suffix,
+                    snapshot: None,
                 }))
             }
             _ => Err(StorageError::Corrupt("mutation kind")),
