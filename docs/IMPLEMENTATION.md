@@ -50,6 +50,64 @@ first three-process executable now exposes that assembly. Generic startup
 the shared typed startup and configured endpoint path are described in Slices
 38–39 below. Separate-host deployment and operational packaging remain work.
 
+## Linked macro and mini plan — updated 8 October 2026
+
+The macro plan tracks usable capabilities, not the number of internal slices.
+The mini plan covers the current deliverable and the next two, including their
+dependencies and acceptance checks. A completed helper advances a milestone;
+it does not create a new milestone by itself. Update this section when evidence
+changes the next step, and explain any added prerequisite before implementing it.
+
+### Macro plan
+
+| Milestone | User-visible result and completion criteria | Position in the full design |
+| --- | --- | --- |
+| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
+| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Current P4 work. This permits safe replica placement changes needed by later responsibilities and ownership movement. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. |
+| Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
+| Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
+
+These are capability milestones, not a claim that every earlier phase is
+finished. The detailed phase table above remains the scope ledger. P8 remains
+deferred research. Online membership and split/merge do not block use of the
+static service; no calendar estimate or completion percentage is inferred from
+the count of remaining milestones.
+
+### Mini plan: current deliverable and next two
+
+1. **Finish retained route and credential admission (current, P4).** Bind
+   accepted queued/core peer requirements to owned routes and preprovisioned
+   exact-store credentials. Reconcile connections as core requirements change;
+   retain retiring peers until their pending sends and original outbound credits
+   clear. Depends on the completed witness, roster and owner-capacity work.
+   Completion means rejection preserves ownership, route withdrawal cannot
+   strand accepted work, stale plans cannot restore withdrawn authority, and
+   focused owner/node plus native TCP/QUIC checks pass. Slice 51 now passes those
+   checks. An earlier run hit `AddrInUse`; the fixture releases reserved ports
+   before child processes bind, leaving a race window. A subsequent full run
+   passes; collision-free process startup is not claimed.
+2. **Implement learner readiness evidence (next, P4).** Define and validate the
+   evidence required to promote a caught-up replica, tied to exact store/session,
+   configuration and replicated position, including application/snapshot
+   capability. Depends on retained transport admission and existing learner
+   recovery. Completion means stale, restarted, insufficient and mismatched
+   evidence cannot authorize promotion; a valid caught-up learner can proceed.
+   Connection liveness alone is not readiness.
+3. **Complete and expose the online membership path (following, P4).** Connect
+   readiness to the replicated joint/final configuration lifecycle and an
+   actionable host/service entry point. Depends on both items above and existing
+   journal/snapshot recovery. Completion means actual multi-node add/promote/
+   remove histories, including leader loss, restart, rollback and partial
+   delivery, preserve quorum and retirement rules. Open public configuration
+   ingress only after those checks pass; then advance to the P5 milestone.
+
+Before editing each item, sketch its data/API shape, transitions, ownership,
+failure cleanup and focused checks. If that sketch reveals another dependency,
+first decide whether it is essential to the stated completion criteria. Record
+essential scope changes here; defer unrelated improvements. A failed check calls
+for a cause and a focused fix, not an unchanged test loop or a new redesign.
+
 ## Safety rules carried forward
 
 Responsibilities, quorum trees, execution lanes and WAL lanes are distinct
@@ -3008,10 +3066,54 @@ This completes capacity retention, not online configuration activation. Pins and
 owned route plans still need admission-time integration, followed by readiness
 and faulted distributed histories. Public configuration ingress stays gated.
 
+## Slice 51 — retained credential and route admission
+
+Mini schema plan: retain owned exact-store hints beside selected peer providers,
+check every hint against preprovisioned credentials, and bind the owner queue
+reservation ledger to that closed set. Replacement validates all current and
+queued requirements before mutation and returns the whole proposed map on
+failure. Reconcile actual core requirements around Node replica polling, while
+preserving a retiring peer until its owner-held sends and original queue credits
+finish. This advances P4; learner readiness and online lifecycle validation are
+the next two deliverables in the linked plan above.
+
+PeerRoute and PeerRoutesRejected expose owned plans and rejection. PeerParts
+retains admission_routes through drain, failed construction and recovery. Node
+construction derives a default from current routes, validates exact connector
+pins and metadata, and installs the closed owner policy only after successful
+assembly. Standalone PeerDriver hosts explicitly install the owner policy.
+ConnectionBudget::provisioned_peers exposes it; public capacity changes preserve
+the current policy so old cloned budgets cannot restore withdrawn peers.
+
+Queued prospective peers reserve admission without authorizing connects. Actual
+core requirements, including verified witness permits, drive planned roster
+reconciliation. Node checks before network polling and after replica polling to
+make new connection deadlines visible immediately. Unchanged assignments retain
+fairness, attempts and bindings. Pending sends are tracked by destination in the
+existing lease kind, without duplicating payloads. Per-peer retention avoids
+dropping retirement notices or blocking idle-peer removal behind unrelated work.
+Plans charge bounded hint/identity metadata; generic endpoint heap and cloning
+remain a host contract, while native socket addresses are fixed-size.
+
+New downstream histories cover rejected credentials, queued route withdrawal,
+stale budget restoration, witness-driven connections, original outbound credits,
+live Node plan replacement and failed construction ownership. Native TCP/QUIC
+wire-2/3 startup histories replace valid plans, reject changed stores and preserve
+live bindings before committed writes, drain and recovery. Library/effect-owner/
+peers/runtime/startup/service suites pass 43/109/18/25/8/7 (210 tests). Core-only
+all-target check, all-feature/all-target Clippy, API docs and inventory validation
+pass. An earlier process test hit AddrInUse; reservation release before child
+binding leaves a fixture race, and the later full run passed without code changes.
+
+No new durable effect, watermark or generation is introduced. Restart uses the
+existing fresh StoreSession and recovered core plus explicitly supplied hints and
+credentials. Live credential rotation remains unsupported. Readiness and complete
+faulted distributed configuration histories remain required before public online
+configuration ingress opens. No macOS execution or performance claim is made.
+
 ## Next slice
 
-Integrate retained credential/route-plan admission with these queued reservations,
-then implement readiness evidence and faulted activation/retirement histories
-before releasing online configuration ingress. Preserve usable static TCP/QUIC
-service. Full P0–P7 retains recursive responsibilities, split/merge and broader
-P7 evidence.
+Implement exact learner readiness evidence, then the faulted online membership
+path described in the linked mini plan. Preserve the usable static TCP/QUIC
+service; recursive responsibilities, split/merge and measured tuning remain in
+the full P0–P7 goal.

@@ -141,6 +141,9 @@ impl ConnectPollBudget {
 /// and abandons observation. Shared host reactors remain owned by the host. Socket
 /// readiness and deadline wake scheduling are host responsibilities.
 pub trait PeerConnector {
+    /// Host endpoint payloads and clones must be bounded by the embedding host.
+    /// Native endpoints are fixed-size SocketAddr values. Generic route metadata
+    /// accounting cannot inspect heap allocations inside a host-defined endpoint.
     type Endpoint;
     type Session: SecureSession;
     fn local(&self) -> LocalIdentity;

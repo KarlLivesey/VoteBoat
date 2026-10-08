@@ -99,7 +99,7 @@ struct Active {
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum LeaseKind {
     Persist,
-    Send,
+    Send(NodeId),
     Committed(u64),
     Read(ReadBarrier),
     External,
@@ -107,7 +107,7 @@ enum LeaseKind {
 fn kind(effect: &Effect) -> LeaseKind {
     match effect {
         Effect::Persist(_) => LeaseKind::Persist,
-        Effect::Send(_) => LeaseKind::Send,
+        Effect::Send(message) => LeaseKind::Send(message.to),
         Effect::Committed(entries) => LeaseKind::Committed(entries.last().map_or(0, |e| e.index)),
         Effect::ReadReady(barrier) => LeaseKind::Read(*barrier),
         _ => LeaseKind::External,
@@ -256,6 +256,15 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     }
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.runtime.core(group)
+    }
+    /// Includes queued effects and a Send lease held by a downstream driver.
+    pub fn has_pending_send(&self, peer: NodeId) -> bool {
+        self.active.values().any(|a| {
+            a.kind == Some(LeaseKind::Send(peer))
+                || a.effects
+                    .iter()
+                    .any(|e| matches!(e,Effect::Send(m) if m.to == peer))
+        })
     }
     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
         self.runtime.deadline(group)
@@ -731,7 +740,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<(), EffectOwnerError> {
         self.live(ticket)?;
         let a = self.active.get_mut(&ticket.visit.group).unwrap();
-        if a.kind != Some(LeaseKind::Send) {
+        if !matches!(a.kind, Some(LeaseKind::Send(_))) {
             return Err(EffectOwnerError::StaleEffect);
         }
         a.leased = None;

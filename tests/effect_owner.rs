@@ -2127,6 +2127,7 @@ mod native {
                 .collect();
             let factory = make_factory(n);
             parts.push(PeerParts {
+                admission_routes: None,
                 connector,
                 roster,
                 factory,

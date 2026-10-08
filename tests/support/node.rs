@@ -664,3 +664,132 @@ fn uncertain_maintenance_preserves_earlier_reply_and_failed_result() {
     ));
     assert!(n.poll_reclaim().is_none());
 }
+
+fn current_route_plan() -> BTreeMap<NodeId, PeerRoute<()>> {
+    use voteboat::connect::ConnectDirection;
+    [2, 3]
+        .into_iter()
+        .map(|n| {
+            (
+                node(n),
+                PeerRoute {
+                    store: identity(n as u128),
+                    direction: ConnectDirection::Dial(()),
+                },
+            )
+        })
+        .collect()
+}
+#[test]
+fn node_retains_pin_checked_routes_across_live_poll_and_drain_and_rejects_withdrawal() {
+    let mut n = boat(parts(3, true));
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    let before = n.peers().unwrap().roster().binding(node(2));
+    assert!(before.is_some());
+    let mut missing = current_route_plan();
+    missing.remove(&node(2));
+    let rejected = n.set_admission_routes(missing, MonoTime(0)).err().unwrap();
+    assert_eq!(rejected.reason, PeerDriverError::WrongBinding);
+    assert_eq!(rejected.routes.len(), 1);
+    let mut unsupported = current_route_plan();
+    unsupported.insert(
+        node(4),
+        PeerRoute {
+            store: identity(4),
+            direction: voteboat::connect::ConnectDirection::Dial(()),
+        },
+    );
+    let rejected = n
+        .set_admission_routes(unsupported, MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(rejected.reason, PeerDriverError::WrongBinding);
+    assert_eq!(rejected.routes.len(), 3);
+    n.set_admission_routes(current_route_plan(), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    n.poll(MonoTime(0), NodePollBudget::default()).unwrap();
+    assert_eq!(n.peers().unwrap().roster().binding(node(2)), before);
+    assert_eq!(
+        n.local()
+            .owner
+            .connection_budget()
+            .unwrap()
+            .provisioned_peers()
+            .unwrap()
+            .count(),
+        2
+    );
+    n.begin_shutdown();
+    assert_eq!(
+        n.set_admission_routes(current_route_plan(), MonoTime(0))
+            .err()
+            .unwrap()
+            .reason,
+        PeerDriverError::NotQuiescent
+    );
+    shutdown(&mut n);
+    let p = n.into_parts().unwrap_or_else(|_| panic!("not drained"));
+    assert_eq!(p.peers.unwrap().admission_routes.unwrap().len(), 2);
+}
+#[test]
+fn route_plan_constructor_failure_returns_hints_and_leaves_owner_policy_uninstalled() {
+    let mut p = parts(3, true);
+    let mut plan = current_route_plan();
+    plan.insert(
+        node(4),
+        PeerRoute {
+            store: identity(4),
+            direction: voteboat::connect::ConnectDirection::Dial(()),
+        },
+    );
+    p.peers.as_mut().unwrap().admission_routes = Some(plan);
+    let rejected = Boat::from_parts(p, NodeLimits::default(), MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(
+        rejected.reason,
+        NodeError::Peer(PeerDriverError::WrongBinding)
+    );
+    assert!(rejected.parts.local.owner.connection_budget().is_none());
+    assert_eq!(
+        rejected
+            .parts
+            .peers
+            .unwrap()
+            .admission_routes
+            .unwrap()
+            .len(),
+        3
+    );
+    let mut p = parts(3, true);
+    p.peers.as_mut().unwrap().admission_routes = Some(current_route_plan());
+    let rejected = Boat::from_parts(
+        p,
+        NodeLimits {
+            peers: PeerDriverLimits {
+                metadata_bytes: 1,
+                ..PeerDriverLimits::default()
+            },
+            ..NodeLimits::default()
+        },
+        MonoTime(0),
+    )
+    .err()
+    .unwrap();
+    assert_eq!(
+        rejected.reason,
+        NodeError::Peer(PeerDriverError::InvalidLimits)
+    );
+    assert!(rejected.parts.local.owner.connection_budget().is_none());
+    assert_eq!(
+        rejected
+            .parts
+            .peers
+            .unwrap()
+            .admission_routes
+            .unwrap()
+            .len(),
+        2
+    );
+}

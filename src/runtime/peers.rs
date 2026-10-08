@@ -25,6 +25,19 @@ pub struct PeerParts<C: PeerConnector, F: PeerTransportFactory<C::Session>> {
     /// Fixed address hints/directions for exactly the authorized roster peers.
     /// These cannot authorize membership, stores, sessions or application service.
     pub routes: BTreeMap<NodeId, ConnectDirection<C::Endpoint>>,
+    /// Optional future connection hints retained through drain/recovery handoff.
+    pub admission_routes: Option<BTreeMap<NodeId, PeerRoute<C::Endpoint>>>,
+}
+/// Owned hint for one exact provisioned store. Endpoint payloads must obey the
+/// host connector's bounded endpoint contract; hints never provision credentials.
+#[derive(Clone)]
+pub struct PeerRoute<E> {
+    pub store: StoreIdentity,
+    pub direction: ConnectDirection<E>,
+}
+pub struct PeerRoutesRejected<E> {
+    pub reason: PeerDriverError,
+    pub routes: BTreeMap<NodeId, PeerRoute<E>>,
 }
 #[derive(Clone, Copy, Debug)]
 pub struct PeerDriverLimits {
@@ -80,6 +93,7 @@ impl PeerDriverBudget {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PeerDriverError {
+    Owner(EffectOwnerError),
     InvalidLimits,
     WrongBinding,
     NotQuiescent,
@@ -183,6 +197,9 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 .validate()
                 .map_err(PeerDriverError::Outbound)?;
             let peers = parts.roster.authorized_peers().collect::<Vec<_>>();
+            if let Some(routes) = &parts.admission_routes {
+                Self::route_budget(&parts, routes, limits)?;
+            }
             if peers.len() != parts.routes.len()
                 || peers.iter().any(|p| !parts.routes.contains_key(p))
             {
@@ -289,9 +306,168 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         .flatten()
         .min()
     }
-    /// Inspect prospective connection resources for one event across all hosted
-    /// groups. No state, routes, clock or ownership changes. Success is neither
-    /// protocol authority nor a retained reservation: recheck at execution.
+    /// Retained owned hints for provisioned exact stores, including future peers.
+    pub fn admission_routes(&self) -> Option<&BTreeMap<NodeId, PeerRoute<C::Endpoint>>> {
+        self.parts.admission_routes.as_ref()
+    }
+    pub(super) fn install_admission_routes(
+        &mut self,
+        routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
+    ) {
+        self.parts.admission_routes = Some(routes);
+    }
+    pub(super) fn route_budget(
+        parts: &PeerParts<C, F>,
+        routes: &BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
+        limits: PeerDriverLimits,
+    ) -> Result<ConnectionBudget, PeerDriverError> {
+        parts
+            .connector
+            .limits()
+            .validate()
+            .map_err(PeerDriverError::Connect)?;
+        let bytes = routes
+            .len()
+            // Retained hints plus the owner's exact identity map; endpoint heap
+            // payloads remain bounded by the host endpoint contract.
+            .checked_mul(384usize.saturating_add(size_of::<PeerRoute<C::Endpoint>>()))
+            .and_then(|n| n.checked_add(parts.roster.limits().peers * size_of::<NodeId>()))
+            .and_then(|n| {
+                n.checked_add(parts.connector.limits().requests * size_of::<ConnectTicket>())
+            })
+            .and_then(|n| {
+                n.checked_add(
+                    limits
+                        .staged_batches
+                        .checked_mul(size_of::<OutboundBatch>())?,
+                )
+            });
+        if routes.len() > 65536 || bytes.is_none_or(|b| b > limits.metadata_bytes) {
+            return Err(PeerDriverError::InvalidLimits);
+        }
+        if routes.iter().any(|(&node, route)| {
+            node == parts.roster.local().node
+                || !parts.connector.supports_peer(PeerIdentity {
+                    node,
+                    store: route.store,
+                })
+        }) {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        if parts.roster.authorized_peers().any(|node| {
+            routes
+                .get(&node)
+                .is_none_or(|r| Some(r.store) != parts.roster.peer_identity(node).map(|p| p.store))
+        }) {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        ConnectionBudget::new(
+            parts.roster.local(),
+            parts.roster.limits().peers,
+            parts
+                .roster
+                .tracked_identities()
+                .map(|p| (p.node, p.store))
+                .collect(),
+        )
+        .and_then(|budget| {
+            budget.with_provisioned(routes.iter().map(|(&n, r)| (n, r.store)).collect())
+        })
+        .map_err(|e| PeerDriverError::Owner(EffectOwnerError::Runtime(e)))
+    }
+    /// Install owned, pin-checked hints and an exact closed peer set on the owner.
+    /// Replacement must cover all current/queued requirements. No connections or
+    /// core transitions occur; failures return the complete proposed plan.
+    pub fn set_admission_routes<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerRoutesRejected<C::Endpoint>> {
+        let prepared = (|| {
+            self.check_assignment_owner(owner, now)?;
+            let budget = Self::route_budget(&self.parts, &routes, self.limits)?;
+            owner
+                .prepare_connection_budget(budget)
+                .map_err(PeerDriverError::Owner)
+        })();
+        let budget = match prepared {
+            Ok(b) => b,
+            Err(reason) => return Err(PeerRoutesRejected { reason, routes }),
+        };
+        owner.install_connection_budget(budget);
+        self.parts.admission_routes = Some(routes);
+        self.now = now;
+        Ok(())
+    }
+    /// Use retained hints when core state needs a different connection set.
+    /// Queue-only prospective peers are reserved but do not authorize connects.
+    pub fn reconcile_planned_membership<
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        owner: &EffectOwner<Q, T, E>,
+        outbound: &O,
+        now: MonoTime,
+    ) -> Result<(), PeerDriverError>
+    where
+        C::Endpoint: Clone,
+    {
+        self.check_assignment_owner(owner, now)?;
+        if outbound.binding() != self.outbound {
+            return Err(PeerDriverError::WrongBinding);
+        }
+        let Some(plan) = &self.parts.admission_routes else {
+            return Ok(());
+        };
+        let mut assignments = PeerAssignments::from_cores(
+            self.parts.roster.local(),
+            owner.groups().map(|g| owner.core(g).unwrap()),
+            self.parts.roster.limits().peers,
+        )
+        .map_err(PeerDriverError::Assignments)?;
+        for peer in self.parts.roster.authorized_peers() {
+            if owner.has_pending_send(peer) || outbound.peer_usage(peer).batches > 0 {
+                assignments
+                    .retain_peer(
+                        peer,
+                        self.parts.roster.peer_identity(peer).unwrap().store,
+                        self.parts.roster.limits().peers,
+                    )
+                    .map_err(PeerDriverError::Assignments)?;
+            }
+        }
+        let desired = assignments.peers().collect::<BTreeMap<_, _>>();
+        let routes = desired
+            .iter()
+            .map(|(&node, &store)| {
+                let route = plan
+                    .get(&node)
+                    .filter(|r| r.store == store)
+                    .ok_or(PeerDriverError::WrongBinding)?;
+                Ok((node, route.direction.clone()))
+            })
+            .collect::<Result<BTreeMap<_, _>, PeerDriverError>>()?;
+        if self.parts.roster.authorized_peers().count() == desired.len()
+            && desired.iter().all(|(&n, &s)| {
+                self.parts
+                    .roster
+                    .peer_identity(n)
+                    .is_some_and(|p| p.store == s)
+            })
+        {
+            // Adopt changed hints without canceling accepted work or resetting fairness.
+            self.parts.routes = routes;
+            return Ok(());
+        }
+        let peers = self.check_assignment_routes(&assignments, &routes, now)?;
+        self.apply_assignments(assignments, peers, routes, now)
+            .map_err(|r| r.reason)
+    }
+    /// Pure prospective inspection; success retains no capacity or authority.
     pub fn preflight_event<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
         &self,
         owner: &EffectOwner<Q, T, E>,
@@ -408,6 +584,15 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             Ok(prepared) => prepared,
             Err(reason) => return Err(PeerReconcileRejected { reason, routes }),
         };
+        self.apply_assignments(assignments, peers, routes, now)
+    }
+    fn apply_assignments(
+        &mut self,
+        assignments: PeerAssignments,
+        peers: Vec<NodeId>,
+        routes: BTreeMap<NodeId, ConnectDirection<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerReconcileRejected<C::Endpoint>> {
         let canceled = match self.parts.roster.reconcile(&assignments, now) {
             Ok(canceled) => canceled,
             Err(reason) => {

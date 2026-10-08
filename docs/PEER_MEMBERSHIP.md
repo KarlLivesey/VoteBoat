@@ -87,8 +87,9 @@ tracked roster store, including inactive history. `Shard`, `TimedShard` and
 `reserved_connection_peers`. A networked `Node::from_parts` prepares this budget
 from its roster and installs it only after successful assembly. Host-only owners
 opt in and must seed all shared roster records and use the actual selected
-provider ceiling. The budget validates capacity and exact stores; it does not
-provision credentials or retain endpoint hints.
+provider ceiling. Standalone budgets validate capacity and exact stores.
+Networked Node construction additionally installs a closed provisioned peer set
+from retained, pin-checked routes; the budget itself never creates credentials.
 
 The existing owned event queue is the reservation ledger. Before transferring
 configuration append, snapshot or granted witness-reply input, admission unions
@@ -116,7 +117,39 @@ from recovered core views plus explicitly supplied roster history under the
 existing fresh local StoreSession contract.
 
 This implementation recomputes a bounded union rather than maintaining a second
-asynchronous ticket table. No throughput or allocation claim is made. Pins and
-route-plan retention still need integration with event admission, followed by
-readiness and full distributed transition histories. The protocol ingress gate
-remains closed while those requirements are unfinished.
+asynchronous ticket table. No throughput or allocation claim is made. Learner
+readiness and full distributed transition histories remain unfinished. The
+protocol ingress gate remains closed while those requirements are unfinished.
+
+## Retained route admission
+
+`PeerRoute<E>` owns an endpoint direction and exact store identity.
+`PeerParts::admission_routes` optionally supplies future peers as well as current
+ones. Node construction defaults it from current routes, checks every exact
+store against `PeerConnector::supports_peer`, and installs the owner policy only
+after assembly succeeds. Failed construction and drain/recovery return the hints
+with the selected providers.
+
+`Node::set_admission_routes` and `PeerDriver::set_admission_routes` replace the
+owned plan atomically. Rejection returns the entire proposed map through
+`PeerRoutesRejected`; the old plan, policy and clock remain intact. Replacement
+must cover authorized roster peers and current/queued core requirements.
+Admission rejects unavailable peers before taking event ownership. Public
+capacity-budget replacement preserves the current closed set, so a stale cloned
+budget cannot restore withdrawn routes.
+
+`reconcile_planned_membership(owner, outbound, now)` derives actual connection
+requirements from hosted cores. A queue-only future peer reserves admission but
+does not authorize a connection. Node runs reconciliation before network work
+and after replica execution so newly required peers become visible to deadlines.
+Unchanged assignments preserve bindings, attempts and fairness. Retirement waits
+for that peer's owner-held Send effects/leases and original outbound credits;
+another peer's traffic does not impose a global drain barrier. Explicit low-level
+`reconcile_membership` retains its caller-controlled withdrawal semantics.
+
+Plans have at most 65536 entries and charge hint/identity metadata against the
+driver limit. Host endpoint heap payloads and cloning must satisfy the connector's
+bounded endpoint contract; native endpoints use fixed-size socket addresses.
+Credential provisioning is still construction-time, and live credential rotation
+is unsupported. This introduces no persistence effect, durable receipt,
+watermark or generation, and grants no readiness, voting or activation authority.

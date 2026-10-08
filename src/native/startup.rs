@@ -625,6 +625,7 @@ where
                 }),
             },
             peers: Some(PeerParts {
+                admission_routes: None,
                 connector,
                 roster,
                 factory,

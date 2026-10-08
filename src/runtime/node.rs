@@ -229,21 +229,34 @@ where
                 .peers
                 .as_ref()
                 .map(|network| {
-                    let budget = ConnectionBudget::new(
-                        network.roster.local(),
-                        network.roster.limits().peers,
-                        network
-                            .roster
-                            .tracked_identities()
-                            .map(|peer| (peer.node, peer.store))
-                            .collect(),
-                    )
-                    .map_err(|e| NodeError::Owner(EffectOwnerError::Runtime(e)))?;
-                    parts
+                    let routes = match &network.admission_routes {
+                        Some(routes) => routes.clone(),
+                        None => network
+                            .routes
+                            .iter()
+                            .map(|(&node, direction)| {
+                                let peer = network
+                                    .roster
+                                    .peer_identity(node)
+                                    .ok_or(NodeError::WrongPeerStore)?;
+                                Ok((
+                                    node,
+                                    PeerRoute {
+                                        store: peer.store,
+                                        direction: direction.clone(),
+                                    },
+                                ))
+                            })
+                            .collect::<Result<BTreeMap<_, _>, NodeError>>()?,
+                    };
+                    let budget = PeerDriver::<C, F>::route_budget(network, &routes, limits.peers)
+                        .map_err(NodeError::Peer)?;
+                    let budget = parts
                         .local
                         .owner
                         .prepare_connection_budget(budget)
-                        .map_err(NodeError::Owner)
+                        .map_err(NodeError::Owner)?;
+                    Ok((budget, routes))
                 })
                 .transpose()?;
             let replica = ReplicaDriver::new(&parts.local.as_parts(), limits.replica, now)
@@ -259,7 +272,7 @@ where
                 })
             }
         };
-        let peers = if let Some(network) = parts.peers.take() {
+        let mut peers = if let Some(network) = parts.peers.take() {
             match PeerDriver::new(
                 network,
                 parts.local.owner.identity(),
@@ -279,8 +292,9 @@ where
         } else {
             None
         };
-        if let Some(budget) = budget {
+        if let Some((budget, routes)) = budget {
             parts.local.owner.install_connection_budget(budget);
+            peers.as_mut().unwrap().install_admission_routes(routes);
         }
         Ok(Self {
             local: parts.local,
@@ -460,6 +474,30 @@ where
             self.state = NodeState::Quiescing;
         }
     }
+    pub fn set_admission_routes(
+        &mut self,
+        routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
+        now: MonoTime,
+    ) -> Result<(), PeerRoutesRejected<C::Endpoint>> {
+        if self.state != NodeState::Running || self.peers.is_none() {
+            return Err(PeerRoutesRejected {
+                reason: PeerDriverError::NotQuiescent,
+                routes,
+            });
+        }
+        if now < self.now {
+            return Err(PeerRoutesRejected {
+                reason: PeerDriverError::TimeWentBack,
+                routes,
+            });
+        }
+        self.peers
+            .as_mut()
+            .unwrap()
+            .set_admission_routes(&mut self.local.owner, routes, now)?;
+        self.now = now;
+        Ok(())
+    }
     pub fn poll(
         &mut self,
         now: MonoTime,
@@ -494,6 +532,13 @@ where
         now: MonoTime,
         budget: NodePollBudget,
     ) -> Result<NodeProgress, NodeError> {
+        if matches!(self.state, NodeState::Running | NodeState::Quiescing) {
+            if let Some(peers) = &mut self.peers {
+                peers
+                    .reconcile_planned_membership(&self.local.owner, &self.local.outbound, now)
+                    .map_err(NodeError::Peer)?;
+            }
+        }
         let peers = self
             .peers
             .as_mut()
@@ -511,6 +556,13 @@ where
             .replica
             .poll(&mut self.local.as_parts(), now, budget.replica)
             .map_err(NodeError::Replica)?;
+        if matches!(self.state, NodeState::Running | NodeState::Quiescing) {
+            if let Some(peers) = &mut self.peers {
+                peers
+                    .reconcile_planned_membership(&self.local.owner, &self.local.outbound, now)
+                    .map_err(NodeError::Peer)?;
+            }
+        }
         if self.state == NodeState::Quiescing
             && self.local.clients.is_drained()
             && self.local.reads.is_drained()

@@ -306,3 +306,25 @@ assertion uses a borrowed expected-message slice.
   Credential/route-plan admission and readiness remain incomplete, so online
   configuration ingress remains gated. No macOS execution or full protocol proof
   claim. The complete P0–P7 objective remains active.
+
+## 2026-10-08: retained credential/route admission (slice 51)
+
+- QUIC-enabled library/effect-owner/peers/runtime/startup/counter-service suites
+  pass 43/109/18/25/8/7 tests (210 total). This includes native TCP/QUIC wire-2/3
+  create, live plan replacement, committed write, drain and recovery histories.
+- Five new downstream histories cover missing pins, queued route withdrawal,
+  stale budget restoration, witness-driven actual connections, per-peer original
+  send-credit retirement, live Node replacement and failed construction return.
+  Existing failed factory recovery also verifies retained admission hints.
+- Core-only all-target check, all-feature/all-target Clippy with warnings denied,
+  API docs and inventory validation pass (49 contract records; inventory checks
+  shape and paths, not behavioral correctness). Formatting/diff checks pass.
+- An earlier service run failed with AddrInUse. Inspection confirms the fixture
+  reserves ports then releases them before child binding, leaving a race window.
+  The subsequent full run passes without code changes; the specific competing
+  socket owner was not established and collision-free startup is not claimed.
+- Plans and identity maps are metadata-bounded; host endpoint heap/cloning obeys
+  the connector contract. No new persistence receipt, watermark or generation.
+  Live credential rotation, learner readiness and full faulted online membership
+  histories remain unfinished. Public configuration ingress remains gated.
+  No macOS execution, performance or full protocol proof claim. P0–P7 stays active.

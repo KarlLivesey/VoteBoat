@@ -938,7 +938,8 @@
         "set_connection_budget",
         "connection_budget",
         "reserved_connection_peers",
-        "retained_peers"
+        "retained_peers",
+        "provisioned_peers"
       ],
       "native": "Deterministic bounded union of owned queued events, live/pending/staged core views and retained exact identity history. Networked Node construction installs the selected roster ceiling without new I/O or a second reservation queue.",
       "conformance": [
@@ -950,7 +951,26 @@
         "tests/startup.rs",
         "tests/counter_service.rs"
       ],
-      "scope": "Capacity and exact-store admission only; not credentials, routes, readiness, quorum or membership authority. Queued append/snapshot/granted witness-reply input reserves its prospective union before ownership transfer. Execution rechecks; protocol rejection and stop release queue-only peers, while accepted/pending/staged and verified permit peers enter bounded retained identity history. Shared peers count once across groups. Budget replacement preserves history, validates the entire owned union and never drops below it. Internal with_core mutations that exceed the budget fence the group before returning effects. Native Node installs from all tracked roster records only after successful assembly. Host-only assemblies opt in and must seed history from all shared roster records. Core membership includes staged snapshots and verified replication permits; snapshot bootstrap peers are conservatively inspected even without dynamic metadata. No credential-plan admission or public online configuration ingress yet; no performance or macOS execution claim."
+      "scope": "Capacity and exact-store admission only; not credentials, routes, readiness, quorum or membership authority. Queued append/snapshot/granted witness-reply input reserves its prospective union before ownership transfer. Execution rechecks; protocol rejection and stop release queue-only peers, while accepted/pending/staged and verified permit peers enter bounded retained identity history. Shared peers count once across groups. Budget replacement preserves history, validates the entire owned union and never drops below it. Internal with_core mutations that exceed the budget fence the group before returning effects. Native Node installs from all tracked roster records only after successful assembly. Host-only assemblies opt in and must seed history from all shared roster records. Core membership includes staged snapshots and verified replication permits; snapshot bootstrap peers are conservatively inspected even without dynamic metadata. No credential-plan admission or public online configuration ingress yet; no performance or macOS execution claim. Pin-checked retained route installation can add a closed provisioned exact-store set; ordinary budget replacement preserves the current set and cannot restore a stale cloned route policy. Missing queued/core peers reject before ownership transfer. This does not grant readiness or membership authority."
+    },
+    {
+      "design_id": "C06/C09/C10/C15",
+      "public_contract": "PeerRoute / PeerRoutesRejected / PeerParts::admission_routes",
+      "operations": [
+        "PeerDriver::set_admission_routes",
+        "Node::set_admission_routes",
+        "PeerDriver::admission_routes",
+        "PeerDriver::reconcile_planned_membership",
+        "EffectOwner::has_pending_send"
+      ],
+      "native": "Owned exact-store endpoint plans checked against selected connector credentials; Node installs on successful assembly and reconciles around replica polling.",
+      "conformance": [
+        "tests/support/peer_driver.rs",
+        "tests/support/node.rs",
+        "tests/startup.rs",
+        "tests/effect_owner.rs"
+      ],
+      "scope": "Bounded future hints and owner provisioned identities retained through failed construction, drain and recovery. Replacement covers authorized roster and queued/core requirements, returning the whole proposed map on rejection without clock mutation. Queue-only peers do not authorize connection. Actual core requirements trigger connections; per-peer pending Send leases and original outbound credits delay retirement without a global barrier. Unchanged assignments preserve bindings and fairness. Host endpoint heap/cloning must be bounded by the connector contract. No live credential rotation, new durability evidence or online activation/readiness claim."
     }
   ],
   "not_yet_implemented": [

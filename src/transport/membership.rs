@@ -99,6 +99,21 @@ impl PeerAssignments {
     pub fn local(&self) -> LocalIdentity {
         self.local
     }
+    pub(crate) fn retain_peer(
+        &mut self,
+        node: NodeId,
+        store: StoreIdentity,
+        limit: usize,
+    ) -> Result<(), PeerAssignmentsError> {
+        if self.peers.get(&node).is_some_and(|old| *old != store) {
+            return Err(PeerAssignmentsError::ConflictingStore);
+        }
+        if !self.peers.contains_key(&node) && self.peers.len() == limit {
+            return Err(PeerAssignmentsError::Overloaded);
+        }
+        self.peers.insert(node, store);
+        Ok(())
+    }
     pub fn store(&self, node: NodeId) -> Option<StoreIdentity> {
         self.peers.get(&node).copied()
     }

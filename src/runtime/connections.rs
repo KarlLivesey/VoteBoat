@@ -25,6 +25,7 @@ pub struct ConnectionBudget {
     local: LocalIdentity,
     limit: usize,
     history: BTreeMap<NodeId, StoreIdentity>,
+    provisioned: Option<BTreeMap<NodeId, StoreIdentity>>,
 }
 impl ConnectionBudget {
     pub fn new(
@@ -39,6 +40,7 @@ impl ConnectionBudget {
             local,
             limit,
             history: BTreeMap::new(),
+            provisioned: None,
         };
         for (node, store) in history {
             budget.retain(node, store)?;
@@ -53,6 +55,27 @@ impl ConnectionBudget {
     }
     pub fn retained_peers(&self) -> impl Iterator<Item = (NodeId, StoreIdentity)> + '_ {
         self.history.iter().map(|(&n, &s)| (n, s))
+    }
+    pub fn provisioned_peers(&self) -> Option<impl Iterator<Item = (NodeId, StoreIdentity)> + '_> {
+        self.provisioned
+            .as_ref()
+            .map(|peers| peers.iter().map(|(&n, &s)| (n, s)))
+    }
+    pub(super) fn with_provisioned(
+        mut self,
+        peers: BTreeMap<NodeId, StoreIdentity>,
+    ) -> Result<Self, RuntimeError> {
+        if peers.len() > 65536 || peers.contains_key(&self.local.node) {
+            return Err(RuntimeError::InvalidLimits);
+        }
+        if peers
+            .iter()
+            .any(|(n, s)| self.history.get(n).is_some_and(|old| old != s))
+        {
+            return Err(RuntimeError::PeerStoreConflict);
+        }
+        self.provisioned = Some(peers);
+        Ok(self)
     }
     fn retain(&mut self, node: NodeId, store: StoreIdentity) -> Result<(), RuntimeError> {
         add(&mut self.history, self.local, self.limit, node, store)
@@ -112,6 +135,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 _ => RuntimeError::PeerCapacity,
             })?;
             for (node, store) in required {
+                if node != budget.local.node
+                    && budget
+                        .provisioned
+                        .as_ref()
+                        .is_some_and(|p| p.get(&node) != Some(&store))
+                {
+                    return Err(RuntimeError::PeerUnavailable);
+                }
                 add(&mut peers, budget.local, budget.limit, node, store)?;
             }
             Ok(())
@@ -135,7 +166,16 @@ impl<Q: ReadyScheduler> Shard<Q> {
     }
     /// Install/tighten only after the entire owned queue/core union fits. Failure
     /// preserves the previous budget. This grants no credentials or membership.
-    pub fn set_connection_budget(&mut self, budget: ConnectionBudget) -> Result<(), RuntimeError> {
+    pub fn set_connection_budget(
+        &mut self,
+        mut budget: ConnectionBudget,
+    ) -> Result<(), RuntimeError> {
+        // Public capacity changes cannot restore a stale cloned route policy.
+        // Only the driver's pin-checked owned-plan path may replace that set.
+        budget.provisioned = self
+            .connection_budget
+            .as_ref()
+            .and_then(|b| b.provisioned.clone());
         let budget = self.prepare_connection_budget(budget)?;
         self.install_connection_budget(budget);
         Ok(())
@@ -150,6 +190,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
             }
             for (&node, &store) in &previous.history {
                 budget.retain(node, store)?;
+            }
+            if budget.provisioned.is_none() {
+                budget.provisioned.clone_from(&previous.provisioned);
+            }
+            if budget.provisioned.as_ref().is_some_and(|p| {
+                p.iter()
+                    .any(|(n, s)| budget.history.get(n).is_some_and(|old| old != s))
+            }) {
+                return Err(RuntimeError::PeerStoreConflict);
             }
         }
         self.reserved_connections(&budget, None, None)?;

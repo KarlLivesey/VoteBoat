@@ -110,6 +110,7 @@ pub struct ProposalPosition {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RuntimeError {
+    PeerUnavailable,
     PeerCapacity,
     PeerStoreConflict,
     InvalidLimits,

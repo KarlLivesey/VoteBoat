@@ -75,6 +75,7 @@ struct ConnectControl {
     closed: bool,
     wrong: bool,
     unsupported: bool,
+    extra_pins: BTreeMap<NodeId, StoreIdentity>,
     polls: usize,
     drops: Rc<Cell<usize>>,
 }
@@ -83,9 +84,11 @@ impl PeerConnector for Connector {
     type Endpoint = ();
     type Session = Session;
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
-        !self.0.borrow().unsupported
-            && matches!(peer.node.get(), 2 | 3)
-            && peer.store == local(peer.node.get()).store.identity
+        let c = self.0.borrow();
+        !c.unsupported
+            && ((matches!(peer.node.get(), 2 | 3)
+                && peer.store == local(peer.node.get()).store.identity)
+                || c.extra_pins.get(&peer.node) == Some(&peer.store))
     }
     fn local(&self) -> LocalIdentity {
         local(1)
@@ -332,6 +335,7 @@ fn parts_with(
     transports: Controls,
 ) -> PeerParts<Connector, Factory> {
     PeerParts {
+        admission_routes: None,
         connector: Connector(connect),
         factory: Factory {
             controls: transports,
@@ -384,6 +388,9 @@ impl Fixture {
         )
     }
     fn new() -> Self {
+        Self::with_peer_capacity(2)
+    }
+    fn with_peer_capacity(peer_capacity: usize) -> Self {
         let (owner, _) = single(1);
         let mut limits = OutboundLimits::default();
         limits.node.max.batches = 8;
@@ -408,9 +415,26 @@ impl Fixture {
             connect: Default::default(),
             transports: Default::default(),
         };
+        let mut parts = f.parts();
+        let mut roster_limits = parts.roster.limits();
+        roster_limits.peers = peer_capacity;
+        parts.roster = PeerRoster::new(
+            PeerRosterConfig {
+                local: local(1),
+                outbound: f.outbound.binding(),
+                first_generation: SecureSessionGeneration::new(1).unwrap(),
+                last_generation: SecureSessionGeneration::new(100).unwrap(),
+                wire_version: 1,
+                limits: roster_limits,
+                transport_limits: TransportLimits::default(),
+            },
+            [(node(2), identity(2)), (node(3), identity(3))].into(),
+            MonoTime(0),
+        )
+        .unwrap();
         f.driver = Some(
             PeerDriver::new(
-                f.parts(),
+                parts,
                 f.owner.identity(),
                 &f.outbound,
                 PeerDriverLimits {
@@ -796,6 +820,7 @@ fn invalid_factory_transport_is_aborted_and_fences_before_any_raft_or_send_progr
     let mut f = Fixture::new();
     let mut parts = f.parts();
     parts.factory.bad = true;
+    parts.admission_routes = Some(plan(&[2, 3]));
     f.driver = Some(
         PeerDriver::new(
             parts,
@@ -816,6 +841,13 @@ fn invalid_factory_transport_is_aborted_and_fences_before_any_raft_or_send_progr
     assert!(f.outbound.is_drained());
     assert_eq!(f.connect.borrow().drops.get(), 2);
     assert_eq!(f.owner.core(group(1)).unwrap().state().commit_index, 0);
+    let recovery = f
+        .driver
+        .take()
+        .unwrap()
+        .into_recovery()
+        .unwrap_or_else(|_| panic!("not failed"));
+    assert_eq!(recovery.parts.admission_routes.unwrap().len(), 2);
 }
 
 struct FaultQueue {
@@ -1235,6 +1267,291 @@ fn membership_removal_discards_held_input_and_completes_accepted_and_staged_outp
     assert_eq!(p.ingress.admitted, 0);
     assert_eq!(p.ingress.discarded, 1);
     assert!(f.outbound.is_drained());
+    assert!(!f.owner.is_failed());
+    f.close(0);
+}
+
+fn plan(peers: &[u64]) -> BTreeMap<NodeId, PeerRoute<()>> {
+    peers
+        .iter()
+        .map(|n| {
+            (
+                node(*n),
+                PeerRoute {
+                    store: identity(*n as u128),
+                    direction: ConnectDirection::Dial(()),
+                },
+            )
+        })
+        .collect()
+}
+#[test]
+fn owned_route_plan_checks_pins_retains_queued_dependencies_and_rejects_stale_budget_restore() {
+    let mut f = Fixture::with_peer_capacity(4);
+    let proposed = plan(&[2, 3, 4]);
+    let rejected = f
+        .driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, proposed, MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(rejected.reason, PeerDriverError::WrongBinding);
+    assert_eq!(rejected.routes.len(), 3);
+    assert!(f.owner.connection_budget().is_none());
+    f.connect
+        .borrow_mut()
+        .extra_pins
+        .insert(node(4), identity(4));
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, rejected.routes, MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let old = f.owner.connection_budget().unwrap().clone();
+    let event = prospective_event(&[4]);
+    let ticket = f.owner.admit_tracked(group(1), event.clone()).unwrap();
+    let rejected = f
+        .driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3]), MonoTime(0))
+        .err()
+        .unwrap();
+    assert_eq!(
+        rejected.reason,
+        PeerDriverError::Owner(EffectOwnerError::Runtime(RuntimeError::PeerUnavailable))
+    );
+    assert_eq!(rejected.routes.len(), 2);
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .admission_routes()
+        .unwrap()
+        .contains_key(&node(4)));
+    assert_eq!(
+        f.owner.advance(MonoTime(0), 1).unwrap()[0].admission,
+        Some(ticket)
+    );
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, rejected.routes, MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    let rejected = f.owner.admit_tracked(group(1), event.clone()).unwrap_err();
+    assert_eq!(rejected.reason, RuntimeError::PeerUnavailable);
+    assert_eq!(*rejected.event, event);
+    f.owner.set_connection_budget(old).unwrap();
+    assert_eq!(
+        f.owner.admit(group(1), event).unwrap_err().reason,
+        RuntimeError::PeerUnavailable
+    );
+    assert!(!f
+        .owner
+        .connection_budget()
+        .unwrap()
+        .provisioned_peers()
+        .unwrap()
+        .any(|(n, _)| n == node(4)));
+    assert!(f.connect.borrow().submitted.is_empty());
+    f.close(0);
+    let parts = f
+        .driver
+        .take()
+        .unwrap()
+        .into_parts()
+        .unwrap_or_else(|_| panic!("not drained"));
+    assert_eq!(parts.admission_routes.unwrap().len(), 2);
+}
+
+#[test]
+fn retained_plan_connects_only_after_valid_witness_reply_and_preserves_live_bindings() {
+    let mut f = Fixture::with_peer_capacity(4);
+    let mut log = HostLogStore::new(1);
+    let runtime = timed(1, &mut log, 1, 3);
+    f.owner = EffectOwner::new(
+        runtime,
+        HostWorker::new(log).binding(),
+        EffectOwnerLimits::default(),
+    )
+    .unwrap();
+    f.connect
+        .borrow_mut()
+        .extra_pins
+        .insert(node(4), identity(4));
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3, 4]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    f.attach();
+    let before = f.driver.as_ref().unwrap().roster().binding(node(2));
+    f.owner
+        .admit(
+            group(1),
+            Event::AuthorizeReplication {
+                witness: PeerIdentity {
+                    node: node(2),
+                    store: identity(2),
+                },
+                candidate: PeerIdentity {
+                    node: node(4),
+                    store: identity(4),
+                },
+                configuration: ConfigurationId::new(2).unwrap(),
+            },
+        )
+        .unwrap();
+    assert!(f.owner.advance(MonoTime(0), 1).unwrap()[0].error.is_none());
+    let lease = f.owner.take_effect().unwrap().unwrap();
+    assert!(f.owner.has_pending_send(node(2)));
+    let Effect::Send(query) = lease.effect else {
+        panic!("authority query");
+    };
+    let context = query.context;
+    f.outbound.submit(vec![query]).unwrap();
+    f.owner.release_transferred_send(lease.ticket).unwrap();
+    assert!(!f.owner.has_pending_send(node(2)));
+    let mut reply = message(2, 1);
+    reply.context = context;
+    reply.rpc = Rpc::AuthorityReply {
+        candidate: PeerIdentity {
+            node: node(4),
+            store: identity(4),
+        },
+        configuration: ConfigurationId::new(2).unwrap(),
+        committed_index: 1,
+        committed_term: 1,
+        granted: true,
+    };
+    f.owner.admit(group(1), Event::Receive(reply)).unwrap();
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_planned_membership(&f.owner, &f.outbound, MonoTime(0))
+        .unwrap();
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .peer_identity(node(4))
+        .is_none());
+    assert!(f.owner.advance(MonoTime(0), 1).unwrap()[0].error.is_none());
+    assert_eq!(
+        f.owner.core(group(1)).unwrap().membership().id(),
+        ConfigurationId::new(1).unwrap()
+    );
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_planned_membership(&f.owner, &f.outbound, MonoTime(0))
+        .unwrap();
+    assert_eq!(f.driver.as_ref().unwrap().roster().binding(node(2)), before);
+    f.poll(0).unwrap();
+    f.poll(0).unwrap();
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .binding(node(4))
+        .is_some());
+    assert!(f
+        .connect
+        .borrow()
+        .submitted
+        .iter()
+        .any(|t| t.peer.node == node(4)));
+    f.owner
+        .admit(group(1), Event::CancelReplicationAuthorization)
+        .unwrap();
+    f.owner.advance(MonoTime(0), 1).unwrap();
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_planned_membership(&f.owner, &f.outbound, MonoTime(0))
+        .unwrap();
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .binding(node(4))
+        .is_none());
+    assert_eq!(f.driver.as_ref().unwrap().roster().binding(node(2)), before);
+    assert_eq!(f.owner.reserved_connection_peers().unwrap(), Some(3));
+    f.close(0);
+    assert!(f.outbound.is_drained());
+}
+
+#[test]
+fn planned_retirement_waits_for_only_that_peers_original_outbound_credits() {
+    let mut f = Fixture::new();
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    f.attach();
+    let old = f.driver.as_ref().unwrap().roster().binding(node(2));
+    f.transports.borrow()[&node(2)].borrow_mut().blocked = true;
+    let accepted = f.enqueue(2);
+    let staged = f.enqueue(2);
+    f.poll(0).unwrap();
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_planned_membership(&f.owner, &f.outbound, MonoTime(0))
+        .unwrap();
+    assert_eq!(f.driver.as_ref().unwrap().roster().binding(node(2)), old);
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .binding(node(3))
+        .is_none());
+    assert_eq!(f.outbound.usage().batches, 2);
+    assert_eq!(
+        f.driver
+            .as_mut()
+            .unwrap()
+            .set_admission_routes(&mut f.owner, plan(&[]), MonoTime(0))
+            .err()
+            .unwrap()
+            .reason,
+        PeerDriverError::WrongBinding
+    );
+    f.transports.borrow()[&node(2)].borrow_mut().blocked = false;
+    let mut completed = Vec::new();
+    for _ in 0..4 {
+        completed.extend(f.poll(0).unwrap().completions);
+    }
+    for ticket in [accepted, staged] {
+        assert!(completed
+            .iter()
+            .any(|c| c.ticket == ticket && c.result == LocalSendResult::Sent));
+    }
+    assert!(f.outbound.is_drained());
+    f.driver
+        .as_mut()
+        .unwrap()
+        .reconcile_planned_membership(&f.owner, &f.outbound, MonoTime(0))
+        .unwrap();
+    assert!(f
+        .driver
+        .as_ref()
+        .unwrap()
+        .roster()
+        .binding(node(2))
+        .is_none());
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
     assert!(!f.owner.is_failed());
     f.close(0);
 }

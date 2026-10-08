@@ -512,6 +512,17 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
     let mut nodes = open(NativeOpenMode::Create);
     for node in &nodes {
         assert_eq!(node.peers().unwrap().roster().wire_version(), version);
+        assert_eq!(node.peers().unwrap().admission_routes().unwrap().len(), 2);
+        assert_eq!(
+            node.local()
+                .owner
+                .connection_budget()
+                .unwrap()
+                .provisioned_peers()
+                .unwrap()
+                .count(),
+            2
+        );
     }
     nodes[0].control(group(), NodeControl::Campaign).unwrap();
     let clock = Instant::now();
@@ -564,6 +575,22 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
             })
             .collect();
         node.reconcile_membership(routes, MonoTime(clock.elapsed().as_millis() as u64))
+            .unwrap_or_else(|r| panic!("{:?}", r.reason));
+        let mut retained = node.peers().unwrap().admission_routes().unwrap().clone();
+        let peer = *retained.keys().next().unwrap();
+        let store = retained[&peer].store;
+        retained.get_mut(&peer).unwrap().store.id = StoreId::new(999).unwrap();
+        let rejected = node
+            .set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
+            .err()
+            .unwrap();
+        assert_eq!(
+            rejected.reason,
+            voteboat::runtime::PeerDriverError::WrongBinding
+        );
+        let mut retained = rejected.routes;
+        retained.get_mut(&peer).unwrap().store = store;
+        node.set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
             .unwrap_or_else(|r| panic!("{:?}", r.reason));
         for (peer, binding) in before {
             assert_eq!(node.peers().unwrap().roster().binding(peer), Some(binding));
