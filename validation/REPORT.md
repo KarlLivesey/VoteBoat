@@ -70,3 +70,18 @@ The assignment import is a trusted host action, not proof of an online remote
 commit. Promoted-sender authorization, learner readiness, dynamic recovery and
 the distributed model/network membership gates remain unfinished. The local
 ballot model above is unchanged; no full proof or macOS/hardware claim is made.
+
+## Slice 41 reservation evidence
+
+The final default-feature library/runtime/effect-owner run passes 26/25/94 tests;
+the executable service/routing and downstream startup suites pass 6/5 tests.
+These are Linux checks, including actual loopback TLS/worker histories. Four new
+core fixtures cover prospective append/snapshot and intermediate joint fanout,
+rollback through learner/final shrink, committed shrink, compacted membership,
+checked overflow, pure inspection and continued rejection of online configuration
+ingress. Two downstream tests cover exact non-consuming queue selection and
+oversized-input rejection without queue/ticket/core/timer mutation, plus continued
+control service and admission under held output reservations. The core-only run
+passes 18/18/90 tests; its run preceded the final held-lease assertion checked in
+the default suite. This slice does not change the finite ballot model or establish
+distributed membership activation, macOS compatibility or performance evidence.

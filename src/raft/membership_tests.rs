@@ -1099,3 +1099,152 @@ fn configuration_changes_discard_old_request_authority_even_with_retained_peer_a
         Err(RaftError::WrongCompletion)
     ));
 }
+
+#[test]
+fn reservation_covers_rollback_until_the_shrink_is_committed() {
+    let mut leader = staged();
+    assert_eq!(leader.rollback_replicas(), 5);
+    let effects = accept(
+        &mut leader,
+        102,
+        ConfigurationChange::Learners(configuration(3, &[1, 2, 3], &[])),
+    );
+    durable(&mut leader, effects);
+    assert_eq!(leader.membership().replicas().count(), 3);
+    assert_eq!(leader.rollback_replicas(), 5);
+    assert_eq!(
+        leader.effect_reservation(100),
+        leader.reserve_effects(100, 5)
+    );
+    committed_fixture(&mut leader, 3);
+    assert_eq!(leader.rollback_replicas(), 3);
+    assert_eq!(
+        leader.effect_reservation(100),
+        leader.reserve_effects(100, 3)
+    );
+}
+
+#[test]
+fn reservation_covers_joint_rollback_and_compacted_membership() {
+    let mut leader = staged();
+    let effects = accept(
+        &mut leader,
+        103,
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: configuration(4, &[1, 2, 3], &[]),
+        },
+    );
+    durable(&mut leader, effects);
+    committed_fixture(&mut leader, 3);
+    let effects = accept(&mut leader, 103, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut leader, effects);
+    assert_eq!(leader.membership().replicas().count(), 3);
+    assert_eq!(leader.rollback_replicas(), 5);
+    committed_fixture(&mut leader, 4);
+    assert_eq!(leader.rollback_replicas(), 3);
+    let (compacted, _, _) = compacted_joint();
+    assert!(compacted.state().entries.is_empty());
+    assert_eq!(compacted.rollback_replicas(), 5);
+}
+
+#[test]
+fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress() {
+    let mut leader = core();
+    let before = leader.state().clone();
+    let message = reply(
+        &leader,
+        2,
+        RequestContext {
+            origin: leader.binding,
+            sequence: 500,
+        },
+        Rpc::Append {
+            previous_index: 1,
+            previous_term: 1,
+            leader_commit: 1,
+            entries: vec![LogEntry {
+                index: 2,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: operation(500),
+                    expected: cid(1),
+                    change: ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5, 6])),
+                })),
+            }],
+        },
+    );
+    let event = Event::Receive(message);
+    assert_eq!(
+        leader.event_effect_reservation(&event, 100),
+        leader.reserve_effects(100, 6)
+    );
+    assert_eq!(leader.state(), &before);
+    assert_eq!(leader.membership().id(), cid(1));
+    assert_eq!(leader.event_effect_reservation(&event, usize::MAX), None);
+    assert_eq!(leader.step(event), Err(RaftError::InvalidMessage));
+    assert_eq!(leader.state(), &before);
+    let (_, _, snapshot) = compacted_joint();
+    let event = Event::Receive(reply(
+        &leader,
+        2,
+        RequestContext {
+            origin: leader.binding,
+            sequence: 501,
+        },
+        Rpc::Snapshot {
+            snapshot: Box::new(snapshot),
+        },
+    ));
+    assert_eq!(
+        leader.event_effect_reservation(&event, 100),
+        leader.reserve_effects(100, 5)
+    );
+    assert_eq!(leader.state(), &before);
+}
+
+#[test]
+fn prospective_reservation_retains_intermediate_joint_fanout_after_final() {
+    let leader = core();
+    let changes = [
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5, 6])),
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: configuration(4, &[1, 2, 3], &[4]),
+        },
+        ConfigurationChange::Final { id: cid(4) },
+    ];
+    let entries = changes
+        .into_iter()
+        .enumerate()
+        .map(|(offset, change)| LogEntry {
+            index: offset as u64 + 2,
+            term: 1,
+            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                operation: operation(if offset == 0 { 701 } else { 702 }),
+                expected: cid(offset as u64 + 1),
+                change,
+            })),
+        })
+        .collect();
+    let event = Event::Receive(reply(
+        &leader,
+        2,
+        RequestContext {
+            origin: leader.binding,
+            sequence: 700,
+        },
+        Rpc::Append {
+            previous_index: 1,
+            previous_term: 1,
+            entries,
+            leader_commit: 3,
+        },
+    ));
+    // Conservative union bound (six old + four new), despite final shrink.
+    assert_eq!(
+        leader.event_effect_reservation(&event, 200),
+        leader.reserve_effects(200, 10)
+    );
+    assert_eq!(leader.rollback_replicas(), 3);
+}

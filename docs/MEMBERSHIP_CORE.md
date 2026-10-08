@@ -55,7 +55,7 @@ Raft's current-term rule; it is never the largest observed acknowledgement.
 | Configuration change | Clear old read authority and recollect volatile ballots/progress under fresh contexts. |
 | Local removal/demotion | No new proposals/reads/campaigns after accepted final; finish final commitment, then step down and clear leadership state once the final record is durable and committed. |
 | Node construction | Roster compatibility checks every effective replication assignment, including learners. This check grants no new network authorization. |
-| Output reservation | Counts all current replication identities, including learners. Prospective growth from an online input remains an explicit unfinished prerequisite. |
+| Output reservation | Includes voters/learners at the current head, rollback-reachable uncommitted prefixes and prospective incoming append/snapshot configurations. Owner admission and exact next-event checks precede execution; counting grants no configuration authority. |
 
 The implementation has no check-quorum, pre-vote, leader-transfer or separate
 "quorum available" subsystem. Those future sites must use the same configuration
@@ -85,15 +85,22 @@ A retiring leader's final propagation also needs end-to-end histories.
 Initial learner-only enrollment/restart now uses committed exact-store
 assignments and verified application recovery. Remaining prerequisites include
 dynamic-electorate recovery, application/storage compatibility and caught-up
-evidence, prospective fanout
-reservation before an expanding event, route/roster admission, the distributed
+evidence, route/roster admission, the distributed
 activation/ballot state-machine model and faulted native/host network histories.
 The bounded local ballot model is one prerequisite, not that complete model.
 The internal tests do not justify removing any of these gates.
 
+Output reservation now covers prospective fanout before an expanding event and
+rollback through an uncommitted shrink, including snapshot membership bases.
+Committed shrink stops budgeting obsolete configurations. Incoming journal
+counts conservatively bound intermediate joint unions without cloning or
+validating untrusted history; actual core membership validation remains mandatory.
+Any future administrative event must also describe its prospective fanout before
+its ingress gate can open.
+
 ## Evidence boundary
 
-Fourteen internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
+Eighteen internal tests in `src/raft/membership_tests.rs` drive the actual persistence,
 completion, election, append-acknowledgement, read, compaction and rollback
 helpers. Their deliberately prepared committed boundaries and host-asserted
 completion tokens isolate the core rules being checked. They do not exercise

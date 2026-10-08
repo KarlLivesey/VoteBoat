@@ -10,19 +10,29 @@ check rejects the wrong store binding and insufficient reservation limits.
 ## Reserve before execution
 
 Before stepping one ingress event, the owner reserves output space for that
-visit's event and subsequent durable completions. `Raft::effect_reservation`
+visit's event and subsequent durable completions. `Raft::event_effect_reservation`
 conservatively includes the current retained log, four input budgets, at most
-64 entries per replication append, append/read fan-out to the configured voter
-set, and metadata slack. It uses checked arithmetic and the selected log batch
+64 entries per replication append, append/read fan-out to voters and learners,
+and metadata slack. It includes configurations reachable by rolling back an
+uncommitted suffix and prospective growth in incoming append/snapshot data.
+`effect_reservation` bounds local rollback without incoming growth. Both use
+checked arithmetic and the selected log batch
 limit. The bound is tied to the current native core's effect paths, not an
 arbitrary provider's promise. Exactly one event runs in a visit. A larger log
 can require a larger reservation on a later visit; an estimate above the entire
 configured owner budget fences service before executing that event. Recovery
 with adequate budgets or future compaction/admission integration is required.
+Ingress first rejects an event whose prospective bound exceeds its total traffic
+class capacity, returning the original input with `EventTooLarge` before queue or
+ticket allocation. This check uses capacity, not currently available space. The
+owner rechecks the selected queued event immediately before execution because
+earlier work can grow the log or change membership. If that later bound no longer
+fits its entire class capacity, service is fenced before the event runs.
 
 Defaults allow 256 active visits and 256 MiB of conservative output reservation,
-with 16 visits and 32 MiB reserved against non-control input. `next_class` inspects
-the same bounded priority selection used by the runtime step. Bulk work cannot
+with 16 visits and 32 MiB reserved against non-control input. `next_class` and
+`next_effect_reservation` inspect the same bounded priority/byte/deadline selection
+used by the runtime step, without consuming the event or advancing the cursor. Bulk work cannot
 consume these control reserves. Control classification does not guarantee
 progress when every control consumer itself stalls; committed data can also be
 released by a control acknowledgement. Capacity saturation requeues an unstepped
@@ -34,7 +44,9 @@ including leased work. Effect-array accounting includes metadata growth slack.
 Core/log state, worker input/completions, outbound buffers, application state,
 host task results and socket/TLS/codec memory have separate budgets. This is
 not a process-wide RSS or CPU-duration guarantee. The reservation calculation
-walks the current log; no throughput or zero-overhead claim is made.
+walks the current log and incoming configuration records; no throughput or
+zero-overhead claim is made. Counting prospective replicas never authorizes a
+configuration: online membership ingress still has its protocol gates.
 
 ## Exact leases and persistence
 

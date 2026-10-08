@@ -2544,18 +2544,63 @@ contract, peer wire format or persistent format changed. The prior five startup
 conformance tests were not repeated. Linux only; no new macOS, separate-host or
 performance evidence is claimed. CI remains background feedback.
 
+## Slice 41 — prospective effect reservation through membership rollback
+
+Mini schema plan: derive an allocation-free replica bound from accepted state,
+rollback-reachable uncommitted prefixes and incoming configuration records.
+Inspect the exact next priority/byte/deadline choice without consuming it; reserve
+before executing. Reject oversized ingress with its original event before queue
+or ticket allocation. Retain existing protocol/durability gates and verify the
+usable static service alongside the core/runtime checks.
+
+Raft::effect_reservation now covers local rollback as well as the accepted head.
+A committed shrink releases obsolete fanout allowance; an uncommitted shrink or
+final record still budgets the larger predecessor. Snapshot membership is the
+initial replay view. Raft::event_effect_reservation additionally bounds incoming
+append configurations, including intermediate joint unions before final shrink,
+and incoming snapshot membership. Incoming joint counts are conservative upper
+bounds capped by the mandatory validated membership limit. This calculation
+allocates no replay state and grants no configuration authority.
+
+Shard and TimedShard expose next_effect_reservation. Selection, next_class and
+execution share one priority/byte/deadline helper, preserving the cursor across
+visits. EffectOwner checks prospective class capacity at ingress and rechecks the
+exact selected event before execution. Initial rejection returns EventTooLarge
+with the original input and no ticket, queue, core or timer mutation; it does not
+fence the owner. Admission uses total class capacity rather than free capacity,
+so other held effects do not incorrectly reject otherwise admissible input.
+Temporary reservation saturation still requeues an untouched event. If earlier
+work makes a queued event exceed its entire class capacity, execution is refused
+and the owner fences rather than leaving an impossible bulk visit queued forever.
+
+Four new core fixtures cover learner/final shrink rollback, committed shrink,
+compacted bases, append/snapshot growth, intermediate joint fanout, arithmetic
+overflow, pure inspection and the unchanged public configuration ingress gate.
+Downstream tests check exact priority selection, repeated non-consuming inspection,
+visit exhaustion/deadline/stale tickets, original-input rejection with no spent
+admission identity, continued control service and admission while a lease is held.
+
+Linux validation: final default-feature library/runtime/effect-owner run passes
+26 + 25 + 94 tests, including native TLS/worker histories. The first sandboxed run
+could not open loopback sockets; rerunning those checks with loopback permission
+passed. All six process-service/routing tests and five startup tests also pass.
+The core-only library/runtime/effect-owner run passes 18 + 18 + 90 tests; its run
+preceded the final additional held-lease assertion, which passes in the default
+run. Default all-target Clippy, native-only all-target compilation, API docs,
+formatting and diff checks pass. Persistent/wire formats and configuration gates
+are unchanged. No new storage optimization, formal model, macOS execution,
+separate-host deployment or performance claim is made; CI remains background.
+
 ## Next slice
 
-The static service/library path now has runnable commands, shared typed startup,
-configured peer addresses, verified restart/retry and local leader selection.
-Continue P4 with prospective output reservation before enabling configuration
-fanout or rollback, keeping the usable static baseline available throughout.
-
-Then complete the promoted-leader authorization protocol with replay-resistant group,
-configuration, term, store and committed/election provenance; a claimed head or
-well-formed learner-supplied configuration alone is insufficient. Complete voter
-and learner dynamic recovery, readiness evidence, prospective fanout reservation
-and retiring-leader final propagation before opening online configuration ingress.
-The distributed activation/ballot model and faulted actual network membership
-histories remain gates. Full P0–P7 stays active; recursive responsibilities,
-safe split/merge and P7 evidence remain outstanding.
+The static service/library path remains usable with runnable commands, typed
+startup, configured peer addresses, verified restart/retry and local leader
+selection. Continue P4 with promoted-leader authorization carrying replay-resistant
+group, configuration, term, store and committed/election provenance. A claimed
+head or well-formed learner-supplied configuration alone is insufficient.
+Complete dynamic voter/learner recovery, readiness evidence, retiring-leader final
+propagation and route/roster admission before opening online configuration ingress.
+Any new administrative event needs prospective reservation coverage. The
+distributed activation/ballot model and faulted actual network membership histories
+remain gates. Full P0–P7 stays active; recursive responsibilities, safe split/merge
+and broader P7 evidence remain outstanding.

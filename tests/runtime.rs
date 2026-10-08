@@ -2206,3 +2206,104 @@ fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replicatio
     assert_eq!(runtime.core(group(1)).unwrap().state().commit_index, 2);
     assert!(!runtime.core(group(1)).unwrap().local_voter());
 }
+
+#[test]
+fn prospective_reservation_peeks_the_exact_queue_choice_without_consumption() {
+    use voteboat::membership::*;
+    let (mut shard, _) = host_shard(HostReady::new(3));
+    let core = shard.core(group(1)).unwrap();
+    let before = core.state().clone();
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        before.bootstrap.policy.clone(),
+        before.bootstrap.voter_stores.clone(),
+        [(
+            node(4),
+            StoreIdentity {
+                id: StoreId::new(4).unwrap(),
+                incarnation: StoreIncarnation::new(1).unwrap(),
+            },
+        )]
+        .into_iter()
+        .collect(),
+    )
+    .unwrap();
+    let incoming = Event::Receive(Message {
+        group: group(1),
+        configuration: before.bootstrap.configuration,
+        from: node(2),
+        to: node(1),
+        sender: core.storage_binding(),
+        term: 1,
+        context: RequestContext {
+            origin: core.storage_binding(),
+            sequence: 1,
+        },
+        rpc: Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            leader_commit: 0,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: OperationId::new(700).unwrap(),
+                    expected: before.bootstrap.configuration,
+                    change: ConfigurationChange::Learners(next),
+                })),
+            }],
+        },
+    });
+    let ordinary = core
+        .effect_reservation(small_limits().max_event_bytes)
+        .unwrap();
+    let growth = core
+        .event_effect_reservation(&incoming, small_limits().max_event_bytes)
+        .unwrap();
+    assert!(growth > ordinary);
+    shard.admit(group(1), incoming).unwrap();
+    shard.admit(group(1), Event::Heartbeat).unwrap();
+    shard.admit(group(1), Event::Heartbeat).unwrap();
+    // Two control turns precede data. Repeated inspection must not move that cursor.
+    for expected in [ordinary, ordinary, growth] {
+        let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
+        let usage = shard.usage();
+        for _ in 0..3 {
+            assert_eq!(
+                shard.next_effect_reservation(visit, MonoTime(0)).unwrap(),
+                Some(expected)
+            );
+        }
+        assert_eq!(shard.usage(), usage);
+        assert_eq!(shard.core(group(1)).unwrap().state(), &before);
+        let step = shard.step_next(visit, MonoTime(0)).unwrap().unwrap();
+        if expected == growth {
+            assert_eq!(step.result, Err(RaftError::InvalidMessage));
+        } else {
+            assert!(step.result.unwrap().is_empty());
+        }
+        assert_eq!(
+            shard.next_effect_reservation(visit, MonoTime(0)).unwrap(),
+            None
+        );
+        shard.finish(visit).unwrap();
+        assert_eq!(
+            shard.next_effect_reservation(visit, MonoTime(0)),
+            Err(RuntimeError::StaleTicket)
+        );
+    }
+    assert!(shard.is_drained());
+    shard.admit(group(1), Event::Heartbeat).unwrap();
+    let visit = shard.poll(MonoTime(0)).unwrap().unwrap();
+    assert_eq!(
+        shard.next_effect_reservation(visit, MonoTime(5)).unwrap(),
+        None
+    );
+    assert!(shard.step_next(visit, MonoTime(5)).unwrap().is_none());
+    shard.finish(visit).unwrap();
+    assert_eq!(
+        shard.usage().items,
+        1,
+        "expired inspection leaves input queued"
+    );
+}

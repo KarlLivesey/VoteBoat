@@ -4664,3 +4664,97 @@ mod read_invocations {
         assert!(!owner.is_failed());
     }
 }
+
+#[test]
+fn prospective_fanout_rejection_returns_input_without_ticket_or_fencing() {
+    use voteboat::membership::*;
+    let mut store = HostLogStore::new(1);
+    let runtime = timed(1, &mut store, 1, 1);
+    let baseline = runtime
+        .core(group(1))
+        .unwrap()
+        .effect_reservation(runtime.limits().max_event_bytes)
+        .unwrap();
+    let worker = HostWorker::new(store);
+    let mut owner = EffectOwner::new(
+        runtime,
+        worker.binding(),
+        EffectOwnerLimits {
+            active_visits: 2,
+            control_visits: 1,
+            reserved_bytes: baseline + 1024,
+            control_bytes: 512,
+        },
+    )
+    .unwrap();
+    let before = owner.core(group(1)).unwrap().state().clone();
+    let initial = &before.bootstrap;
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        initial.policy.clone(),
+        initial.voter_stores.clone(),
+        (2..=30)
+            .map(|n| {
+                (
+                    node(n),
+                    StoreIdentity {
+                        id: StoreId::new(n as u128).unwrap(),
+                        incarnation: StoreIncarnation::new(1).unwrap(),
+                    },
+                )
+            })
+            .collect(),
+    )
+    .unwrap();
+    let event = Event::Receive(Message {
+        group: group(1),
+        configuration: initial.configuration,
+        from: node(1),
+        to: node(1),
+        sender: owner.worker_binding().store,
+        term: 1,
+        context: RequestContext {
+            origin: owner.worker_binding().store,
+            sequence: 1,
+        },
+        rpc: Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            leader_commit: 0,
+            entries: vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                    operation: OperationId::new(600).unwrap(),
+                    expected: initial.configuration,
+                    change: ConfigurationChange::Learners(next),
+                })),
+            }],
+        },
+    });
+    let timer = owner.deadline(group(1));
+    let rejection = owner.admit_tracked(group(1), event.clone()).unwrap_err();
+    assert_eq!(rejection.reason, RuntimeError::EventTooLarge);
+    assert_eq!(*rejection.event, event);
+    assert_eq!(owner.core(group(1)).unwrap().state(), &before);
+    assert_eq!(owner.deadline(group(1)), timer);
+    assert_eq!(owner.usage().reserved_bytes, 0);
+    assert!(!owner.is_failed());
+    assert!(owner.advance(MonoTime(0), 1).unwrap().is_empty());
+    let ticket = owner.admit_tracked(group(1), Event::Heartbeat).unwrap();
+    assert_eq!(
+        ticket.sequence, 1,
+        "rejection allocates no admission ticket"
+    );
+    let step = owner.advance(MonoTime(0), 1).unwrap().pop().unwrap();
+    assert_eq!(step.admission, Some(ticket));
+    assert!(step.error.is_none());
+    assert!(!owner.is_failed());
+    owner.admit(group(1), Event::Campaign).unwrap();
+    owner.advance(MonoTime(0), 1).unwrap();
+    let held = owner.take_effect().unwrap().unwrap();
+    assert!(owner.usage().reserved_bytes > 0);
+    owner.admit_tracked(group(1), Event::Heartbeat).unwrap();
+    assert!(owner.advance(MonoTime(0), 1).unwrap().is_empty());
+    assert!(matches!(held.effect, Effect::Persist(_)));
+}

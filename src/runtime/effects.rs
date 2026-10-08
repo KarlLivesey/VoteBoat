@@ -269,9 +269,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
     }
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
-        if self.failed.is_some() {
+        if let Err(reason) = self.check_input_reservation(group, &event) {
             return Err(Rejected {
-                reason: RuntimeError::Fenced,
+                reason,
                 event: Box::new(event),
             });
         }
@@ -282,13 +282,35 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         group: GroupIdentity,
         event: Event,
     ) -> Result<AdmissionTicket, Rejected> {
-        if self.failed.is_some() {
+        if let Err(reason) = self.check_input_reservation(group, &event) {
             return Err(Rejected {
-                reason: RuntimeError::Fenced,
+                reason,
                 event: Box::new(event),
             });
         }
         self.runtime.admit_tracked(group, event)
+    }
+    fn check_input_reservation(
+        &self,
+        group: GroupIdentity,
+        event: &Event,
+    ) -> Result<(), RuntimeError> {
+        if self.failed.is_some() {
+            return Err(RuntimeError::Fenced);
+        }
+        let (class, _) = self.runtime.admission_shape(group, event)?;
+        let capacity = if class == Class::Control {
+            self.limits.reserved_bytes
+        } else {
+            self.limits.reserved_bytes - self.limits.control_bytes
+        };
+        self.runtime
+            .core(group)
+            .unwrap()
+            .event_effect_reservation(event, self.runtime.limits().max_event_bytes)
+            .filter(|bound| *bound <= capacity)
+            .map(|_| ())
+            .ok_or(RuntimeError::EventTooLarge)
     }
     fn refresh(&mut self, group: GroupIdentity) -> Result<(), EffectOwnerError> {
         let a = self
@@ -374,12 +396,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
                 break;
             };
-            let reserved = self
+            let Some(reserved) = self
                 .runtime
-                .core(visit.group)
-                .unwrap()
-                .effect_reservation(self.runtime.limits().max_event_bytes)
-                .ok_or(EffectOwnerError::ReservationTooLarge)?;
+                .next_effect_reservation(visit, now)
+                .map_err(EffectOwnerError::Runtime)?
+            else {
+                self.runtime
+                    .finish(visit)
+                    .map_err(EffectOwnerError::Runtime)?;
+                continue;
+            };
             if reserved > self.limits.reserved_bytes {
                 return self.fail(EffectOwnerError::ReservationTooLarge);
             }
@@ -395,6 +421,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 .map_err(EffectOwnerError::Runtime)?
                 == Some(MessageClass::Control);
             if !control {
+                if reserved > self.limits.reserved_bytes - self.limits.control_bytes {
+                    return self.fail(EffectOwnerError::ReservationTooLarge);
+                }
                 let bulk_count = self.active.values().filter(|a| !a.control).count();
                 let bulk_bytes = self
                     .active

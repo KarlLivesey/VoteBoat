@@ -302,6 +302,22 @@ impl Group {
     fn ready(&self) -> bool {
         self.queues.iter().any(|q| !q.is_empty())
     }
+    fn next_queued(&self, limits: ShardLimits, now: MonoTime) -> Option<(usize, usize)> {
+        let visit = self.visit.as_ref()?;
+        let used = sum(&visit.used);
+        if now >= visit.deadline || used.items >= limits.visit_items {
+            return None;
+        }
+        // Cursor survives visits, including visit_items=1.
+        const ORDER: [usize; 4] = [0, 0, 1, 2];
+        (0..4)
+            .map(|offset| (self.turn + offset, ORDER[(self.turn + offset) % 4]))
+            .find(|(_, c)| {
+                self.queues[*c]
+                    .front()
+                    .is_some_and(|q| q.cost <= limits.visit_bytes.saturating_sub(used.bytes))
+            })
+    }
 }
 fn sum(usages: &[Usage; 3]) -> Usage {
     Usage {
@@ -420,12 +436,10 @@ impl<Q: ReadyScheduler> Shard<Q> {
         self.usage().items == 0 && self.active_visits() == 0
     }
 
-    fn admit_inner(
-        &mut self,
+    fn admission_shape(
+        &self,
         group: GroupIdentity,
         event: &Event,
-        timer: Option<TimerToken>,
-        tracked: bool,
     ) -> Result<(Class, usize), RuntimeError> {
         if self.closed {
             return Err(RuntimeError::Closed);
@@ -437,7 +451,17 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if matches!(event, Event::Receive(m) if m.group != group) {
             return Err(RuntimeError::WrongOwner);
         }
-        let (class, mut cost) = event_cost(event, self.limits.max_event_bytes)?;
+        event_cost(event, self.limits.max_event_bytes)
+    }
+    fn admit_inner(
+        &mut self,
+        group: GroupIdentity,
+        event: &Event,
+        timer: Option<TimerToken>,
+        tracked: bool,
+    ) -> Result<(Class, usize), RuntimeError> {
+        let (class, mut cost) = self.admission_shape(group, event)?;
+        let g = self.groups.get(&group).unwrap();
         if tracked {
             cost = cost
                 .checked_add(size_of::<AdmissionTicket>())
@@ -619,24 +643,35 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if g.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
         }
-        let visit = g.visit.as_ref().unwrap();
-        let used = sum(&visit.used);
-        if now >= visit.deadline || used.items >= limits.visit_items {
-            return Ok(None);
+        Ok(g.next_queued(limits, now).map(|(_, c)| match c {
+            0 => MessageClass::Control,
+            1 => MessageClass::Data,
+            _ => MessageClass::Background,
+        }))
+    }
+    /// Non-consuming reservation for the exact next priority/byte-budget choice.
+    /// Recheck immediately before stepping: earlier visits can change membership.
+    pub fn next_effect_reservation(
+        &mut self,
+        ticket: VisitTicket,
+        now: MonoTime,
+    ) -> Result<Option<usize>, RuntimeError> {
+        self.observe(now)?;
+        let limits = self.limits;
+        let g = self.live(ticket)?;
+        if g.core.has_pending_dependency() {
+            return Err(RuntimeError::DependencyPending);
         }
-        const ORDER: [usize; 4] = [0, 0, 1, 2];
-        Ok((0..4)
-            .map(|offset| ORDER[(g.turn + offset) % 4])
-            .find(|c| {
-                g.queues[*c]
-                    .front()
-                    .is_some_and(|q| q.cost <= limits.visit_bytes.saturating_sub(used.bytes))
+        g.next_queued(limits, now)
+            .map(|(_, c)| {
+                g.core
+                    .event_effect_reservation(
+                        &g.queues[c].front().unwrap().event,
+                        limits.max_event_bytes,
+                    )
+                    .ok_or(RuntimeError::EventTooLarge)
             })
-            .map(|c| match c {
-                0 => MessageClass::Control,
-                1 => MessageClass::Data,
-                _ => MessageClass::Background,
-            }))
+            .transpose()
     }
     /// Effects become the host worker's owned responsibility. Host bounds its
     /// output queues and applies committed entries before client success. A
@@ -660,22 +695,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if g.core.has_pending_dependency() {
             return Err(RuntimeError::DependencyPending);
         }
-        let v = g.visit.as_ref().unwrap();
-        let used = sum(&v.used);
-        if now >= v.deadline || used.items >= limits.visit_items {
-            return Ok(None);
-        }
-        // Bounded priority: two control turns, one data turn, one background.
-        // The cursor survives visits so visit_items=1 cannot starve replay/data.
-        const ORDER: [usize; 4] = [0, 0, 1, 2];
-        let Some((turn, class)) = (0..4)
-            .map(|offset| (g.turn + offset, ORDER[(g.turn + offset) % 4]))
-            .find(|(_, c)| {
-                g.queues[*c]
-                    .front()
-                    .is_some_and(|q| q.cost <= limits.visit_bytes.saturating_sub(used.bytes))
-            })
-        else {
+        let Some((turn, class)) = g.next_queued(limits, now) else {
             return Ok(None);
         };
         g.turn = (turn + 1) % 4;

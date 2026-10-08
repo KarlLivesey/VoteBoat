@@ -391,6 +391,28 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.check()?;
         self.shard.next_class(visit, now)
     }
+    pub fn next_effect_reservation(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+    ) -> Result<Option<usize>, RuntimeError> {
+        self.check()?;
+        self.shard.next_effect_reservation(visit, now)
+    }
+    pub(super) fn admission_shape(
+        &self,
+        group: GroupIdentity,
+        event: &Event,
+    ) -> Result<(Class, usize), RuntimeError> {
+        self.check()?;
+        if self.shard.core(group).is_some_and(Raft::is_fenced) {
+            return Err(RuntimeError::Fenced);
+        }
+        if self.closed {
+            return Err(RuntimeError::Closed);
+        }
+        self.shard.admission_shape(group, event)
+    }
     pub fn with_core<R>(
         &mut self,
         visit: VisitTicket,

@@ -431,9 +431,106 @@ impl Raft {
     /// completions. The owner must bound input retention by `input_bytes`, drain
     /// each output batch before another completion, and run only one event in
     /// the visit. Core/log memory and host snapshot-worker buffers are separate.
-    /// This covers current replicas only. Online configuration growth remains
-    /// gated until its prospective fanout can be reserved before execution.
+    /// Covers the accepted head and every configuration reachable by truncating
+    /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {
+        self.reserve_effects(input_bytes, self.rollback_replicas())
+    }
+    /// Reserve before executing an event, including prospective membership in
+    /// incoming append/snapshot data. This is a memory bound, never authority to
+    /// accept that data; configuration ingress still has its protocol gates.
+    pub fn event_effect_reservation(&self, event: &Event, input_bytes: usize) -> Option<usize> {
+        use crate::membership::ConfigurationChange;
+        let mut peers = self.rollback_replicas();
+        if let Event::Receive(message) = event {
+            match &message.rpc {
+                Rpc::Append { entries, .. } => {
+                    // Any surviving prefix may be the append's starting view.
+                    // Count bounds avoid cloning/replaying untrusted history.
+                    let mut stable = peers;
+                    let mut joint = None;
+                    for entry in entries {
+                        if let EntryPayload::Configuration(record) = &entry.payload {
+                            match &record.change {
+                                ConfigurationChange::Learners(next) => {
+                                    stable = next.voter_stores().len() + next.learners().len();
+                                    joint = None;
+                                }
+                                ConfigurationChange::Joint { next, .. } => {
+                                    joint = Some(next.voter_stores().len() + next.learners().len());
+                                }
+                                ConfigurationChange::Final { .. } => {
+                                    stable = joint.take().unwrap_or(stable);
+                                }
+                            }
+                            // Validated membership limits the union to this cap.
+                            // Invalid histories are rejected before fanout.
+                            peers = peers.max(
+                                (stable + joint.unwrap_or(0))
+                                    .min(crate::quorum::Limits::default().max_voters),
+                            );
+                        }
+                    }
+                }
+                Rpc::Snapshot { snapshot } => {
+                    if let Some(base) = &snapshot.metadata.membership {
+                        peers = peers.max(base.replicas().count());
+                    }
+                }
+                _ => (),
+            }
+        }
+        self.reserve_effects(input_bytes, peers)
+    }
+    fn rollback_replicas(&self) -> usize {
+        use crate::membership::ConfigurationChange;
+        let base = self.durable.snapshot_membership.as_deref();
+        let mut stable = base.map(Membership::stable);
+        let mut joint = base.and_then(Membership::joint).map(|j| &j.next);
+        let count = |stable: Option<&crate::membership::Configuration>,
+                     joint: Option<&crate::membership::Configuration>| {
+            let mut count = stable.map_or(self.durable.bootstrap.voter_stores.len(), |c| {
+                c.voter_stores().len() + c.learners().len()
+            });
+            if let Some(next) = joint {
+                count += next
+                    .voter_stores()
+                    .keys()
+                    .chain(next.learners().keys())
+                    .filter(|node| {
+                        stable.map_or_else(
+                            || !self.durable.bootstrap.voter_stores.contains_key(node),
+                            |c| {
+                                !c.voter_stores().contains_key(node)
+                                    && !c.learners().contains_key(node)
+                            },
+                        )
+                    })
+                    .count();
+            }
+            count
+        };
+        let mut maximum = self.membership().replicas().count();
+        for entry in &self.durable.entries {
+            if entry.index > self.durable.commit_index {
+                maximum = maximum.max(count(stable, joint));
+            }
+            if let EntryPayload::Configuration(record) = &entry.payload {
+                match &record.change {
+                    ConfigurationChange::Learners(next) => {
+                        stable = Some(next);
+                        joint = None;
+                    }
+                    ConfigurationChange::Joint { next, .. } => joint = Some(next),
+                    ConfigurationChange::Final { .. } => {
+                        stable = joint.take().or(stable);
+                    }
+                }
+            }
+        }
+        maximum.max(count(stable, joint))
+    }
+    fn reserve_effects(&self, input_bytes: usize, peers: usize) -> Option<usize> {
         use std::mem::size_of;
         let mut log = self
             .durable
@@ -449,7 +546,6 @@ impl Raft {
         // A heartbeat can produce append and read probes for every peer. Each
         // append contains at most 64 entries and max_batch_bytes payload/framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.
-        let peers = self.membership().replicas().count();
         let message = self
             .limits
             .max_batch_bytes
