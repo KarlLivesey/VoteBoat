@@ -1478,3 +1478,422 @@ fn retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_h
     );
     assert_eq!(receiver.state().commit_index, 4);
 }
+
+fn authority_query(receiver: &mut Raft, head: u64) -> Message {
+    one_reply(
+        receiver
+            .step(Event::AuthorizeReplication {
+                witness: PeerIdentity {
+                    node: node(1),
+                    store: store(1),
+                },
+                candidate: PeerIdentity {
+                    node: node(4),
+                    store: store(4),
+                },
+                configuration: cid(head),
+            })
+            .unwrap(),
+    )
+}
+fn authority_witness() -> Raft {
+    let mut witness = joint(false);
+    committed_fixture(&mut witness, 3);
+    witness
+}
+fn promoted_message(receiver: &Raft, head: u64, rpc: Rpc) -> Message {
+    let mut message = reply(
+        receiver,
+        4,
+        RequestContext {
+            origin: StoreBinding {
+                identity: store(4),
+                session: StoreSession::new(1).unwrap(),
+            },
+            sequence: 41,
+        },
+        rpc,
+    );
+    message.configuration = cid(head);
+    message
+}
+#[test]
+fn witnessed_promoted_leader_catches_up_only_after_exact_durability() {
+    let mut receiver = follower(staged(), 2);
+    let mut witness = authority_witness();
+    let replication = promoted_message(
+        &receiver,
+        3,
+        Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![witness.durable.entries[2].clone()],
+            leader_commit: 3,
+        },
+    );
+    assert_eq!(
+        receiver.receive_inner(replication.clone()),
+        Err(RaftError::WrongIdentity)
+    );
+    let before = (
+        receiver.durable.clone(),
+        receiver.role(),
+        receiver.election_reset_sequence(),
+    );
+    let query = authority_query(&mut receiver, 3);
+    let grant = one_reply(witness.step(Event::Receive(query)).unwrap());
+    assert!(matches!(
+        grant.rpc,
+        Rpc::AuthorityReply {
+            granted: true,
+            committed_index: 3,
+            ..
+        }
+    ));
+    assert!(receiver.step(Event::Receive(grant)).unwrap().is_empty());
+    assert_eq!(
+        (
+            receiver.durable.clone(),
+            receiver.role(),
+            receiver.election_reset_sequence()
+        ),
+        before
+    );
+    // The public activation gate remains closed even with a permit.
+    assert_eq!(
+        receiver.step(Event::Receive(replication.clone())),
+        Err(RaftError::InvalidMessage)
+    );
+    let effects = receiver.receive_inner(replication).unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert!(receiver.replication_permit.is_some());
+    assert_eq!(receiver.durable.last_index(), 2);
+    let completed = durable(&mut receiver, effects);
+    assert!(completed.iter().any(|effect| matches!(
+        effect,
+        Effect::Send(Message {
+            rpc: Rpc::Appended { success: true, .. },
+            ..
+        })
+    )));
+    assert_eq!(receiver.membership().id(), cid(3));
+    assert_eq!(receiver.durable.commit_index, 3);
+    assert!(receiver.replication_permit.is_none());
+}
+#[test]
+fn witness_never_grants_from_accepted_uncommitted_promotion_or_future_head() {
+    for (commit, head, granted) in [(2, 3, false), (3, 3, true), (3, 4, true), (3, 5, false)] {
+        let mut witness = joint(false);
+        if commit == 3 {
+            committed_fixture(&mut witness, 3);
+        }
+        let mut receiver = follower(staged(), 2);
+        let mut query = authority_query(&mut receiver, head);
+        query.term = 99; // Control traffic cannot force a term update.
+        let before = (
+            witness.durable.clone(),
+            witness.role(),
+            witness.election_reset_sequence(),
+        );
+        let result = one_reply(witness.step(Event::Receive(query)).unwrap());
+        assert!(
+            matches!(result.rpc, Rpc::AuthorityReply { granted: actual, .. } if actual == granted)
+        );
+        assert_eq!(
+            (
+                witness.durable.clone(),
+                witness.role(),
+                witness.election_reset_sequence()
+            ),
+            before
+        );
+        receiver.step(Event::Receive(result)).unwrap();
+        assert_eq!(receiver.replication_permit.is_some(), granted);
+    }
+}
+#[test]
+fn witness_reply_is_bound_to_exact_pending_request_and_local_restart_session() {
+    let mut witness = authority_witness();
+    let mut receiver = follower(staged(), 2);
+    let query = authority_query(&mut receiver, 3);
+    let grant = one_reply(witness.step(Event::Receive(query.clone())).unwrap());
+    let mut invalid = Vec::new();
+    let mut message = grant.clone();
+    message.from = node(3);
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.sender.identity = store(9);
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.context.sequence += 1;
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.context.origin.session = StoreSession::new(2).unwrap();
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.configuration = cid(1);
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.group.incarnation = GroupIncarnation::new(2).unwrap();
+    invalid.push(message);
+    let mut message = grant.clone();
+    message.to = node(3);
+    invalid.push(message);
+    let mut message = grant.clone();
+    if let Rpc::AuthorityReply { candidate, .. } = &mut message.rpc {
+        candidate.store = store(9);
+    }
+    invalid.push(message);
+    let mut message = grant.clone();
+    if let Rpc::AuthorityReply { committed_term, .. } = &mut message.rpc {
+        *committed_term = 99;
+    }
+    invalid.push(message);
+    let mut message = grant.clone();
+    if let Rpc::AuthorityReply {
+        committed_index, ..
+    } = &mut message.rpc
+    {
+        *committed_index = receiver.membership().last_configuration_index();
+    }
+    invalid.push(message);
+    for message in invalid {
+        assert!(receiver.step(Event::Receive(message)).is_err());
+        assert!(receiver.authority_request.is_some());
+        assert!(receiver.replication_permit.is_none());
+    }
+    assert_eq!(
+        receiver.step(Event::AuthorizeReplication {
+            witness: PeerIdentity {
+                node: node(1),
+                store: store(1)
+            },
+            candidate: PeerIdentity {
+                node: node(4),
+                store: store(4)
+            },
+            configuration: cid(3),
+        }),
+        Err(RaftError::Busy)
+    );
+    receiver
+        .step(Event::CancelReplicationAuthorization)
+        .unwrap();
+    let newer = authority_query(&mut receiver, 3);
+    assert_ne!(query.context, newer.context);
+    assert_eq!(
+        receiver.step(Event::Receive(grant.clone())),
+        Err(RaftError::WrongIdentity)
+    );
+    let mut binding = receiver.binding;
+    binding.session = StoreSession::new(2).unwrap();
+    let mut recovered =
+        Raft::recover_member(node(2), binding, receiver.durable.clone(), receiver.limits).unwrap();
+    let after_restart = authority_query(&mut recovered, 3);
+    assert_ne!(after_restart.context.origin, grant.context.origin);
+    assert_eq!(
+        recovered.step(Event::Receive(grant)),
+        Err(RaftError::WrongIdentity)
+    );
+}
+#[test]
+fn permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads() {
+    let mut receiver = follower(staged(), 2);
+    let mut witness = authority_witness();
+    let query = authority_query(&mut receiver, 3);
+    let grant = one_reply(witness.step(Event::Receive(query)).unwrap());
+    receiver.step(Event::Receive(grant.clone())).unwrap();
+    assert_eq!(
+        receiver.step(Event::Receive(grant)),
+        Err(RaftError::WrongIdentity)
+    );
+    for rpc in [
+        Rpc::ReadProbe,
+        Rpc::Vote {
+            last_index: 3,
+            last_term: 1,
+        },
+        Rpc::ReadAck,
+    ] {
+        assert_eq!(
+            receiver.step(Event::Receive(promoted_message(&receiver, 3, rpc))),
+            Err(RaftError::WrongIdentity)
+        );
+    }
+    let probe = promoted_message(
+        &receiver,
+        3,
+        Rpc::Append {
+            previous_index: 3,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 3,
+        },
+    );
+    let before = receiver.election_reset_sequence();
+    let reply = one_reply(receiver.step(Event::Receive(probe.clone())).unwrap());
+    assert!(matches!(reply.rpc, Rpc::Appended { success: false, .. }));
+    assert!(receiver.replication_permit.is_some());
+    assert!(receiver.election_reset_sequence() > before);
+    let mut wrong = probe.clone();
+    wrong.configuration = cid(4);
+    assert_eq!(
+        receiver.step(Event::Receive(wrong)),
+        Err(RaftError::WrongIdentity)
+    );
+    let mut wrong = probe.clone();
+    wrong.sender.identity = store(9);
+    wrong.context.origin = wrong.sender;
+    assert_eq!(
+        receiver.step(Event::Receive(wrong)),
+        Err(RaftError::WrongIdentity)
+    );
+    receiver
+        .step(Event::CancelReplicationAuthorization)
+        .unwrap();
+    assert_eq!(
+        receiver.step(Event::Receive(probe)),
+        Err(RaftError::WrongIdentity)
+    );
+}
+#[test]
+fn witness_requires_authenticated_historical_assignment_and_surviving_history() {
+    let mut receiver = follower(staged(), 2);
+    let mut witness = authority_witness();
+    let query = authority_query(&mut receiver, 3);
+    let mut wrong = query.clone();
+    wrong.sender.identity = store(9);
+    wrong.context.origin = wrong.sender;
+    assert_eq!(
+        witness.step(Event::Receive(wrong)),
+        Err(RaftError::WrongIdentity)
+    );
+    let mut wrong = query.clone();
+    wrong.context.origin.session = StoreSession::new(2).unwrap();
+    assert_eq!(
+        witness.step(Event::Receive(wrong)),
+        Err(RaftError::WrongIdentity)
+    );
+    let mut wrong = query.clone();
+    wrong.configuration = cid(9);
+    assert_eq!(
+        witness.step(Event::Receive(wrong)),
+        Err(RaftError::WrongIdentity)
+    );
+    // A now-retired witness retains authority to describe its committed history.
+    let effects = accept(&mut witness, 101, ConfigurationChange::Final { id: cid(4) });
+    durable(&mut witness, effects);
+    committed_fixture(&mut witness, 4);
+    let mut final_query = query;
+    if let Rpc::AuthorityRequest { configuration, .. } = &mut final_query.rpc {
+        *configuration = cid(4);
+    }
+    assert!(matches!(
+        one_reply(witness.step(Event::Receive(final_query)).unwrap()).rpc,
+        Rpc::AuthorityReply { granted: true, .. }
+    ));
+}
+
+#[test]
+fn witness_compaction_preserves_only_the_locally_retained_authorization_base() {
+    let mut witness = authority_witness();
+    let mut receiver = follower(staged(), 2);
+    let query = authority_query(&mut receiver, 3);
+    let reference = SnapshotRef {
+        store: store(1),
+        group: witness.state().bootstrap.group,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: cid(2),
+        index: 2,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 128,
+        checksum: 7,
+    };
+    // Host-verified pin fixture, as in the other core compaction histories.
+    let effects = witness.begin_compact(reference).unwrap();
+    durable(&mut witness, effects);
+    assert!(matches!(
+        one_reply(witness.step(Event::Receive(query.clone())).unwrap()).rpc,
+        Rpc::AuthorityReply { granted: true, .. }
+    ));
+    let effects = witness
+        .begin_compact(SnapshotRef {
+            configuration: cid(3),
+            index: 3,
+            generation: SnapshotGeneration::new(2).unwrap(),
+            ..reference
+        })
+        .unwrap();
+    durable(&mut witness, effects);
+    assert_eq!(
+        witness.step(Event::Receive(query)),
+        Err(RaftError::WrongIdentity)
+    );
+}
+
+#[test]
+fn promoted_term_observation_waits_for_storage_and_retains_same_base_permit() {
+    let mut receiver = follower(staged(), 2);
+    let mut witness = authority_witness();
+    let query = authority_query(&mut receiver, 4);
+    let grant = one_reply(witness.step(Event::Receive(query)).unwrap());
+    receiver.step(Event::Receive(grant)).unwrap();
+    let mut probe = promoted_message(
+        &receiver,
+        4,
+        Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 2,
+        },
+    );
+    probe.term = 2;
+    let effects = receiver.step(Event::Receive(probe.clone())).unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert_eq!(receiver.state().hard_state.term, 1);
+    assert!(receiver.replication_permit.is_some());
+    assert_eq!(
+        receiver.complete(&DurableLog { tickets: vec![] }),
+        Err(RaftError::WrongCompletion)
+    );
+    let result = durable(&mut receiver, effects);
+    assert!(matches!(
+        one_reply(result).rpc,
+        Rpc::Appended {
+            success: true,
+            matching_index: 2
+        }
+    ));
+    assert_eq!(receiver.state().hard_state.term, 2);
+    assert!(receiver.replication_permit.is_some());
+    receiver.storage_failed();
+    assert!(receiver.authority_request.is_none());
+    assert!(receiver.replication_permit.is_none());
+    assert_eq!(receiver.step(Event::Receive(probe)), Err(RaftError::Fenced));
+}
+#[test]
+fn in_flight_promotion_cannot_emit_witness_evidence_before_completion() {
+    let mut receiver = follower(staged(), 2);
+    let query = authority_query(&mut receiver, 3);
+    let mut witness = staged();
+    let effects = accept(
+        &mut witness,
+        101,
+        ConfigurationChange::Joint {
+            id: cid(3),
+            next: configuration(4, &[2, 3, 4], &[1, 5]),
+        },
+    );
+    assert_eq!(witness.membership().id(), cid(3));
+    assert_eq!(
+        witness.step(Event::Receive(query.clone())),
+        Err(RaftError::Busy)
+    );
+    durable(&mut witness, effects);
+    assert!(matches!(
+        one_reply(witness.step(Event::Receive(query)).unwrap()).rpc,
+        Rpc::AuthorityReply { granted: false, .. }
+    ));
+}

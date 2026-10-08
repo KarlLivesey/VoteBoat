@@ -835,3 +835,176 @@ fn failed_retirement_commit_barriers_release_no_reply_and_recover_whole_boundari
         }
     }
 }
+
+fn authority_transfer(message: &Message) -> Message {
+    #[cfg(feature = "native")]
+    {
+        use voteboat::{native::wire::NativeWireCodec, wire::*};
+        let codec = NativeWireCodec::with_authority(WireLimits::default()).unwrap();
+        let scope = WireScope {
+            from: message.from,
+            sender: message.sender,
+            to: message.to,
+        };
+        let bytes = codec
+            .encode_batch(scope, std::slice::from_ref(message))
+            .unwrap();
+        codec.decode_batch(scope, &bytes).unwrap().remove(0)
+    }
+    #[cfg(not(feature = "native"))]
+    message.clone()
+}
+fn witnessed_replication<S: LogStore>(witness_log: &mut S) {
+    use voteboat::secure::PeerIdentity;
+    prepare(witness_log, false, false);
+    commit(witness_log, 2);
+    let mut witness = Raft::recover_member(
+        node(1),
+        witness_log.binding(),
+        witness_log.state(group(1)).unwrap(),
+        witness_log.limits(),
+    )
+    .unwrap();
+    let mut receiver_log = HostLogStore::new(3);
+    append(
+        &mut receiver_log,
+        vec![LogMutation::Create(bootstrap(1, 3))],
+    );
+    record(
+        &mut receiver_log,
+        2,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
+        1,
+    );
+    let mut receiver = Raft::recover_member(
+        node(3),
+        receiver_log.binding(),
+        receiver_log.state(group(1)).unwrap(),
+        receiver_log.limits(),
+    )
+    .unwrap();
+    let before = receiver.state().clone();
+    let reset = receiver.election_reset_sequence();
+    let query = receiver
+        .step(Event::AuthorizeReplication {
+            witness: PeerIdentity {
+                node: node(1),
+                store: witness_log.binding().identity,
+            },
+            candidate: PeerIdentity {
+                node: node(4),
+                store: identity(4),
+            },
+            configuration: cid(3),
+        })
+        .unwrap();
+    let [Effect::Send(query)] = query.as_slice() else {
+        panic!()
+    };
+    let reply = witness
+        .step(Event::Receive(authority_transfer(query)))
+        .unwrap();
+    let [Effect::Send(reply)] = reply.as_slice() else {
+        panic!()
+    };
+    assert!(matches!(
+        reply.rpc,
+        Rpc::AuthorityReply {
+            granted: true,
+            committed_index: 2,
+            ..
+        }
+    ));
+    receiver
+        .step(Event::Receive(authority_transfer(reply)))
+        .unwrap();
+    assert_eq!(receiver.state(), &before);
+    assert_eq!(receiver.election_reset_sequence(), reset);
+    let sender = StoreBinding {
+        identity: identity(4),
+        session: StoreSession::new(1).unwrap(),
+    };
+    let probe = Message {
+        group: group(1),
+        configuration: cid(3),
+        from: node(4),
+        sender,
+        to: node(3),
+        term: 1,
+        context: RequestContext {
+            origin: sender,
+            sequence: 10,
+        },
+        rpc: Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 2,
+        },
+    };
+    let result = receiver.step(Event::Receive(probe.clone())).unwrap();
+    assert!(matches!(
+        result.as_slice(),
+        [Effect::Send(Message {
+            rpc: Rpc::Appended { success: false, .. },
+            ..
+        })]
+    ));
+    receiver.storage_failed();
+    assert_eq!(
+        receiver.step(Event::Receive(probe.clone())),
+        Err(RaftError::Fenced)
+    );
+    let mut receiver = Raft::recover_member(
+        node(3),
+        receiver_log.binding(),
+        before,
+        receiver_log.limits(),
+    )
+    .unwrap();
+    assert_eq!(
+        receiver.step(Event::Receive(probe)),
+        Err(RaftError::WrongIdentity)
+    );
+}
+#[test]
+fn host_witness_authorizes_only_volatile_replication_through_public_contracts() {
+    witnessed_replication(&mut HostLogStore::new(1));
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_witness_authorizes_only_volatile_replication_through_public_contracts() {
+    use voteboat::native::log_store::*;
+    witnessed_replication(
+        &mut NativeLogStore::create(ModelIo::default(), identity(1), LogLimits::default()).unwrap(),
+    );
+}
+#[test]
+fn term_zero_replica_can_query_without_advancing_hard_state() {
+    use voteboat::secure::PeerIdentity;
+    let mut log = HostLogStore::new(2);
+    append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let state = log.state(group(1)).unwrap();
+    let mut receiver = Raft::recover(node(2), log.binding(), state.clone(), log.limits()).unwrap();
+    let result = receiver
+        .step(Event::AuthorizeReplication {
+            witness: PeerIdentity {
+                node: node(1),
+                store: identity(1),
+            },
+            candidate: PeerIdentity {
+                node: node(4),
+                store: identity(4),
+            },
+            configuration: cid(2),
+        })
+        .unwrap();
+    assert!(matches!(
+        result.as_slice(),
+        [Effect::Send(Message { term: 1, .. })]
+    ));
+    assert_eq!(receiver.state(), &state);
+    receiver
+        .step(Event::CancelReplicationAuthorization)
+        .unwrap();
+}

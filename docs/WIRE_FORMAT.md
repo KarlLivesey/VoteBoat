@@ -1,8 +1,10 @@
-# Native wire formats 1 and 2
+# Native wire formats 1–3
 
 `NativeWireCodec::new` selects wire version 1 for existing static-configuration
 assemblies. `NativeWireCodec::with_membership` explicitly selects version 2,
-adding configuration entries and configuration-aware snapshots. Both implement
+adding configuration entries and configuration-aware snapshots.
+`NativeWireCodec::with_authority` selects version 3, retaining format 2 payloads
+and adding direct witness authorization. All implement
 `WireCodec` with a fixed 24-byte prefix. A selected codec accepts only its own
 version; session/roster wire versions must match before transport admission.
 There is no automatic downgrade. Codec capability does not enable online Raft
@@ -25,7 +27,7 @@ choose that trusted scope. This codec does not authenticate a connection.
 | Offset | Bytes | Meaning |
 | --- | --- | --- |
 | 0 | 8 | ASCII `VBWIRE01` |
-| 8 | 2 | Wire version, 1 or 2 as explicitly selected |
+| 8 | 2 | Wire version, 1, 2 or 3 as explicitly selected |
 | 10 | 2 | Flags, 0 |
 | 12 | 4 | Total frame bytes, including prefix and final checksum |
 | 16 | 4 | Message count, positive |
@@ -196,3 +198,24 @@ queues and decoded ingress have separate ownership/budgets. No network I/O is
 implemented here. Successful decode establishes no new consensus authority:
 the core still validates membership, term/configuration, log provenance and
 fresh read contexts. Production assembly must supply authenticated sessions.
+
+## Format 3 direct witness extensions
+
+Format 3 retains all format 2 layouts and adds RPC tags 10/11. Native session
+startup still selects format 1; hosts must explicitly negotiate matching format
+3 sessions. There is no automatic upgrade or fallback.
+
+- Kind 10, AuthorityRequest: candidate node (`u64`), store ID (16 bytes), store
+  incarnation (`u64`), requested configuration (`u64`).
+- Kind 11, AuthorityReply: the same fields, committed index (`u64`), committed
+  term (`u64`), granted (one Boolean byte).
+
+The candidate differs from both envelope nodes, and the requested configuration
+is newer than the envelope's base configuration. Request context origin equals
+the authenticated sender binding. Granted boundaries are positive and term is at
+most the envelope term; denied boundaries are both zero. The receiver matches
+replies against its fresh pending context and exact trusted witness store.
+Formats 1/2 reject these tags even in relabelled, resealed frames. Format 3 keeps
+existing membership snapshot tag 9. These are membership control assertions,
+not ballots, read probes or term updates. See
+[replication authorization](REPLICATION_AUTHORITY.md) for provenance and limits.

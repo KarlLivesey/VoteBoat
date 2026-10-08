@@ -924,4 +924,100 @@ mod native {
         snapshot.metadata.membership = Some(Box::new(base));
         fixture_roundtrip(membership_codec(), input);
     }
+
+    #[test]
+    fn authority_format_is_explicit_bounded_and_preserves_membership_payloads() {
+        use voteboat::secure::PeerIdentity;
+        let codec = NativeWireCodec::with_authority(WireLimits::default()).unwrap();
+        assert_eq!(codec.format_version(), 3);
+        let candidate = PeerIdentity {
+            node: node(4),
+            store: identity(4),
+        };
+        let head = ConfigurationId::new(3).unwrap();
+        let mut query = message(Rpc::AuthorityRequest {
+            candidate,
+            configuration: head,
+        });
+        query.context.origin = query.sender;
+        let grant = message(Rpc::AuthorityReply {
+            candidate,
+            configuration: head,
+            committed_index: 2,
+            committed_term: 2,
+            granted: true,
+        });
+        let denial = message(Rpc::AuthorityReply {
+            candidate,
+            configuration: head,
+            committed_index: 0,
+            committed_term: 0,
+            granted: false,
+        });
+        for input in [query.clone(), grant.clone(), denial] {
+            fixture_roundtrip(codec, input.clone());
+            for old in [super::native::codec(), membership_codec()] {
+                assert!(old
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .is_err());
+                let frame = codec
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .unwrap();
+                assert!(old.decode_batch(scope(), &frame).is_err());
+                // Even correctly resealed old-version frames reject the RPC kind.
+                let frame = change(&frame, 8, &old.format_version().to_le_bytes());
+                assert!(old.decode_batch(scope(), &frame).is_err());
+            }
+        }
+        fixture_roundtrip(codec, membership_snapshot(true));
+        fixture_roundtrip(codec, membership_snapshot(false));
+        let frame = codec
+            .encode_batch(scope(), std::slice::from_ref(&grant))
+            .unwrap();
+        let end = frame.len() - 5;
+        assert!(codec
+            .decode_batch(scope(), &change(&frame, end, &[2]))
+            .is_err());
+        for cut in 0..frame.len() {
+            assert!(codec.decode_batch(scope(), &frame[..cut]).is_err());
+        }
+        let mut invalid = Vec::new();
+        let mut wrong = query.clone();
+        wrong.context.origin.session = StoreSession::new(9).unwrap();
+        invalid.push(wrong);
+        let mut wrong = query.clone();
+        if let Rpc::AuthorityRequest { candidate, .. } = &mut wrong.rpc {
+            candidate.node = wrong.from;
+        }
+        invalid.push(wrong);
+        let mut wrong = grant.clone();
+        if let Rpc::AuthorityReply {
+            committed_index, ..
+        } = &mut wrong.rpc
+        {
+            *committed_index = 0;
+        }
+        invalid.push(wrong);
+        let mut wrong = grant.clone();
+        if let Rpc::AuthorityReply { committed_term, .. } = &mut wrong.rpc {
+            *committed_term = 4;
+        }
+        invalid.push(wrong);
+        let mut wrong = grant;
+        if let Rpc::AuthorityReply { granted, .. } = &mut wrong.rpc {
+            *granted = false;
+        }
+        invalid.push(wrong);
+        for input in invalid {
+            assert!(codec.encode_batch(scope(), &[input]).is_err());
+        }
+        let narrow = NativeWireCodec::with_authority(WireLimits {
+            max_messages: 1,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        assert!(narrow
+            .encode_batch(scope(), &[query.clone(), query])
+            .is_err());
+    }
 }

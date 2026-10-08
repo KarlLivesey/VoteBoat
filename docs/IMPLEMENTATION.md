@@ -2779,12 +2779,59 @@ the final entry still need catch-up. Full faulted activation/retirement and rost
 histories remain required. Online configuration ingress remains closed; full
 P0–P7 remains active. No macOS, formal completeness or performance claim is made.
 
+## Slice 46 — direct promoted-replica witness authorization
+
+Mini schema plan: retain one pending direct query and one volatile replication
+permit, bound to exact witness/candidate stores, local session, base head and fresh
+request context. Witness only durable committed membership, including its reserved
+final target; grant no vote/read/term/commit/timer authority. Preserve ordinary
+matching-prefix and storage dependencies; clear on cancellation, configuration
+change, fencing and recovery. Test partial progress and stale/faulted boundaries
+before extending public activation.
+
+Public authorization/cancellation events and AuthorityRequest/AuthorityReply now
+implement this exchange. The source reconstructs the requester's retained committed
+base, checks both historical identities and grants only a committed voter. The
+receiver admits exact-head candidate Append/Snapshot traffic through a volatile
+permit. Controls never update leadership or hard state. Queries use existing
+request/session generations; source durability is its earlier exact completion or
+verified recovery. A permit is neither receiver progress nor a quorum certificate.
+Explicit native wire format 3 adds tags 10/11 and retains format 2 membership
+payloads. Existing native sessions still negotiate format 1.
+
+Eight internal actual-core tests and three downstream tests cover promoted joint
+receipt behind the public gate, exact completion, committed versus accepted
+promotion, final target, stale/canceled/forged replies, session restart, partial
+progress, higher-term persistence, vote/read exclusion, fencing, retired witnesses
+and compacted history. A codec test checks variants, versions, invalid shapes,
+truncations, bounds and membership snapshots. Two fixture corrections preserved
+the intended contracts: final entries reuse their joint operation ID, and runtime
+byte-reserve tests now derive exact event size after enum growth instead of using
+an obsolete fixed allowance. Production budgets were not increased.
+
+Default library/member/membership/Raft/scope/runtime/snapshot/wire suites pass
+37/17/27/22/4/25/19/13 tests (164 total). Core-only equivalents excluding runtime
+pass 29/10/16/10/1/8/1 tests (75 total). TCP/QUIC service/session/connector/startup
+regressions pass 7/9/4/6 tests. All-feature all-target Clippy and API docs pass.
+See REPLICATION_AUTHORITY.md for protocol and evidence limits.
+
+Public configuration ingress remains closed. This exchange cannot bootstrap
+trust when all old witnesses are unavailable or have compacted the required view.
+Native session negotiation, roster admission, readiness, online administrative
+integration and complete faulted activation histories remain required. Full P0–P7
+remains active; no macOS execution, formal proof or performance claim is made.
+
+Additional verification: connect/effect-owner/outbound/peers/secure/
+transport/worker suites pass 12/94/4/13/12/13/9 tests (157 total). Native-only
+all-target compilation, formatting, inventory conformance paths, changed local
+links and diff checks pass. Public witness histories also traverse format-3
+query/reply frames with native support. Final focused library/member checks
+include a too-old claimed commit boundary and a high-term control query.
+
 ## Next slice
 
-Continue P4 with promoted-leader catch-up
-authorization, readiness/capability evidence, retiring-leader final propagation,
-route/roster admission, distributed activation modeling and faulted network
-membership histories before releasing online configuration ingress. Explicit
-host-authorized dynamic recovery and prospective fanout reservations are now
-available. Full P0–P7 remains active, including recursive responsibilities,
-split/merge and broader P7 evidence.
+Continue P4 with authenticated session capability/version selection and
+route/roster admission for promoted catch-up, readiness evidence and distributed
+activation/retirement fault histories before releasing online configuration
+ingress. Preserve the usable static TCP/QUIC service. Full P0–P7 also retains
+recursive responsibilities, split/merge and broader P7 evidence.

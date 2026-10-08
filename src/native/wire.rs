@@ -50,6 +50,11 @@ impl NativeWireCodec {
     pub fn with_membership(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 2)
     }
+    /// Explicit format 3: membership records and direct witness authorization.
+    /// The host must negotiate this capability; native sessions default to 1.
+    pub fn with_authority(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 3)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -99,6 +104,41 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
     match &m.rpc {
+        Rpc::AuthorityRequest {
+            candidate,
+            configuration,
+        }
+        | Rpc::AuthorityReply {
+            candidate,
+            configuration,
+            ..
+        } => {
+            if version < 3
+                || candidate.node == m.from
+                || candidate.node == m.to
+                || *configuration <= m.configuration
+            {
+                return Err(WireError::InvalidMessage("authority scope/version"));
+            }
+            let request = matches!(m.rpc, Rpc::AuthorityRequest { .. });
+            if request && m.context.origin != m.sender {
+                return Err(WireError::InvalidMessage("authority context"));
+            }
+            if let Rpc::AuthorityReply {
+                committed_index,
+                committed_term,
+                granted,
+                ..
+            } = &m.rpc
+            {
+                if (*granted && (*committed_index == 0 || *committed_term == 0))
+                    || (!*granted && (*committed_index != 0 || *committed_term != 0))
+                {
+                    return Err(WireError::InvalidMessage("authority boundary"));
+                }
+                boundary(*committed_index, *committed_term, m.term)?;
+            }
+        }
         Rpc::Vote {
             last_index,
             last_term,
@@ -209,6 +249,11 @@ impl Encoder {
         self.u64(b.identity.incarnation.get())?;
         self.u64(b.session.get())
     }
+    fn peer(&mut self, peer: crate::secure::PeerIdentity) -> Result<(), WireError> {
+        self.u64(peer.node.get())?;
+        self.u128(peer.store.id.get())?;
+        self.u64(peer.store.incarnation.get())
+    }
     fn tree(
         &mut self,
         tree: &Tree,
@@ -281,7 +326,7 @@ impl Encoder {
         self.stores(configuration.learners())
     }
     fn record(&mut self, record: &ConfigurationRecord) -> Result<(), WireError> {
-        if self.version != 2 {
+        if self.version < 2 {
             return Err(WireError::InvalidMessage(
                 "configuration requires wire format 2",
             ));
@@ -433,7 +478,7 @@ impl Encoder {
                 self.budget.charge(size_of::<Snapshot>())?;
                 self.budget.charge(snapshot.application.len())?;
                 let meta = &snapshot.metadata;
-                if meta.membership.is_some() && self.version != 2 {
+                if meta.membership.is_some() && self.version < 2 {
                     return Err(WireError::InvalidMessage(
                         "membership requires wire format 2",
                     ));
@@ -475,6 +520,28 @@ impl Encoder {
                 self.u8(8)?;
                 self.u64(*index)?;
                 self.u64(*term)
+            }
+            Rpc::AuthorityRequest {
+                candidate,
+                configuration,
+            } => {
+                self.u8(10)?;
+                self.peer(*candidate)?;
+                self.u64(configuration.get())
+            }
+            Rpc::AuthorityReply {
+                candidate,
+                configuration,
+                committed_index,
+                committed_term,
+                granted,
+            } => {
+                self.u8(11)?;
+                self.peer(*candidate)?;
+                self.u64(configuration.get())?;
+                self.u64(*committed_index)?;
+                self.u64(*committed_term)?;
+                self.u8(u8::from(*granted))
             }
         }
     }
@@ -539,6 +606,16 @@ impl<'a> Decoder<'a> {
             },
             session: StoreSession::new(self.u64()?)
                 .ok_or(WireError::InvalidMessage("zero store session"))?,
+        })
+    }
+    fn peer(&mut self) -> Result<crate::secure::PeerIdentity, WireError> {
+        Ok(crate::secure::PeerIdentity {
+            node: NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero candidate"))?,
+            store: StoreIdentity {
+                id: StoreId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero store"))?,
+                incarnation: StoreIncarnation::new(self.u64()?)
+                    .ok_or(WireError::InvalidMessage("zero incarnation"))?,
+            },
         })
     }
     fn tree(
@@ -787,7 +864,7 @@ impl<'a> Decoder<'a> {
                                 bytes: bytes.to_vec(),
                             }
                         }
-                        2 if version == 2 => {
+                        2 if version >= 2 => {
                             EntryPayload::Configuration(Box::new(self.record(limits, budget)?))
                         }
                         _ => return Err(WireError::InvalidMessage("entry kind")),
@@ -812,7 +889,7 @@ impl<'a> Decoder<'a> {
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
             kind @ (6 | 9) => {
-                if kind == 9 && version != 2 {
+                if kind == 9 && version < 2 {
                     return Err(WireError::InvalidMessage("RPC kind"));
                 }
                 let bootstrap_configuration = if kind == 9 {
@@ -885,6 +962,17 @@ impl<'a> Decoder<'a> {
             8 => Rpc::Compacted {
                 index: self.u64()?,
                 term: self.u64()?,
+            },
+            10 if version >= 3 => Rpc::AuthorityRequest {
+                candidate: self.peer()?,
+                configuration: self.configuration_id()?,
+            },
+            11 if version >= 3 => Rpc::AuthorityReply {
+                candidate: self.peer()?,
+                configuration: self.configuration_id()?,
+                committed_index: self.u64()?,
+                committed_term: self.u64()?,
+                granted: bool_value(self.u8()?)?,
             },
             _ => return Err(WireError::InvalidMessage("RPC kind")),
         };

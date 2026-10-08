@@ -252,10 +252,13 @@ effects, encoded buffers and receive queues separately. This queue creates no
 sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
 `wire::WireCodec` supplies a public bounded framing seam. The native
-`NativeWireCodec` implements [wire formats 1 and 2](docs/WIRE_FORMAT.md).
+`NativeWireCodec` implements [wire formats 1–3](docs/WIRE_FORMAT.md).
 The default constructor retains format 1 for current static-configuration peers;
 `with_membership` explicitly selects format 2 for configuration entries and
-membership-aware snapshots. Online Raft membership changes remain disabled; the
+membership-aware snapshots. `with_authority` selects format 3 for
+[direct promoted-replica witness authorization](docs/REPLICATION_AUTHORITY.md).
+Native TLS/QUIC startup still selects format 1.
+Online Raft membership changes remain disabled; the
 [accepted-log core audit](docs/MEMBERSHIP_CORE.md) records quorum integration
 and the remaining activation/recovery gates. Validate its fixed prefix before
 allocating a receive frame, then decode one exact frame with the connection's

@@ -528,7 +528,7 @@
       "operations": ["format_version", "header_bytes", "limits", "frame_length", "encode_batch", "decode_batch"],
       "native": "NativeWireCodec",
       "conformance": ["tests/wire.rs", "tests/worker.rs", "tests/snapshot.rs"],
-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol."
+      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions still select format 1."
     },
     {
       "design_id": "C09",
@@ -645,6 +645,22 @@
     "authorization",
     "compression",
     "scope-transfer",
-    "transactions"
+    "transactions",
+    {
+      "design_id": "C01/C03/C10",
+      "public_contract": "Raft promoted replication authorization",
+      "operations": [
+        "step(Event::AuthorizeReplication)",
+        "step(Event::CancelReplicationAuthorization)",
+        "step(Event::Receive)"
+      ],
+      "native": "Deterministic direct witness query/reply and volatile replication-only permit; explicit NativeWireCodec format 3",
+      "conformance": [
+        "src/raft/membership_tests.rs",
+        "tests/member_recovery.rs",
+        "tests/wire.rs"
+      ],
+      "scope": "One pending request and one permit per core, exact trusted witness/candidate store, base head and fresh context. Witness grants only from durable committed membership or its reserved final target. No ballot/read/term/commit/timer authority from controls. Exact Append/Snapshot checks and durable completions remain mandatory. Cancellation, configuration change, fencing and recovery discard volatile authority. Authenticated non-Byzantine source premise; no transferable certificate. Public membership ingress and native session format upgrade remain gated."
+    }
   ]
 }

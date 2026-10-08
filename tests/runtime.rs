@@ -390,11 +390,14 @@ fn node_item_and_group_byte_limits_each_preserve_control_reserves() {
 
     let mut log = HostLogStore::new(1);
     append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+    // Exactly two data events and one reserved control event, independent of
+    // the inline enum size as public protocol variants are added.
+    let event_bytes = std::mem::size_of::<Event>();
     let limits = ShardLimits {
-        group_bytes: 1000,
-        group_control_bytes: 250,
-        max_event_bytes: 512,
-        visit_bytes: 512,
+        group_bytes: 3 * event_bytes + 256,
+        group_control_bytes: event_bytes,
+        max_event_bytes: event_bytes + 128,
+        visit_bytes: event_bytes + 128,
         ..small_limits()
     };
     let mut shard = Shard::new(owner(log.binding()), limits, HostReady::new(3)).unwrap();
@@ -426,7 +429,7 @@ fn node_item_and_group_byte_limits_each_preserve_control_reserves() {
     );
     shard.admit(group(1), Event::Heartbeat).unwrap();
     assert_eq!(shard.usage().items, 3);
-    assert!(shard.usage().bytes <= 1000);
+    assert_eq!(shard.usage().bytes, limits.group_bytes);
 }
 
 #[test]

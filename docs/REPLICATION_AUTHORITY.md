@@ -1,0 +1,87 @@
+# Promoted replica catch-up authorization
+
+`Event::AuthorizeReplication { witness, candidate, configuration }` asks one
+exact current voter store for a direct membership assertion. The candidate must
+be a different node, currently outside the receiver's electorate; the requested
+head must be newer than the receiver's accepted configuration. One pending
+request and one installed permit are retained inline per core. A second request
+returns Busy. `CancelReplicationAuthorization` discards both; hosts drive expiry
+and retry with a new request context. There is no hidden timer, queue or fanout.
+
+The network provider must authenticate Message.from/sender before delivery, as
+for existing Raft traffic. The witness independently reconstructs the receiver's
+base configuration from retained committed history and requires the requester to
+be its exact assigned replica and itself to be an exact voter there. It describes
+only its durable committed membership. The candidate must be an exact voter in
+that membership; the requested head must equal that committed head or the final
+target reserved by its committed joint configuration. An accepted uncommitted
+promotion is insufficient. Missing compacted history is rejected, never inferred
+from the request. A retired witness can still describe retained committed history.
+
+AuthorityRequest and AuthorityReply are control messages. The reply echoes the
+base scope, exact candidate/store and requested head, plus the committed index
+and term. A denied reply carries zero boundaries. The receiver requires its exact
+pending context, local store session, witness node/store, unchanged base head and
+matching request fields. A granted committed boundary must be later than the
+base's last configuration entry. A valid reply consumes the pending request exactly once.
+It grants no term, ballot, role, commit or election-timer change. Positive envelope
+terms keep wire shape valid even for a term-zero requester; control handling does
+not treat those terms as leader evidence.
+
+A granted permit admits only Append/Snapshot requests from the exact candidate
+store with the exact requested head while the base configuration remains current.
+Normal log-prefix, term, committed-prefix, snapshot and exact storage-completion
+checks still apply. An actual authorized leader contact can reset an election
+timer. Votes, read probes, read acknowledgements and replication responses gain
+no authority from the permit. Partial matching-prefix repair and higher-term
+persistence retain the same-base permit. Durable configuration change, rollback
+to a different head, cancellation, storage fencing and recovery discard it.
+Recovery must use a fresh persisted StoreSession; a restarted replica must query
+again. Connection generations and transport revocation remain separate contracts.
+
+The grant is an authenticated non-Byzantine peer assertion about its own durable
+state, using the same trust premise as leader_commit. It is neither a quorum
+certificate nor a transferable signature. Its new output needs no new storage
+write: the witness's exact earlier DurableLog completion/recovered durable state
+is the prerequisite. An in-flight dependency blocks queries. The returned index
+is that source's contiguous committed prefix, not receiver progress or a maximum
+observed network index. The volatile request sequence uses the existing checked
+RequestContext counter and persisted local store session to reject old replies.
+
+## Wire and integration
+
+`NativeWireCodec::with_authority` explicitly selects format 3. It includes format
+2 membership payloads and adds tags 10/11 for request/reply (tag 9 remains the
+explicit membership snapshot). Formats 1/2 reject authority traffic. Decoding
+checks identities, scope, boundary, booleans, lengths and retained-memory budgets;
+a checksum is integrity detection, not authentication.
+
+Native TLS/QUIC startup still selects wire format 1. Hosts selecting format 3
+must provide a matching authenticated session capability; this slice does not
+silently upgrade existing connections. Public configuration-bearing Append and
+membership Snapshot ingress remains gated. Internal actual-core tests exercise
+promoted joint activation behind that gate. Public host/native tests exercise
+query/grant and static-prefix probing. This protocol is groundwork for online
+membership, not a released online administration flow.
+
+If every old witness is unavailable or has compacted the required old view, this
+exchange cannot authorize catch-up. Retaining historical evidence, authenticated
+route/roster admission, readiness and session-version negotiation, faulted full
+activation/retirement histories and administrative integration remain required.
+No fallback accepts a candidate's self-reported configuration as authority.
+
+## Evidence
+
+Eight actual-core tests cover committed/uncommitted promotion, reserved final
+heads, direct promoted joint receipt and exact durability, identity/context/store
+session mismatches, duplicate/canceled/stale replies, restart, partial progress,
+read/vote exclusion, higher-term persistence, fencing, retired witnesses and
+retained/compacted-away historical bases. Verified snapshot pins in these core
+fixtures are host assertions, not native snapshot publication evidence.
+
+Three downstream tests cover public host/native query/grant/probing and loss of
+volatile authority on fencing/recovery, including a term-zero request. A native
+codec test covers all authority variants, old-format rejection, round trips,
+invalid booleans/boundaries/identities, every truncation, batch limits and existing
+membership snapshots. These finite checks do not prove arbitrary distributed
+membership schedules, macOS execution or performance.

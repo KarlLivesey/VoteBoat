@@ -169,3 +169,40 @@ All-feature Clippy, native-only all-target compilation and all-feature API docs
 pass. Notifications are one-shot; faulted delivery, missing configuration catch-up,
 promoted-leader authorization and full distributed activation remain open gates.
 These finite Linux checks establish no macOS execution or performance claim.
+
+## Slice 46 direct witness authorization evidence
+
+Eight actual-core tests cover direct promoted-replica joint catch-up, exact
+storage completion, committed versus uncommitted promotion, reserved final head,
+identity/context/session mismatch, canceled/stale/duplicate replies, restart,
+partial progress, higher-term persistence, read/vote exclusion, fencing, retired
+witnesses and compaction boundaries. Three public host/native tests cover query,
+grant, prefix probing and volatile authority loss, including term-zero queries.
+One codec test checks format 3 variants, explicit old-version rejection, bounded
+batches, malformed identities/boundaries/booleans, every truncation and existing
+membership snapshot layouts. These tests use authenticated-identity premises;
+they do not constitute a new end-to-end wire-3 TLS/QUIC membership history.
+
+Default library/member/membership/Raft/scope/runtime/snapshot/wire suites pass
+37/17/27/22/4/25/19/13 tests (164 total). Core-only equivalents without runtime
+pass 29/10/16/10/1/8/1 tests (75 total). Actual TCP/QUIC service, QUIC session,
+QUIC connector and startup regressions pass 7/9/4/6 tests. All-feature all-target
+Clippy and API docs pass. The scheduler byte-bound fixture derives exact enum
+size and still proves two admitted data events plus one reserved control event.
+
+Witness output relies only on earlier completed/recovered durable committed
+membership. It is a direct authenticated non-Byzantine assertion, not a quorum
+certificate. Public configuration ingress, native wire-3 session negotiation,
+readiness/roster integration and faulted complete activation remain unfinished.
+Finite Linux checks establish no macOS execution, formal completeness or
+performance claim.
+
+Additional connect/effect-owner/outbound/peers/secure/transport/worker regressions
+pass 12/94/4/13/12/13/9 tests (157 total), including actual TLS loops and bounded
+accepted-work ownership. Native-only all-target compilation, formatting,
+inventory conformance paths, changed documentation links and diff checks pass.
+The public host/native witness histories round-trip their query/reply through
+format 3 when native support is enabled; this is codec/provider composition,
+not encrypted format-3 session negotiation. Final focused library/member checks
+also cover rejecting a claimed committed boundary at or before the base's last
+configuration and ignoring a high term carried by a control query.

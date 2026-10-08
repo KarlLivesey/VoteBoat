@@ -20,6 +20,7 @@ use crate::{
     identity::*,
     log::*,
     membership::Membership,
+    secure::PeerIdentity,
     snapshot::{Snapshot, SnapshotRef},
 };
 use std::collections::{BTreeMap, BTreeSet};
@@ -61,6 +62,19 @@ pub enum Rpc {
         index: u64,
         term: u64,
     },
+    /// Direct query to a voter trusted in the requester's configuration.
+    AuthorityRequest {
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+    },
+    /// Committed membership evidence, never a ballot or read acknowledgement.
+    AuthorityReply {
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+        committed_index: u64,
+        committed_term: u64,
+        granted: bool,
+    },
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Message {
@@ -93,6 +107,14 @@ pub enum Event {
     Heartbeat,
     /// Request a local application checkpoint; never establishes quorum evidence.
     Checkpoint,
+    /// Request replication-only authorization from one currently trusted voter.
+    AuthorizeReplication {
+        witness: PeerIdentity,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+    },
+    /// Discard both the pending query and any installed replication permit.
+    CancelReplicationAuthorization,
     Receive(Message),
     Propose {
         operation: OperationId,
@@ -240,6 +262,8 @@ pub struct Raft {
     checkpoint_requested: Option<RequestContext>,
     checkpoint_reconcile: Option<SnapshotRef>,
     election_reset: u64,
+    authority_request: Option<authority::PendingAuthority>,
+    replication_permit: Option<authority::ReplicationPermit>,
 }
 
 impl Raft {
@@ -431,6 +455,8 @@ impl Raft {
             checkpoint_requested: None,
             checkpoint_reconcile: None,
             election_reset: 0,
+            authority_request: None,
+            replication_permit: None,
         })
     }
     pub fn role(&self) -> Role {
@@ -610,6 +636,7 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.clear_replication_authority();
         self.fenced = true;
         self.pending = None;
         self.staged_snapshot = None;
@@ -726,6 +753,15 @@ impl Raft {
             return Err(RaftError::Busy);
         }
         match event {
+            Event::AuthorizeReplication {
+                witness,
+                candidate,
+                configuration,
+            } => self.authorize_replication(witness, candidate, configuration),
+            Event::CancelReplicationAuthorization => {
+                self.clear_replication_authority();
+                Ok(Vec::new())
+            }
             Event::Checkpoint => {
                 if self.durable.commit_index <= self.durable.base_index() {
                     return Err(RaftError::NotApplied);
@@ -1041,6 +1077,7 @@ impl Raft {
     /// fresh request contexts, including unchanged identities and same-voter
     /// policy changes. This is not a durability or catch-up assertion.
     fn configuration_changed(&mut self) -> Result<(), RaftError> {
+        self.clear_replication_authority();
         self.clear_reads();
         self.votes.clear();
         self.vote_context = None;
@@ -1347,7 +1384,7 @@ impl Raft {
         {
             return Err(RaftError::InvalidMessage);
         }
-        let contact = self.membership().is_voter(m.from)
+        let contact = (self.membership().is_voter(m.from) || self.permitted_replication(&m))
             && m.term >= self.durable.hard_state.term
             && matches!(
                 &m.rpc,
@@ -1370,6 +1407,12 @@ impl Raft {
         Ok(effects)
     }
     fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+        if matches!(
+            m.rpc,
+            Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. }
+        ) {
+            return self.receive_authority(m);
+        }
         if let Some(index) = self.retirement_commit(&m) {
             let reply = self.reply(
                 &m,
@@ -1395,17 +1438,19 @@ impl Raft {
         // prefix. Election/read authority and every response require the local
         // current scope; response handlers also match their admitted request.
         let replication_request = matches!(&m.rpc, Rpc::Append { .. } | Rpc::Snapshot { .. });
+        let permitted = self.permitted_replication(&m);
         if m.to != self.node
             || m.from == self.node
             || m.group != self.durable.bootstrap.group
             || (!replication_request && m.configuration != self.membership().id())
-            || self.membership().replica_store(m.from) != Some(m.sender.identity)
+            || (!permitted && self.membership().replica_store(m.from) != Some(m.sender.identity))
         {
             return Err(RaftError::WrongIdentity);
         }
         // Learners return replication evidence but never vote, lead, or
         // establish read authority. Replication replies remain non-voting.
-        if !self.membership().is_voter(m.from)
+        if !permitted
+            && !self.membership().is_voter(m.from)
             && !matches!(
                 m.rpc,
                 Rpc::Appended { .. } | Rpc::SnapshotAck { .. } | Rpc::Compacted { .. }
@@ -1445,6 +1490,7 @@ impl Raft {
             self.requests.clear();
         }
         match &m.rpc {
+            Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. } => unreachable!(),
             Rpc::Vote {
                 last_index,
                 last_term,
@@ -2010,3 +2056,6 @@ pub fn persist_effect<S: LogStore>(
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;
+
+#[path = "raft/authority.rs"]
+mod authority;
