@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #[path = "delegation/fixtures.rs"]
 mod fixture;
+#[path = "delegation/repeat.rs"]
+mod repeat;
 #[path = "transfer_source/fixtures.rs"]
 pub mod source_fixture;
 use base::{entry, group, op};

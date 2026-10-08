@@ -87,7 +87,18 @@ grandparent locator stays unchanged. Direct target retries and new writes are
 also checked with all ancestor and source workers stopped, then reopened again.
 Execution results and transport/storage coverage are recorded in validation/REPORT.md.
 
-This is selected split evidence, not delegated merge/repeated moves,
-pre-fence cancellation, arbitrary-fault liveness,
+`tests/delegation/repeat.rs` additionally composes an actual delegated split,
+two-source merge and further split. Each later source is the previous activated
+target, carrying its actual data, deduplication and outbox history. Parent/child
+journals and later target phases recover from checkpoints; target restoration
+uses fresh unstaged applications constructed from retained original child intents.
+Original retries preserve their historical outcomes without duplicate outbox
+records; new final writes execute with only the child manifest needed for routing.
+Parent ownership epoch/ancestry and grandparent locator remain unchanged. Old
+owners remain fenced, and stale intents or wrong bound freeze operations refuse.
+
+This is selected native split and deterministic repeated-movement evidence,
+not native delegated merge/repeated recovery, pre-fence cancellation,
+arbitrary-fault liveness,
 mixed-version, macOS or separate-host validation. Those remain in the active P0–P7
 scope; ordinary top-level handoffs and the static service remain usable.

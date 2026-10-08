@@ -1929,3 +1929,9 @@ These are selected Linux ordinary-majority process-reopen histories, not arbitra
 power-loss/fault completeness, delegated merge/repeated movement, abandoned
 reservation cancellation, macOS or separate-host validation. Those limitations
 remain in the active baseline scope; P8 research remains deferred.
+
+## Slice 96 — delegated merge and repeated movement composition
+
+The downstream test in tests/delegation/repeat.rs performs an actual delegated split 20 -> 21/22, merge 21/22 -> 23, and split 23 -> 24/25. Later sources are the actual prior activated targets. Real exports/imports carry data, original retries and outbox history; child decisions and immediate-parent completions come from retained journal state. Parent/child journals recover after later actions; targets restore into fresh unstaged applications derived from original child intents at staging/import/activation/fencing and final writes. Exact freeze/completion retries retain outcomes, stale source intents and wrong bound operation IDs refuse, old owners stay fenced, final values are 10/16 with exactly three outbox records each. Parent generation reaches 4 with ownership epoch 1; grandparent locator remains unchanged. Cold recursive and child-only warm routing agree.
+
+All-feature delegation 8/8 and repeat 5/5 pass; core-only 7/7 and 5/5 pass. This is deterministic public-contract application composition, not native delegated merge/repeated recovery. No production code, protocol, format or dependency changed. The four native split cases from slice 95 remain the network evidence; native repeated movement, abandoned reservation recovery and broader platform/fault/performance gaps remain active.

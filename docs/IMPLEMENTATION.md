@@ -5626,3 +5626,55 @@ and the 71-contract inventory pass. No persistent format, consensus timer, quoru
 policy or dependency changed. P6 delegated merge/repeated movement and abandoned
 pre-fence reservation recovery remain current; P7 measurement/tuning and recorded
 platform/operational/broader validation gaps remain in the full active P0–P7 goal.
+
+### Slice 96 mini schema — delegated merge and repeated ownership composition
+
+Previous slice is published as c253352. Current P6 deliverable composes the
+existing parent-bound intent with actual activated targets as later sources:
+delegated split 20 -> 21/22, merge 21/22 -> 23, then split 23 -> 24/25. No new
+production protocol is planned. Parent reservations use distinct operation IDs
+400/402/404; child intents use 200/202/204; publications have their own IDs.
+Each reservation derives from the actual current parent/child manifest and
+supplies the next immutable target bootstrap, never from a fabricated decision.
+
+Stage targets before fences. Preflight every source; then retain each exact fence
+and export commitment through checkpoint/replay. Imports consume the actual
+previous targets' data/retries/outbox. Child publication uses actual source and
+target observations; parent completion uses the actual retained child decision.
+Recover parent/child applications after each journal action, and targets after
+staging/import/activation and later-source fencing. Until activation targets
+refuse; all prior owners remain fenced afterward. Failures stop forward progress
+without thawing or releasing reservations. Final cold routing traverses the
+unchanged grandparent, and warm routing uses only the child manifest. Parent own
+epoch/ancestry remain unchanged while its child locator advances each time.
+
+Acceptance: original operations 1/2 retain their outcomes, operations introduced
+between moves retain theirs, retries do not duplicate outbox records, new writes
+execute on the final owners, old owners refuse, exact parent completion/freeze
+retries preserve original decisions, wrong prior bindings/operations refuse.
+Run core-only/all-feature delegation and later-source suites plus compile/lint
+checks. This deterministic composition alone will not claim native delegated
+merge/repeated recovery; that remains a separate missing evidence gate. Next is
+native repeated-movement recovery, following abandoned pre-fence reservation
+recovery. These close P6 before the macro P7 measured baseline/tuning work.
+
+Checkpoint acceptance must restore into a fresh, unstaged target constructed from
+the original intent retained in the child journal, selected by target operation
+and group. Cloning the current live target would leave old state available and
+weaken this recovery check; use committed bootstrap facts instead.
+
+Slice 96 result: the downstream delegated split -> merge -> split test passes.
+Actual activated targets are reused as sources with staged destinations, exact
+fences/exports, real imported data and actual child publication decisions. Parent
+completion/freeze retries retain their original outcomes; retained original
+intents reconstruct fresh target applications for checkpoint restore. Original
+and intervening data retries preserve outcomes and outbox multiplicity; final
+values are 10 and 16, with three outbox records on each final target. Parent route
+generation advances to 4 while its ownership epoch stays 1 and grandparent locator
+stays unchanged. Old sources refuse and stale intents/wrong bound operations fail
+preflight. No production contract or storage format changed.
+
+All-feature delegation 8/8 and later-source repeat 5/5 pass; core-only equivalents
+7/7 and 5/5 pass. Native delegated repeated-movement phase/reopen, abandoned
+reservation recovery and the other recorded P0–P7 gaps remain unfinished. This
+adds deterministic composition evidence to P6, not a broader native recovery claim.
