@@ -1337,3 +1337,44 @@ actual durable child writes during parent quorum loss, TCP/QUIC directory ingres
 cross-authority ancestry protocol and source fence/import/activation remain work.
 MacOS and separate-host execution are not established. The full P0–P7 goal remains
 active, with P4's explicit fault-release gates and P6 lifecycle still required.
+
+## Slice 80 — routed application and native parent-independent progress
+
+Ten all-feature routed tests cover fixed committed bootstrap binding, context
+rechecks at admission/apply, key/payload semantic retries, bounded pending/history
+reservations, atomic invalid commands/batches/restores, local fencing of queued
+data/reads and checkpoint truncations. A downstream host application supplies
+allocated receipts, queries and results and restricts its own hosting group;
+outer and nested bounds are checked independently. Wrong-group native startup
+returns the fresh application before creating files/listeners/workers.
+
+TCP/TLS and QUIC histories each exercise WAL-only and compacted checkpoint
+recovery. Three real directory replicas publish a three-level forest and provide
+quorum-backed grants. Orders/jobs use distinct {1,2}/{2,3} child voter sets.
+After every parent role stops and ancestor cache entries are removed, children
+commit, retry and serve fresh quorum reads, close/join, recover and return original
+results. Changed grants and limits refuse recovery and clean up their failed
+startup handles. Parent WAL state compares exactly unchanged after all child work.
+
+The first network attempt exposed a missing caller-owned parent directory in the
+test setup. QUIC then exposed two harness scheduling issues: a constant clock
+prevented timed close from draining, and polling only parent roles during their
+shutdown starved the still-live child roles into election timeouts. The harness
+now uses one explicit advancing host clock and polls live children while others
+drain. The resulting histories pass without modifying QUIC or election behavior.
+
+Final checks (overlapping scopes, not unique-test totals):
+
+- `cargo +stable test --locked --offline --all-features --test routed --test directory --test application --test routing --test snapshot --test snapshot_worker --test effect_owner --test startup`: 212 passed, including 10 routed tests and four native routing/recovery histories across TCP/QUIC and WAL/checkpoint modes.
+- `cargo +stable test --locked --offline --no-default-features --test routed --test directory --test application --test snapshot`: 37 passed, including 7 routed tests.
+- `cargo +stable test --locked --offline --no-default-features --features native --test routed --quiet`: 7 passed.
+- `cargo +stable test --locked --offline --all-features --lib --quiet`: 57 passed.
+- All-feature/all-target Clippy with `-D warnings`, formatting and diff checks pass. Inventory validation passes for 64 implemented contracts; it checks metadata shape/paths, not consensus correctness.
+
+The source fence is local committed application state, not an import/activation
+certificate. No new general lifecycle model, power-failure schedule, directory
+wire endpoint, cross-authority protocol or split/merge implementation is claimed.
+Existing provider fault evidence remains separate. These Linux loopback tests do
+not establish macOS or separate-host operations. The mini plan proceeds to the
+remaining P4 fault ledger, P6 lifecycle and P7 measurements; the full goal remains
+active and CI stays background feedback.

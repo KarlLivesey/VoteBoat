@@ -8,14 +8,15 @@ applications. It creates no runtime, file, socket, worker or consensus group.
 
 This slice publishes and recovers routing metadata for **fixed, explicitly trusted
 initial ownership**. It does not perform source fencing, ownership transfer,
-reparenting or target activation. Routed data-command admission/apply integration
-and real child writes during parent quorum loss remain the next P5 work.
+reparenting or target activation. [Routed application execution](ROUTED_APPLICATION.md)
+now supplies data-command admission/apply and native child writes during parent loss.
 
 ## Bootstrap, ownership and publication
 
 Construct a `DirectoryPlan` for one exact metadata authority group using already
-checked responsibility manifests. The host must bind that authority to the actual
-Raft group used for this application. The plan is an explicit trusted bootstrap
+checked responsibility manifests. Its StateMachine group check binds that authority
+to the actual Raft group at startup, assembly, execution and recovery. Lower-level
+embedding hosts must perform the same check. The plan is an explicit trusted bootstrap
 input for already established group assignments, not a discovery hint or a way
 to replace an unreachable owner. External parent grants require caller verification
 against an authenticated authorized source; this application cannot independently

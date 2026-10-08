@@ -20,9 +20,11 @@
 //! implements fencing, import or activation of a transferred scope.
 use crate::{identity::*, placement::PlacementRequirements};
 use std::mem::size_of;
+pub(crate) mod codec;
 
 pub const ROUTING_CONTRACT_VERSION: u32 = 1;
 pub const MAX_MANIFEST_ROUTES: usize = 256;
+pub const MAX_MANIFEST_BYTES: usize = 32768;
 pub const MAX_ROUTE_HOPS: usize = 32;
 pub const MAX_ROUTING_KEY_BYTES: usize = 4096;
 pub const MAX_CACHE_MANIFESTS: usize = 4096;

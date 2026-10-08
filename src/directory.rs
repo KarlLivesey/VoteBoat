@@ -18,13 +18,12 @@
 //! cannot transfer ownership, fence a source or activate a target. Host-controlled
 //! authorization remains required before proposal. Durable progress comes solely
 //! from the existing Raft/WAL/application/checkpoint contracts.
+use crate::routing::codec::*;
 use crate::{application::*, identity::*, log::*, routing::*};
 use std::{
     collections::{BTreeMap, BTreeSet},
     mem::size_of,
 };
-mod codec;
-use codec::*;
 
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
@@ -455,6 +454,12 @@ impl Directory {
 }
 impl StateMachine for Directory {
     type Receipt = DirectoryReceipt;
+    fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
+        if group != self.plan.authority {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(())
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

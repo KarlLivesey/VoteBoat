@@ -293,6 +293,7 @@
       "design_id": "C05",
       "public_contract": "StateMachine",
       "operations": [
+        "validate_group",
         "applied_index",
         "apply_batch"
       ],
@@ -300,9 +301,10 @@
       "conformance": [
         "tests/application.rs",
         "examples/replicated_counter.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check."
     },
     {
       "design_id": "C05/C15",
@@ -313,9 +315,10 @@
       "native": "Counter",
       "conformance": [
         "tests/effect_owner.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
     },
     {
       "design_id": "C05/C10/C15",
@@ -352,9 +355,10 @@
       "conformance": [
         "tests/raft.rs",
         "examples/replicated_counter.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
     },
     {
       "design_id": "C05/C15",
@@ -367,9 +371,10 @@
       "native": "Counter",
       "conformance": [
         "tests/effect_owner.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Optional contract 1. Immutable, no-I/O query validation and retained-allocation bounds before read execution, plus actual nested result validation. Independent host application and native Counter implement the same capability. No core protocol or format changes. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Optional contract 1. Immutable, no-I/O query validation and retained-allocation bounds before read execution, plus actual nested result validation. Independent host application and native Counter implement the same capability. No core protocol or format changes. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
     },
     {
       "design_id": "C05/C10/C15",
@@ -526,9 +531,10 @@
         "tests/application.rs",
         "tests/snapshot.rs",
         "examples/replicated_counter.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
     },
     {
       "design_id": "C05/C15",
@@ -543,9 +549,10 @@
       "conformance": [
         "tests/application.rs",
         "tests/effect_owner.rs",
-        "tests/directory.rs"
+        "tests/directory.rs",
+        "tests/routed.rs"
       ],
-      "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. No routed data-command ownership or P6 transfer claim."
+      "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
     },
     {
       "design_id": "C05/C10/C15",
@@ -1254,13 +1261,50 @@
         "restore_checkpoint",
         "readiness_requirements",
         "bootstrap_command",
-        "is_initialized"
+        "is_initialized",
+        "validate_group"
       ],
       "native": "Deterministic native directory application using the existing public application/log/snapshot contracts. No new provider owner or mandatory ancestor write path.",
       "conformance": [
         "tests/directory.rs"
       ],
-      "scope": "One exact metadata authority, bounded trusted fixed-bootstrap manifest forest, atomic generation-CAS publication and original-command/result retry history. Local ancestry and delegation constraints are core checked; external grants require trusted authenticated verification. Ordinary publication permits explicit placement metadata edits but rejects owner/epoch/scope/adapter/topology/lifecycle changes. Fixed bounded command/manifest/checkpoint codecs, strict plan/capacity recovery, public read-barrier and native three-replica WAL/compaction/snapshot recovery exercised. Lifetime retry history is retained without eviction; selected providers must cover declared envelope. No group creation, routed Node data commands, cross-authority ancestry verification, source fence/import/activation or network directory endpoint. Before publication, an ordinary committed initialization command binds the exact complete bootstrap plan and capacities. Native WAL-only recovery rejects changed child grants/capacities and added unused grants before any checkpoint. Initialization has an 8 MiB hard ceiling and its actual plan-dependent size is included in provider envelopes; publication stays bounded to 32768 bytes."
+      "scope": "One exact metadata authority, bounded trusted fixed-bootstrap manifest forest, atomic generation-CAS publication and original-command/result retry history. Local ancestry and delegation constraints are core checked; external grants require trusted authenticated verification. Ordinary publication permits explicit placement metadata edits but rejects owner/epoch/scope/adapter/topology/lifecycle changes. Fixed bounded command/manifest/checkpoint codecs, strict plan/capacity recovery, public read-barrier and native three-replica WAL/compaction/snapshot recovery exercised. Lifetime retry history is retained without eviction; selected providers must cover declared envelope. No group creation, cross-authority ancestry verification, source fence/import/activation or network directory endpoint. Directory restricts hosting to its metadata authority. Native routed tests use quorum-backed directory reads to bootstrap child application grants. Before publication, an ordinary committed initialization command binds the exact complete bootstrap plan and capacities. Native WAL-only recovery rejects changed child grants/capacities and added unused grants before any checkpoint. Initialization has an 8 MiB hard ceiling and its actual plan-dependent size is included in provider envelopes; publication stays bounded to 32768 bytes."
+    },
+    {
+      "design_id": "C05/C16/C17",
+      "public_contract": "RoutedApplication<A, P> / RoutedQuery<Q> / RoutedReceipt<R>",
+      "operations": [
+        "new",
+        "validate_group",
+        "bootstrap_command",
+        "is_initialized",
+        "grant",
+        "local",
+        "limits",
+        "application",
+        "remaining_operations",
+        "readiness_requirements",
+        "check_context",
+        "encode_routed",
+        "encode_fence",
+        "validate_proposal",
+        "apply_batch",
+        "receipt_bytes_bound",
+        "read_at",
+        "query_bytes",
+        "read_result_bound",
+        "read_result_bytes",
+        "checkpoint",
+        "restore_checkpoint",
+        "fence"
+      ],
+      "native": "Generic deterministic ownership guard over host-selected checkpointable applications and partition policies; native Counter, NativeStartup/Node, WAL, snapshots and TCP/QUIC exercise the same public contracts.",
+      "conformance": [
+        "tests/routed.rs",
+        "tests/routed/host.rs",
+        "tests/routed/native.rs"
+      ],
+      "scope": "One trusted fixed responsibility grant/local group; exact committed bootstrap binding, admission/apply ownership rechecks, key/payload semantic retries, bounded pending/history and nested receipt/read accounting. One-way applied source fence refuses queued data and reads and survives checkpoint/replay; it is not a P6 transfer certificate. Native three-level directory/child histories use distinct child replica sets, remove ancestor caches and stop all parent replicas, then write/read/retry and recover WAL-only/compacted children with unchanged parent WAL state. Changed grants/limits reject recovery. Host injection covers allocated receipt/query/result storage and inner group constraints. No dynamic ownership activation/import/merge, group multiplexing, general authorization service or directory wire endpoint; Linux loopback evidence only."
     }
   ],
   "not_yet_implemented": [
@@ -1277,7 +1321,6 @@
     "transactions",
     "placement-planning-scoring-and-move-proposals",
     "service-enforced-configuration-application-envelope",
-    "routed-node-data-admission-and-apply",
     "dynamic-directory-ownership-lifecycle"
   ]
 }

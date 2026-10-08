@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Ordered application seam and a deterministic counter with operation retries.
 use crate::{
-    identity::OperationId,
+    identity::{GroupIdentity, OperationId},
     log::{EntryPayload, LogEntry},
     raft::{Raft, RaftError, ReadBarrier},
 };
@@ -73,6 +73,12 @@ pub enum ApplicationError {
 /// Application checkpoints and restore join this seam with snapshot support.
 pub trait StateMachine {
     type Receipt;
+    /// Validate the concrete group before assembly, execution or recovery.
+    /// Generic applications may accept any group; ownership-bound applications
+    /// must reject another group without changing state or performing I/O.
+    fn validate_group(&self, _group: GroupIdentity) -> Result<(), ApplicationError> {
+        Ok(())
+    }
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
@@ -212,6 +218,9 @@ pub fn read_at_barrier<A: ReadableStateMachine>(
 ) -> Result<A::ReadResult, ReadError> {
     raft.finish_read(barrier, application.applied_index())
         .map_err(ReadError::Consensus)?;
+    application
+        .validate_group(raft.state().bootstrap.group)
+        .map_err(ReadError::Application)?;
     application
         .read_at(barrier.index(), query)
         .map_err(ReadError::Application)

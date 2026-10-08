@@ -138,6 +138,9 @@ impl SnapshotRouter {
             owner
                 .validate_lease(&lease)
                 .map_err(SnapshotRouteError::Owner)?;
+            application
+                .validate_group(lease.ticket.visit.group)
+                .map_err(|e| SnapshotRouteError::Checkpoint(CheckpointError::Application(e)))?;
             if !matches!(
                 lease.effect,
                 Effect::VerifyLearnerReadiness(_)

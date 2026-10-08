@@ -243,6 +243,9 @@ impl<R> ReadRouter<R> {
             let core = owner
                 .core(barrier.group())
                 .ok_or(ReadRouteError::WrongBinding)?;
+            application
+                .validate_group(barrier.group())
+                .map_err(ReadRouteError::Application)?;
             if application.applied_index() > core.state().commit_index {
                 return Err(ReadRouteError::Application(ApplicationError::NotApplied));
             }

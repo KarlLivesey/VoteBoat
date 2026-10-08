@@ -12,17 +12,17 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Fixed, bounded little-endian directory application format 1.
-use super::*;
+//! Shared checked manifest format 1 and bounded little-endian application reader.
+use crate::{application::ApplicationError, routing::*};
 
-pub(super) struct Reader<'a> {
+pub(crate) struct Reader<'a> {
     bytes: &'a [u8],
 }
 impl<'a> Reader<'a> {
-    pub(super) fn new(bytes: &'a [u8]) -> Self {
+    pub(crate) fn new(bytes: &'a [u8]) -> Self {
         Self { bytes }
     }
-    pub(super) fn take(&mut self, count: usize) -> Result<&'a [u8], ApplicationError> {
+    pub(crate) fn take(&mut self, count: usize) -> Result<&'a [u8], ApplicationError> {
         if count > self.bytes.len() {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -30,65 +30,65 @@ impl<'a> Reader<'a> {
         self.bytes = tail;
         Ok(head)
     }
-    pub(super) fn done(&self) -> bool {
+    pub(crate) fn done(&self) -> bool {
         self.bytes.is_empty()
     }
-    pub(super) fn u8(&mut self) -> Result<u8, ApplicationError> {
+    pub(crate) fn u8(&mut self) -> Result<u8, ApplicationError> {
         Ok(self.take(1)?[0])
     }
-    pub(super) fn u16(&mut self) -> Result<u16, ApplicationError> {
+    pub(crate) fn u16(&mut self) -> Result<u16, ApplicationError> {
         Ok(u16::from_le_bytes(self.take(2)?.try_into().unwrap()))
     }
-    pub(super) fn u32(&mut self) -> Result<u32, ApplicationError> {
+    pub(crate) fn u32(&mut self) -> Result<u32, ApplicationError> {
         Ok(u32::from_le_bytes(self.take(4)?.try_into().unwrap()))
     }
-    pub(super) fn u64(&mut self) -> Result<u64, ApplicationError> {
+    pub(crate) fn u64(&mut self) -> Result<u64, ApplicationError> {
         Ok(u64::from_le_bytes(self.take(8)?.try_into().unwrap()))
     }
-    fn u128(&mut self) -> Result<u128, ApplicationError> {
+    pub(crate) fn u128(&mut self) -> Result<u128, ApplicationError> {
         Ok(u128::from_le_bytes(self.take(16)?.try_into().unwrap()))
     }
-    fn boolean(&mut self) -> Result<bool, ApplicationError> {
+    pub(crate) fn boolean(&mut self) -> Result<bool, ApplicationError> {
         match self.u8()? {
             0 => Ok(false),
             1 => Ok(true),
             _ => Err(ApplicationError::InvalidCommand),
         }
     }
-    pub(super) fn group(&mut self) -> Result<GroupIdentity, ApplicationError> {
+    pub(crate) fn group(&mut self) -> Result<GroupIdentity, ApplicationError> {
         Ok(GroupIdentity {
             id: GroupId::new(self.u128()?).ok_or(ApplicationError::InvalidCommand)?,
             incarnation: GroupIncarnation::new(self.u64()?)
                 .ok_or(ApplicationError::InvalidCommand)?,
         })
     }
-    fn responsibility(&mut self) -> Result<ResponsibilityIdentity, ApplicationError> {
+    pub(crate) fn responsibility(&mut self) -> Result<ResponsibilityIdentity, ApplicationError> {
         Ok(ResponsibilityIdentity {
             id: ResponsibilityId::new(self.u128()?).ok_or(ApplicationError::InvalidCommand)?,
             incarnation: ResponsibilityIncarnation::new(self.u64()?)
                 .ok_or(ApplicationError::InvalidCommand)?,
         })
     }
-    pub(super) fn operation(&mut self) -> Result<OperationId, ApplicationError> {
+    pub(crate) fn operation(&mut self) -> Result<OperationId, ApplicationError> {
         OperationId::new(self.u128()?).ok_or(ApplicationError::InvalidCommand)
     }
-    fn range(&mut self) -> Result<BucketRange, ApplicationError> {
+    pub(crate) fn range(&mut self) -> Result<BucketRange, ApplicationError> {
         BucketRange::new(self.u16()?, self.u16()?).map_err(|_| ApplicationError::InvalidCommand)
     }
 }
-pub(super) fn put_group(out: &mut Vec<u8>, group: GroupIdentity) {
+pub(crate) fn put_group(out: &mut Vec<u8>, group: GroupIdentity) {
     out.extend(group.id.get().to_le_bytes());
     out.extend(group.incarnation.get().to_le_bytes());
 }
-fn put_responsibility(out: &mut Vec<u8>, id: ResponsibilityIdentity) {
+pub(crate) fn put_responsibility(out: &mut Vec<u8>, id: ResponsibilityIdentity) {
     out.extend(id.id.get().to_le_bytes());
     out.extend(id.incarnation.get().to_le_bytes());
 }
-fn put_range(out: &mut Vec<u8>, scope: BucketRange) {
+pub(crate) fn put_range(out: &mut Vec<u8>, scope: BucketRange) {
     out.extend(scope.start().to_le_bytes());
     out.extend(scope.end().to_le_bytes());
 }
-pub(super) fn manifest_len(m: &ResponsibilityManifest) -> usize {
+pub(crate) fn manifest_len(m: &ResponsibilityManifest) -> usize {
     let input = m.input();
     // magic + identity + parent tag + authority + adapter + scheme + scope +
     // epoch/generation + placement + state + mode + mode-dependent body.
@@ -119,7 +119,7 @@ pub(super) fn manifest_len(m: &ResponsibilityManifest) -> usize {
             }
         }
 }
-pub(super) fn put_manifest(out: &mut Vec<u8>, m: &ResponsibilityManifest) {
+pub(crate) fn put_manifest(out: &mut Vec<u8>, m: &ResponsibilityManifest) {
     let input = m.input();
     out.extend(b"VBMAN001");
     put_responsibility(out, input.responsibility);
@@ -174,8 +174,8 @@ pub(super) fn put_manifest(out: &mut Vec<u8>, m: &ResponsibilityManifest) {
         }
     }
 }
-pub(super) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, ApplicationError> {
-    if bytes.len() > MAX_DIRECTORY_PUBLICATION_BYTES {
+pub(crate) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, ApplicationError> {
+    if bytes.len() > MAX_MANIFEST_BYTES {
         return Err(ApplicationError::InvalidCommand);
     }
     let mut reader = Reader::new(bytes);

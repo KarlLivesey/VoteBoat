@@ -91,8 +91,11 @@ partition-policy seams, and local committed-owner checks. Cached child lookup
 works without a parent cache entry. The [replicated directory application](docs/DIRECTORY_APPLICATION.md)
 now publishes fixed-bootstrap manifests through ordinary Raft commands and
 recovers retry history through native WAL replay, checkpoints and snapshot install.
-Routed Node data commands and durable child writes during parent quorum loss remain
-P5 work; ordinary metadata publication cannot activate or transfer ownership.
+The [routed application wrapper](docs/ROUTED_APPLICATION.md) now checks ownership
+at admission and apply, preserves semantic retries and enforces a durable local
+fence. Native TCP/QUIC child writes and recovery work with every parent replica
+stopped and unchanged ancestor logs. Ordinary metadata publication cannot activate
+or transfer ownership; split/merge remains lifecycle work.
 
 ## Run
 

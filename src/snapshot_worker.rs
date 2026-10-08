@@ -171,6 +171,7 @@ pub fn prepare_snapshot_work<A: CheckpointStateMachine>(
     effect: &Effect,
     binding: SnapshotWorkerBinding,
 ) -> Result<SnapshotWork, CheckpointError> {
+    application.validate_group(raft.state().bootstrap.group)?;
     if visit.owner.store != binding.store
         || raft.storage_binding() != binding.store
         || visit.group != raft.state().bootstrap.group
@@ -228,6 +229,7 @@ pub fn prepare_local_checkpoint_work<A: CheckpointStateMachine>(
     binding: SnapshotWorkerBinding,
     max_bytes: usize,
 ) -> Result<SnapshotWork, CheckpointError> {
+    application.validate_group(raft.state().bootstrap.group)?;
     if visit.owner.store != binding.store
         || raft.storage_binding() != binding.store
         || visit.group != raft.state().bootstrap.group
@@ -292,6 +294,7 @@ pub fn complete_snapshot_work<A: CheckpointStateMachine>(
     visit: VisitTicket,
     event: SnapshotWorkEvent,
 ) -> Result<Vec<Effect>, CheckpointError> {
+    application.validate_group(raft.state().bootstrap.group)?;
     if event.request != expected
         || event.visit != visit
         || expected.sequence == 0

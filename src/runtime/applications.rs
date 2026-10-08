@@ -228,6 +228,9 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
             };
             let through = entries.last().unwrap().index;
             let state = owner.core(lease.ticket.visit.group).unwrap().state();
+            application
+                .validate_group(state.bootstrap.group)
+                .map_err(ApplicationRouteError::Application)?;
             if through > state.commit_index
                 || entries.iter().any(|e| state.entry_at(e.index) != Some(e))
             {

@@ -27,6 +27,7 @@ pub mod outbound;
 pub mod placement;
 pub mod quorum;
 pub mod raft;
+pub mod routed;
 pub mod routing;
 pub mod runtime;
 pub mod secure;

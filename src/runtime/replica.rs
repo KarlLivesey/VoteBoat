@@ -264,6 +264,8 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                 .applications
                 .get(&group)
                 .ok_or(ReplicaError::MissingApplication)?;
+            app.validate_group(group)
+                .map_err(|_| ReplicaError::WrongBinding)?;
             if app.applied_index() != core.state().commit_index {
                 return Err(ReplicaError::MissingApplication);
             }

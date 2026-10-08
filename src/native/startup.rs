@@ -105,6 +105,9 @@ impl NativeMemberStartup {
             return Err(error("enrollment", "incompatible bootstrap or wire"));
         }
         // Validate application and exact learner assignment before file creation.
+        application
+            .validate_group(self.startup.bootstrap.group)
+            .map_err(|_| error("application", "application rejects the configured group"))?;
         incoming.metadata.validate()?;
         let membership = incoming
             .metadata
@@ -458,6 +461,11 @@ impl NativeStartup {
         let mut application = Some(app);
         let result = (|| {
             self.validate()?;
+            application
+                .as_ref()
+                .unwrap()
+                .validate_group(self.bootstrap.group)
+                .map_err(|_| error("application", "application rejects the configured group"))?;
             if application.as_ref().unwrap().applied_index() != 0 {
                 return Err(error(
                     "application",
@@ -516,6 +524,11 @@ impl NativeStartup {
         let mut application = Some(app);
         let result = (|| {
             authorization.validate(&self)?;
+            application
+                .as_ref()
+                .unwrap()
+                .validate_group(self.bootstrap.group)
+                .map_err(|_| error("application", "application rejects the configured group"))?;
             if application.as_ref().unwrap().applied_index() != 0 {
                 return Err(error(
                     "application",

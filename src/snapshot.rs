@@ -272,6 +272,7 @@ pub fn checkpoint_application<A: CheckpointStateMachine, S: SnapshotStore>(
     store: &mut S,
 ) -> Result<SnapshotReceipt, CheckpointError> {
     check_binding(raft, store)?;
+    application.validate_group(raft.state().bootstrap.group)?;
     let limits = store.limits().validate()?;
     let index = application.applied_index();
     if index == 0 || index > raft.state().commit_index {
@@ -327,6 +328,7 @@ pub fn restore_application<A: CheckpointStateMachine, S: SnapshotRetention>(
     store: &mut S,
 ) -> Result<Restored<A::Receipt>, CheckpointError> {
     check_binding(raft, store)?;
+    application.validate_group(raft.state().bootstrap.group)?;
     if application.applied_index() != 0 {
         return Err(CheckpointError::InvalidBoundary);
     }
@@ -452,6 +454,7 @@ pub fn enroll_learner_snapshot<A: CheckpointStateMachine, L: LogStore, S: Snapsh
     };
     incoming.metadata.validate()?;
     let group = incoming.metadata.bootstrap.group;
+    application.validate_group(group)?;
     let state = log.state(group)?;
     let limits = snapshots.limits().validate()?;
     let membership = incoming
@@ -575,6 +578,7 @@ fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetenti
     application: &mut A,
     mode: RecoveryMode,
 ) -> Result<(Raft, Restored<A::Receipt>), CheckpointError> {
+    application.validate_group(group)?;
     let state = log.state(group)?;
     let core = match mode {
         RecoveryMode::BootstrapLearner => {
@@ -617,6 +621,7 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
 ) -> Result<Vec<Effect>, CheckpointError> {
     verify_log(raft, log)?;
     check_binding(raft, store)?;
+    application.validate_group(raft.state().bootstrap.group)?;
     if application.applied_index() < reference.index {
         return Err(CheckpointError::InvalidBoundary);
     }
@@ -674,6 +679,7 @@ pub fn stage_snapshot_effect<A: CheckpointStateMachine, L: LogStore, S: Snapshot
     let result = (|| {
         verify_log(raft, log)?;
         check_binding(raft, store)?;
+        application.validate_group(raft.state().bootstrap.group)?;
         if !raft.staged_matches(&message) {
             return Err(CheckpointError::Consensus(RaftError::WrongCompletion));
         }
@@ -729,6 +735,7 @@ pub fn finish_snapshot_install<A: CheckpointStateMachine, L: LogStore, S: Snapsh
     let result = (|| {
         verify_log(raft, log)?;
         check_binding(raft, store)?;
+        application.validate_group(raft.state().bootstrap.group)?;
         if raft.state().snapshot != Some(reference) || application.applied_index() > reference.index
         {
             return Err(CheckpointError::InvalidBoundary);
