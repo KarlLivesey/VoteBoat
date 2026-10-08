@@ -168,4 +168,12 @@ Explicit member assemblies now select validated receive-side configuration
 replication, which supplies the native integration path for those transitions.
 
 Explicit native member restart is documented in the [service/embedding guide](COUNTER_SERVICE.md).
+The counter executable now exposes `serve recover-member` for existing dynamic
+histories among its fixed three provisioned identities, selecting wire format 6
+on all participants. This reuses verified member recovery and enforced counter
+bounds; ordinary service polling continues to deny configuration mutation.
+Prepared TCP/QUIC service histories cover joint/final reopening, real checkpoint
+drain and retry deduplication after restart. Deployment/enrollment inputs and
+authorized mutation endpoints remain integration work; these fixtures do not
+prove online proposal delivery.
 The original static NativeStartup entry points retain their rejection of dynamic journals.

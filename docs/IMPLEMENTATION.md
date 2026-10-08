@@ -113,6 +113,13 @@ The mini plan advances to that integration; unresolved divergent retained-only
 learner histories and broader policy/fault schedules remain release gates in item
 2 below. This does not declare P4 complete or open service mutation endpoints.
 
+Slice 71 connects explicit member restart to the executable service through
+`serve recover-member`. Prepared joint/final TCP/QUIC histories now pass through
+the real CLI, application envelope, checkpoint drain and second process restart.
+The original bootstrap/provisioned identities remain 1..3. Explicit enrollment
+inputs and authorized administration still belong to current item 1; this is
+its service recovery path, not completion of enrollment or online membership.
+
 1. **Enrollment and administrative service integration (current, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
@@ -4007,3 +4014,39 @@ P4 completion, P5 routing, P6 split/merge and P7 remain required by the active f
 P0–P7 goal. Static service/embedding usability remains independent. Public service
 mutations are still gated; no macOS, performance or complete protocol-proof claim.
 P8 remains deferred.
+
+## Slice 71 — explicit executable member recovery
+
+Mini schema plan: add an explicit `serve recover-member` mode beside static
+create/recover. Retain original bootstrap and trusted provisioned identities
+1..3, select exact membership/repair wire 6, and delegate authoritative assignment,
+checkpoint/WAL recovery and resource cleanup to `NativeMemberStartup`. Missing
+files and removed assignment must fail through that constructor; routes never
+grant membership. The service still polls without configuration authorization.
+No new effect, token, watermark, generation, provider seam or file format is needed.
+The same counter envelope is checked before assembly and enforced by admission,
+application and restore. Do not create an implicit enrollment fallback on failure.
+
+The executable now reopens existing dynamic membership through that explicit mode
+for TCP/TLS or QUIC. All participating peers must select matching wire format 6;
+static modes retain wire 1 and reject dynamic journals. Existing shutdown/rejected
+startup cleanup ownership is unchanged. Enrollment/deployment inputs beyond the
+fixed three identities and authorized configuration commands remain work in mini
+item 1. This connects the service recovery path needed by its enrollment/admin
+integration and later fault-tested release; it does not complete P4 or supersede
+the remaining macro milestones P5–P7.
+
+Actual executable histories seed committed joint and final records, then reopen
+all three processes, observe the retained operation, commit/read a counter write,
+drain a real compacted checkpoint, restart and retry the same operation. The final
+view demotes node 3 to learner; it cannot lead or accept a write. Static recovery
+refuses those same journals, member mode refuses missing files, and unsupported
+configuration commands remain rejected. These test prepared durable histories,
+not distributed enrollment, original joint/final commitment or general liveness.
+
+Both TCP/QUIC new histories and the complete all-feature executable suite pass
+(9 tests), along with all-feature/all-target Clippy with warnings denied. A first
+parallel run exposed colliding clock-derived fixture directory names before QUIC
+startup; a per-process atomic sequence makes directory allocation distinct. The
+corrected histories pass. See validation/REPORT.md for final checks. Linux was
+exercised; macOS execution, broader fault schedules and performance remain unclaimed.

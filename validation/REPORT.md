@@ -981,3 +981,29 @@ assertion uses a borrowed expected-message slice.
 - Final core-only library 47 pass; all-feature/all-target Clippy with warnings
   denied, all-feature docs, formatting/diff and inventory metadata checks pass
   (60 contracts). No new provider seam or production dependency.
+
+## Slice 71 — executable member recovery
+
+- Explicit `serve recover-member` selects NativeMemberStartup and wire format 6
+  for existing service stores among the original three provisioned identities.
+  Static create/recover retain wire 1. Shared counter envelope and startup/shutdown
+  ownership remain in use; ordinary polling denies configuration execution.
+- Actual TCP/TLS and QUIC executable histories reopen seeded committed joint/final
+  views, observe configuration operation 500, commit/read counter value 42, drain
+  and verify native checkpoint compaction, restart all processes and preserve retry
+  deduplication. The final learner cannot lead/accept a write. Static recovery
+  refuses the dynamic journals and missing member files are not created.
+- The initial parallel run failed before QUIC startup because clock-derived
+  temporary directory names collided. A per-process atomic allocation sequence
+  fixes that fixture issue; both corrected histories pass. Full all-feature
+  counter_service target passes 9 tests, including existing static leader-loss,
+  recovery, input bounds, quorum loss and absolute client deadline tests.
+- All-feature/all-target Clippy with warnings denied passes. No new provider seam
+  or production dependency. Seeded assignments do not establish online proposal
+  commitment, enrollment or a complete remote lifecycle. Enrollment/deployment
+  inputs and authorized administration remain mini item 1; remaining faults stay
+  in release item 2 before P5 routing/P6 ownership movement/P7. Full goal remains
+  active. No macOS execution, performance or complete protocol-proof claim.
+- Default-build counter_service passes 8 tests, including rejection of unavailable
+  QUIC before store creation. Formatting/diff and inventory metadata checks pass
+  (60 contracts). No consensus/storage changes required broader protocol tests.

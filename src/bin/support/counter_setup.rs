@@ -145,7 +145,11 @@ pub fn configuration(
     config.validate()?;
     Ok(config)
 }
-pub fn open(config: NativeStartup, protocol: NativePeerProtocol) -> Result<Service, Failure> {
+pub fn open(
+    mut config: NativeStartup,
+    protocol: NativePeerProtocol,
+    member: bool,
+) -> Result<Service, Failure> {
     let app = checked(Counter::new(10000))?;
     // Bind the service declaration to the same capacity enforced by admission,
     // application and restore, including future retry history growth.
@@ -165,7 +169,21 @@ pub fn open(config: NativeStartup, protocol: NativePeerProtocol) -> Result<Servi
     {
         return Err("counter application envelope exceeds selected native payload limits".into());
     }
-    match config.open_with_protocol(protocol, app, Arc::new(ThreadWake::current()), MonoTime(0)) {
+    let wake = Arc::new(ThreadWake::current());
+    let opened = if member {
+        // Explicit recovery only: provisioned routes do not establish assignment.
+        // The native member constructor verifies the authoritative WAL/checkpoint.
+        config.tls = checked(config.tls.with_wire_version(6))?;
+        let provisioned_stores = config.bootstrap.voter_stores.clone();
+        NativeMemberStartup {
+            startup: config,
+            provisioned_stores,
+        }
+        .open_with_protocol(protocol, app, wake, MonoTime(0))
+    } else {
+        config.open_with_protocol(protocol, app, wake, MonoTime(0))
+    };
+    match opened {
         Ok(node) => Ok(node),
         Err(mut rejected) => {
             let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);

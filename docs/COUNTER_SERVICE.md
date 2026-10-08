@@ -4,8 +4,9 @@
 `native::node::NativeNode<Counter, NativeServiceConnector>`. Three nodes communicate
 over mutually authenticated TCP/TLS or optional QUIC, elect leaders using native
 timers, and keep separate durable
-WALs and snapshots. This is an initial usable local service, with static
-three-voter membership and one counter group. Peer addresses are configurable;
+WALs and snapshots. The quickstart creates static three-voter membership and one
+counter group. Explicit member recovery can reopen compatible dynamic histories
+prepared through the Rust administration APIs. Peer addresses are configurable;
 the trusted local command endpoint always binds to 127.0.0.1.
 
 ## Start three processes
@@ -93,6 +94,42 @@ addresses cannot change membership or grant voting authority. Run client command
 locally on the relevant host; the command port is not a remote service API.
 Actual acceptance tests use explicitly configured non-default loopback endpoints.
 Separate-host deployment has not been exercised here.
+
+## Recover an existing member journal
+
+For stores whose membership has been changed through the Rust APIs, explicitly
+select member recovery on **every participating service process**:
+
+```sh
+target/debug/voteboat-counter serve recover-member /your/data/node1 1 43000 /your/tls peers.txt
+```
+
+Use node 2/3 with their own directories, and append `--transport quic` for QUIC.
+This mode selects exact wire format 6, including membership reception and the
+existing learner repair protocols. Ordinary `create` and `recover` retain wire
+format 1 and static recovery semantics; incompatible wire selections cannot form
+peer sessions. Stop the participating processes before switching their mode.
+
+Member recovery verifies the existing WAL, pinned checkpoint and exact local
+assignment through `NativeMemberStartup`. It neither creates missing files nor
+infers assignment from peer routes. Removed local stores are rejected. The CLI
+still fixes the original bootstrap, provisioned node/store identities and routes
+to 1..3; this mode supports changes among those identities, including learners
+and joint/final views. Arbitrary new deployment identities, offline enrollment
+commands and service configuration mutation endpoints remain integration work.
+Rust hosts can already supply explicit provisioning and trusted enrollment images.
+
+The same enforced counter envelope, local commands, durable configuration-status
+observation, checkpoint drain and retry IDs apply. Configuration execution remains
+denied by ordinary service polling. No automatic witness query or finalization is
+implied by starting a member process; hosts must still drive those controls when
+their recovery history requires them.
+
+Executable TCP/TLS and QUIC histories reopen prepared committed joint and final
+views, commit/read a counter write, drain a real checkpoint and reopen all three
+processes. They preserve retry deduplication and configuration observation; the
+final-view learner cannot lead or accept a write. These seeded histories validate
+service recovery, not online enrollment or the distributed proposal lifecycle.
 
 ## Write, retry and read
 

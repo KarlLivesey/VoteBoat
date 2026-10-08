@@ -20,11 +20,15 @@ use std::{
     net::{Ipv4Addr, TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command},
-    sync::Mutex,
+    sync::{
+        atomic::{AtomicU64, Ordering},
+        Mutex,
+    },
     time::{Duration, Instant},
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-counter");
 static PORT_BLOCKS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
+static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 struct Cluster {
     root: PathBuf,
     base: u16,
@@ -37,12 +41,13 @@ struct Cluster {
 impl Cluster {
     fn new() -> Self {
         let root = std::env::temp_dir().join(format!(
-            "voteboat-service-{}-{}",
+            "voteboat-service-{}-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
-                .as_nanos()
+                .as_nanos(),
+            DIRECTORIES.fetch_add(1, Ordering::Relaxed)
         ));
         fs::create_dir(&root).unwrap();
         // Never recycle a fixture's block within this test process: accepted
@@ -234,6 +239,214 @@ fn three_service_processes_retry_replace_leader_and_recover_native_files() {
 fn three_quic_service_processes_retry_replace_leader_and_recover_native_files() {
     replicated_history(true);
 }
+/// Prepared durable assignment tests service recovery, not online proposal delivery.
+fn seed_member_service(root: &std::path::Path, final_view: bool) {
+    use voteboat::{
+        contracts::HardState,
+        identity::*,
+        log::*,
+        membership::*,
+        native::{log_store::*, snapshot_store::*},
+        quorum::*,
+        snapshot::*,
+    };
+    let node = |n| NodeId::new(n).unwrap();
+    let store = |n: u64| StoreIdentity {
+        id: StoreId::new(n as u128).unwrap(),
+        incarnation: StoreIncarnation::new(1).unwrap(),
+    };
+    let cid = |n| ConfigurationId::new(n).unwrap();
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let policy = |ids: &[u64]| {
+        Policy::new(
+            Tree::Majority(ids.iter().map(|&n| Tree::Voter(node(n))).collect()),
+            Limits::default(),
+        )
+        .unwrap()
+    };
+    let bootstrap = Bootstrap {
+        group,
+        configuration: cid(1),
+        policy: policy(&[1, 2, 3]),
+        voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
+    };
+    let next = Configuration::new(
+        cid(3),
+        policy(&[1, 2]),
+        (1..=2).map(|n| (node(n), store(n))).collect(),
+        [(node(3), store(3))].into(),
+    )
+    .unwrap();
+    let records = [
+        ConfigurationRecord {
+            operation: OperationId::new(500).unwrap(),
+            expected: cid(1),
+            change: ConfigurationChange::Joint { id: cid(2), next },
+        },
+        ConfigurationRecord {
+            operation: OperationId::new(500).unwrap(),
+            expected: cid(2),
+            change: ConfigurationChange::Final { id: cid(3) },
+        },
+    ];
+    for local in 1..=3 {
+        let path = root.join(local.to_string());
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&path).unwrap(),
+            store(local),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let tickets = log
+            .append_batch(vec![LogMutation::Create(bootstrap.clone())])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        let state = log.state(group).unwrap();
+        let entries = records
+            .iter()
+            .take(if final_view { 2 } else { 1 })
+            .enumerate()
+            .map(|(i, r)| LogEntry {
+                index: i as u64 + 1,
+                term: 1,
+                payload: EntryPayload::Configuration(Box::new(r.clone())),
+            })
+            .collect::<Vec<_>>();
+        let tickets = log
+            .append_batch(vec![LogMutation::Update(LogUpdate {
+                group,
+                expected_revision: state.revision,
+                hard_state: HardState {
+                    term: 1,
+                    voted_for: None,
+                },
+                commit_index: entries.len() as u64,
+                suffix: Some(Suffix { from: 1, entries }),
+                snapshot: None,
+                snapshot_membership: None,
+            })])
+            .unwrap();
+        log.barrier(&tickets).unwrap();
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(path.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                group,
+                store: store(local),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    }
+}
+fn member_service_history(quic: bool) {
+    for final_view in [false, true] {
+        let mut cluster = Cluster::new();
+        cluster.quic = quic;
+        seed_member_service(&cluster.root, final_view);
+        // Selecting ordinary recovery must not silently opt into a dynamic view.
+        cluster.listeners.clear();
+        cluster.udp_sockets.clear();
+        let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let refused = Command::new(BIN)
+            .args(["serve", "recover"])
+            .arg(cluster.root.join("1"))
+            .arg("1")
+            .arg(cluster.base.to_string())
+            .arg(tls)
+            .output()
+            .unwrap();
+        assert!(
+            !refused.status.success(),
+            "static recovery must refuse the journal"
+        );
+        for id in 1..=3 {
+            cluster.start(id, "recover-member");
+        }
+        let leader = cluster.leader();
+        if final_view {
+            assert_ne!(leader, 3, "demoted learner must not lead");
+        }
+        let expected = if final_view {
+            "action=completed"
+        } else {
+            "action=finalize_requires_authorization"
+        };
+        for id in 1..=3 {
+            assert!(cluster
+                .wait_configuration_status(id, "500")
+                .contains(expected));
+        }
+        assert!(cluster
+            .ok(leader, &["add", "700", "42"])
+            .contains("Value(42)"));
+        assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+        // Configuration intake remains closed even in explicit member mode.
+        assert!(!cluster
+            .request(leader, &["configure", "501"])
+            .status
+            .success());
+        cluster.ok(leader, &["checkpoint"]);
+        cluster.stop();
+        {
+            use voteboat::{identity::*, log::*, native::log_store::*};
+            let log = NativeLogStore::recover(
+                FileLogIo::open(cluster.root.join(leader.to_string())).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(leader as u128).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                LogLimits::default(),
+            )
+            .unwrap();
+            let group = GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            };
+            assert!(
+                log.state(group).unwrap().base_index() > 0,
+                "member checkpoint must drain before restart"
+            );
+        }
+        for id in 1..=3 {
+            cluster.start(id, "recover-member");
+        }
+        let leader = cluster.leader();
+        assert!(cluster
+            .ok(leader, &["add", "700", "42"])
+            .contains("duplicate=true"));
+        assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+        for id in 1..=3 {
+            assert!(cluster
+                .wait_configuration_status(id, "500")
+                .contains(expected));
+        }
+        if final_view {
+            assert!(cluster.ok(3, &["status"]).contains("role=Follower"));
+            assert!(!cluster.request(3, &["add", "701", "1"]).status.success());
+        }
+        cluster.stop();
+        for id in 1..=3 {
+            assert!(
+                fs::read_to_string(cluster.root.join(format!("{id}-recover-member.log")))
+                    .unwrap()
+                    .contains("workers_joined=true")
+            );
+        }
+        fs::remove_dir_all(&cluster.root).unwrap();
+    }
+}
+#[test]
+fn member_service_recovers_joint_and_final_histories_and_checkpoint_retries() {
+    member_service_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries() {
+    member_service_history(true);
+}
 fn replicated_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
@@ -381,7 +594,7 @@ fn missing_recovery_and_invalid_configuration_do_not_create_a_store() {
     cluster.listeners.remove(&101);
     let root = cluster.root.join("missing");
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-    for (mode, id) in [("recover", "1"), ("create", "4")] {
+    for (mode, id) in [("recover", "1"), ("recover-member", "1"), ("create", "4")] {
         let output = Command::new(BIN)
             .args(["serve", mode])
             .arg(&root)

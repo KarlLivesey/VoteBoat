@@ -28,12 +28,13 @@ use voteboat::membership::ConfigurationResumeAction;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
 voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
+recover-member explicitly verifies existing membership journals and selects wire format 6 on all peers.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 Use the same operation ID and delta when retrying an unknown write.";
@@ -193,14 +194,14 @@ fn serve(
 ) -> Result<(), Failure> {
     let create = match mode {
         "create" => true,
-        "recover" => false,
-        _ => return Err("expected create or recover".into()),
+        "recover" | "recover-member" => false,
+        _ => return Err("expected create, recover or recover-member".into()),
     };
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
     listener.set_nonblocking(true)?;
     let config = setup::configuration(root, id, base, tls, create, endpoints)?;
     let peer_address = config.listen;
-    let mut service = setup::open(config, protocol)?;
+    let mut service = setup::open(config, protocol, mode == "recover-member")?;
     let start = Instant::now();
     println!(
         "ready node={id} peer={peer_address} transport={protocol:?} command=127.0.0.1:{}",
