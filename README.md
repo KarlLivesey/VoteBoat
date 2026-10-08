@@ -399,3 +399,7 @@ The Linux/macOS CI template is in `ci/platform-feedback.yml`. The current GitHub
 token lacks workflow-write permission, so it has not been activated. When
 enabled, CI will provide background feedback without a required merge gate.
 Development proceeds using relevant local checks.
+
+The evolving split/merge path now includes [verified metadata publication](docs/TRANSFER_PUBLICATION.md)
+after source fencing and target imports. Target activation and complete transfer
+recovery remain in progress; the static service is usable independently.

@@ -125,3 +125,8 @@ identity, F, epoch, operation, scope and observed content commitments. Next requ
 fence/import evidence before metadata publication and durable target activation,
 with interrupted-stage and no-dual-owner histories. Compatible merge reuses that
 path. P6, recursive lifecycle and the full P0–P7 objective remain unfinished.
+
+Checked metadata ownership decisions are now available through
+[verified transfer publication](TRANSFER_PUBLICATION.md), including reserved control
+history and original-decision recovery. Targets remain non-serving; durable activation,
+complete interrupted split recovery and distributed merge are still pending.

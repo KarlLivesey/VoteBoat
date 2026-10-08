@@ -1399,6 +1399,24 @@
         "tests/routed/native.rs"
       ],
       "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, complete ordered source coverage and source-observed content commitments. Inline committed load carries actual data and source fence/configuration lineage; source F is separate from target I. Exact phase retries/status survive native three-node TCP/QUIC WAL/checkpoint recovery while data remains NotActive. 8 MiB import body, 256 sources, bounded pending/read/result/state. Multi-source collision/coverage adapter tests do not prove distributed merge. Trusted authenticated host verifies foreign provenance/staging/envelopes. No metadata publication, activation, recursive coordination, later-transfer/retirement or complete transfer proof; no new store/thread owner."
+    },
+    {
+      "design_id": "C05/C15",
+      "public_contract": "TransferPublication / SourceFenceEvidence / TargetReadyEvidence / TransferPublicationStatus",
+      "operations": [
+        "new",
+        "from_status",
+        "encode",
+        "decode",
+        "retained_bytes",
+        "transfer_publication_at"
+      ],
+      "native": "Checked metadata publication over the existing Directory journal, LifecycleDirectory quorum-read view and authoritative native log/checkpoint providers.",
+      "conformance": [
+        "tests/transfer_publication.rs",
+        "tests/routed/native.rs"
+      ],
+      "scope": "Exact ordered source/target coverage, matching fence/configuration/scope/image commitments and retained intent; authenticated foreign quorum provenance remains host responsibility. Bounded reserved publication history survives ordinary capacity exhaustion and replay. Native TCP/QUIC WAL/checkpoint histories recover the original decision while targets stay NotActive. No activation, full split/no-dual-owner recovery, distributed merge, recursive coordination or mixed-version claim."
     }
   ],
   "not_yet_implemented": [

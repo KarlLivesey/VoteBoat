@@ -53,8 +53,8 @@ or silently change a child's voting rules. Placement metadata is a declaration;
 actual replica/quorum changes still require the P4 protocol. The [transfer intent journal](TRANSFER_INTENTS.md) now records a proposed top-level
 split/merge and locks conflicting publications without changing ownership.
 The optional source wrapper supplies local committed fencing and exact-boundary
-export. The optional target guard supplies committed staging/inline imports. Cross-group
-verification, ownership publication and activation remain pending.
+export. The optional target guard supplies committed staging/inline imports. [Verified transfer publication](TRANSFER_PUBLICATION.md) now checks complete cross-group
+evidence and commits the exact ownership decision. Target activation remains pending.
 
 There is one DirectoryReceipt per Command, including the initialization command. Published includes the resulting route
 generation. Valid commands that lose their compare-and-set race or violate the
@@ -88,10 +88,11 @@ cache and resolves an existing child partition. That is not yet a routed data wr
 
 ## Lifetime bounds and formats
 
-DirectoryLimits fixes 1..4096 retained unique operations and 1..64 MiB of retained
+DirectoryLimits fixes 1..4096 ordinary retained unique operations and 1..64 MiB of retained
 original command bytes. These capacities are schema parameters identical across
 replicas and checked on restore. The constructor rejects a history budget too small for the initialization command.
-Initialization consumes one operation slot and its full request bytes. There is
+Initialization consumes one operation slot and its full request bytes. Successful transfer publications use an additional bounded control pool reserved
+when intents are accepted; see TRANSFER_PUBLICATION.md. There is
 no retry eviction. ProposalAdmission
 reserves both operation count and bytes against all pending unique operations;
 conflicting pending payloads reserve their largest size. Applied duplicates need
@@ -112,6 +113,7 @@ Directory application schema is 1. Fixed little-endian format tags are:
 | `VBDINIT1` | Exact authority, operation/history capacities and the complete canonical initial plan. Its bounded maximum is 8 MiB; actual required size depends on the plan. |
 | `VBDCMD01` | Expected generation (u64, zero means initial publication), u32 manifest length and one manifest. Maximum complete command is 32768 bytes. |
 | `VBTINT01` | Exact checked before/after split or merge manifests; bounded by the same 32768-byte ceiling. |
+| `VBTPUB01` | Complete checked source/target evidence and exact intent; at most 65536 bytes. |
 | `VBDIR001` | Applied boundary, exact configured capacities/authority/bootstrap plan, then every unique original command in first-application order with its original index and operation ID. |
 
 `DirectoryCommand::encode(max_bytes)` and `Directory::bootstrap_command(max_bytes)`
@@ -136,10 +138,10 @@ bound history indices, duplicate operation IDs, malformed commands, oversized
 history and trailing/truncated bytes. Failure leaves the existing application
 unchanged. The conservative whole-lifetime snapshot envelope is:
 
-`58 + encoded_plan_bytes + 28 * operation_capacity + history_byte_capacity`.
+`58 + encoded_plan_bytes + 56 * operation_capacity + history_byte_capacity + control_history_capacity`.
 
 `readiness_requirements()` returns that bound, application schema and maximum
-command size: the larger of the 32768-byte publication ceiling and actual
+command size: the larger of the 65536-byte transfer-publication ceiling and actual
 initialization size. Large forests can exceed default log command limits, so the
 embedding must explicitly select compatible log/snapshot/transport envelopes;
 this application does not resize providers or hot-reload its plan. Persisted

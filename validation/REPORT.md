@@ -1627,3 +1627,39 @@ remain trusted-host duties and required work for the complete lifecycle. Inline
 imports have explicit 8 MiB body ceilings and selected native envelopes may be
 smaller. Further transfers/retirement, recursive parent coordination and full P0–P7
 remain unfinished; P8 stays deferred.
+
+## Slice 88 — checked durable transfer publication
+
+Seven publication conformance tests cover complete ordered source/target evidence,
+changed/missing facts, ordinary operation/byte exhaustion with reserved control
+capacity, pending competitors, original retries, bounded quorum-read values,
+atomic checkpoint recovery and every codec/checkpoint truncation. Maximum
+256-route split and 256-source merge metadata encode to 63,624 and 61,584 bytes;
+these synthetic envelope tests do not establish distributed merge behavior.
+
+Four new native histories run three-replica metadata, source and two target groups
+over TCP/TLS or QUIC. Targets stage/import actual per-bucket data; quorum-observed
+fence and import commitments feed a checked publication. The fenced source stops,
+ordinary directory operation slots are full, and the committed original decision
+survives discarded observation, WAL/checkpoint reopen, retry and another reopen.
+Targets continue to refuse data. No activation or complete no-dual-owner split
+claim follows from this evidence. Foreign quorum provenance is trusted authenticated
+host input, not a cryptographic certificate derived from the evidence structs.
+
+Final affected all-feature suites pass: library 57, directory 22, routed 22,
+scopes 8, source 7, target 9, publication 7 (132). Core-only library 48, directory
+20, scopes 7, source 7, target 9, publication 7 pass (98). All-target/all-feature
+Clippy with warnings denied, formatting, 69-contract inventory and diff checks pass.
+
+Intermediate native failures exposed harness assumptions about persistent node-1
+leadership, current-term read readiness, competing elections and cleared read
+cancellations. Helpers now observe the actual current-term-ready leader. Publication
+histories bound exact-ID/bytes retries and fresh quorum-read retries to four attempts
+for leadership uncertainty only. ReadRequests already validates tracked StaleRead
+cancellation after term changes; other unexpected step/application/owner errors fail.
+Independent native histories are serialized within the binary to bound unrelated
+worker/socket contention; each history retains concurrent replicas/groups and
+unchanged production deadlines. The final full routed run passes all 22 tests.
+These selected graceful-reopen Linux schedules are not power-cut, macOS,
+separate-host, activation, distributed merge or complete protocol proofs. P0–P7
+remains active and P8 deferred. CI remains background feedback.

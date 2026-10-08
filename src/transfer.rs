@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Checked ownership-transfer intents. An intent does not fence or activate owners.
+use crate::transfer_publication::{TransferPublication, TransferPublicationStatus};
 use crate::{application::*, directory::*, identity::*, log::*, routing::codec::*, routing::*};
 use std::{collections::BTreeSet, mem::size_of};
 
@@ -176,12 +177,14 @@ pub struct TransferIntentStatus {
 pub enum DirectoryQuery {
     Manifest(ResponsibilityIdentity),
     Transfer(OperationId),
+    Publication(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
     Manifest(Option<ResponsibilityManifest>),
     Transfer(Option<TransferIntentStatus>),
+    Publication(Option<TransferPublicationStatus>),
 }
 
 /// Read view with lifecycle queries over the same directory state, log and
@@ -261,6 +264,10 @@ impl ReadableStateMachine for LifecycleDirectory {
                 .0
                 .transfer_intent_at(required, operation)
                 .map(DirectoryRead::Transfer),
+            DirectoryQuery::Publication(operation) => self
+                .0
+                .transfer_publication_at(required, operation)
+                .map(DirectoryRead::Publication),
         }
     }
 }
@@ -280,6 +287,12 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
                     .map_or(0, |s| {
                         s.intent.retained_bytes() - size_of::<TransferIntent>()
                     }),
+                DirectoryQuery::Publication(operation) => self
+                    .0
+                    .transfer_publication_at(self.applied_index(), *operation)?
+                    .map_or(0, |s| {
+                        s.publication.retained_bytes() - size_of::<TransferPublication>()
+                    }),
             })
     }
     fn read_result_bytes(
@@ -293,6 +306,9 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
             }),
             DirectoryRead::Transfer(s) => s.as_ref().map_or(0, |s| {
                 s.intent.retained_bytes() - size_of::<TransferIntent>()
+            }),
+            DirectoryRead::Publication(s) => s.as_ref().map_or(0, |s| {
+                s.publication.retained_bytes() - size_of::<TransferPublication>()
             }),
         };
         if bytes > limit {

@@ -19,7 +19,8 @@
 //! authorization remains required before proposal. Durable progress comes solely
 //! from the existing Raft/WAL/application/checkpoint contracts.
 use crate::routing::codec::*;
-use crate::transfer::{TransferIntent, TransferIntentStatus, MAX_TRANSFER_INTENT_BYTES};
+use crate::transfer::{TransferIntent, TransferIntentStatus};
+use crate::transfer_publication::*;
 use crate::{application::*, identity::*, log::*, routing::*};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -243,12 +244,16 @@ pub enum DirectoryOutcome {
     TransferIntentRecorded,
     LifecycleBusy,
     TransferGroupBusy,
+    TransferControlBusy,
+    TransferEvidenceMismatch,
+    TransferPublished(RouteGeneration),
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
     Bootstrap,
     Publish(DirectoryCommand),
     Transfer(TransferIntent),
+    Publication(TransferPublication),
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DirectoryReceipt {
@@ -283,6 +288,8 @@ pub struct Directory {
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
     history_bytes: usize,
+    control_bytes: usize,
+    publications: BTreeMap<OperationId, OperationId>,
     /// Locks reference existing bounded history rather than duplicate manifests.
     transfers: BTreeMap<ResponsibilityIdentity, OperationId>,
     transfer_targets: BTreeSet<GroupIdentity>,
@@ -307,6 +314,8 @@ impl Directory {
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
             history_bytes: 0,
+            control_bytes: 0,
+            publications: BTreeMap::new(),
             transfers: BTreeMap::new(),
             transfer_targets: BTreeSet::new(),
         })
@@ -322,7 +331,14 @@ impl Directory {
         self.limits
     }
     pub fn remaining_operations(&self) -> usize {
-        self.limits.operations - self.history.len()
+        self.limits.operations - (self.history.len() - self.publications.len())
+    }
+    /// Extra bounded control pool; successful publications never use ordinary history.
+    pub fn control_history_capacity(&self) -> usize {
+        self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * MAX_TRANSFER_PUBLICATION_BYTES
+    }
+    pub fn reserved_publication_bytes(&self) -> usize {
+        self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
     }
     /// Commit this exact plan/capacity binding before any publication. It uses
     /// an ordinary operation ID and retains its original request/result. Large
@@ -362,6 +378,8 @@ impl Directory {
             }
             if bytes.starts_with(b"VBTINT01") {
                 TransferIntent::decode(bytes).map(Request::Transfer)
+            } else if bytes.starts_with(b"VBTPUB01") {
+                TransferPublication::decode(bytes).map(Request::Publication)
             } else {
                 DirectoryCommand::decode(bytes).map(Request::Publish)
             }
@@ -370,11 +388,12 @@ impl Directory {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: DIRECTORY_APPLICATION_SCHEMA,
-            command_bytes: MAX_TRANSFER_INTENT_BYTES.max(46 + self.plan.encoded_len()),
+            command_bytes: MAX_TRANSFER_PUBLICATION_BYTES.max(46 + self.plan.encoded_len()),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
-                + 28 * self.limits.operations
-                + self.limits.history_bytes,
+                + 56 * self.limits.operations
+                + self.limits.history_bytes
+                + self.control_history_capacity(),
         }
     }
     fn publish(&mut self, command: DirectoryCommand) -> DirectoryOutcome {
@@ -475,6 +494,11 @@ impl Directory {
                 return DirectoryOutcome::TransferGroupBusy;
             }
         }
+        if self.control_bytes + self.reserved_publication_bytes() + MAX_TRANSFER_PUBLICATION_BYTES
+            > self.control_history_capacity()
+        {
+            return DirectoryOutcome::TransferControlBusy;
+        }
         for target in targets {
             let RouteTarget::Group(group) = target.target else {
                 unreachable!("checked intent")
@@ -506,6 +530,55 @@ impl Directory {
             intent: TransferIntent::decode(&record.bytes)?,
         }))
     }
+    fn publication_permitted(&self, publication: &TransferPublication) -> bool {
+        let id = publication.intent().before().input().responsibility;
+        self.transfers.get(&id) == Some(&publication.operation())
+            && self.manifests.get(&id) == Some(publication.intent().before())
+            && self
+                .transfer_intent_at(self.applied, publication.operation())
+                .ok()
+                .flatten()
+                .is_some_and(|s| s.intent == *publication.intent())
+    }
+    fn complete_transfer(
+        &mut self,
+        operation: OperationId,
+        publication: TransferPublication,
+    ) -> DirectoryOutcome {
+        if !self.publication_permitted(&publication) {
+            return DirectoryOutcome::TransferEvidenceMismatch;
+        }
+        let id = publication.intent().before().input().responsibility;
+        let generation = publication.intent().after().input().generation;
+        self.manifests
+            .insert(id, publication.intent().after().clone());
+        self.transfers.remove(&id);
+        self.publications.insert(publication.operation(), operation);
+        DirectoryOutcome::TransferPublished(generation)
+    }
+    /// Local applied diagnostic. Use LifecycleDirectory with a quorum read barrier
+    /// before treating this decision as foreign activation evidence.
+    pub fn transfer_publication_at(
+        &self,
+        required: u64,
+        operation: OperationId,
+    ) -> Result<Option<TransferPublicationStatus>, ApplicationError> {
+        if required > self.applied {
+            return Err(ApplicationError::NotApplied);
+        }
+        let Some(record) = self
+            .publications
+            .get(&operation)
+            .and_then(|op| self.history.get(op).map(|h| (*op, h)))
+        else {
+            return Ok(None);
+        };
+        Ok(Some(TransferPublicationStatus {
+            publication_operation: record.0,
+            index: record.1.index,
+            publication: TransferPublication::decode(&record.1.bytes)?,
+        }))
+    }
     fn execute(
         &mut self,
         index: u64,
@@ -523,14 +596,21 @@ impl Directory {
                 true,
             )
         } else {
-            if self.history.len() == self.limits.operations
-                || self.history_bytes + bytes.len() > self.limits.history_bytes
+            let control =
+                matches!(&command,Request::Publication(p) if self.publication_permitted(p));
+            if !control
+                && (self.remaining_operations() == 0
+                    || self.history_bytes + bytes.len() > self.limits.history_bytes)
+                || control
+                    && (bytes.len() > MAX_TRANSFER_PUBLICATION_BYTES
+                        || self.control_bytes + bytes.len() > self.control_history_capacity())
             {
                 return Err(ApplicationError::DedupCapacity);
             }
             let outcome = match command {
                 Request::Publish(command) => self.publish(command),
                 Request::Transfer(intent) => self.begin_transfer(operation, intent),
+                Request::Publication(publication) => self.complete_transfer(operation, publication),
                 Request::Bootstrap => {
                     self.initialized = true;
                     DirectoryOutcome::Initialized
@@ -544,7 +624,11 @@ impl Directory {
                     outcome,
                 },
             );
-            self.history_bytes += bytes.len();
+            if control {
+                self.control_bytes += bytes.len();
+            } else {
+                self.history_bytes += bytes.len();
+            }
             (outcome, false)
         };
         Ok(DirectoryReceipt {
@@ -608,31 +692,56 @@ impl ProposalAdmission for Directory {
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
         self.request(bytes)?;
-        let mut reserved = BTreeMap::new();
-        let mut reserve_bytes = 0;
-        let mut reserve = |id, request: &[u8]| -> Result<(), ApplicationError> {
-            self.request(request)?;
-            if !self.history.contains_key(&id) {
-                let size = reserved.entry(id).or_insert(0);
-                if request.len() > *size {
-                    reserve_bytes += request.len() - *size;
-                    *size = request.len();
-                }
-                if reserved.len() > self.remaining_operations()
-                    || reserve_bytes > self.limits.history_bytes - self.history_bytes
-                {
-                    return Err(ApplicationError::DedupCapacity);
-                }
+        // At most one successful decision per open lifecycle uses its reserve.
+        // Other distinct requests still reserve ordinary history for losing outcomes.
+        let mut reserved: BTreeMap<OperationId, (usize, Option<OperationId>)> = BTreeMap::new();
+        let mut reserve = |id, bytes: &[u8]| -> Result<(), ApplicationError> {
+            let request = self.request(bytes)?;
+            if self.history.contains_key(&id) {
+                return Ok(());
+            }
+            let lifecycle = match request {
+                Request::Publication(p) if self.publication_permitted(&p) => Some(p.operation()),
+                _ => None,
+            };
+            reserved
+                .entry(id)
+                .and_modify(|(size, old)| {
+                    *size = (*size).max(bytes.len());
+                    if *old != lifecycle {
+                        *old = None;
+                    }
+                })
+                .or_insert((bytes.len(), lifecycle));
+            if reserved.len() > 2 * self.limits.operations {
+                return Err(ApplicationError::DedupCapacity);
             }
             Ok(())
         };
-        for (count, (id, request)) in pending.enumerate() {
-            if count == MAX_DIRECTORY_PENDING {
+        for (position, (id, request)) in pending.enumerate() {
+            if position >= MAX_DIRECTORY_PENDING {
                 return Err(ApplicationError::DedupCapacity);
             }
             reserve(id, request)?;
         }
         reserve(operation, bytes)?;
+        let mut credited = BTreeSet::new();
+        let mut count = 0usize;
+        let mut total = 0usize;
+        for (size, lifecycle) in reserved.values() {
+            if lifecycle.is_some_and(|op| credited.insert(op)) {
+                continue;
+            }
+            count += 1;
+            total = total
+                .checked_add(*size)
+                .ok_or(ApplicationError::DedupCapacity)?;
+        }
+        if count > self.remaining_operations()
+            || total > self.limits.history_bytes - self.history_bytes
+        {
+            return Err(ApplicationError::DedupCapacity);
+        }
         Ok(size_of::<DirectoryReceipt>())
     }
 }
@@ -681,7 +790,11 @@ impl CheckpointStateMachine for Directory {
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         // Unique commands in first-application order reconstruct manifests and
         // original outcomes. Retry/conflict/noop entries only affect applied.
-        let len = 58 + self.plan.encoded_len() + 28 * self.history.len() + self.history_bytes;
+        let len = 58
+            + self.plan.encoded_len()
+            + 28 * self.history.len()
+            + self.history_bytes
+            + self.control_bytes;
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -737,7 +850,7 @@ impl CheckpointStateMachine for Directory {
                 }
             }
             let count = reader.u32()? as usize;
-            if count > self.limits.operations || count as u64 > applied {
+            if count > 2 * self.limits.operations || count as u64 > applied {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
             let mut next = Self::new(self.plan.clone(), self.limits).map_err(|(e, _)| e)?;

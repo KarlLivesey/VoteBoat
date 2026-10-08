@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; publication/activation remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication implemented; target activation and complete split/merge recovery remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -100,8 +100,9 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
    remains pending. Slice 85 records durable intents/local target reservations.
    Slice 86 supplies intent-bound source fencing and immutable exports. Slice 87
    adds non-serving target staging, committed inline imports and source-observed
-   content commitments. Next verify cross-group evidence for publication and
-   durable activation, then exercise end-to-end interruption/no-dual-owner
+   content commitments. Slice 88 adds checked complete evidence and reserved durable
+   directory publication. Next implement durable target activation consuming that
+   decision, then exercise end-to-end interruption/no-dual-owner
    histories. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
@@ -4972,3 +4973,99 @@ compatible merge/resumption and recursive lifecycle/retirement rather than assum
 that the local multi-source data test completes them. P7 measured tuning, broader
 fault/macOS/separate-host evidence and the full P0–P7 objective stay active. P8 is
 deferred. Static service availability remains independent of these gates.
+
+### Slice 88 mini schema — verified transfer publication
+
+Purpose: connect source fences and target imports to the metadata ownership decision
+required before activation. A checked TransferPublication binds the exact retained
+intent/lifecycle ID, every source fence/configuration/image commitment, and every
+target staged/imported index/configuration/content commitment. Coverage and shared
+edges must match exactly; foreign provenance is verified by the authenticated
+trusted host before proposal, not inferred from a serializable struct. Canonical
+bounded metadata carries no application images. Directory commit changes only to
+the intent's exact after manifest and retains the original decision/status for
+receipt-loss recovery through a quorum read. It releases the responsibility lock
+while retaining target/incarnation tombstones; ordinary child writes still need no
+ancestor commit. No target activates from publication alone.
+
+Capacity/restart sketch: reserve bounded control-history space when an intent is
+recorded, separate from ordinary finite history, so later ordinary traffic cannot
+prevent its final decision. Successful decisions consume that reserve and retain
+original command bytes in the same journal/checkpoint; failed/stale proposals use
+ordinary history and cannot steal the reserve. Replay reconstructs both pools and
+locks without another store or new durability token. Existing VBDIR001 record layout
+and old command outcomes stay supported; new commands fail closed in old code.
+Tests must fill ordinary history, publish through reserved space, reject missing/
+changed/mismatched facts atomically, preserve exact retries/decision recovery, test
+all truncations/count bounds and drive actual native metadata commit/reopen over
+TCP/QUIC. Next add durable target activation with payload-key/route checks and
+original imported retries. Following exercise interrupted end-to-end split/no-dual-
+owner recovery, then compatible merge/recursive lifecycle and P7. Full P0–P7 remains.
+
+Slice 88 envelope correction: an initially loose 128 KiB metadata cap unnecessarily
+widened the declared command envelope above an existing 90,670-byte initializer.
+The checked first-format shapes have at most 256 source/target intersections:
+maximum canonical split = 63,624 bytes, merge = 61,584 bytes. Use 64 KiB and add a
+maximum-256-route conformance case; preserve existing native command compatibility
+rather than changing that initializer assertion. This also halves the derived
+control pool. No requirement or route count is reduced.
+
+Harness correction: the four-group native history deliberately pauses groups while
+driving another. Explicitly campaign the submitting node after such pauses rather
+than assuming earlier leadership; the shared campaign helper now waits for a committed
+current-term entry before permitting quorum reads. Reordering target staging avoids
+leaving the right target idle after its campaign. No production consensus behavior,
+timeout or rejection was changed. An intermediate concurrent run passed three histories
+but timed out in the fourth; the focused checkpoint/QUIC rerun passed. Final aggregate
+results are recorded below after verification.
+
+The full routed regression then exposed legitimate competing elections and an
+unknown publication observation after leadership changed. The helper selects the
+actual current-term-ready leader rather than requiring its requested candidate to
+win. Publication histories now recover only `LeadershipChanged`/`NotLeader` by
+reacquiring that leader and retrying the exact operation ID and bytes, at most four
+attempts. Other failures remain fatal; no timeout, quorum or production rejection
+was relaxed. This exercises the existing semantic retry contract instead of
+assuming leader stability while several independent native groups run concurrently.
+The maximum 256-source merge envelope also has a codec conformance test; its
+synthetic metadata is capacity evidence, not distributed merge evidence.
+
+Native histories now hold a test-only mutex across each complete topology so
+unrelated histories cannot oversubscribe socket/storage workers. Each selected
+history retains concurrent replicas/groups and unchanged production deadlines.
+One serialized QUIC run still observed a lost read during leadership change;
+publication status/data reads now reacquire a current-term-ready leader and request
+a fresh quorum barrier, bounded to four attempts. Only leadership/read-readiness
+errors qualify; application, owner and other read errors remain fatal. No cached
+result substitutes for a quorum read. Earlier failed runs remain evidence of
+invalid harness stability assumptions, not passing lifecycle evidence.
+
+Read recovery also exercised a queued CancelRead after a term change had already
+cleared that read. ReadRequests explicitly validates StaleRead for tracked
+cancellation; the harness's blanket error assertion was stricter than that contract.
+It now accepts only tracked non-proposal/non-read StaleRead cancellation and typed
+read/proposal leadership refusals, leaving the existing owner validation and all
+other error checks intact. Completion helpers still require actual application
+receipts or a fresh successful quorum read; no refused work counts as success.
+
+Slice 88 final evidence: all-feature library 57, directory 22, routed 22,
+scopes 8, source 7, target 9 and publication 7 pass (132 across the affected suites).
+Core-only library 48, directory 20, scopes 7, source 7, target 9 and publication 7
+pass (98). All-target/all-feature Clippy with warnings denied, formatting,
+contract inventory (69) and diff checks pass. The full final routed run uses
+serialized independent native histories with concurrent replicas/groups inside
+each. TCP/QUIC WAL/checkpoint publication recovery, full ordinary operation
+history, exact decision retries and inactive targets pass. These are graceful
+reopen histories, not OS power-loss or complete transfer/activation evidence.
+See TRANSFER_PUBLICATION.md for the public contract, capacity and trust boundary.
+
+Next mini deliverable: durable target activation consuming quorum-observed
+TransferPublicationStatus and metadata configuration, matched against the exact
+local intent and import. Persist that authority and original activation outcome;
+check data route/envelope/payload keys and delegate semantic retries to the
+imported scope adapter. Recovery must not require a live metadata group after
+activation. This unlocks actual target service. Following: interrupted complete
+split histories with source restart, receipt loss and no dual serving, unlocking
+the macro first usable ownership-movement milestone. Compatible merge and
+recursive lifecycle/retirement remain P6 work before P7 measured tuning; full
+P0–P7 stays active, with macOS/separate-host validation still outstanding.

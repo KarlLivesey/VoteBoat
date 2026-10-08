@@ -91,3 +91,8 @@ local phases with exact identity/boundary/operation/content binding. Next verify
 fence/import evidence before directory publication and durable target activation.
 Those steps turn this journal into a usable split; compatible merge reuses the same
 handoff machinery before P7 measured tuning.
+
+Checked metadata ownership decisions are now available through
+[verified transfer publication](TRANSFER_PUBLICATION.md), including reserved control
+history and original-decision recovery. Targets remain non-serving; durable activation,
+complete interrupted split recovery and distributed merge are still pending.

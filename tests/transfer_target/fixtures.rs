@@ -94,3 +94,33 @@ pub fn ready() -> Target {
         .unwrap();
     t
 }
+
+pub fn publication() -> voteboat::transfer_publication::TransferPublication {
+    use voteboat::{transfer_publication::*, transfer_source::*};
+    let source = frozen();
+    let SourceRead::Freeze(Some(status)) = source
+        .read_at(source.applied_index(), SourceQuery::Freeze)
+        .unwrap()
+    else {
+        panic!("source observation")
+    };
+    let evidence = SourceFenceEvidence::from_status(ConfigurationId::new(1).unwrap(), status)
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let mut targets = Vec::new();
+    for group in [21, 22] {
+        let mut target = fresh_for(group);
+        let import = from_source(&source, group, ConfigurationId::new(1).unwrap());
+        target
+            .apply_batch(&[
+                source::entry(1, 200, target.bootstrap_command(65536).unwrap()),
+                source::entry(2, 200, target.import_command(&import, 65536).unwrap()),
+            ])
+            .unwrap();
+        targets.push(
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
+                .unwrap_or_else(|e| panic!("{:?}", e.0)),
+        );
+    }
+    TransferPublication::new(source::op(200), source::intent(), vec![evidence], targets)
+        .unwrap_or_else(|e| panic!("{:?}", e.0))
+}

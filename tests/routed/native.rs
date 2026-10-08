@@ -29,6 +29,10 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+// Each history starts its own real worker/socket topology. Keep unrelated
+// histories from oversubscribing this process; replicas/groups within one
+// history remain concurrent under the production deadlines.
+static NATIVE_HISTORY: std::sync::Mutex<()> = std::sync::Mutex::new(());
 type Node<A> = NativeNode<A, NativeServiceConnector>;
 type Child = RoutedApplication<Counter, HostPolicy>;
 fn certificate(n: u64) -> &'static [u8] {
@@ -134,6 +138,7 @@ where
         })
         .collect()
 }
+#[track_caller]
 fn drive<A>(nodes: &mut [Node<A>], clock: &Instant, mut done: impl FnMut(&mut [Node<A>]) -> bool)
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
@@ -156,7 +161,28 @@ where
                 .unwrap();
             if let Some(p) = progress.replica {
                 for step in p.steps {
-                    assert!(step.error.is_none(), "{:?}", step.error);
+                    // ReadRequests validates tracked cancellation completions.
+                    // A term change can already have cleared the read, making
+                    // its later CancelRead correctly return StaleRead.
+                    let cleared_read = step.admission.is_some()
+                        && step.operation.is_none()
+                        && step.read.is_none()
+                        && step.error == Some(voteboat::raft::RaftError::StaleRead);
+                    let read_refused = step.read.is_some()
+                        && matches!(
+                            step.error,
+                            Some(
+                                voteboat::raft::RaftError::NotLeader
+                                    | voteboat::raft::RaftError::ReadNotReady
+                            )
+                        );
+                    let proposal_refused = step.operation.is_some()
+                        && step.error == Some(voteboat::raft::RaftError::NotLeader);
+                    assert!(
+                        step.error.is_none() || cleared_read || read_refused || proposal_refused,
+                        "{:?}",
+                        step.error
+                    );
                 }
             }
         }
@@ -170,25 +196,29 @@ where
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
+#[track_caller]
 fn campaign<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128)
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
     nodes[0].control(group(g), NodeControl::Campaign).unwrap();
+    let mut leader = None;
     drive(nodes, clock, |ns| {
-        ns[0].local().owner.core(group(g)).unwrap().role() == voteboat::raft::Role::Leader
-            && ns.iter().all(|n| {
-                n.local().applications[&group(g)].applied_index()
-                    == ns[0]
-                        .local()
-                        .owner
-                        .core(group(g))
-                        .unwrap()
-                        .state()
-                        .commit_index
-            })
+        leader = ns.iter().position(|n| {
+            let core = n.local().owner.core(group(g)).unwrap();
+            let state = core.state();
+            core.role() == voteboat::raft::Role::Leader
+                && state.term_at(state.commit_index) == Some(state.hard_state.term)
+                && ns.iter().all(|n| {
+                    n.local().applications[&group(g)].applied_index() == state.commit_index
+                })
+        });
+        leader.is_some()
     });
+    // A competing timer-driven campaign may win. Subsequent helpers submit to
+    // the observed ready leader, whose authority is still checked by the core.
+    nodes.swap(0, leader.unwrap());
 }
 fn propose<A>(
     nodes: &mut [Node<A>],
@@ -201,6 +231,42 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
+    propose_attempt(nodes, clock, g, operation, bytes).unwrap()
+}
+
+// Selected receipt-loss histories recover only leadership uncertainty, retaining
+// the exact semantic operation and payload. Other failures remain fatal.
+fn propose_recovering<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: Vec<u8>,
+) -> A::Receipt
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    for _ in 0..4 {
+        match propose_attempt(nodes, clock, g, operation, bytes.clone()) {
+            Ok(receipt) => return receipt,
+            Err(ClientUnknown::LeadershipChanged) => campaign(nodes, clock, g),
+            Err(e) => panic!("group {g} operation {operation} unknown: {e:?}"),
+        }
+    }
+    panic!("group {g} operation {operation} repeatedly lost leadership");
+}
+fn propose_attempt<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: Vec<u8>,
+) -> Result<A::Receipt, ClientUnknown>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
     nodes[0]
         .propose(ClientRequest {
             group: group(g),
@@ -209,6 +275,7 @@ where
         })
         .unwrap();
     let mut receipt = None;
+    let mut unknown = None;
     drive(nodes, clock, |ns| {
         while let Some(reply) = ns[0].poll_client() {
             match ns[0]
@@ -220,21 +287,60 @@ where
                     receipt = Some(r);
                 }
                 ClientOutcome::NotProposed(e) => {
-                    panic!("group {g} operation {operation} not proposed: {e:?}")
+                    if e == voteboat::raft::RaftError::NotLeader {
+                        unknown = Some(ClientUnknown::LeadershipChanged);
+                    } else {
+                        panic!("group {g} operation {operation} not proposed: {e:?}")
+                    }
                 }
                 ClientOutcome::Unknown(e) => {
-                    panic!("group {g} operation {operation} unknown: {e:?}")
+                    unknown = Some(e);
                 }
             }
         }
-        receipt.as_ref().is_some_and(|r| {
-            ns.iter()
-                .all(|n| n.local().applications[&group(g)].applied_index() >= r.index())
-        })
+        unknown.is_some()
+            || receipt.as_ref().is_some_and(|r| {
+                ns.iter()
+                    .all(|n| n.local().applications[&group(g)].applied_index() >= r.index())
+            })
     });
-    receipt.unwrap()
+    match unknown {
+        Some(e) => Err(e),
+        None => Ok(receipt.unwrap()),
+    }
 }
 fn read<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128, query: A::Query) -> A::ReadResult
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    read_attempt(nodes, clock, g, query).expect("read lost leadership")
+}
+fn read_recovering<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    query: A::Query,
+) -> A::ReadResult
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+    A::Query: Clone,
+{
+    for _ in 0..4 {
+        if let Some(result) = read_attempt(nodes, clock, g, query.clone()) {
+            return result;
+        }
+        campaign(nodes, clock, g);
+    }
+    panic!("group {g} read repeatedly lost leadership");
+}
+fn read_attempt<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    query: A::Query,
+) -> Option<A::ReadResult>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
@@ -243,6 +349,7 @@ where
         .read(group(g), query)
         .unwrap_or_else(|_| panic!("read invocation rejected"));
     let mut result = None;
+    let mut changed = false;
     drive(nodes, clock, |ns| {
         while let Some(reply) = ns[0].poll_read() {
             match ns[0]
@@ -250,12 +357,19 @@ where
                 .unwrap_or_else(|_| panic!("read completion rejected"))
             {
                 ReadOutcome::Read { result: Ok(r), .. } => result = Some(r),
-                _ => panic!("read failed"),
+                ReadOutcome::Unavailable(ReadUnavailable::LeadershipChanged)
+                | ReadOutcome::NotRead(voteboat::raft::RaftError::NotLeader)
+                | ReadOutcome::NotRead(voteboat::raft::RaftError::ReadNotReady) => changed = true,
+                ReadOutcome::NotRead(e) => panic!("read refused: {e:?}"),
+                ReadOutcome::Unavailable(e) => panic!("read unavailable: {e:?}"),
+                ReadOutcome::Read { result: Err(e), .. } => {
+                    panic!("application read failed: {e:?}")
+                }
             }
         }
-        result.is_some()
+        changed || result.is_some()
     });
-    result.unwrap()
+    result
 }
 fn close<A>(
     mut nodes: Vec<Node<A>>,
@@ -401,6 +515,7 @@ fn wrong_group_rejected_before_native_startup_creates_files() {
     assert_eq!(rejected.application.take().unwrap().applied_index(), 0);
 }
 fn parent_independence(protocol: NativePeerProtocol, compact: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
         "voteboat-routed-native-{}-{:?}",
@@ -629,6 +744,7 @@ fn quic_child_writes_checkpoint_and_restart_without_parent_commits() {
 
 use super::source_fixture;
 fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     use voteboat::{bucket_counter::*, scope::*, transfer_source::*};
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
@@ -778,6 +894,7 @@ fn quic_transfer_source_freeze_survives_checkpoint_and_later_log_progress() {
 #[path = "../transfer_target/fixtures.rs"]
 mod target_fixture;
 fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     use voteboat::{transfer::ContentDigest, transfer_source::*, transfer_target::*};
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
@@ -1012,4 +1129,309 @@ fn quic_target_staging_and_inline_import_survive_wal_reopen() {
 #[test]
 fn quic_target_staging_and_inline_import_survive_checkpoint_reopen() {
     target_import_recovery(NativePeerProtocol::Quic, true);
+}
+
+fn publication_recovery(protocol: NativePeerProtocol, compact: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    use voteboat::{transfer::*, transfer_publication::*, transfer_source::*, transfer_target::*};
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-publication-{}-{protocol:?}-{compact}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let metadata = || {
+        LifecycleDirectory::new(
+            Directory::new(
+                DirectoryPlan::new(group(1), vec![source_fixture::grant()]).unwrap(),
+                DirectoryLimits {
+                    operations: 3,
+                    history_bytes: 65536,
+                },
+            )
+            .unwrap(),
+        )
+    };
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        metadata,
+    );
+    let mut sources = open(
+        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        source_fixture::fresh,
+    );
+    let mut left = open(
+        configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        target_fixture::fresh,
+    );
+    let mut right = open(
+        configuration(&root, 22, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        || target_fixture::fresh_for(22),
+    );
+    campaign(&mut parents, &clock, 1);
+    propose_recovering(
+        &mut parents,
+        &clock,
+        1,
+        1000,
+        metadata().directory().bootstrap_command(65536).unwrap(),
+    );
+    propose_recovering(
+        &mut parents,
+        &clock,
+        1,
+        1001,
+        DirectoryCommand {
+            expected: None,
+            manifest: source_fixture::grant(),
+        }
+        .encode(32768)
+        .unwrap(),
+    );
+    propose_recovering(
+        &mut parents,
+        &clock,
+        1,
+        200,
+        source_fixture::intent().encode(32768).unwrap(),
+    );
+    assert!(parents.iter().all(|p| p.local().applications[&group(1)]
+        .directory()
+        .remaining_operations()
+        == 0));
+    campaign(&mut left, &clock, 21);
+    propose_recovering(
+        &mut left,
+        &clock,
+        21,
+        200,
+        target_fixture::fresh().bootstrap_command(65536).unwrap(),
+    );
+    campaign(&mut right, &clock, 22);
+    propose_recovering(
+        &mut right,
+        &clock,
+        22,
+        200,
+        target_fixture::fresh_for(22)
+            .bootstrap_command(65536)
+            .unwrap(),
+    );
+    campaign(&mut sources, &clock, 20);
+    propose_recovering(
+        &mut sources,
+        &clock,
+        20,
+        100,
+        source_fixture::fresh().bootstrap_command(65536).unwrap(),
+    );
+    propose_recovering(&mut sources, &clock, 20, 1, source_fixture::data(1, 7));
+    propose_recovering(&mut sources, &clock, 20, 2, source_fixture::data(200, 11));
+    propose_recovering(&mut sources, &clock, 20, 200, source_fixture::freeze());
+    let SourceRead::Freeze(Some(source_status)) =
+        read_recovering(&mut sources, &clock, 20, SourceQuery::Freeze)
+    else {
+        panic!("source status")
+    };
+    let source_configuration = sources[0]
+        .local()
+        .owner
+        .core(group(20))
+        .unwrap()
+        .state()
+        .bootstrap
+        .configuration;
+    let source_evidence = SourceFenceEvidence::from_status(source_configuration, source_status)
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let mut targets = Vec::new();
+    for (nodes, g) in [(&mut left, 21u128), (&mut right, 22u128)] {
+        campaign(nodes, &clock, g);
+        let import = target_fixture::from_source(
+            &sources[0].local().applications[&group(20)],
+            g,
+            source_configuration,
+        );
+        propose_recovering(
+            nodes,
+            &clock,
+            g,
+            200,
+            target_fixture::fresh_for(g)
+                .import_command(&import, 65536)
+                .unwrap(),
+        );
+        let TargetRead::Status(status) = read_recovering(nodes, &clock, g, TargetQuery::Status)
+        else {
+            panic!("target status")
+        };
+        let configuration = nodes[0]
+            .local()
+            .owner
+            .core(group(g))
+            .unwrap()
+            .state()
+            .bootstrap
+            .configuration;
+        targets.push(
+            TargetReadyEvidence::from_status(configuration, status)
+                .unwrap_or_else(|e| panic!("{:?}", e.0)),
+        );
+        assert_eq!(
+            read_recovering(
+                nodes,
+                &clock,
+                g,
+                TargetQuery::Data(RoutedQuery {
+                    hint: source_fixture::hint(if g == 21 { 1 } else { 200 }),
+                    key: vec![if g == 21 { 1 } else { 200 }],
+                    query: vec![if g == 21 { 1 } else { 200 }]
+                })
+            ),
+            TargetRead::NotActive
+        );
+    }
+    let publication = TransferPublication::new(
+        OperationId::new(200).unwrap(),
+        source_fixture::intent(),
+        vec![source_evidence],
+        targets,
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let bytes = publication.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap();
+    // The source can be offline after its durable fence; no parent write can revive it.
+    close(sources, &clock, 20, || {
+        drive(&mut parents, &clock, |_| true);
+        drive(&mut left, &clock, |_| true);
+        drive(&mut right, &clock, |_| true);
+    });
+    // Driving the other groups can leave metadata timers unpolled long enough
+    // for leadership to change. Establish the submitting node's authority
+    // explicitly rather than assuming the earlier campaign still holds.
+    campaign(&mut parents, &clock, 1);
+    let _ = propose_recovering(&mut parents, &clock, 1, 201, bytes.clone()); // discard the publication observation
+    let DirectoryRead::Publication(Some(original)) = read_recovering(
+        &mut parents,
+        &clock,
+        1,
+        DirectoryQuery::Publication(OperationId::new(200).unwrap()),
+    ) else {
+        panic!("publication status")
+    };
+    assert_eq!(original.publication, publication);
+    assert_eq!(
+        read_recovering(
+            &mut parents,
+            &clock,
+            1,
+            DirectoryQuery::Manifest(source_fixture::grant().input().responsibility)
+        ),
+        DirectoryRead::Manifest(Some(source_fixture::intent().after().clone()))
+    );
+    if compact {
+        for node in &mut parents {
+            node.control(group(1), NodeControl::Checkpoint).unwrap();
+        }
+        drive(&mut parents, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local().owner.core(group(1)).unwrap().state().base_index()
+                    == n.local().applications[&group(1)].applied_index()
+            })
+        });
+    }
+    close(parents, &clock, 1, || {
+        drive(&mut left, &clock, |_| true);
+        drive(&mut right, &clock, |_| true);
+    });
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        metadata,
+    );
+    campaign(&mut parents, &clock, 1);
+    let retry = propose_recovering(&mut parents, &clock, 1, 201, bytes);
+    assert!(retry.duplicate);
+    assert_eq!(
+        retry.outcome,
+        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
+    );
+    assert_eq!(
+        read_recovering(
+            &mut parents,
+            &clock,
+            1,
+            DirectoryQuery::Publication(OperationId::new(200).unwrap())
+        ),
+        DirectoryRead::Publication(Some(original.clone()))
+    );
+    for (nodes, g, key) in [(&mut left, 21u128, 1u8), (&mut right, 22u128, 200u8)] {
+        campaign(nodes, &clock, g);
+        assert_eq!(
+            read_recovering(
+                nodes,
+                &clock,
+                g,
+                TargetQuery::Data(RoutedQuery {
+                    hint: source_fixture::hint(key),
+                    key: vec![key],
+                    query: vec![key]
+                })
+            ),
+            TargetRead::NotActive
+        );
+    }
+    close(left, &clock, 21, || {
+        drive(&mut parents, &clock, |_| true);
+        drive(&mut right, &clock, |_| true);
+    });
+    close(right, &clock, 22, || {
+        drive(&mut parents, &clock, |_| true);
+    });
+    close(parents, &clock, 1, || {});
+    let parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        metadata,
+    );
+    for parent in &parents {
+        assert_eq!(
+            parent.local().applications[&group(1)]
+                .directory()
+                .transfer_publication_at(
+                    parent.local().applications[&group(1)].applied_index(),
+                    OperationId::new(200).unwrap()
+                )
+                .unwrap(),
+            Some(original.clone())
+        );
+    }
+    close(parents, &clock, 1, || {});
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_transfer_publication_survives_full_history_and_wal_reopen() {
+    publication_recovery(NativePeerProtocol::TcpTls, false);
+}
+#[test]
+fn tcp_transfer_publication_survives_checkpoint_and_lost_observation() {
+    publication_recovery(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_transfer_publication_survives_full_history_and_wal_reopen() {
+    publication_recovery(NativePeerProtocol::Quic, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_transfer_publication_survives_checkpoint_and_lost_observation() {
+    publication_recovery(NativePeerProtocol::Quic, true);
 }

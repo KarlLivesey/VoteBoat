@@ -135,3 +135,8 @@ publication, then require a matching durable activation before serving. Add
 interrupted-stage/no-dual-owner histories and operator resumption. Compatible merge
 reuses that handoff; recursive parent coordination and later transfers/retirement
 remain required P6 work. The full P0–P7 goal stays active and P8 stays deferred.
+
+Checked metadata ownership decisions are now available through
+[verified transfer publication](TRANSFER_PUBLICATION.md), including reserved control
+history and original-decision recovery. Targets remain non-serving; durable activation,
+complete interrupted split recovery and distributed merge are still pending.
