@@ -5544,3 +5544,85 @@ mixed-version claim. Full P0–P7 remains active; P8 deferred and CI background.
 Final all-target/all-feature Clippy with warnings denied, formatting, diff checks
 and the 71-contract inventory validator pass. No consensus timers, quorum policy,
 storage/transport provider or dependency changed.
+
+### Slice 95 mini schema — native delegated split recovery ledger
+
+Previous turn was progress: slice 94 is committed/pushed as 5d3fb99. Current macro
+work is still P6 delegated lifecycle, next P7 committed/applied baseline, following
+measured tuning/broader validation. This slice supplies missing native evidence
+for the already implemented parent binding; no new production protocol is planned.
+
+Share the existing deterministic delegation fixtures so native source grants and
+target bootstrap bindings are identical to the public conformance assembly. Build
+actual three-replica grandparent, parent, child metadata and source groups; create
+each target only after reading the committed parent reservation. Target application
+configuration must bind the actual reservation index/configuration, not a guessed
+constant or volatile precomputed intent. Reopen target groups only when they were
+explicitly created; derive their immutable bootstrap from fresh committed parent/
+child status. Every resumption decision starts with fresh quorum observations.
+
+Phase ledger: parent reservation, child intent, each target staging, source fence,
+each final import, child publication, parent publication, each activation. Discard
+action completions, close/reopen all established groups after each phase from WAL
+or verified checkpoints and compare original durable facts (not new term/noop
+prefixes). Before activation targets refuse; after F source refuses permanently.
+Cold grandparent/parent routing must keep the grandparent locator unchanged and
+show the temporary stale-parent gap after child publication. Warm child routing
+and real target writes/retries must work with all ancestor/source workers stopped.
+
+Failure/cleanup: stop/reopen the parent after reservation to check source continuity
+before F, and after child publication to check forward-only paused recovery before
+parent publication/activation. No timeout grants authority or bypasses a phase.
+All file/socket workers drain before exclusive store reopen or temporary directory
+cleanup; existing serial native-history guard avoids unrelated test oversubscription.
+Run TCP/TLS and QUIC with both WAL-only and checkpoint recovery. These are selected
+Linux ordinary-majority process-reopen histories, not power loss/arbitrary faults,
+delegated merge/repeated movement, cancellation, macOS or separate-host evidence.
+
+Preflight integration refinement: NativeManifestCache currently treats every
+execution-vector change at unchanged parent ownership epoch as a reassignment.
+The reserved parent completion changes only child-locator epochs, so a warm
+parent cache would reject a valid committed refresh. Add a checked manifest
+predicate for strictly newer route generation with identical parent ownership,
+sorted route ranges and concrete group/child identity bindings, allowing only
+non-regressing child epochs. Native cache uses that predicate; same-epoch scope,
+group, child-identity, shape or state-revival changes still refuse. Expose the
+predicate for host caches through the same manifest API. Regression tests must
+refresh an existing native parent cache and reject each invalid replacement;
+native recovery tests retain their cache across parent publication.
+
+The immediate mini-plan remains inside macro P6 until its recorded gaps close:
+1. Current: native delegated split recovery ledger and cache compatibility.
+   Depends on the reserved parent contract and existing native recovery providers;
+   finishes with TCP/QUIC WAL/checkpoint phase evidence, focused cache regressions,
+   checked documentation and a published commit.
+2. Next: delegated merge and repeated movement using actual prior target owners.
+   Depends on this parent binding and the existing later-source freeze/import
+   contracts; completion checks must preserve original retry/outbox lineage,
+   advance only the immediate parent's child locator, and recover each committed
+   movement without reviving prior sources. This closes reusable delegated P6
+   composition rather than adding another ownership protocol.
+3. Following: abandoned pre-fence reservation recovery. First specify how actual
+   child metadata rejects a stale binding permanently before releasing a parent
+   reservation; a parent-only timeout/cancel cannot prove absence of a child
+   fence. Completion requires ordered replay/checkpoint and racing old-intent/
+   cancellation tests. The dependency is exclusive fencing authority, not time.
+   Measured committed/applied P7 baseline follows the remaining P6 work.
+
+Slice 95 result: all four native delegated split histories pass (TCP/TLS and QUIC,
+each with WAL-only and checkpoint recovery; 428.83 seconds for the serialized
+matrix). They reconstruct target bootstrap from actual reservation facts, discard
+phase completions and re-query after all established groups reopen at each of
+11 phases. Parent outages preserve source availability before F and forward-only
+refusal after child publication. Original decisions, grandparent locator and
+target lineage survive; target retries/new writes work with ancestor/source
+workers stopped and survive a further reopen. This is selected Linux
+ordinary-majority process-reopen evidence, not arbitrary-fault or power-loss
+completeness. The narrow parent cache child-epoch refresh fix is included.
+
+Delegation/routing tests pass all-feature and native-only (7/11), and core-only
+(6/7). All-target/all-feature Clippy with warnings denied, formatting, diff checks
+and the 71-contract inventory pass. No persistent format, consensus timer, quorum
+policy or dependency changed. P6 delegated merge/repeated movement and abandoned
+pre-fence reservation recovery remain current; P7 measurement/tuning and recorded
+platform/operational/broader validation gaps remain in the full active P0–P7 goal.

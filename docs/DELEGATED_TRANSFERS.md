@@ -70,7 +70,24 @@ same-group local provenance, three-level cold resolution and parent-free warm
 writes. They cover changed operations/configuration/reservation, concurrent parent
 updates, ordinary operation/byte exhaustion, competing pending final commands,
 all new codec/checkpoint truncations and a bit flip at every byte position of a bound
-intent. This is selected split evidence, not native delegated-network recovery,
-delegated merge/repeated moves, pre-fence cancellation, arbitrary-fault liveness,
+intent. Two additional regressions check the public child-locator refresh predicate
+and native cache admission. At unchanged parent ownership epoch, a newer route
+generation can advance child epochs only with unchanged ranges, child identities
+and metadata groups. Refused refreshes preserve the previous cached view.
+
+`tests/routed/delegation.rs` adds a native recovery ledger with independent
+three-replica grandparent, parent, child metadata, source and two target groups.
+Targets are created with bindings derived from the actual committed parent
+reservation. Each action completion is discarded; resumption queries committed
+status again after all established groups reopen. The 11 phases span reservation
+through both activations. Parent outages check source continuity before fencing
+and refusal by both old and unactivated new owners after child publication.
+The existing parent cache accepts the final child-epoch refresh, while the
+grandparent locator stays unchanged. Direct target retries and new writes are
+also checked with all ancestor and source workers stopped, then reopened again.
+Execution results and transport/storage coverage are recorded in validation/REPORT.md.
+
+This is selected split evidence, not delegated merge/repeated moves,
+pre-fence cancellation, arbitrary-fault liveness,
 mixed-version, macOS or separate-host validation. Those remain in the active P0–P7
 scope; ordinary top-level handoffs and the static service remain usable.

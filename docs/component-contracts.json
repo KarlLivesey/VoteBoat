@@ -1221,12 +1221,13 @@
         "scheme",
         "bucket",
         "ResponsibilityManifest::new",
+        "ResponsibilityManifest::refreshes_child_epochs",
         "resolve",
         "check_owner"
       ],
       "native": "NativeBytePartition: stable unsigned single-byte bucket scheme 1/version 1; native and host caches pass the same checked core resolver.",
       "conformance": [
-        "tests/routing.rs"
+        "tests/routing.rs", "tests/delegation.rs"
       ],
       "scope": "Synchronous deterministic 256-bucket routing, immutable checked Single/Partitioned/Delegated manifests, distinct responsibility incarnation/ownership epoch/route generation, disjoint full coverage and bounded 32-visit traversal. Provider results and parent/child identity/authority/scope/epoch bindings are checked. Route hints cannot grant authority; check_owner requires caller-supplied local committed/applied ownership at admission and application. Host cache/policy injection and all-bucket/refusal/fence tests pass. No replicated directory, Node command integration, network discovery, durable fence/import/activation or parent-outage child-write evidence yet."
     },
@@ -1242,9 +1243,9 @@
       ],
       "native": "NativeManifestCache: explicit caller-owned BTreeMap hints, bounded count and retained value/route capacity, atomic owned admission/replacement and generation-scoped invalidation.",
       "conformance": [
-        "tests/routing.rs"
+        "tests/routing.rs", "tests/delegation.rs"
       ],
-      "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch mapping edits/reactivation and capacity overflow reject. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage."
+      "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch ownership mapping edits/reactivation and capacity overflow reject. An authenticated newer generation may refresh child locator epochs with unchanged ranges, child identities, groups and parent ownership; child epochs cannot regress. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage."
     },
     {
       "design_id": "C05/C16/C17",
@@ -1464,8 +1465,8 @@
       "public_contract": "DelegationPlan / DelegationBinding / DelegationReservationStatus / DelegationCompletion / DelegationPublicationStatus",
       "operations": ["new", "encode", "decode", "retained_bytes", "child_intent", "delegation_reservation_at", "delegation_publication_at"],
       "native": "Checked parent reservation/completion requests in the existing Directory application journal, public application/read/admission/checkpoint seams and same authoritative storage binding. No new provider/worker.",
-      "conformance": ["tests/delegation.rs", "tests/directory.rs", "tests/transfer_publication.rs"],
-      "scope": "One delegated parent's generation and bounded final control history are reserved before child fencing. VBTINT02 binds exact child manifests, operation and authenticated parent reservation facts; decode recomputes content binding. Complete child publication gates parent route epoch update, leaving parent ownership epoch/ancestry stable. Same-group metadata validates actual local retained facts. Original outcomes, locks and control capacity survive journal replay/checkpoint. Five downstream deterministic split/provenance/routing/codec/capacity tests; foreign observations remain authenticated host obligations. No native delegated-network or delegated-merge/repeated evidence, cancellation/replanning of abandoned pre-fence reservations, namespace creation/deletion/reparenting, parent data migration, arbitrary-fault, mixed-version, macOS or separate-host claim."
+      "conformance": ["tests/delegation.rs", "tests/delegation/fixtures.rs", "tests/directory.rs", "tests/transfer_publication.rs", "tests/routed/delegation.rs"],
+      "scope": "One delegated parent's generation and bounded final control history are reserved before child fencing. VBTINT02 binds exact child manifests, operation and authenticated parent reservation facts; decode recomputes content binding. Complete child publication gates parent route epoch update, leaving parent ownership epoch/ancestry stable. Same-group metadata validates actual local retained facts. Original outcomes, locks and control capacity survive journal replay/checkpoint. Five downstream deterministic split/provenance/routing/codec/capacity tests plus two child-locator/cache regressions; foreign observations remain authenticated host obligations. Four selected TCP/QUIC WAL/checkpoint split histories reopen six three-replica groups after every committed phase, survive parent outages, retain unchanged grandparent locators, and commit target retries/new writes with ancestors and old source stopped. No delegated-merge/repeated evidence, cancellation/replanning of abandoned pre-fence reservations, namespace creation/deletion/reparenting, parent data migration, arbitrary-fault, mixed-version, macOS or separate-host claim."
     }
   ],
   "not_yet_implemented": [

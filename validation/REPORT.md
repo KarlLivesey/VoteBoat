@@ -1899,3 +1899,33 @@ detected before fencing; no timeout/unfreeze bypass exists. No mixed-version,
 macOS or separate-host claim. Full P0–P7 remains active; P8 deferred.
 All-target/all-feature Clippy with warnings denied, formatting, diff checks and
 the 71-contract inventory validator pass.
+## Slice 95 — native delegated split recovery and parent cache refresh
+
+Native tests use separate three-replica grandparent, parent, child metadata,
+source and two target groups. Targets bind the actual quorum-observed parent
+reservation index/configuration. The resumer discards action completions and
+reads committed phase status after reopening all established groups. It checks
+11 transitions, immutable original decisions, source fencing, target refusal
+before activation, unchanged grandparent locator and the temporary stale-parent
+routing gap. Additional parent outages exercise source retries before fencing
+and forward-only refusal after child publication. Finally, original target
+retries and new writes succeed while all ancestor/source workers are stopped,
+then their results survive another reopen.
+
+The native cache needed a narrow compatibility fix: at unchanged parent ownership
+epoch, accept an authenticated newer generation that changes only child locator
+epochs, retaining ranges, child identities and groups. Child epochs cannot regress.
+The public manifest predicate supports the same decision for host caches. Tests
+check skipped intermediate epochs, changed ownership/ancestry/authority/state/
+scope/shape/child bindings, and atomic native cache rejection. No durable format,
+quorum policy, transport provider or production timer changed.
+
+Focused validation: all-feature and native-only delegation 7/7, routing 11/11;
+core-only delegation 6/6, routing 7/7. All-target/all-feature Clippy passes with
+warnings denied. Formatting, diff checks and the 71-contract inventory pass.
+`cargo +stable test --locked --offline --all-features --test routed native::delegation -- --nocapture`: 4/4 passed in 428.83 seconds. This covers TCP/TLS and QUIC, each with WAL-only and checkpoint recovery. The shared native-history guard serializes these cases. A preliminary TCP/WAL case also passed in 56.23 seconds; it is not an additional distinct history.
+
+These are selected Linux ordinary-majority process-reopen histories, not arbitrary
+power-loss/fault completeness, delegated merge/repeated movement, abandoned
+reservation cancellation, macOS or separate-host validation. Those limitations
+remain in the active baseline scope; P8 research remains deferred.

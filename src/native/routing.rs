@@ -76,7 +76,10 @@ impl NativeManifestCache {
             if next.epoch < prior.epoch {
                 return Err(RoutingError::EpochRegression);
             }
-            if next.epoch == prior.epoch && next.execution != prior.execution {
+            if next.epoch == prior.epoch
+                && next.execution != prior.execution
+                && !manifest.refreshes_child_epochs(old)
+            {
                 return Err(RoutingError::EpochMismatch);
             }
             if prior.state == ResponsibilityState::Fenced

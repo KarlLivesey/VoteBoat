@@ -189,6 +189,45 @@ impl ResponsibilityManifest {
     pub fn into_input(self) -> ManifestInput {
         self.0
     }
+    /// A newer authenticated routing view may advance child locator epochs
+    /// without moving this parent's own ownership. No range, group or child
+    /// identity can change through this metadata-only refresh.
+    pub fn refreshes_child_epochs(&self, previous: &Self) -> bool {
+        let next = self.input();
+        let old = previous.input();
+        if next.responsibility != old.responsibility
+            || next.parent != old.parent
+            || next.authority != old.authority
+            || next.application != old.application
+            || next.scheme != old.scheme
+            || next.scope != old.scope
+            || next.epoch != old.epoch
+            || next.state != old.state
+            || next.generation <= old.generation
+        {
+            return false;
+        }
+        let (ExecutionMode::Delegated(a), ExecutionMode::Delegated(b)) =
+            (&next.execution, &old.execution)
+        else {
+            return false;
+        };
+        a.len() == b.len()
+            && a.iter().zip(b).all(|(a, b)| {
+                if a.scope != b.scope {
+                    return false;
+                }
+                match (a.target, b.target) {
+                    (RouteTarget::Group(a), RouteTarget::Group(b)) => a == b,
+                    (RouteTarget::Child(a), RouteTarget::Child(b)) => {
+                        a.responsibility == b.responsibility
+                            && a.group == b.group
+                            && a.epoch >= b.epoch
+                    }
+                    _ => false,
+                }
+            })
+    }
     /// Charges value bytes and all retained route capacity. Collection/allocator
     /// bookkeeping is separately bounded by the fixed entry ceiling.
     pub fn retained_bytes(&self) -> usize {

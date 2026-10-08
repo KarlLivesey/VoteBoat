@@ -12,282 +12,106 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[path = "delegation/fixtures.rs"]
+mod fixture;
 #[path = "transfer_source/fixtures.rs"]
-mod base;
+pub mod source_fixture;
 use base::{entry, group, op};
+use fixture::*;
 use std::collections::BTreeMap;
 use voteboat::{
     application::*, bucket_counter::*, delegation::*, directory::*, identity::*, routed::*,
-    routing::*, transfer::*, transfer_publication::*, transfer_source::*, transfer_target::*,
+    routing::*, transfer::*, transfer_target::*,
 };
-fn id(n: u128) -> ResponsibilityIdentity {
-    ResponsibilityIdentity {
-        id: ResponsibilityId::new(n).unwrap(),
-        incarnation: ResponsibilityIncarnation::new(1).unwrap(),
-    }
-}
-fn before() -> ResponsibilityManifest {
-    let mut input = base::grant().into_input();
-    input.parent = Some(ParentAuthority {
-        responsibility: id(500),
-        group: group(100),
-    });
-    ResponsibilityManifest::new(input).unwrap()
-}
-fn after() -> ResponsibilityManifest {
-    let mut input = base::intent().after().clone().into_input();
-    input.parent = before().input().parent;
-    ResponsibilityManifest::new(input).unwrap()
-}
-fn parent() -> ResponsibilityManifest {
-    let mut input = base::grant().into_input();
-    input.responsibility = id(500);
-    input.authority = group(100);
-    // A non-root parent proves the update need not change its own delegation.
-    input.parent = Some(ParentAuthority {
-        responsibility: id(600),
-        group: group(200),
-    });
-    input.execution = ExecutionMode::Delegated(vec![RouteEntry {
-        scope: input.scope,
-        target: RouteTarget::Child(ChildAuthority {
-            responsibility: before().input().responsibility,
-            group: group(1),
-            epoch: before().input().epoch,
-        }),
-    }]);
-    ResponsibilityManifest::new(input).unwrap()
-}
-fn grandparent() -> ResponsibilityManifest {
+fn refreshed_parent(epoch: u64) -> ResponsibilityManifest {
     let mut input = parent().into_input();
-    input.responsibility = id(600);
-    input.authority = group(200);
-    input.parent = None;
-    input.execution = ExecutionMode::Delegated(vec![RouteEntry {
-        scope: input.scope,
-        target: RouteTarget::Child(ChildAuthority {
-            responsibility: id(500),
-            group: group(100),
-            epoch: parent().input().epoch,
-        }),
-    }]);
+    input.generation = RouteGeneration::new(2).unwrap();
+    let ExecutionMode::Delegated(routes) = &mut input.execution else {
+        unreachable!()
+    };
+    let RouteTarget::Child(child) = &mut routes[0].target else {
+        unreachable!()
+    };
+    child.epoch = OwnershipEpoch::new(epoch).unwrap();
     ResponsibilityManifest::new(input).unwrap()
 }
-fn plan() -> DelegationPlan {
-    DelegationPlan::new(parent(), before(), after(), op(200)).unwrap()
-}
-fn fresh_directory(p: bool, operations: usize) -> LifecycleDirectory {
-    let manifest = if p { parent() } else { before() };
-    LifecycleDirectory::new(
-        Directory::new(
-            DirectoryPlan::new(manifest.input().authority, vec![manifest]).unwrap(),
-            DirectoryLimits {
-                operations,
-                history_bytes: 65536,
-            },
-        )
-        .unwrap(),
-    )
-}
-fn command<A: StateMachine>(app: &mut A, operation: u128, bytes: Vec<u8>) -> A::Receipt {
-    app.apply_batch(&[entry(app.applied_index() + 1, operation, bytes)])
-        .unwrap()
-        .remove(0)
-}
-fn ready_directory(p: bool, operations: usize) -> LifecycleDirectory {
-    let mut d = fresh_directory(p, operations);
-    let bootstrap = d.directory().bootstrap_command(65536).unwrap();
-    command(&mut d, 1000, bootstrap);
-    command(
-        &mut d,
-        1001,
-        DirectoryCommand {
-            expected: None,
-            manifest: if p { parent() } else { before() },
+
+#[test]
+fn child_locator_refresh_requires_unchanged_parent_and_child_bindings() {
+    let old = parent();
+    let next = refreshed_parent(3); // A cache may miss intermediate publications.
+    assert!(next.refreshes_child_epochs(&old));
+    assert!(!old.refreshes_child_epochs(&next));
+    assert!(!old.refreshes_child_epochs(&old));
+    assert!(!refreshed_parent(2).refreshes_child_epochs(&next));
+    for mutation in 0..8 {
+        let mut input = next.clone().into_input();
+        match mutation {
+            0 => input.epoch = OwnershipEpoch::new(2).unwrap(),
+            1 => input.parent = None,
+            2 => input.state = ResponsibilityState::Fenced,
+            3 => input.authority = group(101),
+            6 => {
+                input.scope = BucketRange::new(input.scope.start(), input.scope.end() - 1).unwrap();
+                let ExecutionMode::Delegated(routes) = &mut input.execution else {
+                    unreachable!()
+                };
+                routes[0].scope = input.scope;
+            }
+            7 => input.execution = ExecutionMode::Single(group(20)),
+            n => {
+                let ExecutionMode::Delegated(routes) = &mut input.execution else {
+                    unreachable!()
+                };
+                let RouteTarget::Child(child) = &mut routes[0].target else {
+                    unreachable!()
+                };
+                if n == 4 {
+                    child.group = group(2);
+                } else {
+                    child.responsibility = id(11);
+                }
+            }
         }
-        .encode(65536)
-        .unwrap(),
-    );
-    d
-}
-fn reservation(parent: &LifecycleDirectory) -> DelegationReservationStatus {
-    let DirectoryRead::DelegationReservation(Some(s)) = parent
-        .read_at(
-            parent.applied_index(),
-            DirectoryQuery::DelegationReservation(op(400)),
-        )
-        .unwrap()
-    else {
-        panic!("reservation")
-    };
-    s
-}
-fn fresh_source() -> base::Source {
-    fresh_source_for(before())
-}
-fn fresh_source_for(grant: ResponsibilityManifest) -> base::Source {
-    TransferSource::new(
-        RoutedApplication::new(
-            group(20),
-            grant,
-            BucketCounter::new(base::range(0, 256), base::Policy, base::bucket_limits()).unwrap(),
-            base::Policy,
-            RoutedLimits {
-                operations: 32,
-                semantic_bytes: 8192,
-                payload_bytes: 1024,
-                inner_checkpoint_bytes: base::bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.error)),
-        65536,
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0))
-}
-fn fresh_target(
-    g: u128,
-    intent: &TransferIntent,
-) -> TransferTarget<BucketCounter<base::Policy>, base::Policy> {
-    TransferTarget::new(
-        group(g),
-        op(200),
-        intent.clone(),
-        BucketCounter::new(
-            if g == 21 {
-                base::range(0, 128)
-            } else {
-                base::range(128, 256)
-            },
-            base::Policy,
-            base::bucket_limits(),
-        )
-        .unwrap(),
-        base::Policy,
-        TargetLimits {
-            import_bytes: 65536,
-            application_checkpoint_bytes: base::bucket_limits().checkpoint_bound().unwrap(),
-        },
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0))
-}
-struct Cache(BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>);
-impl ManifestCache for Cache {
-    fn get(&self, r: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
-        self.0.get(&r)
-    }
-    fn admit(
-        &mut self,
-        m: ResponsibilityManifest,
-    ) -> Result<(), (RoutingError, ResponsibilityManifest)> {
-        self.0.insert(m.input().responsibility, m);
-        Ok(())
-    }
-    fn invalidate(&mut self, r: ResponsibilityIdentity, _: RouteGeneration) -> bool {
-        self.0.remove(&r).is_some()
-    }
-    fn limits(&self) -> ManifestCacheLimits {
-        ManifestCacheLimits {
-            manifests: 4,
-            bytes: 65536,
-        }
-    }
-    fn usage(&self) -> ManifestCacheUsage {
-        ManifestCacheUsage {
-            manifests: self.0.len(),
-            bytes: self.0.values().map(|m| m.retained_bytes()).sum(),
-        }
-    }
-}
-fn recover_directory(d: &LifecycleDirectory, p: bool, operations: usize) -> LifecycleDirectory {
-    let cp = d.checkpoint(1000000).unwrap();
-    let mut recovered = fresh_directory(p, operations);
-    recovered
-        .restore_checkpoint(d.schema_version(), d.applied_index(), &cp)
-        .unwrap();
-    assert_eq!(cp, recovered.checkpoint(1000000).unwrap());
-    recovered
-}
-fn completed_child(
-    intent: &TransferIntent,
-    child: &mut LifecycleDirectory,
-) -> (
-    base::Source,
-    Vec<TransferTarget<BucketCounter<base::Policy>, base::Policy>>,
-    TransferPublicationStatus,
-) {
-    assert_eq!(
-        command(child, 200, intent.encode(65536).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
-    let mut source = fresh_source_for(intent.before().clone());
-    let boot = source.bootstrap_command(65536).unwrap();
-    command(&mut source, 100, boot);
-    command(&mut source, 1, base::data(1, 7));
-    command(&mut source, 2, base::data(200, 11));
-    let mut targets = [21, 22]
-        .into_iter()
-        .map(|g| fresh_target(g, intent))
-        .collect::<Vec<_>>();
-    for target in &mut targets {
-        let boot = target.bootstrap_command(65536).unwrap();
-        command(target, 200, boot);
-    }
-    command(
-        &mut source,
-        200,
-        base::Source::freeze_command(intent, 65536).unwrap(),
-    );
-    let SourceRead::Freeze(Some(frozen)) = source
-        .read_at(source.applied_index(), SourceQuery::Freeze)
-        .unwrap()
-    else {
-        panic!("freeze")
-    };
-    let cfg = ConfigurationId::new(1).unwrap();
-    let mut ready = Vec::new();
-    for (g, target) in [21, 22].into_iter().zip(&mut targets) {
-        let digest = frozen
-            .exports
-            .iter()
-            .find(|e| e.target == group(g))
+        assert!(!ResponsibilityManifest::new(input)
             .unwrap()
-            .digest;
-        let import = TargetImport::new(
-            op(200),
-            intent.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: frozen.fence,
-                configuration: cfg,
-                image: source.export_target(group(g), 65536).unwrap(),
-                digest,
-            }],
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-        let bytes = target.import_command(&import, 65536).unwrap();
-        command(target, 200, bytes);
-        ready.push(
-            TargetReadyEvidence::from_status(cfg, target.status())
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        );
+            .refreshes_child_epochs(&old));
     }
-    let publication = TransferPublication::new(
-        op(200),
-        intent.clone(),
-        vec![SourceFenceEvidence::from_status(cfg, frozen).unwrap_or_else(|e| panic!("{:?}", e.0))],
-        ready,
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert_eq!(
-        command(child, 201, publication.encode(65536).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
-    );
-    let decision = child
-        .directory()
-        .transfer_publication_at(child.applied_index(), op(200))
-        .unwrap()
-        .unwrap();
-    (source, targets, decision)
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn native_parent_cache_accepts_child_epoch_refresh_and_preserves_rejected_view() {
+    use voteboat::native::routing::NativeManifestCache;
+    let mut cache = NativeManifestCache::new(ManifestCacheLimits {
+        manifests: 4,
+        bytes: 65536,
+    })
+    .unwrap();
+    cache.admit(parent()).unwrap();
+    let next = refreshed_parent(3);
+    cache.admit(next.clone()).unwrap();
+    let usage = cache.usage();
+    for mutation in 0..3 {
+        let mut input = next.clone().into_input();
+        input.generation = RouteGeneration::new(3).unwrap();
+        let ExecutionMode::Delegated(routes) = &mut input.execution else {
+            unreachable!()
+        };
+        let RouteTarget::Child(child) = &mut routes[0].target else {
+            unreachable!()
+        };
+        match mutation {
+            0 => child.epoch = OwnershipEpoch::new(2).unwrap(),
+            1 => child.group = group(2),
+            _ => child.responsibility = id(11),
+        }
+        assert!(cache
+            .admit(ResponsibilityManifest::new(input).unwrap())
+            .is_err());
+        assert_eq!(cache.usage(), usage);
+        assert_eq!(cache.get(id(500)), Some(&next));
+    }
 }
 #[test]
 fn delegated_split_reserves_parent_and_recovers_epochs_without_ancestor_write_dependency() {

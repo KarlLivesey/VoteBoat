@@ -1636,3 +1636,6 @@ mod merge;
 
 #[path = "retirement.rs"]
 mod retirement;
+
+#[path = "delegation.rs"]
+mod delegation;
