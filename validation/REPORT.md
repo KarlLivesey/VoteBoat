@@ -1454,3 +1454,41 @@ Final verification:
 Coverage is finite and weighted. Broader recursive partial joint/final delivery
 and restart remain the P4 release gate; public mutation ingress remains closed.
 P6 lifecycle, P7 measurement and macOS/separate-host validation remain outstanding.
+
+## Slice 83 — recursive partial joint/final restart
+
+Eight native TCP/QUIC schedules broaden the finite P4 fault ledger:
+
+- Partial joint: keep the required old voter absent while the native candidate
+  repairs the learner across multiple retained batches, with and without a
+  divergent uncommitted command suffix. Observe durable accepted joint with no
+  pending dependency, unchanged commit 1/application 0 and no leader. Drain/join
+  both survivors, reopen their files and require the same pre-commit state before
+  restoring the old voter. Ordinary recursive quorum commitment then reaches
+  application 18, and final file recovery excludes abandoned learner commands.
+- Partial final: seed committed joint on all three stores but final on only 3.
+  Old policy requires 1; new policy requires both members of a nested Majority(2,3)
+  child. Keep 1 offline. Persist 3's campaign promise and restart it before any
+  vote reply; recover 2 from WAL or a verified compacted joint checkpoint. Require
+  a new-policy election, committed final and acknowledged application 7. Voter 2
+  retains joint ballot origin despite echoing final request scope and subsequently
+  catching up. Reopen survivors and the unchanged offline store to check exact
+  respective application/membership state.
+
+The joint driver initially applied a pre-repair non-voter assertion after restart,
+when accepted joint correctly made the learner a voter. The assertion is now at
+initial opening; the restart boundary explicitly requires durable accepted joint,
+no pending dependency, no leader and unchanged commitment/application. A missing
+closure type annotation was also corrected. No production checks were changed.
+
+Final validation: 57 core + 4 activation model + 33 member recovery + 32 membership
++ 44 native startup = 170 tests pass with all features. All-target/all-feature
+Clippy denies warnings; formatting, diff and inventory validation pass. Inventory
+remains 64 contracts, with the downstream recursive module recorded as evidence.
+
+These selected native schedules cover the remaining named slice-77 fault rows;
+they do not prove arbitrary distributed traces. Transition prefixes are fixtures,
+and graceful drain/reopen is distinct from the existing storage-fault histories.
+General public mutation endpoints remain gated. Work advances through the existing
+trusted administration path to P6 durable split/merge; P7 and the full P0–P7 goal
+remain active, with macOS/separate-host evidence outstanding and P8 deferred.

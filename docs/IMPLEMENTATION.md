@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; public mutation ingress, generic application envelopes and faulted online transitions remain |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -71,7 +71,7 @@ cause and revise this sketch before another material change.
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
-| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Current P4 work. This permits safe replica placement changes needed by later responsibilities and ownership movement. |
+| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration and the named P4 fault schedules are implemented. General public mutation endpoints remain gated. Safe placement supports ownership movement. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
@@ -84,30 +84,30 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Slices 78–80 complete the fixed-assignment responsibility path: checked routing,
-a replicated directory and routed application execution. Native TCP/QUIC tests
-now demonstrate the roadmap's recursive example with distinct child replica sets,
-parent outage, unchanged ancestor logs and recoverable retries. This advances the
-plan to the explicitly retained P4 fault ledger; it does not declare the complete
-P0–P7 objective finished or activate transferred ownership.
+Slices 78–80 complete fixed-assignment routing and application execution. Slices
+81–83 cover the finite named P4 fault ledger: held readiness/session changes,
+promoted-leader/witness outage, and recursive partial joint/final restart. This
+is selected-schedule evidence, not a complete protocol proof. General public
+membership mutation endpoints and generic envelopes remain gated; the existing
+trusted Node/executable administration path supplies placement for P6. Adding a
+new public endpoint is not a prerequisite for using those existing contracts.
+The full P0–P7 objective and outstanding scope ledger remain unchanged.
 
-1. **Fault-tested remote membership release (current, P4).** Finish the finite
-   remaining schedules from slice 77. Slice 81 now checks held readiness across
-   cancellation and changed-session promotion through owning assembly, including
-   native TCP/QUIC cancellation. Slice 82 adds promoted-leader loss with older
-   views and unavailable/restored/compacted witnesses over both transports.
-   Remaining: broader recursive partial joint/final delivery and restart.
-   Depends on the existing executable lifecycle,
-   authorization and recovery paths. Completion requires safe rejection/recovery
-   in those actual histories before opening public mutation ingress. This supplies
-   safe replica placement for the next ownership-movement milestone.
-2. **First durable split/merge lifecycle (next, P6).** Use P5 owner manifests and
-   P4 safe placement with a genuinely splittable application adapter. Sketch source
-   freeze/export, target import, metadata publication and activation records before
-   editing; preserve data, operation results, outbox and ownership lineage. Check
-   interrupted stages and lost receipts without two active owners, then compatible
-   merge. Depends on routing, checkpoint recovery and the P4 release checks. This
-   enables actual data movement; the current local fence alone is insufficient.
+1. **First durable split lifecycle (current, P6).** Use the P5 owner manifests,
+   routed application and tested P4 placement path with a genuinely splittable
+   application adapter. Sketch bounded export/import records, source fencing,
+   metadata publication and activation before editing. Preserve application data,
+   operation results/digests, outbox and lineage. Completion requires actual
+   source/target/directory recovery across interrupted stages and lost receipts,
+   with no dual active owners. A local fence alone is insufficient. This advances
+   the macro ownership-movement milestone.
+2. **Compatible merge and retry lineage (next, also P6).** Reuse split's durable
+   handoff records for compatible owners, with checked disjoint scopes and
+   adapter/schema/lineage compatibility. Preserve retries/results and outbox
+   state without ID collisions or duplicate effects; refuse incompatible input.
+   Completion requires restart and receipt-loss histories demonstrating one
+   active merged owner and recoverable fenced sources. This completes the first
+   split/merge capability, rather than creating a separate infrastructure phase.
 3. **Measured tuning and broader validation (following, P7).** Establish a
    reproducible committed/applied baseline with workload, durability and latency
    budget before changing lanes, batching, reclamation or recovery throttling.
@@ -129,12 +129,12 @@ without it, a correct-looking route could execute through the wrong group.
 
 Native durable child writes and retries now pass while the parent cannot commit,
 with unchanged parent logs, recovery and stale-owner rejection. This
-advances P5, gives the current P4 release work a concrete routed application
-to protect, and supplies P6 with owner-context and retry-state foundations.
+advances P5 and supplies P6 with owner-context and retry-state foundations
+over the tested trusted P4 placement path.
 The local fence does not itself implement ownership transfer: P6 still needs
 source-fence evidence, target import, publication and activation with recovery
 that prevents two active owners. The P5 fixed-assignment path remains usable
-while P4 release checks and P6 ownership movement proceed.
+while P6 ownership movement and remaining P4 public administration work proceed.
 
 For immediate implementation, distinguish the concrete dependency chain from
 the capability milestones above:
@@ -142,8 +142,8 @@ the capability milestones above:
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
 | Routed responsibility foundation (completed slices 78–80, P5) | Namespace and local ownership checks are necessary before safe data movement. | TCP/QUIC child writes, quorum reads and WAL/checkpoint recovery pass with all parents stopped and unchanged parent logs; stale contexts refuse at admission/apply. | Supplies routing and retry foundations for P6; remains usable independently of public membership ingress. |
-| Finish fault-tested remote membership release (current P4) | Executable-created lifecycle, divergent learner repair, slice 81 held-readiness and slice 82 promoted-leader/witness-outage checks now pass. | Remaining: broader recursive partial joint/final delivery/restart. | Establishes safe placement for ownership movement; does not block the usable P5 path. |
-| First durable split/merge (next P6) | Routing selects a destination but cannot revoke an old owner's service. Both P5 and the P4 release checks are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
+| Named remote membership fault ledger (covered slices 76–77, 81–83) | Executable lifecycle, divergent repair, readiness/session changes, leader/witness outage and recursive partial-delivery/restart now have native evidence. | Finite selected histories pass; general public mutation endpoints remain gated. | Existing trusted administration supplies placement for P6; no claim of arbitrary-fault completeness. |
+| First durable split/merge (current P6) | Routing selects a destination but cannot revoke an old owner's service. P5 and the tested trusted P4 placement path are dependencies. | Durable source fence, imported state and activation with preserved retries/lineage; crash and receipt-loss recovery without dual owners. | Enables safe data/ownership movement, then P7 measured tuning. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
 and actual-core limitations recorded below. Slice 63 confirms the separate
@@ -4335,8 +4335,8 @@ The P4 known fault-gap ledger is now:
 | Executable-created full lifecycle and failed original voter | Slice 76 TCP/QUIC bootstrap → add/enroll/promote → retire absent voter → compact/reopen, with fresh survivor-quorum writes. |
 | Divergent retained-only uncommitted learner suffix | Slice 77 weighted/recursive TCP/QUIC plus native atomic-recovery faults and protected-conflict refusal. |
 | Lost readiness reply across cancellation/session change | Slice 81 checks delayed replies through owning Node ingress/runtime, queued old-session proof rejection and fresh proof/joint commitment. Native TCP/QUIC hold an actual snapshot-verified reply in ingress across cancellation, then re-exchange and complete promotion/recovery. This is finite schedule evidence, not every possible loss/restart combination. |
-| Promoted leader failure while a replica retains an older view | Existing witness/catch-up and lost-leader histories; still require combined failure with unavailable/restored witness and compacted-base refusal, with no invented authority or empty replacement. |
-| Broader partial joint/final recursive delivery | Existing accepted-log core, finite activation model and native recursive repair evidence; broader remote partial-delivery/restart schedules remain required. |
+| Promoted leader failure while a replica retains an older view | Slice 82 combines acknowledged leader loss, old-view campaign, unavailable/restored retained or compacted witnesses, snapshot catch-up/refusal and native file reopening over TCP/QUIC. |
+| Broader partial joint/final recursive delivery | Slice 83 adds TCP/QUIC restart after native uncommitted learner repair (including divergent suffix replacement), plus partial-final recursive policy changes with candidate ballot restart and WAL/compacted-joint voter recovery. Finite schedules; initial transition records are seeded. |
 
 This is a concrete remaining-work ledger, not a complete protocol proof. P5
 manifest/routing work over established concrete groups is independent of opening
@@ -4622,3 +4622,51 @@ restart before public mutation ingress. Next is durable P6 split/import/fence/
 publish/activate and compatible merge, then measured P7 tuning. Static/routed
 service use remains independent; macOS and separate-host evidence are outstanding.
 The complete P0–P7 goal remains active and P8 remains deferred.
+
+## Slice 83 — recursive partial joint/final native restart histories
+
+Mini schema: extend the existing recursive learner-repair schedule with an
+explicit pre-commit stop. Keep the required old voter offline until native repair
+has durably installed the learner's joint view; neither candidate nor learner
+may become leader, commit beyond the original prefix or apply speculative data.
+Drain/join and reopen both stores, then restore the old voter and require normal
+recursive election/commit/application. Cover retained multi-batch repair and a
+different-term abandoned learner suffix. Final-stage evidence uses a separate
+nested policy: old requires voter 1, new requires the complete Majority(2,3)
+subtree. Seed committed joint everywhere but final only on 3; leave 1 offline,
+persist 3's campaign ballot, reopen 3 before any reply, then open joint-view 2
+from WAL or a real compacted joint checkpoint. Require election under the new
+policy, committed final/write and retained joint ballot origin on voter 2.
+
+Eight new TCP/QUIC histories pass. Partial-joint reopening preserves accepted
+joint with commit 1 and application value 0. Restoring the missing old voter
+allows ordinary commitment and value 18; recovered logs exclude abandoned learner
+commands. Partial-final reopening preserves the exact candidate promise. Node 2's
+reply echoes the candidate's final scope while its durable origin remains joint;
+catch-up, write acknowledgment and actual-file recovery retain that distinction.
+Node 1 remains offline and its files retain joint/commit 2/value 0 while the final
+survivors reach value 7. Initial transition prefixes are seeded, not new evidence
+of distributed enrollment; shutdown/reopen is not modeled power loss. Existing
+storage-fault and actual-core traces remain complementary evidence.
+
+An initial harness assertion checked the learner's original non-voter role after
+its repaired joint had already survived restart. It now checks that initial role
+before repair, then checks durable joint installation, unchanged commitment and
+application at the restart boundary. No production protocol, API, effect, token,
+generation, watermark or wire/storage format changed.
+
+The named finite fault ledger from slice 77 now has selected native evidence for
+every row. General public membership mutation endpoints and generic envelopes
+remain gated; arbitrary distributed schedules are not proved. The existing
+trusted Node/executable administration path is sufficient for P6 placement, so
+another public endpoint is not a prerequisite for ownership movement. The mini
+plan advances to durable split, compatible merge/retry lineage (both P6), then P7
+measured tuning. This changes work order, not the full P0–P7 completion scope.
+Static service/routed use remains available; macOS and separate-host execution
+remain outstanding, and P8 remains deferred.
+
+Validation: all-feature core library 57, activation model 4, member recovery 33,
+membership 32 and native member startup 44 tests pass (170 total). All-target/
+all-feature Clippy with warnings denied, formatting, inventory and diff checks
+pass. The new downstream test module uses existing public provider contracts;
+inventory remains 64 with no new production seam.

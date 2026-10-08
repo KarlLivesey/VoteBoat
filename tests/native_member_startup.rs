@@ -37,6 +37,9 @@ use voteboat::{
     placement::*,
 };
 
+#[path = "native_member_startup/recursive.rs"]
+mod recursive;
+
 fn administrative_promotion(protocol: NativePeerProtocol) {
     use voteboat::outbound::OutboundQueue;
     type Service = NativeNode<Counter, NativeServiceConnector>;
@@ -970,6 +973,24 @@ fn remote_joint_repair_with_tail(
     recursive: bool,
     divergent: bool,
 ) {
+    remote_joint_repair_schedule(
+        protocol,
+        missing_entries,
+        checkpoint_mode,
+        recursive,
+        divergent,
+        false,
+    );
+}
+fn remote_joint_repair_schedule(
+    protocol: NativePeerProtocol,
+    missing_entries: u64,
+    checkpoint_mode: Option<bool>,
+    recursive: bool,
+    divergent: bool,
+    restart_repaired: bool,
+) {
+    assert!(!restart_repaired || (recursive && checkpoint_mode.is_none()));
     let root = root();
     std::fs::create_dir(&root).unwrap();
     let policy = |required| {
@@ -1197,16 +1218,69 @@ fn remote_joint_repair_with_tail(
         learner.startup.tls = learner.startup.tls.with_wire_version(6).unwrap();
         candidate.startup.tls = candidate.startup.tls.with_wire_version(6).unwrap();
     }
+    let restart_addresses = endpoint1.as_ref().map(|e| [e.0, endpoint2.0, endpoint3.0]);
+    let restart_bootstrap = learner.startup.bootstrap.clone();
     drop(endpoint1);
     drop(endpoint2);
     drop(endpoint3);
-    let mut old_voter = old_config.take().map(|c| open(c, protocol).unwrap());
+    let mut old_voter = if restart_repaired {
+        None
+    } else {
+        old_config.take().map(|c| open(c, protocol).unwrap())
+    };
     let mut learner = open(learner, protocol).unwrap();
     let mut candidate = open(candidate, protocol).unwrap();
+    assert!(!learner.local().owner.core(group()).unwrap().local_voter());
+    if restart_repaired {
+        // Without the old required voter, repairing accepted membership cannot
+        // supply the missing old quorum or commit any speculative application.
+        let mut survivors = vec![learner, candidate];
+        let clock = Instant::now();
+        survivors[1]
+            .control(group(), NodeControl::Campaign)
+            .unwrap();
+        recursive::drive(&mut survivors, &clock, |ns| {
+            let core = ns[0].local().owner.core(group()).unwrap();
+            core.membership().id() == cid(11)
+                && core.state().last_index() >= missing_entries + 2
+                && !core.has_pending_dependency()
+        });
+        for n in &survivors {
+            let core = n.local().owner.core(group()).unwrap();
+            assert_eq!(core.state().commit_index, 1);
+            assert_ne!(core.role(), Role::Leader);
+            assert_eq!(n.local().applications[&group()].read_applied(1), Ok(0));
+        }
+        recursive::shutdown(survivors, &clock);
+        let reopen = |local: u64| {
+            let (mut selected, _hints) = startup(&root.join(local.to_string()), local, &[1, 2, 3]);
+            let addresses = restart_addresses.unwrap();
+            selected.startup.bootstrap = restart_bootstrap.clone();
+            selected.startup.listen = addresses[local as usize - 1];
+            selected.startup.tls = selected.startup.tls.with_wire_version(6).unwrap();
+            for (peer, hint) in &mut selected.startup.peers {
+                hint.address = addresses[peer.get() as usize - 1];
+            }
+            open(selected, protocol).unwrap()
+        };
+        learner = reopen(2);
+        candidate = reopen(3);
+        for n in [&learner, &candidate] {
+            assert_eq!(
+                n.local().owner.core(group()).unwrap().membership().id(),
+                cid(11)
+            );
+            assert_eq!(
+                n.local().owner.core(group()).unwrap().state().commit_index,
+                1
+            );
+            assert_eq!(n.local().applications[&group()].read_applied(1), Ok(0));
+        }
+        old_voter = old_config.take().map(|c| open(c, protocol).unwrap());
+    }
     if recursive {
         candidate.control(group(), NodeControl::Campaign).unwrap();
     }
-    assert!(!learner.local().owner.core(group()).unwrap().local_voter());
     let start = Instant::now();
     let mut ticket = None;
     let mut applied_index = None;

@@ -360,3 +360,21 @@ end-to-end progress and recovery and permits no storage/fencing errors. Distinct
 per-node election entropy avoids the fixture's previous lockstep campaigns.
 Finite histories are not a general fork/term/liveness proof. Service mutations
 and broader promoted-leader/witness failure histories remain release work.
+
+## Selected native recursive restart evidence (slice 83)
+
+Eight TCP/QUIC histories supplement the actual-core traces and activation model.
+An old quorum member stays offline during durable native learner repair; accepted
+joint survives restart without commitment/application progress until that member
+returns. Retained and divergent-tail cases then elect, commit and reopen normally.
+A separate partial-final policy change uses Weighted(Voter(1), Majority(2,3)),
+changing weights so the new view requires the complete nested child. Only voter 3
+initially has final. It restarts after its durable ballot and elects with voter 2,
+which still holds joint in WAL or a pinned checkpoint. Voter 2's ballot origin
+remains joint while its response echoes final scope, and survives final catch-up
+and native file recovery. The old voter stays offline and unchanged.
+
+Transition prefixes are seeded, and these are finite selected schedules. Existing
+trusted Node/executable administration supplies the placement path used by P6;
+general public mutation endpoints remain gated. No production protocol or default
+static ingress gate changed in this slice.
