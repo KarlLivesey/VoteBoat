@@ -13,9 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 mod support;
-use std::collections::VecDeque;
+use std::collections::{BTreeMap, VecDeque};
 use support::*;
-use voteboat::{identity::*, log::*, raft::*, runtime::*, worker::*};
+use voteboat::{application::*, identity::*, log::*, raft::*, runtime::*, worker::*};
 
 struct Ready(VecDeque<GroupIdentity>);
 impl ReadyScheduler for Ready {
@@ -283,6 +283,389 @@ fn stopped_visit_does_not_discard_other_groups_in_a_shared_completion() {
     shard.finish(surviving).unwrap();
 }
 
+/// End-to-end assembly uses public owner/worker interfaces, with no synchronous
+/// log access after construction. All retained test-driver queues have ceilings.
+struct WorkerNode<W: PersistenceWorker> {
+    shard: Shard<Ready>,
+    worker: W,
+    apps: BTreeMap<GroupIdentity, Counter>,
+    pending: BTreeMap<GroupIdentity, PersistUnit>,
+    messages: VecDeque<Message>,
+    held: Option<WorkerEvent>,
+    hold: bool,
+    results: Vec<CounterReceipt>,
+    reads: Vec<i64>,
+    largest_batch: usize,
+}
+impl<W: PersistenceWorker> WorkerNode<W> {
+    fn new<L: LogStore>(id: u64, mut store: L, create: bool, worker: impl FnOnce(L) -> W) -> Self {
+        if create {
+            append(
+                &mut store,
+                (1..=100)
+                    .map(|g| LogMutation::Create(bootstrap(g, 3)))
+                    .collect(),
+            );
+        }
+        let mut shard = Shard::new(
+            owner(store.binding()),
+            ShardLimits {
+                max_groups: 100,
+                visit_items: 1,
+                group_items: 6,
+                group_control_items: 2,
+                ..ShardLimits::default()
+            },
+            Ready(VecDeque::new()),
+        )
+        .unwrap();
+        let mut apps = BTreeMap::new();
+        for g in 1..=100 {
+            let core = Raft::recover(
+                node(id),
+                store.binding(),
+                store.state(group(g)).unwrap(),
+                store.limits(),
+            )
+            .unwrap();
+            let mut app = Counter::new(10).unwrap();
+            app.apply_batch(core.replay_committed()).unwrap();
+            apps.insert(group(g), app);
+            shard.register(core).unwrap();
+        }
+        Self {
+            shard,
+            worker: worker(store),
+            apps,
+            pending: BTreeMap::new(),
+            messages: VecDeque::new(),
+            held: None,
+            hold: false,
+            results: vec![],
+            reads: vec![],
+            largest_batch: 0,
+        }
+    }
+    fn effects(&mut self, visit: VisitTicket, effects: Vec<Effect>) {
+        for effect in effects {
+            match effect {
+                Effect::Persist(update) => {
+                    assert!(self.pending.len() < 100);
+                    assert!(self
+                        .pending
+                        .insert(visit.group, PersistUnit { visit, update })
+                        .is_none());
+                }
+                Effect::Send(message) => {
+                    assert!(self.messages.len() < 8192);
+                    self.messages.push_back(message);
+                }
+                Effect::Committed(entries) => {
+                    let receipts = self
+                        .apps
+                        .get_mut(&visit.group)
+                        .unwrap()
+                        .apply_batch(&entries)
+                        .unwrap();
+                    assert!(self.results.len() + receipts.len() <= 8192);
+                    self.results.extend(receipts);
+                }
+                Effect::ReadReady(barrier) => {
+                    assert!(self.reads.len() < 1024);
+                    let app = &self.apps[&visit.group];
+                    self.reads.push(
+                        self.shard
+                            .with_core(visit, |core| read_at_barrier(core, &barrier, app, ()))
+                            .unwrap()
+                            .unwrap(),
+                    );
+                }
+                _ => panic!("snapshot installation is outside this worker history"),
+            }
+        }
+        if !self
+            .shard
+            .core(visit.group)
+            .unwrap()
+            .has_pending_dependency()
+        {
+            self.shard.finish(visit).unwrap();
+        }
+    }
+    fn deliver(&mut self, mut event: WorkerEvent) {
+        if self.hold {
+            if let WorkerEvent::Durable {
+                request,
+                visits,
+                completion,
+            } = &mut event
+            {
+                if let Some(index) = visits.iter().position(|v| v.group == group(1)) {
+                    assert!(self.held.is_none());
+                    self.held = Some(WorkerEvent::Durable {
+                        request: *request,
+                        visits: vec![visits.remove(index)],
+                        completion: completion.clone(),
+                    });
+                }
+            }
+        }
+        for delivery in apply_to_shard(&mut self.shard, event) {
+            self.effects(delivery.visit, delivery.result.unwrap());
+        }
+    }
+    fn progress(&mut self) -> bool {
+        let mut progress = false;
+        for event in self.worker.poll(16) {
+            self.deliver(event);
+            progress = true;
+        }
+        for _ in 0..100 {
+            let Some(visit) = self.shard.poll(MonoTime(0)).unwrap() else {
+                break;
+            };
+            let effects = self
+                .shard
+                .step_next(visit, MonoTime(0))
+                .unwrap()
+                .unwrap()
+                .result
+                .unwrap();
+            self.effects(visit, effects);
+            progress = true;
+        }
+        if !self.pending.is_empty() {
+            let units = std::mem::take(&mut self.pending)
+                .into_values()
+                .collect::<Vec<_>>();
+            let count = units.len();
+            match submit_for_shard(&mut self.shard, &mut self.worker, units) {
+                Ok(_) => {
+                    self.largest_batch = self.largest_batch.max(count);
+                    progress = true;
+                }
+                Err(WorkerRejected {
+                    reason: WorkerError::Overloaded,
+                    units,
+                }) => {
+                    for unit in units {
+                        self.pending.insert(unit.visit.group, unit);
+                    }
+                }
+                Err(e) => panic!("worker rejected valid persistence: {e:?}"),
+            }
+        }
+        progress
+    }
+    fn values(&self, expected: i64) {
+        for app in self.apps.values() {
+            assert_eq!(app.read_applied(app.applied_index()), Ok(expected));
+        }
+    }
+}
+fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Option<NodeId>) {
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let mut network = VecDeque::new();
+    let mut sequence = 0;
+    loop {
+        assert!(
+            std::time::Instant::now() < end,
+            "worker cluster did not converge"
+        );
+        let mut progress = false;
+        for node in nodes.iter_mut() {
+            progress |= node.progress();
+            assert!(network.len() + node.messages.len() <= 8192);
+            network.append(&mut node.messages);
+        }
+        // Bound each network visit and redeliver some packets. Rejected ingress
+        // stays owned by this bounded driver rather than disappearing.
+        for _ in 0..32 {
+            let Some(message) = network.pop_front() else {
+                break;
+            };
+            if isolated.is_some_and(|n| message.from == n || message.to == n) {
+                progress = true;
+                continue;
+            }
+            sequence += 1;
+            let duplicate = (sequence % 17 == 0).then(|| message.clone());
+            let target = message.to.get() as usize - 1;
+            match nodes[target]
+                .shard
+                .admit(message.group, Event::Receive(message))
+            {
+                Ok(()) => {
+                    progress = true;
+                    if let Some(message) = duplicate {
+                        assert!(network.len() < 8192);
+                        network.push_back(message);
+                    }
+                }
+                Err(rejected) if rejected.reason == RuntimeError::Overloaded => {
+                    let Event::Receive(message) = *rejected.event else {
+                        panic!()
+                    };
+                    network.push_back(message);
+                }
+                Err(e) => panic!("unexpected network rejection: {e:?}"),
+            }
+        }
+        if !progress {
+            if network.is_empty()
+                && nodes
+                    .iter()
+                    .all(|n| n.worker.is_drained() && n.pending.is_empty())
+            {
+                return;
+            }
+            // ThreadWake can coalesce notifications; the bounded poll is the
+            // authority. Host replacements also make progress on the next poll.
+            std::thread::park_timeout(std::time::Duration::from_millis(1));
+        }
+    }
+}
+fn propose(operation: u128, delta: i64) -> Event {
+    Event::Propose {
+        operation: OperationId::new(operation).unwrap(),
+        bytes: delta.to_le_bytes().to_vec(),
+    }
+}
+fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
+    for g in 1..=100 {
+        nodes[0].shard.admit(group(g), Event::Campaign).unwrap();
+    }
+    worker_pump(nodes, None);
+    assert_eq!(nodes[0].largest_batch, 100);
+    for node in nodes.iter() {
+        for g in 1..=100 {
+            assert_eq!(node.shard.core(group(g)).unwrap().state().commit_index, 1);
+        }
+    }
+    nodes[0].hold = true;
+    for g in 1..=100 {
+        nodes[0].shard.admit(group(g), propose(1, 7)).unwrap();
+    }
+    worker_pump(nodes, None);
+    assert!(nodes[0].held.is_some());
+    assert_eq!(nodes[0].apps[&group(1)].read_applied(1), Ok(0));
+    for node in nodes.iter() {
+        for g in 2..=100 {
+            assert_eq!(node.apps[&group(g)].read_applied(2), Ok(7));
+        }
+    }
+    let mut admitted = 0;
+    while nodes[0].shard.admit(group(1), propose(1, 7)).is_ok() {
+        admitted += 1;
+        assert!(admitted < 6);
+    }
+    assert!(admitted > 0);
+    nodes[0].shard.admit(group(1), Event::Heartbeat).unwrap();
+    nodes[0]
+        .shard
+        .admit(
+            group(100),
+            Event::Read {
+                request: ReadRequestId::new(1).unwrap(),
+            },
+        )
+        .unwrap();
+    worker_pump(nodes, None);
+    assert_eq!(nodes[0].reads, [7]);
+    nodes[0].hold = false;
+    let event = nodes[0].held.take().unwrap();
+    nodes[0].deliver(event);
+    worker_pump(nodes, None);
+    for g in 1..=100 {
+        nodes[0].shard.admit(group(g), propose(1, 7)).unwrap();
+    }
+    worker_pump(nodes, None);
+    for g in 1..=100 {
+        nodes[0].shard.admit(group(g), propose(2, 3)).unwrap();
+    }
+    worker_pump(nodes, None);
+    for node in nodes.iter() {
+        node.values(10);
+        assert!(node
+            .results
+            .iter()
+            .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7)));
+    }
+    for g in 1..=100 {
+        nodes[0]
+            .shard
+            .admit(
+                group(g),
+                Event::Read {
+                    request: ReadRequestId::new(2).unwrap(),
+                },
+            )
+            .unwrap();
+    }
+    worker_pump(nodes, None);
+    assert_eq!(nodes[0].reads.len(), 101);
+    assert!(nodes[0].reads[1..].iter().all(|v| *v == 10));
+    // An isolated old leader cannot complete a fresh read. The other two
+    // workers continue and elect a new leader without sharing a storage lane.
+    nodes[0]
+        .shard
+        .admit(
+            group(100),
+            Event::Read {
+                request: ReadRequestId::new(3).unwrap(),
+            },
+        )
+        .unwrap();
+    for g in 1..=100 {
+        nodes[1].shard.admit(group(g), Event::Campaign).unwrap();
+    }
+    worker_pump(nodes, Some(node(1)));
+    for g in 1..=100 {
+        nodes[1].shard.admit(group(g), propose(3, 5)).unwrap();
+    }
+    worker_pump(nodes, Some(node(1)));
+    assert_eq!(nodes[0].reads.len(), 101);
+    nodes[0].values(10);
+    nodes[1].values(15);
+    nodes[2].values(15);
+    for g in 1..=100 {
+        nodes[1].shard.admit(group(g), Event::Heartbeat).unwrap();
+    }
+    worker_pump(nodes, None);
+    for node in nodes.iter() {
+        node.values(15);
+        assert!(node.shard.is_drained());
+    }
+    // Close one instance sharing the same wake resource. The surviving quorum
+    // must still persist, apply and serve a fresh read.
+    nodes[0].shard.close_admission();
+    nodes[0].worker.close();
+    nodes[1].shard.admit(group(100), propose(4, 1)).unwrap();
+    worker_pump(nodes, Some(node(1)));
+    nodes[1]
+        .shard
+        .admit(
+            group(100),
+            Event::Read {
+                request: ReadRequestId::new(1).unwrap(),
+            },
+        )
+        .unwrap();
+    worker_pump(nodes, Some(node(1)));
+    assert_eq!(nodes[1].reads, [16]);
+    assert!(nodes
+        .iter()
+        .all(|n| n.worker.is_drained() && n.pending.is_empty()));
+}
+
+#[test]
+fn public_host_workers_replicate_read_retry_replace_leader_and_close_independently() {
+    let mut nodes = (1..=3)
+        .map(|id| WorkerNode::new(id, HostLogStore::new(id as u128), true, HostWorker::new))
+        .collect::<Vec<_>>();
+    worker_cluster_history(&mut nodes);
+}
+
 #[cfg(feature = "native")]
 mod native {
     use super::*;
@@ -329,6 +712,188 @@ mod native {
                 }
             }
         }
+    }
+    #[test]
+    fn three_native_wal_workers_replicate_and_recover_acknowledged_operations() {
+        let root =
+            std::env::temp_dir().join(format!("voteboat-worker-cluster-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let wake = Arc::new(ThreadWake::current());
+        let mut nodes = (1..=3)
+            .map(|id| {
+                let store = NativeLogStore::create(
+                    FileLogIo::create(root.join(id.to_string())).unwrap(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap();
+                WorkerNode::new(id, store, true, |store| {
+                    NativeLogWorker::spawn(
+                        store,
+                        StorageWorkerGeneration::new(1).unwrap(),
+                        WorkerLimits::default(),
+                        wake.clone(),
+                    )
+                    .unwrap()
+                })
+            })
+            .collect::<Vec<_>>();
+        let old_bindings = nodes
+            .iter()
+            .map(|n| n.worker.binding().store)
+            .collect::<Vec<_>>();
+        worker_cluster_history(&mut nodes);
+        for node in &mut nodes {
+            node.shard.close_admission();
+            drop(reclaim(&mut node.worker).unwrap());
+        }
+        drop(nodes);
+        let mut nodes = (1..=3)
+            .map(|id| {
+                let store = NativeLogStore::recover(
+                    FileLogIo::open(root.join(id.to_string())).unwrap(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap();
+                assert_ne!(store.binding(), old_bindings[id as usize - 1]);
+                WorkerNode::new(id, store, false, |store| {
+                    NativeLogWorker::spawn(
+                        store,
+                        StorageWorkerGeneration::new(1).unwrap(),
+                        WorkerLimits::default(),
+                        wake.clone(),
+                    )
+                    .unwrap()
+                })
+            })
+            .collect::<Vec<_>>();
+        // The explicitly stopped follower missed operation 4; both surviving
+        // durable voters recover its success before the follower catches up.
+        for (id, node) in nodes.iter().enumerate() {
+            for g in 1..=100 {
+                let app = &node.apps[&group(g)];
+                assert_eq!(
+                    app.read_applied(app.applied_index()),
+                    Ok(if g == 100 && id != 0 { 16 } else { 15 })
+                );
+            }
+        }
+        for g in 1..=100 {
+            nodes[1].shard.admit(group(g), Event::Campaign).unwrap();
+        }
+        worker_pump(&mut nodes, None);
+        for operation in [1, 3, 5] {
+            let delta = match operation {
+                1 => 7,
+                3 => 5,
+                _ => 4,
+            };
+            for g in 1..=100 {
+                nodes[1]
+                    .shard
+                    .admit(group(g), propose(operation, delta))
+                    .unwrap();
+            }
+            worker_pump(&mut nodes, None);
+        }
+        for g in 1..=100 {
+            nodes[1]
+                .shard
+                .admit(
+                    group(g),
+                    Event::Read {
+                        request: ReadRequestId::new(1).unwrap(),
+                    },
+                )
+                .unwrap();
+        }
+        worker_pump(&mut nodes, None);
+        assert_eq!(nodes[1].reads.len(), 100);
+        assert_eq!(nodes[1].reads.iter().filter(|v| **v == 20).count(), 1);
+        assert_eq!(nodes[1].reads.iter().filter(|v| **v == 19).count(), 99);
+        for node in &mut nodes {
+            assert!(node
+                .results
+                .iter()
+                .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(7)));
+            assert!(node
+                .results
+                .iter()
+                .any(|r| r.duplicate && r.outcome == CounterOutcome::Value(15)));
+            for g in 1..=100 {
+                let app = &node.apps[&group(g)];
+                assert_eq!(
+                    app.read_applied(app.applied_index()),
+                    Ok(if g == 100 { 20 } else { 19 })
+                );
+            }
+            node.shard.close_admission();
+            drop(reclaim(&mut node.worker).unwrap());
+        }
+        drop(nodes);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn automatic_timers_submit_and_receive_through_the_timed_worker_helpers() {
+        use voteboat::native::runtime::{DeadlineQueue, JitterEntropy};
+        let mut store = HostLogStore::new(1);
+        let shard = shard(&mut store, 2);
+        let timers = DeadlineQueue::new(owner(store.binding()), 100).unwrap();
+        let mut timed = TimedShard::new(
+            shard,
+            timers,
+            JitterEntropy::new(7),
+            TimerConfig::default(),
+            MonoTime(0),
+        )
+        .unwrap();
+        let mut worker = NativeLogWorker::spawn(
+            store,
+            StorageWorkerGeneration::new(1).unwrap(),
+            WorkerLimits::default(),
+            Arc::new(ThreadWake::current()),
+        )
+        .unwrap();
+        let now = MonoTime(300);
+        let mut units = vec![];
+        while let Some(visit) = timed.poll(now).unwrap() {
+            let effects = timed
+                .step_next(visit, now)
+                .unwrap()
+                .unwrap()
+                .result
+                .unwrap();
+            let [Effect::Persist(update)] = effects.as_slice() else {
+                panic!()
+            };
+            units.push(PersistUnit {
+                visit,
+                update: update.clone(),
+            });
+        }
+        assert_eq!(units.len(), 2);
+        submit_for_timed(&mut timed, &mut worker, units, now).unwrap();
+        let written = event(&mut worker);
+        assert!(apply_to_timed(&mut timed, written, now).iter().all(|d| d
+            .result
+            .as_ref()
+            .unwrap()
+            .is_empty()));
+        assert!(timed.poll(MonoTime(301)).unwrap().is_none());
+        let durable = event(&mut worker);
+        let deliveries = apply_to_timed(&mut timed, durable, MonoTime(301));
+        assert_eq!(deliveries.len(), 2);
+        for delivery in deliveries {
+            assert_eq!(delivery.result.unwrap().len(), 2);
+            timed.finish(delivery.visit).unwrap();
+        }
+        assert!(timed.is_drained());
+        assert!(timed.poll(MonoTime(302)).unwrap().is_none());
+        timed.close_admission().unwrap();
+        drop(reclaim(&mut worker).unwrap());
     }
     #[derive(Default)]
     struct Gate {

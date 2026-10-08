@@ -743,6 +743,54 @@ snapshot work, outbound admission and authenticated transport remain pending.
 Current snapshot helpers require quiescent synchronous store access. macOS and
 hardware power-cut execution remain outstanding; P0–P7 remains active.
 
+## Slice 9: three-node asynchronous worker integration
+
+The end-to-end public assembly now drives three independent WAL workers from
+three shard owners, with 100 groups per node. Once a store moves to its worker,
+the driver has no synchronous log access. Each owner batches exact persistence
+effects, retries rejected admission with the returned owned units, processes
+written and durable stages separately, and applies only committed entries.
+The same history runs against a manually progressed host worker with native
+features disabled and against three native worker threads with actual WAL files.
+
+The integration driver explicitly bounds its pending units, network retention,
+per-poll visits, application receipts and read results. It retains one deferred
+durable completion for an intentionally stalled group. That group retains its
+active input credits while 99 unrelated groups continue. Rejected network
+ingress remains in a bounded deferred queue, and duplicate delivery exercises
+request correlation. These are test-driver budgets; a production outbound
+admission/transport provider is still required.
+
+### Slice 9 validation
+
+Linux, Rust 1.98.1, 8 October 2026:
+
+- Native suite: 107 tests pass; core/host-only suite: 49 tests pass. Both builds
+  pass Clippy with warnings denied; formatting passes. No production API changed.
+  The actual-file asynchronous cluster history also passes 20 repeated runs.
+- Both provider histories elect 100 leaders through durable votes, replicate
+  commands, preserve original retry outcomes, and serve fresh quorum reads.
+  Group-local saturation and a delayed durable owner delivery leave another
+  group's read and committed writes runnable.
+- Partitioning the original leader prevents its fresh read from completing.
+  The surviving two workers elect a replacement and commit new operations;
+  healing catches the former leader up. Closing one instance leaves the other
+  two working, including when all native workers share the same injected wake.
+- Closing and reclaiming all three stores, reopening actual files and replaying
+  committed entries preserves acknowledged results and fresh store sessions.
+  The stopped follower initially lacks the final operation; the durable voters
+  retain it and bring the follower up to date after restart. Original retries
+  still return 7 and 15, and a new command advances each recovered value once.
+- A focused native integration test drives automatic campaign deadlines through
+  `submit_for_timed`/`apply_to_timed`, preserving the written/durable distinction
+  and owner timer bookkeeping.
+
+This history uses an ordinary three-voter majority and an in-process bounded
+test transport. It does not establish native socket security, asynchronous
+snapshot installation, full recursive-policy integration, power-cut behavior,
+production performance or macOS execution. Existing recursive quorum and crash
+histories remain separate evidence. The full P0–P7 goal remains active.
+
 ## Next slice
 
 Add bounded output admission, wire

@@ -245,7 +245,7 @@
       "operations": ["binding", "limits", "usage", "submit", "poll", "close", "is_drained"],
       "native": "NativeLogWorker<L: LogStore + Send>",
       "conformance": ["tests/worker.rs"],
-      "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store."
+      "scope": "Explicit owned batches, separate written/durable stages, one pending transition per group, bounded request/unit/capacity-byte retention with control reserves and terminal-delivery credit release. The selected store remains authoritative; cores stay on their owner. Native close drains accepted work and try_reclaim returns the store. Three-node/100-group integration covers replication, read barriers, retries, leader replacement and actual-file restart."
     },
     {
       "design_id": "C10",
