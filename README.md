@@ -102,8 +102,10 @@ and pending outbox instructions. It supplies the data path for P6; ownership
 fencing, publication and activation remain separate lifecycle work.
 
 The [durable transfer intent journal](docs/TRANSFER_INTENTS.md) records proposed
-splits/merges and reserves local targets across recovery. Source fencing, import
-and activation remain pending.
+splits/merges and reserves local targets across recovery. The optional
+[source guard](docs/SOURCE_FENCING.md) now commits a fence and preserves exports
+at its exact boundary. Target staging/import, publication and activation remain
+pending.
 
 ## Run
 

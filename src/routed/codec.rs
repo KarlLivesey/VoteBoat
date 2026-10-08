@@ -16,7 +16,7 @@
 use super::*;
 
 pub(super) const DATA_HEADER: usize = 125;
-pub(super) enum Command<'a> {
+pub(crate) enum Command<'a> {
     Bootstrap(&'a [u8]),
     Data {
         hint: RouteHint,
@@ -25,7 +25,7 @@ pub(super) enum Command<'a> {
     },
     Fence(OwnershipEpoch),
 }
-pub(super) fn decode(bytes: &[u8], max_payload: usize) -> Result<Command<'_>, ApplicationError> {
+pub(crate) fn decode(bytes: &[u8], max_payload: usize) -> Result<Command<'_>, ApplicationError> {
     if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
         return Err(ApplicationError::InvalidCommand);
     }

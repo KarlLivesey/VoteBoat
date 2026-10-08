@@ -15,7 +15,7 @@
 //! Bounded application data movement. Images do not certify ownership or durability.
 use crate::{application::*, routing::*};
 
-pub const SCOPE_APPLICATION_CONTRACT_VERSION: u32 = 1;
+pub const SCOPE_APPLICATION_CONTRACT_VERSION: u32 = 2;
 pub const MAX_SCOPE_IMAGE_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_SCOPE_IMPORTS: usize = 256;
 
@@ -66,6 +66,10 @@ impl ScopeImage {
     pub fn source_applied(&self) -> u64 {
         self.source_applied
     }
+    /// Retained provider payload capacity, excluding this fixed image value.
+    pub fn payload_capacity(&self) -> usize {
+        self.bytes.capacity()
+    }
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
     }
@@ -87,6 +91,10 @@ pub trait ScopeStateMachine: CheckpointStateMachine {
     fn scheme(&self) -> PartitionScheme;
     /// Exact application key, for checking a routed envelope against its payload.
     fn command_key<'a>(&self, command: &'a [u8]) -> Result<&'a [u8], ApplicationError>;
+    /// Configured lifetime upper bound on exported payload capacity for this range.
+    /// Must cover future writes and noops, not just current serialized data.
+    /// A provider changing this bound after bootstrap violates the contract.
+    fn export_scope_bound(&self, scope: BucketRange) -> Result<usize, ApplicationError>;
     fn export_scope(
         &self,
         scope: BucketRange,

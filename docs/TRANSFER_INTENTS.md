@@ -67,8 +67,10 @@ Checkpoint publication and WAL recovery use existing store bindings and durabili
 tokens. No new consensus effect, watermark, generation source or storage format
 is introduced.
 
-There is currently no cancellation, unlock, source-fence receipt, import receipt,
-ownership publication or activation command. Do not begin an operational transfer
+The [source fence wrapper](SOURCE_FENCING.md) now commits an intent-bound fence
+and preserves immutable exports at its exact boundary. Directory orchestration
+still has no cancellation/unlock, foreign fence/import receipt, ownership
+publication or activation command. Do not begin an operational transfer
 expecting this intent-only slice to finish it. Forward recovery, retained lineage,
 recursive coordination and no-dual-owner histories remain the P6 completion gate.
 

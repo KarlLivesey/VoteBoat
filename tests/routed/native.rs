@@ -626,3 +626,145 @@ fn quic_child_writes_checkpoint_and_restart_without_parent_commits() {
         parent_independence(NativePeerProtocol::Quic, compact);
     }
 }
+
+#[path = "../transfer_source/fixtures.rs"]
+mod source_fixture;
+fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
+    use voteboat::{bucket_counter::*, scope::*, transfer_source::*};
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-source-freeze-{}-{protocol:?}-{compact}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let mut nodes = open(
+        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        source_fixture::fresh,
+    );
+    campaign(&mut nodes, &clock, 20);
+    propose(
+        &mut nodes,
+        &clock,
+        20,
+        100,
+        source_fixture::fresh().bootstrap_command(100000).unwrap(),
+    );
+    propose(&mut nodes, &clock, 20, 1, source_fixture::data(1, 7));
+    propose(&mut nodes, &clock, 20, 2, source_fixture::data(200, 11));
+    // Discard the client observation; recover from committed application state.
+    let _ = propose(&mut nodes, &clock, 20, 200, source_fixture::freeze());
+    let original_fence = nodes[0].local().applications[&group(20)].fence().unwrap();
+    let original_image = nodes[0].local().applications[&group(20)]
+        .export_target(group(21), 65536)
+        .unwrap();
+    assert_eq!(original_image.source_applied(), original_fence.index);
+    if compact {
+        for node in &mut nodes {
+            node.control(group(20), NodeControl::Checkpoint).unwrap();
+        }
+        drive(&mut nodes, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local()
+                    .owner
+                    .core(group(20))
+                    .unwrap()
+                    .state()
+                    .base_index()
+                    == n.local().applications[&group(20)].applied_index()
+            })
+        });
+    }
+    close(nodes, &clock, 20, || {});
+    let mut nodes = open(
+        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        source_fixture::fresh,
+    );
+    campaign(&mut nodes, &clock, 20);
+    let retry = propose(&mut nodes, &clock, 20, 200, source_fixture::freeze());
+    assert_eq!(retry.outcome, RoutedOutcome::Fenced(original_fence));
+    assert_eq!(
+        read(
+            &mut nodes,
+            &clock,
+            20,
+            SourceQuery::Data(RoutedQuery {
+                hint: source_fixture::hint(1),
+                key: vec![1],
+                query: vec![1]
+            })
+        ),
+        SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+    assert_eq!(
+        read(&mut nodes, &clock, 20, SourceQuery::Freeze),
+        SourceRead::Freeze(Some(SourceFreezeStatus {
+            fence: original_fence,
+            intent: source_fixture::intent()
+        }))
+    );
+    for n in &nodes {
+        let source = &n.local().applications[&group(20)];
+        assert!(source.applied_index() > original_fence.index);
+        assert_eq!(source.routed().applied_index(), original_fence.index);
+        assert_eq!(
+            source.export_target(group(21), 65536).unwrap(),
+            original_image
+        );
+        assert_eq!(source.routed().application().value(&[1]), Ok(7));
+        assert_eq!(source.routed().application().value(&[200]), Ok(11));
+    }
+    let mut target = BucketCounter::new(
+        source_fixture::range(0, 128),
+        source_fixture::Policy,
+        source_fixture::bucket_limits(),
+    )
+    .unwrap();
+    target.import_scopes(&[original_image], 1).unwrap();
+    assert_eq!(target.value(&[1]), Ok(7));
+    assert_eq!(target.outbox().count(), 1);
+    let bytes = encode_add(&[1], 7, b"effect", 1024).unwrap();
+    assert!(
+        target
+            .apply_batch(&[source_fixture::entry(2, 1, bytes)])
+            .unwrap()[0]
+            .duplicate
+    );
+    // Target import above is local adapter evidence, not a committed activation.
+    close(nodes, &clock, 20, || {});
+    let nodes = open(
+        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        source_fixture::fresh,
+    );
+    for n in &nodes {
+        assert_eq!(
+            n.local().applications[&group(20)].fence(),
+            Some(original_fence)
+        );
+    }
+    close(nodes, &clock, 20, || {});
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_transfer_source_freeze_survives_wal_reopen_and_lost_observation() {
+    source_freeze_recovery(NativePeerProtocol::TcpTls, false);
+}
+#[test]
+fn tcp_transfer_source_freeze_survives_checkpoint_and_later_log_progress() {
+    source_freeze_recovery(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_transfer_source_freeze_survives_wal_reopen_and_lost_observation() {
+    source_freeze_recovery(NativePeerProtocol::Quic, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_transfer_source_freeze_survives_checkpoint_and_later_log_progress() {
+    source_freeze_recovery(NativePeerProtocol::Quic, true);
+}

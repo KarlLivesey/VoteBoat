@@ -1560,3 +1560,34 @@ coordination, lifecycle cancellation/resumption, data publication/activation and
 full no-dual-owner histories remain pending under P6. Old implementations reject
 the new application command; no mixed-version deployment is validated. Full P0–P7
 remains active, including macOS/separate-host evidence; P8 is deferred.
+
+## Slice 86 — source freeze recovery over native TCP and QUIC
+
+Seven new source conformance tests validate exact intent binding, irreversible
+fence, immutable F-state while the wrapper applied prefix advances, same-batch
+ordering, original data/retry/outbox after adapter import, provider lifetime export
+bounds, envelope/payload key matching, original construction resources, every
+freeze/checkpoint truncation, atomic refusal, pending ceilings and status/read
+capacity accounting. Source status and ordinary data rejection are distinct query
+results; the latter never serves old-epoch data after the fence.
+
+Four three-node native histories use actual TCP/TLS or QUIC and durable files,
+with WAL-only or checkpoint/compaction recovery. They discard the initial success
+observation, reopen, elect, retry the original operation, verify original fence
+and byte-identical exports despite later log progress, perform quorum-backed
+status/data queries, and reopen again. Exported target data retains original
+counter result and outbox after local adapter import. This is selected source-side
+network/recovery evidence. It does not establish committed target import/readiness,
+metadata publication, activation, no-dual-owner transfer completion or power-loss
+behavior. Existing storage-fault/core evidence is complementary.
+
+All-feature core 57 + directory 22 + scopes 8 + routed 14 + source 7 = 108 tests
+pass. Core-only library 48 + scopes 7 + source 7 = 62 pass. All-target/all-feature
+Clippy with warnings denied, formatting, diff and inventory shape/path checks pass;
+inventory now has 67 contracts. Compile/test-harness mistakes (range Result mapping
+and core state accessor) and a test clone style warning were fixed before passing.
+No new consensus effect, persistence token, transport/WAL format or dependency is
+introduced. Scope capability version 2 adds an explicit provider lifetime bound;
+new source application formats are separately documented. P6 target/import/
+publication/activation, recursive lifecycle and full P0–P7 remain active; macOS/
+separate-host operational evidence remains outstanding and P8 is deferred.

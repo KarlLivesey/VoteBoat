@@ -20,7 +20,7 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     mem::size_of,
 };
-mod codec;
+pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 pub use codec::{encode_fence, encode_routed};
 

@@ -488,6 +488,12 @@ impl<P: PartitionPolicy + Clone> ScopeStateMachine for BucketCounter<P> {
     fn command_key<'a>(&self, bytes: &'a [u8]) -> Result<&'a [u8], ApplicationError> {
         Ok(command(bytes)?.key)
     }
+    fn export_scope_bound(&self, scope: BucketRange) -> Result<usize, ApplicationError> {
+        if scope.start() < self.scope.start() || scope.end() > self.scope.end() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        self.limits.checkpoint_bound()
+    }
     fn export_scope(
         &self,
         scope: BucketRange,

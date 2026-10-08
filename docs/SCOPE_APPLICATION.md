@@ -6,7 +6,11 @@ is the first native provider: one independent signed counter per logical bucket,
 with a host-selected deterministic partition policy. The original global Counter
 remains indivisible. No threads, sockets, file owners or dependencies are added.
 
-The contract is version 1. Scope images carry provider schema, partition scheme,
+The contract is version 2. Providers declare `export_scope_bound(range)`, a
+configured lifetime upper bound on exported payload capacity, stable under future
+writes/noops. Source fencing uses it to refuse oversized layouts before the cut.
+The native counter conservatively uses its whole configured checkpoint bound
+for each subrange. Existing image formats are unchanged. Scope images carry provider schema, partition scheme,
 half-open bucket range, source applied boundary and immutable bounded bytes. They
 are data containers, not ownership credentials, source-fence receipts or target
 readiness. Constructor rejection returns the original image buffer; counter

@@ -15,7 +15,7 @@ record claims that unimplemented phases already work.
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; fence/import/publication/activation remain pending |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; target import/publication/activation remain pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -97,7 +97,7 @@ The full P0–P7 objective and outstanding scope ledger remain unchanged.
    routed application and tested P4 placement path with a genuinely splittable
    application adapter. Slice 84 supplies the public scope seam and native
    per-bucket counter with transferable retry results/outbox; ownership transfer
-   remains pending. Slice 85 records bounded durable intents and local target reservations without changing ownership. Next commit source fencing and non-serving target imports, then verify publication/activation. Sketch bounded export/import records, source fencing,
+   remains pending. Slice 85 records bounded durable intents and local target reservations without changing ownership. Slice 86 adds intent-bound source fencing, immutable exports and quorum-readable status. Next establish non-serving target bootstrap and committed imports, then verify publication/activation. Sketch bounded export/import records, source fencing,
    metadata publication and activation before editing. Preserve application data,
    operation results/digests, outbox and lineage. Completion requires actual
    source/target/directory recovery across interrupted stages and lost receipts,
@@ -4777,3 +4777,84 @@ publication and activation with interrupted-stage/no-dual-owner histories. Compa
 merge/retry lineage follows the completed split, then P7 measured tuning. Full P0–P7,
 recursive lifecycle, macOS/separate-host validation and other scope-ledger gaps stay
 active; P8 remains deferred. Static service use remains independent of these gates.
+
+### Slice 86 mini schema — source fence/export (in progress)
+
+Purpose: make the source half of the first split recoverable, binding the durable
+intent to an exact fence and immutable scope exports. Reuse RoutedApplication's
+ownership guard, semantic history, local fence and provider seams. Add a source
+wrapper with replicated bootstrap-bound export budget, freeze command containing
+the exact intent, and checkpoint retaining the frozen intent plus routed state.
+Before freeze, command envelope keys must equal the scope provider payload keys.
+At freeze F the routed state stops advancing; wrapper applied progress continues
+for later noops/rejections/retries. Export always reads that immutable F state.
+A provider lifetime export bound must make aggregate target images fit before
+fencing; no hidden disk owner or new durability token is introduced. Constructor
+and failed batch/restore preserve owned inputs/state. Scope export capability is
+versioned explicitly. Tests must cover same-batch data/freeze/later data, lost
+observation, exact replay/checkpoint restoration, outbox/retry preservation,
+changed intent/budget refusal, every truncation, and key mismatch.
+
+Next: non-serving target bootstrap and committed import retaining exact source
+identity/fence/intent/content. Following: verified metadata publication and durable
+activation, with interrupted-stage and no-dual-owner histories. Together these
+advance P6's usable split; merge follows, then P7. This source slice alone is not
+end-to-end transfer evidence and does not satisfy the full P0–P7 objective.
+
+## Slice 86 — intent-bound source fence and exact-boundary exports
+
+Implemented the mini schema above as public TransferSource<A,P>, using the same
+application/read/checkpoint/provider contracts and native Node assembly. Bootstrap
+binds the export budget and exact routed context. Scope contract version 2 adds
+provider lifetime export bounds; native BucketCounter and downstream HostScope
+implement them without a provider-format change. Aggregate target bounds are
+checked before fencing. Envelope and semantic payload keys must agree. Raw routed
+bootstrap/fence bypasses are refused. Rejected construction returns the original
+routed application; failed apply/restore preserves live state.
+
+Committed freeze projects to the existing local routed fence at F and retains the
+exact intent. Routed data remains immutable at F, while the wrapper's contiguous
+applied prefix advances through later log entries. This is deliberately distinct
+from transferring the source index into a target's log. Export metadata/capacity
+is checked against provider declarations. Exact retries retain the first fence;
+competing intents cannot replace it. SourceQuery::Freeze supports original status
+recovery through the existing quorum read barrier; structs/local diagnostics alone
+are not foreign quorum certificates. Trusted host authorization still verifies
+foreign intent provenance and target non-serving staging/capacity before proposing
+a cut. There is no orchestration or target activation in this slice.
+
+New application formats are VBSROWN1 (bootstrap), VBSFREE1 (intent-bound freeze)
+and VBSRC001 (schema-1 wrapper checkpoint). Checkpoints retain outer progress,
+export budget, inner F, intent and routed checkpoint. Restore verifies exact
+binding and fence/intent/boundary agreement. This new wrapper is not an automatic
+migration of an existing P5 checkpoint. No core/WAL/wire format, effect, persistence
+token, worker, file owner, dependency or route generation changes. Pending
+simulation is bounded at 8192 commands, checks byte ceilings before copying and
+uses bounded cloned state; no performance claim is made.
+
+Seven downstream tests cover same-batch bootstrap/data/freeze/later data, immutable
+exports despite advancing progress, checkpoint and log replay, original retry/
+outbox after adapter import, unbound commands/key mismatch, budget/binding refusal,
+every freeze/checkpoint truncation, atomic rejection, construction return, pending
+capacity and status/result bounds. Four actual native three-node histories cover
+TCP/TLS and QUIC, each WAL-only and checkpoint recovery, discarded observations,
+re-election, exact freeze retries/exports, quorum data/status reads and second
+reopen. Target import in these histories is local adapter validation only. Graceful
+shutdown/reopen is not modeled power loss; these finite schedules do not prove
+whole distributed transfer or target readiness. See docs/SOURCE_FENCING.md.
+
+Validation: all-feature library 57, directory 22, scopes 8, routed 14 and source 7
+pass (108 tests). Core-only library 48, scopes 7 and source 7 pass (62 tests).
+All-target/all-feature Clippy with warnings denied passes. Initial compilation
+identified Result versus Option handling for BucketRange and use of a nonexistent
+Raft log accessor in the new test; corrected to checked Result mapping and the
+existing state/base-index API. Clippy requested slice::from_ref for a test import;
+fixed before the passing run. Formatting, inventory and diff checks pass; inventory
+now has 67 contracts. Existing application formats/versions remain separately named.
+
+P6 remains current: implement non-serving targets and committed recoverable imports
+with exact source identity/F/epoch/operation/scope/content and lifecycle lineage.
+Then verify all source/target evidence before metadata publication and durable
+activation, including interrupted-stage/no-dual-owner histories. Compatible merge
+and P7 follow. Recursive lifecycle, broader fault/macOS/separate-host evidence and
+full P0–P7 remain unfinished; P8 stays deferred. Static service use remains available.

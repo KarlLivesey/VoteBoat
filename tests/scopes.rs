@@ -402,6 +402,12 @@ impl ScopeStateMachine for HostScope {
     fn command_key<'a>(&self, command: &'a [u8]) -> Result<&'a [u8], ApplicationError> {
         self.0.command_key(command)
     }
+    fn export_scope_bound(&self, scope: BucketRange) -> Result<usize, ApplicationError> {
+        self.0
+            .export_scope_bound(scope)?
+            .checked_add(4)
+            .ok_or(ApplicationError::InvalidCheckpoint)
+    }
     fn export_scope(
         &self,
         scope: BucketRange,
