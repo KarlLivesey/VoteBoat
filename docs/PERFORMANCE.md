@@ -67,11 +67,58 @@ The Counter retains lifetime deduplication state, so operation count changes bot
 history size and workload cost. Compare equal counts/configuration with repeated
 runs, fixed p99 budgets and full failure/error reporting before accepting tuning.
 
+## Shared Multi-Raft comparison
+
+An optional fifth argument selects a benchmark assembly using the public
+`NativeNode::from_parts` contracts with 1–32 groups. For example:
+
+```sh
+./target/release/examples/native_benchmark target/benchmark-runs/tcp-shared-one tcp 256 8 1
+./target/release/examples/native_benchmark target/benchmark-runs/tcp-shared-eight tcp 256 8 8
+```
+
+Use the optional argument for both sides of a comparison: omitting it selects
+the existing one-group NativeStartup convenience API. Each shared replica has
+one authoritative WAL/worker, one snapshot worker and one peer endpoint, plus one
+TCP dial worker when using TCP. Snapshot handles and application/core state are
+per group. Group count does not multiply endpoints or workers. Default resource
+limits stay unchanged. The shared comparison explicitly selects 50 ms heartbeats
+and 10000–19999 ms elections on both sides: initial trials at 1000–1999 ms lost
+leadership under the measured storage latency. The four-argument startup mode
+retains 1000–1999 ms elections. These settings trade failure detection speed for
+headroom in this throughput experiment; they do not change service defaults.
+
+Global operation IDs route round-robin across groups. The global window remains
+bounded by WINDOW; each group is additionally bounded by ceil(WINDOW/GROUPS).
+The dispatcher waits when the next round-robin group has reached that bound;
+it does not skip slow groups. Thus WINDOW=8 gives one group eight outstanding
+requests, or eight groups at most one each. Each group uses the same lifetime
+Counter capacity (total measured count plus 64 warm-up operations). Workloads
+whose per-group history plus a 64-entry control reserve exceed the default log
+capacity are rejected before creating the run directory.
+
+Requests route to the observed leader of their concrete group; the core still
+checks proposal/read authority. Summary `leader_placement` records group:node
+pairs at the start of measurement, not a guarantee against later elections.
+CSV adds a `group` column. Applied positions and recovery boundaries are checked
+separately per group. `recovered_value` is the sum across groups; every replica
+and each group's quorum read must match its round-robin partition of that sum.
+Original first/last retries return their own group's historical outcomes.
+All successful runs retain the full shutdown/reopen/retry/final-join gates.
+
+This measures partitioned useful operations sharing local resources. It does not
+measure a single group's acceleration, cross-group transactions or independent
+machine failure domains. Record actual leader placement and compare equal total
+operation counts, windows and resources when interpreting results.
+The [slice-101 baseline](../validation/performance/slice101/README.md) records the
+controlled TCP/QUIC comparison and its limitations: eight groups are slower in
+this workload, so it supplies no scaling-improvement claim.
+
 Keep raw samples, git revision plus harness hash, compiler/build flags and lockfile,
 CPU/core allocation, memory, kernel, filesystem/mount options, device/firmware and
 network topology with results. Linux results are in
 [the slice-99 evidence](../validation/performance/slice99/README.md). macOS execution,
-open-loop load, shared multi-group scaling, maintenance/recovery load and attributable
+open-loop load, broader shared multi-group scaling, maintenance/recovery load and attributable
 batching/lane improvements remain required P7 work. No consensus protocol, default timer value or release performance threshold
 changed. The native startup API now exposes the existing TimerConfig capability
 so embeddings can declare timing appropriate to their deployment.

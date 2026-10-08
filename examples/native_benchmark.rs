@@ -37,6 +37,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "benchmark/shared.rs"]
+mod shared;
 type Failure = Box<dyn std::error::Error>;
 type Replica = NativeNode<Counter, NativeServiceConnector>;
 const WARMUP: usize = 64;
@@ -47,8 +49,11 @@ fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }
 fn group() -> GroupIdentity {
+    group_id(1)
+}
+fn group_id(n: usize) -> GroupIdentity {
     GroupIdentity {
-        id: GroupId::new(1).unwrap(),
+        id: GroupId::new(n as u128).unwrap(),
         incarnation: GroupIncarnation::new(1).unwrap(),
     }
 }
@@ -219,25 +224,42 @@ fn until(
         std::thread::park_timeout(Duration::from_micros(100));
     }
 }
-fn campaign(replicas: &mut [Replica], clock: &Instant) -> Result<(), Failure> {
-    checked(replicas[0].control(group(), NodeControl::Campaign))?;
-    let mut leader = None;
-    until(replicas, clock, |ns| {
-        leader = ns.iter().position(|n| {
-            let core = n.local().owner.core(group()).unwrap();
+fn leader(replicas: &[Replica], group: GroupIdentity) -> Result<usize, Failure> {
+    replicas
+        .iter()
+        .position(|n| {
+            let core = n.local().owner.core(group).unwrap();
             core.role() == voteboat::raft::Role::Leader
                 && core.state().term_at(core.state().commit_index)
                     == Some(core.state().hard_state.term)
-                && ns.iter().all(|r| {
-                    r.local().applications[&group()].applied_index() == core.state().commit_index
+        })
+        .ok_or_else(|| format!("no ready leader for group {}", group.id.get()).into())
+}
+fn campaign(replicas: &mut [Replica], clock: &Instant, groups: usize) -> Result<(), Failure> {
+    for g in 1..=groups {
+        // Leave an existing leader alone; reopening may already have elected one.
+        if leader(replicas, group_id(g)).is_err() {
+            checked(replicas[0].control(group_id(g), NodeControl::Campaign))?;
+        }
+    }
+    until(replicas, clock, |ns| {
+        Ok((1..=groups).all(|g| {
+            let group = group_id(g);
+            leader(ns, group).is_ok_and(|i| {
+                let core = ns[i].local().owner.core(group).unwrap();
+                ns.iter().all(|r| {
+                    r.local().applications[&group].applied_index() == core.state().commit_index
                 })
-        });
-        Ok(leader.is_some())
+            })
+        }))
     })?;
-    replicas.swap(0, leader.unwrap());
     Ok(())
 }
+fn operation_group(operation: usize, groups: usize) -> GroupIdentity {
+    group_id((operation - 1) % groups + 1)
+}
 struct Sample {
+    group: GroupIdentity,
     operation: u128,
     submitted_ns: u128,
     completed_ns: u128,
@@ -256,64 +278,81 @@ fn workload(
     first: usize,
     count: usize,
     window: usize,
+    groups: usize,
 ) -> Result<Measurement, Failure> {
     let start = Instant::now();
     let mut sent = 0;
     let mut pending = BTreeMap::new();
+    let mut group_pending = BTreeMap::<GroupIdentity, usize>::new();
     let mut samples = Vec::with_capacity(count);
     let mut max_inflight = 0;
     let polls = until(replicas, clock, |ns| {
         while sent < count && pending.len() < window {
             let operation = (first + sent) as u128;
             let submitted = start.elapsed().as_nanos();
-            let ticket = ns[0]
+            let group = operation_group(first + sent, groups);
+            if group_pending.get(&group).copied().unwrap_or(0) >= window.div_ceil(groups) {
+                break;
+            }
+            let replica = leader(ns, group)?;
+            let ticket = ns[replica]
                 .propose(ClientRequest {
-                    group: group(),
+                    group,
                     operation: OperationId::new(operation).unwrap(),
                     bytes: 1i64.to_le_bytes().to_vec(),
                 })
                 .map_err(|e| format!("admission refused; invalid run: {:?}", e.reason))?;
             if pending
-                .insert(ticket.sequence, (ticket, submitted))
+                .insert((replica, ticket.sequence), (ticket, submitted))
                 .is_some()
             {
                 return Err("duplicate live ticket".into());
             }
             sent += 1;
+            *group_pending.entry(group).or_default() += 1;
             max_inflight = max_inflight.max(pending.len());
         }
-        while let Some(output) = ns[0].poll_client() {
-            let completed = start.elapsed().as_nanos();
-            let ticket = output.ticket();
-            let (original, submitted) = pending
-                .remove(&ticket.sequence)
-                .ok_or("untracked receipt")?;
-            if ticket != original {
-                return Err("ticket identity mismatch".into());
-            }
-            let receipt = match checked(ns[0].complete_client(output).map_err(|e| e.reason))? {
-                ClientOutcome::Applied { receipt, .. } => receipt,
-                other => {
-                    return Err(format!(
-                        "operation {}: non-applied outcome invalidates measurement: {other:?}",
-                        ticket.operation.get()
-                    )
-                    .into())
+        for (replica, n) in ns.iter_mut().enumerate() {
+            while let Some(output) = n.poll_client() {
+                let completed = start.elapsed().as_nanos();
+                let ticket = output.ticket();
+                let (original, submitted) = pending
+                    .remove(&(replica, ticket.sequence))
+                    .ok_or("untracked receipt")?;
+                if ticket != original {
+                    return Err("ticket identity mismatch".into());
                 }
-            };
-            let CounterOutcome::Value(value) = receipt.outcome else {
-                return Err("non-value receipt".into());
-            };
-            if receipt.operation != ticket.operation || receipt.duplicate {
-                return Err("invalid useful-write receipt".into());
+                *group_pending
+                    .get_mut(&ticket.group)
+                    .ok_or("untracked group")? -= 1;
+                let receipt = match checked(n.complete_client(output).map_err(|e| e.reason))? {
+                    ClientOutcome::Applied { receipt, .. } => receipt,
+                    other => {
+                        return Err(format!(
+                            "operation {}: non-applied outcome invalidates measurement: {other:?}",
+                            ticket.operation.get()
+                        )
+                        .into())
+                    }
+                };
+                let CounterOutcome::Value(value) = receipt.outcome else {
+                    return Err("non-value receipt".into());
+                };
+                if receipt.operation != ticket.operation || receipt.duplicate {
+                    return Err("invalid useful-write receipt".into());
+                }
+                if value != ((receipt.operation.get() - 1) / groups as u128 + 1) as i64 {
+                    return Err("receipt disagrees with round-robin group history".into());
+                }
+                samples.push(Sample {
+                    group: ticket.group,
+                    operation: receipt.operation.get(),
+                    submitted_ns: submitted,
+                    completed_ns: completed,
+                    index: receipt.index,
+                    value,
+                });
             }
-            samples.push(Sample {
-                operation: receipt.operation.get(),
-                submitted_ns: submitted,
-                completed_ns: completed,
-                index: receipt.index,
-                value,
-            });
         }
         Ok(samples.len() == count)
     })?;
@@ -324,59 +363,86 @@ fn workload(
         polls,
     })
 }
+fn boundaries(samples: impl Iterator<Item = (GroupIdentity, u64)>) -> BTreeMap<GroupIdentity, u64> {
+    let mut result = BTreeMap::new();
+    for (g, index) in samples {
+        result
+            .entry(g)
+            .and_modify(|old: &mut u64| *old = (*old).max(index))
+            .or_insert(index);
+    }
+    result
+}
 fn verify(
     replicas: &mut [Replica],
     clock: &Instant,
-    expected: i64,
-    last_index: u64,
+    total: usize,
+    groups: usize,
+    last: &BTreeMap<GroupIdentity, u64>,
 ) -> Result<(), Failure> {
     until(replicas, clock, |ns| {
-        Ok(ns
-            .iter()
-            .all(|n| n.local().applications[&group()].applied_index() >= last_index))
+        Ok(last.iter().all(|(g, index)| {
+            ns.iter()
+                .all(|n| n.local().applications[g].applied_index() >= *index)
+        }))
     })?;
-    for n in replicas.iter() {
-        let app = &n.local().applications[&group()];
-        if checked(app.read_applied(last_index))? != expected {
-            return Err("replica value mismatch".into());
-        }
-    }
-    checked(replicas[0].read(group(), ())).map_err(|e| format!("{e:?}"))?;
-    until(replicas, clock, |ns| {
-        let Some(output) = ns[0].poll_read() else {
-            return Ok(false);
+    for g in 1..=groups {
+        let group = group_id(g);
+        let expected = if total >= g {
+            ((total - g) / groups + 1) as i64
+        } else {
+            0
         };
-        match checked(ns[0].complete_read(output).map_err(|e| e.reason))? {
-            ReadOutcome::Read {
-                result: Ok(value), ..
-            } if value == expected => Ok(true),
-            other => Err(format!("quorum read verification failed: {other:?}").into()),
+        let last_index = last[&group];
+        for n in replicas.iter() {
+            if checked(n.local().applications[&group].read_applied(last_index))? != expected {
+                return Err(format!("replica value mismatch for group {g}").into());
+            }
         }
-    })
-    .map(|_| ())
+        let replica = leader(replicas, group)?;
+        let ticket = checked(replicas[replica].read(group, ()))?;
+        until(replicas, clock, |ns| {
+            let Some(output) = ns[replica].poll_read() else {
+                return Ok(false);
+            };
+            if output.ticket() != ticket {
+                return Err("read ticket mismatch".into());
+            }
+            match checked(ns[replica].complete_read(output).map_err(|e| e.reason))? {
+                ReadOutcome::Read {
+                    result: Ok(value), ..
+                } if value == expected => Ok(true),
+                other => Err(format!("group {g} quorum read failed: {other:?}").into()),
+            }
+        })?;
+    }
+    Ok(())
 }
 fn retry_once(
     replicas: &mut [Replica],
     clock: &Instant,
     operation: usize,
     expected: i64,
+    groups: usize,
 ) -> Result<bool, Failure> {
-    let ticket = replicas[0]
+    let group = operation_group(operation, groups);
+    let replica = leader(replicas, group)?;
+    let ticket = replicas[replica]
         .propose(ClientRequest {
-            group: group(),
+            group,
             operation: OperationId::new(operation as u128).unwrap(),
             bytes: 1i64.to_le_bytes().to_vec(),
         })
         .map_err(|e| format!("retry refused: {:?}", e.reason))?;
     let mut changed = false;
     until(replicas, clock, |ns| {
-        let Some(output) = ns[0].poll_client() else {
+        let Some(output) = ns[replica].poll_client() else {
             return Ok(false);
         };
         if output.ticket() != ticket {
             return Err("retry ticket mismatch".into());
         }
-        match checked(ns[0].complete_client(output).map_err(|e| e.reason))? {
+        match checked(ns[replica].complete_client(output).map_err(|e| e.reason))? {
             ClientOutcome::Unknown(ClientUnknown::LeadershipChanged)
             | ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader) => {
                 changed = true;
@@ -399,10 +465,11 @@ fn retry(
     clock: &Instant,
     operation: usize,
     expected: i64,
+    groups: usize,
 ) -> Result<usize, Failure> {
     for attempt in 0..4 {
-        campaign(replicas, clock)?;
-        if retry_once(replicas, clock, operation, expected)? {
+        campaign(replicas, clock, groups)?;
+        if retry_once(replicas, clock, operation, expected, groups)? {
             return Ok(attempt);
         }
         eprintln!("phase=recovery-retry operation={operation} leadership_changed=true");
@@ -455,12 +522,20 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 }
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    let [root, protocol, operations, window] = args.as_slice() else {
+    if !(4..=5).contains(&args.len()) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32)"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32)]"
                 .into(),
         );
+    }
+    let [root, protocol, operations, window] = &args[..4] else {
+        unreachable!()
     };
+    let shared = args.len() == 5;
+    let groups = if shared { args[4].parse::<usize>()? } else { 1 };
+    if !(1..=32).contains(&groups) {
+        return Err("group count out of bounds".into());
+    }
     let protocol = match protocol.as_str() {
         "tcp" => NativePeerProtocol::TcpTls,
         #[cfg(feature = "quic")]
@@ -472,31 +547,60 @@ fn main() -> Result<(), Failure> {
     if !(1..=50000).contains(&count) || !(1..=32).contains(&window) {
         return Err("count/window out of bounds".into());
     }
+    let capacity = count + WARMUP;
+    if capacity.div_ceil(groups) + 64 > LogLimits::default().max_entries_per_group {
+        return Err(
+            "workload exceeds default per-group log capacity (including control reserve)".into(),
+        );
+    }
     let root = Path::new(root);
     std::fs::create_dir(root)?;
     let mut csv = exclusive(&root.join("samples.csv"))?;
-    let capacity = count + WARMUP;
     let clock = Instant::now();
-    let mut replicas = open(root, NativeOpenMode::Create, protocol, capacity, &clock)?;
-    campaign(&mut replicas, &clock)?;
+    let open_cluster = |mode| {
+        if shared {
+            shared::open(root, mode, protocol, capacity, &clock, groups)
+        } else {
+            open(root, mode, protocol, capacity, &clock)
+        }
+    };
+    let mut replicas = open_cluster(NativeOpenMode::Create)?;
+    campaign(&mut replicas, &clock, groups)?;
     eprintln!("phase=warmup protocol={protocol:?} window={window}");
-    let warmup = workload(&mut replicas, &clock, 1, WARMUP, window)?;
-    let warmup_last = warmup.samples.iter().map(|s| s.index).max().unwrap();
-    verify(&mut replicas, &clock, WARMUP as i64, warmup_last)?;
-    eprintln!("phase=measurement operations={count}");
-    let measured = workload(&mut replicas, &clock, WARMUP + 1, count, window)?;
-    let last = measured
-        .samples
-        .iter()
-        .map(|s| s.index)
-        .max()
-        .ok_or("missing samples")?;
-    verify(&mut replicas, &clock, capacity as i64, last)?;
+    let warmup = workload(&mut replicas, &clock, 1, WARMUP, window, groups)?;
+    let warmup_last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
+    verify(&mut replicas, &clock, WARMUP, groups, &warmup_last)?;
+    let placement = (1..=groups)
+        .map(|g| {
+            let group = group_id(g);
+            Ok(format!(
+                "{g}:{}",
+                replicas[leader(&replicas, group)?]
+                    .local()
+                    .owner
+                    .core(group)
+                    .unwrap()
+                    .local_node()
+                    .get()
+            ))
+        })
+        .collect::<Result<Vec<_>, Failure>>()?
+        .join(",");
+    eprintln!("phase=measurement operations={count} groups={groups} leaders={placement}");
+    let measured = workload(&mut replicas, &clock, WARMUP + 1, count, window, groups)?;
+    let last = boundaries(
+        warmup
+            .samples
+            .iter()
+            .chain(&measured.samples)
+            .map(|s| (s.group, s.index)),
+    );
+    verify(&mut replicas, &clock, capacity, groups, &last)?;
     close(replicas, &clock)?;
     eprintln!("phase=recovery-verification");
-    let mut replicas = open(root, NativeOpenMode::Recover, protocol, capacity, &clock)?;
-    campaign(&mut replicas, &clock)?;
-    verify(&mut replicas, &clock, capacity as i64, last)?;
+    let mut replicas = open_cluster(NativeOpenMode::Recover)?;
+    campaign(&mut replicas, &clock, groups)?;
+    verify(&mut replicas, &clock, capacity, groups, &last)?;
     let first_value = warmup
         .samples
         .iter()
@@ -509,25 +613,31 @@ fn main() -> Result<(), Failure> {
         .find(|s| s.operation == capacity as u128)
         .unwrap()
         .value;
-    let recovery_retries = retry(&mut replicas, &clock, 1, first_value)?
-        + retry(&mut replicas, &clock, capacity, last_value)?;
-    let retry_index = replicas[0].local().applications[&group()].applied_index();
-    verify(&mut replicas, &clock, capacity as i64, retry_index)?;
+    let recovery_retries = retry(&mut replicas, &clock, 1, first_value, groups)?
+        + retry(&mut replicas, &clock, capacity, last_value, groups)?;
+    let retry_index = boundaries(replicas.iter().flat_map(|n| {
+        n.local()
+            .applications
+            .iter()
+            .map(|(g, a)| (*g, a.applied_index()))
+    }));
+    verify(&mut replicas, &clock, capacity, groups, &retry_index)?;
     close(replicas, &clock)?;
     writeln!(
         csv,
-        "operation,submitted_ns,completed_ns,latency_ns,applied_index,value"
+        "operation,submitted_ns,completed_ns,latency_ns,applied_index,value,group"
     )?;
     for s in &measured.samples {
         writeln!(
             csv,
-            "{},{},{},{},{},{}",
+            "{},{},{},{},{},{},{}",
             s.operation,
             s.submitted_ns,
             s.completed_ns,
             s.completed_ns - s.submitted_ns,
             s.index,
-            s.value
+            s.value,
+            s.group.id.get()
         )?;
     }
     csv.sync_all()?;
@@ -538,8 +648,9 @@ fn main() -> Result<(), Failure> {
         .collect::<Vec<_>>();
     latency.sort_unstable();
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
-    let summary = format!("protocol={protocol:?} replicas=3 groups=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}\n",
-        measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
+    let election_ms = if shared { 10000 } else { 1000 };
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}\n",
+        if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;
     output.sync_all()?;

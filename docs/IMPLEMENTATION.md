@@ -6049,3 +6049,123 @@ applied throughput and p99 at fixed declared workload/resource settings, retaini
 recovery and overload isolation. Following work remains sustained/offered-load,
 maintenance/recovery and broader Linux/macOS/platform/fault evidence. All other
 unfinished P0–P7 scope remains active; P8 is deferred and CI stays background.
+
+### Slice 101 mini schema — shared native Multi-Raft measurement
+
+Previous turn was progress: 6b07231 pushed verified WAL/host attribution. Current
+P7 work measures actual shared cross-group barrier amortization; next select a
+measured optimization at the unchanged declared p99 budget, following sustained,
+offered-load/maintenance/platform/fault evidence. Full P0–P7 remains active.
+
+NativeStartup is an explicitly one-group convenience API. Add a benchmark-owned
+assembly through the existing public NativeNode::from_parts contracts, not another
+engine or production provider: one authoritative native WAL/worker and one shared
+snapshot worker per replica; explicit per-group snapshot handles/application/core,
+one scheduler/deadline owner and one TCP/QUIC peer endpoint shared across groups.
+Use fixed three-voter policies, actual recovered store sessions and verified
+per-group WAL/snapshot/application recovery. Bound group count at 32. This helper
+is required to measure sharing the existing startup convenience cannot select;
+existing one-group CLI behavior remains available for comparison.
+
+Extend native_benchmark with optional GROUPS (1–32) selecting the shared assembly.
+Round-robin unique 8-byte +1 operations across groups; same total warm-up (64),
+measurement count/window, timer settings and lifetime Counter capacity per group.
+Track each outstanding ticket with replica index as well as sequence; receipts
+must match the full original group/operation/ticket. Submit to each group's actual
+observed ready leader, with core authority checks unchanged. Do not assume all
+groups share a leader or swap replica indices globally. Retain per-group applied
+boundaries and verify expected partitioned values via every replica plus quorum
+reads. After full joins/reopen, retry original global first/last operation in its
+actual group, retain historical outcomes and ensure every group stays unchanged.
+
+CSV adds group identity; summary names group count/shared assembly and observed
+leader placement. Diagnostic persistence counts remain totals, not watermarks.
+Warm-up/measurement uncertainty remains fatal; no inferred success from role or
+cache. Root is exclusive, failed run has no valid summary, successful shutdown
+joins every shared worker. No production protocol, format, provider or default
+resource/timer setting changes.
+
+Acceptance: the shared assembly with 1 and 8 groups over TCP and QUIC, same 256
+measured writes and window 8. A single group at window 8 and eight groups at one
+in-flight each have the same global concurrency; report changed partitioning
+and actual leader placement rather than calling this single-group acceleration.
+Raw latency/progress samples, full per-group reopen/retry verification and explicit
+resource counts must pass. Preserve the 250 ms p99 tuning target; missing it is
+not permission to relax it. Existing static service remains usable independently.
+
+Slice-101 measurement adjustment: the first shared one-group TCP run passes at
+16.944 applied ops/s but p99 is 1559.711 ms, overlapping the selected 1000–1999 ms
+election range. The initial eight-group TCP run reaches measurement with all
+groups led by node 1, then operation 92 reports Unknown(LeadershipChanged); it
+is invalid and has no summary. Driver budgets allow 128 steps/128 persistence
+units and the worker allows 256 units, so eight groups do not exceed those batch
+bounds. This does not prove the cause of the leadership loss. For the controlled
+shared comparison select explicit 10000–19999 ms elections on *both* sides,
+retaining 50 ms heartbeats, all durable barriers and fatal measured uncertainty.
+This benchmark-only timing adjustment trades slower failure detection for room
+above observed latency; it is not a production tuning result or a change to
+service/startup defaults. Preserve the failed attempt and initial one-group result.
+
+### Slice 101 implementation and evidence
+
+Implemented benchmark-owned shared assembly in examples/benchmark/shared.rs
+through existing public Node::from_parts providers. Optional GROUPS selects it;
+four-argument NativeStartup mode remains. One WAL worker, snapshot worker and peer
+endpoint per replica serve all groups; TCP adds one dial worker. Fixed voter/store
+identities recover through actual snapshots/WAL before service. Tickets are keyed
+by replica/sequence and checked in full; observed leaders and per-group boundaries
+replace the prior global leader swap/index assumption. Useful receipts must match
+round-robin historical values. Each group is additionally limited to
+ceil(window/groups) pending requests; the dispatcher waits at the next group.
+
+Four controlled release runs (TCP/QUIC × 1/8 groups, 256 measured writes, 64 warm-up,
+window 8, 10000–19999 ms elections) pass full all-replica values/quorum reads,
+drain/join/reopen, historical first/last retry and unchanged final values/final
+joins. All begin measurement with node 1 leading every group; all have zero extra
+recovery retries. TCP 1/8 group rates are 21.141/9.204 applied ops/s and p99
+950.520/1308.700 ms. QUIC rates are 15.807/7.786 and p99 1769.466/2920.492 ms.
+Eight groups submit roughly 1524–1526 persistence batches versus 551–554 for one;
+shared resource ownership has not demonstrated barrier-amortization improvement.
+The predeclared 250 ms TCP serial p99 target remains unmet/unproven. Do not infer
+single-group acceleration, sustained capacity or a causal trace from these totals.
+Raw samples/source/environment hashes and the invalid preliminary attempt are
+recorded in validation/performance/slice101. Independent raw validation checks all
+256 operation IDs, group assignment/historical values, per-group index increases,
+global/per-group windows, timing arithmetic and latency/rate summaries.
+
+An additional eight-group TCP correctness run with one measured operation and
+window 3 passes, including groups with only warm-up history and per-group boundary
+recovery. It is a correctness check, not a performance comparison; local compilation
+was allowed during this extra check. All-target/all-feature Clippy, TLS-only
+example compilation, formatting/diff checks and the 71-contract inventory pass.
+The original four-argument startup mode also passes a full one-operation recovery
+check. See validation/REPORT.md. No public seam or production
+protocol/provider/format changed. Full P0–P7 remains active.
+
+### Next linked mini plan — P7 batching attribution and measured tuning
+
+1. Attribute submitted persistence units and physical barriers in the actual shared
+   three-replica workload, with per-request/batch scope and bounded diagnostics.
+   Purpose: distinguish underfilled driver batches, queued worker batches and
+   history-cost growth before selecting a fix. Dependencies: slice-101 raw workload
+   and the existing driver/worker contracts. Completion: source-scoped unit/barrier
+   evidence reconciles actual successful requests and recovery; retain failed runs.
+   This is necessary to advance the P7 useful-throughput milestone, not another
+   consensus/storage engine.
+2. Select the measured cause and implement a bounded batching/tuning change only
+   after its ownership/durability/failure schema is explicit. Preserve every
+   original request/token, control reserve, reclamation order, fence and published
+   prefix. Dependencies: attribution and relevant crash/conformance tests.
+   Completion: crash/recovery and stale/failure checks pass, then matched repeated
+   TCP/QUIC comparisons improve useful rate at a declared unchanged latency budget;
+   rerun the existing TCP serial target rather than replacing it with partitioned
+   aggregate throughput. If the measured cause differs, revise this item explicitly.
+3. Exercise sustained/offered-load and maintenance/recovery behavior, then broaden
+   Linux/macOS/separate-host/fault evidence. Dependencies: stable measured tuning
+   and unchanged admission/lifecycle contracts. Completion: finite bursts no longer
+   substitute for sustained/overload evidence; platform limitations remain explicit.
+   These checks advance P7 and do not erase unfinished scope in earlier phases.
+
+Macro scope is unchanged: usable static service remains independently available;
+full baseline P0–P7 still needs recorded phase gaps/validation and P7 performance.
+P8 remains deferred; CI remains background feedback.

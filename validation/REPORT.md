@@ -2075,3 +2075,43 @@ fixed-p99 improvement, macOS/separate-host and broader phase gaps remain outstan
 
 Native-only WAL example and TLS-only replicated example compilation also pass.
 Final formatting, diff checks and the unchanged 71-contract inventory pass.
+
+## Slice 101 — actual shared native Multi-Raft benchmark
+
+Added a benchmark-only Node::from_parts assembly with one authoritative WAL/worker,
+one snapshot worker and one TCP/QUIC endpoint per replica for 1–32 groups. Optional
+GROUPS CLI retains the one-group startup mode. Client ticket tracking is replica
+and group scoped; all-replica/recovery positions remain per-group. A per-group
+window ceil(global window/groups) prevents claiming one outstanding request/group
+while accidentally accumulating several. Receipt histories, every group's local
+value and quorum read, full worker joins/reopen and original retry outcomes gate
+successful sample publication. No production protocol, format, provider, public
+contract or default changed.
+
+Four sequential release measurements (256 measured +64 warm-up writes, global
+window 8; TCP/QUIC, 1/8 groups) pass with recovered aggregate 320, every expected
+partition value and zero extra recovery retries. Both sides use explicit 50 ms
+heartbeats and 10000–19999 ms elections. TCP rates are 21.141/9.204 applied ops/s,
+p99 950.520/1308.700 ms; QUIC rates 15.807/7.786, p99 1769.466/2920.492 ms.
+All groups begin measurement with node 1 leading. Eight groups are slower and
+submit more persistence batches; no amortization/throughput improvement is claimed.
+The unchanged 250 ms TCP serial p99 target remains unmet/unproven.
+
+The preliminary 1000–1999 ms election TCP one-group run passes, but the eight-group
+run reports Unknown(LeadershipChanged) for operation 92 during measurement and
+is invalid (no successful summary). Longer experimental elections are disclosed,
+not a fix or a service-default change. See validation/performance/slice101 for
+raw samples, summaries, environment/source/executable hashes and scope limits.
+Independent CSV checks verify complete unique IDs, group history/indices, bounded
+windows, arithmetic, nearest-rank percentiles and rates for all controlled runs.
+An extra eight-group/one-measured-operation/window-3 TCP correctness run also
+passes complete recovery and groups with only warm-up history; its timing is not
+used for performance claims. Full P0–P7 remains active, P8 deferred; sustained,
+offered-load, maintenance, macOS/separate-host and broader fault evidence remain.
+
+The original four-argument startup mode also passes a one-operation TCP
+recovery/retry/join check. All seven published raw result sets (four controlled,
+two correctness-only and one preliminary successful run) pass the independent
+validator. All-target/all-feature Clippy with warnings denied, TLS-only example
+compilation, formatting/diff checks and the 71-contract inventory pass. The Node
+inventory records this evidence without adding a public contract.
