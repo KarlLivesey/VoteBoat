@@ -690,3 +690,30 @@ assertion uses a borrowed expected-message slice.
   endpoints, provisioning/readiness integration and faulted online transitions
   remain pending; P0–P7 stays active. No new token/generation/watermark/format,
   macOS execution, performance or full protocol proof claim.
+
+## Slice 63 — confirmed partial-joint election release blocker
+
+- Actual core diagnostic prepares committed learner assignment and partial joint
+  delivery with weighted old/new required voters 2/5. Node 1 disappears while
+  2/3/5 retain both physical quorums. Four complete campaign/restart rounds deliver
+  every surviving vote request/reply but produce no leader: node 3 is stale,
+  node 2 lacks the required new vote, node 5 remains a learner. Exact public member
+  recovery preserves each durable prefix and cannot manufacture delivery.
+- Explicit internal delivery of the joint to learner 5 isolates the missing
+  transition. Public configuration ingress refuses it. Pending accepted membership
+  is not durability evidence: Campaign and Vote return Busy until the exact
+  completion. Only afterward can node 5 grant a durable vote and node 2 elect.
+  No production recovery transfer is implemented; this is a release diagnosis.
+- Focused actual-core diagnostic passes all-feature and core-only. Independent
+  activation model: 4 pass in both builds, including the available-quorum/no-
+  election case and feasibility after joint delivery. Existing all-feature library
+  tests: 44 pass under ordinary permissions; the remaining QUIC socket case
+  encountered PermissionDenied and passes when rerun with socket permission.
+- All-feature/all-target Clippy with warnings denied passes. Formatting, diff and
+  inventory checks pass (59 contracts). No new public contract or production
+  behavior. The diagnostic encodes an unresolved defect and must become a positive
+  production recovery regression after repair; green tests do not release P4.
+- Exact completion tokens are host-asserted fixtures; this adds no new filesystem,
+  network, fork, macOS, performance or full proof evidence. Service mutation
+  integration stays behind the partial-joint repair and remote lifecycle gates.
+  Full P0–P7 remains active; P8 is deferred.

@@ -60,6 +60,31 @@ const DISJOINT: Topology = Topology {
     old: [0, 1, 2],
     new: [3, 4, 5],
 };
+
+#[test]
+fn available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner() {
+    let mut case = Case {
+        topology: Topology {
+            nodes: 4,
+            old: [0, 2, 1],
+            new: [1, 2, 3],
+        },
+        old: Shape::Weighted,
+        new: Shape::Weighted,
+        heads: vec![1, 1, 0, 0],
+    };
+    let alive = 0b1110;
+    assert!(case.admitted(Variant::Correct));
+    assert!(case.quorum(1, alive, Variant::Correct));
+    for candidate in 1..4 {
+        let grants = case.grants(candidate, alive, Variant::Correct);
+        assert!(!case.quorum(case.heads[candidate], grants, Variant::Correct));
+    }
+    // Delivery is the missing state transition. This model does not authorize
+    // any production pre-election transfer, nor weaken the learner vote rule.
+    case.heads[3] = 1;
+    assert!(case.quorum(1, case.grants(1, alive, Variant::Correct), Variant::Correct));
+}
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Variant {
     Correct,

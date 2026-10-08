@@ -91,7 +91,24 @@ Slice 62 adds local service configuration observation and the counter's enforced
 lifetime envelope. Mutation endpoints and binding their declarations to placement,
 readiness and transport admission remain within the same current deliverable.
 
-1. **Enrollment and administrative service integration (current, P4).** Connect
+Slice 63 confirms a release prerequisite using the actual core: after partial
+joint delivery and old-leader loss, available weighted quorums can still fail to
+elect because the required promoted replica remains a learner. The internal
+delivery fixture restores election eligibility only after its exact durability
+completion. No production pre-election transfer exists. Resolve this before
+exposing service mutations that could strand a group; it is part of the existing
+P4 activation gate, not an additional global milestone.
+
+1. **Partial-joint catch-up and election repair (current, P4).** Define and
+   implement a bounded authenticated recovery path that delivers the needed
+   configuration before election without granting a learner votes or service
+   authority. Depends on accepted/committed history, exact store/session checks
+   and the reproduced slice 63 history. Check available weighted/recursive
+   quorums, stale/forked history, lost replies, pending/Written durability,
+   leader loss and restart. Replace the diagnostic stall expectation with a
+   successful production-path recovery check. This removes a P4 release blocker
+   needed by safe online placement.
+2. **Enrollment and administrative service integration (next, P4).** Connect
    explicit durable enrollment and administration/status endpoints to placement,
    readiness, capacity and member restart. Bind/enforce declared application
    schema/command/checkpoint bounds as deduplication grows. Depends on slices
@@ -99,33 +116,28 @@ readiness and transport admission remain within the same current deliverable.
    rejection before mutation, lost-reply resumption and matching TCP/QUIC
    assemblies. Provides the native path for release testing, not an early opening
    of public configuration ingress.
-2. **Fault-tested remote membership release (next, P4).** Exercise actual
+3. **Fault-tested remote membership release (following, P4).** Exercise actual
    add/catch-up/promote/remove with partial joint/final delivery, weighted and
    recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
-   Depends on item 1. Resolve activation/catch-up gaps before releasing ingress.
+   Depends on items 1–2. Resolve activation/catch-up gaps before releasing ingress.
    Completes safe placement for P5 responsibility routing and P6 ownership movement;
    P5–P7 remain the global capability chain above.
-3. **Responsibility manifests and routing (following, P5).** Implement the first
-   complete manifest-to-group request path with explicit responsibility identities,
-   validated placement and bounded routing. Depends on safe P4 placement changes
-   for moving replicas. Check stale manifests, wrong ownership and unavailable
-   parents; normal child writes must not require ancestor commits. This establishes
-   the routing foundation for P6 data movement, fencing and activation.
 
 ### How the current work fits globally
 
-For immediate implementation, distinguish the next two concrete changes from
+For immediate implementation, distinguish the concrete dependency chain from
 the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
+| Repair partial-joint catch-up/election | Actual-core and independent model histories confirm that available weighted quorums do not suffice when a required new voter still has only its learner view. | Production-path recovery without learner votes, premature durability evidence or serving authority, including lost replies and restart. | Removes a P4 activation prerequisite before native mutation release. |
 | Integrate native enrollment and administration | Placement, durable resumption, selected transport envelope checks and explicit native member restart now exist; the native service must bind them to enrollment and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 
 The partial-final election fix is complete as slice 55, with its bounded model
-and actual-core limitations recorded below. The first change is a prerequisite
-of the second, not a new global
-milestone. Review this immediate pair after each completed slice. Keep the static
+and actual-core limitations recorded below. Slice 63 confirms the separate
+partial-joint delivery gap. These changes are dependencies within P4, not new global
+milestones. Review the immediate chain after each completed slice. Keep the static
 service and embedding usable throughout; their remaining macOS and operational
 validation does not depend on finishing P4.
 
@@ -3638,3 +3650,41 @@ remains enrollment/admin integration: connect mutations and readiness to these
 bounds, placement and provisioning, then exercise faulted remote transitions before
 release. P5 routing and P6 split/merge remain subsequent global milestones; P0–P7
 is active. See validation/REPORT.md for executed checks and limits.
+
+## Slice 63 — actual-core partial-joint release-gate diagnosis
+
+Mini schema plan: before connecting service mutations to a closed core ingress,
+reproduce the remaining partial-joint activation concern through real Campaign,
+Vote and exact durable completion paths. Prepare committed learner assignment,
+place an accepted uncommitted joint record at only one survivor, lose the old
+leader and retain both weighted quorums. Deliver all surviving election messages,
+including rejections, and recover each survivor through the public member recovery
+contract after each round. No production protocol change or new effect/token,
+watermark, generation or format is introduced.
+
+The actual-core diagnostic confirms a stall across four campaign/restart rounds:
+old nodes 1/2/3 require node 2 by weight; new nodes 2/3/5 require node 5. Only
+node 2 has the joint record, node 3 is behind, node 5 remains a learner and node 1
+is unavailable. Node 2 receives old-view votes but cannot satisfy the new policy;
+node 3 cannot get node 2's vote because its log is behind. Node 5 refuses votes
+and campaigns. Both physical quorums are available, so availability arithmetic
+alone is insufficient to establish the protocol's election progress.
+
+An explicitly injected internal Append identifies the missing transition: public
+configuration ingress rejects it, while the inner transition can persist the
+joint record at node 5. Pending accepted membership may already be visible to
+local_voter, but the common Busy guard prevents both Campaign and Vote while its
+durability dependency is pending. After exact completion, node 5 can durably grant
+a vote and node 2 can become leader. This is not a production repair: a follower/
+candidate currently emits no such transfer. No fabricated leader authority or
+learner vote is added. The independent activation model agrees that durable
+configuration delivery changes election feasibility in this fixed-prefix case.
+
+Next implement a bounded authenticated pre-election recovery design, including
+stale/forked prefix and receipt-loss behavior, then connect service mutation paths
+and run remote lifecycle gates. The diagnostic's stall expectation must be
+replaced by a successful production-path recovery test when that repair lands.
+The mini plan moves this already-required gate ahead of service mutation exposure;
+the macro P4 → P5 routing → P6 split/merge → P7 chain is unchanged. Full P0–P7
+remains active. These fixture completions do not validate physical durability,
+network delivery, arbitrary forks or a full liveness proof.

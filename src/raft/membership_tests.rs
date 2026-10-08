@@ -359,6 +359,201 @@ fn partially_delivered_final_can_elect_new_leader_after_old_leader_loss() {
     assert_eq!(recovered.membership().id(), cid(4));
 }
 
+/// Release-gate regression: this deliberately records the unresolved liveness
+/// gap rather than blessing it as a successful online membership transition.
+#[test]
+fn partial_joint_with_required_promoted_learner_stalls_despite_available_quorums() {
+    fn weighted(voters: &[u64], required: u64) -> Policy {
+        Policy::new(
+            Tree::Weighted(
+                voters
+                    .iter()
+                    .map(|id| WeightedChild {
+                        weight: if *id == required { 3 } else { 1 },
+                        node: Tree::Voter(node(*id)),
+                    })
+                    .collect(),
+            ),
+            Limits::default(),
+        )
+        .unwrap()
+    }
+    fn recover(id: u64, state: GroupLog, session: u64) -> Raft {
+        Raft::recover_member(
+            node(id),
+            StoreBinding {
+                identity: store(id),
+                session: StoreSession::new(session).unwrap(),
+            },
+            state,
+            LogLimits::default(),
+        )
+        .unwrap()
+    }
+    let initial = core();
+    let mut state = initial.state().clone();
+    state.bootstrap.policy = weighted(&[1, 2, 3], 2);
+    let mut leader = recover(1, state, 1);
+    leader.role = Role::Leader;
+    leader.initialize_replication().unwrap();
+    let learners = Configuration::new(
+        cid(2),
+        leader.state().bootstrap.policy.clone(),
+        leader.state().bootstrap.voter_stores.clone(),
+        [(node(5), store(5))].into(),
+    )
+    .unwrap();
+    let effects = accept(&mut leader, 100, ConfigurationChange::Learners(learners));
+    durable(&mut leader, effects);
+    committed_fixture(&mut leader, 2);
+    let old = leader.state().clone();
+    let next = Configuration::new(
+        cid(4),
+        weighted(&[2, 3, 5], 5),
+        [2, 3, 5]
+            .into_iter()
+            .map(|id| (node(id), store(id)))
+            .collect(),
+        BTreeMap::new(),
+    )
+    .unwrap();
+    let effects = accept(
+        &mut leader,
+        101,
+        ConfigurationChange::Joint { id: cid(3), next },
+    );
+    durable(&mut leader, effects);
+    let joint = leader.state().clone();
+    assert_eq!(joint.commit_index, 2);
+    // Only node 2 received the joint record. Lose node 1 before further delivery.
+    // Nodes 2/3/5 contain both policy quorums, but node 5 is still a learner.
+    let mut survivors: BTreeMap<_, _> = [(2, joint), (3, old.clone()), (5, old)]
+        .into_iter()
+        .map(|(id, state)| (id, recover(id, state, 1)))
+        .collect();
+    let available = [node(2), node(3), node(5)].into_iter().collect();
+    assert!(survivors[&2].membership().is_satisfied(&available));
+    let heads = survivors
+        .iter()
+        .map(|(&id, core)| (id, core.state().last_index()))
+        .collect::<BTreeMap<_, _>>();
+    let mut denied_learner_votes = 0;
+    let mut denied_stale_votes = 0;
+    for round in 0..4 {
+        for candidate in [2, 3] {
+            let effects = survivors
+                .get_mut(&candidate)
+                .unwrap()
+                .step(Event::Campaign)
+                .unwrap();
+            let requests = durable(survivors.get_mut(&candidate).unwrap(), effects);
+            for request in requests {
+                let Effect::Send(request) = request else {
+                    panic!("campaign must send votes only")
+                };
+                assert!(matches!(request.rpc, Rpc::Vote { .. }));
+                let target = request.to.get();
+                let Some(receiver) = survivors.get_mut(&target) else {
+                    continue;
+                };
+                let effects = receiver.step(Event::Receive(request)).unwrap();
+                let effects = if receiver.has_pending_dependency() {
+                    durable(receiver, effects)
+                } else {
+                    effects
+                };
+                let response = one_reply(effects);
+                if target == 5 {
+                    assert!(matches!(response.rpc, Rpc::Voted { granted: false }));
+                    assert!(receiver.state().hard_state.voted_for.is_none());
+                    denied_learner_votes += 1;
+                }
+                if candidate == 3 && target == 2 {
+                    assert!(matches!(response.rpc, Rpc::Voted { granted: false }));
+                    denied_stale_votes += 1;
+                }
+                let sender = survivors.get_mut(&candidate).unwrap();
+                let effects = sender.step(Event::Receive(response)).unwrap();
+                if sender.has_pending_dependency() {
+                    durable(sender, effects);
+                } else {
+                    assert!(effects.is_empty());
+                }
+            }
+        }
+        for (&id, core) in &survivors {
+            assert_ne!(core.role(), Role::Leader);
+            assert_eq!(core.state().commit_index, 2);
+            assert_eq!(core.state().last_index(), heads[&id]);
+        }
+        let learner = survivors.get_mut(&5).unwrap();
+        let term = learner.state().hard_state.term;
+        assert_eq!(learner.step(Event::Campaign), Err(RaftError::NotVoter));
+        assert_eq!(learner.state().hard_state.term, term);
+        // Restart cannot manufacture delivery or promote the missing joint view.
+        survivors = survivors
+            .into_iter()
+            .map(|(id, core)| (id, recover(id, core.state().clone(), round + 2)))
+            .collect();
+    }
+    assert_eq!(denied_learner_votes, 4);
+    assert_eq!(denied_stale_votes, 4);
+    // An internal delivery fixture identifies the missing transition. No
+    // production candidate sends this append and public ingress remains closed.
+    let candidate = &survivors[&2];
+    let transfer = candidate.message(
+        node(5),
+        RequestContext {
+            origin: candidate.binding,
+            sequence: 500,
+        },
+        Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![candidate.state().entry_at(3).unwrap().clone()],
+            leader_commit: 2,
+        },
+    );
+    let learner = survivors.get_mut(&5).unwrap();
+    assert_eq!(
+        learner.step(Event::Receive(transfer.clone())),
+        Err(RaftError::InvalidMessage)
+    );
+    let effects = learner.receive_inner(transfer.clone()).unwrap();
+    assert!(learner.has_pending_dependency());
+    assert_eq!(learner.step(Event::Campaign), Err(RaftError::Busy));
+    let mut vote = transfer;
+    vote.rpc = Rpc::Vote {
+        last_index: 3,
+        last_term: 1,
+    };
+    assert_eq!(learner.step(Event::Receive(vote)), Err(RaftError::Busy));
+    assert_eq!(learner.state().last_index(), 2);
+    durable(learner, effects);
+    assert!(learner.local_voter());
+    assert_eq!(learner.state().last_index(), 3);
+    assert_eq!(learner.state().commit_index, 2);
+    let candidate = survivors.get_mut(&2).unwrap();
+    let effects = candidate.step(Event::Campaign).unwrap();
+    let requests = durable(candidate, effects);
+    let request = requests
+        .into_iter()
+        .find_map(|e| match e {
+            Effect::Send(message) if message.to == node(5) => Some(message),
+            _ => None,
+        })
+        .unwrap();
+    let voter = survivors.get_mut(&5).unwrap();
+    let effects = voter.step(Event::Receive(request)).unwrap();
+    assert_eq!(voter.state().hard_state.voted_for, None);
+    let response = one_reply(durable(voter, effects));
+    assert!(matches!(response.rpc, Rpc::Voted { granted: true }));
+    let candidate = survivors.get_mut(&2).unwrap();
+    let effects = candidate.step(Event::Receive(response)).unwrap();
+    durable(candidate, effects);
+    assert_eq!(candidate.role(), Role::Leader);
+}
+
 #[test]
 fn pending_configuration_view_precedes_durability_without_releasing_effects() {
     let mut core = core();
