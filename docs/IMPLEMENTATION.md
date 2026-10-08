@@ -111,7 +111,8 @@ P4 activation gate, not an additional global milestone.
    quorums, stale/forked history, lost replies, pending/Written durability,
    leader loss and restart. Replace the diagnostic stall expectation with a
    successful production-path recovery check (done for the exact-prefix case in
-   slice 64). Still check behind/compacted learners, candidate tails, promoted
+   slice 64; native TCP/QUIC in slice 65; bounded retained tail in slice 66).
+   Still check learners beyond that tail, compacted learners, candidate tails, promoted
    senders and recursive-policy histories before
    claiming the general release gate is complete. This removes a P4 release blocker
    needed by safe online placement.
@@ -3758,3 +3759,40 @@ remain open. Mini item 2 is still service enrollment/admin integration and item 
 the complete faulted remote lifecycle. These feed P4 safe placement, then P5
 responsibility routing and P6 ownership movement; P7 tuning and full P0–P7 remain
 active. No general membership release or macOS execution claim.
+
+## Slice 66 — bounded retained-prefix joint repair
+
+Mini schema plan: extend the same Append exception to a bounded retained suffix
+ending at the joint record, with no earlier configuration entries. The sender
+selects at most 64 entries within the existing replication byte budget, never
+before the stable configuration or retained log floor. The receiver requires a
+matching retained preceding boundary, exact equality of all overlap, contiguous
+indices/terms, exact stable committed learner assignment, trusted old voter and
+promotion journal. The joint must extend beyond its local log end. Check all
+range/budget conditions before entering the role/term-mutating receive path.
+If the batch overlaps a local checkpoint, verify its included index/term and
+trim already-compacted entries before persistence; mismatched boundaries refuse.
+One ordinary atomic LogUpdate and its exact durable completion install the pure
+extension; leader_commit remains zero. No new token, cursor, format or authority.
+
+Core checks cover a wholly missing tail, identical partial/full overlap, the
+64-entry limit, a longer source log with the learner inside its last 64 entries,
+sender byte truncation/oversized joint omission, forked overlap, malformed ranges,
+interior configurations and receiver budget refusal without mutation.
+Core checkpoint fixtures check accepted/rejected compacted overlap without
+changing the checkpoint or claiming new imported snapshot data. Native
+wire formats 2–4, WAL barrier faults and actual-file reopen cover a 32-entry tail.
+TCP and QUIC native nodes catch up that tail, elect, commit/apply and reopen a
+write; the full native startup suite has 14 passing tests. Actual validation is
+recorded in validation/REPORT.md.
+
+This advances current mini item 1 beyond exact-prefix repair. It does not finish
+general catch-up: a learner outside the retained byte/entry window still refuses.
+Next is an explicit multi-batch pre-election repair protocol with capability
+negotiation, durable cursor acknowledgements and protection against delayed/forked
+traffic after promotion; compacted learners additionally need snapshot handling.
+The existing Append contract suffices for one atomic pure extension, not that
+broader protocol. Mini items 2–3 remain enrollment/admin integration and faulted
+remote lifecycle release. P4 safe placement continues to feed P5 routing and P6
+split/merge; P7 and the full P0–P7 goal stay active. No general membership release,
+macOS execution, performance or full proof claim.

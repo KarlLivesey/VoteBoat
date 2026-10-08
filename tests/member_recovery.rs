@@ -1183,9 +1183,34 @@ mod joint_repair {
         native::{log_store::*, wire::NativeWireCodec},
         wire::*,
     };
-    fn source() -> (HostLogStore, Raft, Message) {
+    fn source(gap: u64) -> (HostLogStore, Raft, Message) {
         let mut log = HostLogStore::new(2);
         prepare(&mut log, false, false);
+        if gap != 0 {
+            let state = log.state(group(1)).unwrap();
+            let mut joint = state.entries.last().unwrap().clone();
+            joint.index += gap;
+            let mut entries = (2..2 + gap)
+                .map(|index| LogEntry {
+                    index,
+                    term: 1,
+                    payload: EntryPayload::Noop,
+                })
+                .collect::<Vec<_>>();
+            entries.push(joint);
+            append(
+                &mut log,
+                vec![LogMutation::Update(LogUpdate {
+                    group: group(1),
+                    expected_revision: state.revision,
+                    hard_state: state.hard_state,
+                    commit_index: state.commit_index,
+                    suffix: Some(Suffix { from: 2, entries }),
+                    snapshot: None,
+                    snapshot_membership: None,
+                })],
+            );
+        }
         let mut core = Raft::recover_member(
             node(2),
             log.binding(),
@@ -1238,7 +1263,7 @@ mod joint_repair {
     }
     #[test]
     fn public_repair_roundtrips_membership_wire_and_native_wal() {
-        let (_, _, message) = source();
+        let (_, _, message) = source(32);
         let scope = WireScope {
             from: message.from,
             sender: message.sender,
@@ -1282,42 +1307,46 @@ mod joint_repair {
     }
     #[test]
     fn failed_native_repair_barriers_release_no_ack_and_recover_whole_assignment() {
-        let (_, _, message) = source();
-        for fault in [
-            Fault::Append(0),
-            Fault::Append(64),
-            Fault::Sync,
-            Fault::PublishBefore,
-            Fault::PublishAfter,
-        ] {
-            let io = ModelIo::default();
-            let mut log =
-                NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
-            let mut core = destination(&mut log);
-            io.0.borrow_mut().fault = fault;
-            assert!(install(&mut log, &mut core, message.clone()).is_err());
-            assert!(core.is_fenced());
-            drop(log);
-            io.0.borrow_mut().power_loss();
-            let mut log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
-            let mut core = Raft::recover_member(
-                node(4),
-                log.binding(),
-                log.state(group(1)).unwrap(),
-                log.limits(),
-            )
-            .unwrap();
-            assert_eq!(core.state().commit_index, 1);
-            assert_eq!(core.local_voter(), core.state().last_index() == 2);
-            if !core.local_voter() {
-                install(&mut log, &mut core, message.clone()).unwrap();
+        for gap in [0, 32] {
+            let (_, _, message) = source(gap);
+            for fault in [
+                Fault::Append(0),
+                Fault::Append(64),
+                Fault::Sync,
+                Fault::PublishBefore,
+                Fault::PublishAfter,
+            ] {
+                let io = ModelIo::default();
+                let mut log =
+                    NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+                let mut core = destination(&mut log);
+                io.0.borrow_mut().fault = fault;
+                assert!(install(&mut log, &mut core, message.clone()).is_err());
+                assert!(core.is_fenced());
+                drop(log);
+                io.0.borrow_mut().power_loss();
+                let mut log =
+                    NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+                let mut core = Raft::recover_member(
+                    node(4),
+                    log.binding(),
+                    log.state(group(1)).unwrap(),
+                    log.limits(),
+                )
+                .unwrap();
+                assert_eq!(core.state().commit_index, 1);
+                assert!([1, gap + 2].contains(&core.state().last_index()));
+                assert_eq!(core.local_voter(), core.state().last_index() == gap + 2);
+                if !core.local_voter() {
+                    install(&mut log, &mut core, message.clone()).unwrap();
+                }
+                assert!(core.local_voter());
             }
-            assert!(core.local_voter());
         }
     }
     #[test]
     fn actual_files_keep_joint_repair_after_lost_ack_and_reopen() {
-        let (_, _, message) = source();
+        let (_, _, message) = source(32);
         let path = std::env::temp_dir().join(format!(
             "voteboat-joint-repair-{}-{}",
             std::process::id(),

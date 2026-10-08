@@ -1460,16 +1460,18 @@ impl Raft {
         let (index, term, previous) = self.retirement_predecessor()?;
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
-    fn receive(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
+    fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
         // General configuration delivery stays closed. The append-only joint
         // repair exception targets exact committed learners and cannot replace
         // voting history or advance commitment; other transition fixtures use
         // receive_inner while distributed release gates remain unfinished.
-        if (matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
-            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some()))
-            && !self.permits_joint_repair(&m)
+        if matches!(&m.rpc, Rpc::Append { entries, .. } if entries.iter().any(|e| matches!(e.payload, EntryPayload::Configuration(_))))
+            || matches!(&m.rpc, Rpc::Snapshot { snapshot } if snapshot.metadata.membership.is_some())
         {
-            return Err(RaftError::InvalidMessage);
+            if !self.permits_joint_repair(&m) {
+                return Err(RaftError::InvalidMessage);
+            }
+            self.trim_joint_repair(&mut m);
         }
         let contact = (self.membership().is_voter(m.from) || self.permitted_replication(&m))
             && m.term >= self.durable.hard_state.term

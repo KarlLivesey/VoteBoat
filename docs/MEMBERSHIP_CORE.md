@@ -178,17 +178,25 @@ power-failure certification or benchmark.
 
 An old-view voter campaigning with a durably accepted, uncommitted joint entry
 sends one existing-format Append to each exact learner promoted by that entry,
-then sends its ordinary Vote requests. The transfer contains only the joint
-entry and its preceding index/term; leader_commit is zero. Sends wait for the
+then sends its ordinary Vote requests. The transfer ends at the joint entry and
+includes a bounded retained tail since the stable configuration (at most 64
+entries, also limited by the replication byte budget). leader_commit is zero.
+Sends wait for the
 campaign's exact persisted term/self-ballot completion. Repair acknowledgements
 are ordinary Appended messages and cannot satisfy the candidate's vote set.
 
 The receiver's public configuration gate allows this one shape only when its
 committed and accepted membership agree on a stable exact local learner, the
 sender is an exact voter of that view, the incoming joint promotes this learner,
-the journal grammar is valid, and the preceding boundary equals its local log
-end. Term, group/store/context and byte limits must also pass. It is a pure
-extension: no existing entry can be overwritten and commitment cannot advance.
+the journal grammar is valid, and the preceding boundary matches a retained local
+index/term. If that boundary precedes the local checkpoint, the batch must contain
+the checkpoint's exact index/term; already-compacted entries are trimmed before
+normal persistence. Retained overlapping entries must be identical, including payloads; the
+final joint must extend beyond the local log end. Earlier entries in the batch
+must be commands or noops. Contiguous indices, nondecreasing terms, per-entry and
+aggregate byte limits are checked before normal receive can mutate role or term.
+Term, group/store/context checks must also pass. It is a pure extension: no
+existing entry can be overwritten and commitment cannot advance.
 An existing voter or joint-view replica refuses this exception. Duplicate repair
 after durable acceptance is refused; normal voting can proceed with the retained
 joint after restart. General configuration Append and membership Snapshot remain
@@ -210,8 +218,16 @@ restart rounds, then delivers the production transfer and Vote through public
 entry points. Native provider checks cover wire versions 2–4, torn append/sync/
 manifest failures and actual file reopen after a lost acknowledgement. These are
 bounded evidence, not a proof over arbitrary forks or a complete remote release.
-This path deliberately refuses behind/compacted prefixes, transferred snapshots,
+Native TCP/QUIC nodes also recover with 32 missing retained entries, elect and
+commit an application write before file reopen. This path deliberately refuses
+learners behind the bounded retained tail, compacted/missing preceding boundaries,
+forked overlap, transferred snapshots,
 uncommitted learner assignments, existing joint heads and promoted senders that
 are not trusted voters in the learner's current view. Candidate suffixes beyond
 the joint may still require additional catch-up before log freshness permits a
-vote. Those cases and remote TCP/QUIC repair delivery remain release work.
+vote. Those cases remain release work. General retained-range repair spanning
+multiple batches needs explicit candidate repair state and authenticated replies
+that advance only a repair cursor. Ordinary Append backoff cannot be reused
+unrestrictedly: a later or competing accepted joint could otherwise have its
+voting history replaced by delayed pre-election traffic. Any new RPC requires
+explicit codec/session capability negotiation and matching native integration.

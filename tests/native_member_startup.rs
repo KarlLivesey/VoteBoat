@@ -475,7 +475,7 @@ fn tcp_member_startup_recovers_learner_joint_final_and_checkpoint() {
     member_histories(NativePeerProtocol::TcpTls);
 }
 
-fn remote_joint_repair(protocol: NativePeerProtocol) {
+fn remote_joint_repair(protocol: NativePeerProtocol, missing_entries: u64) {
     let root = root();
     std::fs::create_dir(&root).unwrap();
     let policy = |required| {
@@ -521,7 +521,7 @@ fn remote_joint_repair(protocol: NativePeerProtocol) {
         BTreeMap::new(),
     )
     .unwrap();
-    let history = [
+    let mut history = [
         ConfigurationRecord {
             operation: OperationId::new(100).unwrap(),
             expected: cid(9),
@@ -544,7 +544,18 @@ fn remote_joint_repair(protocol: NativePeerProtocol) {
         payload: EntryPayload::Configuration(Box::new(record)),
     })
     .collect::<Vec<_>>();
-    for (local, count) in [(2, 1), (3, 2)] {
+    let mut joint = history.pop().unwrap();
+    for index in 2..2 + missing_entries {
+        history.push(LogEntry {
+            index,
+            term: 1,
+            payload: EntryPayload::Noop,
+        });
+    }
+    joint.index += missing_entries;
+    history.push(joint);
+    let election_commit = history.len() as u64 + 1;
+    for (local, count) in [(2, 1), (3, history.len())] {
         let path = root.join(local.to_string());
         let mut log = NativeLogStore::create(
             FileLogIo::create(&path).unwrap(),
@@ -614,7 +625,10 @@ fn remote_joint_repair(protocol: NativePeerProtocol) {
             }
         }
         let core = candidate.local().owner.core(group()).unwrap();
-        if core.role() == Role::Leader && core.state().commit_index >= 3 && ticket.is_none() {
+        if core.role() == Role::Leader
+            && core.state().commit_index >= election_commit
+            && ticket.is_none()
+        {
             ticket = Some(
                 candidate
                     .propose(ClientRequest {
@@ -687,12 +701,21 @@ fn remote_joint_repair(protocol: NativePeerProtocol) {
 }
 #[test]
 fn tcp_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::TcpTls);
+    remote_joint_repair(NativePeerProtocol::TcpTls, 0);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_native_joint_repair_elects_and_commits_after_old_leader_loss() {
-    remote_joint_repair(NativePeerProtocol::Quic);
+    remote_joint_repair(NativePeerProtocol::Quic, 0);
+}
+#[test]
+fn tcp_native_joint_repair_catches_up_retained_learner_prefix() {
+    remote_joint_repair(NativePeerProtocol::TcpTls, 32);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_native_joint_repair_catches_up_retained_learner_prefix() {
+    remote_joint_repair(NativePeerProtocol::Quic, 32);
 }
 #[cfg(feature = "quic")]
 #[test]

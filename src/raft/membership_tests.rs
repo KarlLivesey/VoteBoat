@@ -681,6 +681,214 @@ fn joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mut
     assert!(restarted.local_voter());
 }
 
+fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
+    let mut state = joint(false).state().clone();
+    let mut joint = state.entries.pop().unwrap();
+    let prefix = (3..3 + gap)
+        .map(|index| LogEntry {
+            index,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: operation(u128::from(1000 + index)),
+                bytes: vec![index as u8; 8],
+            },
+        })
+        .collect::<Vec<_>>();
+    state.entries.extend(prefix.clone());
+    joint.index += gap;
+    state.entries.push(joint);
+    let recover = |id, state| {
+        Raft::recover_member(
+            node(id),
+            StoreBinding {
+                identity: store(id),
+                session: StoreSession::new(1).unwrap(),
+            },
+            state,
+            LogLimits::default(),
+        )
+        .unwrap()
+    };
+    let source = recover(2, state);
+    let mut state = staged().state().clone();
+    state.entries.extend_from_slice(&prefix[..overlap]);
+    (source, recover(4, state))
+}
+fn emitted_repair(source: &mut Raft) -> Message {
+    let effects = source.step(Event::Campaign).unwrap();
+    durable(source, effects)
+        .into_iter()
+        .find_map(|effect| match effect {
+            Effect::Send(m) if m.to == node(4) && matches!(m.rpc, Rpc::Append { .. }) => Some(m),
+            _ => None,
+        })
+        .unwrap()
+}
+#[test]
+fn joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim() {
+    for (gap, overlap) in [(3, 0), (3, 1), (63, 0), (100, 70), (100, 100)] {
+        let (mut source, mut receiver) = retained_repair_pair(gap, overlap);
+        let repair = emitted_repair(&mut source);
+        let Rpc::Append { entries, .. } = &repair.rpc else {
+            unreachable!()
+        };
+        assert!(entries.len() <= 64);
+        let before = receiver.state().clone();
+        let effects = receiver.step(Event::Receive(repair)).unwrap();
+        assert_eq!(receiver.state(), &before);
+        assert!(receiver.has_pending_dependency());
+        assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+        let ack = one_reply(durable(&mut receiver, effects));
+        assert!(
+            matches!(ack.rpc, Rpc::Appended { success: true, matching_index } if matching_index == gap + 3)
+        );
+        assert_eq!(receiver.state().entries, source.state().entries);
+        assert_eq!(receiver.state().commit_index, before.commit_index);
+        assert!(receiver.local_voter());
+        assert!(source.step(Event::Receive(ack)).unwrap().is_empty());
+        assert_eq!(source.role(), Role::Candidate);
+        let recovered = Raft::recover_member(
+            node(4),
+            receiver.binding,
+            receiver.state().clone(),
+            receiver.limits,
+        )
+        .unwrap();
+        assert!(recovered.local_voter());
+        assert_eq!(recovered.state().commit_index, before.commit_index);
+    }
+}
+#[test]
+fn joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners() {
+    for variant in 0..7 {
+        let (mut source, mut receiver) =
+            retained_repair_pair(if variant == 6 { 100 } else { 3 }, 1);
+        let mut repair = emitted_repair(&mut source);
+        let Rpc::Append { entries, .. } = &mut repair.rpc else {
+            unreachable!()
+        };
+        match variant {
+            0 => {
+                let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                    unreachable!()
+                };
+                bytes[0] ^= 1;
+            }
+            1 => entries[1].term = repair.term + 1,
+            2 => entries[1].index += 1,
+            3 => entries[1].term = 0,
+            4 => entries[1].payload = source.state().entries[1].payload.clone(),
+            5 => receiver.limits.max_batch_bytes = 256,
+            6 => (),
+            _ => unreachable!(),
+        }
+        let before = (
+            receiver.state().clone(),
+            receiver.role(),
+            receiver.election_reset_sequence(),
+        );
+        assert_eq!(
+            receiver.step(Event::Receive(repair)),
+            Err(RaftError::InvalidMessage),
+            "variant {variant}"
+        );
+        assert_eq!(
+            (
+                receiver.state().clone(),
+                receiver.role(),
+                receiver.election_reset_sequence()
+            ),
+            before
+        );
+        assert!(!receiver.has_pending_dependency());
+    }
+}
+
+#[test]
+fn joint_repair_tail_respects_byte_budget_and_omits_oversized_joint() {
+    let (mut source, mut receiver) = retained_repair_pair(3, 2);
+    let joint_bytes = source
+        .state()
+        .entries
+        .last()
+        .unwrap()
+        .retained_payload_bytes();
+    source.limits.max_command_bytes = joint_bytes;
+    source.limits.max_batch_bytes = 256 + 37 + joint_bytes + 45;
+    let message = emitted_repair(&mut source);
+    let Rpc::Append {
+        entries,
+        previous_index,
+        ..
+    } = &message.rpc
+    else {
+        unreachable!()
+    };
+    assert_eq!(entries.len(), 2);
+    assert_eq!(*previous_index, 4);
+    let effects = receiver.step(Event::Receive(message)).unwrap();
+    durable(&mut receiver, effects);
+    assert_eq!(receiver.state().entries, source.state().entries);
+    source.limits.max_batch_bytes = 256 + 37 + joint_bytes - 1;
+    let effects = source.step(Event::Campaign).unwrap();
+    let effects = durable(&mut source, effects);
+    assert!(!effects.iter().any(|e| matches!(
+        e,
+        Effect::Send(Message {
+            rpc: Rpc::Append { .. },
+            ..
+        })
+    )));
+}
+
+#[test]
+fn joint_repair_trims_only_a_verified_compacted_overlap() {
+    for valid in [false, true] {
+        let (mut source, mut receiver) = retained_repair_pair(3, 2);
+        committed_fixture(&mut receiver, 4);
+        // Host-verified checkpoint fixture, as in the other core compaction
+        // histories; native snapshot publication is separately tested.
+        let reference = SnapshotRef {
+            store: store(4),
+            group: receiver.state().bootstrap.group,
+            generation: SnapshotGeneration::new(1).unwrap(),
+            configuration: cid(2),
+            index: 4,
+            term: 1,
+            application_schema: 1,
+            file_bytes: 128,
+            checksum: 7,
+        };
+        let effects = receiver.begin_compact(reference).unwrap();
+        durable(&mut receiver, effects);
+        let mut message = emitted_repair(&mut source);
+        if !valid {
+            let Rpc::Append { entries, .. } = &mut message.rpc else {
+                unreachable!()
+            };
+            entries
+                .iter_mut()
+                .filter(|e| e.index >= 4)
+                .for_each(|e| e.term = 2);
+        }
+        let before = receiver.state().clone();
+        let effects = receiver.step(Event::Receive(message));
+        if valid {
+            let effects = effects.unwrap();
+            assert_eq!(receiver.state(), &before);
+            durable(&mut receiver, effects);
+            assert!(receiver.local_voter());
+            assert_eq!(receiver.state().commit_index, 4);
+            assert_eq!(receiver.state().base_index(), 4);
+            assert_eq!(receiver.state().entries, source.state().entries[4..]);
+        } else {
+            assert_eq!(effects, Err(RaftError::InvalidMessage));
+            assert_eq!(receiver.state(), &before);
+            assert!(!receiver.has_pending_dependency());
+        }
+    }
+}
+
 #[test]
 fn pending_configuration_view_precedes_durability_without_releasing_effects() {
     let mut core = core();

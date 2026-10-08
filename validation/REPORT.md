@@ -776,3 +776,42 @@ assertion uses a borrowed expected-message slice.
   recovery and full remote membership lifecycle remain unvalidated. No general
   P4 release, macOS, performance or complete protocol proof claim. Full P0–P7
   stays active; P8 is deferred.
+
+## Slice 66 — retained-range pure-extension joint repair
+
+- Candidate transfer now contains at most 64 retained entries ending at the
+  uncommitted joint, within a conservative replication byte budget. It begins
+  after the stable configuration and never before the sender's retained floor.
+  The receiver verifies contiguous indices/terms, identical retained overlap,
+  budgets and the original exact committed-learner/trusted-old-voter promotion
+  conditions before role/term changes. A matching local checkpoint boundary
+  permits trimming already-compacted overlap; mismatches refuse. No overwrite,
+  commit claim, new RPC/format, cursor or durability token.
+- New core histories cover missing/partial/full overlap, 64-entry truncation,
+  a longer source with an in-window learner, sender byte truncation/oversized
+  joint omission, forked overlap, invalid ranges/configurations and receiver
+  budgets. A host-verified checkpoint fixture covers compacted-overlap trimming;
+  it is not native snapshot transfer or publication evidence. Pending repair
+  blocks voting/campaign, acknowledgements cannot elect and restart retains the
+  durable joint without advancing commit.
+- Native wire versions 2–4 and native WAL fault/reopen tests now use a 32-entry
+  tail. Short append, failed sync and failed manifest publication fence without
+  reply; modeled power loss recovers only the old prefix or whole repaired
+  assignment, then exact retry succeeds. Actual native files preserve repair
+  after losing its acknowledgement. ModelIo power-loss assumptions remain
+  distinct from hardware power-failure validation.
+- TCP/QUIC native nodes missing 32 entries repair, elect, commit/apply a client
+  write, drain/join workers and reopen application state. Starting membership
+  records are seeded premises, not distributed enrollment/commit evidence.
+- Actual final runs: all-feature library 50 pass, core-only library 41 pass;
+  native member startup 14, member recovery 22, learners 23, wire 14 and independent
+  activation model 4 pass. Socket suites use local socket permission. All-feature
+  all-target Clippy with warnings denied passes. Formatting/diff and inventory
+  checks pass (60 contract metadata records). No broad test rerun is treated as
+  a complete protocol proof.
+- Learners beyond the retained entry/byte window, missing checkpoint boundaries,
+  multi-batch repair, transferred snapshots, promoted senders and broader
+  recursive/fork/term histories remain gates. General configuration ingress stays
+  closed. This advances P4 recovery toward native enrollment/admin integration,
+  then faulted remote membership release; P5–P7 and full P0–P7 remain active.
+  No macOS execution or performance claim; P8 remains deferred.
