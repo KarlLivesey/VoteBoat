@@ -30,7 +30,8 @@ The native three-node/100-group durable history now runs through actual loopback
 TCP/TLS connections, including leader replacement and restart. The bounded
 `EffectOwner` now reserves output space before execution and retains exact effect
 leases through rejection, persistence, application and read completion. Peer
-roster/reconnect management and full node assembly remain in progress. An explicit
+connection coordination is now bounded by `transport::PeerRoster`; the full node
+assembly remains in progress. An explicit
 asynchronous snapshot worker now preserves publication, WAL durability and
 application-installation dependencies, and supports local checkpoints and logical
 compaction while both storage workers retain their handles.
@@ -199,9 +200,14 @@ batch and encoded frame until local channel output drains. Consume `take_send`
 through the original queue's `complete` to release its retained credits. One
 completed receive batch blocks further frame reads until `take_received` moves
 it into separately bounded ingress. Neither event proves Raft durability.
-The host supplies a bounded peer roster, fair visits, ingress capacity and
-reconnect policy. See [the transport contract](docs/TRANSPORT.md) for ownership,
-failure and shutdown details.
+`transport::PeerRoster` coordinates construction-authorized peers, fair visits,
+bounded connection reservations, retry deadlines and fresh connection generations.
+It preserves accepted send ownership across failure and rejects obsolete input.
+The host supplies socket/TLS establishment, reactor readiness, ingress capacity
+and bounded rejected-send staging. The 100-group TCP/TLS checkpoint history now
+reconnects a peer pair before further replicated work. See the
+[transport](docs/TRANSPORT.md) and [peer-roster](docs/PEER_ROSTER.md) contracts for
+ownership, failure and shutdown details.
 
 Embedding hosts admit a read with `Event::Read`, drive its `ReadProbe`/`ReadAck`
 messages, then consume `Effect::ReadReady` through `application::read_at_barrier`.

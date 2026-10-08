@@ -620,7 +620,8 @@ mod native {
         outbound: NativeOutbound,
         pending: Vec<EffectLease>,
         reads: Vec<i64>,
-        transports: BTreeMap<NodeId, Box<dyn voteboat::transport::PeerTransport>>,
+        transports:
+            Option<voteboat::transport::PeerRoster<Box<dyn voteboat::transport::PeerTransport>>>,
         staged: VecDeque<OutboundBatch>,
         sent: usize,
         received: usize,
@@ -825,7 +826,7 @@ mod native {
             outbound,
             pending: Vec::new(),
             reads: Vec::new(),
-            transports: BTreeMap::new(),
+            transports: None,
             staged: VecDeque::new(),
             sent: 0,
             received: 0,
@@ -842,17 +843,56 @@ mod native {
         use voteboat::{
             native::{transport::NativePeerTransport, wire::NativeWireCodec},
             secure::LocalIdentity,
-            transport::TransportLimits,
+            transport::{PeerRoster, PeerRosterConfig, PeerRosterLimits, TransportLimits},
             wire::WireLimits,
         };
+        let locals = nodes
+            .iter()
+            .map(|n| LocalIdentity {
+                node: n.outbound.binding().node,
+                store: n.outbound.binding().store,
+            })
+            .collect::<Vec<_>>();
+        let mut tickets = BTreeMap::new();
+        for (i, n) in nodes.iter_mut().enumerate() {
+            let peers = locals
+                .iter()
+                .filter(|l| l.node != locals[i].node)
+                .map(|l| (l.node, l.store.identity))
+                .collect();
+            let mut roster = PeerRoster::new(
+                PeerRosterConfig {
+                    local: locals[i],
+                    outbound: n.outbound.binding(),
+                    first_generation: SecureSessionGeneration::new(1).unwrap(),
+                    last_generation: SecureSessionGeneration::new(u64::MAX).unwrap(),
+                    wire_version: 1,
+                    limits: PeerRosterLimits::default(),
+                    transport_limits: TransportLimits::default(),
+                },
+                peers,
+                MonoTime(0),
+            )
+            .unwrap();
+            for ticket in roster.due_connections(MonoTime(0), 3).unwrap() {
+                tickets.insert((locals[i].node, ticket.peer.node), ticket);
+            }
+            n.transports = Some(roster);
+        }
         for a in 0..3 {
             for b in a + 1..3 {
                 let local = |n: &Node| LocalIdentity {
                     node: n.outbound.binding().node,
                     store: n.outbound.binding().store,
                 };
-                let (left, right) =
-                    support::tls::pair(local(&nodes[a]), local(&nodes[b]), (a * 3 + b + 1) as u64);
+                let lt = tickets[&(locals[a].node, locals[b].node)];
+                let rt = tickets[&(locals[b].node, locals[a].node)];
+                let (left, right) = support::tls::pair_generations(
+                    local(&nodes[a]),
+                    local(&nodes[b]),
+                    lt.generation.get(),
+                    rt.generation.get(),
+                );
                 let left = NativePeerTransport::new(
                     left,
                     NativeWireCodec::new(WireLimits::default()).unwrap(),
@@ -869,10 +909,16 @@ mod native {
                 .unwrap();
                 nodes[a]
                     .transports
-                    .insert(node(b as u64 + 1), Box::new(left));
+                    .as_mut()
+                    .unwrap()
+                    .attach(lt, Box::new(left), MonoTime(0))
+                    .unwrap_or_else(|r| panic!("left attach: {:?}", r.reason));
                 nodes[b]
                     .transports
-                    .insert(node(a as u64 + 1), Box::new(right));
+                    .as_mut()
+                    .unwrap()
+                    .attach(rt, Box::new(right), MonoTime(0))
+                    .unwrap_or_else(|r| panic!("right attach: {:?}", r.reason));
             }
         }
     }
@@ -986,44 +1032,50 @@ mod native {
                         n.pending = rejected.leases;
                     }
                 }
-                if n.transports.is_empty() {
-                    for mut batch in n.outbound.poll(32) {
-                        assert!(network.len() + batch.messages.len() <= 8192);
-                        network.extend(batch.messages.drain(..));
-                        n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
+                match &mut n.transports {
+                    None => {
+                        for mut batch in n.outbound.poll(32) {
+                            assert!(network.len() + batch.messages.len() <= 8192);
+                            network.extend(batch.messages.drain(..));
+                            n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
+                        }
                     }
-                } else {
-                    if n.staged.is_empty() {
-                        n.staged.extend(n.outbound.poll(32));
-                    }
-                    for _ in 0..n.staged.len().min(32) {
-                        let batch = n.staged.pop_front().unwrap();
-                        match n
-                            .transports
-                            .get_mut(&batch.ticket.peer)
-                            .unwrap()
-                            .submit(batch)
-                        {
-                            Ok(()) => n.sent += 1,
-                            Err(rejected) => {
-                                assert_eq!(
-                                    rejected.reason,
-                                    voteboat::transport::TransportError::Overloaded
-                                );
-                                n.staged.push_back(*rejected.batch);
+                    Some(roster) => {
+                        if n.staged.is_empty() {
+                            n.staged.extend(n.outbound.poll(32));
+                        }
+                        for _ in 0..n.staged.len().min(32) {
+                            let batch = n.staged.pop_front().unwrap();
+                            match roster.submit(batch) {
+                                Ok(()) => n.sent += 1,
+                                Err(rejected) => {
+                                    assert_eq!(
+                                        rejected.reason,
+                                        voteboat::transport::PeerRosterError::Overloaded
+                                    );
+                                    n.staged.push_back(*rejected.batch);
+                                }
                             }
                         }
-                    }
-                    for t in n.transports.values_mut() {
-                        t.poll(now, voteboat::transport::TransportPollBudget::default())
-                            .unwrap();
-                        if let Some(done) = t.take_send() {
-                            n.outbound.complete(done.batch, done.result).unwrap();
+                        for event in roster
+                            .poll(now, 3, voteboat::transport::TransportPollBudget::default())
+                            .unwrap()
+                        {
+                            assert!(matches!(
+                                event,
+                                voteboat::transport::PeerPoll::Progress { .. }
+                            ));
                         }
-                        if network.len() <= 8192 - 128 {
-                            if let Some(batch) = t.take_received() {
-                                network.extend(batch.messages);
-                                n.received += 1;
+                        let local_node = n.outbound.binding().node;
+                        for peer in (1..=3).map(node).filter(|id| *id != local_node) {
+                            if let Some(done) = roster.take_send(peer).unwrap() {
+                                n.outbound.complete(done.batch, done.result).unwrap();
+                            }
+                            if network.len() <= 8192 - 128 {
+                                if let Some(batch) = roster.take_received(peer).unwrap() {
+                                    network.extend(batch.messages);
+                                    n.received += 1;
+                                }
                             }
                         }
                     }
@@ -1078,8 +1130,120 @@ mod native {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
-    fn close(nodes: &mut [Node]) {
+    #[cfg(feature = "tls")]
+    fn reconnect(nodes: &mut [Node], a: usize, b: usize, disconnected: MonoTime, ready: MonoTime) {
+        use voteboat::{
+            native::{transport::NativePeerTransport, wire::NativeWireCodec},
+            transport::TransportLimits,
+            wire::WireLimits,
+        };
+        let old_left = nodes[a]
+            .transports
+            .as_ref()
+            .unwrap()
+            .binding(node(b as u64 + 1))
+            .unwrap();
+        let old_right = nodes[b]
+            .transports
+            .as_ref()
+            .unwrap()
+            .binding(node(a as u64 + 1))
+            .unwrap();
+        nodes[a]
+            .transports
+            .as_mut()
+            .unwrap()
+            .disconnect(node(b as u64 + 1), disconnected)
+            .unwrap();
+        nodes[b]
+            .transports
+            .as_mut()
+            .unwrap()
+            .disconnect(node(a as u64 + 1), disconnected)
+            .unwrap();
+        let left_ticket = nodes[a]
+            .transports
+            .as_mut()
+            .unwrap()
+            .due_connections(ready, 3)
+            .unwrap()
+            .pop()
+            .unwrap();
+        let right_ticket = nodes[b]
+            .transports
+            .as_mut()
+            .unwrap()
+            .due_connections(ready, 3)
+            .unwrap()
+            .pop()
+            .unwrap();
+        assert!(left_ticket.generation > old_left.generation);
+        assert!(right_ticket.generation > old_right.generation);
+        let (left, right) = support::tls::pair_generations(
+            left_ticket.local,
+            right_ticket.local,
+            left_ticket.generation.get(),
+            right_ticket.generation.get(),
+        );
+        let left = NativePeerTransport::new(
+            left,
+            NativeWireCodec::new(WireLimits::default()).unwrap(),
+            &nodes[a].outbound,
+            TransportLimits::default(),
+        )
+        .unwrap();
+        let right = NativePeerTransport::new(
+            right,
+            NativeWireCodec::new(WireLimits::default()).unwrap(),
+            &nodes[b].outbound,
+            TransportLimits::default(),
+        )
+        .unwrap();
+        nodes[a]
+            .transports
+            .as_mut()
+            .unwrap()
+            .attach(left_ticket, Box::new(left), ready)
+            .unwrap_or_else(|r| panic!("reconnect left: {:?}", r.reason));
+        nodes[b]
+            .transports
+            .as_mut()
+            .unwrap()
+            .attach(right_ticket, Box::new(right), ready)
+            .unwrap_or_else(|r| panic!("reconnect right: {:?}", r.reason));
+    }
+    fn close(nodes: &mut [Node], now: MonoTime) {
+        for n in nodes.iter_mut() {
+            if let Some(roster) = &mut n.transports {
+                roster.close();
+            }
+        }
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while nodes
+            .iter()
+            .any(|n| n.transports.as_ref().is_some_and(|r| !r.is_drained()))
+        {
+            for n in nodes.iter_mut() {
+                if let Some(roster) = &mut n.transports {
+                    roster
+                        .poll(now, 3, voteboat::transport::TransportPollBudget::default())
+                        .unwrap();
+                    for peer in (1..=3).map(node) {
+                        assert!(roster.take_send(peer).unwrap().is_none());
+                    }
+                }
+            }
+            assert!(
+                Instant::now() < deadline,
+                "native peer roster did not close"
+            );
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
         for n in nodes {
+            assert!(n
+                .transports
+                .as_ref()
+                .is_none_or(|r| r.usage().reserved_bytes == 0));
             n.owner.close_admission().unwrap();
             assert!(n.owner.is_drained());
             assert!(n.snapshot_pending.is_empty());
@@ -1156,6 +1320,8 @@ mod native {
         }
         // No explicit heartbeat: the native timer provider drives these sends.
         #[cfg(feature = "tls")]
+        reconnect(&mut nodes, 0, 1, MonoTime(0), MonoTime(100));
+        #[cfg(feature = "tls")]
         let before_heartbeat = nodes[0].sent;
         let before_deadline = nodes[0].owner.deadline(group(1)).unwrap().deadline;
         drain(&mut nodes, None, MonoTime(100));
@@ -1185,7 +1351,7 @@ mod native {
             .iter()
             .map(|n| n.owner.identity().store)
             .collect::<Vec<_>>();
-        close(&mut nodes);
+        close(&mut nodes, MonoTime(101));
         drop(nodes);
         let mut nodes = (1..=3)
             .map(|id| make_snapshots(id, &root.join(id.to_string()), true, true))
@@ -1210,7 +1376,7 @@ mod native {
                 assert_eq!(app.read_applied(app.applied_index()), Ok(15));
             }
         }
-        close(&mut nodes);
+        close(&mut nodes, MonoTime(0));
         drop(nodes);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -1364,7 +1530,7 @@ mod native {
                 assert_eq!(app.read_applied(app.applied_index()), Ok(10));
             }
         }
-        close(&mut nodes);
+        close(&mut nodes, now);
         drop(nodes);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -1417,7 +1583,7 @@ mod native {
             .iter()
             .map(|n| n.worker.binding().store)
             .collect::<Vec<_>>();
-        close(&mut nodes);
+        close(&mut nodes, MonoTime(2));
         drop(nodes);
         let mut nodes = (1..=3)
             .map(|id| make(id, &root.join(id.to_string()), true))
@@ -1441,7 +1607,7 @@ mod native {
                 assert_eq!(a.read_applied(a.applied_index()).unwrap(), 15);
             }
         }
-        close(&mut nodes);
+        close(&mut nodes, MonoTime(0));
         drop(nodes);
         std::fs::remove_dir_all(root).unwrap();
     }

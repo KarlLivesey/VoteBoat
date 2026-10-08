@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "shared-runtime-with-asynchronous-checkpoint-maintenance",
+  "status": "shared-runtime-with-bounded-peer-reconnect-coordination",
   "selection": "construction-time",
   "third_party_runtime_dependencies": [
     "rustls =0.23.45 (optional tls feature; std/ring)",
@@ -323,10 +323,18 @@
     {
       "design_id": "C06",
       "public_contract": "PeerTransport",
-      "operations": ["binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
+      "operations": ["security", "binding", "state", "limits", "usage", "submit", "poll", "take_send", "take_received", "close", "abort"],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
-      "conformance": ["tests/transport.rs", "tests/worker.rs"],
-      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history. Host core-only fixture demonstrates selection, not full alternative transport conformance. Global peer roster, reconnect policy, node ingress assembly remain pending. Native timer-driven election/partition/healing history also passes."
+      "conformance": ["tests/transport.rs", "tests/worker.rs", "tests/peers.rs", "tests/effect_owner.rs"],
+      "scope": "Authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. Complete listener/dial and ingress/result assembly remain pending."
+    },
+    {
+      "design_id": "C06/C15",
+      "public_contract": "PeerRoster<P: PeerTransport>",
+      "operations": ["new", "usage", "binding", "next_deadline", "due_connections", "connect_failed", "attach", "submit", "poll", "take_send", "take_received", "disconnect", "close", "abort", "is_fenced", "is_drained", "discard_failed_send", "reclaim_generation"],
+      "native": "Fixed bounded coordination over selected PeerTransport; native histories select NativePeerTransport",
+      "conformance": ["tests/peers.rs", "tests/effect_owner.rs"],
+      "scope": "Construction-authorized identities, bounded connection/handshake reservations, host-reserved checked generation ranges, fair polling, monotonic reconnect deadlines/backoff, stale attempt/input rejection and exact accepted-send lifetime through retirement. Provider violations fence coordination without releasing separate outbound credits. Native 100-group TCP/TLS histories and quiescent connection replacement before further replication/checkpoint/recovery. Host owns socket/TLS establishment and separate ingress/staging resources. No membership or quorum authority."
     },
     {
       "design_id": "C13",

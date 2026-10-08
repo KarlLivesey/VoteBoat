@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! Authenticated peer stream contract. No transport event proves durability.
 use crate::{outbound::*, raft::Message, runtime::MonoTime, secure::*};
+mod peers;
+pub use peers::*;
 
 pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 1;
 
@@ -157,6 +159,8 @@ pub struct ReceivedBatch {
 /// the channel immediately and fails accepted sends. Dropping a handle abandons
 /// observation, not external progress or the queue's retained credits.
 pub trait PeerTransport {
+    /// Production providers attest an authenticated identity-bound channel.
+    fn security(&self) -> SessionSecurity;
     fn binding(&self) -> SessionBinding;
     fn state(&self) -> TransportState;
     fn limits(&self) -> TransportLimits;
@@ -171,4 +175,44 @@ pub trait PeerTransport {
     fn take_received(&mut self) -> Option<ReceivedBatch>;
     fn close(&mut self);
     fn abort(&mut self);
+}
+
+impl<P: PeerTransport + ?Sized> PeerTransport for Box<P> {
+    fn security(&self) -> SessionSecurity {
+        (**self).security()
+    }
+    fn binding(&self) -> SessionBinding {
+        (**self).binding()
+    }
+    fn state(&self) -> TransportState {
+        (**self).state()
+    }
+    fn limits(&self) -> TransportLimits {
+        (**self).limits()
+    }
+    fn usage(&self) -> TransportUsage {
+        (**self).usage()
+    }
+    fn submit(&mut self, batch: OutboundBatch) -> Result<(), TransportRejected> {
+        (**self).submit(batch)
+    }
+    fn poll(
+        &mut self,
+        now: MonoTime,
+        budget: TransportPollBudget,
+    ) -> Result<TransportProgress, TransportError> {
+        (**self).poll(now, budget)
+    }
+    fn take_send(&mut self) -> Option<TransportSend> {
+        (**self).take_send()
+    }
+    fn take_received(&mut self) -> Option<ReceivedBatch> {
+        (**self).take_received()
+    }
+    fn close(&mut self) {
+        (**self).close()
+    }
+    fn abort(&mut self) {
+        (**self).abort()
+    }
 }

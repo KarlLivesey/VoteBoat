@@ -132,7 +132,9 @@ providers retain their separate injection/conformance histories. A separate
 native network history now covers timer-driven election, partition replacement
 and healing. Native-without-TLS uses bounded simulated delivery. Network isolation is injected after decode.
 
-A full node facade, bounded peer roster/reconnect handling, asynchronous
-checkpoint creation/compaction, administrative/application result admission and
-broader automatic-timer network histories remain. No complete deployable
+A bounded PeerRoster now coordinates the native connections in these histories,
+including real TLS reconnection. Asynchronous checkpoint creation and compaction
+also run through the selected workers. A full node facade, listener/dial execution,
+administrative/application result admission and broader network fault schedules
+remain. No complete deployable
 consensus release or macOS execution is claimed. The full P0–P7 goal remains active.

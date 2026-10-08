@@ -235,6 +235,9 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
     }
 }
 impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C> {
+    fn security(&self) -> SessionSecurity {
+        SessionSecurity::Authenticated
+    }
     fn binding(&self) -> SessionBinding {
         self.binding
     }

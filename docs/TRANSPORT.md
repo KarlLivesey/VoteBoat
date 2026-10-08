@@ -2,7 +2,9 @@
 
 `transport::PeerTransport` owns one authenticated peer connection and multiplexes
 Raft groups in bounded frames. `NativePeerTransport<S, C>` uses the same public
-`SecureSession` and `WireCodec` contracts offered to host replacements. Its
+`SecureSession` and `WireCodec` contracts offered to host replacements.
+`PeerTransport::security` exposes the authenticated/simulator capability to
+assembly; boxed providers implement the same contract. Its
 constructor takes the selected outbound queue by shared reference only to copy
 its binding and limits; it does not own the queue or create another one. The
 host supplies a ready session. An insecure or unready provider, wrong local
@@ -107,7 +109,14 @@ heartbeat traffic; campaigns are explicit. See [snapshot routing](SNAPSHOT_ROUTE
 A separate 100-group history uses native timers for initial elections,
 partition-driven replacement and healing over these sockets, checking retries
 and fresh reads. This seeded post-decode partition schedule is bounded evidence;
-a complete node facade, peer reconnect policy, application result admission and
+a complete node facade, listener/dial execution, application result admission and
 the broader network fault matrix remain in progress. Bounded effect ownership and asynchronous snapshot routing are
 implemented as separate composable runtime components. This connection driver does not by itself constitute
 a complete deployable Raft service. macOS execution remains unobserved.
+
+`PeerRoster` now supplies the bounded authorized peer map, connection reservations,
+fair visits and reconnect scheduling over this public transport. It validates
+fresh connection generations and exact completion/input scopes. The native
+effect-owner histories use it, including a quiescent real TLS reconnection before
+further replicated work. Socket/TLS establishment and ingress/result admission
+remain explicit host assembly. See [the roster contract](PEER_ROSTER.md).

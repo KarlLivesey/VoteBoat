@@ -56,12 +56,19 @@ pub fn pair(
     b: LocalIdentity,
     generation: u64,
 ) -> (NativeTlsSession<TcpStream>, NativeTlsSession<TcpStream>) {
+    pair_generations(a, b, generation, generation)
+}
+pub fn pair_generations(
+    a: LocalIdentity,
+    b: LocalIdentity,
+    a_generation: u64,
+    b_generation: u64,
+) -> (NativeTlsSession<TcpStream>, NativeTlsSession<TcpStream>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let stream_a = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
     let (stream_b, _) = listener.accept().unwrap();
     stream_a.set_nodelay(true).unwrap();
     stream_b.set_nodelay(true).unwrap();
-    let generation = SecureSessionGeneration::new(generation).unwrap();
     let limits = SessionLimits {
         write_buffer_bytes: 256,
         ..SessionLimits::default()
@@ -71,7 +78,7 @@ pub fn pair(
         &configuration(a.node.get()),
         a,
         peer(b),
-        generation,
+        SecureSessionGeneration::new(a_generation).unwrap(),
         limits,
         MonoTime(0),
     )
@@ -81,7 +88,7 @@ pub fn pair(
         &configuration(b.node.get()),
         b,
         peer(a),
-        generation,
+        SecureSessionGeneration::new(b_generation).unwrap(),
         limits,
         MonoTime(0),
     )

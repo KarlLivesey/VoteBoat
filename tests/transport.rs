@@ -38,6 +38,9 @@ fn transport_limits_are_available_without_native_dependencies() {
     // A host transport can be selected through this same object-safe contract.
     struct Host;
     impl PeerTransport for Host {
+        fn security(&self) -> voteboat::secure::SessionSecurity {
+            voteboat::secure::SessionSecurity::SimulatorOnly
+        }
         fn binding(&self) -> voteboat::secure::SessionBinding {
             binding(1, 2)
         }

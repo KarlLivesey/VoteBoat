@@ -11,7 +11,7 @@ record claims that unimplemented phases already work.
 | --- | --- | --- |
 | P0 | Checked identities, validated policies, public seams, deterministic failure harness | Storage/core/application/checkpoint/runtime/wire/TLS/peer-transport seams, virtual deadlines and delayed-completion histories implemented; other subsystem contracts and broader simulation remain |
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers and real TCP/TLS histories; full node facade remains |
-| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, shared WAL and snapshot workers, timers and 100-group histories implemented; production peer roster/reconnect and result admission remain |
+| P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, shared workers, timers, authorized peer roster/reconnect coordination and native 100-group histories implemented; listener/dial execution and full ingress/result admission remain |
 | P3 | Recursive quorum integration at every consensus quorum site | Elections, durable commitment and read barriers use validated predicates; check-quorum sites and full audit remain |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Pending; online configuration changes rejected |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
@@ -1320,9 +1320,73 @@ application result admission, membership, recursive responsibilities and
 split/merge remain unfinished. macOS execution and hardware power cuts remain
 unobserved. The full P0–P7 goal remains active.
 
+## Slice 18: bounded peer roster and reconnect coordination
+
+`transport::PeerRoster<P: PeerTransport>` now owns the construction-authorized
+remote-node/store map and selected peer connection handles. It reserves declared
+transport frame/decoded ceilings before issuing ConnectTickets, caps concurrent
+connection attempts, checks exact ready-result identities and security capability,
+and fairly visits connections with the existing bounded session/plaintext budgets.
+`PeerTransport::security` exposes production/simulator capability; boxed providers
+forward the same public interface. The native network histories use this fixed
+coordinator over NativePeerTransport rather than bypassing it with a raw map.
+
+The host supplies a disjoint inclusive SecureSessionGeneration range per roster
+within the recovered local WAL session. Checked ticket allocation stays within
+that range. Drained replacement can reclaim the next unused generation; restart
+changes the persisted WAL session before service. No new persistent generation,
+durability token, quorum rule or remote progress watermark is introduced. Local
+transport status never establishes replication or client success.
+
+Failed/expired attempts use monotonic exponential retry backoff. `next_deadline`
+exposes local scheduling hints without requiring a busy retry loop while capacity
+is full. Remote authenticated sessions cannot regress within the roster. Failure
+retires the connection, discards obsolete input and preserves its accepted send
+and slot reservation until exact terminal consumption. The host completes that
+returned batch through the original outbound queue to release separate credits.
+Malformed completions fence the coordinator and return the offending payload;
+explicit failed discard never allows that roster to resume.
+
+Admission sequence is deliberately **not** used as dispatch order. Native
+integration exposed that reserved priority scheduling can dispatch newer control
+tickets ahead of older bulk work. Exact in-flight correlation is sufficient;
+imposing an unrelated sequence watermark would incorrectly reject valid batches.
+See [the peer-roster contract](PEER_ROSTER.md) for budgets, ownership, shutdown,
+host generation allocation and connection-establishment obligations.
+
+### Slice 18 validation
+
+- Full local suites pass with 186 tests for default native/TLS, 175 for
+  native-only and 89 for core/host-only. Clippy passes all three feature sets
+  with warnings denied; formatting, documentation and contract JSON checks pass.
+- Public host-provider tests cover authentication/identity/wire/limit rejection,
+  fair visits, aggregate reservation, timeout/backoff, stale attempts, remote
+  session rollback, exact failure ownership, invalid terminal completions,
+  mis-scoped/excess-capacity input, priority reordering, close/drain, generation
+  handoff and range exhaustion. They exercise the same public PeerTransport and
+  OutboundQueue surfaces as the native assembly; their security attestation is
+  a test assumption, not cryptographic evidence.
+- All three native three-node/100-group effect-owner histories now use the
+  roster with actual TCP/TLS under default features, alongside real WAL/snapshot
+  workers. The snapshot/checkpoint history replaces one quiescent peer pair with
+  fresh generations after the retry deadline, then continues automatic heartbeat
+  traffic, replicated writes/retries/reads, repeated checkpoints, actual-file
+  recovery and more replicated work. Native-only uses bounded simulated delivery
+  and tests the roster separately. This does not cover every kernel fault or
+  replacement with partially delivered frames.
+- Native histories explicitly close every roster and poll TLS shutdown, checking
+  that all connection reservations are released. Host replacement tests also
+  accept bounded preallocated frame buffers rather than requiring native layout.
+
+Socket/listener/dial execution, complete node ingress/result admission, physical
+WAL cleaning, membership/policy changes, recursive responsibilities and split/merge
+remain unfinished. Host-owned external handshakes must be canceled on expiry or
+shutdown and remain under separate budgets. No production release, performance
+claim, macOS execution or power-cut evidence is implied. Full P0–P7 remains active.
+
 ## Next slice
 
-Continue native node assembly with bounded peer roster/reconnect handling,
-decoded ingress and application result admission. Implement physical WAL cleaning
-with explicit durable replacement and recovery dependencies. CI stays background
-feedback; relevant local checks guide direct commits.
+Continue full native node assembly with bounded socket establishment, decoded
+ingress and application result admission, then physical WAL cleaning with durable
+replacement/recovery dependencies. CI stays background feedback; relevant local
+checks guide direct commits.
