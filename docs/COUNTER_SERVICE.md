@@ -116,14 +116,16 @@ infers assignment from peer routes. Removed local stores are rejected. The CLI
 retains the original bootstrap of voters/stores 1..3, group/configuration 1 and
 initial incarnations. Default/legacy provisioning covers identities 1..3;
 `--deployment` declares additional exact stores/routes as described below. This
-does not rewrite bootstrap or assign a replica. Service configuration mutation
-endpoints remain integration work. Offline enrollment is available below.
+does not rewrite bootstrap or assign a replica. Trusted startup administration
+plans are available below. Public configuration mutation endpoints remain gated.
+Offline enrollment is available below.
 Rust hosts can already supply explicit provisioning and trusted enrollment images.
 
 The same enforced counter envelope, local commands, durable configuration-status
 observation, checkpoint drain and retry IDs apply. Configuration execution remains
-denied by ordinary service polling. No automatic witness query or finalization is
-implied by starting a member process; hosts must still drive those controls when
+denied by ordinary service polling. Without an explicit `--admin-plan`, no automatic
+finalization is implied by starting a member process. Witness queries remain
+explicit host controls; hosts must still drive them when
 their recovery history requires them.
 
 Executable TCP/TLS and QUIC histories reopen prepared committed joint and final
@@ -135,7 +137,7 @@ service recovery, not online enrollment or the distributed proposal lifecycle.
 ## Explicit member deployment
 
 Use `--deployment FILE` instead of PEERS_FILE with member recovery or offline
-enrollment. Put it before a final `--transport tcp|quic` on serve commands:
+enrollment. Trailing named options may appear in any order; duplicates reject:
 
 ```sh
 target/debug/voteboat-counter serve recover-member /your/data/node4 4 43000 /your/tls --deployment deployment.txt --transport quic
@@ -388,7 +390,7 @@ missing checkpoint data, pre-I/O mode/version rejection, and late worker/socket
 cleanup. These histories seed native durable journal fixtures; they do not prove
 online distributed creation/commit of those configurations. The counter CLI now
 offers explicit `recover-member` startup and offline enrollment. Enforced counter
-envelopes are implemented below. Service administration, generic application-envelope
+envelopes and trusted startup administration are implemented below. Generic application-envelope
 integration and full faulted remote transitions remain pending; public service
 mutation endpoints stay gated. Explicit member assemblies receive validated
 configuration replication.
@@ -510,3 +512,97 @@ This is the application payload bound; growing membership metadata and retained
 configuration operation IDs still require the selected codec/transport checks
 before each configuration mutation. General host application envelope enforcement,
 service mutation endpoints and remote lifecycle release remain work.
+
+## Trusted startup administration plan
+
+`serve recover-member ... --admin-plan FILE` loads operator-owned intent once,
+**before opening the WAL, workers or sockets**. Supply the same immutable plan
+and deployment to participating processes. Only the current leader drives it;
+ordinary polling without a plan still denies configuration proposals. The local
+command port gains no configuration mutation command. This adapter is for the
+counter assembly and fixed group/incarnation 1/1, with its enforced schema-1,
+eight-byte command and 330032-byte checkpoint envelope.
+
+For example, when committed configuration 3 has voters 1/2 and an already enrolled
+learner 3 with the legacy exact store identities, this plan promotes node 3:
+
+```text
+voteboat-counter-admin-v1
+placement 2 false
+replica 1 1
+replica 2 2
+replica 3 3
+joint 800 3 4 5 - m:3 v:1 v:2 v:3
+final 800 4 5
+```
+
+```sh
+target/debug/voteboat-counter serve recover-member /your/data/node1 1 43000 /your/tls --admin-plan promotion.plan --transport tcp
+```
+
+The example requires that existing view and enrollment; it does not initialize
+it. Create a learner assignment through a separate trusted plan, checkpoint its
+source, then use offline `enroll` and start the target in member mode before
+promotion. Replica declarations must cover current voters/learners as well as
+proposed assignments. Store identities come from the checked `--deployment` file
+or legacy provisioning; labels do not create stores or grant membership.
+
+The UTF-8 file is at most 64 KiB, with no blank/comment lines or trailing fields.
+Its grammar is:
+
+```text
+voteboat-counter-admin-v1
+placement MINIMUM_VOTING_DOMAINS true|false
+replica NODE FAILURE_DOMAIN
+... replica declarations before all intents ...
+learners OPERATION EXPECTED NEXT LEARNERS POLICY
+joint OPERATION EXPECTED JOINT FINAL LEARNERS POLICY
+final OPERATION EXPECTED FINAL
+```
+
+`LEARNERS` is `-` or a comma-separated list of distinct provisioned node IDs.
+Voters come from `POLICY`, a prefix tree using `v:NODE`, `m:CHILD_COUNT` followed
+by that many trees, or `w:CHILD_COUNT` followed by `WEIGHT TREE` pairs. For example,
+`w:2 2 m:2 v:1 v:2 2 v:3` needs both its nested 1/2 majority and voter 3.
+The existing validated strict-majority policy owns quorum semantics; zero weights,
+duplicate voters, excessive tree depth/count and malformed shapes reject. Limits
+include 64 intents, at most 64 failure domains and the native plan's retained-byte
+ceiling. `placement`'s boolean requests tolerance of any one voting-domain loss;
+these labels are trusted operator assertions. Both current and proposed views
+must pass placement checks.
+
+Each intent fixes its original nonzero operation ID, expected head and complete
+target. A joint's matching final must also appear in the plan with the same
+operation and exact reserved target. The owner enforces journal grammar and
+selected provider/wire capacities at execution. Malformed files fail before
+opening resources. Invalid placement, mismatched heads or permanent proposal
+rejection stop automatic administration and log the reason while normal service
+continues; correct the trusted input and restart after inspecting durable status.
+Transient leadership/readiness changes retry the original intent with backoff.
+
+The leader waits for an actual current-term committed record. Normal application
+work can establish it; the adapter does not manufacture a counter command. After
+leadership changes, continuing real application work may be needed before the
+next administrative phase. Promotion proofs are collected from authenticated
+peers and checked against the current term/configuration/commit prefix/session.
+One readiness request runs at a time; a two-second observation timeout queues
+owner-side cancellation, then a fresh binding-scoped round. Cancellation changes
+only volatile readiness, not membership or previously accepted configurations.
+
+The adapter retains one configuration ticket, consumes its outcome and consults
+local durable status before further work. Accepted uncommitted records wait;
+committed joint records yield their exact final; completed historical operations
+are skipped. Unknown outcomes never create a replacement ID or rollback. Local
+absence is inconclusive; only the original explicit operator intent authorizes a
+fresh submission, still subject to normal leader/journal checks. A completed
+historical operation does **not** compare a newly supplied payload, so preserve
+the original file and use fresh operation IDs for genuinely new intentions.
+`configuration-status OPERATION` exposes the existing local durable evidence.
+Shutdown drains configuration observations with the same owner and workers.
+
+Executable tests commit joint/final promotion from a prepared enrolled learner,
+reopen all three native stores with the same plan and verify exactly one joint
+and final plus preserved counter deduplication. TCP uses an ordinary majority;
+QUIC also exercises a nested weighted policy. These are concrete promotion and
+restart histories, not full faulted add/enroll/promote/remove release evidence.
+macOS execution and separate-host validation remain outstanding.

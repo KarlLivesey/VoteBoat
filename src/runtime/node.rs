@@ -573,6 +573,18 @@ where
             )
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
     }
+    /// Queue cancellation of volatile readiness work/results. This revokes no
+    /// durable membership and takes effect only when the owner executes it.
+    /// A host may then start a fresh round after a lost reply or changed session.
+    pub fn cancel_learner_readiness(&mut self, group: GroupIdentity) -> Result<(), NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        self.local
+            .owner
+            .admit(group, Event::CancelLearnerReadiness)
+            .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
+    }
     pub fn disconnect(&mut self, peer: NodeId, now: MonoTime) -> Result<(), NodeError> {
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);

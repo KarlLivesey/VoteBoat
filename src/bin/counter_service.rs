@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
+#[path = "support/counter_admin.rs"]
+mod administration;
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/counter_setup.rs"]
@@ -28,7 +30,7 @@ use voteboat::membership::ConfigurationResumeAction;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE] [--transport tcp|quic]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -39,7 +41,8 @@ recover-member explicitly verifies existing membership journals and selects wire
 enroll is an offline trusted handoff; stop source and destination before use and preserve files on failure.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
-recover-member also accepts --deployment FILE instead of PEERS_FILE; use it before --transport.\n\
+recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
+--admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -196,8 +199,9 @@ fn serve(
     base: u16,
     tls: &Path,
     input: setup::PeerInput<'_>,
-    protocol: NativePeerProtocol,
+    options: (NativePeerProtocol, Option<&Path>),
 ) -> Result<(), Failure> {
+    let (protocol, plan_path) = options;
     let create = match mode {
         "create" => true,
         "recover" | "recover-member" => false,
@@ -209,9 +213,15 @@ fn serve(
                 .into(),
         );
     }
+    if plan_path.is_some() && mode != "recover-member" {
+        return Err("administration plan requires recover-member".into());
+    }
+    let config = setup::configuration(root, id, base, tls, create, input)?;
+    let mut administration = plan_path
+        .map(|path| administration::Administration::load(path, &config.provisioned_stores))
+        .transpose()?;
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
     listener.set_nonblocking(true)?;
-    let config = setup::configuration(root, id, base, tls, create, input)?;
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     let start = Instant::now();
@@ -223,7 +233,19 @@ fn serve(
     let mut quit = false;
     let mut shutdown_started = None;
     loop {
-        let progress = checked(service.poll(now(start), NodePollBudget::default()))?;
+        let progress = if let Some(admin) = administration.as_ref() {
+            checked(service.poll_with_configuration_authorization(
+                now(start),
+                NodePollBudget::default(),
+                |core, proposal| {
+                    admin
+                        .plan
+                        .authorize(core.state().bootstrap.group, core.membership(), proposal)
+                },
+            ))?
+        } else {
+            checked(service.poll(now(start), NodePollBudget::default()))?
+        };
         if let Some(replica) = progress.replica {
             for step in replica.steps {
                 // Client/read errors are reported through their exact output tickets.
@@ -233,6 +255,9 @@ fn serve(
             }
         }
         outputs(&mut service, &mut connection)?;
+        if let Some(admin) = administration.as_mut() {
+            admin.tick(&mut service, quit)?;
+        }
         if !quit && connection.is_none() {
             match listener.accept() {
                 Ok((stream, _)) => {
@@ -324,33 +349,39 @@ fn serve(
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
-    let protocol = if args.first().is_some_and(|a| a == "serve")
-        && args.len() >= 3
-        && args[args.len() - 2] == "--transport"
-    {
-        let selected = args.pop().unwrap();
-        args.pop();
-        match selected.as_str() {
-            "tcp" => NativePeerProtocol::TcpTls,
-            #[cfg(feature = "quic")]
-            "quic" => NativePeerProtocol::Quic,
-            #[cfg(not(feature = "quic"))]
-            "quic" => return Err("QUIC support requires building with --features quic".into()),
-            _ => return Err("expected --transport tcp or --transport quic".into()),
+    let mut protocol = NativePeerProtocol::TcpTls;
+    let mut transport_selected = false;
+    let mut deployment = None;
+    let mut admin_plan = None;
+    while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
+        let flag = args[args.len() - 2].as_str();
+        if !matches!(flag, "--transport" | "--deployment" | "--admin-plan") {
+            break;
         }
-    } else {
-        NativePeerProtocol::TcpTls
-    };
-    let deployment = if args.first().is_some_and(|a| a == "serve" || a == "enroll")
-        && args.len() >= 3
-        && args[args.len() - 2] == "--deployment"
-    {
-        let path = args.pop().unwrap();
-        args.pop();
-        Some(std::path::PathBuf::from(path))
-    } else {
-        None
-    };
+        let value = args.pop().unwrap();
+        match args.pop().unwrap().as_str() {
+            "--transport" if !transport_selected && args[0] == "serve" => {
+                transport_selected = true;
+                protocol = match value.as_str() {
+                    "tcp" => NativePeerProtocol::TcpTls,
+                    #[cfg(feature = "quic")]
+                    "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => {
+                        return Err("QUIC support requires building with --features quic".into())
+                    }
+                    _ => return Err("expected --transport tcp or --transport quic".into()),
+                };
+            }
+            "--deployment" if deployment.is_none() => {
+                deployment = Some(std::path::PathBuf::from(value))
+            }
+            "--admin-plan" if admin_plan.is_none() && args[0] == "serve" => {
+                admin_plan = Some(std::path::PathBuf::from(value))
+            }
+            _ => return Err("duplicate or unsupported startup option".into()),
+        }
+    }
     match args.as_slice() {
         [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
             if enroll_arg == "enroll" && rest.len() <= 1 =>
@@ -392,7 +423,7 @@ fn main() -> Result<(), Failure> {
                 base,
                 Path::new(tls),
                 input,
-                protocol,
+                (protocol, admin_plan.as_deref()),
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {

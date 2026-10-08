@@ -1041,7 +1041,8 @@
         "is_drained",
         "Node::poll_with_configuration_authorization",
         "NativeAdministrationPlan::new",
-        "NativeAdministrationPlan::authorize"
+        "NativeAdministrationPlan::authorize",
+        "voteboat-counter --admin-plan"
       ],
       "native": "Bounded owner-ticket observer through existing Node/ReplicaDriver/ClientRouter/EffectOwner composition; native startup exercises selected WAL worker and real file reopen. NativeAdministrationPlan binds exact trusted intents and application envelope to the selected PlacementAuthorizer through the same execution-time callback.",
       "conformance": [
@@ -1049,9 +1050,10 @@
         "tests/effect_owner.rs",
         "tests/startup.rs",
         "tests/placement.rs",
-        "tests/native_member_startup.rs"
+        "tests/native_member_startup.rs",
+        "tests/counter_service.rs"
       ],
-      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence includes a local same-electorate transition and the distributed promotion histories below. Counter envelope enforcement, offline enrollment and explicit deployment are implemented; service administration commands and full faulted network lifecycle remain pending. Native trusted plans bound 64 intents/1 MiB, reject duplicate operation/expected-head keys and nonpositive envelopes, and return original inputs on construction failure. Exact group/record/envelope plus selected native or host placement are rechecked at execution. TCP/QUIC native histories revoke queued scope, authenticate learner readiness, commit real joint/final records after lost observation, checkpoint and reopen files; initial stable learner assignment is prepared. This does not release public service mutation ingress or prove broader faulted lifecycle."
+      "scope": "One retained request/outcome per group and global count/byte ceilings. Exact tracked configuration operation and proposed index/term are observations, not durability. Committed requires the exact record at that position in the durable committed core prefix; compacted/unavailable history or changed leadership yields unknown. Default Node polling denies configuration execution. Explicit execution-time host authorization covers scope/placement/provider capacity; Node also checks selected membership wire support and exact live format-4 promotion bindings, preserving application admission. Cancellation stops observation only; shutdown retains existing committed results and marks unresolved waits unknown, and recovery transfers the observer alongside original providers. Existing owner admission sequences and store/runtime identities scope tickets; no new durable token, watermark or generation. Native evidence includes a local same-electorate transition and the distributed promotion histories below. Counter envelope enforcement, offline enrollment and explicit deployment are implemented; trusted startup service administration is implemented; full faulted network lifecycle remains pending. Native trusted plans bound 64 intents/1 MiB, reject duplicate operation/expected-head keys and nonpositive envelopes, and return original inputs on construction failure. Exact group/record/envelope plus selected native or host placement are rechecked at execution. TCP/QUIC native histories revoke queued scope, authenticate learner readiness, commit real joint/final records after lost observation, checkpoint and reopen files; initial stable learner assignment is prepared. This does not release public service mutation ingress or prove broader faulted lifecycle. Counter startup accepts at most 64 KiB of versioned trusted UTF-8 intents and explicit placement domains bound to provisioned stores and its enforced application envelope before resource opening. The serialized owner drives exact records, fresh bounded readiness rounds, one ticket, durable local resumption and shutdown; no network mutation command or consensus/storage format is introduced. TCP/QUIC executable promotion and same-plan restart verify no duplicate records from a prepared learner; QUIC additionally uses a nested weighted policy. Completed historical operation IDs do not certify a newly supplied payload. Permanent rejection stops automatic administration, transient leadership/readiness changes preserve original intent; ordinary application work must establish current-term commitment."
     },
     {
       "design_id": "C01/C04/C10/C15",
@@ -1061,7 +1063,8 @@
         "Node::request_learner_readiness",
         "Raft::ready_learner",
         "prepare_snapshot_work",
-        "complete_snapshot_work"
+        "complete_snapshot_work",
+        "Node::cancel_learner_readiness"
       ],
       "native": "Explicit wire 4 over matching authenticated TCP/TLS and optional QUIC sessions; NativeSnapshotWorker read-only Readiness jobs and original EffectOwner/SnapshotRouter leases.",
       "conformance": [
@@ -1070,9 +1073,10 @@
         "tests/startup.rs",
         "tests/secure.rs",
         "tests/quic.rs",
-        "tests/quic_connect.rs"
+        "tests/quic_connect.rs",
+        "tests/native_member_startup.rs"
       ],
-      "scope": "One pending leader request, one volatile checked result and one suspended learner verification per group. Exact group/configuration/term/context/peer-store-session checks; no term/timer/vote/read authority. Existing durable core prefix and optional verified pin plus selected limits and bounded checkpoint/restore govern positive replies. Native recovery binds core limits/state to the authoritative log; custom hosts must honor that construction contract. Capability/application lag denies without fencing; accepted storage/output failure fences. Original worker tickets, effect leases, decoded/output credits and loaded-image/checkpoint reservations survive delay, stale observation and shutdown. Lost replies require explicit host cancellation/retry. Actual TCP/QUIC exchange uses native framing/worker with host snapshot stores and host-imported enrollment; separate tests cover native-file readiness/reopen. Wire/transport capacity and placement authorization remain administrator obligations. No native online enrollment/promotion endpoint or released configuration ingress; no new durable token, watermark or generation."
+      "scope": "One pending leader request, one volatile checked result and one suspended learner verification per group. Exact group/configuration/term/context/peer-store-session checks; no term/timer/vote/read authority. Existing durable core prefix and optional verified pin plus selected limits and bounded checkpoint/restore govern positive replies. Native recovery binds core limits/state to the authoritative log; custom hosts must honor that construction contract. Capability/application lag denies without fencing; accepted storage/output failure fences. Original worker tickets, effect leases, decoded/output credits and loaded-image/checkpoint reservations survive delay, stale observation and shutdown. Lost replies require explicit host cancellation/retry. Actual TCP/QUIC exchange uses native framing/worker with host snapshot stores and host-imported enrollment; separate tests cover native-file readiness/reopen. Wire/transport capacity and placement authorization remain administrator obligations. No native online enrollment/promotion endpoint or released configuration ingress; no new durable token, watermark or generation. Node cancellation admits the existing core event through the bounded owner and rejects after close. It clears volatile pending/result state only upon execution; handed-out proofs remain subject to normal current-scope checks. Native TCP/QUIC promotion histories cancel a checked result, then authenticate a fresh exchange before promotion. The counter adapter queues cancellation after a two-second lost-readiness observation timeout before retrying; full dropped-reply transport schedules remain release work."
     },
     {
       "design_id": "C01/C04/C10/C20",

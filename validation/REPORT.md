@@ -1103,3 +1103,39 @@ assertion uses a borrowed expected-message slice.
   member target passes 28 and placement passes 8. Native-only placement passes 8;
   all-feature/all-target Clippy warnings-denied and all-feature docs pass. Inventory
   metadata (60 contracts), formatting and diff checks pass.
+
+## Slice 75 — trusted executable administration
+
+The counter loads bounded trusted startup intent/placement files before opening
+native resources, then drives existing Node authorization, authenticated readiness,
+exact proposals, durable status and shutdown. No public command-port mutation API
+is added. Current-term application commitment remains required. Owner cancellation
+of a lost readiness round uses the existing volatile core event; it is neither
+membership rollback nor a durable receipt.
+
+Validation run:
+
+- `cargo +stable test --locked --offline --all-features --test counter_service --test native_member_startup`: service 18 and native member 28 passed. The two new executable histories commit a real joint/final promotion from a prepared enrolled learner over TCP/QUIC, reopen all three files with the same startup plan, inspect exactly one joint/final and preserve counter retry state. QUIC uses a nested weighted policy; this is a fault-free concrete policy history, not full recursive fault coverage.
+- The parser rejection test covers malformed header/64-KiB limit/empty plan, duplicate or unprovisioned replicas, duplicate voters/learners, zero weight, branch-count/depth overflow, invalid IDs/trailing fields, duplicate intent keys/intent-count ceiling and unsupported static startup modes before native store opening.
+- Native promotion histories additionally cancel an observed readiness result through Node, execute the cancellation, then obtain fresh authenticated readiness before promotion. Closed cancellation rejects after shutdown starts.
+- `cargo +stable test --locked --offline --no-default-features --features native,tls --test counter_service trusted_startup_plan_promotes_and_restarts_tcp`: one TCP-only assembly history passed.
+- All-feature public docs built; inventory remains 60 implemented contracts with valid conformance paths. Final lint/format/check results are recorded below after completion.
+
+During implementation, an attempted binary precheck called crate-private
+Membership::validate_next; compilation rejected that call. The adapter now checks
+its exact expected head and delegates complete journal validation to the existing
+Node/core admission path. No core visibility or validation semantics changed.
+Clippy also identified a nested cancellation condition; it was collapsed with no
+behavior change.
+
+Broader faulted add/enroll/promote/remove, deliberately dropped readiness replies,
+unavailable/compacted witnesses, divergent retained-only tails, promoted-leader
+failure schedules and macOS/separate-host execution remain outstanding. The
+operator must preserve the original trusted plan; historical completed operation
+identity does not compare a newly supplied payload. Full P0–P7 remains active.
+
+Final slice-75 checks: all-feature/all-target Clippy passed with warnings denied;
+format and diff checks passed; inventory passed at 60 contracts. After the final
+retry classification change, both TCP/QUIC executable administration histories
+passed again. After adding the shutdown assertion, both native promotion histories
+passed again. All-feature docs and the TCP-only feature assembly passed as above.

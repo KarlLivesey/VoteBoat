@@ -223,7 +223,7 @@ pub fn configuration(
     }
     Ok(config)
 }
-fn application() -> Result<Counter, Failure> {
+pub fn application() -> Result<Counter, Failure> {
     let app = checked(Counter::new(10000))?;
     // Bind the service declaration to the same capacity enforced by admission,
     // application and restore, including future retry history growth.

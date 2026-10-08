@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment and enforced counter bounds implemented; service placement-policy/authorized mutation endpoints, generic application envelopes and faulted online transitions remain |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; public mutation ingress, generic application envelopes and faulted online transitions remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Pending |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Pending |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Pending; no benchmark claims |
@@ -142,30 +142,36 @@ files. The initial learner is prepared, but joint/final are not seeded. Current
 item 1 still needs the service plan/command adapter; the next two remain fault-
 tested release and P5 routing. No new helper milestone or general liveness claim.
 
-1. **Enrollment and administrative service integration (current, P4).** Connect
-   explicit durable enrollment and administration/status endpoints to placement,
-   readiness, capacity and member restart. Bind/enforce declared application
-   schema/command/checkpoint bounds as deduplication grows. Depends on slices
-   51–74 and authenticated service scope. Check exact committed assignments,
-   rejection before mutation, lost-reply resumption and matching TCP/QUIC
-   assemblies. Provides the native path for release testing, not an early opening
-   of public configuration ingress.
-2. **Fault-tested remote membership release (next, P4).** Exercise actual
+Slice 75 connects trusted startup administration to the executable, with bounded
+placement/policy input, owner-driven readiness/cancellation, exact proposals,
+durable resumption and same-plan restart over TCP/QUIC. Together with enrollment,
+deployment and counter bounds this supplies the native integration path. The
+mini plan advances to its fault-tested release; public configuration mutation
+ingress stays gated and the full P0–P7 objective is unchanged.
+
+1. **Fault-tested remote membership release (current, P4).** Exercise actual
    add/catch-up/promote/remove with partial joint/final delivery, weighted and
    recursive policies, leader loss, rollback, snapshots and restart over TCP/QUIC.
-   Depends on item 1 and the implemented recovery/authorization paths. Check
+   Depends on the integrated service path and implemented recovery/authorization paths. Check
    divergent retained-only learner histories, unavailable/compacted witnesses,
    promoted-leader failures and broader recursive-policy schedules; resolve
    activation/catch-up gaps before releasing service mutation endpoints.
    Completes safe placement for P5 responsibility routing and P6 ownership movement;
    P5–P7 remain the global capability chain above.
-3. **Responsibility manifests and routing (following, P5).** Implement the first
+2. **Responsibility manifests and routing (next, P5).** Implement the first
    usable Single/Partitioned/Delegated manifest and bounded resolution/cache path
    over concrete groups, with explicit ordering boundaries. Depends on the group,
    runtime and application foundations; placement changes use safe P4 operations.
    Check range coverage, generations/stale routes and cached child operation during
    parent unavailability without ancestor commits on the ordinary write path.
    Supplies the routing/ownership context required by P6 split and merge.
+3. **First durable split/merge lifecycle (following, P6).** Move real application
+   data using P5 ownership manifests, exact source fencing, target import readiness
+   and durable activation. Preserve operation/deduplication/outbox/lineage state.
+   Depends on routing plus the membership and checkpoint foundations. Check crash
+   and receipt-loss recovery without two active owners; routing and ownership
+   movement have separate receipts. Advances the global split/merge milestone,
+   followed by measured P7 tuning. This is not inferred from learner readiness.
 
 ### How the current work fits globally
 
@@ -174,7 +180,7 @@ the capability milestones above:
 
 | Immediate change | Why it belongs now | Completion check | Global contribution |
 | --- | --- | --- | --- |
-| Integrate native enrollment and administration | Placement, durable resumption, transport envelopes, member restart/reception and recovery/witness controls now exist; the native service must bind them to enrollment and enforced application bounds. | Service/embedding can enroll and recover exact stores, administer and query outcomes; unsupported assemblies and outgrown envelopes reject before mutation. | Makes P4 usable through the native service and supplies the release-test path. |
+| Integrated native enrollment and administration (slices 71–75) | Member restart, offline enrollment, explicit deployment, enforced Counter bounds and trusted startup plans now compose through public Node APIs. | Executable TCP/QUIC promotion and same-plan native recovery pass; broader lifecycle faults remain the current release checks. | Makes P4 usable through the native service and supplies the release-test path. |
 | Release fault-tested remote membership transitions | Local journal/readiness/administration evidence does not yet establish remote enrollment or configuration delivery. | TCP/QUIC add/promote/remove with partial joint/final delivery, weighted/recursive policies, leader loss, rollback, snapshots and restart; resolve activation/catch-up gaps before opening configuration ingress. | Completes safe placement for P5 routing and P6 ownership movement. |
 | Resolve and route responsibility manifests | Concrete groups need an explicit namespace/partition ownership view before safe data movement. | Validated manifests and bounded cached routing; established child work survives parent failure without ancestor commits. | Implements P5 routing and supplies P6 ownership lineage. |
 
@@ -4218,3 +4224,58 @@ all-feature/all-target Clippy warnings-denied, all-feature docs, inventory metad
 (60 contracts), formatting and diff checks pass. One later parallel run exposed
 an older fixture's AddrInUse probe/rebind race; per-process unique endpoint
 assignments resolve that reuse. No production socket/retry semantics changed.
+
+## Slice 75 — trusted executable administration and owner readiness retry
+
+Mini schema: accept a bounded immutable startup plan of exact records and failure
+labels, bind stores to deployment and requirements to the real Counter, then use
+only the serialized Node's existing authorization/proposal/status paths. Keep one
+configuration ticket and bounded fresh promotion proofs. On restart inspect local
+durable operation history; accepted work waits, committed joint yields its exact
+final, and unknown never replaces an operation ID. Current-term application
+commitment remains a core prerequisite. Cancel a lost volatile readiness exchange
+through the owner before retrying. Drain configuration outcomes during shutdown.
+Acceptance: actual executable promotion, same-plan native reopen with no duplicate
+records, malformed input rejection before opening stores, and TCP/QUIC parity.
+
+The counter now supports `serve recover-member ... --admin-plan FILE`. The UTF-8
+version-1 host-input grammar supports learner assignments, joint/final records,
+recursive majority/weighted policy trees and explicit placement requirements.
+Input is limited to 64 KiB, 64 intents and the existing backend policy/domain/byte
+ceilings. Exact stores are drawn from checked provisioning, never inferred from
+node numbers in explicit deployment. The existing Counter enforces and supplies
+its lifetime application envelope. The plan is selected at every execution poll;
+ordinary service polling remains denied and no command-port configuration
+mutation API is introduced. Tail options accept any order and reject duplicates.
+
+The host driver waits for leadership/current-term commitment, prechecks exact
+scope and placement, collects and rechecks live-binding proofs, retains one
+configuration observation and rederives durable status. Permanent rejection stops
+automatic administration with a diagnostic while service continues. Transient
+leader/readiness changes retry original intent after backoff; current-term
+application work is never fabricated. Historical completion is explicitly local
+operation evidence, not a comparison to a changed startup payload. Preserve the
+original plan across restart. Accepted records and Unknown observations never
+cause rollback or replacement IDs.
+
+A dropped readiness reply previously left the existing core round busy until a
+scope change. `Node::cancel_learner_readiness` exposes its existing event through
+bounded owner admission, with the same running/close checks as request admission.
+The driver queues cancellation after a two-second observation timeout before a
+fresh round. Cancellation affects volatile checks/results only when executed;
+handed-out proofs still require the ordinary fresh scope check. This introduces
+no consensus effect, durability token, watermark, generation or storage/wire
+format. Versioned text is trusted host input. Public contracts and inventory reuse
+the existing Node/authorization/placement seams, with no new provider trait.
+
+Executable TCP/QUIC histories start from a prepared committed stable learner,
+commit actual promotion joint/final records, preserve counter retry state and
+restart all three stores with the same plan. They inspect exactly one original
+joint and final in each durable log. QUIC uses a nested weighted policy; this is
+specific fault-free policy evidence, not broad recursive-policy fault coverage.
+Malformed header/size/policy/depth/assignment/intent inputs and unsupported static
+modes reject before opening a store. Existing native promotion histories now
+cancel a checked result and repeat readiness through the real owner/exchange.
+The fault-tested remote membership release becomes the current mini objective,
+then P5 routing and P6 ownership movement. P7 and the full goal remain active;
+macOS and separate-host operational validation remain outstanding.

@@ -53,6 +53,7 @@ struct Cluster {
     children: Vec<Option<Child>>,
     endpoints: Option<PathBuf>,
     deployment: Option<PathBuf>,
+    admin_plan: Option<PathBuf>,
     tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
@@ -108,6 +109,7 @@ impl Cluster {
             children: (0..3).map(|_| None).collect(),
             endpoints: None,
             deployment: None,
+            admin_plan: None,
             tls: None,
             listeners,
             udp_sockets,
@@ -145,6 +147,9 @@ impl Cluster {
         }
         if self.quic {
             command.args(["--transport", "quic"]);
+        }
+        if let Some(path) = &self.admin_plan {
+            command.arg("--admin-plan").arg(path);
         }
         let _gate = fixture_gate();
         self.children[id - 1] = Some(
@@ -389,6 +394,163 @@ fn seed_member_service(root: &std::path::Path, final_view: bool, include_learner
             SnapshotLimits::default(),
         )
         .unwrap();
+    }
+}
+fn trusted_administration_history(quic: bool) {
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    seed_member_service(&cluster.root, true, true);
+    let path = cluster.root.join("administration.plan");
+    let policy = if quic {
+        "w:2 2 m:2 v:1 v:2 2 v:3"
+    } else {
+        "m:3 v:1 v:2 v:3"
+    };
+    fs::write(&path, format!("voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\njoint 800 3 4 5 - {policy}\nfinal 800 4 5\n")).unwrap();
+    cluster.admin_plan = Some(path);
+    for restart in [false, true] {
+        for id in 1..=3 {
+            cluster.start(id, "recover-member");
+        }
+        cluster.leader();
+        // A real application write establishes this leader's current-term
+        // commitment. Administration never manufactures an application write.
+        assert!(cluster.routed(&["add", "900", "1"]).contains("Value(1)"));
+        let deadline = Instant::now() + Duration::from_secs(25);
+        for id in 1..=3 {
+            loop {
+                let status = cluster.wait_configuration_status(id, "800");
+                if status.contains("action=completed") {
+                    break;
+                }
+                assert!(
+                    Instant::now() < deadline,
+                    "administration did not finish: {status}; logs at {:?}",
+                    cluster.root
+                );
+                std::thread::sleep(Duration::from_millis(30));
+            }
+        }
+        assert_eq!(cluster.routed(&["read"]), "OK value=1\n");
+        let leader = cluster.leader();
+        // Startup scope does not add configuration mutation to the command port.
+        assert!(!cluster
+            .request(leader, &["configure", "801"])
+            .status
+            .success());
+        cluster.stop();
+        let _gate = fixture_gate();
+        use voteboat::{identity::*, log::*, membership::*, native::log_store::*};
+        let group = GroupIdentity {
+            id: GroupId::new(1).unwrap(),
+            incarnation: GroupIncarnation::new(1).unwrap(),
+        };
+        for id in 1..=3 {
+            let log = NativeLogStore::recover(
+                FileLogIo::open(cluster.root.join(id.to_string())).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(id as u128).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                LogLimits::default(),
+            )
+            .unwrap();
+            let state = log.state(group).unwrap();
+            let membership = state.membership_at(state.commit_index).unwrap();
+            assert_eq!(membership.id().get(), 5);
+            assert_eq!(membership.stable().voter_stores().len(), 3);
+            assert!(membership.stable().learners().is_empty());
+            let records = state
+                .entries
+                .iter()
+                .filter_map(|entry| match &entry.payload {
+                    EntryPayload::Configuration(record) if record.operation.get() == 800 => {
+                        Some(&record.change)
+                    }
+                    _ => None,
+                })
+                .collect::<Vec<_>>();
+            assert_eq!(
+                records.len(),
+                2,
+                "restart={restart} must not duplicate original intent"
+            );
+            assert!(matches!(records[0], ConfigurationChange::Joint { .. }));
+            assert!(matches!(records[1], ConfigurationChange::Final { .. }));
+        }
+    }
+}
+#[test]
+fn trusted_startup_plan_promotes_and_restarts_tcp() {
+    trusted_administration_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn trusted_startup_plan_promotes_and_restarts_quic() {
+    trusted_administration_history(true);
+}
+#[test]
+fn invalid_administration_is_rejected_before_store_open() {
+    let cluster = Cluster::new();
+    let prefix =
+        "voteboat-counter-admin-v1\nplacement 1 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\n";
+    let valid = "joint 800 1 2 3 - m:3 v:1 v:2 v:3\nfinal 800 2 3\n";
+    let cases = [
+        "wrong header\n".to_owned(),
+        "x".repeat(65537),
+        prefix.to_owned(),
+        format!("{prefix}replica 1 2\n{valid}"),
+        format!("{prefix}replica 4 4\n{valid}"),
+        format!("{prefix}joint 800 1 2 3 - m:2 v:1 v:1\n"),
+        format!("{prefix}joint 800 1 2 3 - w:2 0 v:1 1 v:2\n"),
+        format!("{prefix}joint 800 1 2 3 - m:999999 v:1\n"),
+        format!("{prefix}joint 800 1 2 3 - {}v:1\n", "m:1 ".repeat(34)),
+        format!("{prefix}learners 800 1 2 3,3 m:2 v:1 v:2\n"),
+        format!("{prefix}final 0 2 3\n"),
+        format!("{prefix}final 800 2 3 extra\n"),
+        format!("{prefix}{valid}final 800 2 3\n"),
+        format!(
+            "{prefix}{}",
+            (1..=65)
+                .map(|n| format!("final {n} 2 3\n"))
+                .collect::<String>()
+        ),
+    ];
+    let path = cluster.root.join("invalid.plan");
+    let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    for (i, contents) in cases.iter().enumerate() {
+        fs::write(&path, contents).unwrap();
+        let target = cluster.root.join(format!("invalid-{i}"));
+        let output = run(Command::new(BIN)
+            .args(["serve", "recover-member"])
+            .arg(&target)
+            .arg("1")
+            .arg(cluster.base.to_string())
+            .arg(&tls)
+            .arg("--admin-plan")
+            .arg(&path));
+        assert!(!output.status.success());
+        assert!(!target.exists());
+        assert!(
+            !String::from_utf8_lossy(&output.stderr).contains("No such file"),
+            "parser should reject before missing WAL: {i}"
+        );
+    }
+    fs::write(&path, format!("{prefix}{valid}")).unwrap();
+    for mode in ["create", "recover"] {
+        let target = cluster.root.join(mode);
+        let output = run(Command::new(BIN)
+            .args(["serve", mode])
+            .arg(&target)
+            .arg("1")
+            .arg(cluster.base.to_string())
+            .arg(&tls)
+            .arg("--admin-plan")
+            .arg(&path));
+        assert!(!output.status.success());
+        assert!(String::from_utf8_lossy(&output.stderr)
+            .contains("administration plan requires recover-member"));
+        assert!(!target.exists());
     }
 }
 fn member_service_history(quic: bool) {

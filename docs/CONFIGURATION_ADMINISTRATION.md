@@ -1,5 +1,12 @@
 # Owned configuration requests
 
+The counter executable now accepts bounded trusted startup plans through
+`--admin-plan` in member recovery mode. See the grammar, operator prerequisites
+and restart behavior in [the service guide](COUNTER_SERVICE.md#trusted-startup-administration-plan).
+This supplies the service adapter over the existing public Node authorization,
+readiness and durable-status APIs; public configuration mutation ingress remains
+gated pending the fault-tested lifecycle release.
+
 `Node::configure(ConfigurationRequest)` admits a typed administrative proposal
 and returns a `ConfigurationTicket`. It preserves the original request on
 rejection. Admission is volatile; it does not certify persistence or commitment.
@@ -61,9 +68,10 @@ Remote configuration-bearing Append and membership Snapshot remain gated by
 default. Explicit member assemblies can select receive-side configuration
 replication; native member startup does so after its exact-store/codec/route checks.
 This is distinct from releasing public service mutation endpoints.
-Generic application-envelope integration, authorized service mutation endpoints
-and faulted multi-node add/promote/remove remain required. Counter bounds and
-offline executable enrollment are implemented as described below. The supplied authorization
+Generic application-envelope integration, public service mutation endpoints
+and faulted multi-node add/promote/remove remain required. Counter bounds,
+offline executable enrollment and trusted startup administration are implemented.
+The supplied authorization
 callback is also available to host policy implementations. Existing TCP/QUIC
 readiness and static-service tests do not establish this complete path.
 

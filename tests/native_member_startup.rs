@@ -207,6 +207,30 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
             .ready_learner()
             .is_some()
     });
+    // Owner-admitted cancellation clears only volatile checks/results. Reissue
+    // through the same authenticated binding before constructing the proposal.
+    nodes[0].cancel_learner_readiness(group()).unwrap();
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .ready_learner()
+            .is_none()
+    });
+    nodes[0]
+        .request_learner_readiness(group(), node(2), requirements)
+        .unwrap();
+    drive(&mut nodes, &allowed, clock, |nodes| {
+        nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .ready_learner()
+            .is_some()
+    });
     let ready = nodes[0]
         .local()
         .owner
@@ -357,6 +381,7 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
     });
     for n in &mut nodes {
         n.begin_shutdown();
+        assert_eq!(n.cancel_learner_readiness(group()), Err(NodeError::Closed));
     }
     drive(&mut nodes, &allowed, clock, |nodes| {
         nodes.iter().all(|n| n.is_drained())
