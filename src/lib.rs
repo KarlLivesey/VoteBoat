@@ -21,6 +21,7 @@ pub mod buffer;
 pub mod connect;
 pub mod contracts;
 pub mod delegation;
+pub mod deletion;
 pub mod dial;
 pub mod directory;
 pub mod discovery;

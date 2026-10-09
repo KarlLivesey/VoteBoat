@@ -20,8 +20,10 @@
 //! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
 //! reserves fresh identities but cannot bootstrap groups or activate ownership.
 pub mod creation;
+mod deletion;
 mod namespace;
 use crate::delegation::*;
+use crate::deletion::*;
 use crate::namespace_creation::*;
 use crate::routing::codec::*;
 use crate::transfer::{InsertionChild, TransferIntent, TransferIntentStatus};
@@ -268,10 +270,14 @@ pub enum DirectoryOutcome {
     DelegationPublished(RouteGeneration),
     DelegationDeclined,
     DelegationCancelled,
+    DeletionIntentRecorded,
+    Deleted(RouteGeneration),
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
     Bootstrap,
+    Deletion(DeletionIntent),
+    DeletionCompletion(DeletionCompletion),
     Create(GroupCreationIntent),
     Namespace(NamespacePublication),
     Publish(DirectoryCommand),
@@ -319,6 +325,9 @@ pub struct Directory {
     recursive_insertion: bool,
     cross_authority_insertion: bool,
     retained_insertion: bool,
+    namespace_deletion: bool,
+    deletions: BTreeMap<ResponsibilityIdentity, OperationId>,
+    deletion_publications: BTreeMap<OperationId, OperationId>,
     insertion_creations: BTreeSet<OperationId>,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
@@ -359,6 +368,9 @@ impl Directory {
             recursive_insertion: false,
             cross_authority_insertion: false,
             retained_insertion: false,
+            namespace_deletion: false,
+            deletions: BTreeMap::new(),
+            deletion_publications: BTreeMap::new(),
             insertion_creations: BTreeSet::new(),
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
@@ -430,6 +442,21 @@ impl Directory {
         Ok(next)
     }
 
+    /// Select schema9 before bootstrap. Tombstones and their source/child facts
+    /// remain in the original bounded log/checkpoint; there is no live upgrade.
+    #[allow(clippy::result_large_err)]
+    pub fn with_namespace_deletion(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_retained_insertion()?;
+        next.namespace_deletion = true;
+        Ok(next)
+    }
+    fn control_command_limit(&self) -> usize {
+        if self.namespace_deletion {
+            MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
+        } else {
+            MAX_DIRECTORY_CONTROL_BYTES
+        }
+    }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -446,14 +473,16 @@ impl Directory {
                 - self.publications.len()
                 - self.delegation_publications.len()
                 - self.delegation_cancellations.len()
-                - self.namespace_publications.len())
+                - self.namespace_publications.len()
+                - self.deletion_publications.len())
     }
     /// Extra bounded control pool; successful publications never use ordinary history.
     pub fn control_history_capacity(&self) -> usize {
-        self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * MAX_DIRECTORY_CONTROL_BYTES
+        self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * self.control_command_limit()
     }
     pub fn reserved_publication_bytes(&self) -> usize {
-        self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
+        (self.deletions.len() - self.deletion_publications.len()) * MAX_DELETION_COMPLETION_BYTES
+            + self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
             + self.delegations.len() * MAX_DIRECTORY_CONTROL_BYTES
             + if self.namespace_creation {
                 (self.creations.len()
@@ -473,7 +502,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.retained_insertion {
+        bytes.extend(if self.namespace_deletion {
+            b"VBDINIT9"
+        } else if self.retained_insertion {
             b"VBDINIT8"
         } else if self.cross_authority_insertion {
             b"VBDINIT7"
@@ -515,6 +546,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINIT6")
             || bytes.starts_with(b"VBDINIT7")
             || bytes.starts_with(b"VBDINIT8")
+            || bytes.starts_with(b"VBDINIT9")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -524,7 +556,11 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if bytes.starts_with(b"VBNSPUB1") {
+            if self.namespace_deletion && bytes.starts_with(b"VBDDEL01") {
+                DeletionIntent::decode(bytes).map(Request::Deletion)
+            } else if self.namespace_deletion && bytes.starts_with(b"VBDDCM01") {
+                DeletionCompletion::decode(bytes).map(Request::DeletionCompletion)
+            } else if bytes.starts_with(b"VBNSPUB1") {
                 if !self.namespace_creation {
                     return Err(ApplicationError::InvalidCommand);
                 }
@@ -583,7 +619,8 @@ impl Directory {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
-            command_bytes: MAX_DIRECTORY_CONTROL_BYTES
+            command_bytes: self
+                .control_command_limit()
                 .max(46 + self.plan.encoded_len())
                 .max(if self.group_creation {
                     MAX_GROUP_CREATION_BYTES
@@ -600,7 +637,10 @@ impl Directory {
     fn publish(&mut self, command: DirectoryCommand) -> DirectoryOutcome {
         let input = command.manifest.input();
         let id = input.responsibility;
-        if self.transfers.contains_key(&id) || self.delegations.contains_key(&id) {
+        if self.transfers.contains_key(&id)
+            || self.delegations.contains_key(&id)
+            || self.deletion_busy(id)
+        {
             return DirectoryOutcome::LifecycleBusy;
         }
         let Some(grant) = self
@@ -731,7 +771,12 @@ impl Directory {
         {
             return DirectoryOutcome::UnknownResponsibility;
         }
-        if self.transfers.contains_key(&before.responsibility)
+        if self.deletion_busy(before.responsibility)
+            || before
+                .parent
+                .filter(|p| p.group == self.plan.authority)
+                .is_some_and(|p| self.deletion_busy(p.responsibility))
+            || self.transfers.contains_key(&before.responsibility)
             || self.delegations.contains_key(&before.responsibility)
         {
             return DirectoryOutcome::LifecycleBusy;
@@ -928,7 +973,9 @@ impl Directory {
         if operation == plan.child_operation() {
             return DirectoryOutcome::TransferEvidenceMismatch;
         }
-        if self.delegations.contains_key(&parent.responsibility)
+        if self.deletion_busy(parent.responsibility)
+            || self.deletion_busy(plan.before().input().responsibility)
+            || self.delegations.contains_key(&parent.responsibility)
             || self.transfers.contains_key(&parent.responsibility)
         {
             return DirectoryOutcome::LifecycleBusy;
@@ -1200,7 +1247,8 @@ impl Directory {
                 true,
             )
         } else {
-            let control = matches!(&command,Request::Publication(p) if self.publication_permitted(p))
+            let control = matches!(&command,Request::DeletionCompletion(c) if self.deletion_permitted(operation,c))
+                || matches!(&command,Request::Publication(p) if self.publication_permitted(p))
                 || matches!(&command,Request::Namespace(p) if self.namespace_permitted(p))
                 || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
                 || matches!(&command,Request::DelegationCancellation(c) if self.cancellation_permitted(c));
@@ -1208,12 +1256,14 @@ impl Directory {
                 && (self.remaining_operations() == 0
                     || self.history_bytes + bytes.len() > self.limits.history_bytes)
                 || control
-                    && (bytes.len() > MAX_DIRECTORY_CONTROL_BYTES
+                    && (bytes.len() > self.control_command_limit()
                         || self.control_bytes + bytes.len() > self.control_history_capacity())
             {
                 return Err(ApplicationError::DedupCapacity);
             }
             let outcome = match command {
+                Request::Deletion(i) => self.begin_deletion(operation, i),
+                Request::DeletionCompletion(c) => self.complete_deletion(operation, c),
                 Request::Publish(command) => self.publish(command),
                 Request::Create(intent) => self.reserve_group_creation(operation, intent),
                 Request::Namespace(p) => self.complete_namespace(operation, p),
@@ -1320,6 +1370,9 @@ impl ProposalAdmission for Directory {
                 return Ok(());
             }
             let lifecycle = match request {
+                Request::DeletionCompletion(c) if self.deletion_permitted(id, &c) => {
+                    Some(c.intent.operation)
+                }
                 Request::Namespace(p) if self.namespace_permitted(&p) => Some(p.creation),
                 Request::Publication(p) if self.publication_permitted(&p) => Some(p.operation()),
                 Request::DelegationCompletion(c) if self.delegation_permitted(&c) => {
@@ -1411,7 +1464,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.retained_insertion {
+        if self.namespace_deletion {
+            DELETION_DIRECTORY_SCHEMA
+        } else if self.retained_insertion {
             RETAINED_INSERTION_DIRECTORY_APPLICATION_SCHEMA
         } else if self.cross_authority_insertion {
             CROSS_AUTHORITY_INSERTION_DIRECTORY_APPLICATION_SCHEMA
@@ -1441,7 +1496,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.retained_insertion {
+        bytes.extend(if self.namespace_deletion {
+            b"VBDIR009"
+        } else if self.retained_insertion {
             b"VBDIR008"
         } else if self.cross_authority_insertion {
             b"VBDIR007"
@@ -1493,7 +1550,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.retained_insertion {
+                != if self.namespace_deletion {
+                    b"VBDIR009"
+                } else if self.retained_insertion {
                     b"VBDIR008"
                 } else if self.cross_authority_insertion {
                     b"VBDIR007"
@@ -1536,6 +1595,7 @@ impl CheckpointStateMachine for Directory {
             next.recursive_insertion = self.recursive_insertion;
             next.cross_authority_insertion = self.cross_authority_insertion;
             next.retained_insertion = self.retained_insertion;
+            next.namespace_deletion = self.namespace_deletion;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

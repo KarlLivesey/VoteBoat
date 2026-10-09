@@ -323,6 +323,8 @@ pub struct TransferIntentStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
+    DeletionIntent(OperationId),
+    Deletion(OperationId),
     Manifest(ResponsibilityIdentity),
     Transfer(OperationId),
     Publication(OperationId),
@@ -334,6 +336,8 @@ pub enum DirectoryQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
+    DeletionIntent(Option<crate::deletion::DeletionIntentStatus>),
+    Deletion(Option<crate::deletion::DeletionStatus>),
     Manifest(Option<ResponsibilityManifest>),
     Transfer(Option<TransferIntentStatus>),
     Publication(Option<TransferPublicationStatus>),
@@ -413,6 +417,14 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::DeletionIntent(operation) => self
+                .0
+                .deletion_intent_at(required, operation)
+                .map(DirectoryRead::DeletionIntent),
+            DirectoryQuery::Deletion(operation) => self
+                .0
+                .deletion_status_at(required, operation)
+                .map(DirectoryRead::Deletion),
             DirectoryQuery::Manifest(id) => {
                 self.0.read_at(required, id).map(DirectoryRead::Manifest)
             }
@@ -450,6 +462,19 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::DeletionIntent(op) => self
+                    .0
+                    .deletion_intent_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.intent.retained_bytes() - size_of::<crate::deletion::DeletionIntent>()
+                    }),
+                DirectoryQuery::Deletion(op) => self
+                    .0
+                    .deletion_status_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.intent.intent.retained_bytes()
+                            - size_of::<crate::deletion::DeletionIntent>()
+                    }),
                 DirectoryQuery::Manifest(id) => self.0.manifest(*id).map_or(0, |m| {
                     m.retained_bytes() - size_of::<ResponsibilityManifest>()
                 }),
@@ -499,6 +524,12 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::DeletionIntent(s) => s.as_ref().map_or(0, |s| {
+                s.intent.retained_bytes() - size_of::<crate::deletion::DeletionIntent>()
+            }),
+            DirectoryRead::Deletion(s) => s.as_ref().map_or(0, |s| {
+                s.intent.intent.retained_bytes() - size_of::<crate::deletion::DeletionIntent>()
+            }),
             DirectoryRead::Manifest(m) => m.as_ref().map_or(0, |m| {
                 m.retained_bytes() - size_of::<ResponsibilityManifest>()
             }),

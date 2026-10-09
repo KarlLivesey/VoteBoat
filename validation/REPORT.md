@@ -4032,3 +4032,52 @@ Current153 deletion, next154 reparenting, following155 target-backed partial sou
 general mappings/retention, metadata authority movement, wider membership, macOS and
 original platform/fault/P7 requirements stay open. Full P0–P7 remains active; Windows
 and P8 deferred, RPL-1.5 and ignored original pack preserved.
+
+## Slice153a — checked recursive deletion and retained tombstones
+
+Pristine Directory schema9 binds VBDINIT9/VBDIR009 and adds VBDDEL01 original
+manifest reservation plus VBDDCM01 checked completion. Existing log/checkpoint
+history owns deletion locks, original intent/status and tombstones. Original full
+owner fence observations and fixed published child tombstone projections cover
+exact direct owners/selectors. Same-authority child facts require actual local
+records; foreign facts still require authenticated original quorum/configuration
+provenance from the host. These types/digests are content bindings, not certificates.
+
+Deletion reserves bounded control capacity before owner fencing, retains Fenced
+manifests at the original ownership epoch and next generation, preserves IDs and
+original retries, and blocks incompatible publication/transfer/delegation/creation.
+Unresolved creation or lifecycle reservations refuse deletion. Ordinary capacity
+exhaustion cannot prevent an otherwise valid reserved completion. No physical
+reclamation/expiry, cancellation, replacement log or native provider is introduced.
+
+Actual conformance: original routed-owner full fences, retained data/outbox and
+checkpoint fence recovery, leaf deletion, same/foreign child deletion, a three-
+authority bottom-up chain, partitioned scopes with repeated direct groups,
+delegation/deletion ordering and failed-batch atomicity. Missing/wrong/duplicate
+coverage, wrong original operations/epochs, profile/count/capacity/pending/boundary
+and all-cut codec/checkpoint refusals are exercised. Native ModelIo tests every
+byte append interruption plus synchronization and before/after manifest publication
+faults separately at intent and tombstone journal frames. Recovered committed
+prefix is either the original state or the exact complete next transition;
+checkpoint and exact original retry then preserve facts/outcomes.
+
+Final all-feature deletion10/10 passes0.18s; core-only9/9 passes0.01s after1.77s
+build. Existing relevant application suites all pass: directory31, delegation14,
+insertion11, namespace_creation12 and retained_insertion10. Final all-feature/
+all-target Clippy -D warnings passes2.64s. Formatting, whitespace and81 implemented
+contract inventory pass. Clippy initially caught a fixture Vec used only as an
+array; changed only that allocation. Added ordering fixture initially attempted
+unsupported Single-to-Single transfer, which the existing contract correctly
+refused in both feature runs. Inspected TransferIntent::validate_shape and changed
+that fixture to the accepted two-target split. Focused ordering1/1 and final full
+feature/core deletion suites pass; production safety checks were not weakened.
+A final manifest-cache source review confirms same-epoch Active-to-Fenced newer
+routing generations are accepted and Fenced routing refuses service.
+
+This is finite application/native-journal evidence, not actual networked recursive
+deletion or an arbitrary-fault proof. Current153b supplies TCP/QUIC WAL/checkpoint
+unread-phase resumption and actual quorum owner facts. Wider owner families,
+retention/cancellation, metadata movement, reparenting154, partial sources155,
+original membership/platform/fault/P7 gates remain active. Linux local evidence;
+macOS execution pending, Windows/P8 deferred, RPL-1.5 and ignored original pack
+preserved. No CI gate or unchanged benchmark suite blocked this feature work.

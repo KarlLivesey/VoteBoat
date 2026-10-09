@@ -102,6 +102,10 @@ namespace publication and requires target activation before service. Selected
 TCP/QUIC histories cover partial provisioning, checkpoint/reopen and operation
 with metadata offline. Inserting children into existing covered selectors still
 requires fencing and transfer; creation cannot replace an existing owner.
+Opt-in [recursive deletion](docs/DELETION.md) now reserves original manifests and
+publishes retained tombstones after owner fences and child deletion facts.
+Application/checkpoint/native journal conformance passes; native deletion
+composition remains in progress.
 The [routed application wrapper](docs/ROUTED_APPLICATION.md) now checks ownership
 at admission and apply, preserves semantic retries and enforces a durable local
 fence. Native TCP/QUIC child writes and recovery work with every parent replica

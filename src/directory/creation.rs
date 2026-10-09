@@ -252,7 +252,8 @@ impl Directory {
         if parent.input().state != ResponsibilityState::Active {
             return DirectoryOutcome::OwnershipChange;
         }
-        if self.transfers.contains_key(&intent.parent)
+        if self.deletion_busy(intent.parent)
+            || self.transfers.contains_key(&intent.parent)
             || self.delegations.contains_key(&intent.parent)
         {
             return DirectoryOutcome::LifecycleBusy;

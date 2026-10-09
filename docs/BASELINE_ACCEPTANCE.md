@@ -117,3 +117,12 @@ and activated child serve/recover; original stopped metadata bytes/logs remain
 unchanged. Root TCP/WAL factory regression passes. No production protocol change.
 Current153 deletion, next154 reparenting, following155 target-backed partial sources
 and wider original scope/gates remain open; Linux evidence, macOS pending.
+
+Slice153a adds schema9 recursive deletion: bounded original manifest reservation,
+checked full-owner fences and published child tombstone projections precede
+retained Fenced manifests and exact immutable retry history. Leaf/multiple-owner,
+same/foreign and three-authority conformance, legacy/bounds/checkpoint/capacity/
+ordering refusal and native intent/tombstone journal faults pass. Native TCP/QUIC
+resumption remains current153b; reparenting154, partial sources155 and wider original
+scope remain open. Physical reclamation and unresolved-creation cancellation are
+not granted by this deletion protocol. See DELETION.md and IMPLEMENTATION.md.
