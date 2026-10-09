@@ -3749,3 +3749,45 @@ protocol/provider changes, retained-scope feature, macOS execution, separate-hos
 or performance claim. Full P0–P7 and prior open gates remain active; current151
 implements retained scope, next152 native composition and following153 deletion.
 Windows/P8 remain deferred, CI background, RPL-1.5 and original pack preserved.
+
+## Slice151a — scoped fencing with continuing retained service
+
+Opt-in pristine RoutedApplication schema2 binds scoped history capacity in
+VBROWN02. VBRSCF01 fences one exact locally owned range forward-only and emits its
+original scoped operation/index/epoch fact only through applied receipts. VBROUT02
+reconstructs exact facts without live/profile upgrade. Default schema1 stays
+separate; existing whole-source TransferSource refuses the scoped profile.
+
+Native BucketCounter data/retry/outbox histories preserve transferred7 while
+retained11 becomes13 then16, surviving replay and checkpoints. Transferred reads/
+writes, overlaps, wrong owners/epochs, control/data ID conflicts and contradictory
+snapshot facts refuse. Pending admission orders actual scoped state transitions,
+checks host admission and bounds, and reserves separate control capacity even
+when ordinary dedup history is full. A later full fence stops the remainder.
+Independent host heap receipts/queries/read results retain nested byte accounting.
+Native ModelIo cuts every scoped-fence frame byte and injects sync and manifest
+publication failures. Recovery is old state or exact complete fence; retained
+writes remain available in both. This is finite native I/O-model fault evidence.
+
+Initial constructor trait access/exhaustive-arm compile mistakes and a missing
+fixture identity import were corrected directly against existing contracts.
+Initial focused3/3 pass0.33s after14.11s build. Added native faults/local range
+checks5/5 pass0.22s after24.78s build including lock wait. Core-only routed11/11
+and transfer_source7/7 pass0.28s/0.45s after5.18s build. Clippy flagged duplicate
+fixture/support loads and redundant allowance: share original root modules,
+no suppressions. Native without TLS5/5 pass0.35s after8.93s build. Clippy7.80s
+then passes. Added host check initially11/12 passes with one fixture error: original
+grant0..128 was entirely fenced and key200 lay outside it. Freeze0..64 and retain
+key100 within that grant; no production owner check changes. Final core-only
+routed12/12 and source7/7 pass0.35s/0.56s after1.15s build. Final Clippy and metadata
+checks follow below. No unchanged broad network/performance run is added.
+
+Partial151 ownership guard, not complete insertion: immutable original-F exports,
+checked mixed retained/delegated intent/publication and target activation remain
+current151 work. Next152 is real native partial-transfer composition; following153
+is bounded namespace deletion. Scoped facts are neither whole-source fence receipts
+nor external certificates. Full P0–P7 remains active with original gaps, macOS
+execution pending, Windows/P8 deferred, CI background, RPL-1.5 and pack preserved.
+Final151a all-feature/all-target Clippy -D warnings passes1.31s. Cargo formatting,
+included-fixture rustfmt, whitespace and80-contract inventory pass. All handles
+terminal; no CI gate used. These checks do not complete retained-scope insertion.

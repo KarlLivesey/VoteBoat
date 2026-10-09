@@ -373,3 +373,29 @@ stopped. Their original durable files, including logs, remain byte-for-byte
 unchanged; creation bindings stay exact and the recovered source stays fenced.
 Retained-scope insertion, deletion/reparenting,
 metadata authority movement and broader fault/platform evidence remain work.
+
+### Retained-scope source guard (insertion still in progress)
+
+Slice151a adds `RoutedApplication::with_scoped_fencing(maximum)` before bootstrap.
+It selects schema2 and binds a finite1..256 scoped-control history into VBROWN02.
+`encode_scope_fence(epoch, range)` is a separately authorized lifecycle command;
+ordinary ingress must not accept it as data. Only committed/applied Node outcomes
+establish the original `ScopedOwnershipFence`: group/responsibility/epoch,
+operation, original index and exact owned range. Encoding or local diagnostics
+are not quorum evidence. This profile introduces no new storage/resource owner.
+
+Transferred ranges permanently refuse reads/writes, including stale cached routes.
+Disjoint retained ranges continue with original retry/outbox semantics. Exact fence
+retries return the original fact; overlap, wrong scope/epoch and conflicting IDs
+refuse. Scoped control capacity remains separate from data deduplication. A later
+full-source fence stops every remaining range. There is no unfence operation.
+VBROUT02 snapshots reconstruct these facts; different profiles, old formats and
+contradictory indices/IDs/scopes refuse. There is no live profile upgrade.
+
+This guard is the first necessary ownership step of retained-scope insertion,
+not the complete lifecycle. Immutable exact-boundary scoped exports, checked
+mixed retained/delegated intent/publication and activation still need implementation.
+The existing whole-source TransferSource constructor explicitly rejects the scoped
+profile; scoped facts must not be passed as whole-source fence receipts. Selected
+native WAL-model byte cuts/barrier faults test old-or-complete guard recovery,
+not an end-to-end networked partial transfer or a general physical-power-loss proof.

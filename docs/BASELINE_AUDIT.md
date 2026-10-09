@@ -163,3 +163,12 @@ separate-authority phase recovery with original command retries, partial assigne
 provisioning and independently activated successor service with metadata/source
 owners stopped and durable files unchanged. Retained-scope insertion is current151. This advances P5/P6 feature coverage without
 closing broader lifecycle, platform/fault or original P7 performance gates.
+
+Slice151a implements the missing scoped ownership guard needed for retained-source
+service, selected before bootstrap through the same public RoutedApplication seam.
+Transferred ranges refuse while the original group serves retained ranges, with
+original fence/retry/outbox facts through checkpoint/replay and selected native
+WAL-model interrupted-frame/barrier faults. This advances151 but does not close it:
+immutable final scoped export, mixed retained/delegated metadata publication and
+activation remain, followed by152 native network composition. No whole-source
+handoff is relabeled as retained ownership. Original P0–P7 gaps remain active.

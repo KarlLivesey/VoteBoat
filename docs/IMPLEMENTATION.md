@@ -161,7 +161,9 @@ its selected native acceptance passes. General retention and broader faults rema
    Dependencies: existing exact scope adapters, source fencing, bounded mapping
    and target activation plus150's authority evidence. Completion: a checked
    mixed ownership transition, no overlap/gaps, original retry/outbox lineage and
-   named partial-progress/recovery checks. Schema is sketched before edits.
+   named partial-progress/recovery checks. Scoped source guard151a is implemented;
+   immutable exact-boundary exports and checked retained/delegated publication
+   remain current work within151. Schema is sketched before edits.
 10. **Native retained-scope composition (next152, P1/P5/P6).** Purpose:
    make151 usable in real service work. Dependencies:151's accepted ownership
    shape and existing native nodes. Completion: routed writes/reads/retries in
@@ -10726,3 +10728,90 @@ scope-specific authority/fencing and recovery before changing production code;
 it must not disguise a whole-source move as retained ownership. Broader membership,
 lifecycle, macOS/separate-host and original P7 gates remain. Linux evidence only;
 Windows/P8 deferred, CI background, RPL-1.5 and original pack preserved.
+
+Slice151 first schema before edits: the existing full-source protocol cannot
+preserve retained service. Implement its necessary first ownership transition in
+the existing RoutedApplication public seam, not an alternative runtime or a
+whole-source move disguised as retention. A pristine opt-in scoped-fencing profile
+binds a finite fence count (1..256) into bootstrap/schema2. A typed scoped fence
+binds original group/responsibility/epoch, exact owned range, operation and original
+index. Nonoverlapping original ranges fence forward-only; exact retries return the
+original fact, conflicting IDs/ranges refuse. Full-source fencing remains available
+and dominates scoped service. Ordinary reads/writes in fenced ranges refuse before
+inner application access; unfenced ranges retain original retry/outbox semantics.
+Control facts have separate bounded capacity from data dedup history. Pending
+admission must simulate ordered scoped transitions rather than accept conflicting
+fence/data IDs. Checkpoint/replay reconstruct exact original bounds/fences and
+reject scope/operation/index/epoch inconsistencies atomically. Legacy bootstrap,
+commands and checkpoint admission remain unchanged; no live profile upgrade.
+Acceptance: interleaved retained writes, transferred read/write refusal, original
+fence retry/conflicts, pending order/capacity, whole-fence dominance, checkpoint
+truncation/profile mismatch and replay. This is the scoped source guard of151,
+not complete insertion or target activation: immutable exact-boundary export and
+metadata/target publication must follow. A scoped fact is not a whole-source fence
+receipt or an externally verifiable certificate. Full P0–P7 stays active.
+
+## Slice151a — forward-only scoped ownership while retained data serves
+
+Previous goal turn150 was progress: actual cross-authority composition passed and
+commit f2089af was pushed. Current151 remains retained-scope insertion; this bounded
+first ownership step removes its whole-source-only fencing restriction without
+claiming completion of insertion. P5/P6 macro scope is unchanged.
+
+Public with_scoped_fencing binds a pristine selected schema2/bootstrap profile and
+finite1..256 separate control history. ScopedOwnershipFence and VBRSCF01 preserve
+original group/responsibility/epoch, exact local range, operation and applied index.
+Original disjoint range facts are permanent, retryable and separately bounded;
+wrong local scope, epoch, overlaps and control/data ID conflicts refuse. Existing
+whole-source fencing can then stop all remaining service. The default schema1
+bootstrap/checkpoint/command contracts remain separate, with no live upgrade.
+The original full-source TransferSource rejects selected scoped profiles.
+
+Native BucketCounter histories interleave transferred scope refusal with retained
+writes/retries: transferred value7 remains unchanged, retained11 becomes13 then16,
+original duplicate and three original/new outbox items survive. VBROUT02 checkpoint
+and replay reconstruct exact original fence facts and retained service. Pending
+admission simulates scoped transitions in order, checks selected inner admission,
+and rejects conflicts/capacity without mutation. Full ordinary dedup history cannot
+consume scoped control slots. ProposalAdmission now composes BoundedStateMachine,
+matching the state-machine apply contract; no replacement runtime/provider is added.
+Independent host heap receipts/read results retain exact nested capacity behavior.
+
+Profile changes, every snapshot truncation and contradictory original operations,
+indices/epochs/ranges reject atomically. Exact local ownership checks prevent
+fencing ranges belonging to another group; false hint buckets cannot bypass guard
+policy validation. Native ModelIo cuts every byte of a scoped-fence frame and
+injects sync/manifest publication faults. Recovery yields original old service or
+the exact committed scoped fence; retained service succeeds in both states.
+Finite native-provider fault evidence, not actual networked partial transfer.
+
+Initial check identified constructor index access requiring a stronger generic
+bound; use the existing inner applied index. A misplaced exhaustive codec arm was
+corrected without changing scope semantics. First fixture build lacked an identity
+import, corrected directly. Initial focused tests3/3 pass0.33s after14.11s build.
+Added native faults/local range checks5/5 pass0.22s after24.78s build/lock wait.
+Core-only routed11/11 and transfer_source7/7 pass0.28/0.45s after5.18s build.
+Clippy then identified duplicated fixture/support module loads and redundant
+allowance; share the existing root modules rather than suppress warnings. Native
+without TLS focused5/5 passes0.35s after8.93s build. Clippy7.80s passes after that
+focused fixture correction. Final added host-capacity checks/results follow below.
+
+Mini plan review:151 current purpose remains mixed retained/delegated service.
+Scoped guard is implemented evidence; immutable frozen exports, original checked
+creation/intent publication and target activation remain planned within151. Next152
+still composes that accepted protocol over TCP/QUIC with partial progress/reopen;
+following153 still adds bounded namespace deletion. The exact-boundary export is
+necessary because retained writes advance the live application's applied boundary;
+re-exporting that changing state as original F would violate import lineage.
+Keep the frozen transferred image and its original digest/boundary owned separately
+from the continuing retained application, with explicit configured capacity and
+snapshot/replay reconstruction. Sketch that source/intent schema before editing.
+All full P0–P7 gaps remain active, Windows/P8 deferred, Linux evidence only/macOS
+target, background CI, RPL-1.5 and original pack preserved.
+Slice151a added host-fixture check correction: its original grant is0..128, unlike
+BucketCounter's0..256 fixture. The test froze that entire grant and requested key200,
+which correctly refused. Freeze0..64 and use retained key100 within the actual grant;
+keep the exact ownership checks rather than changing production range validation.
+Final151a Clippy all-feature/all-target -D warnings passes1.31s. Cargo formatting,
+explicit included-fixture rustfmt, whitespace and80-contract inventory pass.
+All execution handles terminal; full goal remains active, no CI gate used.

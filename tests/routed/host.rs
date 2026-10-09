@@ -214,3 +214,70 @@ fn host_application_nested_capacity_bounds_and_group_constraints_are_preserved()
     assert_eq!(returned.application.applied_index(), 0);
     assert_eq!(returned.policy.scheme(), HostPolicy.scheme());
 }
+
+#[test]
+fn scoped_profile_preserves_host_receipt_and_read_capacity_contracts() {
+    let make = || {
+        RoutedApplication::new(
+            group(20),
+            grant(),
+            HostApplication(Counter::new(64).unwrap()),
+            HostPolicy,
+            limits(),
+        )
+        .unwrap_or_else(|r| panic!("{:?}", r.error))
+        .with_scoped_fencing(2)
+        .unwrap_or_else(|r| panic!("{:?}", r.0))
+    };
+    let mut a = make();
+    a.apply_batch(&[entry(
+        1,
+        10000,
+        a.bootstrap_command(MAX_ROUTED_COMMAND_BYTES).unwrap(),
+    )])
+    .unwrap();
+    a.apply_batch(&[entry(
+        2,
+        200,
+        encode_scope_fence(grant().input().epoch, BucketRange::new(0, 64).unwrap()),
+    )])
+    .unwrap();
+    let bytes = data(100, 7);
+    let expected = size_of::<RoutedReceipt<HeapReceipt>>() + 8;
+    assert_eq!(
+        a.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty()),
+        Ok(expected)
+    );
+    assert_eq!(
+        a.receipt_bytes_bound(&[entry(3, 1, bytes.clone())]),
+        Ok(expected)
+    );
+    let r = a.apply_batch(&[entry(3, 1, bytes)]).unwrap().remove(0);
+    assert_eq!(r.nested_bytes(8), Ok(8));
+    assert!(r.nested_bytes(7).is_err());
+    let query = |key| RoutedQuery {
+        hint: hint(key),
+        key: vec![key],
+        query: vec![9; 16],
+    };
+    assert_eq!(a.query_bytes(&query(100), 17), Ok(17));
+    assert_eq!(
+        a.read_at(3, query(100)).unwrap(),
+        RoutedRead::Served(7i64.to_le_bytes().to_vec())
+    );
+    assert_eq!(
+        a.read_at(3, query(1)).unwrap(),
+        RoutedRead::Rejected(RoutingError::Fenced)
+    );
+    let image = a.checkpoint(100000).unwrap();
+    let mut recovered = make();
+    recovered.restore_checkpoint(2, 3, &image).unwrap();
+    assert_eq!(
+        recovered.read_at(3, query(1)).unwrap(),
+        RoutedRead::Rejected(RoutingError::Fenced)
+    );
+    assert_eq!(
+        recovered.read_at(3, query(100)).unwrap(),
+        RoutedRead::Served(7i64.to_le_bytes().to_vec())
+    );
+}

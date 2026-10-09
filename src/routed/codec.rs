@@ -24,13 +24,23 @@ pub(crate) enum Command<'a> {
         payload: &'a [u8],
     },
     Fence(OwnershipEpoch),
+    ScopeFence(OwnershipEpoch, BucketRange),
 }
 pub(crate) fn decode(bytes: &[u8], max_payload: usize) -> Result<Command<'_>, ApplicationError> {
     if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
         return Err(ApplicationError::InvalidCommand);
     }
-    if bytes.starts_with(b"VBROWN01") {
+    if bytes.starts_with(b"VBROWN01") || bytes.starts_with(b"VBROWN02") {
         return Ok(Command::Bootstrap(bytes));
+    }
+    if let Some(inner) = bytes.strip_prefix(b"VBRSCF01") {
+        let mut r = Reader::new(inner);
+        let epoch = OwnershipEpoch::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+        let scope = r.range()?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        return Ok(Command::ScopeFence(epoch, scope));
     }
     let mut r = Reader::new(bytes);
     if r.take(8)? != b"VBRCMD01" {
@@ -135,5 +145,16 @@ pub fn encode_fence(epoch: OwnershipEpoch) -> Vec<u8> {
     out.extend(b"VBRCMD01");
     out.push(1);
     out.extend(epoch.get().to_le_bytes());
+    out
+}
+
+/// Privileged forward-only scoped fence. Only an explicitly selected scoped
+/// profile admits it; hosts must authorize lifecycle commands separately.
+/// This command does not publish routes, activate a target or export data.
+pub fn encode_scope_fence(epoch: OwnershipEpoch, scope: BucketRange) -> Vec<u8> {
+    let mut out = Vec::with_capacity(20);
+    out.extend(b"VBRSCF01");
+    out.extend(epoch.get().to_le_bytes());
+    put_range(&mut out, scope);
     out
 }

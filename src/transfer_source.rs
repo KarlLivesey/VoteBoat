@@ -76,6 +76,7 @@ where
     ) -> Result<Self, (ApplicationError, RoutedApplication<A, P>)> {
         let scope = Self::local_scope(&routed);
         if routed.applied_index() != 0
+            || routed.scoped_fence_limit() != 0
             || routed.is_initialized()
             || routed.fence().is_some()
             || export_bytes == 0

@@ -22,9 +22,10 @@ use std::{
 };
 pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
-pub use codec::{encode_fence, encode_routed};
+pub use codec::{encode_fence, encode_routed, encode_scope_fence};
 
 pub const ROUTED_APPLICATION_SCHEMA: u64 = 1;
+pub const SCOPED_ROUTED_APPLICATION_SCHEMA: u64 = 2;
 pub const MAX_ROUTED_OPERATIONS: usize = 4096;
 pub const MAX_ROUTED_SEMANTIC_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_ROUTED_PAYLOAD_BYTES: usize = 1024 * 1024;
@@ -58,10 +59,17 @@ pub struct OwnershipFence {
     pub operation: OperationId,
     pub index: u64,
 }
+/// Original local scoped outcome, not a whole-source or transferable certificate.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ScopedOwnershipFence {
+    pub fence: OwnershipFence,
+    pub scope: BucketRange,
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RoutedOutcome<R> {
     Bootstrapped,
     Fenced(OwnershipFence),
+    ScopeFenced(ScopedOwnershipFence),
     Applied(R),
     Rejected(RoutingError),
     OperationConflict,
@@ -119,6 +127,8 @@ pub struct RoutedApplication<A, P> {
     binding: Vec<u8>,
     initialized: Option<(OperationId, u64)>,
     fence: Option<OwnershipFence>,
+    scope_limit: usize,
+    scope_fences: Vec<ScopedOwnershipFence>,
     history: BTreeMap<OperationId, Semantic>,
     semantic_bytes: usize,
 }
@@ -188,9 +198,60 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             binding,
             initialized: None,
             fence: None,
+            scope_limit: 0,
+            scope_fences: Vec::new(),
             history: BTreeMap::new(),
             semantic_bytes: 0,
         })
+    }
+    /// Select schema2 before bootstrap. Retains ownership of the original object
+    /// on rejection. No live profile upgrade or unfencing operation exists.
+    #[allow(clippy::result_large_err)]
+    pub fn with_scoped_fencing(mut self, maximum: usize) -> Result<Self, (ApplicationError, Self)> {
+        if maximum == 0
+            || maximum > MAX_MANIFEST_ROUTES
+            || self.scope_limit != 0
+            || self.inner.applied_index() != 0
+            || self.initialized.is_some()
+            || self.fence.is_some()
+            || self
+                .binding
+                .len()
+                .checked_add(2)
+                .is_none_or(|n| n > MAX_ROUTED_COMMAND_BYTES)
+        {
+            return Err((ApplicationError::InvalidCommand, self));
+        }
+        self.scope_limit = maximum;
+        self.binding[..8].copy_from_slice(b"VBROWN02");
+        self.binding.extend((maximum as u16).to_le_bytes());
+        Ok(self)
+    }
+    /// Local diagnostics only; remote evidence requires the original quorum outcome.
+    pub fn scoped_fence_limit(&self) -> usize {
+        self.scope_limit
+    }
+    pub fn scoped_fences(&self) -> &[ScopedOwnershipFence] {
+        &self.scope_fences
+    }
+    fn scoped_operation(&self, operation: OperationId) -> bool {
+        self.scope_fences
+            .iter()
+            .any(|s| s.fence.operation == operation)
+    }
+    fn owns_scope(&self, scope: BucketRange) -> bool {
+        let m = self.grant.input();
+        if scope.start() < m.scope.start() || scope.end() > m.scope.end() {
+            return false;
+        }
+        match &m.execution {
+            ExecutionMode::Single(g) => *g == self.local,
+            ExecutionMode::Partitioned(v) | ExecutionMode::Delegated(v) => v.iter().any(|r| {
+                r.target == RouteTarget::Group(self.local)
+                    && r.scope.start() <= scope.start()
+                    && r.scope.end() >= scope.end()
+            }),
+        }
     }
     pub fn bootstrap_command(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         if self.binding.len() > max_bytes {
@@ -228,7 +289,11 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: ROUTED_APPLICATION_SCHEMA,
+            application_schema: if self.scope_limit == 0 {
+                ROUTED_APPLICATION_SCHEMA
+            } else {
+                SCOPED_ROUTED_APPLICATION_SCHEMA
+            },
             command_bytes: self
                 .binding
                 .len()
@@ -237,7 +302,12 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
                 + self.binding.len()
                 + self.limits.inner_checkpoint_bytes
                 + 30 * self.limits.operations
-                + self.limits.semantic_bytes,
+                + self.limits.semantic_bytes
+                + if self.scope_limit == 0 {
+                    0
+                } else {
+                    2 + 36 * self.scope_limit
+                },
         }
     }
     pub fn check_context(&self, hint: &RouteHint, key: &[u8]) -> Result<(), RoutingError> {
@@ -247,10 +317,21 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         if self.fence.is_some() {
             return Err(RoutingError::Fenced);
         }
-        check_owner(&self.grant, self.local, hint, key, &self.policy)
+        check_owner(&self.grant, self.local, hint, key, &self.policy)?;
+        if self
+            .scope_fences
+            .iter()
+            .any(|s| s.scope.contains(hint.bucket))
+        {
+            return Err(RoutingError::Fenced);
+        }
+        Ok(())
     }
     fn request<'a>(&self, bytes: &'a [u8]) -> Result<Command<'a>, ApplicationError> {
         let request = decode(bytes, self.limits.payload_bytes)?;
+        if matches!(request, Command::ScopeFence(_, _)) && self.scope_limit == 0 {
+            return Err(ApplicationError::InvalidCommand);
+        }
         if let Command::Bootstrap(binding) = request {
             if binding != self.binding {
                 return Err(ApplicationError::InvalidCommand);
@@ -262,6 +343,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     fn semantic_conflict(&self, operation: OperationId, key: &[u8], payload: &[u8]) -> bool {
         self.initialized.is_some_and(|(op, _)| op == operation)
+            || self.scoped_operation(operation)
             || self.fence.is_some_and(|f| f.operation == operation)
             || self
                 .history
@@ -329,6 +411,7 @@ where
                     Command::Bootstrap(_) => {
                         if next.initialized.is_some_and(|(op, _)| op != *operation)
                             || next.history.contains_key(operation)
+                            || next.scoped_operation(*operation)
                             || next.fence.is_some_and(|f| f.operation == *operation)
                         {
                             Some(RoutedOutcome::OperationConflict)
@@ -342,6 +425,7 @@ where
                             Some(RoutedOutcome::Rejected(RoutingError::EpochMismatch))
                         } else if next.initialized.is_some_and(|(op, _)| op == *operation)
                             || next.history.contains_key(operation)
+                            || next.scoped_operation(*operation)
                         {
                             Some(RoutedOutcome::OperationConflict)
                         } else if let Some(fence) = next.fence {
@@ -360,6 +444,54 @@ where
                             };
                             next.fence = Some(fence);
                             Some(RoutedOutcome::Fenced(fence))
+                        }
+                    }
+                    Command::ScopeFence(epoch, scope) => {
+                        if epoch != next.grant.input().epoch {
+                            Some(RoutedOutcome::Rejected(RoutingError::EpochMismatch))
+                        } else if next.initialized.is_some_and(|(op, _)| op == *operation)
+                            || next.history.contains_key(operation)
+                        {
+                            Some(RoutedOutcome::OperationConflict)
+                        } else if let Some(f) = next
+                            .scope_fences
+                            .iter()
+                            .find(|s| s.fence.operation == *operation)
+                        {
+                            Some(if f.scope == scope {
+                                RoutedOutcome::ScopeFenced(*f)
+                            } else {
+                                RoutedOutcome::OperationConflict
+                            })
+                        } else if next.fence.is_some()
+                            || next.scope_fences.iter().any(|s| {
+                                s.scope.start() < scope.end() && scope.start() < s.scope.end()
+                            })
+                        {
+                            Some(RoutedOutcome::Rejected(RoutingError::Fenced))
+                        } else if !next.owns_scope(scope) {
+                            Some(RoutedOutcome::Rejected(RoutingError::WrongOwner))
+                        } else if next.scope_fences.len() == next.scope_limit {
+                            return Err(ApplicationError::ReceiptBudget);
+                        } else {
+                            let f = ScopedOwnershipFence {
+                                scope,
+                                fence: OwnershipFence {
+                                    group: next.local,
+                                    responsibility: next.grant.input().responsibility,
+                                    epoch,
+                                    operation: *operation,
+                                    index: entry.index,
+                                },
+                            };
+                            next.scope_fences
+                                .try_reserve_exact(1)
+                                .map_err(|_| ApplicationError::ReceiptBudget)?;
+                            if next.scope_fences.capacity() > MAX_MANIFEST_ROUTES {
+                                return Err(ApplicationError::ReceiptBudget);
+                            }
+                            next.scope_fences.push(f);
+                            Some(RoutedOutcome::ScopeFenced(f))
                         }
                     }
                     Command::Data { hint, key, payload } => {
@@ -442,6 +574,20 @@ where
     P: PartitionPolicy + Clone,
 {
     fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
+        if self.scope_limit != 0 {
+            let mut next = self.clone();
+            let receipts = next.apply_batch(entries)?;
+            let mut bound = receipts
+                .len()
+                .checked_mul(size_of::<Self::Receipt>())
+                .ok_or(ApplicationError::ReceiptBudget)?;
+            for receipt in receipts {
+                bound = bound
+                    .checked_add(receipt.nested_bytes(usize::MAX)?)
+                    .ok_or(ApplicationError::ReceiptBudget)?;
+            }
+            return Ok(bound);
+        }
         let mut projected = Vec::with_capacity(entries.len());
         let mut commands = 0usize;
         let mut data = 0usize;
@@ -477,7 +623,7 @@ where
 }
 impl<A, P> ProposalAdmission for RoutedApplication<A, P>
 where
-    A: CheckpointStateMachine + ProposalAdmission,
+    A: CheckpointStateMachine + BoundedStateMachine + ProposalAdmission,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
 {
@@ -487,6 +633,61 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
+        if self.scope_limit != 0 {
+            if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let mut next = self.clone();
+            for (position, (id, pending_bytes)) in pending.enumerate() {
+                if position >= MAX_ROUTED_PENDING {
+                    return Err(ApplicationError::ReceiptBudget);
+                }
+                if pending_bytes.len() > MAX_ROUTED_COMMAND_BYTES {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                let entry = LogEntry {
+                    index: next
+                        .applied_index()
+                        .checked_add(1)
+                        .ok_or(ApplicationError::IndexGap)?,
+                    term: 1,
+                    payload: EntryPayload::Command {
+                        operation: id,
+                        bytes: pending_bytes.to_vec(),
+                    },
+                };
+                next.apply_batch(&[entry])?;
+            }
+            let entry = LogEntry {
+                index: next
+                    .applied_index()
+                    .checked_add(1)
+                    .ok_or(ApplicationError::IndexGap)?,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation,
+                    bytes: bytes.to_vec(),
+                },
+            };
+            if let Command::Data { hint, key, payload } = next.request(bytes)? {
+                next.check_context(&hint, key)
+                    .map_err(|_| ApplicationError::InvalidCommand)?;
+                if next.semantic_conflict(operation, key, payload) {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                next.inner
+                    .validate_proposal(operation, payload, std::iter::empty())?;
+            }
+            let bound = next.receipt_bytes_bound(std::slice::from_ref(&entry))?;
+            let receipts = next.apply_batch(&[entry])?;
+            if matches!(
+                receipts[0].outcome,
+                RoutedOutcome::Rejected(_) | RoutedOutcome::OperationConflict
+            ) {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            return Ok(bound);
+        }
         let candidate = self.request(bytes)?;
         let mut reserved = BTreeMap::new();
         let mut retained = 0;
@@ -544,6 +745,7 @@ where
                 }
                 size_of::<Self::Receipt>()
             }
+            Command::ScopeFence(_, _) => return Err(ApplicationError::InvalidCommand),
             Command::Fence(epoch) => {
                 if epoch != self.grant.input().epoch
                     || self.history.contains_key(&operation)
@@ -631,7 +833,11 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        ROUTED_APPLICATION_SCHEMA
+        if self.scope_limit == 0 {
+            ROUTED_APPLICATION_SCHEMA
+        } else {
+            SCOPED_ROUTED_APPLICATION_SCHEMA
+        }
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self.inner.checkpoint(self.limits.inner_checkpoint_bytes)?;
@@ -646,12 +852,21 @@ where
             + self.initialized.map_or(0, |_| 24)
             + self.fence.map_or(0, |_| 32)
             + 30 * self.history.len()
-            + semantic;
+            + semantic
+            + if self.scope_limit == 0 {
+                0
+            } else {
+                2 + 36 * self.scope_fences.len()
+            };
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBROUT01");
+        bytes.extend(if self.scope_limit == 0 {
+            b"VBROUT01"
+        } else {
+            b"VBROUT02"
+        });
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -665,6 +880,15 @@ where
             bytes.extend(fence.operation.get().to_le_bytes());
             bytes.extend(fence.index.to_le_bytes());
             bytes.extend(fence.epoch.get().to_le_bytes());
+        }
+        if self.scope_limit != 0 {
+            bytes.extend((self.scope_fences.len() as u16).to_le_bytes());
+            for s in &self.scope_fences {
+                bytes.extend(s.fence.operation.get().to_le_bytes());
+                bytes.extend(s.fence.index.to_le_bytes());
+                bytes.extend(s.fence.epoch.get().to_le_bytes());
+                put_range(&mut bytes, s.scope);
+            }
         }
         bytes.extend(self.inner.schema_version().to_le_bytes());
         bytes.extend((inner.len() as u32).to_le_bytes());
@@ -694,7 +918,14 @@ where
         }
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
-            if r.take(8)? != b"VBROUT01" || r.u64()? != applied {
+            if r.take(8)?
+                != if self.scope_limit == 0 {
+                    b"VBROUT01"
+                } else {
+                    b"VBROUT02"
+                }
+                || r.u64()? != applied
+            {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
             let binding_len = r.u32()? as usize;
@@ -734,6 +965,50 @@ where
             } else {
                 None
             };
+            let mut scope_fences = Vec::new();
+            let mut scope_operations = BTreeSet::new();
+            let mut last_scope_index = 0;
+            if self.scope_limit != 0 {
+                let count = usize::from(r.u16()?);
+                if count > self.scope_limit {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                for _ in 0..count {
+                    let operation = r.operation()?;
+                    let index = r.u64()?;
+                    let epoch =
+                        OwnershipEpoch::new(r.u64()?).ok_or(ApplicationError::InvalidCheckpoint)?;
+                    let scope = r.range()?;
+                    let Some((initial, initial_index)) = initialized else {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    };
+                    if !self.owns_scope(scope)
+                        || epoch != self.grant.input().epoch
+                        || operation == initial
+                        || index <= initial_index
+                        || index > applied
+                        || index <= last_scope_index
+                        || !scope_operations.insert(operation)
+                        || fence.is_some_and(|f| f.operation == operation || index >= f.index)
+                        || scope_fences.iter().any(|s: &ScopedOwnershipFence| {
+                            s.scope.start() < scope.end() && scope.start() < s.scope.end()
+                        })
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    scope_fences.push(ScopedOwnershipFence {
+                        scope,
+                        fence: OwnershipFence {
+                            group: self.local,
+                            responsibility: self.grant.input().responsibility,
+                            epoch,
+                            operation,
+                            index,
+                        },
+                    });
+                    last_scope_index = index;
+                }
+            }
             let inner_schema = r.u64()?;
             let inner_len = r.u32()? as usize;
             if inner_schema != self.inner.schema_version()
@@ -768,6 +1043,8 @@ where
                 };
                 if operation.get() <= previous
                     || operation == initial
+                    || scope_operations.contains(&operation)
+                    || scope_fences.iter().any(|s| s.fence.index == index)
                     || fence.is_some_and(|f| f.operation == operation || index >= f.index)
                     || index <= initial_index
                     || index > applied
@@ -779,7 +1056,12 @@ where
                 }
                 let key = r.take(key_len)?;
                 let payload = r.take(payload_len)?;
-                if !self.initial_key(key) {
+                if !self.initial_key(key)
+                    || scope_fences.iter().any(|s| {
+                        self.policy.bucket(key).is_ok_and(|b| s.scope.contains(b))
+                            && index >= s.fence.index
+                    })
+                {
                     return Err(ApplicationError::InvalidCheckpoint);
                 }
                 let semantic = Semantic {
@@ -799,6 +1081,7 @@ where
             }
             next.initialized = initialized;
             next.fence = fence;
+            next.scope_fences = scope_fences;
             next.history = history;
             next.semantic_bytes = retained;
             Ok(next)

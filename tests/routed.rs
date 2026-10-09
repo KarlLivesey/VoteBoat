@@ -20,7 +20,7 @@ mod host;
 #[cfg(feature = "tls")]
 #[path = "routed/native.rs"]
 mod native;
-#[cfg(feature = "tls")]
+#[cfg(feature = "native")]
 mod support;
 #[derive(Clone)]
 struct HostPolicy;
@@ -455,6 +455,8 @@ fn checkpoint_preserves_semantic_bindings_and_rejects_every_truncation_atomicall
     assert!(image.len() <= app.readiness_requirements().snapshot_bytes);
 }
 
-#[cfg(feature = "tls")]
 #[path = "transfer_source/fixtures.rs"]
 pub mod source_fixture;
+
+#[path = "routed/scoped.rs"]
+mod scoped;

@@ -1332,15 +1332,20 @@
         "read_result_bytes",
         "checkpoint",
         "restore_checkpoint",
-        "fence"
+        "fence",
+        "with_scoped_fencing",
+        "scoped_fence_limit",
+        "scoped_fences",
+        "encode_scope_fence"
       ],
       "native": "Generic deterministic ownership guard over host-selected checkpointable applications and partition policies; native Counter, NativeStartup/Node, WAL, snapshots and TCP/QUIC exercise the same public contracts.",
       "conformance": [
         "tests/routed.rs",
         "tests/routed/host.rs",
-        "tests/routed/native.rs"
+        "tests/routed/native.rs",
+        "tests/routed/scoped.rs"
       ],
-      "scope": "One trusted fixed responsibility grant/local group; exact committed bootstrap binding, admission/apply ownership rechecks, key/payload semantic retries, bounded pending/history and nested receipt/read accounting. One-way applied source fence refuses queued data and reads and survives checkpoint/replay; it is not a P6 transfer certificate. Native three-level directory/child histories use distinct child replica sets, remove ancestor caches and stop all parent replicas, then write/read/retry and recover WAL-only/compacted children with unchanged parent WAL state. Changed grants/limits reject recovery. Host injection covers allocated receipt/query/result storage and inner group constraints. No dynamic ownership activation/import/merge, group multiplexing, general authorization service or directory wire endpoint; Linux loopback evidence only."
+      "scope": "One trusted fixed responsibility grant/local group; exact committed bootstrap binding, admission/apply ownership rechecks, key/payload semantic retries, bounded pending/history and nested receipt/read accounting. One-way applied source fence refuses queued data and reads and survives checkpoint/replay; it is not a P6 transfer certificate. Native three-level directory/child histories use distinct child replica sets, remove ancestor caches and stop all parent replicas, then write/read/retry and recover WAL-only/compacted children with unchanged parent WAL state. Changed grants/limits reject recovery. Host injection covers allocated receipt/query/result storage and inner group constraints. No dynamic ownership activation/import/merge, group multiplexing, general authorization service or directory wire endpoint; Linux loopback evidence only. Slice151a adds a pristine opt-in schema2 scoped-fencing profile: VBROWN02 binds a 1..256 fence limit, VBRSCF01 binds original epoch and exact local range, and VBROUT02 checkpoints original scoped operation/index/range facts. Disjoint scopes fence forward-only, exact retries retain original facts, ID/overlap/epoch/owner conflicts refuse, and unfenced data/read/retry/outbox service continues. A later whole-source fence dominates service. Ordered pending admission uses bounded state simulation plus the host application admission contract; ProposalAdmission composition now requires BoundedStateMachine as apply does. Separate control history is not consumed by ordinary dedup operations. Native BucketCounter and independent heap-receipt host application exercise the same guard. Profile mismatch/truncation/contradictory checkpoint facts reject atomically; native ModelIo cuts every scoped-fence frame byte and injects sync/publication faults, recovering old or exact complete state with retained service. Default schema1 remains separate and the full-source TransferSource constructor rejects selected scoped profiles. Scoped outcomes are local facts, not whole-source receipts/certificates; no immutable export, mixed-manifest publication or target activation for retained-scope insertion is implemented by this sub-slice."
     },
     {
       "design_id": "C01/C20/C23",
