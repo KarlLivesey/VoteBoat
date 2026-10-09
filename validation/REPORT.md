@@ -2619,3 +2619,33 @@ P0–P7 active; P8/Windows deferred.
 Continuation observation: the same live run21618 subsequently passed
 native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints.
 The overall run still has no terminal result; preserve it.
+
+## Slice115 — authenticated provisioned-intent configuration command
+
+Linux executed checks:
+
+- Remote configuration histories TCP/QUIC and missing-access preflight: 3/3.
+  Dormant startup, native reader/writer denial, wrong-scope admin grants,
+  nonleader refusal, missing operation, learner and joint/final commitments,
+  checkpoint/restart and original-ID completed retries preserve Counter dedup.
+- Isolated interrupted configuration CLI reply: 1/1; exact original bytes and
+  UNKNOWN response, no automatic reroute. This uses a fake peer, not an arbitrary
+  native configuration-phase disconnect campaign.
+- Existing automatic executable membership add/enroll/promote/retire/restart:
+  2/2 (12.50 seconds). Existing authenticated ordinary command/scope/recovery
+  histories: 2/2 (2.74 seconds).
+- All-feature/all-target Clippy with warnings denied, fmt/diff and inventory78 pass.
+
+A first Clippy check reported a collapsible nested cleanup conditional. A focused
+short-circuit-preserving fix passed the final check. Remote calls reuse existing
+PrincipalCredentials/ServiceAuthorizer, exact NativeAdministrationPlan and Node
+configuration admission; no new wire/WAL format or durability shortcut. Native
+positive remote histories use unchanged voters for their joint/final phases;
+new-voter readiness is exercised by existing automatic enrollment histories, not
+claimed as independently fault-tested remote promotion.
+
+The prior full routed lifecycle run21618 remains live; more delegation WAL,
+QUIC merge collision and cancellation checkpoint cases passed on that same run.
+It is not counted as a terminal full-suite pass. Client-supplied targets and broad
+ingress interruption schedules, macOS/separate-host/fault and performance gates
+remain open. Full P0–P7 stays active, P8/Windows deferred.

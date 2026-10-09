@@ -648,3 +648,49 @@ selecting the next immutable startup plan. They do not establish uninterrupted
 online enrollment, arbitrary partial joint/final delivery, dropped readiness
 reply recovery, divergent retained-only learner repair or unavailable witness
 liveness. The broader fault-release gates and public mutation-ingress gate remain.
+
+## Authenticated submission of provisioned configuration intents
+
+Slice115 adds an opt-in command path alongside automatic startup plans:
+
+```sh
+target/debug/voteboat-counter serve recover-member /your/data/node1 1 43000 /your/tls --remote-admin-plan /your/administration.plan --service-access /your/access.txt
+target/debug/voteboat-counter client 43000 1 configure 15001 --service-tls /your/tls --principal 3
+```
+
+Use the existing administration-plan grammar and provision the same original
+records/placement/application bounds on eligible servers. --remote-admin-plan is
+exclusive with --admin-plan and requires --service-access and recover-member.
+It validates these prerequisites before opening stores/listeners. The plan stays
+dormant at startup/restart. Configure permission is administrator-only under the
+native roles; reader/writer or wrong group/incarnation grants cannot submit it.
+The command names an operation already in the plan. Missing operations refuse;
+clients cannot send arbitrary target policies/assignments through this command.
+
+Address a node explicitly; automatic CLI routing still accepts only read/add.
+A nonleader refuses before submission. For a joint change, the first configure
+call observes joint commitment; repeat the same operation ID to request its
+provisioned final phase. Fresh learner readiness remains mandatory for promotion.
+The service rechecks Configure on the same pending authenticated channel at
+execution, followed by the original exact plan, application capacity, placement,
+wire/roster and core admission. No operation starts merely because it appears in
+the remote plan.
+
+An OK with committed_index/term observes commitment of that phase, not a later
+final phase. Historical completed replies explicitly report local durable
+operation identity evidence; compaction may no longer retain original payloads.
+Keep original operation IDs and plan contents when retrying. The command port
+retains one bounded request/result through ciphertext flush. Deadline, observed
+channel failure or disconnect cancels observation, not committed work; the CLI
+returns UNKNOWN on an interrupted reply and does not automatically reroute.
+Queued work cannot reauthorize using a replacement command connection. Use
+configuration-status for historical local evidence, which is not a fresh quorum
+read and does not prove non-execution from absence.
+
+Real TCP/QUIC tests cover dormant startup, reader/writer denial, missing operation,
+learner and joint/final commitment, original-ID completion retries and application
+deduplication after checkpoint/restart. A separate fake-peer CLI test covers a
+lost reply; arbitrary socket-loss timing across every membership phase remains
+unverified. General client-supplied configuration targets and complete public
+administration release are still work. Earlier references to mutation ingress
+being absent apply to that broader endpoint or to the historical slice described.

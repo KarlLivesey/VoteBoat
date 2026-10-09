@@ -52,8 +52,10 @@ the generation when replacing credentials or permissions.
 | admin | writer commands plus checkpoint and quit |
 
 Startup `--admin-plan` remains an operator input with separate committed
-configuration checks; this mode adds no network configuration-mutation command.
-The public Configure permission is reserved for hosts implementing that ingress.
+configuration checks. Slice115 adds --remote-admin-plan with administrator-only
+configure OPERATION_ID for provisioned intents, rechecked on the live channel at
+execution. General client-supplied target parsing remains absent; see
+[the service contract](COUNTER_SERVICE.md#authenticated-submission-of-provisioned-configuration-intents).
 
 Clients select their certificate and the same principal number:
 

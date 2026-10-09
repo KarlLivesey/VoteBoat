@@ -54,6 +54,7 @@ struct Cluster {
     endpoints: Option<PathBuf>,
     deployment: Option<PathBuf>,
     admin_plan: Option<PathBuf>,
+    remote_admin: bool,
     command_access: Option<PathBuf>,
     command_principal: Option<u64>,
     tls: Option<PathBuf>,
@@ -112,6 +113,7 @@ impl Cluster {
             endpoints: None,
             deployment: None,
             admin_plan: None,
+            remote_admin: false,
             command_access: None,
             command_principal: None,
             tls: None,
@@ -153,7 +155,13 @@ impl Cluster {
             command.args(["--transport", "quic"]);
         }
         if let Some(path) = &self.admin_plan {
-            command.arg("--admin-plan").arg(path);
+            command
+                .arg(if self.remote_admin {
+                    "--remote-admin-plan"
+                } else {
+                    "--admin-plan"
+                })
+                .arg(path);
         }
         if let Some(path) = &self.command_access {
             command.arg("--service-access").arg(path);
@@ -2291,4 +2299,134 @@ fn invalid_service_access_fails_before_store_creation_or_listener_ownership() {
         .arg(access));
     assert!(!output.status.success());
     assert!(!directory.exists());
+}
+
+fn remote_configuration_history(quic: bool) {
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    let access = cluster.root.join("remote-access.txt");
+    fs::write(
+        &access,
+        "voteboat-service-access-v1 1\n1 reader 1 1\n1 admin 1 99\n2 writer 1 1\n2 admin 99 1\n3 admin 1 1\n",
+    )
+    .unwrap();
+    cluster.command_access = Some(access);
+    cluster.command_principal = Some(3);
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    cluster.leader();
+    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("Value(42)"));
+    cluster.stop();
+    let plan = cluster.root.join("remote-plan.txt");
+    fs::write(&plan, "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\nlearners 15001 1 2 - m:3 v:1 v:2 v:3\njoint 15003 2 3 4 - m:3 v:1 v:2 v:3\nfinal 15003 3 4\n").unwrap();
+    cluster.admin_plan = Some(plan);
+    cluster.remote_admin = true;
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    let follower = (1..=3).find(|id| *id != leader).unwrap();
+    let refused = cluster.request(follower, &["configure", "15001"]);
+    assert_eq!(
+        String::from_utf8(refused.stdout).unwrap(),
+        "ERR NOT_LEADER\n"
+    );
+    assert!(cluster
+        .ok(leader, &["configuration-status", "15001"])
+        .contains("inconclusive_local_absence"));
+    for principal in [1, 2] {
+        cluster.command_principal = Some(principal);
+        let denied = cluster.request(leader, &["configure", "15001"]);
+        assert!(!denied.status.success());
+        assert_eq!(
+            String::from_utf8(denied.stdout).unwrap(),
+            "ERR AUTHORIZATION\n"
+        );
+    }
+    cluster.command_principal = Some(3);
+    let missing = cluster.request(leader, &["configure", "15002"]);
+    assert!(!missing.status.success());
+    assert!(String::from_utf8(missing.stdout)
+        .unwrap()
+        .contains("absent from provisioned plan"));
+    assert!(cluster
+        .ok(leader, &["configuration-status", "15001"])
+        .contains("inconclusive_local_absence"));
+    let applied = cluster.ok(leader, &["configure", "15001"]);
+    assert!(applied.contains("committed_index="), "{applied}");
+    assert!(cluster
+        .ok(leader, &["configure", "15001"])
+        .contains("action=completed"));
+    assert!(cluster
+        .ok(leader, &["configure", "15003"])
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure", "15003"])
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure", "15003"])
+        .contains("action=completed"));
+    assert!(cluster
+        .ok(leader, &["add", "15000", "42"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    for id in 1..=3 {
+        cluster.ok(id, &["checkpoint"]);
+    }
+    cluster.stop();
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["configure", "15001"])
+        .contains("action=completed"));
+    assert!(cluster
+        .ok(leader, &["add", "15000", "42"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    cluster.stop();
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp() {
+    remote_configuration_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic() {
+    remote_configuration_history(true);
+}
+
+#[test]
+fn remote_configuration_requires_access_before_opening_files_or_listeners() {
+    let cluster = Cluster::new();
+    let missing = cluster.root.join("not-created");
+    let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    let result = run(Command::new(BIN)
+        .args(["serve", "recover-member"])
+        .arg(&missing)
+        .arg("1")
+        .arg(cluster.base.to_string())
+        .arg(tls)
+        .arg("--remote-admin-plan")
+        .arg(cluster.root.join("missing-plan")));
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr)
+        .contains("remote administration requires service access"));
+    assert!(!missing.exists());
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+
+#[test]
+fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation() {
+    let mut cluster = Cluster::new();
+    let peer = reply_peer(cluster.take_listener(101), None);
+    let result = cluster.request(1, &["configure", "15001"]);
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stdout).starts_with("UNKNOWN "));
+    assert!(String::from_utf8_lossy(&result.stdout).contains("same configuration operation ID"));
+    assert_eq!(peer.join().unwrap(), b"configure 15001\n");
+    fs::remove_dir_all(&cluster.root).unwrap();
 }

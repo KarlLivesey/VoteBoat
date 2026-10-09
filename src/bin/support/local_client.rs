@@ -150,6 +150,8 @@ fn terminal(response: String) -> Result<(), Failure> {
 fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
     if command.first().is_some_and(|c| c == "add") {
         println!("UNKNOWN {reason}; retry the same operation ID and delta");
+    } else if command.first().is_some_and(|c| c == "configure") {
+        println!("UNKNOWN {reason}; retry the same configuration operation ID");
     } else {
         println!("ERR {reason}");
     }

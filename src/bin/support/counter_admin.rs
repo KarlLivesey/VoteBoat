@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Trusted startup input and bounded owner-driven administration; no ingress API.
+//! Trusted intent scope and bounded owner-driven automatic or remote administration.
 use super::setup::{application, checked, group, Failure, Service, MAX_NODE};
 use std::{
     collections::BTreeMap,
@@ -37,6 +37,9 @@ pub struct Administration {
     waiting: Option<(NodeId, Instant)>,
     next: Instant,
     stopped: bool,
+    remote: bool,
+    requested: Option<OperationId>,
+    reply: Option<String>,
 }
 fn node(text: &str) -> Result<NodeId, Failure> {
     let number: u64 = text.parse()?;
@@ -87,7 +90,11 @@ fn tree<'a>(
     }
 }
 impl Administration {
-    pub fn load(path: &Path, stores: &BTreeMap<NodeId, StoreIdentity>) -> Result<Self, Failure> {
+    pub fn load(
+        path: &Path,
+        stores: &BTreeMap<NodeId, StoreIdentity>,
+        remote: bool,
+    ) -> Result<Self, Failure> {
         let mut data = Vec::new();
         std::fs::File::open(path)?
             .take(65537)
@@ -210,8 +217,56 @@ impl Administration {
             proofs: BTreeMap::new(),
             waiting: None,
             next: Instant::now(),
-            stopped: false,
+            stopped: remote,
+            remote,
+            requested: None,
+            reply: None,
         })
+    }
+    pub fn remote(&self) -> bool {
+        self.remote
+    }
+    pub fn request(&mut self, operation: OperationId) -> Result<(), String> {
+        if !self.remote {
+            return Err("remote administration disabled".into());
+        }
+        if self.requested.is_some() || self.pending.is_some() || self.reply.is_some() {
+            return Err("administration busy".into());
+        }
+        if !self.plan.intents().iter().any(|r| r.operation == operation) {
+            return Err("operation absent from provisioned plan".into());
+        }
+        self.requested = Some(operation);
+        self.stopped = false;
+        self.next = Instant::now();
+        Ok(())
+    }
+    pub fn take_reply(&mut self) -> Option<String> {
+        if self.remote
+            && self.stopped
+            && self.pending.is_none()
+            && self.requested.take().is_some()
+            && self.reply.is_none()
+        {
+            self.reply = Some("ERR administration blocked; inspect server log".into());
+        }
+        self.reply.take()
+    }
+    pub fn cancel_remote(&mut self, service: &mut Service) -> Result<(), Failure> {
+        if !self.remote {
+            return Ok(());
+        }
+        if let Some(ticket) = self.pending {
+            checked(service.cancel_configuration(ticket))?;
+        }
+        self.requested = None;
+        self.reply = None;
+        self.proofs.clear();
+        self.stopped = true;
+        if self.waiting.take().is_some() {
+            checked(service.cancel_learner_readiness(group()))?;
+        }
+        Ok(())
     }
     pub fn tick(&mut self, service: &mut Service, shutting_down: bool) -> Result<(), Failure> {
         while let Some(result) = service.poll_configuration() {
@@ -225,6 +280,30 @@ impl Administration {
                 result.ticket.operation().get(),
                 result.outcome
             );
+            if self.remote {
+                if self.requested == Some(result.ticket.operation()) {
+                    self.reply = Some(match &result.outcome {
+                        ConfigurationOutcome::Committed(position) => format!(
+                            "OK operation={} committed_index={} term={}",
+                            result.ticket.operation().get(),
+                            position.index,
+                            position.term
+                        ),
+                        ConfigurationOutcome::NotProposed(RaftError::NotLeader) => {
+                            "ERR NOT_LEADER".into()
+                        }
+                        ConfigurationOutcome::NotProposed(error) => {
+                            format!("ERR not_proposed={error:?}")
+                        }
+                        ConfigurationOutcome::Unknown(reason) => {
+                            format!("UNKNOWN {reason:?}; retry the same configuration operation ID")
+                        }
+                    });
+                    self.requested = None;
+                }
+                self.stopped = true;
+                continue;
+            }
             if let ConfigurationOutcome::NotProposed(error) = result.outcome {
                 // Scope/readiness can change between enqueue and execution. Recheck
                 // exact original intent; do not alter its ID or target on retry.
@@ -261,7 +340,12 @@ impl Administration {
             return Ok(());
         }
         let mut selected = None;
-        for intent in self.plan.intents() {
+        for intent in self
+            .plan
+            .intents()
+            .iter()
+            .filter(|r| !self.remote || self.requested == Some(r.operation))
+        {
             match checked(service.configuration_status(group(), intent.operation))?.resume_action()
             {
                 ConfigurationResumeAction::Completed => continue,
@@ -283,6 +367,12 @@ impl Administration {
         }
         let Some(record) = selected else {
             self.stopped = true;
+            if let Some(operation) = self.requested.take() {
+                self.reply = Some(format!(
+                    "OK evidence=local_durable operation={} action=completed",
+                    operation.get()
+                ));
+            }
             eprintln!("administration historical operations completed; inspect configuration-status for local evidence");
             return Ok(());
         };

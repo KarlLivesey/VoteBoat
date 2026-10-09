@@ -439,3 +439,7 @@ admission. It preserves voting policy and does not perform automatic rebalancing
 [Application deployment envelopes](docs/APPLICATION_ENVELOPES.md) expose enforced
 whole-lifetime bounds through the public StateMachine contract. Configuration
 execution and learner readiness refuse unavailable or understated envelopes.
+
+Opt-in authenticated configuration submission uses `--remote-admin-plan` and
+`configure OPERATION_ID` for provisioned intents. See [the command contract](docs/COUNTER_SERVICE.md#authenticated-submission-of-provisioned-configuration-intents)
+for phase receipts, retries and remaining general-ingress limits.

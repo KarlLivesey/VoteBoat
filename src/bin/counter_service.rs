@@ -33,9 +33,9 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE] [--service-access FILE]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE] [--service-access FILE]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
-voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
@@ -52,6 +52,7 @@ Use the same operation ID and delta when retrying an unknown write.";
 enum Pending {
     Write(ClientTicket),
     Read(ReadInvocationTicket),
+    Configure(OperationId),
 }
 enum Phase {
     Input { bytes: [u8; 256], len: usize },
@@ -89,6 +90,7 @@ fn command(
     service: &mut Service,
     observer: &impl Observer,
     command: &str,
+    administration: &mut Option<administration::Administration>,
     quit: &mut bool,
 ) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
@@ -112,6 +114,16 @@ fn command(
             format!("OK evidence=local_durable operation={} committed_prefix={} durable_last={} committed={:?} accepted={:?} action={}",
                 operation.get(), status.committed_index, status.durable_last_index,
                 status.committed, status.accepted, action)
+        }
+        ["configure", operation] => {
+            let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
+                .ok_or("invalid operation ID")?;
+            if service.local().owner.core(group()).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
+                return Err("NOT_LEADER".into());
+            }
+            administration.as_mut().ok_or("remote administration disabled")?
+                .request(operation)?;
+            return Ok(Phase::Pending(Pending::Configure(operation)));
         }
         ["status"] => {
             let core = service.local().owner.core(group()).ok_or("missing group")?;
@@ -213,9 +225,12 @@ fn serve(
     base: u16,
     tls: &Path,
     input: setup::PeerInput<'_>,
-    options: (NativePeerProtocol, Option<&Path>, Option<&Path>),
+    options: (NativePeerProtocol, Option<&Path>, Option<&Path>, bool),
 ) -> Result<(), Failure> {
-    let (protocol, plan_path, access_path) = options;
+    let (protocol, plan_path, access_path, remote) = options;
+    if remote && (access_path.is_none() || plan_path.is_none()) {
+        return Err("remote administration requires service access and provisioned plan".into());
+    }
     let create = match mode {
         "create" => true,
         "recover" | "recover-member" => false,
@@ -235,7 +250,7 @@ fn serve(
         .map(|path| service_access::Access::load(path, tls, config.startup.tls.clone()))
         .transpose()?;
     let mut administration = plan_path
-        .map(|path| administration::Administration::load(path, &config.provisioned_stores))
+        .map(|path| administration::Administration::load(path, &config.provisioned_stores, remote))
         .transpose()?;
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
     listener.set_nonblocking(true)?;
@@ -260,6 +275,13 @@ fn serve(
                 time,
                 NodePollBudget::default(),
                 |core, proposal| {
+                    if admin.remote() {
+                        let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
+                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
+                            .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                        live.stream.authorize(access.as_ref(), group(), "configure", time)
+                            .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                    }
                     admin
                         .plan
                         .authorize(core.state().bootstrap.group, core.membership(), proposal)
@@ -287,6 +309,14 @@ fn serve(
         outputs(&mut service, &mut connection)?;
         if let Some(admin) = administration.as_mut() {
             admin.tick(&mut service, quit)?;
+            if let Some(reply) = admin.take_reply() {
+                if let Some(c) = connection
+                    .as_mut()
+                    .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
+                {
+                    c.reply(reply);
+                }
+            }
         }
         if !quit && connection.is_none() {
             match listener.accept() {
@@ -334,7 +364,13 @@ fn serve(
                                             return Err("one command per connection".into());
                                         }
                                         c.stream.authorize(access.as_ref(), group(), s, time)?;
-                                        command(&mut service, &observer, s, &mut quit)
+                                        command(
+                                            &mut service,
+                                            &observer,
+                                            s,
+                                            &mut administration,
+                                            &mut quit,
+                                        )
                                     });
                                     match result {
                                         Ok(phase) => c.phase = phase,
@@ -378,6 +414,11 @@ fn serve(
                     Pending::Read(t) => {
                         checked(service.cancel_read(t))?;
                     }
+                    Pending::Configure(_) => {
+                        if let Some(admin) = administration.as_mut() {
+                            admin.cancel_remote(&mut service)?;
+                        }
+                    }
                 }
             }
             connection = None;
@@ -406,11 +447,16 @@ fn main() -> Result<(), Failure> {
     let mut deployment = None;
     let mut admin_plan = None;
     let mut service_access = None;
+    let mut remote_admin = false;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
             flag,
-            "--transport" | "--deployment" | "--admin-plan" | "--service-access"
+            "--transport"
+                | "--deployment"
+                | "--admin-plan"
+                | "--remote-admin-plan"
+                | "--service-access"
         ) {
             break;
         }
@@ -432,7 +478,10 @@ fn main() -> Result<(), Failure> {
             "--deployment" if deployment.is_none() => {
                 deployment = Some(std::path::PathBuf::from(value))
             }
-            "--admin-plan" if admin_plan.is_none() && args[0] == "serve" => {
+            flag @ ("--admin-plan" | "--remote-admin-plan")
+                if admin_plan.is_none() && args[0] == "serve" =>
+            {
+                remote_admin = flag == "--remote-admin-plan";
                 admin_plan = Some(std::path::PathBuf::from(value))
             }
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
@@ -482,7 +531,12 @@ fn main() -> Result<(), Failure> {
                 base,
                 Path::new(tls),
                 input,
-                (protocol, admin_plan.as_deref(), service_access.as_deref()),
+                (
+                    protocol,
+                    admin_plan.as_deref(),
+                    service_access.as_deref(),
+                    remote_admin,
+                ),
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {

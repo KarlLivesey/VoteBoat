@@ -7410,3 +7410,98 @@ counted as passed. Full P0–P7 stays active; P8/Windows deferred, CI background
    and original intent authorization. Completion checks: reply loss before/after
    persistence, exact retry/conflict refusal, bounded outcomes and partial-progress
    native TCP/QUIC recovery. Advances macro safe membership/lifecycle operations.
+
+## Slice115 schema plan — authenticated executable configuration submission
+
+Previous turn was progress: slice114 committed/pushed an enforced generic capacity
+contract with native/host and real readiness/membership evidence. Current audit:
+service Configure permission exists but no command consumes it; Administration
+already serializes trusted exact intents, live readiness and durable status/resume.
+Reuse that machinery rather than adding a second configuration owner/helper.
+
+Add opt-in --remote-admin-plan FILE (exclusive with --admin-plan), requiring
+--service-access and recover-member before opening files/listeners. The plan
+continues to provision allowed exact records/placement/envelope. Unlike automatic
+startup administration, it is dormant until authenticated configure OPERATION_ID.
+Connection phase retains one operation; existing one-connection/256-byte input,
+64-intent/1MiB plan and ConfigurationRequests bounds remain. Request acceptance is
+volatile. Admin tick chooses only the requested operation; fresh readiness gates
+joint promotion and committed status can select its provisioned final record.
+
+Before configuration execution, require the same live pending command connection
+and reauthorize Configure through current session/policy, then existing exact plan
+and all Node gates. Reply only on observed committed/not-proposed/unknown result;
+historical completed replies explicitly name local durable identity evidence, not
+comparison to a newly supplied payload. Output remains retained through TLS flush.
+Disconnect/deadline cancels the wait/clears remote selection, not committed work;
+queued work without that connection cannot regain authorization. Restart rebuilds
+policy/plan and stays dormant; caller retries original operation or inspects local
+configuration-status. No new persistent/wire formats or quorum protocol.
+
+Acceptance: actual TCP/QUIC service histories show no automatic commit, reader/
+writer denial and scope mismatch, administrator submission/commit, missing intent
+refusal and original-operation retry after checkpoint/restart. Existing automatic
+plan histories must still pass. This is initial provisioned-intent network ingress,
+not arbitrary client-supplied target parsing or a complete public administration
+release. That remaining requirement stays active in the macro/next mini plan.
+
+### Slice115 implemented evidence and macro review
+
+The executable now accepts --remote-admin-plan only with recover-member and
+--service-access. It remains dormant until Configure-authorized configure OP.
+The same Administration owner chooses provisioned records, obtains fresh readiness,
+submits through Node, observes configuration outcomes and handles joint/final
+resumption. No new public provider seam duplicates the existing service-authorizer,
+configuration-request or native-plan contracts. Execution rechecks the same live
+pending command channel/deadline before exact plan and ordinary Node admission.
+Interrupted CLI replies for configure return UNKNOWN with the original ID.
+
+Real TCP/QUIC histories cover dormant startup, reader/writer denial (including
+admin grants for wrong group/incarnation), nonleader refusal, missing intent,
+learner record and joint/final commitments, checkpoint/restart and original-ID
+completed retries with application deduplication. The missing-service-access
+preflight test preserves nonexistent store paths. The isolated CLI lost-reply
+fixture preserves original bytes and reports UNKNOWN; it is not evidence for
+arbitrary native socket-loss schedules. Automatic trusted membership histories
+and authenticated ordinary command/recovery histories still pass. Actual counts
+and final checks are in validation/REPORT.md. Clippy initially found a nested
+conditional in reply cleanup; it was collapsed with identical short-circuit state
+handling and the final check passed. No protocol/storage format change.
+
+P0/P4/C20/C21 advance with an actual authenticated network consumer, but the
+endpoint selects provisioned intents rather than accepting client-supplied target
+records. The full ingress requirement is not renamed complete. Next work must
+add bounded full-target parsing/authorization and interruption evidence, retaining
+readiness, capacity, placement, status/resume and original operation IDs. P5/P6/P7
+and platform/fault/performance gaps remain. The older broad lifecycle run21618
+continues on its original handle, with additional TCP delegation WAL, QUIC merge
+collision and QUIC cancellation checkpoint cases passed; no terminal suite pass.
+Full P0–P7 active; P8/Windows deferred, CI background.
+
+### Linked mini plan after slice115
+
+1. Current — authenticated provisioned-intent command (implemented above).
+   Purpose: allow an administrator to initiate configuration without automatic
+   startup execution. Dependencies: existing session gate, native trusted plan,
+   serialized Administration readiness and Node configuration observer.
+   Completion checks: scoped-role/nonleader/missing-operation refusal, dormant
+   startup, native learner/joint/final commits and checkpoint/retry; actual CLI
+   interruption reports unknown. Advances usable membership operations (P0/P4).
+2. Next — bounded client-supplied full configuration targets (P4/C20/C21).
+   Purpose: remove the need to predeclare each operation in an intent file while
+   keeping operator-provisioned identities, placement and application bounds.
+   Dependencies: inspect/factor current record/policy parsing, separate deployment
+   authorization from intent allowlisting, specify owned request/result bounds and
+   exact session/principal/target reauthorization. Completion checks: malformed/
+   oversized/duplicate input before persistence, exact target authorization and
+   actual native transitions without preseeded operation intents. Advances macro
+   public composable administration and safe membership; no arbitrary protocol
+   or ownership authority is delegated to parsing.
+3. Following — native ingress interruption/retry release checks (P4/P6).
+   Purpose: resolve accepted administration through lost replies, reconnect,
+   leadership changes and restart without inventing operation identities.
+   Dependencies: full-target ingress plus existing configuration status/resume;
+   bind original target/requirements throughout accepted request lifetime.
+   Completion checks: disconnect/deadline before/after persistence, execution-time
+   revocation, exact retry/conflict refusal, bounded retained outputs and native
+   TCP/QUIC partial-progress recovery. Advances macro safe lifecycle operations.
