@@ -16,6 +16,8 @@
 //! cannot grant authority, and successful establishment is not Raft evidence.
 use crate::{dial::DialError, runtime::MonoTime, secure::*, transport::ConnectTicket};
 use std::io::ErrorKind;
+mod discovery;
+pub use discovery::DiscoveryConnector;
 #[derive(Clone, Debug)]
 pub enum ConnectDirection<E> {
     Dial(E),
@@ -41,6 +43,7 @@ pub enum ConnectError {
     TimeWentBack,
     ProviderViolation,
     Dial(DialError),
+    Discovery(crate::discovery::DiscoveryError),
     Session(SessionError),
     Io(ErrorKind),
 }

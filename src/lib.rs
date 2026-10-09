@@ -23,6 +23,7 @@ pub mod contracts;
 pub mod delegation;
 pub mod dial;
 pub mod directory;
+pub mod discovery;
 pub mod identity;
 pub mod log;
 pub mod membership;

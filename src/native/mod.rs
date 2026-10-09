@@ -19,6 +19,7 @@ pub mod buffer;
 #[cfg(feature = "tls")]
 pub mod connect;
 pub mod dial;
+pub mod discovery;
 pub mod log_store;
 #[cfg(feature = "tls")]
 pub mod node;

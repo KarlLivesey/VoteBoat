@@ -1560,13 +1560,33 @@
         "tests/counter_service.rs"
       ],
       "scope": "Exact authenticated Ready SecureSession binding, captured credential generation/time, expiry and concrete group/action checks before admission; recheck channel after policy. Host-local principal snapshots are not bearer tokens. Native one-to-one stable peer/principal mapping, bounded grants, rejection ownership, scoped close and explicit replacement generation. Command mode uses existing rustls pins/hello and separate service identities, retains bounded partial I/O/deadline/reply flush and original operation retries; restart reloads policy. No voting/configuration/ownership authority, live rotation, external issuer, durable audit or arbitrary callback sandbox. Legacy unflagged endpoint remains trusted plaintext loopback."
+    },
+    {
+      "design_id": "C17",
+      "public_contract": "PeerDiscovery / PeerEndpointHint / DiscoveryConnector",
+      "operations": [
+        "resolve",
+        "invalidate",
+        "close",
+        "NativePeerDiscovery::publish",
+        "DiscoveryConnector::submit",
+        "poll",
+        "into_parts"
+      ],
+      "native": "NativePeerDiscovery bounded explicit endpoint cache, consumed by the public DiscoveryConnector around native or host SocketAddr connectors",
+      "conformance": [
+        "tests/discovery.rs",
+        "tests/connect.rs",
+        "tests/support/peer_driver.rs"
+      ],
+      "scope": "Exact already-provisioned stable peer hints with nonzero generations and monotonic expiry; native bounded fixed-size entries retain invalidation/expiry floors, reject conflicts/stale publication and return rejected input. Public wrapper checks peer/address/expiry before dial, preserves original refusal and exact accepted attempt lifetime, invalidates only used generations on failure, bypasses lookup for accept and suppresses invalidation on cancel/close. PeerDriver retries transient discovery misses under existing roster backoff and deadlines. No implicit DNS/network/worker, trust provision, membership/owner authority, durable cache or hot executable refresh. Actual native TCP/TLS failed-hint/refresh/authentication/drain history; authority resolution and QUIC discovery execution remain separate."
     }
   ],
   "not_yet_implemented": [
     "automatic-wal-maintenance-scheduling",
     "incremental-segment-cleaning-and-general-retention",
     "client-disk-and-connection-admission-policy",
-    "discovery",
+    "responsibility-authority-discovery-and-live-endpoint-refresh",
     "observability-latency-and-budgeted-events",
     "native-configuration-service-endpoints",
     "live-credential-rotation-and-durable-authorization-audit",

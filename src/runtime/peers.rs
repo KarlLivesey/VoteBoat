@@ -878,7 +878,9 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                             .roster
                             .connect_failed(ticket, now)
                             .map_err(PeerDriverError::Roster)?;
-                        if rejected.reason != ConnectError::Overloaded {
+                        if rejected.reason != ConnectError::Overloaded
+                            && !matches!(rejected.reason, ConnectError::Discovery(e) if e.retryable())
+                        {
                             return Err(PeerDriverError::Connect(rejected.reason));
                         }
                         out.connection_failures += 1;

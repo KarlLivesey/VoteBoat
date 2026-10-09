@@ -2473,3 +2473,44 @@ Final cleanup inspection moved pending-ticket cancellation into the common
 connection-removal path for deadline and TLS/channel failures. The final full
 service suite and Clippy were rerun after this edit; the specific post-admission
 TLS-failure branch was inspected, not separately fault-injected.
+
+## Slice 111 — bounded peer endpoint discovery through native connections
+
+Executed Linux checks:
+
+- Discovery conformance: all-features 4/4, core-only 3/3, native without TLS 4/4.
+  Independent host resolver/connector exercise original refused request, resolved
+  address substitution, retained slots, wrong identity/expiry, duplicate receipt,
+  exact-generation invalidation, cancellation, rejected construction and shared
+  resource views. Native tests cover capacity, conflict/stale generations,
+  invalidation/expiry floors, monotonic clock and volatile restart.
+- Connector suite 14/14: real native TCP/TLS timed-out obsolete endpoint,
+  invalidation, externally published fresh hint and authenticated connection to
+  its new address despite the caller supplying the obsolete address. Exact
+  node/store/generation authentication and explicit close/drain/dial-worker join
+  are checked; returned sessions remain live after connector cleanup.
+- Full owning runtime suite 129/129: includes new driver backoff on four transient
+  discovery errors and terminal wrong-scope rejection, plus existing real native
+  hundred-group transport/checkpoint/recovery histories.
+- Full executable service suite 25/25: existing TCP/QUIC principal, membership,
+  automatic routing, quorum-loss/deadline, checkpoint/restart and retry histories.
+- All-feature/all-target Clippy with warnings denied, fmt/diff and inventory pass
+  (76 contract records). The shared-view construction/close test was added after
+  the combined runtime/service run and subsequently passed all feature selections.
+
+No failed acceptance check was observed. Source review added duplicate-completion
+validation before removing any attempt, avoiding partial removal or a repeated
+receipt panic. Accepted attempts retain original deadlines and completion lifetime;
+only the selected endpoint is replaced. Discovery hints cannot provision pins,
+activate voters, grant read authority or modify ownership. No wire/WAL/Raft change.
+
+C17 remains partial: responsibility-authority resolution, dynamic executable
+refresh, external protocols/refresh scheduling and real discovery-selected QUIC
+execution are outstanding. QUIC service regressions do not establish that last
+integration. Native hints/floors are volatile; reconstruction is explicit trusted
+host input. The cache is not a durable authority journal. No performance, macOS,
+separate-host, arbitrary-fault or complete-baseline claim. Full P0–P7 stays active,
+P8/Windows deferred; CI background.
+
+The new peer-driver transient discovery/backoff test also passed core-only (1/1),
+without native/TLS features.

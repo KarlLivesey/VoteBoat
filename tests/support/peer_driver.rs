@@ -77,6 +77,7 @@ struct ConnectControl {
     closed: bool,
     wrong: bool,
     unsupported: bool,
+    rejection: Option<ConnectError>,
     extra_pins: BTreeMap<NodeId, StoreIdentity>,
     polls: usize,
     drops: Rc<Cell<usize>>,
@@ -113,6 +114,12 @@ impl PeerConnector for Connector {
     } // Host wakes explicit completion availability.
     fn submit(&mut self, r: ConnectRequest<()>, _: MonoTime) -> Result<(), ConnectRejected<()>> {
         let mut c = self.0.borrow_mut();
+        if let Some(reason) = c.rejection {
+            return Err(ConnectRejected {
+                reason,
+                request: Box::new(r),
+            });
+        }
         if c.closed || c.pending.len() == 2 {
             return Err(ConnectRejected {
                 reason: if c.closed {
@@ -1712,4 +1719,37 @@ fn local_configuration_admission_uses_retained_pins_and_prevents_queued_route_wi
         .unwrap_or_else(|r| panic!("{:?}", r.reason));
     assert!(f.connect.borrow().submitted.is_empty());
     f.close(0);
+}
+
+#[test]
+fn discovery_misses_back_off_without_fencing_but_invalid_scope_is_terminal() {
+    use voteboat::discovery::DiscoveryError;
+    for error in [
+        DiscoveryError::Missing,
+        DiscoveryError::Expired,
+        DiscoveryError::Unavailable,
+        DiscoveryError::Overloaded,
+    ] {
+        let mut f = Fixture::new();
+        f.connect.borrow_mut().rejection = Some(ConnectError::Discovery(error));
+        let p = f.poll(0).unwrap();
+        assert_eq!(p.connection_failures, 2);
+        assert_eq!(p.connection_submissions, 0);
+        assert_eq!(
+            f.poll(0).unwrap().connection_failures,
+            0,
+            "retry needs backoff"
+        );
+        f.connect.borrow_mut().rejection = None;
+        f.connect.borrow_mut().ready = true;
+        assert_eq!(f.poll(4).unwrap().connection_submissions, 2);
+        assert_eq!(f.poll(4).unwrap().connections, 2);
+        f.close(4);
+    }
+    let mut f = Fixture::new();
+    f.connect.borrow_mut().rejection = Some(ConnectError::Discovery(DiscoveryError::WrongBinding));
+    assert_eq!(
+        f.poll(0).unwrap_err(),
+        PeerDriverError::Connect(ConnectError::Discovery(DiscoveryError::WrongBinding))
+    );
 }

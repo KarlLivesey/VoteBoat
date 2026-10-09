@@ -909,4 +909,95 @@ mod native {
             finish(b, 0);
         }
     }
+    #[test]
+    fn native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates() {
+        use voteboat::{discovery::*, native::discovery::NativePeerDiscovery};
+        let a = make(1, &[2], 1);
+        let mut b = make(2, &[1], 1);
+        // This held listener accepts no TLS work. It is also the stale address
+        // passed on the refreshed request, so success proves substitution.
+        let stale = TcpListener::bind("127.0.0.1:0").unwrap();
+        let stale_address = stale.local_addr().unwrap();
+        let mut resolver = NativePeerDiscovery::new(1, MonoTime(0)).unwrap();
+        let first = PeerEndpointHint {
+            peer: ticket(1, 2, 1).peer,
+            generation: HintGeneration::new(1).unwrap(),
+            endpoint: stale_address,
+            expires_at: MonoTime(1000),
+        };
+        resolver.publish(first, MonoTime(0)).unwrap();
+        let mut a = DiscoveryConnector::new(a, resolver, MonoTime(0))
+            .unwrap_or_else(|_| panic!("construct discovery"));
+        a.submit(
+            req(ticket(1, 2, 1), ConnectDirection::Dial(stale_address)),
+            MonoTime(0),
+        )
+        .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            let events = a.poll(MonoTime(100), ConnectPollBudget::default()).unwrap();
+            if let Some(event) = events.into_iter().next() {
+                assert_eq!(event.result.err(), Some(ConnectError::Timeout));
+                break;
+            }
+            assert!(Instant::now() < deadline);
+            thread::park_timeout(Duration::from_millis(1));
+        }
+        assert_eq!(
+            a.discovery_mut().resolve(first.peer, MonoTime(100)),
+            Err(DiscoveryError::Missing)
+        );
+        a.discovery_mut()
+            .publish(
+                PeerEndpointHint {
+                    generation: HintGeneration::new(2).unwrap(),
+                    endpoint: b.listener_addr().unwrap().unwrap(),
+                    ..first
+                },
+                MonoTime(100),
+            )
+            .unwrap();
+        a.submit(
+            ConnectRequest {
+                ticket: ticket(1, 2, 2),
+                direction: ConnectDirection::Dial(stale_address),
+                deadline: MonoTime(200),
+            },
+            MonoTime(100),
+        )
+        .unwrap();
+        b.submit(
+            ConnectRequest {
+                ticket: ticket(2, 1, 1),
+                direction: ConnectDirection::Accept,
+                deadline: MonoTime(200),
+            },
+            MonoTime(100),
+        )
+        .unwrap();
+        let mut sessions = Vec::new();
+        while sessions.len() < 2 {
+            for event in a
+                .poll(MonoTime(100), ConnectPollBudget::default())
+                .unwrap()
+                .into_iter()
+                .chain(step(&mut b, 100))
+            {
+                let session = event.result.unwrap();
+                let binding = require_authenticated(&session).unwrap();
+                assert_eq!(binding.local, event.ticket.local);
+                assert_eq!(binding.peer.node, event.ticket.peer.node);
+                assert_eq!(binding.peer.store.identity, event.ticket.peer.store);
+                sessions.push(session);
+            }
+            assert!(Instant::now() < deadline);
+            thread::park_timeout(Duration::from_millis(1));
+        }
+        a.close();
+        assert!(a.is_drained());
+        let (a, _) = a.into_parts().unwrap_or_else(|_| panic!("discovery drain"));
+        finish(a, 100);
+        finish(b, 100);
+        assert!(sessions.iter().all(|s| require_authenticated(s).is_ok()));
+    }
 }

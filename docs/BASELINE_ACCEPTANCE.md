@@ -52,7 +52,7 @@ component-contracts.json and its linked contract document.
 | C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Initial encoded-frame integration. WAL/snapshot/application buffers remain separate; shared-pool fairness/control reserve and host connection admission remain to be addressed. Legacy host-codec defaults use separate bounded scratch. |
 | C15 admission | Core ceilings/reserves plus public AdmissionPolicy/AdmissionLease, native shareable bulk provider and NativeOutbound integration; tests/admission.rs, tests/transport.rs; slice109 | Initial outbound path. Policy cannot bypass hard ceilings or veto reserved control. General client/disk/connection/shared-buffer admission and fairness remain. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
-| C17 discovery | ManifestCache and directory/routed lookup | General peer/authority hint resolver with bounded retries/invalidation is missing. |
+| C17 discovery | PeerDiscovery / NativePeerDiscovery through DiscoveryConnector; tests/discovery.rs, tests/connect.rs and peer-driver backoff; existing ManifestCache/directory lookup | Initial peer-address seam has real native TCP/TLS evidence. Responsibility-authority resolution, dynamic executable refresh and discovery-selected QUIC execution remain. |
 | C18 placement | PlacementAuthorizer and native declared deployments | Scoring/planning/move proposals are missing; recommendations cannot activate membership. |
 | C19 observability | New Observer / NativeCounterObserver, post-poll capture and local service metrics | Fixed volatile counts only. No timer/queue/disk latency attribution, per-group event history or external exporter integration claim. |
 | C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | General public mutation endpoint and generic envelopes remain gated. |
@@ -63,11 +63,11 @@ component-contracts.json and its linked contract document.
 
 ## Next usable path
 
-1. Finish slice110's principal/scope conformance and authenticated process recovery;
-   keep live rotation, durable audit and general configuration ingress explicit.
-2. Inspect C17's missing peer/authority resolver against current static endpoints
-   and manifest hints. Add bounded resolve/invalidate/retry semantics through a real
-   native call site; resolved hints must never activate membership or ownership.
+1. Finish slice111 peer discovery conformance and native regressions; preserve
+   its explicit peer-hint boundary and existing membership/ownership checks.
+2. Complete C17 responsibility-authority hint resolution against committed
+   manifests: bounded lookup/invalidation, stale owner/retired lineage refusal,
+   and cached child progress during parent unavailability.
 3. Inspect C18 placement planning against committed placement authorization;
    bounded proposals must remain hints until existing durable protocols accept them.
 

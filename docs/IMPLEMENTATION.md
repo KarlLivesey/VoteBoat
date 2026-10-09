@@ -7014,3 +7014,108 @@ active; P8/Windows remain deferred and CI stays background feedback.
    Completion checks: bounded deterministic proposals, stale/capacity refusal and
    native consumer evidence that proposals cannot bypass committed membership or
    transfer fencing. Advances macro online membership/recursive routing (P4/P5).
+
+## Slice111 schema plan — bounded peer endpoint discovery
+
+C17 advances P0 composition and macro recursive routing/P5 without inserting an
+ancestor lookup into writes. Add public PeerDiscovery::resolve/invalidate/close,
+fixed SocketAddr PeerEndpointHint carrying exact stable PeerIdentity, nonzero
+HintGeneration and monotonic expires_at, plus typed missing/expired/closed/time/
+capacity/provider errors. Resolution is bounded, synchronous and nonblocking:
+hosts refresh externally; no DNS or hidden worker. The initial native provider is
+a finite explicit hint cache with owned atomic publish/rejection, generation floors
+retained on invalidation/expiry and scoped close. No certificate/credential source,
+implicit join, owner epoch or retired-group recreation is added.
+
+A public DiscoveryConnector<C,R> wraps the existing SocketAddr PeerConnector and
+consumes either native or host discovery through the same operations. Construction
+requires quiescent validated connector limits; failed construction returns both
+providers. Dial admission checks local/provisioned peer/deadline/capacity before
+resolution. It checks hint identity, endpoint, expiry and generation, substitutes
+only the address, and returns the original request on refusal. Accepted attempt
+metadata holds exact ticket and hint generation until terminal poll. Failure
+invalidates only the generation used, preserving a newer concurrently published
+hint; cancellation/close do not invalidate healthy hints. Accept bypasses discovery.
+Close affects the selected view and connector; drain/reclaim keeps native dialer
+cleanup explicit. Host provider lifetime stays construction-owned and no global
+reactor is created. Restart rebuilds hints explicitly; stale hint publication cannot
+regress an extant cache floor, but hints are never persistent authority.
+
+PeerDriver will retry only declared transient discovery misses/expiry/unavailability
+through its existing roster backoff; invalid/provider scope remains terminal. No
+inner loop retries, attempt deadline extension or silent fallback to obsolete
+supplied addresses. Existing session/roster checks still validate authentication.
+
+Acceptance: downstream resolver through the public wrapper; invalid identity/expiry,
+exact rejection ownership and bounded request slots; native stale publish,
+conditional invalidation, close/restart; actual TCP/TLS dial to a resolved address
+rather than the supplied stale address, failed dial then refreshed retry, and
+explicit resource drain/join. Existing connector/driver and service regressions,
+core/native feature checks and inventory documentation. This first peer-address
+slice does not claim responsibility-authority resolution or dynamic service
+configuration, which remain following C17 work before C18 placement planning.
+
+### Slice111 implemented evidence and macro review
+
+Implemented public PeerDiscovery/PeerEndpointHint/HintGeneration and typed errors,
+native finite explicit hint cache and public DiscoveryConnector<C,R>. The native
+connector is the actual consumer in the real TLS test; host replacements use the
+same resolve/invalidate operations without editing the core. Only the endpoint of
+an already provisioned exact peer is substituted. Original refused requests are
+preserved; accepted tickets retain selected generations through terminal poll.
+Failed attempts invalidate conditionally, cancellations do not poison hints, and
+newer publications survive older failures. Duplicate/mis-scoped tickets close the
+wrapper as provider violations. Existing PeerDriver backoff now recognises only
+declared transient discovery refusals. Native hints/floors remain volatile,
+bounded and independent of membership, credentials and ownership authority.
+
+Actual Linux checks: discovery all-features4/4, core-only3/3, native-without-TLS4/4
+pass. Native/connect suite14/14 passes, including a real TCP/TLS timed-out obsolete
+listener, invalidation, refreshed-address substitution despite an obsolete supplied
+address, exact authenticated identity and explicit dial-worker drain/join. Full
+owning runtime suite129/129 passes, including the new transient-miss backoff versus
+terminal wrong-scope check and existing real hundred-group worker/TLS/recovery
+histories. Full TCP/QUIC executable service suite25/25 passes, retaining principal,
+membership, deadline, recovery and original-operation retry histories. Final
+all-target/all-feature Clippy with warnings denied, fmt/diff and inventory76 pass.
+The shared-view construction/close test was added after the combined run and then
+run under all three feature selections. No failed acceptance check or dependency
+change was hidden; no consensus/wire/persistent format change was needed.
+
+Macro review: this advances P0 discovery composition and P5 peer reachability,
+without making a parent lookup part of child writes. It is initial peer endpoint
+resolution, not complete C17 authority discovery: existing cached routing still
+needs a public bounded responsibility/authority resolver and actual native
+consumer. The executable remains statically configured; dynamic external refresh
+and discovery-selected QUIC execution remain separate. This scope refinement
+moves C17 authority resolution before C18 planning; no helper is added merely to
+populate a catalogue. DISCOVERY.md records bounded resources, exact lifetime,
+progress/restart assumptions and remaining scope. Other P4/P6/P7/platform/fault
+requirements remain active; no performance, macOS or separate-host claim.
+
+### Linked mini plan after slice111
+
+1. Current — peer endpoint discovery (implemented above).
+   Purpose: resolve refreshed peer addresses through native authentication without
+   rebuilding consensus or granting trust. Dependencies: existing connector pins,
+   tickets, roster backoff and public ownership lifetimes. Completion checks:
+   downstream/native finite cache and exact attempt tests, actual resolved TLS dial,
+   backoff and owner/service regressions. Advances P0/P5 and macro recursive routing.
+2. Next — C17 responsibility/authority discovery at existing routed ingress.
+   Purpose: fetch/invalidate bounded manifest hints while preserving cached child
+   service during parent outage. Dependencies: committed Directory/ManifestCache,
+   concrete responsibility incarnation/owner epochs and current routed request gate;
+   inspect those contracts before choosing the API. Completion checks: independent
+   host/native resolver, stale/retired/wrong-authority refusal, bounded lookup/retry
+   ownership and actual native child progress without an ancestor write. Advances
+   P0/P5 and macro recursive responsibilities/routing. Endpoint refresh is useful
+   but cannot substitute for this authority evidence.
+3. Following — C18 placement proposals via existing committed administration.
+   Purpose: propose useful selective placement while keeping membership/ownership
+   changes in their durable protocols. Dependencies: C17 discovery, current placement
+   authorization and P4 administration; no global root/transaction requirement.
+   Completion checks: bounded deterministic proposal sets, stale identity/capacity
+   rejection and real native use that cannot bypass joint consensus or source
+   fencing. Advances P4/P5 and macro online membership/recursive responsibilities.
+
+Full P0–P7 remains active; P8/Windows remain deferred and CI stays background.
