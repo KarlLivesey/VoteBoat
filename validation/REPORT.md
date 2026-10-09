@@ -4000,3 +4000,35 @@ proof. Foreign-parent152b remains current within152; next153 deletion, following
 partial sources/mappings/retention, membership/metadata movement/platform/fault/P7
 requirements stay open. Linux local evidence, macOS execution pending, Windows/P8
 deferred, RPL-1.5 and ignored original design pack preserved.
+
+## Slice152b — native foreign-parent retained service recovery
+
+Extended the existing retained fixture through explicit original factory selection:
+parent100 owns an existing locator, child metadata1 reserves/assigns fresh target21,
+and source20 preserves its retained range. Actual reservation400 produces canonical
+bound intent200 and is WAL/checkpoint reopened/retried before target construction.
+The unread intent/stage/freeze/import/publication/completion/adoption/activation
+histories compare exact original quorum observations after joined reopen and exact
+command retries. Parent completion401 updates the child locator epoch and parent route generation,
+checked against the complete expected parent manifest; own parent/epoch stay intact.
+Original creation records/assignment binding bytes remain unchanged through phases.
+
+With child and parent metadata both stopped/joined, retained and target data/retries
+continue and independently recover values14/9, original frozen export/digest and
+adoption. Original target transferred retry/outbox semantics remain checked.
+Stopped metadata files and recovered GroupLogs compare unchanged for both groups.
+Root selection remains separate, and no new production/provider/persistence owner
+was introduced. No fake commitment or normalized facts replace actual observations.
+
+Actual local Linux checks: compile-only all-feature routed target passes6.75s;
+initial foreign TCP/WAL1/1 passes33.03s; final foreign TCP/QUIC x WAL/checkpoint4/4
+passes135.83s; root TCP/WAL regression1/1 passes11.71s. Native execution used required
+loopback permissions. All-feature/all-target Clippy -D warnings passes1.90s;
+formatting/diff and81 implemented contract inventory pass. All process handles
+terminal. No failed test or broad unchanged network/performance rerun this slice.
+
+Selected direct-parent retained path, not universal recursive lifecycle/fault proof.
+Current153 deletion, next154 reparenting, following155 target-backed partial sources;
+general mappings/retention, metadata authority movement, wider membership, macOS and
+original platform/fault/P7 requirements stay open. Full P0–P7 remains active; Windows
+and P8 deferred, RPL-1.5 and ignored original pack preserved.

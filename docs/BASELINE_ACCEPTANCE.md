@@ -108,3 +108,12 @@ Source retained E2 and activated-child service continue with metadata stopped;
 independent data-owner recovery preserves values/retries/exports while exact
 metadata files/GroupLogs stay unchanged. Current152b is foreign-parent composition;
 153 deletion,154 reparenting and all original broader scope/gates remain active.
+
+Slice152b completes selected native foreign-parent retained insertion evidence:
+actual reservation/recovery binds the child intent; child publication precedes
+parent completion and exact locator refresh. TCP/QUIC WAL/checkpoint unread-phase
+recovery4/4 passes. Both metadata authorities remain stopped while retained source
+and activated child serve/recover; original stopped metadata bytes/logs remain
+unchanged. Root TCP/WAL factory regression passes. No production protocol change.
+Current153 deletion, next154 reparenting, following155 target-backed partial sources
+and wider original scope/gates remain open; Linux evidence, macOS pending.

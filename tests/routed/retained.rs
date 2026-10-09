@@ -19,10 +19,31 @@ use voteboat::{
     native::group_creation::FileCreationBindings, scoped_source::*,
 };
 type Source = ScopedTransferSource<BucketCounter<source_fixture::Policy>, source_fixture::Policy>;
-fn metadata() -> LifecycleDirectory {
+fn before(foreign: bool) -> ResponsibilityManifest {
+    if foreign {
+        fixture::before()
+    } else {
+        source_fixture::grant()
+    }
+}
+fn retained_parent() -> LifecycleDirectory {
     LifecycleDirectory::new(
         Directory::new(
-            DirectoryPlan::new(group(1), vec![source_fixture::grant()]).unwrap(),
+            DirectoryPlan::new(group(100), vec![fixture::parent()]).unwrap(),
+            DirectoryLimits {
+                operations: 32,
+                history_bytes: 200000,
+            },
+        )
+        .unwrap()
+        .with_retained_insertion()
+        .unwrap_or_else(|_| panic!("parent schema8")),
+    )
+}
+fn metadata(foreign: bool) -> LifecycleDirectory {
+    LifecycleDirectory::new(
+        Directory::new(
+            DirectoryPlan::new(group(1), vec![before(foreign)]).unwrap(),
             DirectoryLimits {
                 operations: 32,
                 history_bytes: 200000,
@@ -33,10 +54,10 @@ fn metadata() -> LifecycleDirectory {
         .unwrap_or_else(|_| panic!("schema8")),
     )
 }
-fn source() -> Source {
+fn source(foreign: bool) -> Source {
     let r = RoutedApplication::new(
         group(20),
-        source_fixture::grant(),
+        before(foreign),
         BucketCounter::new(
             source_fixture::range(0, 256),
             source_fixture::Policy,
@@ -78,7 +99,14 @@ fn target(intent: &TransferIntent) -> target_fixture::Target {
     .unwrap_or_else(|e| panic!("{:?}", e.0))
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct ParentFacts {
+    manifest: ResponsibilityManifest,
+    reservation: Option<DelegationReservationStatus>,
+    publication: Option<DelegationPublicationStatus>,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct Facts {
+    parent: Option<ParentFacts>,
     manifest: ResponsibilityManifest,
     child: Option<ResponsibilityManifest>,
     intent: Option<TransferIntentStatus>,
@@ -93,6 +121,8 @@ struct Retained {
     clock: Instant,
     protocol: NativePeerProtocol,
     checkpoint: bool,
+    foreign: bool,
+    parent: Vec<Node<LifecycleDirectory>>,
     metadata: Vec<Node<LifecycleDirectory>>,
     source: Vec<Node<Source>>,
     target: Vec<Node<target_fixture::Target>>,
@@ -101,9 +131,9 @@ struct Retained {
     bindings: BTreeMap<NodeId, Vec<u8>>,
 }
 impl Retained {
-    fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
+    fn new(protocol: NativePeerProtocol, checkpoint: bool, foreign: bool) -> Self {
         let root = std::env::temp_dir().join(format!(
-            "voteboat-retained-native-{}-{protocol:?}-{checkpoint}",
+            "voteboat-retained-native-{}-{protocol:?}-{checkpoint}-{foreign}",
             std::process::id()
         ));
         std::fs::create_dir_all(&root).unwrap();
@@ -112,14 +142,14 @@ impl Retained {
             configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
             &clock,
             protocol,
-            metadata,
+            || metadata(foreign),
         );
-        initialize(&mut metadata_nodes, &clock, 1, source_fixture::grant());
+        initialize(&mut metadata_nodes, &clock, 1, before(foreign));
         let mut source_nodes = open(
             configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
             &clock,
             protocol,
-            source,
+            || source(foreign),
         );
         campaign(&mut source_nodes, &clock, 20);
         propose_recovering(
@@ -127,7 +157,7 @@ impl Retained {
             &clock,
             20,
             100,
-            source().bootstrap_command(100000).unwrap(),
+            source(foreign).bootstrap_command(100000).unwrap(),
         );
         propose_recovering(&mut source_nodes, &clock, 20, 1, source_fixture::data(1, 7));
         propose_recovering(
@@ -140,11 +170,11 @@ impl Retained {
         let configs = configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover);
         let request = GroupCreationIntent {
             authority: group(1),
-            parent: source_fixture::grant().input().responsibility,
+            parent: before(foreign).input().responsibility,
             expected: RouteGeneration::new(1).unwrap(),
             responsibility: fixture::id(21),
             bootstrap: configs[0].bootstrap.clone(),
-            application: source_fixture::grant().input().application,
+            application: before(foreign).input().application,
             mode: GroupCreationMode::Staging,
         };
         campaign(&mut metadata_nodes, &clock, 1);
@@ -163,7 +193,7 @@ impl Retained {
             &mut metadata_nodes,
             &clock,
             1,
-            DirectoryQuery::Manifest(source_fixture::grant().input().responsibility),
+            DirectoryQuery::Manifest(before(foreign).input().responsibility),
         );
         let core = metadata_nodes[0].local().owner.core(group(1)).unwrap();
         let creation = metadata_nodes[0].local().applications[&group(1)]
@@ -183,7 +213,7 @@ impl Retained {
             configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
             &clock,
             protocol,
-            metadata,
+            || metadata(foreign),
         );
         campaign(&mut metadata_nodes, &clock, 1);
         assert!(
@@ -200,22 +230,22 @@ impl Retained {
             &mut metadata_nodes,
             &clock,
             1,
-            DirectoryQuery::Manifest(source_fixture::grant().input().responsibility),
+            DirectoryQuery::Manifest(before(foreign).input().responsibility),
         );
         let bindings = configs
             .iter()
             .map(|c| (c.node, establish(&metadata_nodes, c, &creation)))
             .collect();
-        let mut child = source_fixture::grant().into_input();
+        let mut child = before(foreign).into_input();
         child.responsibility = fixture::id(21);
         child.parent = Some(ParentAuthority {
-            responsibility: source_fixture::grant().input().responsibility,
+            responsibility: before(foreign).input().responsibility,
             group: group(1),
         });
         child.scope = source_fixture::range(0, 128);
         child.execution = ExecutionMode::Single(group(21));
         let child = ResponsibilityManifest::new(child).unwrap();
-        let mut after = source_fixture::grant().into_input();
+        let mut after = before(foreign).into_input();
         after.epoch = OwnershipEpoch::new(2).unwrap();
         after.generation = RouteGeneration::new(2).unwrap();
         after.execution = ExecutionMode::Delegated(vec![
@@ -232,18 +262,76 @@ impl Retained {
                 target: RouteTarget::Group(group(20)),
             },
         ]);
-        let intent = TransferIntent::insert_retained_child(
-            source_fixture::grant(),
-            ResponsibilityManifest::new(after).unwrap(),
-            InsertionChild::from_creation(child, &creation).unwrap(),
-        )
-        .unwrap();
+        let after = ResponsibilityManifest::new(after).unwrap();
+        let child = InsertionChild::from_creation(child, &creation).unwrap();
+        let mut parent_nodes = Vec::new();
+        let intent = if foreign {
+            parent_nodes = open(
+                configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Create),
+                &clock,
+                protocol,
+                retained_parent,
+            );
+            initialize(&mut parent_nodes, &clock, 100, fixture::parent());
+            let plan = DelegationPlan::retained_insertion(
+                fixture::parent(),
+                before(foreign),
+                after,
+                child,
+                source_fixture::op(200),
+            )
+            .unwrap();
+            let bytes = plan.encode(100000).unwrap();
+            campaign(&mut parent_nodes, &clock, 100);
+            phase_write(true, &mut parent_nodes, &clock, 100, 400, bytes.clone());
+            let DirectoryRead::DelegationReservation(Some(original)) = observe(
+                &mut parent_nodes,
+                &clock,
+                100,
+                DirectoryQuery::DelegationReservation(source_fixture::op(400)),
+            ) else {
+                panic!("reservation")
+            };
+            if checkpoint {
+                compact(&mut parent_nodes, &clock, 100);
+            }
+            creation::abandon(parent_nodes, 100);
+            parent_nodes = open(
+                configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+                &clock,
+                protocol,
+                retained_parent,
+            );
+            campaign(&mut parent_nodes, &clock, 100);
+            assert!(propose_recovering(&mut parent_nodes, &clock, 100, 400, bytes).duplicate);
+            assert_eq!(
+                observe(
+                    &mut parent_nodes,
+                    &clock,
+                    100,
+                    DirectoryQuery::DelegationReservation(source_fixture::op(400))
+                ),
+                DirectoryRead::DelegationReservation(Some(original.clone()))
+            );
+            let cfg = parent_nodes[0]
+                .local()
+                .owner
+                .core(group(100))
+                .unwrap()
+                .membership()
+                .id();
+            original.child_intent(cfg).unwrap()
+        } else {
+            TransferIntent::insert_retained_child(before(foreign), after, child).unwrap()
+        };
         let target_nodes = open(configs, &clock, protocol, || target(&intent));
         Self {
             root,
             clock,
             protocol,
             checkpoint,
+            foreign,
+            parent: parent_nodes,
             metadata: metadata_nodes,
             source: source_nodes,
             target: target_nodes,
@@ -309,7 +397,41 @@ impl Retained {
         else {
             panic!("target")
         };
+        let parent = if self.foreign {
+            let DirectoryRead::Manifest(Some(manifest)) = observe(
+                &mut self.parent,
+                &self.clock,
+                100,
+                DirectoryQuery::Manifest(fixture::id(500)),
+            ) else {
+                panic!("parent")
+            };
+            let DirectoryRead::DelegationReservation(reservation) = observe(
+                &mut self.parent,
+                &self.clock,
+                100,
+                DirectoryQuery::DelegationReservation(source_fixture::op(400)),
+            ) else {
+                panic!("reservation")
+            };
+            let DirectoryRead::DelegationPublication(publication) = observe(
+                &mut self.parent,
+                &self.clock,
+                100,
+                DirectoryQuery::DelegationPublication(source_fixture::op(400)),
+            ) else {
+                panic!("parent publication")
+            };
+            Some(ParentFacts {
+                manifest,
+                reservation,
+                publication,
+            })
+        } else {
+            None
+        };
         Facts {
+            parent,
             manifest,
             child,
             intent,
@@ -321,10 +443,23 @@ impl Retained {
         }
     }
     fn reopen(&mut self) {
+        let foreign = self.foreign;
         if self.checkpoint {
+            if foreign {
+                compact(&mut self.parent, &self.clock, 100);
+            }
             compact(&mut self.metadata, &self.clock, 1);
             compact(&mut self.source, &self.clock, 20);
             compact(&mut self.target, &self.clock, 21);
+        }
+        if foreign {
+            creation::abandon(std::mem::take(&mut self.parent), 100);
+            self.parent = open(
+                configuration(&self.root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+                &self.clock,
+                self.protocol,
+                retained_parent,
+            );
         }
         creation::abandon(std::mem::take(&mut self.metadata), 1);
         creation::abandon(std::mem::take(&mut self.source), 20);
@@ -333,13 +468,13 @@ impl Retained {
             configuration(&self.root, 1, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            metadata,
+            || metadata(foreign),
         );
         self.source = open(
             configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            source,
+            || source(foreign),
         );
         let intent = &self.intent;
         self.target = open(
@@ -351,6 +486,10 @@ impl Retained {
     }
     fn phase(&mut self, g: u128, op: u128, bytes: Vec<u8>) {
         match g {
+            100 => {
+                campaign(&mut self.parent, &self.clock, g);
+                phase_write(true, &mut self.parent, &self.clock, g, op, bytes.clone())
+            }
             1 => {
                 campaign(&mut self.metadata, &self.clock, g);
                 phase_write(true, &mut self.metadata, &self.clock, g, op, bytes.clone())
@@ -369,6 +508,10 @@ impl Retained {
         self.reopen();
         assert_eq!(self.facts(), original);
         match g {
+            100 => {
+                campaign(&mut self.parent, &self.clock, g);
+                propose_recovering(&mut self.parent, &self.clock, g, op, bytes);
+            }
             1 => {
                 campaign(&mut self.metadata, &self.clock, g);
                 propose_recovering(&mut self.metadata, &self.clock, g, op, bytes);
@@ -458,8 +601,8 @@ fn source_read(
         }),
     )
 }
-fn run(protocol: NativePeerProtocol, checkpoint: bool) {
-    let mut rig = Retained::new(protocol, checkpoint);
+fn run(protocol: NativePeerProtocol, checkpoint: bool, foreign: bool) {
+    let mut rig = Retained::new(protocol, checkpoint, foreign);
     rig.phase(1, 200, rig.intent.encode(100000).unwrap());
     assert_eq!(
         child_read(&mut rig.target, &rig.clock),
@@ -541,6 +684,45 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .membership()
         .id();
     let decision = facts.decision.unwrap();
+    if foreign {
+        let original_parent = facts.parent.unwrap();
+        let reservation = original_parent.reservation.unwrap();
+        let completion = DelegationCompletion {
+            reservation: reservation.operation,
+            reservation_index: reservation.index,
+            parent_configuration: rig.parent[0]
+                .local()
+                .owner
+                .core(group(100))
+                .unwrap()
+                .membership()
+                .id(),
+            child_configuration: metadata_configuration,
+            decision: decision.clone(),
+        };
+        rig.phase(
+            100,
+            401,
+            completion.encode(MAX_DELEGATION_COMPLETION_BYTES).unwrap(),
+        );
+        let parent = rig.facts().parent.unwrap();
+        let mut expected = fixture::parent().into_input();
+        expected.generation = RouteGeneration::new(2).unwrap();
+        expected.execution = ExecutionMode::Delegated(vec![RouteEntry {
+            scope: expected.scope,
+            target: RouteTarget::Child(ChildAuthority {
+                responsibility: rig.intent.after().input().responsibility,
+                group: group(1),
+                epoch: rig.intent.after().input().epoch,
+            }),
+        }]);
+        assert_eq!(
+            parent.manifest,
+            ResponsibilityManifest::new(expected).unwrap()
+        );
+        assert_eq!(parent.publication.unwrap().completion, completion);
+        assert_eq!(parent.reservation, Some(reservation));
+    }
     let adoption = RetainedGrantAdoption {
         metadata_configuration,
         decision: decision.clone(),
@@ -588,6 +770,12 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     assert!(original.target.activated.is_some());
     let metadata_logs = creation::abandon(std::mem::take(&mut rig.metadata), 1);
     let metadata_files = durable_files(&rig.root.join("1"));
+    let parent_stopped = if foreign {
+        let logs = creation::abandon(std::mem::take(&mut rig.parent), 100);
+        Some((logs, durable_files(&rig.root.join("100"))))
+    } else {
+        None
+    };
     assert_eq!(child_read(&mut rig.target, &rig.clock), TargetRead::Data(7));
     campaign(&mut rig.target, &rig.clock, 21);
     let r = propose_recovering(&mut rig.target, &rig.clock, 21, 200, bytes.clone());
@@ -648,7 +836,7 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         configuration(&rig.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
         &rig.clock,
         protocol,
-        source,
+        || source(foreign),
     );
     rig.target = open(
         configuration(&rig.root, 21, &[1, 2, 3], NativeOpenMode::Recover),
@@ -695,25 +883,56 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .unwrap();
         assert_eq!(log.state(group(1)).unwrap(), metadata_logs[&c.node]);
     }
+    if let Some((logs, files)) = parent_stopped {
+        assert_eq!(durable_files(&rig.root.join("100")), files);
+        for c in configuration(&rig.root, 100, &[1, 2, 3], NativeOpenMode::Recover) {
+            let log = NativeLogStore::recover(
+                FileLogIo::open(&c.directory).unwrap(),
+                c.store,
+                LogLimits::default(),
+            )
+            .unwrap();
+            assert_eq!(log.state(group(100)).unwrap(), logs[&c.node]);
+        }
+    }
     creation::abandon(std::mem::take(&mut rig.source), 20);
     creation::abandon(std::mem::take(&mut rig.target), 21);
     std::fs::remove_dir_all(&rig.root).unwrap();
 }
 #[test]
 fn tcp_root_retained_scopes_recover_unread_phases_from_wal() {
-    run(NativePeerProtocol::TcpTls, false);
+    run(NativePeerProtocol::TcpTls, false, false);
 }
 #[test]
 fn tcp_root_retained_scopes_recover_unread_phases_from_checkpoint() {
-    run(NativePeerProtocol::TcpTls, true);
+    run(NativePeerProtocol::TcpTls, true, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_root_retained_scopes_recover_unread_phases_from_wal() {
-    run(NativePeerProtocol::Quic, false);
+    run(NativePeerProtocol::Quic, false, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_root_retained_scopes_recover_unread_phases_from_checkpoint() {
-    run(NativePeerProtocol::Quic, true);
+    run(NativePeerProtocol::Quic, true, false);
+}
+
+#[test]
+fn tcp_foreign_retained_scopes_recover_unread_phases_from_wal() {
+    run(NativePeerProtocol::TcpTls, false, true);
+}
+#[test]
+fn tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint() {
+    run(NativePeerProtocol::TcpTls, true, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_foreign_retained_scopes_recover_unread_phases_from_wal() {
+    run(NativePeerProtocol::Quic, false, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint() {
+    run(NativePeerProtocol::Quic, true, true);
 }
