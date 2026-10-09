@@ -50,7 +50,8 @@ struct Attempt {
 }
 /// At most eight 1200-byte packets are queued per live authorized session lease.
 /// Cancel/close releases owned handshakes; transferred sessions retain independent
-/// leases and keep the socket alive. No anonymous peer, migration or address dialing.
+/// leases and keep the socket alive. No anonymous peer or live migration.
+/// Discovered dial addresses require explicit construction selection.
 pub struct NativeQuicConnector {
     config: NativeConnectConfig,
     tls: NativeTlsConfig,
@@ -62,6 +63,7 @@ pub struct NativeQuicConnector {
     terminal_cursor: Option<NodeId>,
     now: MonoTime,
     closed: bool,
+    discovered_dials: bool,
 }
 fn next<V>(map: &BTreeMap<NodeId, V>, cursor: Option<NodeId>) -> Option<NodeId> {
     cursor
@@ -73,6 +75,20 @@ fn next<V>(map: &BTreeMap<NodeId, V>, cursor: Option<NodeId>) -> Option<NodeId> 
         .or_else(|| map.first_key_value().map(|(k, _)| *k))
 }
 impl NativeQuicConnector {
+    /// Explicitly permit validated discovered Dial endpoints for already pinned
+    /// peers. Accept still uses its provisioned endpoint. Accepted sessions keep
+    /// their original socket lease; address changes cannot preempt them.
+    pub fn new_with_discovered_dials(
+        config: NativeConnectConfig,
+        tls: NativeTlsConfig,
+        peers: BTreeMap<NodeId, (SocketAddr, TlsPeer)>,
+        socket: UdpSocket,
+        now: MonoTime,
+    ) -> Result<Self, Box<QuicConnectRejected>> {
+        let mut connector = Self::new(config, tls, peers, socket, now)?;
+        connector.discovered_dials = true;
+        Ok(connector)
+    }
     pub fn new(
         config: NativeConnectConfig,
         tls: NativeTlsConfig,
@@ -146,6 +162,7 @@ impl NativeQuicConnector {
             terminal_cursor: None,
             now,
             closed: false,
+            discovered_dials: false,
         })
     }
     pub(super) fn closed_and_drained(&self) -> bool {
@@ -176,7 +193,10 @@ impl NativeQuicConnector {
         }
         if r.deadline <= now
             || r.deadline.0 - now.0 > self.config.limits.timeout_ms
-            || matches!(r.direction, ConnectDirection::Dial(a) if a != peer.remote)
+            || matches!(r.direction, ConnectDirection::Dial(a) if
+                (!self.discovered_dials && a != peer.remote) || a.port() == 0
+                || a.ip().is_unspecified() || a.ip().is_multicast()
+                || a.is_ipv4() != self.address.is_ipv4() || a == self.address)
         {
             return Err(ConnectError::InvalidRequest);
         }
@@ -237,9 +257,14 @@ impl PeerConnector for NativeQuicConnector {
         let result = (|| {
             self.admission(&request, now)?;
             let peer = &self.peers[&request.ticket.peer.node];
+            let remote = match request.direction {
+                ConnectDirection::Dial(address) => address,
+                ConnectDirection::Accept => peer.remote,
+            };
             let socket = QuicSocketHub::lease(
                 self.hub.as_ref().unwrap(),
-                peer.remote,
+                request.ticket.peer.node,
+                remote,
                 request.ticket.generation.get(),
             )
             .map_err(|e| {
@@ -258,7 +283,7 @@ impl PeerConnector for NativeQuicConnector {
                 QuicSessionOptions {
                     local: self.config.local,
                     peer: peer.pin.clone(),
-                    remote: peer.remote,
+                    remote,
                     generation: request.ticket.generation,
                     limits,
                 },

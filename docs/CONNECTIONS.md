@@ -104,6 +104,11 @@ transferred sessions retain their leases. There is no dial worker or anonymous
 routing preface. NativeStartup::open_with_protocol and the counter's --transport
 flag explicitly select it; TCP remains the default. See
 [QUIC construction, accounting and evidence](QUIC_TRANSPORT.md).
+Explicit `NativeQuicConnector::new_with_discovered_dials` permits validated
+replacement Dial addresses through `DiscoveryConnector`. Static construction and
+Accept addresses remain provisioned. Pinned identities and one live lease per
+peer prevent endpoint hints from granting trust or accumulating sessions.
+See [discovered endpoint refresh](DISCOVERY.md).
 
 The owner checks injected dialer identity, immutable limits, outstanding count,
 receipt bounds and exact tickets. Provider violations stop admission and return

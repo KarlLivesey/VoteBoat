@@ -91,8 +91,32 @@ preserves transferred session ownership. `tests/support/peer_driver.rs` checks
 transient misses use backoff and wrong scope remains terminal. Full connector,
 owner and TCP/QUIC service regressions are recorded in validation/REPORT.md.
 
-This is peer-address discovery, not complete C17. Responsibility/authority-hint
-resolution, dynamic executable endpoint refresh, external discovery protocols and
-refresh scheduling remain outstanding. Real discovery integration was executed
-with TCP/TLS; QUIC service regressions do not prove a discovery-selected QUIC
-connection. No macOS/separate-host, arbitrary-fault or performance claim follows.
+This is peer-address discovery, not complete C17. Automatic manifest fetching,
+dynamic executable endpoint refresh, external discovery protocols and refresh
+scheduling remain outstanding. Real selected discovery connections include
+TCP/TLS and QUIC. No macOS/separate-host, arbitrary-fault or performance claim follows.
+
+## Explicit QUIC dial refresh
+
+`NativeQuicConnector::new_with_discovered_dials` permits validated Dial addresses
+for already provisioned peers. Wrap it in `DiscoveryConnector` with native or host
+`PeerDiscovery`. The ordinary constructor stays static; Accept uses its provisioned
+remote address. Refresh requires explicit publication; no DNS worker or executable
+hot-reload is inferred. This does not enable live QUIC migration.
+
+The endpoint must have a nonzero port, non-multicast/non-unspecified IP, the bound
+socket's address family and differ from its local bound address. Certificate,
+peer/store identity, ticket generation and deadline checks remain. Each native
+hub retains at most one live lease per provisioned peer as well as per endpoint:
+address changes cannot bypass the old peer lease. Refusal returns the original
+request and consumes no generation; drop the old session before reconnecting.
+Accepted sessions retain their original address and crypto state.
+
+Slice146 real QUIC tests time out an obsolete hint, invalidate its generation,
+publish a newer endpoint and establish authenticated bidirectional data despite
+stale caller input. Changing the hint while a session is held refuses; release
+permits reconnect using the previously refused ticket generation. An independent
+host hint provider works through the same wrapper. Closing the connector leaves
+transferred sessions usable; final drop releases bound ports. A reachable different
+certificate cannot satisfy the pinned peer. Native mailbox checks cover peer/endpoint
+collision bounds and generation cleanup.

@@ -141,8 +141,12 @@ permits catch-up. Joined shutdown returns all frames, then durable reopen verifi
 original retries and a fresh write. The initial half-quota test assumption failed
 because completed receives legitimately return credit; full-quota setup is the
 documented focused correction. This is one finite Linux schedule, not arbitrary
-fairness/fault, selected QUIC pressure or performance evidence. Next select
-the next outstanding path from the acceptance ledger. Retain original P0–P7
+fairness/fault, selected QUIC pressure or performance evidence. Slice146 source
+review found fixed QUIC Dial endpoints blocked the existing discovery wrapper;
+explicit discovered-Dial construction now implements that missing selection.
+Actual native/host hint refresh authenticates and exchanges QUIC data, preserving
+pins and bounded retained peer leases. Next implement automatic responsibility
+lookup/refresh and compose it with routed service work. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
-macOS execution in143–145. Windows/P8 stay deferred and CI remains background.
+macOS execution in143–146. Windows/P8 stay deferred and CI remains background.

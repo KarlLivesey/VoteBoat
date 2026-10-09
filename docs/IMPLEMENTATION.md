@@ -128,19 +128,48 @@ its selected native acceptance passes. General retention and broader faults rema
    Dependencies:item2 selected resource/transport contracts and native assembly.
    Completion: writes/reads/original retries survive selected peer/group pressure,
    restart and clean shutdown, with bounded accounting and no fabricated delivery.
-4. **Acceptance-ledger gap selection (current146, P0–P7).** Purpose: choose
-   the next missing user-visible baseline path from current evidence rather than
-   adding generic prerequisites. Dependencies:145 composed pressure results and
-   BASELINE_ACCEPTANCE. Completion: one prioritized missing path with exact
-   schema, failure/cleanup checks and its service/membership/lifecycle milestone.
-5. **Selected missing baseline path (next147, P0–P7).** Purpose: implement
-   the user-visible gap selected by146. Dependencies: its exact schema and existing
-   contracts. Completion: bounded complete path with named fault/restart evidence,
-   recorded without replacing earlier milestone requirements.
-6. **Composed validation of the selected path (following148, P0–P7).** Purpose:
-   establish its real restart/partial-progress behavior. Dependencies:147 and its
-   named acceptance checks. Completion: exact receipts/state and cleanup through
-   the selected native fault schedule, advancing the same milestone chosen in146.
+4. **QUIC discovered dial endpoints (completed146, P0/P5).** Purpose: enable the
+   existing public discovery wrapper to dial refreshed QUIC peer addresses.
+   Dependencies: C17 generation/expiry hints, public connector and native QUIC.
+   Completion: failed stale hint followed by refreshed real authenticated QUIC
+   exchange; exact pins and original refusals; bounded retained-session leases.
+   Advances usable service/embedding and responsibility discovery.
+5. **Automatic responsibility lookup/refresh (current147, P0/P5).** Purpose:
+   remove manual cache observation from the Rust routing path. Dependencies: C17
+   ManifestDiscovery, existing Directory read authority and bounded Node reads.
+   Completion: an explicitly driven public asynchronous lookup path with exact
+   read ownership, stale/unavailable refusal and routing refresh acceptance.
+6. **Compose automatic lookup with routed service work (next148, P1/P5).**
+   Purpose: use147 to remove manual cache population from useful writes/reads.
+   Dependencies:147 and existing native Directory/routed Node contracts.
+   Completion: resolve actual routes, execute writes/reads/retries, refresh stale
+   cache and preserve exact lookup/data ownership across a selected restart.
+7. **Next missing lifecycle feature (following149, P5/P6).** Purpose: complete
+   a missing recursive ownership operation from the preserved acceptance ledger.
+   Dependencies:148 and its exact authority/retained-scope evidence. Completion:
+   select and implement the missing transition with source fencing, preserved
+   retry lineage and named partial-progress/recovery checks. No wider milestone
+   is declared complete from a selected fixture.
+
+Slice146 selection/schema before editing: peer discovery supports refreshed TCP
+dials, but source inspection shows NativeQuicConnector rejects any dial address
+different from its provisioned endpoint and leases that provisioned endpoint.
+Add an explicit construction selection for discovered Dial addresses; keep default
+static selection unchanged and Accept bound to its provisioned address. Validate
+numeric endpoint/IP family/nonlocal scope before lease admission; certificate,
+store identity, generation and deadline checks stay mandatory. A socket mailbox
+must include its provisioned peer owner so changing addresses cannot accumulate
+unbounded live sessions: one live lease per peer, one per endpoint. Old accepted
+sessions retain their socket/address and cannot be preempted; a new address refuses
+until the old owner lease is dropped. Refusal consumes no generation; session
+construction failure drops its temporary lease. Discovery expiry/invalidation
+remains scoped to the exact hinted generation; hints grant no authorization,
+membership or ownership. Acceptance: real timeout/stale hint, refresh/substitution,
+original request preservation, exact authenticated binding/data exchange, retained
+session bound across address changes, cancellation/close and static regressions.
+This closes a missing usable transport selection, not all C17 or P5. User priority
+is feature completion; run necessary checks per change and implement missing paths
+without expanding unrelated stress/performance evidence. Full P0–P7 remains active.
 
 Slice145 schema before editing: NativeNode/NativeNodeParts gain a defaulted
 transport-factory parameter, preserving existing selections while enabling the
@@ -10330,3 +10359,60 @@ fault/restart path rather than adding unrelated prerequisites.
 Final cargo formatting, explicit included-fixture rustfmt checks, whitespace and
 80-contract inventory checks pass. All test/check handles are terminal. Macro
 review preserves the full original ledger; no milestone exit is asserted.
+
+## Slice146 — explicit discovered QUIC dial addresses
+
+Previous source review yielded evidence changing the next action: TCP discovery
+works but the native QUIC connector refused any non-provisioned Dial endpoint.
+No implementation was committed during that review. This turn revalidated the
+clean worktree and implemented the missing selection instead of expanding
+unrelated stress/performance cases. The user's feature-completion priority is
+reflected in the linked mini plan: next147 is automatic responsibility lookup,
+then148 composes it with real routed service work and149 selects the missing
+recursive ownership feature. Full P0–P7 remains the macro scope.
+
+NativeQuicConnector::new_with_discovered_dials explicitly enables validated Dial
+endpoints for already provisioned peer pins; default new and Accept stay static.
+Submit uses the selected address for both socket lease and QUIC session while
+retaining exact certificate/store identity, generation and deadline checks.
+Invalid endpoint/IP family/local address rejects before acceptance. Public
+DiscoveryConnector and native or host PeerDiscovery supply hints through the
+existing seam; no new contract signature, protocol or wire format is needed.
+QuicSocketHub mailboxes now record their provisioned peer owner, enforcing at
+most one live lease per peer and endpoint. This bound is necessary: otherwise
+repeated changed addresses could accumulate transferred sessions despite the
+connector's finite attempt slots. Accepted sessions keep their original address;
+new requests cannot preempt them. Refusal leaves the generation available, and
+session failure/drop releases the temporary mailbox through existing ownership.
+Hints establish no trust, membership, durable watermark or consensus evidence.
+
+Real QUIC tests timeout an obsolete hint, invalidate its generation, publish a
+newer address and establish authenticated bidirectional data with stale original
+caller input. Changing hints while a session is retained overloads and preserves
+that original request. Dropping the old sessions permits a new handshake with
+the previously refused connection generation. Connector close/drop preserves
+transferred sessions; final session drop releases both bound ports. An independent
+host hint provider composes with the same native path. A reachable different
+certificate fails authentication and invalidates the exact failed hint; numeric
+invalid endpoint/self/family cases refuse without requests. Existing native tests
+retain static-address rejection, versions, cancellation and transferred leases.
+
+Executed QUIC connector7/7 pass0.06s after1.72s build, then the added independent
+host resolver test1/1 passes0.01s after2.14s build. Native socket mailbox1/1 passes
+0.00s after11.47s build (including concurrent Cargo lock waits). Existing real
+three-replica QUIC framing/log-completion regression1/1 passes0.01s after5.65s
+build. Initial fixture compilation used equality on ConnectDirection, which has
+no PartialEq; focused matches assertions corrected it without changing the public
+enum. Clippy -D warnings all-feature/all-target passes3.78s; final check below
+covers the last host test. One documentation patch context mismatch wrote nothing
+and was corrected against its actual current lines. No production test failed.
+
+This completes explicit Rust-host QUIC discovered Dial selection, not automatic
+remote manifest fetch, dynamic executable endpoint refresh, Accept-address refresh
+or live QUIC migration. Current execution is Linux; macOS/separate-host and prior
+P7 performance/fault gates remain. RPL-1.5 and original pack retained; P8/Windows
+remain deferred; CI background. Macro review changes the order toward missing
+features, not the original definition of completion.
+Final all-feature/all-target Clippy -D warnings passes1.08s after the host test.
+Cargo formatting/whitespace and80-contract inventory pass; all execution handles
+are terminal. Reviewed scope retains all earlier P0–P7 requirements.

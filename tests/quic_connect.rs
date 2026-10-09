@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![cfg(feature = "quic")]
+#[path = "quic_connect/discovery.rs"]
+mod discovered;
 mod support;
 use std::{
     collections::BTreeMap,
@@ -177,7 +179,7 @@ fn exchange(sessions: &mut BTreeMap<(u64, u64), NativeQuicSession>, start: u64) 
                 }
             }
         }
-        if received.len() == 6 {
+        if received.len() == sessions.len() {
             return;
         }
     }

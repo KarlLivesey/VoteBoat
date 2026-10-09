@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Internal bounded socket sharing for the native QUIC connector.
+use crate::identity::NodeId;
 use std::{
     collections::{BTreeMap, VecDeque},
     io,
@@ -22,6 +23,7 @@ use std::{
 pub(super) const MTU: usize = 1200;
 const QUEUED: usize = 8;
 struct Mailbox {
+    owner: NodeId,
     generation: u64,
     packets: VecDeque<Vec<u8>>,
 }
@@ -40,16 +42,18 @@ impl QuicSocketHub {
     }
     pub(super) fn lease(
         hub: &Arc<Mutex<Self>>,
+        owner: NodeId,
         remote: SocketAddr,
         generation: u64,
     ) -> io::Result<SessionSocket> {
         let mut shared = lock(hub)?;
-        if shared.leases.contains_key(&remote) {
+        if shared.leases.contains_key(&remote) || shared.leases.values().any(|m| m.owner == owner) {
             return Err(io::ErrorKind::WouldBlock.into());
         }
         shared.leases.insert(
             remote,
             Mailbox {
+                owner,
                 generation,
                 packets: VecDeque::new(),
             },
@@ -161,8 +165,31 @@ mod tests {
         let a = UdpSocket::bind("127.0.0.1:0").unwrap();
         let b = UdpSocket::bind("127.0.0.1:0").unwrap();
         let stranger = UdpSocket::bind("127.0.0.1:0").unwrap();
-        let a_route = QuicSocketHub::lease(&hub, a.local_addr().unwrap(), 1).unwrap();
-        let b_route = QuicSocketHub::lease(&hub, b.local_addr().unwrap(), 1).unwrap();
+        let a_route =
+            QuicSocketHub::lease(&hub, NodeId::new(1).unwrap(), a.local_addr().unwrap(), 1)
+                .unwrap();
+        let b_route =
+            QuicSocketHub::lease(&hub, NodeId::new(2).unwrap(), b.local_addr().unwrap(), 1)
+                .unwrap();
+        assert_eq!(
+            QuicSocketHub::lease(
+                &hub,
+                NodeId::new(1).unwrap(),
+                stranger.local_addr().unwrap(),
+                2
+            )
+            .err()
+            .unwrap()
+            .kind(),
+            io::ErrorKind::WouldBlock
+        );
+        assert_eq!(
+            QuicSocketHub::lease(&hub, NodeId::new(3).unwrap(), a.local_addr().unwrap(), 1)
+                .err()
+                .unwrap()
+                .kind(),
+            io::ErrorKind::WouldBlock
+        );
         let mut bytes = [0; MTU];
         for n in 0..20u8 {
             b.send_to(&[n; MTU], address).unwrap();
@@ -187,7 +214,9 @@ mod tests {
         b.send_to(&[77; MTU], address).unwrap();
         assert_eq!(a_route.recv(&mut bytes).unwrap(), (MTU, None));
         drop(b_route);
-        let replacement = QuicSocketHub::lease(&hub, b.local_addr().unwrap(), 2).unwrap();
+        let replacement =
+            QuicSocketHub::lease(&hub, NodeId::new(2).unwrap(), b.local_addr().unwrap(), 2)
+                .unwrap();
         assert_eq!(
             replacement.recv(&mut bytes).unwrap_err().kind(),
             io::ErrorKind::WouldBlock

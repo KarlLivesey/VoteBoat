@@ -107,7 +107,7 @@ budget retains terminal slots. `next_deadline` includes protocol timers, attempt
 expiry and immediately pollable terminal results. There are no TCP dial or
 anonymous-preface slots.
 
-Only one live lease may own a peer address. Cancellation drops an owned handshake
+Only one live lease may own a provisioned peer or peer address. Cancellation drops an owned handshake
 and clears its queued packets; a transferred session retains its lease until
 dropped. A reconnect is overloaded while that old lease remains live. Generation
 checks prevent stale cleanup from removing a replacement route. Connector close

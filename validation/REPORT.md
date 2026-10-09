@@ -3584,3 +3584,35 @@ watermark, wire/persistent format or consensus effect. Full P0–P7 remains acti
 with all prior unresolved acceptance requirements; P8/Windows deferred.
 Final cargo formatting, explicit included-fixture rustfmt, whitespace and
 80-contract inventory checks pass. All execution handles terminal.
+
+## Slice146 — discovered QUIC dial endpoint selection
+
+NativeQuicConnector::new_with_discovered_dials uses validated selected Dial
+addresses through existing public DiscoveryConnector/PeerDiscovery. Exact pinned
+certificate/store, ticket generation and deadline gates remain. Static new and
+Accept selection remain provisioned. Native socket mailboxes enforce one live
+lease per provisioned peer as well as endpoint, preventing changed addresses from
+accumulating retained sessions. Accepted sessions are not migrated or preempted.
+
+Actual QUIC connector7/7 pass0.06s after1.72s build: new stale-hint timeout/refresh,
+authenticated bidirectional data despite stale original input, changed-address
+held-session overload with original request, unconsumed-generation retry after
+release, wrong certificate rejection, invalid endpoint/self/family refusal and
+existing static/cancellation/version/retained-session checks. Added independent
+host PeerDiscovery→native QUIC test1/1 passes0.01s after2.14s build. Transferred
+sessions survive connector close/drop and final session drop frees bound ports.
+Mailbox ownership/routed packet bounds/generation-cleanup unit1/1 passes0.00s
+(after11.47s build including concurrent Cargo locks). Existing real three-replica
+QUIC framing/exact log completion regression1/1 passes0.01s after5.65s build.
+Clippy all-feature/all-target -D warnings passes3.78s; final check below covers
+last host test. Initial fixture-only ConnectDirection equality compile failure
+was fixed using matches; no enum/API change or production test failure. A failed
+documentation patch context produced no write and was corrected locally.
+
+Selected real Linux connections, not automatic manifest fetching, executable
+hot endpoint refresh, Accept-address refresh, live migration, arbitrary-fault or
+performance evidence. No new core/storage/crypto protocol or durability fact.
+Full P0–P7 and earlier missing scope remain active; RPL-1.5 retained, P8/Windows
+ deferred and CI background feedback.
+Final Clippy all-feature/all-target -D warnings passes1.08s after the host test.
+Formatting/whitespace and80-contract inventory pass. All execution handles terminal.
