@@ -162,8 +162,9 @@ its selected native acceptance passes. General retention and broader faults rema
    and target activation plus150's authority evidence. Completion: a checked
    mixed ownership transition, no overlap/gaps, original retry/outbox lineage and
    named partial-progress/recovery checks. Scoped source guard151a is implemented;
-   immutable exact-boundary exports and checked retained/delegated publication
-   remain current work within151. Schema is sketched before edits.
+   immutable exact-boundary source exports151b are implemented. Checked mixed
+   retained/delegated intent/publication, retained-grant adoption and target
+   activation remain current work within151. Schema is sketched before edits.
 10. **Native retained-scope composition (next152, P1/P5/P6).** Purpose:
    make151 usable in real service work. Dependencies:151's accepted ownership
    shape and existing native nodes. Completion: routed writes/reads/retries in
@@ -10815,3 +10816,101 @@ keep the exact ownership checks rather than changing production range validation
 Final151a Clippy all-feature/all-target -D warnings passes1.31s. Cargo formatting,
 explicit included-fixture rustfmt, whitespace and80-contract inventory pass.
 All execution handles terminal; full goal remains active, no CI gate used.
+
+Slice151b schema before edits: an explicit ScopedTransferSource owns the151a
+routed profile and immutable per-operation ScopeImages through the existing
+ScopeStateMachine seam. This ownership wrapper is required: exporting live state
+after retained writes would falsely replace original F with a later boundary.
+Bootstrap binds a configured aggregate export-capacity budget; construction rejects
+non-pristine/unselected scoped profiles or mismatched local application scope.
+A scoped fence applies to a cloned candidate; at that exact index, capture and
+validate provider image/schema/scheme/range/F before publishing either state.
+Original retries reuse the immutable image rather than recapture. Data keys must
+match provider commands; lifecycle IDs cannot hide imported data identities.
+Payload capacities and image count remain separately bounded; capacity preflight
+and pending admission reject before fencing without changing live state. Reads
+return fixed original status/digest under the original Node quorum barrier, while
+image export is local data access, not a certificate. Checkpoint embeds routed
+schema2 plus canonical operation/image/digest records; restore verifies exact
+one-to-one fence/image linkage and aggregate configured capacity atomically.
+Failure leaves original state/buffers intact; accepted work survives normal Node
+checkpoint/replay, images stay owned until explicit later retention protocol.
+Acceptance: freeze at F then interleave retained writes/retries/noops, immutable
+original exports/digests, imported retry/outbox preservation, pending/capacity and
+provider key/ID refusal, checkpoint corruption/truncation/profile refusal, native
+WAL interrupted frame/sync/publication old-or-exact-image recovery. This is151's
+source path; checked mixed intent/publication and target activation remain next
+within151 before152 network composition. It grants no target serving authority.
+Slice151b restart-budget refinement before tests: Vec clone/checkpoint recovery
+can shrink provider payload capacity. Charging only that volatile capacity could
+admit a different later fence after reopen. Each immutable image therefore owns
+its original configured lifetime reservation as durable metadata. Charge those
+reservations (not current allocation capacity), validate each against the provider's
+fixed range bound on restore, and require payload capacity within that charge.
+This keeps pending/admission headroom identical across recovery and avoids changing
+replicated decisions because a buffer allocator returned a different capacity.
+
+## Slice151b — immutable scoped exports and continuing retained service
+
+Previous goal turn151a made progress: scoped guard and commit c987524 were pushed.
+ScopedTransferSource composes that guard with ScopeStateMachine; no new runtime,
+transport, store or hidden resource owner is added. VBSCOWN1 binds explicit source
+export capacity; construction checks original local application/scheme/selected
+profile and a64MiB combined checkpoint ceiling. Each exact scoped fence captures
+provider state at F on an owned candidate. Validate schema/scheme/range/F and
+capacity before publishing that candidate; failed export cannot emit a success.
+Original images/digests survive later retained writes/noops and exact control retries.
+
+Each image owns a durable configured lifetime reservation. Remaining admission
+headroom uses these reservations, so buffer allocation shrink on clone/restore
+cannot alter later replicated decisions. Payload capacity stays within its charge
+and the aggregate budget. Fixed Frozen(operation) status supplies the original
+scoped fact/digest through existing Node quorum-read semantics; local export is
+only data. Commands verify provider key bindings and lifecycle IDs cannot hide
+retained/imported data IDs. Canonical VBSCCHK1 snapshots wrap routed schema2 and
+exact operation/image/digest/reservation records; restore checks one-to-one scoped
+fence/image linkage, original bounds, metadata and digests atomically. No automatic
+image release or fence clearing is introduced.
+
+Actual native BucketCounter freezeF4 then retained writes/retry/noop preserves
+original exported value7/digest; retained11→13→16 continues. Provider import into
+empty staging data retains duplicate operation1 and one original outbox item.
+A later full-source fence stops retained service while preserving frozen exports
+through another snapshot/recovery. Every snapshot truncation, altered profile,
+image digest/payload, original operation/F and reservation change refuses. Pending
+second exports exceeding aggregate capacity refuse before either fence publishes;
+exact retry needs no new export capacity. Whole-source/source-adapter regressions
+remain valid. An independent host provider returns padded buffers (which shrink
+on clone/restore) without changing reservation headroom; wrong original-F metadata
+fails capture/admission atomically with no scoped fact/image.
+Native ModelIo cuts every byte of a scoped-fence WAL frame and injects sync/manifest
+publication failure. Replay yields old source state or exact committed fence and
+image together; retained work succeeds and any recovered original image is stable.
+
+First all-feature check passes6.77s. Reservation refactoring briefly introduced a
+capture-only variable into the wrong block; fixed locally. Initial native/source
+checks4/4 pass0.30s after8.92s build, with one then-used identity import warning.
+Caching original digests avoids rehashing large immutable data for each status
+query; its restored initializer first omitted that field, corrected directly.
+A file-edit script stopped after saving the source because it reassigned a const;
+complete its test edit with a targeted patch, no production redesign. Added host
+provider tests5/5 pass0.24s after12.05s build/lock wait. Core-only new4/4, scopes7/7
+and whole-source7/7 pass0.27s/0.09s/0.57s after4.50s build. Clippy all features/
+all targets -D warnings passes10.40s. Added inflated-reservation refusal passes1/1
+in0.22s after0.95s build; final full-source export retention check follows below.
+
+Mini/macro review:151a guard and151b immutable source exports are implemented.
+Current151 next requires checked mixed retained/delegated intent/publication,
+retained-grant adoption and activation. A source retaining its original group must
+adopt the new route epoch through a recorded checked transition; merely publishing
+an after-manifest would make its still-original fixed grant reject fresh hints.
+Grant adoption must preserve original frozen scopes/images/history and never
+restore transferred authority. Sketch that protocol/schema before production
+edits; do not replace retained service with whole-source relocation. Next152 is
+native TCP/QUIC partial-transfer recovery, following153 namespace deletion. Full
+P0–P7 remains active; original lifecycle/platform/P7 gaps stay open, macOS target,
+Linux evidence only, Windows/P8 deferred, CI background, RPL-1.5/pack preserved.
+Final151b original-export retention through a later whole fence/snapshot/recovery
+passes1/1 in0.00s after2.17s build. Final all-feature/all-target Clippy -D warnings
+passes0.69s. Formatting, whitespace and81-contract inventory pass. All execution
+handles terminal; no CI gate used. Retained insertion and the full goal remain open.

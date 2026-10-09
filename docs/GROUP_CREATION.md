@@ -399,3 +399,29 @@ The existing whole-source TransferSource constructor explicitly rejects the scop
 profile; scoped facts must not be passed as whole-source fence receipts. Selected
 native WAL-model byte cuts/barrier faults test old-or-complete guard recovery,
 not an end-to-end networked partial transfer or a general physical-power-loss proof.
+
+Slice151b adds `ScopedTransferSource::new(selected_routed, export_bytes)` over the
+public ScopeStateMachine seam. Select the151a routed profile before construction;
+bootstrap VBSCOWN1 binds aggregate export capacity. Source scope/application and
+scheme must match the original local grant. Exactly at a committed/applied scoped
+fence F, capture the final provider image before publishing the candidate state.
+Provider output must bind schema/scheme/range/F and stay within its configured
+lifetime bound. Failed capture cannot publish a source status. Normal Node ordered
+apply/durable reply and quorum-read rules still govern escaped outcomes.
+
+Original exports/digests stay immutable as retained commands advance the source
+prefix. Frozen(operation) returns a fixed original status through the ordinary
+Node barrier; export(operation, max_bytes) supplies local data, not authority.
+VBSCCHK1 snapshots bind each image/digest to its exact original scoped operation
+and routed fence. Durable per-image lifetime reservations make admission headroom
+identical after buffer cloning or restore. Retention stays explicit: this version
+never drops frozen images or clears fences automatically. The64MiB combined
+checkpoint ceiling is checked before construction; incompatible bounds reject.
+
+Checked mixed retained/delegated intent/publication, retained-grant adoption and
+target activation remain current151 work. In particular, retained writes use the
+original source grant during this source phase; publishing a newer manifest must
+be followed by an explicit checked retained-grant adoption that cannot reopen the
+frozen range. Provider import alone supplies staging data and grants no service.
+Next152 composes that complete protocol over TCP/QUIC; selected source WAL-model
+faults do not establish an end-to-end networked partial transfer.

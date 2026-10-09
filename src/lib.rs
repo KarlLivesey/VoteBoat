@@ -38,6 +38,7 @@ pub mod routed;
 pub mod routing;
 pub mod runtime;
 pub mod scope;
+pub mod scoped_source;
 pub mod secure;
 pub mod snapshot;
 pub mod snapshot_worker;

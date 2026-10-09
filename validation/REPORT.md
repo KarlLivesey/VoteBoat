@@ -3791,3 +3791,44 @@ execution pending, Windows/P8 deferred, CI background, RPL-1.5 and pack preserve
 Final151a all-feature/all-target Clippy -D warnings passes1.31s. Cargo formatting,
 included-fixture rustfmt, whitespace and80-contract inventory pass. All handles
 terminal; no CI gate used. These checks do not complete retained-scope insertion.
+
+## Slice151b — immutable original-F scoped source exports
+
+Public ScopedTransferSource uses151a selected RoutedApplication and existing
+ScopeStateMachine with explicit aggregate capacity and canonical VBSCOWN1/VBSCCHK1
+bindings. Capture schema/scheme/range/F-correct immutable provider output exactly
+at each scoped fence before publishing the owned candidate. Later retained
+writes/retries/noops cannot change that image/digest. Per-image configured lifetime
+reservations survive checkpoint/clone capacity shrink and preserve admission
+headroom. Fixed original status uses the existing Node quorum-read seam; export
+returns local data, not a transferable certificate or target authority.
+
+Native BucketCounter F4 exports value7 while retained11 becomes13 then16; snapshot
+and replay retain original image/digest, capacity reservation and fenced refusal.
+Staging provider import preserves original duplicate operation1/outbox. Padded
+independent host images keep stable headroom after recovery; wrong-F host output
+fails atomically. Pending aggregate capacity, exact control retry, data/provider
+key/ID conflicts, every checkpoint truncation and altered image/profile/op/F/
+reservation/digest refuse appropriately without publishing a malformed fact.
+Native ModelIo scoped-fence frame byte cuts plus sync/manifest publication faults
+recover old state or exact complete scoped fence and image together, with retained
+service. No source retirement/automatic image cleanup or new storage owner exists.
+
+Initial all-feature check6.77s passes. Reservation refactor scope-variable mistake
+and missing restored cached-digest initializer were corrected locally. A const
+reassignment stopped one file-edit script after its source save; finish the test
+edit with a targeted patch. Initial4/4 pass0.30s after8.92s build; later5/5 including
+host provider pass0.24s after12.05s build/lock wait. Core-only new4/4, scope adapter7/7
+and whole-source7/7 pass0.27/0.09/0.57s after4.50s build. Clippy all-feature/all-target
+-D warnings10.40s passes. Added inflated-reservation refusal1/1 passes0.22s after
+0.95s build; subsequent Clippy0.96s passes. Final whole-fence export-retention and
+metadata checks follow below. No unchanged broad socket/performance suite added.
+
+Finite deterministic/provider/native-I/O-model evidence, not complete retained
+insertion or arbitrary faults/physical power loss. Checked mixed intent/publication,
+retained-grant adoption and target activation are current151;152 native networked
+composition and153 deletion follow. Full P0–P7 and prior gaps remain active; macOS
+execution pending, Windows/P8 deferred, CI background, RPL-1.5/pack preserved.
+Final151b whole-fence export retention/snapshot recovery1/1 passes0.00s after2.17s
+build. Final all-feature/all-target Clippy -D warnings0.69s, formatting, whitespace
+and81-contract inventory pass. All execution handles terminal; no CI gate used.

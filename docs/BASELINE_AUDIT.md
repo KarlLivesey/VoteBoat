@@ -172,3 +172,11 @@ WAL-model interrupted-frame/barrier faults. This advances151 but does not close 
 immutable final scoped export, mixed retained/delegated metadata publication and
 activation remain, followed by152 native network composition. No whole-source
 handoff is relabeled as retained ownership. Original P0–P7 gaps remain active.
+
+Slice151b completes the immutable scoped source export path: original images,
+digests and fixed capacity reservations survive checkpoint/replay while the same
+source continues retained writes. Native BucketCounter and independent padded/
+wrong-boundary host providers use the same public seam. Selected native WAL-model
+faults recover old state or exact fence/image together. Current151 still requires
+mixed intent/publication, retained-grant adoption and target activation;152 will
+compose the complete path natively. Source/provider import is not activation.
