@@ -4081,3 +4081,49 @@ retention/cancellation, metadata movement, reparenting154, partial sources155,
 original membership/platform/fault/P7 gates remain active. Linux local evidence;
 macOS execution pending, Windows/P8 deferred, RPL-1.5 and ignored original pack
 preserved. No CI gate or unchanged benchmark suite blocked this feature work.
+
+## Slice153b — native recursive deletion and original full-fence quorum reads
+
+RoutedControlReads adds Data/Fence queries over the existing checked routed owner.
+State/admission/deployment/receipt/checkpoint paths delegate to the original owner;
+commands, initialization, application schema and checkpoint bytes stay identical.
+Fixed fence results are charged inline with no nested allocation, preserve original
+operation/index/epoch and use the existing Node quorum read contract. Local
+read_at/fence diagnostics alone establish no foreign commitment. A scoped fence
+never becomes full-owner evidence. Host nested query/result capacity and admission,
+NotApplied/group bounds and plain/view checkpoint compatibility are exercised.
+The first compile exposed a missing underlying host ProposalAdmission bound; added
+that required bound to the delegating implementation, without weakening admission.
+
+Actual native histories use four distinct three-replica groups: parent/child
+metadata1/2 and routed data owners20/21. Original parent/child reservations, child
+fence/tombstone and parent fence/tombstone each leave the original result unread,
+obtain actual quorum facts, abort/join, reopen original factories and retry exact
+commands. The publication facts and child projections come from actual original
+Directory reads; full F facts come from actual original read-view quorum results
+and configured membership identities. No invented native index or normalized
+status determines progress. Retained parent service continues after child F;
+missing-child completion cannot encode/publish before original child status.
+
+Both metadata authorities stop/join before owners independently recover and keep
+refusing old-context reads/writes with no client-credit leak. Original metadata
+files and recovered GroupLogs remain unchanged. Original stored7/11, retry content
+and outbox survive: isolated cloned-provider diagnostics replay the original data
+operation without modifying or serving through the fenced native owner. Late
+metadata recovery preserves all original manifests/intents/tombstones/fences and
+cannot thaw service. All owners abort/join before temporary store cleanup.
+
+Actual Linux validation: initial selected TCP/WAL1/1 passes15.01s; final TCP/QUIC
+x WAL/checkpoint4/4 passes65.11s after3.51s build. Loopback execution uses required
+permissions. Final all-feature deletion/read-view12/12 passes0.10s; routed app/host
+checks14/14 pass0.22s (native network suite excluded). Core-only deletion11/11 and
+routed13/13 pass0.01s/0.21s. Final all-feature/all-target Clippy -D warnings passes
+0.11s. Formatting/whitespace and81-contract inventory pass. All process handles
+terminal; no unchanged broad network/performance rerun or CI gate used.
+
+Selected two-authority native and broader application/journal evidence, not a
+universal recursive lifecycle/platform/fault proof. Current154 reparenting, next155
+activated partial sources, following156 metadata authority movement; wider owner
+families, retention/cancellation/general mappings and original membership/platform/
+fault/P7 gates remain open. Full P0–P7 goal stays active. macOS execution pending,
+Windows/P8 deferred, RPL-1.5 and ignored original pack preserved.

@@ -232,3 +232,12 @@ ordering refusal and native intent/tombstone journal faults pass. Native TCP/QUI
 resumption remains current153b; reparenting154, partial sources155 and wider original
 scope remain open. Physical reclamation and unresolved-creation cancellation are
 not granted by this deletion protocol. See DELETION.md and IMPLEMENTATION.md.
+
+Slice153b adds fixed quorum full-fence reads over the original routed owner, with
+unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
+WAL/checkpoint two-authority recursive deletion histories pass original unread
+results/reopen/retry facts. Both metadata authorities stop during independent owner
+recovery; retained values/retry/outbox and exact stopped metadata files/GroupLogs
+remain, old service stays fenced, late metadata recovery cannot thaw it. Current154
+reparenting, next155 activated partial sources, following156 metadata movement;
+wider owner families, retention/cancellation and original scope/gates remain open.

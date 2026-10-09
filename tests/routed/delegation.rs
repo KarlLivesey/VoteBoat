@@ -987,3 +987,6 @@ mod cross_authority;
 
 #[path = "retained.rs"]
 mod retained;
+
+#[path = "deletion.rs"]
+mod deletion;

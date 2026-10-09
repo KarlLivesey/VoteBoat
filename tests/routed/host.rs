@@ -281,3 +281,57 @@ fn scoped_profile_preserves_host_receipt_and_read_capacity_contracts() {
         RoutedRead::Served(7i64.to_le_bytes().to_vec())
     );
 }
+#[test]
+fn control_read_view_charges_host_nested_capacity_and_preserves_admission() {
+    let routed = RoutedApplication::new(
+        group(20),
+        grant(),
+        HostApplication(Counter::new(64).unwrap()),
+        HostPolicy,
+        limits(),
+    )
+    .unwrap_or_else(|r| panic!("{:?}", r.error));
+    let mut view = RoutedControlReads::new(routed);
+    let boot = entry(
+        1,
+        10000,
+        view.routed()
+            .bootstrap_command(MAX_ROUTED_COMMAND_BYTES)
+            .unwrap(),
+    );
+    view.apply_batch(&[boot]).unwrap();
+    let bytes = data(10, 7);
+    assert_eq!(
+        view.validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty()),
+        view.routed()
+            .validate_proposal(OperationId::new(1).unwrap(), &bytes, std::iter::empty())
+    );
+    let result = view.apply_batch(&[entry(2, 1, bytes)]).unwrap().remove(0);
+    assert_eq!(result.nested_bytes(8), Ok(8));
+    let q = RoutedControlQuery::Data(RoutedQuery {
+        hint: hint(10),
+        key: vec![10],
+        query: vec![9; 16],
+    });
+    assert_eq!(view.query_bytes(&q, 17), Ok(17));
+    assert!(view.query_bytes(&q, 16).is_err());
+    assert_eq!(
+        view.read_result_bound(&q),
+        Ok(size_of::<RoutedControlRead<Vec<u8>>>() + 8)
+    );
+    let r = view.read_at(2, q).unwrap();
+    assert_eq!(view.read_result_bytes(&r, 8), Ok(8));
+    assert!(view.read_result_bytes(&r, 7).is_err());
+    let mut padded = Vec::with_capacity(32);
+    padded.extend(7i64.to_le_bytes());
+    assert!(view
+        .read_result_bytes(&RoutedControlRead::Data(RoutedRead::Served(padded)), 8)
+        .is_err());
+    let fq = RoutedControlQuery::Fence;
+    assert_eq!(view.query_bytes(&fq, 0), Ok(0));
+    assert_eq!(
+        view.read_result_bound(&fq),
+        Ok(size_of::<RoutedControlRead<Vec<u8>>>())
+    );
+    assert!(view.read_at(3, fq).is_err());
+}

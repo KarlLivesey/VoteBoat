@@ -22,7 +22,9 @@ use std::{
 };
 pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
+mod control_reads;
 pub use codec::{encode_fence, encode_routed, encode_scope_fence};
+pub use control_reads::{RoutedControlQuery, RoutedControlRead, RoutedControlReads};
 
 pub const ROUTED_APPLICATION_SCHEMA: u64 = 1;
 pub const SCOPED_ROUTED_APPLICATION_SCHEMA: u64 = 2;

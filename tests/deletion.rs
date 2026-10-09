@@ -820,3 +820,136 @@ fn deletion_and_parent_delegation_serialize_and_failed_batches_keep_original_sta
         .unwrap()
         .is_none());
 }
+#[test]
+fn fixed_owner_fence_read_preserves_original_schema_and_data_guards() {
+    use std::mem::size_of;
+    let mut view = RoutedControlReads::new(routed());
+    assert!(view.validate_group(group(21)).is_err());
+    assert_eq!(
+        view.deployment_requirements(),
+        routed().deployment_requirements()
+    );
+    let q = RoutedControlQuery::<Vec<u8>>::Fence;
+    assert_eq!(view.query_bytes(&q, 0).unwrap(), 0);
+    assert_eq!(
+        view.read_result_bound(&q).unwrap(),
+        size_of::<RoutedControlRead<i64>>()
+    );
+    assert_eq!(
+        view.read_at(0, q.clone()).unwrap(),
+        RoutedControlRead::Fence(None)
+    );
+    assert!(view.read_at(1, q.clone()).is_err());
+    let boot = view.routed().bootstrap_command(200000).unwrap();
+    commit(&mut view, 100, boot);
+    commit(&mut view, 1, data(1, 7));
+    let dq = RoutedControlQuery::Data(RoutedQuery {
+        hint: hint(1),
+        key: vec![1],
+        query: vec![1],
+    });
+    assert_eq!(
+        view.read_at(view.applied_index(), dq.clone()).unwrap(),
+        RoutedControlRead::Data(RoutedRead::Served(7))
+    );
+    assert!(view.query_bytes(&dq, 1).is_err());
+    let RoutedOutcome::Fenced(f) =
+        commit(&mut view, 200, encode_fence(grant().input().epoch)).outcome
+    else {
+        panic!("fence")
+    };
+    assert_eq!(
+        view.read_at(view.applied_index(), q.clone()).unwrap(),
+        RoutedControlRead::Fence(Some(f))
+    );
+    assert_eq!(
+        view.read_result_bytes(&RoutedControlRead::Fence(Some(f)), 0)
+            .unwrap(),
+        0
+    );
+    assert_eq!(
+        view.read_at(view.applied_index(), dq).unwrap(),
+        RoutedControlRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+    assert_eq!(
+        view.checkpoint(200000).unwrap(),
+        view.routed().checkpoint(200000).unwrap()
+    );
+    let mut plain = routed();
+    plain
+        .restore_checkpoint(
+            view.schema_version(),
+            view.applied_index(),
+            &view.checkpoint(200000).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(plain.fence(), Some(f));
+    let mut restored = RoutedControlReads::new(routed());
+    restored
+        .restore_checkpoint(
+            plain.schema_version(),
+            plain.applied_index(),
+            &plain.checkpoint(200000).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(
+        restored.read_at(restored.applied_index(), q).unwrap(),
+        RoutedControlRead::Fence(Some(f))
+    );
+    assert_eq!(restored.into_routed().fence(), Some(f));
+}
+#[test]
+fn fence_read_view_does_not_promote_a_scoped_fence_to_whole_owner_evidence() {
+    let base = routed()
+        .with_scoped_fencing(2)
+        .unwrap_or_else(|_| panic!("scoped"));
+    let mut view = RoutedControlReads::new(base);
+    let boot = view.routed().bootstrap_command(200000).unwrap();
+    commit(&mut view, 100, boot);
+    assert!(matches!(
+        commit(
+            &mut view,
+            200,
+            encode_scope_fence(grant().input().epoch, range(0, 128))
+        )
+        .outcome,
+        RoutedOutcome::ScopeFenced(_)
+    ));
+    assert_eq!(
+        view.read_at(view.applied_index(), RoutedControlQuery::Fence)
+            .unwrap(),
+        RoutedControlRead::Fence(None)
+    );
+    let mut restored = RoutedControlReads::new(
+        routed()
+            .with_scoped_fencing(2)
+            .unwrap_or_else(|_| panic!("scoped")),
+    );
+    restored
+        .restore_checkpoint(
+            view.schema_version(),
+            view.applied_index(),
+            &view.checkpoint(200000).unwrap(),
+        )
+        .unwrap();
+    assert_eq!(restored.schema_version(), SCOPED_ROUTED_APPLICATION_SCHEMA);
+    assert_eq!(
+        restored
+            .read_at(restored.applied_index(), RoutedControlQuery::Fence)
+            .unwrap(),
+        RoutedControlRead::Fence(None)
+    );
+    assert_eq!(
+        restored
+            .read_at(
+                restored.applied_index(),
+                RoutedControlQuery::Data(RoutedQuery {
+                    hint: hint(1),
+                    key: vec![1],
+                    query: vec![1]
+                })
+            )
+            .unwrap(),
+        RoutedControlRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+}

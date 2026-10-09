@@ -13,7 +13,12 @@ A trusted coordinator performs these steps:
    metadata quorum and configuration, read its published `DeletionStatus`, then
    derive `ChildDeletionEvidence::from_status`. Do not infer deletion from a
    missing child, unavailable process or locally manufactured status.
-3. Commit a full fence at every distinct concrete owner, using the original
+3. Use `RoutedControlReads` to expose data and fixed full-fence queries over an
+   existing `RoutedApplication`. The original commands/schema/checkpoint stay the
+   same. After receipt loss, read `RoutedControlQuery::Fence` through the original
+   Node quorum; local `read_at` and `routed().fence()` alone establish no quorum.
+   A scoped fence still returns `None` from this full-fence query.
+   Commit a full fence at every distinct concrete owner, using the original
    deletion intent operation and ownership epoch. Authenticate the original owner
    quorum/configuration and retain its exact immutable `OwnershipFence`. No scope
    fence, stale epoch, unknown index or different operation substitutes for it.
@@ -45,5 +50,9 @@ no physical reclamation permission or automatic expiry of tombstone records.
 recursive deletion, a three-authority chain, capacity/pending/profile refusal,
 checkpoint/codec truncations, exact retries and every-byte native journal faults
 at intent/tombstone publication. These are finite application/storage histories.
-Actual TCP/QUIC deletion resumption and the wider owner families remain current153b;
-this is not a complete native deletion or arbitrary-fault acceptance claim.
+Selected native TCP/QUIC WAL/checkpoint histories now pass unread phase-result
+recovery across two metadata authorities and two original routed owners. Original
+quorum facts/retries survive every phase; both metadata authorities stop during
+independent owner recovery, retained values/retry/outbox remain, old service stays
+fenced and late metadata recovery cannot thaw it. These are finite loopback
+histories; wider owner families and retention/cancellation remain open.
