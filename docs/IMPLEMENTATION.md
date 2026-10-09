@@ -125,20 +125,20 @@ retry preservation, bounded profile rejection and native journal interruption.
 Then complete service composition over TCP/QUIC; activated partial sources155 and
 metadata authority movement156 remain the next two capability deliverables.
 
-1. **154e, owner-family reparenting (current; P5/P6).** Extend parent moves to
-   retained/scoped and imported owners without losing prior export/import facts
-   or restoring transferred write authority. Depends on completed metadata
-   reparenting154b/154d1–2, original full-owner adoption/cache154c/154d3 and
-   native TCP/QUIC recovery154d4. Preserve the same checked move protocol and
-   original operation identities. Completion checks: local/cross parent moves,
-   earlier retry/outbox/export evidence, later movement and restart, and selected
-   native service recovery for these families. This advances recursive routing
-   and split/merge. Retained/scoped schema4 adoption154e1 now has application,
-   checkpoint and native journal evidence. Imported-owner adaptation154e2 now
-   includes local/cross observation adoption, later merge/retirement and native
-   journal recovery; native parent-move service composition remains for both
-   families. Full reparenting154
-   stays open.
+1. **154f, parent-side reparenting continuity (current; P5/P6).** Allow a live
+   data owner of an affected parent to adopt the checked child-slot change, so
+   it can start subsequent transfers from the published current grant. Depends
+   on metadata reparenting154b/154d, owner-family ledgers154e1–2 and the native
+   imported-child observation154e3. That case preserves ordinary remaining
+   writes, but proves the old source grant still predates the removed slot.
+   Completion checks: exact committed decision/publication provenance, unchanged
+   concrete data ownership, preserved old fences/images/retries, current-grant
+   subsequent transfer, capacity/pending/restart rejection and native recovery.
+   This closes reparenting continuity in the existing recursive-routing and
+   split/merge milestone; it adds no new runtime or durability domain. Full154
+   stays open until this path is checked. Retained/imported moved-owner
+   implementations and eight selected native service cases are now implemented;
+   final shared-harness regression validation is recorded below.
 2. **155, activated partial sources (next; P5/P6).** Let an imported child
    delegate part of its scope and retain the remainder. Depends on original
    activation/import lineage and retained source contracts. Check imported
@@ -12233,3 +12233,90 @@ Macro review:154e now has both owner implementations. Next is native service
 composition for these profiles;155 imported partial sources and156 metadata
 authority movement remain the next two capabilities. The full P0–P7 goal remains
 active; this is not full reparenting or roadmap completion.
+
+## Slice154e3 schema sketch — native owner-family parent moves (planned)
+
+Complete154e's native acceptance using the existing retained-transfer harness.
+Select Directory13, scoped-source4 and imported-target5 at pristine construction;
+preserve legacy harness defaults. Factor only the existing transfer activation
+phase so new tests begin with real original source fences/images and imported
+activation rather than synthesized owner data. No production schema or provider
+changes are planned. Separate selected retained-root and imported-child scenarios
+share the same original nested transfer and three metadata authorities.
+
+Read the closed reparent plan, guards, coordinator decision, child publication
+and completion through each original metadata group's quorum. Propose the checked
+adoption to the selected owner's own log; an unread result is followed by joined
+worker abort, WAL/checkpoint reopen and exact original retry. Preserve creation
+bindings, immutable exports and import/activation facts. Refresh the native cache
+from quorum observations; partial refresh must refuse routing. Stop all metadata,
+then check data reads/writes/retries, owner restart, original adoption status and
+unchanged stopped metadata files/logs. Late metadata reopen must retain original
+observations. Cleanup joins all workers before deleting test directories.
+
+Acceptance: retained and imported families over TCP/TLS and QUIC, each with WAL
+and checkpoint recovery; each uses real prior transfer and native metadata
+commit/publication/release. Broader parent-slot data-owner grant refresh and
+subsequent partial-source155 work remain separate requirements, not inferred from
+the selected moved owner's service. Update macro evidence after these cases pass;
+155 and156 remain the next two capability deliverables.
+
+The native imported-child case explicitly checks the parent-side consequence:
+the old parent's remaining data still serves under refreshed routes (same epoch
+and concrete scope), but its source grant retains the earlier generation and
+child slot. A later intent must not be accepted against that stale grant. Add a
+bounded checked parent-side grant refresh as154f before claiming full reparenting
+continuity. Preserve the original frozen scope/image and reject changes to live
+concrete ownership. This extends the current154 milestone;155/156 keep their
+places as the next two capability deliverables.
+
+154e3 test-fixture adjustment: the first matrix exposed AddrInUse between the
+test's free-port probe and native listener bind, followed by a failed-case
+directory collision. Preserve production startup refusal. Give the two owner
+families distinct directories and probe bounded test listener ports below the
+host's automatic ephemeral range, keeping both TCP and UDP checks. This avoids
+ordinary outbound connections consuming the proposed listener port during the
+gap; it does not claim to reserve ports against arbitrary external processes.
+Re-run the affected QUIC/checkpoint cases and the shared legacy harness.
+
+## Slice154e3 — native retained and imported parent-move composition
+
+Added eight native histories: retained and imported owners, TCP/TLS and QUIC,
+WAL and checkpoint recovery. They reuse the original retained-transfer setup,
+including quorum-backed group creation, actual immutable source images and
+target import/activation. The setup explicitly selects Directory13, scoped
+source4 and imported target5 before bootstrap, keeping the older test profiles.
+The moved retained responsibility includes its imported child in the checked
+closed subtree. The imported-child move includes its current parent and target
+parent. Original metadata quorums supply every guard, decision, publication and
+completion; each metadata phase loses its result and recovers from the actual
+files before returning the original result on retry.
+
+After owner adoption and a separate owner reopen, the tests refresh routing and
+stop all three metadata groups. Moved-owner reads, new writes, original retries
+and another owner reopen succeed while metadata files and recovered GroupLogs
+remain unchanged. Original scoped exports, import/activation statuses, retained
+publication status and per-replica creation bindings remain exact. Late metadata
+reopen returns the original phase observations. These are joined worker-abort
+histories on Linux loopback, not hardware power-loss or arbitrary-fault proof.
+
+The shared test allocator now probes bounded listener ports outside this host's
+automatic ephemeral range, rather than releasing a :0 allocation that outbound
+connections could immediately consume. Native startup still refuses occupied
+ports. Separate owner-family directories prevent one failed fixture from causing
+an unrelated AlreadyExists failure. No production protocol/provider was changed.
+
+Actual Linux validation: all eight new owner-family cases pass across focused
+runs. The two initial TCP/WAL runs pass in44.73s and40.93s; the remaining matrix
+had four successes and the two fixture-startup failures described above. After
+the fixture fix, both QUIC/checkpoint cases pass in91.61s. All eight existing
+root/foreign retained-transfer TCP/QUIC WAL/checkpoint regressions pass in177.43s
+(119 unrelated routed tests filtered). All-target/all-feature Clippy -D warnings,
+formatting/whitespace and81-contract inventory checks pass. Production code is
+unchanged, so the already-recorded deterministic/journal suites were not rerun.
+
+Macro review: selected moved-owner native service is now covered for the original,
+retained/scoped and imported families. Full reparenting remains open for the
+explicit parent-side grant continuity154f exposed by the imported-child case.
+155 and156 keep their place in the full plan; macOS and broader fault/P7 scope
+are not inferred complete from these Linux histories.

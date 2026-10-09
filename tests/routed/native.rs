@@ -46,12 +46,20 @@ fn certificate(n: u64) -> &'static [u8] {
     }
 }
 fn configuration(root: &Path, g: u128, voters: &[u64], mode: NativeOpenMode) -> Vec<NativeStartup> {
+    // Keep listener candidates out of the automatic outbound ephemeral pool.
+    // The old bind(:0)/drop probe could let another group's connection take the
+    // proposed listener port before NativeStartup bound it. Still check TCP
+    // and UDP: both transports use this fixture and no port is assumed free.
+    static NEXT_LISTENER: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
     let reservations = voters
         .iter()
         .map(|_| {
             (0..32)
                 .find_map(|_| {
-                    let tcp = TcpListener::bind("127.0.0.1:0").ok()?;
+                    let port = 10000
+                        + NEXT_LISTENER.fetch_add(1, std::sync::atomic::Ordering::Relaxed) % 10000;
+                    let tcp =
+                        TcpListener::bind((std::net::Ipv4Addr::LOCALHOST, port as u16)).ok()?;
                     let udp = UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
                     Some((tcp, udp))
                 })

@@ -4450,3 +4450,33 @@ public host-observation seam without weakening those production checks. Actual
 metadata protocol/recovery tests remain separately covered by reparent_guards.
 New-profile native family service composition, macOS and the remaining roadmap
 are still open.
+
+### Slice154e3 — native retained/imported parent moves
+
+Eight distinct new native cases pass across focused runs: retained and imported
+owners over TCP/TLS and QUIC, each with WAL and checkpoint reopen. Original
+source transfer, assigned target import and activation run through the real
+three-replica service. Original metadata quorum observations supply the closed
+plan, guards, commit, publications and completion. Unread results are followed
+by joined worker abort, exact-file reopen and original-result retry. Partial
+cache refresh refuses routing. With all metadata stopped, moved-owner writes,
+reads, imported/retained retries and another owner reopen succeed. Frozen
+exports, activation, creation bindings and original metadata observations remain
+exact. Stopped metadata file bytes and recovered GroupLogs do not change.
+
+Initial TCP/WAL cases pass in44.73s and40.93s. The remaining six-case run produced
+four passes and two startup failures: AddrInUse after the free-port probe, then
+AlreadyExists from the failed fixture's shared directory. Fixes are test-only:
+probe listener candidates below this host's32768–60999 automatic ephemeral
+range, and give owner families separate directories. The two affected
+QUIC/checkpoint cases pass on rerun in91.61s. All eight existing root/foreign
+retained-transfer TCP/QUIC WAL/checkpoint regressions pass in177.43s (119 other
+routed tests filtered). All-target/all-feature Clippy -D warnings, formatting,
+whitespace and81-contract inventory checks pass. No production protocol or
+provider changed; earlier deterministic/journal tests were not redundantly run.
+
+The imported-child case also verifies old-parent retained writes with refreshed
+routing, while explicitly recording that the source's stored grant predates the
+child-slot removal. Parent-side grant refresh before its next transfer is154f,
+not a completed capability. These are Linux loopback joined-abort histories;
+arbitrary faults, macOS and the full roadmap remain separate requirements.

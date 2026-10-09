@@ -215,8 +215,8 @@ already handed off. Schemas1–3 and their immutable inner guards remain separat
 
 Deterministic/checkpoint and native frame-cut tests cover retained handoff,
 local/cross parent adoption, later retained handoff, historical exports and full
-fencing. Complete native parent-move service histories for these families remain
-outstanding.
+fencing. Native parent-move service for these families is covered by the selected
+cases below.
 
 Imported owners may now select `TransferTarget::with_parent_adoption(maximum)`
 before bootstrap (schema5, VBTSOWN4/VBTRGT06). This accepts the same local and
@@ -237,5 +237,17 @@ Legacy profiles retain their existing encodings.
 Imported-owner tests supply canonical metadata observations at the trusted-host
 seam and exercise actual import/activation, local/cross moves, ordinary service,
 later merge, retirement, restart, malformed histories and every native journal
-byte cut. They do not establish native TCP/QUIC parent-move service composition
-for this new profile; that remains the next part of154e.
+byte cut. Slice154e3 adds eight native service cases for retained and imported
+owners, each over TCP/TLS and QUIC with WAL and checkpoint recovery. Each starts
+with real retained transfer/import/activation, obtains metadata move observations
+from the original quorums, recovers unread phase and adoption results, refreshes
+routing, and continues owner service/retries after all metadata groups stop.
+Original exports, activation, creation bindings and stopped metadata files/logs
+remain exact; late metadata reopen returns the original observations.
+
+Moving the imported child also changes its old parent's child slot. The parent's
+remaining data keeps working at the same epoch and concrete scope, but its
+stored grant must be refreshed before a later transfer can use the newly
+published manifest. That parent-side continuity is the next154f deliverable.
+These are selected Linux loopback recovery histories, not full-roadmap or
+arbitrary-fault proof.

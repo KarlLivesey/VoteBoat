@@ -190,4 +190,12 @@ capacity, strict recovery and native parent/full-fence frame cuts pass. Imported
 owner implementation is now added by154e2: TransferTarget schema5 preserves
 original import/activation while accepting bounded local/cross parent changes,
 later full transfer and retirement/reopen. Owner tests and native journal cuts
-pass; native parent-move service composition for these families remains open.
+pass; native parent-move service composition for these families is added below.
+
+Slice154e3 adds eight passing selected native parent-move service cases for
+retained and imported owners: TCP/TLS and QUIC, WAL and checkpoint recovery.
+Actual transfer lineage, original metadata quorum observations, unread-result
+recovery, route refresh and metadata-independent owner service are checked.
+The old parent's remaining service survives an imported-child move, but its
+next transfer still needs checked parent-side grant refresh154f. Full
+reparenting, broader faults, macOS and the remaining roadmap stay open.
