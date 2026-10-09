@@ -45,8 +45,12 @@ fn fresh(m: ResponsibilityManifest, selected: bool) -> Directory {
             .unwrap_or_else(|_| panic!("schema7"))
     }
 }
-fn initial(m: ResponsibilityManifest) -> Directory {
-    let mut d = fresh(m.clone(), true);
+fn initial_profile(m: ResponsibilityManifest, parent_moves: bool) -> Directory {
+    let mut d = if parent_moves {
+        move_directory(vec![m.clone()])
+    } else {
+        fresh(m.clone(), true)
+    };
     let boot = d.bootstrap_command(100000).unwrap();
     commit(&mut d, 1000, boot);
     commit(
@@ -62,9 +66,17 @@ fn initial(m: ResponsibilityManifest) -> Directory {
     d
 }
 fn recover(d: &Directory) -> Directory {
-    let mut next = fresh(d.plan().manifests().next().unwrap().clone(), true);
-    next.restore_checkpoint(8, d.applied_index(), &d.checkpoint(100000).unwrap())
-        .unwrap();
+    let mut next = if d.schema_version() == 13 {
+        move_directory(d.plan().manifests().cloned().collect())
+    } else {
+        fresh(d.plan().manifests().next().unwrap().clone(), true)
+    };
+    next.restore_checkpoint(
+        d.schema_version(),
+        d.applied_index(),
+        &d.checkpoint(100000).unwrap(),
+    )
+    .unwrap();
     next
 }
 fn rid(n: u128) -> ResponsibilityIdentity {
@@ -98,8 +110,14 @@ fn parent(b: &ResponsibilityManifest) -> ResponsibilityManifest {
     ResponsibilityManifest::new(m).unwrap()
 }
 fn setup(foreign: bool) -> (Directory, Option<Directory>, TransferIntent) {
+    setup_profile(foreign, false)
+}
+fn setup_profile(
+    foreign: bool,
+    parent_moves: bool,
+) -> (Directory, Option<Directory>, TransferIntent) {
     let b = before(foreign);
-    let mut d = initial(b.clone());
+    let mut d = initial_profile(b.clone(), parent_moves);
     let mut c = b.clone().into_input();
     c.parent = Some(ParentAuthority {
         responsibility: b.input().responsibility,
@@ -146,7 +164,7 @@ fn setup(foreign: bool) -> (Directory, Option<Directory>, TransferIntent) {
     ]);
     let after = ResponsibilityManifest::new(after).unwrap();
     if foreign {
-        let mut p = initial(parent(&b));
+        let mut p = initial_profile(parent(&b), parent_moves);
         let plan =
             DelegationPlan::retained_insertion(parent(&b), b, after, child, op(200)).unwrap();
         let bytes = plan.encode(100000).unwrap();
@@ -248,7 +266,20 @@ fn target_hint(intent: &TransferIntent) -> RouteHint {
     }
 }
 fn handoff(foreign: bool) -> (Directory, Source, TransferIntent, RetainedGrantAdoption) {
-    let (mut d, mut p, intent) = setup(foreign);
+    let (d, _, s, i, a) = handoff_profile(foreign, false);
+    (d, s, i, a)
+}
+fn handoff_profile(
+    foreign: bool,
+    parent_moves: bool,
+) -> (
+    Directory,
+    Option<Directory>,
+    Source,
+    TransferIntent,
+    RetainedGrantAdoption,
+) {
+    let (mut d, mut p, intent) = setup_profile(foreign, parent_moves);
     let bytes = intent.encode(100000).unwrap();
     assert_eq!(&bytes[..8], b"VBTINT06");
     assert_eq!(TransferIntent::decode(&bytes).unwrap(), intent);
@@ -287,7 +318,7 @@ fn handoff(foreign: bool) -> (Directory, Source, TransferIntent, RetainedGrantAd
         intent
     );
     assert!(commit(&mut d, 200, bytes).duplicate);
-    let mut s = retained_source(&intent);
+    let mut s = source_profile(&intent, parent_moves);
     let boot = s.bootstrap_command(100000).unwrap();
     commit(&mut s, 100, boot);
     commit(&mut s, 1, data_at(&intent, 1, 7));
@@ -536,13 +567,9 @@ fn handoff(foreign: bool) -> (Directory, Source, TransferIntent, RetainedGrantAd
     );
     let image = s.export(op(200), 65536).unwrap();
     let cp = s.checkpoint(100000).unwrap();
-    let mut restored = retained_source(&intent);
+    let mut restored = source_profile(&intent, parent_moves);
     restored
-        .restore_checkpoint(
-            RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA,
-            s.applied_index(),
-            &cp,
-        )
+        .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
         .unwrap();
     assert_eq!(restored.export(op(200), 65536).unwrap(), image);
     assert_eq!(restored.grant(), intent.after());
@@ -613,13 +640,13 @@ fn handoff(foreign: bool) -> (Directory, Source, TransferIntent, RetainedGrantAd
         RoutedOutcome::Rejected(RoutingError::EpochMismatch)
     ));
     let cp = restored.checkpoint(100000).unwrap();
-    let mut reopened = retained_source(&intent);
+    let mut reopened = source_profile(&intent, parent_moves);
     reopened
-        .restore_checkpoint(3, restored.applied_index(), &cp)
+        .restore_checkpoint(restored.schema_version(), restored.applied_index(), &cp)
         .unwrap();
     assert_eq!(reopened.grant(), intent.after());
     assert_eq!(reopened.export(op(200), 65536).unwrap(), image);
-    (d, reopened, intent, adoption)
+    (d, p, reopened, intent, adoption)
 }
 #[test]
 fn root_retained_child_moves_real_data_without_full_source_fence() {
@@ -1607,3 +1634,27 @@ fn adoption_profiles_corrupt_ledgers_and_wrong_original_evidence_refuse_atomical
         .is_err());
     assert_eq!(recovered.checkpoint(100000).unwrap(), original);
 }
+
+fn move_directory(ms: Vec<ResponsibilityManifest>) -> Directory {
+    Directory::new(
+        DirectoryPlan::new(ms[0].input().authority, ms).unwrap(),
+        DirectoryLimits {
+            operations: 32,
+            history_bytes: 400000,
+        },
+    )
+    .unwrap()
+    .with_cross_authority_reparenting()
+    .unwrap_or_else(|_| panic!("moves"))
+}
+fn source_profile(i: &TransferIntent, moves: bool) -> Source {
+    let s = retained_source(i);
+    if moves {
+        s.with_parent_adoption(4)
+            .unwrap_or_else(|_| panic!("parent profile"))
+    } else {
+        s
+    }
+}
+#[path = "retained_insertion/parent_moves.rs"]
+mod parent_moves;

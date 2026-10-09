@@ -42,7 +42,7 @@ pub(super) struct ParentAdoptionRecord {
 // Keep the original local command inline: at most 64 records, with no new
 // per-record allocation or failure path. Both variants' nested data are bounded.
 #[allow(clippy::large_enum_variant)]
-pub(super) enum ParentAdoptionCommand {
+pub(crate) enum ParentAdoptionCommand {
     Local(OwnerParentAdoption),
     Cross(CrossOwnerParentAdoption),
 }

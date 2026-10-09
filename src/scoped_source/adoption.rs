@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Checked retained-grant publication observations; never foreign authentication.
 use super::*;
+use crate::routed::parent_adoption::ParentAdoptionCommand;
 pub const MAX_RETAINED_ADOPTION_BYTES: usize = 56 + MAX_TRANSFER_PUBLICATION_BYTES;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RetainedGrantAdoption {
@@ -79,5 +80,58 @@ impl Adoption {
             command,
             digest: ContentDigest::sha256(&body),
         })
+    }
+}
+
+#[derive(Clone)]
+// Both record variants have bounded inline and nested storage.
+#[allow(clippy::large_enum_variant)]
+pub(super) enum GrantChange {
+    Retained(Adoption),
+    Parent {
+        status: ParentGrantStatus,
+        command: ParentAdoptionCommand,
+    },
+}
+impl GrantChange {
+    pub fn operation(&self) -> OperationId {
+        match self {
+            Self::Retained(a) => a.status.operation,
+            Self::Parent { status, .. } => status.operation,
+        }
+    }
+    pub fn index(&self) -> u64 {
+        match self {
+            Self::Retained(a) => a.status.index,
+            Self::Parent { status, .. } => status.index,
+        }
+    }
+    pub fn retained(&self) -> Option<&Adoption> {
+        match self {
+            Self::Retained(a) => Some(a),
+            _ => None,
+        }
+    }
+    pub fn after(&self) -> ResponsibilityManifest {
+        match self {
+            Self::Retained(a) => a.command.decision.publication.intent().after().clone(),
+            Self::Parent { command, .. } => command.after(),
+        }
+    }
+    pub fn command(&self) -> Result<Vec<u8>, ApplicationError> {
+        match self {
+            Self::Retained(a) => a.command.encode(MAX_RETAINED_ADOPTION_BYTES),
+            Self::Parent { command, .. } => command.encode(MAX_CROSS_PARENT_ADOPTION_BYTES),
+        }
+    }
+    pub fn digest(&self) -> Result<ContentDigest, ApplicationError> {
+        if let Self::Retained(a) = self {
+            return Ok(a.digest);
+        }
+        let mut b = b"VBSPARD1".to_vec();
+        b.extend(self.operation().get().to_le_bytes());
+        b.extend(self.index().to_le_bytes());
+        b.extend(self.command()?);
+        Ok(ContentDigest::sha256(&b))
     }
 }

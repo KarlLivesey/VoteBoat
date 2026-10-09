@@ -197,3 +197,23 @@ with all metadata authorities offline. Original retries/outbox persist and
 stopped metadata files/logs do not change during owner service. These are finite
 joined owner-abort histories, not a general power-loss/fault proof. Retained/scoped
 and imported owner families and broader platform/fault coverage remain work.
+
+
+Retained/scoped sources now have an explicit schema4 parent-move profile. Build
+an original scoped routed guard, select retained insertion and retained grants,
+then call `ScopedTransferSource::with_parent_adoption(maximum)` before bootstrap.
+The selected bound is checked against the source's full snapshot budget. Submit
+the same `OwnerParentAdoption` or `CrossOwnerParentAdoption` observations as for
+full owners, with original foreign quorum authentication by the host.
+
+`ScopedSourceQuery::ParentAdoption` returns the fixed original result. The
+ordered grant history keeps retained publications and parent changes together;
+original exports/digests and frozen scopes remain unchanged. Later retained
+transfers must use the current moved grant. Old exact data/control retries remain
+bound to original results; a parent move grants no permission to serve a scope
+already handed off. Schemas1–3 and their immutable inner guards remain separate.
+
+Deterministic/checkpoint and native frame-cut tests cover retained handoff,
+local/cross parent adoption, later retained handoff, historical exports and full
+fencing. Imported-owner support and complete native parent-move histories for
+these families remain outstanding.

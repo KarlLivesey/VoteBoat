@@ -4393,3 +4393,32 @@ All-target/all-feature Clippy -D warnings, formatting/whitespace and the81-contr
 inventory pass. Production code is unchanged in this slice; earlier application
 and byte-cut checks were not rerun. These finite joined-abort histories do not
 claim hardware power-loss, arbitrary faults, macOS, or other owner-family support.
+
+
+### Slice154e1 — retained/scoped parent adoption
+
+Actual Linux validation: 65 focused all-feature checks pass across retained
+insertion14, scoped source5, routed14 (105 native tests excluded by the shared
+filter), reparenting14 and reparent guards18. The final retained/scoped/routed
+run passes33 tests after7.68s build; suites finish in3.36/0.37/0.28s. Core-only
+retained10/scoped4 pass after0.34s rebuild. All four existing foreign retained-source
+TCP/TLS and QUIC WAL/checkpoint regressions pass in35.19s after5.01s build
+(115 other routed tests filtered). All-target/all-feature Clippy -D warnings,
+formatting, whitespace and81-contract inventory pass.
+
+Four new checks cover completed retained handoff -> guarded cross-authority
+parent move -> schema4 source adoption/reopen -> another parent-reserved retained
+handoff with target activation and parent completion; unchanged original exports,
+retry/outbox and full-fence behavior; local metadata parent movement with full
+ordinary history and independent capacity; strict profile/limit/collision/pending
+and mixed-ledger checkpoint rejection; every native parent-adoption/full-fence
+frame byte, sync and publication fault with exact old or complete recovery.
+
+Two failing test fixtures were corrected: parent metadata must be published before
+its dependent child, and a parent retry must use its original bytes rather than
+a later retained-adoption command. Those refusals were correct; no production
+safety contract was weakened. Existing schemas1–3 retain their old encoding,
+while schema4 selects a tagged bounded history and advertises its larger reserve.
+This is selected application/checkpoint/native-journal evidence. Imported owners
+and native parent-move service for these families remain open; the four network
+checks above are legacy-profile regressions, not proof of new-profile movement.

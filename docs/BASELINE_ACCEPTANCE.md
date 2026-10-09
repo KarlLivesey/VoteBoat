@@ -182,3 +182,9 @@ authorities, recover each phase's unread result, adopt the owner grant and resta
 that owner with all metadata stopped. Original observations/retries/outbox and
 unchanged stopped metadata files/GroupLogs are checked. Retained/scoped/imported
 owners, macOS and broader faults remain; full P5/P6 is not thereby complete.
+
+Slice154e1 adds retained/scoped schema4 parent changes while preserving an ordered
+mixed grant history, immutable earlier scope exports and original data/control
+retries. Local/cross moves, a subsequent retained handoff, independent control
+capacity, strict recovery and native parent/full-fence frame cuts pass. Imported
+owners and native parent-move composition for these families remain open.

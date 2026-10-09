@@ -24,7 +24,7 @@ pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 mod control_reads;
 mod cross_parent_adoption;
-mod parent_adoption;
+pub(crate) mod parent_adoption;
 pub use codec::{encode_fence, encode_routed, encode_scope_fence};
 pub use control_reads::{RoutedControlQuery, RoutedControlRead, RoutedControlReads};
 pub use cross_parent_adoption::{

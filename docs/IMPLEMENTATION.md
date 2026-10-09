@@ -133,8 +133,10 @@ metadata authority movement156 remain the next two capability deliverables.
    original operation identities. Completion checks: local/cross parent moves,
    earlier retry/outbox/export evidence, later movement and restart, and selected
    native service recovery for these families. This advances recursive routing
-   and split/merge. Implemented evidence remains restricted to original full
-   owners until those checks pass; full reparenting154 stays open.
+   and split/merge. Retained/scoped schema4 adoption154e1 now has application,
+   checkpoint and native journal evidence; imported-owner adaptation154e2 and
+   native parent-move composition for these families remain. Full reparenting154
+   stays open.
 2. **155, activated partial sources (next; P5/P6).** Let an imported child
    delegate part of its scope and retain the remainder. Depends on original
    activation/import lineage and retained source contracts. Check imported
@@ -12080,3 +12082,78 @@ Reparenting154 still includes retained/scoped and imported owner families (next
 154e); activated partial sources155 and metadata authority movement156 retain
 their place in the linked plan. macOS, broader fault coverage, remaining P4/P7
 and the full P0–P7 objective are still open. No full-roadmap completion claim.
+
+## Slice154e1 schema sketch — retained/scoped owner parent changes (planned)
+
+Purpose: allow a retained source with existing immutable exports to follow a
+committed parent move and later delegate more of its remaining scope. This
+advances owner-family reparenting154e and supplies the grant-history pattern
+needed for imported partial sources155. Imported owners remain the next part of
+154e; metadata authority movement156 stays in the full plan.
+
+Select a new immutable ScopedTransferSource schema4 before bootstrap, on the
+existing retained-grant profile. Reuse the checked local/cross parent adoption
+commands and fixed ParentGrantStatus. Keep the inner original scoped routed
+guard unchanged. Store retained ownership publications and parent-only changes
+in one ordered bounded history; replay that history to derive active authority
+and the grant at each historical export/fence boundary. Old schemas1–3 retain
+their exact formats. Advertise and check the larger command/snapshot reservation
+at profile selection rather than allocating unbounded history.
+
+Parent adoption checks exact current grant, initialization, independent lifetime
+capacity, full-fence state and operation collision with data/bootstrap/fences,
+other adoptions and reserved child creation. Exact retries precede later fence
+checks and return the original status. Preserve all frozen images, digests,
+intent bindings, transferred scopes, data and retry/outbox history. A later
+retained publication must chain from the moved grant; it cannot rewrite the
+original source intent. No new durability domain or ancestor write dependency.
+
+Acceptance: actual retained handoff -> parent change -> restart -> another
+retained handoff, preserving both original exports/retries and remaining service;
+mixed ledger order, stale/conflicting/profile/capacity rejection and atomic
+checkpoint failures; byte-cut native replay of adoption and later freeze. Then
+extend the same capability to imported owners and native service composition.
+
+
+## Slice154e1 — retained/scoped parent moves with immutable exports
+
+Implemented the schema sketch above. An explicit pristine
+ScopedTransferSource::with_parent_adoption(maximum) selection adds schema4
+(VBSCOWN4/VBSCCHK4) after the existing retained-grant profile. It reuses the
+checked local and completed cross-authority adoption commands, reports original
+ParentGrantStatus through ScopedSourceQuery::ParentAdoption and reserves parent
+changes separately from retained publications and ordinary data operations.
+Selection checks the total64MiB snapshot ceiling; a requested maximum may be
+refused when its complete advertised command reserve would exceed that ceiling.
+
+One ordered tagged grant ledger now records retained publications and parent
+changes. It reconstructs current authority and historical grants at each export
+or full-fence index. The original inner schema2 guard, frozen scope images,
+intent/digest bindings, data, retry/outbox and immutable bootstrap remain intact.
+Old schemas1–3 encode their original untagged retained ledger. Parent changes
+cannot consume creation/data/fence/adoption identities, reopen frozen scopes,
+bypass initialization or follow a full fence; exact original retries still work
+after subsequent transfers/fencing. No provider, log owner or durability domain
+was added. Internal parent-command decoding is shared with original full owners.
+
+Four new tests cover a real retained handoff followed by a completed guarded
+cross-authority move, source adoption/reopen, another parent-reserved retained
+handoff, both old exports, new-parent publication and original retries; same-
+authority parent movement with full ordinary history and independent lifetime
+capacity; strict profile/budget/pending/collision/atomic checkpoint rejection;
+and every native journal byte cut across parent adoption and subsequent full
+fencing. Test setup initially tried to publish a child before its parent and to
+retry a parent operation using later retained-command bytes. Both refusals were
+correct; fixtures now publish in dependency order and retry exact original bytes.
+
+Current Linux checks:33 focused all-feature retained/scoped/routed tests pass,
+including all four new cases; the shared module filter excludes105 network cases.
+The earlier18 guard and14 reparenting regressions pass (65 focused cases total).
+Core-only retained10/scoped4 pass. All-target/all-feature Clippy -D warnings,
+formatting, whitespace and the81-contract inventory pass. All four existing
+foreign retained-source TCP/QUIC WAL/checkpoint regressions pass in35.19s; they
+do not yet establish native parent movement for schema4.
+
+Next is imported-owner parent adoption154e2, then native composition for the
+remaining families. Activated partial sources155, metadata authority movement156,
+macOS and full P0–P7 scope remain active; this does not complete all reparenting.
