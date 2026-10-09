@@ -86,3 +86,7 @@ headers. `tests/wire.rs` checks direct encoding against canonical frames and rej
 short/long destination slices. Real TCP/TLS and QUIC histories exercise default
 native provisioning. This does not integrate WAL/snapshot/application buffers,
 provide a universal memory budget, or establish performance gains.
+
+Outbound bulk policy leases now cover original message ownership independently
+of these frame buffers; see [constrained admission](ADMISSION.md). Their reserved
+control accounting does not close shared encoded-pool connection/fairness gaps.

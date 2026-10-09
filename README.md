@@ -289,6 +289,12 @@ Raft acknowledgement. The host drives polling and budgets retained rejected
 effects, encoded buffers and receive queues separately. This queue creates no
 sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
+`NativeOutbound::with_policy` selects the public [admission policy](docs/ADMISSION.md)
+for additional shareable bulk credits. Mandatory ceilings run first and control
+bypasses optional policy. Outbound contract2 carries an owned lease with each
+policy-admitted batch; it survives transport work and queue destruction until
+the last owner releases it. The original constructor selects the native provider.
+
 `wire::WireCodec` supplies a public bounded framing seam. The native
 `NativeWireCodec` implements [wire formats 1–6](docs/WIRE_FORMAT.md).
 The default constructor retains format 1 for current static-configuration peers;

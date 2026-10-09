@@ -50,7 +50,7 @@ component-contracts.json and its linked contract document.
 | C12 clock | Clock / host-injected MonoTime and native clock | No implicit wall clock in the core. |
 | C13 entropy | ElectionEntropy / native jitter and deterministic doubles | Not a credential or cryptographic identity source. |
 | C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Initial encoded-frame integration. WAL/snapshot/application buffers remain separate; shared-pool fairness/control reserve and host connection admission remain to be addressed. Legacy host-codec defaults use separate bounded scratch. |
-| C15 admission | Core hard ceilings, ProposalAdmission, client/read/queue reservations | General host admission-policy seam remains missing; policy cannot bypass hard ceilings. |
+| C15 admission | Core ceilings/reserves plus public AdmissionPolicy/AdmissionLease, native shareable bulk provider and NativeOutbound integration; tests/admission.rs, tests/transport.rs; slice109 | Initial outbound path. Policy cannot bypass hard ceilings or veto reserved control. General client/disk/connection/shared-buffer admission and fairness remain. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
 | C17 discovery | ManifestCache and directory/routed lookup | General peer/authority hint resolver with bounded retries/invalidation is missing. |
 | C18 placement | PlacementAuthorizer and native declared deployments | Scoring/planning/move proposals are missing; recommendations cannot activate membership. |
@@ -63,14 +63,14 @@ component-contracts.json and its linked contract document.
 
 ## Next usable path
 
-1. Complete slice108's C14 frame ownership checks and real TCP/QUIC regressions;
-   retain explicit limits for other buffer domains and shared-pool admission.
-2. Introduce C15's constrained host admission policy against existing hard limits,
-   using C14 ownership where needed. Test refusal/release/retained async ownership
-   and prove policy cannot admit past core ceilings or consume control reserves.
-3. Inspect C21 service-principal authorization separately from authenticated peers
+1. Finish slice109's outbound policy/lease conformance and real native regressions;
+   keep general client/disk/connection/shared-buffer admission gaps explicit.
+2. Inspect C21 service-principal authorization separately from authenticated peers
    and committed voter membership. Implement a bounded public/native service gate
    with scope/refusal/recovery evidence before claiming exposed mutation is safe.
+3. Inspect C17's missing peer/authority resolver against current static endpoints
+   and manifest hints. Add bounded resolve/invalidate/retry semantics through a real
+   native call site; resolved hints must never activate membership or ownership.
 
 These are linked deliverables, not a redefinition of the full goal. P4/P6/P7,
 platform/fault and the remaining supporting catalogue gaps stay in this ledger.

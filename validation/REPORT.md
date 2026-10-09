@@ -2386,3 +2386,47 @@ budgets can stall idle receive reservations. No performance tests were run and
 no speed/zero-overhead claim follows. macOS/separate-host, broader fault/lifecycle,
 long QUIC selected-group repair and fixed-p99 gates remain open. Full P0–P7 stays
 active, P8/Windows deferred, CI background.
+
+## Slice 109 — constrained public/native outbound admission
+
+AdmissionPolicy reserves bounded Copy owner/peer/class/cost/usage metadata after
+mandatory native queue checks. An opaque owned AdmissionLease retains provider
+credits through queued/dispatched work, original-batch completion and both
+queue/batch destruction orders. NativeAdmissionPolicy supplies finite shareable
+bulk batch/message/capacity-byte reservations with bounded atomic attempts,
+rollback and scoped view close. Control bypasses optional policy and remains
+subject to mandatory hard ceilings/reserves. Policy grants no consensus authority.
+
+Executed Linux checks:
+
+- All-features admission 8/8, outbound 4/4, transport 19/19 pass. Independent
+  downstream policy injection checks original Vec pointer/capacity on refusal,
+  exact owner/peer metadata, permissive/refusing policy versus node/peer/background/
+  peer-count ceilings and control reserve, stale completion, delayed ownership,
+  close/drop in both orders, failed construction, native partial rollback and
+  concurrent views. Native transport holds a lease through delayed flush and a
+  partial-send abort, retaining credits until the original batch is consumed.
+- Native without TLS: admission 8/8, outbound 4/4, transport 18/18 pass.
+- Core/contracts-only: admission 1/1, outbound 3/3, transport 1/1 pass without
+  warnings after moving a test import into its native-only module.
+- Real shared 100-group owner/native WAL/TLS history: 1/1 passes.
+- Actual three-process service recovery/original-retry histories: TCP/TLS and
+  QUIC 2/2 pass. Full worker joins/reopen preserve application values/retries.
+- Actual executable add/enroll/promote/retire/restart histories: TCP/TLS and QUIC
+  2/2 pass.
+- All-target/all-feature Clippy with warnings denied passes (one fixture default
+  initializer lint corrected); fmt/diff checks and inventory pass (74 contracts).
+
+Outbound Rust contract2 adds the optional batch lease. Host constructors were
+updated to set None when they supply no additional reservation; the original
+native queue constructor remains available. The lease is shared by retained
+queue bookkeeping and the batch, preventing early credit return when either
+owner is destroyed first. Message storage drops before the batch's lease field.
+No wire, persistent format, durability token, timer or Raft algorithm change.
+
+This is initial outbound policy integration. Client/disk/connection/shared-frame
+policy, shared-pool fairness/control storage and C21 authorization remain separate
+work. One fixed opaque lease allocation per accepted bulk batch is bounded by
+batch ceilings; no performance benchmark or zero-overhead claim was made. Previous
+long QUIC repair, fixed-p99, platform and broader fault/lifecycle gaps remain.
+Full P0–P7 stays active; P8/Windows deferred and CI background.

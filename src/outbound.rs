@@ -17,7 +17,7 @@
 use crate::{identity::*, log::EntryPayload, quorum::Tree, raft::*};
 use std::mem::size_of;
 
-pub const OUTBOUND_CONTRACT_VERSION: u32 = 1;
+pub const OUTBOUND_CONTRACT_VERSION: u32 = 2;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct OutboundBinding {
     pub node: NodeId,
@@ -233,6 +233,9 @@ pub struct SendRejected {
 pub struct OutboundBatch {
     pub ticket: SendTicket,
     pub messages: Vec<Message>,
+    /// Preserve through downstream ownership and rejected completions. None for
+    /// providers without additional policy credits and mandatory control traffic.
+    pub admission: Option<crate::admission::AdmissionLease>,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LocalSendResult {
@@ -251,7 +254,8 @@ pub struct CompletionRejected {
     pub batch: Box<OutboundBatch>,
 }
 
-/// Version 1 has no wire format, sockets, security or persistent delivery claim.
+/// Version 2 carries optional admission leases and has no wire format, sockets,
+/// security or persistent delivery claim.
 /// Submission transfers a same-peer owned batch only on success. Poll transfers
 /// accepted batches to the transport; both queued and dispatched work retain
 /// credits. Complete only after transport I/O has released its buffers; consuming

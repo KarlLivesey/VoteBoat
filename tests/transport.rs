@@ -559,6 +559,78 @@ mod native {
         );
     }
     #[test]
+    fn policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release() {
+        use voteboat::native::admission::NativeAdmissionPolicy;
+        let policy = NativeAdmissionPolicy::new(OutboundUsage {
+            batches: 1,
+            messages: 16,
+            bytes: 65536,
+        })
+        .unwrap();
+        let (a, b) = sessions(7);
+        let outgoing = a.outgoing.clone();
+        outgoing.lock().unwrap().flushed = false;
+        let mut qa = NativeOutbound::with_policy(
+            queue(1).binding(),
+            OutboundLimits::default(),
+            policy.clone(),
+        )
+        .unwrap();
+        let qb = queue(2);
+        let mut a = NativePeerTransport::new(a, codec(), &qa, TransportLimits::default()).unwrap();
+        let mut b = NativePeerTransport::new(b, codec(), &qb, TransportLimits::default()).unwrap();
+        let mut data = message(1, 2, 1);
+        data.rpc = Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            entries: vec![support::entry(1, 1, 7)],
+            leader_commit: 0,
+        };
+        a.submit(batch(&mut qa, vec![data.clone()])).unwrap();
+        for _ in 0..1000 {
+            poll(&mut a);
+            poll(&mut b);
+            if b.received_info().is_some() {
+                break;
+            }
+        }
+        assert!(b.received_info().is_some());
+        assert!(!a.usage().completion);
+        assert_eq!(policy.usage().batches, 1);
+        outgoing.lock().unwrap().flushed = true;
+        poll(&mut a);
+        assert!(a.usage().completion);
+        assert_eq!(a.usage().send_frame_bytes, 0);
+        drop(qa); // completed transport batch still owns its shared policy lease
+        assert_eq!(policy.usage().batches, 1);
+        let completed = a.take_send().unwrap();
+        assert_eq!(completed.result, LocalSendResult::Sent);
+        assert_eq!(policy.usage().batches, 1);
+        drop(completed);
+        assert_eq!(policy.usage(), OutboundUsage::default());
+        a.abort();
+        b.abort();
+        let (session, _peer) = sessions(7);
+        session.outgoing.lock().unwrap().flushed = false;
+        let mut queue = NativeOutbound::with_policy(
+            queue(1).binding(),
+            OutboundLimits::default(),
+            policy.clone(),
+        )
+        .unwrap();
+        let mut transport =
+            NativePeerTransport::new(session, codec(), &queue, TransportLimits::default()).unwrap();
+        transport.submit(batch(&mut queue, vec![data])).unwrap();
+        assert!(poll(&mut transport).written_bytes > 0);
+        transport.abort();
+        assert_eq!(policy.usage().batches, 1);
+        let failed = transport.take_send().unwrap();
+        assert_eq!(failed.result, LocalSendResult::Failed);
+        queue.complete(failed.batch, failed.result).unwrap();
+        assert_eq!(policy.usage(), OutboundUsage::default());
+        assert!(queue.is_drained());
+    }
+    #[test]
     fn short_io_preserves_batch_and_queue_credits_until_terminal_consumption() {
         let (a, b) = sessions(7);
         let mut q = queue(1);

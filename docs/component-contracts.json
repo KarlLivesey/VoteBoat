@@ -744,12 +744,12 @@
         "close",
         "is_drained"
       ],
-      "native": "NativeOutbound",
+      "native": "NativeOutbound<P=NativeAdmissionPolicy>",
       "conformance": [
         "tests/outbound.rs",
         "tests/worker.rs"
       ],
-      "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. PeerTransport consumes dispatched batches and returns them for exact completion after buffer release. Local completion is not a Raft acknowledgement or persistent delivery claim."
+      "scope": "Version-2 same-peer owned batches with optional shared admission leases, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. PeerTransport consumes dispatched batches and returns them for exact completion after buffer release. Local completion is not a Raft acknowledgement or persistent delivery claim."
     },
     {
       "design_id": "C07",
@@ -1524,12 +1524,32 @@
         "tests/counter_service.rs"
       ],
       "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, shared-pool fairness/control reserve, or performance claim."
+    },
+    {
+      "design_id": "C15",
+      "public_contract": "AdmissionPolicy / AdmissionRequest / AdmissionLease",
+      "operations": [
+        "reserve",
+        "close",
+        "AdmissionLease::new",
+        "clone"
+      ],
+      "native": "NativeAdmissionPolicy, selected by NativeOutbound defaults or explicit with_policy; finite shareable bulk credit budget",
+      "conformance": [
+        "tests/admission.rs",
+        "tests/support/admission.rs",
+        "tests/outbound.rs",
+        "tests/transport.rs",
+        "tests/effect_owner.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Optional bulk reservation after mandatory queue binding/capacity/node/peer/control/background/peer-count checks. Control bypasses optional policy; refusal preserves original Vec and existing transient Overloaded semantics. Fixed metadata includes exact owner/peer/class/cost and existing usage. Opaque shared owned lease survives queued/dispatched transport work, rejected completion and queue destruction; final owner Drop returns provider credits. Native finite atomic batch/message/byte reservations roll back partial failure, support scoped view close and shared credits, and start empty on restart. No I/O, clock, worker, implicit global budget, consensus authority or wire/persistent format. Outbound Rust contract2 carries an optional lease. Initial outbound integration; general client/disk/connection/shared-buffer policy remains separate. No performance or arbitrary callback sandbox claim."
     }
   ],
   "not_yet_implemented": [
     "automatic-wal-maintenance-scheduling",
     "incremental-segment-cleaning-and-general-retention",
-    "admission-policy",
+    "client-disk-and-connection-admission-policy",
     "discovery",
     "observability-latency-and-budgeted-events",
     "native-configuration-service-endpoints",

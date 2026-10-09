@@ -54,7 +54,7 @@ first three-process executable now exposes that assembly. Generic startup
 the shared typed startup and configured endpoint path are described in Slices
 38–39 below. Separate-host deployment and operational packaging remain work.
 
-## Linked macro and mini plan — updated 8 October 2026
+## Linked macro and mini plan — updated 9 October 2026
 
 The macro plan tracks usable capabilities, not the number of internal slices.
 The mini plan covers the current deliverable and the next two, including their
@@ -111,29 +111,29 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Integrated buffer provisioning (current, C14/P0/P2).** Slice108 adds
-   BufferPool/FrameBuffer, native bounded shared reservations and direct native
-   codec encoding at real transport send/receive ownership boundaries. Purpose:
-   usable memory composition and overload isolation. Dependencies: authenticated
-   channel, owned outbound batch, separate decoded ingress and codec limits.
-   Completion: downstream/native lifetime/credit/failure checks, canonical frames,
-   native/core-only checks and real TCP/QUIC regressions; record actual outcomes
-   below. This initial seam does not pool every subsystem or promise fairness.
-2. **Constrained admission policy (next, C15/P0/P2).** Make host policy selection
-   explicit while retaining mandatory hard ceilings and control reserve. Purpose:
-   usable workload admission within safe budgets. Dependencies: existing client/
-   queue reservations, integrated frame ownership and a review of shared-pool
-   connection admission. Completion: actual native/public admission call site,
-   reject-before-ownership, exact retained/released credits and tests showing a
-   permissive policy cannot exceed ceilings or starve reserved control.
-3. **Service-principal authorization (following, C21/P0/P4).** Purpose: gate
-   exposed service mutations by principal/scope independently of peer identity
-   and committed voting membership. Dependencies: inspect existing trusted admin
-   and enrollment/application call sites, define a small schema before adding
-   credentials/gates. Completion: public/native bounded integration with explicit
-   unsupported/refused cases, scope separation, restart/expiry tests as applicable
-   and no route from authorization results to quorum or ownership authority.
-   Broader baseline/platform/lifecycle/P7 requirements remain in the acceptance map.
+1. **Constrained outbound admission (current, C15/P0/P2).** Slice109 introduces
+   public AdmissionPolicy/AdmissionLease and a finite shareable native bulk budget
+   used by NativeOutbound after mandatory checks. Purpose: usable host workload
+   admission without relaxing limits or consuming reserved control. Dependencies:
+   existing queue ownership, exact ticket completion and slice108 frame lifetime.
+   Completion: downstream/native policy and lease conformance, both queue/batch
+   destruction orders, permissive/refusing-policy hard limits, native transport/
+   shared-runtime and real TCP/QUIC service regressions. General client/disk/
+   connection/shared-buffer policy and fairness remain separate requirements.
+2. **Service-principal authorization (next, C21/P0/P4).** Purpose: gate exposed
+   service mutations by principal/scope independently of peer identity and voting
+   membership. Dependencies: existing trusted admin/enrollment/application call
+   sites; define a small schema before adding credentials/gates. Completion:
+   public/native bounded integration, explicit unsupported/refused cases, scope
+   separation, restart/expiry tests as applicable and no authority over quorum or
+   ownership. Existing trusted loopback behavior must remain explicit.
+3. **Bounded discovery/resolution (following, C17/P0/P5).** Purpose: usable host
+   peer/authority hints beyond static endpoint maps. Dependencies: inspect current
+   connector/manifest-cache contracts and C21 source authorization. Completion:
+   real native/public resolve/invalidate/retry call site, bounded attempts/cache
+   and stale/foreign/retired-source tests. Hints cannot create membership, bypass
+   fences or grant ownership. Remaining baseline/platform/lifecycle/P7 requirements
+   stay in the linked acceptance map; this is no replacement for the full goal.
 
 ### How the current work fits globally
 
@@ -6848,3 +6848,62 @@ legacy host-codec defaults use separate bounded scratch. The next linked slice
 is C15 constrained admission, followed by C21 service-principal authorization.
 No performance, macOS, arbitrary-fault or complete-baseline claim. Existing long
 QUIC repair, fixed-p99 and lifecycle gaps remain; full P0–P7 goal stays active.
+
+## Slice109 schema plan — constrained outbound admission
+
+P0/P2 C15 adds AdmissionPolicy::reserve over bounded Copy metadata (owner/peer,
+traffic class, batch cost and current queue usage). It returns an opaque owned
+AdmissionLease or refuses before message ownership transfers. NativeAdmissionPolicy
+uses finite shareable bulk credits with scoped close. The native outbound queue
+first checks mandatory node/peer ceilings, control/background reserves, peer count
+and sequence exhaustion. Only then may optional policy reserve data/background;
+control bypasses it. Policy cannot grant quorum, change weights or relax hard limits.
+
+A successful lease is shared by retained queue bookkeeping and the owned batch.
+Queued -> dispatched -> completion preserves it. Valid completion drops both
+owners; a rejected completion keeps both; queue destruction cannot release a
+lease still carried by a dispatched batch. Dropping an abandoned batch cannot
+release the queue's retained credits. Host-selected shared resources remain alive
+through their leases; closing one queue never closes a host policy or another view.
+Pool/frame credits remain separate and follow slice108's lifetime.
+
+Acceptance: independent downstream policy with shared credits through the native
+queue; permissive/refusing policies cannot exceed ceilings or consume reserved
+control; exact rejection ownership, delayed/invalid completion, close/drop in both
+orders, shared native limits and native transport flush/abort. Core-only seam and
+actual TCP/QUIC service/restart/membership regressions remain required. This slice
+covers outbound admission; client/disk/connection/global shared-buffer admission
+remain separate requirements. No wire or persistent format change is planned.
+
+### Slice109 implemented evidence and macro review
+
+Implemented public AdmissionPolicy/AdmissionRequest/AdmissionLease and native
+finite shared bulk budgets. NativeOutbound<P=NativeAdmissionPolicy> selects the
+same public reserve operation through both its original default constructor and
+with_policy. Hard identity/capacity/node/peer/control/background/peer-count checks
+and ticket exhaustion precede policy. Control bypasses the optional provider;
+refusal returns the original allocation under existing Overloaded retry semantics.
+Accepted leases stay shared by queue bookkeeping and the owned batch through
+transport completion, rejected completion and both destruction orders. No queue
+shutdown closes a host policy or another view. Outbound Rust contract2 introduces
+the optional batch lease; host queues without policy credits set None. Wire and
+persistent formats, Raft authority and durability dependencies are unchanged.
+See ADMISSION.md for the full contract and its limits.
+
+Actual checks: all-features admission8/8, outbound4/4, transport19/19; native
+without TLS admission8/8, outbound4/4, transport18/18; core-only admission1/1,
+outbound3/3, transport1/1. Real shared100-group owner/native WAL/TLS1/1, real
+three-process TCP/QUIC service recovery/retry2/2, and executable membership
+add/enroll/promote/retire/restart2/2 pass. Clippy all-target/all-feature denies
+warnings and passes; fmt/diff/inventory pass (74 contracts). A core-only test
+import and a default-initializer lint were corrected before final validation.
+
+Macro review: this closes the initially missing outbound C15 seam and advances
+P0 composition/P2 bounded overload isolation. It does not complete P0 or general
+admission: client/disk/connection/shared-pool policy and fairness remain explicit.
+One fixed lease allocation per accepted bulk batch adds bounded metadata; its
+performance cost has not been benchmarked. Control admission does not guarantee
+quorum availability, frame preemption or unlimited repair capacity. Next linked
+work is C21 service-principal authorization, then C17 bounded discovery. Existing
+P4/P6/P7/platform/fault/catalogue gaps remain in BASELINE_ACCEPTANCE.md; full
+P0–P7 stays active, P8/Windows deferred and CI background.

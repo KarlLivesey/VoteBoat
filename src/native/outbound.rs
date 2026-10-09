@@ -13,7 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Caller-driven bounded outbound scheduling. No network I/O or worker thread.
-use crate::{identity::NodeId, outbound::*, raft::Message};
+use crate::{
+    admission::*, identity::NodeId, native::admission::NativeAdmissionPolicy, outbound::*,
+    raft::Message,
+};
 use std::collections::{BTreeMap, VecDeque};
 
 #[derive(Default)]
@@ -41,12 +44,14 @@ impl Peer {
     }
 }
 struct Retained {
+    _admission: Option<AdmissionLease>,
     peer: NodeId,
     class: MessageClass,
     cost: OutboundUsage,
     dispatched: bool,
 }
-pub struct NativeOutbound {
+pub struct NativeOutbound<P: AdmissionPolicy = NativeAdmissionPolicy> {
+    policy: P,
     binding: OutboundBinding,
     limits: OutboundLimits,
     usage: [OutboundUsage; 3],
@@ -58,7 +63,20 @@ pub struct NativeOutbound {
 }
 impl NativeOutbound {
     pub fn new(binding: OutboundBinding, limits: OutboundLimits) -> Result<Self, OutboundError> {
+        let limits = limits.validate()?;
+        let policy = NativeAdmissionPolicy::new(limits.node.max)
+            .map_err(|_| OutboundError::InvalidLimits)?;
+        Self::with_policy(binding, limits, policy)
+    }
+}
+impl<P: AdmissionPolicy> NativeOutbound<P> {
+    pub fn with_policy(
+        binding: OutboundBinding,
+        limits: OutboundLimits,
+        policy: P,
+    ) -> Result<Self, OutboundError> {
         Ok(Self {
+            policy,
             binding,
             limits: limits.validate()?,
             usage: Default::default(),
@@ -76,7 +94,7 @@ fn total(usage: [OutboundUsage; 3]) -> OutboundUsage {
     v.add(usage[2]);
     v
 }
-impl OutboundQueue for NativeOutbound {
+impl<P: AdmissionPolicy> OutboundQueue for NativeOutbound<P> {
     fn binding(&self) -> OutboundBinding {
         self.binding
     }
@@ -115,9 +133,25 @@ impl OutboundQueue for NativeOutbound {
                 .sequence
                 .checked_add(1)
                 .ok_or(OutboundError::Exhausted)?;
-            Ok((peer, class, cost, sequence))
+            let admission = if class == MessageClass::Control {
+                None
+            } else {
+                Some(
+                    self.policy
+                        .reserve(AdmissionRequest {
+                            owner: self.binding,
+                            peer,
+                            class,
+                            cost,
+                            node_usage: total(self.usage),
+                            peer_usage: total(peer_usage),
+                        })
+                        .map_err(|_| OutboundError::Overloaded)?,
+                )
+            };
+            Ok((peer, class, cost, sequence, admission))
         })();
-        let (peer, class, cost, sequence) = match result {
+        let (peer, class, cost, sequence, admission) = match result {
             Ok(v) => v,
             Err(reason) => return Err(SendRejected { reason, messages }),
         };
@@ -130,12 +164,17 @@ impl OutboundQueue for NativeOutbound {
         if !p.queued() {
             self.ready.push_back(peer);
         }
-        p.queues[class.index()].push_back(OutboundBatch { ticket, messages });
+        p.queues[class.index()].push_back(OutboundBatch {
+            ticket,
+            messages,
+            admission: admission.clone(),
+        });
         p.usage[class.index()].add(cost);
         self.usage[class.index()].add(cost);
         self.retained.insert(
             sequence,
             Retained {
+                _admission: admission,
                 peer,
                 class,
                 cost,

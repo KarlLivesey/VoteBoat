@@ -145,6 +145,7 @@ fn conformance(mut queue: impl OutboundQueue) {
     let replay = OutboundBatch {
         ticket: original_ticket,
         messages: vec![],
+        admission: None,
     };
     assert_eq!(
         queue
@@ -271,6 +272,7 @@ fn bytes_and_exact_completion(mut queue: impl OutboundQueue) {
     let premature = OutboundBatch {
         ticket,
         messages: vec![],
+        admission: None,
     };
     assert_eq!(
         queue

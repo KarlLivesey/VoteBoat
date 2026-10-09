@@ -158,3 +158,8 @@ history growth or application state beyond the declared envelope. Existing queue
 worker and output reservations still apply; service integration must enforce
 application command/checkpoint bounds and revalidate every later configuration.
 No frame format, store format, generation or durability token changes.
+
+Outbound contract2 carries an optional [admission lease](ADMISSION.md). Preserve
+it with the original OutboundBatch through rejection, local completion and owner
+queue completion. Frame release at local flush does not release that lease while
+the original batch or its queue bookkeeping still owns it.
