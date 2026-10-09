@@ -2153,3 +2153,43 @@ pass. The LogStore/JournalIo inventory records the observer conformance evidence
 without adding a public seam. Full P0–P7 remains active; the prior 250 ms TCP serial
 p99 target is unmet/unproven. Sustained/offered-load, maintenance/recovery, broader
 fault/macOS/separate-host and other recorded phase gaps remain; P8 stays deferred.
+
+## Slice 103 — bounded ready-request shared native barriers
+
+NativeLogWorker gathers only already-ready independent FIFO requests within
+existing request/unit/retained-byte and store pending limits. Original appends
+remain independent; one fully validated ticket-union barrier permits only original
+request/visit/owner durable subsets. Original credits/control reserves and queued
+reclamation/close ordering remain. No public API, format, timer-default or thread
+change. The PersistenceWorker inventory records the new conformance evidence.
+
+Eight new deterministic/native-crash tests pass with all features: reversed exact
+union and mixed owners; independent append rejection; partial/duplicate/wrong-
+session/wrong-generation/failed barrier and fatal append; FIFO unit/byte limits,
+close/reclamation order and store dependency limits. They include 436 native
+framing/failure schedules over either shared record (106 bytes each) and eight
+actual-file append/sync/publication fault/reopen cases. Existing worker (9),
+maintenance (5), log-store (9) and effect-owner (127) tests pass, including actual
+three-node/100-group replication/restart/dedup paths. Final all-target/all-feature
+Clippy with warnings denied passes. These finite checks are not a complete proof.
+
+Baseline A reuses slice102 raw evidence; baseline B rebuilds 007dbde with the
+same executable hash. Two candidate samples per TCP/QUIC × 1/8-group case use
+identical workload/observer/timers/resources. All 16 shared runs pass full values,
+reads, joins/reopen and original retries; recovered aggregate 320, extra retries
+zero. Eight-group TCP rates rise from 7.276/10.612 to 20.108/30.614 ops/s; QUIC
+7.326/9.687 to 22.746/27.861. Candidate mean units/barrier are roughly 3.0–3.1.
+One-group controls vary with no reliable improvement; cross-sample p99 varies and
+no general latency-budget or sustainable-capacity claim follows. Compilation was
+excluded from timing; uncontrolled desktop activity remains a source of variation.
+
+Both original startup-mode TCP serial runs also pass recovery/retry/joins. Baseline
+p99 478.658 ms, candidate 311.801 ms; the predeclared 250 ms serial target remains
+unmet. Full raw CSVs/summaries, storage observations, independent passing arithmetic,
+hashes and reproduction/limitations are in validation/performance/slice103. P7 and
+other recorded P0–P7 phase gaps stay active; broader sustained/offered-load,
+maintenance, fault/macOS/separate-host evidence remains. P8 stays deferred and CI
+remains background feedback.
+
+Final native-only shared-barrier tests also pass (8/8), as do formatting/diff
+checks and the unchanged 71-contract inventory.

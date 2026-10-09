@@ -125,7 +125,8 @@ for (const directory of directories) {
             assert.ok(row.append_max_ns <= row.append_ns && row.barrier_max_ns <= row.barrier_ns);
             if (row.stage.endsWith('_join')) {
                 assert.equal(row.append_calls, row.io_append_calls);
-                assert.equal(row.append_calls, row.barrier_calls);
+                // Independent original appends may share a verified barrier.
+                assert.ok(row.barrier_calls > 0 && row.barrier_calls <= row.append_calls);
                 assert.equal(row.append_units, row.barrier_tickets);
                 assert.equal(row.sync_calls, row.barrier_calls + 1);
                 assert.equal(row.publish_calls, row.barrier_calls + 1);
@@ -148,6 +149,6 @@ for (const directory of directories) {
                 histogram.set(units, (histogram.get(units) ?? 0) + delta);
             }
         }
-        console.log(`storage measured deltas: append_calls=${totals.append_calls} units=${totals.append_units} commands=${totals.append_commands} mean_units=${(totals.append_units / totals.append_calls).toFixed(3)} append_ms=${(totals.append_ns / 1e6).toFixed(3)} barriers=${totals.barrier_calls} barrier_ms=${(totals.barrier_ns / 1e6).toFixed(3)} sync_ms=${(totals.sync_ns / 1e6).toFixed(3)} publish_ms=${(totals.publish_ns / 1e6).toFixed(3)} histogram=${[...histogram].sort((a,b)=>a[0]-b[0]).map(([n,c])=>n+':'+c).join('|')}`);
+        console.log(`storage measured deltas: append_calls=${totals.append_calls} units=${totals.append_units} commands=${totals.append_commands} mean_units=${(totals.append_units / totals.append_calls).toFixed(3)} append_ms=${(totals.append_ns / 1e6).toFixed(3)} barriers=${totals.barrier_calls} mean_appends_per_barrier=${(totals.append_calls / totals.barrier_calls).toFixed(3)} mean_units_per_barrier=${(totals.barrier_tickets / totals.barrier_calls).toFixed(3)} barrier_ms=${(totals.barrier_ns / 1e6).toFixed(3)} sync_ms=${(totals.sync_ns / 1e6).toFixed(3)} publish_ms=${(totals.publish_ns / 1e6).toFixed(3)} histogram=${[...histogram].sort((a,b)=>a[0]-b[0]).map(([n,c])=>n+':'+c).join('|')}`);
     }
 }

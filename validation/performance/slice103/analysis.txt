@@ -1,0 +1,32 @@
+validation/performance/slice103/baseline-tcp-g1-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=551 units=551 commands=768 mean_units=1.000 append_ms=22.012 barriers=550 mean_appends_per_barrier=1.002 mean_units_per_barrier=1.000 barrier_ms=26133.482 sync_ms=9317.161 publish_ms=16813.155 histogram=1:551
+validation/performance/slice103/baseline-tcp-g1-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=549 units=549 commands=768 mean_units=1.000 append_ms=29.683 barriers=547 mean_appends_per_barrier=1.004 mean_units_per_barrier=1.000 barrier_ms=19634.995 sync_ms=6538.846 publish_ms=13105.759 histogram=1:549
+validation/performance/slice103/baseline-tcp-g8-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1521 units=1528 commands=768 mean_units=1.005 append_ms=76.022 barriers=1519 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.005 barrier_ms=105131.796 sync_ms=36347.672 publish_ms=68749.712 histogram=1:1520|8:1
+validation/performance/slice103/baseline-tcp-g8-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1524 units=1531 commands=768 mean_units=1.005 append_ms=76.440 barriers=1522 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.005 barrier_ms=72140.052 sync_ms=25691.897 publish_ms=46400.419 histogram=1:1523|8:1
+validation/performance/slice103/baseline-quic-g1-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=549 units=549 commands=768 mean_units=1.000 append_ms=19.556 barriers=548 mean_appends_per_barrier=1.002 mean_units_per_barrier=1.000 barrier_ms=26055.870 sync_ms=8535.164 publish_ms=17527.908 histogram=1:549
+validation/performance/slice103/baseline-quic-g1-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=552 units=552 commands=768 mean_units=1.000 append_ms=24.778 barriers=552 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=18597.415 sync_ms=6295.697 publish_ms=12291.418 histogram=1:552
+validation/performance/slice103/baseline-quic-g8-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1361 units=1523 commands=767 mean_units=1.119 append_ms=72.594 barriers=1359 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.119 barrier_ms=94075.088 sync_ms=32172.096 publish_ms=61856.552 histogram=1:1329|6:31|8:1
+validation/performance/slice103/baseline-quic-g8-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1526 units=1533 commands=768 mean_units=1.005 append_ms=72.176 barriers=1525 mean_appends_per_barrier=1.001 mean_units_per_barrier=1.005 barrier_ms=78993.792 sync_ms=27400.509 publish_ms=51540.390 histogram=1:1525|8:1
+validation/performance/slice103/candidate-tcp-g1-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=555 units=555 commands=768 mean_units=1.000 append_ms=32.961 barriers=555 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=23551.954 sync_ms=7959.517 publish_ms=15579.933 histogram=1:555
+validation/performance/slice103/candidate-tcp-g1-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=554 units=554 commands=768 mean_units=1.000 append_ms=25.550 barriers=554 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=19792.055 sync_ms=6863.492 publish_ms=12916.285 histogram=1:554
+validation/performance/slice103/candidate-tcp-g8-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1340 units=1532 commands=768 mean_units=1.143 append_ms=44.863 barriers=493 mean_appends_per_barrier=2.718 mean_units_per_barrier=3.103 barrier_ms=36911.084 sync_ms=12222.397 publish_ms=24685.063 histogram=1:1275|2:27|3:5|4:2|5:11|6:16|7:3|8:1
+validation/performance/slice103/candidate-tcp-g8-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1348 units=1532 commands=768 mean_units=1.136 append_ms=61.439 barriers=490 mean_appends_per_barrier=2.751 mean_units_per_barrier=3.122 barrier_ms=24479.537 sync_ms=9227.249 publish_ms=15264.321 histogram=1:1294|2:11|3:4|4:13|5:10|6:11|7:4|8:1
+validation/performance/slice103/candidate-quic-g1-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=552 units=552 commands=768 mean_units=1.000 append_ms=74.961 barriers=552 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=23534.459 sync_ms=8125.827 publish_ms=15396.391 histogram=1:552
+validation/performance/slice103/candidate-quic-g1-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=554 units=554 commands=768 mean_units=1.000 append_ms=34.817 barriers=554 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=26953.461 sync_ms=9038.676 publish_ms=17903.216 histogram=1:554
+validation/performance/slice103/candidate-quic-g8-a: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1386 units=1530 commands=768 mean_units=1.104 append_ms=50.488 barriers=494 mean_appends_per_barrier=2.806 mean_units_per_barrier=3.093 barrier_ms=33360.647 sync_ms=11494.156 publish_ms=21875.278 histogram=1:1319|2:15|3:37|4:9|5:4|6:1|7:0|8:1
+validation/performance/slice103/candidate-quic-g8-b: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1341 units=1526 commands=768 mean_units=1.138 append_ms=33.440 barriers=506 mean_appends_per_barrier=2.650 mean_units_per_barrier=3.014 barrier_ms=26604.294 sync_ms=9103.591 publish_ms=17504.865 histogram=1:1281|2:10|3:18|4:4|5:16|6:9|7:3|8:0

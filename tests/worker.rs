@@ -1415,12 +1415,21 @@ mod native {
             assert!(matches!(written, WorkerEvent::Written { .. }));
             apply_to_shard(&mut shard, written);
             release(&gate);
-            for _ in 0..2 {
-                let failed = event(&mut worker);
-                assert!(matches!(failed, WorkerEvent::Failed { .. }));
-                assert!(apply_to_shard(&mut shard, failed)
-                    .iter()
-                    .all(|d| d.result.is_err()));
+            let mut failures = std::collections::BTreeSet::new();
+            while failures.len() < 2 {
+                let output = event(&mut worker);
+                match output {
+                    WorkerEvent::Written { .. } => assert!(apply_to_shard(&mut shard, output)
+                        .iter()
+                        .all(|d| d.result.as_ref().unwrap().is_empty())),
+                    WorkerEvent::Failed { request, .. } => {
+                        assert!(failures.insert(request.sequence));
+                        assert!(apply_to_shard(&mut shard, output)
+                            .iter()
+                            .all(|d| d.result.is_err()));
+                    }
+                    WorkerEvent::Durable { .. } => panic!("failed barrier released durability"),
+                }
             }
             assert!(shard.core(group(1)).unwrap().is_fenced());
             assert!(shard.core(group(2)).unwrap().is_fenced());

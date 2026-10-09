@@ -1,0 +1,2 @@
+validation/performance/slice103/baseline-tcp-serial: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+validation/performance/slice103/candidate-tcp-serial: 256 receipts, group routing/history, windows and latency/rate arithmetic pass

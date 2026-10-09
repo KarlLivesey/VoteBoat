@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! One explicitly constructed blocking WAL thread, shared by many groups and
 //! execution owners. It owns the selected LogStore, never another WAL/runtime.
+//! Already queued independent requests can share one bounded durability barrier;
+//! original appends, completion scopes, admission credits and FIFO are retained.
 use crate::{contracts::StorageError, identity::*, log::*, runtime::VisitTicket, worker::*};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -95,6 +97,7 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             store: store.binding(),
             generation,
         };
+        let max_pending_units = store.limits().max_pending_units;
         let reclaim_supported = store.supports_reclaim();
         let max_reclaim_bytes = store.limits().max_wal_bytes;
         let (sender, requests) = mpsc::sync_channel::<Work>(limits.max_requests);
@@ -104,7 +107,8 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
             .name("voteboat-wal".into())
             .spawn(move || {
                 let mut fenced = false;
-                while let Ok(work) = requests.recv() {
+                let mut deferred = None;
+                while let Some(work) = deferred.take().or_else(|| requests.recv().ok()) {
                     let batch = match work {
                         Work::Persist(batch) => batch,
                         Work::Reclaim { ticket, max_bytes } => {
@@ -139,94 +143,9 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
                             continue;
                         }
                     };
-                    let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
-                    let result = if fenced {
-                        Err(StorageError::Fenced)
-                    } else {
-                        store.append_batch(
-                            batch
-                                .units
-                                .into_iter()
-                                .map(|u| LogMutation::Update(u.update))
-                                .collect(),
-                        )
-                    };
-                    let terminal = match result {
-                        Ok(tickets) => {
-                            if tickets.len() != visits.len()
-                                || visits.iter().any(|v| {
-                                    tickets
-                                        .iter()
-                                        .filter(|t| {
-                                            t.binding == binding.store && t.group == v.group
-                                        })
-                                        .count()
-                                        != 1
-                                })
-                            {
-                                fenced = true;
-                                WorkerEvent::Failed {
-                                    request: batch.ticket,
-                                    visits,
-                                    error: StorageError::Corrupt("worker admission scope mismatch"),
-                                }
-                            } else {
-                                let admissions = visits
-                                    .iter()
-                                    .map(|v| {
-                                        (*v, *tickets.iter().find(|t| t.group == v.group).unwrap())
-                                    })
-                                    .collect();
-                                let _ = out.send(WorkerEvent::Written {
-                                    request: batch.ticket,
-                                    admissions,
-                                });
-                                wake.wake();
-                                match store.barrier(&tickets) {
-                                    Ok(completion)
-                                        if completion.tickets.len() == tickets.len()
-                                            && tickets
-                                                .iter()
-                                                .all(|t| completion.tickets.contains(t)) =>
-                                    {
-                                        WorkerEvent::Durable {
-                                            request: batch.ticket,
-                                            visits,
-                                            completion,
-                                        }
-                                    }
-                                    Ok(_) => {
-                                        fenced = true;
-                                        WorkerEvent::Failed {
-                                            request: batch.ticket,
-                                            visits,
-                                            error: StorageError::Corrupt(
-                                                "worker barrier scope mismatch",
-                                            ),
-                                        }
-                                    }
-                                    Err(error) => {
-                                        fenced |= fatal(&error);
-                                        WorkerEvent::Failed {
-                                            request: batch.ticket,
-                                            visits,
-                                            error,
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        Err(error) => {
-                            fenced |= fatal(&error);
-                            WorkerEvent::Failed {
-                                request: batch.ticket,
-                                visits,
-                                error,
-                            }
-                        }
-                    };
-                    let _ = out.send(terminal);
-                    wake.wake();
+                    let batches =
+                        ready_window(batch, &requests, &mut deferred, limits, max_pending_units);
+                    persist_window(&mut store, batches, binding, &mut fenced, &out, &*wake);
                 }
                 store
             })
@@ -334,6 +253,162 @@ impl<L: LogStore + Send + 'static> NativeLogWorker<L> {
         }
     }
 }
+// Gather only work already in the FIFO. A deferred item is never overtaken.
+fn ready_window(
+    first: Batch,
+    requests: &Receiver<Work>,
+    deferred: &mut Option<Work>,
+    limits: WorkerLimits,
+    max_pending_units: usize,
+) -> Vec<Batch> {
+    let ceiling = limits.batch_units.min(max_pending_units);
+    let mut units = first.units.len();
+    let mut bytes = batch_cost(&first.units, first.units.capacity(), limits)
+        .expect("admitted request retains its validated cost")
+        .0;
+    let mut batches = vec![first];
+    while batches.len() < limits.max_requests && units < ceiling {
+        let Ok(work) = requests.try_recv() else {
+            break;
+        };
+        let Work::Persist(next) = work else {
+            *deferred = Some(work);
+            break;
+        };
+        let cost = batch_cost(&next.units, next.units.capacity(), limits)
+            .expect("admitted request retains its validated cost")
+            .0;
+        if next.units.len() > ceiling - units || cost > limits.batch_bytes.saturating_sub(bytes) {
+            *deferred = Some(Work::Persist(next));
+            break;
+        }
+        units += next.units.len();
+        bytes += cost;
+        batches.reserve_exact(1);
+        batches.push(next);
+    }
+    batches
+}
+struct PendingBarrier {
+    request: WorkerTicket,
+    visits: Vec<VisitTicket>,
+}
+fn persist_window<L: LogStore>(
+    store: &mut L,
+    batches: Vec<Batch>,
+    binding: WorkerBinding,
+    fenced: &mut bool,
+    out: &SyncSender<WorkerEvent>,
+    wake: &dyn WorkerWake,
+) {
+    let count = batches.iter().map(|b| b.units.len()).sum();
+    let mut tickets = Vec::with_capacity(count);
+    let mut pending = Vec::with_capacity(batches.len());
+    let mut window_failure = None;
+    for batch in batches {
+        let visits = batch.units.iter().map(|u| u.visit).collect::<Vec<_>>();
+        let result = if *fenced {
+            Err(StorageError::Fenced)
+        } else {
+            store.append_batch(
+                batch
+                    .units
+                    .into_iter()
+                    .map(|u| LogMutation::Update(u.update))
+                    .collect(),
+            )
+        };
+        let result = result.and_then(|admitted| {
+            if admitted.len() != visits.len()
+                || visits.iter().any(|v| {
+                    admitted
+                        .iter()
+                        .filter(|t| t.binding == binding.store && t.group == v.group)
+                        .count()
+                        != 1
+                })
+            {
+                Err(StorageError::Corrupt("worker admission scope mismatch"))
+            } else {
+                Ok(admitted)
+            }
+        });
+        match result {
+            Ok(admitted) => {
+                let admissions = visits
+                    .iter()
+                    .map(|v| (*v, *admitted.iter().find(|t| t.group == v.group).unwrap()))
+                    .collect();
+                let _ = out.send(WorkerEvent::Written {
+                    request: batch.ticket,
+                    admissions,
+                });
+                wake.wake();
+                tickets.extend(admitted);
+                pending.push(PendingBarrier {
+                    request: batch.ticket,
+                    visits,
+                });
+            }
+            Err(error) => {
+                if fatal(&error) && !*fenced {
+                    window_failure = Some(error.clone());
+                }
+                *fenced |= fatal(&error);
+                let _ = out.send(WorkerEvent::Failed {
+                    request: batch.ticket,
+                    visits,
+                    error,
+                });
+                wake.wake();
+            }
+        }
+    }
+    if pending.is_empty() {
+        return;
+    }
+    let result = if *fenced {
+        Err(window_failure.unwrap_or(StorageError::Fenced))
+    } else {
+        store.barrier(&tickets).and_then(|completion| {
+            if completion.tickets.len() == tickets.len()
+                && tickets.iter().all(|t| completion.tickets.contains(t))
+            {
+                // Exact union validation permits projection to each original
+                // request. The provider may return the union in another order.
+                Ok(())
+            } else {
+                Err(StorageError::Corrupt("worker barrier scope mismatch"))
+            }
+        })
+    };
+    if let Err(error) = &result {
+        *fenced |= fatal(error);
+    }
+    let mut tickets = tickets.into_iter();
+    for p in pending {
+        let terminal = match &result {
+            Ok(()) => {
+                let completion = DurableLog {
+                    tickets: tickets.by_ref().take(p.visits.len()).collect(),
+                };
+                WorkerEvent::Durable {
+                    request: p.request,
+                    visits: p.visits,
+                    completion,
+                }
+            }
+            Err(error) => WorkerEvent::Failed {
+                request: p.request,
+                visits: p.visits,
+                error: error.clone(),
+            },
+        };
+        let _ = out.send(terminal);
+        wake.wake();
+    }
+}
+
 fn fatal(error: &StorageError) -> bool {
     matches!(
         error,

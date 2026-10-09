@@ -198,3 +198,37 @@ node validation/check-native-benchmark.mjs --storage RUN_DIRECTORY...
 The validator also accepts an archived prefix with `.txt`, `.csv` and
 `.storage.csv` files. Instrumentation adds measurement overhead; observed timings
 alone are not evidence of a tuning improvement over earlier unobserved runs.
+
+## Ready queued requests share a native barrier
+
+NativeLogWorker now gathers immediately available FIFO requests within its existing
+request/unit/retained-byte limits and the store's pending-ticket limit. It does
+not wait for more work. A queued reclamation or an oversized next request closes
+the window; the deferred item executes next. Each original append still validates
+independently and retains its own on-disk record and Written/Failed result.
+Successful appends share one physical barrier over their exact ticket union.
+Only a fully validated union can be projected back to per-request DurableLog
+subsets. Failed or malformed durability evidence grants no subset success.
+Original request credits and control reserves release only on original terminals.
+No API, protocol, persistent format or service timer/resource default changes.
+
+Joined storage metrics can therefore have fewer barrier calls than append calls,
+while total barrier tickets must equal successfully appended transition units.
+The checker validates this relationship and reports mean appends/units per barrier.
+Batch histograms describe original append calls; they do not alone describe the
+number of requests sharing a barrier. Compare physical barriers as well as useful
+applied receipts and latency at the same workload/resources/timers.
+
+The scheduling change does not create single-group parallel ordering or a
+cross-group transaction. With one group and one outstanding persistence transition,
+there is no second independent request to combine; its durability requirements
+remain unchanged. Single-group latency and the predeclared TCP serial p99 target
+must still be checked separately from multi-group aggregate throughput.
+
+Repeated slice-103 comparisons and raw evidence are recorded in
+[validation/performance/slice103](../validation/performance/slice103/README.md).
+Eight-group throughput improves in both transports with fewer barriers; single-
+group controls vary without a reliable gain. The original startup TCP serial
+candidate p99 is 311.801 ms versus baseline 478.658 ms (one sample each), still
+above the predeclared 250 ms target. These finite closed-loop results do not prove
+sustainable offered-load capacity or a general latency improvement.

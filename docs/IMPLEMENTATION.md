@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Initial finite three-replica TCP/QUIC applied baseline, raw recovery/latency evidence and local WAL/host-progress attribution implemented; deeper attribution, sustainable/offered-load/multi-group/maintenance measurements and fixed-p99 tuning remain |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Sustainable/offered-load/maintenance measurements, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
@@ -6279,3 +6279,112 @@ improve performance. The following schema must precede implementation:
    fault validation. Dependencies: validated measured tuning. Macro scope remains
    full P0–P7; these checks do not replace earlier phase gaps. P8 is deferred and
    CI remains background feedback.
+
+### Slice 103 mini schema — bounded ready-request shared barriers
+
+Previous turn was progress: 007dbde pushed actual batch/stage attribution and real
+recovery evidence. P7 now tests the selected scheduling optimization; next matched
+repeated timing/latency evidence, then sustained/offered-load/maintenance/platform
+validation. Full P0–P7 scope and prior phase gaps remain intact.
+
+NativeLogWorker retains its public PersistenceWorker contract, request identities,
+credits and control reservation. Its worker thread gathers only immediately ready
+FIFO Persist requests. Bound a window by max_requests, batch_units, batch_bytes
+(using existing retained-capacity accounting) and the store's max_pending_units.
+A first request still gets its original append/rejection behavior even if a host
+store selects a smaller pending limit. One deferred work item preserves FIFO when
+the next request exceeds the window or is reclamation; never cross reclamation
+and never wait for another request to fill a window. Close drains both deferred
+and channel-owned accepted work. No new thread/runtime or persistent format.
+
+Append each original request independently. Retain its exact visits and its range
+in the window's ticket union; emit its original Written scope only after successful
+append validation. A rejected append gets only its own Failed result; other valid
+pending requests still require the barrier. Fatal/malformed append fences pending
+work before any dependent Durable can escape, and later work fails fenced.
+The one shared barrier must return exactly the requested ticket union (including
+full binding/revision/generation identity). Only then project the verified evidence
+back into exact per-request DurableLog subsets. Wrong/partial/duplicate completion
+fences every affected request. A failed barrier fails all pending requests with
+original scope; no Written event or queue acceptance grants durability. Original
+credits remain held until each original terminal is observed. This shares physical
+synchronization, not group log order, commit prefixes or business transactions.
+
+Acceptance: deterministic gates force several queued requests, verify one barrier
+and original outputs/credits, independent rejection, fatal append/barrier failure,
+wrong completion, byte/unit cuts, close and reclamation FIFO. Exercise real native
+journal failure cuts while multiple original records await one barrier, then
+recover exact acknowledged state and reject stale scope. Run existing worker,
+maintenance, log-store/runtime/service conformance as affected; then repeated
+same-settings observed TCP/QUIC 1/8-group comparisons, full reopen/retry/joins and
+original TCP serial latency target. Keep failed runs and scope timing evidence;
+do not claim the 250 ms target or full P7 merely from reduced barrier counts.
+
+### Slice 103 implemented — ready-request shared barriers
+
+NativeLogWorker implements the schema above through its existing public
+PersistenceWorker/LogStore seam. Each original append remains independent;
+Written and terminal visits retain original request, runtime-owner and group
+identity. Only exact union barrier evidence permits durable subset projection.
+Ready windows obey existing unit/retained-byte/request and store dependency
+limits; reclamation is not crossed, close drains deferred work and original
+credits release only when original terminals are observed. No fill delay, new
+thread, API, persistent format or timer-default change.
+
+Eight deterministic/provider/native-crash tests pass: mixed owner identities,
+reverse completion order, exact credits/scopes, independent rejection, fatal
+append, malformed/partial/duplicate/wrong-session/wrong-generation/failed barrier,
+bounded FIFO/deferred close, reclamation order and store limits. Native framing
+covers 436 failure schedules across either 106-byte record and durability stages;
+eight actual-file failure/reopen cases preserve acknowledged promises and valid
+Raft recovery. Existing worker 9, maintenance 5, log-store 9 and effect-owner 127
+checks pass, including three-node and 100-group restart integration. All-target/
+all-feature Clippy with warnings denied passes. These finite tests are not a
+complete protocol or crash proof.
+
+Repeated release comparisons use identical benchmark/observer/resources/timers.
+Baseline A is the unchanged slice102 evidence; baseline B is rebuilt from 007dbde
+with the identical executable hash. Fresh candidate A/B runs cover TCP/QUIC ×
+1/8 groups. All 16 shared runs pass complete values/reads/joins/reopen/retries;
+independent raw checks pass. Eight-group TCP baseline rates 7.276/10.612 versus
+candidate 20.108/30.614 applied ops/s; QUIC 7.326/9.687 versus 22.746/27.861.
+Candidate measured group units/barrier are approximately 3.0–3.1. One-group controls
+vary without a reliable gain, and p99 varies: no universal latency, sustainable
+capacity or unchanged-budget success is claimed. Compilation/build preparation
+was excluded from performance measurements; desktop load remained uncontrolled.
+
+The original four-argument startup TCP serial comparison also passes complete
+recovery/retry/joins with zero extra retries: baseline 7.997 ops/s and 478.658 ms
+p99; candidate 8.517 ops/s and 311.801 ms p99. **The predeclared 250 ms TCP serial
+p99 target remains unmet.** One pair does not prove single-group improvement.
+Raw histories/storage snapshots, arithmetic, hashes, reproduction and limitations
+are in validation/performance/slice103. No latency target or durability dependency
+was relaxed to accept the multi-group throughput gain.
+
+### Next linked mini plan — sustained evidence and remaining baseline gaps
+
+1. Current slice completion: finish native-only compatibility, inventory and final
+   formatting/diff checks; commit/push the bounded worker optimization and complete
+   raw evidence. Dependencies: schema/conformance and measurements above. Completion
+   checks: no false durable completion, exact recovery, reproducible artifacts and
+   clean committed state. Advances the P7 tuning macro milestone without declaring
+   its latency gate complete.
+2. Add a bounded sustained/offered-load benchmark mode through the existing public
+   service/runtime contracts. First sketch admission/receipt schema, bounded
+   pending IDs and timeout/unknown cleanup. Preserve successful useful receipts,
+   explicit backpressure/refusals/unknowns, actual duration and recovery checks;
+   do not infer sustainable capacity from the finite closed-loop runs. Dependencies:
+   verified worker and unchanged benchmark baseline. Completion checks: offered,
+   admitted and committed/applied rates reconcile; backlog/latency and maintenance
+   effects remain visible, and exact restart/retry gates pass. Advances P7 measured
+   capacity and operational usability; the serial latency gate remains separate.
+3. Reconcile remaining P0–P7 phase requirements against authoritative implementation
+   and executed evidence, then implement the next missing usable end-to-end path.
+   Dependencies: the existing phase table and public contract inventory; P7 work
+   does not erase earlier lifecycle/membership/fault/platform gaps. Completion
+   checks must match each actual requirement, including macOS/Linux and recursive
+   membership/responsibility/split/merge recovery. Full objective stays active;
+   P8 and Windows remain deferred and CI remains background feedback.
+
+Final native-only shared-barrier tests also pass (8/8), as do formatting/diff
+checks and the unchanged 71-contract inventory.
