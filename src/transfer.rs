@@ -324,6 +324,8 @@ pub struct TransferIntentStatus {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
     Reparent(OperationId),
+    ReparentGuard(OperationId),
+    ReparentCancellation(OperationId),
     RetiredChildSlot(OperationId),
     DeletionIntent(OperationId),
     Deletion(OperationId),
@@ -339,6 +341,8 @@ pub enum DirectoryQuery {
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
     Reparent(Option<crate::reparenting::ReparentStatus>),
+    ReparentGuard(Option<crate::reparent_guard::ReparentGuardStatus>),
+    ReparentCancellation(Option<crate::reparent_guard::ReparentCancellationStatus>),
     RetiredChildSlot(Option<crate::child_slots::RetiredChildSlotStatus>),
     DeletionIntent(Option<crate::deletion::DeletionIntentStatus>),
     Deletion(Option<crate::deletion::DeletionStatus>),
@@ -421,6 +425,14 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::ReparentGuard(operation) => self
+                .0
+                .reparent_guard_at(required, operation)
+                .map(DirectoryRead::ReparentGuard),
+            DirectoryQuery::ReparentCancellation(operation) => self
+                .0
+                .reparent_cancellation_at(required, operation)
+                .map(DirectoryRead::ReparentCancellation),
             DirectoryQuery::Reparent(operation) => self
                 .0
                 .reparent_status_at(required, operation)
@@ -474,6 +486,17 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::ReparentGuard(op) => self
+                    .0
+                    .reparent_guard_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.plan.retained_bytes()
+                            - size_of::<crate::reparent_guard::CrossReparentPlan>()
+                    }),
+                DirectoryQuery::ReparentCancellation(op) => {
+                    self.0.reparent_cancellation_at(self.applied_index(), *op)?;
+                    0
+                }
                 DirectoryQuery::Reparent(op) => self
                     .0
                     .reparent_status_at(self.applied_index(), *op)?
@@ -549,6 +572,10 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::ReparentCancellation(_) => 0,
+            DirectoryRead::ReparentGuard(s) => s.as_ref().map_or(0, |s| {
+                s.plan.retained_bytes() - size_of::<crate::reparent_guard::CrossReparentPlan>()
+            }),
             DirectoryRead::Reparent(s) => s.as_ref().map_or(0, |s| {
                 s.plan.retained_bytes() - size_of::<crate::reparenting::ReparentPlan>()
             }),

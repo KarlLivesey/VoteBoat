@@ -4269,3 +4269,45 @@ This completes selected original full-owner adoption. Scoped retained and
 activated/imported owner families, guarded cross-authority movement and native
 network reparenting remain. The full P0–P7 objective, macOS and broader scope/gates
 stay active; this evidence does not close full reparenting154.
+
+## Slice154d1 — cross-authority reparent guards and cancellation
+
+Directory schema12 explicitly binds preparation/cancellation. Canonical
+CrossReparentPlan closes the full new ancestry and moved subtree under128 manifest
+records, with exact local guards at each participating authority. The first sorted
+authority records the initial guard; later prepares bind its original authenticated
+quorum observation. No routes or data ownership change during preparation.
+Only that coordinator records the original cancellation decision. Participant
+release verifies its digest/identity and local facts; an early cancellation
+creates a tombstone that rejects delayed acquisition. Guards never time out.
+
+Actual Linux checks:
+
+- All-feature reparent_guards8/8 pass. Histories cover three-authority preparation,
+  original status/retry/checkpoint recovery, reserved cancellation under ordinary
+  exhaustion, cancellation-before-prepare, reciprocal-move exclusion, pending
+  ordering, exact closure/depth, codec/profile/atomicity and quorum read budgets.
+- Original data writes/retries/outbox and disjoint metadata changes proceed while
+  affected publication, deletion, creation and local reparenting refuse.
+- The native ModelIo history cuts every byte of coordinator guard/cancellation
+  and participant guard/release journal frames, plus sync and publication failures.
+  Fresh replay/checkpoint reopen preserves old-or-complete locks/tombstones,
+  unchanged manifests and original retry indexes. This is finite journal-model
+  evidence, not networked complete-move or arbitrary-power-loss evidence.
+- 100 distinct focused all-feature tests pass across directory31, delegation14,
+  deletion12, insertion11, retained_insertion10, reparenting14 and new guards8.
+  Directory tests were rerun after the creation fix. Core-only directory27,
+  reparenting11 and guards7 pass (45 tests).
+- All-feature/all-target Clippy -D warnings passes; formatting, whitespace and
+  the81-contract inventory checks pass.
+
+A new negative test found that the post-command guard check could miss a fresh
+creation: its lookup history had not yet been inserted. Creation admission now
+checks the protected parent directly, and both prepare/creation orderings are
+covered. A test's deliberately changed cancellation initially violated its own
+index ordering; it now keeps a valid shape while testing refusal against actual
+local history. Clippy removed an unnecessary clone of a Copy query.
+
+This closes preparation/cancellation only. Cross-authority commit/publication,
+owner-family adoption and native complete-move resumption remain154d. Full P0–P7,
+macOS and the other declared roadmap gates remain active.

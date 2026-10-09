@@ -146,6 +146,13 @@ every-byte adoption/freeze journal cuts are checked. Scoped retained and importe
 owner-family composition, cross-authority movement and native network reparenting
 remain required. See [local reparenting](REPARENTING.md).
 
+Slice154d1 adds schema12 cross-authority preparation/cancellation, with complete
+bounded ancestry/subtree validation, coordinator-first evidence, conflicting
+metadata/creation/lifecycle guards and reserved cancellation capacity. Early
+cancellation tombstones reject delayed prepare. Original result/checkpoint replay
+and every-byte coordinator/participant journal failures are exercised. The next
+phase must add commit/publication; these guards alone cannot move a child.
+
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
 WAL/checkpoint two-authority recursive deletion histories pass original unread

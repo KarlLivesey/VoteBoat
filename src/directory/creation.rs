@@ -255,6 +255,7 @@ impl Directory {
         if self.deletion_busy(intent.parent)
             || self.transfers.contains_key(&intent.parent)
             || self.delegations.contains_key(&intent.parent)
+            || self.guarded_manifests.contains_key(&intent.parent)
         {
             return DirectoryOutcome::LifecycleBusy;
         }

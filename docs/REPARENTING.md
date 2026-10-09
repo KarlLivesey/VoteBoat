@@ -84,3 +84,50 @@ adoption -> two-target split/publication/activation, retained original retries a
 outbox, repeated moves, full-history control reserve, strict recovery and every-byte
 native adoption/freeze frame failures. It uses application histories and the native
 journal failure model; it does not add a new network or macOS execution claim.
+
+Cross-authority preparation and cancellation are now available behind
+`Directory::with_reparent_guards()` selected before bootstrap (schema12).
+They are a protocol phase; they cannot publish a cross-authority move yet.
+
+Build a `CrossReparentPlan` from the exact old parent, destination parent and child
+identities and the complete manifest set: old parent, destination ancestry through
+its root, and every manifest in the moved subtree. The canonical set is bounded
+at128 manifests. Every edge, authority, scope, active state and application/scheme
+must agree. Missing paths, extraneous nodes, cycles and excessive resulting depth
+refuse. The planner may read these views separately, but their validity must then
+be protected by the committed guards below.
+
+The smallest participating authority is the coordinator. Propose
+`PrepareReparent { plan, coordinator: None }` there with one global operation ID.
+Read its original `ReparentGuardStatus` through that authority's quorum, authenticate
+its configuration/provenance, and derive `ReparentGuardEvidence::from_status`.
+Propose the same plan/global operation to the remaining authorities, with that
+coordinator evidence. Acquire them in sorted order to avoid contention loops.
+Each checks its exact local manifests and reserves completion capacity before
+returning `ReparentGuarded`. The digest and constructible values do not authenticate
+foreign state themselves.
+
+While a guard is held, conflicting metadata publication, local reparenting,
+creation and lifecycle reservations refuse. Disjoint metadata and ordinary data
+writes can proceed. No owner epoch or parent binding changes at this phase.
+Guards are reconstructed from the original log/checkpoint and do not expire.
+A timeout is neither successful completion nor permission to unlock.
+
+To abandon preparation, propose `CancelReparent { guard }` to its coordinator.
+`DirectoryQuery::ReparentCancellation(guard)` returns the original cancellation
+operation/index, plan digest and coordinator guard index. Authenticate that quorum
+observation, then propose `ReleaseReparentGuard` at each participant. Its tombstone
+may arrive before a delayed prepare; the later prepare stays cancelled. The
+coordinator itself accepts only its actual local cancellation record. Original
+prepare/cancel results remain available after release, so a retried original
+prepare receipt is historical evidence, not a claim that the lock is still held.
+`DirectoryQuery::ReparentGuard` and `ReparentCancellation` use existing Node reads.
+
+Prepared participants have reserved cancellation capacity even if ordinary
+history fills. An unprepared participant needs ordinary capacity to record an
+early cancellation; if it has none, preparation also cannot acquire a guard.
+Resume incomplete cancellation by reading original statuses and retrying it.
+The follow-on publication phase must bind all original guards and serialize its
+commit/cancel decision at the coordinator before any participant changes a route.
+That phase, owner adoption across authority boundaries and native network
+complete-move recovery remain required work.

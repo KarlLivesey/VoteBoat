@@ -36,6 +36,7 @@ pub mod outbound;
 pub mod placement;
 pub mod quorum;
 pub mod raft;
+pub mod reparent_guard;
 pub mod reparenting;
 pub mod routed;
 pub mod routing;
