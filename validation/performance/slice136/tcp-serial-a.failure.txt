@@ -1,0 +1,1 @@
+Benchmark exit 1: operation 250 returned Unknown(LeadershipChanged). No completed summary, final value/read/reopen/retry/join or performance success claim. Raw emitted samples retained. This was planned run A, not replaced by a favorable retry.

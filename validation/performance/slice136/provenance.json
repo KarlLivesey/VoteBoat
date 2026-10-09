@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-10-09T06:33:26.871Z",
+  "changes": "documentation and validation-only gate; no Rust production/benchmark source changes",
+  "measurement": "three replicas on this host/device; no CPU/device reservation; no concurrent compilation or bulk work; reference startup TCP 256/window1 with 64 warmup",
+  "node": "v24.21.0",
+  "source_revision": "b2a367e48e045c1776f38aafb4826d4d50462b24",
+  "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "platform": "Linux",
+  "reference_filesystem": "btrfs",
+  "sha256": {
+    "Cargo.lock": "532a0f956d683a1f35701ce838c35ede07b4bf98ceb5305370b34a27427b7ae8",
+    "examples/native_benchmark.rs": "e924f8b48a13bb95c344473ecfd4a4372dc308bfce6b876b63076756a3ce2a5b",
+    "examples/benchmark/shared.rs": "398d6fc99bb979fa6e9e7ce1c27c41c6a92c62ff8e59c879686313b9c4123d81",
+    "examples/benchmark/observe.rs": "8e94ef2798febe4a70d2f632b975c50d6964bd1e44d64b0f188f5a9af3e59c36",
+    "examples/benchmark/offered.rs": "7c62fd5e8b3777d792b0cf767a0431c91bee77579e0a18c39ba64669f6e027e9",
+    "examples/benchmark/maintenance.rs": "3ace37062856d869e6257de6f413d1c89f83620f9e53c0debb233f9f2292dd3d",
+    "src/native/worker.rs": "1c07f30b978beca1c3e049f1ead65323f39edb37ee2f07af0be043f1935959ea",
+    "src/native/log_store.rs": "50ccced9592f7b73e935f44e531298fb8f8fbeb882aa1d5ea28cae515347d4f2",
+    "target/release/examples/native_benchmark": "b4db6d3136a5549768151dee27ec39a8ca58f33ac97f0626e95fbbfd752c6072"
+  },
+  "excluded_smoke": {
+    "root": "/tmp/voteboat-slice136-tcp-serial-a",
+    "filesystem": "tmpfs",
+    "reason": "not disk-backed reference; retained process/recovery smoke only"
+  },
+  "reference_roots": [
+    "target/bench-slice136-tcp-serial-a",
+    "target/bench-slice136-tcp-serial-b"
+  ],
+  "privacy": "Detailed hostname, kernel, hardware/device inventory, mount paths and memory metadata retained only in the local private capture. Public result is not fully hardware-reproducible."
+}

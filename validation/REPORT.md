@@ -3253,3 +3253,47 @@ audited path with its own schema/contracts/acceptance. CI remains background.
 
 Final slice135 format, whitespace and80-contract inventory passed; all validation
 handles are terminal. No CI gate used. Full goal remains active.
+
+## Slice136 — baseline audit and fixed serial performance gate
+
+Production/benchmark revision b2a367e48e045c1776f38aafb4826d4d50462b24 unchanged.
+Read roadmap, component contracts, invariant/scenario/release gates and existing
+source/evidence; docs/BASELINE_AUDIT.md records missing and unvalidated scope.
+Historical tests are not claimed as newly executed. Full P0–P7 remains active.
+
+Actual release example all-feature build succeeded in17.53s. Sequential reference
+runs used TCP/TLS,three replicas,one group,64 warmup,256 measured8-byte commands,
+window1,50ms heartbeat and1000–1999ms election range. Initial /tmp root was tmpfs;
+its successful3.988ms p99 smoke/recovery result is retained but excluded from disk
+acceptance. Fresh Btrfs A stopped at operation250 Unknown(LeadershipChanged),
+exit1,no complete summary and only a CSV header. Fresh B completed44.532562s,
+5.749ops/s,p99432.366616ms,recovered320,original retries verified,workers joined.
+Raw B checker passes256 receipts and routing/history/window/timing arithmetic.
+Fixed250ms gate correctly fails (exit1); A missing-summary and smoke-context
+checks also correctly reject (exit1). Logs, samples, contexts and captured
+source/binary/toolchain/kernel/device provenance: performance/slice136. This is
+finite Linux loopback evidence, not sustainable throughput, macOS, real power
+loss or measured attribution of the leadership-change/storage cause.
+
+Added validation-only fixed-workload/context/numeric checker. It requires the
+existing raw checker first and binds context to summary/sample hashes. Captured
+host metadata remains trusted input, not proof of device durability. Five direct
+Node unit tests passed; final rerun10.80ms. Actual CLI checks ran with approved
+escalated read-only execution after sandbox child-spawn EPERM. No automatic
+approval rejection or protocol change. Final cargo fmt check, git whitespace
+check and80-contract inventory check pass. No Rust suite rerun claimed because
+no Rust source changed; the executed complete native benchmark supplies B's
+fresh recovery/retry/join evidence. No CI gate used.
+
+Next slice must preserve partial outcomes and measure the startup critical path
+before choosing a safe fix. Same250ms gate and durability remain. P8/Windows
+stay deferred; original pack and RPL-1.5 retained.
+
+Public-artifact privacy revision: automatic approval review rejected the initial
+push due to local paths and captured machine/environment metadata. Detailed
+capture remains local; public provenance omits hostname/kernel/device/memory
+inventory, archived checker logs redact the workspace prefix, and B context names
+the actual workspace-relative benchmark root. Summary/sample/binary hashes and
+measurements are unchanged. Independent hardware reproduction is limited by this
+redaction. Six final direct Node tests pass10.83ms; B actual raw validator passes
+and fixed numeric gate still correctly exits1 after context revision.

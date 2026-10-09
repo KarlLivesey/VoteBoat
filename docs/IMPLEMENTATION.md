@@ -111,23 +111,27 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Native later movement recovery (current slice135, P1/P5/P6).** Purpose:
-   carry the actually assigned nested grandchild through networked split/merge.
-   Dependencies:133 consumed native setup,134 continuation and existing delegated
-   transfer contracts. Completion: TCP/QUIC x WAL/checkpoint unread phase recovery,
-   exact retries and source lineage, partial fencing/activation, parent locator
-   refresh, final ancestor/source-offline service with immutable stopped files.
-2. **Full baseline gap audit and next required path (next, P0–P7).** Purpose:
-   tie lifecycle evidence to original user-visible baseline requirements. Dependencies:
-   135 acceptance, original roadmap/component/invariant ledgers. Completion: inspect
-   actual code and executed evidence for deletion/reparenting, authority movement,
-   retention, admission/mutation, tuning and platform/fault gates; select the next
-   missing complete path without shrinking the goal or counting indirect evidence.
-3. **Implement the next audited complete path (following, P0–P7).** Purpose:
-   close the highest-priority remaining user-visible requirement. Dependencies:
-   explicit audit finding and existing contracts. Completion: own schema/API/state/
-   failure sketch, native public seam where needed, meaningful acceptance and
-   recorded actual evidence; retain every unfulfilled original baseline requirement.
+1. **Baseline audit and fixed reference gate (slice136, P0–P7).** Purpose:
+   tie actual lifecycle/service evidence to all original requirements and measure
+   the unchanged P7 gate. Dependencies:135, chapter12/17/11 and existing native
+   benchmark. Completion: code/evidence audit, retained success/failure artifacts,
+   exact-workload raw/context/numeric checker and recorded validation. Implemented
+   evidence: BASELINE_AUDIT.md; disk B recovery passes but432ms p99 fails250ms;
+   disk A unknown outcome remains a failure. This does not complete P7.
+2. **Failure retention and critical-path diagnosis (next, P1/P7).** Purpose:
+   distinguish why the serial disk path is slow and why A lost leadership before
+   changing production. Dependencies:136 raw failures, existing benchmark and
+   observer/storage contracts. Completion: schema sketch, partial receipts and
+   unknown outcomes retained on failure, stage attribution without weakening the
+   recovery gate, focused tests and fresh matched disk evidence. The diagnostic
+   is necessary because the current failure path discards accumulated samples.
+3. **Cause-supported improvement and matched acceptance (following, P1/P7).**
+   Purpose: improve usable durable service at the original correctness/p99 budget.
+   Dependencies: measured cause from item2 and relevant provider invariants.
+   Completion: smallest justified fix, crash/conformance regression appropriate
+   to the changed contract and matched original250ms reference gate; record
+   failures honestly and retain all other P0–P7 requirements. If evidence calls
+   for another cause investigation, update the mini plan rather than guess a fix.
 
 ### How the current work fits globally
 
@@ -9493,3 +9497,91 @@ audited path with its own schema/contracts/acceptance. CI remains background.
 
 Final slice135 format, whitespace and80-contract inventory passed; all validation
 handles are terminal. No CI gate used. Full goal remains active.
+
+## Slice136 schema plan — baseline audit and fixed-p99 revalidation
+
+Previous turn progressed:135 committed/pushedb2a367e; tree clean at audit start.
+Current macro goal remains all P0–P7. Read roadmap, component contract sheet,
+I01–I12/scenario/release gates and performance acceptance; inspect actual public
+traits, native providers, directory constraints, Cargo features and recorded raw
+success/failure artifacts. Historical test counts and inventory shape are not
+new execution or full proof. Classify implemented coverage, missing paths and
+unvalidated gates separately; do not infer completion from existing phase counts.
+
+Concrete next path selected from audit: revalidate the existing unchanged250ms
+TCP serial p99 gate at current production revision before selecting a tuning fix.
+Use existing native_benchmark startup assembly, three replicas,64 warmup plus256
+measured8-byte commands, window1, one group, same durability/recovery/retry/join
+checks. Record current revision/source/binary hashes, toolchain/kernel/device and
+raw samples; finish compilation before measurement. Run A/B sequentially with
+fresh roots. No benchmark/protocol/timer/durability changes or concurrent bulk work.
+This is needed for P7 measured tuning; old slice103 p99 failures do not measure
+135's code. It is not sustainable capacity, offered-load or macOS evidence.
+
+Add a small validation-only numeric gate around the existing independent raw
+checker. Data shape: completed closed startup summary, exact reference workload,
+raw sample path and fixed250000us p99 deadline. Reject alternate workload, offered
+mode, missing recovery/retry/joins and invalid timing before evaluating threshold.
+CLI invokes the raw checker first; arithmetic pass is distinct from numeric pass.
+No editable deadline flag or false performance success when samples are missing.
+Unit checks classify equal/above/below threshold and malformed/alternative cases;
+actual A/B measurements provide the native evidence. Rejections retain artifacts.
+
+Ownership/failure: benchmark owns temporary sockets/files/workers and joins/reopens
+before summary; retain failing runs rather than retry for a preferred result.
+Validation tool reads results only; numeric refusal is not consensus failure.
+No production helper is proposed before measured cause analysis. Next deliverable:
+identify the demonstrated critical-path cause and implement the smallest safe
+improvement with original contract checks. Following: repeat matched measurement
+with the fixed gate and continue unresolved lifecycle/admission/platform work.
+Full P0–P7 stays active; P8/Windows deferred and CI background.
+
+## Slice136 implemented — baseline audit and fixed reference gate
+
+BASELINE_AUDIT.md reviews roadmap exits, supporting catalogue gaps, I01–I12 and
+scenario/release evidence without claiming full completion. BASELINE_ACCEPTANCE.md
+now links the current decision. No Rust production/benchmark source changed.
+Macro measured-tuning work is selected because current evidence still fails its
+fixed gate; service/embedding remains usable independently, and all P0–P7 gaps
+remain in scope. Networked retirement, deletion/reparenting, authority movement,
+admission/discovery/placement and platform/fault validation remain explicit.
+
+New validation-only serial checker runs the independent raw validator first,
+requires exact reference workload/recovery flags and captured disk context/digests,
+and evaluates fixed250000us p99. No adjustable threshold or missing-result pass.
+Five direct Node tests cover the boundary, alternate workloads, incomplete
+recovery, invalid timing and mismatching/memory-filesystem provenance.
+
+Release build all-features succeeded17.53s atb2a367e. Initial /tmp root was tmpfs;
+retain that successful smoke separately and exclude its3.988ms p99 from disk
+acceptance. Sequential fresh Btrfs A failed operation250 with
+Unknown(LeadershipChanged), leaving no valid complete summary or partial receipt
+CSV. B completed256 measured commands44.532562s,5.749ops/s,p99432.366616ms,
+recovered320 with original retries and worker joins verified. Raw B validation
+passes; numeric gate fails250ms. No preferred rerun or cause attribution claim.
+All raw logs/context/hashes retained in validation/performance/slice136.
+
+Actual CLI rejects A's missing summary and the smoke's non-reference context;
+B returns numeric failure JSON. Initial sandbox EPERM prevented Node child spawn;
+approved escalated read-only CLI execution completed these checks. No automatic
+approval rejection or production limitation is inferred. Current next deliverable
+is partial-result retention and measured critical-path/leadership diagnosis; its
+own schema plan must precede editing. Following is a cause-supported safe fix and
+matched measurement. Full goal active; P8/Windows deferred; CI background.
+
+Final slice136 direct Node tests5/5 passed10.80ms; format/whitespace and
+80-contract inventory checks passed. All benchmark/check handles terminal.
+No new Rust test-suite execution or full baseline completion claim.
+
+Slice136 public-artifact revision: automatic approval review rejected the initial
+push because captured machine metadata and local paths would be published.
+Safer schema: retain detailed capture locally; publish toolchain/source/binary
+hashes, Linux/filesystem labels and result data, omit hostname/kernel/device/
+memory inventory, redact absolute workspace paths in archived checker logs.
+Context may explicitly use a traversal-free workspace-relative target/bench root;
+its hashes and all workload/recovery/numeric gates remain unchanged. Public
+hardware reproduction is consequently limited. Original unpublished commit is
+replaced before pushing, so sensitive artifacts are absent from published history.
+Six direct Node tests pass10.83ms, including path-kind/traversal checks; actual B
+raw checking still passes and numeric gate still fails with exit1. No production
+code or measurement was changed.

@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "mode": "smoke",
+  "filesystem": "tmpfs",
+  "root": "/tmp/voteboat-slice136-tcp-serial-a",
+  "source_revision": "b2a367e48e045c1776f38aafb4826d4d50462b24",
+  "executable_sha256": "b4db6d3136a5549768151dee27ec39a8ca58f33ac97f0626e95fbbfd752c6072",
+  "summary_sha256": "8744000ed4ae088940bbf14d8d651ab00cfbd3c115da4fd37b9c8f33bc6058a5",
+  "samples_sha256": "3f577e7a7c37c2ff1f943a98c281646e80ec40c41cf1acf12b8581903ece344f"
+}
