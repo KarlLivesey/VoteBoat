@@ -161,3 +161,12 @@ sync/publication faults with unsynced loss/reopen. Two native TCP/QUIC histories
 retain original publication/data retry results and keep metadata WALs unchanged
 while the activated namespace operates offline. These are selected Linux schedules,
 not a full distributed proof or arbitrary hardware power-failure coverage.
+
+The interrupted TCP/QUIC variants also leave original initialization, publication
+and activation client tickets unread. Publication and activation progress on only
+two replicas; the third lacks the committed phase and stays non-serving. Owner abort
+stops protocol polling, discards worker observations and releases actual native
+stores before WAL-only reopen. Exact retries repair the lagging replica and retain
+original phase indices/outcomes. Assertions compare actual quorum and laggard WAL
+commit prefixes to the phase boundary. This is distinct from hardware power loss;
+accepted native I/O can finish after owner abort.

@@ -8542,3 +8542,91 @@ resolves it through NativeManifestCache/resolve to the exact target hint before
 activation. Both TCP/QUIC histories passed1.88s, build5.13s; all-feature/all-target
 Clippy -D warnings, format/whitespace and80-contract inventory passed afterward.
 This closes the client routing step without adding authority to the hint/cache.
+
+## Slice126 schema plan — partial publication/activation owner abort
+
+Previous goal turn was progress:125 committed/pushed970e121; worktree clean.
+Current mini deliverable advances P1/P5/P6 by strengthening actual created-namespace
+lifecycle failure histories. No production schema/API redesign is proposed. Reuse
+schema3 Directory and CreatedNamespace statuses/commands, exact original operation
+IDs and existing native owning Node recovery. A test-only abandon helper is needed
+because graceful close drains protocol work; owner abort must stop core polling,
+discard worker observations and reclaim selected actual file stores before reopen.
+It creates no new production seam or rollback behavior.
+
+Shape/transition: extend existing TCP/QUIC histories with interrupted variants.
+Submit initialization without consuming its client result, wait for committed ready
+facts, abort owners and reopen WAL-only. Submit metadata publication without consuming
+its client result; poll only leader plus one follower so the third application still
+has no publication. Abort/reopen all metadata replicas, retry original publication
+and repair the lagging one. Target remains NotActive throughout. With metadata offline,
+submit activation without consuming result; drive only two target replicas to commit,
+assert third remains non-serving, abort and reopen all target stores. Commit/retry
+the exact activation and require original activation boundary recovery, then preserve
+ordinary data retry/dedup through existing checkpoint/reopen path.
+
+Ownership/failure: no result is interpreted as rollback; actual accepted native I/O
+may finish after abort, and its observations are discarded rather than applied to
+an old core. Recover exact selected WAL/snapshot identities; keep creation binding
+and all durable facts. This is an owner-abort/partial-delivery test, not hardware
+power loss. Quorum observation/status and unapplied replica state are distinguished.
+
+Acceptance: actual TCP and QUIC original tickets remain unread, phase facts are
+committed on the selected quorum, third metadata/target application demonstrably
+lags, WAL-only replay survives owner abort, original publication/activation retry
+keeps original boundary/outcome, and no target read/write succeeds before activation.
+Original namespace/data retries and unchanged offline metadata WALs remain checked.
+Current mini126 depends on125. Next: activated fresh namespace source freeze/export
+(P5/P6), dependent on persisted activation and existing source contracts; checks
+must fence at a durable boundary, preserve retry lineage and recover no-dual-owner
+state. Following: recursive insertion under covered selectors (P5/P6), dependent
+on that source fence plus checked parent/child publication; checks must retain
+complete coverage, reject alias/cycle and resume partial progress. Full P0–P7 stays
+active, P8/Windows deferred, macOS/separate-host unverified, CI background feedback.
+
+## Slice126 implemented — unread results and partial phase owner abort
+
+Extended the same native namespace history with interrupted variants; no production
+API/format/provider or safety gate changed. Ready, publication and activation requests
+retain original accepted client tickets without poll/complete. Initialization is
+recovered from WAL-only files after owner abort. Publication drives only two metadata
+replicas, leaves the third with no new manifest, then aborts and reopens all owners.
+Original publication retry repairs that replica and preserves the original status
+on every application. Activation drives only two target replicas, leaves the third
+NotActive, aborts/reopens all owners and retries the exact activation; every target
+then recovers the original ready/activation indices. Actual reclaimed WAL commit
+prefixes cross each phase boundary on the quorum and remain below it on the laggard.
+All interrupted pre-activation stores have base_index0, so this is WAL replay rather
+than accidentally relying on a compacted application image.
+
+The test-only abandon helper stops core polling through Node::abort, discards accepted
+native worker observations and reclaims the actual selected log/snapshot stores
+before reopen. Accepted writes may finish after abort. It does not model power loss
+or assert rollback. Ordinary data/checkpoint/reopen/dedup and exact offline metadata
+WAL preservation remain checked after resumed activation. The uninterrupted cases
+continue to cover checkpoint-based phase recovery and client cache resolution.
+
+Executed Linux: first interrupted TCP/QUIC histories2 passed1.68s; all six linked
+created-service/namespace histories passed4.49s after exact per-replica phase-status
+checks. Final interrupted histories2 passed1.75s, build5.32s, after adding actual
+selected-store quorum/laggard commit-prefix assertions. All-feature/all-target
+Clippy -D warnings passed5.37s. No test failure or production fix was needed. Format,
+whitespace and inventory outcomes are recorded below after final documentation.
+
+Macro review: selected creation interruption evidence now covers unread initialization,
+partial metadata publication and partial target activation across owner abort/reopen,
+with original outcomes and non-serving laggard state. Broader arbitrary schedules,
+process/hardware crashes, macOS/separate-host and the full P0–P7 objective remain open.
+Current mini126 complete under these checks. Next: source freeze/export for freshly
+activated namespaces (P5/P6), depending on persisted activation and existing scope
+provider/source guards; acceptance requires durable fence, exact-boundary exports,
+preserved retry/outbox lineage and no old-owner service after recovery. Inspection
+found TransferSource::new requires a fresh RoutedApplication, so the source-capable
+assembly must be chosen before namespace initialization. Do not unwrap/reinitialize
+an already active guard or silently change its checkpoint binding to gain that
+capability. Following: recursive insertion into existing covered selectors (P5/P6),
+dependent on source fence and atomic parent/child publication; require complete
+coverage, alias/cycle refusal and partial-progress resumption. Existing deletion/
+reparenting/directory authority movement and all other phase-ledger gaps stay active.
+P8/Windows deferred, CI background feedback.
+Final slice126 format, whitespace and80-contract inventory checks passed.

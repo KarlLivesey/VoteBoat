@@ -2940,3 +2940,24 @@ of the published manifest and exact client cache resolution before target activa
 All-feature/all-target Clippy -D warnings, format/whitespace and80-contract inventory
 passed after this addition. Cached routing remains a hint; target guard enforces
 its own committed activation/ownership state.
+
+## Slice126 — partial namespace publication/activation with owner abort
+
+Final interrupted TCP/QUIC histories2 passed1.75s (build5.32s). Six linked native
+created-service/namespace histories passed4.49s before final strengthened WAL boundary
+assertions. Original initialization/publication/activation client tickets stay unread.
+Publication/activation commit on two replicas with a demonstrably lagging third;
+owner abort stops core polling, discards terminal worker observations and reclaims
+actual selected file stores before reopen. WAL base_index0 confirms non-compacted
+replay at interruption boundaries. Reclaimed store commit prefixes retain the phase
+on the quorum and remain below it on the laggard. Original retries repair the missing
+phase and preserve exact status/indices on all replicas. The activation laggard stays
+NotActive; post-recovery original data retries and unchanged offline metadata WALs
+remain covered. All-feature/all-target Clippy -D warnings passed5.37s.
+
+No production schema/provider/gate changed. Owner abort permits accepted native I/O
+to finish; this is not hardware power loss, arbitrary distributed schedules or a
+claim of rollback. Source freeze/export for fresh namespaces, recursive selector
+insertion and broader original P0–P7 gaps remain open. P8/Windows deferred; Linux
+loopback execution does not establish macOS or separate-host behavior.
+Final format, whitespace and80-contract inventory validation passed.

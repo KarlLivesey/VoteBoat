@@ -296,16 +296,67 @@ fn quic_created_group_resumes_partial_assignment_and_runs_with_metadata_offline(
 }
 
 use voteboat::namespace_creation::*;
+use voteboat::{snapshot_worker::SnapshotWorker, worker::PersistenceWorker};
+
+// Stop core polling immediately. Accepted native I/O may still finish; discard
+// its observations and reclaim actual stores before reopening. No rollback or
+// hardware power-loss claim follows from owner abort.
+fn abandon<A>(mut nodes: Vec<Node<A>>, g: u128) -> BTreeMap<NodeId, GroupLog>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    for n in &mut nodes {
+        n.abort();
+    }
+    nodes
+        .into_iter()
+        .map(|n| {
+            let id = n.local().owner.core(group(g)).unwrap().local_node();
+            let mut recovery = n
+                .into_recovery()
+                .unwrap_or_else(|_| panic!("aborted owner"));
+            drop(recovery.peers.take());
+            let mut snapshots = recovery.local.snapshots.take().unwrap();
+            let deadline = Instant::now() + Duration::from_secs(5);
+            let mut log = None;
+            let mut snapshot_done = false;
+            loop {
+                if log.is_none() {
+                    let _ = recovery.local.persistence.poll(64);
+                    let _ = recovery.local.persistence.poll_reclaims(64);
+                    if let Some(store) = recovery.local.persistence.try_reclaim().unwrap() {
+                        log = Some(store.state(group(g)).unwrap());
+                    }
+                }
+                if !snapshot_done {
+                    let _ = snapshots.worker.poll(64);
+                    snapshot_done = snapshots.worker.try_reclaim().unwrap().is_some();
+                }
+                if snapshot_done {
+                    if let Some(log) = log.take() {
+                        return (id, log);
+                    }
+                }
+                assert!(
+                    Instant::now() < deadline,
+                    "aborted selected workers must return stores"
+                );
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+        })
+        .collect()
+}
 fn namespace_directory() -> Directory {
     directory()
         .with_namespace_creation()
         .unwrap_or_else(|_| panic!("schema3"))
 }
-fn namespace_service(protocol: NativePeerProtocol) {
+fn namespace_service(protocol: NativePeerProtocol, interrupted: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
-        "voteboat-namespace-service-{}-{protocol:?}",
+        "voteboat-namespace-service-{}-{protocol:?}-{interrupted}",
         std::process::id()
     ));
     std::fs::create_dir_all(&root).unwrap();
@@ -432,31 +483,61 @@ fn namespace_service(protocol: NativePeerProtocol) {
     let init = fresh()
         .initialization_command(MAX_ROUTED_COMMAND_BYTES)
         .unwrap();
-    assert_eq!(
-        propose(&mut nodes, &clock, 100, 10002, init).outcome,
-        NamespaceOutcome::Ready
-    );
+    if interrupted {
+        let ticket = nodes[0]
+            .propose(ClientRequest {
+                group: group(100),
+                operation: creation.operation,
+                bytes: init,
+            })
+            .unwrap();
+        drive(&mut nodes, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local().applications[&group(100)]
+                    .status()
+                    .ready_index
+                    .is_some()
+            })
+        });
+        assert_eq!(ticket.operation, creation.operation);
+        assert_eq!(nodes[0].local().clients.usage().requests, 1);
+    } else {
+        assert_eq!(
+            propose(&mut nodes, &clock, 100, 10002, init).outcome,
+            NamespaceOutcome::Ready
+        );
+    }
     let NamespaceRead::Status(ready) = read(&mut nodes, &clock, 100, NamespaceQuery::Status) else {
         panic!("ready status")
     };
     let publication = NamespacePublication::from_status(&plan, ready).unwrap();
-    for n in &mut nodes {
-        n.control(group(100), NodeControl::Checkpoint).unwrap();
+    if !interrupted {
+        for n in &mut nodes {
+            n.control(group(100), NodeControl::Checkpoint).unwrap();
+        }
+        drive(&mut nodes, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local()
+                    .owner
+                    .core(group(100))
+                    .unwrap()
+                    .state()
+                    .base_index()
+                    == n.local().applications[&group(100)].applied_index()
+            })
+        });
     }
-    drive(&mut nodes, &clock, |ns| {
-        ns.iter().all(|n| {
-            n.local()
-                .owner
-                .core(group(100))
-                .unwrap()
-                .state()
-                .base_index()
-                == n.local().applications[&group(100)].applied_index()
-        })
-    });
-    close(nodes, &clock, 100, || {
-        drive(&mut parents, &clock, |_| true);
-    });
+    if interrupted {
+        let logs = abandon(nodes, 100);
+        assert!(logs.values().all(|s| s.base_index() == 0));
+        assert!(logs
+            .values()
+            .all(|s| s.commit_index >= ready.ready_index.unwrap()));
+    } else {
+        close(nodes, &clock, 100, || {
+            drive(&mut parents, &clock, |_| true);
+        });
+    }
     let mut nodes = open(
         configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
         &clock,
@@ -464,32 +545,77 @@ fn namespace_service(protocol: NativePeerProtocol) {
         fresh,
     );
     campaign(&mut nodes, &clock, 100);
+    assert!(nodes
+        .iter()
+        .all(|n| n.local().applications[&group(100)].status() == ready));
     assert_eq!(
         read(&mut nodes, &clock, 100, query()),
         NamespaceRead::NotActive
     );
     campaign(&mut parents, &clock, 1);
     let pub_bytes = publication.encode(MAX_NAMESPACE_PUBLICATION_BYTES).unwrap();
-    assert_eq!(
-        propose(&mut parents, &clock, 1, 10003, pub_bytes.clone()).outcome,
-        DirectoryOutcome::NamespacePublished(RouteGeneration::new(1).unwrap())
-    );
+    if interrupted {
+        let ticket = parents[0]
+            .propose(ClientRequest {
+                group: group(1),
+                operation: OperationId::new(10003).unwrap(),
+                bytes: pub_bytes.clone(),
+            })
+            .unwrap();
+        drive(&mut parents[..2], &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local().applications[&group(1)]
+                    .namespace_publication_at(0, creation.operation)
+                    .unwrap()
+                    .is_some()
+            })
+        });
+        assert_eq!(ticket.operation, OperationId::new(10003).unwrap());
+        assert_eq!(parents[0].local().clients.usage().requests, 1);
+        assert!(parents[2].local().applications[&group(1)]
+            .manifest(responsibility(50))
+            .is_none());
+    } else {
+        assert_eq!(
+            propose(&mut parents, &clock, 1, 10003, pub_bytes.clone()).outcome,
+            DirectoryOutcome::NamespacePublished(RouteGeneration::new(1).unwrap())
+        );
+    }
     let status = parents[0].local().applications[&group(1)]
         .namespace_publication_at(0, creation.operation)
         .unwrap()
         .unwrap();
-    for n in &mut parents {
-        n.control(group(1), NodeControl::Checkpoint).unwrap();
+    if !interrupted {
+        for n in &mut parents {
+            n.control(group(1), NodeControl::Checkpoint).unwrap();
+        }
+        drive(&mut parents, &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local().owner.core(group(1)).unwrap().state().base_index()
+                    == n.local().applications[&group(1)].applied_index()
+            })
+        });
     }
-    drive(&mut parents, &clock, |ns| {
-        ns.iter().all(|n| {
-            n.local().owner.core(group(1)).unwrap().state().base_index()
-                == n.local().applications[&group(1)].applied_index()
-        })
-    });
-    close(parents, &clock, 1, || {
-        drive(&mut nodes, &clock, |_| true);
-    });
+    if interrupted {
+        let quorum = parents[..2]
+            .iter()
+            .map(|n| n.local().owner.core(group(1)).unwrap().local_node())
+            .collect::<Vec<_>>();
+        let lagging = parents[2]
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .local_node();
+        let logs = abandon(parents, 1);
+        assert!(logs.values().all(|s| s.base_index() == 0));
+        assert!(quorum.iter().all(|n| logs[n].commit_index >= status.index));
+        assert!(logs[&lagging].commit_index < status.index);
+    } else {
+        close(parents, &clock, 1, || {
+            drive(&mut nodes, &clock, |_| true);
+        });
+    }
     let mut parents = open(
         configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
         &clock,
@@ -504,6 +630,10 @@ fn namespace_service(protocol: NativePeerProtocol) {
             .unwrap(),
         Some(status.clone())
     );
+    assert!(parents.iter().all(|n| n.local().applications[&group(1)]
+        .namespace_publication_at(0, creation.operation)
+        .unwrap()
+        == Some(status.clone())));
     assert_eq!(
         parents[0].local().applications[&group(1)].manifest(responsibility(1)),
         Some(&parent_manifest)
@@ -541,10 +671,74 @@ fn namespace_service(protocol: NativePeerProtocol) {
     let activation = nodes[0].local().applications[&group(100)]
         .activation_command(&status, 2000)
         .unwrap();
-    assert_eq!(
-        propose(&mut nodes, &clock, 100, 10003, activation.clone()).outcome,
-        NamespaceOutcome::Activated
-    );
+    if interrupted {
+        let ticket = nodes[0]
+            .propose(ClientRequest {
+                group: group(100),
+                operation: status.operation,
+                bytes: activation.clone(),
+            })
+            .unwrap();
+        drive(&mut nodes[..2], &clock, |ns| {
+            ns.iter().all(|n| {
+                n.local().applications[&group(100)]
+                    .status()
+                    .activation_index
+                    .is_some()
+            })
+        });
+        let original = nodes[0].local().applications[&group(100)].status();
+        assert_eq!(ticket.operation, status.operation);
+        assert_eq!(nodes[0].local().clients.usage().requests, 1);
+        assert!(nodes[2].local().applications[&group(100)]
+            .status()
+            .activation_index
+            .is_none());
+        assert_eq!(
+            nodes[2].local().applications[&group(100)]
+                .read_at(
+                    nodes[2].local().applications[&group(100)].applied_index(),
+                    query()
+                )
+                .unwrap(),
+            NamespaceRead::NotActive
+        );
+        let quorum = nodes[..2]
+            .iter()
+            .map(|n| n.local().owner.core(group(100)).unwrap().local_node())
+            .collect::<Vec<_>>();
+        let lagging = nodes[2]
+            .local()
+            .owner
+            .core(group(100))
+            .unwrap()
+            .local_node();
+        let logs = abandon(nodes, 100);
+        assert!(logs.values().all(|s| s.base_index() == 0));
+        assert!(quorum
+            .iter()
+            .all(|n| logs[n].commit_index >= original.activation_index.unwrap()));
+        assert!(logs[&lagging].commit_index < original.activation_index.unwrap());
+        nodes = open(
+            configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+            &clock,
+            protocol,
+            fresh,
+        );
+        campaign(&mut nodes, &clock, 100);
+        assert_eq!(
+            propose(&mut nodes, &clock, 100, 10003, activation.clone()).outcome,
+            NamespaceOutcome::Activated
+        );
+        assert!(nodes
+            .iter()
+            .all(|n| n.local().applications[&group(100)].status() == original));
+    } else {
+        assert_eq!(
+            propose(&mut nodes, &clock, 100, 10003, activation.clone()).outcome,
+            NamespaceOutcome::Activated
+        );
+    }
     let original = propose(&mut nodes, &clock, 100, 20000, bytes.clone());
     assert!(matches!(
         original.outcome,
@@ -620,10 +814,20 @@ fn namespace_service(protocol: NativePeerProtocol) {
 }
 #[test]
 fn tcp_namespace_ready_publish_activate_survives_reopen_and_metadata_outage() {
-    namespace_service(NativePeerProtocol::TcpTls);
+    namespace_service(NativePeerProtocol::TcpTls, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage() {
-    namespace_service(NativePeerProtocol::Quic);
+    namespace_service(NativePeerProtocol::Quic, false);
+}
+
+#[test]
+fn tcp_namespace_partial_publication_activation_unread_receipts_owner_abort() {
+    namespace_service(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_namespace_partial_publication_activation_unread_receipts_owner_abort() {
+    namespace_service(NativePeerProtocol::Quic, true);
 }
