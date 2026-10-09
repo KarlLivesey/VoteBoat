@@ -91,7 +91,7 @@ preserves transferred session ownership. `tests/support/peer_driver.rs` checks
 transient misses use backoff and wrong scope remains terminal. Full connector,
 owner and TCP/QUIC service regressions are recorded in validation/REPORT.md.
 
-This is peer-address discovery, not complete C17. Automatic manifest fetching,
+This is peer-address discovery, not complete C17. External remote manifest fetching,
 dynamic executable endpoint refresh, external discovery protocols and refresh
 scheduling remain outstanding. Real selected discovery connections include
 TCP/TLS and QUIC. No macOS/separate-host, arbitrary-fault or performance claim follows.
@@ -120,3 +120,44 @@ host hint provider works through the same wrapper. Closing the connector leaves
 transferred sessions usable; final drop releases bound ports. A reachable different
 certificate cannot satisfy the pinned peer. Native mailbox checks cover peer/endpoint
 collision bounds and generation cleanup.
+
+## Automatic responsibility reads for Rust hosts
+
+`routing::ManifestReadSource` (contract version1) exposes original trusted
+Directory reads: immutable binding, pending count, bounded submit, exact terminal
+poll and best-effort cancel. Native `Node` implements it for Directory-shaped
+readable applications. Host replacements use the same public contract. A read
+outcome is not a signed remote credential; the source must preserve the original
+Node's quorum-backed authority and receipt ownership.
+
+`native::lookup_discovery::NativeManifestLookup` owns one selected source and a
+bounded `NativeAuthorityDiscovery`. Pass it to `resolve_discovered`. A missing,
+expired or below-floor observation submits one original read and returns
+`Unavailable`. Poll the existing source Node through `source_mut()`, then call
+the driver's `poll(now)` and retry resolution. Successful original reads publish
+through the existing identity, barrier, replay, epoch and generation checks.
+There is no manual `observe` step, hidden worker or second runtime.
+
+One pending read prevents duplicates; another uncached request returns
+`Overloaded`. One fixed negative-result slot with a checked retry delay prevents
+busy retries. Cache entry/byte limits still bound observations and retained floors.
+Construction returns the owned source on refusal and requires no pending reads.
+The driver is its source's exclusive read-result consumer while work is pending;
+the host may still drive Node polling and other existing operations.
+
+Cancellation, deadline and close suppress publication, including late successful
+reads, while retaining the accepted ticket until its actual completion. Close
+affects the lookup view, not the underlying Node. Closed and drained `into_source`
+returns that original source for ordinary shutdown/join. `into_recovery` returns
+the source and unresolved request/ticket explicitly. Alien completions are returned
+owned and fence lookup intake; provider replacement requires explicit recovery.
+Restart constructs a new driver for the new original read binding; observations
+are volatile. No ownership activation or durable protocol state is introduced.
+
+Slice147 tests automatically resolve a real three-replica Directory over TCP/TLS
+and QUIC, refresh expired unchanged metadata, reject a higher requested epoch and
+suppress a real late positive read after host cancellation. Public host conformance
+checks retained deadline/close work, bounded retry, construction refusal and exact
+recovery handoff. This adds embedded automatic Directory-read orchestration.
+An external remote lookup protocol and executable endpoint refresh remain work;
+existing cached child routes retain their parent-independent behavior.

@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
+#[path = "lookup_discovery.rs"]
+mod automatic_lookup;
 use std::{
     collections::BTreeMap,
     net::{TcpListener, UdpSocket},

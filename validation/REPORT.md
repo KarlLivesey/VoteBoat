@@ -3616,3 +3616,34 @@ Full P0–P7 and earlier missing scope remain active; RPL-1.5 retained, P8/Windo
  deferred and CI background feedback.
 Final Clippy all-feature/all-target -D warnings passes1.08s after the host test.
 Formatting/whitespace and80-contract inventory pass. All execution handles terminal.
+
+## Slice147 — bounded automatic original Directory reads
+
+ManifestReadSource version1 and NativeManifestLookup use exact original Node
+read ownership with one pending lookup, bounded observation cache and one retry
+slot. Explicit Node/driver polls replace manual observe; no hidden runtime or
+remote credential is created. Deadline/cancel/close retain accepted work and
+suppress late publication; recovery returns the original unresolved ticket/source.
+
+Final real TCP/TLS and QUIC automatic lookup tests2/2 pass0.70s after6.11s build:
+missing recursive route resolution, no duplicate accepted read, other-query
+overload, expired unchanged metadata/new observation, demanded epoch refusal,
+real host-retained positive completion after cancellation, retry without cached
+cancelled result, original read-credit recovery and joined native cleanup.
+Independent host lifecycle3/3 and all-feature routing13/13 pass0.00s after6.09s
+build; core-only source1/1 and routing9/9 pass0.00s after5.13s build. Lifecycle
+checks cover deadline retention, negative retry, closed-view terminal drain,
+nonquiescent constructor refusal, time/binding refusal and exact recovery handoff.
+All-feature/all-target check passes6.12s, initial library Clippy -D warnings3.74s,
+final all-feature/all-target Clippy -D warnings3.70s. Fixture compile errors used
+wrong existing protocol variant/observation field names; corrected locally with
+no production redesign. Initial real tests2/2 passed0.61s before expiry addition.
+80-contract inventory passes; final formatting/whitespace checks recorded below.
+
+Finite Linux native and independent host histories, not arbitrary-fault proof,
+external remote fetch transport, signed read authority, executable endpoint
+refresh, macOS execution or performance evidence. Cached child routes retain
+parent independence; hints do not activate ownership. Full P0–P7 stays active,
+P8/Windows deferred, pack preserved and RPL-1.5 retained.
+Final cargo formatting, included-fixture rustfmt and whitespace checks pass.
+All test/check handles are terminal; no remote CI gate was used.

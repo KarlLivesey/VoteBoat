@@ -17,6 +17,7 @@ use super::*;
 use crate::runtime::MonoTime;
 use std::num::NonZeroU64;
 pub const MANIFEST_DISCOVERY_CONTRACT_VERSION: u32 = 1;
+pub const MANIFEST_READ_SOURCE_CONTRACT_VERSION: u32 = 1;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AuthorityLocator {
     pub responsibility: ResponsibilityIdentity,
@@ -53,6 +54,9 @@ pub enum ManifestDiscoveryError {
     Expired,
     Closed,
     Unavailable,
+    Overloaded,
+    Cancelled,
+    ProviderViolation,
     Missing,
     StaleObservation,
     TimeWentBack,
@@ -100,6 +104,33 @@ pub trait ManifestDiscovery {
     ) -> Result<ManifestObservation, ManifestDiscoveryError>;
     fn invalidate(&mut self, locator: AuthorityLocator, observed: ManifestObservationId) -> bool;
     fn close(&mut self);
+}
+/// Original trusted Directory reads, not serialized assertions of read authority.
+/// Calls are bounded/nonblocking. Binding stays immutable. Submission refusal
+/// accepts nothing; accepted reads retain their original Node credits until the
+/// exact completion is consumed. Cancellation ends observation, not consensus.
+/// This source's read-result consumer is exclusive while a lookup is pending.
+pub trait ManifestReadSource {
+    fn binding(&self) -> crate::runtime::ReadInvocationBinding;
+    fn pending_reads(&self) -> usize;
+    fn submit(
+        &mut self,
+        request: ManifestLookup,
+    ) -> Result<
+        crate::runtime::ReadInvocationTicket,
+        crate::runtime::ReadInvocationRejected<ResponsibilityIdentity>,
+    >;
+    fn poll_result(
+        &mut self,
+        ticket: crate::runtime::ReadInvocationTicket,
+    ) -> Result<
+        Option<crate::runtime::ReadOutcome<Option<ResponsibilityManifest>>>,
+        crate::runtime::ReadCompletionRejected<Option<ResponsibilityManifest>>,
+    >;
+    fn cancel(
+        &mut self,
+        ticket: crate::runtime::ReadInvocationTicket,
+    ) -> Result<(), crate::runtime::ReadInvocationError>;
 }
 #[derive(Clone, Copy, Debug)]
 pub struct DiscoverRouteRequest<'a> {

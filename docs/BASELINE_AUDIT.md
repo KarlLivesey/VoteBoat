@@ -145,8 +145,8 @@ fairness/fault, selected QUIC pressure or performance evidence. Slice146 source
 review found fixed QUIC Dial endpoints blocked the existing discovery wrapper;
 explicit discovered-Dial construction now implements that missing selection.
 Actual native/host hint refresh authenticates and exchanges QUIC data, preserving
-pins and bounded retained peer leases. Next implement automatic responsibility
-lookup/refresh and compose it with routed service work. Retain original P0–P7
+pins and bounded retained peer leases. Slice147 now supplies automatic original Directory-read lookup/refresh for Rust
+hosts; next compose it with routed service work. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
 macOS execution in143–146. Windows/P8 stay deferred and CI remains background.

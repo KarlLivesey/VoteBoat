@@ -134,22 +134,28 @@ its selected native acceptance passes. General retention and broader faults rema
    Completion: failed stale hint followed by refreshed real authenticated QUIC
    exchange; exact pins and original refusals; bounded retained-session leases.
    Advances usable service/embedding and responsibility discovery.
-5. **Automatic responsibility lookup/refresh (current147, P0/P5).** Purpose:
+5. **Automatic responsibility lookup/refresh (completed147, P0/P5).** Purpose:
    remove manual cache observation from the Rust routing path. Dependencies: C17
    ManifestDiscovery, existing Directory read authority and bounded Node reads.
    Completion: an explicitly driven public asynchronous lookup path with exact
    read ownership, stale/unavailable refusal and routing refresh acceptance.
-6. **Compose automatic lookup with routed service work (next148, P1/P5).**
+6. **Compose automatic lookup with routed service work (current148, P1/P5).**
    Purpose: use147 to remove manual cache population from useful writes/reads.
    Dependencies:147 and existing native Directory/routed Node contracts.
    Completion: resolve actual routes, execute writes/reads/retries, refresh stale
    cache and preserve exact lookup/data ownership across a selected restart.
-7. **Next missing lifecycle feature (following149, P5/P6).** Purpose: complete
+7. **Next missing lifecycle feature (next149, P5/P6).** Purpose: complete
    a missing recursive ownership operation from the preserved acceptance ledger.
    Dependencies:148 and its exact authority/retained-scope evidence. Completion:
    select and implement the missing transition with source fencing, preserved
    retry lineage and named partial-progress/recovery checks. No wider milestone
    is declared complete from a selected fixture.
+8. **Compose the selected recursive transition (following150, P1/P5/P6).**
+   Purpose: expose149 in real routed service work instead of leaving a standalone
+   transition. Dependencies:149's exact authority and ownership contract plus the
+   existing native service. Completion: useful successor writes/reads and original
+   retries through partial progress/reopen, with no dual serving owner and joined
+   cleanup. Scope is selected after149; unrelated performance work is not a prerequisite.
 
 Slice146 selection/schema before editing: peer discovery supports refreshed TCP
 dials, but source inspection shows NativeQuicConnector rejects any dial address
@@ -10416,3 +10422,63 @@ features, not the original definition of completion.
 Final all-feature/all-target Clippy -D warnings passes1.08s after the host test.
 Cargo formatting/whitespace and80-contract inventory pass; all execution handles
 are terminal. Reviewed scope retains all earlier P0–P7 requirements.
+
+Slice147 schema before implementation: add public ManifestReadSource over exact
+original Node read bindings/tickets/outcomes, with bounded submit/poll/cancel and
+owned rejected-completion return. Native Node implements the same source for
+Directory-shaped readable applications. NativeManifestLookup owns that source
+and NativeAuthorityDiscovery: a missing/expired/below-floor observation initiates
+one read and returns Unavailable; explicit poll consumes the matching original
+completion and publishes via existing observe checks. One pending fixed-size
+lookup and one bounded negative-result retry slot prevent duplicate/busy reads.
+The host drives the existing Node through source_mut; no hidden runtime/network
+or second persistence owner is created. Deadline/close/cancel suppress publication
+but retain pending work until its actual completion; alien completions return
+owned data and fence lookup intake. Source binding is immutable while selected.
+Construction rejects nonquiescent read sources with ownership returned. Closed
+and drained extraction returns the original source; explicit recovery extraction
+returns the unresolved ticket/request rather than claiming completion. Routing
+still reruns its checked path on each resolution attempt; hints cannot activate
+ownership. Acceptance: native TCP/QUIC automatic cache-miss reads and resolution,
+positive floor checks, expiry refresh, pending duplicate/budget refusal, late
+cancel/deadline results and exact source recovery/close. Original P0–P7 retained.
+
+## Slice147 — automatic original Directory-read lookup
+
+Public ManifestReadSource version1 exposes the existing original read binding,
+pending count, submit/poll/cancel and owned rejected completions. Native Node
+implements that same contract for Directory-shaped readable applications.
+NativeManifestLookup composes it with the existing checked observation cache:
+cache miss, expiry or below-floor demand starts one original read; explicit host
+polling publishes only its checked actual outcome. Fixed pending/negative slots,
+timeout and retry bounds prevent duplicate or unbounded read work. Cancel/deadline/
+close suppress publication while preserving accepted work until its real terminal
+result. Quiescent construction refusal returns the source; closed/drained source
+extraction and unresolved recovery handoff preserve existing Node ownership.
+Wrong binding/time fail closed; alien completion returns its original allocation
+and fences intake. The host remains responsible for explicit Node poll/shutdown.
+No new runtime, persistence owner, durability token, watermark or protocol generation.
+
+Actual three-replica TCP/TLS and QUIC automatic missing-path routing, expiry of
+unchanged metadata with a new observation, demanded-epoch refusal and retained
+late-positive cancellation pass2/2 in0.70s after6.11s build. No manual observe is
+used by those histories. Original Node read credits return before joined shutdown.
+Independent host source lifecycle3/3 passes0.00s; all-feature routing13/13 passes
+0.00s after6.09s build. Core-only source1/1 and routing9/9 pass0.00s after5.13s
+build. Earlier check all-target/all-feature passes6.12s and library Clippy3.74s;
+final all-target/all-feature Clippy -D warnings passes3.70s. Initial fixtures used
+Tcp instead of TcpTls and observed instead of observation; focused compile-only
+corrections changed no production contract. The first real histories passed2/2
+in0.61s before adding explicit expiry acceptance. Inventory80 passes.
+
+This completes bounded embedded lookup orchestration, not an external signed
+remote fetch protocol or executable endpoint refresh. Observations remain hints;
+existing route caches intentionally bypass parent lookup, and server ownership
+admission remains authoritative. Current148 composes useful routed writes/reads/
+restart with automatic lookup. Next149 selects a missing recursive operation;
+following150 composes its service recovery. Macro review retains P0–P7 and all
+earlier acceptance gaps; no whole milestone is declared complete. Linux execution
+only; macOS remains a target, Windows/P8 deferred, CI background, RPL-1.5 retained
+and original design pack preserved.
+Final cargo formatting, explicit included-fixture rustfmt, whitespace and inventory
+checks pass; all execution handles are terminal. No remote CI wait is required.

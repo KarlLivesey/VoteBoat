@@ -22,6 +22,7 @@ pub mod connect;
 pub mod dial;
 pub mod discovery;
 pub mod log_store;
+pub mod lookup_discovery;
 #[cfg(feature = "tls")]
 pub mod node;
 pub mod observability;
