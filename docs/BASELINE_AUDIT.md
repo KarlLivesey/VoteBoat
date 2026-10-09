@@ -206,3 +206,11 @@ Ordered pending, checkpoint/profile/budget refusals and native adoption-frame cu
 pass. Current152 still requires complete TCP/QUIC partial-service recovery evidence;
 153 deletion,154 reparenting, target-backed partial sources/general mappings/retention
 and original wider lifecycle/membership/platform/fault/P7 scope stay open.
+
+Slice152a adds selected native TCP/TLS and QUIC WAL/checkpoint root partial service:
+actual quorum creation/partial assignment and unread intent/stage/fence/import/
+publication/adoption/activation results recover through original facts/retries.
+Source retained E2 and activated-child service continue with metadata stopped;
+independent data-owner recovery preserves values/retries/exports while exact
+metadata files/GroupLogs stay unchanged. Current152b is foreign-parent composition;
+153 deletion,154 reparenting and all original broader scope/gates remain active.

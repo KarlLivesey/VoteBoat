@@ -3962,3 +3962,41 @@ Checked bounded application path151 implemented; current152 is TCP/QUIC partial
 phase recovery/offline service, next153 deletion, following154 reparenting. Full
 P0–P7 stays active, including target-backed partial sources/general mappings/
 retention and wider membership/metadata movement/platform/fault/P7 requirements.
+
+## Slice152a — native retained root service phase recovery
+
+Directory8, ScopedTransferSource3 and assigned TransferTarget3 compose over actual
+three-replica TCP/TLS and QUIC nodes. Original metadata quorum creation authorizes
+two-store partial Staging assignment, metadata WAL/checkpoint reopen, exact original
+creation retry and final assignment. Original immutable binding bytes persist.
+Intent/stage/freeze/import/publication/adoption/activation each leave the original
+application completion unconsumed with its client credit owned until explicit abort.
+Native workers join before original stores/factories reopen. Actual quorum-read
+manifest/intent/Frozen/Grant/target facts determine progress, compare exactly after
+recovery, and survive original command retries. No production protocol/provider
+change or invented commitment/fence/import certificate is introduced.
+
+Before activation child reads refuse; source freezes only the moved range and
+retained key200 still serves11. E2 adoption permits retained service and refuses
+stale E1 and moved-range requests without credit leaks. Metadata shutdown/join
+precedes target activation retry, transferred original retry7/outbox and fresh
+write9, source retained original retry11 and fresh write14. Independent source/
+target recovery with metadata still stopped preserves14/9, original frozen image/
+digest and original adoption status. Exact stopped metadata files and recovered
+GroupLogs remain unchanged. All owners abort/join before temporary cleanup.
+
+Fixture compilation corrected CreationBindings trait and native Node/Core config
+API names. Source review corrected activation encoding to use the actual imported
+target rather than a fresh factory. First selected TCP WAL1/1 passes12.17s after
+8.76s build. Added explicit native moved-scope query/proposal refusal; final selected
+TCP/QUIC x WAL/checkpoint4/4 passes53.62s after4.60s build with required loopback
+permissions. All-feature/all-target Clippy -D warnings passes2.16s. Formatting,
+whitespace and81-contract inventory pass. All handles terminal; no CI gate or
+unchanged broad network/performance suite used.
+
+Selected native root evidence, not a complete recursive lifecycle/platform/fault
+proof. Foreign-parent152b remains current within152; next153 deletion, following
+154 reparenting and original full P0–P7 scope remain active. Broader target-backed
+partial sources/mappings/retention, membership/metadata movement/platform/fault/P7
+requirements stay open. Linux local evidence, macOS execution pending, Windows/P8
+deferred, RPL-1.5 and ignored original design pack preserved.

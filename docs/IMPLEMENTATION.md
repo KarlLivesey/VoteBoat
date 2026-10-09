@@ -171,7 +171,10 @@ its selected native acceptance passes. General retention and broader faults rema
    is current152 and broader mappings/target-backed partial sources remain open.
 10. **Native retained-scope composition (current152, P1/P5/P6).** Purpose:
    make151 usable in real service work. Dependencies:151's accepted ownership
-   shape and existing native nodes. Completion: routed writes/reads/retries in
+   shape and existing native nodes. Root152a now passes selected TCP/QUIC WAL/
+   checkpoint unread-phase recovery and metadata-offline service. Current152b
+   extends the same source/target path to actual foreign-parent reservations and
+   locator refresh. Completion: routed writes/reads/retries in
    both retained and delegated scopes through selected partial progress/reopen,
    no concurrent owners and joined cleanup. No unrelated helper is a prerequisite.
 11. **Recursive namespace deletion (next153, P5/P6).** Purpose: release a
@@ -11212,3 +11215,80 @@ metadata movement, platform/fault and P7 gaps. Linux local evidence, macOS execu
 pending, Windows/P8 deferred, CI background, RPL-1.5/ignored pack preserved.
 Final151d2 formatting, whitespace and81-contract inventory pass. All handles terminal;
 no remote CI gate used. Complete native partial-service evidence remains current152.
+
+Slice152a schema before edits: compose Directory8, original ScopedTransferSource3
+and assigned TransferTarget3 in the existing native Node/startup/creation/TCP/QUIC
+seams. Dedicated typed fixture is needed because whole-source native rigs stop all
+source data after fencing, whereas retained service stays active. Reuse original
+quorum observation, partial assignment, checkpoint, unread completion and owner
+abort/join helpers; no production protocol/provider changes are planned.
+Root authority1, source20 and child21 each use actual three-replica policies/stores.
+Original metadata quorum creation authorizes partial assigned provisioning, metadata
+reopen and exact creation retry. Intent, stage, scoped freeze, import, publication,
+source grant adoption and target activation leave original completions unconsumed.
+Quorum facts determine every next phase. Capture exact facts, optionally checkpoint,
+abort/join all owners and reopen the same bindings before each original retry.
+No timeout implies terminal work or permits restarting a live owner.
+
+Acceptance: selected TCP/QUIC WAL/checkpoint phase histories reconstruct original
+creation/intent/fence/image/import/decision/adoption/activation facts and retries;
+source refuses moved/stale contexts while retained work remains usable. Before
+activation the child never serves. Stop/join metadata, compare exact stopped file
+bytes/logs, then retained and child reads/original retries/outbox/new writes and
+independent data-owner recovery must succeed without metadata changes. Finish
+with joined cleanup. Root composition152a precedes foreign-parent152b, both within
+current152;153 deletion and154 reparenting follow. Full P0–P7 remains active,
+including original broader mappings/target-backed partial sources/retention,
+membership/metadata movement/platform/fault/P7 gaps. No full lifecycle exit claim.
+
+
+## Slice152a — native retained root service survives phase recovery
+
+Previous goal turn151d2 made progress: grant adoption commit1efd05a was pushed.
+New typed fixture composes existing Directory8, ScopedTransferSource3 and assigned
+TransferTarget3 over actual three-replica TCP/TLS or QUIC nodes. Original metadata
+quorum creation authorizes two-store partial Staging assignment, metadata checkpoint/
+WAL reopen and original creation retry before finishing the last exact assignment.
+Immutable FileCreationBindings remain exact through later recoveries.
+
+Intent, target stage, scoped freeze, import, metadata publication, source grant
+adoption and target activation each preserve an unconsumed terminal application
+completion. Its client credit stays owned until explicit abort; joined persistence/
+snapshot workers release files before reopening original factories/bindings.
+Original quorum manifest/intent/source Frozen+Grant/target status facts drive every
+phase. Actual source/target/metadata configurations come from their native core
+membership. Each phase optionally checkpoints, aborts/reopens all owners, compares
+exact original facts, retries original commands and checks facts/creation/bindings
+again. No reconstructed helper certificate or invented fence/import receipt is used.
+
+Target reads refuse before activation. Source serves retained key200=11 after
+scoped freeze while key1 refuses; after grant adoption fresh retained E2 hints
+serve, stale E1 hints and moved scope queries/proposals refuse without client credit
+leaks. The source export names the actual original F and remains unchanged.
+After metadata abort/join, target activation retry returns the original outcome,
+imported operation1 remains7/outbox1 and a fresh target write reaches9/outbox2.
+Source original operation2 stays duplicate11 and fresh retained write reaches14.
+Independent source/target WAL/checkpoint recovery with metadata still stopped
+preserves14/9, original frozen image/digest and adoption status. Exact stopped
+metadata file bytes and recovered GroupLogs remain unchanged. All owners are
+aborted/joined before temporary cleanup. No production API/provider changes are
+introduced in this composition.
+
+Initial check corrected fixture-only trait name (CreationBindings) and Node/Core
+configuration API use. Activation command encoding requires the actual imported
+target; source review catches/fixes a fresh-factory receiver before the first run.
+First TCP WAL1/1 passes12.17s after8.76s build. Added explicit native moved-range
+query/proposal refusal; selected final TCP/QUIC x WAL/checkpoint4/4 passes53.62s
+after4.60s build, with required loopback socket permissions. All-feature/all-target
+Clippy -D warnings passes2.16s. Final metadata/format checks follow below.
+
+Root152a demonstrates selected native partial service. Current152b extends to the
+actual foreign parent reservation/completion/locator path; the linked current/next/
+following plan still names152 composition,153 deletion and154 reparenting. Full
+P0–P7 remains active, including target-backed partial sources/general mappings/
+retention, membership/metadata movement/platform/fault and P7 requirements.
+Linux local evidence, macOS execution pending, Windows/P8 deferred, CI background,
+RPL-1.5 and ignored original design pack preserved. No unchanged network/performance
+suite is repeated and no whole roadmap/milestone completion is inferred.
+Final152a formatting, whitespace and81-contract inventory pass. All process handles
+terminal; root native composition is implemented, foreign-parent152b remains current.
