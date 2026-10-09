@@ -1,0 +1,12 @@
+validation/performance/slice104/tcp-low: 120 scheduled offers, 120 admissions, 120 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=4.000 admitted_during=4.000 applied_during=4.000 applied_drain=0.000 applied_total=4.000 ops/s; window_refused=0 backlog_at_horizon=0
+storage measured deltas: append_calls=720 units=720 commands=360 mean_units=1.000 append_ms=36.534 barriers=642 mean_appends_per_barrier=1.121 mean_units_per_barrier=1.118 barrier_ms=51347.309 sync_ms=17439.468 publish_ms=33934.764 histogram=1:720|3:0|6:0|7:0|8:0
+validation/performance/slice104/tcp-high: 240 scheduled offers, 40 admissions, 40 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=48.000 admitted_during=8.000 applied_during=6.400 applied_drain=20.781 applied_total=7.428 ops/s; window_refused=200 backlog_at_horizon=8
+storage measured deltas: append_calls=238 units=238 commands=120 mean_units=1.000 append_ms=10.910 barriers=81 mean_appends_per_barrier=2.938 mean_units_per_barrier=2.938 barrier_ms=15885.849 sync_ms=5594.198 publish_ms=10288.911 histogram=1:238|2:0|3:0|5:0|6:0|7:0|8:0
+validation/performance/slice104/quic-low: 120 scheduled offers, 120 admissions, 120 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=4.000 admitted_during=4.000 applied_during=4.000 applied_drain=0.000 applied_total=4.000 ops/s; window_refused=0 backlog_at_horizon=0
+storage measured deltas: append_calls=720 units=720 commands=360 mean_units=1.000 append_ms=51.552 barriers=684 mean_appends_per_barrier=1.053 mean_units_per_barrier=1.050 barrier_ms=48993.353 sync_ms=18792.026 publish_ms=30175.425 histogram=1:720|2:0|3:0|4:0|5:0|6:0|7:0|8:0
+validation/performance/slice104/quic-high: 240 scheduled offers, 121 admissions, 121 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=48.000 admitted_during=24.200 applied_during=23.600 applied_drain=19.390 applied_total=23.474 ops/s; window_refused=119 backlog_at_horizon=3
+storage measured deltas: append_calls=722 units=724 commands=363 mean_units=1.003 append_ms=24.145 barriers=314 mean_appends_per_barrier=2.299 mean_units_per_barrier=2.293 barrier_ms=15257.036 sync_ms=5407.649 publish_ms=9836.256 histogram=1:720|2:2|3:0|5:0|6:0|8:0

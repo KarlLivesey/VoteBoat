@@ -1,0 +1,29 @@
+validation/performance/slice105/tcp-control: 480 scheduled offers, 462 admissions, 462 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.700 applied_during=7.700 applied_drain=0.000 applied_total=7.700 ops/s; window_refused=18 backlog_at_horizon=0
+storage measured deltas: append_calls=2770 units=2771 commands=1386 mean_units=1.000 append_ms=200.505 barriers=2385 mean_appends_per_barrier=1.161 mean_units_per_barrier=1.161 barrier_ms=164896.929 sync_ms=61526.112 publish_ms=103282.988 histogram=1:2769|2:1|3:0|6:0|8:0
+validation/performance/slice105/tcp-maintenance: 480 scheduled offers, 443 admissions, 443 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.383 applied_during=7.383 applied_drain=0.000 applied_total=7.383 ops/s; window_refused=37 backlog_at_horizon=0
+validation/performance/slice105/tcp-maintenance: 27 durable checkpoint boundaries, 81 exact-scope reclamation rows, 2 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=10908.761 reclaim_ms=21027.444 reclaimed_bytes=352388 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=2617 units=2618 commands=1328 mean_units=1.000 append_ms=170.659 barriers=2028 mean_appends_per_barrier=1.290 mean_units_per_barrier=1.290 barrier_ms=141645.540 sync_ms=52003.167 publish_ms=89583.296 histogram=1:2616|2:1|3:0|4:0|5:0|8:0
+validation/performance/slice105/quic-control: 480 scheduled offers, 456 admissions, 456 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.600 applied_during=7.483 applied_drain=3.018 applied_total=7.317 ops/s; window_refused=24 backlog_at_horizon=7
+storage measured deltas: append_calls=2732 units=2732 commands=1368 mean_units=1.000 append_ms=292.462 barriers=2276 mean_appends_per_barrier=1.200 mean_units_per_barrier=1.199 barrier_ms=166453.831 sync_ms=57309.801 publish_ms=109128.042 histogram=1:2732|2:0|3:0|4:0|5:0|6:0|7:0|8:0
+validation/performance/slice105/quic-maintenance: 480 scheduled offers, 424 admissions, 424 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.067 applied_during=7.050 applied_drain=13.431 applied_total=7.058 ops/s; window_refused=56 backlog_at_horizon=1
+validation/performance/slice105/quic-maintenance: 26 durable checkpoint boundaries, 78 exact-scope reclamation rows, 3 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=11139.348 reclaim_ms=19177.783 reclaimed_bytes=344004 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=2565 units=2568 commands=1272 mean_units=1.001 append_ms=126.145 barriers=1893 mean_appends_per_barrier=1.355 mean_units_per_barrier=1.357 barrier_ms=149851.402 sync_ms=50180.609 publish_ms=99593.318 histogram=1:2562|2:3|4:0|5:0|6:0|8:0
+validation/performance/slice105/preliminary-smoke-tcp: 120 scheduled offers, 112 admissions, 112 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.467 applied_during=7.000 applied_drain=3.895 applied_total=6.668 ops/s; window_refused=8 backlog_at_horizon=7
+validation/performance/slice105/preliminary-smoke-tcp: 5 durable checkpoint boundaries, 15 exact-scope reclamation rows, 2 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=3651.316 reclaim_ms=7166.301 reclaimed_bytes=117316 pending_at_horizon=1; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=602 units=603 commands=336 mean_units=1.002 append_ms=64.761 barriers=487 mean_appends_per_barrier=1.236 mean_units_per_barrier=1.238 barrier_ms=35666.802 sync_ms=11883.879 publish_ms=23766.890 histogram=1:601|2:1|6:0|7:0|8:0
+validation/performance/slice105/preliminary-tcp-control: 480 scheduled offers, 470 admissions, 470 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=7.833 applied_during=7.817 applied_drain=59.063 applied_total=7.831 ops/s; window_refused=10 backlog_at_horizon=1
+storage measured deltas: append_calls=2818 units=2818 commands=1410 mean_units=1.000 append_ms=193.093 barriers=2435 mean_appends_per_barrier=1.157 mean_units_per_barrier=1.157 barrier_ms=153611.742 sync_ms=55397.164 publish_ms=98090.524 histogram=1:2818|2:0|4:0|5:0|6:0|7:0|8:0
+validation/performance/slice105/diagnostic-quic-pause: 120 scheduled offers, 96 admissions, 96 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=6.400 applied_during=6.267 applied_drain=17.698 applied_total=6.352 ops/s; window_refused=24 backlog_at_horizon=2
+validation/performance/slice105/diagnostic-quic-pause: 5 durable checkpoint boundaries, 15 exact-scope reclamation rows, 2 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=2037.516 reclaim_ms=5304.550 reclaimed_bytes=108348 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=549 units=549 commands=287 mean_units=1.000 append_ms=45.872 barriers=431 mean_appends_per_barrier=1.274 mean_units_per_barrier=1.274 barrier_ms=27639.467 sync_ms=8061.155 publish_ms=19565.497 histogram=1:549|2:0|5:0|6:0|7:0|8:0

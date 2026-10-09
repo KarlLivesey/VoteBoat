@@ -1,0 +1,1 @@
+ maintenance_period_ns=2000000000 checkpoints=0 reclaims=0 maintenance_skips=0 reclaimed_bytes=0 snapshot_events=0 snapshot_supplies=0 follower_snapshot_installs=0 pause_start_ns=1000000000 pause_end_ns=6000000000 actual_pause_ns=0 actual_resume_ns=0 forced_group=1 forced_index=0 forced_prior_last=0 forced_leader=0 forced_term=0 installs_at_resume=0

@@ -297,3 +297,64 @@ checks. Independent analysis prints admitted-during and transient applied-drain
 rates separately. Both 30-second low-rate samples admit every offer; higher-rate
 samples expose actual window refusals. They establish the mode and its accounting,
 not sustainable maintenance capacity or a passed p99 budget.
+
+## Checkpoint, reclamation and follower catch-up load
+
+Scheduled load can enable one bounded maintenance wave at a time:
+
+```sh
+BINARY FRESH_ROOT tcp 480 8 8 --offered 8 --maintenance 2
+BINARY OTHER_FRESH_ROOT quic 480 8 8 --offered 8 --maintenance 2 --pause-follower 1:5
+```
+
+`--maintenance SECONDS` (1–60) selects periodic opportunities strictly before the
+scheduled offering horizon. A wave asks the current leader of one round-robin
+group for a checkpoint. Admission is not completion: the benchmark waits for the
+same leader/term/store binding, a strictly advanced durable snapshot base at or
+beyond the requested applied boundary, and drained snapshot routing/worker work.
+It then submits one WAL reclamation per replica and matches each exact full
+ReclaimTicket before accepting its result. Later opportunities while a wave is
+active are recorded as skipped; there is no deferred maintenance queue. Missed
+opportunities after a host stall are also explicit skips. Bounded raw history
+follows the 300-second offering cap and minimum maintenance period.
+
+The optional `--pause-follower START:DURATION` requires maintenance mode. Integer
+seconds select a pause of replica 3's host reactor, lasting 1–5 seconds and ending
+before the offering horizon, with at least one maintenance opportunity in the
+window. It must be a follower in every group. Workers, sockets and files remain
+owned; this is a polling stall, not a process crash or worker restart. Original
+intended client times continue. Resume waits the full requested duration from the
+observed pause start; intended and actual timestamps are both retained. A late
+start that cannot fit the full duration before the horizon fails the run.
+During the pause, maintenance prioritizes a group
+whose leader applied beyond the leader's highest accepted index captured at pause
+start. The successful catch-up gate requires that checkpoint to complete while
+the follower remains paused, a new snapshot install on replica 3 after resume,
+its durable base at/after that boundary, and unchanged source leader/term/binding.
+That evidence distinguishes real snapshot catch-up from merely resuming polling.
+
+`maintenance.csv` retains each opportunity, checkpoint boundary, exact reclamation
+sequence, before/after bytes and admission-to-observed-completion times, plus pause
+and resume observations. `bases.csv` records every replica/group's base before
+close and immediately after reopen; bases may advance but cannot regress. The
+ordinary useful-write/refusal/raw-history, all-replica values, quorum reads,
+recovery/retry and full join gates still apply. Client drain also waits for active
+maintenance and all opportunity decisions; unknown or failed work invalidates a
+successful summary and preserves diagnostic artifacts/cleanup attempts.
+
+Maintenance times include queue and terminal-observation delay. A paused reactor
+can delay observing a completed worker operation. They are not pure physical I/O
+costs or an additive elapsed critical path. The existing storage observer's
+append/barrier primitive counters omit internal snapshot and replacement I/O;
+explicit reclamation rows provide actual rewritten before/after bytes separately.
+No new durable token, protocol, provider, resource count or timer default is added.
+The independent checker validates maintenance schedules, bounded wave ordering,
+bytes, observed boundaries, recovered bases and selected catch-up arithmetic;
+it does not prove protocol correctness or sustainable fixed-p99 capacity.
+
+Slice 105 archives 60-second control and maintenance cases in
+[validation/performance/slice105](../validation/performance/slice105/README.md).
+TCP maintenance includes verified paused-follower snapshot catch-up; QUIC's
+paused case fails that gate and is retained. A separate QUIC run verifies
+maintenance without the pause. These are selected finite observations, with
+all failed/preliminary cases kept separate and the fixed-p99 target still unmet.

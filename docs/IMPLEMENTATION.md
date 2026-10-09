@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded scheduled offered-load/refusal/drain evidence added; sustainable/maintenance measurements, fixed-p99 tuning and broader platform/fault evidence remain |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
@@ -107,28 +107,30 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Measurement and latency attribution (current, P7).** Slice 99 supplies an
-   initial finite native three-replica applied baseline, raw samples and durable
-   recovery checks. Slice 100 adds local WAL barrier and host-progress attribution.
-   Explicit host timing is available without changing defaults. Next measure
-   cross-group shared-barrier amortization and deepen queue/transport attribution,
-   then extend repeated/steady-state measurements. Depends on public
-   native provider/runtime seams; completion needs attributable costs and stable
-   bounded workload results, with all failures reported. Advances the macro
-   measured-tuning milestone; current finite runs do not complete P7.
-2. **Measured tuning (next, P7).** Select batching, independent group/lane placement,
-   scheduling or recovery changes from those costs. Declare a p99 budget and fixed
-   workload before comparison; require useful applied throughput improvement at
-   unchanged durability/authority with corresponding failure regressions. Depends
-   on attribution and the existing shared-runtime contracts. This supplies the
-   macro performance milestone with evidence instead of a concurrency-only speedup.
-3. **Broader lifecycle, load and platform validation (following, P7/cross-cutting).**
-   Extend offered-load/multi-group/maintenance/recovery measurements and selected
-   recursive faults/later-source native retirement/general retention. Preserve
-   outstanding public mutation/envelope and deployment gaps in the phase ledger.
-   Depends on existing handoff/runtime contracts and workload harness; completion
-   needs scoped fault/overload evidence and Linux/macOS operational results.
-   macOS/separate-host execution remains unverified; CI remains background feedback.
+1. **Maintenance and catch-up evidence (current, P7).** Slice 105 exercises
+   scheduled load with bounded checkpoint/reclaim waves and a full-duration
+   follower host-poll stall. Purpose: expose maintenance interference and verify
+   actual snapshot repair, advancing measured tuning and broader validation.
+   Dependencies: the offered ledger, exact reclaim tickets and existing durable
+   snapshot contracts. Completion: TCP/QUIC raw histories reconcile maintenance,
+   useful outcomes/refusals, recovered bases, reads/retries and worker joins;
+   archive all attempts and commit. Finite runs do not complete P7.
+2. **Fixed-budget improvement (next, P7).** Use measured persistence/maintenance
+   costs to select one bounded scheduling or durability improvement. Purpose:
+   improve useful applied throughput at unchanged durability and a declared p99
+   budget, advancing the measured-tuning milestone. Dependencies: matched raw
+   evidence and a schema review of existing ownership/restart contracts before
+   editing. Completion: a focused failure regression and matched workload/budget
+   comparison; retain unsuccessful measurements and the unmet 250 ms serial gate.
+3. **Baseline acceptance reconciliation (following, P0–P7).** Map remaining design
+   requirements to direct evidence and implement the next missing usable behavior
+   or validation. Purpose: finish the actual baseline rather than accumulate
+   benchmark slices; advances membership, recursive lifecycle and broader
+   validation milestones according to the requirement found. Dependencies: the
+   roadmap, public contract inventory and current phase gaps. Completion: explicit
+   requirement/evidence links and a tested missing vertical slice; macOS,
+   separate-host, public mutation/envelope and broader fault/retention gaps remain
+   open until their own checks pass. P8/Windows stay deferred; CI is background.
 
 ### How the current work fits globally
 
@@ -6506,3 +6508,128 @@ Full P0–P7 and all prior phase gaps remain active; P8 remains deferred.
    platform/fault scope, exact durability/recovery and matched p99 settings; earlier
    membership/recursive lifecycle gaps stay open until their own evidence closes
    them. P8/Windows remain deferred and CI stays background feedback.
+
+### Slice 105 mini schema — offered load with bounded maintenance and catch-up
+
+Previous turn was progress: b2a07ca pushed the tested offered-load generator and
+four finite native histories. Current P7 slice adds actual checkpoint/compaction
+and physical reclamation during longer offered load; optional bounded follower
+host-poll pause exercises snapshot catch-up. Next: use measured costs for a
+fixed-budget durability improvement, then reconcile remaining baseline/platform/
+fault requirements. This does not complete P7 or erase earlier P0–P7 gaps.
+
+Benchmark CLI extends the shared offered mode with --maintenance SECONDS (1..60).
+An optional --pause-follower START_SECONDS:DURATION_SECONDS (duration 1..5, within
+the offering horizon) pauses replica 3's host reactor only; its existing resources
+remain owned, and it resumes during the same measurement. This is not a process
+crash, worker restart or independent-host outage. Periodic maintenance has one
+active wave: a local leader checkpoint for one round-robin group, then one exact
+reclaim per replica, then completion. Busy intervals are explicitly skipped and
+never queued for catch-up. Bounded event history follows the <=300 s horizon and
+minimum 1 s maintenance period. No production API/provider/format/timer change.
+
+NodeControl::Checkpoint is admission only. Capture the selected leader's full
+binding, term, previous base and requested applied boundary. Record observed
+completion only when that same leader/term/store has a strictly advanced durable
+snapshot base >= requested boundary and snapshot router/worker are drained.
+There is no fabricated checkpoint ticket. Reclaim completions must equal original
+full ReclaimTickets; before/after bytes and admission-to-completion latency are
+separate from logical durability and useful writes. Errors/mismatched evidence
+invalidate successful publication, retaining raw diagnostics and cleanup attempts.
+Storage primitive counters exclude internal replacement/snapshot I/O; maintenance
+wall times/bytes are separate, not an invented complete critical path.
+
+For paused-follower mode, capture every group's highest leader last index when
+pause begins. During the pause prioritize a checkpoint whose leader has applied
+beyond that captured prefix, so its compacted boundary excludes the paused
+replica's possible pre-pause accepted work. Require that forced boundary, actual
+snapshot-load/install progress on replica 3 after resume, and replica 3's durable
+base >= that boundary. Normal foreground proposals continue with the other quorum.
+All client outcomes, refusals, original schedule, bounded windows and horizon/drain
+accounting stay unchanged. Drain also waits for active maintenance; then verify
+all values/reads, joins/reopen, nonregressing compacted bases and original retries.
+Cleanup polls every replica irrespective of the experimental pause.
+
+Acceptance: deterministic maintenance state/timing/scope tests and independent
+raw maintenance arithmetic/schedule/boundary checks; real TCP/QUIC longer load
+with checkpoints/reclaims, optional paused-follower catch-up and full restart
+verification. Retain failed attempts without silently changing timers, durability
+or the 250 ms TCP serial target. These finite histories establish selected
+maintenance/catch-up behavior, not arbitrary-fault proof or sustainable fixed-p99
+capacity. Full P0–P7 remains active; P8/Windows deferred, CI background feedback.
+
+Slice 105 focused timing correction before the long pause cases: review found
+that resuming at the planned end could shorten a requested pause when its start
+was observed late. Retain intended timestamps, but resume only after the full
+requested duration from actual pause start; reject a late start that would push
+that duration past the offering horizon. Validate actual duration independently.
+The completed first TCP control and smoke remain preliminary evidence under the
+original executable, not mixed into the rebuilt matched performance set. No
+production protocol or timer changes are involved.
+
+Slice 105 retained failure and diagnostic follow-up: the matched 60-second QUIC
+pause case exits with `paused follower lacks verified same-leader snapshot
+catch-up`; all 480 raw offers remain (411 Applied, 69 window refusals), and
+cancellation/reclaim cleanup and close succeed. No successful summary or recovery
+claim is published. Pause/resume and a post-pause durable checkpoint appear in
+raw history, but the combined final predicate does not retain which of install
+count, follower base or source identity failed. A host-poll pause leaves sockets
+owned, so buffered log delivery is a possible alternative to snapshot repair;
+this is a hypothesis, not an established cause. Keep the catch-up gate unchanged.
+
+Mini schema for diagnostic correction: on a failed catch-up gate record actual
+resume, installs at resume/now, original and current source binding/term/role,
+and forced/current follower base in the error retained before cleanup. These are
+observations only, not durable authority or a new success path. No new state
+transition, ownership, provider or retry policy. Acceptance: existing state/timing
+and checker tests remain valid, and a selected short QUIC pause run retains the
+individual failed facts or passes the unchanged gate. The longer no-pause QUIC
+maintenance case separates maintenance from the failed optional repair experiment;
+it does not replace or pass that experiment. Advances P7's honest fault evidence,
+with full baseline scope and the QUIC catch-up gap still open until verified.
+
+### Slice 105 implemented evidence — maintenance under offered load
+
+Added benchmark-only one-active-wave checkpoint/reclaim scheduling, explicit
+bounded skips, full-duration follower host-poll pauses, durable checkpoint
+observation, exact reclaim receipts and before-close/immediate-recover base
+checks. Unknown/failed work prevents success publication and preserves client/
+maintenance histories plus cleanup errors. No production contract/provider,
+protocol, durable format, resource count or timer changes.
+
+Six new maintenance tests plus the existing seven ledger/observer tests pass
+with all features and TLS-only (13/13 each); all-target/all-feature Clippy with
+warnings denied passes. Four independent maintenance negative tests and five
+existing offered checker tests pass. Updated raw checks also pass four slice104
+and 18 slice103 archived histories. Inventory remains 71 contracts.
+
+Four successful 60-second, eight-group, three-replica cases schedule 480 offers
+at 8/s with window 8: TCP control/maintenance+pause apply 462/443, refuse 18/37,
+p99 1171.573/2051.818 ms; QUIC control/maintenance-without-pause apply 456/424,
+refuse 24/56, p99 1495.611/1956.002 ms. TCP maintenance completes 27 checkpoints,
+81 reclaims, 2 skips and reclaims 352388 bytes; QUIC without pause completes
+26/78/3 and reclaims 344004 bytes. All successful cases pass values/reads, full
+joins/reopen/nonregressing bases and historical retries with zero extra retries.
+TCP's forced boundary 11 exceeds pre-pause accepted index 10; replica 3 installs
+new snapshots after its full five-second pause. The matched QUIC pause experiment
+fails the unchanged catch-up gate and remains archived, not counted as success.
+
+This advances the macro measured-tuning/broader-validation milestone through
+actual maintenance and selected repair evidence. It does not complete that
+milestone or establish sustainable capacity, a transport gain or fixed-p99
+acceptance. The original 250 ms serial target and all earlier P0–P7 gaps stay
+open; macOS/separate-host execution remains unverified. See
+validation/performance/slice105 for all successful/preliminary/failed artifacts,
+source/executable provenance and independent checks. CI remains background;
+P8/Windows remain deferred and the full goal stays active.
+
+The diagnostic-only short QUIC pause rerun passes the unchanged gate: 120 offers
+in 15 seconds, 96 Applied/24 refused, 5 checkpoints/15 reclaims/2 skips, 108348
+bytes reclaimed, full 5.000185054-second pause and one new follower snapshot
+install beyond pre-pause accepted prefix 10 at forced boundary 11. Values/reads,
+reopen/nonregressing bases, original retries and joins pass with zero extra
+retries; independent raw checks pass. This establishes one selected QUIC pause
+history but does not explain the failed 60-second case or prove repeatability.
+Retain that gap; do not repeatedly rerun it hoping for success. Next work should
+use per-predicate diagnostics and a declared fault schedule if deeper repair
+validation is needed. Final formatting/diff and 71-contract metadata checks pass.

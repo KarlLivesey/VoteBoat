@@ -2230,3 +2230,52 @@ deliberate maintenance/fault injection: no sustainable-capacity, transport-speed
 fixed-p99, macOS or separate-host claim. The 250 ms TCP serial target remains
 unmet; compatibility runs do not replace it. Full P0–P7 remains active, including
 earlier phase gaps; P8/Windows are deferred and CI remains background feedback.
+
+## Slice 105 — bounded maintenance and selected follower catch-up
+
+Benchmark-only scheduled checkpoint/reclaim waves use the public Node controls,
+same-leader/term/store durable snapshot boundaries and exact original full reclaim
+tickets. Bounded skipped opportunities, full observed pause duration, raw
+maintenance/offer outcomes, nonregressing reopen bases and explicit cleanup remain
+visible. No production provider/protocol/format/resource/timer changes.
+
+Thirteen benchmark tests pass with all features and TLS-only, including six new
+maintenance state/scope/timing tests. All-target/all-feature Clippy with warnings
+denied passes. Four independent maintenance negative checker tests and five
+offered checker tests pass. The updated verifier passes all four archived slice104
+and 18 slice103 histories. Contract inventory remains 71; it verifies metadata
+shape/paths, not protocol correctness.
+
+Four successful eight-group/three-replica cases offer 480 commands at 8/s over
+60 seconds: TCP control and maintenance+pause apply 462/443, window-refuse 18/37,
+p99 1171.573/2051.818 ms. QUIC control and maintenance without pause apply 456/424,
+refuse 24/56, p99 1495.611/1956.002 ms. TCP maintenance completes 27 checkpoints,
+81 exact reclaims and 2 skips; QUIC without pause completes 26/78/3. Freed bytes
+are 352388/344004. Every successful case passes expected values, quorum reads,
+full joins/reopen and original historical retries with zero extra retries. TCP's
+five-second host-poll pause produces a post-pause-prefix checkpoint and actual
+new follower snapshot installs, with recovered bases retained.
+
+The matched QUIC pause experiment fails the final catch-up gate. Raw 411 Applied/
+69 refused offers, maintenance rows and successful cleanup are archived, without
+a successful summary/recovery claim. The original error lacks individual failed
+predicate values; a focused diagnostic change retains those facts on future
+failures while preserving acceptance. A no-pause QUIC result does not pass the
+failed pause experiment. Preliminary old-executable control and concurrent-build
+correctness smoke are retained separately. Raw evidence, independent arithmetic,
+hashes and environment are in validation/performance/slice105.
+
+These finite single-host cases establish selected maintenance behavior, not
+sustainable capacity, a transport advantage, arbitrary-fault proof or macOS/
+separate-host validation. No compilation/bulk build work overlaps long performance
+runs. The original 250 ms serial p99 target and prior P0–P7 scope gaps remain open;
+P8/Windows stay deferred, CI is background and the full goal remains active.
+
+A short QUIC pause run under the diagnostic-only executable passes the unchanged
+catch-up gate and independent arithmetic: 120 offers/15 seconds, 96 Applied,
+24 window refusals, 5 checkpoints/15 reclaims/2 skips, 108348 bytes reclaimed;
+actual pause 5.000185054 seconds, one new follower install at/after forced boundary
+11 beyond prior accepted index 10. Full value/read/reopen/base/retry/join gates
+pass with zero extra retries. This selected success does not diagnose or erase
+the failed long run. Both are archived; repeatable 60-second QUIC catch-up remains
+unverified. Final formatting/diff and unchanged 71-contract metadata checks pass.

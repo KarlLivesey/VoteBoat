@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { validateOffered } from './check-offered.mjs';
+import { validateMaintenance } from './check-maintenance.mjs';
 
 const requireStorage = process.argv.includes('--storage');
 const directories = process.argv.slice(2).filter(arg => arg !== '--storage');
@@ -19,6 +20,9 @@ for (const directory of directories) {
     if (summary.mode === 'offered') {
         const offers = runDirectory ? path.join(directory, 'offers.csv') : `${directory}.offers.csv`;
         validateOffered(directory, summary, offers);
+        if (summary.maintenance_period_ns) {
+            validateMaintenance(directory, summary, runDirectory ? path.join(directory, 'maintenance.csv') : `${directory}.maintenance.csv`, runDirectory ? path.join(directory, 'bases.csv') : `${directory}.bases.csv`);
+        }
     } else {
         const count = Number(summary.operations);
         const window = Number(summary.window);

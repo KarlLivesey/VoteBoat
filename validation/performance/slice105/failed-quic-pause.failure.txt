@@ -1,0 +1,1 @@
+measurement=paused follower lacks verified same-leader snapshot catch-up; cancellation_errors=[]; reclaim_cleanup=Ok(()); reclaim_events=[]; cleanup=Ok(())

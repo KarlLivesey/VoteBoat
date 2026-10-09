@@ -200,14 +200,28 @@ struct PollTotals {
     persistence_batches: usize,
     worker_events: usize,
     application_deliveries: usize,
+    snapshot_events: usize,
+    snapshot_installs: [usize; 3],
+    snapshot_supplies: usize,
 }
 fn poll<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
     totals: &mut PollTotals,
 ) -> Result<(), Failure> {
+    poll_selected(replicas, clock, totals, None)
+}
+fn poll_selected<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    totals: &mut PollTotals,
+    paused: Option<usize>,
+) -> Result<(), Failure> {
     let start = Instant::now();
-    for replica in replicas {
+    for (i, replica) in replicas.iter_mut().enumerate() {
+        if paused == Some(i) {
+            continue;
+        }
         let progress = checked(replica.poll(
             MonoTime(clock.elapsed().as_millis() as u64),
             NodePollBudget::default(),
@@ -216,6 +230,9 @@ fn poll<L: LogStore + Send + 'static>(
             totals.persistence_batches += p.persistence_batches;
             totals.worker_events += p.worker_events;
             totals.application_deliveries += p.applications;
+            totals.snapshot_events += p.snapshot_events;
+            totals.snapshot_installs[i] += p.snapshot_installs;
+            totals.snapshot_supplies += p.snapshot_supplies;
             for step in p.steps {
                 if let Some(e) = step.error {
                     return Err(format!("runtime step failed: {e:?}").into());
@@ -570,9 +587,9 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 }
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    if !matches!(args.len(), 4 | 5 | 7) {
+    if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32) [--offered RATE(1..100000)]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -595,13 +612,34 @@ fn main() -> Result<(), Failure> {
     if !(1..=50000).contains(&count) || !(1..=32).contains(&window) {
         return Err("count/window out of bounds".into());
     }
-    let offered_rate = if args.len() == 7 {
+    let offered_rate = if args.len() >= 7 {
         if args[5] != "--offered" {
             return Err("expected --offered RATE".into());
         }
         let rate = args[6].parse::<usize>()?;
         offered::validate(count, rate)?;
         Some(rate)
+    } else {
+        None
+    };
+    let maintenance = if args.len() >= 9 {
+        if args[7] != "--maintenance" {
+            return Err("expected --maintenance SECONDS".into());
+        }
+        let pause = if args.len() == 11 {
+            if args[9] != "--pause-follower" {
+                return Err("expected --pause-follower START:DURATION".into());
+            }
+            Some(args[10].as_str())
+        } else {
+            None
+        };
+        Some(offered::maintenance_config(
+            count,
+            offered_rate.unwrap(),
+            args[8].parse()?,
+            pause,
+        )?)
     } else {
         None
     };
@@ -621,6 +659,7 @@ fn main() -> Result<(), Failure> {
         groups,
         shared,
         offered_rate,
+        maintenance,
     };
     if shared {
         run(config, &clock, |mode| {
@@ -640,6 +679,7 @@ struct RunConfig<'a> {
     groups: usize,
     shared: bool,
     offered_rate: Option<usize>,
+    maintenance: Option<offered::MaintenanceConfig>,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,
@@ -657,6 +697,7 @@ fn run<L: LogStore + Send + 'static>(
         groups,
         shared,
         offered_rate: _,
+        maintenance: _,
     } = config;
     let capacity = count + WARMUP;
     std::fs::create_dir(root)?;

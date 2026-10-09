@@ -14,6 +14,10 @@
 // rights and limitations under the RPL.
 //! Scheduled offered load: refused offers remain visible; no client retry queue.
 use super::*;
+#[path = "maintenance.rs"]
+mod maintenance;
+use maintenance::Maintenance;
+pub(super) use maintenance::{config as maintenance_config, Config as MaintenanceConfig};
 
 pub(super) fn validate(count: usize, rate: usize) -> Result<(), Failure> {
     if !(1..=100000).contains(&rate) || count == 0 || count > 50000 {
@@ -249,9 +253,11 @@ fn measure<L: LogStore + Send + 'static>(
     ledger: &mut Ledger,
     totals: &mut PollTotals,
     start: &Instant,
+    maintenance: &mut Maintenance,
 ) -> Result<(), Failure> {
     loop {
-        poll(replicas, clock, totals)?;
+        let paused = maintenance.paused(start.elapsed().as_nanos(), replicas, totals)?;
+        poll_selected(replicas, clock, totals, paused)?;
         outputs(replicas, start, ledger)?;
         for _ in 0..64 {
             let now = start.elapsed().as_nanos();
@@ -282,7 +288,11 @@ fn measure<L: LogStore + Send + 'static>(
             }
         }
         let now = start.elapsed().as_nanos();
-        if ledger.rows.len() == ledger.count && ledger.pending.is_empty() && now >= ledger.horizon()
+        maintenance.step(replicas, now)?;
+        if maintenance.finished()
+            && ledger.rows.len() == ledger.count
+            && ledger.pending.is_empty()
+            && now >= ledger.horizon()
         {
             return Ok(());
         }
@@ -315,6 +325,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         count,
         window,
         groups,
+        maintenance: maintenance_config,
         ..
     } = config;
     std::fs::create_dir(root)?;
@@ -347,16 +358,39 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         }
     };
     let mut ledger = Ledger::new(count, rate, window, groups);
+    let mut maintenance = Maintenance::new(maintenance_config, ledger.horizon(), groups);
+    if maintenance_config.is_some() {
+        std::fs::write(
+            root.join("maintenance-config.txt"),
+            maintenance.summary(&PollTotals::default()),
+        )?;
+    }
     let mut totals = PollTotals::default();
     observe::capture(&mut storage, "before_measurement", &traces);
     eprintln!("phase=offering operations={count} rate={rate} groups={groups} leaders={placement}");
     let start = Instant::now();
-    let result = measure(&mut replicas, clock, &mut ledger, &mut totals, &start);
+    let result = measure(
+        &mut replicas,
+        clock,
+        &mut ledger,
+        &mut totals,
+        &start,
+        &mut maintenance,
+    );
     let elapsed = start.elapsed();
     observe::capture(&mut storage, "after_measurement", &traces);
     // Preserve all observed rows before validation or cleanup can fail.
     let persisted = ledger.write(&mut raw);
-    let history = result.and(persisted).and_then(|()| ledger.history(&warmup));
+    let maintenance_raw = if maintenance_config.is_some() {
+        maintenance.write(&mut exclusive(&root.join("maintenance.csv"))?)
+    } else {
+        Ok(())
+    };
+    let history = result
+        .and(persisted)
+        .and(maintenance_raw)
+        .and_then(|()| maintenance.validate(&replicas, &totals))
+        .and_then(|()| ledger.history(&warmup));
     let (expected, last) = match history {
         Ok(h) => h,
         Err(error) => {
@@ -374,21 +408,34 @@ pub(super) fn run<L: LogStore + Send + 'static>(
                     }
                 }
             }
+            let mut reclaimed = Vec::new();
+            let reclaim_cleanup = until(&mut replicas, clock, |ns| {
+                for n in ns.iter_mut() {
+                    while let Some(e) = n.poll_reclaim() {
+                        reclaimed.push(format!("{e:?}"));
+                    }
+                }
+                Ok(ns.iter().all(|n| n.replica_usage().reclaims == 0))
+            })
+            .map(|_| ());
             let cleanup = close(replicas, clock);
             std::fs::write(
                 root.join("failure.txt"),
-                format!("measurement={error}; cancellation_errors={cancellation_errors:?}; cleanup={cleanup:?}\n"),
+                format!("measurement={error}; cancellation_errors={cancellation_errors:?}; reclaim_cleanup={reclaim_cleanup:?}; reclaim_events={reclaimed:?}; cleanup={cleanup:?}\n"),
             )?;
             return Err(error);
         }
     };
+    let compacted_bases = maintenance.bases(&replicas);
     let verified = verify_expected(&mut replicas, clock, &expected, &last);
     let joined = close(replicas, clock);
     checked_stage(root, "verification", verified, joined)?;
     observe::capture(&mut storage, "after_create_join", &traces);
     eprintln!("phase=recovery-verification mode=offered");
     let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+    let recovered_bases = maintenance.bases(&replicas);
     let recovered = (|| {
+        maintenance.verify_recovery(&replicas, &compacted_bases)?;
         campaign(&mut replicas, clock, groups)?;
         verify_expected(&mut replicas, clock, &expected, &last)?;
         let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
@@ -417,6 +464,19 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     })();
     let joined = close(replicas, clock);
     let retries = checked_stage(root, "recovery", recovered, joined)?;
+    if maintenance_config.is_some() {
+        let mut bases = exclusive(&root.join("bases.csv"))?;
+        writeln!(bases, "stage,replica,group,base_index")?;
+        for (stage, values) in [
+            ("before_close", &compacted_bases),
+            ("after_recover", &recovered_bases),
+        ] {
+            for ((replica, group), base) in values {
+                writeln!(bases, "{stage},{},{},{base}", replica + 1, group.id.get())?;
+            }
+        }
+        bases.sync_all()?;
+    }
     observe::capture(&mut storage, "after_recover_join", &recovered_traces);
     observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
     let horizon = ledger.horizon();
@@ -463,7 +523,8 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         .map(|r| r.dispatched - r.intended)
         .collect::<Vec<_>>();
     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+    let maintenance_summary = maintenance.summary(&totals);
+    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
     let mut file = exclusive(&root.join("summary.txt"))?;
     file.write_all(summary.as_bytes())?;
     file.sync_all()?;
