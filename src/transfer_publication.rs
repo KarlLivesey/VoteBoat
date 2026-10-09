@@ -145,7 +145,12 @@ impl TransferPublication {
                 }
             }
             for (target, route) in targets.iter().zip(&new) {
-                if route.target != RouteTarget::Group(target.group)
+                if intent.insertion_children().is_some_and(|children| {
+                    !children.iter().any(|child| {
+                        child.manifest.input().execution == ExecutionMode::Single(target.group)
+                            && child.configuration == target.configuration
+                    })
+                }) || route.target != RouteTarget::Group(target.group)
                     || target.operation != operation
                     || target.staged_index == 0
                     || target.imported.index <= target.staged_index

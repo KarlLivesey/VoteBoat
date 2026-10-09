@@ -30,6 +30,7 @@ use crate::{
 use std::mem::size_of;
 
 pub const TRANSFER_TARGET_SCHEMA: u64 = 2;
+pub const INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 3;
 pub const MAX_TARGET_ACTIVATION_BYTES: usize = 64 * 1024;
 pub const MAX_INLINE_IMPORT_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_TARGET_FREEZE_BYTES: usize = 52 + MAX_TRANSFER_INTENT_BYTES;
@@ -385,7 +386,11 @@ where
                 return Err(ApplicationError::InvalidCommand);
             }
             let mut bytes = Vec::with_capacity(len);
-            bytes.extend(b"VBTSOWN1");
+            bytes.extend(if intent.insertion_children().is_some() {
+                b"VBTSOWN2"
+            } else {
+                b"VBTSOWN1"
+            });
             put_group(&mut bytes, group);
             bytes.extend(operation.get().to_le_bytes());
             bytes.extend((limits.import_bytes as u64).to_le_bytes());
@@ -494,7 +499,11 @@ where
     }
     fn check_freeze(&self, intent: &TransferIntent, budget: usize) -> Result<(), ApplicationError> {
         if self.activated.is_none()
-            || intent.before() != self.intent.after()
+            || intent.before()
+                != self
+                    .intent
+                    .target_manifest(self.group)
+                    .expect("checked target")
             || budget == 0
             || budget > MAX_SCOPE_IMAGE_BYTES
         {
@@ -746,7 +755,7 @@ where
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: TRANSFER_TARGET_SCHEMA,
+            application_schema: self.schema_version(),
             command_bytes: self
                 .binding
                 .len()
@@ -922,9 +931,15 @@ where
                     else {
                         return Err(ApplicationError::InvalidCommand);
                     };
-                    if let Err(error) =
-                        check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
-                    {
+                    if let Err(error) = check_owner(
+                        next.intent
+                            .target_manifest(next.group)
+                            .expect("checked target"),
+                        next.group,
+                        &hint,
+                        key,
+                        &next.policy,
+                    ) {
                         TargetOutcome::Rejected(error)
                     } else {
                         let projected = LogEntry {
@@ -998,8 +1013,16 @@ where
                     else {
                         return Err(ApplicationError::InvalidCommand);
                     };
-                    if check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
-                        .is_ok()
+                    if check_owner(
+                        next.intent
+                            .target_manifest(next.group)
+                            .expect("checked target"),
+                        next.group,
+                        &hint,
+                        key,
+                        &next.policy,
+                    )
+                    .is_ok()
                     {
                         let projected = LogEntry {
                             index: entry.index,
@@ -1071,8 +1094,16 @@ where
             if next.activated.is_none() || next.frozen.is_some() || operation == next.operation {
                 return Err(ApplicationError::InvalidCommand);
             }
-            check_owner(next.intent.after(), next.group, &hint, key, &next.policy)
-                .map_err(|_| ApplicationError::InvalidCommand)?;
+            check_owner(
+                next.intent
+                    .target_manifest(next.group)
+                    .expect("checked target"),
+                next.group,
+                &hint,
+                key,
+                &next.policy,
+            )
+            .map_err(|_| ApplicationError::InvalidCommand)?;
             let inner = next
                 .inner
                 .validate_proposal(operation, payload, std::iter::empty())?;
@@ -1116,7 +1147,11 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        TRANSFER_TARGET_SCHEMA
+        if self.intent.insertion_children().is_some() {
+            INSERTION_TRANSFER_TARGET_SCHEMA
+        } else {
+            TRANSFER_TARGET_SCHEMA
+        }
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self
@@ -1137,7 +1172,11 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBTRGT03");
+        bytes.extend(if self.intent.insertion_children().is_some() {
+            b"VBTRGT04"
+        } else {
+            b"VBTRGT03"
+        });
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -1179,7 +1218,10 @@ where
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != TRANSFER_TARGET_SCHEMA && schema != 1 {
+        let insertion = self.intent.insertion_children().is_some();
+        if (insertion && schema != INSERTION_TRANSFER_TARGET_SCHEMA)
+            || (!insertion && schema != TRANSFER_TARGET_SCHEMA && schema != 1)
+        {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if bytes.len() > self.readiness_requirements().snapshot_bytes {
@@ -1187,8 +1229,11 @@ where
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        let frozen_format = tag == b"VBTRGT03";
-        if (schema == TRANSFER_TARGET_SCHEMA) != frozen_format {
+        let frozen_format = tag == b"VBTRGT03" || tag == b"VBTRGT04";
+        if (insertion && tag != b"VBTRGT04")
+            || (!insertion && tag == b"VBTRGT04")
+            || (schema >= TRANSFER_TARGET_SCHEMA) != frozen_format
+        {
             return Err(ApplicationError::UnsupportedSchema);
         }
         let activated_format = frozen_format || tag == b"VBTRGT02";
@@ -1339,7 +1384,9 @@ where
                     return Ok(TargetRead::NotActive);
                 }
                 if let Err(error) = check_owner(
-                    self.intent.after(),
+                    self.intent
+                        .target_manifest(self.group)
+                        .expect("checked target"),
                     self.group,
                     &query.hint,
                     &query.key,
@@ -1458,7 +1505,12 @@ where
         status: &SourceFreezeStatus,
     ) -> Result<(), ApplicationError> {
         self.validate_group(status.fence.group)?;
-        if status.intent.before() != self.intent.after() {
+        if status.intent.before()
+            != self
+                .intent
+                .target_manifest(self.group)
+                .expect("checked target")
+        {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         Ok(())

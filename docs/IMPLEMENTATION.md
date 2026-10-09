@@ -111,27 +111,23 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Native created-namespace transfer (current slice129, P1/P5/P6).** Purpose:
-   exercise the source-capable path through actual TCP/QUIC owners. Dependencies:
-   schema4 metadata, slice128 source guard and existing native creation/transfer
-   contracts. Completion: assigned bootstrap, quorum-observed phases, unread results,
-   WAL/checkpoint owner-abort reopen, exact retries, no dual owner and independent
-   target activation/writes with source/metadata offline. Implemented evidence and
-   executed results are recorded in slice129 below.
-2. **Recursive insertion protocol (next, P5/P6).** Purpose: insert child ownership
-   into an existing covered namespace while moving actual data. Dependencies:
-   source handoff and checked parent/child publication; inspect same-responsibility
-   transfer restrictions before selecting the schema. Completion: a bounded tested
-   protocol retaining complete selector coverage, explicit identity/lineage mapping,
-   alias/cycle refusal, durable fence/import/activation and partial-progress recovery.
-   This remains planned; a new manifest alone cannot authorize insertion.
-3. **Native recursive insertion recovery (following, P1/P5/P6).** Purpose: verify
-   the insertion protocol through actual owners. Dependencies: the checked insertion
-   protocol/guards and existing native phase fixtures. Completion: quorum-observed
-   interrupted publication/activation, WAL/checkpoint recovery, original operation
-   resumption and child service under ancestor outage without dual owners. All
-   original deletion/reparenting, authority movement, retention, broader membership,
-   tuning and platform/fault gates stay active.
+1. **Responsibility insertion (current slice130, P5/P6).** Purpose: move existing
+   root-owned data to fresh same-authority child responsibilities. Dependencies:
+   checked creation reservations and existing fence/import/publication/activation.
+   Completion checks: explicit identities/scopes, atomic metadata publication,
+   exact child service, preserved retries/outbox, later child freeze, checkpoint
+   recovery, reserved publication capacity and selected native intent WAL faults.
+   Implemented evidence is recorded below; native service phases remain next.
+2. **Native insertion recovery (next, P1/P5/P6).** Purpose: run insertion through
+   assigned actual owners. Dependencies: slice130 and verified staging bootstrap.
+   Completion checks: TCP/QUIC, unread receipts, partial provisioning, publication
+   and activation, WAL/checkpoint reopen, exact retry and ancestor-offline service.
+3. **Recursive insertion composition (following, P5/P6).** Purpose: extend the
+   root insertion path to deeper ownership trees. Dependencies: native insertion
+   evidence and a reviewed parent reservation/identity protocol. Completion checks:
+   nested coverage, alias/cycle refusal, interrupted lifecycle continuity and
+   independent child service. Deletion/reparenting, authority movement, retention,
+   membership, tuning and platform/fault requirements remain in the full goal.
 
 ### How the current work fits globally
 
@@ -8911,3 +8907,97 @@ Final slice129 all-feature/all-target Clippy -D warnings passed3.16s. Final form
 whitespace and80-contract inventory checks are recorded on completion below.
 Final slice129 format, whitespace and80-contract inventory checks passed. All
 recorded validation handles are terminal; no remote CI gate was used.
+
+## Slice130 schema plan — explicit same-authority responsibility insertion
+
+Previous goal turn progressed:129 committed/pushed89b6662; current worktree clean.
+Inspection: ordinary TransferIntent binds one responsibility and Single/Partitioned
+maps; insertion requires explicit old-parent -> fresh-child identity mapping. Do
+not fabricate a virtual published route or rewrite child requests under a parent
+identity. Extend the checked intent with a distinct VBTINT03 insertion kind carrying
+bounded fresh child manifests and compact references to committed Staging creation
+reservations (operation/index/configuration). Source remains the existing protocol;
+target selects its exact child grant from that intent instead of the parent after
+manifest. Scope imports retain the original parent source fence/retry/outbox lineage.
+
+Initial bounded path: one authority, existing root Single/Partitioned data ownership
+moves completely to one or more fresh Single child groups. Parent becomes Delegated
+with complete disjoint Child selectors; child parent pointers/authority/scheme/adapter,
+initial epoch/generation and exact scope/group/configuration are bound. No existing
+child alias/reparenting, cross-authority move, retained-source scope or silent identity
+reuse. Existing static arbitrary-depth routing stays supported; broader insertion
+composition remains subsequent work rather than weakening this checked cut.
+
+Metadata schema5/INIT5/DIR005 selected before bootstrap adds insertion admission,
+verifies exact own creation references and fresh identities/assigned groups, reserves
+lifecycle locks/control and manifest capacity, then atomically publishes parent and
+children only with the existing complete source-fence/target-import publication.
+Creation reservations remain immutable; track completed staging references via
+history replay to release their namespace-control reservations. Schemas1–4 refuse
+the new kind and preserve historical semantics. Old transfer kinds/formats unchanged.
+Target insertion bootstrap/checkpoint select schema3/SOWN2/TRGT04; ordinary target
+schema2 and legacy schema1 restore stay unchanged. All read/apply/admission/later
+freeze/retirement owner checks use the selected exact serving grant, never a parent
+alias. Publication target configuration must equal the child's reserved configuration.
+
+State/failure: recorded insertion -> staged assigned targets -> source committed F
+-> imports remain NotActive -> atomic metadata parent/child publication -> each
+child target's own activation. Lost receipts resume original indices/outcomes;
+checkpoint/WAL replay reconstruct reservations/maps before later commands. Fenced
+source cannot revive; stale parent hints refuse at targets. Target later freeze must
+use its child identity and existing delegated transfer authorization. Data writes
+never commit through the ancestor. Foreign observations remain authenticated host
+quorum obligations; compact reference or digest is not a certificate.
+
+Acceptance: bounded canonical codec/all truncations, malformed identity/coverage/
+parent/configuration/ref/alias rejection, reserved metadata control at exhaustion,
+atomic parent+children replay/checkpoint, actual deterministic source export/import/
+publication/activation with preserved retry/outbox and routed child resolution,
+source/target gates, child serving grant and later delegated freeze, legacy source/
+target/directory regressions and relevant native torn-frame checks. Current130
+advances P5/P6 and depends on129/128 plus existing transfer/creation/routing contracts.
+Next: native insertion phase recovery (P1/P5/P6), dependent on130, checking assigned
+staging bootstrap, interrupted publication/activation, WAL/checkpoint recovery and
+ancestor outage. Following: recursive insertion composition/gap audit (P5/P6),
+dependent on that evidence, checking nested authority/coverage/lifecycle continuity
+before implementing the next missing path. Full P0–P7 remains active; P8/Windows
+are deferred and CI stays background feedback.
+
+### Slice130 implemented evidence and validation
+
+Added public InsertionChild compact Staging references and TransferIntent contract3
+VBTINT03 checked root-to-fresh-child mapping. Opt-in Directory schema5 binds
+bootstrap/checkpoint and preserves schemas1–4; exact retained creation records,
+parent generation and new IDs are required before locking. Publication atomically
+installs parent Delegated and all child Single manifests, releasing staging control
+reservations. Creation lifetime slots remain bounded. Insertion TransferTarget
+schema3 binds its exact child serving grant in apply/admission/read/later freeze/
+retirement; ordinary target schema2/legacy1 remain separate. Target evidence must
+match the reserved configuration. Foreign committed observations still require
+authenticated host quorum provenance.
+
+Executed 83 related tests across insertion, directory, delegation, namespace_creation,
+transfer_source, transfer_target and transfer_publication. Three insertion tests
+cover canonical codec/all truncations, malformed identities/parent/epoch/source
+alias, exact reservation index refusal before locking, legacy schema rejection,
+actual parent fence/export/two-child import/publication/activation, imported retry
+and outbox preservation, wrong parent hints, later delegated child freeze, atomic
+batch failure and all publication-checkpoint truncations. Exhausted ordinary history
+still permits the reserved publication in a separate cloned history. Native intent
+WAL tests cover every append cut and Sync/PublishBefore/PublishAfter, recovering
+old or exact recorded intent without publishing children. No native insertion
+publication/activation/socket-phase claim; those checks belong to the next slice.
+
+Initial compile/test issues were missing imports and incorrect fixture outcome/
+error variants; activation initially used a different operation ID and correctly
+refused. Capacity exhaustion initially shared the later-reservation history and
+correctly hit DedupCapacity; separated branches. A self-parent alias was already
+rejected by ResponsibilityManifest as Cycle; test now checks that earlier rejection.
+Clippy found a Copy hint clone; removed. These were focused fixture/import fixes,
+not relaxed protocol rules. Broader P0–P7 remains active, P8/Windows deferred.
+Final slice130: another21 activation/repeat/retirement regressions passed, bringing
+unique related tests to104; insertion3 also passed with the child read assertion.
+Core-only insertion2 passed before that assertion; final rerun/checks recorded below.
+Final core-only insertion2 passed0.12s; all-feature/all-target Clippy -D warnings
+passed1.31s. Format, whitespace and80-contract inventory passed. All validation
+handles are terminal; no remote CI gate was used. Full goal remains active.

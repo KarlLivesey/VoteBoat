@@ -16,10 +16,12 @@
 use crate::transfer_publication::{TransferPublication, TransferPublicationStatus};
 use crate::{application::*, directory::*, identity::*, log::*, routing::codec::*, routing::*};
 use std::{collections::BTreeSet, mem::size_of};
+mod insertion;
+pub use insertion::InsertionChild;
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;
-pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 2;
+pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 3;
 
 /// Exact before/after manifests for a conservative whole-responsibility split
 /// or compatible merge. Sources and targets are distinct concrete groups.
@@ -29,6 +31,7 @@ pub struct TransferIntent {
     before: ResponsibilityManifest,
     after: ResponsibilityManifest,
     delegation: Option<crate::delegation::DelegationBinding>,
+    insertion: Option<Vec<InsertionChild>>,
 }
 impl TransferIntent {
     #[allow(clippy::result_large_err)]
@@ -46,6 +49,7 @@ impl TransferIntent {
             before,
             after,
             delegation: None,
+            insertion: None,
         })
     }
     pub(crate) fn validate_shape(
@@ -133,6 +137,10 @@ impl TransferIntent {
         self.delegation
             .as_ref()
             .is_none_or(|b| b.child_operation == operation)
+            && self
+                .insertion
+                .as_ref()
+                .is_none_or(|children| children.iter().all(|c| c.creation != operation))
     }
     pub(crate) fn delegated(
         before: ResponsibilityManifest,
@@ -152,24 +160,47 @@ impl TransferIntent {
             before,
             after,
             delegation: Some(binding),
+            insertion: None,
         })
     }
     pub fn sources(&self) -> Vec<RouteEntry> {
         Self::groups(&self.before).expect("checked intent")
     }
     pub fn targets(&self) -> Vec<RouteEntry> {
+        if let Some(children) = &self.insertion {
+            return children
+                .iter()
+                .map(|c| {
+                    let ExecutionMode::Single(group) = c.manifest.input().execution else {
+                        unreachable!("checked child")
+                    };
+                    RouteEntry {
+                        scope: c.manifest.input().scope,
+                        target: RouteTarget::Group(group),
+                    }
+                })
+                .collect();
+        }
         Self::groups(&self.after).expect("checked intent")
     }
     pub fn encode(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let len = 16
             + manifest_len(&self.before)
             + manifest_len(&self.after)
-            + self.delegation.map_or(0, |_| 120);
+            + self.delegation.map_or(0, |_| 120)
+            + self.insertion.as_ref().map_or(0, |c| {
+                2 + c
+                    .iter()
+                    .map(|c| 36 + manifest_len(&c.manifest))
+                    .sum::<usize>()
+            });
         if len > max_bytes || len > MAX_TRANSFER_INTENT_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.delegation.is_some() {
+        bytes.extend(if self.insertion.is_some() {
+            b"VBTINT03"
+        } else if self.delegation.is_some() {
             b"VBTINT02"
         } else {
             b"VBTINT01"
@@ -181,6 +212,16 @@ impl TransferIntent {
         if let Some(binding) = self.delegation {
             binding.write(&mut bytes);
         }
+        if let Some(children) = &self.insertion {
+            bytes.extend((children.len() as u16).to_le_bytes());
+            for c in children {
+                bytes.extend(c.creation.get().to_le_bytes());
+                bytes.extend(c.creation_index.to_le_bytes());
+                bytes.extend(c.configuration.get().to_le_bytes());
+                bytes.extend((manifest_len(&c.manifest) as u32).to_le_bytes());
+                put_manifest(&mut bytes, &c.manifest);
+            }
+        }
         Ok(bytes)
     }
     pub fn decode(bytes: &[u8]) -> Result<Self, ApplicationError> {
@@ -189,7 +230,7 @@ impl TransferIntent {
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        if tag != b"VBTINT01" && tag != b"VBTINT02" {
+        if tag != b"VBTINT01" && tag != b"VBTINT02" && tag != b"VBTINT03" {
             return Err(ApplicationError::InvalidCommand);
         }
         let len = r.u32()? as usize;
@@ -201,6 +242,30 @@ impl TransferIntent {
         } else {
             None
         };
+        if tag == b"VBTINT03" {
+            let count = usize::from(r.u16()?);
+            if count == 0 || count > MAX_MANIFEST_ROUTES {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let mut children = Vec::with_capacity(count);
+            for _ in 0..count {
+                let creation = r.operation()?;
+                let creation_index = r.u64()?;
+                let configuration =
+                    ConfigurationId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+                let len = r.u32()? as usize;
+                children.push(InsertionChild {
+                    creation,
+                    creation_index,
+                    configuration,
+                    manifest: read_manifest(r.take(len)?)?,
+                });
+            }
+            if !r.done() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            return Self::insert_children(before, after, children).map_err(|e| e.0);
+        }
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -212,6 +277,12 @@ impl TransferIntent {
     pub fn retained_bytes(&self) -> usize {
         size_of::<Self>() + self.before.retained_bytes() + self.after.retained_bytes()
             - 2 * size_of::<ResponsibilityManifest>()
+            + self.insertion.as_ref().map_or(0, |c| {
+                c.capacity() * size_of::<InsertionChild>()
+                    + c.iter()
+                        .map(|c| c.manifest.retained_bytes() - size_of::<ResponsibilityManifest>())
+                        .sum::<usize>()
+            })
     }
 }
 

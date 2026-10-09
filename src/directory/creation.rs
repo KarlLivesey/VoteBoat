@@ -257,6 +257,11 @@ impl Directory {
         {
             return DirectoryOutcome::LifecycleBusy;
         }
+        if self.responsibility_insertion
+            && self.plan.manifests.len() + self.creations.len() >= MAX_DIRECTORY_MANIFESTS
+        {
+            return DirectoryOutcome::CreationConflict;
+        }
         let group = intent.bootstrap.group;
         let child = intent.responsibility;
         let used = self

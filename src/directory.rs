@@ -24,7 +24,7 @@ mod namespace;
 use crate::delegation::*;
 use crate::namespace_creation::*;
 use crate::routing::codec::*;
-use crate::transfer::{TransferIntent, TransferIntentStatus};
+use crate::transfer::{InsertionChild, TransferIntent, TransferIntentStatus};
 use crate::transfer_publication::*;
 use crate::{application::*, identity::*, log::*, routing::*};
 pub use creation::*;
@@ -37,6 +37,7 @@ pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
 pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
+pub const INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 5;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -311,6 +312,8 @@ pub struct Directory {
     group_creation: bool,
     namespace_creation: bool,
     namespace_transfers: bool,
+    responsibility_insertion: bool,
+    insertion_creations: BTreeSet<OperationId>,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
@@ -346,6 +349,8 @@ impl Directory {
             group_creation: false,
             namespace_creation: false,
             namespace_transfers: false,
+            responsibility_insertion: false,
+            insertion_creations: BTreeSet::new(),
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
@@ -386,6 +391,13 @@ impl Directory {
         next.namespace_transfers = true;
         Ok(next)
     }
+    /// Select schema5 before bootstrap; insertion publishes parent and children together.
+    #[allow(clippy::result_large_err)]
+    pub fn with_responsibility_insertion(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_namespace_transfers()?;
+        next.responsibility_insertion = true;
+        Ok(next)
+    }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -412,7 +424,9 @@ impl Directory {
         self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
             + self.delegations.len() * MAX_DIRECTORY_CONTROL_BYTES
             + if self.namespace_creation {
-                (self.creations.len() - self.namespace_publications.len())
+                (self.creations.len()
+                    - self.namespace_publications.len()
+                    - self.insertion_creations.len())
                     * MAX_NAMESPACE_PUBLICATION_BYTES
             } else {
                 0
@@ -427,7 +441,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_transfers {
+        bytes.extend(if self.responsibility_insertion {
+            b"VBDINIT5"
+        } else if self.namespace_transfers {
             b"VBDINIT4"
         } else if self.namespace_creation {
             b"VBDINIT3"
@@ -457,6 +473,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINIT2")
             || bytes.starts_with(b"VBDINIT3")
             || bytes.starts_with(b"VBDINIT4")
+            || bytes.starts_with(b"VBDINIT5")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -476,7 +493,10 @@ impl Directory {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 GroupCreationIntent::decode(bytes).map(Request::Create)
-            } else if bytes.starts_with(b"VBTINT01") || bytes.starts_with(b"VBTINT02") {
+            } else if bytes.starts_with(b"VBTINT01")
+                || bytes.starts_with(b"VBTINT02")
+                || (self.responsibility_insertion && bytes.starts_with(b"VBTINT03"))
+            {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01") {
                 TransferPublication::decode(bytes).map(Request::Publication)
@@ -609,6 +629,37 @@ impl Directory {
                 return DirectoryOutcome::TransferEvidenceMismatch;
             }
         }
+        if let Some(children) = intent.insertion_children() {
+            if !self.responsibility_insertion
+                || children.iter().any(|child| {
+                    let ExecutionMode::Single(group) = child.manifest.input().execution else {
+                        return true;
+                    };
+                    self.manifests
+                        .keys()
+                        .any(|id| id.id == child.manifest.input().responsibility.id)
+                        || self.insertion_creations.contains(&child.creation)
+                        || !self
+                            .group_creation_at(self.applied, group)
+                            .ok()
+                            .flatten()
+                            .is_some_and(|status| {
+                                status.operation == child.creation
+                                    && status.index == child.creation_index
+                                    && status.intent.expected == before.generation
+                                    && InsertionChild::from_creation(
+                                        child.manifest.clone(),
+                                        &status,
+                                    )
+                                    .ok()
+                                    .as_ref()
+                                        == Some(child)
+                            })
+                })
+            {
+                return DirectoryOutcome::TransferEvidenceMismatch;
+            }
+        }
         let targets = intent.targets();
         for target in &targets {
             let RouteTarget::Group(group) = target.target else {
@@ -697,6 +748,15 @@ impl Directory {
         let generation = publication.intent().after().input().generation;
         self.manifests
             .insert(id, publication.intent().after().clone());
+        if let Some(children) = publication.intent().insertion_children() {
+            for child in children {
+                self.manifests.insert(
+                    child.manifest.input().responsibility,
+                    child.manifest.clone(),
+                );
+                self.insertion_creations.insert(child.creation);
+            }
+        }
         self.transfers.remove(&id);
         self.publications.insert(publication.operation(), operation);
         DirectoryOutcome::TransferPublished(generation)
@@ -1221,7 +1281,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.namespace_transfers {
+        if self.responsibility_insertion {
+            INSERTION_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.namespace_transfers {
             NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA
         } else if self.namespace_creation {
             NAMESPACE_DIRECTORY_APPLICATION_SCHEMA
@@ -1243,7 +1305,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_transfers {
+        bytes.extend(if self.responsibility_insertion {
+            b"VBDIR005"
+        } else if self.namespace_transfers {
             b"VBDIR004"
         } else if self.namespace_creation {
             b"VBDIR003"
@@ -1287,7 +1351,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.namespace_transfers {
+                != if self.responsibility_insertion {
+                    b"VBDIR005"
+                } else if self.namespace_transfers {
                     b"VBDIR004"
                 } else if self.namespace_creation {
                     b"VBDIR003"
@@ -1318,6 +1384,7 @@ impl CheckpointStateMachine for Directory {
             next.group_creation = self.group_creation;
             next.namespace_creation = self.namespace_creation;
             next.namespace_transfers = self.namespace_transfers;
+            next.responsibility_insertion = self.responsibility_insertion;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

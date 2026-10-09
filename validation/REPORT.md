@@ -3039,3 +3039,30 @@ Final slice129 all-feature/all-target Clippy -D warnings passed3.16s; final form
 whitespace/inventory recorded below on completion. No remote CI gate was used.
 Final slice129 format, whitespace and80-contract inventory passed; all recorded
 validation handles terminal.
+
+## Slice130 — checked responsibility insertion
+
+83 related tests passed (directory31, delegation14, namespace_creation12,
+transfer_source7, transfer_target9, transfer_publication7, insertion3). Insertion
+covers actual deterministic fenced-parent handoff to two fresh children, exact
+reservation/configuration checks, imported retries/outbox, child identity service
+and later delegated freeze, full publication checkpoint truncations, atomic batch
+rejection and reserved publication after ordinary-history exhaustion. Native
+intent recovery covers every frame append cut plus Sync/PublishBefore/PublishAfter
+in ModelIo, observing only old or exact recorded intent and no early children.
+This does not validate native assigned insertion publication/activation phases,
+arbitrary faults, power loss on real hardware, macOS or separate hosts.
+
+Failed initial checks: missing production/test imports, fixture used RoutedOutcome
+for TargetOutcome and nonexistent WrongResponsibility instead of WrongIdentity;
+activation used a wrong operation ID; exhausted history prevented a later fresh
+reservation; self-parent mutation refused earlier by manifest Cycle; Clippy Copy
+hint clone. Corrected fixtures/imports and separated exhaustion/later-lifecycle
+branches without weakening production checks. Final extra checks recorded below.
+Additional slice130 activation9/repeat5/retirement7 regressions passed (104 unique
+related tests total). Insertion3 rerun also verifies exact child reads. Core-only
+insertion2 and all-feature/all-target Clippy passed before this read assertion;
+final rerun/checks recorded below.
+Final core-only insertion2 passed0.12s; all-feature/all-target Clippy -D warnings
+passed1.31s. Format, whitespace and80-contract inventory passed. All validation
+handles terminal; no remote CI gate used.

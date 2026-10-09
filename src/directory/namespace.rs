@@ -17,7 +17,9 @@ impl Directory {
     pub(super) fn namespace_permitted(&self, p: &NamespacePublication) -> bool {
         if !self.namespace_creation
             || self.namespace_publications.contains_key(&p.creation)
-            || self.plan.manifests.len() + self.namespace_publications.len()
+            || self.plan.manifests.len()
+                + self.namespace_publications.len()
+                + self.insertion_creations.len()
                 >= MAX_DIRECTORY_MANIFESTS
             || self
                 .manifests

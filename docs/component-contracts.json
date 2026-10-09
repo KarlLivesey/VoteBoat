@@ -1369,7 +1369,7 @@
     },
     {
       "design_id": "C05/C15",
-      "public_contract": "TransferIntent / TransferIntentStatus / LifecycleDirectory / DirectoryQuery / DirectoryRead / ContentDigest",
+      "public_contract": "TransferIntent / TransferIntentStatus / LifecycleDirectory / DirectoryQuery / DirectoryRead / ContentDigest / InsertionChild",
       "operations": [
         "new",
         "encode",
@@ -1381,15 +1381,20 @@
         "ContentDigest::sha256",
         "ContentDigest::scope_image",
         "delegation",
-        "permits_operation"
+        "permits_operation",
+        "insert_children",
+        "insertion_children",
+        "target_manifest",
+        "InsertionChild::from_creation"
       ],
       "native": "Directory intent journal and owning lifecycle query view over existing application/read/checkpoint contracts.",
       "conformance": [
         "tests/directory/transfer.rs",
         "tests/directory.rs",
-        "tests/delegation.rs"
+        "tests/delegation.rs",
+        "tests/insertion.rs"
       ],
-      "scope": "Contract 2: bounded exact whole-responsibility split/merge intent. Top-level VBTINT01 remains unchanged; VBTINT02 adds a checked content binding to an authenticated committed parent reservation for a delegated child. Unbound child intents refuse. Local responsibility/target and parent-generation/control reservations plus original outcomes reconstruct through schema-1 journal replay. LifecycleDirectory exposes bounded quorum reservation/completion queries alongside existing handoff status. Selected deterministic delegated split/routing/checkpoint tests and existing top-level native recovery evidence; foreign provenance remains authenticated host input. No native delegated phase/reopen, arbitrary-fault, namespace creation/deletion/reparenting or mixed-version claim."
+      "scope": "Contract 2: bounded exact whole-responsibility split/merge intent. Top-level VBTINT01 remains unchanged; VBTINT02 adds a checked content binding to an authenticated committed parent reservation for a delegated child. Unbound child intents refuse. Local responsibility/target and parent-generation/control reservations plus original outcomes reconstruct through schema-1 journal replay. LifecycleDirectory exposes bounded quorum reservation/completion queries alongside existing handoff status. Selected deterministic delegated split/routing/checkpoint tests and existing top-level native recovery evidence; foreign provenance remains authenticated host input. No native delegated phase/reopen, arbitrary-fault, namespace creation/deletion/reparenting or mixed-version claim. Slice130 contract3 adds bounded VBTINT03 root-to-fresh same-authority children, exact scope/identity mapping and compact committed Staging reservation references. Schema5 Directory atomically publishes parent and children with complete source/import evidence; insertion targets use schema3 and actual child grants. Selected deterministic handoff, imported retries/outbox, later delegated child freeze, malformed inputs, checkpoint truncations and native intent torn-frame/barrier tests pass. Native assigned insertion phase recovery and broader recursive insertion remain unvalidated."
     },
     {
       "design_id": "C05/C15/C23",
@@ -1447,9 +1452,10 @@
         "tests/transfer_merge.rs",
         "tests/routed/merge.rs",
         "tests/transfer_repeat.rs",
-        "tests/routed/repeat.rs"
+        "tests/routed/repeat.rs",
+        "tests/insertion.rs"
       ],
-      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, ordered complete actual imports and source commitments. Reserved lifecycle IDs cannot collide with retained provider data IDs. Decision-bound local activation retains original stage/import/decision/configuration and consumes no data slot. Active owner/epoch/scope/envelope-key checks preserve imported retries/outbox without ancestor access. Later VBTFRZ01 fixes the same provider/log at exact F, preserves original activation lineage, and permits only exact freeze retries while wrapper applied progress advances. Bounded quorum-readable source status/exports use existing publication evidence. VBTRGT03/application schema 2 reads old schema-1 VBTRGT01/VBTRGT02; schema/tag mismatches refuse. Selected deterministic split/merge/split and native TCP/QUIC split/merge WAL/checkpoint histories cover repeated activated sources and retained original operations/outbox. Host providers use the same scope contract; authenticated foreign provenance remains trusted host input. No new worker/store owner, retirement/reclamation, delegated-parent lifecycle, arbitrary-fault or macOS claim."
+      "scope": "Bootstrap-bound lifecycle/target/intent/provider limits, ordered complete actual imports and source commitments. Reserved lifecycle IDs cannot collide with retained provider data IDs. Decision-bound local activation retains original stage/import/decision/configuration and consumes no data slot. Active owner/epoch/scope/envelope-key checks preserve imported retries/outbox without ancestor access. Later VBTFRZ01 fixes the same provider/log at exact F, preserves original activation lineage, and permits only exact freeze retries while wrapper applied progress advances. Bounded quorum-readable source status/exports use existing publication evidence. VBTRGT03/application schema 2 reads old schema-1 VBTRGT01/VBTRGT02; schema/tag mismatches refuse. Selected deterministic split/merge/split and native TCP/QUIC split/merge WAL/checkpoint histories cover repeated activated sources and retained original operations/outbox. Host providers use the same scope contract; authenticated foreign provenance remains trusted host input. No new worker/store owner, retirement/reclamation, delegated-parent lifecycle, arbitrary-fault or macOS claim. Slice130 insertion targets bind VBTSOWN2/schema3/VBTRGT04, selecting the fresh child grant for read/admission/apply, later freeze and retirement. Ordinary schema2/legacy1 paths remain separate. Selected deterministic insertion activation and child-identity freeze/checkpoint recovery covered; native insertion recovery remains next."
     },
     {
       "design_id": "C05/C15",

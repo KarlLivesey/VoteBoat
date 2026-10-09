@@ -254,3 +254,28 @@ retains original lifecycle statuses, updated target data/outbox and stale-route/
 fenced-source refusal. These selected Linux loopback/owner-abort histories add
 native integration evidence; recursive insertion and broader lifecycle/platform/
 arbitrary-fault validation remain separate work.
+
+## Inserting children into an existing responsibility
+
+Slice130 adds an explicit same-authority insertion path. Select
+`Directory::with_responsibility_insertion()` before bootstrap (schema5). Reserve
+fresh child groups in `Staging` mode under the current root generation. Build each
+`InsertionChild::from_creation(child_manifest, committed_status)` and a
+`TransferIntent::insert_children(before, delegated_after, children)`. Child scopes
+must exactly match the parent's complete delegated selectors; each child starts
+with epoch/generation1 and its own responsibility identity and concrete group.
+
+The existing source fence/export, target import, complete transfer publication
+and individual target activation protocol then applies. Publication installs the
+parent and all child manifests atomically. Insertion targets bind schema3 and
+serve their exact child identity. Imported deduplication/outbox records keep the
+parent's source lineage. A later child split uses the existing parent delegation
+reservation protocol and freezes under the child's identity.
+
+A compact creation reference is not a bootstrap or quorum certificate. Assigned
+node bootstrap, authenticated committed observations, and host placement checks
+remain required. Current evidence covers deterministic handoff, checkpoint
+recovery and selected native intent WAL faults. Native assigned insertion service
+phase recovery is the next deliverable. This path currently requires a root source,
+one metadata authority, complete scope movement and fresh Single child owners;
+deeper insertion, deletion/reparenting and authority movement remain planned.
