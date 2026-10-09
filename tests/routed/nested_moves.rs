@@ -116,7 +116,7 @@ struct Moves {
 }
 impl Moves {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
-        let mut base = Nested::new(protocol, checkpoint);
+        let mut base: Nested = Nested::new(protocol, checkpoint);
         let b = data(base.plan.before(), 21, 40, 3);
         let r = propose_recovering(&mut base.source, &base.clock, 21, 81, b);
         assert!(

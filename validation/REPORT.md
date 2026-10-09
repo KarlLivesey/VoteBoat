@@ -3410,3 +3410,28 @@ background. None of these finite checks certifies the full baseline.
 
 Final restored store9/timing2 pass0.02s after4.64s build; final all-feature/all-target
 Clippy -D warnings7.96s passes. All handles terminal.
+
+## Slice140 — guarded profile selected before nested network bootstrap
+
+The actual recursive insertion fixture now supports raw and initially guarded
+grandchildren31/32 through a test-only profile. No production protocol, provider,
+format or implicit migration was added. Exact owner receipt/read extraction
+refuses retired/fenced variants. Existing assigned creation bindings and the
+complete lifecycle history are shared between profiles.
+
+Executed cargo +stable test --all-features --test routed guarded_nested_insertion
+--locked --offline -- --test-threads=1 --nocapture:4/4 pass349.62s after10.70s
+compile. TCP/TLS and QUIC, each WAL/checkpoint, cover ten unread lifecycle and
+two unread activation abort/reopen/retry cuts per history, quorum fact equality,
+no-dual-owner observations, imported operation IDs/outbox, original activation,
+immutable creation bindings and successor writes while ancestor files remain
+unchanged. Executed the existing raw tcp_nested_insertion_recovers_unread_phases_
+from_wal history:1/1 pass84.91s after1.47s compile. Other raw profiles not rerun.
+
+All-feature/all-target Clippy -D warnings passes2.42s; cargo fmt check, git diff
+--check and node validation/check-inventory.mjs pass (80 contracts). Initial
+compile failures were limited to fixture visibility/query bounds/type inference
+and fixed directly. All handles terminal. This is Linux pre-retirement live-guard
+evidence, not networked nested retirement/reclamation, macOS, power-loss or broad
+protocol proof. Next test actual later transfer and retirement of assigned31;
+full P0–P7 and prior gaps remain active, P8/Windows deferred, CI background.

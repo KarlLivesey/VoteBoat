@@ -9846,3 +9846,73 @@ requirements remain active. P8/Windows deferred, RPL-1.5 retained, pack preserve
 
 Final restored store9/timing2 pass0.02s after4.64s build; final all-feature/all-target
 Clippy -D warnings7.96s passes. All benchmark/test/check handles terminal.
+
+## Slice140 schema plan — guard selected before nested target bootstrap
+
+Previous goal turn explained P8; no implementation progress. Revalidated clean
+worktree and the next available path. Nested network targets currently use raw
+TransferTarget checkpoints. RetirementGuard must be selected before bootstrap;
+hot wrapping those recovered applications would silently change their contract.
+Before testing later-source retirement, parameterize this existing fixture with
+a test-only profile for raw and guarded targets. This helper is necessary to
+exercise the actual assigned nested groups and immutable creation bindings,
+without copying the lifecycle protocol or substituting a simpler source.
+
+Data/API: profile chooses the initial target factory, wraps owner queries and
+extracts exact owner receipts/read results. Guarded extraction must refuse any
+retirement/fenced variant; no fabricated success. Production APIs unchanged.
+Transitions remain reservation -> stage -> source fence -> import -> publication
+-> parent refresh -> activation. Sources and metadata retain their existing
+profiles. Each target owns its chosen profile throughout WAL/checkpoint reopen.
+Failures abort the owner with the accepted completion unread, then reconstruct
+facts through quorum reads and retry the original bytes/operation. Native workers
+and file locks terminate before reopen; cleanup follows the existing fixture.
+
+Acceptance: run the guarded nested insertion history over TCP/TLS and QUIC,
+WAL and checkpoint, preserving assigned creation bindings, import/dedup/outbox,
+first activation and no-dual-owner observations at each cut. Run the unchanged
+raw TCP history as a regression and check all-feature compilation/Clippy. These
+are pre-retirement checks, not evidence of networked nested retirement or reclaim.
+
+Linked mini plan: current profile-selection/recovery fixture (P1/P6), depends on
+RetirementGuard and actual nested insertion, checks above. Next later handoff
+and unread retirement of assigned group31 (P1/P6), depends on this profile,
+publication/all target activations/exact retention release, checks retired lineage
+and quorum retry/reopen. Following retired checkpoint publication and reclaim
+plus successor service with ancestors offline (P1/P6), depends on retirement and
+pinned snapshot/log boundary, checks no retained owner commands and unchanged
+stopped ancestor files. Macro full P0–P7 remains active; wider admission, fairness,
+platform and measured P7 gaps remain. P8/Windows deferred, CI background.
+
+## Slice140 implemented — native guarded nested insertion and recovery
+
+Test-only TargetProfile selects raw TransferTarget or RetirementGuard from the
+initial factory for assigned grandchildren31/32. The existing nested fixture is
+shared, not copied; metadata and source21 remain raw. Owner queries/receipts are
+unwrapped exactly, and retired/fenced wrapper variants panic rather than being
+translated into a successful owner outcome. Production APIs, admission, storage
+formats and retirement protocol are unchanged. No hot wrapping or migration.
+
+Four guarded TCP/TLS and QUIC histories, WAL and checkpoint, pass349.62s after
+10.70s compile. Each executes ten accepted/unread lifecycle abort/reopen/retry
+cuts and two accepted/unread activation cuts, preserving quorum-observed facts,
+actual assigned creation bindings, imported deduplication/outbox and original
+activation. Ancestor groups are stopped while new owners serve original retries
+and new writes; their durable files remain unchanged. Subsequent whole-fixture
+reopen preserves the active profile. Existing raw TCP WAL history passes84.91s
+after1.47s compile as the shared-fixture regression. Other raw combinations were
+not rerun in this slice. All network tests ran serialized on Linux.
+
+All-feature/all-target Clippy -D warnings passes2.42s; formatting, whitespace
+and80-contract inventory pass. Initial compilation exposed private child-module
+visibility, missing Query:Clone and default-profile inference; focused fixture
+fixes resolved these, with no production rewrite. All process handles terminal.
+These are live-profile checks, not nested retirement/reclamation, physical power
+loss, macOS, separate-host or general protocol proof.
+
+Macro review: P1/P6 evidence advances; no milestone completed. Mini next remains
+later handoff and unread retirement of actually assigned group31, then retired
+checkpoint/reclaim plus ancestor-offline successor service. Reuse the profile
+for subsequent targets before bootstrap and keep retirement queries/receipts
+typed, outside the live-owner extraction helper. Entire P0–P7 remains active,
+including prior admission/lifecycle/platform/P7 gaps; P8/Windows deferred.

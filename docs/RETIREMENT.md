@@ -76,3 +76,12 @@ original split source; later activated-source retirement currently has
 deterministic and native-file evidence. These finite Linux tests are not machine
 power-loss, arbitrary-fault, macOS or separate-host proof. Recursive lifecycle,
 general retention and broader P7 validation remain outstanding.
+
+The nested insertion fixture now selects raw or guarded grandchild targets before
+their first bootstrap. Four guarded network histories cover TCP/TLS and QUIC,
+WAL and checkpoint recovery, ten unread lifecycle cuts and two unread activation
+cuts per history. They retain actual creation bindings, imported operation IDs,
+outbox state and original activation while serving with ancestors offline. This
+is evidence for the live guard profile through nested insertion and recovery;
+it does not yet retire those nested targets or reclaim their storage. The next
+history must move their ownership and establish the exact retirement proof.

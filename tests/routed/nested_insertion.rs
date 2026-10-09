@@ -14,6 +14,9 @@
 // rights and limitations under the RPL.
 use super::*;
 use voteboat::delegation::*;
+#[path = "target_profile.rs"]
+mod profile;
+use profile::*;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Step {
     Data,
@@ -97,7 +100,7 @@ fn target(intent: &TransferIntent, g: u128) -> target_fixture::Target {
     )
     .unwrap_or_else(|e| panic!("{:?}", e.0))
 }
-struct Nested {
+struct Nested<P: TargetProfile = Raw> {
     root: std::path::PathBuf,
     clock: Instant,
     protocol: NativePeerProtocol,
@@ -108,11 +111,11 @@ struct Nested {
     bound: Option<TransferIntent>,
     parent: Vec<Node<LifecycleDirectory>>,
     source: Vec<Node<target_fixture::Target>>,
-    targets: [Vec<Node<target_fixture::Target>>; 2],
+    targets: [Vec<Node<P::Application>>; 2],
     bindings: BTreeMap<(u128, NodeId), Vec<u8>>,
     stopped: BTreeMap<std::path::PathBuf, Vec<u8>>,
 }
-impl Nested {
+impl<P: TargetProfile> Nested<P> {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
         let mut base = Insertion::with_metadata(protocol, checkpoint, metadata);
         // Consume setup results; interruption evidence for this root path already exists.
@@ -285,7 +288,7 @@ impl Nested {
                         ),
                         &self.clock,
                         self.protocol,
-                        || target(intent, 31 + i as u128),
+                        || profile_target::<P>(intent, 31 + i as u128),
                     );
                 }
             }
@@ -416,7 +419,7 @@ impl Nested {
             if self.targets[i].is_empty() {
                 None
             } else {
-                let TargetRead::Status(s) = split::observe(
+                let TargetRead::Status(s) = observe_target::<P>(
                     &mut self.targets[i],
                     &self.clock,
                     31 + i as u128,
@@ -528,7 +531,7 @@ impl Nested {
                     g,
                     300,
                     b.clone(),
-                    |a| a.status().staged_index.is_some(),
+                    |a| P::owner(a).status().staged_index.is_some(),
                 );
                 return Some(Request {
                     step: Step::Stage(g),
@@ -590,7 +593,7 @@ impl Nested {
                     }],
                 )
                 .unwrap_or_else(|e| panic!("{:?}", e.0));
-                let b = self.targets[i][0].local().applications[&group(g)]
+                let b = P::owner(&self.targets[i][0].local().applications[&group(g)])
                     .import_command(&import, 100000)
                     .unwrap();
                 deliver(
@@ -600,7 +603,7 @@ impl Nested {
                     g,
                     300,
                     b.clone(),
-                    |a| a.status().imported.is_some(),
+                    |a| P::owner(a).status().imported.is_some(),
                 );
                 return Some(Request {
                     step: Step::Import(g),
@@ -719,7 +722,7 @@ impl Nested {
                 let key = if i == 0 { 1 } else { 80 };
                 let m = intent.target_manifest(group(g)).unwrap();
                 assert_eq!(
-                    split::observe(&mut self.targets[i], &self.clock, g, query(m, g, key)),
+                    observe_target::<P>(&mut self.targets[i], &self.clock, g, query(m, g, key)),
                     TargetRead::NotActive
                 );
                 assert!(self.targets[i][0]
@@ -826,7 +829,7 @@ impl Nested {
             }
         } else {
             let i = (r.group - 31) as usize;
-            let result = propose_recovering(
+            let result = propose_target::<P>(
                 &mut self.targets[i],
                 &self.clock,
                 r.group,
@@ -846,9 +849,9 @@ impl Nested {
         }
     }
 }
-fn history(protocol: NativePeerProtocol, checkpoint: bool) {
+fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Nested::new(protocol, checkpoint);
+    let mut rig = Nested::<P>::new(protocol, checkpoint);
     let source_original = rig.source[0].local().applications[&group(21)].status();
     for step in [
         Step::Data,
@@ -901,7 +904,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             metadata_configuration: configuration,
             decision: publication.clone(),
         };
-        let bytes = rig.targets[i][0].local().applications[&group(g)]
+        let bytes = P::owner(&rig.targets[i][0].local().applications[&group(g)])
             .activation_command(&activation, 100000)
             .unwrap();
         unread(
@@ -910,10 +913,10 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             g,
             300,
             bytes.clone(),
-            |a| a.status().activated.is_some(),
+            |a| P::owner(a).status().activated.is_some(),
         );
         let TargetRead::Status(status) =
-            split::observe(&mut rig.targets[i], &rig.clock, g, TargetQuery::Status)
+            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, TargetQuery::Status)
         else {
             panic!("activation")
         };
@@ -931,18 +934,18 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             configuration_for(&rig.root, g),
             &rig.clock,
             protocol,
-            || target(&intent, g),
+            || profile_target::<P>(&intent, g),
         );
         campaign(&mut rig.targets[i], &rig.clock, g);
-        let retry = propose_recovering(&mut rig.targets[i], &rig.clock, g, 300, bytes);
+        let retry = propose_target::<P>(&mut rig.targets[i], &rig.clock, g, 300, bytes);
         assert!(matches!(retry.outcome,TargetOutcome::Activated(v) if Some(v)==status.activated));
         assert_eq!(
-            split::observe(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
+            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
             TargetRead::Data(value)
         );
         if i == 0 {
             assert_eq!(
-                split::observe(
+                observe_target::<P>(
                     &mut rig.targets[1],
                     &rig.clock,
                     32,
@@ -951,7 +954,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
                 TargetRead::NotActive
             );
         }
-        let retry = propose_recovering(
+        let retry = propose_target::<P>(
             &mut rig.targets[i],
             &rig.clock,
             g,
@@ -961,7 +964,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         assert!(
             matches!(retry.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
         );
-        let write = propose_recovering(
+        let write = propose_target::<P>(
             &mut rig.targets[i],
             &rig.clock,
             g,
@@ -992,18 +995,18 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     for (i, g, key, value) in [(0, 31, 1, 9), (1, 32, 80, 7)] {
         let m = intent.target_manifest(group(g)).unwrap();
         assert_eq!(
-            split::observe(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
+            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
             TargetRead::Data(value)
         );
         assert!(rig.targets[i]
             .iter()
-            .all(|n| n.local().applications[&group(g)]
+            .all(|n| P::owner(&n.local().applications[&group(g)])
                 .application()
                 .outbox()
                 .count()
                 == 2));
         assert_eq!(
-            split::observe(
+            observe_target::<P>(
                 &mut rig.targets[i],
                 &rig.clock,
                 g,
@@ -1029,21 +1032,40 @@ fn configuration_for(root: &Path, g: u128) -> Vec<NativeStartup> {
 }
 #[test]
 fn tcp_nested_insertion_recovers_unread_phases_from_wal() {
-    history(NativePeerProtocol::TcpTls, false);
+    history::<Raw>(NativePeerProtocol::TcpTls, false);
 }
 #[test]
 fn tcp_nested_insertion_recovers_unread_phases_from_checkpoint() {
-    history(NativePeerProtocol::TcpTls, true);
+    history::<Raw>(NativePeerProtocol::TcpTls, true);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_nested_insertion_recovers_unread_phases_from_wal() {
-    history(NativePeerProtocol::Quic, false);
+    history::<Raw>(NativePeerProtocol::Quic, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_nested_insertion_recovers_unread_phases_from_checkpoint() {
-    history(NativePeerProtocol::Quic, true);
+    history::<Raw>(NativePeerProtocol::Quic, true);
+}
+
+#[test]
+fn tcp_guarded_nested_insertion_recovers_unread_phases_from_wal() {
+    history::<Guarded>(NativePeerProtocol::TcpTls, false);
+}
+#[test]
+fn tcp_guarded_nested_insertion_recovers_unread_phases_from_checkpoint() {
+    history::<Guarded>(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_guarded_nested_insertion_recovers_unread_phases_from_wal() {
+    history::<Guarded>(NativePeerProtocol::Quic, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_guarded_nested_insertion_recovers_unread_phases_from_checkpoint() {
+    history::<Guarded>(NativePeerProtocol::Quic, true);
 }
 
 #[path = "nested_moves.rs"]
