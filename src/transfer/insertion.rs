@@ -59,7 +59,7 @@ impl TransferIntent {
     /// Source fences retain the parent's identity; target service uses each exact
     /// child identity. Publication must atomically install parent and children.
     #[allow(clippy::result_large_err)]
-    pub fn insert_children(
+    pub(crate) fn insertion_candidate(
         before: ResponsibilityManifest,
         after: ResponsibilityManifest,
         children: Vec<InsertionChild>,
@@ -78,7 +78,7 @@ impl TransferIntent {
             let ExecutionMode::Delegated(routes) = &a.execution else {
                 return Err(ApplicationError::InvalidCommand);
             };
-            if b.parent.is_some()
+            if b.parent.is_some_and(|p| p.group != b.authority)
                 || a.parent != b.parent
                 || a.responsibility != b.responsibility
                 || a.authority != b.authority
@@ -119,6 +119,8 @@ impl TransferIntent {
                     || c.generation.get() != 1
                     || c.state != ResponsibilityState::Active
                     || c.responsibility.id == b.responsibility.id
+                    || b.parent
+                        .is_some_and(|p| p.responsibility.id == c.responsibility.id)
                     || g.id == b.authority.id
                     || sources.iter().any(|s| match s.target {
                         RouteTarget::Group(s) => s.id == g.id,
@@ -151,6 +153,49 @@ impl TransferIntent {
             insertion: Some(children),
         })
     }
+    /// Root insertion; delegated sources require a checked parent reservation.
+    #[allow(clippy::result_large_err)]
+    pub fn insert_children(
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        children: Vec<InsertionChild>,
+    ) -> Result<
+        Self,
+        (
+            ApplicationError,
+            ResponsibilityManifest,
+            ResponsibilityManifest,
+            Vec<InsertionChild>,
+        ),
+    > {
+        if before.input().parent.is_some() {
+            return Err((ApplicationError::InvalidCommand, before, after, children));
+        }
+        Self::insertion_candidate(before, after, children)
+    }
+    pub(crate) fn delegated_insertion(
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        children: Vec<InsertionChild>,
+        binding: crate::delegation::DelegationBinding,
+    ) -> Result<Self, ApplicationError> {
+        let mut intent = Self::insertion_candidate(before, after, children).map_err(|e| e.0)?;
+        let children = intent.insertion_children().expect("checked insertion");
+        if intent.before.input().parent.is_none()
+            || binding.index == 0
+            || binding.index == u64::MAX
+            || binding.operation == binding.child_operation
+            || children
+                .iter()
+                .any(|c| c.creation == binding.operation || c.creation == binding.child_operation)
+            || binding.plan_digest
+                != binding.digest_insertion_for(&intent.before, &intent.after, children)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        intent.delegation = Some(binding);
+        Ok(intent)
+    }
     pub fn insertion_children(&self) -> Option<&[InsertionChild]> {
         self.insertion.as_deref()
     }
@@ -174,4 +219,43 @@ impl TransferIntent {
             }
         }
     }
+}
+
+// Shared canonical mapping used by intents, reservations and their content binding.
+pub(crate) fn insertion_len(children: &[InsertionChild]) -> usize {
+    2 + children
+        .iter()
+        .map(|c| 36 + manifest_len(&c.manifest))
+        .sum::<usize>()
+}
+pub(crate) fn put_insertion(out: &mut Vec<u8>, children: &[InsertionChild]) {
+    out.extend((children.len() as u16).to_le_bytes());
+    for c in children {
+        out.extend(c.creation.get().to_le_bytes());
+        out.extend(c.creation_index.to_le_bytes());
+        out.extend(c.configuration.get().to_le_bytes());
+        out.extend((manifest_len(&c.manifest) as u32).to_le_bytes());
+        put_manifest(out, &c.manifest);
+    }
+}
+pub(crate) fn read_insertion(r: &mut Reader<'_>) -> Result<Vec<InsertionChild>, ApplicationError> {
+    let count = usize::from(r.u16()?);
+    if count == 0 || count > MAX_MANIFEST_ROUTES {
+        return Err(ApplicationError::InvalidCommand);
+    }
+    let mut children = Vec::with_capacity(count);
+    for _ in 0..count {
+        let creation = r.operation()?;
+        let creation_index = r.u64()?;
+        let configuration =
+            ConfigurationId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?;
+        let len = r.u32()? as usize;
+        children.push(InsertionChild {
+            creation,
+            creation_index,
+            configuration,
+            manifest: read_manifest(r.take(len)?)?,
+        });
+    }
+    Ok(children)
 }

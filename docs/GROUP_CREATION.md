@@ -277,6 +277,28 @@ node bootstrap, authenticated committed observations, and host placement checks
 remain required. Current evidence covers deterministic handoff, checkpoint
 recovery and selected native intent WAL faults. Slice131 adds selected assigned
 native TCP/QUIC WAL/checkpoint phase recovery, partial provisioning, unread results,
-exact retries and individual child activation with ancestor/source offline. This path currently requires a root source,
-one metadata authority, complete scope movement and fresh Single child owners;
-deeper insertion, deletion/reparenting and authority movement remain planned.
+exact retries and individual child activation with ancestor/source offline. Root insertion requires one metadata authority, complete scope movement and fresh
+Single child owners. Slice132 adds same-authority nested insertion through an
+explicit parent reservation; native nested phase recovery, cross-authority and
+retained local scope insertion, deletion/reparenting and authority movement remain
+planned.
+
+### Nested insertion
+
+Select Directory::with_recursive_insertion() before bootstrap (schema6). Reserve
+fresh Staging grandchildren under the existing child's current generation. Use
+DelegationPlan::insertion(parent, before, after, children, child_operation) to
+reserve the exact parent route and entire mapping. After authenticated committed
+reservation observation, child_intent(configuration) produces VBTINT04. Changing
+a child manifest or creation ID/index/configuration breaks the parent binding.
+
+Follow the existing fence/import/publication path, then commit DelegationCompletion
+to refresh the parent's child epoch locator, and activate each grandchild using the
+exact child publication. Dynamic parents may reserve later lifecycles; local
+ancestry must be rooted and leave space within MAX_ROUTE_HOPS. Nested targets bind
+schema4; source lineage and imported operations remain unchanged. Existing original
+decline/cancellation remains available before a successful child intent.
+
+Current nested evidence is deterministic handoff, checkpoint/partial-progress
+recovery, exact retries/outbox, parent refresh, dynamic-parent later freeze and
+legacy codec/schema checks. Native nested TCP/QUIC phase recovery is next.

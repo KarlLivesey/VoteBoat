@@ -3094,3 +3094,31 @@ to equivalent iterator/enumerate. Final all-feature/all-target Clippy -D warning
 passed1.42s; acceptance cases did not fail. Final metadata checks recorded below.
 Final slice131 format, whitespace and80-contract inventory passed. All recorded
 validation handles terminal; no CI gate used.
+
+## Slice132 — checked same-authority nested insertion
+
+107 related tests passed: insertion6, directory31, delegation14, namespace12,
+source7, target9, publication7, activation9, repeat5, retirement7. Focused insertion6
+passed2.29s; core-only insertion5 passed2.29s. Three new nested tests cover actual
+root insertion then child-to-grandchild handoff, full-map parent reservation/ref/
+configuration binding, all codec truncations/tampering, source fence/reopen, atomic
+child publication/parent locator refresh, reserved completion after ordinary-history
+exhaustion, target activation and retry/outbox/fresh-write preservation. New schema4
+targets refuse schema3 restore; schema5 metadata refuses new plan/schema6 restore.
+Checkpoint all truncations and failed-batch checks preserve prior state. Dynamic
+parent later reservation/grandchild freeze works;31-node ancestry accepts a new
+child while32-node ancestry refuses. Cancellation and nested read budgets checked.
+
+All-feature/all-target Clippy -D warnings passed0.88s. Initial fixture missing
+ScopeImage import and Copy query clone were corrected without relaxing acceptance.
+Selected native root regression is pending its terminal result. No native nested
+phase, arbitrary-fault, cross-authority/retained-scope or macOS/separate-host claim.
+Full P0–P7 remains active. Final metadata checks recorded below.
+Selected native TCP/TLS root-insertion WAL regression passed46.08s under the new
+production code, preserving schema5/root-target compatibility. Other prior native
+cases were not rerun without a changed path/failure; this is not nested native
+acceptance. Added successful nested-intent decline refusal assertion; final focused
+result follows.
+Final focused insertion6 passed2.95s; core-only insertion5 passed2.57s;
+all-feature/all-target Clippy -D warnings passed1.20s. Format, whitespace and
+80-contract inventory passed; all handles terminal. No CI gate used.

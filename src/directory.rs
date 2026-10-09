@@ -38,6 +38,7 @@ pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
 pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
 pub const INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 5;
+pub const RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 6;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -313,6 +314,7 @@ pub struct Directory {
     namespace_creation: bool,
     namespace_transfers: bool,
     responsibility_insertion: bool,
+    recursive_insertion: bool,
     insertion_creations: BTreeSet<OperationId>,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
@@ -350,6 +352,7 @@ impl Directory {
             namespace_creation: false,
             namespace_transfers: false,
             responsibility_insertion: false,
+            recursive_insertion: false,
             insertion_creations: BTreeSet::new(),
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
@@ -398,6 +401,13 @@ impl Directory {
         next.responsibility_insertion = true;
         Ok(next)
     }
+    /// Select schema6 before bootstrap; authorize nested insertion and dynamic parents.
+    #[allow(clippy::result_large_err)]
+    pub fn with_recursive_insertion(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_responsibility_insertion()?;
+        next.recursive_insertion = true;
+        Ok(next)
+    }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -441,7 +451,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.responsibility_insertion {
+        bytes.extend(if self.recursive_insertion {
+            b"VBDINIT6"
+        } else if self.responsibility_insertion {
             b"VBDINIT5"
         } else if self.namespace_transfers {
             b"VBDINIT4"
@@ -474,6 +486,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINIT3")
             || bytes.starts_with(b"VBDINIT4")
             || bytes.starts_with(b"VBDINIT5")
+            || bytes.starts_with(b"VBDINIT6")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -496,11 +509,14 @@ impl Directory {
             } else if bytes.starts_with(b"VBTINT01")
                 || bytes.starts_with(b"VBTINT02")
                 || (self.responsibility_insertion && bytes.starts_with(b"VBTINT03"))
+                || (self.recursive_insertion && bytes.starts_with(b"VBTINT04"))
             {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01") {
                 TransferPublication::decode(bytes).map(Request::Publication)
-            } else if bytes.starts_with(b"VBDPLAN1") {
+            } else if bytes.starts_with(b"VBDPLAN1")
+                || (self.recursive_insertion && bytes.starts_with(b"VBDPLAN2"))
+            {
                 DelegationPlan::decode(bytes).map(Request::Delegation)
             } else if bytes.starts_with(b"VBDCOMP1") {
                 DelegationCompletion::decode(bytes).map(Request::DelegationCompletion)
@@ -586,6 +602,64 @@ impl Directory {
         self.manifests.insert(id, command.manifest);
         DirectoryOutcome::Published(generation)
     }
+    fn insertion_permitted(
+        &self,
+        before: &ResponsibilityManifest,
+        children: &[InsertionChild],
+    ) -> bool {
+        if !self.responsibility_insertion {
+            return false;
+        }
+        let b = before.input();
+        if self.recursive_insertion {
+            let mut current = b.responsibility;
+            let mut seen = [None; MAX_ROUTE_HOPS];
+            let mut rooted = false;
+            for hop in 0..MAX_ROUTE_HOPS - 1 {
+                if seen[..hop].contains(&Some(current)) {
+                    return false;
+                }
+                seen[hop] = Some(current);
+                let Some(m) = self.manifests.get(&current) else {
+                    return false;
+                };
+                match m.input().parent {
+                    None => {
+                        rooted = true;
+                        break;
+                    }
+                    Some(p) if p.group == self.plan.authority => current = p.responsibility,
+                    _ => return false,
+                }
+            }
+            if !rooted {
+                return false;
+            }
+        }
+        children.iter().all(|child| {
+            let ExecutionMode::Single(group) = child.manifest.input().execution else {
+                return false;
+            };
+            !self
+                .manifests
+                .keys()
+                .any(|id| id.id == child.manifest.input().responsibility.id)
+                && !self.insertion_creations.contains(&child.creation)
+                && self
+                    .group_creation_at(self.applied, group)
+                    .ok()
+                    .flatten()
+                    .is_some_and(|status| {
+                        status.operation == child.creation
+                            && status.index == child.creation_index
+                            && status.intent.expected == b.generation
+                            && InsertionChild::from_creation(child.manifest.clone(), &status)
+                                .ok()
+                                .as_ref()
+                                == Some(child)
+                    })
+        })
+    }
     fn begin_transfer(
         &mut self,
         operation: OperationId,
@@ -630,33 +704,7 @@ impl Directory {
             }
         }
         if let Some(children) = intent.insertion_children() {
-            if !self.responsibility_insertion
-                || children.iter().any(|child| {
-                    let ExecutionMode::Single(group) = child.manifest.input().execution else {
-                        return true;
-                    };
-                    self.manifests
-                        .keys()
-                        .any(|id| id.id == child.manifest.input().responsibility.id)
-                        || self.insertion_creations.contains(&child.creation)
-                        || !self
-                            .group_creation_at(self.applied, group)
-                            .ok()
-                            .flatten()
-                            .is_some_and(|status| {
-                                status.operation == child.creation
-                                    && status.index == child.creation_index
-                                    && status.intent.expected == before.generation
-                                    && InsertionChild::from_creation(
-                                        child.manifest.clone(),
-                                        &status,
-                                    )
-                                    .ok()
-                                    .as_ref()
-                                        == Some(child)
-                            })
-                })
-            {
+            if !self.insertion_permitted(intent.before(), children) {
                 return DirectoryOutcome::TransferEvidenceMismatch;
             }
         }
@@ -791,9 +839,19 @@ impl Directory {
     ) -> DirectoryOutcome {
         let parent = plan.parent().input();
         if parent.authority != self.plan.authority
-            || !self.plan.manifests.contains_key(&parent.responsibility)
+            || (!self.plan.manifests.contains_key(&parent.responsibility)
+                && !(self.recursive_insertion
+                    && self.manifests.contains_key(&parent.responsibility)))
         {
             return DirectoryOutcome::UnknownResponsibility;
+        }
+        if let Some(children) = plan.insertion_children() {
+            if !self.recursive_insertion
+                || children.iter().any(|c| c.creation == operation)
+                || !self.insertion_permitted(plan.before(), children)
+            {
+                return DirectoryOutcome::TransferEvidenceMismatch;
+            }
         }
         if operation == plan.child_operation() {
             return DirectoryOutcome::TransferEvidenceMismatch;
@@ -1281,7 +1339,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.responsibility_insertion {
+        if self.recursive_insertion {
+            RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.responsibility_insertion {
             INSERTION_DIRECTORY_APPLICATION_SCHEMA
         } else if self.namespace_transfers {
             NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA
@@ -1305,7 +1365,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.responsibility_insertion {
+        bytes.extend(if self.recursive_insertion {
+            b"VBDIR006"
+        } else if self.responsibility_insertion {
             b"VBDIR005"
         } else if self.namespace_transfers {
             b"VBDIR004"
@@ -1351,7 +1413,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.responsibility_insertion {
+                != if self.recursive_insertion {
+                    b"VBDIR006"
+                } else if self.responsibility_insertion {
                     b"VBDIR005"
                 } else if self.namespace_transfers {
                     b"VBDIR004"
@@ -1385,6 +1449,7 @@ impl CheckpointStateMachine for Directory {
             next.namespace_creation = self.namespace_creation;
             next.namespace_transfers = self.namespace_transfers;
             next.responsibility_insertion = self.responsibility_insertion;
+            next.recursive_insertion = self.recursive_insertion;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

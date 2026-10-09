@@ -31,6 +31,7 @@ use std::mem::size_of;
 
 pub const TRANSFER_TARGET_SCHEMA: u64 = 2;
 pub const INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 3;
+pub const RECURSIVE_INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 4;
 pub const MAX_TARGET_ACTIVATION_BYTES: usize = 64 * 1024;
 pub const MAX_INLINE_IMPORT_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_TARGET_FREEZE_BYTES: usize = 52 + MAX_TRANSFER_INTENT_BYTES;
@@ -386,11 +387,15 @@ where
                 return Err(ApplicationError::InvalidCommand);
             }
             let mut bytes = Vec::with_capacity(len);
-            bytes.extend(if intent.insertion_children().is_some() {
-                b"VBTSOWN2"
-            } else {
-                b"VBTSOWN1"
-            });
+            bytes.extend(
+                if intent.insertion_children().is_some() && intent.delegation().is_some() {
+                    b"VBTSOWN3"
+                } else if intent.insertion_children().is_some() {
+                    b"VBTSOWN2"
+                } else {
+                    b"VBTSOWN1"
+                },
+            );
             put_group(&mut bytes, group);
             bytes.extend(operation.get().to_le_bytes());
             bytes.extend((limits.import_bytes as u64).to_le_bytes());
@@ -1147,7 +1152,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.intent.insertion_children().is_some() {
+        if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
+            RECURSIVE_INSERTION_TRANSFER_TARGET_SCHEMA
+        } else if self.intent.insertion_children().is_some() {
             INSERTION_TRANSFER_TARGET_SCHEMA
         } else {
             TRANSFER_TARGET_SCHEMA
@@ -1172,11 +1179,15 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.intent.insertion_children().is_some() {
-            b"VBTRGT04"
-        } else {
-            b"VBTRGT03"
-        });
+        bytes.extend(
+            if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
+                b"VBTRGT05"
+            } else if self.intent.insertion_children().is_some() {
+                b"VBTRGT04"
+            } else {
+                b"VBTRGT03"
+            },
+        );
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -1219,7 +1230,8 @@ where
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
         let insertion = self.intent.insertion_children().is_some();
-        if (insertion && schema != INSERTION_TRANSFER_TARGET_SCHEMA)
+        let recursive = insertion && self.intent.delegation().is_some();
+        if (insertion && schema != self.schema_version())
             || (!insertion && schema != TRANSFER_TARGET_SCHEMA && schema != 1)
         {
             return Err(ApplicationError::UnsupportedSchema);
@@ -1229,8 +1241,10 @@ where
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        let frozen_format = tag == b"VBTRGT03" || tag == b"VBTRGT04";
-        if (insertion && tag != b"VBTRGT04")
+        let frozen_format = tag == b"VBTRGT03" || tag == b"VBTRGT04" || tag == b"VBTRGT05";
+        if (recursive && tag != b"VBTRGT05")
+            || (!recursive && tag == b"VBTRGT05")
+            || (insertion && !recursive && tag != b"VBTRGT04")
             || (!insertion && tag == b"VBTRGT04")
             || (schema >= TRANSFER_TARGET_SCHEMA) != frozen_format
         {

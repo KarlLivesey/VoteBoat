@@ -39,7 +39,9 @@ fn directory() -> Directory {
     .unwrap_or_else(|_| panic!("schema5"))
 }
 fn setup() -> (Directory, TransferIntent) {
-    let mut d = directory();
+    setup_in(directory())
+}
+fn setup_in(mut d: Directory) -> (Directory, TransferIntent) {
     let b = d.bootstrap_command(100000).unwrap();
     commit(&mut d, 100, b);
     commit(
@@ -576,3 +578,6 @@ fn insertion_intent_native_torn_frames_recover_exact_reservations_and_lock() {
     }
     assert!(old && complete);
 }
+
+#[path = "insertion/nested.rs"]
+mod nested;

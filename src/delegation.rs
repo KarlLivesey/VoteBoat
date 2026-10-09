@@ -83,6 +83,18 @@ impl DelegationBinding {
         put_manifest(&mut bytes, after);
         ContentDigest::sha256(&bytes)
     }
+    pub(crate) fn digest_insertion_for(
+        &self,
+        before: &ResponsibilityManifest,
+        after: &ResponsibilityManifest,
+        children: &[InsertionChild],
+    ) -> ContentDigest {
+        let mut bytes = Vec::with_capacity(40 + insertion_len(children));
+        bytes.extend(b"VBDIGINS");
+        bytes.extend(self.digest_for(before, after).0);
+        put_insertion(&mut bytes, children);
+        ContentDigest::sha256(&bytes)
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DelegationPlan {
@@ -90,6 +102,7 @@ pub struct DelegationPlan {
     before: ResponsibilityManifest,
     after: ResponsibilityManifest,
     child_operation: OperationId,
+    insertion: Option<Vec<InsertionChild>>,
 }
 impl DelegationPlan {
     pub fn new(
@@ -100,6 +113,19 @@ impl DelegationPlan {
     ) -> Result<Self, ApplicationError> {
         TransferIntent::validate_shape(&before, &after)
             .map_err(|_| ApplicationError::InvalidCommand)?;
+        Self::validate_parent(&parent, &before)?;
+        Ok(Self {
+            parent,
+            before,
+            after,
+            child_operation,
+            insertion: None,
+        })
+    }
+    fn validate_parent(
+        parent: &ResponsibilityManifest,
+        before: &ResponsibilityManifest,
+    ) -> Result<(), ApplicationError> {
         let p = parent.input();
         let b = before.input();
         let ExecutionMode::Delegated(routes) = &p.execution else {
@@ -125,12 +151,38 @@ impl DelegationPlan {
         {
             return Err(ApplicationError::InvalidCommand);
         }
+        Ok(())
+    }
+    /// Reserve a delegated source's complete fresh-child insertion mapping.
+    pub fn insertion(
+        parent: ResponsibilityManifest,
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        children: Vec<InsertionChild>,
+        child_operation: OperationId,
+    ) -> Result<Self, ApplicationError> {
+        Self::validate_parent(&parent, &before)?;
+        if before.input().authority != parent.input().authority
+            || children.iter().any(|c| c.creation == child_operation)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let intent =
+            TransferIntent::insertion_candidate(before, after, children).map_err(|e| e.0)?;
+        let children = intent
+            .insertion_children()
+            .expect("checked mapping")
+            .to_vec();
         Ok(Self {
             parent,
-            before,
-            after,
+            before: intent.before().clone(),
+            after: intent.after().clone(),
             child_operation,
+            insertion: Some(children),
         })
+    }
+    pub fn insertion_children(&self) -> Option<&[InsertionChild]> {
+        self.insertion.as_deref()
     }
     pub fn parent(&self) -> &ResponsibilityManifest {
         &self.parent
@@ -153,16 +205,24 @@ impl DelegationPlan {
         let len = 36
             + manifest_len(&self.parent)
             + manifest_len(&self.before)
-            + manifest_len(&self.after);
+            + manifest_len(&self.after)
+            + self.insertion.as_ref().map_or(0, |c| insertion_len(c));
         if len > limit || len > MAX_DELEGATION_PLAN_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(b"VBDPLAN1");
+        out.extend(if self.insertion.is_some() {
+            b"VBDPLAN2"
+        } else {
+            b"VBDPLAN1"
+        });
         out.extend(self.child_operation.get().to_le_bytes());
         for manifest in [&self.parent, &self.before, &self.after] {
             out.extend((manifest_len(manifest) as u32).to_le_bytes());
             put_manifest(&mut out, manifest);
+        }
+        if let Some(children) = &self.insertion {
+            put_insertion(&mut out, children);
         }
         Ok(out)
     }
@@ -171,7 +231,8 @@ impl DelegationPlan {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut r = Reader::new(bytes);
-        if r.take(8)? != b"VBDPLAN1" {
+        let tag = r.take(8)?;
+        if tag != b"VBDPLAN1" && tag != b"VBDPLAN2" {
             return Err(ApplicationError::InvalidCommand);
         }
         let operation = r.operation()?;
@@ -181,6 +242,13 @@ impl DelegationPlan {
         let before = read_manifest(r.take(len)?)?;
         let len = r.u32()? as usize;
         let after = read_manifest(r.take(len)?)?;
+        if tag == b"VBDPLAN2" {
+            let children = read_insertion(&mut r)?;
+            if !r.done() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            return Self::insertion(parent, before, after, children, operation);
+        }
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -192,6 +260,12 @@ impl DelegationPlan {
                 .iter()
                 .map(|m| m.retained_bytes() - size_of::<ResponsibilityManifest>())
                 .sum::<usize>()
+            + self.insertion.as_ref().map_or(0, |c| {
+                c.capacity() * size_of::<InsertionChild>()
+                    + c.iter()
+                        .map(|c| c.manifest.retained_bytes() - size_of::<ResponsibilityManifest>())
+                        .sum::<usize>()
+            })
     }
     pub(crate) fn updated_parent(&self) -> Result<ResponsibilityManifest, ApplicationError> {
         let mut input = self.parent.clone().into_input();
@@ -237,6 +311,16 @@ impl DelegationReservationStatus {
             configuration,
             child_operation: self.plan.child_operation,
         };
+        if let Some(children) = &self.plan.insertion {
+            binding.plan_digest =
+                binding.digest_insertion_for(&self.plan.before, &self.plan.after, children);
+            return TransferIntent::delegated_insertion(
+                self.plan.before.clone(),
+                self.plan.after.clone(),
+                children.clone(),
+                binding,
+            );
+        }
         binding.plan_digest = binding.digest_for(&self.plan.before, &self.plan.after);
         TransferIntent::delegated(self.plan.before.clone(), self.plan.after.clone(), binding)
     }
