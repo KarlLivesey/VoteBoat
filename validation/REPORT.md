@@ -3462,3 +3462,33 @@ its cause. All handles terminal. Selected Linux histories do not establish both
 merged-source cleanup, general retention registry, physical power loss, macOS,
 separate-host or broad protocol proof. Full P0–P7 and previous gaps remain active;
 P8/Windows deferred; CI background; no performance claim.
+
+## Slice142 — independent retirement of nested merge sources
+
+Executed cargo +stable test --all-features --test routed nested_merge_retirement
+--locked --offline -- --test-threads=1 --nocapture:4/4 pass403.86s after9.20s
+compile. TCP/TLS and QUIC, WAL/checkpoint, follow actual assigned ancestry through
+501 split/601 merge and retire41/42 independently into43. Source-swapped release
+refusal, complete quorum publication/activation and distinct release IDs are
+checked. Each accepted retirement stays unread during native abort/join; recovery
+preserves exact R/freeze/original activation lineage and original retirement retry.
+
+Full restart after only41 retirement retains41's tombstone and42's live fenced
+owner/activation. Fresh quorum facts rebuild42 proof;43 serves imported original
+retries and a new write before42 retirement. Both old live checkpoint/tail replays
+and retired checkpoint/reclaim reopen are exercised. Exact Node requests report
+reduced WAL bytes; retained logs have no application commands after retired bases.
+With ancestors and both old sources stopped,43/sibling32 retain imported IDs,
+values/outbox and serve new writes with unchanged stopped files. Final old-source
+reopen remains retired. Selected41-first order only; broader schedules remain.
+
+Shared141 helpers now use exact source IDs and explicit immutable startup templates,
+with mandatory assigned31 binding checks. Executed tcp_assigned_nested_retirement
+filter:2/2 WAL/checkpoint regressions pass130.27s after4.30s compile. Other141/raw135
+combinations not rerun. Initial Clippy all-feature/all-target -D warnings passes
+1.98s; final after strict binding assertion passes3.98s. Format/whitespace and
+80-contract inventory pass. All handles terminal. Production unchanged; no general
+retention/migration, physical power-loss, macOS, separate-host, arbitrary-fault or
+performance proof. Full P0–P7 and previous gaps active; P8/Windows deferred, CI
+background. BASELINE_ACCEPTANCE.md updated to distinguish these selected native
+cleanup histories from remaining requirements.

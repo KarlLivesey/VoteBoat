@@ -24,55 +24,109 @@ fn recovered(
     bytes: &[u8],
 ) {
     let clock = rig.base.clock;
-    for n in rig.nodes(31).iter() {
-        let app = &n.local().applications[&group(31)];
+    let g = retired.source.id.get();
+    for n in rig.nodes(g).iter() {
+        let app = &n.local().applications[&group(g)];
         assert!(app.owner().is_none());
         assert_eq!(app.status(), Some(retired));
         assert_eq!(app.freeze_status().unwrap().as_ref(), Some(frozen));
         assert_eq!(app.retired_lineage(), Some(lineage));
-        assert!(app.export_target(group(41), 65536).is_err());
-        assert!(app.export_target(group(42), 65536).is_err());
+        for export in &frozen.exports {
+            assert!(app.export_target(export.target, 65536).is_err());
+        }
     }
     assert_eq!(
-        split::observe(rig.nodes(31), &clock, 31, RetirementQuery::Status),
+        split::observe(rig.nodes(g), &clock, g, RetirementQuery::Status),
         RetirementRead::Status(Some(retired))
     );
     assert_eq!(
-        split::observe(rig.nodes(31), &clock, 31, RetirementQuery::Freeze),
+        split::observe(rig.nodes(g), &clock, g, RetirementQuery::Freeze),
         RetirementRead::Freeze(Some(frozen.clone()))
     );
     assert_eq!(
         split::observe(
-            rig.nodes(31),
+            rig.nodes(g),
             &clock,
-            31,
+            g,
             RetirementQuery::Owner(TargetQuery::Status)
         ),
         RetirementRead::Retired
     );
-    let retry = propose_recovering(rig.nodes(31), &clock, 31, 501, bytes.to_vec());
-    assert_eq!(retry.operation, source_fixture::op(501));
+    let retry = propose_recovering(
+        rig.nodes(g),
+        &clock,
+        g,
+        retired.operation.get(),
+        bytes.to_vec(),
+    );
+    assert_eq!(retry.operation, retired.operation);
     assert_eq!(retry.outcome, RetirementOutcome::Retired(retired));
-    assert!(rig.nodes(31)[0]
+    assert!(rig.nodes(g)[0]
         .propose(ClientRequest {
-            group: group(31),
+            group: group(g),
             operation: source_fixture::op(9999),
-            bytes: request_data(frozen.intent.before(), 1, 1),
+            bytes: request_data(frozen.intent.before(), if g == 42 { 40 } else { 1 }, 1),
         })
         .is_err());
-    for c in configuration_for(&rig.base.root, 31) {
-        let mut b = FileCreationBindings::open(&c.directory).unwrap();
-        assert_eq!(b.load().unwrap().unwrap(), rig.base.bindings[&(31, c.node)]);
+    for c in configuration_for(&rig.base.root, g) {
+        if g == 31 {
+            let expected = &rig.base.bindings[&(g, c.node)];
+            let mut b = FileCreationBindings::open(&c.directory).unwrap();
+            assert_eq!(&b.load().unwrap().unwrap(), expected);
+        }
     }
 }
-fn reopen(rig: &mut Moves<Guarded>) {
-    let intent = rig.base.bound.clone().unwrap();
-    rig.base.targets[0] = open(
-        configuration_for(&rig.base.root, 31),
-        &rig.base.clock,
-        rig.base.protocol,
-        || profile_target::<Guarded>(&intent, 31),
-    );
+fn reopen(rig: &mut Moves<Guarded>, g: u128, initial: &TransferIntent) {
+    if g == 31 {
+        rig.base.targets[0] = open(
+            configuration_for(&rig.base.root, g),
+            &rig.base.clock,
+            rig.base.protocol,
+            || profile_target::<Guarded>(initial, g),
+        );
+    } else {
+        assert!(matches!(g, 41 | 42));
+        rig.later.insert(
+            g,
+            open(
+                configuration_for(&rig.base.root, g),
+                &rig.base.clock,
+                rig.base.protocol,
+                || profile_later::<Guarded>(initial, g, 501),
+            ),
+        );
+    }
+}
+fn reclaim(rig: &mut Moves<Guarded>, retired: RetirementStatus, initial: &TransferIntent) {
+    let clock = rig.base.clock;
+    let g = retired.source.id.get();
+    split::compact(rig.nodes(g), &clock, g);
+    let requests = rig
+        .nodes(g)
+        .iter_mut()
+        .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
+        .collect::<Vec<_>>();
+    let mut completed = [false; 3];
+    drive(rig.nodes(g), &clock, |ns| {
+        for (i, n) in ns.iter_mut().enumerate() {
+            if let Some(event) = n.poll_reclaim() {
+                assert_eq!(event.request, requests[i]);
+                let report = event.result.unwrap();
+                assert!(report.after_bytes < report.before_bytes);
+                completed[i] = true;
+            }
+        }
+        completed.iter().all(|x| *x)
+    });
+    let logs = creation::abandon(std::mem::take(rig.nodes(g)), g);
+    for log in logs.values() {
+        assert!(log.base_index() >= retired.index);
+        assert!(log
+            .entries
+            .iter()
+            .all(|e| !matches!(e.payload, EntryPayload::Command { .. })));
+    }
+    reopen(rig, g, initial);
 }
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
@@ -89,6 +143,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         rig.check(501, &s);
     }
     let before = rig.observed(501);
+    let initial = rig.base.bound.clone().unwrap();
     rig.restart();
     assert_eq!(rig.observed(501), before);
     rig.check(501, &before);
@@ -166,36 +221,10 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
                     && matches!(e.payload, EntryPayload::Command { .. }))
         );
     }
-    reopen(&mut rig);
+    reopen(&mut rig, 31, &initial);
     recovered(&mut rig, retired, &frozen, &lineage, &bytes);
     if checkpoint {
-        split::compact(rig.nodes(31), &clock, 31);
-        let requests = rig
-            .nodes(31)
-            .iter_mut()
-            .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
-            .collect::<Vec<_>>();
-        let mut completed = [false; 3];
-        drive(rig.nodes(31), &clock, |ns| {
-            for (i, n) in ns.iter_mut().enumerate() {
-                if let Some(event) = n.poll_reclaim() {
-                    assert_eq!(event.request, requests[i]);
-                    let report = event.result.unwrap();
-                    assert!(report.after_bytes < report.before_bytes);
-                    completed[i] = true;
-                }
-            }
-            completed.iter().all(|x| *x)
-        });
-        let logs = creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
-        for log in logs.values() {
-            assert!(log.base_index() >= retired.index);
-            assert!(log
-                .entries
-                .iter()
-                .all(|e| !matches!(e.payload, EntryPayload::Command { .. })));
-        }
-        reopen(&mut rig);
+        reclaim(&mut rig, retired, &initial);
         recovered(&mut rig, retired, &frozen, &lineage, &bytes);
     }
     creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
@@ -237,7 +266,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let mut old = durable_files(&rig.base.root.join("20"));
     old.extend(durable_files(&rig.base.root.join("22")));
     assert_eq!(old, rig.base.stopped);
-    reopen(&mut rig);
+    reopen(&mut rig, 31, &initial);
     recovered(&mut rig, retired, &frozen, &lineage, &bytes);
     rig.stop();
     std::fs::remove_dir_all(rig.base.root).unwrap();
@@ -260,3 +289,6 @@ fn quic_assigned_nested_retirement_recovers_unread_result_from_wal() {
 fn quic_assigned_nested_retirement_recovers_then_reclaims_checkpoint() {
     history(NativePeerProtocol::Quic, true);
 }
+
+#[path = "nested_merge_retirement.rs"]
+mod merge;

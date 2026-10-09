@@ -102,5 +102,21 @@ and reopens with no retained application commands. New owners41/42 and sibling32
 serve imported retries/new writes and retain outbox state while metadata, ancestors
 and retired31 are offline with unchanged durable files. Actual assigned31 creation
 bindings remain identical. These selected Linux histories do not establish
-cleanup of both later merge sources, general retention registry, mixed-version
+general retention registry, mixed-version
 migration, macOS, separate-host or physical power-loss behavior.
+
+Four `tests/routed/nested_merge_retirement.rs` histories extend that guarded
+ancestry through501 split and601 merge into43. Each41/42 proof has its own exact
+freeze/release; swapping sources refuses. The first unread retirement recovers,
+then the whole fixture restarts with only41 retired and42 still fenced. Fresh
+quorum metadata/43 activation observations authorize42 retirement. The merged
+owner serves imported retries and a new write between retirements. Both original
+activation lineages, freezes and exact retirement retries survive independently.
+
+TCP/TLS and QUIC WAL/checkpoint paths cover unread retirement-tail replay for both
+sources. Checkpoint cases physically reclaim both through verified retired bases
+and exact tickets, then reopen without retained application commands. With all
+ancestors/old sources offline,43 and sibling32 serve further writes with unchanged
+stopped files and preserved imported operation IDs/outbox. Final source reopen
+remains retired. This is the selected41-before42 order and application profile;
+broader recursive lifecycle/fault coverage and external retention remain open.
