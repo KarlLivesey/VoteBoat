@@ -16,7 +16,6 @@ use super::*;
 use voteboat::{
     bucket_counter::{encode_add, BucketCounter, BucketOutcome},
     group_creation::*,
-    namespace_creation::*,
     native::{group_creation::*, snapshot_store::*},
     snapshot::{SnapshotIdentity, SnapshotLimits},
     transfer::*,
@@ -24,12 +23,9 @@ use voteboat::{
     transfer_source::*,
     transfer_target::*,
 };
-type Source = CreatedNamespaceSource<BucketCounter<source_fixture::Policy>, source_fixture::Policy>;
+type Source = source_fixture::Source;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Phase {
-    Ready,
-    NamespacePublish,
-    NamespaceActivate,
     Data(u128),
     Intent,
     Stage(u128),
@@ -40,8 +36,8 @@ enum Phase {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Observed {
-    namespace: NamespaceStatus,
-    namespace_publication: Option<NamespacePublicationStatus>,
+    parent: ResponsibilityManifest,
+    children: [Option<ResponsibilityManifest>; 2],
     intent: Option<TransferIntentStatus>,
     publication: Option<TransferPublicationStatus>,
     source: Option<SourceFreezeStatus>,
@@ -53,36 +49,42 @@ struct Retry {
     operation: u128,
     bytes: Vec<u8>,
 }
-fn anchor() -> ResponsibilityManifest {
-    let mut m = source_fixture::grant().into_input();
-    m.responsibility = responsibility(1);
-    m.execution = ExecutionMode::Single(group(30));
-    ResponsibilityManifest::new(m).unwrap()
-}
 fn metadata() -> LifecycleDirectory {
     LifecycleDirectory::new(
         Directory::new(
-            DirectoryPlan::new(group(1), vec![anchor()]).unwrap(),
+            DirectoryPlan::new(group(1), vec![source_fixture::grant()]).unwrap(),
             DirectoryLimits {
-                operations: 16,
-                history_bytes: 65536,
+                operations: 32,
+                history_bytes: 200000,
             },
         )
         .unwrap()
-        .with_namespace_transfers()
-        .unwrap_or_else(|_| panic!("fresh schema4")),
+        .with_responsibility_insertion()
+        .unwrap_or_else(|_| panic!("schema5")),
     )
 }
-fn source(plan: &NamespacePlan) -> Source {
-    Source::from_source(plan.clone(), source_fixture::fresh())
-        .unwrap_or_else(|e| panic!("source binding {:?}", e.0))
-}
-fn source_query(key: u8) -> SourceNamespaceQuery<Vec<u8>> {
-    SourceNamespaceQuery::Data(SourceQuery::Data(RoutedQuery {
+fn source_query(key: u8) -> SourceQuery<Vec<u8>> {
+    SourceQuery::Data(RoutedQuery {
         hint: source_fixture::hint(key),
         key: vec![key],
         query: vec![key],
-    }))
+    })
+}
+fn target(intent: &TransferIntent, g: u128) -> target_fixture::Target {
+    TransferTarget::new(
+        group(g),
+        source_fixture::op(200),
+        intent.clone(),
+        BucketCounter::new(
+            intent.target_manifest(group(g)).unwrap().input().scope,
+            source_fixture::Policy,
+            source_fixture::bucket_limits(),
+        )
+        .unwrap(),
+        source_fixture::Policy,
+        target_fixture::limits(),
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0))
 }
 fn target_hint(key: u8) -> RouteHint {
     let mut hint = source_fixture::hint(key);
@@ -91,8 +93,9 @@ fn target_hint(key: u8) -> RouteHint {
         if key < 128 { 0 } else { 128 },
         if key < 128 { 128 } else { 256 },
     );
-    hint.epoch = OwnershipEpoch::new(2).unwrap();
-    hint.generation = RouteGeneration::new(2).unwrap();
+    hint.responsibility = responsibility(if key < 128 { 21 } else { 22 });
+    hint.epoch = OwnershipEpoch::new(1).unwrap();
+    hint.generation = RouteGeneration::new(1).unwrap();
     hint
 }
 fn target_data(key: u8, delta: i64) -> Vec<u8> {
@@ -104,67 +107,23 @@ fn target_data(key: u8, delta: i64) -> Vec<u8> {
     )
     .unwrap()
 }
-// Exact byte oracle for this fixture's stopped metadata files, including its
-// selected WAL/manifests and snapshots. No native worker owns them during use.
-pub(super) fn durable_files(root: &Path) -> BTreeMap<std::path::PathBuf, Vec<u8>> {
-    fn visit(path: &Path, files: &mut BTreeMap<std::path::PathBuf, Vec<u8>>) {
-        for entry in std::fs::read_dir(path).unwrap() {
-            let entry = entry.unwrap();
-            let path = entry.path();
-            if entry.file_type().unwrap().is_dir() {
-                visit(&path, files);
-            } else {
-                files.insert(path.clone(), std::fs::read(path).unwrap());
-            }
-        }
-    }
-    let mut files = BTreeMap::new();
-    visit(root, &mut files);
-    files
-}
-// Accepted requests are intentionally left unconsumed. Only committed/applied
-// application facts drive progress; the original client result is lost on reopen.
-pub(super) fn unread<A>(
-    nodes: &mut [Node<A>],
-    clock: &Instant,
-    g: u128,
-    operation: u128,
-    bytes: Vec<u8>,
-    done: impl Fn(&A) -> bool,
-) where
-    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
-    A::Receipt: ApplicationReceipt,
-{
-    campaign(nodes, clock, g);
-    assert_eq!(nodes[0].local().clients.usage().requests, 0);
-    let ticket = nodes[0]
-        .propose(ClientRequest {
-            group: group(g),
-            operation: OperationId::new(operation).unwrap(),
-            bytes,
-        })
-        .unwrap();
-    drive(nodes, clock, |ns| {
-        ns.iter().all(|n| done(&n.local().applications[&group(g)]))
-    });
-    assert_eq!(ticket.operation, OperationId::new(operation).unwrap());
-    assert_eq!(nodes[0].local().clients.usage().requests, 1);
-}
-struct CreatedSplit {
+use super::creation_source::{durable_files, unread};
+struct Insertion {
     root: std::path::PathBuf,
     clock: Instant,
     protocol: NativePeerProtocol,
     checkpoint: bool,
-    plan: NamespacePlan,
+    intent: TransferIntent,
+    creations: [GroupCreationStatus; 2],
     parent: Vec<Node<LifecycleDirectory>>,
     source: Vec<Node<Source>>,
     targets: [Vec<Node<target_fixture::Target>>; 2],
-    creation_records: BTreeMap<NodeId, Vec<u8>>,
+    creation_records: BTreeMap<(u128, NodeId), Vec<u8>>,
 }
-impl CreatedSplit {
+impl Insertion {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
         let root = std::env::temp_dir().join(format!(
-            "voteboat-created-source-{}-{protocol:?}-{checkpoint}",
+            "voteboat-insertion-{}-{protocol:?}-{checkpoint}",
             std::process::id()
         ));
         std::fs::create_dir_all(&root).unwrap();
@@ -181,10 +140,7 @@ impl CreatedSplit {
             &clock,
             1,
             1000,
-            metadata()
-                .directory()
-                .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
-                .unwrap(),
+            metadata().directory().bootstrap_command(100000).unwrap(),
         );
         propose_recovering(
             &mut parent,
@@ -193,89 +149,216 @@ impl CreatedSplit {
             1001,
             DirectoryCommand {
                 expected: None,
-                manifest: anchor(),
+                manifest: source_fixture::grant(),
             }
-            .encode(MAX_DIRECTORY_COMMAND_BYTES)
+            .encode(100000)
             .unwrap(),
         );
-        let configs = configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Recover);
-        let intent = GroupCreationIntent {
-            authority: group(1),
-            parent: responsibility(1),
-            expected: RouteGeneration::new(1).unwrap(),
-            responsibility: source_fixture::grant().input().responsibility,
-            bootstrap: configs[0].bootstrap.clone(),
-            application: source_fixture::grant().input().application,
-            mode: GroupCreationMode::Empty,
-        };
-        assert_eq!(
-            propose_recovering(
+        let mut source = open(
+            configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
+            &clock,
+            protocol,
+            source_fixture::fresh,
+        );
+        campaign(&mut source, &clock, 20);
+        propose_recovering(
+            &mut source,
+            &clock,
+            20,
+            100,
+            source_fixture::fresh().bootstrap_command(100000).unwrap(),
+        );
+        let mut configs: [Vec<NativeStartup>; 2] = std::array::from_fn(|i| {
+            configuration(&root, 21 + i as u128, &[1, 2, 3], NativeOpenMode::Recover)
+        });
+        let creations: [GroupCreationStatus; 2] = std::array::from_fn(|i| {
+            let g = 21 + i as u128;
+            let reservation = GroupCreationIntent {
+                authority: group(1),
+                parent: source_fixture::grant().input().responsibility,
+                expected: RouteGeneration::new(1).unwrap(),
+                responsibility: responsibility(g),
+                bootstrap: configs[i][0].bootstrap.clone(),
+                application: source_fixture::grant().input().application,
+                mode: GroupCreationMode::Staging,
+            };
+            assert_eq!(
+                propose_recovering(
+                    &mut parent,
+                    &clock,
+                    1,
+                    1002 + i as u128,
+                    reservation.encode(100000).unwrap()
+                )
+                .outcome,
+                DirectoryOutcome::CreationReserved
+            );
+            // Quorum read before relying on this local immutable reservation.
+            let _ = split::observe(
                 &mut parent,
                 &clock,
                 1,
-                1002,
-                intent.encode(MAX_GROUP_CREATION_BYTES).unwrap()
-            )
-            .outcome,
-            DirectoryOutcome::CreationReserved
-        );
-        let creation = parent[0].local().applications[&group(1)]
-            .directory()
-            .group_creation_at(0, group(20))
-            .unwrap()
-            .unwrap();
-        let plan = NamespacePlan {
-            creation: creation.clone(),
-            manifest: source_fixture::grant(),
-        };
-        std::fs::create_dir_all(root.join("20")).unwrap();
-        let mut records = BTreeMap::new();
-        for c in &configs {
+                DirectoryQuery::Manifest(source_fixture::grant().input().responsibility),
+            );
+            let core = parent[0].local().owner.core(group(1)).unwrap();
+            parent[0].local().applications[&group(1)]
+                .directory()
+                .group_creation_at(core.state().commit_index, group(g))
+                .unwrap()
+                .unwrap()
+        });
+        let establish = |parents: &[Node<LifecycleDirectory>],
+                         c: &NativeStartup,
+                         status: &GroupCreationStatus| {
+            std::fs::create_dir_all(c.directory.parent().unwrap()).unwrap();
             let verified = VerifiedGroupCreation::verify(
                 &LocalCreationAuthority {
-                    core: parent[0].local().owner.core(group(1)).unwrap(),
-                    directory: parent[0].local().applications[&group(1)].directory(),
+                    core: parents[0].local().owner.core(group(1)).unwrap(),
+                    directory: parents[0].local().applications[&group(1)].directory(),
                 },
-                creation.clone(),
+                status.clone(),
                 c.node,
                 c.store,
-                intent.application,
+                status.intent.application,
             )
             .unwrap();
-            let mut log = NativeLogStore::create(
-                FileLogIo::create(&c.directory).unwrap(),
-                c.store,
-                LogLimits::default(),
-            )
-            .unwrap();
+            let exists = c.directory.exists();
+            let mut log = if exists {
+                NativeLogStore::recover(
+                    FileLogIo::open(&c.directory).unwrap(),
+                    c.store,
+                    LogLimits::default(),
+                )
+                .unwrap()
+            } else {
+                NativeLogStore::create(
+                    FileLogIo::create(&c.directory).unwrap(),
+                    c.store,
+                    LogLimits::default(),
+                )
+                .unwrap()
+            };
             let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
             establish_created_group(&verified, &mut log, &mut bindings).unwrap();
-            records.insert(c.node, bindings.load().unwrap().unwrap());
-            NativeSnapshotStore::create(
-                FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
-                SnapshotIdentity {
-                    store: c.store,
-                    group: group(20),
-                },
-                SnapshotLimits::default(),
-            )
-            .unwrap();
+            assert_eq!(
+                log.state(c.bootstrap.group).unwrap().bootstrap,
+                status.intent.bootstrap
+            );
+            let id = SnapshotIdentity {
+                store: c.store,
+                group: c.bootstrap.group,
+            };
+            if exists {
+                NativeSnapshotStore::recover(
+                    FileSnapshotIo::open(c.directory.join("snapshots")).unwrap(),
+                    id,
+                    SnapshotLimits::default(),
+                )
+                .unwrap();
+            } else {
+                NativeSnapshotStore::create(
+                    FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
+                    id,
+                    SnapshotLimits::default(),
+                )
+                .unwrap();
+            }
+            bindings.load().unwrap().unwrap()
+        };
+        // Partial assigned provisioning: only two stores in child21 exist.
+        for c in &configs[0][..2] {
+            establish(&parent, c, &creations[0]);
         }
-        let source = open(configs, &clock, protocol, || source(&plan));
-        let targets = std::array::from_fn(|i| {
-            open(
-                configuration(&root, 21 + i as u128, &[1, 2, 3], NativeOpenMode::Create),
+        assert!(!configs[0][2].directory.exists());
+        assert!(!configs[1][0].directory.exists());
+        assert!(parent.iter().all(|p| p.local().applications[&group(1)]
+            .directory()
+            .manifest(responsibility(21))
+            .is_none()));
+        close(parent, &clock, 1, || {
+            drive(&mut source, &clock, |_| true);
+        });
+        parent = open(
+            configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+            &clock,
+            protocol,
+            metadata,
+        );
+        campaign(&mut parent, &clock, 1);
+        let mut records = BTreeMap::new();
+        let mut children = Vec::new();
+        for i in 0..2 {
+            let r = propose_recovering(
+                &mut parent,
                 &clock,
-                protocol,
-                || target_fixture::fresh_for(21 + i as u128),
-            )
+                1,
+                1002 + i as u128,
+                creations[i].intent.encode(100000).unwrap(),
+            );
+            assert!(r.duplicate);
+            let _ = split::observe(
+                &mut parent,
+                &clock,
+                1,
+                DirectoryQuery::Manifest(source_fixture::grant().input().responsibility),
+            );
+            for c in &configs[i] {
+                records.insert(
+                    (21 + i as u128, c.node),
+                    establish(&parent, c, &creations[i]),
+                );
+            }
+            let mut m = source_fixture::grant().into_input();
+            m.responsibility = responsibility(21 + i as u128);
+            m.parent = Some(ParentAuthority {
+                responsibility: source_fixture::grant().input().responsibility,
+                group: group(1),
+            });
+            m.scope =
+                source_fixture::range(if i == 0 { 0 } else { 128 }, if i == 0 { 128 } else { 256 });
+            m.execution = ExecutionMode::Single(group(21 + i as u128));
+            children.push(
+                InsertionChild::from_creation(
+                    ResponsibilityManifest::new(m).unwrap(),
+                    &creations[i],
+                )
+                .unwrap(),
+            );
+        }
+        let mut after = source_fixture::grant().into_input();
+        after.epoch = OwnershipEpoch::new(2).unwrap();
+        after.generation = RouteGeneration::new(2).unwrap();
+        after.execution = ExecutionMode::Delegated(
+            children
+                .iter()
+                .map(|c| RouteEntry {
+                    scope: c.manifest.input().scope,
+                    target: RouteTarget::Child(ChildAuthority {
+                        responsibility: c.manifest.input().responsibility,
+                        group: group(1),
+                        epoch: c.manifest.input().epoch,
+                    }),
+                })
+                .collect(),
+        );
+        let intent = TransferIntent::insert_children(
+            source_fixture::grant(),
+            ResponsibilityManifest::new(after).unwrap(),
+            children,
+        )
+        .unwrap();
+        let targets = std::array::from_fn(|i| {
+            open(std::mem::take(&mut configs[i]), &clock, protocol, || {
+                target(&intent, 21 + i as u128)
+            })
         });
         Self {
             root,
             clock,
             protocol,
             checkpoint,
-            plan,
+            intent,
+            creations,
             parent,
             source,
             targets,
@@ -283,31 +366,6 @@ impl CreatedSplit {
         }
     }
     fn observed(&mut self) -> Observed {
-        let NamespaceOwnerRead::Status(namespace) = split::observe(
-            &mut self.source,
-            &self.clock,
-            20,
-            SourceNamespaceQuery::Status,
-        ) else {
-            panic!("namespace status")
-        };
-        let DirectoryRead::Manifest(manifest) = split::observe(
-            &mut self.parent,
-            &self.clock,
-            1,
-            DirectoryQuery::Manifest(self.plan.manifest.input().responsibility),
-        ) else {
-            panic!("manifest")
-        };
-        let core = self.parent[0].local().owner.core(group(1)).unwrap();
-        let d = self.parent[0].local().applications[&group(1)].directory();
-        let namespace_publication = d
-            .namespace_publication_at(core.state().commit_index, self.plan.creation.operation)
-            .unwrap();
-        if let Some(p) = &namespace_publication {
-            assert!(p.index <= core.state().commit_index);
-            assert!(manifest.is_some());
-        }
         let DirectoryRead::Transfer(intent) = split::observe(
             &mut self.parent,
             &self.clock,
@@ -324,14 +382,68 @@ impl CreatedSplit {
         ) else {
             panic!("publication")
         };
-        let source = match split::observe(
-            &mut self.source,
+        let DirectoryRead::Manifest(Some(parent)) = split::observe(
+            &mut self.parent,
             &self.clock,
-            20,
-            SourceNamespaceQuery::Data(SourceQuery::Freeze),
-        ) {
-            NamespaceOwnerRead::NotActive => None,
-            NamespaceOwnerRead::Data(SourceRead::Freeze(s)) => s,
+            1,
+            DirectoryQuery::Manifest(source_fixture::grant().input().responsibility),
+        ) else {
+            panic!("parent manifest")
+        };
+        let children = std::array::from_fn(|i| {
+            let DirectoryRead::Manifest(child) = split::observe(
+                &mut self.parent,
+                &self.clock,
+                1,
+                DirectoryQuery::Manifest(responsibility(21 + i as u128)),
+            ) else {
+                panic!("child manifest")
+            };
+            let core = self.parent[0].local().owner.core(group(1)).unwrap();
+            assert_eq!(
+                self.parent[0].local().applications[&group(1)]
+                    .directory()
+                    .group_creation_at(core.state().commit_index, group(21 + i as u128))
+                    .unwrap()
+                    .as_ref(),
+                Some(&self.creations[i])
+            );
+            child
+        });
+        if publication.is_some() {
+            assert_eq!(parent, *self.intent.after());
+            let mut cache = NativeManifestCache::new(ManifestCacheLimits {
+                manifests: 3,
+                bytes: 65536,
+            })
+            .unwrap();
+            cache.admit(parent.clone()).unwrap();
+            for (i, child) in children.iter().enumerate() {
+                assert_eq!(
+                    child.as_ref(),
+                    Some(&self.intent.insertion_children().unwrap()[i].manifest)
+                );
+                cache.admit(child.clone().unwrap()).unwrap();
+            }
+            for key in [1, 200] {
+                assert_eq!(
+                    resolve(
+                        &cache,
+                        &source_fixture::Policy,
+                        parent.input().responsibility,
+                        &[key],
+                        3
+                    )
+                    .unwrap(),
+                    target_hint(key)
+                );
+            }
+        } else {
+            assert_eq!(parent, source_fixture::grant());
+            assert!(children.iter().all(Option::is_none));
+        }
+        let source = match split::observe(&mut self.source, &self.clock, 20, SourceQuery::Freeze) {
+            SourceRead::Freeze(s) => s,
             _ => panic!("freeze status"),
         };
         let targets = std::array::from_fn(|i| {
@@ -346,8 +458,8 @@ impl CreatedSplit {
             s
         });
         Observed {
-            namespace,
-            namespace_publication,
+            parent,
+            children,
             intent,
             publication,
             source,
@@ -356,52 +468,6 @@ impl CreatedSplit {
     }
     fn resume_one(&mut self) -> Option<Retry> {
         let state = self.observed();
-        if state.namespace.ready_index.is_none() {
-            let b = source(&self.plan)
-                .initialization_command(MAX_ROUTED_COMMAND_BYTES)
-                .unwrap();
-            unread(&mut self.source, &self.clock, 20, 1002, b.clone(), |a| {
-                a.status().ready_index.is_some()
-            });
-            return Some(Retry {
-                phase: Phase::Ready,
-                group: 20,
-                operation: 1002,
-                bytes: b,
-            });
-        }
-        if state.namespace_publication.is_none() {
-            let publication =
-                NamespacePublication::from_status(&self.plan, state.namespace).unwrap();
-            let b = publication.encode(MAX_NAMESPACE_PUBLICATION_BYTES).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 1003, b.clone(), |a| {
-                a.directory()
-                    .manifest(source_fixture::grant().input().responsibility)
-                    .is_some()
-            });
-            return Some(Retry {
-                phase: Phase::NamespacePublish,
-                group: 1,
-                operation: 1003,
-                bytes: b,
-            });
-        }
-        if state.namespace.activation_index.is_none() {
-            let p = state.namespace_publication.as_ref().unwrap();
-            assert_eq!(p.publication.manifest, self.plan.manifest);
-            let b = self.source[0].local().applications[&group(20)]
-                .activation_command(p, MAX_ROUTED_COMMAND_BYTES)
-                .unwrap();
-            unread(&mut self.source, &self.clock, 20, 1003, b.clone(), |a| {
-                a.status().activation_index.is_some()
-            });
-            return Some(Retry {
-                phase: Phase::NamespaceActivate,
-                group: 20,
-                operation: 1003,
-                bytes: b,
-            });
-        }
         for (op, key, value) in [(1, 1u8, 7), (2, 200u8, 11)] {
             if self.source[0].local().applications[&group(20)]
                 .routed()
@@ -424,7 +490,9 @@ impl CreatedSplit {
             }
         }
         if state.intent.is_none() {
-            let b = source_fixture::intent()
+            let b = self
+                .intent
+                .clone()
                 .encode(MAX_TRANSFER_INTENT_BYTES)
                 .unwrap();
             unread(&mut self.parent, &self.clock, 1, 200, b.clone(), |a| {
@@ -440,16 +508,11 @@ impl CreatedSplit {
                 bytes: b,
             });
         }
-        assert_eq!(
-            state.intent.as_ref().unwrap().intent,
-            source_fixture::intent()
-        );
+        assert_eq!(state.intent.as_ref().unwrap().intent, self.intent.clone());
         for i in 0..2 {
             if state.targets[i].staged_index.is_none() {
                 let g = 21 + i as u128;
-                let b = target_fixture::fresh_for(g)
-                    .bootstrap_command(100000)
-                    .unwrap();
+                let b = target(&self.intent, g).bootstrap_command(100000).unwrap();
                 unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
                     a.status().staged_index.is_some()
                 });
@@ -462,9 +525,9 @@ impl CreatedSplit {
             }
         }
         if state.source.is_none() {
-            let b = source_fixture::freeze();
+            let b = Source::freeze_command(&self.intent, 100000).unwrap();
             unread(&mut self.source, &self.clock, 20, 200, b.clone(), |a| {
-                a.owner().fence().is_some()
+                a.fence().is_some()
             });
             return Some(Retry {
                 phase: Phase::Fence,
@@ -493,13 +556,12 @@ impl CreatedSplit {
                     .digest;
                 let import = TargetImport::new(
                     source_fixture::op(200),
-                    source_fixture::intent(),
+                    self.intent.clone(),
                     group(g),
                     vec![SourceImport {
                         fence: status.fence,
                         configuration,
                         image: self.source[0].local().applications[&group(20)]
-                            .owner()
                             .export_target(group(g), 65536)
                             .unwrap(),
                         digest,
@@ -544,7 +606,7 @@ impl CreatedSplit {
                 .collect();
             let p = TransferPublication::new(
                 source_fixture::op(200),
-                source_fixture::intent(),
+                self.intent.clone(),
                 vec![source],
                 targets,
             )
@@ -594,24 +656,22 @@ impl CreatedSplit {
         None
     }
     fn serving(&mut self, state: &Observed) {
-        let expected = if state.namespace.activation_index.is_none() {
-            NamespaceOwnerRead::NotActive
-        } else if state.source.is_some() {
-            NamespaceOwnerRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
+        let expected = if state.source.is_some() {
+            SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
         } else {
-            NamespaceOwnerRead::Data(SourceRead::Data(RoutedRead::Served(
+            SourceRead::Data(RoutedRead::Served(
                 self.source[0].local().applications[&group(20)]
                     .routed()
                     .application()
                     .value(&[1])
                     .unwrap(),
-            )))
+            ))
         };
         assert_eq!(
             split::observe(&mut self.source, &self.clock, 20, source_query(1)),
             expected
         );
-        if state.source.is_some() || state.namespace.activation_index.is_none() {
+        if state.source.is_some() {
             assert!(self.source[0]
                 .propose(ClientRequest {
                     group: group(20),
@@ -718,7 +778,7 @@ impl CreatedSplit {
             configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            || source(&self.plan),
+            source_fixture::fresh,
         );
         self.targets = std::array::from_fn(|i| {
             open(
@@ -730,17 +790,25 @@ impl CreatedSplit {
                 ),
                 &self.clock,
                 self.protocol,
-                || target_fixture::fresh_for(21 + i as u128),
+                || target(&self.intent, 21 + i as u128),
             )
         });
-        for c in configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover) {
-            let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
-            assert_eq!(
-                bindings.load().unwrap().unwrap(),
-                self.creation_records[&c.node]
-            );
+        for i in 0..2 {
+            for c in configuration(
+                &self.root,
+                21 + i as u128,
+                &[1, 2, 3],
+                NativeOpenMode::Recover,
+            ) {
+                let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
+                assert_eq!(
+                    bindings.load().unwrap().unwrap(),
+                    self.creation_records[&(21 + i as u128, c.node)]
+                );
+            }
         }
     }
+
     fn retry(&mut self, retry: &Retry, expected: &Observed) {
         match retry.group {
             1 => {
@@ -764,13 +832,11 @@ impl CreatedSplit {
                     retry.bytes.clone(),
                 );
                 match retry.phase {
-                    Phase::Ready => assert_eq!(r.outcome, NamespaceOutcome::Ready),
-                    Phase::NamespaceActivate => assert_eq!(r.outcome, NamespaceOutcome::Activated),
-                    Phase::Data(_) => assert!(
-                        matches!(r.outcome,NamespaceOutcome::Data(RoutedReceipt {outcome:RoutedOutcome::Applied(v),..}) if v.duplicate)
-                    ),
+                    Phase::Data(_) => {
+                        assert!(matches!(r.outcome,RoutedOutcome::Applied(v) if v.duplicate))
+                    }
                     Phase::Fence => assert!(
-                        matches!(r.outcome,NamespaceOutcome::Data(RoutedReceipt {outcome:RoutedOutcome::Fenced(f),..}) if f==expected.source.as_ref().unwrap().fence)
+                        matches!(r.outcome,RoutedOutcome::Fenced(f) if f==expected.source.as_ref().unwrap().fence)
                     ),
                     _ => panic!("unexpected source retry"),
                 }
@@ -802,11 +868,8 @@ impl CreatedSplit {
 }
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = CreatedSplit::new(protocol, checkpoint);
+    let mut rig = Insertion::new(protocol, checkpoint);
     let phases = [
-        Phase::Ready,
-        Phase::NamespacePublish,
-        Phase::NamespaceActivate,
         Phase::Data(1),
         Phase::Data(2),
         Phase::Intent,
@@ -818,7 +881,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         Phase::Publish,
     ];
     for phase in phases {
-        eprintln!("created source {protocol:?} checkpoint={checkpoint} phase={phase:?}");
+        eprintln!("insertion {protocol:?} checkpoint={checkpoint} phase={phase:?}");
         let retry = rig.resume_one().unwrap();
         assert_eq!(retry.phase, phase);
         let before = rig.observed();
@@ -845,9 +908,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         split::compact(&mut rig.parent, &rig.clock, 1);
         split::compact(&mut rig.source, &rig.clock, 20);
     }
-    let parent_logs =
-        CreatedSplit::stop(std::mem::take(&mut rig.parent), &rig.clock, 1, checkpoint);
-    CreatedSplit::stop(std::mem::take(&mut rig.source), &rig.clock, 20, checkpoint);
+    let parent_logs = Insertion::stop(std::mem::take(&mut rig.parent), &rig.clock, 1, checkpoint);
+    Insertion::stop(std::mem::take(&mut rig.source), &rig.clock, 20, checkpoint);
     let parent_files = durable_files(&rig.root.join("1"));
     // Publication is already quorum-observed. Both original activations now run
     // with source and metadata fully stopped, using the retained exact decision.
@@ -879,7 +941,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         if checkpoint {
             split::compact(&mut rig.targets[i], &rig.clock, g);
         }
-        CreatedSplit::stop(
+        Insertion::stop(
             std::mem::take(&mut rig.targets[i]),
             &rig.clock,
             g,
@@ -889,7 +951,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             configuration(&rig.root, g, &[1, 2, 3], NativeOpenMode::Recover),
             &rig.clock,
             protocol,
-            || target_fixture::fresh_for(g),
+            || target(&rig.intent, g),
         );
         campaign(&mut rig.targets[i], &rig.clock, g);
         let r = propose_recovering(&mut rig.targets[i], &rig.clock, g, 200, bytes);
@@ -997,11 +1059,10 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     }
     assert_eq!(
         split::observe(&mut rig.source, &rig.clock, 20, source_query(1)),
-        NamespaceOwnerRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
+        SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
     );
     assert_eq!(
         rig.source[0].local().applications[&group(20)]
-            .owner()
             .export_target(group(21), 65536)
             .unwrap()
             .source_applied(),
@@ -1011,20 +1072,20 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     std::fs::remove_dir_all(rig.root).unwrap();
 }
 #[test]
-fn tcp_created_namespace_split_recovers_unread_phases_from_wal() {
+fn tcp_insertion_recovers_unread_phases_from_wal() {
     history(NativePeerProtocol::TcpTls, false)
 }
 #[test]
-fn tcp_created_namespace_split_recovers_unread_phases_from_checkpoint() {
+fn tcp_insertion_recovers_unread_phases_from_checkpoint() {
     history(NativePeerProtocol::TcpTls, true)
 }
 #[cfg(feature = "quic")]
 #[test]
-fn quic_created_namespace_split_recovers_unread_phases_from_wal() {
+fn quic_insertion_recovers_unread_phases_from_wal() {
     history(NativePeerProtocol::Quic, false)
 }
 #[cfg(feature = "quic")]
 #[test]
-fn quic_created_namespace_split_recovers_unread_phases_from_checkpoint() {
+fn quic_insertion_recovers_unread_phases_from_checkpoint() {
     history(NativePeerProtocol::Quic, true)
 }

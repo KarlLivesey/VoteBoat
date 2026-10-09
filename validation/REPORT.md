@@ -3066,3 +3066,31 @@ final rerun/checks recorded below.
 Final core-only insertion2 passed0.12s; all-feature/all-target Clippy -D warnings
 passed1.31s. Format, whitespace and80-contract inventory passed. All validation
 handles terminal; no remote CI gate used.
+
+## Slice131 — native assigned responsibility insertion
+
+Four selected actual native histories passed: TCP/TLS WAL41.20s; QUIC checkpoint,
+TCP/TLS checkpoint and QUIC WAL together143.56s (topologies serialized by the
+native-history mutex). Tests/routed/insertion.rs uses verified metadata Staging
+assignments for all six child stores; first only two child21 stores are provisioned
+before metadata recovery/original reservation retries and completion. No route
+or serving owner is implied by creation. Exact binding bytes survive phase recovery.
+
+Each case leaves results unread at two data writes, intent, two stages, fence, two
+imports and publication; quorum facts then survive abort/reclaim/reopen and exact
+retry. Parent and child manifests publish together and resolve to actual child
+identities. Original activations run with metadata/source stopped, each target
+individually reopens and retries while the first serves with its sibling NotActive.
+Imported retries/outbox and new writes survive final recovery; stale parent hints
+and source writes refuse. Every stopped metadata file byte and recovered GroupLog
+remains unchanged during child-only activity. Checkpoint cases assert reclaimed
+positive floors; WAL cases assert zero floors.
+
+This is finite Linux loopback/owner-abort evidence, not arbitrary schedules, real
+hardware power loss, macOS, separate hosts or deeper insertion. No production
+protocol/store/runtime changed. Initial compile found NativeStartup non-Clone;
+owned vectors are moved into open. Clippy flagged needless_range_loop; changed
+to equivalent iterator/enumerate. Final all-feature/all-target Clippy -D warnings
+passed1.42s; acceptance cases did not fail. Final metadata checks recorded below.
+Final slice131 format, whitespace and80-contract inventory passed. All recorded
+validation handles terminal; no CI gate used.

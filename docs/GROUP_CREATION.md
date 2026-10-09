@@ -275,7 +275,8 @@ reservation protocol and freezes under the child's identity.
 A compact creation reference is not a bootstrap or quorum certificate. Assigned
 node bootstrap, authenticated committed observations, and host placement checks
 remain required. Current evidence covers deterministic handoff, checkpoint
-recovery and selected native intent WAL faults. Native assigned insertion service
-phase recovery is the next deliverable. This path currently requires a root source,
+recovery and selected native intent WAL faults. Slice131 adds selected assigned
+native TCP/QUIC WAL/checkpoint phase recovery, partial provisioning, unread results,
+exact retries and individual child activation with ancestor/source offline. This path currently requires a root source,
 one metadata authority, complete scope movement and fresh Single child owners;
 deeper insertion, deletion/reparenting and authority movement remain planned.

@@ -76,7 +76,7 @@ cause and revise this sketch before another material change.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration and the named P4 fault schedules are implemented. General public mutation endpoints remain gated. Safe placement supports ownership movement. |
-| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–131 add checked same-authority root-to-child insertion; deeper insertion remains planned. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
 
@@ -111,23 +111,26 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Responsibility insertion (current slice130, P5/P6).** Purpose: move existing
-   root-owned data to fresh same-authority child responsibilities. Dependencies:
-   checked creation reservations and existing fence/import/publication/activation.
-   Completion checks: explicit identities/scopes, atomic metadata publication,
-   exact child service, preserved retries/outbox, later child freeze, checkpoint
-   recovery, reserved publication capacity and selected native intent WAL faults.
-   Implemented evidence is recorded below; native service phases remain next.
-2. **Native insertion recovery (next, P1/P5/P6).** Purpose: run insertion through
-   assigned actual owners. Dependencies: slice130 and verified staging bootstrap.
-   Completion checks: TCP/QUIC, unread receipts, partial provisioning, publication
-   and activation, WAL/checkpoint reopen, exact retry and ancestor-offline service.
-3. **Recursive insertion composition (following, P5/P6).** Purpose: extend the
-   root insertion path to deeper ownership trees. Dependencies: native insertion
-   evidence and a reviewed parent reservation/identity protocol. Completion checks:
-   nested coverage, alias/cycle refusal, interrupted lifecycle continuity and
-   independent child service. Deletion/reparenting, authority movement, retention,
-   membership, tuning and platform/fault requirements remain in the full goal.
+1. **Native insertion recovery (current slice131, P1/P5/P6).** Purpose: run
+   root-to-child insertion through assigned native owners. Dependencies: slice130,
+   verified Staging bootstrap and the existing phase-recovery fixture. Completion:
+   TCP/QUIC x WAL/checkpoint, partial provisioning, unread results, exact phase
+   retries, atomic parent/children publication, independent child activation and
+   ancestor-offline service. Executed evidence is recorded below as checks finish.
+2. **Deeper insertion composition (next, P5/P6).** Purpose: insert children below
+   an existing delegated responsibility. Dependencies: native insertion evidence
+   and explicit parent reservation bound to the complete insertion mapping.
+   Completion: nested scope/identity coverage, aliases/cycles refused, full mapping
+   authorized before fence, exact metadata generation refresh and restart recovery.
+   Existing DelegationPlan currently validates only ordinary split/merge shape;
+   source inspection confirms this dependency rather than assuming compatibility.
+3. **Native nested lifecycle (following, P1/P5/P6).** Purpose: verify deeper
+   insertion and subsequent movement through actual owners. Dependencies: the
+   checked deeper insertion protocol. Completion: interrupted parent reservation,
+   fence/import/publication/activation, original retries, ancestor-offline child
+   service and later split/merge/retirement continuity. Deletion/reparenting,
+   authority movement, retention, membership, tuning and platform/fault gates remain
+   in the full goal; the next audit must retain these outstanding requirements.
 
 ### How the current work fits globally
 
@@ -9001,3 +9004,116 @@ Core-only insertion2 passed before that assertion; final rerun/checks recorded b
 Final core-only insertion2 passed0.12s; all-feature/all-target Clippy -D warnings
 passed1.31s. Format, whitespace and80-contract inventory passed. All validation
 handles are terminal; no remote CI gate was used. Full goal remains active.
+
+## Slice131 schema plan — native assigned responsibility insertion
+
+Previous goal turn progressed: slice130 committed/pushed36a8cb7. Current worktree
+is clean. Reuse the selected native created-source phase ledger's unread-ticket,
+quorum-observation, compact-before-abort and immutable stopped-file checks. New
+fixture binds existing root Source to schema5 Directory and VBTINT03 exact child
+identities; targets are actual Staging-assigned groups with verified metadata
+creation provenance, FileCreationBindings and one authoritative native WAL/store.
+No production consensus or storage redesign is planned.
+
+Data/API: three metadata replicas, three existing source replicas and three per
+child; two exact disjoint child scopes and immutable reservation statuses. Build
+InsertionChild references from authenticated local quorum-observed metadata; use
+them to select target grants/bootstrap on reopen. Before target group establishment,
+stop after two assigned replicas of the first child, recover metadata and retry
+the reservation/provisioning, then establish all replicas. No route or data owner
+is published by that step. All phase decisions derive from applied quorum reads.
+
+Transitions: committed intent -> both target stages -> source fence -> each import
+-> atomic parent/children publication -> independent activations. At each phase,
+leave the accepted ticket unread, observe exact durable indices/digests, abort and
+reclaim owners (optionally compact first), reopen from the same store identities,
+retry the original command and check original facts. Activation resumes with source
+and metadata stopped; one child serves while its sibling remains NotActive. Child
+identity is used for writes/reads/retries; original parent hints refuse. Snapshot
+and WAL reopen retain imported dedup/outbox and source fence lineage.
+
+Ownership/failure: Staging evidence does not authorize serving; committed source
+fence + full imports + metadata publication + local activation do. Lost results
+must not recreate operation IDs or reinitialize imports. Creation bindings remain
+unchanged through phase recovery. Explicit abort/reclaim owns shutdown, preventing
+unread client buffers from blocking graceful drain. Compare every stopped metadata
+file byte and recovered GroupLog before/after ancestor-offline child service.
+
+Acceptance: selected TCP/QUIC x WAL/checkpoint cases, partial assigned provisioning,
+intent/stage/fence/import/publication reopen, original retries, exact routes/child
+identities, partial target activation with ancestor offline, preserved data/outbox,
+no dual owner, positive reclaimed checkpoint bases versus zero WAL bases. Relevant
+local compilation/Clippy/format/inventory checks; no CI wait. This advances P1/P5/P6
+and depends on130 plus assigned-creation and existing native ledger contracts.
+Next: deeper insertion composition/gap audit (P5/P6), dependent on native evidence,
+with explicit parent reservation/coverage/cycle/lifecycle checks. Following: select
+and implement the next missing full-baseline path from that audit (P0–P7); retain
+all deletion/reparenting, authority movement, retention, mutation/admission, tuning,
+platform and broader fault requirements. P8/Windows remain deferred.
+
+### Slice131 executed evidence — initial TCP WAL history
+
+Added tests/routed/insertion.rs using existing native socket/phase helpers. Child
+groups are verified Staging assignments: first only two child21 stores exist,
+metadata recovers and original reservations retry before all six target stores
+are established. Exact creation binding bytes are checked on every phase reopen.
+The immutable source is the existing trusted root owner, not a newly created
+namespace. Separate schema5 metadata and schema3 target bindings are reopened.
+
+TCP/TLS WAL case passed41.20s: both data writes plus intent, stages, fence, imports
+and atomic parent/children publication each leave an unread client ticket, abort/
+reclaim all owners, reopen, observe matching indices/digests, retry the exact
+command and check serving gates. Quorum-observed manifests resolve to exact
+child identities. Both original activations then run with source/metadata stopped;
+individual target abort/reopen/retry and sibling NotActive are checked. Imported
+retries/outbox and new writes survive final reopen. Every stopped metadata file
+byte and recovered GroupLog remain unchanged during child activity. Source remains
+fenced. This is selected Linux loopback/owner-abort evidence, not arbitrary faults,
+real hardware power loss, macOS or separate hosts. Remaining three cases subsequently passed; terminal outputs are recorded below.
+
+Initial compilation found NativeStartup is intentionally not Clone; moved each
+owned startup vector into open instead of cloning. No production contract change.
+
+### Scope audit for the next insertion deliverable
+
+Current source confirms three remaining recursive-composition restrictions:
+TransferIntent::insert_children rejects any source with a parent;
+DelegationPlan::new invokes ordinary Single/Partitioned validate_shape, excluding
+an insertion's Delegated after manifest; Directory::begin_delegation only admits
+parent identities from the original DirectoryPlan. DelegationBinding's digest
+binds before/after but carries no full child creation mapping. Thus root insertion
+and a later ordinary split of its child do not establish arbitrary-depth insertion.
+
+The next protocol must reserve the exact parent route and the full insertion
+mapping before allowing a delegated source to fence, and admit dynamically
+published parents under a new explicitly selected schema so old replay outcomes
+remain unchanged. This is needed for the user-visible recursive responsibility
+milestone, not an optional convenience helper. Parent selector epoch refresh,
+complete source/target evidence, reservation cancellation/partial-progress recovery
+and later source reuse must remain coherent. Cross-authority moves and retained
+local parent scopes need separate checked coverage; do not pretend a metadata
+manifest edit supplies them. Existing baseline gap ledger remains authoritative.
+
+### Slice131 terminal validation
+
+All four selected native insertion histories passed. Initial TCP/TLS WAL case
+passed41.20s; the remaining QUIC checkpoint, TCP/TLS checkpoint and QUIC WAL cases
+passed together143.56s with the native-history mutex serializing topologies. Each
+checks partial assigned provisioning, nine unread-result/reopen phases, original
+creation/status/binding preservation, atomic root/child publication and resolution,
+source fencing, both individual activations with ancestor/source stopped, sibling
+NotActive, imported retries/outbox, fresh writes and final recovery. Checkpoint
+cases reclaim positive WAL floors; WAL cases retain zero floors. Every metadata
+file byte and recovered GroupLog remains unchanged during child-only activity.
+
+All-feature/all-target Clippy -D warnings passed1.42s after changing one indexed
+child loop to iterator/enumerate; that iteration-only change does not alter the
+executed history or assertions. The initial Clippy needless_range_loop finding
+was corrected without a protocol change. No native acceptance case failed.
+No production implementation changed in131; two existing test helpers became
+sibling-visible for reuse. This advances the recursive routing and safe movement
+macro milestones; deeper insertion still needs the reviewed parent/full-map
+protocol. Full P0–P7/retention/fault/platform/tuning scope remains active. Final
+format/whitespace/inventory checks will be recorded on completion.
+Final slice131 format, whitespace and80-contract inventory checks passed. All
+validation handles are terminal; CI was not a gate. Full goal remains active.
