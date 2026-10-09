@@ -3713,3 +3713,39 @@ macOS execution, separate hosts or performance result claimed. Full P0–P7 stay
 active with earlier ledgers, P8/Windows deferred, RPL-1.5 and original pack retained.
 Final cargo formatting, included-fixture rustfmt, whitespace and80-contract
 inventory pass. All execution handles terminal; no remote CI gate used.
+
+## Slice150 — real cross-authority insertion phase histories
+
+Linux loopback native TCP/TLS and QUIC with WAL and checkpoint recovery exercise
+separate metadata quorums, original schema7 local creation provenance, partially
+established Staging assignments and exact binding reuse. Each accepted reserve,
+intent, stage, source fence, import, child publication and parent refresh leaves
+its original application completion unconsumed until owner abort. Exact original
+quorum statuses and command retries survive reopen. No terminal-envelope polling
+is confused with application result consumption or cancellation rollback.
+
+Stale parent locator and unactivated targets refuse service. With metadata/source
+owners stopped, both targets activate, lose original result observation, reopen
+and exactly retry activation. Imported operations return duplicate7/11 with one
+outbox item; fresh writes/quorum reads yield9/13. Original assignments stay exact.
+Stopped metadata/source files, including logs, remain byte-for-byte unchanged;
+recovered source still refuses the stale grant. Owners are joined before cleanup.
+
+Initial fixture compile mismatches were corrected against existing contracts.
+The first native run refused creation admission as NotLeader: campaign the actual
+child before original/retry submissions. The next compared omitted dormant target
+owners with correctly reopened assigned owners: expose the same uninitialized
+owners after original reservation. Exact equality and consensus admission remain.
+Corrected initial TCP/WAL1/1 passes57.88s after6.01s build. Final explicit original
+phase retry matrix4/4 passes306.38s after7.70s build. Existing default TCP delegated
+split WAL1/1 passes57.34s. Final all-feature/all-target Clippy -D warnings7.55s,
+cargo formatting, included-fixture rustfmt, whitespace and80-contract inventory
+pass. The matrix serializes socket histories; observation timeouts did not restart
+live test processes. All execution handles are terminal.
+
+Finite selected owner-abort/checkpoint histories, not arbitrary faults, physical
+power-loss proof or global authenticated ancestry certificates. No production
+protocol/provider changes, retained-scope feature, macOS execution, separate-host
+or performance claim. Full P0–P7 and prior open gates remain active; current151
+implements retained scope, next152 native composition and following153 deletion.
+Windows/P8 remain deferred, CI background, RPL-1.5 and original pack preserved.

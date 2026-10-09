@@ -108,7 +108,7 @@ fn target_data(key: u8, delta: i64) -> Vec<u8> {
     .unwrap()
 }
 use super::creation_source::{durable_files, unread};
-fn establish(
+pub(super) fn establish(
     parents: &[Node<LifecycleDirectory>],
     c: &NativeStartup,
     status: &GroupCreationStatus,

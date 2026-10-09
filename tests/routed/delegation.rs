@@ -117,9 +117,64 @@ struct Delegated {
     source: Vec<Node<source_fixture::Source>>,
     targets: [Vec<Node<target_fixture::Target>>; 2],
     cache: NativeManifestCache,
+    metadata: [fn() -> LifecycleDirectory; 2],
+    insertion_plan: Option<DelegationPlan>,
+}
+// Capture an original terminal envelope without consuming its application result.
+// Explicit owner abort later preserves the unknown observation and joins workers.
+fn phase_write<A>(
+    unread: bool,
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: Vec<u8>,
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    if !unread {
+        let _ = propose_recovering(nodes, clock, g, operation, bytes);
+        return;
+    }
+    assert_eq!(nodes[0].local().clients.usage().requests, 0);
+    let ticket = nodes[0]
+        .propose(ClientRequest {
+            group: group(g),
+            operation: OperationId::new(operation).unwrap(),
+            bytes,
+        })
+        .unwrap();
+    let mut completion = None;
+    drive(nodes, clock, |ns| {
+        if completion.is_none() {
+            completion = ns[0].poll_client();
+        }
+        completion.is_some()
+            && ns.iter().all(|n| {
+                n.local().applications[&group(g)].applied_index()
+                    >= ns[0]
+                        .local()
+                        .owner
+                        .core(group(g))
+                        .unwrap()
+                        .state()
+                        .commit_index
+            })
+    });
+    assert_eq!(completion.unwrap().ticket(), ticket);
+    assert_eq!(nodes[0].local().clients.usage().requests, 1);
 }
 impl Delegated {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
+        Self::with_metadata(protocol, checkpoint, parent_metadata, child_metadata)
+    }
+    fn with_metadata(
+        protocol: NativePeerProtocol,
+        checkpoint: bool,
+        parent_factory: fn() -> LifecycleDirectory,
+        child_factory: fn() -> LifecycleDirectory,
+    ) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-delegated-{}-{protocol:?}-{checkpoint}",
             std::process::id()
@@ -137,13 +192,13 @@ impl Delegated {
                 configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Create),
                 &clock,
                 protocol,
-                parent_metadata,
+                parent_factory,
             ),
             child: open(
                 configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
                 &clock,
                 protocol,
-                child_metadata,
+                child_factory,
             ),
             source: open(
                 configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
@@ -163,6 +218,8 @@ impl Delegated {
             checkpoint,
             transfer_operation: 200,
             reservation_operation: 400,
+            metadata: [parent_factory, child_factory],
+            insertion_plan: None,
         };
         initialize(
             &mut rig.grandparent,
@@ -276,20 +333,25 @@ impl Delegated {
         let state = self.observed();
         if state.reservation.is_none() {
             campaign(&mut self.parent, &self.clock, 100);
-            let _ = propose_recovering(
+            phase_write(
+                self.insertion_plan.is_some(),
                 &mut self.parent,
                 &self.clock,
                 100,
                 self.reservation_operation,
-                DelegationPlan::new(
-                    fixture::parent(),
-                    fixture::before(),
-                    fixture::after(),
-                    OperationId::new(self.transfer_operation).unwrap(),
-                )
-                .unwrap()
-                .encode(65536)
-                .unwrap(),
+                self.insertion_plan
+                    .clone()
+                    .unwrap_or_else(|| {
+                        DelegationPlan::new(
+                            fixture::parent(),
+                            fixture::before(),
+                            fixture::after(),
+                            OperationId::new(self.transfer_operation).unwrap(),
+                        )
+                        .unwrap()
+                    })
+                    .encode(65536)
+                    .unwrap(),
             );
             return Phase::Reserve;
         }
@@ -305,7 +367,8 @@ impl Delegated {
         let intent = reservation.child_intent(cfg).unwrap();
         if state.intent.is_none() {
             campaign(&mut self.child, &self.clock, 1);
-            let _ = propose_recovering(
+            phase_write(
+                self.insertion_plan.is_some(),
                 &mut self.child,
                 &self.clock,
                 1,
@@ -323,7 +386,16 @@ impl Delegated {
                 let g = 21 + i as u128;
                 if self.targets[i].is_empty() {
                     self.targets[i] = open(
-                        configuration(&self.root, g, &[1, 2, 3], NativeOpenMode::Create),
+                        configuration(
+                            &self.root,
+                            g,
+                            &[1, 2, 3],
+                            if self.insertion_plan.is_some() {
+                                NativeOpenMode::Recover
+                            } else {
+                                NativeOpenMode::Create
+                            },
+                        ),
                         &self.clock,
                         self.protocol,
                         || fixture::fresh_target_for(g, &intent, self.transfer_operation),
@@ -333,7 +405,8 @@ impl Delegated {
                     .bootstrap_command(65536)
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(
+                phase_write(
+                    self.insertion_plan.is_some(),
                     &mut self.targets[i],
                     &self.clock,
                     g,
@@ -345,7 +418,8 @@ impl Delegated {
         }
         if state.source.is_none() {
             campaign(&mut self.source, &self.clock, 20);
-            let _ = propose_recovering(
+            phase_write(
+                self.insertion_plan.is_some(),
                 &mut self.source,
                 &self.clock,
                 20,
@@ -390,7 +464,8 @@ impl Delegated {
                     .import_command(&import, 65536)
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(
+                phase_write(
+                    self.insertion_plan.is_some(),
                     &mut self.targets[i],
                     &self.clock,
                     g,
@@ -427,7 +502,8 @@ impl Delegated {
             )
             .unwrap_or_else(|e| panic!("{:?}", e.0));
             campaign(&mut self.child, &self.clock, 1);
-            let _ = propose_recovering(
+            phase_write(
+                self.insertion_plan.is_some(),
                 &mut self.child,
                 &self.clock,
                 1,
@@ -454,7 +530,8 @@ impl Delegated {
                 decision,
             };
             campaign(&mut self.parent, &self.clock, 100);
-            let _ = propose_recovering(
+            phase_write(
+                self.insertion_plan.is_some(),
                 &mut self.parent,
                 &self.clock,
                 100,
@@ -480,7 +557,8 @@ impl Delegated {
                     )
                     .unwrap();
                 campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(
+                phase_write(
+                    self.insertion_plan.is_some(),
                     &mut self.targets[i],
                     &self.clock,
                     g,
@@ -499,6 +577,12 @@ impl Delegated {
             state.parent.input().parent,
             fixture::parent().input().parent
         );
+        if self.insertion_plan.is_some() && state.decision.is_some() {
+            for g in [21, 22] {
+                let m = manifest(&mut self.child, &self.clock, 1, fixture::id(g));
+                self.cache.admit(m).unwrap();
+            }
+        }
         for m in [&state.root, &state.parent, &state.child] {
             self.cache.admit(m.clone()).unwrap();
         }
@@ -544,7 +628,7 @@ impl Delegated {
                 continue;
             }
             let key = if i == 0 { 1 } else { 200 };
-            let q = target_query(key);
+            let q = self.target_query(key);
             let value = observe(&mut self.targets[i], &self.clock, 21 + i as u128, q);
             if state.targets[i].as_ref().unwrap().activated.is_some() {
                 assert!(
@@ -557,6 +641,17 @@ impl Delegated {
                 assert_eq!(value, TargetRead::NotActive);
             }
         }
+    }
+    fn target_query(&self, key: u8) -> TargetQuery<Vec<u8>> {
+        let Some(plan) = &self.insertion_plan else {
+            return target_query(key);
+        };
+        let child = &plan.insertion_children().unwrap()[usize::from(key >= 128)].manifest;
+        TargetQuery::Data(RoutedQuery {
+            hint: cross_authority::hint(child, key),
+            key: vec![key],
+            query: vec![key],
+        })
     }
     fn close_parent(&mut self) {
         if self.checkpoint {
@@ -590,13 +685,9 @@ impl Delegated {
         if frozen {
             assert_eq!(value, RoutedRead::Rejected(RoutingError::Fenced));
             for i in 0..2 {
+                let query = self.target_query(if i == 0 { 1 } else { 200 });
                 assert_eq!(
-                    observe(
-                        &mut self.targets[i],
-                        &self.clock,
-                        21 + i as u128,
-                        target_query(if i == 0 { 1 } else { 200 })
-                    ),
+                    observe(&mut self.targets[i], &self.clock, 21 + i as u128, query),
                     TargetRead::NotActive
                 );
             }
@@ -615,7 +706,7 @@ impl Delegated {
             configuration(&self.root, 100, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            parent_metadata,
+            self.metadata[0],
         );
     }
     fn close_all(&mut self) {
@@ -676,6 +767,9 @@ impl Delegated {
     }
     fn restart(&mut self) {
         self.close_all();
+        self.reopen();
+    }
+    fn reopen(&mut self) {
         self.grandparent = open(
             configuration(&self.root, 200, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
@@ -686,13 +780,13 @@ impl Delegated {
             configuration(&self.root, 100, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            parent_metadata,
+            self.metadata[0],
         );
         self.child = open(
             configuration(&self.root, 1, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            child_metadata,
+            self.metadata[1],
         );
         self.source = open(
             configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
@@ -888,3 +982,5 @@ mod repeat;
 
 #[path = "delegation_cancel.rs"]
 mod cancellation;
+#[path = "cross_authority_insertion.rs"]
+mod cross_authority;

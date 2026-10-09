@@ -158,6 +158,8 @@ insertion path through opt-in Directory schema7 and separate canonical tags.
 The child's local creation records remain authoritative; foreign parent reservation
 and child publication observations retain authenticated host provenance obligations.
 Actual deterministic data handoff/checkpoint recovery and native intent-frame faults
-are exercised; real TCP/QUIC separate-authority phase recovery is current150.
-Retained-scope insertion is next151. This advances P5/P6 feature coverage without
+are exercised. Slice150 adds selected real TCP/TLS and QUIC WAL/checkpoint
+separate-authority phase recovery with original command retries, partial assigned
+provisioning and independently activated successor service with metadata/source
+owners stopped and durable files unchanged. Retained-scope insertion is current151. This advances P5/P6 feature coverage without
 closing broader lifecycle, platform/fault or original P7 performance gates.

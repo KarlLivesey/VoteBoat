@@ -364,6 +364,12 @@ Deterministic public-contract tests preserve original retries/outbox, source fen
 non-serving imported targets, parent refresh and activated target state through
 checkpoints; new successor writes succeed. Native ModelIo cuts every byte of the
 intent frame and injects sync/publication faults, recovering no intent or the exact
-original intent/local creation reservations. Actual native TCP/QUIC cross-authority
-phase/reopen composition is next150. Retained-scope insertion, deletion/reparenting,
+original intent/local creation reservations. Slice150 adds native TCP/TLS and QUIC
+WAL/checkpoint histories with separate metadata quorums, verified assigned targets,
+partial provisioning, unread accepted phase results and exact original retries
+after reopen. Targets refuse before activation, then activate independently and
+serve imported retries/outbox and new writes with all metadata/source owners
+stopped. Their original durable files, including logs, remain byte-for-byte
+unchanged; creation bindings stay exact and the recovered source stays fenced.
+Retained-scope insertion, deletion/reparenting,
 metadata authority movement and broader fault/platform evidence remain work.
