@@ -229,6 +229,28 @@ transfer, activate both targets, and verify imported retry/outbox continuity. Th
 native ModelIo test cuts every fence frame and exercises sync/publication failures:
 recovery observes either the old active owner or complete fence, and exact retry
 converges to the original export boundary. Existing TCP/QUIC fixed-owner creation
-histories pass after guard generalization; source-capable native network phase/reopen
-histories are the next slice. No arbitrary-fault, macOS, separate-host, recursive
+histories pass after guard generalization; selected source-capable native network
+phase/reopen histories are described below. No arbitrary-fault, macOS, separate-host, recursive
 insertion or complete lifecycle-proof claim is made by these selected histories.
+
+The four source-capable native histories in `tests/routed/creation_source.rs` combine
+TCP/QUIC with WAL/checkpoint recovery. Metadata schema4 commits the actual source
+assignment; verified assigned bootstrap establishes all three source stores and
+immutable creation records before elections. Twelve complete-reopen phase boundaries
+cover namespace ready/publication/activation, two data writes, intent, both stages,
+source fence, both imports and transfer publication. Original phase results remain
+unread until owner abort, committed statuses drive recovery, and original retries
+retain indices/digests and source creation records. Snapshot variants compact each
+selected prefix before abort; they cannot use graceful drain while client results
+are intentionally unconsumed. WAL variants recover from actual base0 logs.
+
+After publication both source and metadata are completely offline for the original
+target activations. Each activation remains unread and recovers through target
+abort/reopen/retry. The first target serves while the other remains NotActive.
+Imported retry values and outbox items survive; new target operations continue
+independently. Exact metadata file bytes, including selected WAL/manifests/snapshots,
+and recovered GroupLogs remain unchanged during the outage. Final all-group recovery
+retains original lifecycle statuses, updated target data/outbox and stale-route/
+fenced-source refusal. These selected Linux loopback/owner-abort histories add
+native integration evidence; recursive insertion and broader lifecycle/platform/
+arbitrary-fault validation remain separate work.

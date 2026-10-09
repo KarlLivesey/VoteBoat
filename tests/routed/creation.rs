@@ -301,7 +301,7 @@ use voteboat::{snapshot_worker::SnapshotWorker, worker::PersistenceWorker};
 // Stop core polling immediately. Accepted native I/O may still finish; discard
 // its observations and reclaim actual stores before reopening. No rollback or
 // hardware power-loss claim follows from owner abort.
-fn abandon<A>(mut nodes: Vec<Node<A>>, g: u128) -> BTreeMap<NodeId, GroupLog>
+pub(super) fn abandon<A>(mut nodes: Vec<Node<A>>, g: u128) -> BTreeMap<NodeId, GroupLog>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,

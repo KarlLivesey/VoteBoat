@@ -3007,3 +3007,35 @@ phase/reopen validation is next. Existing fixed-owner network histories remain
 regression evidence. No complete lifecycle-proof/hardware/macOS/separate-host claim.
 Final slice128 Clippy all-features/all-targets -D warnings passed3.04s; format,
 whitespace and80-contract inventory passed. All checks terminal; CI not a gate.
+
+## Slice129 — native created-source split phase recovery
+
+Linux cargo +stable --locked --offline --all-features --test routed. Initial
+standalone TCP WAL history passed52.08s (build14.13s); unused test Done variant warning
+removed. Four-case run: TCP and QUIC WAL cases passed, both checkpoint cases timed
+out after Ready in graceful close at native.rs420 (aggregate145.65s/build8.62s).
+Runtime Node Quiescing requires clients.is_drained(), so this was incompatible with
+intentionally unread phase results. Focused correction uses existing owner-abort/
+reclaim after checkpoint compaction, preserving unread-result checks and original
+timeouts. Focused TCP/QUIC checkpoint rerun2 passed113.26s, build7.12s. All four
+selected combinations have passing evidence across these runs; the failed combined
+run remains recorded. No production fix or protocol redesign was needed.
+
+Each combination uses actual committed creation authorization and assigned native
+source WAL/snapshot establishment, immutable creation-record checks, twelve all-
+replica phase reopen boundaries (ready, namespace publication/activation, two writes,
+intent, two stages, fence, two imports, publication), unread original tickets and
+exact retries with unchanged phase indices/digests. Quorum reads verify guard service
+state, targets remain non-serving until activation, and source stays fenced. Original
+activations then run with metadata/source offline, each target aborts/reopens/retries,
+one target serves while the other remains NotActive, imported retries/outbox and new
+writes continue independently. Exact offline metadata file bytes and recovered
+GroupLogs remain unchanged. Final all-group recovery retains original phases plus
+new target data/outbox and stale-route/fenced-source refusal. Actual reclaimed WAL
+bases are zero; checkpoint bases are positive after selected prefix compaction.
+This is selected Linux loopback/owner-abort evidence, not process/hardware power loss,
+arbitrary schedules, recursive insertion, macOS or separate-host validation.
+Final slice129 all-feature/all-target Clippy -D warnings passed3.16s; final format,
+whitespace/inventory recorded below on completion. No remote CI gate was used.
+Final slice129 format, whitespace and80-contract inventory passed; all recorded
+validation handles terminal.

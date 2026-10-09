@@ -111,25 +111,27 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Source-capable created namespace (current slice128, P5/P6).** Purpose:
-   let freshly created namespaces enter the existing safe split/merge protocol.
-   Dependencies: schema4 metadata transfer admission and existing TransferSource/
-   staged-target contracts. Completion: exact pre-initialization owner binding,
-   activation gate, actual fence/export/import/publication/activation with retained
-   retries/outbox, checkpoint provenance and torn-frame fence recovery. Implemented
-   evidence and executed results are recorded in slice128 below.
-2. **Native created-namespace transfer (next, P1/P5/P6).** Purpose: demonstrate the
-   source-capable path through actual TCP/QUIC owners. Dependencies: slice128 and
-   existing native creation/transfer fixtures. Completion: quorum-observed phases,
-   WAL/checkpoint reopen, original receipt-loss retries, metadata outage and no old
-   owner service after fencing. This remains planned, not implied by deterministic
-   or existing fixed-owner network histories.
-3. **Recursive insertion into covered selectors (following, P5/P6).** Purpose:
-   add recursive child ownership to existing data without losing selector coverage.
-   Dependencies: source-capable transfer and checked parent/child publication.
-   Completion: complete coverage, alias/cycle rejection, durable fencing, no dual
-   owner and resumable partial publication/activation. Original deletion/reparenting,
-   authority movement, broader P0–P7/platform/fault/performance gaps remain active.
+1. **Native created-namespace transfer (current slice129, P1/P5/P6).** Purpose:
+   exercise the source-capable path through actual TCP/QUIC owners. Dependencies:
+   schema4 metadata, slice128 source guard and existing native creation/transfer
+   contracts. Completion: assigned bootstrap, quorum-observed phases, unread results,
+   WAL/checkpoint owner-abort reopen, exact retries, no dual owner and independent
+   target activation/writes with source/metadata offline. Implemented evidence and
+   executed results are recorded in slice129 below.
+2. **Recursive insertion protocol (next, P5/P6).** Purpose: insert child ownership
+   into an existing covered namespace while moving actual data. Dependencies:
+   source handoff and checked parent/child publication; inspect same-responsibility
+   transfer restrictions before selecting the schema. Completion: a bounded tested
+   protocol retaining complete selector coverage, explicit identity/lineage mapping,
+   alias/cycle refusal, durable fence/import/activation and partial-progress recovery.
+   This remains planned; a new manifest alone cannot authorize insertion.
+3. **Native recursive insertion recovery (following, P1/P5/P6).** Purpose: verify
+   the insertion protocol through actual owners. Dependencies: the checked insertion
+   protocol/guards and existing native phase fixtures. Completion: quorum-observed
+   interrupted publication/activation, WAL/checkpoint recovery, original operation
+   resumption and child service under ancestor outage without dual owners. All
+   original deletion/reparenting, authority movement, retention, broader membership,
+   tuning and platform/fault gates stay active.
 
 ### How the current work fits globally
 
@@ -8803,3 +8805,109 @@ The top linked mini plan now reflects this sequence. Full P0–P7 stays active;
 P8/Windows deferred, macOS/separate-host unverified, CI remains background feedback.
 Final slice128 all-feature/all-target Clippy -D warnings passed3.04s; format,
 whitespace and80-contract inventory checks passed. All recorded checks terminal.
+
+## Slice129 schema plan — native created namespace transfer phase recovery
+
+Previous goal turn progressed:128 committed/pushed6fcaeab; current worktree clean.
+Current deliverable advances P1/P5/P6 through actual TCP/QUIC created-source transfer
+histories. No production schema/API redesign: compose schema4 LifecycleDirectory,
+exact assigned source bootstrap, source-capable namespace schema2 and existing staged
+TransferTarget. Reuse native fixture open/campaign/read/compact/close and actual scope
+providers; one selected log/snapshot binding per replica, no new runtime/provider.
+
+Shape/state: start metadata with an independent administrative anchor not naming
+source/target groups; commit creation reservation and establish source's three exact
+assigned stores/immutable creation records. Source readiness -> namespace publication
+-> source namespace activation -> ordinary writes -> transfer intent -> both stages
+-> source freeze -> both imports -> transfer publication -> both target activations.
+Quorum-observe each phase, reopen all replicas using WAL or checkpoint recovery,
+compare original statuses/indices and check source/target service authority. Phase
+selection comes from recovered committed observations, not retained client receipts.
+Namespace publication is verified against the actual metadata commit and quorum
+manifest observation before target activation; source freeze retains the existing
+host-authenticated intent/staging boundary.
+
+Failure/ownership: accepted phase tickets remain unread; abort owners and reclaim
+actual selected workers for WAL recovery where used, so accepted I/O may complete
+without being delivered to old cores. Checkpoint variants compact through original
+phase facts and reopen exact identities. Fenced sources stay non-serving; staged/
+imported targets remain NotActive until checked publication/activation. Metadata
+outage after publication cannot add an ancestor dependency to target activation,
+retries/new writes. Preserve immutable creation binding and original export digest,
+operation retries/outbox. No timeout-driven rollback, unfreeze or empty replacement.
+
+Checks: four selected TCP/QUIC × WAL/checkpoint phase ledgers, unread phase outcomes,
+actual assigned bootstrap, original namespace/fence/import/publication/activation
+recovery, no dual owner, independent target use with source/metadata offline and
+unchanged offline metadata files. This is selected Linux loopback/owner-abort coverage,
+not arbitrary hardware-fault or macOS proof. Current129 depends on128/127 and existing
+native fixtures. Next: recursive insertion schema/implementation (P5/P6), dependent
+on this source handoff and checked parent/child publication, checking complete
+coverage and alias/cycle/partial-progress refusal. Following: native recursive
+insertion recovery (P1/P5/P6), dependent on that protocol, checking interrupted
+publication/activation and ancestor outage. Full P0–P7 and earlier gaps stay active;
+P8/Windows deferred, CI remains background feedback.
+Slice129 failed-check diagnosis: first standalone TCP WAL history passed52.08s.
+The four-case run's checkpoint variants timed out in the graceful close fixture
+at native.rs420 after Ready. Runtime Node drain requires clients.is_drained(),
+so deliberately unread original results cannot complete graceful shutdown. Keep
+unread-result acceptance intact: compact each selected application/log prefix,
+then use the existing owner-abort/reclaim helper for checkpoint variants too.
+Assert checkpoint base>0 versus WAL base0 on actual reclaimed GroupLogs. No
+production change, timeout increase or result consumption. The same run's WAL
+variants continue as confirmed live tests; final results follow termination.
+
+## Slice129 implemented — native created-source split phase/reopen ledger
+
+Added four selected TCP/QUIC × WAL/checkpoint histories using actual schema4 metadata,
+committed creation reservation, LocalCreationAuthority/VerifiedGroupCreation and
+FileCreationBindings to establish all three assigned source stores before elections.
+An independent administrative anchor never names the new source/targets as existing
+owners. Source plan equals the real bucket-counter grant; immutable creation records
+are checked unchanged on every reopen. Existing native fixture helpers supply
+networking, quorum reads, checkpoint compaction and actual worker reclamation.
+No production format, provider, consensus behavior or API was changed.
+
+Each history leaves original phase client results unread, obtains committed
+observations, aborts owners/reopens all replicas and retries the original request.
+Twelve full-reopen phase boundaries cover ready, namespace publication/activation,
+both data writes, transfer intent, both target stages, source fence, both imports
+and transfer publication. Original ready/activation/fence/import/publication indices
+and content commitments remain equal after each reopen/retry; pending targets remain
+NotActive and frozen source rejects guarded reads and new proposals. Phase selection
+uses recovered state/status observations, not previous client receipts; data setup
+uses the fixture's committed counter values. No production automatic resumer claim.
+
+After transfer publication, metadata and source owners stop completely. Both original
+target activations run from the previously quorum-observed exact decision, remain
+unread, reopen individually and retry original activation. The first activated target
+serves while the second remains NotActive. Imported original operations return
+original duplicate values; independent new operations advance counters and retain
+outbox state. Offline metadata WAL/manifest/snapshot file bytes remain exactly equal,
+and separately recovered GroupLogs remain equal. A final all-group reopen preserves
+all historical phases, updated target data/outbox and stale-route/source refusal.
+WAL paths assert actual reclaimed base0; checkpoint paths compact each selected
+prefix and assert reclaimed base>0. Accepted I/O may finish after owner abort; no
+rollback or hardware-power-loss claim follows.
+
+Executed Linux: initial standalone TCP WAL history passed52.08s, build14.13s with an
+unused test enum variant warning (removed). Four-case run's TCP/QUIC WAL cases both
+passed with exact metadata byte checks; the checkpoint cases failed at graceful
+close as diagnosed above (aggregate145.65s, build8.62s). Focused checkpoint rerun after
+compact-then-abort correction passed both TCP/QUIC cases113.26s, build7.12s. WAL stop
+behavior stayed the same. These four selected combinations therefore have passing
+evidence across the focused runs; the failed four-case run is not reported green.
+Final Clippy/format/whitespace/inventory checks follow below.
+
+Macro review: selected fresh namespace lifecycle now connects actual assigned
+creation through source fencing/import/publication to independent target service,
+advancing P1/P5/P6. Current129 complete under these histories. Next is recursive
+insertion into covered selectors, requiring a checked protocol/identity mapping
+rather than editing a manifest; following is its native interrupted recovery ledger.
+The top mini plan reflects those dependencies/checks. Broader P0–P7/retention/fault/
+platform/membership/tuning requirements remain active; P8/Windows deferred and CI
+stays background feedback.
+Final slice129 all-feature/all-target Clippy -D warnings passed3.16s. Final format,
+whitespace and80-contract inventory checks are recorded on completion below.
+Final slice129 format, whitespace and80-contract inventory checks passed. All
+recorded validation handles are terminal; no remote CI gate was used.
