@@ -333,6 +333,14 @@ the follower remains paused, a new snapshot install on replica 3 after resume,
 its durable base at/after that boundary, and unchanged source leader/term/binding.
 That evidence distinguishes real snapshot catch-up from merely resuming polling.
 
+A host-poll stall retains socket and transport data, including possible log
+messages sent after the pause began. It therefore cannot guarantee that the
+selected group will need a snapshot. Slice106's explicit buffered/dropped
+delivery tests show why the selected durable base must be checked independently
+of aggregate install counts. A failed snapshot gate is retained as a failed
+experiment; it does not by itself establish lost acknowledged data. The live
+QUIC packet history is not reconstructed by those deterministic tests.
+
 `maintenance.csv` retains each opportunity, checkpoint boundary, exact reclamation
 sequence, before/after bytes and admission-to-observed-completion times, plus pause
 and resume observations. `bases.csv` records every replica/group's base before

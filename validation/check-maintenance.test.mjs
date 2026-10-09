@@ -44,3 +44,15 @@ test('catch-up needs a post-pause boundary, new snapshot install and recovered f
  assert.throws(()=>check(rr,{...s,forced_prior_last:9},bases));
  assert.throws(()=>check(rr,s,originalBases));
 });
+test('a snapshot on another group cannot certify the forced group caught up',()=>{
+ const rr=[
+  '0,pause,1,3,1000000000,1000100000,1000100000,completed,0,0,0,0,0,0,0,',
+  ...rows.slice(0,4),
+  '0,resume,1,3,2000000000,2000100000,2000100000,completed,0,0,0,0,0,0,0,',rows[4],
+ ];
+ const s={...metadata,groups:2,pause_start_ns:1e9,pause_end_ns:2e9,actual_pause_ns:1000100000,actual_resume_ns:2000100000,forced_group:1,forced_index:9,forced_prior_last:7,forced_leader:1,forced_term:1,follower_snapshot_installs:1,installs_at_resume:0};
+ const otherGroup=['before_close','after_recover'].flatMap(stage=>[1,2,3].map(r=>`${stage},${r},2,${r===3?9:0}\n`)).join('');
+ const unrelated=originalBases+otherGroup;
+ assert.throws(()=>check(rr,s,unrelated));
+ check(rr,s,unrelated.replace('before_close,3,1,0','before_close,3,1,9').replace('after_recover,3,1,0','after_recover,3,1,9'));
+});

@@ -107,30 +107,29 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Maintenance and catch-up evidence (current, P7).** Slice 105 exercises
-   scheduled load with bounded checkpoint/reclaim waves and a full-duration
-   follower host-poll stall. Purpose: expose maintenance interference and verify
-   actual snapshot repair, advancing measured tuning and broader validation.
-   Dependencies: the offered ledger, exact reclaim tickets and existing durable
-   snapshot contracts. Completion: TCP/QUIC raw histories reconcile maintenance,
-   useful outcomes/refusals, recovered bases, reads/retries and worker joins;
-   archive all attempts and commit. Finite runs do not complete P7.
-2. **Fixed-budget improvement (next, P7).** Use measured persistence/maintenance
-   costs to select one bounded scheduling or durability improvement. Purpose:
-   improve useful applied throughput at unchanged durability and a declared p99
-   budget, advancing the measured-tuning milestone. Dependencies: matched raw
-   evidence and a schema review of existing ownership/restart contracts before
-   editing. Completion: a focused failure regression and matched workload/budget
-   comparison; retain unsuccessful measurements and the unmet 250 ms serial gate.
-3. **Baseline acceptance reconciliation (following, P0–P7).** Map remaining design
-   requirements to direct evidence and implement the next missing usable behavior
-   or validation. Purpose: finish the actual baseline rather than accumulate
-   benchmark slices; advances membership, recursive lifecycle and broader
-   validation milestones according to the requirement found. Dependencies: the
-   roadmap, public contract inventory and current phase gaps. Completion: explicit
-   requirement/evidence links and a tested missing vertical slice; macOS,
-   separate-host, public mutation/envelope and broader fault/retention gaps remain
-   open until their own checks pass. P8/Windows stay deferred; CI is background.
+1. **Buffered compaction fault evidence (current, P1/P7).** Slice 106 separates
+   retained log delivery from a dropped-message partition using existing public
+   core/storage/application seams. Purpose: explain what a host-poll pause can
+   establish and preserve recovery/retry safety, advancing broader validation.
+   Dependencies: slice105 per-predicate diagnostics and SnapshotCluster.
+   Completion: explicit host/native-file schedules, full native close/reopen and
+   historical retry, independent rejection of another group's install, and raw
+   failed QUIC diagnostics retained. No benchmark gate is weakened.
+2. **Baseline acceptance reconciliation (next, P0–P7).** Map each roadmap exit
+   condition and component catalogue obligation to direct implementation/evidence.
+   Purpose: choose the next missing baseline deliverable across the full macro
+   plan rather than accumulate benchmarks. Dependencies: chapters12/17, the
+   inventory and phase ledger. Completion: requirement/evidence links with exact
+   unresolved checks, followed by a named bounded implementation slice. Optional
+   adapters/P8 must not become prerequisites or substitute for baseline work.
+3. **Close the selected baseline gap (following).** Implement the behavior or
+   conformance selected by that reconciliation. Purpose: make the requested final
+   state more complete, advancing its mapped macro milestone. Dependencies:
+   explicit API/state/ownership/restart schema and existing native/public seams.
+   Completion: the named acceptance condition passes with relevant local fault
+   checks. If P7 tuning is selected, declare workload/p99 before comparison and
+   require improvement at unchanged durability; the 250 ms serial gate remains
+   open. macOS/separate-host and broader lifecycle/membership gaps stay explicit.
 
 ### How the current work fits globally
 
@@ -6633,3 +6632,68 @@ history but does not explain the failed 60-second case or prove repeatability.
 Retain that gap; do not repeatedly rerun it hoping for success. Next work should
 use per-predicate diagnostics and a declared fault schedule if deeper repair
 validation is needed. Final formatting/diff and 71-contract metadata checks pass.
+
+### Slice 106 mini schema — buffered log delivery across compaction
+
+Previous goal turn was progress: 33194d1 pushed maintenance/catch-up evidence.
+One diagnostic repeat of the failed 60-second QUIC workload now isolates the
+failed fact: source remains leader/term 1/same binding, one install is counted
+across the replica, but forced group 1 retains follower base 0 below boundary 11.
+Thus aggregate install counts cannot establish selected-group snapshot repair.
+No acknowledgement-loss or value corruption is established by this failure.
+
+Current deliverable advances macro measured-validation and P1/P7 fault evidence:
+use the existing downstream SnapshotCluster and public core/storage/application
+contracts to hold an Append plus its commit-bearing retry destined for follower 3
+while leader 1 and follower 2 commit, then compact leader 1. Compare two explicit
+schedules: deliver retained matching Append messages before snapshot repair, or
+discard them. The first may recover committed state without installing a snapshot;
+the second must actually install one. Check exact values/commit/base boundaries,
+original retry outcome, quorum read and reconstruction from persisted state.
+Retained message ownership stays in a bounded test Vec; blocked messages are
+explicitly dropped. No provider/API/protocol/format/timer or benchmark gate change.
+Acceptance: same schedules through host doubles and actual native files, then
+close/reopen native stores and repeat original retries; finite tests are not a
+claim that the exact live QUIC packet sequence has been reproduced.
+
+Next deliverable: link each baseline roadmap exit condition to direct tests and
+explicit unresolved evidence, then select the smallest missing baseline behavior.
+Purpose/dependencies: prevent benchmark-only work hiding P0–P7 requirements;
+requires chapter 12/17 and the current contract/phase ledger, advancing all macro
+milestones according to the discovered gap. Completion: concrete requirement/
+evidence map and one prioritized missing vertical slice, without requiring P8.
+Following deliverable: implement that slice with a schema and relevant local
+fault/conformance checks. Completion must close the named requirement, rather
+than add a helper or weaken acceptance; macOS/separate-host and fixed-p99 gaps
+remain explicit. Full goal remains active and CI stays background feedback.
+
+### Slice 106 implemented evidence — distinguish retained delivery from repair
+
+The diagnostic 60-second QUIC repeat retains 480 rows (416 Applied, 64 refused)
+and fails the unchanged gate with individual facts: original source leader,
+term1 and store/session unchanged; one new install across replica3's groups,
+but forced group1 base0 < required11. Cleanup succeeds. This narrows the failed
+predicate; full value/read/reopen gates were not reached, so no successful
+performance or recovery claim follows. See validation/performance/slice106.
+
+Two new downstream Rust tests each compare explicit buffered and dropped message
+schedules across leader compaction. Buffered Append plus same-context committed
+retry can advance the follower to the committed value with base0 and no snapshot;
+dropping those messages requires a snapshot install at base2. Both preserve exact
+values/commit boundaries, original duplicate outcome, quorum reads and persisted
+reconstruction even after old requests arrive following a newer committed suffix.
+Actual native-file cases close/reopen all three WAL/snapshot stores, retain bases
+and values, elect anew and return the original historical retry without changing
+state. These tests establish the declared schedules, not the live QUIC trace.
+
+Snapshot suite passes 21/21 all-features and 9/9 core/contracts-only; all-target/
+all-feature Clippy with warnings denied passes. Five independent maintenance
+checker tests pass, including a new two-group rejection where another group's
+installed snapshot and positive aggregate count cannot certify the selected
+boundary. No production/helper API, new provider, format or timer change; public
+SnapshotRetention conformance scope updated with the same 71-contract inventory.
+The experiment gate is preserved. The long QUIC catch-up condition remains
+unpassed; its exact transport history remains unresolved. Full P0–P7 and all
+baseline/platform/fixed-p99 gaps stay active; next mini deliverable reconciles
+baseline requirements to concrete evidence before choosing the next missing
+implementation slice. P8/Windows remain deferred and CI is background feedback.

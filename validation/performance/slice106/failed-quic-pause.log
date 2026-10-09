@@ -1,0 +1,3 @@
+phase=warmup protocol=Quic mode=offered
+phase=offering operations=480 rate=8 groups=8 leaders=1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1
+Error: "paused follower lacks verified same-leader snapshot catch-up: resume=Some(6000280849) installs_at_resume=0 installs_now=1 forced_group=GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) } forced_index=11 follower_base=0 source_binding_expected=StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } source_binding_now=StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } source_term_expected=1 source_term_now=1 source_role=Leader"

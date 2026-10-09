@@ -2279,3 +2279,32 @@ actual pause 5.000185054 seconds, one new follower install at/after forced bound
 pass with zero extra retries. This selected success does not diagnose or erase
 the failed long run. Both are archived; repeatable 60-second QUIC catch-up remains
 unverified. Final formatting/diff and unchanged 71-contract metadata checks pass.
+
+## Slice 106 — buffered compaction schedules and selected-group repair evidence
+
+One 60-second QUIC diagnostic repeat fails the unchanged catch-up gate with the
+source still leader/term1/same binding, aggregate new follower installs1, but
+selected group1 base0 < required11. All480 offers remain (416 Applied,64 refused).
+Cancellation/reclaim cleanup/close succeed; no successful summary or full
+value/read/reopen claim is made. Raw failed artifacts and exact diagnostic facts
+are archived in validation/performance/slice106. No build/compilation overlaps
+this diagnostic run. This identifies a failed predicate, not a packet trace or
+production corruption.
+
+Two new public-contract tests compare buffered Append/commit-retry delivery after
+leader compaction against dropping those messages. Buffered delivery preserves
+committed state at follower base0 without installation; dropped delivery requires
+a snapshot at base2. Both check delayed old requests after newer commitment,
+exact original duplicate outcomes, quorum reads and reconstruction. Native-file
+cases close/reopen all WAL/snapshot stores, check recovered bases/values, elect
+anew and return original retries without a second application effect.
+
+Snapshot suite21/21 all-features and9/9 core/contracts-only pass, as does all-target/
+all-feature Clippy with warnings denied. Five independent maintenance checker
+tests pass; a new two-group case rejects falsely using another group's installed
+base and a positive aggregate install count as selected-group repair. Inventory
+remains71 contracts, with SnapshotRetention's finite conformance scope updated.
+No production/benchmark behavior, protocol, format, provider or timer change.
+These deterministic schedules do not reconstruct the live QUIC history or prove
+arbitrary-fault safety. Long QUIC acceptance and earlier baseline/platform/p99
+gaps remain open. FullP0–P7 stays active; P8/Windows deferred, CI background.

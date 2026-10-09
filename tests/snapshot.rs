@@ -1218,6 +1218,220 @@ fn host_snapshots(id: u64) -> HostSnapshots {
     s.binding.identity = s.identity.store;
     s
 }
+// A host-poll stall retains transport data; a dropped-message partition does not.
+// Exercise both schedules before interpreting a snapshot-install counter.
+fn buffered_compaction_history<L: LogStore, S: SnapshotRetention>(
+    cluster: &mut SnapshotCluster<L, S>,
+    retain_append: bool,
+) {
+    use voteboat::raft::*;
+    cluster.act(1, Event::Campaign);
+    cluster.pump();
+    cluster.isolate(3);
+    cluster.act(
+        1,
+        Event::Propose {
+            operation: OperationId::new(1).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        },
+    );
+    let mut buffered = Vec::new();
+    cluster.messages.retain(|m| {
+        if m.to == node(3) {
+            buffered.push(m.clone());
+            false
+        } else {
+            true
+        }
+    });
+    cluster.pump();
+    assert_eq!(cluster.replicas[&1].core.state().commit_index, 2);
+    // Retain the same outstanding request with its now-committed boundary.
+    cluster.act(1, Event::Heartbeat);
+    cluster.messages.retain(|m| {
+        if m.to == node(3) {
+            buffered.push(m.clone());
+            false
+        } else {
+            true
+        }
+    });
+    cluster.pump();
+    assert_eq!(buffered.len(), 2);
+    assert_eq!(buffered[0].context, buffered[1].context);
+    assert!(
+        matches!(&buffered[1].rpc, Rpc::Append { entries, leader_commit: 2, .. } if entries.len() == 1 && entries[0].index == 2)
+    );
+    cluster.compact(1);
+    cluster.pump();
+    assert_eq!(cluster.replicas[&1].core.state().base_index(), 2);
+    assert_eq!(cluster.replicas[&3].application.applied_index(), 1);
+    cluster.blocked.clear();
+    if retain_append {
+        for m in &buffered {
+            cluster.act(3, Event::Receive(m.clone()));
+        }
+        cluster.pump();
+        assert_eq!(cluster.replicas[&3].application.read_applied(2), Ok(7));
+        assert_eq!(cluster.replicas[&3].core.state().base_index(), 0);
+    }
+    cluster.act(1, Event::Heartbeat);
+    cluster.pump();
+    assert_eq!(cluster.installs, usize::from(!retain_append));
+    assert_eq!(
+        cluster.replicas[&3].core.state().base_index(),
+        if retain_append { 0 } else { 2 }
+    );
+    for r in cluster.replicas.values() {
+        assert_eq!(r.application.read_applied(2), Ok(7));
+        assert_eq!(r.core.state().commit_index, 2);
+    }
+    cluster.propose(1, 2, 3);
+    // Delayed original requests cannot truncate the newly committed suffix or
+    // turn their old response contexts into new replication authority.
+    for m in buffered {
+        cluster.act(3, Event::Receive(m));
+    }
+    cluster.pump();
+    cluster.propose(1, 1, 7);
+    for r in cluster.replicas.values() {
+        assert_eq!(r.application.read_applied(4), Ok(10));
+        let receipt = r.receipts.last().unwrap();
+        assert!(receipt.duplicate);
+        assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+    }
+    cluster.act(
+        1,
+        Event::Read {
+            request: ReadRequestId::new(1).unwrap(),
+        },
+    );
+    cluster.pump();
+    assert_eq!(cluster.read_values, [10]);
+    for (&id, r) in &mut cluster.replicas {
+        let mut application = Counter::new(100).unwrap();
+        let (core, _) = recover_replica(
+            node(id),
+            group(1),
+            &r.log,
+            &mut r.snapshots,
+            &mut application,
+        )
+        .unwrap();
+        assert_eq!(application.read_applied(4), Ok(10));
+        r.core = core;
+        r.application = application;
+    }
+}
+
+#[test]
+fn buffered_append_can_catch_up_across_compaction_without_snapshot_install() {
+    for retain_append in [false, true] {
+        let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
+            (HostLogStore::new(id as u128), host_snapshots(id))
+        });
+        buffered_compaction_history(&mut cluster, retain_append);
+    }
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn buffered_compaction_schedules_survive_native_file_reopen_and_original_retry() {
+    use voteboat::native::{
+        log_store::{FileLogIo, NativeLogStore},
+        snapshot_store::{FileSnapshotIo, NativeSnapshotStore},
+    };
+    for retain_append in [false, true] {
+        let root = std::env::temp_dir().join(format!(
+            "voteboat-buffered-compaction-{}-{retain_append}",
+            std::process::id()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
+            let directory = root.join(id.to_string());
+            (
+                NativeLogStore::create(
+                    FileLogIo::create(&directory).unwrap(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                NativeSnapshotStore::create(
+                    FileSnapshotIo::create(directory.join("snapshots")).unwrap(),
+                    SnapshotIdentity {
+                        store: identity(id as u128),
+                        group: group(1),
+                    },
+                    SnapshotLimits::default(),
+                )
+                .unwrap(),
+            )
+        });
+        buffered_compaction_history(&mut cluster, retain_append);
+        drop(cluster);
+        let mut replicas = BTreeMap::new();
+        for id in 1..=3 {
+            let directory = root.join(id.to_string());
+            let log = NativeLogStore::recover(
+                FileLogIo::open(&directory).unwrap(),
+                identity(id as u128),
+                LogLimits::default(),
+            )
+            .unwrap();
+            let mut snapshots = NativeSnapshotStore::recover(
+                FileSnapshotIo::open(directory.join("snapshots")).unwrap(),
+                SnapshotIdentity {
+                    store: identity(id as u128),
+                    group: group(1),
+                },
+                SnapshotLimits::default(),
+            )
+            .unwrap();
+            let mut application = Counter::new(100).unwrap();
+            let (core, _) =
+                recover_replica(node(id), group(1), &log, &mut snapshots, &mut application)
+                    .unwrap();
+            assert_eq!(application.read_applied(4), Ok(10));
+            assert_eq!(
+                core.state().base_index(),
+                if id == 1 || (id == 3 && !retain_append) {
+                    2
+                } else {
+                    0
+                }
+            );
+            replicas.insert(
+                id,
+                SnapshotReplica {
+                    core,
+                    log,
+                    snapshots,
+                    application,
+                    receipts: Vec::new(),
+                },
+            );
+        }
+        let mut cluster = SnapshotCluster {
+            replicas,
+            messages: VecDeque::new(),
+            blocked: BTreeSet::new(),
+            installs: 0,
+            read_values: Vec::new(),
+            wire: None,
+        };
+        cluster.act(1, voteboat::raft::Event::Campaign);
+        cluster.pump();
+        cluster.propose(1, 1, 7);
+        for r in cluster.replicas.values() {
+            assert_eq!(r.application.read_applied(6), Ok(10));
+            assert!(r.receipts.last().unwrap().duplicate);
+            assert_eq!(r.receipts.last().unwrap().outcome, CounterOutcome::Value(7));
+        }
+        drop(cluster);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}
+
 fn snapshot_catchup_history<L: LogStore, S: SnapshotRetention>(mut cluster: SnapshotCluster<L, S>) {
     use voteboat::raft::*;
     #[cfg(feature = "native")]
