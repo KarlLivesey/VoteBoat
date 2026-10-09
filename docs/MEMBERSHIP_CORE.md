@@ -413,3 +413,35 @@ joint image, forced native-network final-checkpoint schedules, and broader
 membership fault histories remain separate validation/implementation work.
 No persistent format or backend migration is introduced. All peers must agree
 on wire7; stop/restart a deployment together when changing the selected wire mode.
+
+### Accepted final with a committed joint checkpoint (wire7)
+
+Wire7 can now export the actual earlier joint checkpoint under its historical
+joint configuration ID. Its exact target must equal the candidate's current
+stable configuration; the source must be both an old-view and current voter, and
+the peer must be the exact old learner promoted into that target. The same scope
+calculation validates campaign admission, asynchronous image completion and
+repair responses. The final entry remains outside the image and is not certified
+by the checkpoint. The receiver uses the existing joint-image validation and
+restore barriers. Its successful reply only resends an ordinary Vote using the
+candidate's current final scope. Current-policy ballots and leader persistence
+remain mandatory. Wire6 behavior is unchanged.
+
+Forced native TCP/QUIC tests now cover both this joint checkpoint and wire7's
+committed-final checkpoint mode, with the other old voter absent. The candidate's
+joint record is below its compacted floor; the receiver's installed boundary and
+application are checked before election. Both owners abort before the candidate
+observes that repair reply, release/join the actual persistence providers, reopen
+native files, elect, replicate another command and deduplicate an operation from
+the image. This is an explicit owner-abort history; it is not a process/power-loss
+claim. Older stable checkpoints differing from the accepted head remain refused,
+and broader partial-progress/recursive/fault schedules remain release work.
+
+Queued learner repair from an exact current voter is discarded without effects
+when its authenticated envelope has an obsolete term. At current/higher term,
+an older configuration cannot repair an already voting recipient: it is refused
+as WrongIdentity without term observation. Other malformed/unauthorized repair
+checks remain in force. Host regression covers batch/joint-image/final-image
+requests and state preservation; the native witness recovery assertion remains
+strict. This handles transport delay across promotion, without reviving learner
+authority or allowing a repair acknowledgement to become a ballot.

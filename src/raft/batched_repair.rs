@@ -187,15 +187,15 @@ impl Raft {
             matching_term,
         } = message.rpc
         {
-            let committed_checkpoint = self.committed_snapshot_repair
-                && self.membership().joint().is_none()
-                && self.repair_requests.get(&message.from).is_some_and(|sent| {
-                    sent.snapshot.is_some()
-                        && sent.snapshot == self.durable.snapshot
-                        && sent.configuration == self.membership().id()
-                        && self.durable.snapshot_membership.as_deref() == Some(self.membership())
-                        && self.membership().voter_store(message.from)
-                            == Some(message.sender.identity)
+            let checkpoint = self
+                .repair_requests
+                .get(&message.from)
+                .filter(|sent| sent.snapshot.is_some() && sent.snapshot == self.durable.snapshot)
+                .and_then(|sent| {
+                    self.snapshot_repair_scope(message.from).filter(|scope| {
+                        scope.configuration == sent.configuration
+                            && scope.peer_store == message.sender.identity
+                    })
                 });
             let historical = self
                 .repair_requests
@@ -212,7 +212,7 @@ impl Raft {
                     != Some(&message.sender.identity)
                     && historical.as_ref().map(|(_, _, store)| *store)
                         != Some(message.sender.identity)
-                    && !committed_checkpoint)
+                    && checkpoint.is_none())
             {
                 return Err(RaftError::WrongIdentity);
             }
@@ -258,13 +258,8 @@ impl Raft {
             if sent.context != message.context || sent.configuration != message.configuration {
                 return Ok(Vec::new());
             }
-            let joint_index = if committed_checkpoint {
-                sent.end
-            } else if sent.snapshot.is_some() {
-                self.membership()
-                    .joint()
-                    .ok_or(RaftError::InvalidMessage)?
-                    .index
+            let joint_index = if sent.snapshot.is_some() {
+                checkpoint.ok_or(RaftError::InvalidMessage)?.voting_index
             } else {
                 historical.ok_or(RaftError::InvalidMessage)?.0.index
             };

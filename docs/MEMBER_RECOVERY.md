@@ -107,3 +107,11 @@ Host-provider restore/lost-completion, ordinary ballot, protocol/refusal and nat
 WAL fault evidence is recorded in slice118. Existing interrupted TCP/QUIC service
 histories pass under7, but do not force this new checkpoint path; that native
 history and the accepted-final/older-joint checkpoint bridge remain open.
+
+Slice119 adds the accepted-final/committed-joint bridge using the image's own
+historical joint scope, without exporting or certifying the uncommitted final.
+Four forced native TCP/QUIC histories now cover joint and final checkpoint
+boundaries, abort observation before the candidate processes a repair reply,
+reopen both native stores, then elect/apply and preserve snapshot-carried retries.
+See tests/native_member_startup/checkpoint_final.rs. Older mismatching stable
+checkpoints, arbitrary fault schedules and the broader P4 release remain open.

@@ -2735,3 +2735,33 @@ bridging from that actual joint image and forced native-network checkpoint
 histories are next. Missing trusted old-view source remains unavailable. Full
 P0–P7 remains active with previous scope/fault/platform/performance gates, P8 and
 Windows deferred, CI background.
+
+## Slice119 — committed joint checkpoint bridge beneath accepted final
+
+Linux: 60 all-feature library, 38 member_recovery and 48 native_member_startup
+tests passed in the final completed run (0.07s, 0.50s and 3.38s). All-feature
+all-target Clippy -D warnings, core-only all-target compilation, formatting and
+78-contract inventory checks passed. Previous repair source used as a negative
+control fails the bridge test at the required historical snapshot export.
+
+Four native histories force wire7 TCP/QUIC pre-election recovery from committed
+joint and final checkpoints, with original voter absent and the joint entry
+compacted away. They check application restore before eligibility, candidate
+status before observation, owner abort/reclaim/reopen, ordinary election, new
+write, duplicate original receipt and final WAL/checkpoint/application reopen.
+Owner abort permits accepted I/O to finish and discards observations; it is not
+power-loss or process-kill evidence. Host image/WAL fault coverage remains
+separate. Historical joint replies cannot certify accepted-final commitment.
+
+The wider native run found delayed learner repair arriving after promotion,
+first in an obsolete term and then retrying an older configuration. Temporary
+message traces identified the ingress; exact current-voter authentication gates
+stale-term discard and old-view WrongIdentity refusal. No term/log effect escapes.
+A host regression covers all three repair envelopes, current/higher terms,
+unknown sender and wrong group. The existing native strict error assertion was
+not relaxed. Earlier intermediate runs failed; final suite results above cover
+the focused correction and checkpoint changes together.
+
+No new provider or persistent format. Older mismatching stable checkpoint,
+broader membership/lifecycle/fault schedules, macOS/separate-host evidence and
+performance remain incomplete. Full P0–P7 stays active; P8/Windows deferred.

@@ -40,6 +40,9 @@ use voteboat::{
 #[path = "native_member_startup/recursive.rs"]
 mod recursive;
 
+#[path = "native_member_startup/checkpoint_final.rs"]
+mod checkpoint_final;
+
 fn administrative_promotion(protocol: NativePeerProtocol) {
     use voteboat::outbound::OutboundQueue;
     type Service = NativeNode<Counter, NativeServiceConnector>;

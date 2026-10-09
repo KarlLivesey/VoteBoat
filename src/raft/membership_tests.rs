@@ -1132,10 +1132,9 @@ fn batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_p
             assert!(receiver.local_voter());
             assert_eq!(receiver.state().entries, source.state().entries);
             let before = receiver.state().clone();
-            assert_eq!(
-                receiver.step(Event::Receive(first)),
-                Err(RaftError::InvalidMessage)
-            );
+            // The authenticated old-term replay is discarded without reviving
+            // learner repair or changing the promoted replica's state.
+            assert!(receiver.step(Event::Receive(first)).unwrap().is_empty());
             assert_eq!(receiver.state(), &before);
             let effects = receiver.step(Event::Receive(next)).unwrap();
             assert!(matches!(

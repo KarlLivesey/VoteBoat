@@ -1572,6 +1572,54 @@ mod joint_repair {
         decoded
     }
     #[test]
+    fn promoted_voter_discards_only_authenticated_obsolete_repair_requests() {
+        for request in [
+            batched_source().2,
+            snapshot_source(true).2,
+            final_snapshot_source().2,
+        ] {
+            let mut log = HostLogStore::new(4);
+            prepare(&mut log, true, true);
+            let state = log.state(group(1)).unwrap();
+            append(
+                &mut log,
+                vec![update(&state, request.term + 1, state.commit_index, None)],
+            );
+            let mut receiver = recover(&log).with_committed_snapshot_repair();
+            let before = receiver.state().clone();
+            assert!(receiver.local_voter());
+            assert!(receiver
+                .step(Event::Receive(request.clone()))
+                .unwrap()
+                .is_empty());
+            assert_eq!(receiver.state(), &before);
+            assert_eq!(receiver.role(), Role::Follower);
+            let mut current = request.clone();
+            current.term = before.hard_state.term;
+            let refusal = if current.configuration < receiver.membership().id() {
+                RaftError::WrongIdentity
+            } else {
+                RaftError::InvalidMessage
+            };
+            assert_eq!(
+                receiver.step(Event::Receive(current.clone())),
+                Err(refusal.clone())
+            );
+            current.term += 1;
+            assert_eq!(receiver.step(Event::Receive(current)), Err(refusal));
+            let mut unknown = request.clone();
+            unknown.from = node(5);
+            unknown.sender.identity = identity(5);
+            unknown.context.origin = unknown.sender;
+            assert!(receiver.step(Event::Receive(unknown)).is_err());
+            let mut wrong_group = request;
+            wrong_group.group = group(2);
+            assert!(receiver.step(Event::Receive(wrong_group)).is_err());
+            assert_eq!(receiver.state(), &before);
+        }
+    }
+
+    #[test]
     fn wire_five_repair_is_explicit_bounded_and_rejects_every_truncation() {
         let (_, _, message) = batched_source();
         let scope = WireScope {
@@ -2014,7 +2062,7 @@ mod joint_repair {
     }
 
     #[test]
-    fn accepted_final_cannot_export_an_uncommitted_final_checkpoint() {
+    fn accepted_final_repairs_from_only_its_committed_joint_checkpoint() {
         let mut log = HostLogStore::new(2);
         prepare(&mut log, true, false);
         let mut core = Raft::recover_member(
@@ -2045,16 +2093,79 @@ mod joint_repair {
             .is_some());
         let effects = core.step(Event::Campaign).unwrap();
         let effects = persist(&mut core, &mut log, effects);
-        assert!(!effects
-            .iter()
-            .any(|effect| matches!(effect, Effect::SnapshotRequired { .. })));
-        assert!(effects.iter().any(|effect| matches!(
-            effect,
-            Effect::Send(Message {
-                rpc: Rpc::Vote { .. },
-                ..
+        let (context, reference) = effects
+            .into_iter()
+            .find_map(|effect| match effect {
+                Effect::SnapshotRequired {
+                    to,
+                    context,
+                    reference,
+                } if to == node(4) => Some((context, reference)),
+                _ => None,
             })
-        )));
+            .expect("accepted final must bridge the committed joint checkpoint");
+        let mut stale_context = context;
+        stale_context.sequence += 1;
+        assert!(supply_snapshot(&core, &mut images, node(4), stale_context, reference).is_err());
+        let request =
+            one(supply_snapshot(&core, &mut images, node(4), context, reference).unwrap());
+        assert_eq!(request.configuration, cid(3));
+        let Rpc::LearnerRepairSnapshot { snapshot } = &request.rpc else {
+            panic!("only the joint image may escape")
+        };
+        assert_eq!(snapshot.metadata.index, 2);
+        assert_eq!(snapshot.metadata.configuration(), cid(3));
+        let mut destination_log = HostLogStore::new(4);
+        let mut receiver = destination(&mut destination_log).with_committed_snapshot_repair();
+        let mut destination_images = support::snapshot::HostSnapshots::new();
+        destination_images.identity.store = identity(4);
+        destination_images.binding = destination_log.binding();
+        let mut destination_app = Counter::new(100).unwrap();
+        destination_app
+            .apply_batch(receiver.replay_committed())
+            .unwrap();
+        let effects = receiver.step(Event::Receive(request)).unwrap();
+        let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
+            panic!("stage")
+        };
+        let effects = stage_snapshot_effect(
+            &mut receiver,
+            &mut destination_log,
+            &mut destination_images,
+            &destination_app,
+            stage.clone(),
+        )
+        .unwrap();
+        let [Effect::SnapshotInstalled(reference)] = effects.as_slice() else {
+            panic!("restore")
+        };
+        assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+        assert_eq!(destination_app.applied_index(), 1);
+        let ack = one(finish_snapshot_install(
+            &mut receiver,
+            &destination_log,
+            &mut destination_images,
+            &mut destination_app,
+            *reference,
+        )
+        .unwrap());
+        let mut stale = ack.clone();
+        stale.configuration = cid(4);
+        assert!(core.step(Event::Receive(stale)).unwrap().is_empty());
+        assert_eq!(core.state().commit_index, 2);
+        assert_eq!(receiver.state().commit_index, 2);
+        let vote = one(core.step(Event::Receive(ack)).unwrap());
+        assert!(matches!(vote.rpc, Rpc::Vote { .. }));
+        assert_eq!(vote.configuration, cid(4));
+        assert_eq!(core.role(), Role::Candidate);
+        assert_eq!(receiver.membership().id(), cid(3));
+        let effects = receiver.step(Event::Receive(vote)).unwrap();
+        let ballot = one(persist(&mut receiver, &mut destination_log, effects));
+        assert!(matches!(ballot.rpc, Rpc::Voted { granted: true }));
+        let effects = core.step(Event::Receive(ballot)).unwrap();
+        let _ = persist(&mut core, &mut log, effects);
+        assert_eq!(core.role(), Role::Leader);
+        assert_eq!(destination_app.applied_index(), 2);
     }
 
     #[test]

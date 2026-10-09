@@ -7846,3 +7846,115 @@ Macro P0–P7 stays active with all previous ledger gaps; static service remains
 usable independently. No general P4 release/proof, recursive/arbitrary faults,
 macOS/separate-host execution or performance claim. P8/Windows deferred; CI stays
 background feedback.
+
+## Slice119 schema plan — joint checkpoint bridge and forced native recovery
+
+Previous goal turn was progress: wire7 committed-final checkpoint mode was tested,
+committed and pushed (1379d2b). Worktree is clean. This slice preserves the source
+export gate: an accepted final is not a committed final checkpoint. A retained
+committed joint checkpoint instead supplies its own historical configuration.
+
+Data/API: centralize the checkpoint repair scope calculation used by campaign,
+image-load completion and repair replies. For wire7, a stable accepted head may
+use its joint checkpoint only when the joint's exact target equals the current
+stable configuration, the source is an exact old-view and current voter, and the
+peer is that joint's exact old learner/promoted current voter. Scope is the
+checkpoint joint ID and voting boundary is the joint index. The emitted existing
+LearnerRepairSnapshot carries only that committed image. It cannot export the
+accepted final or change either commit index through a cursor acknowledgement.
+The receiver's existing joint-image checks and publication/pin/WAL/application
+barriers remain unchanged. A subsequent ordinary Vote uses the candidate's current
+final scope; current validated policy and durable ballots/no-op establish election.
+
+Ownership/failure: reuse the campaign-owned bounded repair map and existing
+snapshot load workers, no new provider/cursor/wire/storage format. Revalidate the
+historical relationship at image completion/reply. Context/view/session changes,
+compaction and restart invalidate old requests. A checkpoint from another old
+configuration, unknown promoted source, wrong target/store or stale reply cannot
+supply voting eligibility or progress. Older stable snapshots mismatching the
+current head remain refused pending a separately specified bridge.
+
+Acceptance: host joint-checkpoint/final-head restore-before-ballot and election,
+exact request/refusal/restart checks; native TCP/QUIC final and joint checkpoints
+with the original old voter absent. Seed exact native WAL/checkpoint histories,
+force the candidate's joint entry below its compacted floor and assert the lagging
+learner's installed boundary/application precede election. Preserve application
+operation deduplication and inspect native WAL/checkpoint reopen. These are trusted
+initial fixtures, not distributed enrollment or a complete arbitrary-fault proof.
+
+Mini plan: current checkpoint bridge and forced native histories advance P4/P1;
+depend on exact checkpoint membership provenance and existing wire7 workers,
+complete with acceptance above. Next: remote new-voter interruption/revocation
+and retirement histories (P4/P6), dependent on retained and both checkpoint paths,
+checked by stale session/readiness refusal and preserved original operation IDs.
+Following: close the next concrete admission or recursive lifecycle dependency
+from the baseline ledger (P0/P5/P6); inspect actual missing contract before adding
+helpers, then state its own schema and native checks. Full P0–P7 remains active;
+static usable release stays independent, P8/Windows deferred, CI background.
+
+Slice119 focused failure schema: a retained old-view voter can send a learner
+repair that remains in QUIC transport until the promoted receiver leads in a
+newer term. Discard only obsolete repair requests whose envelope binds this
+recipient/group, nonzero term/context, matching context origin/sender and exact
+current voter store. This produces no effect, persistence or reply; unknown
+senders and non-obsolete malformed requests retain existing refusal checks.
+Cover both batch/image repair envelopes and exact state preservation in a host
+regression, then rerun the original native witness history without relaxing its
+error assertion. This advances P4 recovery under delayed ingress.
+The focused replay also exposed a later retry at the promoted receiver's current
+term: it still addresses the old joint view. Exact current-voter ingress to an
+already voting replica with an older configuration is an authority refusal
+(WrongIdentity), without term observation or persistence. This preserves the
+native test's existing expected old-view refusal contract; it does not excuse
+InvalidMessage generally. Host checks cover current and higher terms as well as
+unknown senders and wrong groups. Temporary diagnostic logging was removed.
+
+### Slice119 implemented evidence and remaining scope
+
+Implemented the historical committed-joint checkpoint bridge beneath an accepted
+final head. Campaign, image completion and repair reply use one exact provenance
+calculation. The accepted final is never exported as committed; repair is scoped
+to the actual joint checkpoint. Its acknowledgement only permits an ordinary
+ballot request, never a commit or vote. Existing stable-final and active-joint
+checkpoint paths retain their durability/application barriers and wire formats.
+
+Four forced native TCP/QUIC histories cover joint and final checkpoint boundaries
+with the original voter absent and the source joint entry compacted away. The
+learner restores application state while the source remains a candidate. Owner
+abort discards observations; native workers complete/reclaim before actual files
+reopen. Normal election follows; a new write and retry of the checkpointed
+operation preserve state and original duplicate receipt through another reopen.
+This is owner-abort/lost-observation evidence, not process kill or power loss.
+
+Linux validation: 60 all-feature library, 38 member_recovery and 48
+native_member_startup tests passed (0.07s/0.50s/3.38s test execution). All-feature
+all-target Clippy with warnings denied, core-only all-target compilation,
+formatting and 78-contract inventory checks passed. The bridge regression was
+also checked against the previous production repair implementation and failed at
+its required snapshot-export assertion. Existing native QUIC witness recovery
+exposed queued historical repair arriving after promotion; focused traces led to
+exact stale-term discard/old-view authority refusal, with state-preserving host
+coverage. The original native error assertion remains unchanged. Temporary
+trace instrumentation was removed. Earlier test expectation and test ownership
+compile errors were corrected; only the final completed runs above are green.
+
+Macro review: this advances P4/P1 recovery, without changing the full P0–P7 goal.
+No general online membership/protocol proof, arbitrary faults, macOS or separate
+host execution, or performance claim. Older stable checkpoints mismatching the
+current head still refuse. All prior phase-ledger gaps remain; P8/Windows deferred.
+
+Linked mini plan after slice119:
+1. Current completed deliverable: checkpoint bridge/forced native recovery (P4/P1).
+   Purpose, dependencies and completion checks are the schema and evidence above.
+2. Next: remote new-voter interruption/revocation and retirement (P4/P6). Purpose:
+   establish original session/target/readiness lifetime across partial progress.
+   Dependencies: retained-history and both checkpoint recovery paths, native
+   authenticated admission. Completion: stale session/readiness refusal, bounded
+   cleanup, promotion/retirement and original operation/application retry identity
+   in forced native histories. Sketch the exact interruption states before edits.
+3. Following: the next missing recursive responsibility/lifecycle contract from
+   the baseline ledger (P5/P6). Purpose: advance usable namespace/ownership
+   operations. Dependencies: inspect existing directory authority, fencing and
+   scope transfer evidence; select the smallest complete missing operation.
+   Completion: record its concrete API/state schema and demonstrate restart,
+   partial-progress and no-dual-owner checks before claiming that operation.

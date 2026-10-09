@@ -1509,6 +1509,29 @@ impl Raft {
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        // Repair can remain queued while its learner completes promotion.
+        // Authenticate before discarding obsolete terms or refusing a repair
+        // whose historical view no longer owns this replica's voting state.
+        if matches!(
+            m.rpc,
+            Rpc::LearnerRepair { .. }
+                | Rpc::LearnerRepairSnapshot { .. }
+                | Rpc::CommittedLearnerRepairSnapshot { .. }
+        ) && m.to == self.node
+            && m.from != self.node
+            && m.group == self.durable.bootstrap.group
+            && m.context.origin == m.sender
+            && m.context.sequence > 0
+            && m.term > 0
+            && self.membership().voter_store(m.from) == Some(m.sender.identity)
+        {
+            if m.term < self.durable.hard_state.term {
+                return Ok(Vec::new());
+            }
+            if self.local_voter() && m.configuration < self.membership().id() {
+                return Err(RaftError::WrongIdentity);
+            }
+        }
         if matches!(
             m.rpc,
             Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }

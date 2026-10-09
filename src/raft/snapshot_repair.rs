@@ -15,6 +15,13 @@
 //! Historical committed checkpoints for pre-election learner recovery.
 use super::*;
 
+pub(super) struct CheckpointRepairScope {
+    pub(super) configuration: ConfigurationId,
+    pub(super) final_checkpoint: bool,
+    pub(super) voting_index: u64,
+    pub(super) peer_store: StoreIdentity,
+}
+
 impl Raft {
     /// Explicit wire7 capability. Only a receiver's already trusted old-view
     /// voter may supply a locally committed stable checkpoint after promotion.
@@ -33,75 +40,80 @@ impl Raft {
         self
     }
 
+    // One provenance calculation for admission, image completion and replies.
+    // A historical joint checkpoint never certifies an accepted final entry.
+    pub(super) fn snapshot_repair_scope(&self, peer: NodeId) -> Option<CheckpointRepairScope> {
+        let reference = self.durable.snapshot?;
+        let base = self.durable.snapshot_membership.as_deref()?;
+        if peer == self.node || reference.index > self.durable.commit_index {
+            return None;
+        }
+        if self.committed_snapshot_repair && self.membership().joint().is_none() {
+            let peer_store = self.membership().voter_store(peer)?;
+            if self.membership().voter_store(self.node) != Some(self.binding.identity) {
+                return None;
+            }
+            if base == self.membership() {
+                return Some(CheckpointRepairScope {
+                    configuration: base.id(),
+                    final_checkpoint: true,
+                    voting_index: reference.index,
+                    peer_store,
+                });
+            }
+            let joint = base.joint()?;
+            if &joint.next != self.membership().stable()
+                || base.stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
+                || base.stable().learners().get(&peer) != Some(&peer_store)
+                || joint.next.voter_stores().get(&peer) != Some(&peer_store)
+                || joint.index > reference.index
+            {
+                return None;
+            }
+            return Some(CheckpointRepairScope {
+                configuration: joint.id,
+                final_checkpoint: false,
+                voting_index: joint.index,
+                peer_store,
+            });
+        }
+        let joint = self.membership().joint()?;
+        let peer_store = *self.membership().stable().learners().get(&peer)?;
+        if self.membership().stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
+            || base.stable() != self.membership().stable()
+            || base.joint().is_some_and(|j| j != joint)
+            || joint.next.voter_stores().get(&peer) != Some(&peer_store)
+        {
+            return None;
+        }
+        Some(CheckpointRepairScope {
+            configuration: joint.id,
+            final_checkpoint: false,
+            voting_index: joint.index,
+            peer_store,
+        })
+    }
+
     pub(super) fn repair_snapshot_messages(&mut self) -> Result<Option<Vec<Effect>>, RaftError> {
         let Some(reference) = self.durable.snapshot else {
             return Ok(None);
         };
-        let Some(base) = self.durable.snapshot_membership.as_deref() else {
-            return Ok(None);
-        };
-        if self.committed_snapshot_repair && self.membership().joint().is_none() {
-            if base != self.membership()
-                || base.voter_store(self.node) != Some(self.binding.identity)
-                || reference.index > self.durable.commit_index
-            {
-                return Ok(None);
-            }
-            let peers = base
-                .stable()
-                .voter_stores()
-                .keys()
-                .copied()
-                .filter(|node| *node != self.node)
-                .collect::<Vec<_>>();
-            let mut effects = Vec::new();
-            for peer in peers {
-                let context = self.context()?;
-                self.repair_requests.insert(
-                    peer,
-                    Replication {
-                        context,
-                        configuration: self.membership().id(),
-                        start: 0,
-                        end: reference.index,
-                        snapshot: Some(reference),
-                    },
-                );
-                effects.push(Effect::SnapshotRequired {
-                    to: peer,
-                    context,
-                    reference,
-                });
-            }
-            return Ok(Some(effects));
-        }
-        let Some(joint) = self.membership().joint() else {
-            return Ok(None);
-        };
-        if self.membership().stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
-            || base.stable() != self.membership().stable()
-            || base
-                .joint()
-                .is_some_and(|j| Some(j) != self.membership().joint())
-            || reference.index > self.durable.commit_index
-        {
-            return Ok(None);
-        }
-        let peers = joint
-            .next
-            .voter_stores()
-            .iter()
-            .filter(|(node, store)| self.membership().stable().learners().get(node) == Some(store))
-            .map(|(node, _)| *node)
+        let peers = self
+            .membership()
+            .replicas()
+            .map(|(node, _)| node)
             .collect::<Vec<_>>();
         let mut effects = Vec::new();
         for peer in peers {
+            let Some(scope) = self.snapshot_repair_scope(peer) else {
+                continue;
+            };
             let context = self.context()?;
             self.repair_requests.insert(
                 peer,
                 Replication {
                     context,
-                    configuration: self.membership().id(),
+                    configuration: scope.configuration,
                     start: 0,
                     end: reference.index,
                     snapshot: Some(reference),
@@ -113,7 +125,7 @@ impl Raft {
                 reference,
             });
         }
-        Ok(Some(effects))
+        Ok((!effects.is_empty()).then_some(effects))
     }
 
     pub(super) fn repair_snapshot_send(
@@ -126,9 +138,12 @@ impl Raft {
         let Some(sent) = self.repair_requests.get(&to) else {
             return Err(RaftError::WrongCompletion);
         };
+        let scope = self
+            .snapshot_repair_scope(to)
+            .ok_or(RaftError::WrongCompletion)?;
         if sent.context != context
             || sent.snapshot != Some(reference)
-            || sent.configuration != self.membership().id()
+            || sent.configuration != scope.configuration
             || self.durable.snapshot != Some(reference)
             || reference.index > self.durable.commit_index
             || !reference.matches(&snapshot)
@@ -142,7 +157,7 @@ impl Raft {
             sent.configuration,
             to,
             context,
-            if self.committed_snapshot_repair && self.membership().joint().is_none() {
+            if scope.final_checkpoint {
                 Rpc::CommittedLearnerRepairSnapshot {
                     snapshot: Box::new(snapshot),
                 }
