@@ -111,23 +111,24 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Native nested merged-source retirement (current slice142, P1/P6).** Purpose: finish
-   the corresponding selected merge cleanup path for41/42 while43 serves.
-   Dependencies:141 guarded shared fixture, complete601 publication/activation
-   and per-source retention release. Completion: partial retirement/reopen does
-   not revive either source, both exact lineages survive checkpoint/reclaim,
-   original imported retries/outbox and new writes continue at43.
-2. **Broader baseline evidence review (next, P0–P7).**
-   Purpose: keep native lifecycle acceptance tied to the complete original goal.
-   Dependencies:item1 evidence plus baseline ledger. Completion: inspect remaining
-   resource fairness/discovery/platform/fault requirements against actual sources,
-   choose a bounded missing path and its own schema. P7 fixed250ms/sustainable-capacity requirements remain
-   unmet; publication data-sync was rejected, not substituted for acceptance.
-3. **Implement the selected missing baseline path (following, P0–P7).** Purpose:
-   close the requirement selected by item2 without adding unrelated prerequisites.
-   Dependencies:item2 schema, named contracts and authoritative acceptance checks.
-   Completion: production behavior and meaningful local failure/recovery evidence
-   for that original requirement, recorded separately from all remaining gaps.
+1. **Shared encoded control reserve (current slice143, P0/P2).** Purpose:
+   keep bulk shared frames from exhausting protocol-control send capacity.
+   Dependencies:108 public buffer contract and109 independent outbound admission.
+   Completion: native/downstream byte/slot saturation and lifetime/rollback,
+   actual transport class dispatch/delayed flush/abort, constructor refusal and
+   existing transport/wire/core-only/QUIC regression checks.
+2. **Per-owner shared bulk isolation/admission (next, P0/P2).** Purpose: preserve
+   unrelated owner progress while one owner pressures shared resources.
+   Dependencies:item1 reserve, I10/C14/C15 contracts and explicit owned views.
+   Completion: bounded hot-owner admission cannot borrow protected control or
+   prevent the configured unrelated owner from progressing; exact credit return
+   and partial-failure/close behavior use public host/native seams.
+3. **Native Node shared-resource overload/fault history (following, P1/P2).**
+   Purpose: demonstrate the composed policy in real service work.
+   Dependencies:item2 selected resource/transport contracts and native assembly.
+   Completion: writes/reads/original retries survive selected peer/group pressure,
+   restart and clean shutdown, with bounded accounting and no fabricated delivery.
+
 
 ### How the current work fits globally
 
@@ -10072,3 +10073,105 @@ schema. Following implementation must close that actual requirement, not add an
 unrelated prerequisite. Resource admission/fairness/discovery/placement, broader
 fault/platform and P7 fixed250ms/sustainable-capacity gaps remain. Full P0–P7 active,
 P8/Windows deferred; CI background.
+
+## Slice143 audit/schema plan — protected shared encoded control frames
+
+Previous142 progressed/pushedff9db49; clean tree revalidated. Reviewed chapter12
+exits, chapter17 catalogue, component specification and actual BufferPool/native
+transport/admission/fixture sources against BASELINE_ACCEPTANCE/AUDIT. Native
+141–142 closes selected nested network cleanup evidence, not universal P6. P7
+fixed250ms/sustainable-capacity and wider platform/fault requirements remain.
+Concrete next gap: outbound queues reserve control capacity, but C14 shared encoded
+pool has one byte/lease budget. Bulk/idle receive reservations can exhaust it and
+block even a validated control send. C15 queue leases cannot reserve C14 frames.
+
+Data/API: additive BufferClass::{Bulk,Control}, BufferPool::acquire_class and an
+optional declared control_reserve. Existing pools default to no reserve and old
+acquire behavior. A provider declaring a reserve must implement class-aware
+acquisition; default refuses such unsupported calls instead of silently bypassing
+reserve. Contract version2; wire/persistent formats unchanged. Native explicitly
+selected new_with_control_reserve keeps total and bulk byte/lease atomic counters.
+Bulk stays below total-minus-reserve; control uses the total ceiling. Legacy
+acquire means bulk. All shared views keep the same counters/caps.
+
+Transitions: validate limits and initial size -> bounded reserve bulk if needed
+-> reserve total -> lazy allocate -> retain lease through async frame use -> free
+storage before returning total/bulk credits. Any partial counter or allocation
+failure rolls back precisely. Close remains per view; accepted leases outlive
+views. No worker/cache/clock/queue, no durability effect, no starvation/deadline
+claim under control competition or bounded CAS contention.
+
+Native transport classifies validated actual batch contents using existing
+batch_cost; mixed data/background batches cannot claim Control. Receive requests
+Bulk because its untrusted header is not an authenticated control classification.
+Selected reserves must fit one maximum send frame/lease; remaining bulk capacity
+must fit one full-duplex connection (maximum send plus receive and two leases). Constructors reject
+malformed/undersized declared reserves before reads/leases. Preserve original
+batch on overload and all short-write/flush/abort/queue-credit semantics.
+
+Acceptance: native/downstream pool reserve/refusal/resize/close/rollback tests;
+concurrent bulk saturation cannot consume reserved control bytes or lease slots;
+actual native transports with host sessions/shared selected pools admit control
+while bulk refuses, hold the frame through delayed flush and release on abort;
+class dispatch and mixed batch classification; malformed/undersized declarations
+fail before resources. Existing buffer/transport/wire suites, core-only host
+injection, all-feature Clippy and inventory. No full receive/connection fairness,
+WAL/snapshot/application buffer integration or performance inference.
+
+Linked mini: current audit plus shared encoded control reserve (P0/P2), depends
+on108 buffer and109 outbound contracts; checks above. Next per-owner shared bulk
+isolation/admission (P0/P2), depends on this reserve and original I10/C14/C15 limits;
+require unrelated owner progress under hot-owner overload without borrowing
+protected control. Following selected native Node shared-resource overload/fault
+history (P1/P2), depends on that policy/transport integration, verifies real writes,
+retries/recovery and shutdown while one peer/group applies pressure. Macro usable
+service/embedding stays usable; fullP0–P7 remains active, P8/Windows deferred,
+RPL-1.5 retained, original pack preserved and CI background.
+
+## Slice143 implemented — public/native protected encoded control capacity
+
+BufferPool contract2 adds BufferClass, acquire_class and optional declared control
+reserve through the same public mechanism used by native and independent host
+pools. Legacy implementations declare no reserve and retain acquisition behavior;
+a declared reserve without class implementation fails closed. Explicit native
+new_with_control_reserve enforces both byte and lease headroom with bounded
+atomic total/restricted-bulk reservations and precise partial failure rollback.
+Accepted frames free storage before returning credits, retain close/drop lifetime
+and lazy growth semantics. Default native selection uses total-only counter
+operations; no new worker/cache/dependency, format, generation or durability effect.
+
+Native shared factory/transport validates protected max-send capacity plus a
+full-duplex bulk remainder before frame use. Existing batch_cost classifies actual
+validated contents: control-only sends can use reserve; mixed/data/background and
+unclassified receives remain bulk. Bulk saturation refuses original work without
+stealing protected capacity. Control frames remain charged through short writes/
+delayed flush; frame credits return independently of original outbound batch
+credits, including abort. Host session fixtures attest trusted identity only, not
+cryptographic security. Existing service/default constructor selection unchanged.
+
+All-feature buffer7/transport22/wire14 suites pass0.03/0.04/0.60s after10.66s
+compile, including actual default TCP/TLS transport regression. Added malformed
+host reserve test passes1/1 (0.00s after7.42s compile), zero frame/plaintext calls
+and owned-session drop checked. Real default QUIC framing/credit regression
+passes1/1 (0.02s after6.19s compile). Core-only downstream buffer3/transport1/wire1
+pass after5.24s compile. Native concurrency/barrier test preserves reserved bytes/
+slots across eight held bulk owners; deterministic Vec capacity-overflow and total
+admission failure return all credits. Shared host/native control dispatch, mixed
+batch refusal, delayed flush/abort and invalid/undersized reserve cases pass.
+Initial all-feature/all-target check passes7.77s; Clippy -D warnings11.33s, final
+5.26s after added malformed-host test; format/whitespace and updated80-contract
+inventory pass. A Cargo invocation with two different filters was refused before
+execution, then corrected to separate test commands; inventory edit corrected
+array selection before writing. No production failed check or broad rewrite.
+All handles terminal. No protected shared-pool encrypted load/performance claim,
+macOS execution or full per-owner/receive/connection fairness.
+
+Macro review: this closes selected C14 control-send headroom behind C15 queue
+reserve (P0/P2), strengthens usable embedding composition and leaves the full
+P0–P7 objective active. Updated acceptance/audit catalogue and top mini plan name
+next144 per-owner shared bulk isolation/admission, then native Node selected
+shared-resource overload/fault evidence. Every new quota/owner path needs its own
+schema/rollback/lifetime checks before edit. General lifecycle/retention, broader
+configuration/discovery/placement/platform/fault and original P7 fixed250ms /
+sustainable-capacity gaps remain. P8/Windows deferred, CI background, RPL-1.5
+retained and original design pack preserved.

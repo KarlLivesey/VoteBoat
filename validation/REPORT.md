@@ -3492,3 +3492,34 @@ retention/migration, physical power-loss, macOS, separate-host, arbitrary-fault 
 performance proof. Full P0–P7 and previous gaps active; P8/Windows deferred, CI
 background. BASELINE_ACCEPTANCE.md updated to distinguish these selected native
 cleanup histories from remaining requirements.
+
+## Slice143 — protected shared encoded frame control reserve
+
+Production BufferPool contract2/native pool/native transport now support explicit
+control byte/lease headroom. Shared bulk accounting cannot consume it; actual
+validated batches select Control, mixed/data/background and unclassified receives
+use Bulk. No reserve is silently inferred or enabled by service startup. Legacy
+native pools retain total-only counter operations; unsupported declared reserve
+implementations fail closed. Constructor validates full-duplex bulk capacity plus
+one protected max-send. Wire/persistent formats and consensus rules unchanged.
+
+Executed all-feature buffer7/transport22/wire14 tests:0.03/0.04/0.60s after10.66s
+build. Public independent host/native cases cover bytes/slots saturation, legacy
+fallback/declaration refusal, close/resize/drop, exact partial-total/overflow
+rollback, eight concurrent held bulk owners, mixed-batch classification, blocked
+unclassified receive, control send under saturation, short writes/delayed flush,
+abort and separate queue/frame credit return. Existing real TCP/TLS transport
+regression is included; shared-reserve sessions are trusted host test attestations,
+not cryptographic evidence. Added malformed host declaration test1/1 passes0.00s
+after7.42s build, before any lease/plaintext and with consumed-session drop. Real
+QUIC default framed transport credit test1/1 passes0.02s after6.19s build.
+
+Core-only buffer3/transport1/wire1 pass after5.24s build. All-feature/all-target
+check7.77s, initial Clippy -D warnings11.33s and final5.26s pass. Format/whitespace
+and updated80-contract inventory pass. Unsupported two-filter Cargo command did
+not execute tests; corrected separate commands above provide the actual evidence.
+Inventory array lookup correction preceded its successful write/check. All handles
+terminal. No new startup/CLI reserve option or selected-reserve Node load test, encrypted
+shared load/performance, full per-owner/receive/connection fairness, macOS or general
+fault proof. Full P0–P7 active; broader ledger and fixed250ms/sustainable-capacity
+P7 gaps retained; P8/Windows deferred, CI background.

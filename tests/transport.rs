@@ -353,6 +353,215 @@ mod native {
         pool.close();
         assert!(qa.is_drained());
     }
+    fn protected_control<P: voteboat::buffer::BufferPool + Clone>(mut pool: P) {
+        use voteboat::{buffer::*, native::transport::NativeTransportFactory};
+        let max = TransportLimits::default().send_frame_bytes;
+        let (a, b) = sessions(7);
+        let incoming = a.incoming.clone();
+        let outgoing = a.outgoing.clone();
+        outgoing.lock().unwrap().flushed = false;
+        let mut qa = queue(1);
+        let qb = queue(2);
+        let mut factory = NativeTransportFactory::new(codec(), TransportLimits::default())
+            .unwrap()
+            .with_buffers(pool.clone())
+            .unwrap();
+        let mut a = factory.build(a, &qa).unwrap();
+        let mut b = NativePeerTransport::new(b, codec(), &qb, TransportLimits::default()).unwrap();
+        drop(factory);
+        let blocker = pool.acquire(3 * max, 0).unwrap();
+        pool.close(); // transport views and accepted blocker remain valid
+                      // Unclassified receive must not borrow the free control reservation.
+        poll(&mut a);
+        assert_eq!(incoming.lock().unwrap().reads, 0);
+        let control = message(1, 2, 11);
+        let mut data = message(1, 2, 12);
+        data.rpc = Rpc::Append {
+            previous_index: 0,
+            previous_term: 0,
+            entries: vec![support::entry(1, 1, 7)],
+            leader_commit: 0,
+        };
+        let mixed = vec![control.clone(), data];
+        let rejected = a.submit(batch(&mut qa, mixed.clone())).unwrap_err();
+        assert_eq!(rejected.reason, TransportError::Overloaded);
+        assert_eq!(rejected.batch.messages, mixed);
+        assert_eq!(
+            pool.usage(),
+            BufferUsage {
+                reserved_bytes: 3 * max,
+                leases: 1
+            }
+        );
+        assert_eq!(qa.usage().batches, 1);
+        qa.complete(*rejected.batch, LocalSendResult::Cancelled)
+            .unwrap();
+        a.submit(batch(&mut qa, vec![control.clone()])).unwrap();
+        for _ in 0..1000 {
+            poll(&mut a);
+            poll(&mut b);
+            if b.received_info().is_some() {
+                break;
+            }
+        }
+        assert_eq!(b.take_received().unwrap().messages, vec![control]);
+        assert!(!a.usage().completion);
+        assert_eq!(
+            pool.usage(),
+            BufferUsage {
+                reserved_bytes: 4 * max,
+                leases: 2
+            }
+        );
+        outgoing.lock().unwrap().flushed = true;
+        poll(&mut a);
+        assert_eq!(
+            pool.usage(),
+            BufferUsage {
+                reserved_bytes: 3 * max,
+                leases: 1
+            }
+        );
+        let done = a.take_send().unwrap();
+        assert_eq!(done.result, LocalSendResult::Sent);
+        assert_eq!(qa.usage().batches, 1);
+        qa.complete(done.batch, done.result).unwrap();
+        outgoing.lock().unwrap().flushed = false;
+        a.submit(batch(&mut qa, vec![message(1, 2, 13)])).unwrap();
+        a.abort();
+        let done = a.take_send().unwrap();
+        assert_ne!(done.result, LocalSendResult::Sent);
+        qa.complete(done.batch, done.result).unwrap();
+        b.abort();
+        drop(blocker);
+        assert_eq!(pool.usage(), BufferUsage::default());
+        assert_eq!(qa.usage().batches, 0);
+    }
+    #[test]
+    fn downstream_shared_pool_protects_validated_control_and_holds_flush_ownership() {
+        use voteboat::buffer::*;
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = support::buffer::HostPool::with_control_reserve(
+            4 * max,
+            4,
+            BufferLimits {
+                reserved_bytes: max,
+                leases: 1,
+            },
+        );
+        let observer = pool.clone();
+        protected_control(pool);
+        assert!(observer.class_calls()[0] > 2);
+        assert_eq!(observer.class_calls()[1], 2);
+    }
+    #[test]
+    fn native_shared_pool_protects_validated_control_and_holds_flush_ownership() {
+        use voteboat::{buffer::*, native::buffer::NativeBufferPool};
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = NativeBufferPool::new_with_control_reserve(
+            BufferLimits {
+                reserved_bytes: 4 * max,
+                leases: 4,
+            },
+            BufferLimits {
+                reserved_bytes: max,
+                leases: 1,
+            },
+        )
+        .unwrap();
+        protected_control(pool.clone());
+        assert_eq!(pool.bulk_usage(), BufferUsage::default());
+    }
+    #[test]
+    fn shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing() {
+        use voteboat::{
+            buffer::*,
+            native::{buffer::NativeBufferPool, transport::NativeTransportFactory},
+        };
+        let max = TransportLimits::default().send_frame_bytes;
+        for reserve in [
+            BufferLimits {
+                reserved_bytes: max - 1,
+                leases: 1,
+            },
+            BufferLimits {
+                reserved_bytes: 3 * max,
+                leases: 1,
+            },
+            BufferLimits {
+                reserved_bytes: max,
+                leases: 3,
+            },
+        ] {
+            let pool = NativeBufferPool::new_with_control_reserve(
+                BufferLimits {
+                    reserved_bytes: 4 * max,
+                    leases: 4,
+                },
+                reserve,
+            )
+            .unwrap();
+            assert!(matches!(
+                NativeTransportFactory::new(codec(), TransportLimits::default())
+                    .unwrap()
+                    .with_buffers(pool.clone()),
+                Err(TransportError::InvalidLimits)
+            ));
+            assert_eq!(pool.usage(), BufferUsage::default());
+        }
+    }
+    #[test]
+    fn malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session() {
+        use voteboat::{buffer::*, native::transport::NativeTransportFactory};
+        #[derive(Clone)]
+        struct Declared(support::buffer::HostPool);
+        impl BufferPool for Declared {
+            type Buffer = support::buffer::HostBuffer;
+            fn limits(&self) -> BufferLimits {
+                self.0.limits()
+            }
+            fn usage(&self) -> BufferUsage {
+                self.0.usage()
+            }
+            fn acquire(&self, r: usize, n: usize) -> Result<Self::Buffer, BufferError> {
+                self.0.acquire(r, n)
+            }
+            fn control_reserve(&self) -> Option<BufferLimits> {
+                Some(BufferLimits {
+                    reserved_bytes: self.limits().reserved_bytes,
+                    leases: 1,
+                })
+            }
+            fn close(&mut self) {
+                self.0.close();
+            }
+        }
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = Declared(support::buffer::HostPool::new(4 * max, 4));
+        assert!(matches!(
+            NativeTransportFactory::new(codec(), TransportLimits::default())
+                .unwrap()
+                .with_buffers(pool.clone()),
+            Err(TransportError::Buffer(BufferError::InvalidLimits))
+        ));
+        let (session, _peer) = sessions(7);
+        let incoming = session.incoming.clone();
+        let outgoing = session.outgoing.clone();
+        assert!(matches!(
+            NativePeerTransport::with_buffers(
+                session,
+                codec(),
+                &queue(1),
+                TransportLimits::default(),
+                pool.clone()
+            ),
+            Err(TransportError::Buffer(BufferError::InvalidLimits))
+        ));
+        assert_eq!(incoming.lock().unwrap().reads, 0);
+        assert!(outgoing.lock().unwrap().broken);
+        assert_eq!(pool.usage(), BufferUsage::default());
+        assert_eq!(pool.0.class_calls(), [0; 2]);
+    }
     #[test]
     fn exhausted_pool_returns_original_send_and_retries_receive_without_reading() {
         use voteboat::buffer::*;

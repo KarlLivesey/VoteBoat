@@ -49,7 +49,7 @@ component-contracts.json and its linked contract document.
 | C11 timers | TimerService / native deadlines and explicit generations | Native lateness/owner tests exist; general telemetry remains partial. |
 | C12 clock | Clock / host-injected MonoTime and native clock | No implicit wall clock in the core. |
 | C13 entropy | ElectionEntropy / native jitter and deterministic doubles | Not a credential or cryptographic identity source. |
-| C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Initial encoded-frame integration. WAL/snapshot/application buffers remain separate; shared-pool fairness/control reserve and host connection admission remain to be addressed. Legacy host-codec defaults use separate bounded scratch. |
+| C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Slice143 adds optional declared control byte/lease reserve through class-aware public/native pools and selected native shared transport. Validated control sends progress under bulk saturation; mixed/data/background and unclassified receives stay bulk. Native/downstream lifetime/rollback/concurrency and transport flush/abort/declaration tests pass. WAL/snapshot/application buffers remain separate; per-owner/receive/connection fairness and host connection admission remain. Legacy host-codec defaults use separate bounded scratch. |
 | C15 admission | Core ceilings/reserves plus public AdmissionPolicy/AdmissionLease, native shareable bulk provider and NativeOutbound integration; tests/admission.rs, tests/transport.rs; slice109 | Initial outbound path. Policy cannot bypass hard ceilings or veto reserved control. General client/disk/connection/shared-buffer admission and fairness remain. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
 | C17 discovery | PeerDiscovery/DiscoveryConnector; ManifestDiscovery/resolve_discovered and NativeAuthorityDiscovery from original Directory quorum reads; tests/discovery.rs, tests/connect.rs, tests/routing.rs, tests/routed/native.rs | Initial peer-address and responsibility-authority observation seams. Automatic remote fetch/refresh, dynamic executable endpoints and discovery-selected QUIC peer establishment remain; source hints cannot activate owners. |
@@ -72,8 +72,9 @@ independent of online-change and lifecycle acceptance work.
 2. Slices140–142 connect initially guarded assigned nested targets to actual
    later split and merge retirement/reclamation, retaining lineage and successor
    service (P1/P6). Selected native lifecycle evidence does not close all P6 gaps.
-3. Continue remaining resource fairness, discovery/placement, platform/fault and
-   measured runtime work. Original250ms/sustainable-capacity requirements remain
+3. Slice143 supplies selected shared encoded control reserve; next per-owner bulk
+   isolation/admission and native Node overload/fault validation continue resource
+   fairness. Discovery/placement, platform/fault and measured runtime work remain. Original250ms/sustainable-capacity requirements remain
    active; repeated unsuccessful publication experiments are not acceptance.
 
 Purpose, dependencies and completion checks are linked in IMPLEMENTATION.md's

@@ -18,9 +18,15 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
 };
-struct Credits {
+#[derive(Default)]
+struct Budget {
     bytes: AtomicUsize,
     leases: AtomicUsize,
+}
+#[derive(Default)]
+struct Credits {
+    total: Budget,
+    bulk: Budget,
 }
 /// Clone shares credits, while close is scoped to that view. No buffers are
 /// cached: each lease frees its allocation before returning reserved credits.
@@ -29,17 +35,44 @@ pub struct NativeBufferPool {
     credits: Arc<Credits>,
     limits: BufferLimits,
     closed: bool,
+    control_reserve: Option<BufferLimits>,
 }
 impl NativeBufferPool {
     pub fn new(limits: BufferLimits) -> Result<Self, BufferError> {
-        Ok(Self {
-            credits: Arc::new(Credits {
-                bytes: AtomicUsize::new(0),
-                leases: AtomicUsize::new(0),
-            }),
-            limits: limits.validate()?,
+        Ok(Self::build(limits.validate()?, None))
+    }
+    /// Shared bulk work cannot consume this byte/lease headroom. Control is
+    /// still bounded by total limits and may compete with other control work.
+    pub fn new_with_control_reserve(
+        limits: BufferLimits,
+        reserve: BufferLimits,
+    ) -> Result<Self, BufferError> {
+        Ok(Self::build(
+            limits.validate_control_reserve(reserve)?,
+            Some(reserve),
+        ))
+    }
+    fn build(limits: BufferLimits, control_reserve: Option<BufferLimits>) -> Self {
+        Self {
+            credits: Arc::new(Credits::default()),
+            limits,
             closed: false,
-        })
+            control_reserve,
+        }
+    }
+    /// Restricted bulk reservations; zero when no reserve was selected.
+    pub fn bulk_usage(&self) -> BufferUsage {
+        self.credits.bulk.usage()
+    }
+    fn bulk_limits(&self) -> BufferLimits {
+        let reserve = self.control_reserve.unwrap_or(BufferLimits {
+            reserved_bytes: 0,
+            leases: 0,
+        });
+        BufferLimits {
+            reserved_bytes: self.limits.reserved_bytes - reserve.reserved_bytes,
+            leases: self.limits.leases - reserve.leases,
+        }
     }
 }
 fn reserve(counter: &AtomicUsize, amount: usize, limit: usize) -> Result<(), BufferError> {
@@ -57,9 +90,30 @@ fn reserve(counter: &AtomicUsize, amount: usize, limit: usize) -> Result<(), Buf
     }
     Err(BufferError::Overloaded)
 }
+impl Budget {
+    fn acquire(&self, bytes: usize, limits: BufferLimits) -> Result<(), BufferError> {
+        reserve(&self.leases, 1, limits.leases)?;
+        if let Err(error) = reserve(&self.bytes, bytes, limits.reserved_bytes) {
+            self.leases.fetch_sub(1, Ordering::AcqRel);
+            return Err(error);
+        }
+        Ok(())
+    }
+    fn release(&self, bytes: usize) {
+        self.bytes.fetch_sub(bytes, Ordering::AcqRel);
+        self.leases.fetch_sub(1, Ordering::AcqRel);
+    }
+    fn usage(&self) -> BufferUsage {
+        BufferUsage {
+            reserved_bytes: self.bytes.load(Ordering::Acquire),
+            leases: self.leases.load(Ordering::Acquire),
+        }
+    }
+}
 pub struct NativeFrameBuffer {
     bytes: Vec<u8>,
     reservation: usize,
+    bulk: bool,
     credits: Arc<Credits>,
 }
 impl AsRef<[u8]> for NativeFrameBuffer {
@@ -95,10 +149,10 @@ impl FrameBuffer for NativeFrameBuffer {
 impl Drop for NativeFrameBuffer {
     fn drop(&mut self) {
         self.bytes = Vec::new();
-        self.credits
-            .bytes
-            .fetch_sub(self.reservation, Ordering::AcqRel);
-        self.credits.leases.fetch_sub(1, Ordering::AcqRel);
+        self.credits.total.release(self.reservation);
+        if self.bulk {
+            self.credits.bulk.release(self.reservation);
+        }
     }
 }
 impl BufferPool for NativeBufferPool {
@@ -107,12 +161,20 @@ impl BufferPool for NativeBufferPool {
         self.limits
     }
     fn usage(&self) -> BufferUsage {
-        BufferUsage {
-            reserved_bytes: self.credits.bytes.load(Ordering::Acquire),
-            leases: self.credits.leases.load(Ordering::Acquire),
-        }
+        self.credits.total.usage()
+    }
+    fn control_reserve(&self) -> Option<BufferLimits> {
+        self.control_reserve
     }
     fn acquire(&self, reservation: usize, initial_len: usize) -> Result<Self::Buffer, BufferError> {
+        self.acquire_class(BufferClass::Bulk, reservation, initial_len)
+    }
+    fn acquire_class(
+        &self,
+        class: BufferClass,
+        reservation: usize,
+        initial_len: usize,
+    ) -> Result<Self::Buffer, BufferError> {
         if self.closed {
             return Err(BufferError::Closed);
         }
@@ -120,14 +182,20 @@ impl BufferPool for NativeBufferPool {
         {
             return Err(BufferError::TooLarge);
         }
-        reserve(&self.credits.leases, 1, self.limits.leases)?;
-        if let Err(e) = reserve(&self.credits.bytes, reservation, self.limits.reserved_bytes) {
-            self.credits.leases.fetch_sub(1, Ordering::AcqRel);
-            return Err(e);
+        let bulk = class == BufferClass::Bulk && self.control_reserve.is_some();
+        if bulk {
+            self.credits.bulk.acquire(reservation, self.bulk_limits())?;
+        }
+        if let Err(error) = self.credits.total.acquire(reservation, self.limits) {
+            if bulk {
+                self.credits.bulk.release(reservation);
+            }
+            return Err(error);
         }
         let mut buffer = NativeFrameBuffer {
             bytes: Vec::new(),
             reservation,
+            bulk,
             credits: self.credits.clone(),
         };
         buffer.resize(initial_len)?;

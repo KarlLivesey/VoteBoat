@@ -1584,9 +1584,11 @@
     },
     {
       "design_id": "C14",
-      "public_contract": "BufferPool / FrameBuffer / BufferLimits / BufferUsage",
+      "public_contract": "BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage",
       "operations": [
         "acquire",
+        "acquire_class",
+        "control_reserve",
         "resize",
         "reservation",
         "capacity",
@@ -1603,7 +1605,7 @@
         "tests/quic.rs",
         "tests/counter_service.rs"
       ],
-      "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, shared-pool fairness/control reserve, or performance claim."
+      "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, per-owner/receive/connection fairness, or performance claim. Contract version2 adds optional declared control byte/lease reserve and class-aware acquisition, fail-closed compatibility defaults for unsupported reserve declarations. Explicit native reserved selection uses total/restricted-bulk counters with bounded rollback; default native selection retains total-only counter operations. Actual validated batch contents select Control, mixed/data/background and unclassified receive use Bulk. Constructor validates protected max-send capacity plus full-duplex bulk remainder. Independent host/native saturation, concurrent owners, allocation overflow, delayed flush/abort and malformed declaration tests exercise the same public seam. No control deadline/preemption or automatic Node/service shared-reserve selection."
     },
     {
       "design_id": "C15",

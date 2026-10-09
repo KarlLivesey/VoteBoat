@@ -295,6 +295,11 @@ Raft acknowledgement. The host drives polling and budgets retained rejected
 effects, encoded buffers and receive queues separately. This queue creates no
 sockets; `PeerTransport` consumes its dispatched batches for framed channel I/O.
 
+An explicitly shared [encoded-frame pool](docs/BUFFERS.md) can protect control
+send capacity with `NativeBufferPool::new_with_control_reserve` and
+`NativeTransportFactory::with_buffers`. Bulk frames cannot consume that byte/lease
+headroom; receive frames remain bulk and per-owner fairness remains separate.
+
 `NativeOutbound::with_policy` selects the public [admission policy](docs/ADMISSION.md)
 for additional shareable bulk credits. Mandatory ceilings run first and control
 bypasses optional policy. Outbound contract2 carries an owned lease with each

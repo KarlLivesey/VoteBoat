@@ -14,7 +14,14 @@
 // rights and limitations under the RPL.
 //! Owned, bounded byte storage for asynchronous transport frames.
 /// Rust contract version; independent of wire and persistent formats.
-pub const BUFFER_POOL_CONTRACT_VERSION: u32 = 1;
+pub const BUFFER_POOL_CONTRACT_VERSION: u32 = 2;
+/// Unclassified input and application/snapshot sends are Bulk. Only validated
+/// protocol-control sends may use protected capacity.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum BufferClass {
+    Bulk,
+    Control,
+}
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BufferError {
     InvalidLimits,
@@ -32,6 +39,15 @@ pub struct BufferLimits {
 impl BufferLimits {
     pub fn validate(self) -> Result<Self, BufferError> {
         if self.reserved_bytes == 0 || self.leases == 0 {
+            return Err(BufferError::InvalidLimits);
+        }
+        Ok(self)
+    }
+    /// Leave positive bulk capacity in both dimensions.
+    pub fn validate_control_reserve(self, reserve: Self) -> Result<Self, BufferError> {
+        self.validate()?;
+        reserve.validate()?;
+        if reserve.reserved_bytes >= self.reserved_bytes || reserve.leases >= self.leases {
             return Err(BufferError::InvalidLimits);
         }
         Ok(self)
@@ -64,5 +80,25 @@ pub trait BufferPool {
     fn limits(&self) -> BufferLimits;
     fn usage(&self) -> BufferUsage;
     fn acquire(&self, reservation: usize, initial_len: usize) -> Result<Self::Buffer, BufferError>;
+    /// Declared capacity protected from Bulk reservations, including acquire.
+    /// None preserves the original undivided-budget contract. Control may use
+    /// any free total capacity; it cannot exceed limits. No deadline guarantee.
+    fn control_reserve(&self) -> Option<BufferLimits> {
+        None
+    }
+    /// Same ownership/failure contract as acquire. Providers declaring reserve
+    /// must override this method; the compatibility default cannot honor it.
+    fn acquire_class(
+        &self,
+        class: BufferClass,
+        reservation: usize,
+        initial_len: usize,
+    ) -> Result<Self::Buffer, BufferError> {
+        let _ = class;
+        if self.control_reserve().is_some() {
+            return Err(BufferError::ProviderViolation);
+        }
+        self.acquire(reservation, initial_len)
+    }
     fn close(&mut self);
 }

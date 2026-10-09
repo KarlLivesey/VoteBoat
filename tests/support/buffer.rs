@@ -20,6 +20,9 @@ pub struct HostPool {
     usage: Rc<Cell<BufferUsage>>,
     limits: BufferLimits,
     closed: bool,
+    reserve: Option<BufferLimits>,
+    bulk: Rc<Cell<BufferUsage>>,
+    calls: Rc<Cell<[usize; 2]>>,
 }
 impl HostPool {
     pub fn new(bytes: usize, leases: usize) -> Self {
@@ -30,13 +33,26 @@ impl HostPool {
                 leases,
             },
             closed: false,
+            reserve: None,
+            bulk: Rc::new(Cell::new(BufferUsage::default())),
+            calls: Rc::new(Cell::new([0; 2])),
         }
+    }
+    pub fn with_control_reserve(bytes: usize, leases: usize, reserve: BufferLimits) -> Self {
+        let mut pool = Self::new(bytes, leases);
+        pool.limits.validate_control_reserve(reserve).unwrap();
+        pool.reserve = Some(reserve);
+        pool
+    }
+    pub fn class_calls(&self) -> [usize; 2] {
+        self.calls.get()
     }
 }
 pub struct HostBuffer {
     bytes: Vec<u8>,
     reservation: usize,
     usage: Rc<Cell<BufferUsage>>,
+    bulk: Option<Rc<Cell<BufferUsage>>>,
 }
 impl AsRef<[u8]> for HostBuffer {
     fn as_ref(&self) -> &[u8] {
@@ -73,6 +89,12 @@ impl Drop for HostBuffer {
         usage.reserved_bytes -= self.reservation;
         usage.leases -= 1;
         self.usage.set(usage);
+        if let Some(bulk) = &self.bulk {
+            let mut usage = bulk.get();
+            usage.reserved_bytes -= self.reservation;
+            usage.leases -= 1;
+            bulk.set(usage);
+        }
     }
 }
 impl BufferPool for HostPool {
@@ -83,7 +105,21 @@ impl BufferPool for HostPool {
     fn usage(&self) -> BufferUsage {
         self.usage.get()
     }
+    fn control_reserve(&self) -> Option<BufferLimits> {
+        self.reserve
+    }
     fn acquire(&self, reservation: usize, initial_len: usize) -> Result<HostBuffer, BufferError> {
+        self.acquire_class(BufferClass::Bulk, reservation, initial_len)
+    }
+    fn acquire_class(
+        &self,
+        class: BufferClass,
+        reservation: usize,
+        initial_len: usize,
+    ) -> Result<HostBuffer, BufferError> {
+        let mut calls = self.calls.get();
+        calls[if class == BufferClass::Control { 1 } else { 0 }] += 1;
+        self.calls.set(calls);
         if self.closed {
             return Err(BufferError::Closed);
         }
@@ -97,6 +133,23 @@ impl BufferPool for HostPool {
         {
             return Err(BufferError::Overloaded);
         }
+        let bulk = if class == BufferClass::Bulk {
+            self.reserve
+        } else {
+            None
+        };
+        if let Some(reserve) = bulk {
+            let mut used = self.bulk.get();
+            if used.leases >= self.limits.leases - reserve.leases
+                || reservation
+                    > self.limits.reserved_bytes - reserve.reserved_bytes - used.reserved_bytes
+            {
+                return Err(BufferError::Overloaded);
+            }
+            used.leases += 1;
+            used.reserved_bytes += reservation;
+            self.bulk.set(used);
+        }
         usage.leases += 1;
         usage.reserved_bytes += reservation;
         self.usage.set(usage);
@@ -104,6 +157,7 @@ impl BufferPool for HostPool {
             bytes: Vec::new(),
             reservation,
             usage: self.usage.clone(),
+            bulk: bulk.map(|_| self.bulk.clone()),
         };
         buffer.resize(initial_len)?;
         Ok(buffer)

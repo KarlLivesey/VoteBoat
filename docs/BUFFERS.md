@@ -1,4 +1,4 @@
-# Owned transport buffers, contract version 1
+# Owned transport buffers, contract version 2
 
 `buffer::BufferPool` provisions owned `FrameBuffer` leases. A request names its
 maximum reserved bytes and initial visible length. Rejection transfers nothing;
@@ -24,6 +24,23 @@ it leaves the existing bytes intact. The provider cannot revoke accepted leases.
 These volatile credits are reconstructed empty on process startup and convey no
 storage durability or consensus evidence.
 
+Version2 adds `BufferClass`, `acquire_class` and an optional `control_reserve`.
+Ordinary `acquire` is bulk. A selected reserve protects both bytes and lease slots
+from bulk; control can use any free total capacity but cannot exceed total limits.
+Unclassified input is bulk. Existing implementations default to no reserve and
+class acquisition forwards to their existing acquire method. Declaring a reserve
+without implementing class acquisition fails with ProviderViolation; it does not
+silently weaken that declaration. Providers must keep limits/reserve stable across
+shared views and acquisitions.
+
+`NativeBufferPool::new_with_control_reserve(total, reserve)` explicitly selects
+protected capacity. Both dimensions must leave positive bulk capacity. Total and
+restricted-bulk counters reserve independently with precise rollback on partial
+admission/allocation failure. `bulk_usage` reports restricted reservations, zero
+when no reserve is selected; ordinary usage includes both classes. The unselected
+native path uses only total counter operations. Counters are volatile, not a
+retention registry or durability receipt.
+
 # Native integration and ownership
 
 `NativePeerTransport<S,C,P>` accepts a host pool through `with_buffers`.
@@ -35,6 +52,9 @@ Both paths use the public contract. Construction requires capacity for at least
 one full-duplex connection, creates no lease and takes no pool-wide shutdown
 ownership. A host sharing a pool across N active connections should budget both
 frame reservations for each connection, or explicitly manage admission/pressure.
+If a reserve is declared, it must fit one maximum send frame/lease and leave a
+full-duplex bulk connection (send plus receive and two leases). Malformed or
+insufficient declarations refuse before any frame acquisition or plaintext I/O.
 
 Send checks outbound ownership, acquires its maximum frame reservation, sizes and
 encodes into the lease, then accepts the original OutboundBatch. Any refusal returns
@@ -43,8 +63,10 @@ channel flush retains the lease. Local flush completion releases encoded storage
 the original batch still holds its independent queue credits until completion is
 consumed and returned to the queue. Pool exhaustion becomes the existing
 TransportError::Overloaded, so the owning peer driver stages and retries the batch.
+The class comes from validated actual message contents through batch_cost.
+Control-only protocol traffic uses Control; mixed data or snapshot work uses Bulk.
 
-Receive acquires its maximum reservation before reading, but allocates only the
+Receive acquires its maximum Bulk reservation before reading, but allocates only the
 codec header. A valid advertised length permits growth within that reservation.
 Invalid headers never allocate full-frame storage. Exhaustion reads no plaintext
 and stops that direction for the current poll, allowing later retry. Completed
@@ -60,7 +82,11 @@ owned by an unrelated outbound queue.
 The driver checks returned reservation, capacity and both slice lengths before
 use. Host implementations still must obey allocation and stable-storage contracts;
 post-validation cannot sandbox arbitrary provider code or undo its allocations.
-The pool itself supplies no fairness, traffic-class control reserve or deadline.
+The unselected pool supplies no traffic reserve. The selected reserve protects
+control sends from shared bulk saturation, not receive/connection admission or
+per-owner fairness. Control competition and bounded atomic contention can still
+refuse; no deadline is promised. It does not preempt an accepted send on the same
+ordered connection.
 An undersized shared pool can stall connections holding idle receive reservations.
 Hosts must provision/admit connections accordingly; constrained policy integration
 is the next slice. Existing per-connection defaults preserve previous full-duplex
@@ -87,6 +113,26 @@ short/long destination slices. Real TCP/TLS and QUIC histories exercise default
 native provisioning. This does not integrate WAL/snapshot/application buffers,
 provide a universal memory budget, or establish performance gains.
 
-Outbound bulk policy leases now cover original message ownership independently
-of these frame buffers; see [constrained admission](ADMISSION.md). Their reserved
-control accounting does not close shared encoded-pool connection/fairness gaps.
+Outbound bulk policy leases cover original message ownership independently of
+these frame buffers; see [constrained admission](ADMISSION.md). Optional selected
+encoded control capacity does not close shared receive/connection/fairness gaps.
+
+```rust
+use voteboat::{buffer::BufferLimits, native::buffer::NativeBufferPool,
+    transport::TransportLimits};
+let frames = TransportLimits::default();
+let pool = NativeBufferPool::new_with_control_reserve(
+    BufferLimits { reserved_bytes: 2 * frames.send_frame_bytes + frames.receive_frame_bytes,
+        leases: 3 },
+    BufferLimits { reserved_bytes: frames.send_frame_bytes, leases: 1 },
+).expect("valid frame budget");
+// Pass pool to NativeTransportFactory::with_buffers, sharing its views explicitly.
+```
+
+Reserve conformance includes independent downstream/native byte/slot saturation,
+allocation-overflow rollback, concurrent bulk holders, close and exact credit
+return. Native transport with host-attested sessions verifies control progress,
+mixed-batch rejection, delayed flush/abort and unclassified input refusal. These
+host sessions are not cryptographic evidence. Default real TCP/TLS and QUIC paths
+also have regression checks; no real encrypted shared-reserve load experiment or
+performance gain is claimed.

@@ -19,6 +19,28 @@ use crate::{
 };
 use std::mem::size_of;
 
+fn validate_pool(pool: &impl BufferPool, limits: TransportLimits) -> Result<(), TransportError> {
+    let total = pool.limits().validate().map_err(TransportError::Buffer)?;
+    if total.reserved_bytes < limits.send_frame_bytes + limits.receive_frame_bytes
+        || total.leases < 2
+    {
+        return Err(TransportError::InvalidLimits);
+    }
+    if let Some(reserve) = pool.control_reserve() {
+        total
+            .validate_control_reserve(reserve)
+            .map_err(TransportError::Buffer)?;
+        if reserve.reserved_bytes < limits.send_frame_bytes
+            || total.reserved_bytes - reserve.reserved_bytes
+                < limits.send_frame_bytes + limits.receive_frame_bytes
+            || total.leases - reserve.leases < 2
+        {
+            return Err(TransportError::InvalidLimits);
+        }
+    }
+    Ok(())
+}
+
 /// Explicit codec/limit selection reused for each authenticated connection.
 pub struct NativeTransportFactory<C: WireCodec + Clone> {
     codec: C,
@@ -128,15 +150,7 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
         buffers: P,
     ) -> Result<Self, TransportError> {
         let limits = limits.validate()?;
-        let pool_limits = buffers
-            .limits()
-            .validate()
-            .map_err(TransportError::Buffer)?;
-        if pool_limits.reserved_bytes < limits.send_frame_bytes + limits.receive_frame_bytes
-            || pool_limits.leases < 2
-        {
-            return Err(TransportError::InvalidLimits);
-        }
+        validate_pool(&buffers, limits)?;
         let outbound = outbound_queue.binding();
         let outbound_limits = outbound_queue
             .limits()
@@ -246,7 +260,11 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
         if self.incoming.is_none() {
             let mut buffer = self
                 .buffers
-                .acquire(self.limits.receive_frame_bytes, self.codec.header_bytes())
+                .acquire_class(
+                    BufferClass::Bulk,
+                    self.limits.receive_frame_bytes,
+                    self.codec.header_bytes(),
+                )
                 .map_err(|e| match e {
                     BufferError::Overloaded => TransportError::Session(SessionError::WouldBlock),
                     other => TransportError::Buffer(other),
@@ -392,7 +410,7 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeer
             {
                 return Err(TransportError::WrongBinding);
             }
-            batch_cost(
+            let (_, class, _) = batch_cost(
                 self.outbound,
                 &batch.messages,
                 batch.messages.capacity(),
@@ -403,7 +421,15 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeer
             // cannot run while this pool is already exhausted.
             let mut frame = self
                 .buffers
-                .acquire(self.limits.send_frame_bytes, 0)
+                .acquire_class(
+                    if class == MessageClass::Control {
+                        BufferClass::Control
+                    } else {
+                        BufferClass::Bulk
+                    },
+                    self.limits.send_frame_bytes,
+                    0,
+                )
                 .map_err(|e| match e {
                     BufferError::Overloaded => TransportError::Overloaded,
                     other => TransportError::Buffer(other),
@@ -565,15 +591,7 @@ impl<C: WireCodec + Clone> NativeTransportFactory<C> {
         self,
         buffers: P,
     ) -> Result<NativeSharedTransportFactory<C, P>, TransportError> {
-        let limits = buffers
-            .limits()
-            .validate()
-            .map_err(TransportError::Buffer)?;
-        if limits.reserved_bytes < self.limits.send_frame_bytes + self.limits.receive_frame_bytes
-            || limits.leases < 2
-        {
-            return Err(TransportError::InvalidLimits);
-        }
+        validate_pool(&buffers, self.limits)?;
         Ok(NativeSharedTransportFactory {
             base: self,
             buffers,

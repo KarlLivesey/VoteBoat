@@ -105,3 +105,31 @@ advances P1/P7; it is not another prerequisite for using the static service.
 After evidence identifies a cause, make the smallest contract-preserving fix and
 repeat matched disk-backed measurements with the same correctness and250ms gate.
 Keep all other ledger gaps active; do not replace P0–P7 with a performance task.
+
+## Slice143 source review and next baseline decision
+
+Reviewed starting revisionff9db49, chapter12 exits/chapter17 catalogue and current
+buffer/admission/native transport/contracts/tests. Historical136 findings above
+remain historical. Since then138 adds optional native file stage timings;139
+retains native publication-cut tests and rejected tuning evidence;140–142 supplies
+selected guarded nested split/merge retirement/replay/reclamation, including actual
+assigned lineage and partial merged-source cleanup. General retention/lifecycle
+faults, broad platforms and sustainable fixed-p99 performance remain unproven.
+These are linked in the updated acceptance map, not counted as universal proofs.
+
+The selected next missing baseline path is C14 shared encoded control headroom.
+Source inspection showed a single undivided pool can exhaust frames even when
+C15 outbound control queue capacity is reserved. BufferPool version2 now offers
+explicit class acquisition/optional control reserve; native counters enforce total
+and restricted bulk limits. Existing undivided selection retains total-only
+counter operations. Actual validated batch contents classify sends; unclassified
+receives cannot borrow control reserve. Native/downstream saturation, rollback,
+concurrency, flush/abort and invalid declaration tests execute that path. This
+closes this selected resource gap, not per-owner/receive/connection fairness.
+
+Next inspect and implement bounded per-owner shared bulk isolation/admission
+using explicit owned views, keeping reserved control independent. Follow with
+real native Node shared-resource overload/fault histories. Retain original P0–P7
+scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
+fixed250ms/sustainable-throughput gates stay active. No new performance runs or
+macOS execution in143. Windows/P8 stay deferred and CI remains background.
