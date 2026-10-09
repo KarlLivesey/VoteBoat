@@ -193,7 +193,10 @@ fn source(intent: &TransferIntent) -> Source {
     .unwrap_or_else(|e| panic!("{:?}", e.error))
     .with_scoped_fencing(2)
     .unwrap_or_else(|e| panic!("{:?}", e.0));
-    Source::new(r, 65536).unwrap_or_else(|e| panic!("{:?}", e.0))
+    Source::new(r, 65536)
+        .unwrap_or_else(|e| panic!("{:?}", e.0))
+        .with_retained_insertion()
+        .unwrap_or_else(|e| panic!("{:?}", e.0))
 }
 fn target(intent: &TransferIntent) -> Target {
     Target::new(
@@ -306,11 +309,7 @@ fn handoff(foreign: bool) {
     assert!(
         TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status()).is_err()
     );
-    commit(
-        &mut s,
-        200,
-        encode_scope_fence(intent.before().input().epoch, range(0, 128)),
-    );
+    commit(&mut s, 200, intent.encode(100000).unwrap());
     let ScopedSourceRead::Frozen(Some(status)) = s
         .read_at(s.applied_index(), ScopedSourceQuery::Frozen(op(200)))
         .unwrap()
@@ -321,6 +320,10 @@ fn handoff(foreign: bool) {
         SourceFenceEvidence::from_scoped_status(ConfigurationId::new(1).unwrap(), status, &intent)
             .unwrap_or_else(|e| panic!("{:?}", e.0));
     assert_eq!(evidence.scope, Some(range(0, 128)));
+    assert_eq!(
+        status.intent_digest,
+        Some(ContentDigest::sha256(&intent.encode(100000).unwrap()))
+    );
     assert!(SourceFenceEvidence::from_status(
         ConfigurationId::new(1).unwrap(),
         voteboat::transfer_source::SourceFreezeStatus {
@@ -506,7 +509,7 @@ fn handoff(foreign: bool) {
     let cp = s.checkpoint(100000).unwrap();
     let mut restored = source(&intent);
     restored
-        .restore_checkpoint(1, s.applied_index(), &cp)
+        .restore_checkpoint(BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA, s.applied_index(), &cp)
         .unwrap();
     assert_eq!(restored.export(op(200), 65536).unwrap(), image);
     // Current source phase retains the old grant: checked new-epoch adoption is next.
@@ -812,4 +815,238 @@ fn retained_nested_decline_cancels_only_before_child_intent_acceptance() {
             .intent,
         intent
     );
+}
+
+#[test]
+fn bound_source_intent_ids_profiles_and_checkpoint_links_fail_closed() {
+    let (_, _, intent) = setup(false);
+    let mut s = source(&intent);
+    let boot = s.bootstrap_command(100000).unwrap();
+    commit(&mut s, 100, boot);
+    let original = s.checkpoint(1000000).unwrap();
+    assert!(s.clone().with_retained_insertion().is_err());
+    let pending = data_at(&intent, 1, 7);
+    assert!(s
+        .validate_proposal(
+            op(200),
+            &intent.encode(100000).unwrap(),
+            [(op(21), pending.as_slice())].into_iter()
+        )
+        .is_err());
+    assert_eq!(s.checkpoint(1000000).unwrap(), original);
+    for bytes in [
+        encode_scope_fence(intent.before().input().epoch, range(0, 128)),
+        s.routed().bootstrap_command(100000).unwrap(),
+    ] {
+        assert!(s.apply_batch(&[entry(2, 200, bytes)]).is_err());
+        assert_eq!(s.checkpoint(1000000).unwrap(), original);
+    }
+    commit(&mut s, 1, data_at(&intent, 1, 7));
+    commit(&mut s, 2, data_at(&intent, 200, 11));
+    let bytes = intent.encode(100000).unwrap();
+    commit(&mut s, 200, bytes.clone());
+    let image = s.export(op(200), 65536).unwrap();
+    let original = s.checkpoint(1000000).unwrap();
+    for bytes in [
+        data_at(&intent, 200, 2),
+        encode_fence(intent.before().input().epoch),
+    ] {
+        assert!(s.apply_batch(&[entry(5, 21, bytes)]).is_err());
+        assert_eq!(s.checkpoint(1000000).unwrap(), original);
+    }
+    let mut changed = intent.insertion_children().unwrap()[0].clone();
+    changed.creation_index += 1;
+    let changed = TransferIntent::insert_retained_child(
+        intent.before().clone(),
+        intent.after().clone(),
+        changed,
+    )
+    .unwrap()
+    .encode(100000)
+    .unwrap();
+    assert!(s
+        .validate_proposal(op(200), &changed, std::iter::empty())
+        .is_err());
+    assert_eq!(s.checkpoint(1000000).unwrap(), original);
+    let retried = commit(&mut s, 200, bytes.clone());
+    assert!(matches!(retried.outcome,RoutedOutcome::ScopeFenced(f) if f.fence.index==4));
+    assert_eq!(s.export(op(200), 65536).unwrap(), image);
+    let cp = s.checkpoint(1000000).unwrap();
+    let pristine_routed = source(&intent).routed().clone();
+    let requirements = pristine_routed.readiness_requirements();
+    let limit = MAX_SCOPED_SOURCE_CHECKPOINT_BYTES
+        - requirements.snapshot_bytes
+        - 30
+        - 100 * pristine_routed.scoped_fence_limit();
+    assert!(Source::new(pristine_routed.clone(), limit)
+        .unwrap_or_else(|_| panic!("budget"))
+        .with_retained_insertion()
+        .is_err());
+    let mut legacy = Source::new(pristine_routed, 65536).unwrap_or_else(|_| panic!("legacy"));
+    let boot = legacy.bootstrap_command(100000).unwrap();
+    commit(&mut legacy, 100, boot);
+    assert!(legacy.apply_batch(&[entry(2, 200, bytes.clone())]).is_err());
+    assert!(legacy
+        .restore_checkpoint(2, s.applied_index(), &cp)
+        .is_err());
+    let mut restored = source(&intent);
+    for end in 0..cp.len() {
+        assert!(restored
+            .restore_checkpoint(2, s.applied_index(), &cp[..end])
+            .is_err());
+        assert_eq!(restored.applied_index(), 0);
+    }
+    let offset = cp
+        .windows(bytes.len())
+        .position(|w| w == bytes.as_slice())
+        .unwrap();
+    let mut corrupt = cp.clone();
+    corrupt[offset..offset + bytes.len()].copy_from_slice(&changed);
+    assert!(restored
+        .restore_checkpoint(2, s.applied_index(), &corrupt)
+        .is_err());
+    assert!(restored
+        .restore_checkpoint(1, s.applied_index(), &cp)
+        .is_err());
+    restored
+        .restore_checkpoint(2, s.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(restored.export(op(200), 65536).unwrap(), image);
+    let ScopedSourceRead::Frozen(Some(status)) = restored
+        .read_at(restored.applied_index(), ScopedSourceQuery::Frozen(op(200)))
+        .unwrap()
+    else {
+        panic!("fact")
+    };
+    let mut wrong = status;
+    wrong.intent_digest = Some(ContentDigest::sha256(b"wrong intent"));
+    assert!(SourceFenceEvidence::from_scoped_status(
+        ConfigurationId::new(1).unwrap(),
+        wrong,
+        &intent
+    )
+    .is_err());
+    let mut collided = source(&intent);
+    let boot = collided.bootstrap_command(100000).unwrap();
+    commit(&mut collided, 100, boot);
+    commit(&mut collided, 21, data_at(&intent, 1, 7));
+    let before = collided.checkpoint(1000000).unwrap();
+    assert!(collided
+        .validate_proposal(op(200), &bytes, std::iter::empty())
+        .is_err());
+    assert!(collided.apply_batch(&[entry(3, 200, bytes)]).is_err());
+    assert_eq!(collided.checkpoint(1000000).unwrap(), before);
+    assert!(collided.export(op(200), 65536).is_err());
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn bound_source_frame_cuts_recover_intent_fence_and_image_together() {
+    use support::{Fault, ModelIo};
+    use voteboat::{log::*, native::log_store::*};
+    let (_, _, intent) = setup(false);
+    let limits = LogLimits::default();
+    let seed = || {
+        let io = ModelIo::default();
+        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+        support::append(
+            &mut log,
+            vec![LogMutation::Create(support::bootstrap(20, 3))],
+        );
+        let app = source(&intent);
+        let state = log.state(group(20)).unwrap();
+        support::append(
+            &mut log,
+            vec![support::update(
+                &state,
+                1,
+                3,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![
+                        entry(1, 100, app.bootstrap_command(100000).unwrap()),
+                        entry(2, 1, data_at(&intent, 1, 7)),
+                        entry(3, 2, data_at(&intent, 200, 11)),
+                    ],
+                }),
+            )],
+        );
+        (io, log)
+    };
+    let (_, log) = seed();
+    let state = log.state(group(20)).unwrap();
+    let mutation = support::update(
+        &state,
+        1,
+        4,
+        Some(Suffix {
+            from: 4,
+            entries: vec![entry(4, 200, intent.encode(100000).unwrap())],
+        }),
+    );
+    let frame = NativeLogCodec
+        .encode_batch(3, std::slice::from_ref(&mutation), limits)
+        .unwrap();
+    let mut old = false;
+    let mut complete = false;
+    for fault in (0..=frame.len()).map(Fault::Append).chain([
+        Fault::Sync,
+        Fault::PublishBefore,
+        Fault::PublishAfter,
+    ]) {
+        let (io, mut log) = seed();
+        io.0.borrow_mut().fault = fault;
+        if let Ok(tickets) = log.append_batch(vec![mutation.clone()]) {
+            assert!(log.barrier(&tickets).is_err());
+        }
+        drop(log);
+        io.0.borrow_mut().power_loss();
+        let log = NativeLogStore::recover(io, support::identity(1), limits).unwrap();
+        let state = log.state(group(20)).unwrap();
+        let mut app = source(&intent);
+        app.apply_batch(
+            &state
+                .entries
+                .into_iter()
+                .filter(|e| e.index <= state.commit_index)
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
+        if state.commit_index == 3 {
+            old = true;
+            assert!(app.export(op(200), 65536).is_err());
+            assert!(app.routed().scoped_fences().is_empty());
+        } else {
+            complete = true;
+            assert_eq!(state.commit_index, 4);
+            assert_eq!(app.export(op(200), 65536).unwrap().source_applied(), 4);
+        }
+        let fact = app
+            .read_at(app.applied_index(), ScopedSourceQuery::Frozen(op(200)))
+            .unwrap();
+        if state.commit_index == 3 {
+            assert_eq!(fact, ScopedSourceRead::Frozen(None));
+        } else {
+            assert!(
+                matches!(fact,ScopedSourceRead::Frozen(Some(f)) if f.intent_digest==Some(ContentDigest::sha256(&intent.encode(100000).unwrap())))
+            );
+        }
+        let before = app.export(op(200), 65536).ok();
+        app.apply_batch(&[entry(state.commit_index + 1, 3, data_at(&intent, 200, 2))])
+            .unwrap();
+        assert_eq!(
+            app.read_at(
+                app.applied_index(),
+                ScopedSourceQuery::Data(RoutedQuery {
+                    hint: source_hint(&intent, 200),
+                    key: vec![200],
+                    query: vec![200]
+                })
+            )
+            .unwrap(),
+            ScopedSourceRead::Data(RoutedRead::Served(13))
+        );
+        assert_eq!(app.export(op(200), 65536).ok(), before);
+    }
+    assert!(old && complete);
 }

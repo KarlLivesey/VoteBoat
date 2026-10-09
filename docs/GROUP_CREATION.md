@@ -435,3 +435,9 @@ profile refusals, pre-intent cancellation and native intent-frame faults pass.
 The source still retains its E1 grant; fresh E2 hints refuse until checked source
 binding/grant adoption151d. Complete native partial service evidence follows152.
 This advances P5/P6 without closing the full lifecycle or platform/fault/P7 gates.
+
+Slice151d1 opts source schema2 into exact retained-intent binding at scoped freeze.
+Original intent digest/F/image recover together, provider/control ID collisions
+refuse, and older raw profiles remain separate. Actual root/foreign handoffs use
+bound facts. Source grant adoption151d2 and native complete composition152 remain
+required; source E2 retained hints still refuse until that transition exists.

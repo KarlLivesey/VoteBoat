@@ -3865,3 +3865,41 @@ Finite local application/I/O-model evidence; native network composition152,
 retained source binding/adoption151d and original broader P0–P7 gaps remain open.
 No unchanged socket/performance loop or remote CI gate was added. Linux checks;
 macOS execution pending, Windows/P8 deferred, RPL-1.5/ignored pack preserved.
+
+## Slice151d1 — original retained intent bound at scoped source freeze
+
+Opt-in ScopedTransferSource schema2 selects canonical VBTINT06 freeze and explicit
+bootstrap/checkpoint tags2. Exact source grant/group/range/control and provider ID
+checks precede atomic original intent/digest/fence/image publication. Raw scoped
+fences/bootstrap bypasses and old profiles refuse. Fixed original quorum status
+includes an optional intent digest; publication checks any present digest. Default
+raw schema1 remains unbound, separately selected, and supplies no adoption authority.
+Independent cached intent digest and original scope/F/image metadata validate
+checkpoint links. Maximum configured intent/digest storage participates in the
+64MiB combined deployment ceiling. No new runtime/persistence provider is added.
+
+Actual root/foreign nested data handoffs now use bound original source facts.
+Changed original retry, every bound snapshot truncation, changed creation reference,
+old profile, live selection, combined capacity overflow and creation/control/data
+ID collisions fail closed. Ordered pending collision refuses without effect; actual
+committed collision cannot freeze/export. Future data/full-fence commands cannot
+reuse original creation IDs. Native ModelIo cuts every bound intent-frame byte and
+injects sync/manifest failure: committed-prefix recovery yields no binding/fence/
+image or their exact original combined fact, while retained work continues.
+Existing raw source and independent padded/wrong-boundary host provider checks pass.
+
+An initial check called a nonexistent routed method; use its existing internal data
+history/initialization/fence checks. Review added independent cached intent digest
+before accepting a valid-shaped changed creation reference on checkpoint restore.
+Expanded all-feature retained7/7 and raw source5/5 pass0.31s/0.18s after4.14s build.
+Core-only retained5/5 and source4/4 pass0.04s/0.27s after4.72s build. Added bounded
+budget/pending/profile assertions targeted1/1 pass0.03s after0.65s build. Final
+all-feature/all-target Clippy -D warnings passes1.49s (earlier7.81s). Formatting,
+whitespace and81-contract inventory pass; all handles terminal. No unchanged socket/
+performance suite or remote CI gate is added.
+
+This completes the bounded source-binding step, not retained-grant adoption or a
+complete partial service. Current151d2 must retain frozen authority/history/images
+while accepting the new grant epoch; next152 native TCP/QUIC composition, following
+153 deletion and full original P0–P7 scope remain active. Linux local evidence,
+macOS execution pending, Windows/P8 deferred, RPL-1.5/ignored pack preserved.

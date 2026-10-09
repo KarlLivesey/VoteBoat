@@ -164,8 +164,8 @@ its selected native acceptance passes. General retention and broader faults rema
    named partial-progress/recovery checks. Scoped source guard151a is implemented;
    immutable exact-boundary source exports151b are implemented. Slice151c implements
    mixed intent/publication and target activation with actual data/retry recovery.
-   Current151d binds the source fence to the original metadata intent and adopts
-   its checked retained grant at the new epoch; without this, fresh retained-route
+   Slice151d1 binds the source fence to the original metadata intent. Current151d2
+   adopts its checked retained grant at the new epoch; without this, fresh retained-route
    hints refuse. Completion checks include exact original-image/history retention,
    no thaw/authority expansion and checkpoint/replay/partial-progress refusal.
    Schema is sketched before edits; native service evidence stays next152.
@@ -11009,3 +11009,85 @@ RPL-1.5 and ignored original pack preserved. No unchanged performance loop added
 Final151c core-only retained4/4 pass0.02s after1.16s build. Final Clippy all-feature/
 all-target -D warnings passes1.54s; cargo formatting, whitespace and81-contract
 inventory pass. All process handles terminal; current151 remains incomplete.
+
+Slice151d1 schema before edits: bind the original metadata intent at the source
+fence before allowing future checked retained-grant adoption. Existing raw scoped
+source schema1 remains unchanged. Opt-in pristine source schema2 selects VBSCOWN2/
+VBSCCHK2 and accepts canonical VBTINT06 as the scoped freeze command; raw scope
+fences refuse in this profile. Before projection to the existing durable routed
+fence, require exact current before-grant/local source/moved range, permitted
+control ID, no creation/control/provider-data collision and bounded export capacity.
+The same atomic application candidate captures the original image and retains its
+exact intent/digest; original retries return the original fact without recapture.
+Later data cannot claim these reserved lifecycle IDs. Fixed Frozen status includes
+an optional original intent digest; publication checks a present digest against its
+canonical intent. Legacy raw-source status remains explicitly unbound and cannot
+be used for planned grant adoption. Authenticated original metadata/source quorum
+provenance remains the host's obligation; no new certificate is inferred.
+
+The source owns no new persistence/runtime provider. Snapshot2 stores each bounded
+original intent with its image, validates exact operation/F/scope/digest/identity
+and IDs against original application history, and reconstructs atomic linkage.
+Reserve maximum intent bytes per configured fence in deployment requirements;
+reject construction if combined snapshot exceeds64MiB. Old schema/profile and
+command bypasses refuse. Acceptance: actual root/foreign nested handoffs use bound
+source facts, changed intent/original retry, pre-fence ID collisions, later lifecycle
+ID reuse refusal, snapshot truncation/corruption/profile refusal, and native frame
+cuts recover either no binding/fence/image or all three together. This advances
+current151's complete partial delegation, followed by checked new-epoch adoption
+151d2, native152 composition and153 deletion. It does not replace those exits.
+
+
+## Slice151d1 — bind scoped source fences to original metadata intent
+
+Previous turn151c made progress: checked retained-child metadata/activation commit
+5d15971 was pushed. This step selects ScopedTransferSource schema2 before bootstrap
+through with_retained_insertion, preserving raw-source schema1. Canonical VBTINT06
+is the source freeze command; actual exact before-grant/group/scope/control and
+provider ID checks precede projection to the existing durable routed scoped fence.
+The atomic candidate stores the original image, intent and independent cached
+intent digest together. Frozen quorum-read facts expose that fixed digest and
+publication checks it against the actual canonical intent. Values remain structural
+facts requiring authenticated original host quorum provenance. No new provider,
+worker, Raft log or automatic cleanup is added.
+
+Bound source bootstrap/checkpoint tags2 reserve maximum intent+digest bytes per
+configured fence within the64MiB combined ceiling. Snapshot restore validates the
+independent original digest, intent/grant/operation/scope/F linkage, exact provider
+image and original ID reservations before exposure. Raw scoped-fence/bootstrap
+bypasses, wrong schema/profile, selection after bootstrap and capacity overflow
+refuse. Creation/control IDs cannot collide with original application histories;
+future data and full-fence commands cannot claim bound creation IDs. Exact retry
+preserves original F/image, changed original intent refuses. This does not adopt
+new ownership: source remains at E1 and fresh E2 hints still refuse.
+
+Root and foreign nested real-data tests now use the bound source profile, preserving
+value7/original retry/outbox through target import/publication/activation while the
+retained key reaches13. Every checkpoint truncation and an independently modified
+creation reference refuse atomically. Pending creation/data ID collisions and
+actual committed collisions refuse before freeze; no image appears. Legacy source
+profiles reject the new command/checkpoint. Native ModelIo cuts every bound source
+intent-frame byte and injects sync/manifest faults: recovered committed prefix has
+no binding/fence/image or exact original intent digest/F/image together. Retained
+work still progresses and original images remain immutable. Existing raw source
+and independent padded/wrong-boundary provider tests remain valid.
+
+First check used a nonexistent RoutedApplication::contains_operation name; use
+its existing internal has_data_operation plus initialization/fence checks, no API
+redesign. Independent cached intent digest was added to the planned snapshot after
+reviewing valid-shaped creation-reference corruption; payload and original digest
+must agree before restore. Expanded all-feature retained7/7 and legacy source5/5
+pass0.31s/0.18s after4.14s build (earlier5/5+5/5 pass0.17s/0.19s after3.94s build).
+Core-only retained5/5 and source4/4 pass0.04s/0.27s after4.72s build. Clippy all
+features/all targets -D warnings passes7.81s. Added deployment budget/pending/profile
+refusals pass targeted1/1 in0.03s after0.65s build. Final checks follow below.
+
+Mini/macro review: current151d2 adopts a checked retained grant at the new epoch,
+keeping original fenced authority/history/images and exact retries; no source
+thaw or route expansion. Purpose/dependencies/checks remain in the linked plan.
+Next152 composes native TCP/QUIC partial recovery; following153 adds deletion.
+Full P0–P7 and original remaining lifecycle/membership/platform/fault/P7 requirements
+stay active. Linux local checks, macOS execution pending, Windows/P8 deferred,
+CI background, RPL-1.5/ignored pack preserved. No milestone exit is asserted.
+Final151d1 all-feature/all-target Clippy -D warnings passes1.49s. Formatting,
+whitespace and81-contract inventory pass; all process handles terminal.

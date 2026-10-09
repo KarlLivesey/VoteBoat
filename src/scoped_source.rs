@@ -23,10 +23,11 @@ use crate::{
     },
     routing::{codec::Reader, *},
     scope::*,
-    transfer::ContentDigest,
+    transfer::{ContentDigest, TransferIntent, MAX_TRANSFER_INTENT_BYTES},
 };
 use std::{collections::BTreeMap, mem::size_of};
 pub const SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 1;
+pub const BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 2;
 pub const MAX_SCOPED_SOURCE_CHECKPOINT_BYTES: usize = 64 * 1024 * 1024;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ScopedExportStatus {
@@ -34,6 +35,7 @@ pub struct ScopedExportStatus {
     pub digest: ContentDigest,
     pub schema: u64,
     pub payload_bytes: usize,
+    pub intent_digest: Option<ContentDigest>,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ScopedSourceQuery<Q> {
@@ -50,6 +52,8 @@ struct FrozenExport {
     digest: ContentDigest,
     image: ScopeImage,
     reservation: usize,
+    intent: Option<TransferIntent>,
+    intent_digest: Option<ContentDigest>,
 }
 /// Owns one routed application and bounded immutable provider images. No I/O or
 /// additional persistence owner. Authorize fences separately from ordinary data;
@@ -59,6 +63,7 @@ pub struct ScopedTransferSource<A, P> {
     routed: RoutedApplication<A, P>,
     export_bytes: usize,
     images: BTreeMap<OperationId, FrozenExport>,
+    bound_intents: bool,
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -111,6 +116,75 @@ where
             routed,
             export_bytes,
             images: BTreeMap::new(),
+            bound_intents: false,
+        })
+    }
+    /// Bind each scoped freeze to its exact retained-insertion intent before bootstrap.
+    /// Schema1/raw fences remain a separate profile; no live upgrade is supported.
+    #[allow(clippy::result_large_err)]
+    pub fn with_retained_insertion(mut self) -> Result<Self, (ApplicationError, Self)> {
+        let extra = (36 + MAX_TRANSFER_INTENT_BYTES) * self.routed.scoped_fence_limit();
+        if self.applied_index() != 0
+            || self.routed.is_initialized()
+            || self.bound_intents
+            || self
+                .readiness_requirements()
+                .snapshot_bytes
+                .checked_add(extra)
+                .is_none_or(|n| n > MAX_SCOPED_SOURCE_CHECKPOINT_BYTES)
+        {
+            return Err((ApplicationError::InvalidCommand, self));
+        }
+        self.bound_intents = true;
+        Ok(self)
+    }
+    fn checked_intent(
+        &self,
+        operation: OperationId,
+        intent: &TransferIntent,
+    ) -> Result<BucketRange, ApplicationError> {
+        let sources = intent.sources();
+        if !intent.is_retained_insertion()
+            || intent.before() != self.routed.grant()
+            || sources.len() != 1
+            || sources[0].target != RouteTarget::Group(self.routed.local())
+            || !intent.permits_operation(operation)
+            || self.reserved_creation(operation)
+            || self
+                .routed
+                .initialization()
+                .is_some_and(|(id, _)| id == operation)
+            || self.routed.application().contains_operation(operation)
+            || self.routed.has_data_operation(operation)
+            || intent.insertion_children().is_none_or(|children| {
+                children.iter().any(|c| {
+                    self.routed
+                        .initialization()
+                        .is_some_and(|(id, _)| id == c.creation)
+                        || self
+                            .routed
+                            .fence()
+                            .is_some_and(|f| f.operation == c.creation)
+                        || self.routed.application().contains_operation(c.creation)
+                        || self.routed.has_data_operation(c.creation)
+                        || self
+                            .routed
+                            .scoped_fences()
+                            .iter()
+                            .any(|f| f.fence.operation == c.creation)
+                })
+            })
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(sources[0].scope)
+    }
+    fn reserved_creation(&self, operation: OperationId) -> bool {
+        self.images.values().any(|e| {
+            e.intent.as_ref().is_some_and(|i| {
+                i.insertion_children()
+                    .is_some_and(|children| children.iter().any(|c| c.creation == operation))
+            })
         })
     }
     pub fn routed(&self) -> &RoutedApplication<A, P> {
@@ -137,7 +211,11 @@ where
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(20 + inner.len());
-        bytes.extend(b"VBSCOWN1");
+        bytes.extend(if self.bound_intents {
+            b"VBSCOWN2"
+        } else {
+            b"VBSCOWN1"
+        });
         bytes.extend((self.export_bytes as u64).to_le_bytes());
         bytes.extend((inner.len() as u32).to_le_bytes());
         bytes.extend(inner);
@@ -153,19 +231,51 @@ where
             if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
                 return Err(ApplicationError::InvalidCommand);
             }
-            let replacement = if bytes.starts_with(b"VBSCOWN1") {
+            let replacement = if bytes.starts_with(b"VBSCOWN1") || bytes.starts_with(b"VBSCOWN2") {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 self.routed.bootstrap_command(bytes.len())?
+            } else if self.bound_intents && bytes.starts_with(b"VBTINT06") {
+                let intent = TransferIntent::decode(bytes)?;
+                if bytes != &intent.encode(bytes.len())? {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self
+                    .images
+                    .get(operation)
+                    .is_some_and(|e| e.intent.as_ref() != Some(&intent))
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                let scope = self.checked_intent(*operation, &intent)?;
+                if !self.images.contains_key(operation) {
+                    self.export_capacity(scope)?;
+                }
+                encode_scope_fence(intent.before().input().epoch, scope)
             } else {
                 match decode(bytes, self.routed.limits().payload_bytes)? {
                     Command::Data { key, payload, .. } => {
+                        if self.bound_intents
+                            && self.images.iter().any(|(id, e)| {
+                                *id == *operation
+                                    || e.intent.as_ref().is_some_and(|i| {
+                                        i.insertion_children().is_some_and(|children| {
+                                            children.iter().any(|c| c.creation == *operation)
+                                        })
+                                    })
+                            })
+                        {
+                            return Err(ApplicationError::InvalidCommand);
+                        }
                         if self.routed.application().command_key(payload)? != key {
                             return Err(ApplicationError::InvalidCommand);
                         }
                     }
                     Command::ScopeFence(_, scope) => {
+                        if self.bound_intents {
+                            return Err(ApplicationError::InvalidCommand);
+                        }
                         if !self.images.contains_key(operation) {
                             if self.routed.application().contains_operation(*operation) {
                                 return Err(ApplicationError::InvalidCommand);
@@ -174,7 +284,9 @@ where
                         }
                     }
                     Command::Fence(_) => {
-                        if self.routed.application().contains_operation(*operation) {
+                        if self.routed.application().contains_operation(*operation)
+                            || (self.bound_intents && self.reserved_creation(*operation))
+                        {
                             return Err(ApplicationError::InvalidCommand);
                         }
                     }
@@ -217,6 +329,7 @@ where
             digest: frozen.digest,
             schema: image.schema(),
             payload_bytes: image.bytes().len(),
+            intent_digest: frozen.intent_digest,
         })
     }
     fn checked_image(
@@ -238,12 +351,25 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: SCOPED_TRANSFER_SOURCE_SCHEMA,
-            command_bytes: inner.command_bytes + 20,
+            application_schema: if self.bound_intents {
+                BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
+            } else {
+                SCOPED_TRANSFER_SOURCE_SCHEMA
+            },
+            command_bytes: (inner.command_bytes + 20).max(if self.bound_intents {
+                MAX_TRANSFER_INTENT_BYTES
+            } else {
+                0
+            }),
             snapshot_bytes: inner.snapshot_bytes
                 + 30
                 + 100 * self.routed.scoped_fence_limit()
-                + self.export_bytes,
+                + self.export_bytes
+                + if self.bound_intents {
+                    (36 + MAX_TRANSFER_INTENT_BYTES) * self.routed.scoped_fence_limit()
+                } else {
+                    0
+                },
         }
     }
 }
@@ -292,6 +418,22 @@ where
                                 digest: ContentDigest::scope_image(&image),
                                 image,
                                 reservation: bound,
+                                intent: if next.bound_intents {
+                                    let EntryPayload::Command { bytes, .. } = &entry.payload else {
+                                        return Err(ApplicationError::InvalidCommand);
+                                    };
+                                    Some(TransferIntent::decode(bytes)?)
+                                } else {
+                                    None
+                                },
+                                intent_digest: if next.bound_intents {
+                                    let EntryPayload::Command { bytes, .. } = &entry.payload else {
+                                        return Err(ApplicationError::InvalidCommand);
+                                    };
+                                    Some(ContentDigest::sha256(bytes))
+                                } else {
+                                    None
+                                },
                             },
                         );
                     }
@@ -389,7 +531,7 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        SCOPED_TRANSFER_SOURCE_SCHEMA
+        self.readiness_requirements().application_schema
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self.routed.checkpoint(max_bytes)?;
@@ -398,13 +540,25 @@ where
             + self
                 .images
                 .values()
-                .map(|e| 100 + e.image.bytes().len())
+                .map(|e| {
+                    100 + e.image.bytes().len()
+                        + e.intent.as_ref().map_or(0, |i| {
+                            36 + i
+                                .encode(MAX_TRANSFER_INTENT_BYTES)
+                                .expect("checked intent")
+                                .len()
+                        })
+                })
                 .sum::<usize>();
         if len > max_bytes || len > self.readiness_requirements().snapshot_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(b"VBSCCHK1");
+        out.extend(if self.bound_intents {
+            b"VBSCCHK2"
+        } else {
+            b"VBSCCHK1"
+        });
         out.extend(self.applied_index().to_le_bytes());
         out.extend((self.export_bytes as u64).to_le_bytes());
         out.extend((inner.len() as u32).to_le_bytes());
@@ -423,6 +577,20 @@ where
             out.extend(i.source_applied().to_le_bytes());
             out.extend((i.bytes().len() as u32).to_le_bytes());
             out.extend(i.bytes());
+            if self.bound_intents {
+                out.extend(
+                    e.intent_digest
+                        .ok_or(ApplicationError::InvalidCheckpoint)?
+                        .0,
+                );
+                let intent = e
+                    .intent
+                    .as_ref()
+                    .ok_or(ApplicationError::InvalidCheckpoint)?
+                    .encode(MAX_TRANSFER_INTENT_BYTES)?;
+                out.extend((intent.len() as u32).to_le_bytes());
+                out.extend(intent);
+            }
         }
         Ok(out)
     }
@@ -432,7 +600,7 @@ where
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != SCOPED_TRANSFER_SOURCE_SCHEMA {
+        if schema != self.schema_version() {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if bytes.len() > self.readiness_requirements().snapshot_bytes {
@@ -440,7 +608,12 @@ where
         }
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
-            if r.take(8)? != b"VBSCCHK1"
+            if r.take(8)?
+                != if self.bound_intents {
+                    b"VBSCCHK2"
+                } else {
+                    b"VBSCCHK1"
+                }
                 || r.u64()? != applied
                 || r.u64()? != self.export_bytes as u64
             {
@@ -506,6 +679,33 @@ where
                 if digest != ContentDigest::scope_image(&image) {
                     return Err(ApplicationError::InvalidCheckpoint);
                 }
+                let intent = if next.bound_intents {
+                    let original_digest = ContentDigest(
+                        r.take(32)?
+                            .try_into()
+                            .map_err(|_| ApplicationError::InvalidCheckpoint)?,
+                    );
+                    let len = r.u32()? as usize;
+                    let intent = TransferIntent::decode(r.take(len)?)?;
+                    if next.checked_intent(op, &intent)? != fence.scope {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    if original_digest
+                        != ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?)
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    Some(intent)
+                } else {
+                    None
+                };
+                let intent_digest = intent
+                    .as_ref()
+                    .map(|i| {
+                        i.encode(MAX_TRANSFER_INTENT_BYTES)
+                            .map(|b| ContentDigest::sha256(&b))
+                    })
+                    .transpose()?;
                 retained = retained
                     .checked_add(reservation)
                     .filter(|n| *n <= next.export_bytes)
@@ -516,6 +716,8 @@ where
                         digest,
                         image,
                         reservation,
+                        intent,
+                        intent_digest,
                     },
                 );
             }

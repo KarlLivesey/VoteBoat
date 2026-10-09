@@ -49,6 +49,7 @@ impl SourceFenceEvidence {
             let sources = intent.sources();
             let targets = intent.targets();
             let f = status.fence.fence;
+            let intent_digest = ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?);
             if sources.len() != 1
                 || targets.len() != 1
                 || sources[0].target != RouteTarget::Group(f.group)
@@ -61,6 +62,7 @@ impl SourceFenceEvidence {
                 || status.schema == 0
                 || status.payload_bytes == 0
                 || status.payload_bytes > crate::scope::MAX_SCOPE_IMAGE_BYTES
+                || status.intent_digest.is_some_and(|d| d != intent_digest)
             {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -71,7 +73,7 @@ impl SourceFenceEvidence {
                 fence: f,
                 scope: Some(status.fence.scope),
                 configuration,
-                intent_digest: ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?),
+                intent_digest,
                 exports: vec![SourceExportCommitment {
                     target,
                     scope: status.fence.scope,
