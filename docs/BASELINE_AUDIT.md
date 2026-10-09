@@ -146,7 +146,9 @@ review found fixed QUIC Dial endpoints blocked the existing discovery wrapper;
 explicit discovered-Dial construction now implements that missing selection.
 Actual native/host hint refresh authenticates and exchanges QUIC data, preserving
 pins and bounded retained peer leases. Slice147 now supplies automatic original Directory-read lookup/refresh for Rust
-hosts; next compose it with routed service work. Retain original P0–P7
+hosts; slice148 composes actual routed writes/reads/retries, exact invalidation
+refresh, offline-parent operation and WAL/checkpoint restart over TCP/QUIC.
+Next implement a missing recursive ownership operation. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
 macOS execution in143–146. Windows/P8 stay deferred and CI remains background.

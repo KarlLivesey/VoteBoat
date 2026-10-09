@@ -301,3 +301,280 @@ fn automatic_manifest_cache_miss_and_late_cancel_tcp() {
 fn automatic_manifest_cache_miss_and_late_cancel_quic() {
     automatic(NativePeerProtocol::Quic);
 }
+
+fn checkpoint<A>(nodes: &mut [Node<A>], clock: &Instant, g: u128)
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    for node in nodes.iter_mut() {
+        node.control(group(g), NodeControl::Checkpoint).unwrap();
+    }
+    drive(nodes, clock, |ns| {
+        ns.iter().all(|n| {
+            n.local().owner.core(group(g)).unwrap().state().base_index()
+                == n.local().applications[&group(g)].applied_index()
+        })
+    });
+}
+fn service(protocol: NativePeerProtocol, compact: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-automatic-routed-service-{}-{protocol:?}-{compact}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        directory,
+    );
+    campaign(&mut parents, &clock, 1);
+    propose(
+        &mut parents,
+        &clock,
+        1,
+        10000,
+        directory()
+            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap(),
+    );
+    for (i, manifest) in manifests().into_iter().enumerate() {
+        propose(
+            &mut parents,
+            &clock,
+            1,
+            10001 + i as u128,
+            DirectoryCommand {
+                expected: None,
+                manifest,
+            }
+            .encode(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap(),
+        );
+    }
+    if compact {
+        checkpoint(&mut parents, &clock, 1);
+    }
+    let original_bindings = parents
+        .iter()
+        .map(|n| {
+            let binding = n.local().reads.binding();
+            (binding.owner.store.identity, binding)
+        })
+        .collect::<Vec<_>>();
+    let source = parents.remove(0);
+    let mut driver = NativeManifestLookup::new(source, limits(), 60_000, 10000, 1, now(&clock))
+        .unwrap_or_else(|_| panic!("service lookup"));
+    let mut cache = NativeManifestCache::new(limits()).unwrap();
+    let route = resolve_auto(&mut driver, &mut parents, &clock, &mut cache);
+    let grant = cache.get(responsibility(2)).unwrap().clone();
+    // An explicit stale-route signal invalidates only the observed generation.
+    // Resolution then obtains another actual read instead of republishing a receipt.
+    let observed = driver.lookup(query(2), now(&clock)).unwrap().observation;
+    assert!(driver.invalidate(query(2).locator, observed));
+    assert!(cache.invalidate(responsibility(2), grant.input().generation));
+    let refreshed = resolve_auto(&mut driver, &mut parents, &clock, &mut cache);
+    assert_eq!(refreshed, route);
+    assert_ne!(
+        driver.lookup(query(2), now(&clock)).unwrap().observation,
+        observed
+    );
+    let mut children = open(
+        configuration(&root, 20, &[1, 2], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        || child(20, grant.clone()),
+    );
+    campaign(&mut children, &clock, 20);
+    assert_eq!(
+        propose(
+            &mut children,
+            &clock,
+            20,
+            10000,
+            child(20, grant.clone())
+                .bootstrap_command(MAX_ROUTED_COMMAND_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        RoutedOutcome::Bootstrapped
+    );
+    driver.close();
+    assert!(driver.is_drained());
+    parents.insert(
+        0,
+        driver
+            .into_source()
+            .unwrap_or_else(|_| panic!("lookup held")),
+    );
+    let stores = parents
+        .iter()
+        .map(|n| n.local().reads.binding().owner.store.identity.id.get())
+        .collect::<Vec<_>>();
+    let parent_logs = close(parents, &clock, 1, || {
+        drive(&mut children, &clock, |_| true);
+    });
+    // Cached child routes work after every metadata owner has shut down.
+    struct Offline;
+    impl ManifestDiscovery for Offline {
+        fn lookup(
+            &mut self,
+            _: ManifestLookup,
+            _: MonoTime,
+        ) -> Result<ManifestObservation, ManifestDiscoveryError> {
+            panic!("cached child unexpectedly contacted offline metadata");
+        }
+        fn invalidate(&mut self, _: AuthorityLocator, _: ManifestObservationId) -> bool {
+            false
+        }
+        fn close(&mut self) {}
+    }
+    let cached = resolve_discovered(
+        &mut cache,
+        &HostPolicy,
+        &mut Offline,
+        DiscoverRouteRequest {
+            start: query(2),
+            key: &[10],
+            max_hops: 1,
+            lookups: 0,
+            now: now(&clock),
+        },
+    )
+    .unwrap();
+    assert_eq!(cached, route);
+    let bytes =
+        encode_routed(cached, &[10], &7i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
+    for duplicate in [false, true] {
+        assert!(matches!(
+            propose(&mut children, &clock, 20, 1, bytes.clone()).outcome,
+            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate
+        ));
+    }
+    assert_eq!(
+        read(
+            &mut children,
+            &clock,
+            20,
+            RoutedQuery {
+                hint: cached,
+                key: vec![10],
+                query: ()
+            }
+        ),
+        RoutedRead::Served(7)
+    );
+    if compact {
+        checkpoint(&mut children, &clock, 20);
+    }
+    close(children, &clock, 20, || {});
+    for (store, before) in stores.into_iter().zip(parent_logs) {
+        let log = NativeLogStore::recover(
+            FileLogIo::open(root.join(format!("1/{store}"))).unwrap(),
+            support::identity(store),
+            LogLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(log.state(group(1)).unwrap(), before);
+    }
+    // Fresh original read bindings and an empty cache after durable restart.
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        directory,
+    );
+    campaign(&mut parents, &clock, 1);
+    let source = parents.remove(0);
+    let fresh_binding = source.local().reads.binding();
+    let (_, original_binding) = original_bindings
+        .iter()
+        .find(|(identity, _)| *identity == fresh_binding.owner.store.identity)
+        .unwrap();
+    assert_ne!(
+        fresh_binding.owner.store.session,
+        original_binding.owner.store.session
+    );
+    let mut driver = NativeManifestLookup::new(source, limits(), 60_000, 10000, 1, now(&clock))
+        .unwrap_or_else(|_| panic!("reopened lookup"));
+    let mut fresh_cache = NativeManifestCache::new(limits()).unwrap();
+    let fresh = resolve_auto(&mut driver, &mut parents, &clock, &mut fresh_cache);
+    assert_eq!(fresh, route);
+    assert_eq!(fresh_cache.get(responsibility(2)), Some(&grant));
+    driver.close();
+    parents.insert(
+        0,
+        driver
+            .into_source()
+            .unwrap_or_else(|_| panic!("reopened lookup held")),
+    );
+    close(parents, &clock, 1, || {});
+    let mut children = open(
+        configuration(&root, 20, &[1, 2], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        || child(20, grant.clone()),
+    );
+    campaign(&mut children, &clock, 20);
+    assert!(matches!(
+        propose(
+            &mut children,
+            &clock,
+            20,
+            1,
+            encode_routed(fresh, &[10], &7i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap()
+        )
+        .outcome,
+        RoutedOutcome::Applied(CounterReceipt {
+            outcome: CounterOutcome::Value(7),
+            duplicate: true,
+            ..
+        })
+    ));
+    assert!(matches!(
+        propose(
+            &mut children,
+            &clock,
+            20,
+            2,
+            encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap()
+        )
+        .outcome,
+        RoutedOutcome::Applied(CounterReceipt {
+            outcome: CounterOutcome::Value(10),
+            duplicate: false,
+            ..
+        })
+    ));
+    assert_eq!(
+        read(
+            &mut children,
+            &clock,
+            20,
+            RoutedQuery {
+                hint: fresh,
+                key: vec![10],
+                query: ()
+            }
+        ),
+        RoutedRead::Served(10)
+    );
+    close(children, &clock, 20, || {});
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn automatic_routed_service_tcp_reopens_wal_and_checkpoint() {
+    for compact in [false, true] {
+        service(NativePeerProtocol::TcpTls, compact);
+    }
+}
+#[cfg(feature = "quic")]
+#[test]
+fn automatic_routed_service_quic_reopens_wal_and_checkpoint() {
+    for compact in [false, true] {
+        service(NativePeerProtocol::Quic, compact);
+    }
+}

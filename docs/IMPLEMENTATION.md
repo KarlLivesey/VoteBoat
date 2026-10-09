@@ -139,23 +139,29 @@ its selected native acceptance passes. General retention and broader faults rema
    ManifestDiscovery, existing Directory read authority and bounded Node reads.
    Completion: an explicitly driven public asynchronous lookup path with exact
    read ownership, stale/unavailable refusal and routing refresh acceptance.
-6. **Compose automatic lookup with routed service work (current148, P1/P5).**
+6. **Compose automatic lookup with routed service work (completed148, P1/P5).**
    Purpose: use147 to remove manual cache population from useful writes/reads.
    Dependencies:147 and existing native Directory/routed Node contracts.
    Completion: resolve actual routes, execute writes/reads/retries, refresh stale
    cache and preserve exact lookup/data ownership across a selected restart.
-7. **Next missing lifecycle feature (next149, P5/P6).** Purpose: complete
+7. **Next missing lifecycle feature (current149, P5/P6).** Purpose: complete
    a missing recursive ownership operation from the preserved acceptance ledger.
    Dependencies:148 and its exact authority/retained-scope evidence. Completion:
    select and implement the missing transition with source fencing, preserved
    retry lineage and named partial-progress/recovery checks. No wider milestone
    is declared complete from a selected fixture.
-8. **Compose the selected recursive transition (following150, P1/P5/P6).**
+8. **Compose the selected recursive transition (next150, P1/P5/P6).**
    Purpose: expose149 in real routed service work instead of leaving a standalone
    transition. Dependencies:149's exact authority and ownership contract plus the
    existing native service. Completion: useful successor writes/reads and original
    retries through partial progress/reopen, with no dual serving owner and joined
    cleanup. Scope is selected after149; unrelated performance work is not a prerequisite.
+9. **Expose the selected operation to Rust hosts (following151, P0/P5/P6).**
+   Purpose: make149–150 usable through the existing public service contracts.
+   Dependencies: the selected transition's checked plan and actual recovery
+   results. Completion: documented construction, bounded progress/status/resume,
+   original refusal ownership and host/native conformance without editing core
+   code or introducing an infrastructure owner.
 
 Slice146 selection/schema before editing: peer discovery supports refreshed TCP
 dials, but source inspection shows NativeQuicConnector rejects any dial address
@@ -10482,3 +10488,64 @@ only; macOS remains a target, Windows/P8 deferred, CI background, RPL-1.5 retain
 and original design pack preserved.
 Final cargo formatting, explicit included-fixture rustfmt, whitespace and inventory
 checks pass; all execution handles are terminal. No remote CI wait is required.
+
+Slice148 schema before implementation: compose the147 public lookup source with
+existing native Directory and RoutedApplication nodes, without adding another
+provider or runtime. Empty route cache resolves root-to-child through actual
+original metadata reads; the resulting checked hint encodes real child writes
+and queries. Close/drain the lookup view and return its Directory Node before
+metadata shutdown. A cached child route continues writes/reads/retries while all
+metadata nodes are offline, without parent log changes. Checkpoint/WAL recovery
+reopens original metadata and child stores with fresh read bindings; a new empty
+cache resolves again through original reads, then preserved child operation IDs
+return duplicates and a new write advances the value. Explicitly poll live child
+nodes while metadata drains, and join every native owner before file inspection
+or reopen. No new durability tokens, generations, format or route authority.
+Acceptance: TCP/TLS and QUIC, WAL-only and checkpoint recovery, missing-route
+resolution, useful writes/reads/retries, offline-parent route reuse, exact unchanged
+parent logs during outage, fresh lookup binding after reopen, duplicate/new effects
+and joined cleanup. This advances P1/P5 service composition; missing recursive
+operations remain next rather than unrelated stress/performance expansion.
+
+## Slice148 — automatic lookup through useful routed service work
+
+Composed147's public original-read source and native lookup with the existing
+Directory/RoutedApplication service owners. No helper provider, second runtime,
+new production seam or protocol redesign was needed. Empty-cache recursive
+resolution produces actual checked child hints. Exact observation and route
+manifest invalidation force a fresh original quorum read/new observation rather
+than renewing an old receipt. This refresh preserves unchanged legitimate routes;
+it is not automatic owner activation or a remote executable lookup endpoint.
+
+After lookup close/drain/source extraction, all metadata Nodes drain and join.
+A cached child resolves with zero lookup budget and an independent source that
+panics on any lookup, then commits7, returns duplicate7 and reads7. Child WAL-only
+or checkpoint recovery runs with metadata offline; recovered original parent
+GroupLogs remain exactly unchanged. Both Directory and child stores then reopen.
+A new driver uses the same store's fresh persisted session, resolves from an empty
+route cache through actual reads, and recovers the exact grant/hint. The original
+child operation retries as duplicate7; new operation+3 commits10 and reads10.
+All child and metadata workers drain/join before file inspection/removal.
+
+Selected TCP/TLS and QUIC tests2/2 (four WAL/checkpoint histories) pass3.08s after
+4.98s build. Earlier composition acceptance passes2/2 in2.80s after4.55s build;
+added explicit invalidation refresh passes2/2 in2.98s after3.56s build. Final test
+strengthens fresh-session evidence by matching the same store identity instead
+of comparing potentially different leaders. Final all-feature/all-target Clippy
+-D warnings passes5.26s including Cargo lock wait; earlier check3.09s. No test or
+production failure occurred. Inventory80 and whitespace checks pass. Remaining
+format checks recorded below; no unchanged broad validation was repeated.
+
+Previous goal turn147 was progress: implementation, conformance and authoritative
+commit b91c0a6 were pushed. This turn advances the planned P1/P5 usable composition,
+not a complete P5/P0–P7 audit. Macro scope remains intact: existing insertion code
+explicitly requires same authority and whole-source child coverage, confirming
+cross-authority/retained-scope insertion still needs implementation. Deletion,
+reparenting and metadata-authority movement remain alongside earlier ledgers.
+Current149 selects and implements the next missing recursive transition, next150
+composes its actual service recovery and151 exposes its checked host path. Do not
+add more unrelated pressure/performance histories before those missing features.
+Linux execution only; macOS remains a target, P8/Windows deferred, RPL-1.5 retained,
+pack preserved and CI background feedback. No milestone exit is asserted.
+Final cargo formatting, explicit included-fixture rustfmt, whitespace and80-contract
+inventory checks pass. All execution handles terminal; no remote CI gate used.

@@ -3647,3 +3647,32 @@ parent independence; hints do not activate ownership. Full P0–P7 stays active,
 P8/Windows deferred, pack preserved and RPL-1.5 retained.
 Final cargo formatting, included-fixture rustfmt and whitespace checks pass.
 All test/check handles are terminal; no remote CI gate was used.
+
+## Slice148 — automatic lookup/routed service composition
+
+Real native TCP/TLS and QUIC tests2/2, comprising four WAL-only/checkpoint histories,
+pass3.08s after4.98s build. Empty-cache original Directory reads resolve recursive
+child routes. Exact source observation/cache manifest invalidation requires a
+fresh actual read/new observation and preserves the unchanged checked route.
+After all metadata Nodes close/drain/join, a zero-budget cached child resolution
+uses an independent provider that panics on any source call; actual child write7,
+original duplicate7 and quorum read7 succeed. Child checkpoint/WAL reopen/retry
+preserves that value. Exact parent GroupLogs remain unchanged during outage.
+
+Directory restart supplies a fresh original read session matched against the same
+store identity, not merely a different leader. A newly empty route cache resolves
+through original read polling again; exact grant/hint survive. Reopened child
+returns original duplicate7, then new+3 commits10 and quorum read10. All native
+owners drain/join before inspection/removal. These tests use actual WAL sync,
+application receipts and read barriers, not local send completion as evidence.
+
+Initial composed tests2/2 pass2.80s after4.55s build. Added explicit invalidation
+checks2/2 pass2.98s after3.56s build. Final all-feature/all-target Clippy -D warnings
+passes5.26s including lock wait; earlier3.09s. No production/test failures. Inventory
+80 and whitespace checks pass; final formatting checks recorded below.
+No new production provider/API, protocol token/generation, persisted format,
+external remote lookup endpoint, arbitrary-fault or performance claim. This is
+finite Linux service composition, not macOS/separate-host execution or complete
+recursive lifecycle acceptance. Full P0–P7 and prior unresolved work stay active.
+Final cargo formatting, included-fixture rustfmt, whitespace and80-contract
+inventory pass. All execution handles terminal; no remote CI gate used.

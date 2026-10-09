@@ -74,7 +74,7 @@ independent of online-change and lifecycle acceptance work.
    service (P1/P6). Selected native lifecycle evidence does not close all P6 gaps.
 3. Slices143–145 supply selected control reserve, per-peer bulk quotas and native
    Node pressure/reconnect/reopen evidence. Slice146 supplies explicit discovered
-   QUIC Dial endpoints. Slice147 adds automatic original Directory-read lookup/refresh for Rust hosts. Next compose it with real routed service work. Discovery/placement, platform/fault and measured runtime work remain. Original250ms/sustainable-capacity requirements remain
+   QUIC Dial endpoints. Slice147 adds automatic original Directory-read lookup/refresh for Rust hosts. Slice148 composes routed writes/reads/retries, exact invalidation refresh and WAL/checkpoint restart over TCP/QUIC. Next implement a missing recursive ownership operation. Discovery/placement, platform/fault and measured runtime work remain. Original250ms/sustainable-capacity requirements remain
    active; repeated unsuccessful publication experiments are not acceptance.
 
 Purpose, dependencies and completion checks are linked in IMPLEMENTATION.md's

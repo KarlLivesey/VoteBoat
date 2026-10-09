@@ -161,3 +161,28 @@ checks retained deadline/close work, bounded retry, construction refusal and exa
 recovery handoff. This adds embedded automatic Directory-read orchestration.
 An external remote lookup protocol and executable endpoint refresh remain work;
 existing cached child routes retain their parent-independent behavior.
+
+## Composition with routed applications
+
+The slice148 service histories exercise the complete embedded path using the
+existing public contracts. Begin with an empty `NativeManifestCache`, a selected
+Directory Node in `NativeManifestLookup`, and bounded `resolve_discovered`
+requests. Drive metadata Nodes and lookup polling until resolution returns a
+checked `RouteHint`. Use that hint with `encode_routed` for writes and with
+`RoutedQuery` for reads; the child application rechecks actual ownership.
+
+On an explicit stale-route signal, invalidate the exact source observation and
+cached manifest generation. Subsequent resolution submits a fresh original read;
+it cannot renew a replayed receipt. Cache expiry in the lookup provider does not
+silently evict otherwise usable child routes. A host can start directly at a
+cached child with zero lookup budget while all metadata owners are offline.
+
+For shutdown, close/drain the lookup view, extract its original Node and join
+native workers through existing Node ownership. Durable reopen uses a new lookup
+driver bound to the fresh original read generation and an empty route cache.
+Resolve again, then retry the original child operation ID and bytes before sending
+new work. Slice148 checks this over TCP/TLS and QUIC, both WAL-only and checkpoint
+recovery: the original7 remains7 on retry, then a new3 reaches10. Metadata logs
+remain unchanged throughout offline child writes/reads and checkpoint recovery.
+This is Rust service composition; no new remote lookup endpoint or CLI command
+is advertised.
