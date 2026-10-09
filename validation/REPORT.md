@@ -2430,3 +2430,46 @@ work. One fixed opaque lease allocation per accepted bulk batch is bounded by
 batch ceilings; no performance benchmark or zero-overhead claim was made. Previous
 long QUIC repair, fixed-p99, platform and broader fault/lifecycle gaps remain.
 Full P0–P7 stays active; P8/Windows deferred and CI background.
+
+## Slice 110 — authenticated service principals and command scopes
+
+Executed Linux checks:
+
+- `cargo +stable test --locked --offline --all-features --test authorization`:
+  4/4 pass. Independent host credentials/policy without native, invalid simulator/
+  unready/changing channels, exact binding, generation, expiry, clock, scopes,
+  native close/replacement snapshots and rejected-plan allocation ownership.
+- The same target with `--no-default-features`: 2/2 pass; with
+  `--no-default-features --features native`: 4/4 pass.
+- `cargo +stable test --locked --offline --all-features --test counter_service`:
+  25/25 pass. New TCP/QUIC peer histories enforce reader/writer/admin permissions
+  on real mutual-TLS command connections, reject plaintext and same-CA wrong pins,
+  checkpoint/recover original operation IDs, revoke writer on policy restart and
+  join workers. Invalid access grants fail before store creation/listener ownership.
+  Existing client routing/uncertainty/deadline, service recovery and executable
+  learner/promote/retire/restart histories remain green.
+- All-feature/all-target Clippy with `-D warnings`, fmt, diff and inventory pass
+  (75 implemented contract records).
+
+Initial authenticated process failures came from a helper's unrelated fixed retry
+ID; its parameter now identifies the actual history operation and recorded result.
+A full concurrent run then observed a valid QUIC UNKNOWN LeadershipChanged. The
+new history explicitly retries only that result with identical operation ID and
+payload under a finite caller deadline, retaining the production CLI's stop-on-
+uncertainty semantics. The final full suite passed. A redundant non-Drop fixture
+call was removed to satisfy Clippy. These failures are not protocol safety claims.
+
+Public service authorization is separate from transport identity and consensus
+membership/ownership. Native plans have explicit generations and finite validity;
+new generations deny old credential snapshots. Executable reload occurs on restart,
+not live refresh. Denied commands admit no work; later expiry cannot undo an
+accepted command. Existing rustls authentication/pins are reused; no custom crypto
+or Raft/wire/WAL format change. Unflagged loopback command mode remains trusted
+plaintext. Live rotation, external issuers, durable principal audit and general
+public configuration ingress remain incomplete. No benchmark, macOS, separate-
+host, arbitrary-fault or complete P0–P7 claim. Goal stays active; P8/Windows deferred.
+
+Final cleanup inspection moved pending-ticket cancellation into the common
+connection-removal path for deadline and TLS/channel failures. The final full
+service suite and Clippy were rerun after this edit; the specific post-admission
+TLS-failure branch was inspected, not separately fault-injected.

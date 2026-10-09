@@ -5,7 +5,7 @@ to current source and recorded execution evidence. It is a working requirement
 ledger, not a completion certificate or a substitute for the detailed normative
 contracts, invariant catalogue, or failure schedules. Source inspection is not an
 executed test. Historical execution is recorded in validation/REPORT.md and raw
-performance artifacts; this slice executes only its changed observability paths.
+performance artifacts; each slice records its actual executed checks separately.
 RPL-1.5 is retained. The original full goal remains active.
 
 ## Roadmap exits
@@ -56,21 +56,20 @@ component-contracts.json and its linked contract document.
 | C18 placement | PlacementAuthorizer and native declared deployments | Scoring/planning/move proposals are missing; recommendations cannot activate membership. |
 | C19 observability | New Observer / NativeCounterObserver, post-poll capture and local service metrics | Fixed volatile counts only. No timer/queue/disk latency attribution, per-group event history or external exporter integration claim. |
 | C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | General public mutation endpoint and generic envelopes remain gated. |
-| C21 authorization | Transport identities and explicit placement/admin validation | No general principal/credential/scope/refresh/audit provider seam; trusted loopback controls are not remote service authorization. |
+| C21 authorization | PrincipalCredentials / ServiceAuthorizer / checked session gate and NativeServiceAccess; optional mutual-TLS counter command mode; tests/authorization.rs and tests/counter_service.rs, slice110 | Initial group-scoped reader/writer/admin gate. Live credential rotation, external issuer integration, durable principal audit and general configuration mutation ingress remain. Unflagged command mode stays trusted plaintext loopback. |
 | C22 integrity/compression | Checked native WAL/wire/snapshot framing, CRC and content digests internally | No selectable integrity/compression provider; optional compression is not enabled. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, BucketCounter and source/target adapters | Core retains fence/publication/activation authority. Broader recursive lifecycle remains partial. |
 | C24 transactions | One-group command/state-machine ordering; no cross-group transaction service | Optional higher layer remains unsupported; do not add global coordination to normal writes. Broader transactions stay P8. |
 
 ## Next usable path
 
-1. Finish slice109's outbound policy/lease conformance and real native regressions;
-   keep general client/disk/connection/shared-buffer admission gaps explicit.
-2. Inspect C21 service-principal authorization separately from authenticated peers
-   and committed voter membership. Implement a bounded public/native service gate
-   with scope/refusal/recovery evidence before claiming exposed mutation is safe.
-3. Inspect C17's missing peer/authority resolver against current static endpoints
+1. Finish slice110's principal/scope conformance and authenticated process recovery;
+   keep live rotation, durable audit and general configuration ingress explicit.
+2. Inspect C17's missing peer/authority resolver against current static endpoints
    and manifest hints. Add bounded resolve/invalidate/retry semantics through a real
    native call site; resolved hints must never activate membership or ownership.
+3. Inspect C18 placement planning against committed placement authorization;
+   bounded proposals must remain hints until existing durable protocols accept them.
 
 These are linked deliverables, not a redefinition of the full goal. P4/P6/P7,
 platform/fault and the remaining supporting catalogue gaps stay in this ledger.

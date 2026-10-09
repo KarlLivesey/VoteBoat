@@ -6907,3 +6907,110 @@ quorum availability, frame preemption or unlimited repair capacity. Next linked
 work is C21 service-principal authorization, then C17 bounded discovery. Existing
 P4/P6/P7/platform/fault/catalogue gaps remain in BASELINE_ACCEPTANCE.md; full
 P0–P7 stays active, P8/Windows deferred and CI background.
+
+## Slice110 schema plan — authenticated service principals
+
+C21 advances P0 composition and the P4 service boundary. Add public checked
+PrincipalId/CredentialGeneration, BoundPrincipal, group-scoped ServiceAction/
+ServicePermissions, PrincipalCredentials and ServiceAuthorizer. A checked helper
+requires a Ready authenticated SecureSession, exact returned channel binding,
+captured credential generation and nonexpired/nonregressing validity before
+consulting policy. Native immutable shared access plans map authenticated stable
+transport identities to principals and principal/group scopes to permissions.
+Closing a view cannot close other plans/channels. Replacement requires an explicit
+fresh generation; no caller-supplied principal text is authentication evidence.
+
+The executable adds optional --service-access FILE on its existing loopback
+command endpoint. That mode requires the existing native rustls mutual-TLS
+session/pins before any command admission. A bounded public principal selector
+only chooses an expected pin; TLS plus the authenticated identity hello must
+match. Demo service-client/server transport identities occupy distinct namespaces
+from Raft peers. Commands pass the same public credential/authorization helper
+before read/propose/checkpoint/shutdown; trusted startup admin plans remain explicit
+operator inputs. The legacy unflagged endpoint remains explicitly trusted local
+controls, without claiming user authentication. Client --service-tls DIR and
+--principal ID select certificate credentials; auto routing retains original
+operation IDs and stops on uncertain/authentication failures.
+
+State/ownership: selector -> TLS handshake -> authorized input -> existing pending
+operation -> encrypted reply -> flush/drop. Preserve partial selector/handshake/
+plaintext I/O and one accepted connection's existing deadline/bounds; handshake
+failures close that connection without stopping Raft polling. A denied request
+creates no command/read/control ticket. After admission, expiry/revocation cannot
+undo commitment: existing result/unknown/cancellation semantics apply. Plans/pins
+are bounded trusted startup data; invalid plans/credentials fail before listeners,
+workers or store creation. Reload on restart, with fresh server store session;
+no live credential rotation or arbitrary durable audit trail is claimed.
+
+Acceptance: downstream credential/policy injection, wrong session/generation/scope/
+expiry/closed refusal, shared-view lifetime and native plan rejection ownership;
+real rustls channels with reader/writer/admin permissions, rejected selector/pin/
+plain traffic, safe original retries, checkpoint and full restart over TCP/QUIC
+Raft peers. Relevant core-only/native checks, existing local service histories
+and Clippy remain required. No Raft/wire/WAL format or quorum change.
+
+### Slice110 implemented evidence and macro review
+
+Public PrincipalCredentials/ServiceAuthorizer now pass the same checked
+session/scope helper as native immutable NativeServiceAccess. Captured credential
+generation/time, exact authenticated binding, expiry and post-policy channel
+rechecks precede service admission. Native grants are bounded, reject duplicate
+or conflicting identities with original-entry ownership, and share immutable
+policy across independently closable views. Counter --service-access requires
+existing rustls mutual authentication and selected certificate pins before
+reader/writer/admin commands; its public selector cannot confer identity. Service
+identities are separate from Raft identities. Replies retain ciphertext ownership
+through flush; existing deadlines, command bounds and Raft polling remain.
+AUTHORIZATION.md documents file grammar, role matrix, client flags and limits.
+Final cleanup inspection unified deadline and TLS/channel-failure removal so both
+cancel pending host tickets; this cannot undo an admitted/committed write.
+
+Actual Linux checks: authorization all-features4/4, native-without-TLS4/4 and
+core-only2/2 pass. Full executable TCP/QUIC service suite25/25 passes, including
+new authenticated histories, same-CA/wrong-pin refusal, denied plaintext/roles,
+checkpoint/restart/revoked-writer and preserved deduplication; original routing,
+absolute deadline, membership and recovery regressions also pass. All-target/
+all-feature Clippy with warnings denied, fmt/diff and inventory75 pass.
+
+The first recovery check reused an unrelated fixture operation700; the helper now
+accepts the history's actual retry ID/payload and checks the recorded outcome.
+Under the full concurrent suite, QUIC returned legitimate UNKNOWN LeadershipChanged
+once. The new history now explicitly retries only that uncertainty with identical
+operation ID/payload and a bounded caller deadline, then verifies one effect.
+The CLI still stops on uncertainty. A redundant drop of a non-Drop test fixture
+was removed for Clippy. No consensus, wire or persistent format change.
+
+Macro review: C21's initial authenticated command boundary advances composable P0
+and the service/administration boundary used by online membership. It does not
+complete general public configuration ingress, live credential rotation, external
+issuer integration or durable principal audit. Unflagged mode remains explicitly
+trusted plaintext loopback. The static service remains independently usable;
+P4 generic envelopes, P5 dynamic/recursive directory lifecycle, P6 broader
+interruptions/retention and P7 performance/lane/throttle requirements remain.
+Linux evidence does not establish macOS/separate-host execution. Full P0–P7 stays
+active; P8/Windows remain deferred and CI stays background feedback.
+
+### Linked mini plan after slice110
+
+1. Current deliverable — C21 authenticated command gate (implemented above).
+   Purpose: make existing service commands enforce concrete principal permissions.
+   Dependencies: C09 authenticated sessions, native startup and existing bounded
+   command/output lifecycle. Completion checks: downstream/native authorization
+   and real TCP/QUIC denial, restart and retry histories plus local lint checks.
+   Advances macro static-service composition and online-membership service boundary;
+   remaining rotation/audit/configuration ingress stay explicit.
+2. Next — C17 bounded discovery at a real native routing/peer call site.
+   Purpose: resolve and invalidate endpoint/authority hints beyond fixed startup
+   addresses while preserving independently usable cached child paths.
+   Dependencies: existing roster/connector, manifest cache, exact identity and
+   committed ownership checks; inspect their contracts before choosing the seam.
+   Completion checks: bounded request/result ownership, stale hints, failure/retry,
+   invalidation/restart and actual selected native consumer; hints cannot activate
+   voters or owners. Advances macro recursive responsibilities and routing (P0/P5).
+3. Following — C18 bounded placement planning through existing authorization.
+   Purpose: propose useful placement changes without changing quorum or ownership
+   from live utilization. Dependencies: C17 hints, committed placement contracts
+   and trusted administration, with no new prerequisite for static service use.
+   Completion checks: bounded deterministic proposals, stale/capacity refusal and
+   native consumer evidence that proposals cannot bypass committed membership or
+   transfer fencing. Advances macro online membership/recursive routing (P4/P5).

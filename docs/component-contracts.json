@@ -1544,6 +1544,22 @@
         "tests/counter_service.rs"
       ],
       "scope": "Optional bulk reservation after mandatory queue binding/capacity/node/peer/control/background/peer-count checks. Control bypasses optional policy; refusal preserves original Vec and existing transient Overloaded semantics. Fixed metadata includes exact owner/peer/class/cost and existing usage. Opaque shared owned lease survives queued/dispatched transport work, rejected completion and queue destruction; final owner Drop returns provider credits. Native finite atomic batch/message/byte reservations roll back partial failure, support scoped view close and shared credits, and start empty on restart. No I/O, clock, worker, implicit global budget, consensus authority or wire/persistent format. Outbound Rust contract2 carries an optional lease. Initial outbound integration; general client/disk/connection/shared-buffer policy remains separate. No performance or arbitrary callback sandbox claim."
+    },
+    {
+      "design_id": "C21",
+      "public_contract": "PrincipalCredentials / ServiceAuthorizer / authorize_session",
+      "operations": [
+        "bind",
+        "authorize",
+        "close",
+        "authorize_session"
+      ],
+      "native": "NativeServiceAccess: bounded immutable shared principal and group-scope access plan; optional counter-service mutual-TLS command gate",
+      "conformance": [
+        "tests/authorization.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Exact authenticated Ready SecureSession binding, captured credential generation/time, expiry and concrete group/action checks before admission; recheck channel after policy. Host-local principal snapshots are not bearer tokens. Native one-to-one stable peer/principal mapping, bounded grants, rejection ownership, scoped close and explicit replacement generation. Command mode uses existing rustls pins/hello and separate service identities, retains bounded partial I/O/deadline/reply flush and original operation retries; restart reloads policy. No voting/configuration/ownership authority, live rotation, external issuer, durable audit or arbitrary callback sandbox. Legacy unflagged endpoint remains trusted plaintext loopback."
     }
   ],
   "not_yet_implemented": [
@@ -1553,7 +1569,7 @@
     "discovery",
     "observability-latency-and-budgeted-events",
     "native-configuration-service-endpoints",
-    "authorization",
+    "live-credential-rotation-and-durable-authorization-audit",
     "compression",
     "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",

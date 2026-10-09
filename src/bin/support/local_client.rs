@@ -13,19 +13,30 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded local routing. Only an explicit NotLeader proves a sent write was not proposed.
-use super::setup::Failure;
+use super::{
+    service_access::{Channel, ClientAccess},
+    setup::Failure,
+};
 use std::{
     io::{Read, Write},
     net::{Ipv4Addr, TcpStream},
     time::{Duration, Instant},
 };
+use voteboat::runtime::MonoTime;
 const NOT_LEADER: &str = "ERR NOT_LEADER\n";
 enum Attempt {
     Unavailable,
     Interrupted(&'static str),
     Reply(String),
 }
-fn exchange(base: u16, id: u64, text: &[u8], deadline: Instant) -> Attempt {
+fn exchange(
+    base: u16,
+    id: u64,
+    text: &[u8],
+    deadline: Instant,
+    auth: Option<&ClientAccess>,
+    start: Instant,
+) -> Attempt {
     let Some(remaining) = deadline.checked_duration_since(Instant::now()) else {
         return Attempt::Unavailable;
     };
@@ -39,10 +50,49 @@ fn exchange(base: u16, id: u64, text: &[u8], deadline: Instant) -> Attempt {
     if stream.set_nonblocking(true).is_err() {
         return Attempt::Interrupted("could not configure connected socket");
     }
+    if let Some(auth) = auth {
+        let selector = format!("{}\n", auth.principal.get());
+        let mut selected = 0;
+        while selected < selector.len() {
+            if Instant::now() >= deadline {
+                return Attempt::Interrupted("authentication deadline expired");
+            }
+            match stream.write(&selector.as_bytes()[selected..]) {
+                Ok(0) => return Attempt::Interrupted("closed authentication selector"),
+                Ok(n) => selected += n,
+                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    std::thread::park_timeout(Duration::from_millis(1))
+                }
+                Err(_) => return Attempt::Interrupted("authentication selector failed"),
+            }
+        }
+    }
+    let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
+    let mut stream = if let Some(auth) = auth {
+        match Channel::client(stream, auth, id, timestamp()) {
+            Ok(stream) => stream,
+            Err(_) => return Attempt::Interrupted("authentication setup failed"),
+        }
+    } else {
+        Channel::Plain(stream)
+    };
+    loop {
+        if Instant::now() >= deadline {
+            return Attempt::Interrupted("authentication deadline expired");
+        }
+        match stream.poll_client(timestamp()) {
+            Ok(true) => break,
+            Ok(false) => std::thread::park_timeout(Duration::from_millis(1)),
+            Err(_) => return Attempt::Interrupted("authentication failed"),
+        }
+    }
     let mut sent = 0;
     while sent < text.len() {
         if Instant::now() >= deadline {
             return Attempt::Interrupted("request deadline expired");
+        }
+        if stream.poll_client(timestamp()).is_err() {
+            return Attempt::Interrupted("authenticated write failed");
         }
         match stream.write(&text[sent..]) {
             Ok(0) => return Attempt::Interrupted("connection closed during request"),
@@ -58,6 +108,9 @@ fn exchange(base: u16, id: u64, text: &[u8], deadline: Instant) -> Attempt {
     loop {
         if Instant::now() >= deadline {
             return Attempt::Interrupted("reply deadline expired");
+        }
+        if stream.poll_client(timestamp()).is_err() {
+            return Attempt::Interrupted("authenticated read failed");
         }
         match stream.read(&mut bytes[used..]) {
             Ok(0) => return Attempt::Interrupted("connection closed without a complete reply"),
@@ -102,7 +155,33 @@ fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
     }
     Err("request interrupted after connection; automatic routing stopped".into())
 }
-pub fn run(base: u16, id: Option<u64>, command: &[String]) -> Result<(), Failure> {
+pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> {
+    let mut command = input.to_vec();
+    let mut tls_directory = None;
+    let mut principal = None;
+    while command.len() >= 2 {
+        let flag = command[command.len() - 2].as_str();
+        if !matches!(flag, "--service-tls" | "--principal") {
+            break;
+        }
+        let value = command.pop().unwrap();
+        match command.pop().unwrap().as_str() {
+            "--service-tls" if tls_directory.is_none() => {
+                tls_directory = Some(std::path::PathBuf::from(value))
+            }
+            "--principal" if principal.is_none() => principal = Some(value.parse::<u64>()?),
+            _ => return Err("duplicate service client option".into()),
+        }
+    }
+    let targets = id.map_or_else(|| vec![1, 2, 3], |id| vec![id]);
+    let auth = match (tls_directory.as_deref(), principal) {
+        (None, None) => None,
+        (Some(directory), Some(principal)) => {
+            Some(ClientAccess::load(directory, principal, &targets)?)
+        }
+        _ => return Err("select --service-tls and --principal together".into()),
+    };
+    let command = command.as_slice();
     if id.is_none() {
         match command {
             [cmd] if cmd == "read" => (),
@@ -120,9 +199,10 @@ pub fn run(base: u16, id: Option<u64>, command: &[String]) -> Result<(), Failure
         return Err("command too long".into());
     }
     let text = format!("{}\n", command.join(" "));
-    let deadline = Instant::now() + Duration::from_secs(10);
+    let start = Instant::now();
+    let deadline = start + Duration::from_secs(10);
     if let Some(id) = id {
-        return match exchange(base, id, text.as_bytes(), deadline) {
+        return match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
             Attempt::Unavailable => Err("node unavailable before connection".into()),
             Attempt::Interrupted(reason) => interrupted(command, reason),
             Attempt::Reply(response) => terminal(response),
@@ -134,7 +214,7 @@ pub fn run(base: u16, id: Option<u64>, command: &[String]) -> Result<(), Failure
             if Instant::now() >= deadline {
                 return Err("no eligible local leader found within the routing deadline".into());
             }
-            match exchange(base, id, text.as_bytes(), deadline) {
+            match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
                 Attempt::Unavailable => (),
                 Attempt::Reply(response) if response == NOT_LEADER => (),
                 Attempt::Reply(response) => return terminal(response),

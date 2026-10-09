@@ -54,6 +54,8 @@ struct Cluster {
     endpoints: Option<PathBuf>,
     deployment: Option<PathBuf>,
     admin_plan: Option<PathBuf>,
+    command_access: Option<PathBuf>,
+    command_principal: Option<u64>,
     tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
@@ -110,6 +112,8 @@ impl Cluster {
             endpoints: None,
             deployment: None,
             admin_plan: None,
+            command_access: None,
+            command_principal: None,
             tls: None,
             listeners,
             udp_sockets,
@@ -151,6 +155,9 @@ impl Cluster {
         if let Some(path) = &self.admin_plan {
             command.arg("--admin-plan").arg(path);
         }
+        if let Some(path) = &self.command_access {
+            command.arg("--service-access").arg(path);
+        }
         let _gate = fixture_gate();
         self.children[id - 1] = Some(
             command
@@ -188,9 +195,20 @@ impl Cluster {
         run(&mut command)
     }
     fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
-        run(Command::new(BIN)
+        let mut command = Command::new(BIN);
+        command
             .args(["client", &self.base.to_string(), target])
-            .args(args))
+            .args(args);
+        if let Some(principal) = self.command_principal {
+            command
+                .arg("--service-tls")
+                .arg(self.tls.clone().unwrap_or_else(|| {
+                    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
+                }))
+                .arg("--principal")
+                .arg(principal.to_string());
+        }
+        run(&mut command)
     }
     fn ok(&self, id: usize, args: &[&str]) -> String {
         let output = self.request(id, args);
@@ -750,13 +768,14 @@ fn enrolled_state_for(
     local: u64,
     identity: voteboat::identity::StoreIdentity,
 ) -> voteboat::log::GroupLog {
-    recovered_state_for(root, local, identity, 42)
+    recovered_state_for(root, local, identity, 42, (700, 42))
 }
 fn recovered_state_for(
     root: &std::path::Path,
     local: u64,
     identity: voteboat::identity::StoreIdentity,
     expected: i64,
+    retry_command: (u128, i64),
 ) -> voteboat::log::GroupLog {
     let _gate = fixture_gate();
     use voteboat::{
@@ -805,13 +824,13 @@ fn recovered_state_for(
             index: app.applied_index() + 1,
             term: 1,
             payload: EntryPayload::Command {
-                operation: OperationId::new(700).unwrap(),
-                bytes: 42i64.to_le_bytes().to_vec(),
+                operation: OperationId::new(retry_command.0).unwrap(),
+                bytes: retry_command.1.to_le_bytes().to_vec(),
             },
         }])
         .unwrap();
     assert!(retry[0].duplicate);
-    assert_eq!(retry[0].outcome, CounterOutcome::Value(42));
+    assert_eq!(retry[0].outcome, CounterOutcome::Value(retry_command.1));
     log.state(group).unwrap()
 }
 fn enrolled_service_history(quic: bool) {
@@ -1234,6 +1253,7 @@ fn complete_executable_membership_history(quic: bool) {
                 id as u64,
                 store(id),
                 value,
+                (700, 42),
             );
             let membership = state.membership_at(state.commit_index).unwrap();
             assert_eq!(membership.id().get(), configuration);
@@ -2052,4 +2072,160 @@ fn native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries() {
 #[test]
 fn native_quic_metrics_are_volatile_and_preserve_recovery_and_retries() {
     metrics_history(true);
+}
+
+// The caller may explicitly retry a leadership-change uncertainty with exactly
+// the same operation ID and payload. The CLI itself still stops on uncertainty.
+fn authenticated_write(cluster: &Cluster, args: &[&str]) -> String {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let output = cluster.target("auto", args);
+        let text = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            return text;
+        }
+        assert!(text.starts_with("UNKNOWN LeadershipChanged;"), "{text}");
+        assert!(
+            Instant::now() < deadline,
+            "leadership failed to settle: {text}"
+        );
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+}
+fn authenticated_command_history(quic: bool) {
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    let access = cluster.root.join("service-access.txt");
+    fs::write(
+        &access,
+        "voteboat-service-access-v1 1\n1 reader 1 1\n2 writer 1 1\n3 admin 1 1\n",
+    )
+    .unwrap();
+    cluster.command_access = Some(access.clone());
+    cluster.command_principal = Some(3);
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    let leader = cluster.leader();
+    cluster.command_principal = Some(1);
+    assert_eq!(cluster.routed(&["read"]), "OK value=0\n");
+    for args in [vec!["add", "11001", "7"], vec!["checkpoint"], vec!["quit"]] {
+        let denied = cluster.request(leader, &args);
+        assert!(!denied.status.success());
+        assert_eq!(
+            String::from_utf8(denied.stdout).unwrap(),
+            "ERR AUTHORIZATION\n"
+        );
+    }
+    cluster.command_principal = Some(2);
+    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
+    assert_eq!(
+        String::from_utf8(cluster.request(leader, &["quit"]).stdout).unwrap(),
+        "ERR AUTHORIZATION\n"
+    );
+    // Plain commands cannot use the TLS-only access mode or change state.
+    cluster.command_principal = None;
+    assert!(!cluster
+        .request(leader, &["add", "11002", "100"])
+        .status
+        .success());
+    // A valid CA certificate with the wrong selected pin cannot impersonate reader1.
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    let spoof = cluster.root.join("spoof");
+    fs::create_dir(&spoof).unwrap();
+    for (from, to) in [
+        ("ca.der", "ca.der"),
+        ("node3.der", "node1.der"),
+        ("node3-key.der", "node1-key.der"),
+        ("node2.der", "node2.der"),
+    ] {
+        fs::copy(fixtures.join(from), spoof.join(to)).unwrap();
+    }
+    let denied = run(Command::new(BIN)
+        .args([
+            "client",
+            &cluster.base.to_string(),
+            "2",
+            "read",
+            "--service-tls",
+        ])
+        .arg(&spoof)
+        .args(["--principal", "1"]));
+    assert!(!denied.status.success());
+    assert!(String::from_utf8_lossy(&denied.stdout).contains("authentication"));
+    cluster.command_principal = Some(3);
+    assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
+    cluster.ok(leader, &["checkpoint"]);
+    cluster.stop();
+    let state = recovered_state_for(
+        &cluster.root.join(leader.to_string()),
+        leader as u64,
+        voteboat::identity::StoreIdentity {
+            id: voteboat::identity::StoreId::new(leader as u128).unwrap(),
+            incarnation: voteboat::identity::StoreIncarnation::new(1).unwrap(),
+        },
+        7,
+        (11001, 7),
+    );
+    assert!(state.base_index() > 0);
+    // Restart selects a fresh access generation and revokes the former writer.
+    fs::write(
+        &access,
+        "voteboat-service-access-v1 2\n1 reader 1 1\n2 reader 1 1\n3 admin 1 1\n",
+    )
+    .unwrap();
+    for id in 1..=3 {
+        cluster.start(id, "recover");
+    }
+    let leader = cluster.leader();
+    cluster.command_principal = Some(2);
+    assert_eq!(
+        String::from_utf8(cluster.request(leader, &["add", "11001", "7"]).stdout).unwrap(),
+        "ERR AUTHORIZATION\n"
+    );
+    assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
+    cluster.command_principal = Some(3);
+    assert!(authenticated_write(&cluster, &["add", "11001", "7"]).contains("duplicate=true"));
+    assert!(authenticated_write(&cluster, &["add", "11003", "3"]).contains("Value(10)"));
+    cluster.stop();
+    for id in 1..=3 {
+        assert!(
+            fs::read_to_string(cluster.root.join(format!("{id}-recover.log")))
+                .unwrap()
+                .contains("workers_joined=true")
+        );
+    }
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn authenticated_service_principals_scope_commands_and_recover_tcp() {
+    authenticated_command_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn authenticated_service_principals_scope_commands_and_recover_quic() {
+    authenticated_command_history(true);
+}
+#[test]
+fn invalid_service_access_fails_before_store_creation_or_listener_ownership() {
+    let cluster = Cluster::new();
+    let access = cluster.root.join("invalid-access.txt");
+    fs::write(
+        &access,
+        "voteboat-service-access-v1 1\n1 reader 1 1\n1 admin 1 1\n",
+    )
+    .unwrap();
+    let directory = cluster.root.join("must-not-exist");
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    let output = run(Command::new(BIN)
+        .args(["serve", "create"])
+        .arg(&directory)
+        .args(["1", &cluster.base.to_string()])
+        .arg(fixtures)
+        .arg("--service-access")
+        .arg(access));
+    assert!(!output.status.success());
+    assert!(!directory.exists());
 }

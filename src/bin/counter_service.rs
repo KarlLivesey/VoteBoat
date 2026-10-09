@@ -17,12 +17,14 @@
 mod administration;
 #[path = "support/local_client.rs"]
 mod local_client;
+#[path = "support/service_access.rs"]
+mod service_access;
 #[path = "support/counter_setup.rs"]
 mod setup;
 use setup::{checked, group, Failure, Service};
 use std::{
     io::{Read, Write},
-    net::{Ipv4Addr, TcpListener, TcpStream},
+    net::{Ipv4Addr, TcpListener},
     path::Path,
     time::{Duration, Instant},
 };
@@ -31,7 +33,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE] [--service-access FILE]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -44,6 +46,7 @@ QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
+Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -56,7 +59,7 @@ enum Phase {
     Output { bytes: Vec<u8>, sent: usize },
 }
 struct Connection {
-    stream: TcpStream,
+    stream: service_access::Channel,
     phase: Phase,
     deadline: Instant,
 }
@@ -210,9 +213,9 @@ fn serve(
     base: u16,
     tls: &Path,
     input: setup::PeerInput<'_>,
-    options: (NativePeerProtocol, Option<&Path>),
+    options: (NativePeerProtocol, Option<&Path>, Option<&Path>),
 ) -> Result<(), Failure> {
-    let (protocol, plan_path) = options;
+    let (protocol, plan_path, access_path) = options;
     let create = match mode {
         "create" => true,
         "recover" | "recover-member" => false,
@@ -228,6 +231,9 @@ fn serve(
         return Err("administration plan requires recover-member".into());
     }
     let config = setup::configuration(root, id, base, tls, create, input)?;
+    let access = access_path
+        .map(|path| service_access::Access::load(path, tls, config.startup.tls.clone()))
+        .transpose()?;
     let mut administration = plan_path
         .map(|path| administration::Administration::load(path, &config.provisioned_stores))
         .transpose()?;
@@ -237,6 +243,8 @@ fn serve(
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     let owner = service.local().owner.identity();
     let mut observer = NativeCounterObserver::new(owner);
+    let command_local = service_access::server_local(id, owner.store.session);
+    let mut command_generation = 0u64;
     let start = Instant::now();
     println!(
         "ready node={id} peer={peer_address} transport={protocol:?} command=127.0.0.1:{}",
@@ -284,8 +292,11 @@ fn serve(
             match listener.accept() {
                 Ok((stream, _)) => {
                     stream.set_nonblocking(true)?;
+                    command_generation = command_generation
+                        .checked_add(1)
+                        .ok_or("command generation exhausted")?;
                     connection = Some(Connection {
-                        stream,
+                        stream: service_access::Channel::server(stream, access.is_some()),
                         phase: Phase::Input {
                             bytes: [0; 256],
                             len: 0,
@@ -300,57 +311,75 @@ fn serve(
         let mut remove = false;
         if let Some(c) = &mut connection {
             if Instant::now() >= c.deadline {
-                if let Phase::Pending(p) = c.phase {
-                    match p {
-                        Pending::Write(t) => {
-                            checked(service.cancel_client(t))?;
-                        }
-                        Pending::Read(t) => {
-                            checked(service.cancel_read(t))?;
-                        }
-                    }
-                }
                 remove = true;
             } else {
-                match &mut c.phase {
-                    Phase::Input { bytes, len } => match c.stream.read(&mut bytes[*len..]) {
-                        Ok(0) => remove = true,
-                        Ok(n) => {
-                            *len += n;
-                            if bytes[..*len].contains(&b'\n') {
-                                let input = std::str::from_utf8(&bytes[..*len])
-                                    .map_err(|_| "invalid UTF-8".to_string());
-                                let result = input.and_then(|s| {
-                                    if s.trim_end_matches('\n').contains('\n') {
-                                        return Err("one command per connection".into());
+                match c.stream.poll(
+                    access.as_ref(),
+                    command_local,
+                    SecureSessionGeneration::new(command_generation).unwrap(),
+                    time,
+                ) {
+                    Err(_) => remove = true,
+                    Ok(false) => (),
+                    Ok(true) => match &mut c.phase {
+                        Phase::Input { bytes, len } => match c.stream.read(&mut bytes[*len..]) {
+                            Ok(0) => remove = true,
+                            Ok(n) => {
+                                *len += n;
+                                if bytes[..*len].contains(&b'\n') {
+                                    let input = std::str::from_utf8(&bytes[..*len])
+                                        .map_err(|_| "invalid UTF-8".to_string());
+                                    let result = input.and_then(|s| {
+                                        if s.trim_end_matches('\n').contains('\n') {
+                                            return Err("one command per connection".into());
+                                        }
+                                        c.stream.authorize(access.as_ref(), group(), s, time)?;
+                                        command(&mut service, &observer, s, &mut quit)
+                                    });
+                                    match result {
+                                        Ok(phase) => c.phase = phase,
+                                        Err(e) => c.reply(format!("ERR {e}")),
                                     }
-                                    command(&mut service, &observer, s, &mut quit)
-                                });
-                                match result {
-                                    Ok(phase) => c.phase = phase,
-                                    Err(e) => c.reply(format!("ERR {e}")),
+                                } else if *len == bytes.len() {
+                                    c.reply("ERR command too long".into());
                                 }
-                            } else if *len == bytes.len() {
-                                c.reply("ERR command too long".into());
                             }
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                            Err(_) => remove = true,
+                        },
+                        Phase::Output { bytes, sent } => {
+                            if *sent < bytes.len() {
+                                match c.stream.write(&bytes[*sent..]) {
+                                    Ok(0) => remove = true,
+                                    Ok(n) => *sent += n,
+                                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                                    Err(_) => remove = true,
+                                }
+                            }
+                            remove |= *sent == bytes.len() && c.stream.is_flushed();
                         }
-                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
-                        Err(_) => remove = true,
+                        Phase::Pending(_) => (),
                     },
-                    Phase::Output { bytes, sent } => match c.stream.write(&bytes[*sent..]) {
-                        Ok(0) => remove = true,
-                        Ok(n) => {
-                            *sent += n;
-                            remove = *sent == bytes.len();
-                        }
-                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
-                        Err(_) => remove = true,
-                    },
-                    Phase::Pending(_) => (),
                 }
             }
         }
         if remove {
+            // Deadline and TLS/channel failure release the same pending host
+            // ticket; cancellation cannot undo an already committed command.
+            if let Some(Connection {
+                phase: Phase::Pending(p),
+                ..
+            }) = &connection
+            {
+                match *p {
+                    Pending::Write(t) => {
+                        checked(service.cancel_client(t))?;
+                    }
+                    Pending::Read(t) => {
+                        checked(service.cancel_read(t))?;
+                    }
+                }
+            }
             connection = None;
         }
         if quit && connection.is_none() && shutdown_started.is_none() {
@@ -376,9 +405,13 @@ fn main() -> Result<(), Failure> {
     let mut transport_selected = false;
     let mut deployment = None;
     let mut admin_plan = None;
+    let mut service_access = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
-        if !matches!(flag, "--transport" | "--deployment" | "--admin-plan") {
+        if !matches!(
+            flag,
+            "--transport" | "--deployment" | "--admin-plan" | "--service-access"
+        ) {
             break;
         }
         let value = args.pop().unwrap();
@@ -401,6 +434,9 @@ fn main() -> Result<(), Failure> {
             }
             "--admin-plan" if admin_plan.is_none() && args[0] == "serve" => {
                 admin_plan = Some(std::path::PathBuf::from(value))
+            }
+            "--service-access" if service_access.is_none() && args[0] == "serve" => {
+                service_access = Some(std::path::PathBuf::from(value));
             }
             _ => return Err("duplicate or unsupported startup option".into()),
         }
@@ -446,7 +482,7 @@ fn main() -> Result<(), Failure> {
                 base,
                 Path::new(tls),
                 input,
-                (protocol, admin_plan.as_deref()),
+                (protocol, admin_plan.as_deref(), service_access.as_deref()),
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {

@@ -7,7 +7,9 @@ timers, and keep separate durable
 WALs and snapshots. The quickstart creates static three-voter membership and one
 counter group. Explicit member recovery can reopen compatible dynamic histories
 prepared through the Rust administration APIs. Peer addresses are configurable;
-the trusted local command endpoint always binds to 127.0.0.1.
+the command endpoint always binds to 127.0.0.1. Its default mode is trusted
+plaintext; optional `--service-access FILE` requires authenticated, scoped
+commands. See [principal permissions and client flags](AUTHORIZATION.md).
 
 ## Start three processes
 
