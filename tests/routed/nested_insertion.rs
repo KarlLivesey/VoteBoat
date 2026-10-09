@@ -441,6 +441,9 @@ impl Nested {
         }
     }
     fn resume(&mut self) -> Option<Request> {
+        self.resume_with_delivery(true)
+    }
+    fn resume_with_delivery(&mut self, keep_unread: bool) -> Option<Request> {
         let f = self.observed();
         if f.fence.is_none()
             && self.source[0].local().applications[&group(21)]
@@ -450,9 +453,15 @@ impl Nested {
                 == 0
         {
             let b = data(self.plan.before(), 21, 80, 5);
-            unread(&mut self.source, &self.clock, 21, 80, b.clone(), |a| {
-                a.application().value(&[80]).unwrap() == 5
-            });
+            deliver(
+                keep_unread,
+                &mut self.source,
+                &self.clock,
+                21,
+                80,
+                b.clone(),
+                |a| a.application().value(&[80]).unwrap() == 5,
+            );
             return Some(Request {
                 step: Step::Data,
                 group: 21,
@@ -462,12 +471,20 @@ impl Nested {
         }
         if f.reservation.is_none() {
             let b = self.plan.encode(100000).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 400, b.clone(), |a| {
-                a.directory()
-                    .delegation_reservation_at(a.applied_index(), source_fixture::op(400))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                400,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .delegation_reservation_at(a.applied_index(), source_fixture::op(400))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Request {
                 step: Step::Reserve,
                 group: 1,
@@ -478,12 +495,20 @@ impl Nested {
         let intent = self.bound.as_ref().unwrap();
         if f.intent.is_none() {
             let b = intent.encode(100000).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 300, b.clone(), |a| {
-                a.directory()
-                    .transfer_intent_at(a.applied_index(), source_fixture::op(300))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                300,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .transfer_intent_at(a.applied_index(), source_fixture::op(300))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Request {
                 step: Step::Intent,
                 group: 1,
@@ -496,9 +521,15 @@ impl Nested {
             if f.targets[i].as_ref().unwrap().staged_index.is_none() {
                 let g = 31 + i as u128;
                 let b = target(intent, g).bootstrap_command(100000).unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 300, b.clone(), |a| {
-                    a.status().staged_index.is_some()
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    300,
+                    b.clone(),
+                    |a| a.status().staged_index.is_some(),
+                );
                 return Some(Request {
                     step: Step::Stage(g),
                     group: g,
@@ -511,9 +542,15 @@ impl Nested {
             let b = self.source[0].local().applications[&group(21)]
                 .freeze_command(intent, 65536, 100000)
                 .unwrap();
-            unread(&mut self.source, &self.clock, 21, 300, b.clone(), |a| {
-                a.fence().is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.source,
+                &self.clock,
+                21,
+                300,
+                b.clone(),
+                |a| a.fence().is_some(),
+            );
             return Some(Request {
                 step: Step::Fence,
                 group: 21,
@@ -556,9 +593,15 @@ impl Nested {
                 let b = self.targets[i][0].local().applications[&group(g)]
                     .import_command(&import, 100000)
                     .unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 300, b.clone(), |a| {
-                    a.status().imported.is_some()
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    300,
+                    b.clone(),
+                    |a| a.status().imported.is_some(),
+                );
                 return Some(Request {
                     step: Step::Import(g),
                     group: g,
@@ -590,12 +633,20 @@ impl Nested {
             )
             .unwrap_or_else(|e| panic!("{:?}", e.0));
             let b = p.encode(100000).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 301, b.clone(), |a| {
-                a.directory()
-                    .transfer_publication_at(a.applied_index(), source_fixture::op(300))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                301,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .transfer_publication_at(a.applied_index(), source_fixture::op(300))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Request {
                 step: Step::Publish,
                 group: 1,
@@ -620,12 +671,20 @@ impl Nested {
                 decision: f.publication.unwrap(),
             };
             let b = completion.encode(100000).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 403, b.clone(), |a| {
-                a.directory()
-                    .delegation_publication_at(a.applied_index(), source_fixture::op(400))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                403,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .delegation_publication_at(a.applied_index(), source_fixture::op(400))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Request {
                 step: Step::Refresh,
                 group: 1,
@@ -986,3 +1045,6 @@ fn quic_nested_insertion_recovers_unread_phases_from_wal() {
 fn quic_nested_insertion_recovers_unread_phases_from_checkpoint() {
     history(NativePeerProtocol::Quic, true);
 }
+
+#[path = "nested_moves.rs"]
+mod moves;

@@ -3206,3 +3206,50 @@ Next native later-movement acceptance, then full-gap audit/next required path.
 Final strengthened continuation passed0.07s; final all-feature/all-target Clippy
 -D warnings passed1.73s. Format, whitespace and80-contract inventory passed.
 All validation handles terminal; no CI gate used. Full goal remains active.
+
+## Slice135 — native inserted-grandchild later split/merge recovery
+
+A test-only native history finishes actual root/nested setup with consumed results,
+then moves assigned schema4 grandchild31 through ordinary split41/42 and merge43.
+Later targets use explicit trusted three-replica bootstrap; application bindings
+are reconstructed from quorum-observed original parent reservations. All20 selected
+later phase cuts leave accepted results unread, observe exact quorum facts, abort/
+reclaim, reopen the same files and retry original operations/bytes. Source and
+target status/indices/digests plus actual configuration contexts are checked.
+
+Current dynamic parent21 reservations and completions refresh responsibility31
+locators while parent21's epoch and root locator remain unchanged. Root routing
+refuses stale child locators between publication and completion, then resolves
+exact current grants. Partial merge fencing leaves the other source readable;
+non-activated imports refuse data and each target activates independently. Original
+assigned source creation bindings remain byte-exact at every reopen.
+
+Stop metadata, child21, grandchild31 and split41/42 before merged43 imported
+retries/new writes. All stopped file bytes and recovered metadata GroupLogs stay
+unchanged, including root20/sibling22 files stopped throughout. Merged43 retains
+original1/81 and later82 outcomes without repeated effects, new83 survives final
+reopen, four outbox records remain and unrelated sibling32 keeps80. Final reopen
+retains all original and later source fences and the exact completed phase facts.
+
+All four selected TCP/TLS and QUIC later WAL/checkpoint histories passed
+together659.04s (serialized history fixture). Original nested TCP/TLS WAL regression passed84.96s after
+consumed setup extraction. All-feature/all-target Clippy -D warnings passed2.21s;
+format/whitespace and80-contract inventory passed before final evidence edits.
+Initial compile needed an existing CheckpointStateMachine bound. Two setup attempts
+exposed duplicate=true from the retrying helper for an uncertain response; durable
+value3/outbox2 now verify the once-only logical effect. First full TCP attempt
+recovered all phase facts but an idle sibling write failed NotLeader; write
+preflight now uses the existing campaign helper. No serving gate, timeout, storage
+format, production contract or consensus rule was relaxed.
+
+This is selected Linux loopback owner-abort/WAL/checkpoint evidence. It does not
+validate networked retirement, arbitrary faults/power loss, cross-authority or
+retained-scope insertion, macOS, separate hosts or mixed-version deployment.134
+retirement evidence remains deterministic/native-file scope. Full P0–P7 remains
+active, P8/Windows deferred, RPL-1.5 retained and original pack unchanged. Macro
+P1/P5/P6 gains later native movement evidence without dropping prior requirements.
+Next: full baseline gap audit and next required path; following: implement that
+audited path with its own schema/contracts/acceptance. CI remains background.
+
+Final slice135 format, whitespace and80-contract inventory passed; all validation
+handles are terminal. No CI gate used. Full goal remains active.

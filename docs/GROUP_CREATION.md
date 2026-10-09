@@ -322,3 +322,12 @@ while fence/activation tombstones remain. Selected schema4 source native-file
 publication interruption/replay/reclamation is exercised through the same shared
 fixture as ordinary retirement. Networked subsequent movement/retirement remains
 the next deliverable, with broader lifecycle/platform gates still open.
+
+Slice135 adds selected TCP/TLS and QUIC WAL/checkpoint later split/merge recovery
+from an actually assigned inserted grandchild. All20 later phases recover unread original results
+and exact retries; dynamic parent locator refresh, partial fencing/activation,
+imported outcomes/outbox and final ancestor/source-offline service are checked.
+Metadata and stopped source files remain unchanged during merged writes; original
+creation bindings survive reopens. Later groups use explicit trusted bootstrap,
+not a new creation RPC. Networked retirement and broader lifecycle/platform
+evidence remain open.
