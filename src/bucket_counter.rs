@@ -367,6 +367,9 @@ impl<P: PartitionPolicy + Clone> BucketCounter<P> {
 }
 impl<P: PartitionPolicy + Clone> StateMachine for BucketCounter<P> {
     type Receipt = BucketReceipt;
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        Some(self.readiness_requirements())
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

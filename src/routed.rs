@@ -293,6 +293,9 @@ where
         }
         self.inner.validate_group(group)
     }
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        Some(self.readiness_requirements())
+    }
     fn applied_index(&self) -> u64 {
         self.inner.applied_index()
     }

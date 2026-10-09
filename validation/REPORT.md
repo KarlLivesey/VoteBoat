@@ -2589,3 +2589,33 @@ check failed. Automatic voter replacement/global rebalancing, live capacity
 collection/reservations, general public mutation ingress and the broader baseline
 remain unfinished. No macOS/separate-host, performance or full-protocol proof
 claim. Full P0–P7 remains active, P8/Windows deferred.
+
+## Slice114 — generic enforced application envelopes
+
+Linux executed: all-feature application 10/10, core-only application 10/10,
+Node facade 35/35, readiness 10/10 (including native TCP/QUIC compacted learners),
+and executable TCP/QUIC membership/enrollment/promotion/retirement/checkpoint/
+restart 2/2 (12.26 seconds). All-feature/all-target Clippy with warnings denied,
+fmt/diff and inventory78 pass.
+
+New tests distinguish current checkpoint length from whole configured lifetime:
+understated command/checkpoint or wrong-schema configuration fails before host
+authorization and persistence, preserves storage/core and leaves Node Running;
+readiness refuses a fitting current checkpoint with insufficient lifetime budget.
+Downstream capability/default-none and compatible larger declarations are checked.
+Seven native bounded applications report existing enforced envelopes. Providers
+remain trusted to enforce their reports; no capacity reservation is established.
+
+The initial non-escalated readiness run passed seven cases and failed two native
+socket binds with PermissionDenied. The permission-enabled run passed those cases,
+and the final run includes the new lifetime regression (10/10). An initial wrong
+node test target/filter selected zero cases; that is excluded from evidence. The
+correct effect_owner/node_facade selection ran 35 cases. No broad rewrite or
+unchanged failing-check loop. The older full routed lifecycle run21618 remains
+live and is not counted as terminal. Generic public configuration ingress, broader
+lifecycle, macOS/separate-host/fault and performance evidence remain open. Full
+P0–P7 active; P8/Windows deferred.
+
+Continuation observation: the same live run21618 subsequently passed
+native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints.
+The overall run still has no terminal result; preserve it.

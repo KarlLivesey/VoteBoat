@@ -290,3 +290,69 @@ fn malformed_or_incompatible_checkpoints_never_partly_restore_counter() {
     assert!(incompatible.restore_checkpoint(1, 2, &bytes).is_err());
     assert_eq!(incompatible.applied_index(), 0);
 }
+
+#[test]
+fn downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed() {
+    struct Host {
+        envelope: Option<voteboat::raft::ReadinessRequirements>,
+    }
+    impl StateMachine for Host {
+        type Receipt = ();
+        fn applied_index(&self) -> u64 {
+            0
+        }
+        fn apply_batch(&mut self, _: &[LogEntry]) -> Result<Vec<()>, ApplicationError> {
+            Ok(vec![])
+        }
+        fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
+            self.envelope
+        }
+    }
+    struct Legacy;
+    impl StateMachine for Legacy {
+        type Receipt = ();
+        fn applied_index(&self) -> u64 {
+            0
+        }
+        fn apply_batch(&mut self, _: &[LogEntry]) -> Result<Vec<()>, ApplicationError> {
+            Ok(vec![])
+        }
+    }
+    let actual = Counter::new(100).unwrap().readiness_requirements();
+    assert_eq!(Legacy.deployment_requirements(), None);
+    assert_eq!(
+        Legacy.validate_deployment_requirements(actual),
+        Err(ApplicationError::InvalidCheckpoint)
+    );
+    let host = Host {
+        envelope: Some(actual),
+    };
+    host.validate_deployment_requirements(actual).unwrap();
+    host.validate_deployment_requirements(voteboat::raft::ReadinessRequirements {
+        command_bytes: actual.command_bytes + 10,
+        snapshot_bytes: actual.snapshot_bytes + 100,
+        ..actual
+    })
+    .unwrap();
+    for invalid in [
+        voteboat::raft::ReadinessRequirements {
+            command_bytes: 0,
+            ..actual
+        },
+        voteboat::raft::ReadinessRequirements {
+            snapshot_bytes: 0,
+            ..actual
+        },
+        voteboat::raft::ReadinessRequirements {
+            application_schema: 0,
+            ..actual
+        },
+    ] {
+        assert!(Host {
+            envelope: Some(invalid)
+        }
+        .validate_deployment_requirements(actual)
+        .is_err());
+        assert!(host.validate_deployment_requirements(invalid).is_err());
+    }
+}

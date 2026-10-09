@@ -306,6 +306,8 @@
       "public_contract": "StateMachine",
       "operations": [
         "validate_group",
+        "deployment_requirements",
+        "validate_deployment_requirements",
         "applied_index",
         "apply_batch"
       ],
@@ -314,9 +316,12 @@
         "tests/application.rs",
         "examples/replicated_counter.rs",
         "tests/directory.rs",
-        "tests/routed.rs"
+        "tests/routed.rs",
+        "tests/effect_owner.rs",
+        "tests/learners.rs",
+        "tests/counter_service.rs"
       ],
-      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check."
+      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check. Slice114 adds optional enforced whole-lifetime deployment_requirements and common validation, defaulting to unavailable. Native bounded applications expose existing configured envelopes; ClientRouter checks configuration before authorization/persistence and learner readiness refuses understated lifetime capacity. Host capability assertions remain trusted. Direct low-level owners retain their documented application responsibilities; no general public mutation ingress claim."
     },
     {
       "design_id": "C05/C15",
@@ -1627,7 +1632,7 @@
     "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",
     "voter-replacement-and-global-placement-orchestration",
-    "service-enforced-configuration-application-envelope",
+    "general-authenticated-configuration-mutation-ingress",
     "recursive-directory-ownership-lifecycle"
   ]
 }

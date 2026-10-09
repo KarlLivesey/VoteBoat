@@ -462,6 +462,9 @@ fn verify_readiness_evidence<A: CheckpointStateMachine>(
     {
         return Err(ReadinessError::InvalidRequirements);
     }
+    application
+        .validate_deployment_requirements(required)
+        .map_err(|_| ReadinessError::Capability)?;
     if application.schema_version() != required.application_schema
         || raft.limits.max_command_bytes < required.command_bytes
         || raft.limits.max_snapshot_bytes < required.snapshot_bytes

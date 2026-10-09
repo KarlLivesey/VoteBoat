@@ -79,6 +79,39 @@ pub trait StateMachine {
     fn validate_group(&self, _group: GroupIdentity) -> Result<(), ApplicationError> {
         Ok(())
     }
+    /// Enforced whole configured lifetime bounds, including retained retries and
+    /// lifecycle metadata. Current occupancy/checkpoint size is insufficient.
+    /// None preserves ordinary execution but refuses membership/readiness use.
+    /// Reporting bounds is a trusted provider assertion, not a reservation.
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        None
+    }
+    /// Pure, nonblocking check against the selected application's enforced bounds.
+    fn validate_deployment_requirements(
+        &self,
+        declared: crate::raft::ReadinessRequirements,
+    ) -> Result<(), ApplicationError> {
+        let actual = self
+            .deployment_requirements()
+            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        if actual.application_schema == 0
+            || actual.command_bytes == 0
+            || actual.snapshot_bytes == 0
+            || declared.command_bytes == 0
+            || declared.snapshot_bytes == 0
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        if declared.application_schema != actual.application_schema {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        if declared.command_bytes < actual.command_bytes
+            || declared.snapshot_bytes < actual.snapshot_bytes
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
     fn applied_index(&self) -> u64;
     fn apply_batch(&mut self, entries: &[LogEntry])
         -> Result<Vec<Self::Receipt>, ApplicationError>;
@@ -287,6 +320,9 @@ impl Counter {
 }
 impl StateMachine for Counter {
     type Receipt = CounterReceipt;
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        Some(self.readiness_requirements())
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

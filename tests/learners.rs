@@ -2280,3 +2280,35 @@ fn failed_native_joint_barrier_fences_and_power_loss_recovers_prior_configuratio
     assert_eq!(recovered.state().last_index(), 2);
     assert_eq!(recovered.state().commit_index, 2);
 }
+
+#[test]
+fn readiness_refuses_a_current_checkpoint_that_understates_configured_lifetime_capacity() {
+    let mut log = HostLogStore::new(4);
+    let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
+    let actual = app.deployment_requirements().unwrap();
+    let bytes = app.checkpoint(actual.snapshot_bytes).unwrap();
+    assert!(bytes.len() < actual.snapshot_bytes);
+    let request = leader
+        .begin_learner_readiness(
+            learner_peer(),
+            log.binding().session,
+            ReadinessRequirements {
+                snapshot_bytes: bytes.len(),
+                ..actual
+            },
+        )
+        .unwrap();
+    let mut snapshots = snapshots();
+    assert_eq!(
+        verify_learner_readiness(
+            &learner,
+            &app,
+            &log,
+            &mut snapshots,
+            request,
+            leader.storage_binding()
+        ),
+        Err(ReadinessError::Capability)
+    );
+    assert!(leader.ready_learner().is_none());
+}

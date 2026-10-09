@@ -980,6 +980,9 @@ impl StateMachine for Directory {
         }
         Ok(())
     }
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        Some(self.readiness_requirements())
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }

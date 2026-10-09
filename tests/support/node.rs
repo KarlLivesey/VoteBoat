@@ -1930,3 +1930,50 @@ fn refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown() {
         NodeCounters::default()
     );
 }
+
+#[test]
+fn configuration_checks_enforced_application_envelope_before_authorization_or_persistence() {
+    for invalid in 0..3 {
+        let mut n = elected();
+        let before = n.local().owner.core(group(1)).unwrap().state().clone();
+        let mut request = admin_request(1, 9100 + invalid, false);
+        let app = &n.local().applications[&group(1)];
+        let actual = app.deployment_requirements().unwrap();
+        request.proposal.requirements = actual;
+        let error = match invalid {
+            0 => {
+                request.proposal.requirements.command_bytes = actual.command_bytes - 1;
+                ApplicationError::InvalidCheckpoint
+            }
+            1 => {
+                // Current empty state fits, but the configured retry history does not.
+                let current = app.checkpoint(actual.snapshot_bytes).unwrap().len();
+                assert!(current < actual.snapshot_bytes);
+                request.proposal.requirements.snapshot_bytes = current;
+                ApplicationError::InvalidCheckpoint
+            }
+            _ => {
+                request.proposal.requirements.application_schema += 1;
+                ApplicationError::UnsupportedSchema
+            }
+        };
+        let ticket = n.configure(request).unwrap();
+        let mut checks = 0;
+        n.poll_with_configuration_authorization(MonoTime(0), NodePollBudget::default(), |_, _| {
+            checks += 1;
+            Ok(())
+        })
+        .unwrap();
+        assert_eq!(checks, 0);
+        let completion = n.poll_configuration().unwrap();
+        assert_eq!(completion.ticket, ticket);
+        assert_eq!(
+            completion.outcome,
+            ConfigurationOutcome::NotProposed(RaftError::Admission(error))
+        );
+        assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &before);
+        assert_eq!(n.local().persistence.store.state(group(1)).unwrap(), before);
+        assert_eq!(n.state(), NodeState::Running);
+        shutdown(&mut n);
+    }
+}

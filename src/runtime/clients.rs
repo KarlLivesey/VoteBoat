@@ -398,6 +398,12 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         }
         let steps = owner
             .advance_authorized(now, limit, |core, event| {
+                if let Event::Configure(proposal) = event {
+                    let app = application(core.state().bootstrap.group)
+                        .ok_or(RaftError::Admission(ApplicationError::NotApplied))?;
+                    app.validate_deployment_requirements(proposal.requirements)
+                        .map_err(RaftError::Admission)?;
+                }
                 configuration(core, event)?;
                 let Event::Propose { operation, bytes } = event else {
                     return Ok(());

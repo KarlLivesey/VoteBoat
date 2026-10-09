@@ -435,3 +435,7 @@ remain unfinished.
 [Initial learner placement](docs/PLACEMENT_PLANNING.md) exposes host/native
 recommendations through checked placement authorization and ordinary membership
 admission. It preserves voting policy and does not perform automatic rebalancing.
+
+[Application deployment envelopes](docs/APPLICATION_ENVELOPES.md) expose enforced
+whole-lifetime bounds through the public StateMachine contract. Configuration
+execution and learner readiness refuse unavailable or understated envelopes.

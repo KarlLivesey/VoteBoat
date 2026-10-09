@@ -7327,3 +7327,86 @@ The full P0–P7 goal remains active; P8/Windows are deferred and CI is backgrou
    Completion checks: downstream replacement, native successful transition,
    unauthorized/oversized refusal and partial-progress recovery. Advances the same
    P0/P4 milestone, preserving usable static membership throughout.
+
+## Slice114 schema plan — enforced generic application deployment envelopes
+
+Audit: Counter and the native scope/directory wrappers have inherent whole-lifetime
+readiness_requirements, but StateMachine/CheckpointStateMachine exposes only
+current applied/checkpoint/schema state. Generic Node configuration currently trusts
+the host callback's supplied envelope; readiness exercises a current checkpoint,
+which cannot establish future full configured capacity. Add optional synchronous
+StateMachine::deployment_requirements returning an enforced whole-lifetime
+ReadinessRequirements, default None. Existing native bounded applications forward
+their enforced inherent limits. A shared validation method checks nonzero actual/
+declared bounds, exact schema and declared bytes at least actual configured bounds.
+None fails closed for configuration/readiness; ordinary commands remain compatible.
+
+At serialized ClientRouter execution, Configure looks up the exact application and
+validates the declaration before host authorization and before Raft persistence.
+Learner readiness uses the same validation before publishing a positive response.
+No new receipt/generation, worker, watermark, wire or storage format. Refusal is
+NotProposed/negative readiness, not owner rollback. Restart reconstructs the
+application's configured capacity as before and rechecks each operation. Host
+providers are trusted to enforce reported bounds across admission/apply/restore;
+current checkpoint length is not a substitute. Tests must show undersized or
+missing capabilities refuse before durable configuration, native and downstream
+host providers work, larger compatible declarations succeed, and current occupancy
+does not shrink the declared envelope. This closes one P0/P4 capacity gate, not
+public mutation authentication or broader lifecycle/performance requirements.
+
+### Slice114 implemented evidence and macro review
+
+StateMachine now supplies optional deployment_requirements and shared validation;
+all seven native bounded application types expose existing lifetime envelopes.
+ClientRouter configuration execution and learner readiness consume the contract.
+The regression confirms an empty checkpoint can fit an undersized declaration
+while the configured lifetime cannot: configuration remains NotProposed, the host
+authorizer is never invoked, durable storage/core state are unchanged and Node
+remains Running. Learner readiness refuses the same understatement. Downstream
+providers can expose their own bounds; unavailable/zero/mismatched bounds refuse.
+
+Executed Linux evidence: application 10/10 all-feature and 10/10 core-only;
+Node facade 35/35; readiness 10/10 including real TCP/QUIC compacted learner checks;
+executable TCP/QUIC add/enroll/promote/retire/checkpoint/restart histories 2/2
+(12.26 seconds); all-feature/all-target Clippy, fmt/diff and inventory78 pass.
+The first readiness invocation ran without socket permission: seven non-socket
+cases passed and two native bind attempts were denied by the sandbox. The same
+cases passed with socket permission; no implementation rewrite followed that
+environment failure. An earlier filter selected zero cases because node_facade
+belongs to effect_owner rather than runtime; zero-case output is not validation.
+The corrected focused target ran all 35 facade cases. The new readiness regression
+was included in the final ten-case run. No storage/consensus protocol redesign.
+
+Previous goal turn was progress: slice113 was tested, documented, committed and
+pushed. This turn closes an actual generic capacity gap, rather than treating
+current checkpoint size as future capacity. P0/P4 advance but remain incomplete:
+host bounds are trusted capability assertions and a general authenticated public
+configuration mutation endpoint is still absent. Broader P5/P6/P7, platform/fault
+and measured performance requirements remain in BASELINE_ACCEPTANCE.md. The old
+broad routed lifecycle run21618 is still live on its exact handle and is not
+counted as passed. Full P0–P7 stays active; P8/Windows deferred, CI background.
+
+### Linked mini plan after slice114
+
+1. Current — generic enforced application envelopes (implemented above).
+   Purpose: prevent configuration/readiness decisions from understating future
+   application capacity. Dependencies: native lifetime limits, selected group
+   application, existing serialized ClientRouter and readiness consumers.
+   Completion checks: downstream/default capability, before-persist/authorization
+   refusal, lifetime-vs-current occupancy, native readiness and executable restart.
+   Advances macro embedding/composition and safe online membership (P0/P4).
+2. Next — bounded authenticated configuration ingress (P0/P4/C20/C21).
+   Purpose: submit real administration intents beyond trusted startup files.
+   Dependencies: inspect existing service principal/scope and request/receipt
+   lifetimes, common application envelope, placement and selected provider checks.
+   Completion checks: schema for bounded original request/result retention,
+   authenticated administrator binding, execution-time reauthorization, unknown
+   after lost reply, and native authorized/refused/restart histories. Keep ordinary
+   static service use independent; add prerequisites only for this usable path.
+3. Following — ingress interruption and retry recovery (P4/P6).
+   Purpose: make remotely admitted administration usable through disconnect,
+   leadership change and restart without inventing new operation identities.
+   Dependencies: implemented ingress, existing durable configuration status/resume
+   and original intent authorization. Completion checks: reply loss before/after
+   persistence, exact retry/conflict refusal, bounded outcomes and partial-progress
+   native TCP/QUIC recovery. Advances macro safe membership/lifecycle operations.

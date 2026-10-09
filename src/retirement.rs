@@ -447,6 +447,9 @@ where
     fn validate_group(&self, group: GroupIdentity) -> Result<(), ApplicationError> {
         self.initial.validate_group(group)
     }
+    fn deployment_requirements(&self) -> Option<crate::raft::ReadinessRequirements> {
+        Some(self.readiness_requirements())
+    }
     fn applied_index(&self) -> u64 {
         self.applied
     }
