@@ -67,15 +67,14 @@ See BASELINE_AUDIT.md for the slice136 requirement review and fresh reference
 results. The static-membership networked service and Rust embedding remain
 independent of online-change and lifecycle acceptance work.
 
-1. Slice137 implements benchmark failure retention and selected real failure
-   cleanup;138 adds marked startup file timings and separate uninstrumented
-   reference. Next investigate measured manifest-publication cost while retaining
-   every durability dependency and original p99 gate (P1/P7).
-2. Implement a measured, contract-preserving fix and repeat matched disk-backed
-   measurements against the original250ms p99 and recovery gates (P1/P7).
-3. Continue the unresolved lifecycle/admission/platform ledger: networked
-   retirement, deletion/reparenting/authority movement, resource fairness,
-   discovery/placement and broader fault/device/macOS validation remain open.
+1. Slice139 adds15 native publication cuts and retains full synchronization;
+   its data-sync candidate failed and was reverted. No performance gate is closed.
+2. Next actual networked nested-source retirement/reclamation links134's file
+   retirement with135's networked later transfer, preserving lineage/tombstones
+   and successor service (P1/P6).
+3. Continue remaining resource fairness, discovery/placement, platform/fault and
+   measured runtime work. Original250ms/sustainable-capacity requirements remain
+   active; repeated unsuccessful publication experiments are not acceptance.
 
 Purpose, dependencies and completion checks are linked in IMPLEMENTATION.md's
 mini plan. These priorities do not redefine the full P0–P7 goal or assert that

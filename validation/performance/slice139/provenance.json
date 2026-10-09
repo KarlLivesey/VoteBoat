@@ -1,0 +1,11 @@
+{
+  "source_base": "b2fd209",
+  "platform": "Linux",
+  "filesystem": "btrfs",
+  "control_binary_sha256": "2b3e06a138b77acb277e2a782f7107f4e8d7409268ee6baf14124f8c1a87f94f",
+  "candidate_binary_sha256": "dd30bbf3a9495307261e359280cd9d72a8b86bfaa35bd12e7aa01e97564c3191",
+  "candidate_file_source_sha256": "295d3e312082cef3cdf83b3f19c6b73f208c344fae39ee2d77ff1024de3c7c91",
+  "experiment_patch_sha256": "11169f1894e2c58fa74220256c03a6d2b9caa3554216afaf3fd7cce51eef2c88",
+  "workload": "three replicas, startup TCP,256 operations,window1,64warmup,8byte increments,50ms heartbeat/1000–1999ms election; diagnostic file timing explicitly marked; native barriers and recovery checks",
+  "environment": "same host/device without exclusive reservation; no compilation or bulk work during sequential measurement; private machine inventory omitted"
+}

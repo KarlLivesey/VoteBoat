@@ -1,0 +1,1 @@
+164 retained receipt rows: operation IDs65–228, value/identity/group/index and latency arithmetic pass. No assertion about unknown229 or a complete/recovered benchmark.

@@ -1,0 +1,181 @@
+diff --git a/src/native/log_store/file.rs b/src/native/log_store/file.rs
+index 25e63b1..9537101 100644
+--- a/src/native/log_store/file.rs
++++ b/src/native/log_store/file.rs
+@@ -132,6 +132,31 @@ impl FileLogIo {
+             timings: None,
+         })
+     }
++    // Callback is private primitive-boundary fault injection, not a policy hook.
++    fn publish_with(
++        &mut self,
++        bytes: &[u8],
++        mut after: impl FnMut() -> io::Result<()>,
++    ) -> io::Result<()> {
++        let staging = self.directory.join("MANIFEST.tmp");
++        let mut file = OpenOptions::new()
++            .write(true)
++            .create(true)
++            .truncate(true)
++            .open(&staging)?;
++        after()?;
++        file.write_all(bytes)?;
++        after()?;
++        // Content/retrieval-essential metadata precede selection; timestamps
++        // are not protocol state. The containing directory still uses sync_all.
++        file.sync_data()?;
++        after()?;
++        fs::rename(staging, self.directory.join(manifest_name(self.generation)))?;
++        after()?;
++        sync_directory(&self.directory)?;
++        after()?;
++        Ok(())
++    }
+     // The callback injects primitive-boundary errors in native file tests. It
+     // carries no service policy; the normal path always continues.
+     fn replace_with(
+@@ -272,18 +297,7 @@ impl JournalIo for FileLogIo {
+         self.log.set_len(length)
+     }
+     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
+-        self.timed(2, |this| {
+-            let staging = this.directory.join("MANIFEST.tmp");
+-            let mut file = OpenOptions::new()
+-                .write(true)
+-                .create(true)
+-                .truncate(true)
+-                .open(&staging)?;
+-            file.write_all(bytes)?;
+-            file.sync_all()?;
+-            fs::rename(staging, this.directory.join(manifest_name(this.generation)))?;
+-            sync_directory(&this.directory)
+-        })
++        self.timed(2, |this| this.publish_with(bytes, || Ok(())))
+     }
+ 
+     fn supports_replacement(&self) -> bool {
+@@ -332,6 +346,124 @@ mod tests {
+         }
+     }
+     #[test]
++    fn every_manifest_publication_boundary_preserves_selected_state_and_lock() {
++        for generation in [0, 1] {
++            for cut in 1..=5 {
++                let path = std::env::temp_dir().join(format!(
++                    "voteboat-publication-cut-{}-{generation}-{cut}",
++                    std::process::id()
++                ));
++                let mut store = NativeLogStore::create(
++                    FileLogIo::create(&path).unwrap(),
++                    identity(),
++                    LogLimits::default(),
++                )
++                .unwrap();
++                let voter = NodeId::new(1).unwrap();
++                let tickets = store
++                    .append_batch(vec![LogMutation::Create(Bootstrap {
++                        group: group(),
++                        configuration: ConfigurationId::new(1).unwrap(),
++                        policy: Policy::new(Tree::Voter(voter), Limits::default()).unwrap(),
++                        voter_stores: [(voter, identity())].into(),
++                    })])
++                    .unwrap();
++                store.barrier(&tickets).unwrap();
++                fill(&mut store);
++                if generation == 1 {
++                    store.reclaim(store.limits().max_wal_bytes).unwrap();
++                }
++                let expected = store.state(group()).unwrap();
++                let old = store.io.read_manifest().unwrap();
++                let binding = StoreBinding {
++                    session: StoreSession::new(store.binding().session.get() + 1).unwrap(),
++                    ..store.binding()
++                };
++                let new = super::super::manifest(binding, store.length as u64);
++                let mut step = 0;
++                assert!(store
++                    .io
++                    .publish_with(&new, || {
++                        step += 1;
++                        if step == cut {
++                            Err(io::Error::other("publication interrupted"))
++                        } else {
++                            Ok(())
++                        }
++                    })
++                    .is_err());
++                assert!(
++                    FileLogIo::open(&path).is_err(),
++                    "failed publication retains exclusive ownership"
++                );
++                drop(store);
++                let mut io = FileLogIo::open(&path).unwrap();
++                let selected = io.read_manifest().unwrap();
++                assert_eq!(
++                    selected,
++                    if cut < 4 { old } else { new },
++                    "atomic name selection at cut{cut}"
++                );
++                let recovered =
++                    NativeLogStore::recover(io, identity(), LogLimits::default()).unwrap();
++                assert_eq!(
++                    recovered.state(group()).unwrap(),
++                    expected,
++                    "acknowledged hard-state history survives cut{cut}"
++                );
++                assert!(recovered.binding().session.get() > binding.session.get() - 1);
++                drop(recovered);
++                fs::remove_dir_all(path).unwrap();
++            }
++        }
++    }
++    #[test]
++    fn initial_publication_never_selects_a_partial_manifest() {
++        for cut in 1..=5 {
++            let path = std::env::temp_dir().join(format!(
++                "voteboat-first-publication-cut-{}-{cut}",
++                std::process::id()
++            ));
++            let mut io = FileLogIo::create(&path).unwrap();
++            io.sync_log().unwrap();
++            let bytes = super::super::manifest(
++                StoreBinding {
++                    identity: identity(),
++                    session: StoreSession::new(1).unwrap(),
++                },
++                0,
++            );
++            let mut step = 0;
++            assert!(io
++                .publish_with(&bytes, || {
++                    step += 1;
++                    if step == cut {
++                        Err(io::Error::other("initial publication interrupted"))
++                    } else {
++                        Ok(())
++                    }
++                })
++                .is_err());
++            drop(io);
++            if cut < 4 {
++                assert!(
++                    FileLogIo::open(&path).is_err(),
++                    "missing initial selection fails closed"
++                );
++            } else {
++                let recovered = NativeLogStore::recover(
++                    FileLogIo::open(&path).unwrap(),
++                    identity(),
++                    LogLimits::default(),
++                )
++                .unwrap();
++                assert_eq!(recovered.binding().session.get(), 2);
++                drop(recovered);
++            }
++            fs::remove_dir_all(path).unwrap();
++        }
++    }
++    #[test]
+     fn every_file_replacement_boundary_recovers_selected_pair_without_dual_writer() {
+         for generation in [0, 1] {
+             for cut in 1..=13 {

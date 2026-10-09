@@ -178,9 +178,10 @@
       ],
       "native": "FileVoteIo",
       "conformance": [
-        "tests/native_vote_store.rs"
+        "tests/native_vote_store.rs",
+        "src/native/log_store/file.rs"
       ],
-      "scope": "Synchronous bounded worker interface; no async runtime yet."
+      "scope": "Synchronous bounded worker interface; no async runtime yet. Slice139 preserves full staging file synchronization, atomic rename and directory synchronization while adding fifteen native publication primitive-cut checks over initial/legacy/reclaimed selections. Exact selected metadata, acknowledged hard state, session advance and lock ownership survive process-level interruption; missing initial selection fails closed. A measured sync_data experiment was rejected after an unknown-outcome run and is not the production primitive. No physical power-loss or macOS execution proof."
     },
     {
       "design_id": "C08",

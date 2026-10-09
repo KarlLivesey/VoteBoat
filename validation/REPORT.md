@@ -3369,3 +3369,44 @@ are redacted and hardware reproduction is limited by omitted private inventory.
 Next investigate recoverable bounded manifest publication without dropping required
 sync/selection dependencies. Full P0–P7 active, RPL-1.5 retained, pack preserved,
 P8/Windows deferred, CI background.
+
+## Slice139 — publication interruption evidence and rejected data-sync experiment
+
+New private native publication helper retains original create/write/full sync/
+rename/directory-sync dependencies and adds primitive fault injection for tests.
+15 cuts cover initial,legacy and reclaimed manifests, exact selection, unchanged
+acknowledged hard state, exclusive lock and session recovery. Missing initial
+selection fails closed. No new protocol/provider/format or durability downgrade.
+
+The staging sync_data experiment preserved data/essential-metadata synchronization
+and directory/log barriers, but was reverted after an incomplete candidate run.
+Primary rationale: Rust File::sync_data and Linux fsync/fdatasync documentation
+linked in performance/slice139/README.md. Final code retains sync_all. Historical
+experiment.patch and source/binary hashes describe the tested candidate, not the
+final source. Control binary hash matched138's executable before copying.
+
+Actual experimental checks: native library7 tests pass0.06s after5.43s build;
+store9 and timing2 pass0.01s after8.23s build; Clippy all-feature/all-target
+-D warnings6.63s;release build15.93s. After restoration native library7 pass0.05s
+after4.04s build; real three-process TCP/TLS leader replacement/original retry/
+native-file recovery1/1 passes0.96s after6.96s build. Final store/Clippy checks
+recorded below. No claim of physical power-loss, macOS or new QUIC execution.
+
+Sequential marked diagnostic control:256 measured receipts,49.777019s,
+5.143ops/s,p991030.629025ms,recovered320,retries verified,workers joined. Raw
+receipt and journal-stage validators pass. Candidate exits1 at operation229
+Unknown(LeadershipChanged):164 retained receipt rows IDs65–228 independently
+pass identity/value/group/index/latency arithmetic; original error, replica states,
+journal failure snapshot and workers_joined=true cleanup retained. No complete
+candidate summary/performance/recovery result; raw checker correctly rejects it.
+Neither election causation nor sync_data unsafety is established. No preferred
+rerun or optimization acceptance. Marked diagnostics do not satisfy the original
+uninstrumented250ms gate; it and sustainable capacity remain open.
+
+Performance/slice139 retains privacy-safe raw evidence and experiment provenance.
+Next actual networked nested retirement closes another P6 gap; P7 remains active
+with the entire P0–P7 scope. RPL-1.5 and pack retained; P8/Windows deferred, CI
+background. None of these finite checks certifies the full baseline.
+
+Final restored store9/timing2 pass0.02s after4.64s build; final all-feature/all-target
+Clippy -D warnings7.96s passes. All handles terminal.

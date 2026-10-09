@@ -1,0 +1,3 @@
+replica=1 group=1 role=Follower term=1 commit=229 applied=229
+replica=2 group=1 role=Leader term=2 commit=228 applied=228
+replica=3 group=1 role=Follower term=2 commit=228 applied=228

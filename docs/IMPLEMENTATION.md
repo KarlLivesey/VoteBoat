@@ -111,22 +111,27 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Startup file attribution (current slice138, P1/P7).** Purpose: measure
-   actual append/log-sync/manifest calls without substituting a shared assembly.
-   Dependencies:137 failure retention, native JournalIo/startup contracts.
-   Completion: optional fixed-size native reader, exact result/format/lifetime and
-   crash tests, marked diagnostic with raw stage validation, separate unchanged
-   reference, no diagnostic substitution for original250ms acceptance.
-2. **Cause-supported improvement (next, P1/P7).** Purpose: reduce demonstrated
-   cost while preserving all durability dependencies. Dependencies:138 stage
-   evidence plus remaining critical-path uncertainty. Completion: small explicit
-   dependency/restart schema, targeted crash/conformance regressions and useful
-   real service result; do not remove a sync/publication because a counter is high.
-3. **Matched acceptance and remaining baseline gaps (following, P0–P7).**
-   Purpose: verify improvement at original correctness/p99 and continue lifecycle/
-   admission/platform work. Dependencies:item2 justified change. Completion:
-   matched uninstrumented reference and original250ms gate, honest failure reporting
-   and requirement ledger review. Every unfulfilled P0–P7 requirement stays active.
+1. **Staging synchronization experiment (current slice139, P1/P7).** Purpose:
+   test the measured publication cost with unchanged manifest/selection format.
+   Dependencies:138 file attribution and JournalIo recovery contract. Completion:
+   initial/legacy/reclaimed primitive-cut tests, store failure regression and
+   sequential hash-verified control/candidate runs with all recovery checks.
+   Retain production change only if evidence justifies it; failed experiments
+   still retain useful native publication crash regressions and raw evidence.
+2. **Native nested retirement (next, P1/P6).** Purpose: retire and reclaim an
+   actual previously assigned nested source after its networked later transfer,
+   preserving tombstones/retries and refusing stale service. Dependencies:134
+   native-file retirement,135 networked nested movement and existing retention
+   release/RetirementGuard contracts. Completion: own schema and native public
+   path with lost results/reopen/retirement checkpoint/reclamation, exact retained
+   source lineage, no dual owner and continued successor service. This closes a
+   remaining lifecycle gap instead of repeating unsuccessful performance trials.
+3. **Broader baseline validation and measured runtime work (following, P0–P7).**
+   Purpose: keep native lifecycle acceptance tied to the complete original goal.
+   Dependencies:item2 evidence plus baseline ledger. Completion: review remaining
+   resource fairness/discovery/platform/fault gates, choose a bounded next path
+   and its own schema. P7 fixed250ms/sustainable-capacity requirements remain
+   unmet; publication data-sync was rejected, not substituted for acceptance.
 
 ### How the current work fits globally
 
@@ -9752,3 +9757,92 @@ measured cost, with an explicit dependency/restart/failure schema before editing
 never remove a sync because its counter is high. Following matched original
 correctness/250ms acceptance and remaining baseline lifecycle/admission/platform
 work. Macro P1/P7 advances; full P0–P7 active, P8/Windows deferred, CI background.
+
+## Slice139 schema plan — manifest staging data synchronization experiment
+
+Previous138 progressed/pushedb2fd209; clean tree at start. Journal call evidence
+identifies publication37.5–40ms versus log-sync19.6–22ms, but not every client
+critical-path cause. Review existing manifest recovery, session advancement,
+replacement generations and JournalIo publication dependency contract before edit.
+
+Prefer a small format-preserving experiment over a dual-slot manifest redesign:
+dual-slot fallback raises stale-session/corruption questions and would require a
+new recoverable selection/migration protocol. Current proposal keeps immutable
+staging, atomic rename and directory sync. Use File::sync_data for manifest
+staging bytes before rename, retaining log sync_all and final directory sync_all.
+File contents and retrieval-essential metadata (including size) must be durable;
+mtime/atime are not consensus state. Rust's public contract permits platform
+fallback to sync_all. Check primary Rust/Linux documentation; macOS execution
+still absent. No buffered durability mode, removed dependency or new format.
+
+Data/API shape: JournalIo and52-byte manifests unchanged. Private publish_with
+helper follows create/truncate staging -> write all -> data sync -> rename current
+manifest -> directory sync. Primitive-boundary callbacks are test-only fault
+injection, matching existing replace_with structure, not a service policy. Return
+success only after the final directory barrier; any error leaves native store
+fenced and exposes no durability receipt. Lock ownership persists until drop.
+After interruption, recover old or new valid manifest, never a partial selected
+file; complete unacknowledged synchronized log frames may recover normally.
+Initial publication has no old manifest and needs distinct refusal/retry tests.
+
+Acceptance: native-file interrupted publication at each primitive, both legacy
+and post-reclaim slot names, preserves acknowledged hard state/log history and
+exclusive lock; initial-publication cuts fail closed or recover valid complete
+metadata; existing store sync/publication failure and replacement crash suites;
+real TCP startup/reopen/retry/join. Benchmark diagnostic and uninstrumented runs
+use original workload/timers/budget. Treat as an experiment: revert the production
+primitive if it shows no justified benefit rather than accumulating an unmeasured
+storage change. Retain failed measurements and all prior full-goal gaps.
+
+Current mini deliverable: staged-file synchronization experiment (P1/P7), depends
+on138 and JournalIo contracts, checks above. Next: matched original250ms acceptance
+and choose further measured critical-path work. Following: return to unresolved
+baseline lifecycle/admission/platform ledger. Full P0–P7 remains active; P8/Windows
+and CI rules unchanged. No completion percentage inferred.
+
+## Slice139 implemented — publication interruption checks, experiment rejected
+
+Private FileLogIo::publish_with exposes the existing five primitive boundaries to
+native-file fault tests, matching replace_with's test-only callback structure.
+Production delegates with an empty callback and retains full staging sync_all,
+atomic rename and directory sync_all. No public seam, format, generation, timer,
+worker or durability rule changed. New tests cover initial publication and both
+legacy/reclaimed generation names at all15 cuts; selection is exact old/new,
+lock survives failure, acknowledged hard state survives reopen and session
+advances. Missing initial selection fails closed. Finite process/primitive cuts
+are not device power-loss proof.
+
+Experimental staging sync_data was tested using its primary documented contract,
+with required rename/directory/log dependencies unchanged. Control binary SHA
+matched138 before copying; candidate exact patch/source/binary hashes retained.
+Both marked diagnostic workloads were sequential Linux/Btrfs TCP startup256/window1,
+64warmup,8-byte commands,original timers,without overlapping builds/bulk work.
+Control completed49.777019s,5.143ops/s,p991030.629025ms,recovered320/retries/joins
+verified; raw receipts and journal arithmetic pass. Candidate failed operation229
+Unknown(LeadershipChanged), retaining164 valid receipt rows IDs65–228, states,
+journal failure snapshot and workers_joined=true cleanup. No complete candidate
+summary/performance/recovery proof; raw validator refuses it. No preferred rerun.
+
+Because no valid complete benefit was demonstrated, restored staging sync_all
+instead of retaining an unmeasured production change. This does not prove that
+sync_data caused the election or is unsafe. Complete diagnostic numbers cannot
+substitute for uninstrumented fixed250ms acceptance. Full raw/public evidence and
+historical experiment patch are in validation/performance/slice139, without
+private host metadata/paths. Final source differs from the archived experiment.
+
+Experimental native library7 tests pass0.06s after5.43s build; conformance9 plus
+timing2 tests pass0.01s after8.23s build; Clippy all-target/all-feature -D warnings
+6.63s,release15.93s. After restoration native library7 tests pass0.05s after4.04s
+build. Final real three-process TCP/TLS leader-loss/retry/file-recovery test passes
+0.96s after6.96s compile. Partial candidate receipt arithmetic explicitly excludes
+unknown229 and complete recovery claims. No CI gate used.
+
+Macro review:139 strengthens P1 native publication evidence but does not complete
+P7. Next deliverable selected from the full ledger is networked nested retirement
+(P1/P6), using134's file retirement and135's actual later handoff. It will require
+its own schema/retention/cleanup plan and exact lineage before edit. Following
+broader baseline/fairness/platform and justified runtime work; all original P0–P7
+requirements remain active. P8/Windows deferred, RPL-1.5 retained, pack preserved.
+
+Final restored store9/timing2 pass0.02s after4.64s build; final all-feature/all-target
+Clippy -D warnings7.96s passes. All benchmark/test/check handles terminal.

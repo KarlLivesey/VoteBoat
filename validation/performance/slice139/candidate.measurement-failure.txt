@@ -1,0 +1,2 @@
+valid_measurement=false phase=measurement completed=164 unresolved=0 poll_rounds=189908 host_poll_ns=4352463506 max_host_poll_ns=6318742 persistence_batches=987 worker_events=1970 application_deliveries=490
+original_error=operation 229: non-applied outcome invalidates measurement: Unknown(LeadershipChanged)
