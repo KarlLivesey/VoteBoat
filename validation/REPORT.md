@@ -2561,3 +2561,31 @@ arbitrary namespace retirement; that branch was inspected, not independently
 fault-injected in this slice. Existing target admission/apply/fencing remains the
 authority. No wire/WAL/Raft change, macOS/separate-host, performance, arbitrary-
 fault or complete P0–P7 claim. P8/Windows deferred; full goal remains active.
+
+## Slice113 — initial constrained learner placement
+
+Executed Linux checks in this goal turn:
+
+- All-feature placement planning 5/5 and placement authorization 8/8 pass.
+- Core-only planning 4/4 and native-without-TLS planning 5/5 pass.
+- Actual executable TCP/TLS and QUIC add/enroll/promote/retire/restart histories
+  2/2 pass (12.31 seconds). Both consume a planner-produced learner record from
+  recovered membership, preserve ordinary readiness and joint/final admission,
+  and retain configuration identities and Counter deduplication after reopen.
+- All-feature/all-target Clippy with warnings denied passes. fmt/diff and inventory
+  shape/conformance-path checks pass (78 records).
+
+Planning tests exercise independent downstream providers, authorization denial,
+malicious scope/sample/store/candidate output, stale/invalid samples, joint state,
+operation-history bounds/reuse, configuration overflow, eligibility and stable
+ranking across input order. Candidate capacity/domain inputs are fixtures, not
+measured capacity or proof of physical independence. Planning is synchronous and
+non-durable; only existing ordinary membership persistence grants authority.
+
+The prior full routed lifecycle run (session21618) remains live at this record,
+with another TCP checkpoint delegation history passed. It is not counted as a
+terminal suite pass and must be observed through the same handle. No new slice113
+check failed. Automatic voter replacement/global rebalancing, live capacity
+collection/reservations, general public mutation ingress and the broader baseline
+remain unfinished. No macOS/separate-host, performance or full-protocol proof
+claim. Full P0–P7 remains active, P8/Windows deferred.

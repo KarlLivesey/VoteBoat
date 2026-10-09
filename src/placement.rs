@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! Administrative placement checks. These never replace journal or quorum rules.
 use crate::{identity::*, membership::*};
+mod planning;
+pub use planning::*;
 
 pub const PLACEMENT_AUTHORIZATION_CONTRACT_VERSION: u32 = 1;
 

@@ -53,7 +53,7 @@ component-contracts.json and its linked contract document.
 | C15 admission | Core ceilings/reserves plus public AdmissionPolicy/AdmissionLease, native shareable bulk provider and NativeOutbound integration; tests/admission.rs, tests/transport.rs; slice109 | Initial outbound path. Policy cannot bypass hard ceilings or veto reserved control. General client/disk/connection/shared-buffer admission and fairness remain. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
 | C17 discovery | PeerDiscovery/DiscoveryConnector; ManifestDiscovery/resolve_discovered and NativeAuthorityDiscovery from original Directory quorum reads; tests/discovery.rs, tests/connect.rs, tests/routing.rs, tests/routed/native.rs | Initial peer-address and responsibility-authority observation seams. Automatic remote fetch/refresh, dynamic executable endpoints and discovery-selected QUIC peer establishment remain; source hints cannot activate owners. |
-| C18 placement | PlacementAuthorizer and native declared deployments | Scoring/planning/move proposals are missing; recommendations cannot activate membership. |
+| C18 placement | PlacementAuthorizer plus PlacementPlanner/plan_learner and native bounded deterministic learner selection; tests/placement_planning.rs and executable TCP/QUIC membership histories, slice113 | Initial learner placement only. Automatic voter replacement/removal, global rebalancing, measured sample collection and resource reservations remain; recommendations cannot activate membership. |
 | C19 observability | New Observer / NativeCounterObserver, post-poll capture and local service metrics | Fixed volatile counts only. No timer/queue/disk latency attribution, per-group event history or external exporter integration claim. |
 | C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | General public mutation endpoint and generic envelopes remain gated. |
 | C21 authorization | PrincipalCredentials / ServiceAuthorizer / checked session gate and NativeServiceAccess; optional mutual-TLS counter command mode; tests/authorization.rs and tests/counter_service.rs, slice110 | Initial group-scoped reader/writer/admin gate. Live credential rotation, external issuer integration, durable principal audit and general configuration mutation ingress remain. Unflagged command mode stays trusted plaintext loopback. |
@@ -63,13 +63,12 @@ component-contracts.json and its linked contract document.
 
 ## Next usable path
 
-1. Finish slice112 authority-discovery conformance and routed lifecycle regressions;
-   retain explicit observation lifetime and remote-fetch/lifecycle limits.
-2. Implement C18 bounded placement planning through existing committed placement
-   authorization; proposals must not bypass membership or ownership fencing.
-3. Reassess P4 generic application envelopes/public mutation ingress against the
-   now available admission, principal and discovery seams, keeping the existing
-   trusted static/member service usable during that work.
+1. Finish recording slice113 learner-placement validation; preserve the pending
+   broad routed lifecycle run and its eventual terminal result separately.
+2. Audit and implement P4 generic application envelopes/public mutation ingress
+   against admission, principal and placement seams, retaining trusted service use.
+3. Close the next concrete admission or lifecycle dependency identified by that
+   audit; broader C18 orchestration and P4/P6/P7 gates remain explicit.
 
 These are linked deliverables, not a redefinition of the full goal. P4/P6/P7,
 platform/fault and the remaining supporting catalogue gaps stay in this ledger.

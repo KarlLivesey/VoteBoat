@@ -431,3 +431,7 @@ now has selected TCP/QUIC WAL/checkpoint split → merge → split recovery evid
 including parent outages and final writes with ancestors stopped. Abandoned
 reservation recovery, general retention and broader platform/fault validation
 remain unfinished.
+
+[Initial learner placement](docs/PLACEMENT_PLANNING.md) exposes host/native
+recommendations through checked placement authorization and ordinary membership
+admission. It preserves voting policy and does not perform automatic rebalancing.

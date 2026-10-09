@@ -27,6 +27,7 @@ pub mod node;
 pub mod observability;
 pub mod outbound;
 pub mod placement;
+pub mod placement_planning;
 #[cfg(feature = "quic")]
 pub mod quic;
 #[cfg(feature = "quic")]

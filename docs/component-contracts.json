@@ -1141,7 +1141,7 @@
         "tests/startup.rs",
         "tests/counter_service.rs"
       ],
-      "scope": "Exact group incarnation and replica store assignments, minimum voting domains excluding learners, optional survival of each single voting-domain loss evaluated using actual validated weighted/recursive policies. Current stable, accepted joint target and proposed configuration checked; final cannot skip old/new constraints. Trusted operator labels do not certify physical independence. Fixed 4096-replica/64-domain ceilings, unique exact stores and feasible nonzero domain minimum; constructor denial returns original assignments. Synchronous bounded checks retain no requests or receipts and create no durability effect/generation/watermark. Caller reconstructs policy on restart; queued requests recheck selected policy at execution. Placement cannot waive core journal/readiness or provider-capacity obligations. NativeAdministrationPlan composition also exercises TCP/QUIC promotion, joint/final commitment and native file recovery from a prepared initial learner; broader faulted lifecycle remains required. C18 authorization subset only: eligible-host planning, scoring and move proposals remain pending. Slice 76 executable TCP/QUIC histories start from the original bootstrap without seeded configuration records, commit learner addition and promotion of exact store 404/incarnation 7 through trusted plans, retry real offline checkpoint enrollment, deny promotion while the target is offline, and retire absent original voter 1 after a fresh survivor-quorum write. Native checkpoints/reopen preserve exact final voters 2/4, all six operation identities and Counter deduplication while retired routes are omitted. QUIC exercises a majority-wrapped weighted 2/1/2 promotion policy. Maintenance stops and that specific failed-voter schedule do not prove the remaining broad fault-release gates."
+      "scope": "Exact group incarnation and replica store assignments, minimum voting domains excluding learners, optional survival of each single voting-domain loss evaluated using actual validated weighted/recursive policies. Current stable, accepted joint target and proposed configuration checked; final cannot skip old/new constraints. Trusted operator labels do not certify physical independence. Fixed 4096-replica/64-domain ceilings, unique exact stores and feasible nonzero domain minimum; constructor denial returns original assignments. Synchronous bounded checks retain no requests or receipts and create no durability effect/generation/watermark. Caller reconstructs policy on restart; queued requests recheck selected policy at execution. Placement cannot waive core journal/readiness or provider-capacity obligations. NativeAdministrationPlan composition also exercises TCP/QUIC promotion, joint/final commitment and native file recovery from a prepared initial learner; broader faulted lifecycle remains required. Slice113 adds initial learner planning through this authorization seam; broader voter replacement and global move orchestration remain pending. Slice 76 executable TCP/QUIC histories start from the original bootstrap without seeded configuration records, commit learner addition and promotion of exact store 404/incarnation 7 through trusted plans, retry real offline checkpoint enrollment, deny promotion while the target is offline, and retire absent original voter 1 after a fresh survivor-quorum write. Native checkpoints/reopen preserve exact final voters 2/4, all six operation identities and Counter deduplication while retired routes are omitted. QUIC exercises a majority-wrapped weighted 2/1/2 promotion policy. Maintenance stops and that specific failed-voter schedule do not prove the remaining broad fault-release gates."
     },
     {
       "design_id": "C06/C07/C10/C20",
@@ -1597,6 +1597,22 @@
         "tests/routed/native.rs"
       ],
       "scope": "Bounded nonblocking source for exact responsibility/directory incarnations, minimum epoch/generation and expiring provider-local observations. Common native/host consumer fills only missing checked route segments under lookup/path budgets and normal cache admission; cached child routes bypass source/parent. Native observe validates original read binding/group/request, bounds replay with highest accepted sequence, rejects regressing index/term, preserves original rejection allocation, retains manifest floors and invalidates only exact observations. Fresh original reads refresh unchanged manifests; duplicates do not renew. Actual Directory quorum-read to discovered TCP/QUIC child write/checkpoint/restart histories preserve parent independence. No automatic remote fetch, external signed proof, owner activation, namespace recreation or persistent authority; observation IDs end with provider lifetime."
+    },
+    {
+      "design_id": "C18",
+      "public_contract": "PlacementPlanner / PlacementRequest / plan_learner",
+      "operations": [
+        "select",
+        "validate",
+        "plan_learner"
+      ],
+      "native": "NativePlacementPlanner: stateless deterministic ranking over bounded explicit host samples; same common consumer as downstream planners.",
+      "conformance": [
+        "tests/placement_planning.rs",
+        "tests/placement.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Borrowed exact group/configuration/sample, monotonic freshness, unique bounded candidates/stores/domains and complete current assignments. Common consumer checks provider output, operation/configuration/replica capacity, preserves voters/policy/existing learners and invokes PlacementAuthorizer before returning one learner record. No I/O, asynchronous accepted work, durability effects, reservations or quorum weight changes. Actual TCP/QUIC executable membership histories consume a planner-produced record from recovered membership before enrollment/promotion/retirement/checkpoint/restart. Initial learner planning only; automatic voter replacement, global orchestration and live measured samples remain absent."
     }
   ],
   "not_yet_implemented": [
@@ -1610,7 +1626,7 @@
     "compression",
     "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",
-    "placement-planning-scoring-and-move-proposals",
+    "voter-replacement-and-global-placement-orchestration",
     "service-enforced-configuration-application-envelope",
     "recursive-directory-ownership-lifecycle"
   ]

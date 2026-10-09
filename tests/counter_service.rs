@@ -1336,9 +1336,72 @@ fn complete_executable_membership_history(quic: bool) {
     cluster.deployment = Some(deployment.clone());
     let provisioned =
         "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 4 4\n";
+    // Plan from actual recovered membership, then carry the ordinary record
+    // through the same trusted executable administration path as a Rust host.
+    let state = recovered_state_for(&cluster.root.join("1"), 1, store(1), 42, (700, 42));
+    let current = state.membership_at(state.commit_index).unwrap();
+    let candidates = [1usize, 2, 4].map(|n| voteboat::placement::PlacementCandidate {
+        node: NodeId::new(n as u64).unwrap(),
+        placement: voteboat::placement::ReplicaPlacement {
+            store: store(n),
+            domain: FailureDomainId::new(n as u64).unwrap(),
+        },
+        enabled: true,
+        free_bytes: 1024 * 1024,
+        free_replica_slots: 1,
+        load_permille: 100,
+    });
+    let authorizer = voteboat::native::placement::NativePlacementAuthorizer::new(
+        GroupIdentity {
+            id: GroupId::new(1).unwrap(),
+            incarnation: GroupIncarnation::new(1).unwrap(),
+        },
+        candidates.iter().map(|c| (c.node, c.placement)).collect(),
+        voteboat::placement::PlacementRequirements {
+            minimum_voting_domains: 2,
+            survive_any_single_domain_loss: false,
+        },
+    )
+    .unwrap();
+    let planned = voteboat::placement::plan_learner(
+        &voteboat::native::placement_planning::NativePlacementPlanner,
+        &authorizer,
+        voteboat::placement::PlacementRequest {
+            snapshot: voteboat::placement::PlacementSnapshot {
+                group: authorizer.group(),
+                configuration: current.id(),
+                generation: voteboat::placement::PlacementSampleGeneration::new(1).unwrap(),
+                observed_at: voteboat::runtime::MonoTime(0),
+                expires_at: voteboat::runtime::MonoTime(100),
+                candidates: &candidates,
+            },
+            current: &current,
+            now: voteboat::runtime::MonoTime(1),
+            minimum_free_bytes: 1024,
+        },
+        OperationId::new(1002).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(planned.recommendation.node, NodeId::new(4).unwrap());
+    let voteboat::membership::ConfigurationChange::Learners(next) = &planned.record.change else {
+        panic!("planner changed voters");
+    };
+    assert_eq!(next.policy(), current.stable().policy());
+    assert_eq!(next.voter_stores(), current.stable().voter_stores());
+    let learners = next
+        .learners()
+        .keys()
+        .map(|n| n.get().to_string())
+        .collect::<Vec<_>>()
+        .join(",");
     fs::write(
         &plan,
-        format!("{provisioned}learners 1002 4 5 4 m:2 v:1 v:2\n"),
+        format!(
+            "{provisioned}learners {} {} {} {learners} m:2 v:1 v:2\n",
+            planned.record.operation.get(),
+            planned.record.expected.get(),
+            next.id().get()
+        ),
     )
     .unwrap();
     for id in [1, 2] {

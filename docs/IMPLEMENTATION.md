@@ -7240,3 +7240,90 @@ P8/Windows remain deferred, CI background.
    Completion checks: concrete bounds at every admission/apply/checkpoint path,
    before-persist refusal, authorized native transition and faulted restart evidence.
    Advances macro online membership and cross-cutting P0, retaining static usability.
+
+## Slice113 schema plan — constrained learner placement recommendations
+
+C18 advances P0 composition and P4/P5 selective placement. Add public
+PlacementPlanner::select over a borrowed, bounded PlacementSnapshot: exact group/
+configuration, explicit sample generation, observed/expiry monotonic times and
+fixed candidate metadata (node/store/domain, enabled, free bytes/replica slots,
+load permille). PlacementRequest adds current Membership, supplied now and minimum
+free bytes. Result is a Copy recommendation bound to the same group/config/sample.
+No provider owns application state, sockets, workers or accepted asynchronous work.
+
+A common plan_learner consumer validates snapshot freshness, unique bounded
+candidates/stores/domains, complete exact current assignments, no joint transition,
+new operation/configuration capacity and provider output. It constructs only a
+Learners record preserving current voting policy/stores and existing learners,
+then invokes PlacementAuthorizer. Host/native planners pass the same gate. Final
+Node configuration admission still checks authorization, routes/credentials,
+application envelope and ordinary durable membership semantics. Sample values
+are advisory host input, not reservations, voter readiness or measured throughput.
+
+NativePlacementPlanner is deterministic and stateless: eligible unused candidates
+must be enabled with slots and sufficient free bytes; rank fewer existing replicas
+in the asserted failure domain, lower load permille, more free bytes, then NodeId.
+No score changes quorum weights or activates ownership. Planning/record creation
+are synchronous; refusal leaves borrowed inputs/current membership untouched.
+Restart supplies a fresh explicit sample and current recovered membership. An
+old recommendation is checked against the current sample/configuration before
+any new record is built; committed operation retries use existing administration.
+
+Acceptance: independent downstream planner with native and host placement
+checks; malicious scope/store/sample/candidate output, stale configuration/time,
+capacity/duplicate/disabled/no-candidate and deterministic-order refusal; native
+ranking does not mutate membership. Real TCP/QUIC executable membership history
+uses a planner-produced learner record from actual recovered configuration, then
+retains enrollment/readiness/joint/final/retire/checkpoint/retry evidence. This is
+initial learner placement, not automatic voter replacement, global rebalancing,
+resource reservation or data-ownership movement. Those C18 requirements remain
+explicit rather than being renamed complete.
+
+### Slice113 implemented evidence and macro review
+
+Public PlacementPlanner, borrowed PlacementRequest/Snapshot and checked
+plan_learner now produce one authorized learner-addition record. Native selection
+is deterministic across candidate order; authorization and ordinary membership
+admission remain separate gates. No consensus, wire or persistent format changes.
+The real executable TCP/TLS and QUIC membership histories consume a planner record
+built from recovered membership before enrollment/readiness/promotion/retirement.
+
+Focused all-feature planning 5/5 and existing placement 8/8 passed in this turn.
+Tests cover downstream planner/authorizer injection, forged recommendation scope/
+sample/store, existing/disabled candidates, stale/invalid samples, no eligible
+candidate, ranking/ties, active joint state, operation-history exhaustion/reuse
+and configuration-ID overflow. Feature and actual service checks are recorded in
+validation/REPORT.md after completion. The prior broad routed lifecycle session
+21618 remains running: another TCP checkpoint delegation recovery case completed;
+no terminal pass is inferred from partial output. Preserve the exact run.
+
+P0/P4/P5 gain initial bounded placement planning with a real native consumer.
+Full C18 automatic replacement/removal/global orchestration and measured capacity
+collection remain unfinished. General public mutation ingress and generic
+application envelopes are the next linked P4 dependency. P6 interruption/retention,
+P7 performance/platform/fault evidence and all earlier baseline gaps remain open.
+The full P0–P7 goal remains active; P8/Windows are deferred and CI is background.
+
+### Linked mini plan after slice113
+
+1. Current — initial learner placement (implemented above). Purpose: select a
+   useful candidate without changing voting policy or skipping durable membership.
+   Dependencies: recovered membership, explicit fresh sample, placement authorizer
+   and trusted administration. Completion checks: provider conformance, stale/
+   capacity/output refusal, deterministic ranking and actual TCP/QUIC enrollment,
+   promotion, retirement and restart. Advances macro composition/online membership
+   and selective placement (P0/P4/P5); broader orchestration remains planned.
+2. Next — generic application envelope and public mutation ingress audit (P4).
+   Purpose: identify and close the concrete gap between trusted counter plans and
+   safe host/application administration. Dependencies: inspect current application
+   limits at admission/apply/checkpoint, C15 admission, C21 principal checks and
+   placement/configuration gates. Completion checks: evidence map of every relevant
+   path, then a bounded schema with before-persist refusal, authorized transition
+   and restart tests. Advances macro usable embedding/online membership (P0/P4).
+3. Following — implement the first missing generic envelope/ingress path from that
+   audit. Purpose: make the audited administration capability usable end to end.
+   Dependencies: the audit's exact provider and authorization contracts; explain
+   any added prerequisite against that user-visible path before editing.
+   Completion checks: downstream replacement, native successful transition,
+   unauthorized/oversized refusal and partial-progress recovery. Advances the same
+   P0/P4 milestone, preserving usable static membership throughout.
