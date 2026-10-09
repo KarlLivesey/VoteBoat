@@ -2649,3 +2649,30 @@ QUIC merge collision and cancellation checkpoint cases passed on that same run.
 It is not counted as a terminal full-suite pass. Client-supplied targets and broad
 ingress interruption schedules, macOS/separate-host/fault and performance gates
 remain open. Full P0–P7 stays active, P8/Windows deferred.
+
+## Slice116 — client-supplied full configuration targets
+
+Linux final executed checks: dynamic native TCP/QUIC histories2/2 (3.59s),
+provisioned remote/preflight3/3 (2.85s), automatic executable enrollment/promotion/
+retirement/restart2/2 (12.28s), interrupted configuration CLI1/1. All-feature/
+all-target Clippy with warnings denied, fmt/diff and inventory78 pass.
+
+New dynamic tests provision no operation records. They exercise reader/writer
+denial, malformed/truncated/duplicate/unknown-store/trailing input, valid policy
+with denied placement, learner and weighted same-electorate joint/final commits,
+exact retained retries, conflicting reuse, checkpoint/restart, compacted payload
+comparison refusal, historical operation identity status and a fresh post-restart
+record preserving Counter retry state. Oversized commands are refused by the CLI
+before exchange; no new raw authenticated oversize-frame claim. The parser grows
+vectors from parsed children under node/depth limits rather than reserving an
+untrusted branch count.
+
+Initial compilation caught one obsolete Option-plan readiness accessor; a focused
+selected-mode accessor fix passed. No persistent/wire/Raft change. Core/provider
+admission remains required after target/session/placement checks. Compacted
+operation identity alone does not compare payloads; dynamic retries then refuse
+comparison rather than invent matching targets. Broad native ingress disconnect/
+revocation, remote new-voter fault schedules, P4/P5/P6/P7 and platform/performance
+release gates remain open. Full P0–P7 active; P8/Windows deferred. The older broad
+routed lifecycle run21618 remains live with additional QUIC delegated checkpoint
+recovery passed; no terminal suite result is inferred.

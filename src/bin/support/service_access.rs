@@ -329,7 +329,7 @@ impl Channel {
             Some("add") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,
             Some("quit") => ServiceAction::Shutdown,
-            Some("configure") => ServiceAction::Configure,
+            Some("configure" | "configure-record") => ServiceAction::Configure,
             _ => return Err("unknown authorized command".into()),
         };
         let Self::Tls {

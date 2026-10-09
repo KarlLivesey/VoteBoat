@@ -443,3 +443,8 @@ execution and learner readiness refuse unavailable or understated envelopes.
 Opt-in authenticated configuration submission uses `--remote-admin-plan` and
 `configure OPERATION_ID` for provisioned intents. See [the command contract](docs/COUNTER_SERVICE.md#authenticated-submission-of-provisioned-configuration-intents)
 for phase receipts, retries and remaining general-ingress limits.
+
+`--remote-admin-policy` accepts bounded client-supplied `configure-record` targets
+without predeclared operation intents, retaining session, placement and application
+checks. [Target grammar and retry limits](docs/COUNTER_SERVICE.md#client-supplied-configuration-targets)
+include explicit refusal when compaction removed payload comparison history.

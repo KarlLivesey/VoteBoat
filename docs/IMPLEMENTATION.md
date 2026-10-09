@@ -7505,3 +7505,101 @@ Full P0–P7 active; P8/Windows deferred, CI background.
    Completion checks: disconnect/deadline before/after persistence, execution-time
    revocation, exact retry/conflict refusal, bounded retained outputs and native
    TCP/QUIC partial-progress recovery. Advances macro safe lifecycle operations.
+
+## Slice116 schema plan — client-supplied full configuration records
+
+Previous turn was progress: slice115 committed/pushed tested authenticated
+provisioned-intent submission. Reuse its one Administration owner and same session
+execution gate; factor the existing bounded record/policy parser rather than add a
+parallel mutation path. Add exclusive --remote-admin-policy FILE, requiring service
+access/recover-member. This file declares only trusted replica placements and
+application bounds; no operation intents. Exact stores come from the provisioned
+deployment. Client configure-record learners|joint|final supplies operation,
+expected/next IDs, learners and full quorum tree using existing text grammar.
+Existing 256-byte command ceiling bounds parsing/allocation; recursive policy
+limits and Configuration/Policy constructors remain mandatory.
+
+Administration holds one owned parsed record while preparing readiness/queued
+execution. Dynamic authorization checks that exact record/requirements plus the
+operator's NativePlacementAuthorizer. The authenticated channel/deadline is
+rechecked at execution as before. Completion/disconnect cancels observation and
+clears that volatile target, not committed work; restart reconstructs policy and
+stays dormant. No new durable format, quorum model or generation.
+
+Before submission, exact retained committed records can return duplicate success;
+retained uncommitted exact records return Unknown rather than append again. A
+conflicting record with the same operation refuses. A final record may continue
+only when it exactly matches existing committed-joint resume output. Compacted
+completed operation identity without its original payload returns history-
+unavailable, never payload equality or safe reuse. The core repeats journal checks
+at execution; local absence is not a cluster-wide non-execution proof.
+
+Acceptance: native TCP/QUIC transitions with no predeclared operation records,
+role/scope refusal, malformed/duplicate/truncated/unknown-store/placement and
+oversized input before commitment, learner and joint/final commits, exact retry,
+conflict refusal, compacted-history refusal and new authorized records after
+checkpoint/restart. Existing automatic/provisioned paths must remain functional.
+Broader socket-loss/revocation and new-voter remote fault schedules stay in the
+next mini plan; full P0–P7 is not reduced to this endpoint.
+
+### Slice116 implemented evidence and macro review
+
+Client-supplied configure-record targets now work under --remote-admin-policy
+with no provisioned operation intents. The shared parser validates complete
+learner/joint/final records, resolves exact stores from trusted placement and grows
+policy child vectors only after successful child parsing. One immutable target is
+retained through readiness/execution and cleared on completion/cancellation or
+blocked output. The same native/host authorization and Node provider/core gates
+remain authoritative. Exact retained retry comparison is separate from historical
+identity: conflicting reuse refuses and compacted completed payloads are not
+invented. A matching committed-joint final can still use ordinary resume semantics.
+
+Executed Linux: dynamic target TCP/QUIC histories 2/2 (final run3.59s), provisioned
+remote/preflight3/3 (2.85s), automatic full enrollment/promotion/retirement/restart
+2/2 (12.28s), interrupted configuration CLI1/1, all-feature/all-target Clippy,
+fmt/diff and inventory78 pass. Dynamic cases cover no predeclared operations,
+reader/writer denial, malformed/truncated/duplicate/unknown-store/trailing input,
+placement refusal, exact/conflicting retained retries, a weighted same-electorate
+joint/final, compacted-history refusal and fresh post-restart configuration with
+application dedup. Oversized input is refused by the bounded CLI before exchange;
+it is not a new adversarial authenticated raw-frame campaign. The initial compile
+identified one remaining Option-plan accessor in readiness; it was replaced with
+the selected mode's requirements accessor, then relevant checks passed. No Raft,
+wire or persistent format redesign.
+
+Macro review: P0/P4/C20/C21 now have a real authenticated full-target consumer in
+addition to provisioned/automatic plans. It is bounded to this fixed-group demo's
+256-byte command format and trusted provisioned identity/placement scope; generic
+Rust hosts continue to use ConfigurationRequest. This does not finish broad
+public administration fault-release, remote new-voter readiness under failures,
+P4 membership interruption schedules, P5/P6 recursive lifecycle, P7 performance
+or macOS/separate-host validation. Exact comparison history after compaction is
+explicitly unavailable rather than a complete forever-idempotent mutation service.
+Full P0–P7 stays active; P8/Windows deferred and CI background. The older routed
+lifecycle run21618 remains live on its original handle, with another QUIC delegated
+split checkpoint recovery passed; no terminal full-suite pass is claimed.
+
+### Linked mini plan after slice116
+
+1. Current — authenticated client-supplied full targets (implemented above).
+   Purpose: administer configuration without predeclaring operation intents.
+   Dependencies: shared parser, trusted placement/deployment, current immutable
+   target, original session gate, readiness and ConfigurationRequests/Node.
+   Completion checks: native learner/joint/final commits, malformed/placement/
+   role refusal, exact retry/conflict and explicit history-unavailable behavior,
+   fresh operation after checkpoint/restart. Advances public composition and
+   usable safe membership administration (P0/P4/C20/C21).
+2. Next — native target-ingress disconnect/deadline and retry checks (P4/P6).
+   Purpose: validate the accepted-record lifetime through lost observation and
+   leadership/restart changes. Dependencies: existing target/session binding and
+   ConfigurationRequests cancellation/status; inspect actual phase boundaries
+   before adding fault injection. Completion checks: before/after-persist socket
+   loss, deadline authorization refusal, exact retry/conflict recovery and bounded
+   retained response cleanup on real TCP/QUIC. Advances macro safe operations.
+3. Following — remote new-voter readiness/promotion under partial progress (P4).
+   Purpose: extend dynamic target evidence beyond same-electorate transitions.
+   Dependencies: actual offline enrollment and exact provisioned store identity,
+   fresh authenticated readiness, joint/final and preceding ingress recovery.
+   Completion checks: offline-target refusal, catch-up, stale-session/readiness
+   refusal, successful promotion/retirement and checkpoint/restart with original
+   operation/application retry identities. Advances macro safe online membership.

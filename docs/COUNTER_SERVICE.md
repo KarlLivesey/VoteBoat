@@ -694,3 +694,63 @@ lost reply; arbitrary socket-loss timing across every membership phase remains
 unverified. General client-supplied configuration targets and complete public
 administration release are still work. Earlier references to mutation ingress
 being absent apply to that broader endpoint or to the historical slice described.
+
+## Client-supplied configuration targets
+
+Slice116 adds --remote-admin-policy FILE, exclusive with both plan modes. It
+requires --service-access and recover-member. The policy file uses the same
+header/placement/replica grammar, but must contain no operation intent lines:
+
+```text
+voteboat-counter-admin-v1
+placement 2 false
+replica 1 1
+replica 2 2
+replica 3 3
+```
+
+Replica stores/incarnations come from trusted deployment provisioning. Clients
+choose a full target within that authorized deployment; they cannot replace store
+identities, credentials, placement constraints or the enforced application envelope.
+For example, address the leader explicitly with administrator credentials:
+
+```sh
+target/debug/voteboat-counter client 43000 1 configure-record learners 16001 1 2 - m:3 v:1 v:2 v:3 --service-tls /your/tls --principal 3
+target/debug/voteboat-counter client 43000 1 configure-record joint 16003 2 3 4 - w:3 1 v:1 1 v:2 1 v:3 --service-tls /your/tls --principal 3
+target/debug/voteboat-counter client 43000 1 configure-record final 16003 3 4 --service-tls /your/tls --principal 3
+```
+
+Record grammar is the same as administration plan intent lines. Learners takes
+operation, expected configuration, next configuration, comma-separated learners
+(or -), and a full quorum tree. Joint additionally names the eventual final
+configuration after its joint ID. Final names operation, expected joint ID and
+final ID. The existing 256-byte entire-command ceiling applies, as do policy
+node/depth, membership, retained-record and provider-capacity bounds. A group
+whose target cannot fit this demo command format needs the Rust ConfigurationRequest
+API; the service does not silently truncate a target.
+
+The shared parser rejects malformed/duplicate/truncated trees, unknown provisioned
+stores, duplicate learners and trailing input. It grows child vectors only after
+successfully parsing children, rather than reserving from an untrusted branch
+count. Constructors validate the complete policy/configuration. One immutable
+parsed target is retained while fresh readiness is gathered; execution checks the
+same pending authenticated channel, exact target/requirements, placement and all
+ordinary Node gates. Startup and restart remain dormant.
+
+While the original record remains in the durable log, an exact committed retry
+returns duplicate=true with its original index/term. An exact uncommitted record
+returns UNKNOWN. Conflicting operation reuse refuses. A final record can continue
+an existing committed joint only when it matches the existing resume record.
+After compaction removes a completed record's payload, configure-record refuses
+with comparison history unavailable; configuration-status can still report
+historical completed identity. That is deliberate bounded retention, not proof
+that a new target matches the old one. Preserve the entire original record when
+retrying an uncertain result. A later authorized operation uses a fresh ID and
+current configuration, rather than reusing a completed ID.
+
+Native TCP/QUIC tests cover those refusals, fresh learner records, a weighted
+same-electorate joint/final transition, checkpoint/restart, compacted-history
+refusal and another fresh client-supplied operation after restart. The original
+automatic and provisioned-intent modes retain separate regression coverage.
+Arbitrary disconnect/revocation timing, remote new-voter fault schedules, broader
+platform/fault evidence and complete administration release remain open.

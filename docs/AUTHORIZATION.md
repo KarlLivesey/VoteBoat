@@ -102,3 +102,8 @@ Live credential rotation/revocation, external issuer integration and durable
 principal audit trails remain outstanding. This slice authenticates the existing
 counter command boundary; it does not complete general service authorization or
 public configuration mutation ingress throughout P0–P7.
+
+Slice116 also consumes Configure for `configure-record` with `--remote-admin-policy`.
+The same group/session gate is rechecked at execution against one immutable full
+target and operator-provisioned placement. See [client target semantics](COUNTER_SERVICE.md#client-supplied-configuration-targets)
+for bounded parsing, exact retry comparison and compacted-history refusal.

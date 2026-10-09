@@ -55,6 +55,7 @@ struct Cluster {
     deployment: Option<PathBuf>,
     admin_plan: Option<PathBuf>,
     remote_admin: bool,
+    targets_admin: bool,
     command_access: Option<PathBuf>,
     command_principal: Option<u64>,
     tls: Option<PathBuf>,
@@ -114,6 +115,7 @@ impl Cluster {
             deployment: None,
             admin_plan: None,
             remote_admin: false,
+            targets_admin: false,
             command_access: None,
             command_principal: None,
             tls: None,
@@ -156,7 +158,9 @@ impl Cluster {
         }
         if let Some(path) = &self.admin_plan {
             command
-                .arg(if self.remote_admin {
+                .arg(if self.targets_admin {
+                    "--remote-admin-policy"
+                } else if self.remote_admin {
                     "--remote-admin-plan"
                 } else {
                     "--admin-plan"
@@ -2429,4 +2433,139 @@ fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation()
     assert!(String::from_utf8_lossy(&result.stdout).contains("same configuration operation ID"));
     assert_eq!(peer.join().unwrap(), b"configure 15001\n");
     fs::remove_dir_all(&cluster.root).unwrap();
+}
+
+fn client_supplied_configuration_history(quic: bool) {
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    let access = cluster.root.join("target-access.txt");
+    fs::write(
+        &access,
+        "voteboat-service-access-v1 1\n1 reader 1 1\n2 writer 1 1\n3 admin 1 1\n",
+    )
+    .unwrap();
+    cluster.command_access = Some(access);
+    cluster.command_principal = Some(3);
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    cluster.leader();
+    assert!(authenticated_write(&cluster, &["add", "16000", "42"]).contains("Value(42)"));
+    cluster.stop();
+    let policy = cluster.root.join("target-policy.txt");
+    // No predeclared operation identity or target configuration.
+    fs::write(
+        &policy,
+        "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\n",
+    )
+    .unwrap();
+    cluster.admin_plan = Some(policy);
+    cluster.targets_admin = true;
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    for principal in [1, 2] {
+        cluster.command_principal = Some(principal);
+        let denied = cluster.request(
+            leader,
+            &["configure-record", "learners 16001 1 2 - m:3 v:1 v:2 v:3"],
+        );
+        assert_eq!(
+            String::from_utf8(denied.stdout).unwrap(),
+            "ERR AUTHORIZATION\n"
+        );
+    }
+    cluster.command_principal = Some(3);
+    for malformed in [
+        "",
+        "learners",
+        "learners 0 1 2 - m:3 v:1 v:2 v:3",
+        "learners 16099 1 2 - m:16383 v:1",
+        "learners 16099 1 2 - m:3 v:1 v:1 v:3",
+        "learners 16099 1 2 - m:3 v:1 v:2 v:4",
+        "learners 16099 1 2 1,1 m:2 v:2 v:3",
+        "learners 16099 1 2 - m:3 v:1 v:2 v:3 trailing",
+        "joint 16099 1 2 3 - m:1 v:1", // Valid tree, violates placement.
+    ] {
+        let refused = cluster.request(leader, &["configure-record", malformed]);
+        let text = String::from_utf8(refused.stdout).unwrap();
+        assert!(!refused.status.success(), "accepted {malformed}: {text}");
+        assert!(text.starts_with("ERR "), "{text}");
+        assert!(cluster
+            .ok(leader, &["configuration-status", "16099"])
+            .contains("inconclusive_local_absence"));
+    }
+    let record = "learners 16001 1 2 - m:3 v:1 v:2 v:3";
+    assert!(cluster
+        .ok(leader, &["configure-record", record])
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure-record", record])
+        .contains("duplicate=true"));
+    let conflict = cluster.request(
+        leader,
+        &["configure-record", "learners 16001 1 99 - m:3 v:1 v:2 v:3"],
+    );
+    assert!(String::from_utf8(conflict.stdout)
+        .unwrap()
+        .contains("conflicts with retained record"));
+    let joint = "joint 16003 2 3 4 - w:3 1 v:1 1 v:2 1 v:3";
+    assert!(cluster
+        .ok(leader, &["configure-record", joint])
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure-record", joint])
+        .contains("duplicate=true"));
+    let final_record = "final 16003 3 4";
+    assert!(cluster
+        .ok(leader, &["configure-record", final_record])
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure-record", final_record])
+        .contains("duplicate=true"));
+    for id in 1..=3 {
+        cluster.ok(id, &["checkpoint"]);
+    }
+    cluster.stop();
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    let old = cluster.request(leader, &["configure-record", record]);
+    assert!(!old.status.success());
+    assert!(String::from_utf8(old.stdout)
+        .unwrap()
+        .contains("comparison history unavailable"));
+    assert!(cluster
+        .ok(leader, &["configuration-status", "16001"])
+        .contains("action=completed"));
+    assert!(cluster
+        .ok(
+            leader,
+            &[
+                "configure-record",
+                "learners 16004 4 5 - w:3 1 v:1 1 v:2 1 v:3"
+            ]
+        )
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["add", "16000", "42"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    let oversized = "x".repeat(257);
+    let refused = cluster.request(leader, &["configure-record", &oversized]);
+    assert!(!refused.status.success());
+    assert!(String::from_utf8_lossy(&refused.stderr).contains("command too long"));
+    cluster.stop();
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn client_supplied_configuration_targets_are_checked_and_recovered_tcp() {
+    client_supplied_configuration_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn client_supplied_configuration_targets_are_checked_and_recovered_quic() {
+    client_supplied_configuration_history(true);
 }

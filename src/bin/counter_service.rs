@@ -33,7 +33,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE] [--service-access FILE]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -114,6 +114,17 @@ fn command(
             format!("OK evidence=local_durable operation={} committed_prefix={} durable_last={} committed={:?} accepted={:?} action={}",
                 operation.get(), status.committed_index, status.durable_last_index,
                 status.committed, status.accepted, action)
+        }
+        ["configure-record", record @ ..] => {
+            if service.local().owner.core(group()).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
+                return Err("NOT_LEADER".into());
+            }
+            let submission = administration.as_mut().ok_or("client-supplied targets disabled")?
+                .request_record(&record.join(" "), service)?;
+            match submission {
+                administration::RecordSubmission::Pending(operation) => return Ok(Phase::Pending(Pending::Configure(operation))),
+                administration::RecordSubmission::Reply(reply) => reply,
+            }
         }
         ["configure", operation] => {
             let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
@@ -225,9 +236,15 @@ fn serve(
     base: u16,
     tls: &Path,
     input: setup::PeerInput<'_>,
-    options: (NativePeerProtocol, Option<&Path>, Option<&Path>, bool),
+    options: (
+        NativePeerProtocol,
+        Option<&Path>,
+        Option<&Path>,
+        administration::Mode,
+    ),
 ) -> Result<(), Failure> {
-    let (protocol, plan_path, access_path, remote) = options;
+    let (protocol, plan_path, access_path, admin_mode) = options;
+    let remote = admin_mode != administration::Mode::Automatic;
     if remote && (access_path.is_none() || plan_path.is_none()) {
         return Err("remote administration requires service access and provisioned plan".into());
     }
@@ -250,7 +267,9 @@ fn serve(
         .map(|path| service_access::Access::load(path, tls, config.startup.tls.clone()))
         .transpose()?;
     let mut administration = plan_path
-        .map(|path| administration::Administration::load(path, &config.provisioned_stores, remote))
+        .map(|path| {
+            administration::Administration::load(path, &config.provisioned_stores, admin_mode)
+        })
         .transpose()?;
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
     listener.set_nonblocking(true)?;
@@ -283,7 +302,6 @@ fn serve(
                             .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
                     }
                     admin
-                        .plan
                         .authorize(core.state().bootstrap.group, core.membership(), proposal)
                 },
             )
@@ -447,7 +465,7 @@ fn main() -> Result<(), Failure> {
     let mut deployment = None;
     let mut admin_plan = None;
     let mut service_access = None;
-    let mut remote_admin = false;
+    let mut remote_admin = administration::Mode::Automatic;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
@@ -456,6 +474,7 @@ fn main() -> Result<(), Failure> {
                 | "--deployment"
                 | "--admin-plan"
                 | "--remote-admin-plan"
+                | "--remote-admin-policy"
                 | "--service-access"
         ) {
             break;
@@ -478,10 +497,14 @@ fn main() -> Result<(), Failure> {
             "--deployment" if deployment.is_none() => {
                 deployment = Some(std::path::PathBuf::from(value))
             }
-            flag @ ("--admin-plan" | "--remote-admin-plan")
+            flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
                 if admin_plan.is_none() && args[0] == "serve" =>
             {
-                remote_admin = flag == "--remote-admin-plan";
+                remote_admin = match flag {
+                    "--remote-admin-plan" => administration::Mode::Provisioned,
+                    "--remote-admin-policy" => administration::Mode::Targets,
+                    _ => administration::Mode::Automatic,
+                };
                 admin_plan = Some(std::path::PathBuf::from(value))
             }
             "--service-access" if service_access.is_none() && args[0] == "serve" => {

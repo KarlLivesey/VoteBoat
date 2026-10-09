@@ -30,8 +30,24 @@ use voteboat::{
     runtime::*,
 };
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Mode {
+    Automatic,
+    Provisioned,
+    Targets,
+}
+struct DynamicPolicy {
+    placement: NativePlacementAuthorizer,
+    requirements: ReadinessRequirements,
+}
+pub enum RecordSubmission {
+    Pending(OperationId),
+    Reply(String),
+}
 pub struct Administration {
-    pub plan: NativeAdministrationPlan,
+    plan: Option<NativeAdministrationPlan>,
+    dynamic: Option<DynamicPolicy>,
+    target: Option<ConfigurationRecord>,
     pending: Option<ConfigurationTicket>,
     proofs: BTreeMap<NodeId, PromotionReadiness>,
     waiting: Option<(NodeId, Instant)>,
@@ -72,29 +88,99 @@ fn tree<'a>(
         return Err("invalid administration branch size".into());
     }
     match kind {
-        "m" => (0..count)
-            .map(|_| tree(tokens, depth + 1, remaining))
-            .collect::<Result<Vec<_>, _>>()
-            .map(Tree::Majority),
-        "w" => (0..count)
-            .map(|_| {
+        "m" => {
+            let mut children = Vec::new();
+            for _ in 0..count {
+                children.push(tree(tokens, depth + 1, remaining)?);
+            }
+            Ok(Tree::Majority(children))
+        }
+        "w" => {
+            let mut children = Vec::new();
+            for _ in 0..count {
                 let weight = tokens.next().ok_or("missing policy weight")?.parse()?;
-                Ok(WeightedChild {
+                children.push(WeightedChild {
                     weight,
                     node: tree(tokens, depth + 1, remaining)?,
-                })
-            })
-            .collect::<Result<Vec<_>, Failure>>()
-            .map(Tree::Weighted),
+                });
+            }
+            Ok(Tree::Weighted(children))
+        }
         _ => Err("unknown administration policy branch".into()),
     }
 }
+fn parse_record<'a>(
+    kind: &str,
+    mut tokens: impl Iterator<Item = &'a str>,
+    replicas: &BTreeMap<NodeId, ReplicaPlacement>,
+) -> Result<ConfigurationRecord, Failure> {
+    let operation = OperationId::new(tokens.next().ok_or("missing operation")?.parse()?)
+        .ok_or("invalid operation")?;
+    let expected = cid(tokens.next().ok_or("missing expected configuration")?)?;
+    let id = cid(tokens.next().ok_or("missing configuration ID")?)?;
+    let change = match kind {
+        "final" => ConfigurationChange::Final { id },
+        "learners" | "joint" => {
+            let target = if kind == "joint" {
+                cid(tokens.next().ok_or("missing final configuration")?)?
+            } else {
+                id
+            };
+            let learners = tokens.next().ok_or("missing learner list")?;
+            let mut assignments = BTreeMap::new();
+            if learners != "-" {
+                for item in learners.split(',') {
+                    let id = node(item)?;
+                    let store = replicas
+                        .get(&id)
+                        .ok_or("learner missing replica declaration")?
+                        .store;
+                    if assignments.insert(id, store).is_some() {
+                        return Err("duplicate learner".into());
+                    }
+                }
+            }
+            let policy = checked(Policy::new(
+                tree(&mut tokens, 0, &mut 16384)?,
+                Limits::default(),
+            ))?;
+            let voters = policy
+                .voters()
+                .iter()
+                .map(|id| {
+                    replicas
+                        .get(id)
+                        .map(|p| (*id, p.store))
+                        .ok_or("voter missing replica declaration")
+                })
+                .collect::<Result<BTreeMap<_, _>, _>>()?;
+            let next = checked(Configuration::new(target, policy, voters, assignments))?;
+            if kind == "joint" {
+                ConfigurationChange::Joint { id, next }
+            } else {
+                ConfigurationChange::Learners(next)
+            }
+        }
+        _ => return Err("expected replica, learners, joint or final".into()),
+    };
+    if tokens.next().is_some() {
+        return Err("trailing administration fields".into());
+    }
+
+    Ok(ConfigurationRecord {
+        operation,
+        expected,
+        change,
+    })
+}
+
 impl Administration {
     pub fn load(
         path: &Path,
         stores: &BTreeMap<NodeId, StoreIdentity>,
-        remote: bool,
+        mode: Mode,
     ) -> Result<Self, Failure> {
+        let remote = mode != Mode::Automatic;
         let mut data = Vec::new();
         std::fs::File::open(path)?
             .take(65537)
@@ -143,76 +229,40 @@ impl Administration {
                 }
                 continue;
             }
+            if mode == Mode::Targets {
+                return Err("remote policy must not contain operation intents".into());
+            }
             if records.len() >= MAX_ADMINISTRATION_INTENTS {
                 return Err("too many administration intents".into());
             }
-            let operation = OperationId::new(tokens.next().ok_or("missing operation")?.parse()?)
-                .ok_or("invalid operation")?;
-            let expected = cid(tokens.next().ok_or("missing expected configuration")?)?;
-            let id = cid(tokens.next().ok_or("missing configuration ID")?)?;
-            let change = match kind {
-                "final" => ConfigurationChange::Final { id },
-                "learners" | "joint" => {
-                    let target = if kind == "joint" {
-                        cid(tokens.next().ok_or("missing final configuration")?)?
-                    } else {
-                        id
-                    };
-                    let learners = tokens.next().ok_or("missing learner list")?;
-                    let mut assignments = BTreeMap::new();
-                    if learners != "-" {
-                        for item in learners.split(',') {
-                            let id = node(item)?;
-                            let store = replicas
-                                .get(&id)
-                                .ok_or("learner missing replica declaration")?
-                                .store;
-                            if assignments.insert(id, store).is_some() {
-                                return Err("duplicate learner".into());
-                            }
-                        }
-                    }
-                    let policy = checked(Policy::new(
-                        tree(&mut tokens, 0, &mut 16384)?,
-                        Limits::default(),
-                    ))?;
-                    let voters = policy
-                        .voters()
-                        .iter()
-                        .map(|id| {
-                            replicas
-                                .get(id)
-                                .map(|p| (*id, p.store))
-                                .ok_or("voter missing replica declaration")
-                        })
-                        .collect::<Result<BTreeMap<_, _>, _>>()?;
-                    let next = checked(Configuration::new(target, policy, voters, assignments))?;
-                    if kind == "joint" {
-                        ConfigurationChange::Joint { id, next }
-                    } else {
-                        ConfigurationChange::Learners(next)
-                    }
-                }
-                _ => return Err("expected replica, learners, joint or final".into()),
-            };
-            if tokens.next().is_some() {
-                return Err("trailing administration fields".into());
-            }
-            records.push(ConfigurationRecord {
-                operation,
-                expected,
-                change,
-            });
+            records.push(parse_record(kind, tokens, &replicas)?);
         }
         // Vec growth can otherwise exceed the backend's retained-capacity ceiling.
         records.shrink_to_fit();
         let placement = NativePlacementAuthorizer::new(group(), replicas, requirements)
             .map_err(|(e, _)| format!("{e:?}"))?;
         let requirements = application()?.readiness_requirements();
-        let plan = NativeAdministrationPlan::new(group(), placement, requirements, records)
-            .map_err(|e| format!("{:?}", e.reason))?;
+        let (plan, dynamic) = if mode == Mode::Targets {
+            (
+                None,
+                Some(DynamicPolicy {
+                    placement,
+                    requirements,
+                }),
+            )
+        } else {
+            (
+                Some(
+                    NativeAdministrationPlan::new(group(), placement, requirements, records)
+                        .map_err(|e| format!("{:?}", e.reason))?,
+                ),
+                None,
+            )
+        };
         Ok(Self {
             plan,
+            dynamic,
+            target: None,
             pending: None,
             proofs: BTreeMap::new(),
             waiting: None,
@@ -222,6 +272,103 @@ impl Administration {
             requested: None,
             reply: None,
         })
+    }
+    fn requirements(&self) -> ReadinessRequirements {
+        match (&self.plan, &self.dynamic) {
+            (Some(plan), _) => plan.requirements(),
+            (_, Some(policy)) => policy.requirements,
+            _ => unreachable!(),
+        }
+    }
+    fn intents(&self) -> &[ConfigurationRecord] {
+        self.plan.as_ref().map_or(&[], |p| p.intents())
+    }
+    pub fn authorize(
+        &self,
+        scope: GroupIdentity,
+        membership: &Membership,
+        proposal: &ConfigurationProposal,
+    ) -> Result<(), ConfigurationProposalError> {
+        if let Some(policy) = &self.dynamic {
+            if scope != group()
+                || self.target.as_ref() != Some(&proposal.record)
+                || proposal.requirements != policy.requirements
+            {
+                return Err(ConfigurationProposalError::AuthenticationRequired);
+            }
+            policy
+                .placement
+                .authorize(scope, membership, &proposal.record)
+                .map_err(ConfigurationProposalError::Placement)
+        } else {
+            self.plan
+                .as_ref()
+                .ok_or(ConfigurationProposalError::AuthenticationRequired)?
+                .authorize(scope, membership, proposal)
+        }
+    }
+    pub fn request_record(
+        &mut self,
+        text: &str,
+        service: &Service,
+    ) -> Result<RecordSubmission, String> {
+        let policy = self
+            .dynamic
+            .as_ref()
+            .ok_or("client-supplied targets disabled")?;
+        if self.requested.is_some() || self.pending.is_some() || self.reply.is_some() {
+            return Err("administration busy".into());
+        }
+        if text.len() > 256 {
+            return Err("record too long".into());
+        }
+        let mut tokens = text.split_whitespace();
+        let kind = tokens.next().ok_or("missing record kind")?;
+        let record =
+            parse_record(kind, tokens, policy.placement.replicas()).map_err(|e| e.to_string())?;
+        if record.retained_bytes() > MAX_ADMINISTRATION_BYTES {
+            return Err("record retained budget".into());
+        }
+        let core = service.local().owner.core(group()).ok_or("missing group")?;
+        let state = core.state();
+        let status = core
+            .configuration_status(record.operation)
+            .map_err(|e| format!("{e:?}"))?;
+        let exact = state.entries.iter().find(|entry| {
+            matches!(&entry.payload,
+            voteboat::log::EntryPayload::Configuration(previous) if **previous == record)
+        });
+        if let Some(entry) = exact {
+            return Ok(RecordSubmission::Reply(
+                if entry.index <= state.commit_index {
+                    format!(
+                        "OK operation={} committed_index={} term={} duplicate=true",
+                        record.operation.get(),
+                        entry.index,
+                        entry.term
+                    )
+                } else {
+                    "UNKNOWN exact record locally durable but not committed; preserve original record".into()
+                },
+            ));
+        }
+        let final_matches = matches!(status.resume_action(), ConfigurationResumeAction::Finalize(ref next) if *next == record);
+        if !final_matches && status.resume_action() != ConfigurationResumeAction::NotFoundLocally {
+            let retained = state.entries.iter().any(|entry| matches!(&entry.payload,
+                voteboat::log::EntryPayload::Configuration(previous) if previous.operation == record.operation));
+            return Err(if retained {
+                "configuration operation conflicts with retained record"
+            } else {
+                "configuration comparison history unavailable; inspect configuration-status"
+            }
+            .into());
+        }
+        let operation = record.operation;
+        self.target = Some(record);
+        self.requested = Some(operation);
+        self.stopped = false;
+        self.next = Instant::now();
+        Ok(RecordSubmission::Pending(operation))
     }
     pub fn remote(&self) -> bool {
         self.remote
@@ -233,7 +380,7 @@ impl Administration {
         if self.requested.is_some() || self.pending.is_some() || self.reply.is_some() {
             return Err("administration busy".into());
         }
-        if !self.plan.intents().iter().any(|r| r.operation == operation) {
+        if !self.intents().iter().any(|r| r.operation == operation) {
             return Err("operation absent from provisioned plan".into());
         }
         self.requested = Some(operation);
@@ -248,6 +395,7 @@ impl Administration {
             && self.requested.take().is_some()
             && self.reply.is_none()
         {
+            self.target = None;
             self.reply = Some("ERR administration blocked; inspect server log".into());
         }
         self.reply.take()
@@ -260,6 +408,7 @@ impl Administration {
             checked(service.cancel_configuration(ticket))?;
         }
         self.requested = None;
+        self.target = None;
         self.reply = None;
         self.proofs.clear();
         self.stopped = true;
@@ -296,11 +445,12 @@ impl Administration {
                             format!("ERR not_proposed={error:?}")
                         }
                         ConfigurationOutcome::Unknown(reason) => {
-                            format!("UNKNOWN {reason:?}; retry the same configuration operation ID")
+                            format!("UNKNOWN {reason:?}; retry the same configuration operation ID and record")
                         }
                     });
                     self.requested = None;
                 }
+                self.target = None;
                 self.stopped = true;
                 continue;
             }
@@ -339,9 +489,8 @@ impl Administration {
             self.proofs.clear();
             return Ok(());
         }
-        let mut selected = None;
+        let mut selected = self.target.clone();
         for intent in self
-            .plan
             .intents()
             .iter()
             .filter(|r| !self.remote || self.requested == Some(r.operation))
@@ -351,7 +500,7 @@ impl Administration {
                 ConfigurationResumeAction::Completed => continue,
                 ConfigurationResumeAction::WaitForCommit => return Ok(()),
                 ConfigurationResumeAction::Finalize(record) => {
-                    if !self.plan.intents().contains(&record) {
+                    if !self.intents().contains(&record) {
                         self.stopped = true;
                         eprintln!("administration blocked: final record absent from trusted plan");
                         return Ok(());
@@ -388,9 +537,9 @@ impl Administration {
         let mut proposal = ConfigurationProposal {
             record,
             readiness: Vec::new(),
-            requirements: self.plan.requirements(),
+            requirements: self.requirements(),
         };
-        if let Err(error) = self.plan.authorize(group(), core.membership(), &proposal) {
+        if let Err(error) = self.authorize(group(), core.membership(), &proposal) {
             self.stopped = true;
             eprintln!("administration blocked: {error:?}");
             return Ok(());
@@ -439,7 +588,7 @@ impl Administration {
                     self.waiting = None;
                 }
             } else if service
-                .request_learner_readiness(group(), *id, self.plan.requirements())
+                .request_learner_readiness(group(), *id, self.requirements())
                 .is_ok()
             {
                 self.waiting = Some((*id, Instant::now()));
