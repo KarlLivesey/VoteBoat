@@ -158,3 +158,43 @@ background work crossing interval boundaries. Host poll time excludes worker
 execution and parked/waiting time; it is not CPU time. These observations cannot
 be summed with parallel replica storage timings to reconstruct a critical path.
 They are diagnostics, never durable or committed-prefix watermarks.
+
+## Shared WAL attribution
+
+The shared assembly wraps its selected native store and journal through the same
+public `LogStore`/`JournalIo` contracts. Production providers and defaults remain
+unchanged. Its helper functions are generic over the selected store, so the
+original four-argument NativeStartup mode still runs without an observer.
+
+Successful shared runs additionally publish `storage.csv`, with per-replica
+cumulative snapshots before/after measurement, after create-session joins and
+after recovery-session joins. Recovery counters start anew. Fields report logical
+append calls, group transition units, physically appended command entries, batch
+size histogram and per-group units; append/barrier wall durations and maxima;
+encoded bytes; primitive append, synchronization and manifest-publication calls
+and durations. Physically appended commands can repeat during replication/retry
+and are not useful-operation counts. `errors` counts append/barrier failures.
+
+Observers forward exact original tickets/results and all range/reclamation
+capabilities. Each WAL has one bounded aggregate; no aggregate lock spans I/O.
+Counts are diagnostics, not commit/durable watermarks. Snapshot I/O is separate.
+Native create/recover each performs one initialization sync/publication outside
+a logical barrier, so a joined snapshot has one more primitive sync/publication
+than logical barriers. Initialization is included in cumulative totals.
+
+A mid-run snapshot can include a completed primitive inside an unfinished logical
+call. Whole calls crossing a measurement boundary contribute their full duration
+when they complete; maximum fields are cumulative maxima, not interval maxima.
+Sums across three concurrent workers are aggregate work, not elapsed critical-path
+time. Joined snapshots remove in-flight ambiguity and reconcile exact logical
+append/barrier/ticket/unit totals, histograms and physical call counts.
+
+Validate both workload and storage arithmetic, requiring the extra file:
+
+```sh
+node validation/check-native-benchmark.mjs --storage RUN_DIRECTORY...
+```
+
+The validator also accepts an archived prefix with `.txt`, `.csv` and
+`.storage.csv` files. Instrumentation adds measurement overhead; observed timings
+alone are not evidence of a tuning improvement over earlier unobserved runs.

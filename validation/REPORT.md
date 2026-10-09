@@ -2115,3 +2115,41 @@ two correctness-only and one preliminary successful run) pass the independent
 validator. All-target/all-feature Clippy with warnings denied, TLS-only example
 compilation, formatting/diff checks and the 71-contract inventory pass. The Node
 inventory records this evidence without adding a public contract.
+
+## Slice 102 — actual shared WAL attribution through public providers
+
+Benchmark-only LogStore/JournalIo wrappers observe the selected native file store;
+benchmark helpers are generic over that same public store contract, retaining
+plain NativeStartup mode. No production API/provider/protocol/format/default changed.
+Observers forward original results/tickets/capabilities, use bounded aggregates
+without holding locks across I/O and confer no durability/read authority. A
+real-file unit test verifies non-durable append state, exact barrier completion,
+empty/stale barrier rejection, maintenance capability/error forwarding and reopen;
+it passes with all features and TLS-only.
+
+Four sequential release measurements (TCP/QUIC × 1/8 groups, 256 measured +64
+warm-up commands, window 8, explicit 50 ms heartbeat/10000–19999 ms elections) pass
+full all-group/all-replica values/quorum reads, joins/reopen, original first/last
+historical retry and unchanged final values/joins. All groups start measurement
+on node 1. Aggregate recovered value is 320; extra recovery retries are zero.
+TCP rates 15.635/7.276 applied ops/s, p99 779.263/2791.030 ms; QUIC rates
+17.137/7.326, p99 1680.206/2873.822 ms. No speed improvement is claimed.
+
+Observed means are 1.000/1.005 group units per TCP append and 1.000/1.119 per QUIC
+append. Aggregate append processing totals 19.556–76.022 ms versus aggregate
+barriers 26.056–105.132 seconds, dominated by native sync/manifest publication.
+The latter remain required durability dependencies. The source performs one
+append/barrier pair per worker request. This selects bounded ready-queued-request
+shared barriers for the next experiment, not a claim of proven queue availability
+or improvement. Raw data and independent arithmetic checks are recorded in
+validation/performance/slice102, including cumulative joined exact counts and
+explicit interval-boundary/parallel-duration limitations. Physical command appends
+and diagnostic counters are not useful-operation counts or durable watermarks.
+
+An extra plain four-argument startup one-operation TCP run passes full recovery/
+retry/joins and raw checks. All-target/all-feature Clippy with warnings denied,
+TLS-only observer test/compilation, formatting/diff checks and 71-contract inventory
+pass. The LogStore/JournalIo inventory records the observer conformance evidence
+without adding a public seam. Full P0–P7 remains active; the prior 250 ms TCP serial
+p99 target is unmet/unproven. Sustained/offered-load, maintenance/recovery, broader
+fault/macOS/separate-host and other recorded phase gaps remain; P8 stays deferred.

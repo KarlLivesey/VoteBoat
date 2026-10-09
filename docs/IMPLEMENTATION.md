@@ -6169,3 +6169,113 @@ protocol/provider/format changed. Full P0–P7 remains active.
 Macro scope is unchanged: usable static service remains independently available;
 full baseline P0–P7 still needs recorded phase gaps/validation and P7 performance.
 P8 remains deferred; CI remains background feedback.
+
+### Slice 102 mini schema — shared WAL batch/stage attribution
+
+Previous goal turn was progress: 3b68add pushed the actual shared TCP/QUIC baseline
+and full recovery evidence. Current P7 step attributes the unexpectedly expensive
+eight-group case; next choose bounded tuning from this evidence, then sustained/
+offered-load/maintenance/platform checks. Earlier phase gaps and full P0–P7 remain.
+
+Use benchmark-owned transparent LogStore/JournalIo observers around the same
+NativeLogStore<FileLogIo> provider. NativeLogWorker already accepts generic public
+LogStore; generalize benchmark helper functions over that selected store type,
+retaining the original NativeStartup path and CLI. No production API, protocol,
+provider, format, queue limits or timers change. This small generalization is
+needed to inspect actual shared batches without adding permanent native diagnostic
+APIs or copying the benchmark engine.
+
+One bounded Arc/Mutex aggregate per WAL records completed append/barrier calls,
+unit/entry counts and batch-size histogram, per-group update totals, encoded bytes,
+primitive sync/publication durations and call failures. Never hold the aggregate
+lock across I/O. Observers return exact original results/tickets and forward every
+capability/range/reclamation method. Metrics confer no durability or read authority;
+counts are totals, not contiguous prefixes. Snapshot handles/workers remain separate.
+
+Record per-replica cumulative snapshots before/after measurement and after full
+create/recovery joins. Mid-run snapshots can include primitive completions within
+an unfinished logical call and calls that cross interval boundaries; label this
+explicitly. Joined snapshots reconcile exact append/barrier/publication totals
+and bounded histograms. Do not invent an exact critical path from sums over three
+concurrent workers. Raw metric output is published only after existing all-group
+quorum-read/reopen/original-retry/worker-join gates pass. Failed runs retain files
+but have no successful summary. Observer failure/panic invalidates the run rather
+than manufacturing successful evidence.
+
+Acceptance: actual same-host TCP/QUIC, shared 1/8 groups, unchanged 256+64 writes,
+window 8, 50 ms heartbeats and 10000–19999 ms elections; full recovery gates and
+independent raw metrics arithmetic. Confirm original startup mode still compiles/
+runs and observer wrappers preserve actual provider errors/capabilities. Record
+source/environment hashes and attribute batch fill/physical costs before selecting
+tuning. Keep the 250 ms TCP serial target; no claimed speedup from instrumentation.
+
+### Slice 102 implementation and evidence
+
+Benchmark helpers now accept the selected public LogStore type. Shared assembly
+uses transparent ObservedLog/ObservedIo wrappers around the same native file
+provider, with bounded counters/histograms and no locks across I/O. NativeStartup
+mode still selects its original plain store. No production API/provider/protocol,
+format, resource limit or timer changed. Real-file observer testing confirms
+append alone is not durable, exact original ticket completion, empty/stale barrier
+rejection, maintenance capability/error forwarding and actual reopen. It passes
+with all features and TLS-only. All-target/all-feature Clippy with warnings denied,
+formatting/diff and 71-contract inventory checks pass.
+
+Four sequential release runs (TCP/QUIC × shared 1/8 groups, unchanged 256 measured
++64 warm-up writes, window 8, explicit 10000–19999 ms elections) pass complete
+all-group/all-replica values/quorum reads, joins/reopen, original first/last retry
+and final unchanged values/joins. Every group starts measurement on node 1; every
+run recovers aggregate 320 with zero extra recovery retries. TCP rates are
+15.635/7.276 applied ops/s, p99 779.263/2791.030 ms; QUIC 17.137/7.326,
+p99 1680.206/2873.822 ms. These are instrumented attribution runs, not production
+optimization results or a comparison proving instrumentation causes a change.
+
+Measured actual append batch means are 1.000/1.005 units for TCP and 1.000/1.119
+for QUIC. TCP eight-group histogram is 1520 one-unit and one eight-unit append;
+QUIC eight-group has 1329 one-unit, 31 six-unit and one eight-unit append. Aggregate
+append time is only 19.556–76.022 ms, versus 26.056–105.132 seconds of aggregate
+logical barrier work. Manifest publication and WAL synchronization dominate the
+observed storage costs. These are sums over concurrent workers and boundary-
+crossing completed calls, not an exact critical path. The worker source executes
+one append/barrier pair per submitted request, so sharing it alone does not combine
+most observed barriers. Do not remove required manifest publication or optimize
+small state-clone costs as though they explain these measured barriers.
+
+Raw per-replica storage snapshots, histograms, useful-operation samples, arithmetic
+checks, hashes and limitations are in validation/performance/slice102. Independent
+checks reconcile joined append/barrier/unit/ticket/histogram/group and primitive
+call totals, plus useful receipts/windows/rates. Mid-run counts can differ while a
+barrier is in flight; this is neither lost data nor a durability watermark. An
+extra original four-argument startup TCP one-operation correctness run passes full
+recovery/retry/joins and its raw check (timing not used as performance evidence).
+The 250 ms TCP serial p99 target remains unmet/unproven. Full P0–P7 stays active.
+
+### Next linked mini plan — P7 bounded shared barriers
+
+Current attribution selects ready-queued-request barrier sharing as the next
+candidate. It does not prove that enough requests will be ready or that this will
+improve performance. The following schema must precede implementation:
+
+1. Preserve each original request's append operation, records, visits and tickets;
+   gather only already queued independent-group requests within existing unit/
+   byte/dependency bounds and FIFO order. No compulsory fill delay and no crossing
+   of a queued reclamation operation. Append validation/rejection stays per original
+   request; do not turn several independent requests into one atomic append batch.
+   A successful shared barrier must validate its full exact ticket union, then
+   route only each original request's ticket subset as its durable completion.
+   Nonfatal rejection must not erase another request's valid pending tickets;
+   uncertain append/barrier failure must fail/fence affected pending work before
+   any dependent durable output escapes. Retain original credits/control reserve
+   until each original terminal event is observed. This advances P7 using the
+   supported shared-log contract, without inventing a cross-group transaction.
+2. Validate queued sharing with deterministic gates, native/file crash boundaries,
+   nonfatal/fatal append and barrier failures, stale/wrong completion scope, close/
+   reclamation FIFO order and unchanged resource bounds. Dependencies: schema above
+   and existing worker/LogStore conformance. Then run matched repeated observed
+   TCP/QUIC comparisons and the original TCP serial target. Accept only evidence
+   of useful throughput improvement at an unchanged declared latency budget;
+   preserve failed runs and do not relabel partitioned rate as single-group speed.
+3. Follow with sustained/offered-load, maintenance/recovery and broader platform/
+   fault validation. Dependencies: validated measured tuning. Macro scope remains
+   full P0–P7; these checks do not replace earlier phase gaps. P8 is deferred and
+   CI remains background feedback.

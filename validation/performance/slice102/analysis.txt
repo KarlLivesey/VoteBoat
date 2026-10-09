@@ -1,0 +1,8 @@
+validation/performance/slice102/tcp-g1: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=551 units=551 commands=768 mean_units=1.000 append_ms=22.012 barriers=550 barrier_ms=26133.482 sync_ms=9317.161 publish_ms=16813.155 histogram=1:551
+validation/performance/slice102/tcp-g8: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1521 units=1528 commands=768 mean_units=1.005 append_ms=76.022 barriers=1519 barrier_ms=105131.796 sync_ms=36347.672 publish_ms=68749.712 histogram=1:1520|8:1
+validation/performance/slice102/quic-g1: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=549 units=549 commands=768 mean_units=1.000 append_ms=19.556 barriers=548 barrier_ms=26055.870 sync_ms=8535.164 publish_ms=17527.908 histogram=1:549
+validation/performance/slice102/quic-g8: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+storage measured deltas: append_calls=1361 units=1523 commands=767 mean_units=1.119 append_ms=72.594 barriers=1359 barrier_ms=94075.088 sync_ms=32172.096 publish_ms=61856.552 histogram=1:1329|6:31|8:1

@@ -29,7 +29,6 @@ use voteboat::{
     log::*,
     native::{
         connect::{NativePeerProtocol, NativeServiceConnector},
-        node::*,
         startup::*,
         tls::*,
         worker::ThreadWake,
@@ -40,7 +39,25 @@ use voteboat::{
 #[path = "benchmark/shared.rs"]
 mod shared;
 type Failure = Box<dyn std::error::Error>;
-type Replica = NativeNode<Counter, NativeServiceConnector>;
+type Replica<
+    L = voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,
+> = Node<
+    voteboat::native::runtime::FairScheduler,
+    voteboat::native::runtime::DeadlineQueue,
+    voteboat::native::runtime::JitterEntropy,
+    Counter,
+    voteboat::native::worker::NativeLogWorker<L>,
+    voteboat::native::outbound::NativeOutbound,
+    voteboat::native::snapshot_worker::NativeSnapshotWorker<
+        voteboat::native::snapshot_store::NativeSnapshotStore<
+            voteboat::native::snapshot_store::FileSnapshotIo,
+        >,
+    >,
+    NativeServiceConnector,
+    voteboat::native::transport::NativeTransportFactory<voteboat::native::wire::NativeWireCodec>,
+>;
+#[path = "benchmark/observe.rs"]
+mod observe;
 const WARMUP: usize = 64;
 fn checked<T, E: std::fmt::Debug>(v: Result<T, E>) -> Result<T, Failure> {
     v.map_err(|e| format!("{e:?}").into())
@@ -182,7 +199,11 @@ struct PollTotals {
     worker_events: usize,
     application_deliveries: usize,
 }
-fn poll(replicas: &mut [Replica], clock: &Instant, totals: &mut PollTotals) -> Result<(), Failure> {
+fn poll<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    totals: &mut PollTotals,
+) -> Result<(), Failure> {
     let start = Instant::now();
     for replica in replicas {
         let progress = checked(replica.poll(
@@ -206,10 +227,10 @@ fn poll(replicas: &mut [Replica], clock: &Instant, totals: &mut PollTotals) -> R
     totals.max_host_ns = totals.max_host_ns.max(elapsed);
     Ok(())
 }
-fn until(
-    replicas: &mut [Replica],
+fn until<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
     clock: &Instant,
-    mut done: impl FnMut(&mut [Replica]) -> Result<bool, Failure>,
+    mut done: impl FnMut(&mut [Replica<L>]) -> Result<bool, Failure>,
 ) -> Result<PollTotals, Failure> {
     let deadline = Instant::now() + Duration::from_secs(120);
     let mut totals = PollTotals::default();
@@ -224,7 +245,10 @@ fn until(
         std::thread::park_timeout(Duration::from_micros(100));
     }
 }
-fn leader(replicas: &[Replica], group: GroupIdentity) -> Result<usize, Failure> {
+fn leader<L: LogStore + Send + 'static>(
+    replicas: &[Replica<L>],
+    group: GroupIdentity,
+) -> Result<usize, Failure> {
     replicas
         .iter()
         .position(|n| {
@@ -235,7 +259,11 @@ fn leader(replicas: &[Replica], group: GroupIdentity) -> Result<usize, Failure> 
         })
         .ok_or_else(|| format!("no ready leader for group {}", group.id.get()).into())
 }
-fn campaign(replicas: &mut [Replica], clock: &Instant, groups: usize) -> Result<(), Failure> {
+fn campaign<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    groups: usize,
+) -> Result<(), Failure> {
     for g in 1..=groups {
         // Leave an existing leader alone; reopening may already have elected one.
         if leader(replicas, group_id(g)).is_err() {
@@ -272,8 +300,8 @@ struct Measurement {
     max_inflight: usize,
     polls: PollTotals,
 }
-fn workload(
-    replicas: &mut [Replica],
+fn workload<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
     clock: &Instant,
     first: usize,
     count: usize,
@@ -373,8 +401,8 @@ fn boundaries(samples: impl Iterator<Item = (GroupIdentity, u64)>) -> BTreeMap<G
     }
     result
 }
-fn verify(
-    replicas: &mut [Replica],
+fn verify<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
     clock: &Instant,
     total: usize,
     groups: usize,
@@ -418,8 +446,8 @@ fn verify(
     }
     Ok(())
 }
-fn retry_once(
-    replicas: &mut [Replica],
+fn retry_once<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
     clock: &Instant,
     operation: usize,
     expected: i64,
@@ -460,8 +488,8 @@ fn retry_once(
     })?;
     Ok(!changed)
 }
-fn retry(
-    replicas: &mut [Replica],
+fn retry<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
     clock: &Instant,
     operation: usize,
     expected: i64,
@@ -476,7 +504,10 @@ fn retry(
     }
     Err("recovery retry repeatedly lost leadership".into())
 }
-fn close(mut replicas: Vec<Replica>, clock: &Instant) -> Result<(), Failure> {
+fn close<L: LogStore + Send + 'static>(
+    mut replicas: Vec<Replica<L>>,
+    clock: &Instant,
+) -> Result<(), Failure> {
     for n in &mut replicas {
         n.begin_shutdown();
     }
@@ -554,22 +585,56 @@ fn main() -> Result<(), Failure> {
         );
     }
     let root = Path::new(root);
+    let clock = Instant::now();
+    let config = RunConfig {
+        root,
+        protocol,
+        count,
+        window,
+        groups,
+        shared,
+    };
+    if shared {
+        run(config, &clock, |mode| {
+            shared::open(root, mode, protocol, capacity, &clock, groups)
+        })
+    } else {
+        run(config, &clock, |mode| {
+            open(root, mode, protocol, capacity, &clock).map(|nodes| (nodes, Vec::new()))
+        })
+    }
+}
+struct RunConfig<'a> {
+    root: &'a Path,
+    protocol: NativePeerProtocol,
+    count: usize,
+    window: usize,
+    groups: usize,
+    shared: bool,
+}
+fn run<L: LogStore + Send + 'static>(
+    config: RunConfig<'_>,
+    clock: &Instant,
+    open_cluster: impl Fn(NativeOpenMode) -> Result<(Vec<Replica<L>>, Vec<observe::Trace>), Failure>,
+) -> Result<(), Failure> {
+    let RunConfig {
+        root,
+        protocol,
+        count,
+        window,
+        groups,
+        shared,
+    } = config;
+    let capacity = count + WARMUP;
     std::fs::create_dir(root)?;
     let mut csv = exclusive(&root.join("samples.csv"))?;
-    let clock = Instant::now();
-    let open_cluster = |mode| {
-        if shared {
-            shared::open(root, mode, protocol, capacity, &clock, groups)
-        } else {
-            open(root, mode, protocol, capacity, &clock)
-        }
-    };
-    let mut replicas = open_cluster(NativeOpenMode::Create)?;
-    campaign(&mut replicas, &clock, groups)?;
+    let mut storage = Vec::new();
+    let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
+    campaign(&mut replicas, clock, groups)?;
     eprintln!("phase=warmup protocol={protocol:?} window={window}");
-    let warmup = workload(&mut replicas, &clock, 1, WARMUP, window, groups)?;
+    let warmup = workload(&mut replicas, clock, 1, WARMUP, window, groups)?;
     let warmup_last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
-    verify(&mut replicas, &clock, WARMUP, groups, &warmup_last)?;
+    verify(&mut replicas, clock, WARMUP, groups, &warmup_last)?;
     let placement = (1..=groups)
         .map(|g| {
             let group = group_id(g);
@@ -587,7 +652,9 @@ fn main() -> Result<(), Failure> {
         .collect::<Result<Vec<_>, Failure>>()?
         .join(",");
     eprintln!("phase=measurement operations={count} groups={groups} leaders={placement}");
-    let measured = workload(&mut replicas, &clock, WARMUP + 1, count, window, groups)?;
+    observe::capture(&mut storage, "before_measurement", &traces);
+    let measured = workload(&mut replicas, clock, WARMUP + 1, count, window, groups)?;
+    observe::capture(&mut storage, "after_measurement", &traces);
     let last = boundaries(
         warmup
             .samples
@@ -595,12 +662,13 @@ fn main() -> Result<(), Failure> {
             .chain(&measured.samples)
             .map(|s| (s.group, s.index)),
     );
-    verify(&mut replicas, &clock, capacity, groups, &last)?;
-    close(replicas, &clock)?;
+    verify(&mut replicas, clock, capacity, groups, &last)?;
+    close(replicas, clock)?;
+    observe::capture(&mut storage, "after_create_join", &traces);
     eprintln!("phase=recovery-verification");
-    let mut replicas = open_cluster(NativeOpenMode::Recover)?;
-    campaign(&mut replicas, &clock, groups)?;
-    verify(&mut replicas, &clock, capacity, groups, &last)?;
+    let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
+    campaign(&mut replicas, clock, groups)?;
+    verify(&mut replicas, clock, capacity, groups, &last)?;
     let first_value = warmup
         .samples
         .iter()
@@ -613,16 +681,20 @@ fn main() -> Result<(), Failure> {
         .find(|s| s.operation == capacity as u128)
         .unwrap()
         .value;
-    let recovery_retries = retry(&mut replicas, &clock, 1, first_value, groups)?
-        + retry(&mut replicas, &clock, capacity, last_value, groups)?;
+    let recovery_retries = retry(&mut replicas, clock, 1, first_value, groups)?
+        + retry(&mut replicas, clock, capacity, last_value, groups)?;
     let retry_index = boundaries(replicas.iter().flat_map(|n| {
         n.local()
             .applications
             .iter()
             .map(|(g, a)| (*g, a.applied_index()))
     }));
-    verify(&mut replicas, &clock, capacity, groups, &retry_index)?;
-    close(replicas, &clock)?;
+    verify(&mut replicas, clock, capacity, groups, &retry_index)?;
+    close(replicas, clock)?;
+    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+    if shared {
+        observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
+    }
     writeln!(
         csv,
         "operation,submitted_ns,completed_ns,latency_ns,applied_index,value,group"

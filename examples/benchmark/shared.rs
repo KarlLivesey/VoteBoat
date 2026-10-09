@@ -13,7 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Benchmark assembly: one WAL, snapshot worker and peer endpoint per replica.
+use super::observe::{ObservedIo, ObservedLog, Trace};
 use super::*;
+type SharedLog = ObservedLog<NativeLogStore<ObservedIo<FileLogIo>>>;
 use voteboat::{
     connect::*,
     dial::*,
@@ -36,7 +38,7 @@ pub(super) fn open(
     capacity: usize,
     clock: &Instant,
     groups: usize,
-) -> Result<Vec<Replica>, Failure> {
+) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     // Hold every endpoint reservation until all addresses have been selected.
     let reservations = (0..3)
         .map(|_| {
@@ -66,15 +68,23 @@ pub(super) fn open(
         .collect::<Vec<_>>();
     drop(reservations);
     let mut replicas = Vec::new();
+    let mut traces = Vec::new();
     for n in 1..=3 {
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
+        let trace = Trace::default();
         let log = if create {
-            let mut log = checked(NativeLogStore::create(
-                FileLogIo::create(&directory)?,
-                store(n),
-                LogLimits::default(),
-            ))?;
+            let mut log = ObservedLog {
+                inner: checked(NativeLogStore::create(
+                    ObservedIo {
+                        inner: FileLogIo::create(&directory)?,
+                        trace: trace.clone(),
+                    },
+                    store(n),
+                    LogLimits::default(),
+                ))?,
+                trace: trace.clone(),
+            };
             let tickets = checked(
                 log.append_batch(
                     bootstraps
@@ -87,7 +97,17 @@ pub(super) fn open(
             checked(log.barrier(&tickets))?;
             log
         } else {
-            NativeLogStore::recover(FileLogIo::open(&directory)?, store(n), LogLimits::default())?
+            ObservedLog {
+                inner: NativeLogStore::recover(
+                    ObservedIo {
+                        inner: FileLogIo::open(&directory)?,
+                        trace: trace.clone(),
+                    },
+                    store(n),
+                    LogLimits::default(),
+                )?,
+                trace: trace.clone(),
+            }
         };
         let mut cores = Vec::new();
         let mut applications = BTreeMap::new();
@@ -313,8 +333,8 @@ pub(super) fn open(
                 ),
             )?)),
         };
-        let parts = NativeNodeParts {
-            local: NativeLocalParts {
+        let parts = NodeParts {
+            local: NodeLocalParts {
                 owner,
                 persistence,
                 applications,
@@ -348,9 +368,10 @@ pub(super) fn open(
         // Failed runs are invalid and retain their directory; only successful
         // runs advertise workers_joined after the explicit close/reopen gates.
         replicas.push(
-            NativeNode::from_parts(parts, NodeLimits::default(), now)
+            Node::from_parts(parts, NodeLimits::default(), now)
                 .map_err(|e| format!("node assembly failed: {:?}", e.reason))?,
         );
+        traces.push(trace);
     }
-    Ok(replicas)
+    Ok((replicas, traces))
 }
