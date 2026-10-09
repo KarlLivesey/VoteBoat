@@ -279,6 +279,7 @@ impl Directory {
                     ExecutionMode::Single(g) => g.id == group.id,
                     ExecutionMode::Partitioned(entries) | ExecutionMode::Delegated(entries) => {
                         entries.iter().any(|e| match e.target {
+                            RouteTarget::Vacant => false,
                             RouteTarget::Group(g) => g.id == group.id,
                             RouteTarget::Child(c) => {
                                 c.group.id == group.id || c.responsibility.id == child.id
@@ -288,6 +289,7 @@ impl Directory {
                 }
             });
         if used
+            || self.retired_child_identity_used(group, child)
             || self.transfer_targets.iter().any(|g| g.id == group.id)
             || self
                 .creations

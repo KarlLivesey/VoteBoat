@@ -171,7 +171,9 @@ fn missing_lookup<C: ManifestCache, P: PartitionPolicy>(
                     minimum_generation: None,
                 }
             }
-            RouteTarget::Group(_) => return Err(ManifestDiscoveryError::WrongIdentity),
+            RouteTarget::Group(_) | RouteTarget::Vacant => {
+                return Err(ManifestDiscoveryError::WrongIdentity)
+            }
         }
     }
     Err(ManifestDiscoveryError::Routing(RoutingError::HopLimit))

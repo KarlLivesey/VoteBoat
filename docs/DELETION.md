@@ -46,6 +46,10 @@ existing operations first; unresolved-creation cancellation is not implemented h
 Retained physical data, retries, outbox and fences are preserved. Deletion provides
 no physical reclamation permission or automatic expiry of tombstone records.
 
+Schema10 additionally supports [retiring an already-deleted child selector](CHILD_SLOTS.md)
+to an explicit vacancy. Its parent retains every other route and its ownership
+epoch; later deletion requires no owner or child fact for vacant selectors.
+
 `tests/deletion.rs` covers original routed-owner fences, leaf and same/foreign
 recursive deletion, a three-authority chain, capacity/pending/profile refusal,
 checkpoint/codec truncations, exact retries and every-byte native journal faults

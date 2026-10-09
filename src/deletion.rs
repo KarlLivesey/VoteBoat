@@ -65,6 +65,43 @@ pub struct ChildDeletionEvidence {
     pub digest: ContentDigest,
 }
 impl ChildDeletionEvidence {
+    pub(crate) fn put(&self, b: &mut Vec<u8>) {
+        b.extend(self.configuration.get().to_le_bytes());
+        put_group(b, self.authority);
+        put_responsibility(b, self.responsibility);
+        put_responsibility(b, self.parent.responsibility);
+        put_group(b, self.parent.group);
+        put_range(b, self.scope);
+        b.extend(self.epoch.get().to_le_bytes());
+        b.extend(self.generation.get().to_le_bytes());
+        b.extend(self.intent.get().to_le_bytes());
+        b.extend(self.intent_index.to_le_bytes());
+        b.extend(self.operation.get().to_le_bytes());
+        b.extend(self.index.to_le_bytes());
+        b.extend(self.digest.0);
+    }
+    pub(crate) fn read(r: &mut Reader<'_>) -> Result<Self, ApplicationError> {
+        let value = Self {
+            configuration: ConfigurationId::new(r.u64()?)
+                .ok_or(ApplicationError::InvalidCommand)?,
+            authority: r.group()?,
+            responsibility: r.responsibility()?,
+            parent: ParentAuthority {
+                responsibility: r.responsibility()?,
+                group: r.group()?,
+            },
+            scope: r.range()?,
+            epoch: OwnershipEpoch::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?,
+            generation: RouteGeneration::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?,
+            intent: r.operation()?,
+            intent_index: r.u64()?,
+            operation: r.operation()?,
+            index: r.u64()?,
+            digest: ContentDigest(r.take(32)?.try_into().unwrap()),
+        };
+        value.validate()?;
+        Ok(value)
+    }
     pub fn from_status(
         configuration: ConfigurationId,
         s: &DeletionStatus,
@@ -86,7 +123,7 @@ impl ChildDeletionEvidence {
             digest: ContentDigest::sha256(&s.intent.intent.encode(MAX_DELETION_INTENT_BYTES)?),
         })
     }
-    fn validate(&self) -> Result<(), ApplicationError> {
+    pub(crate) fn validate(&self) -> Result<(), ApplicationError> {
         if !index(self.intent_index)
             || !index(self.index)
             || self.index <= self.intent_index
@@ -190,6 +227,7 @@ impl DeletionCompletion {
             ExecutionMode::Partitioned(routes) | ExecutionMode::Delegated(routes) => {
                 for r in routes {
                     match r.target {
+                        RouteTarget::Vacant => {}
                         RouteTarget::Group(g) => {
                             groups.insert(g);
                         }
@@ -260,19 +298,7 @@ impl DeletionCompletion {
         }
         b.extend((self.children.len() as u16).to_le_bytes());
         for f in &self.children {
-            b.extend(f.configuration.get().to_le_bytes());
-            put_group(&mut b, f.authority);
-            put_responsibility(&mut b, f.responsibility);
-            put_responsibility(&mut b, f.parent.responsibility);
-            put_group(&mut b, f.parent.group);
-            put_range(&mut b, f.scope);
-            b.extend(f.epoch.get().to_le_bytes());
-            b.extend(f.generation.get().to_le_bytes());
-            b.extend(f.intent.get().to_le_bytes());
-            b.extend(f.intent_index.to_le_bytes());
-            b.extend(f.operation.get().to_le_bytes());
-            b.extend(f.index.to_le_bytes());
-            b.extend(f.digest.0);
+            f.put(&mut b);
         }
         if b.len() > max.min(MAX_DELETION_COMPLETION_BYTES) {
             return Err(ApplicationError::InvalidCommand);
@@ -319,25 +345,7 @@ impl DeletionCompletion {
         }
         let mut children = Vec::with_capacity(n);
         for _ in 0..n {
-            children.push(ChildDeletionEvidence {
-                configuration: ConfigurationId::new(r.u64()?)
-                    .ok_or(ApplicationError::InvalidCommand)?,
-                authority: r.group()?,
-                responsibility: r.responsibility()?,
-                parent: ParentAuthority {
-                    responsibility: r.responsibility()?,
-                    group: r.group()?,
-                },
-                scope: r.range()?,
-                epoch: OwnershipEpoch::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?,
-                generation: RouteGeneration::new(r.u64()?)
-                    .ok_or(ApplicationError::InvalidCommand)?,
-                intent: r.operation()?,
-                intent_index: r.u64()?,
-                operation: r.operation()?,
-                index: r.u64()?,
-                digest: ContentDigest(r.take(32)?.try_into().unwrap()),
-            });
+            children.push(ChildDeletionEvidence::read(&mut r)?);
         }
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);

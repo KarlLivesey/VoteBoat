@@ -111,6 +111,7 @@ pub(crate) fn manifest_len(m: &ResponsibilityManifest) -> usize {
                     .map(|e| {
                         4 + 1
                             + match e.target {
+                                RouteTarget::Vacant => 0,
                                 RouteTarget::Group(_) => 24,
                                 RouteTarget::Child(_) => 56,
                             }
@@ -121,7 +122,11 @@ pub(crate) fn manifest_len(m: &ResponsibilityManifest) -> usize {
 }
 pub(crate) fn put_manifest(out: &mut Vec<u8>, m: &ResponsibilityManifest) {
     let input = m.input();
-    out.extend(b"VBMAN001");
+    out.extend(if m.has_vacancies() {
+        b"VBMAN002"
+    } else {
+        b"VBMAN001"
+    });
     put_responsibility(out, input.responsibility);
     out.push(u8::from(input.parent.is_some()));
     if let Some(parent) = input.parent {
@@ -161,6 +166,7 @@ pub(crate) fn put_manifest(out: &mut Vec<u8>, m: &ResponsibilityManifest) {
     for entry in entries {
         put_range(out, entry.scope);
         match entry.target {
+            RouteTarget::Vacant => out.push(2),
             RouteTarget::Group(group) => {
                 out.push(0);
                 put_group(out, group);
@@ -179,9 +185,11 @@ pub(crate) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, Appl
         return Err(ApplicationError::InvalidCommand);
     }
     let mut reader = Reader::new(bytes);
-    if reader.take(8)? != b"VBMAN001" {
+    let tag = reader.take(8)?;
+    if tag != b"VBMAN001" && tag != b"VBMAN002" {
         return Err(ApplicationError::InvalidCommand);
     }
+    let vacant_format = tag == b"VBMAN002";
     let responsibility = reader.responsibility()?;
     let parent = if reader.boolean()? {
         Some(ParentAuthority {
@@ -224,6 +232,7 @@ pub(crate) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, Appl
             for _ in 0..count {
                 let scope = reader.range()?;
                 let target = match reader.u8()? {
+                    2 if vacant_format => RouteTarget::Vacant,
                     0 => RouteTarget::Group(reader.group()?),
                     1 => RouteTarget::Child(ChildAuthority {
                         responsibility: reader.responsibility()?,
@@ -246,7 +255,7 @@ pub(crate) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, Appl
     if !reader.done() {
         return Err(ApplicationError::InvalidCommand);
     }
-    ResponsibilityManifest::new(ManifestInput {
+    let manifest = ResponsibilityManifest::new(ManifestInput {
         responsibility,
         parent,
         authority,
@@ -259,5 +268,9 @@ pub(crate) fn read_manifest(bytes: &[u8]) -> Result<ResponsibilityManifest, Appl
         state,
         execution,
     })
-    .map_err(|_| ApplicationError::InvalidCommand)
+    .map_err(|_| ApplicationError::InvalidCommand)?;
+    if manifest.has_vacancies() != vacant_format {
+        return Err(ApplicationError::InvalidCommand);
+    }
+    Ok(manifest)
 }

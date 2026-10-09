@@ -19,7 +19,9 @@
 //! authorization remains required before proposal. Durable progress comes solely
 //! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
 //! reserves fresh identities but cannot bootstrap groups or activate ownership.
+mod child_slots;
 pub mod creation;
+use crate::child_slots::*;
 mod deletion;
 mod namespace;
 use crate::delegation::*;
@@ -272,10 +274,12 @@ pub enum DirectoryOutcome {
     DelegationCancelled,
     DeletionIntentRecorded,
     Deleted(RouteGeneration),
+    ChildSlotRetired(RouteGeneration),
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
     Bootstrap,
+    RetireChildSlot(RetireChildSlot),
     Deletion(DeletionIntent),
     DeletionCompletion(DeletionCompletion),
     Create(GroupCreationIntent),
@@ -326,6 +330,8 @@ pub struct Directory {
     cross_authority_insertion: bool,
     retained_insertion: bool,
     namespace_deletion: bool,
+    child_slot_retirement: bool,
+    retired_slot_children: BTreeMap<ResponsibilityIdentity, GroupIdentity>,
     deletions: BTreeMap<ResponsibilityIdentity, OperationId>,
     deletion_publications: BTreeMap<OperationId, OperationId>,
     insertion_creations: BTreeSet<OperationId>,
@@ -369,6 +375,8 @@ impl Directory {
             cross_authority_insertion: false,
             retained_insertion: false,
             namespace_deletion: false,
+            child_slot_retirement: false,
+            retired_slot_children: BTreeMap::new(),
             deletions: BTreeMap::new(),
             deletion_publications: BTreeMap::new(),
             insertion_creations: BTreeSet::new(),
@@ -450,6 +458,13 @@ impl Directory {
         next.namespace_deletion = true;
         Ok(next)
     }
+    /// Select schema10 before bootstrap for checked deleted-child slot retirement.
+    #[allow(clippy::result_large_err)]
+    pub fn with_child_slot_retirement(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_namespace_deletion()?;
+        next.child_slot_retirement = true;
+        Ok(next)
+    }
     fn control_command_limit(&self) -> usize {
         if self.namespace_deletion {
             MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
@@ -497,12 +512,23 @@ impl Directory {
     /// an ordinary operation ID and retains its original request/result. Large
     /// plans require explicitly compatible log/transport command envelopes.
     pub fn bootstrap_command(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
+        if !self.child_slot_retirement
+            && self
+                .plan
+                .manifests
+                .values()
+                .any(ResponsibilityManifest::has_vacancies)
+        {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
         let len = 46 + self.plan.encoded_len();
         if len > max_bytes || len > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_deletion {
+        bytes.extend(if self.child_slot_retirement {
+            b"VBDINI10"
+        } else if self.namespace_deletion {
             b"VBDINIT9"
         } else if self.retained_insertion {
             b"VBDINIT8"
@@ -547,6 +573,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINIT7")
             || bytes.starts_with(b"VBDINIT8")
             || bytes.starts_with(b"VBDINIT9")
+            || bytes.starts_with(b"VBDINI10")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -556,7 +583,9 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if self.namespace_deletion && bytes.starts_with(b"VBDDEL01") {
+            if self.child_slot_retirement && bytes.starts_with(b"VBRSLOT1") {
+                RetireChildSlot::decode(bytes).map(Request::RetireChildSlot)
+            } else if self.namespace_deletion && bytes.starts_with(b"VBDDEL01") {
                 DeletionIntent::decode(bytes).map(Request::Deletion)
             } else if self.namespace_deletion && bytes.starts_with(b"VBDDCM01") {
                 DeletionCompletion::decode(bytes).map(Request::DeletionCompletion)
@@ -613,6 +642,25 @@ impl Directory {
             && intent.is_some_and(TransferIntent::cross_authority_insertion)
         {
             return Err(ApplicationError::InvalidCommand);
+        }
+        if !self.child_slot_retirement {
+            let vacant_intent =
+                |i: &TransferIntent| i.before().has_vacancies() || i.after().has_vacancies();
+            let vacancies = match &request {
+                Request::Publish(c) => c.manifest.has_vacancies(),
+                Request::Namespace(c) => c.manifest.has_vacancies(),
+                Request::Deletion(c) => c.before.has_vacancies(),
+                Request::DeletionCompletion(c) => c.intent.intent.before.has_vacancies(),
+                Request::Delegation(c) => {
+                    c.parent().has_vacancies()
+                        || c.before().has_vacancies()
+                        || c.after().has_vacancies()
+                }
+                _ => intent.is_some_and(vacant_intent),
+            };
+            if vacancies {
+                return Err(ApplicationError::UnsupportedSchema);
+            }
         }
         Ok(request)
     }
@@ -821,7 +869,11 @@ impl Directory {
             let RouteTarget::Group(group) = target.target else {
                 unreachable!("checked intent")
             };
-            if self.transfer_targets.contains(&group)
+            if self
+                .retired_slot_children
+                .values()
+                .any(|g| g.id == group.id)
+                || self.transfer_targets.contains(&group)
                 || self
                     .plan
                     .manifests
@@ -836,6 +888,7 @@ impl Directory {
                                 ExecutionMode::Partitioned(routes)
                                 | ExecutionMode::Delegated(routes) => {
                                     routes.iter().any(|r| match r.target {
+                                        RouteTarget::Vacant => false,
                                         RouteTarget::Group(g) => g == group,
                                         RouteTarget::Child(c) => c.group == group,
                                     })
@@ -1262,6 +1315,7 @@ impl Directory {
                 return Err(ApplicationError::DedupCapacity);
             }
             let outcome = match command {
+                Request::RetireChildSlot(r) => self.retire_child_slot(r),
                 Request::Deletion(i) => self.begin_deletion(operation, i),
                 Request::DeletionCompletion(c) => self.complete_deletion(operation, c),
                 Request::Publish(command) => self.publish(command),
@@ -1464,7 +1518,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.namespace_deletion {
+        if self.child_slot_retirement {
+            CHILD_SLOT_DIRECTORY_SCHEMA
+        } else if self.namespace_deletion {
             DELETION_DIRECTORY_SCHEMA
         } else if self.retained_insertion {
             RETAINED_INSERTION_DIRECTORY_APPLICATION_SCHEMA
@@ -1496,7 +1552,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_deletion {
+        bytes.extend(if self.child_slot_retirement {
+            b"VBDIR010"
+        } else if self.namespace_deletion {
             b"VBDIR009"
         } else if self.retained_insertion {
             b"VBDIR008"
@@ -1550,7 +1608,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.namespace_deletion {
+                != if self.child_slot_retirement {
+                    b"VBDIR010"
+                } else if self.namespace_deletion {
                     b"VBDIR009"
                 } else if self.retained_insertion {
                     b"VBDIR008"
@@ -1596,6 +1656,7 @@ impl CheckpointStateMachine for Directory {
             next.cross_authority_insertion = self.cross_authority_insertion;
             next.retained_insertion = self.retained_insertion;
             next.namespace_deletion = self.namespace_deletion;
+            next.child_slot_retirement = self.child_slot_retirement;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

@@ -82,6 +82,8 @@ pub struct ChildAuthority {
 pub enum RouteTarget {
     Group(GroupIdentity),
     Child(ChildAuthority),
+    /// Explicitly unowned delegated selector. It grants no data/child authority.
+    Vacant,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RouteEntry {
@@ -159,11 +161,18 @@ impl ResponsibilityManifest {
         }
         let mut end = input.scope.start;
         let mut children = Vec::new();
+        let mut vacancies = 0;
         for entry in entries {
             if entry.scope.start != end || entry.scope.end > input.scope.end {
                 return Err(RoutingError::Coverage);
             }
             end = entry.scope.end;
+            if entry.target == RouteTarget::Vacant {
+                if !delegated {
+                    return Err(RoutingError::InvalidMode);
+                }
+                vacancies += 1;
+            }
             if let RouteTarget::Child(child) = entry.target {
                 if !delegated {
                     return Err(RoutingError::InvalidMode);
@@ -180,10 +189,13 @@ impl ResponsibilityManifest {
         if end != input.scope.end {
             return Err(RoutingError::Coverage);
         }
-        if delegated && children.is_empty() {
+        if delegated && children.is_empty() && vacancies == 0 {
             return Err(RoutingError::InvalidMode);
         }
         Ok(())
+    }
+    pub fn has_vacancies(&self) -> bool {
+        matches!(&self.0.execution, ExecutionMode::Delegated(v) if v.iter().any(|r|r.target==RouteTarget::Vacant))
     }
     pub fn input(&self) -> &ManifestInput {
         &self.0
@@ -221,6 +233,7 @@ impl ResponsibilityManifest {
                 }
                 match (a.target, b.target) {
                     (RouteTarget::Group(a), RouteTarget::Group(b)) => a == b,
+                    (RouteTarget::Vacant, RouteTarget::Vacant) => true,
                     (RouteTarget::Child(a), RouteTarget::Child(b)) => {
                         a.responsibility == b.responsibility
                             && a.group == b.group
@@ -228,6 +241,48 @@ impl ResponsibilityManifest {
                     }
                     _ => false,
                 }
+            })
+    }
+    /// Recognizes a newer trusted directory view that removes child routes.
+    /// This shape check is not deletion evidence: the directory must commit
+    /// retirement only after observing the original child tombstone.
+    pub fn retires_child_slots(&self, previous: &Self) -> bool {
+        let next = self.input();
+        let old = previous.input();
+        if next.responsibility != old.responsibility
+            || next.parent != old.parent
+            || next.authority != old.authority
+            || next.application != old.application
+            || next.scheme != old.scheme
+            || next.scope != old.scope
+            || next.placement != old.placement
+            || next.epoch != old.epoch
+            || next.state != ResponsibilityState::Active
+            || old.state != ResponsibilityState::Active
+            || next.generation <= old.generation
+        {
+            return false;
+        }
+        let (ExecutionMode::Delegated(a), ExecutionMode::Delegated(b)) =
+            (&next.execution, &old.execution)
+        else {
+            return false;
+        };
+        a.len() == b.len()
+            && a.iter().zip(b).any(|(a, b)| {
+                a.target == RouteTarget::Vacant && matches!(b.target, RouteTarget::Child(_))
+            })
+            && a.iter().zip(b).all(|(a, b)| {
+                a.scope == b.scope
+                    && match (a.target, b.target) {
+                        (RouteTarget::Vacant, RouteTarget::Child(_)) => true,
+                        (RouteTarget::Child(a), RouteTarget::Child(b)) => {
+                            a.responsibility == b.responsibility
+                                && a.group == b.group
+                                && a.epoch >= b.epoch
+                        }
+                        (a, b) => a == b,
+                    }
             })
     }
     /// Charges value bytes and all retained route capacity. Collection/allocator
@@ -257,13 +312,21 @@ impl ResponsibilityManifest {
                 .iter()
                 .find(|r| r.scope.contains(bucket))
                 .copied()
-                .ok_or(RoutingError::Coverage),
+                .ok_or(RoutingError::Coverage)
+                .and_then(|r| {
+                    if r.target == RouteTarget::Vacant {
+                        Err(RoutingError::Vacant)
+                    } else {
+                        Ok(r)
+                    }
+                }),
         }
     }
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RoutingError {
+    Vacant,
     InvalidRange,
     UnsupportedSchema,
     InvalidPlacement,
@@ -407,6 +470,7 @@ pub fn resolve<C: ManifestCache + ?Sized, P: PartitionPolicy + ?Sized>(
         }
         let route = manifest.select(bucket)?;
         match route.target {
+            RouteTarget::Vacant => return Err(RoutingError::Vacant),
             RouteTarget::Group(group) => {
                 return Ok(RouteHint {
                     responsibility: current,

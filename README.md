@@ -107,6 +107,9 @@ publishes retained tombstones after owner fences and child deletion facts.
 Application/checkpoint/native journal conformance and selected TCP/QUIC
 unread-phase recovery pass. Fixed quorum fence reads use the same routed owner
 and checkpoint schema. Wider lifecycle validation remains in progress.
+Schema10 adds [checked child-slot retirement](docs/CHILD_SLOTS.md): after a child
+is deleted, its selector can become an explicit vacancy while other routes keep
+serving. Live-child reparenting remains in progress.
 The [routed application wrapper](docs/ROUTED_APPLICATION.md) now checks ownership
 at admission and apply, preserves semantic retries and enforces a durable local
 fence. Native TCP/QUIC child writes and recovery work with every parent replica

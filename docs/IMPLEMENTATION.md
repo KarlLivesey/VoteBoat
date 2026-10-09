@@ -54,7 +54,7 @@ first three-process executable now exposes that assembly. Generic startup
 the shared typed startup and configured endpoint path are described in Slices
 38–39 below. Separate-host deployment and operational packaging remain work.
 
-## Linked macro and mini plan — updated 9 October 2026
+## Linked macro and mini plan — updated 10 October 2026
 
 The macro plan tracks usable capabilities, not the number of internal slices.
 The mini plan covers the current deliverable and the next two, including their
@@ -87,6 +87,12 @@ static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
+
+Current priority is sensible feature completion: finish a complete usable path,
+check the failures it introduces, and advance to the next capability. Current154b
+is live-child reparenting; next155 is activated partial sources; following156 is
+metadata authority movement. Their purpose, dependencies and completion checks
+are specified below. Completed slices are evidence, not extra release prerequisites.
 
 Slices 78–80 complete fixed-assignment routing and application execution. Slices
 81–83 cover the finite named P4 fault ledger: held readiness/session changes,
@@ -194,6 +200,12 @@ its selected native acceptance passes. General retention and broader faults rema
    identity/authority refusal, original durable publication/locator facts, stale
    parent-route refusal, exact retries and named partial-progress/recovery checks.
    Advances complete recursive responsibility management; no normal ancestor commit.
+   Bounded154a now supplies checked deleted-child slot retirement and explicit
+   vacancies with conformance/checkpoint/native-journal evidence. Current154b is
+   the actual live-child move: reserve the old route and vacant destination,
+   verify committed ancestry, publish/adopt exact parent bindings and recover
+   every interruption without competing routes. Vacancy support alone does not
+   complete this milestone.
 
 13. **Activated children as partial sources (next155, P5/P6).** Purpose:
    let a previously imported child delegate only part of its scope while retaining
@@ -11504,3 +11516,84 @@ an active destination or erase usable descendants. Next155 uses activated childr
 as partial sources; following156 moves metadata authority. Broader owner families,
 retention/cancellation, general mappings, membership/platform/fault/P7 requirements
 remain active. No CI wait or broad unchanged benchmark blocks the next feature.
+
+### Slice154a schema plan: checked vacant child slots for reparenting
+
+Need: manifests currently require complete coverage by groups/children; removing a
+moved child would leave an invalid gap, and replacing a live destination would lose
+data. Reparenting needs explicit non-serving vacancies. Add RouteTarget::Vacant for
+Delegated selectors and VBMAN002 only when vacancies exist; VBMAN001 stays exact
+and rejects the new tag. Selecting a vacancy returns RoutingError::Vacant without
+child lookup. All-vacant Delegated namespaces are valid, while Partitioned remains
+concrete-only. Data owners and transfer targets never gain authority from vacancy.
+
+Small usable path: pristine Directory schema10 with_child_slot_retirement adds
+RetireChildSlot { before, child: ChildDeletionEvidence }. Only the exact active
+parent/child selector and an already published matching child tombstone permit
+atomic Child-to-Vacant replacement. Same-authority facts must match the actual local
+record; foreign facts require authenticated original quorum provenance. Generation
+advances, parent ownership epoch and every other route stay unchanged. Retained
+concrete owner routes continue at the same epoch; old child is already fenced.
+The original retired-slot status and request survive ordinary retry/checkpoint.
+No further irreversible effect needs a reserved second phase for this operation.
+
+Compatibility/ownership: old directory profiles reject vacant bootstrap plans and
+retirement commands; old wire manifest tags reject vacant entries. Full history
+still belongs to the existing metadata log/checkpoint. Pending parent deletion,
+transfer or delegation blocks retirement. Vacant scopes do not add owner-fence or
+child-delete obligations when later deleting an empty namespace; original tombstone
+and binding history remain retained. Transfer/insertion cannot populate a vacancy
+without a future explicitly checked protocol.
+
+Acceptance: actual child deletion/fence then slot retirement, local/foreign facts,
+retained owner service at unchanged epoch, vacancy routing refusal, old cache child
+still fenced, no live-child retirement, exact untouched routes and immutable retry/
+status recovery; codec/profile/budget/atomicity and native journal cuts. This advances
+current154 reparenting; actual moving/adopting a live child is still next154b and is
+not claimed by this preparatory deletion cleanup. Macro next155/156 remain unchanged.
+
+### Slice154a implemented evidence and macro review
+
+Pristine Directory schema10 adds VBRSLOT1 checked retirement of an already-deleted
+child selector into an explicit vacancy. Parent identity, application, scope and
+ownership epoch stay exact; only its generation and that selector change. Same-
+authority evidence must equal the actual local original deletion record. Foreign
+facts still require authenticated original quorum provenance; a digest or decoded
+value is not a certificate. The original metadata owner retains status/index/
+request history and retired identity reservations across checkpoint replay.
+
+Vacant Delegated selectors preserve complete coverage and immediately refuse
+resolution without child lookup. All-vacant namespaces are valid. Partitioned
+vacancies refuse. VBMAN002 is used only when vacancies exist; unchanged non-vacant
+manifests still use VBMAN001. Schema1–9 reject vacant bootstrap/commands and schema10
+checkpoints. The native cache permits authenticated monotonic child retirement
+at the same parent epoch, including intervening child-epoch refresh, while refusing
+vacancy restoration or concrete-owner removal. Original owner grants keep serving
+retained ranges and deleted child owners stay fenced.
+
+Review of the next publication path found that pending creation also depends on
+the original parent generation. Retirement now refuses unconsumed creation, as
+well as parent deletion/transfer/delegation, preserving that publication path.
+This is a focused guard in the current operation, not another implementation
+prerequisite. Two initial test expectations used nonexistent result variants;
+corrected them to the existing Served/DedupCapacity contracts. One bootstrap test
+used generation2 although original grants require generation1; corrected the
+fixture before checking old-profile refusal. No production contract was weakened.
+
+Actual Linux validation: new child_slots10/10, deletion12/12, routing13/13,
+directory31/31, delegation14/14, insertion11/11 and retained_insertion10/10 pass.
+These101 application/storage checks include native every-byte retirement frame
+cuts plus failed sync/publication, accepting only original or complete routes.
+Checkpoint and exact retry recover the original status/index. Core-only
+child_slots8/8, deletion11/11, routing9/9 and routed13/13 pass; all-feature routed
+app/host14/14 pass with101 native network tests filtered. All-feature/all-target
+Clippy with warnings denied passes. Formatting, whitespace and81-entry inventory
+validation pass. No new native network or macOS claim is made by this slice.
+
+Macro review: deleted-slot cleanup is usable and the routing format can now
+represent an empty destination. It does not move a live child. Current154b must
+implement original old/new parent reservations, checked committed ancestry,
+child parent-binding adoption and recovery; next155 activated partial sources and
+following156 metadata authority movement remain. Broader owner families,
+retention/cancellation/general mappings and original membership/platform/fault/P7
+requirements remain active. Full P0–P7 goal stays open; CI is background feedback.

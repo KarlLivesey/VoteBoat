@@ -18,6 +18,7 @@ pub mod application;
 pub mod authorization;
 pub mod bucket_counter;
 pub mod buffer;
+pub mod child_slots;
 pub mod connect;
 pub mod contracts;
 pub mod delegation;

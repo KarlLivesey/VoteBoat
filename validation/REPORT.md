@@ -4127,3 +4127,50 @@ activated partial sources, following156 metadata authority movement; wider owner
 families, retention/cancellation/general mappings and original membership/platform/
 fault/P7 gates remain open. Full P0–P7 goal stays active. macOS execution pending,
 Windows/P8 deferred, RPL-1.5 and ignored original pack preserved.
+
+## Slice154a — checked retirement of already-deleted child slots
+
+Directory schema10 (VBDINI10/VBDIR010) adds bounded VBRSLOT1 retirement of one
+exact published-deleted child selector. Parent generation advances once; identity,
+epoch and all other selectors remain exact. Same-authority facts must match the
+actual local tombstone. Foreign quorum provenance remains a trusted-host duty.
+Original operation/index/status, requests and retired identities survive replay.
+Pending parent deletion/transfer/delegation or unconsumed creation refuses the
+transition. The latter guard preserves creation's original generation dependency.
+
+Delegated vacancies preserve full coverage, return RoutingError::Vacant before
+child lookup, and add no fictitious obligations to later parent deletion. Retained
+owner service remains usable at the original epoch; stale child hints remain
+fenced. The native cache admits trusted child retirement without admitting
+concrete-owner removal, restored vacancies or older generations. VBMAN002 is
+required exactly when vacancies exist; old non-vacant bytes are unchanged, old
+profiles and downgraded/noncanonical tags refuse.
+
+Actual Linux checks:
+
+- All-feature child_slots10/10 (0.09s), deletion12/12 (0.10s), routing13/13 (0.00s),
+  directory31/31 (0.07s), delegation14/14 (0.05s), insertion11/11 (2.09s), and
+  retained_insertion10/10 (0.99s), after a shared1.40s build. New tests include
+  local/foreign actual child deletion, unchanged retained data, all-vacant parent
+  deletion, successive retirement, exact status/retry replay, profile/codec/cache
+  refusal, capacity/pending work and failed-batch atomicity. Native ModelIo cuts
+  every byte of the retirement journal frame and fails sync/publication, then
+  reopens and checkpoints: only the complete old or complete new route survives.
+- Core-only child_slots8/8, deletion11/11, routing9/9 and routed13/13 pass after
+  2.98s build (0.00s/0.01s/0.00s/0.22s).
+- All-feature routed application/host14/14 passes0.22s after8.62s build;
+  101 native network tests deliberately filtered as unchanged by this operation.
+- All-feature/all-target Clippy with -D warnings passes5.22s. Formatting,
+  git whitespace and81-entry component inventory checks pass.
+
+Initial test compile referenced nonexistent Value/HistoryFull variants; adjusted
+to the existing Served and DedupCapacity results. A profile test initially built
+a generation2 bootstrap grant, rejected by the existing generation1 contract;
+corrected that fixture. Production invariants were not relaxed to pass tests.
+
+Finite application/storage evidence only: this step makes deleted-slot cleanup
+usable and explicit vacancies representable. It is not live-child reparenting,
+a new distributed proof, native network feature evidence or macOS validation.
+Current154b live reparenting, next155 activated partial sources and following156
+metadata authority movement remain; full goal stays active. RPL-1.5, Linux/macOS
+targets, deferred Windows/P8 and background-only CI policy remain unchanged.

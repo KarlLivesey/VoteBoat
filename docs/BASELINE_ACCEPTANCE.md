@@ -127,6 +127,13 @@ resumption remains current153b; reparenting154, partial sources155 and wider ori
 scope remain open. Physical reclamation and unresolved-creation cancellation are
 not granted by this deletion protocol. See DELETION.md and IMPLEMENTATION.md.
 
+Slice154a adds schema10 checked retirement of an already-deleted child selector
+to an explicit vacancy. Local/foreign deletion facts, retained owner service,
+immutable status/retry replay, bounded capacity, profile/cache refusal and native
+journal cuts are checked. This permits deleted-slot cleanup and a representable
+empty destination; it does not implement moving a live child or complete P5/P6.
+See [child-slot retirement](CHILD_SLOTS.md).
+
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
 WAL/checkpoint two-authority recursive deletion histories pass original unread

@@ -79,6 +79,7 @@ impl NativeManifestCache {
             if next.epoch == prior.epoch
                 && next.execution != prior.execution
                 && !manifest.refreshes_child_epochs(old)
+                && !manifest.retires_child_slots(old)
             {
                 return Err(RoutingError::EpochMismatch);
             }

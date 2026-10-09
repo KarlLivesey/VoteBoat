@@ -323,6 +323,7 @@ pub struct TransferIntentStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
+    RetiredChildSlot(OperationId),
     DeletionIntent(OperationId),
     Deletion(OperationId),
     Manifest(ResponsibilityIdentity),
@@ -336,6 +337,7 @@ pub enum DirectoryQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
+    RetiredChildSlot(Option<crate::child_slots::RetiredChildSlotStatus>),
     DeletionIntent(Option<crate::deletion::DeletionIntentStatus>),
     Deletion(Option<crate::deletion::DeletionStatus>),
     Manifest(Option<ResponsibilityManifest>),
@@ -417,6 +419,10 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::RetiredChildSlot(operation) => self
+                .0
+                .retired_child_slot_at(required, operation)
+                .map(DirectoryRead::RetiredChildSlot),
             DirectoryQuery::DeletionIntent(operation) => self
                 .0
                 .deletion_intent_at(required, operation)
@@ -462,6 +468,13 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::RetiredChildSlot(op) => self
+                    .0
+                    .retired_child_slot_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.retirement.retained_bytes()
+                            - size_of::<crate::child_slots::RetireChildSlot>()
+                    }),
                 DirectoryQuery::DeletionIntent(op) => self
                     .0
                     .deletion_intent_at(self.applied_index(), *op)?
@@ -524,6 +537,9 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::RetiredChildSlot(s) => s.as_ref().map_or(0, |s| {
+                s.retirement.retained_bytes() - size_of::<crate::child_slots::RetireChildSlot>()
+            }),
             DirectoryRead::DeletionIntent(s) => s.as_ref().map_or(0, |s| {
                 s.intent.retained_bytes() - size_of::<crate::deletion::DeletionIntent>()
             }),
