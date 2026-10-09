@@ -1,8 +1,9 @@
-# Peer transport, contract version 3
+# Peer transport, contract version 4
 
 `transport::PeerTransport` owns one authenticated peer connection and multiplexes
-Raft groups in bounded frames. `NativePeerTransport<S, C>` uses the same public
-`SecureSession` and `WireCodec` contracts offered to host replacements.
+Raft groups in bounded frames. `NativePeerTransport<S, C, P>` uses the same public
+`SecureSession`, `WireCodec` and `BufferPool` contracts offered to host replacements.
+The pool type defaults to NativeBufferPool; see [owned buffers](BUFFERS.md).
 `PeerTransport::security` exposes the authenticated/simulator capability to
 assembly; boxed providers implement the same contract. Its
 constructor takes the selected outbound queue by shared reference only to copy
@@ -44,7 +45,8 @@ an unrelated owner queue or undo bytes already sent.
 ## Prefix validation, ingress and budgets
 
 Only the codec's fixed bounded prefix is read initially. `frame_length` must
-validate it before the driver reserves the full declared frame. The declared
+validate it before the driver allocates storage for the full declared frame.
+The maximum frame reservation is acquired before consuming the header. The declared
 length must fit both the selected codec and transport receive limits. Exactly
 one complete frame is decoded against the authenticated incoming `WireScope`.
 Decode errors release the partial frame and emit no partial message batch.
@@ -76,7 +78,8 @@ charged to the selected queue. Decode can temporarily coexist with its encoded
 receive frame. `usage` reports retained frame capacities and decoded cost; it is
 not exact allocator metadata or RSS. TLS buffers, host streams, peer roster,
 rejected sends, decoded ingress and effects have separate budgets. The driver
-creates no pool, executor, listener or per-group thread.
+creates no executor, listener or per-group thread. The original constructor
+selects a bounded per-connection native pool; with_buffers selects a host pool.
 
 Poll defaults to 16 plaintext calls and 64 KiB per direction, plus the independent
 session I/O budget. Zero budgets are valid. Alternating read/write preference

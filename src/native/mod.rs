@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 pub mod administration;
+pub mod buffer;
 #[cfg(feature = "tls")]
 pub mod connect;
 pub mod dial;

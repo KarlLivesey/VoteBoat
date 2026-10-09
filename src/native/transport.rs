@@ -13,7 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded peer frame driver over the public authenticated channel and codec.
-use crate::{outbound::*, runtime::MonoTime, secure::*, transport::*, wire::*};
+use crate::{
+    buffer::*, native::buffer::NativeBufferPool, outbound::*, runtime::MonoTime, secure::*,
+    transport::*, wire::*,
+};
 use std::mem::size_of;
 
 /// Explicit codec/limit selection reused for each authenticated connection.
@@ -74,12 +77,13 @@ impl<S: SecureSession, C: WireCodec + Clone> PeerTransportFactory<S> for NativeT
     }
 }
 
-struct Sending {
+struct Sending<B: FrameBuffer> {
     batch: OutboundBatch,
-    frame: Vec<u8>,
+    frame: B,
     written: usize,
 }
-pub struct NativePeerTransport<S: SecureSession, C: WireCodec> {
+pub struct NativePeerTransport<S: SecureSession, C: WireCodec, P: BufferPool = NativeBufferPool> {
+    buffers: P,
     session: Option<S>,
     codec: C,
     binding: SessionBinding,
@@ -88,9 +92,9 @@ pub struct NativePeerTransport<S: SecureSession, C: WireCodec> {
     limits: TransportLimits,
     state: TransportState,
     failure: Option<TransportError>,
-    sending: Option<Sending>,
+    sending: Option<Sending<P::Buffer>>,
     completed: Option<TransportSend>,
-    incoming: Vec<u8>,
+    incoming: Option<P::Buffer>,
     read: usize,
     frame_length: Option<usize>,
     received: Option<ReceivedBatch>,
@@ -99,13 +103,40 @@ pub struct NativePeerTransport<S: SecureSession, C: WireCodec> {
     close_started: bool,
 }
 impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
+    /// Compatibility constructor: independent two-frame budget per connection.
     pub fn new(
+        session: S,
+        codec: C,
+        outbound: &(impl OutboundQueue + ?Sized),
+        limits: TransportLimits,
+    ) -> Result<Self, TransportError> {
+        limits.validate()?;
+        let buffers = NativeBufferPool::new(BufferLimits {
+            reserved_bytes: limits.send_frame_bytes + limits.receive_frame_bytes,
+            leases: 2,
+        })
+        .map_err(TransportError::Buffer)?;
+        Self::with_buffers(session, codec, outbound, limits, buffers)
+    }
+}
+impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P> {
+    pub fn with_buffers(
         session: S,
         codec: C,
         outbound_queue: &(impl OutboundQueue + ?Sized),
         limits: TransportLimits,
+        buffers: P,
     ) -> Result<Self, TransportError> {
         let limits = limits.validate()?;
+        let pool_limits = buffers
+            .limits()
+            .validate()
+            .map_err(TransportError::Buffer)?;
+        if pool_limits.reserved_bytes < limits.send_frame_bytes + limits.receive_frame_bytes
+            || pool_limits.leases < 2
+        {
+            return Err(TransportError::InvalidLimits);
+        }
         let outbound = outbound_queue.binding();
         let outbound_limits = outbound_queue
             .limits()
@@ -129,6 +160,7 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
             return Err(TransportError::IncompatibleCodec);
         }
         Ok(Self {
+            buffers,
             session: Some(session),
             codec,
             binding,
@@ -139,7 +171,7 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
             failure: None,
             sending: None,
             completed: None,
-            incoming: Vec::new(),
+            incoming: None,
             read: 0,
             frame_length: None,
             received: None,
@@ -147,6 +179,21 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
             prefer_read: true,
             close_started: false,
         })
+    }
+    fn validate_buffer(
+        buffer: &mut P::Buffer,
+        reservation: usize,
+        len: usize,
+    ) -> Result<(), TransportError> {
+        if buffer.reservation() != reservation
+            || buffer.capacity() > reservation
+            || buffer.as_ref().len() != len
+            || buffer.as_mut().len() != len
+            || buffer.capacity() < len
+        {
+            return Err(TransportError::ProviderViolation);
+        }
+        Ok(())
     }
     fn validate_session(&self) -> Result<(), TransportError> {
         let session = self.session.as_ref().ok_or(TransportError::Closed)?;
@@ -158,7 +205,7 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
         Ok(())
     }
     fn clear_partial(&mut self) {
-        self.incoming = Vec::new();
+        self.incoming = None;
         self.read = 0;
         self.frame_length = None;
     }
@@ -182,7 +229,7 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
         if self
             .sending
             .as_ref()
-            .is_some_and(|s| s.written == s.frame.len())
+            .is_some_and(|s| s.written == s.frame.as_ref().len())
             && self.session.as_ref().is_some_and(SecureSession::is_flushed)
         {
             let send = self.sending.take().unwrap();
@@ -196,15 +243,28 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
         false
     }
     fn read_step(&mut self, limit: usize) -> Result<usize, TransportError> {
-        if self.incoming.is_empty() {
-            self.incoming = vec![0; self.codec.header_bytes()];
+        if self.incoming.is_none() {
+            let mut buffer = self
+                .buffers
+                .acquire(self.limits.receive_frame_bytes, self.codec.header_bytes())
+                .map_err(|e| match e {
+                    BufferError::Overloaded => TransportError::Session(SessionError::WouldBlock),
+                    other => TransportError::Buffer(other),
+                })?;
+            Self::validate_buffer(
+                &mut buffer,
+                self.limits.receive_frame_bytes,
+                self.codec.header_bytes(),
+            )?;
+            self.incoming = Some(buffer);
         }
-        let end = self.incoming.len().min(self.read + limit);
+        let incoming = self.incoming.as_mut().unwrap();
+        let end = incoming.as_ref().len().min(self.read + limit);
         let n = self
             .session
             .as_mut()
             .unwrap()
-            .read_plaintext(&mut self.incoming[self.read..end])
+            .read_plaintext(&mut incoming.as_mut()[self.read..end])
             .map_err(TransportError::Session)?;
         if n > end - self.read {
             return Err(TransportError::ProviderViolation);
@@ -222,25 +282,25 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
             return Ok(0);
         }
         self.read += n;
-        if self.frame_length.is_none() && self.read == self.incoming.len() {
+        if self.frame_length.is_none() && self.read == incoming.as_ref().len() {
             let length = self
                 .codec
-                .frame_length(&self.incoming)
+                .frame_length(incoming.as_ref())
                 .map_err(TransportError::Wire)?;
-            if length < self.incoming.len()
+            if length < incoming.as_ref().len()
                 || length > self.limits.receive_frame_bytes
                 || length > self.codec.limits().max_frame_bytes
             {
                 return Err(TransportError::Wire(WireError::TooLarge));
             }
-            self.incoming.reserve_exact(length - self.incoming.len());
-            self.incoming.resize(length, 0);
+            incoming.resize(length).map_err(TransportError::Buffer)?;
+            Self::validate_buffer(incoming, self.limits.receive_frame_bytes, length)?;
             self.frame_length = Some(length);
         }
         if self.frame_length == Some(self.read) {
             let messages = self
                 .codec
-                .decode_batch(self.binding.incoming(), &self.incoming)
+                .decode_batch(self.binding.incoming(), incoming.as_ref())
                 .map_err(TransportError::Wire)?;
             if messages.is_empty()
                 || messages.len() > self.codec.limits().max_messages
@@ -271,12 +331,12 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
     }
     fn write_step(&mut self, limit: usize) -> Result<usize, TransportError> {
         let send = self.sending.as_mut().unwrap();
-        let end = send.frame.len().min(send.written + limit);
+        let end = send.frame.as_ref().len().min(send.written + limit);
         let n = self
             .session
             .as_mut()
             .unwrap()
-            .write_plaintext(&send.frame[send.written..end])
+            .write_plaintext(&send.frame.as_ref()[send.written..end])
             .map_err(TransportError::Session)?;
         if n == 0 || n > end - send.written {
             return Err(TransportError::ProviderViolation);
@@ -292,7 +352,7 @@ impl<S: SecureSession, C: WireCodec> NativePeerTransport<S, C> {
         }
     }
 }
-impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C> {
+impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeerTransport<S, C, P> {
     fn security(&self) -> SessionSecurity {
         SessionSecurity::Authenticated
     }
@@ -308,7 +368,7 @@ impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C>
     fn usage(&self) -> TransportUsage {
         TransportUsage {
             send_frame_bytes: self.sending.as_ref().map_or(0, |s| s.frame.capacity()),
-            receive_frame_bytes: self.incoming.capacity(),
+            receive_frame_bytes: self.incoming.as_ref().map_or(0, FrameBuffer::capacity),
             decoded_bytes: self.decoded_bytes,
             sending: self.sending.is_some(),
             completion: self.completed.is_some(),
@@ -339,16 +399,31 @@ impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C>
                 self.outbound_limits,
             )
             .map_err(TransportError::Outbound)?;
-            let frame = self
+            // Reserve before sizing so compatibility codecs' temporary buffers
+            // cannot run while this pool is already exhausted.
+            let mut frame = self
+                .buffers
+                .acquire(self.limits.send_frame_bytes, 0)
+                .map_err(|e| match e {
+                    BufferError::Overloaded => TransportError::Overloaded,
+                    other => TransportError::Buffer(other),
+                })?;
+            Self::validate_buffer(&mut frame, self.limits.send_frame_bytes, 0)?;
+            let length = self
                 .codec
-                .encode_batch(self.binding.outgoing(), &batch.messages)
+                .encoded_length(self.binding.outgoing(), &batch.messages)
                 .map_err(TransportError::Wire)?;
-            if frame.is_empty()
-                || frame.capacity() > self.limits.send_frame_bytes
-                || frame.len() > self.codec.limits().max_frame_bytes
+            if length == 0
+                || length > self.limits.send_frame_bytes
+                || length > self.codec.limits().max_frame_bytes
             {
                 return Err(TransportError::ProviderViolation);
             }
+            frame.resize(length).map_err(TransportError::Buffer)?;
+            Self::validate_buffer(&mut frame, self.limits.send_frame_bytes, length)?;
+            self.codec
+                .encode_into(self.binding.outgoing(), &batch.messages, frame.as_mut())
+                .map_err(TransportError::Wire)?;
             Ok(frame)
         })();
         match result {
@@ -406,7 +481,7 @@ impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C>
                 && self
                     .sending
                     .as_ref()
-                    .is_some_and(|s| s.written < s.frame.len())
+                    .is_some_and(|s| s.written < s.frame.as_ref().len())
                 && progress.written_bytes < budget.write_bytes;
             if !read && !write {
                 break;
@@ -476,5 +551,58 @@ impl<S: SecureSession, C: WireCodec> PeerTransport for NativePeerTransport<S, C>
         if matches!(self.state, TransportState::Open | TransportState::Draining) {
             let _: Result<(), _> = self.fail(TransportError::Aborted);
         }
+    }
+}
+
+/// Host-selected pool shared across every connection built by this factory.
+/// Dropping a connection releases only its leases; it never closes the pool.
+pub struct NativeSharedTransportFactory<C: WireCodec + Clone, P: BufferPool + Clone> {
+    base: NativeTransportFactory<C>,
+    buffers: P,
+}
+impl<C: WireCodec + Clone> NativeTransportFactory<C> {
+    pub fn with_buffers<P: BufferPool + Clone>(
+        self,
+        buffers: P,
+    ) -> Result<NativeSharedTransportFactory<C, P>, TransportError> {
+        let limits = buffers
+            .limits()
+            .validate()
+            .map_err(TransportError::Buffer)?;
+        if limits.reserved_bytes < self.limits.send_frame_bytes + self.limits.receive_frame_bytes
+            || limits.leases < 2
+        {
+            return Err(TransportError::InvalidLimits);
+        }
+        Ok(NativeSharedTransportFactory {
+            base: self,
+            buffers,
+        })
+    }
+}
+impl<S: SecureSession, C: WireCodec + Clone, P: BufferPool + Clone> PeerTransportFactory<S>
+    for NativeSharedTransportFactory<C, P>
+{
+    type Transport = NativePeerTransport<S, C, P>;
+    fn configuration_capacity(
+        &self,
+        required: &ConfigurationWireRequirements<'_>,
+    ) -> Result<ConfigurationWireCapacity, TransportError> {
+        <NativeTransportFactory<C> as PeerTransportFactory<S>>::configuration_capacity(
+            &self.base, required,
+        )
+    }
+    fn build<O: OutboundQueue>(
+        &mut self,
+        session: S,
+        outbound: &O,
+    ) -> Result<Self::Transport, TransportError> {
+        NativePeerTransport::with_buffers(
+            session,
+            self.base.codec.clone(),
+            outbound,
+            self.base.limits,
+            self.buffers.clone(),
+        )
     }
 }

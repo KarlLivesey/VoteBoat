@@ -15,6 +15,7 @@
 //! Deterministic consensus components. See the README for implemented scope.
 pub mod application;
 pub mod bucket_counter;
+pub mod buffer;
 pub mod connect;
 pub mod contracts;
 pub mod delegation;

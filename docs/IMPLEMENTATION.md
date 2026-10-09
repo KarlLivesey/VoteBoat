@@ -111,30 +111,29 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Bounded observability and baseline map (current, P0/P2).** Slice107
-   introduces Observer/NativeCounterObserver and actual local service metrics.
-   Purpose: complete an initial C19 public/native path and improve the usable
-   service/Rust embedding while making remaining requirements inspectable.
-   Dependencies: returned NodeProgress, exact RuntimeOwner and chapter12/17 audit.
-   Completion: host/native lifetime/budget/error tests, refusing observer beside
-   real Node operations, TCP/QUIC process recovery/retries/metrics and explicit
-   limits in BASELINE_ACCEPTANCE.md. Initial counters do not close richer telemetry.
-2. **Integrated buffer provisioning (next, C14/P0/P2).** Add a public BufferPool
-   and native bounded provider at a real codec/transport ownership boundary.
-   Purpose: let hosts share bounded memory without a hardcoded allocator or an
-   unused helper, advancing composition/overload isolation. Dependencies: inspect
-   existing owned batches and byte reservations, then sketch acquire/transfer/
-   release across rejection, accepted send/receive, cancellation and shutdown.
-   Completion: native path uses the same seam as a downstream replacement; exact
-   credits/lifetimes survive delayed work and dropping another host view.
-3. **Constrained admission policy (following, C15/P0/P2).** Make host policy
-   selection explicit while retaining mandatory hard ceilings and control reserve.
-   Purpose: usable workload admission rather than live quorum-weight changes.
-   Dependencies: current client/queue reservations and integrated buffer ownership.
-   Completion: real native/public admission call site, reject-before-ownership,
-   exact retained/released credits and tests showing a permissive policy cannot
-   exceed core limits or starve reserved control. All remaining baseline/platform/
-   lifecycle/P7 requirements stay open in the linked acceptance map.
+1. **Integrated buffer provisioning (current, C14/P0/P2).** Slice108 adds
+   BufferPool/FrameBuffer, native bounded shared reservations and direct native
+   codec encoding at real transport send/receive ownership boundaries. Purpose:
+   usable memory composition and overload isolation. Dependencies: authenticated
+   channel, owned outbound batch, separate decoded ingress and codec limits.
+   Completion: downstream/native lifetime/credit/failure checks, canonical frames,
+   native/core-only checks and real TCP/QUIC regressions; record actual outcomes
+   below. This initial seam does not pool every subsystem or promise fairness.
+2. **Constrained admission policy (next, C15/P0/P2).** Make host policy selection
+   explicit while retaining mandatory hard ceilings and control reserve. Purpose:
+   usable workload admission within safe budgets. Dependencies: existing client/
+   queue reservations, integrated frame ownership and a review of shared-pool
+   connection admission. Completion: actual native/public admission call site,
+   reject-before-ownership, exact retained/released credits and tests showing a
+   permissive policy cannot exceed ceilings or starve reserved control.
+3. **Service-principal authorization (following, C21/P0/P4).** Purpose: gate
+   exposed service mutations by principal/scope independently of peer identity
+   and committed voting membership. Dependencies: inspect existing trusted admin
+   and enrollment/application call sites, define a small schema before adding
+   credentials/gates. Completion: public/native bounded integration with explicit
+   unsupported/refused cases, scope separation, restart/expiry tests as applicable
+   and no route from authorization results to quorum or ownership authority.
+   Broader baseline/platform/lifecycle/P7 requirements remain in the acceptance map.
 
 ### How the current work fits globally
 
@@ -6793,3 +6792,59 @@ fault proof or full-baseline completion claim. Existing long QUIC/p99/lifecycle
 and catalogue gaps stay open. Next linked mini deliverables are integrated C14
 buffers then constrained C15 admission; no unused provider qualifies. Full P0–P7
 stays active, P8/Windows deferred and CI background feedback.
+
+## Slice108 schema plan — transport buffer provisioning
+
+C14 advances P0 composition and P2 bounded shared networking. Add public
+BufferPool/FrameBuffer contracts: acquire a fixed byte reservation and initial
+length, own/resize within that reservation, and return credits on Drop. The native
+provider is explicitly shareable and has finite byte/lease ceilings; closing a
+view refuses new work without revoking accepted leases or other views. No cache,
+thread, global allocator replacement or persistence is introduced.
+
+Transport acquires a send lease before encoding and retains it through short
+writes and channel flush. Receive reserves a maximum frame but initially allocates
+only the header, then validates the advertised length before growing storage.
+Pool exhaustion is reversible backpressure before reading/accepting; failure,
+abort, complete decode and channel flush release the corresponding lease. Original
+OutboundBatch completion/queue credits remain independent. Native codec sizing
+and slice encoding avoid a temporary encoded Vec. Existing host codecs retain
+compatibility through explicitly documented bounded temporary encoding defaults.
+Default construction keeps per-connection budgets; an explicit factory/provider
+path shares host-selected budgets. Acceptance: downstream pool injection, shared
+view lifetime, exhaustion/retry, partial receive/header validation, delayed flush,
+abort/error/drop release, exact byte round trips, native/core-only builds and real
+TCP/QUIC transport/service regression tests. No wire or durable format changes.
+
+### Slice108 implemented evidence and remaining limits
+
+Implemented public BufferPool/FrameBuffer plus NativeBufferPool/NativeFrameBuffer,
+with explicit shared maximum-byte/lease credits, lazy allocation, finite atomic
+acquisition, prefix-preserving resize and scoped view close. NativePeerTransport
+now owns send/receive leases through the existing short-I/O, flush, decode and
+shutdown states. Original constructors keep independent two-frame native budgets;
+with_buffers and NativeSharedTransportFactory inject host-selected shared views.
+Native sizing/encode_into writes directly into a lease. Wire/persistent formats
+and all consensus/durability authorities remain unchanged. Transport Rust contract
+version4 adds typed buffer errors; overload retains its existing retry semantics.
+See BUFFERS.md for the full sheet and separate memory domains.
+
+Actual validation: all-features buffer3/3, transport18/18, wire14/14, QUIC10/10;
+native without TLS buffer3/3, transport17/17, wire14/14; core-only buffer1/1,
+transport1/1, wire1/1. Real TCP/TLS and QUIC three-process metrics/recovery/retry
+histories2/2 and executable membership add/enroll/promote/retire/restart2/2 pass.
+All-target/all-feature Clippy denies warnings and passes; fmt/diff/inventory pass
+(73 contracts). The receive allocation-failure fixture's initial assumption of a
+completed remote send was false; it now explicitly aborts that pending sender and
+consumes its failed completion. No production timing workaround was needed.
+
+Macro review: C14 now has a real public/native asynchronous ownership boundary,
+advancing P0/P2. P0 is still incomplete: constrained admission, authorization and
+other catalogue gaps remain. The default service still budgets each connection
+independently; global shared-pool admission/fairness/control reserve is not claimed.
+Idle receives hold maximum reservations, so hosts must provision/admit full-duplex
+connections explicitly. WAL/snapshot/application buffers remain separate, and
+legacy host-codec defaults use separate bounded scratch. The next linked slice
+is C15 constrained admission, followed by C21 service-principal authorization.
+No performance, macOS, arbitrary-fault or complete-baseline claim. Existing long
+QUIC repair, fixed-p99 and lifecycle gaps remain; full P0–P7 goal stays active.

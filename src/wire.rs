@@ -142,5 +142,30 @@ pub trait WireCodec {
     fn limits(&self) -> WireLimits;
     fn frame_length(&self, header: &[u8]) -> Result<usize, WireError>;
     fn encode_batch(&self, scope: WireScope, messages: &[Message]) -> Result<Vec<u8>, WireError>;
+    /// Compatibility default uses a temporary bounded encoded Vec. Providers
+    /// supporting direct provisioning override both methods (native does).
+    fn encoded_length(&self, scope: WireScope, messages: &[Message]) -> Result<usize, WireError> {
+        let bytes = self.encode_batch(scope, messages)?;
+        if bytes.capacity() > self.limits().max_frame_bytes {
+            return Err(WireError::TooLarge);
+        }
+        Ok(bytes.len())
+    }
+    /// Encode exactly the sized frame into caller-owned storage. On error the
+    /// destination may be modified, but no frame may be sent. Default allocates
+    /// temporary encoding storage within the codec's independent frame limit.
+    fn encode_into(
+        &self,
+        scope: WireScope,
+        messages: &[Message],
+        destination: &mut [u8],
+    ) -> Result<(), WireError> {
+        let bytes = self.encode_batch(scope, messages)?;
+        if bytes.capacity() > self.limits().max_frame_bytes || bytes.len() != destination.len() {
+            return Err(WireError::TooLarge);
+        }
+        destination.copy_from_slice(&bytes);
+        Ok(())
+    }
     fn decode_batch(&self, scope: WireScope, frame: &[u8]) -> Result<Vec<Message>, WireError>;
 }

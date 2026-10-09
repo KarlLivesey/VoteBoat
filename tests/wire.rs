@@ -263,6 +263,19 @@ mod native {
         let c = codec();
         let encoded = c.encode_batch(scope(), &messages).unwrap();
         assert_eq!(encoded.capacity(), encoded.len());
+        assert_eq!(c.encoded_length(scope(), &messages).unwrap(), encoded.len());
+        let mut provisioned = vec![0xff; encoded.len()];
+        c.encode_into(scope(), &messages, &mut provisioned).unwrap();
+        assert_eq!(provisioned, encoded);
+        assert_eq!(
+            c.encode_into(scope(), &messages, &mut provisioned[..encoded.len() - 1]),
+            Err(WireError::TooLarge)
+        );
+        provisioned.push(0xff);
+        assert_eq!(
+            c.encode_into(scope(), &messages, &mut provisioned),
+            Err(WireError::TooLarge)
+        );
         let decoded = c.decode_batch(scope(), &encoded).unwrap();
         assert_eq!(decoded, messages);
         assert_eq!(c.encode_batch(scope(), &decoded).unwrap(), encoded);

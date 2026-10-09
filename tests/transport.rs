@@ -299,6 +299,266 @@ mod native {
         p
     }
     #[test]
+    fn shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits() {
+        use voteboat::{buffer::*, native::transport::NativeTransportFactory};
+        let max = TransportLimits::default().send_frame_bytes;
+        let mut pool = support::buffer::HostPool::new(4 * max, 4);
+        let (a, b) = sessions(7);
+        let outgoing = a.outgoing.clone();
+        outgoing.lock().unwrap().flushed = false;
+        let mut qa = queue(1);
+        let qb = queue(2);
+        let mut factory = NativeTransportFactory::new(codec(), TransportLimits::default())
+            .unwrap()
+            .with_buffers(pool.clone())
+            .unwrap();
+        let mut a = factory.build(a, &qa).unwrap();
+        let mut b = factory.build(b, &qb).unwrap();
+        drop(factory); // transports retain their own shared views
+        let mut unrelated = pool.clone();
+        unrelated.close();
+        drop(unrelated);
+        let expected = vec![message(1, 2, 11), message(1, 2, 12)];
+        a.submit(batch(&mut qa, expected.clone())).unwrap();
+        assert_eq!(pool.usage().leases, 1);
+        for _ in 0..1000 {
+            poll(&mut a);
+            poll(&mut b);
+            if b.received_info().is_some() {
+                break;
+            }
+        }
+        assert!(b.received_info().is_some());
+        assert!(!a.usage().completion); // channel flush still owns send bytes
+        assert!(a.usage().send_frame_bytes > 0);
+        // Receive has decoded and released its frame, while a's idle receive
+        // and unflushed send still hold maximum reservations.
+        assert_eq!(
+            pool.usage(),
+            BufferUsage {
+                reserved_bytes: 2 * max,
+                leases: 2
+            }
+        );
+        assert_eq!(b.take_received().unwrap().messages, expected);
+        outgoing.lock().unwrap().flushed = true;
+        poll(&mut a);
+        assert_eq!(a.usage().send_frame_bytes, 0);
+        assert_eq!(qa.usage().batches, 1); // frame credits aren't queue credits
+        let done = a.take_send().unwrap();
+        qa.complete(done.batch, done.result).unwrap();
+        a.abort();
+        b.abort();
+        assert_eq!(pool.usage(), BufferUsage::default());
+        pool.close();
+        assert!(qa.is_drained());
+    }
+    #[test]
+    fn exhausted_pool_returns_original_send_and_retries_receive_without_reading() {
+        use voteboat::buffer::*;
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = support::buffer::HostPool::new(2 * max, 2);
+        let blocker = pool.acquire(2 * max, 0).unwrap();
+        let (a, b) = sessions(7);
+        let incoming = a.incoming.clone();
+        let mut qa = queue(1);
+        let mut qb = queue(2);
+        let mut a = NativePeerTransport::with_buffers(
+            a,
+            codec(),
+            &qa,
+            TransportLimits::default(),
+            pool.clone(),
+        )
+        .unwrap();
+        let mut b = NativePeerTransport::new(b, codec(), &qb, TransportLimits::default()).unwrap();
+        let work = batch(&mut qa, vec![message(1, 2, 1)]);
+        let ticket = work.ticket;
+        let rejected = a.submit(work).unwrap_err();
+        assert_eq!(rejected.reason, TransportError::Overloaded);
+        assert_eq!(rejected.batch.ticket, ticket);
+        qa.complete(*rejected.batch, LocalSendResult::Cancelled)
+            .unwrap();
+        b.submit(batch(&mut qb, vec![message(2, 1, 2)])).unwrap();
+        for _ in 0..10 {
+            poll(&mut a);
+            poll(&mut b);
+        }
+        assert_eq!(incoming.lock().unwrap().reads, 0);
+        assert_eq!(a.state(), TransportState::Open);
+        drop(blocker);
+        for _ in 0..1000 {
+            poll(&mut a);
+            poll(&mut b);
+            if a.received_info().is_some() {
+                break;
+            }
+        }
+        assert_eq!(a.take_received().unwrap().messages, [message(2, 1, 2)]);
+        a.abort();
+        assert_eq!(pool.usage(), BufferUsage::default());
+        let done = b.take_send().unwrap();
+        qb.complete(done.batch, done.result).unwrap();
+    }
+    #[test]
+    fn send_failure_and_transport_drop_release_pool_without_destroying_other_view() {
+        use voteboat::buffer::*;
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = support::buffer::HostPool::new(2 * max, 2);
+        let (a, _) = sessions(1);
+        a.outgoing.lock().unwrap().fail_write = true;
+        let mut qa = queue(1);
+        let mut a = NativePeerTransport::with_buffers(
+            a,
+            codec(),
+            &qa,
+            TransportLimits::default(),
+            pool.clone(),
+        )
+        .unwrap();
+        a.submit(batch(&mut qa, vec![message(1, 2, 1)])).unwrap();
+        assert!(a.poll(MonoTime(0), TransportPollBudget::default()).is_err());
+        assert_eq!(pool.usage(), BufferUsage::default());
+        let done = a.take_send().unwrap();
+        assert_eq!(done.result, LocalSendResult::Failed);
+        qa.complete(done.batch, done.result).unwrap();
+        drop(a);
+        let (a, _other) = sessions(1);
+        let mut a = NativePeerTransport::with_buffers(
+            a,
+            codec(),
+            &qa,
+            TransportLimits::default(),
+            pool.clone(),
+        )
+        .unwrap();
+        a.submit(batch(&mut qa, vec![message(1, 2, 2)])).unwrap();
+        poll(&mut a); // partially written bytes + idle header
+        assert_eq!(pool.usage().leases, 2);
+        drop(a);
+        assert_eq!(pool.usage(), BufferUsage::default());
+        let buffer = pool.acquire(max, 1).unwrap();
+        drop(buffer);
+        // Dropping a transport abandons the completion, not queue ownership.
+        assert_eq!(qa.usage().batches, 1);
+    }
+    #[test]
+    fn malformed_encoding_returns_original_batch_and_pool_credits() {
+        use voteboat::buffer::*;
+        let max = TransportLimits::default().send_frame_bytes;
+        let pool = support::buffer::HostPool::new(2 * max, 2);
+        let (a, _other) = sessions(7);
+        let mut qa = queue(1);
+        let mut a = NativePeerTransport::with_buffers(
+            a,
+            codec(),
+            &qa,
+            TransportLimits::default(),
+            pool.clone(),
+        )
+        .unwrap();
+        let mut malformed = message(1, 2, 1);
+        malformed.term = 0;
+        let work = batch(&mut qa, vec![malformed]);
+        let ticket = work.ticket;
+        let rejected = a.submit(work).unwrap_err();
+        assert!(matches!(rejected.reason, TransportError::Wire(_)));
+        assert_eq!(rejected.batch.ticket, ticket);
+        assert_eq!(pool.usage(), BufferUsage::default());
+        qa.complete(*rejected.batch, LocalSendResult::Cancelled)
+            .unwrap();
+        assert!(qa.is_drained());
+        assert_eq!(a.state(), TransportState::Open);
+    }
+    #[test]
+    fn receive_growth_failure_releases_partial_frame_and_closes_channel() {
+        use support::buffer::{HostBuffer, HostPool};
+        use voteboat::buffer::*;
+        struct LimitedPool(HostPool);
+        struct LimitedBuffer(HostBuffer);
+        impl AsRef<[u8]> for LimitedBuffer {
+            fn as_ref(&self) -> &[u8] {
+                self.0.as_ref()
+            }
+        }
+        impl AsMut<[u8]> for LimitedBuffer {
+            fn as_mut(&mut self) -> &mut [u8] {
+                self.0.as_mut()
+            }
+        }
+        impl FrameBuffer for LimitedBuffer {
+            fn reservation(&self) -> usize {
+                self.0.reservation()
+            }
+            fn capacity(&self) -> usize {
+                self.0.capacity()
+            }
+            fn resize(&mut self, _: usize) -> Result<(), BufferError> {
+                Err(BufferError::AllocationFailed)
+            }
+        }
+        impl BufferPool for LimitedPool {
+            type Buffer = LimitedBuffer;
+            fn limits(&self) -> BufferLimits {
+                self.0.limits()
+            }
+            fn usage(&self) -> BufferUsage {
+                self.0.usage()
+            }
+            fn acquire(&self, size: usize, len: usize) -> Result<LimitedBuffer, BufferError> {
+                self.0.acquire(size, len).map(LimitedBuffer)
+            }
+            fn close(&mut self) {
+                self.0.close();
+            }
+        }
+        let max = TransportLimits::default().receive_frame_bytes;
+        let pool = HostPool::new(2 * max, 2);
+        let (a, b) = sessions(7);
+        let read_channel = a.incoming.clone();
+        let closed_channel = a.outgoing.clone();
+        let qa = queue(1);
+        let mut qb = queue(2);
+        let mut a = NativePeerTransport::with_buffers(
+            a,
+            codec(),
+            &qa,
+            TransportLimits::default(),
+            LimitedPool(pool.clone()),
+        )
+        .unwrap();
+        let mut b = NativePeerTransport::new(b, codec(), &qb, TransportLimits::default()).unwrap();
+        b.submit(batch(&mut qb, vec![message(2, 1, 1)])).unwrap();
+        let mut failure = None;
+        for _ in 0..1000 {
+            poll(&mut b);
+            match a.poll(MonoTime(0), TransportPollBudget::default()) {
+                Ok(_) => {}
+                Err(error) => {
+                    failure = Some(error);
+                    break;
+                }
+            }
+        }
+        assert_eq!(
+            failure,
+            Some(TransportError::Buffer(BufferError::AllocationFailed))
+        );
+        assert_eq!(a.state(), TransportState::Failed);
+        assert!(a.take_received().is_none());
+        assert_eq!(pool.usage(), BufferUsage::default());
+        // Dropping a's session marks its outgoing half broken at b's input.
+        assert!(read_channel.lock().unwrap().reads > 0);
+        assert!(closed_channel.lock().unwrap().broken);
+        b.abort(); // the peer may still be sending when allocation fails
+        let done = b.take_send().unwrap();
+        qb.complete(done.batch, done.result).unwrap();
+        assert_eq!(
+            a.poll(MonoTime(0), TransportPollBudget::default()),
+            Err(TransportError::Buffer(BufferError::AllocationFailed))
+        );
+    }
+    #[test]
     fn short_io_preserves_batch_and_queue_credits_until_terminal_consumption() {
         let (a, b) = sessions(7);
         let mut q = queue(1);

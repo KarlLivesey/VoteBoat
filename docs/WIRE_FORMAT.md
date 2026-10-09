@@ -290,3 +290,12 @@ Hosts selecting the core builder directly must supply compatible codecs and
 transport budgets; the flag is volatile and must be selected again after recovery.
 No WAL/snapshot format changes or automatic upgrade/downgrade. General online
 configuration delivery and pre-election snapshot transfer remain gated.
+
+## Caller-provisioned encoding
+
+`encoded_length` validates/counts a batch and `encode_into` writes exactly that
+frame into a caller slice. Native encoding uses no temporary frame Vec; transport
+selects an owned BufferPool lease. Existing encode_batch callers retain the same
+canonical wire bytes. Short/long destinations fail; destination contents may be
+modified on error and must not be transmitted. Host codec compatibility defaults
+use separately bounded temporary encoding storage. See [buffer ownership](BUFFERS.md).

@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![allow(dead_code)]
+pub mod buffer;
 pub mod outbound;
 #[cfg(feature = "tls")]
 pub mod peer_fault;

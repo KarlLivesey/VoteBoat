@@ -291,17 +291,17 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
     }
     Ok(())
 }
-struct Encoder {
-    data: Option<Vec<u8>>,
+struct Encoder<'a> {
+    data: Option<&'a mut [u8]>,
     len: usize,
     limits: WireLimits,
     budget: Budget,
     version: u16,
 }
-impl Encoder {
-    fn new(limits: WireLimits, capacity: Option<usize>, version: u16) -> Self {
+impl<'a> Encoder<'a> {
+    fn new(limits: WireLimits, data: Option<&'a mut [u8]>, version: u16) -> Self {
         Self {
-            data: capacity.map(Vec::with_capacity),
+            data,
             version,
             len: 0,
             limits,
@@ -318,7 +318,10 @@ impl Encoder {
             .filter(|v| *v <= self.limits.max_frame_bytes)
             .ok_or(WireError::TooLarge)?;
         if let Some(data) = &mut self.data {
-            data.extend_from_slice(bytes);
+            let start = self.len - bytes.len();
+            data.get_mut(start..self.len)
+                .ok_or(WireError::TooLarge)?
+                .copy_from_slice(bytes);
         }
         Ok(())
     }
@@ -1259,14 +1262,29 @@ impl WireCodec for NativeWireCodec {
         }
         Ok(length)
     }
-    fn encode_batch(&self, scope: WireScope, messages: &[Message]) -> Result<Vec<u8>, WireError> {
-        // Count and validate first; malformed input allocates no frame buffer.
-        // The second pass allocates exactly the validated final byte count.
+    fn encoded_length(&self, scope: WireScope, messages: &[Message]) -> Result<usize, WireError> {
         let mut count = Encoder::new(self.limits, None, self.version);
         count.batch(scope, messages)?;
-        let mut encoder = Encoder::new(self.limits, Some(count.len), self.version);
+        Ok(count.len)
+    }
+    fn encode_batch(&self, scope: WireScope, messages: &[Message]) -> Result<Vec<u8>, WireError> {
+        let len = self.encoded_length(scope, messages)?;
+        let mut bytes = vec![0; len];
+        self.encode_into(scope, messages, &mut bytes)?;
+        Ok(bytes)
+    }
+    fn encode_into(
+        &self,
+        scope: WireScope,
+        messages: &[Message],
+        bytes: &mut [u8],
+    ) -> Result<(), WireError> {
+        let expected = bytes.len();
+        let mut encoder = Encoder::new(self.limits, Some(bytes), self.version);
         encoder.batch(scope, messages)?;
-        let mut bytes = encoder.data.unwrap();
+        if encoder.len != expected {
+            return Err(WireError::TooLarge);
+        }
         let len = bytes.len();
         bytes[..8].copy_from_slice(MAGIC);
         bytes[8..10].copy_from_slice(&self.version.to_le_bytes());
@@ -1276,7 +1294,7 @@ impl WireCodec for NativeWireCodec {
         bytes[20..24].copy_from_slice(&crc.to_le_bytes());
         let crc = crc32c(&bytes[..len - 4]);
         bytes[len - 4..].copy_from_slice(&crc.to_le_bytes());
-        Ok(bytes)
+        Ok(())
     }
     fn decode_batch(&self, scope: WireScope, frame: &[u8]) -> Result<Vec<Message>, WireError> {
         if frame.len() < HEADER {

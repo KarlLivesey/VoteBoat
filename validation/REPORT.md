@@ -2342,3 +2342,47 @@ or arbitrary-fault audit. Inventory adds the initial C19 seam (72 contracts),
 corrects wire/scope design associations, and retains richer telemetry/missing
 catalogue requirements. Full P0–P7 remains active; existing long QUIC catch-up,
 fixed-p99, platform/lifecycle gaps remain. P8/Windows deferred, CI background.
+
+## Slice 108 — public/native transport buffer provisioning
+
+BufferPool/FrameBuffer expose fixed maximum-byte owned reservations, initial
+length, bounded resize, diagnostics and scoped close. NativeBufferPool shares
+finite atomic credits, allocates lazily and releases storage before credits.
+NativePeerTransport uses leases for both encoded directions; a selectable shared
+factory accepts an independent downstream pool. NativeWireCodec counts without
+allocating a frame, then encodes into the selected lease. Wire/durable formats
+are unchanged. Original outbound queue credits remain separate from frame credits.
+
+Executed on Linux:
+
+- All-features buffer 3/3, transport 18/18, wire 14/14 and QUIC 10/10 pass.
+  Coverage includes downstream shared-view lifetime, maximum reservation versus
+  initial allocation, native concurrent owners, delayed flush, exact original
+  ticket/queue credit retention, pool exhaustion before read/admission, retry,
+  malformed encoding/header, receive growth allocation failure, abort/drop and
+  real TCP/TLS framing. QUIC includes three Raft replicas and exact log completions.
+- Native without TLS: buffer 3/3, transport 17/17, wire 14/14 pass.
+- Core/contracts-only: buffer 1/1, transport 1/1, wire 1/1 pass.
+- Actual three-process service metrics/recovery/original-retry histories: TCP/TLS
+  and QUIC 2/2 pass. Full worker joins/reopen preserve application values/retries.
+- Actual executable add/enroll/promote/retire/restart histories: TCP/TLS and QUIC
+  2/2 pass, exercising membership formats through the changed native encoding.
+- All-target/all-feature Clippy with warnings denied passes; fmt/diff checks and
+  inventory validation pass (73 contracts).
+
+An initial TCP test needed the permitted local-socket execution environment.
+The new receive-growth failure fixture initially assumed the remote send was
+already terminal when the receiver refused allocation. It now explicitly aborts
+that still-pending sender before collecting its failed completion. Production
+pool exhaustion maps to the existing transport Overloaded result so PeerDriver
+stages/retries original batches; allocation failure during resize is terminal,
+avoiding a retry after a consumed header. No consensus algorithm/timer changes.
+
+This is initial encoded-frame provisioning, not a universal allocator or pooled
+WAL/snapshot/application storage. Existing host codecs' compatibility defaults
+retain separately bounded temporary Vec encoding. Shared-pool fairness/control
+reserve and connection admission remain explicit next work; undersized shared
+budgets can stall idle receive reservations. No performance tests were run and
+no speed/zero-overhead claim follows. macOS/separate-host, broader fault/lifecycle,
+long QUIC selected-group repair and fixed-p99 gates remain open. Full P0–P7 stays
+active, P8/Windows deferred, CI background.

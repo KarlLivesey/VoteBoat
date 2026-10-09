@@ -49,7 +49,7 @@ component-contracts.json and its linked contract document.
 | C11 timers | TimerService / native deadlines and explicit generations | Native lateness/owner tests exist; general telemetry remains partial. |
 | C12 clock | Clock / host-injected MonoTime and native clock | No implicit wall clock in the core. |
 | C13 entropy | ElectionEntropy / native jitter and deterministic doubles | Not a credential or cryptographic identity source. |
-| C14 buffers | Internal bounded owned Vec buffers and queue byte accounting | Public BufferPool plus native provider integrated in asynchronous ownership is missing. A standalone unused pool would not close this. |
+| C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Initial encoded-frame integration. WAL/snapshot/application buffers remain separate; shared-pool fairness/control reserve and host connection admission remain to be addressed. Legacy host-codec defaults use separate bounded scratch. |
 | C15 admission | Core hard ceilings, ProposalAdmission, client/read/queue reservations | General host admission-policy seam remains missing; policy cannot bypass hard ceilings. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
 | C17 discovery | ManifestCache and directory/routed lookup | General peer/authority hint resolver with bounded retries/invalidation is missing. |
@@ -63,16 +63,14 @@ component-contracts.json and its linked contract document.
 
 ## Next usable path
 
-1. Finish C19's bounded initial service/Rust slice with actual integration and
-   conformance; keep richer telemetry gaps explicit.
-2. Sketch C14 against existing codec/transport buffer ownership, then implement
-   a pool only with a real native call site and a downstream replacement. Check
-   cross-instance lifetimes, credits, failed admission and shutdown before changing
-   public transport shapes. This advances P0/P2 composition and bounded operation.
-3. Introduce C15's constrained host admission policy against existing hard limits,
+1. Complete slice108's C14 frame ownership checks and real TCP/QUIC regressions;
+   retain explicit limits for other buffer domains and shared-pool admission.
+2. Introduce C15's constrained host admission policy against existing hard limits,
    using C14 ownership where needed. Test refusal/release/retained async ownership
-   and prove policy cannot admit past core ceilings. This advances usable overload
-   control, not live quorum-weight tuning.
+   and prove policy cannot admit past core ceilings or consume control reserves.
+3. Inspect C21 service-principal authorization separately from authenticated peers
+   and committed voter membership. Implement a bounded public/native service gate
+   with scope/refusal/recovery evidence before claiming exposed mutation is safe.
 
 These are linked deliverables, not a redefinition of the full goal. P4/P6/P7,
 platform/fault and the remaining supporting catalogue gaps stay in this ledger.

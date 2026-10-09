@@ -760,6 +760,8 @@
         "limits",
         "frame_length",
         "encode_batch",
+        "encoded_length",
+        "encode_into",
         "decode_batch",
         "configuration_capacity"
       ],
@@ -770,7 +772,7 @@
         "tests/snapshot.rs",
         "tests/configuration_capacity.rs"
       ],
-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1–5; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1–6 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets."
+      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1–5; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1–6 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding."
     },
     {
       "design_id": "C09",
@@ -1499,12 +1501,34 @@
         "tests/counter_service.rs"
       ],
       "scope": "Fixed-cardinality volatile post-poll counters bound to exact RuntimeOwner and nonregressing host time. Saturating arithmetic, rejection without mutation, copy snapshot export and scoped permanent close. Host providers use the same public interface; shared views remain independent. A refusing observer cannot change original Node writes, reads or shutdown. Real three-process TCP/TLS and QUIC histories expose metrics, preserve values and original retries across full worker joins/reopen, and start fresh counters without startup replay deliveries. Node/core do not invoke diagnostics. No durable or quorum authority, successful-client count, arbitrary callback sandbox, per-group history, latency attribution or external exporter integration is claimed."
+    },
+    {
+      "design_id": "C14",
+      "public_contract": "BufferPool / FrameBuffer / BufferLimits / BufferUsage",
+      "operations": [
+        "acquire",
+        "resize",
+        "reservation",
+        "capacity",
+        "limits",
+        "usage",
+        "close"
+      ],
+      "native": "NativeBufferPool / NativeFrameBuffer, used by NativePeerTransport and selectable NativeSharedTransportFactory",
+      "conformance": [
+        "tests/buffer.rs",
+        "tests/support/buffer.rs",
+        "tests/transport.rs",
+        "tests/wire.rs",
+        "tests/quic.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, shared-pool fairness/control reserve, or performance claim."
     }
   ],
   "not_yet_implemented": [
     "automatic-wal-maintenance-scheduling",
     "incremental-segment-cleaning-and-general-retention",
-    "buffers",
     "admission-policy",
     "discovery",
     "observability-latency-and-budgeted-events",

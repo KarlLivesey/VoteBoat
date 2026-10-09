@@ -41,7 +41,7 @@ pub trait PeerTransportFactory<S: SecureSession> {
     ) -> Result<Self::Transport, TransportError>;
 }
 
-pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 3;
+pub const PEER_TRANSPORT_CONTRACT_VERSION: u32 = 4;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TransportState {
@@ -64,6 +64,7 @@ pub enum TransportError {
     Outbound(OutboundError),
     Session(SessionError),
     Wire(crate::wire::WireError),
+    Buffer(crate::buffer::BufferError),
 }
 #[derive(Clone, Copy, Debug)]
 pub struct TransportLimits {
