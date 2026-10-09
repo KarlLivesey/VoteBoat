@@ -108,11 +108,93 @@ fn target_data(key: u8, delta: i64) -> Vec<u8> {
     .unwrap()
 }
 use super::creation_source::{durable_files, unread};
+fn establish(
+    parents: &[Node<LifecycleDirectory>],
+    c: &NativeStartup,
+    status: &GroupCreationStatus,
+) -> Vec<u8> {
+    std::fs::create_dir_all(c.directory.parent().unwrap()).unwrap();
+    let verified = VerifiedGroupCreation::verify(
+        &LocalCreationAuthority {
+            core: parents[0].local().owner.core(group(1)).unwrap(),
+            directory: parents[0].local().applications[&group(1)].directory(),
+        },
+        status.clone(),
+        c.node,
+        c.store,
+        status.intent.application,
+    )
+    .unwrap();
+    let exists = c.directory.exists();
+    let mut log = if exists {
+        NativeLogStore::recover(
+            FileLogIo::open(&c.directory).unwrap(),
+            c.store,
+            LogLimits::default(),
+        )
+        .unwrap()
+    } else {
+        NativeLogStore::create(
+            FileLogIo::create(&c.directory).unwrap(),
+            c.store,
+            LogLimits::default(),
+        )
+        .unwrap()
+    };
+    let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
+    establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+    assert_eq!(
+        log.state(c.bootstrap.group).unwrap().bootstrap,
+        status.intent.bootstrap
+    );
+    let id = SnapshotIdentity {
+        store: c.store,
+        group: c.bootstrap.group,
+    };
+    if exists {
+        NativeSnapshotStore::recover(
+            FileSnapshotIo::open(c.directory.join("snapshots")).unwrap(),
+            id,
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    } else {
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
+            id,
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    }
+    bindings.load().unwrap().unwrap()
+}
+fn deliver<A>(
+    keep_unread: bool,
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: Vec<u8>,
+    done: impl Fn(&A) -> bool,
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    if keep_unread {
+        unread(nodes, clock, g, operation, bytes, done);
+    } else {
+        let _ = propose_recovering(nodes, clock, g, operation, bytes);
+        drive(nodes, clock, |ns| {
+            ns.iter().all(|n| done(&n.local().applications[&group(g)]))
+        });
+    }
+}
 struct Insertion {
     root: std::path::PathBuf,
     clock: Instant,
     protocol: NativePeerProtocol,
     checkpoint: bool,
+    metadata: fn() -> LifecycleDirectory,
     intent: TransferIntent,
     creations: [GroupCreationStatus; 2],
     parent: Vec<Node<LifecycleDirectory>>,
@@ -122,6 +204,13 @@ struct Insertion {
 }
 impl Insertion {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
+        Self::with_metadata(protocol, checkpoint, metadata)
+    }
+    fn with_metadata(
+        protocol: NativePeerProtocol,
+        checkpoint: bool,
+        metadata: fn() -> LifecycleDirectory,
+    ) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-insertion-{}-{protocol:?}-{checkpoint}",
             std::process::id()
@@ -207,64 +296,6 @@ impl Insertion {
                 .unwrap()
                 .unwrap()
         });
-        let establish = |parents: &[Node<LifecycleDirectory>],
-                         c: &NativeStartup,
-                         status: &GroupCreationStatus| {
-            std::fs::create_dir_all(c.directory.parent().unwrap()).unwrap();
-            let verified = VerifiedGroupCreation::verify(
-                &LocalCreationAuthority {
-                    core: parents[0].local().owner.core(group(1)).unwrap(),
-                    directory: parents[0].local().applications[&group(1)].directory(),
-                },
-                status.clone(),
-                c.node,
-                c.store,
-                status.intent.application,
-            )
-            .unwrap();
-            let exists = c.directory.exists();
-            let mut log = if exists {
-                NativeLogStore::recover(
-                    FileLogIo::open(&c.directory).unwrap(),
-                    c.store,
-                    LogLimits::default(),
-                )
-                .unwrap()
-            } else {
-                NativeLogStore::create(
-                    FileLogIo::create(&c.directory).unwrap(),
-                    c.store,
-                    LogLimits::default(),
-                )
-                .unwrap()
-            };
-            let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
-            establish_created_group(&verified, &mut log, &mut bindings).unwrap();
-            assert_eq!(
-                log.state(c.bootstrap.group).unwrap().bootstrap,
-                status.intent.bootstrap
-            );
-            let id = SnapshotIdentity {
-                store: c.store,
-                group: c.bootstrap.group,
-            };
-            if exists {
-                NativeSnapshotStore::recover(
-                    FileSnapshotIo::open(c.directory.join("snapshots")).unwrap(),
-                    id,
-                    SnapshotLimits::default(),
-                )
-                .unwrap();
-            } else {
-                NativeSnapshotStore::create(
-                    FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
-                    id,
-                    SnapshotLimits::default(),
-                )
-                .unwrap();
-            }
-            bindings.load().unwrap().unwrap()
-        };
         // Partial assigned provisioning: only two stores in child21 exist.
         for c in &configs[0][..2] {
             establish(&parent, c, &creations[0]);
@@ -357,6 +388,7 @@ impl Insertion {
             clock,
             protocol,
             checkpoint,
+            metadata,
             intent,
             creations,
             parent,
@@ -467,6 +499,9 @@ impl Insertion {
         }
     }
     fn resume_one(&mut self) -> Option<Retry> {
+        self.resume_with_delivery(true)
+    }
+    fn resume_with_delivery(&mut self, keep_unread: bool) -> Option<Retry> {
         let state = self.observed();
         for (op, key, value) in [(1, 1u8, 7), (2, 200u8, 11)] {
             if self.source[0].local().applications[&group(20)]
@@ -478,9 +513,15 @@ impl Insertion {
                 && state.source.is_none()
             {
                 let b = source_fixture::data(key, value);
-                unread(&mut self.source, &self.clock, 20, op, b.clone(), |a| {
-                    a.routed().application().value(&[key]).unwrap() == value
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.source,
+                    &self.clock,
+                    20,
+                    op,
+                    b.clone(),
+                    |a| a.routed().application().value(&[key]).unwrap() == value,
+                );
                 return Some(Retry {
                     phase: Phase::Data(op),
                     group: 20,
@@ -495,12 +536,20 @@ impl Insertion {
                 .clone()
                 .encode(MAX_TRANSFER_INTENT_BYTES)
                 .unwrap();
-            unread(&mut self.parent, &self.clock, 1, 200, b.clone(), |a| {
-                a.directory()
-                    .transfer_intent_at(a.applied_index(), source_fixture::op(200))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                200,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .transfer_intent_at(a.applied_index(), source_fixture::op(200))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Retry {
                 phase: Phase::Intent,
                 group: 1,
@@ -513,9 +562,15 @@ impl Insertion {
             if state.targets[i].staged_index.is_none() {
                 let g = 21 + i as u128;
                 let b = target(&self.intent, g).bootstrap_command(100000).unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
-                    a.status().staged_index.is_some()
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    200,
+                    b.clone(),
+                    |a| a.status().staged_index.is_some(),
+                );
                 return Some(Retry {
                     phase: Phase::Stage(g),
                     group: g,
@@ -526,9 +581,15 @@ impl Insertion {
         }
         if state.source.is_none() {
             let b = Source::freeze_command(&self.intent, 100000).unwrap();
-            unread(&mut self.source, &self.clock, 20, 200, b.clone(), |a| {
-                a.fence().is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.source,
+                &self.clock,
+                20,
+                200,
+                b.clone(),
+                |a| a.fence().is_some(),
+            );
             return Some(Retry {
                 phase: Phase::Fence,
                 group: 20,
@@ -571,9 +632,15 @@ impl Insertion {
                 let b = self.targets[i][0].local().applications[&group(g)]
                     .import_command(&import, 100000)
                     .unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
-                    a.status().imported.is_some()
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    200,
+                    b.clone(),
+                    |a| a.status().imported.is_some(),
+                );
                 return Some(Retry {
                     phase: Phase::Import(g),
                     group: g,
@@ -612,12 +679,20 @@ impl Insertion {
             )
             .unwrap_or_else(|e| panic!("publication {:?}", e.0));
             let b = p.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 201, b.clone(), |a| {
-                a.directory()
-                    .transfer_publication_at(a.applied_index(), source_fixture::op(200))
-                    .unwrap()
-                    .is_some()
-            });
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                201,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .transfer_publication_at(a.applied_index(), source_fixture::op(200))
+                        .unwrap()
+                        .is_some()
+                },
+            );
             return Some(Retry {
                 phase: Phase::Publish,
                 group: 1,
@@ -642,9 +717,15 @@ impl Insertion {
                 let b = self.targets[i][0].local().applications[&group(g)]
                     .activation_command(&activation, 100000)
                     .unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
-                    a.status().activated.is_some()
-                });
+                deliver(
+                    keep_unread,
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    200,
+                    b.clone(),
+                    |a| a.status().activated.is_some(),
+                );
                 return Some(Retry {
                     phase: Phase::Activate(g),
                     group: g,
@@ -772,7 +853,7 @@ impl Insertion {
             configuration(&self.root, 1, &[1, 2, 3], NativeOpenMode::Recover),
             &self.clock,
             self.protocol,
-            metadata,
+            self.metadata,
         );
         self.source = open(
             configuration(&self.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
@@ -1089,3 +1170,6 @@ fn quic_insertion_recovers_unread_phases_from_wal() {
 fn quic_insertion_recovers_unread_phases_from_checkpoint() {
     history(NativePeerProtocol::Quic, true)
 }
+
+#[path = "nested_insertion.rs"]
+mod nested;

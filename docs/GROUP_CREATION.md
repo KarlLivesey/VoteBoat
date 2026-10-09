@@ -279,9 +279,9 @@ recovery and selected native intent WAL faults. Slice131 adds selected assigned
 native TCP/QUIC WAL/checkpoint phase recovery, partial provisioning, unread results,
 exact retries and individual child activation with ancestor/source offline. Root insertion requires one metadata authority, complete scope movement and fresh
 Single child owners. Slice132 adds same-authority nested insertion through an
-explicit parent reservation; native nested phase recovery, cross-authority and
-retained local scope insertion, deletion/reparenting and authority movement remain
-planned.
+explicit parent reservation; slice133 adds selected native recovery evidence.
+Cross-authority and retained local scope insertion, deletion/reparenting and
+authority movement remain planned.
 
 ### Nested insertion
 
@@ -301,4 +301,14 @@ decline/cancellation remains available before a successful child intent.
 
 Current nested evidence is deterministic handoff, checkpoint/partial-progress
 recovery, exact retries/outbox, parent refresh, dynamic-parent later freeze and
-legacy codec/schema checks. Native nested TCP/QUIC phase recovery is next.
+legacy codec/schema checks. Slice133 adds selected Linux TCP/TLS and QUIC WAL/checkpoint
+histories with actual assigned grandchildren and a previously activated child as
+source. Every named parent reservation/intent/stage/fence/import/publication/parent
+refresh phase recovers original facts after unread-result abort/reopen and exact
+retry. Before refresh, stale root routing refuses; afterward it resolves exact
+grandchild grants. Original grandchild activations, imported retries and new writes
+work with metadata and source stopped; their file bytes and recovered metadata logs
+stay unchanged. Original source activation lineage and immutable creation bindings
+survive. Subsequent nested movement/retirement,
+cross-authority/retained-scope insertion, arbitrary faults and macOS/separate-host
+execution remain open.

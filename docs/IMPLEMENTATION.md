@@ -76,7 +76,7 @@ cause and revise this sketch before another material change.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration and the named P4 fault schedules are implemented. General public mutation endpoints remain gated. Safe placement supports ownership movement. |
-| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; native nested phase validation remains next. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
 
@@ -111,25 +111,23 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Checked nested insertion (current slice132, P5/P6).** Purpose: move data
-   from an existing child to fresh grandchildren. Dependencies: slice131 evidence,
-   complete mapping bound to a committed parent reservation, schema6 metadata.
-   Completion: exact creation refs/parent route, hop/identity/capacity checks,
-   fence/import/atomic publication/parent refresh/activation, retry/outbox and
-   checkpoint recovery, dynamic-parent later lifecycle, cancellation and legacy
-   regressions. Implemented evidence and executed checks are recorded below.
-2. **Native nested insertion recovery (next, P1/P5/P6).** Purpose: verify nested
-   insertion through actual assigned owners. Dependencies:132 and existing native
-   insertion/delegation fixtures. Completion: TCP/QUIC x WAL/checkpoint, interrupted
-   parent reservation/intent/fence/import/child publication/parent refresh/activation,
-   unread results/exact retries, no dual owner and ancestor-offline grandchild service.
-3. **Nested lifecycle continuity and gap audit (following, P5/P6/P0–P7).** Purpose:
-   demonstrate subsequent movement/cleanup and identify remaining baseline work.
-   Dependencies: native nested recovery and retention-authorized retirement.
-   Completion: nested split/merge/retirement preserves original lineage and imported
-   operations through interruption; review all original deletion/reparenting,
-   authority movement, retention, admission/mutation, tuning, platform/fault gates
-   and select the next required complete path. No full-goal scope reduction.
+1. **Native nested insertion recovery (current slice133, P1/P5/P6).** Purpose:
+   verify a previously activated child can hand real data to fresh grandchildren.
+   Dependencies:132 full-map parent reservation and existing assigned native owners.
+   Completion: TCP/QUIC x WAL/checkpoint, unread phase results, exact reopen/retry,
+   stale/updated parent routing, independent activation and ancestor-offline service
+   with unchanged metadata/source files. Executed evidence is recorded below.
+2. **Nested subsequent lifecycle continuity (next, P5/P6).** Purpose: preserve
+   original lineage through later movement and authorized cleanup. Dependencies:
+   native nested recovery, existing split/merge and retention-authorized retirement.
+   Completion: subsequent nested split/merge/retirement preserves original imported
+   operations/outbox through interrupted phases and refuses premature reclamation.
+3. **Full baseline gap audit and next required path (following, P0–P7).** Purpose:
+   connect the lifecycle evidence to remaining user-visible baseline requirements.
+   Dependencies: nested continuity and original roadmap/acceptance ledger.
+   Completion: review deletion/reparenting, metadata authority movement, retention,
+   admission/mutation, tuning and platform/fault gates against actual evidence;
+   select and implement the next missing complete path without shrinking the goal.
 
 ### How the current work fits globally
 
@@ -9214,3 +9212,85 @@ Final focused insertion6 passed2.95s (including successful-intent decline refusa
 core-only insertion5 passed2.57s; all-feature/all-target Clippy -D warnings
 passed1.20s. Format, whitespace and80-contract inventory passed. All validation
 handles are terminal; no CI gate used. Full goal remains active.
+
+## Slice133 schema plan — native nested insertion phase recovery
+
+Previous goal turn progressed:132 committed/pushed88e3935; current worktree clean.
+Reuse the actual root insertion fixture for setup and its assigned provisioning,
+quorum observation, compact-before-abort and exact stopped-file helpers. Add a
+construction-time metadata factory and a consumed-result setup mode so initial
+root handoff need not repeat its already-tested interruption ledger. This fixture
+reuse is needed to test a real activated child as the later source, preserving its
+original import/activation lineage rather than inventing fresh child data.
+
+Data/API: schema6 metadata, original schema3 activated source group21, new schema4
+Staging grandchildren31/32. Existing root source20 and sibling22 are stopped after
+root completion. Fresh grandchild assignments retain exact FileCreationBindings
+and bootstrap. Before parent reservation, grandchild stores may exist but no
+application binding/serving is invented; open those owners only after an actual
+quorum-observed full-map reservation derives VBTINT04. Bound runtime intent is
+immutable identity context, not a phase oracle. All decisions use quorum reads.
+
+Transitions: child write80 -> parent reservation -> child intent -> stages31/32
+-> child source fence -> imports31/32 -> child/descendant publication -> parent
+locator refresh -> independent activations. Each tested phase leaves an accepted
+result unread, then observes canonical indices/digests/manifests, compacts where
+selected, aborts/reclaims, reopens same stores and retries original commands.
+Before parent refresh, root resolution should reject stale child epoch; afterward
+root-to-grandchild hints must match exact child grants. Source must remain fenced;
+new targets remain NotActive until own valid activation.
+
+Failure/ownership: no cross-authority work or new production protocol is planned.
+Grandchild startup derives only from retained committed parent reservation and
+verified Staging assignments; a missing reservation keeps applications unopened.
+Original source binding/import/activation and new fence survive recovery. Metadata
+and source owners stop before both original activations; first grandchild serves
+while sibling remains inactive. Compare all stopped metadata file bytes and GroupLogs
+before/after warm grandchild retries/writes, plus original root/sibling file bytes.
+Validate preserved imported operations/outbox, exact creation binding bytes and
+checkpoint positive floors versus WAL zero floors. Explicit abort/reclaim handles
+unread buffers and final cleanup; no graceful-drain loop or deadline increase.
+
+Acceptance: selected TCP/QUIC x WAL/checkpoint native nested histories, assigned
+bootstrap, every named phase/retry, stale-versus-refreshed root resolution, partial
+activation with ancestor/source stopped, no dual owner, lineage and final recovery.
+This advances P1/P5/P6 and depends on132 plus existing native fixture contracts.
+Next: nested subsequent split/merge/retirement continuity (P5/P6), checking original
+lineage and retention-authorized cleanup through interruption. Following: audit
+full baseline gaps and implement the next required complete path (P0–P7), retaining
+all deletion/reparenting, authority movement, admission/mutation, retention, tuning,
+platform and broader fault requirements. Full goal stays active; P8/Windows deferred.
+
+## Slice133 — native nested insertion phase recovery
+
+Test-only native composition uses schema6 metadata, the original activated schema3
+child21 as source and verified assigned schema4 Staging grandchildren31/32. The
+fixture derives the binding only from an actual committed full-map parent
+reservation; pre-reservation stores do not invent application owners. Ten selected
+preactivation phases leave accepted results unread, quorum-observe exact facts,
+abort/reclaim, reopen original files and retry exact operations. Each phase checks
+source/target service gates and unchanged original source import/activation lineage.
+Publication and parent locator refresh are distinct: stale root routing refuses
+before refresh and returns exact grandchild grants afterward. Original activations
+then recover independently with metadata/source stopped; the first grandchild
+serves while its sibling remains inactive. Imported retries do not repeat effects,
+new writes/outbox survive final reopen, bindings stay byte-exact, and all stopped
+metadata/source files plus recovered metadata logs remain unchanged during activity.
+
+All four selected nested histories passed: TCP/TLS WAL83.99s; TCP/TLS checkpoint
+and both QUIC WAL/checkpoint cases passed together265.64s (serialized history
+fixture). Existing root TCP/TLS WAL regression passed44.06s after fixture extraction. All-feature/all-target Clippy -D warnings passed1.56s; format,
+whitespace and80-contract inventory checks passed before final documentation edits.
+Pre-run inspection caught missing election before reopened activation retry and
+added the existing campaign helper. No executed acceptance failed.
+
+This is finite Linux loopback owner-abort/selected-boundary evidence, not arbitrary
+power loss, cross-authority insertion, retained local scope, macOS/separate-host
+execution, mixed-version operation or complete lifecycle proof. No production
+protocol, storage or runtime changes. The original pack stays untouched, RPL-1.5
+retained, full P0–P7 active and P8/Windows deferred. Current native recovery advances
+P1/P5/P6; next is subsequent nested split/merge/retirement continuity, followed by
+the full baseline gap audit and next required complete path. CI is not a gate.
+
+Final slice133 format, whitespace and80-contract inventory passed; all validation
+handles are terminal. No CI gate used. Full goal remains active.

@@ -3122,3 +3122,37 @@ result follows.
 Final focused insertion6 passed2.95s; core-only insertion5 passed2.57s;
 all-feature/all-target Clippy -D warnings passed1.20s. Format, whitespace and
 80-contract inventory passed; all handles terminal. No CI gate used.
+
+## Slice133 — native nested insertion phase recovery
+
+Test-only native composition uses schema6 metadata, the original activated schema3
+child21 as source and verified assigned schema4 Staging grandchildren31/32. The
+fixture derives the binding only from an actual committed full-map parent
+reservation; pre-reservation stores do not invent application owners. Ten selected
+preactivation phases leave accepted results unread, quorum-observe exact facts,
+abort/reclaim, reopen original files and retry exact operations. Each phase checks
+source/target service gates and unchanged original source import/activation lineage.
+Publication and parent locator refresh are distinct: stale root routing refuses
+before refresh and returns exact grandchild grants afterward. Original activations
+then recover independently with metadata/source stopped; the first grandchild
+serves while its sibling remains inactive. Imported retries do not repeat effects,
+new writes/outbox survive final reopen, bindings stay byte-exact, and all stopped
+metadata/source files plus recovered metadata logs remain unchanged during activity.
+
+All four selected nested histories passed: TCP/TLS WAL83.99s; TCP/TLS checkpoint
+and both QUIC WAL/checkpoint cases passed together265.64s (serialized history
+fixture). Existing root TCP/TLS WAL regression passed44.06s after fixture extraction. All-feature/all-target Clippy -D warnings passed1.56s; format,
+whitespace and80-contract inventory checks passed before final documentation edits.
+Pre-run inspection caught missing election before reopened activation retry and
+added the existing campaign helper. No executed acceptance failed.
+
+This is finite Linux loopback owner-abort/selected-boundary evidence, not arbitrary
+power loss, cross-authority insertion, retained local scope, macOS/separate-host
+execution, mixed-version operation or complete lifecycle proof. No production
+protocol, storage or runtime changes. The original pack stays untouched, RPL-1.5
+retained, full P0–P7 active and P8/Windows deferred. Current native recovery advances
+P1/P5/P6; next is subsequent nested split/merge/retirement continuity, followed by
+the full baseline gap audit and next required complete path. CI is not a gate.
+
+Final slice133 format, whitespace and80-contract inventory passed; all validation
+handles are terminal. No CI gate used. Full goal remains active.
