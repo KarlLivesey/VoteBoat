@@ -125,6 +125,10 @@ other-peer data progress, control reserve, delayed flush, abort, wrong-owner
 constructor refusal, allocation rollback and concurrent same-owner holders.
 Those selected transport sessions are host attestations; real encrypted Node
 pressure is the next deliverable, not evidence supplied by these fixtures.
+Slice145 separately supplies one actual TCP/TLS Node full-peer-quota history:
+held credits across reconnect, other-peer writes/reads, release/catch-up, joined
+shutdown and durable reopen/retry. See [owning Node](NODE.md). This does not extend
+that evidence to arbitrary faults, per-group fairness or QUIC pressure.
 
 # Codec provisioning and evidence
 

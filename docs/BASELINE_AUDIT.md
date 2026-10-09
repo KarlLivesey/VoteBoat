@@ -134,8 +134,15 @@ native/downstream tests cover other-peer Data delivery under quota pressure,
 Control headroom, delayed flush, registration lifetime, concurrent reconnect
 holders and exact failure/drop rollback. These host-attested pressure fixtures
 are not an encrypted Node load claim. Default service selection is unchanged.
-Next run real native Node shared-resource overload/fault histories, then select
+Slice145 exercises an actual TCP/TLS100-group native Node assembly with one
+full peer quota held across disconnect/reconnect. Eight groups write/read using
+the other peer while the pressured follower stays at its old value; release
+permits catch-up. Joined shutdown returns all frames, then durable reopen verifies
+original retries and a fresh write. The initial half-quota test assumption failed
+because completed receives legitimately return credit; full-quota setup is the
+documented focused correction. This is one finite Linux schedule, not arbitrary
+fairness/fault, selected QUIC pressure or performance evidence. Next select
 the next outstanding path from the acceptance ledger. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
-macOS execution in143–144. Windows/P8 stay deferred and CI remains background.
+macOS execution in143–145. Windows/P8 stay deferred and CI remains background.

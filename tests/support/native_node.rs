@@ -14,23 +14,33 @@
 // rights and limitations under the RPL.
 
 use voteboat::native::{node::*, transport::NativeTransportFactory, wire::NativeWireCodec};
-type Facade = NativeNode<Counter>;
+type Session =
+    <voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::Session;
+type Facade<F = NativeTransportFactory<NativeWireCodec>> =
+    NativeNode<Counter, voteboat::native::connect::NativePeerConnector, F>;
 fn facade_make(root: &std::path::Path, recover: bool) -> Vec<Facade> {
-    let mut fixtures = (1..=3)
-        .map(|id| make_snapshots(id, &root.join(id.to_string()), recover, true))
-        .collect::<Vec<_>>();
-    let network = mesh_parts(&mut fixtures, |_| {
+    facade_make_with(root, recover, |_| {
         NativeTransportFactory::new(
             NativeWireCodec::new(Default::default()).unwrap(),
             Default::default(),
         )
         .unwrap()
-    });
+    })
+}
+fn facade_make_with<F: voteboat::transport::PeerTransportFactory<Session>>(
+    root: &std::path::Path,
+    recover: bool,
+    factory: impl FnMut(&Node) -> F,
+) -> Vec<Facade<F>> {
+    let mut fixtures = (1..=3)
+        .map(|id| make_snapshots(id, &root.join(id.to_string()), recover, true))
+        .collect::<Vec<_>>();
+    let network = mesh_parts(&mut fixtures, factory);
     fixtures
         .into_iter()
         .zip(network)
         .map(|(n, peers)| {
-            Facade::from_parts(
+            NativeNode::from_parts(
                 NativeNodeParts {
                     local: NativeLocalParts {
                         owner: n.owner,
@@ -54,13 +64,23 @@ fn facade_make(root: &std::path::Path, recover: bool) -> Vec<Facade> {
         })
         .collect()
 }
-fn facade_drive(nodes: &mut [Facade], mut done: impl FnMut(&mut [Facade]) -> bool) {
+fn facade_drive<F: voteboat::transport::PeerTransportFactory<Session>>(
+    nodes: &mut [Facade<F>],
+    mut done: impl FnMut(&mut [Facade<F>]) -> bool,
+) {
+    facade_drive_at(nodes, MonoTime(0), &mut done)
+}
+fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+    nodes: &mut [Facade<F>],
+    now: MonoTime,
+    mut done: impl FnMut(&mut [Facade<F>]) -> bool,
+) {
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         for n in nodes.iter_mut() {
             let progress = n
                 .poll(
-                    MonoTime(0),
+                    now,
                     NodePollBudget {
                         replica: ReplicaPollBudget {
                             steps: 100,
@@ -83,7 +103,12 @@ fn facade_drive(nodes: &mut [Facade], mut done: impl FnMut(&mut [Facade]) -> boo
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn facade_proposals(nodes: &mut [Facade], operation: u128, delta: i64, expected: i64) {
+fn facade_proposals<F: voteboat::transport::PeerTransportFactory<Session>>(
+    nodes: &mut [Facade<F>],
+    operation: u128,
+    delta: i64,
+    expected: i64,
+) {
     for g in 1..=100 {
         nodes[0]
             .propose(ClientRequest {
@@ -111,12 +136,22 @@ fn facade_proposals(nodes: &mut [Facade], operation: u128, delta: i64, expected:
             })
     });
 }
-fn facade_close(mut nodes: Vec<Facade>) -> usize {
+fn facade_close<F: voteboat::transport::PeerTransportFactory<Session>>(
+    nodes: Vec<Facade<F>>,
+) -> usize {
+    facade_close_at(nodes, MonoTime(0))
+}
+fn facade_close_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+    mut nodes: Vec<Facade<F>>,
+    now: MonoTime,
+) -> usize {
     let mut reclaimed = 0;
     for n in &mut nodes {
         n.begin_shutdown();
     }
-    facade_drive(&mut nodes, |nodes| nodes.iter().all(|n| n.is_drained()));
+    facade_drive_at(&mut nodes, now, |nodes| {
+        nodes.iter().all(|n| n.is_drained())
+    });
     for n in nodes {
         let mut p = n
             .into_parts()
@@ -161,6 +196,7 @@ fn facade_close(mut nodes: Vec<Facade>) -> usize {
     }
     reclaimed
 }
+include!("native_pressure.rs");
 #[test]
 fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
     let root = std::env::temp_dir().join(format!("voteboat-node-facade-{}", std::process::id()));

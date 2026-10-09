@@ -123,16 +123,41 @@ its selected native acceptance passes. General retention and broader faults rema
    Completion: bounded hot-owner admission cannot borrow protected control or
    prevent the configured unrelated owner from progressing; exact credit return
    and partial-failure/close behavior use public host/native seams.
-3. **Native Node shared-resource overload/fault history (next slice145, P1/P2).**
+3. **Native Node shared-resource overload/fault history (completed slice145, P1/P2).**
    Purpose: demonstrate the composed policy in real service work.
    Dependencies:item2 selected resource/transport contracts and native assembly.
    Completion: writes/reads/original retries survive selected peer/group pressure,
    restart and clean shutdown, with bounded accounting and no fabricated delivery.
-4. **Acceptance-ledger gap selection (following146, P0–P7).** Purpose: choose
+4. **Acceptance-ledger gap selection (current146, P0–P7).** Purpose: choose
    the next missing user-visible baseline path from current evidence rather than
    adding generic prerequisites. Dependencies:145 composed pressure results and
    BASELINE_ACCEPTANCE. Completion: one prioritized missing path with exact
    schema, failure/cleanup checks and its service/membership/lifecycle milestone.
+5. **Selected missing baseline path (next147, P0–P7).** Purpose: implement
+   the user-visible gap selected by146. Dependencies: its exact schema and existing
+   contracts. Completion: bounded complete path with named fault/restart evidence,
+   recorded without replacing earlier milestone requirements.
+6. **Composed validation of the selected path (following148, P0–P7).** Purpose:
+   establish its real restart/partial-progress behavior. Dependencies:147 and its
+   named acceptance checks. Completion: exact receipts/state and cleanup through
+   the selected native fault schedule, advancing the same milestone chosen in146.
+
+Slice145 schema before editing: NativeNode/NativeNodeParts gain a defaulted
+transport-factory parameter, preserving existing selections while enabling the
+existing shared pool through public native aliases. The actual TCP/TLS100-group
+assembly selects one finite owner-quota pool per node and keeps explicit host
+inspection views. After established idle receives, a host-held Bulk frame consumes
+node1→node3 send headroom. Node1↔node2 retains its configured quota and must commit
+new commands and quorum-backed reads; node3 must not be counted as having applied
+those commands while pressure remains. Release returns credits and permits actual
+catch-up. Selected disconnect/reconnect retains old held accounting. Shutdown
+drains/joins connector, WAL and snapshot workers; shared views report zero frames.
+Reopen the same durable directories with fresh session bindings, retry the original
+operation and confirm unchanged effects before a new write. No new consensus,
+storage format, durability receipt or generation is introduced. Test failure must
+identify blocked state, not trigger broad rewrites; no clock/election retuning is
+planned. Macro service/embedding and broader P1/P2 validation advance; original
+P0–P7 and remaining gates remain active.
 
 Slice144 schema before implementation: optional C14 owner policy declares a finite
 owner count and identical per-owner bulk byte/lease ceilings, whose checked sum
@@ -10245,3 +10270,63 @@ RPL-1.5 retained and the original pack preserved. Macro plan unchanged because
 this contract advances service/embedding isolation without completing a milestone.
 Final owner full-duplex refusal test1/1 passes0.00s after1.38s build; all handles
 are terminal. Updated audit/acceptance/inventory retain the broader missing gates.
+
+Slice145 focused schema correction after first executed pressure history: the
+half-quota blocker did not keep peer3 stalled because a completed receive returns
+its credit and permits a send. The native pool correctly allows that transition;
+the test's idle-receive assumption was false. Disconnect/consume old frame cleanup,
+hold the full two-frame owner byte quota, then reconnect at the configured100ms
+first retry boundary (below150ms minimum election deadline). New authenticated
+transport must bind the same held budget and refuse bulk while peer2 progresses.
+This changes the pressure fixture, not production quotas, timer policy or protocol.
+
+## Slice145 — actual Node peer-quota pressure and durable retry
+
+Previous goal turn made progress: slice144's public/native quotas and conformance
+were committed/pushed. This turn revalidated that clean state and advanced the
+planned composed P1/P2 schedule. NativeNode/NativeNodeParts now take a defaulted
+factory parameter; original defaults and NativeStartup selections are unchanged.
+The existing100-group TCP/TLS fixture now accepts the selected public factory
+through the same owning Node contract. This alias extension is necessary to make
+explicit shared resource selection convenient for native Rust embeddings, rather
+than adding a separate runtime, hidden owner or production pressure mechanism.
+
+New tests/support/native_pressure.rs selects a finite5-frame/5-slot pool per node,
+with one protected Control frame and two owners each capped at two Bulk frames.
+After initial native durable replication of all100 groups, disconnect node1↔node3,
+observe old-frame release and hold that entire owner's byte quota through a real
+TLS reconnect at the configured100ms first retry boundary. Connection generation
+changes but held accounting stays. Eight groups then commit/apply new operations
+and complete quorum-backed reads through node1/node2 while node3 remains at7 and
+outbound work is actually staged. A second write/read wave reaches14 on the live
+majority; peer3 still remains7. Release permits real follower catch-up to14.
+Bounded sampled byte/slot counters are checked without claiming coherent samples.
+
+Shutdown drains Nodes and explicitly joins/reclaims dial, WAL and snapshot
+workers; every pool reports zero frames. A surviving host-owned view acquires a
+new frame after Node shutdown. Reopen the same native files with fresh StoreSession
+bindings, retry both original operation IDs in all eight active groups and assert
+actual duplicate receipts with unchanged14. A new operation reaches15 and reads
+return15; final joined shutdown again returns all frames. This uses real native
+WAL synchronization and quorum/application receipts, not local transport completion
+as voter evidence. No new token, generation, watermark or storage format exists.
+
+Initial history failed after5.21s because the half-quota fixture assumed an idle
+receive would retain its credits forever. Completion freed a slot and allowed a
+valid peer3 send. The focused full-quota setup, recorded above before editing,
+passes1/1 in12.18s after2.66s build. Existing default100-group native checkpoint,
+maintenance/reopen/retry/worker-join regression passes1/1 in23.22s. All-feature/
+all-target Clippy -D warnings passes3.67s. Format/diff/inventory checks are recorded
+with final validation below; no timing or performance claim follows these tests.
+
+This is one Linux TCP/TLS pressure schedule in an assembly of100 groups (eight
+actively changed/read under pressure), not an arbitrary fault proof, selected
+QUIC pressure test, per-group fairness, deadline, macOS/separate-host execution or
+automatic CLI selection. The full P0–P7 goal and earlier ledger remain active,
+P8/Windows deferred, CI background, RPL-1.5 retained, pack preserved. No milestone
+is declared complete. Next146 selects a prioritized missing baseline behavior
+from current acceptance evidence;147 implements it and148 validates its composed
+fault/restart path rather than adding unrelated prerequisites.
+Final cargo formatting, explicit included-fixture rustfmt checks, whitespace and
+80-contract inventory checks pass. All test/check handles are terminal. Macro
+review preserves the full original ledger; no milestone exit is asserted.

@@ -3553,3 +3553,34 @@ universal failure proof. All prior phase gaps remain and the full P0–P7 goal i
 active; P8/Windows deferred, CI background feedback.
 Final selected owner full-duplex byte/slot constructor refusal1/1 passes0.00s
 (after1.38s build), no frame leases. All execution handles are terminal.
+
+## Slice145 — real encrypted Node shared-quota history
+
+Actual native Node/TCP/TLS100-group assembly selects finite per-node shared pools:
+5 max-frame byte reservations/5 slots, one Control reserve, two owners each with
+2-frame/2-slot Bulk ceilings. A full host-held peer quota survives explicit
+node1↔node3 disconnect and real TLS reconnect with a different session generation.
+Eight groups commit writes10 then14 and perform quorum-backed reads through the
+other peer; the pressured follower is explicitly still7. Staged outbound work and
+sampled bounded byte/slot counts are checked. Release permits actual catch-up14.
+Explicit Node shutdown/dial/WAL/snapshot worker joins return every frame credit;
+a surviving host view remains usable. Native durable reopen changes StoreSession,
+original operation retries return duplicate receipts without changing14, and a
+new write/read reaches15 before the second zero-frame joined shutdown.
+
+The first attempt failed its stalled-follower assertion in5.21s: half a quota
+plus a temporary idle receive is not sustained saturation because decoded receive
+returns credit. Corrected full-quota setup is recorded before the focused edit;
+production budgeting/consensus/storage/timers were unchanged. Corrected test1/1
+passes12.18s after2.66s build. Existing default hundred-group owning-facade
+checkpoint/maintenance/restart/retry regression1/1 passes23.22s. All-feature/
+all-target Clippy -D warnings passes3.67s. Native alias factory selection is
+backward compatible with existing default Node/startup assemblies.
+
+One finite Linux TCP/TLS schedule, not selected QUIC pressure, arbitrary resource
+fairness/fault proof, a performance result, macOS or separate-host execution.
+No automatic CLI quota selection, new durability token, protocol generation,
+watermark, wire/persistent format or consensus effect. Full P0–P7 remains active
+with all prior unresolved acceptance requirements; P8/Windows deferred.
+Final cargo formatting, explicit included-fixture rustfmt, whitespace and
+80-contract inventory checks pass. All execution handles terminal.

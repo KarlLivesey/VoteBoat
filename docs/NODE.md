@@ -19,6 +19,24 @@ remains independent of filesystem configuration and executables. Native recovery
 existing public checkpoint/WAL recovery contracts; no second authoritative log
 is introduced.
 
+`NativeNode<A,C,F>` and `NativeNodeParts<A,C,F>` accept an optional selected
+transport factory. The existing connector and NativeTransportFactory defaults
+remain, so earlier one/two-parameter uses keep their behavior. Rust hosts can
+select `NativeSharedTransportFactory<NativeWireCodec,NativeBufferPool>` produced
+by `NativeTransportFactory::with_buffers` without expanding every underlying
+Node type argument. Providers are supplied before construction and stay owned
+through accepted work; this is not live replacement or automatic startup policy.
+See [buffer quotas](BUFFERS.md) for explicit finite budgets and reconnect identity.
+
+Slice145's actual native TCP/TLS100-group assembly selects one shared owner-quota
+pool per node. A full host-held peer quota survives disconnect and an authenticated
+reconnect while the other peer commits writes and quorum-backed reads in eight
+groups. The pressured follower remains at the original applied value until
+release, then catches up. Joined shutdown returns all frames and leaves a surviving
+host view usable; durable reopen preserves original operation retries and accepts
+a fresh write. This is one finite Linux pressure schedule, not per-group fairness,
+arbitrary overload/fault proof, selected QUIC pressure or a performance result.
+
 Construction requires quiescent components and checks the local driver contracts,
 peer driver scopes, routes and configured voter store identities. Rejection
 returns all original selected components without closing them. Networking is

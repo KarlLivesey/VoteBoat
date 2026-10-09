@@ -26,7 +26,7 @@ use super::{
     worker::NativeLogWorker,
 };
 use crate::runtime::{Node, NodeLocalParts, NodeParts};
-pub type NativeNode<A, C = NativePeerConnector> = Node<
+pub type NativeNode<A, C = NativePeerConnector, F = NativeTransportFactory<NativeWireCodec>> = Node<
     FairScheduler,
     DeadlineQueue,
     JitterEntropy,
@@ -35,19 +35,20 @@ pub type NativeNode<A, C = NativePeerConnector> = Node<
     NativeOutbound,
     NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
     C,
-    NativeTransportFactory<NativeWireCodec>,
+    F,
 >;
-pub type NativeNodeParts<A, C = NativePeerConnector> = NodeParts<
-    FairScheduler,
-    DeadlineQueue,
-    JitterEntropy,
-    A,
-    NativeLogWorker<NativeLogStore<FileLogIo>>,
-    NativeOutbound,
-    NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
-    C,
-    NativeTransportFactory<NativeWireCodec>,
->;
+pub type NativeNodeParts<A, C = NativePeerConnector, F = NativeTransportFactory<NativeWireCodec>> =
+    NodeParts<
+        FairScheduler,
+        DeadlineQueue,
+        JitterEntropy,
+        A,
+        NativeLogWorker<NativeLogStore<FileLogIo>>,
+        NativeOutbound,
+        NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
+        C,
+        F,
+    >;
 pub type NativeLocalParts<A> = NodeLocalParts<
     FairScheduler,
     DeadlineQueue,
