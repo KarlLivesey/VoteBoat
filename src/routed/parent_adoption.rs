@@ -36,7 +36,48 @@ pub struct ParentGrantStatus {
 #[derive(Clone)]
 pub(super) struct ParentAdoptionRecord {
     pub status: ParentGrantStatus,
-    pub command: OwnerParentAdoption,
+    pub command: ParentAdoptionCommand,
+}
+#[derive(Clone, Debug, Eq, PartialEq)]
+// Keep the original local command inline: at most 64 records, with no new
+// per-record allocation or failure path. Both variants' nested data are bounded.
+#[allow(clippy::large_enum_variant)]
+pub(super) enum ParentAdoptionCommand {
+    Local(OwnerParentAdoption),
+    Cross(CrossOwnerParentAdoption),
+}
+impl ParentAdoptionCommand {
+    pub fn decode(bytes: &[u8], cross: bool) -> Result<Self, ApplicationError> {
+        if cross && bytes.starts_with(b"VBXPAD01") {
+            CrossOwnerParentAdoption::decode(bytes).map(Self::Cross)
+        } else {
+            OwnerParentAdoption::decode(bytes).map(Self::Local)
+        }
+    }
+    pub fn encode(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
+        match self {
+            Self::Local(a) => a.encode(max),
+            Self::Cross(a) => a.encode(max),
+        }
+    }
+    pub fn before(&self) -> &ResponsibilityManifest {
+        match self {
+            Self::Local(a) => a.before(),
+            Self::Cross(a) => a.before(),
+        }
+    }
+    pub fn after(&self) -> ResponsibilityManifest {
+        match self {
+            Self::Local(a) => a.after(),
+            Self::Cross(a) => a.after(),
+        }
+    }
+    pub fn metadata(&self) -> (OperationId, u64) {
+        match self {
+            Self::Local(a) => (a.decision.operation, a.decision.index),
+            Self::Cross(a) => (a.child_publication.operation, a.child_publication.index),
+        }
+    }
 }
 impl OwnerParentAdoption {
     pub fn encode(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
@@ -121,6 +162,25 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     pub fn parent_adoption_limit(&self) -> usize {
         self.parent_adoption_limit
     }
+    /// Select the larger, bounded cross-authority observation profile before
+    /// bootstrap. It also accepts local adoptions in the same ordered ledger.
+    #[allow(clippy::result_large_err)]
+    pub fn with_cross_authority_parent_adoption(
+        self,
+        maximum: usize,
+    ) -> Result<Self, (ApplicationError, Self)> {
+        let mut selected = self.with_parent_adoption(maximum)?;
+        selected.cross_parent_adoption = true;
+        selected.binding[..8].copy_from_slice(b"VBROWN04");
+        Ok(selected)
+    }
+    pub(super) fn parent_command_bound(&self) -> usize {
+        if self.cross_parent_adoption {
+            MAX_CROSS_PARENT_ADOPTION_BYTES
+        } else {
+            MAX_PARENT_ADOPTION_BYTES
+        }
+    }
     /// Local applied diagnostic; foreign use requires the original owner quorum.
     pub fn parent_adoption(&self, operation: OperationId) -> Option<ParentGrantStatus> {
         self.parent_adoptions
@@ -133,7 +193,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         operation: OperationId,
         bytes: &[u8],
     ) -> Option<ParentGrantStatus> {
-        let command = OwnerParentAdoption::decode(bytes).ok()?;
+        let command = ParentAdoptionCommand::decode(bytes, self.cross_parent_adoption).ok()?;
         self.parent_adoptions
             .iter()
             .find(|a| a.status.operation == operation && a.command == command)
@@ -148,7 +208,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         index: u64,
         bytes: &[u8],
     ) -> Result<RoutedOutcome<R>, ApplicationError> {
-        let command = OwnerParentAdoption::decode(bytes)?;
+        let command = ParentAdoptionCommand::decode(bytes, self.cross_parent_adoption)?;
         if let Some(old) = self
             .parent_adoptions
             .iter()
@@ -180,8 +240,8 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         let status = ParentGrantStatus {
             operation,
             index,
-            metadata_operation: command.decision.operation,
-            metadata_index: command.decision.index,
+            metadata_operation: command.metadata().0,
+            metadata_index: command.metadata().1,
             generation: after.input().generation,
         };
         self.parent_adoptions

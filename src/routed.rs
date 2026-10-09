@@ -23,14 +23,18 @@ use std::{
 pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 mod control_reads;
+mod cross_parent_adoption;
 mod parent_adoption;
 pub use codec::{encode_fence, encode_routed, encode_scope_fence};
 pub use control_reads::{RoutedControlQuery, RoutedControlRead, RoutedControlReads};
-use parent_adoption::ParentAdoptionRecord;
+pub use cross_parent_adoption::{
+    CrossOwnerParentAdoption, CROSS_PARENT_ADOPTING_ROUTED_SCHEMA, MAX_CROSS_PARENT_ADOPTION_BYTES,
+};
 pub use parent_adoption::{
     OwnerParentAdoption, ParentGrantStatus, MAX_PARENT_ADOPTIONS, MAX_PARENT_ADOPTION_BYTES,
     PARENT_ADOPTING_ROUTED_SCHEMA,
 };
+use parent_adoption::{ParentAdoptionCommand, ParentAdoptionRecord};
 
 pub const ROUTED_APPLICATION_SCHEMA: u64 = 1;
 pub const SCOPED_ROUTED_APPLICATION_SCHEMA: u64 = 2;
@@ -151,6 +155,7 @@ pub struct RoutedApplication<A, P> {
     history: BTreeMap<OperationId, Semantic>,
     semantic_bytes: usize,
     parent_adoption_limit: usize,
+    cross_parent_adoption: bool,
     parent_adoptions: Vec<ParentAdoptionRecord>,
 }
 impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A, P> {
@@ -224,6 +229,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             history: BTreeMap::new(),
             semantic_bytes: 0,
             parent_adoption_limit: 0,
+            cross_parent_adoption: false,
             parent_adoptions: Vec::new(),
         })
     }
@@ -323,7 +329,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: if self.parent_adoption_limit != 0 {
+            application_schema: if self.cross_parent_adoption {
+                CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
+            } else if self.parent_adoption_limit != 0 {
                 PARENT_ADOPTING_ROUTED_SCHEMA
             } else if self.scope_limit == 0 {
                 ROUTED_APPLICATION_SCHEMA
@@ -337,7 +345,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
                 .max(if self.parent_adoption_limit == 0 {
                     0
                 } else {
-                    MAX_PARENT_ADOPTION_BYTES
+                    self.parent_command_bound()
                 }),
             snapshot_bytes: 94
                 + self.binding.len()
@@ -352,7 +360,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
                 + if self.parent_adoption_limit == 0 {
                     0
                 } else {
-                    2 + self.parent_adoption_limit * (28 + MAX_PARENT_ADOPTION_BYTES)
+                    2 + self.parent_adoption_limit * (28 + self.parent_command_bound())
                 },
         }
     }
@@ -904,7 +912,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.parent_adoption_limit != 0 {
+        if self.cross_parent_adoption {
+            CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
+        } else if self.parent_adoption_limit != 0 {
             PARENT_ADOPTING_ROUTED_SCHEMA
         } else if self.scope_limit == 0 {
             ROUTED_APPLICATION_SCHEMA
@@ -940,7 +950,7 @@ where
                     .map(|a| {
                         28 + a
                             .command
-                            .encode(MAX_PARENT_ADOPTION_BYTES)
+                            .encode(self.parent_command_bound())
                             .expect("checked command")
                             .len()
                     })
@@ -950,7 +960,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.parent_adoption_limit != 0 {
+        bytes.extend(if self.cross_parent_adoption {
+            b"VBROUT04"
+        } else if self.parent_adoption_limit != 0 {
             b"VBROUT03"
         } else if self.scope_limit == 0 {
             b"VBROUT01"
@@ -995,7 +1007,7 @@ where
         if self.parent_adoption_limit != 0 {
             bytes.extend((self.parent_adoptions.len() as u16).to_le_bytes());
             for a in &self.parent_adoptions {
-                let command = a.command.encode(MAX_PARENT_ADOPTION_BYTES)?;
+                let command = a.command.encode(self.parent_command_bound())?;
                 bytes.extend(a.status.operation.get().to_le_bytes());
                 bytes.extend(a.status.index.to_le_bytes());
                 bytes.extend((command.len() as u32).to_le_bytes());
@@ -1019,7 +1031,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.parent_adoption_limit != 0 {
+                != if self.cross_parent_adoption {
+                    b"VBROUT04"
+                } else if self.parent_adoption_limit != 0 {
                     b"VBROUT03"
                 } else if self.scope_limit == 0 {
                     b"VBROUT01"
@@ -1198,7 +1212,8 @@ where
                     let operation = r.operation()?;
                     let index = r.u64()?;
                     let n = r.u32()? as usize;
-                    let command = OwnerParentAdoption::decode(r.take(n)?)?;
+                    let command =
+                        ParentAdoptionCommand::decode(r.take(n)?, self.cross_parent_adoption)?;
                     let Some((initial, initial_index)) = initialized else {
                         return Err(ApplicationError::InvalidCheckpoint);
                     };
@@ -1219,8 +1234,8 @@ where
                         status: ParentGrantStatus {
                             operation,
                             index,
-                            metadata_operation: command.decision.operation,
-                            metadata_index: command.decision.index,
+                            metadata_operation: command.metadata().0,
+                            metadata_index: command.metadata().1,
                             generation: active.input().generation,
                         },
                         command,

@@ -167,3 +167,11 @@ recovery; retained values/retry/outbox and exact stopped metadata files/GroupLog
 remain, old service stays fenced, late metadata recovery cannot thaw it. Current154
 reparenting, next155 activated partial sources, following156 metadata movement;
 wider owner families, retention/cancellation and original scope/gates remain open.
+
+Slice154d3 adds explicit schema4 full-owner adoption of completed cross-authority
+moves and an explicit native cache parent-refresh option. Checked three-authority
+metadata -> owner adoption/restart -> reserved later split -> both target
+activations preserve retries/outbox and source fencing. Every-byte native
+adoption/freeze journal cuts and old-profile refusal pass. Complete TCP/QUIC
+move-and-restart service, other owner families and broader platform/fault evidence
+remain open; this does not mark all reparenting or P5/P6 complete.

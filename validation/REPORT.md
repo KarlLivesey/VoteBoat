@@ -4350,3 +4350,25 @@ This completes the metadata commit protocol. Native cache refresh and original
 owner adoption across authorities remain next154d3, together with a complete
 native TCP/QUIC resumption history. Wider owner families, macOS and full P0–P7
 scope remain open; no complete reparenting-service claim is made here.
+
+
+### Slice154d3 — full-owner cross-authority adoption and native cache
+
+Linux validation: 121 focused all-feature tests pass across directory28,
+guards18, reparenting14, delegation14, deletion12, insertion11,
+retained_insertion10 and routed14. The shared --skip native:: filter excludes
+three directory and 101 routed native-network cases; these are not newly claimed.
+65 core-only tests pass (directory27, guards14, reparenting11, routed13).
+All-target/all-feature Clippy -D warnings, formatting, whitespace and the
+81-contract inventory pass.
+
+Four new cases cover original completed three-authority metadata observations,
+schema4 owner adoption, full ordinary-history control reserve, unchanged data
+retry/outbox and original publication status, strict malformed/partial/profile
+and atomic-checkpoint rejection, both partial native-cache refresh orders,
+subsequent reserved split/fence/import/publication/activation, and every byte of
+native owner adoption and later freeze frames plus sync/publication failures.
+Exact original retries and exported-image digests survive restart. Journal
+recovery sees old or complete states. Prior schema1–3 tests continue to pass.
+No new native TCP/QUIC complete-move history or macOS execution is claimed;
+those and other owner-family integrations remain outstanding.

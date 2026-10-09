@@ -41,6 +41,7 @@ pub struct NativeManifestCache {
     entries: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     bytes: usize,
     local_reparenting: bool,
+    cross_reparenting: bool,
 }
 impl NativeManifestCache {
     pub fn new(limits: ManifestCacheLimits) -> Result<Self, RoutingError> {
@@ -50,6 +51,7 @@ impl NativeManifestCache {
             entries: BTreeMap::new(),
             bytes: 0,
             local_reparenting: false,
+            cross_reparenting: false,
         })
     }
     /// Opt into trusted same-authority reparenting views before admitting hints.
@@ -60,6 +62,14 @@ impl NativeManifestCache {
         }
         self.local_reparenting = true;
         Ok(self)
+    }
+    /// Select trusted cross-authority parent observations before admitting hints.
+    /// Hosts authenticate the metadata observations; cache entries are not proof.
+    #[allow(clippy::result_large_err)]
+    pub fn with_cross_authority_reparenting(self) -> Result<Self, (RoutingError, Self)> {
+        let mut selected = self.with_local_reparenting()?;
+        selected.cross_reparenting = true;
+        Ok(selected)
     }
     fn admission(&self, manifest: &ResponsibilityManifest) -> Result<usize, RoutingError> {
         let next = manifest.input();
@@ -77,7 +87,8 @@ impl NativeManifestCache {
                 };
             }
             if (next.parent != prior.parent
-                && !(self.local_reparenting && manifest.reparents_within_authority(old)))
+                && !(self.local_reparenting && manifest.reparents_within_authority(old))
+                && !(self.cross_reparenting && manifest.reparents_preserving_owner(old)))
                 || next.authority != prior.authority
                 || next.scope != prior.scope
                 || next.application != prior.application

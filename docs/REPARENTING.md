@@ -162,9 +162,33 @@ other participants do not infer success from a timeout. Mixed old/new routing
 views may refuse until refreshed, while the original physical data owner and epoch
 stay unchanged.
 
-Current tests cover actual three-authority metadata routes and ordinary original
-owner service, plus byte-level native journal failures. NativeManifestCache's
-cross-authority parent refresh, data-owner adoption of this decision for later
-transfers, and a complete native TCP/QUIC service history remain integration work.
-The existing same-authority cache/adoption selectors do not silently enable those
-new paths.
+After completion, original full owners may select
+`RoutedApplication::with_cross_authority_parent_adoption(maximum)` before
+bootstrap (schema4). Propose `CrossOwnerParentAdoption` using the checked full
+plan, original coordinator decision/configuration, original child
+publication/configuration and original coordinator completion/configuration.
+The host authenticates these observations against their original quorums.
+The command checks the plan/guard set and all decision/publication/completion
+links; it is not a transferable commitment certificate.
+
+The owner changes only the parent pointer and generation, preserving the epoch,
+physical owner, application, data, retries and outbox. Its bounded ledger also
+accepts local adoption commands and reconstructs the exact chain from the original
+bootstrap on restart. ParentGrantStatus names the original child publication
+operation/index. Exact control retries return the original status even after a
+later full fence. Select the desired lifetime count explicitly (1–64); readiness
+advertises the larger maximum command and snapshot requirements. Schema1–3 and
+their encodings are unchanged, and scoped/imported owner families remain separate.
+
+Select `NativeManifestCache::with_cross_authority_reparenting()` on an empty
+cache to admit authenticated parent-only changes across metadata groups. Partial
+parent/child refresh refuses route resolution until compatible observations are
+available. This option does not authorize data-owner, epoch or selector changes
+as part of parent rebinding. Existing default/local selectors retain their rules.
+
+Tests cover completed three-authority metadata movement, native cache refresh,
+original full-owner adoption/restart and a subsequent reserved two-target split
+under the new parent, including target activation, original retries/outbox and
+source fencing. Every-byte native adoption/freeze journal cuts retain old or
+complete owner states. A complete native TCP/QUIC move-and-restart service history
+and other owner families remain integration work.

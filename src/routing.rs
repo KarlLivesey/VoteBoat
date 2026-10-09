@@ -329,9 +329,17 @@ impl ResponsibilityManifest {
     /// descendant selectors. Only the parent pointer and generation can change.
     pub fn reparents_within_authority(&self, previous: &Self) -> bool {
         let (a, b) = (self.input(), previous.input());
-        a.parent != b.parent
-            && a.parent.is_some_and(|p| p.group == a.authority)
+        a.parent.is_some_and(|p| p.group == a.authority)
             && b.parent.is_some_and(|p| p.group == a.authority)
+            && self.reparents_preserving_owner(previous)
+    }
+    /// Trusted parent rebinding across metadata authorities. Data ownership,
+    /// epoch and every descendant selector must remain unchanged.
+    pub fn reparents_preserving_owner(&self, previous: &Self) -> bool {
+        let (a, b) = (self.input(), previous.input());
+        a.parent != b.parent
+            && a.parent.is_some()
+            && b.parent.is_some()
             && a.responsibility == b.responsibility
             && a.authority == b.authority
             && a.application == b.application
