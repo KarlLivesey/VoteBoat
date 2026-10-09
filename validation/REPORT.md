@@ -2857,3 +2857,25 @@ live schema upgrade or mixed-version deployment is released. Local creation stat
 requires separately established authenticated metadata quorum-read authority for
 foreign use. Full P0–P7 remains active with previous ledger gaps; next is native
 exact-intent bootstrap before election. P8/Windows remain deferred.
+
+## Slice123 — committed creation to assigned durable bootstrap
+
+Linux all-features library61/directory31/group_creation4 passed (0.06/0.13/0.02s),
+core-only directory27/group_creation3 passed (0.06/0.00s). Host authority/log/binding
+replacements check exact assignment/application before mutation, uncertain binding
+publication, exact retry, conflicts, existing-unbound refusal and preservation of
+progressed logs. Native ModelIo covers every torn bootstrap frame plus sync and
+publication faults with modeled unsynced loss/reopen and durable campaign ordering.
+Native immutable binding file unit test reopens at five publication observation
+boundaries, preserves original bytes on conflict and checks exclusive lock ownership.
+It does not simulate hardware power failure or arbitrary filesystem corruption.
+
+The actual three-core metadata WAL/checkpoint history now rejects lagging/altered
+source status and authorizes a new assigned target WAL; target file reopen/exact
+retry preserve identity and campaign persists its ballot before vote sends. This
+history uses in-memory metadata delivery, not TCP/QUIC created-service startup.
+All-feature/all-target Clippy -D warnings passed. Namespace activation, remote
+creation authority protocol, owning-service integration and multi-creation shared
+WAL binding remain outside this evidence. Full P0–P7 remains active.
+Core-only group_creation Clippy -D warnings, format/whitespace and 79-contract
+inventory validation also passed. No macOS/separate-host execution claim.

@@ -8239,3 +8239,97 @@ schema1 stays usable; no live schema upgrade/mixed-version deployment claim.
 Deletion/reparenting, directory authority movement, broader P4/P6 lifecycle and
 P7/platform/fault gaps remain. Full P0–P7 active; P8/Windows deferred. See
 GROUP_CREATION.md and validation/REPORT.md for scope/evidence boundaries.
+
+## Slice123 schema plan — exact assigned bootstrap before election
+
+Previous goal turn was progress: creation journal122 committed/pushed480dd14.
+Worktree clean. Existing Bootstrap persists group/configuration but not the
+metadata operation, application binding or initialization mode. Comparing just
+Bootstrap would allow conflicting creation intents with identical voter configs.
+
+Data/API: add public CreationAuthority verification seam and a local committed
+metadata implementation using actual Raft/Directory applied-prefix status.
+VerifiedGroupCreation captures exact immutable status, assigned node/store and
+application adapter. Add optional CreationLogStore::creation_state typed
+Result<Option<GroupLog>> rather than guessing absence from string storage errors.
+Native WAL and downstream host stores implement that same seam. CreationBindings
+owns bounded immutable bytes; native file provider uses one locked record and one
+pending slot with sync/atomic publication/directory sync. Binding contains exact
+intent bytes, metadata operation/index and assigned node/store, not a second log.
+
+Transition: authenticate exact committed source and validate assigned store/app
+before mutation; inspect typed durable log state and immutable creation binding.
+Unbound existing group or conflicting binding refuses. Persist exact binding
+before append/bootstrap barrier. Return scoped receipt only after selected LogStore
+reports exact durable Bootstrap. Binding-only partial progress resumes from the
+same verified intent. Existing matching progressed groups are idempotent; no
+reset/suffix replacement. Receipt is local bootstrap evidence, never permission
+to serve or publish a namespace. Empty/staging mode remains bound in the intent.
+
+Failure/cleanup: public provider uncertainty returns no receipt; retained binding
+and native WAL are recovered and retried, never deleted because observation was
+lost. A private pending file is never authority and can be rewritten under its
+exclusive lock when final publication is absent. Published binding is immutable.
+Store open/creation and snapshot initialization remain explicit caller-owned
+steps; this is a reusable offline embedding operation, no hidden worker/socket.
+Metadata history is irrevocable here; verification is of a historical committed
+reservation, not a liveness lease. Remote verifiers are trusted authenticated
+non-Byzantine host adapters, not constructible commitment certificates.
+
+Acceptance: downstream host source/binding/log injection, unknown/uncommitted or
+wrong assignment/app refusal without mutation, matching retry and binding conflict,
+existing unbound group refusal, publication uncertainty, native torn WAL/barrier
+recovery and real file reopen; demonstrate recovery/campaign only after complete
+bootstrap. Native TCP/QUIC owning-service integration is a following gate if not
+completed in this slice. Mini plan current assigned bootstrap (P5/P1/P0), next
+native owning-service creation from metadata intent (P5/P1) dependent on exact
+receipt/binding/recovery with original application retries, following namespace
+publication/activation (P5/P6) dependent on bootstrap readiness and no-unready-owner
+checks. Full P0–P7 remains active; prior ledger gaps and P8/Windows deferral remain.
+
+## Slice123 implemented — verified assigned bootstrap
+
+Added public CreationAuthority, CreationLogStore and CreationBindings seams plus
+VerifiedGroupCreation and establish_created_group. Local authority checks actual
+committed metadata Raft/Directory history; exact assignment/application checks
+precede mutation. Native optional durable-state lookup rejects pending/fenced WALs.
+Native FileCreationBindings publishes one bounded immutable provenance record
+through synced pending file, non-overwriting hard link and directory sync. Exact
+retry reestablishes durability, resumes binding-only progress and preserves matching
+progressed groups; existing unbound groups/conflicting provenance refuse. Receipt
+follows the selected WAL bootstrap barrier and scoped durable-state check. The
+native record is initially one creation per directory; no shared-WAL multi-creation
+or snapshot initialization wrapper is claimed.
+
+Executed Linux: all-feature library61/directory31/group_creation4 tests passed
+(0.06/0.13/0.02s); core-only directory27/group_creation3 passed (0.06/0.00s).
+Host replacements cover source/assignment/app refusal before mutation, uncertain
+binding publication, exact retries, conflict and preservation of progressed state.
+Native ModelIo injects every bootstrap frame append cut and sync/publication faults,
+loses unsynced bytes, reopens and campaigns only after exact bootstrap. Actual file
+unit test covers five publication observation boundaries, lock ownership, matching
+retry and different-byte refusal; this is not a hardware power-loss model. Actual
+three-core file metadata test rejects lagging/altered source status, loses receipt,
+compacts/reopens/catches up, then bootstraps and reopens an assigned target file WAL
+and persists its ballot before vote messages. Metadata delivery here is deterministic
+in-memory, not native TCP/QUIC. All-feature/all-target Clippy -D warnings passed;
+core-only new-target Clippy, format, whitespace and 79-contract inventory checks
+are recorded with their actual outcomes below. Removed unused feature-specific
+imports found by the core-only build; no functional failure was hidden.
+
+Macro review: P5 creation now has metadata reservation and assigned durable
+bootstrap. Native created-service operation and namespace publication/activation
+remain open. Current completed mini item: exact assigned bootstrap (P0/P1/P5),
+dependent on committed reservation; completion checks are host/native refusal,
+uncertainty/restart/retry and durable campaign checks above. Next: created TCP/QUIC
+owning service (P1/P5), dependent on selected bootstrap and snapshot initialization;
+checks must demonstrate three-node election, original application retries and
+file reopen through existing owning Node. Following: namespace publication and
+activation (P5/P6), dependent on verified target readiness; checks must refuse
+unready publication/serving and preserve exact retries across partial progress.
+Deletion/reparenting, metadata authority movement and all previous P0–P7 gaps stay
+active. P8/Windows deferred, macOS/separate-host unverified, CI background feedback.
+
+Final slice123 checks: core-only group_creation Clippy -D warnings, format,
+whitespace and 79-contract inventory all passed. Inventory formatting changes to
+unrelated records were removed before commit.

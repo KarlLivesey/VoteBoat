@@ -728,6 +728,7 @@ mod native {
     }
     #[test]
     fn native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen() {
+        use voteboat::{group_creation::*, native::group_creation::*};
         let root = std::env::temp_dir().join(format!(
             "voteboat-creation-{}-{}",
             std::process::id(),
@@ -762,6 +763,19 @@ mod native {
             .group_creation_at(0, group(100))
             .unwrap()
             .is_none());
+        let committed = status.clone().unwrap();
+        let lagging = &cluster.replicas[&node(2)];
+        assert!(VerifiedGroupCreation::verify(
+            &LocalCreationAuthority {
+                core: &lagging.core,
+                directory: &lagging.app
+            },
+            committed.clone(),
+            node(1),
+            identity(1),
+            intent.application,
+        )
+        .is_err());
         // Discard original receipt; preserve only native committed files/images.
         for n in [1, 3] {
             cluster.checkpoint(n);
@@ -793,6 +807,68 @@ mod native {
             assert!(r.app.manifest(id(50)).is_none());
             assert_eq!(r.app.manifest(id(1)), Some(&manifests()[0]));
         }
+        let authority = LocalCreationAuthority {
+            core: &cluster.replicas[&node(3)].core,
+            directory: &cluster.replicas[&node(3)].app,
+        };
+        let mut forged = committed.clone();
+        forged.operation = OperationId::new(11).unwrap();
+        assert!(VerifiedGroupCreation::verify(
+            &authority,
+            forged,
+            node(1),
+            identity(1),
+            intent.application,
+        )
+        .is_err());
+        let verified = VerifiedGroupCreation::verify(
+            &authority,
+            committed.clone(),
+            node(1),
+            identity(1),
+            intent.application,
+        )
+        .unwrap();
+        let target = root.join("created-1");
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&target).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&target).unwrap();
+        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        assert_eq!(receipt.metadata_index(), committed.index);
+        let old_binding = receipt.binding();
+        drop(bindings);
+        drop(log);
+        let mut log = NativeLogStore::recover(
+            FileLogIo::open(&target).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&target).unwrap();
+        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        assert_ne!(receipt.binding(), old_binding);
+        assert_eq!(receipt.operation(), committed.operation);
+        assert_eq!(log.state(group(100)).unwrap().bootstrap, intent.bootstrap);
+        let mut core = Raft::recover(
+            node(1),
+            log.binding(),
+            log.state(group(100)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        let effects = core.step(Event::Campaign).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("created group must persist ballot before voting");
+        };
+        let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+        assert!(effects.iter().any(|e| matches!(e,
+            Effect::Send(message) if matches!(message.rpc, Rpc::Vote { .. }))));
+        drop(bindings);
+        drop(log);
         drop(cluster);
         std::fs::remove_dir_all(root).unwrap();
     }

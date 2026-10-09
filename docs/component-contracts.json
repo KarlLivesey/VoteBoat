@@ -1625,6 +1625,24 @@
         "tests/counter_service.rs"
       ],
       "scope": "Borrowed exact group/configuration/sample, monotonic freshness, unique bounded candidates/stores/domains and complete current assignments. Common consumer checks provider output, operation/configuration/replica capacity, preserves voters/policy/existing learners and invokes PlacementAuthorizer before returning one learner record. No I/O, asynchronous accepted work, durability effects, reservations or quorum weight changes. Actual TCP/QUIC executable membership histories consume a planner-produced record from recovered membership before enrollment/promotion/retirement/checkpoint/restart. Initial learner planning only; automatic voter replacement, global orchestration and live measured samples remain absent."
+    },
+    {
+      "design_id": "C20",
+      "public_contract": "CreationAuthority / CreationLogStore / CreationBindings / establish_created_group",
+      "operations": [
+        "verify",
+        "creation_state",
+        "load",
+        "publish_exact",
+        "establish_created_group"
+      ],
+      "native": "LocalCreationAuthority over actual committed Raft/Directory history; selected NativeLogStore typed presence and FileCreationBindings immutable synced record.",
+      "conformance": [
+        "tests/group_creation.rs",
+        "tests/directory.rs",
+        "src/native/group_creation.rs"
+      ],
+      "scope": "Offline caller-owned assigned bootstrap only. Exact bounded metadata status, assigned node/store/application and immutable provenance precede selected WAL Create/barrier; typed durable absence refuses pending/fenced stores. Host replacements consume the same checked helper. Exact retry preserves progressed groups; conflicts and existing unbound groups refuse. Real metadata file history/reopen/campaign, every torn bootstrap WAL frame and five actual file publication observation boundaries. One native creation record per selected directory. No hidden runtime, remote cryptographic certificate, namespace/serving permission or TCP/QUIC created-service gate."
     }
   ],
   "not_yet_implemented": [

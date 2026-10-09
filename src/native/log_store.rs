@@ -116,6 +116,19 @@ impl<I: JournalIo> NativeLogStore<I> {
     }
 }
 impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
+    pub(crate) fn creation_state_native(
+        &self,
+        group: GroupIdentity,
+    ) -> Result<Option<GroupLog>, StorageError> {
+        if self.fenced {
+            return Err(StorageError::Fenced);
+        }
+        if !self.pending.is_empty() {
+            return Err(StorageError::Rejected("creation requires quiescent WAL"));
+        }
+        Ok(self.durable.get(&group).cloned())
+    }
+
     pub fn create_with_codec(
         mut io: I,
         identity: StoreIdentity,
