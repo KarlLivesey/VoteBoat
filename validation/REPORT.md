@@ -4174,3 +4174,53 @@ a new distributed proof, native network feature evidence or macOS validation.
 Current154b live reparenting, next155 activated partial sources and following156
 metadata authority movement remain; full goal stays active. RPL-1.5, Linux/macOS
 targets, deferred Windows/P8 and background-only CI policy remain unchanged.
+
+## Slice154b — atomic local metadata reparenting
+
+Schema11's bounded ReparentPlan changes old parent, destination parent and child
+in one ordered metadata command. Exact active same-authority views, matching
+application/scheme and an exact destination vacancy are required. Local ancestry
+and subtree traversal checks reject cycles, excessive resulting depth, missing
+or foreign segments and pending lifecycle/creation work. Scope, ownership epochs,
+physical data owners, explicit placement and all descendant manifests are retained.
+The original local status/read view and immutable operation history recover exact
+publication/index across retry and checkpoint. It creates no second metadata owner.
+
+The native cache requires explicit empty-cache with_local_reparenting selection
+for vacancy filling and parent rebinding. Old defaults retain their refusal
+contract; partial refresh returns WrongParent until the child is refreshed. New
+hints grant no serving authority. Actual child data7, retained parent data11 and
+nested descendant data13 survive the move in application histories; the original
+semantic retry produces no duplicate outbox effect. A move back uses current
+published manifests. Concrete data-owner bindings remain original and require a
+follow-on adoption step for later ownership transfers.
+
+Linux validation:
+
+- All-feature reparenting9/9 (final0.20s after0.67s build), covering live/nested
+  continuity, exact repeated move/retry, current cycle/depth/foreign/path refusal,
+  lifecycle and pending-creation conflicts, capacity/failed-batch atomicity,
+  old profile/checkpoint truncation, original status/bounds and explicit native
+  cache selection. Every native reparent journal-frame cut and failed sync/
+  publication reopens to all-old or all-new bindings and preserves original index5.
+- The focused all-feature regression run passes110 tests: child_slots10/10,
+  deletion12/12, routing13/13, directory31/31, delegation14/14, insertion11/11,
+  retained_insertion10/10 and reparenting9/9. Shared build4.85s; individual suite
+  times0.14/0.17/0.00/0.12/0.06/3.09/1.38/0.30s respectively. Two additional
+  delegation-reservation/default-cache cases in the existing tests pass in the
+  final reparenting run.
+- Core-only reparenting7/7, child_slots8/8 and routed13/13 pass after4.56s build,
+  with0.07/0.00/0.35s suite times. All-feature routed application/host14/14 passes;
+  101 native network tests remain filtered as unchanged by this local transition.
+- All-feature/all-target Clippy with -D warnings passes5.16s. Formatting, git
+  whitespace and81-contract inventory validation pass.
+
+The first destination test constructed an invalid Delegated all-Group map;
+corrected the fixture to isolate the occupied slot. The first regression run
+exposed globally widened native-cache admission. The fix was explicit pristine
+selection, retaining the old default rather than weakening its existing test.
+
+This evidence validates the local metadata branch only. Original owner grant
+adoption, guarded cross-authority reparenting and their native service histories
+remain required. The full P0–P7 objective is active; macOS, broader faults and
+remaining roadmap scope are not inferred from these Linux finite checks.

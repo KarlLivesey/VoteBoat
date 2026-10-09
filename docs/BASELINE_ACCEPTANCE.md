@@ -134,6 +134,13 @@ journal cuts are checked. This permits deleted-slot cleanup and a representable
 empty destination; it does not implement moving a live child or complete P5/P6.
 See [child-slot retirement](CHILD_SLOTS.md).
 
+Slice154b adds atomic same-authority reparenting of a live child and locally known
+subtree into an exact vacancy. One metadata commit updates both parent routes and
+the child binding; data owners keep serving at the same epoch. Cycle/depth and
+pending lifecycle checks, exact retries, partial cache refresh and native journal
+cuts are exercised. Owner grant adoption for later transfers and cross-authority
+movement remain required. See [local reparenting](REPARENTING.md).
+
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
 WAL/checkpoint two-authority recursive deletion histories pass original unread

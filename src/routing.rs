@@ -245,7 +245,7 @@ impl ResponsibilityManifest {
     }
     /// Recognizes a newer trusted directory view that removes child routes.
     /// This shape check is not deletion evidence: the directory must commit
-    /// retirement only after observing the original child tombstone.
+    /// retirement through deletion evidence or a checked reparenting transition.
     pub fn retires_child_slots(&self, previous: &Self) -> bool {
         let next = self.input();
         let old = previous.input();
@@ -284,6 +284,65 @@ impl ResponsibilityManifest {
                         (a, b) => a == b,
                     }
             })
+    }
+    /// Shape of a trusted metadata publication filling vacant child selectors.
+    /// This grants no serving authority to the child data group by itself.
+    pub fn fills_vacant_child_slots(&self, previous: &Self) -> bool {
+        let (a, b) = (self.input(), previous.input());
+        if a.responsibility != b.responsibility
+            || a.parent != b.parent
+            || a.authority != b.authority
+            || a.application != b.application
+            || a.scheme != b.scheme
+            || a.scope != b.scope
+            || a.placement != b.placement
+            || a.epoch != b.epoch
+            || a.generation <= b.generation
+            || a.state != ResponsibilityState::Active
+            || b.state != ResponsibilityState::Active
+        {
+            return false;
+        }
+        let (ExecutionMode::Delegated(a), ExecutionMode::Delegated(b)) =
+            (&a.execution, &b.execution)
+        else {
+            return false;
+        };
+        a.len() == b.len()
+            && a.iter().zip(b).any(|(a, b)| {
+                matches!(a.target, RouteTarget::Child(_)) && b.target == RouteTarget::Vacant
+            })
+            && a.iter().zip(b).all(|(a, b)| {
+                a.scope == b.scope
+                    && match (a.target, b.target) {
+                        (RouteTarget::Child(_), RouteTarget::Vacant) => true,
+                        (RouteTarget::Child(a), RouteTarget::Child(b)) => {
+                            a.responsibility == b.responsibility
+                                && a.group == b.group
+                                && a.epoch >= b.epoch
+                        }
+                        (a, b) => a == b,
+                    }
+            })
+    }
+    /// Trusted same-authority parent rebinding preserves data ownership and all
+    /// descendant selectors. Only the parent pointer and generation can change.
+    pub fn reparents_within_authority(&self, previous: &Self) -> bool {
+        let (a, b) = (self.input(), previous.input());
+        a.parent != b.parent
+            && a.parent.is_some_and(|p| p.group == a.authority)
+            && b.parent.is_some_and(|p| p.group == a.authority)
+            && a.responsibility == b.responsibility
+            && a.authority == b.authority
+            && a.application == b.application
+            && a.scheme == b.scheme
+            && a.scope == b.scope
+            && a.placement == b.placement
+            && a.epoch == b.epoch
+            && a.generation > b.generation
+            && a.state == ResponsibilityState::Active
+            && b.state == ResponsibilityState::Active
+            && a.execution == b.execution
     }
     /// Charges value bytes and all retained route capacity. Collection/allocator
     /// bookkeeping is separately bounded by the fixed entry ceiling.

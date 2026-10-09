@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; owner grant adoption, cross-authority reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -89,10 +89,26 @@ the count of remaining milestones.
 ### Mini plan: current deliverable and next two
 
 Current priority is sensible feature completion: finish a complete usable path,
-check the failures it introduces, and advance to the next capability. Current154b
-is live-child reparenting; next155 is activated partial sources; following156 is
-metadata authority movement. Their purpose, dependencies and completion checks
-are specified below. Completed slices are evidence, not extra release prerequisites.
+check the failures it introduces, and advance to the next capability. Immediate
+deliverables after bounded154b are:
+
+1. **154c, owner grant adoption (current; P5/P6 reparenting).** Preserve ordinary
+   service and make the new parent usable for later ownership transfers.
+   Depends on154b's original committed plan/status and existing owner replay.
+   Check exact grant/adoption identity, old retries, unchanged physical ownership,
+   subsequent transfer, capacity and interruption/recovery.
+2. **154d, cross-authority reparenting (next; P5/P6).** Extend live movement across
+   metadata groups without concurrent moves creating cycles. Depends on explicit
+   guarded committed ancestry, old/new parent reservations, child adoption and
+   forward recovery. Check stale/cyclic/partial paths, original lost-result
+   recovery and native TCP/QUIC service across authority outages.
+3. **155, activated partial sources (following; P5/P6).** Let an imported child
+   delegate part of its scope and retain the remainder. Depends on original
+   activation/import lineage and retained source contracts. Check imported
+   data/retries/outbox, both service paths, repeated moves and restart.
+
+Metadata authority movement156 stays in the macro plan below. Completed slices
+are evidence, not extra release prerequisites.
 
 Slices 78–80 complete fixed-assignment routing and application execution. Slices
 81–83 cover the finite named P4 fault ledger: held readiness/session changes,
@@ -200,12 +216,12 @@ its selected native acceptance passes. General retention and broader faults rema
    identity/authority refusal, original durable publication/locator facts, stale
    parent-route refusal, exact retries and named partial-progress/recovery checks.
    Advances complete recursive responsibility management; no normal ancestor commit.
-   Bounded154a now supplies checked deleted-child slot retirement and explicit
-   vacancies with conformance/checkpoint/native-journal evidence. Current154b is
-   the actual live-child move: reserve the old route and vacant destination,
-   verify committed ancestry, publish/adopt exact parent bindings and recover
-   every interruption without competing routes. Vacancy support alone does not
-   complete this milestone.
+   Bounded154a supplies checked deleted-child slot retirement and explicit
+   vacancies. Bounded154b atomically moves the three metadata bindings under one
+   authority, with local ancestry/subtree validation, live data continuity and
+   native-journal recovery. Current154c adopts original owner grants for later
+   transfers;154d adds guarded multi-authority movement. The local metadata path
+   does not complete the full reparenting milestone.
 
 13. **Activated children as partial sources (next155, P5/P6).** Purpose:
    let a previously imported child delegate only part of its scope while retaining
@@ -11597,3 +11613,93 @@ child parent-binding adoption and recovery; next155 activated partial sources an
 following156 metadata authority movement remain. Broader owner families,
 retention/cancellation/general mappings and original membership/platform/fault/P7
 requirements remain active. Full P0–P7 goal stays open; CI is background feedback.
+
+### Slice154b schema plan: atomic reparenting within one metadata authority
+
+The pack requires a durable protocol for cross-parent changes; two unrelated
+publications are unsafe. When old parent, new parent and child share one concrete
+metadata authority, one ordered committed command can perform the complete
+metadata transition. This is the first branch of live reparenting, not a substitute
+for the still-required cross-authority protocol and owner grant adoption.
+
+Data/API: ReparentPlan carries exact old-parent, new-parent and child manifests.
+They are distinct active identities under one authority, with matching application/
+scheme and bounded generations. Old parent must have the exact child selector;
+new parent must have an exact same-scope vacancy. VBRPAR01 is bounded to three
+manifest payloads. Directory::with_local_reparenting selects pristine schema11,
+VBDINI11/VBDIR011. Original profiles cannot execute the new command. A lifecycle
+query returns the original applied operation/index and plan from ordinary history.
+
+Transition: atomically replace the old child selector with Vacant, fill the new
+vacancy with that same child locator, and update only the child's ParentAuthority.
+All three route generations advance once; ownership epochs, data owners, child
+execution maps and descendants stay unchanged. Check committed local destination
+ancestry for cycles and resulting local paths for the visit ceiling. Require
+complete local ancestry for the destination and a locally known moved subtree;
+foreign ancestry/subtrees need the later guarded cross-authority protocol. Existing
+lifecycle locks/unconsumed creation in affected ancestors/subtree refuse the move.
+Ordinary bounded admission occurs before any changes; no external effect escapes
+this metadata command and no second-phase capacity is needed here.
+
+Failure/ownership: apply batches remain atomic, checkpoint replay uses the original
+plan and exact status, stale generation/conflicting operations do not change routes.
+Trusted cache updates recognize vacancy filling and same-authority parent rebinding,
+without accepting owner/epoch/identity changes. Data-path hints retain the same
+physical ownership and epoch; owners keep serving independently of metadata. Their
+stored full grants still need explicit adoption before later ownership transfers;
+that follow-on is required before claiming complete reusable reparenting.
+
+Acceptance: actual live child and nested descendant data/retries remain available,
+old/new routes and parent bindings change together, exact retry/reopen and repeated
+moves work, non-vacant targets/cycles/foreign paths/depth/lifecycle/changed manifests
+refuse, old profiles and malformed bytes fail closed, result budgets and native
+journal partial-write recovery preserve old or complete metadata. Current154's
+remaining work is owner adoption and cross-authority guarded movement; next155
+activated partial sources and following156 metadata movement remain unchanged.
+
+### Slice154b implemented evidence and remaining reparenting work
+
+Pristine Directory schema11 binds VBDINI11/VBDIR011 and bounded VBRPAR01 plans.
+The checked same-authority command moves one live child (and its locally known
+subtree) into an exact vacant selector. One original metadata commit vacates the
+old route, fills the new one and changes the child parent pointer. All three
+route generations advance; ownership epochs, physical owners, explicit placement
+and descendant manifests do not change. Local ancestor/subtree and post-move
+visit-depth checks reject cycles, foreign unknown segments and excessive depth.
+Pending deletion/transfer/delegation or unconsumed creation in affected paths
+refuses. Original status/index, failures and exact retries use ordinary bounded
+history; journal/checkpoint replay preserves the entire atomic result.
+
+Actual application histories preserve child value7/retry/outbox and retained
+parent value11 through the move and a move back; a nested descendant keeps its
+value13 and original manifest while the parent changes. No ancestor commit enters
+ordinary data execution. Same physical owners keep serving at the original epoch.
+This is a local metadata move, not yet the complete reusable owner-transfer path.
+
+The first negative destination fixture accidentally built an invalid all-Group
+Delegated manifest; retaining a vacancy in the other selector isolated the actual
+occupied-destination refusal. Regression tests then caught an unintended change
+to the default native cache: enabling vacancy filling globally accepted a view
+that its prior retirement-only contract rejects. Added an explicit pristine
+NativeManifestCache::with_local_reparenting selection; defaults remain unchanged.
+Selected caches accept exact parent rebinding and vacancy filling, and a partially
+refreshed destination correctly returns WrongParent until its child is refreshed.
+
+Actual validation: all-feature reparenting9/9, plus child_slots10/10, deletion12/12,
+routing13/13, directory31/31, delegation14/14, insertion11/11 and
+retained_insertion10/10 pass (110 focused tests). Added cases include native
+ModelIo cuts at every reparent-frame byte and failed sync/publication: restart
+observes either all three original bindings or all three new bindings, and exact
+retry retains original index5. Core-only reparenting7/7, child_slots8/8 and routed
+13/13 pass. All-feature routed application/host14/14 and all-feature/all-target
+Clippy with -D warnings pass. Formatting, whitespace and81-contract inventory
+checks pass. These are finite application/storage histories; this slice adds no
+native network or macOS execution claim.
+
+Macro review:154b completes the atomic local metadata branch and advances the
+same full reparenting milestone. Current154c must adopt the new full parent grant
+in original data-owner state before later transfers;154d must add guarded
+cross-authority ancestry/reservations/child publication and recovery. Those are
+required scope, not replaced by this smaller branch. Following155 activated
+partial sources and156 metadata authority movement remain; the full P0–P7 goal,
+owner-family/retention/membership/platform/fault/P7 obligations remain active.

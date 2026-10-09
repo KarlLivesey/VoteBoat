@@ -323,6 +323,7 @@ pub struct TransferIntentStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
+    Reparent(OperationId),
     RetiredChildSlot(OperationId),
     DeletionIntent(OperationId),
     Deletion(OperationId),
@@ -337,6 +338,7 @@ pub enum DirectoryQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
+    Reparent(Option<crate::reparenting::ReparentStatus>),
     RetiredChildSlot(Option<crate::child_slots::RetiredChildSlotStatus>),
     DeletionIntent(Option<crate::deletion::DeletionIntentStatus>),
     Deletion(Option<crate::deletion::DeletionStatus>),
@@ -419,6 +421,10 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::Reparent(operation) => self
+                .0
+                .reparent_status_at(required, operation)
+                .map(DirectoryRead::Reparent),
             DirectoryQuery::RetiredChildSlot(operation) => self
                 .0
                 .retired_child_slot_at(required, operation)
@@ -468,6 +474,12 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::Reparent(op) => self
+                    .0
+                    .reparent_status_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.plan.retained_bytes() - size_of::<crate::reparenting::ReparentPlan>()
+                    }),
                 DirectoryQuery::RetiredChildSlot(op) => self
                     .0
                     .retired_child_slot_at(self.applied_index(), *op)?
@@ -537,6 +549,9 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::Reparent(s) => s.as_ref().map_or(0, |s| {
+                s.plan.retained_bytes() - size_of::<crate::reparenting::ReparentPlan>()
+            }),
             DirectoryRead::RetiredChildSlot(s) => s.as_ref().map_or(0, |s| {
                 s.retirement.retained_bytes() - size_of::<crate::child_slots::RetireChildSlot>()
             }),

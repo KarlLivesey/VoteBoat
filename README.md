@@ -109,7 +109,9 @@ unread-phase recovery pass. Fixed quorum fence reads use the same routed owner
 and checkpoint schema. Wider lifecycle validation remains in progress.
 Schema10 adds [checked child-slot retirement](docs/CHILD_SLOTS.md): after a child
 is deleted, its selector can become an explicit vacancy while other routes keep
-serving. Live-child reparenting remains in progress.
+serving. [Local reparenting](docs/REPARENTING.md) can atomically move a live child
+and its subtree between parents under one metadata authority. Owner grant adoption
+for later transfers and cross-authority reparenting remain in progress.
 The [routed application wrapper](docs/ROUTED_APPLICATION.md) now checks ownership
 at admission and apply, preserves semantic retries and enforces a durable local
 fence. Native TCP/QUIC child writes and recovery work with every parent replica

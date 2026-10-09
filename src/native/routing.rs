@@ -40,6 +40,7 @@ pub struct NativeManifestCache {
     limits: ManifestCacheLimits,
     entries: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     bytes: usize,
+    local_reparenting: bool,
 }
 impl NativeManifestCache {
     pub fn new(limits: ManifestCacheLimits) -> Result<Self, RoutingError> {
@@ -48,7 +49,17 @@ impl NativeManifestCache {
             limits,
             entries: BTreeMap::new(),
             bytes: 0,
+            local_reparenting: false,
         })
+    }
+    /// Opt into trusted same-authority reparenting views before admitting hints.
+    #[allow(clippy::result_large_err)]
+    pub fn with_local_reparenting(mut self) -> Result<Self, (RoutingError, Self)> {
+        if !self.entries.is_empty() || self.local_reparenting {
+            return Err((RoutingError::InvalidLimits, self));
+        }
+        self.local_reparenting = true;
+        Ok(self)
     }
     fn admission(&self, manifest: &ResponsibilityManifest) -> Result<usize, RoutingError> {
         let next = manifest.input();
@@ -65,7 +76,8 @@ impl NativeManifestCache {
                     Err(RoutingError::GenerationConflict)
                 };
             }
-            if next.parent != prior.parent
+            if (next.parent != prior.parent
+                && !(self.local_reparenting && manifest.reparents_within_authority(old)))
                 || next.authority != prior.authority
                 || next.scope != prior.scope
                 || next.application != prior.application
@@ -80,6 +92,7 @@ impl NativeManifestCache {
                 && next.execution != prior.execution
                 && !manifest.refreshes_child_epochs(old)
                 && !manifest.retires_child_slots(old)
+                && !(self.local_reparenting && manifest.fills_vacant_child_slots(old))
             {
                 return Err(RoutingError::EpochMismatch);
             }

@@ -44,7 +44,9 @@ The existing metadata owner retains retired child identities, tombstones and
 original command history; retirement does not authorize identity reuse or physical
 reclamation. Deleting a vacant namespace needs no invented child/owner facts for
 its empty selectors. Existing transfer/insertion protocols do not refill them.
-Moving a live child and adopting it under another parent remains separate work.
+The selected [local reparenting](REPARENTING.md) profile can fill a vacancy with a
+live child under the same metadata authority. Its further grant adoption and
+cross-authority protocol remain separate work.
 
 `tests/child_slots.rs` checks local/foreign tombstones, retained service and stale
 child fencing, successive retirements, exact replay, capacity/atomicity, lifecycle
