@@ -3676,3 +3676,40 @@ finite Linux service composition, not macOS/separate-host execution or complete
 recursive lifecycle acceptance. Full P0–P7 and prior unresolved work stay active.
 Final cargo formatting, included-fixture rustfmt, whitespace and80-contract
 inventory pass. All execution handles terminal; no remote CI gate used.
+
+## Slice149 — schema7 cross-authority nested insertion
+
+Explicit public cross-authority plan, contract5 intent and opt-in Directory schema7
+preserve older schema/tag admission and replay. Separate parent and child metadata
+application states exercise local route/reservation and child creation checks.
+Foreign original observations remain authenticated trusted host provenance,
+not transferable certificates. This does not move a metadata authority.
+
+Deterministic new2/2 pass0.01s after1.62s build. Relevant all-feature delegation14/14
+pass0.07s and insertion10/10 pass3.22s after2.86s build, including new native ModelIo
+intent-frame byte cuts and sync/manifest publication faults. Recovery proves old
+or exact complete intent/local creation state; intent cannot publish descendants.
+Added source/non-serving import checkpoint, cancellation and new successor effects
+are covered by new focused4/4 pass0.39s after1.43s build, then successor-write1/1
+pass0.01s after2.17s build. Source stays fenced; targets refuse before activation,
+preserve duplicates7/11 and original outbox items after activation/checkpoint,
+and new writes read8/12. Parent/child decision and cancellation locks reconstruct
+exactly through schema7 checkpoints. Truncation/tag downgrade, unknown local
+creation/mismatching references, legacy schema refusal and live upgrades refuse.
+
+Initial fixture compilation used wrong public receipt/read shapes and a copied
+path attribute; fixed against actual contracts. The added cancellation test first
+failed because it used the child operation's ID for a separate decline command;
+existing decline rules correctly rejected it. The focused distinct-ID correction
+passes without production change; later successful intent declines stay refused.
+All-feature/all-target check4.94s, final Clippy -D warnings1.66s, core-only library
+check3.89s pass. Final formatting/inventory/whitespace checks recorded below.
+
+Application-level deterministic/checkpoint and native I/O-model fault evidence,
+not actual networked foreign quorum observations or physical power-loss proof.
+Native TCP/QUIC separate-authority phase/reopen histories are next150. No global
+foreign-ancestry proof, mixed-binary compatibility, retained-scope insertion,
+macOS execution, separate hosts or performance result claimed. Full P0–P7 stays
+active with earlier ledgers, P8/Windows deferred, RPL-1.5 and original pack retained.
+Final cargo formatting, included-fixture rustfmt, whitespace and80-contract
+inventory pass. All execution handles terminal; no remote CI gate used.

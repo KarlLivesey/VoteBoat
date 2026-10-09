@@ -184,6 +184,36 @@ impl DelegationPlan {
     pub fn insertion_children(&self) -> Option<&[InsertionChild]> {
         self.insertion.as_deref()
     }
+    /// Reserve insertion below a child held by a different metadata authority.
+    /// Foreign committed observations require authenticated host provenance.
+    pub fn cross_authority_insertion(
+        parent: ResponsibilityManifest,
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        children: Vec<InsertionChild>,
+        child_operation: OperationId,
+    ) -> Result<Self, ApplicationError> {
+        Self::validate_parent(&parent, &before)?;
+        if before.input().authority == parent.input().authority
+            || children.iter().any(|c| c.creation == child_operation)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let intent = TransferIntent::insertion_with_foreign_parent(before, after, children, true)
+            .map_err(|e| e.0)?;
+        Ok(Self {
+            parent,
+            before: intent.before().clone(),
+            after: intent.after().clone(),
+            child_operation,
+            insertion: Some(
+                intent
+                    .insertion_children()
+                    .expect("checked mapping")
+                    .to_vec(),
+            ),
+        })
+    }
     pub fn parent(&self) -> &ResponsibilityManifest {
         &self.parent
     }
@@ -211,11 +241,17 @@ impl DelegationPlan {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.insertion.is_some() {
-            b"VBDPLAN2"
-        } else {
-            b"VBDPLAN1"
-        });
+        out.extend(
+            if self.insertion.is_some()
+                && self.before.input().authority != self.parent.input().authority
+            {
+                b"VBDPLAN3"
+            } else if self.insertion.is_some() {
+                b"VBDPLAN2"
+            } else {
+                b"VBDPLAN1"
+            },
+        );
         out.extend(self.child_operation.get().to_le_bytes());
         for manifest in [&self.parent, &self.before, &self.after] {
             out.extend((manifest_len(manifest) as u32).to_le_bytes());
@@ -232,7 +268,7 @@ impl DelegationPlan {
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        if tag != b"VBDPLAN1" && tag != b"VBDPLAN2" {
+        if tag != b"VBDPLAN1" && tag != b"VBDPLAN2" && tag != b"VBDPLAN3" {
             return Err(ApplicationError::InvalidCommand);
         }
         let operation = r.operation()?;
@@ -242,12 +278,16 @@ impl DelegationPlan {
         let before = read_manifest(r.take(len)?)?;
         let len = r.u32()? as usize;
         let after = read_manifest(r.take(len)?)?;
-        if tag == b"VBDPLAN2" {
+        if tag == b"VBDPLAN2" || tag == b"VBDPLAN3" {
             let children = read_insertion(&mut r)?;
             if !r.done() {
                 return Err(ApplicationError::InvalidCommand);
             }
-            return Self::insertion(parent, before, after, children, operation);
+            return if tag == b"VBDPLAN3" {
+                Self::cross_authority_insertion(parent, before, after, children, operation)
+            } else {
+                Self::insertion(parent, before, after, children, operation)
+            };
         }
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);

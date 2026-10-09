@@ -152,3 +152,12 @@ Next implement a missing recursive ownership operation. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
 macOS execution in143–146. Windows/P8 stay deferred and CI remains background.
+
+Slice149 closes the explicit same-authority restriction at the checked nested
+insertion path through opt-in Directory schema7 and separate canonical tags.
+The child's local creation records remain authoritative; foreign parent reservation
+and child publication observations retain authenticated host provenance obligations.
+Actual deterministic data handoff/checkpoint recovery and native intent-frame faults
+are exercised; real TCP/QUIC separate-authority phase recovery is current150.
+Retained-scope insertion is next151. This advances P5/P6 feature coverage without
+closing broader lifecycle, platform/fault or original P7 performance gates.

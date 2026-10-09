@@ -22,7 +22,7 @@ fn directory() -> Directory {
         .with_recursive_insertion()
         .unwrap_or_else(|_| panic!("schema6"))
 }
-fn source_hint(m: &ResponsibilityManifest, g: u128, key: u8) -> RouteHint {
+pub(super) fn source_hint(m: &ResponsibilityManifest, g: u128, key: u8) -> RouteHint {
     let m = m.input();
     RouteHint {
         responsibility: m.responsibility,
@@ -35,7 +35,7 @@ fn source_hint(m: &ResponsibilityManifest, g: u128, key: u8) -> RouteHint {
         generation: m.generation,
     }
 }
-fn data_for(m: &ResponsibilityManifest, g: u128, key: u8, delta: i64) -> Vec<u8> {
+pub(super) fn data_for(m: &ResponsibilityManifest, g: u128, key: u8, delta: i64) -> Vec<u8> {
     let hint = source_hint(m, g, key);
     encode_routed(
         hint,
@@ -45,7 +45,7 @@ fn data_for(m: &ResponsibilityManifest, g: u128, key: u8, delta: i64) -> Vec<u8>
     )
     .unwrap()
 }
-fn target_for(intent: &TransferIntent, g: u128, operation: u128) -> Target {
+pub(super) fn target_for(intent: &TransferIntent, g: u128, operation: u128) -> Target {
     Target::new(
         group(g),
         op(operation),
@@ -64,7 +64,7 @@ fn target_for(intent: &TransferIntent, g: u128, operation: u128) -> Target {
     )
     .unwrap_or_else(|e| panic!("{:?}", e.0))
 }
-fn handoff(
+pub(super) fn handoff(
     d: &mut Directory,
     intent: &TransferIntent,
     operation: u128,
@@ -121,7 +121,11 @@ fn handoff(
         .unwrap();
     (targets, decision)
 }
-fn activate(targets: &mut [Target], operation: u128, decision: TransferPublicationStatus) {
+pub(super) fn activate(
+    targets: &mut [Target],
+    operation: u128,
+    decision: TransferPublicationStatus,
+) {
     for t in targets {
         let bytes = t
             .activation_command(

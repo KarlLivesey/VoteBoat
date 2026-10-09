@@ -39,6 +39,7 @@ pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
 pub const INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 5;
 pub const RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 6;
+pub const CROSS_AUTHORITY_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 7;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -315,6 +316,7 @@ pub struct Directory {
     namespace_transfers: bool,
     responsibility_insertion: bool,
     recursive_insertion: bool,
+    cross_authority_insertion: bool,
     insertion_creations: BTreeSet<OperationId>,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
@@ -353,6 +355,7 @@ impl Directory {
             namespace_transfers: false,
             responsibility_insertion: false,
             recursive_insertion: false,
+            cross_authority_insertion: false,
             insertion_creations: BTreeSet::new(),
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
@@ -408,6 +411,14 @@ impl Directory {
         next.recursive_insertion = true;
         Ok(next)
     }
+    /// Select schema7 before bootstrap for insertion beneath a foreign parent.
+    /// Foreign committed observations require authenticated host provenance.
+    #[allow(clippy::result_large_err)]
+    pub fn with_cross_authority_insertion(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_recursive_insertion()?;
+        next.cross_authority_insertion = true;
+        Ok(next)
+    }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -451,7 +462,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.recursive_insertion {
+        bytes.extend(if self.cross_authority_insertion {
+            b"VBDINIT7"
+        } else if self.recursive_insertion {
             b"VBDINIT6"
         } else if self.responsibility_insertion {
             b"VBDINIT5"
@@ -481,12 +494,13 @@ impl Directory {
         if bytes.len() > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
-        if bytes.starts_with(b"VBDINIT1")
+        let request = if bytes.starts_with(b"VBDINIT1")
             || bytes.starts_with(b"VBDINIT2")
             || bytes.starts_with(b"VBDINIT3")
             || bytes.starts_with(b"VBDINIT4")
             || bytes.starts_with(b"VBDINIT5")
             || bytes.starts_with(b"VBDINIT6")
+            || bytes.starts_with(b"VBDINIT7")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -510,12 +524,14 @@ impl Directory {
                 || bytes.starts_with(b"VBTINT02")
                 || (self.responsibility_insertion && bytes.starts_with(b"VBTINT03"))
                 || (self.recursive_insertion && bytes.starts_with(b"VBTINT04"))
+                || (self.cross_authority_insertion && bytes.starts_with(b"VBTINT05"))
             {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01") {
                 TransferPublication::decode(bytes).map(Request::Publication)
             } else if bytes.starts_with(b"VBDPLAN1")
                 || (self.recursive_insertion && bytes.starts_with(b"VBDPLAN2"))
+                || (self.cross_authority_insertion && bytes.starts_with(b"VBDPLAN3"))
             {
                 DelegationPlan::decode(bytes).map(Request::Delegation)
             } else if bytes.starts_with(b"VBDCOMP1") {
@@ -527,7 +543,21 @@ impl Directory {
             } else {
                 DirectoryCommand::decode(bytes).map(Request::Publish)
             }
+        }?;
+        let intent = match &request {
+            Request::Transfer(i) => Some(i),
+            Request::Publication(p) => Some(p.intent()),
+            Request::DelegationCompletion(c) => Some(c.decision.publication.intent()),
+            Request::DelegationDecline(d) => Some(d.intent()),
+            Request::DelegationCancellation(c) => Some(c.decline.decline.intent()),
+            _ => None,
+        };
+        if !self.cross_authority_insertion
+            && intent.is_some_and(TransferIntent::cross_authority_insertion)
+        {
+            return Err(ApplicationError::InvalidCommand);
         }
+        Ok(request)
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
@@ -629,6 +659,10 @@ impl Directory {
                         break;
                     }
                     Some(p) if p.group == self.plan.authority => current = p.responsibility,
+                    Some(_) if self.cross_authority_insertion => {
+                        rooted = true;
+                        break;
+                    }
                     _ => return false,
                 }
             }
@@ -702,6 +736,14 @@ impl Directory {
             {
                 return DirectoryOutcome::TransferEvidenceMismatch;
             }
+        }
+        if intent.insertion_children().is_some()
+            && before
+                .parent
+                .is_some_and(|p| p.group != self.plan.authority)
+            && (!self.cross_authority_insertion || intent.delegation().is_none())
+        {
+            return DirectoryOutcome::TransferEvidenceMismatch;
         }
         if let Some(children) = intent.insertion_children() {
             if !self.insertion_permitted(intent.before(), children) {
@@ -848,7 +890,16 @@ impl Directory {
         if let Some(children) = plan.insertion_children() {
             if !self.recursive_insertion
                 || children.iter().any(|c| c.creation == operation)
-                || !self.insertion_permitted(plan.before(), children)
+                || if plan.before().input().authority == self.plan.authority {
+                    !self.insertion_permitted(plan.before(), children)
+                } else {
+                    !self.cross_authority_insertion
+                        || children.iter().any(|c| {
+                            self.manifests
+                                .keys()
+                                .any(|id| id.id == c.manifest.input().responsibility.id)
+                        })
+                }
             {
                 return DirectoryOutcome::TransferEvidenceMismatch;
             }
@@ -1339,7 +1390,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.recursive_insertion {
+        if self.cross_authority_insertion {
+            CROSS_AUTHORITY_INSERTION_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.recursive_insertion {
             RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA
         } else if self.responsibility_insertion {
             INSERTION_DIRECTORY_APPLICATION_SCHEMA
@@ -1365,7 +1418,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.recursive_insertion {
+        bytes.extend(if self.cross_authority_insertion {
+            b"VBDIR007"
+        } else if self.recursive_insertion {
             b"VBDIR006"
         } else if self.responsibility_insertion {
             b"VBDIR005"
@@ -1413,7 +1468,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.recursive_insertion {
+                != if self.cross_authority_insertion {
+                    b"VBDIR007"
+                } else if self.recursive_insertion {
                     b"VBDIR006"
                 } else if self.responsibility_insertion {
                     b"VBDIR005"
@@ -1450,6 +1507,7 @@ impl CheckpointStateMachine for Directory {
             next.namespace_transfers = self.namespace_transfers;
             next.responsibility_insertion = self.responsibility_insertion;
             next.recursive_insertion = self.recursive_insertion;
+            next.cross_authority_insertion = self.cross_authority_insertion;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

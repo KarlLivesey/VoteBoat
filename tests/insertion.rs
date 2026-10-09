@@ -579,5 +579,7 @@ fn insertion_intent_native_torn_frames_recover_exact_reservations_and_lock() {
     assert!(old && complete);
 }
 
+#[path = "insertion/cross_authority.rs"]
+mod cross_authority;
 #[path = "insertion/nested.rs"]
 mod nested;

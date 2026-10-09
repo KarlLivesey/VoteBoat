@@ -72,13 +72,30 @@ impl TransferIntent {
             Vec<InsertionChild>,
         ),
     > {
+        Self::insertion_with_foreign_parent(before, after, children, false)
+    }
+    #[allow(clippy::result_large_err)]
+    pub(crate) fn insertion_with_foreign_parent(
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        children: Vec<InsertionChild>,
+        foreign_parent: bool,
+    ) -> Result<
+        Self,
+        (
+            ApplicationError,
+            ResponsibilityManifest,
+            ResponsibilityManifest,
+            Vec<InsertionChild>,
+        ),
+    > {
         let validate = || -> Result<(), ApplicationError> {
             let b = before.input();
             let a = after.input();
             let ExecutionMode::Delegated(routes) = &a.execution else {
                 return Err(ApplicationError::InvalidCommand);
             };
-            if b.parent.is_some_and(|p| p.group != b.authority)
+            if b.parent.is_some_and(|p| p.group != b.authority) != foreign_parent
                 || a.parent != b.parent
                 || a.responsibility != b.responsibility
                 || a.authority != b.authority
@@ -122,6 +139,7 @@ impl TransferIntent {
                     || b.parent
                         .is_some_and(|p| p.responsibility.id == c.responsibility.id)
                     || g.id == b.authority.id
+                    || b.parent.is_some_and(|p| g.id == p.group.id)
                     || sources.iter().any(|s| match s.target {
                         RouteTarget::Group(s) => s.id == g.id,
                         _ => true,
@@ -179,7 +197,12 @@ impl TransferIntent {
         children: Vec<InsertionChild>,
         binding: crate::delegation::DelegationBinding,
     ) -> Result<Self, ApplicationError> {
-        let mut intent = Self::insertion_candidate(before, after, children).map_err(|e| e.0)?;
+        let foreign = before
+            .input()
+            .parent
+            .is_some_and(|p| p.group != before.input().authority);
+        let mut intent = Self::insertion_with_foreign_parent(before, after, children, foreign)
+            .map_err(|e| e.0)?;
         let children = intent.insertion_children().expect("checked insertion");
         if intent.before.input().parent.is_none()
             || binding.index == 0
@@ -198,6 +221,14 @@ impl TransferIntent {
     }
     pub fn insertion_children(&self) -> Option<&[InsertionChild]> {
         self.insertion.as_deref()
+    }
+    pub(crate) fn cross_authority_insertion(&self) -> bool {
+        self.insertion.is_some()
+            && self
+                .before
+                .input()
+                .parent
+                .is_some_and(|p| p.group != self.before.input().authority)
     }
     /// Checked grant for a concrete target. For insertion this is the fresh child;
     /// for ordinary split/merge it remains the original after manifest.

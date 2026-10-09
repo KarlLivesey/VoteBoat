@@ -280,8 +280,8 @@ native TCP/QUIC WAL/checkpoint phase recovery, partial provisioning, unread resu
 exact retries and individual child activation with ancestor/source offline. Root insertion requires one metadata authority, complete scope movement and fresh
 Single child owners. Slice132 adds same-authority nested insertion through an
 explicit parent reservation; slice133 adds selected native recovery evidence.
-Cross-authority and retained local scope insertion, deletion/reparenting and
-authority movement remain planned.
+Slice149 below adds insertion beneath a foreign metadata parent. Retained local
+scope insertion, deletion/reparenting and authority movement remain planned.
 
 ### Nested insertion
 
@@ -331,3 +331,39 @@ Metadata and stopped source files remain unchanged during merged writes; origina
 creation bindings survive reopens. Later groups use explicit trusted bootstrap,
 not a new creation RPC. Networked retirement and broader lifecycle/platform
 evidence remain open.
+
+### Cross-authority nested insertion
+
+Slice149 adds `Directory::with_cross_authority_insertion()` selected before
+bootstrap (schema7), and `DelegationPlan::cross_authority_insertion(...)`.
+Use separate parent and child metadata authorities. Reserve fresh Staging children
+at the child's authority under its original generation; every grandchild keeps
+that authority. The parent reserves the exact current foreign-child route with
+VBDPLAN3; its original committed reservation yields a bound VBTINT05 intent.
+The child checks its actual local creation records and current manifest before
+recording that intent. Foreign creation/decision assertions cannot replace those
+locally verifiable records. Original foreign quorum observations still require
+authenticated host provenance, as for existing delegated transfers.
+
+Commit source fence, final imports and child publication using the existing data
+protocol. Child publication installs its after manifest and all grandchildren
+atomically. Parent DelegationCompletion refreshes the child's epoch locator after
+the exact child decision. Targets require their ordinary durable activation and
+then serve independently of ancestors. Source fencing is permanent; only a
+committed pre-intent refusal permits parent cancellation and fresh replanning.
+
+Schema7 binds VBDINIT7/VBDIR007; schema1–6 and older plan/intent tags retain their
+admission and checkpoint behavior. No live/cross-schema upgrade is supported.
+Wrapped publication/completion/decline/cancellation commands also reject a new
+foreign-insertion intent under an older schema. Mixed application binaries are
+not advertised; old decoders reject the new mandatory tags. This changes child
+insertion beneath a foreign parent, not the child metadata authority itself.
+Whole-source movement and fresh Single grandchildren remain required.
+
+Deterministic public-contract tests preserve original retries/outbox, source fence,
+non-serving imported targets, parent refresh and activated target state through
+checkpoints; new successor writes succeed. Native ModelIo cuts every byte of the
+intent frame and injects sync/publication faults, recovering no intent or the exact
+original intent/local creation reservations. Actual native TCP/QUIC cross-authority
+phase/reopen composition is next150. Retained-scope insertion, deletion/reparenting,
+metadata authority movement and broader fault/platform evidence remain work.

@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; cross-authority/retained-scope insertion, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame evidence; native cross-authority composition, retained-scope insertion, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -144,24 +144,29 @@ its selected native acceptance passes. General retention and broader faults rema
    Dependencies:147 and existing native Directory/routed Node contracts.
    Completion: resolve actual routes, execute writes/reads/retries, refresh stale
    cache and preserve exact lookup/data ownership across a selected restart.
-7. **Next missing lifecycle feature (current149, P5/P6).** Purpose: complete
-   a missing recursive ownership operation from the preserved acceptance ledger.
-   Dependencies:148 and its exact authority/retained-scope evidence. Completion:
-   select and implement the missing transition with source fencing, preserved
-   retry lineage and named partial-progress/recovery checks. No wider milestone
-   is declared complete from a selected fixture.
-8. **Compose the selected recursive transition (next150, P1/P5/P6).**
-   Purpose: expose149 in real routed service work instead of leaving a standalone
-   transition. Dependencies:149's exact authority and ownership contract plus the
-   existing native service. Completion: useful successor writes/reads and original
-   retries through partial progress/reopen, with no dual serving owner and joined
-   cleanup. Scope is selected after149; unrelated performance work is not a prerequisite.
-9. **Expose the selected operation to Rust hosts (following151, P0/P5/P6).**
-   Purpose: make149–150 usable through the existing public service contracts.
-   Dependencies: the selected transition's checked plan and actual recovery
-   results. Completion: documented construction, bounded progress/status/resume,
-   original refusal ownership and host/native conformance without editing core
-   code or introducing an infrastructure owner.
+7. **Cross-authority nested insertion (completed149, P5/P6).** Purpose: insert
+   grandchildren beneath an owner with a foreign metadata parent. Dependencies:
+   existing parent reservation and full data-transfer contracts. Completion:
+   explicit schema/tag capability, original local creation checks, actual fence/
+   import/publish/refresh/activate data path, exact retries/outbox, checkpoint
+   recovery, legacy refusal, pre-intent cancellation and native intent-frame faults.
+8. **Native cross-authority insertion (current150, P1/P5/P6).** Purpose: compose
+  149 with actual separate parent/child metadata groups and assigned data owners.
+   Dependencies:149 plus existing native creation/transport/runtime contracts.
+   Completion: TCP/QUIC original quorum observations, selected unread phase
+   results/reopen, successor writes/reads/retries with old owners offline and
+   joined cleanup. This advances usable recursive ownership, not a universal proof.
+9. **Retained-scope child insertion (next151, P5/P6).** Purpose: delegate part of
+   a responsibility while preserving useful service for the remainder.
+   Dependencies: existing exact scope adapters, source fencing, bounded mapping
+   and target activation plus150's authority evidence. Completion: a checked
+   mixed ownership transition, no overlap/gaps, original retry/outbox lineage and
+   named partial-progress/recovery checks. Schema is sketched before edits.
+10. **Native retained-scope composition (following152, P1/P5/P6).** Purpose:
+   make151 usable in real service work. Dependencies:151's accepted ownership
+   shape and existing native nodes. Completion: routed writes/reads/retries in
+   both retained and delegated scopes through selected partial progress/reopen,
+   no concurrent owners and joined cleanup. No unrelated helper is a prerequisite.
 
 Slice146 selection/schema before editing: peer discovery supports refreshed TCP
 dials, but source inspection shows NativeQuicConnector rejects any dial address
@@ -10547,5 +10552,89 @@ composes its actual service recovery and151 exposes its checked host path. Do no
 add more unrelated pressure/performance histories before those missing features.
 Linux execution only; macOS remains a target, P8/Windows deferred, RPL-1.5 retained,
 pack preserved and CI background feedback. No milestone exit is asserted.
+Final cargo formatting, explicit included-fixture rustfmt, whitespace and80-contract
+inventory checks pass. All execution handles terminal; no remote CI gate used.
+
+Slice149 selection/schema before edits: current insertion_candidate and
+DelegationPlan::insertion reject a foreign parent authority; schema6 admission
+also requires local ancestor traversal and locally retained creation records at
+the parent. Implement explicit cross-authority nested insertion: the parent
+reserves its exact foreign-child route; the child's own metadata authority verifies
+its local original creation reservations, records the bound intent and atomically
+publishes the child/grandchildren after existing source fences/import readiness.
+The parent refreshes only after the exact child publication decision; targets
+still require existing durable activation. Foreign observations retain the existing
+trusted authenticated host provenance obligation and are not certificates.
+Add explicit plan/intent tags and opt-in Directory schema7 selected before bootstrap;
+legacy schemas/tags keep historical admission/replay semantics. Children remain
+owned by the child's metadata authority; this is not metadata-authority movement.
+No new owner/runtime/provider, quorum rule or durability token. All existing
+bounded histories/control reservations and original operation IDs remain.
+Failure/recovery: parent reservation may outlive child refusal, cancellation is
+pre-intent only, source fencing remains forward-only, child publication precedes
+parent route refresh, and checkpoints rebuild exact locks/decisions. Acceptance:
+canonical tag refusal/downgrade, source/local creation checks, parent reservation,
+no pre-fence publication, full import/publish/refresh/activation/retry lineage,
+phase checkpoint recovery and native intent-frame fault evidence. Native service
+composition is next150, not a prerequisite helper before this missing feature.
+
+## Slice149 — explicit cross-authority nested insertion
+
+Previous goal turn148 was progress: authoritative service-composition evidence
+and commit558fbb2 were pushed. Source inspection selected the explicit foreign
+parent restriction rather than another unrelated stress/performance prerequisite.
+Public DelegationPlan::cross_authority_insertion and TransferIntent contract5
+use VBDPLAN3/VBTINT05. Directory::with_cross_authority_insertion selects schema7
+before bootstrap (VBDINIT7/VBDIR007); older tags/schemas preserve their original
+admission, including wrapped publication/completion/decline/cancellation intents.
+Live/cross-schema upgrades refuse. Grandchildren remain under the child's original
+metadata authority; no metadata authority movement is introduced.
+
+Parent reservation checks the original local parent route and bounded history.
+Child intent checks the exact local source grant and actual local Staging creation
+records, preserving verifiable local provenance. Local ancestor traversal remains
+bounded and can end at the foreign authority boundary under the explicit profile.
+Foreign committed reservation/decision and namespace provenance remain trusted,
+authenticated host obligations through the existing delegated-transfer contract;
+compact indices/digests are not external certificates or a global ancestry proof.
+Whole-source fencing/import/publication/activation retains existing tokens and
+receipt gates. Parent refresh follows the exact child decision; established targets
+need no parent commit for ordinary work. Fixed histories/control reserves retain
+existing ceilings; no infrastructure owner/provider/runtime is added.
+
+Deterministic actual BucketCounter data handoff preserves operation1→7 and2→11,
+source fence, imported retries and each target's original outbox item. Source,
+non-serving imported targets, both metadata authorities and activated targets
+recover exact state through checkpoints. Pre-activation reads refuse; original
+retry is duplicate, fresh successor+1 writes read8/12. Child publication atomically
+installs descendants; parent refresh separately advances only its own locator.
+A permanent pre-intent decline/cancel survives recovery and permits new planning;
+a successful intent refuses subsequent decline and remains forward-only.
+Native ModelIo cuts every byte of the new intent frame and injects sync/manifest
+publication failures, recovering either no intent or the exact original committed
+intent/local reservations; no descendant is published from intent alone.
+
+Initial new deterministic tests2/2 pass0.01s after1.62s build. Full relevant existing
+suite delegation14/14 passes0.07s; insertion10/10 passes3.22s after2.86s build,
+including native old/new intent faults. Added source/import checkpoint and decline
+checks first yielded3/4 pass: the decline fixture reused the child operation ID,
+which the existing contract explicitly forbids. Separate decline399 and late303
+commands correct the fixture without weakening production rules. Focused new4/4
+then pass0.39s after1.43s build. Added successor write test1/1 passes0.01s after
+2.17s build. Initial fixture compile mismatches used nonexistent receipt/read
+variants and copied a dangling path attribute; focused fixes match actual public
+contracts. No production redesign followed those fixture failures.
+All-feature/all-target check passes4.94s; relevant final all-feature/all-target
+Clippy -D warnings passes1.66s (earlier7.20s, then1.03s including lock waits).
+Core-only library check passes3.89s. Final metadata/format checks recorded below.
+
+This completes this bounded checked cross-authority operation, not real networked
+cross-authority phase recovery. Current150 supplies actual TCP/QUIC separate
+metadata/assigned-source/target composition, then151 retained-scope insertion
+and152 its native service path. Macro review retains original P0–P7 and previous
+acceptance gaps; no whole milestone exit is asserted. Retained-scope insertion,
+deletion/reparenting, metadata-authority movement, broader platform/fault and P7
+requirements remain. Linux checks, macOS target, Windows/P8 deferred, CI background,
+RPL-1.5 retained and original pack preserved.
 Final cargo formatting, explicit included-fixture rustfmt, whitespace and80-contract
 inventory checks pass. All execution handles terminal; no remote CI gate used.
