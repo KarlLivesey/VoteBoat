@@ -3903,3 +3903,62 @@ complete partial service. Current151d2 must retain frozen authority/history/imag
 while accepting the new grant epoch; next152 native TCP/QUIC composition, following
 153 deletion and full original P0–P7 scope remain active. Linux local evidence,
 macOS execution pending, Windows/P8 deferred, RPL-1.5/ignored pack preserved.
+
+## Slice151d2 — checked retained owner grant adoption
+
+Opt-in source schema3 retains an active grant and bounded original adoption ledger
+alongside the existing original routed history guard, over one authoritative ordered
+application prefix. Data/read contexts pass active ownership first; historical
+projection then preserves original provider retry state and permanent scoped fences.
+VBSADP01 checks actual supplied metadata decision/configuration against original
+locally bound intent/digest/fence/image and current before-grant. Authenticated
+metadata quorum provenance remains a host obligation, as for target activation.
+Only committed application execution permits the grant change/GrantAdopted receipt;
+provider noop advances at that same index. No ancestor dependency, new persistence
+owner, clock or runtime is introduced.
+
+VBSCOWN3/VBSCCHK3 preserve separate profiles1/2 and reserve maximum original decision/
+record digest storage per fence within64MiB. Independent cached digests bind original
+operation/index/command; restore validates source facts, ordered grant chain,
+original grant at each fence, known semantic/index/control collisions and capacity.
+Frozen facts keep original intent epochs; full fences report their active original
+epoch. Original images cannot be cleared/thawed by adoption. Source grant/context
+are active; routed() remains the original bootstrap/history diagnostic.
+
+Actual root and foreign nested paths adopt E2 and retained data13→16; stale and
+transferred contexts refuse. Source imageF4/value7 and original freeze/adoption
+retries survive checkpoints. Actual second Staging child22 moves128..192, preserving
+child21 and the old export; provider value5/retry/outbox import, metadata publication,
+activation and E3 adoption precede retained service and original operation2 retry.
+A subsequent full fence/checkpoint preserves both original epochs/exports.
+New codec/snapshot truncation, changed ledger/index, old profile, missing original
+fact, live selection, combined budget, ID collisions and post-full-fence adoption
+refuse. Pending adoption admits fresh E2 and refuses E1 without changing source.
+Native ModelIo every adoption-frame byte and sync/manifest faults recover E1 or
+exact E2 grant/status with original F4 image; retained writes, original receipt-loss
+retry and another checkpoint preserve exact facts. Finite model/application evidence;
+complete networked partial service remains152, broader lifecycle/platform/fault
+and original P7 gates remain open.
+
+Initial check assembly errors (misplaced match return/private selector/new query
+arms) were fixed directly; all-feature/all-target check passes5.91s. First7/7 and
+repeated8/8 pass0.51s/0.47s after8.61s/6.26s builds. Adoption fault test miscounted
+new adoption after prefix5 plus one write as8; it is7. Correct that fixture only.
+A command already running before correction repeated that failure. Expanded10/10
+then pass1.60s after0.89s build. An inadvertent full routed invocation without
+socket escalation passed13 application checks but failed89 native TCP/UDP endpoint
+setups. Narrow actual required verification: application13/13 pass0.35s after0.02s
+build; relevant legacy TCP source recovery with socket permission1/1 passes0.23s
+after0.74s build. No unchanged full socket suite is rerun or claimed passed.
+Core-only retained7/7, routed12/12, raw source4/4 pass0.13/0.34/0.27s after5.07s build.
+Final changed budget/pending/full-fence assertions: all-feature retained10/10 and
+raw source5/5 pass1.64/0.28s after6.70s build; core-only targeted1/1 passes0.12s after
+4.14s build. Final Clippy all-feature/all-target -D warnings passes6.83s (earlier
+10.29s). Formatting, whitespace and81-contract inventory pass. All process handles
+terminal; no CI gate used. Linux evidence, macOS execution pending, Windows/P8
+research deferred, RPL-1.5/ignored original pack preserved.
+
+Checked bounded application path151 implemented; current152 is TCP/QUIC partial
+phase recovery/offline service, next153 deletion, following154 reparenting. Full
+P0–P7 stays active, including target-backed partial sources/general mappings/
+retention and wider membership/metadata movement/platform/fault/P7 requirements.

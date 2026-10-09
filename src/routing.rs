@@ -241,7 +241,7 @@ impl ResponsibilityManifest {
                 }
             }
     }
-    fn select(&self, bucket: u16) -> Result<RouteEntry, RoutingError> {
+    pub(crate) fn select(&self, bucket: u16) -> Result<RouteEntry, RoutingError> {
         if self.0.state != ResponsibilityState::Active {
             return Err(RoutingError::Fenced);
         }

@@ -90,3 +90,13 @@ profile refusals, pre-intent cancellation and native intent-frame faults pass.
 The source still retains its E1 grant; fresh E2 hints refuse until checked source
 binding/grant adoption151d. Complete native partial service evidence follows152.
 This advances P5/P6 without closing the full lifecycle or platform/fault/P7 gates.
+
+Slice151d2 closes the checked retained-grant adoption gap for the bounded original
+source path. Opt-in source schema3 preserves its original routed history guard and
+records actual publication-backed active grants at the same committed prefix.
+Root/foreign E2 and repeated actual child E3 data/retries/exports recover; stale or
+transferred contexts cannot bypass the active grant or original scoped fences.
+Ordered pending, checkpoint/profile/budget refusals and native adoption-frame cuts
+pass. Current152 still requires complete TCP/QUIC partial-service recovery evidence;
+153 deletion,154 reparenting, target-backed partial sources/general mappings/retention
+and original wider lifecycle/membership/platform/fault/P7 scope stay open.

@@ -24,10 +24,15 @@ use crate::{
     routing::{codec::Reader, *},
     scope::*,
     transfer::{ContentDigest, TransferIntent, MAX_TRANSFER_INTENT_BYTES},
+    transfer_publication::*,
 };
 use std::{collections::BTreeMap, mem::size_of};
+mod adoption;
+use adoption::Adoption;
+pub use adoption::{RetainedGrantAdoption, MAX_RETAINED_ADOPTION_BYTES};
 pub const SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 1;
 pub const BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 2;
+pub const RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 3;
 pub const MAX_SCOPED_SOURCE_CHECKPOINT_BYTES: usize = 64 * 1024 * 1024;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ScopedExportStatus {
@@ -41,11 +46,13 @@ pub struct ScopedExportStatus {
 pub enum ScopedSourceQuery<Q> {
     Data(RoutedQuery<Q>),
     Frozen(OperationId),
+    Grant(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ScopedSourceRead<R> {
     Data(RoutedRead<R>),
     Frozen(Option<ScopedExportStatus>),
+    Grant(Option<RetainedGrantStatus>),
 }
 #[derive(Clone)]
 struct FrozenExport {
@@ -64,6 +71,9 @@ pub struct ScopedTransferSource<A, P> {
     export_bytes: usize,
     images: BTreeMap<OperationId, FrozenExport>,
     bound_intents: bool,
+    retained_grants: bool,
+    active_grant: ResponsibilityManifest,
+    adoptions: Vec<Adoption>,
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -113,10 +123,13 @@ where
             return Err((ApplicationError::InvalidCommand, routed));
         }
         Ok(Self {
+            active_grant: routed.grant().clone(),
             routed,
             export_bytes,
             images: BTreeMap::new(),
             bound_intents: false,
+            retained_grants: false,
+            adoptions: Vec::new(),
         })
     }
     /// Bind each scoped freeze to its exact retained-insertion intent before bootstrap.
@@ -138,18 +151,158 @@ where
         self.bound_intents = true;
         Ok(self)
     }
+    /// Select schema3 before bootstrap; preserve original guard/history and adopt checked active grants.
+    #[allow(clippy::result_large_err)]
+    pub fn with_retained_grants(mut self) -> Result<Self, (ApplicationError, Self)> {
+        if !self.bound_intents
+            || self.retained_grants
+            || self.applied_index() != 0
+            || self
+                .readiness_requirements()
+                .snapshot_bytes
+                .checked_add(
+                    2 + (60 + MAX_RETAINED_ADOPTION_BYTES) * self.routed.scoped_fence_limit(),
+                )
+                .is_none_or(|n| n > MAX_SCOPED_SOURCE_CHECKPOINT_BYTES)
+        {
+            return Err((ApplicationError::InvalidCommand, self));
+        }
+        self.retained_grants = true;
+        Ok(self)
+    }
+    pub fn grant(&self) -> &ResponsibilityManifest {
+        &self.active_grant
+    }
+    pub fn fence(&self) -> Option<OwnershipFence> {
+        self.routed.fence().map(|mut f| {
+            f.epoch = self.grant_at(f.index).input().epoch;
+            f
+        })
+    }
+    pub fn check_context(&self, hint: &RouteHint, key: &[u8]) -> Result<(), RoutingError> {
+        self.routed
+            .check_grant_context(&self.active_grant, hint, key)
+    }
+    fn grant_at(&self, index: u64) -> &ResponsibilityManifest {
+        self.adoptions
+            .iter()
+            .rev()
+            .find(|a| a.status.index < index)
+            .map_or(self.routed.grant(), |a| {
+                a.command.decision.publication.intent().after()
+            })
+    }
+    fn adoption_operation(&self, operation: OperationId) -> bool {
+        self.adoptions
+            .iter()
+            .any(|a| a.status.operation == operation)
+    }
+    fn checked_adoption(
+        &self,
+        operation: OperationId,
+        command: &RetainedGrantAdoption,
+    ) -> Result<Option<RetainedGrantStatus>, ApplicationError> {
+        self.checked_adoption_at(
+            operation,
+            command,
+            self.applied_index()
+                .checked_add(1)
+                .ok_or(ApplicationError::IndexGap)?,
+        )
+    }
+    fn checked_adoption_at(
+        &self,
+        operation: OperationId,
+        command: &RetainedGrantAdoption,
+        index: u64,
+    ) -> Result<Option<RetainedGrantStatus>, ApplicationError> {
+        command.encode(MAX_RETAINED_ADOPTION_BYTES)?;
+        if !self.retained_grants {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        if let Some(a) = self
+            .adoptions
+            .iter()
+            .find(|a| a.status.operation == operation)
+        {
+            return if &a.command == command {
+                Ok(Some(a.status))
+            } else {
+                Err(ApplicationError::InvalidCommand)
+            };
+        }
+        let publication = &command.decision.publication;
+        let intent = publication.intent();
+        let status = self
+            .status(publication.operation())
+            .ok_or(ApplicationError::NotApplied)?;
+        let source = publication
+            .sources()
+            .iter()
+            .find(|s| s.fence.group == self.routed.local())
+            .ok_or(ApplicationError::InvalidCommand)?;
+        let expected =
+            SourceFenceEvidence::from_scoped_status(source.configuration, status, intent)
+                .map_err(|e| e.0)?;
+        if self.routed.fence().is_some_and(|f| f.index <= index)
+            || status.fence.fence.index >= index
+            || intent.before() != self.grant()
+            || source != &expected
+            || status.intent_digest.is_none()
+            || self
+                .images
+                .get(&publication.operation())
+                .is_none_or(|e| e.intent.as_ref() != Some(intent))
+            || self.adoptions.len() >= self.routed.scoped_fence_limit()
+            || self
+                .adoptions
+                .iter()
+                .any(|a| a.status.transfer == publication.operation())
+            || self
+                .routed
+                .initialization()
+                .is_some_and(|(id, _)| id == operation)
+            || self.routed.has_data_operation(operation)
+            || self.routed.application().contains_operation(operation)
+            || self
+                .routed
+                .scoped_fences()
+                .iter()
+                .any(|f| f.fence.operation == operation)
+            || self.reserved_creation(operation)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(None)
+    }
     fn checked_intent(
         &self,
         operation: OperationId,
         intent: &TransferIntent,
     ) -> Result<BucketRange, ApplicationError> {
+        self.checked_intent_for(
+            operation,
+            intent,
+            self.images
+                .get(&operation)
+                .and_then(|e| e.intent.as_ref())
+                .map_or(self.grant(), |i| i.before()),
+        )
+    }
+    fn checked_intent_for(
+        &self,
+        operation: OperationId,
+        intent: &TransferIntent,
+        grant: &ResponsibilityManifest,
+    ) -> Result<BucketRange, ApplicationError> {
         let sources = intent.sources();
         if !intent.is_retained_insertion()
-            || intent.before() != self.routed.grant()
+            || intent.before() != grant
             || sources.len() != 1
             || sources[0].target != RouteTarget::Group(self.routed.local())
             || !intent.permits_operation(operation)
             || self.reserved_creation(operation)
+            || self.adoption_operation(operation)
             || self
                 .routed
                 .initialization()
@@ -167,6 +320,7 @@ where
                             .is_some_and(|f| f.operation == c.creation)
                         || self.routed.application().contains_operation(c.creation)
                         || self.routed.has_data_operation(c.creation)
+                        || self.adoption_operation(c.creation)
                         || self
                             .routed
                             .scoped_fences()
@@ -187,6 +341,7 @@ where
             })
         })
     }
+    /// Original bootstrap/history guard. Use `grant` and `check_context` for active authority.
     pub fn routed(&self) -> &RoutedApplication<A, P> {
         &self.routed
     }
@@ -211,7 +366,9 @@ where
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(20 + inner.len());
-        bytes.extend(if self.bound_intents {
+        bytes.extend(if self.retained_grants {
+            b"VBSCOWN3"
+        } else if self.bound_intents {
             b"VBSCOWN2"
         } else {
             b"VBSCOWN1"
@@ -231,7 +388,10 @@ where
             if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
                 return Err(ApplicationError::InvalidCommand);
             }
-            let replacement = if bytes.starts_with(b"VBSCOWN1") || bytes.starts_with(b"VBSCOWN2") {
+            let replacement = if bytes.starts_with(b"VBSCOWN1")
+                || bytes.starts_with(b"VBSCOWN2")
+                || bytes.starts_with(b"VBSCOWN3")
+            {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
                 }
@@ -252,10 +412,13 @@ where
                 if !self.images.contains_key(operation) {
                     self.export_capacity(scope)?;
                 }
-                encode_scope_fence(intent.before().input().epoch, scope)
+                encode_scope_fence(self.routed.grant().input().epoch, scope)
             } else {
                 match decode(bytes, self.routed.limits().payload_bytes)? {
-                    Command::Data { key, payload, .. } => {
+                    Command::Data { hint, key, payload } => {
+                        if self.adoption_operation(*operation) {
+                            return Err(ApplicationError::InvalidCommand);
+                        }
                         if self.bound_intents
                             && self.images.iter().any(|(id, e)| {
                                 *id == *operation
@@ -271,6 +434,20 @@ where
                         if self.routed.application().command_key(payload)? != key {
                             return Err(ApplicationError::InvalidCommand);
                         }
+                        if self.retained_grants {
+                            self.check_context(&hint, key)
+                                .map_err(|_| ApplicationError::InvalidCommand)?;
+                            encode_routed(
+                                self.routed
+                                    .original_hint(hint)
+                                    .map_err(|_| ApplicationError::InvalidCommand)?,
+                                key,
+                                payload,
+                                MAX_ROUTED_COMMAND_BYTES,
+                            )?
+                        } else {
+                            bytes.clone()
+                        }
                     }
                     Command::ScopeFence(_, scope) => {
                         if self.bound_intents {
@@ -282,17 +459,26 @@ where
                             }
                             self.export_capacity(scope)?;
                         }
+                        bytes.clone()
                     }
-                    Command::Fence(_) => {
+                    Command::Fence(epoch) => {
                         if self.routed.application().contains_operation(*operation)
                             || (self.bound_intents && self.reserved_creation(*operation))
+                            || self.adoption_operation(*operation)
                         {
                             return Err(ApplicationError::InvalidCommand);
+                        }
+                        if self.retained_grants {
+                            if epoch != self.grant().input().epoch {
+                                return Err(ApplicationError::InvalidCommand);
+                            }
+                            encode_fence(self.routed.grant().input().epoch)
+                        } else {
+                            bytes.clone()
                         }
                     }
                     Command::Bootstrap(_) => return Err(ApplicationError::InvalidCommand),
                 }
-                bytes.clone()
             };
             if let EntryPayload::Command { bytes, .. } = &mut projected.payload {
                 *bytes = replacement;
@@ -318,12 +504,15 @@ where
     fn status(&self, operation: OperationId) -> Option<ScopedExportStatus> {
         let frozen = self.images.get(&operation)?;
         let image = &frozen.image;
-        let fence = *self
+        let mut fence = *self
             .routed
             .scoped_fences()
             .iter()
             .find(|f| f.fence.operation == operation)
             .expect("image has original fence");
+        if let Some(intent) = &frozen.intent {
+            fence.fence.epoch = intent.before().input().epoch;
+        }
         Some(ScopedExportStatus {
             fence,
             digest: frozen.digest,
@@ -351,12 +540,16 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.bound_intents {
+            application_schema: if self.retained_grants {
+                RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
+            } else if self.bound_intents {
                 BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA
             } else {
                 SCOPED_TRANSFER_SOURCE_SCHEMA
             },
-            command_bytes: (inner.command_bytes + 20).max(if self.bound_intents {
+            command_bytes: (inner.command_bytes + 20).max(if self.retained_grants {
+                MAX_RETAINED_ADOPTION_BYTES
+            } else if self.bound_intents {
                 MAX_TRANSFER_INTENT_BYTES
             } else {
                 0
@@ -367,6 +560,11 @@ where
                 + self.export_bytes
                 + if self.bound_intents {
                     (36 + MAX_TRANSFER_INTENT_BYTES) * self.routed.scoped_fence_limit()
+                } else {
+                    0
+                }
+                + if self.retained_grants {
+                    2 + (60 + MAX_RETAINED_ADOPTION_BYTES) * self.routed.scoped_fence_limit()
                 } else {
                     0
                 },
@@ -401,8 +599,65 @@ where
                 .count(),
         );
         for entry in entries {
+            if let EntryPayload::Command { operation, bytes } = &entry.payload {
+                if bytes.starts_with(b"VBSADP01") {
+                    let command = RetainedGrantAdoption::decode(bytes)?;
+                    let original = next.checked_adoption(*operation, &command)?;
+                    let noop = LogEntry {
+                        index: entry.index,
+                        term: entry.term,
+                        payload: EntryPayload::Noop,
+                    };
+                    next.routed.apply_batch(&[noop])?;
+                    let status = original.unwrap_or(RetainedGrantStatus {
+                        operation: *operation,
+                        index: entry.index,
+                        transfer: command.decision.publication.operation(),
+                        epoch: command.decision.publication.intent().after().input().epoch,
+                        generation: command
+                            .decision
+                            .publication
+                            .intent()
+                            .after()
+                            .input()
+                            .generation,
+                    });
+                    if original.is_none() {
+                        next.active_grant = command.decision.publication.intent().after().clone();
+                        next.adoptions
+                            .try_reserve_exact(1)
+                            .map_err(|_| ApplicationError::ReceiptBudget)?;
+                        next.adoptions.push(Adoption::new(status, command)?);
+                    }
+                    receipts.push(RoutedReceipt {
+                        index: entry.index,
+                        operation: *operation,
+                        outcome: RoutedOutcome::GrantAdopted(status),
+                    });
+                    continue;
+                }
+                if next.retained_grants {
+                    if let Ok(Command::Data { hint, key, .. }) =
+                        decode(bytes, next.routed.limits().payload_bytes)
+                    {
+                        if let Err(error) = next.check_context(&hint, key) {
+                            next.routed.apply_batch(&[LogEntry {
+                                index: entry.index,
+                                term: entry.term,
+                                payload: EntryPayload::Noop,
+                            }])?;
+                            receipts.push(RoutedReceipt {
+                                index: entry.index,
+                                operation: *operation,
+                                outcome: RoutedOutcome::Rejected(error),
+                            });
+                            continue;
+                        }
+                    }
+                }
+            }
             let projected = next.projected(entry)?;
-            let applied = next.routed.apply_batch(std::slice::from_ref(&projected))?;
+            let mut applied = next.routed.apply_batch(std::slice::from_ref(&projected))?;
             for r in &applied {
                 if let RoutedOutcome::ScopeFenced(fence) = r.outcome {
                     if !next.images.contains_key(&fence.fence.operation) {
@@ -436,6 +691,23 @@ where
                                 },
                             },
                         );
+                    }
+                }
+            }
+            if next.retained_grants {
+                for r in &mut applied {
+                    match &mut r.outcome {
+                        RoutedOutcome::ScopeFenced(f) => {
+                            if let Some(i) = next
+                                .images
+                                .get(&f.fence.operation)
+                                .and_then(|e| e.intent.as_ref())
+                            {
+                                f.fence.epoch = i.before().input().epoch;
+                            }
+                        }
+                        RoutedOutcome::Fenced(f) => f.epoch = next.grant_at(f.index).input().epoch,
+                        _ => {}
                     }
                 }
             }
@@ -513,6 +785,11 @@ where
                 bytes: bytes.to_vec(),
             },
         };
+        if bytes.starts_with(b"VBSADP01") {
+            let bound = next.receipt_bytes_bound(std::slice::from_ref(&entry))?;
+            next.apply_batch(&[entry])?;
+            return Ok(bound);
+        }
         let projected = next.projected(&entry)?;
         let EntryPayload::Command { bytes, .. } = &projected.payload else {
             return Err(ApplicationError::InvalidCommand);
@@ -549,12 +826,29 @@ where
                                 .len()
                         })
                 })
-                .sum::<usize>();
+                .sum::<usize>()
+            + if self.retained_grants {
+                2 + self
+                    .adoptions
+                    .iter()
+                    .map(|a| {
+                        60 + a
+                            .command
+                            .encode(MAX_RETAINED_ADOPTION_BYTES)
+                            .expect("checked adoption")
+                            .len()
+                    })
+                    .sum::<usize>()
+            } else {
+                0
+            };
         if len > max_bytes || len > self.readiness_requirements().snapshot_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.bound_intents {
+        out.extend(if self.retained_grants {
+            b"VBSCCHK3"
+        } else if self.bound_intents {
             b"VBSCCHK2"
         } else {
             b"VBSCCHK1"
@@ -592,6 +886,17 @@ where
                 out.extend(intent);
             }
         }
+        if self.retained_grants {
+            out.extend((self.adoptions.len() as u16).to_le_bytes());
+            for a in &self.adoptions {
+                let command = a.command.encode(MAX_RETAINED_ADOPTION_BYTES)?;
+                out.extend(a.digest.0);
+                out.extend(a.status.operation.get().to_le_bytes());
+                out.extend(a.status.index.to_le_bytes());
+                out.extend((command.len() as u32).to_le_bytes());
+                out.extend(command);
+            }
+        }
         Ok(out)
     }
     fn restore_checkpoint(
@@ -609,7 +914,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.bound_intents {
+                != if self.retained_grants {
+                    b"VBSCCHK3"
+                } else if self.bound_intents {
                     b"VBSCCHK2"
                 } else {
                     b"VBSCCHK1"
@@ -621,6 +928,8 @@ where
             }
             let len = r.u32()? as usize;
             let mut next = self.clone();
+            next.active_grant = next.routed.grant().clone();
+            next.adoptions.clear();
             next.routed.restore_checkpoint(
                 SCOPED_ROUTED_APPLICATION_SCHEMA,
                 applied,
@@ -687,7 +996,7 @@ where
                     );
                     let len = r.u32()? as usize;
                     let intent = TransferIntent::decode(r.take(len)?)?;
-                    if next.checked_intent(op, &intent)? != fence.scope {
+                    if next.checked_intent_for(op, &intent, intent.before())? != fence.scope {
                         return Err(ApplicationError::InvalidCheckpoint);
                     }
                     if original_digest
@@ -721,6 +1030,66 @@ where
                     },
                 );
             }
+            if next.retained_grants {
+                let count = usize::from(r.u16()?);
+                if count > next.routed.scoped_fence_limit() {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                let mut last = 0;
+                for _ in 0..count {
+                    let digest = ContentDigest(
+                        r.take(32)?
+                            .try_into()
+                            .map_err(|_| ApplicationError::InvalidCheckpoint)?,
+                    );
+                    let operation = r.operation()?;
+                    let index = r.u64()?;
+                    let len = r.u32()? as usize;
+                    let command = RetainedGrantAdoption::decode(r.take(len)?)?;
+                    if index == 0
+                        || index <= last
+                        || index > applied
+                        || next.routed.has_semantic_index(index)
+                        || next.adoption_operation(operation)
+                        || next
+                            .checked_adoption_at(operation, &command, index)?
+                            .is_some()
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    let intent = command.decision.publication.intent();
+                    let status = RetainedGrantStatus {
+                        operation,
+                        index,
+                        transfer: command.decision.publication.operation(),
+                        epoch: intent.after().input().epoch,
+                        generation: intent.after().input().generation,
+                    };
+                    next.active_grant = intent.after().clone();
+                    let adopted = Adoption::new(status, command)?;
+                    if adopted.digest != digest {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    next.adoptions
+                        .try_reserve_exact(1)
+                        .map_err(|_| ApplicationError::ReceiptBudget)?;
+                    next.adoptions.push(adopted);
+                    last = index;
+                }
+                for (operation, e) in &next.images {
+                    let intent = e
+                        .intent
+                        .as_ref()
+                        .ok_or(ApplicationError::InvalidCheckpoint)?;
+                    if intent.before() != next.grant_at(e.image.source_applied())
+                        || next
+                            .checked_intent_for(*operation, intent, intent.before())
+                            .is_err()
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                }
+            }
             if !r.done() {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
@@ -747,8 +1116,31 @@ where
             return Err(ApplicationError::NotApplied);
         }
         match query {
-            ScopedSourceQuery::Data(q) => self.routed.read_at(index, q).map(ScopedSourceRead::Data),
+            ScopedSourceQuery::Data(mut q) => {
+                if self.retained_grants {
+                    if let Err(error) = self.check_context(&q.hint, &q.key) {
+                        return Ok(ScopedSourceRead::Data(RoutedRead::Rejected(error)));
+                    }
+                    q.hint = self
+                        .routed
+                        .original_hint(q.hint)
+                        .map_err(|_| ApplicationError::InvalidCommand)?;
+                }
+                self.routed.read_at(index, q).map(ScopedSourceRead::Data)
+            }
             ScopedSourceQuery::Frozen(op) => Ok(ScopedSourceRead::Frozen(self.status(op))),
+            ScopedSourceQuery::Grant(op) => {
+                if self.retained_grants {
+                    Ok(ScopedSourceRead::Grant(
+                        self.adoptions
+                            .iter()
+                            .find(|a| a.status.operation == op)
+                            .map(|a| a.status),
+                    ))
+                } else {
+                    Err(ApplicationError::UnsupportedSchema)
+                }
+            }
         }
     }
 }
@@ -761,7 +1153,7 @@ where
     fn query_bytes(&self, q: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match q {
             ScopedSourceQuery::Data(q) => self.routed.query_bytes(q, limit),
-            ScopedSourceQuery::Frozen(_) => Ok(0),
+            ScopedSourceQuery::Frozen(_) | ScopedSourceQuery::Grant(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
@@ -771,7 +1163,7 @@ where
                 .read_result_bound(q)?
                 .checked_sub(size_of::<RoutedRead<A::ReadResult>>())
                 .ok_or(ApplicationError::ReceiptBudget)?,
-            ScopedSourceQuery::Frozen(_) => 0,
+            ScopedSourceQuery::Frozen(_) | ScopedSourceQuery::Grant(_) => 0,
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -784,7 +1176,7 @@ where
     ) -> Result<usize, ApplicationError> {
         match r {
             ScopedSourceRead::Data(r) => self.routed.read_result_bytes(r, limit),
-            ScopedSourceRead::Frozen(_) => Ok(0),
+            ScopedSourceRead::Frozen(_) | ScopedSourceRead::Grant(_) => Ok(0),
         }
     }
 }

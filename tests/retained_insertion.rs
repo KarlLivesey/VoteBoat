@@ -247,7 +247,7 @@ fn target_hint(intent: &TransferIntent) -> RouteHint {
         generation: c.generation,
     }
 }
-fn handoff(foreign: bool) {
+fn handoff(foreign: bool) -> (Directory, Source, TransferIntent, RetainedGrantAdoption) {
     let (mut d, mut p, intent) = setup(foreign);
     let bytes = intent.encode(100000).unwrap();
     assert_eq!(&bytes[..8], b"VBTINT06");
@@ -287,7 +287,7 @@ fn handoff(foreign: bool) {
         intent
     );
     assert!(commit(&mut d, 200, bytes).duplicate);
-    let mut s = source(&intent);
+    let mut s = retained_source(&intent);
     let boot = s.bootstrap_command(100000).unwrap();
     commit(&mut s, 100, boot);
     commit(&mut s, 1, data_at(&intent, 1, 7));
@@ -505,29 +505,129 @@ fn handoff(foreign: bool) {
         .unwrap(),
         ScopedSourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
     );
+    let adoption = RetainedGrantAdoption {
+        metadata_configuration: ConfigurationId::new(1).unwrap(),
+        decision: decision.clone(),
+    };
+    let adoption_bytes = adoption.encode(100000).unwrap();
+    assert_eq!(
+        RetainedGrantAdoption::decode(&adoption_bytes).unwrap(),
+        adoption
+    );
+    for end in 0..adoption_bytes.len() {
+        assert!(RetainedGrantAdoption::decode(&adoption_bytes[..end]).is_err());
+    }
+    assert!(s
+        .validate_proposal(op(21), &adoption_bytes, std::iter::empty())
+        .is_err());
+    assert!(s
+        .validate_proposal(op(1), &adoption_bytes, std::iter::empty())
+        .is_err());
+    let r = commit(&mut s, 300, adoption_bytes.clone());
+    let RoutedOutcome::GrantAdopted(original) = r.outcome else {
+        panic!("adoption")
+    };
+    assert_eq!(s.grant(), intent.after());
+    assert_eq!(original.epoch, intent.after().input().epoch);
+    assert_eq!(
+        s.read_at(s.applied_index(), ScopedSourceQuery::Grant(op(300)))
+            .unwrap(),
+        ScopedSourceRead::Grant(Some(original))
+    );
     let image = s.export(op(200), 65536).unwrap();
     let cp = s.checkpoint(100000).unwrap();
-    let mut restored = source(&intent);
+    let mut restored = retained_source(&intent);
     restored
-        .restore_checkpoint(BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA, s.applied_index(), &cp)
+        .restore_checkpoint(
+            RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA,
+            s.applied_index(),
+            &cp,
+        )
         .unwrap();
     assert_eq!(restored.export(op(200), 65536).unwrap(), image);
-    // Current source phase retains the old grant: checked new-epoch adoption is next.
+    assert_eq!(restored.grant(), intent.after());
+    assert!(
+        matches!(commit(&mut restored,300,adoption_bytes.clone()).outcome,RoutedOutcome::GrantAdopted(status) if status==original)
+    );
+    assert!(restored
+        .validate_proposal(op(301), &adoption_bytes, std::iter::empty())
+        .is_err());
+    let mut changed = adoption.clone();
+    changed.metadata_configuration = ConfigurationId::new(2).unwrap();
+    assert!(restored
+        .validate_proposal(
+            op(300),
+            &changed.encode(100000).unwrap(),
+            std::iter::empty()
+        )
+        .is_err());
+    assert!(restored
+        .validate_proposal(op(300), &data_at(&intent, 200, 1), std::iter::empty())
+        .is_err());
     let mut fresh = source_hint(&intent, 200);
     fresh.epoch = intent.after().input().epoch;
+    fresh.generation = intent.after().input().generation;
     fresh.scope = range(128, 256);
+    assert_eq!(restored.check_context(&fresh, &[200]), Ok(()));
+    let mut moved = source_hint(&intent, 1);
+    moved.epoch = intent.after().input().epoch;
+    moved.generation = intent.after().input().generation;
+    moved.scope = range(0, 128);
     assert_eq!(
-        restored.routed().check_context(&fresh, &[200]),
+        restored.check_context(&moved, &[1]),
+        Err(RoutingError::WrongOwner)
+    );
+    assert_eq!(
+        restored.check_context(&source_hint(&intent, 200), &[200]),
         Err(RoutingError::EpochMismatch)
     );
+    let bytes = encode_routed(
+        fresh,
+        &[200],
+        &encode_add(&[200], 3, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(
+        matches!(commit(&mut restored,4,bytes).outcome,RoutedOutcome::Applied(r) if r.outcome==BucketOutcome::Value(16))
+    );
+    assert_eq!(
+        restored
+            .read_at(
+                restored.applied_index(),
+                ScopedSourceQuery::Data(RoutedQuery {
+                    hint: fresh,
+                    key: vec![200],
+                    query: vec![200]
+                })
+            )
+            .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Served(16))
+    );
+    assert_eq!(restored.export(op(200), 65536).unwrap(), image);
+    assert!(
+        matches!(commit(&mut restored,200,intent.encode(100000).unwrap()).outcome,RoutedOutcome::ScopeFenced(f) if f.fence.index==4 && f.fence.epoch==intent.before().input().epoch)
+    );
+    assert!(matches!(
+        commit(&mut restored, 5, data_at(&intent, 200, 100)).outcome,
+        RoutedOutcome::Rejected(RoutingError::EpochMismatch)
+    ));
+    let cp = restored.checkpoint(100000).unwrap();
+    let mut reopened = retained_source(&intent);
+    reopened
+        .restore_checkpoint(3, restored.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(reopened.grant(), intent.after());
+    assert_eq!(reopened.export(op(200), 65536).unwrap(), image);
+    (d, reopened, intent, adoption)
 }
 #[test]
 fn root_retained_child_moves_real_data_without_full_source_fence() {
-    handoff(false)
+    handoff(false);
 }
 #[test]
 fn foreign_nested_retained_child_refreshes_parent_then_activates_independently() {
-    handoff(true)
+    handoff(true);
 }
 
 fn refuse_legacy(manifest: ResponsibilityManifest, bytes: &[u8]) {
@@ -1049,4 +1149,461 @@ fn bound_source_frame_cuts_recover_intent_fence_and_image_together() {
         assert_eq!(app.export(op(200), 65536).ok(), before);
     }
     assert!(old && complete);
+}
+
+fn retained_source(intent: &TransferIntent) -> Source {
+    source(intent)
+        .with_retained_grants()
+        .unwrap_or_else(|e| panic!("{:?}", e.0))
+}
+
+#[test]
+fn second_retained_child_keeps_old_child_exports_and_serves_latest_grant() {
+    let (mut d, mut s, first, _) = handoff(false);
+    let before = s.grant().clone();
+    let mut child = before.clone().into_input();
+    child.responsibility = rid(22);
+    child.parent = Some(ParentAuthority {
+        responsibility: before.input().responsibility,
+        group: before.input().authority,
+    });
+    child.scope = range(128, 192);
+    child.epoch = OwnershipEpoch::new(1).unwrap();
+    child.generation = RouteGeneration::new(1).unwrap();
+    child.execution = ExecutionMode::Single(group(22));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let creation = GroupCreationIntent {
+        authority: before.input().authority,
+        parent: before.input().responsibility,
+        expected: before.input().generation,
+        responsibility: child.input().responsibility,
+        bootstrap: support::bootstrap(22, 3),
+        application: before.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    assert_eq!(
+        commit(&mut d, 22, creation.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let created = d
+        .group_creation_at(d.applied_index(), group(22))
+        .unwrap()
+        .unwrap();
+    let mut after = before.clone().into_input();
+    after.epoch = OwnershipEpoch::new(3).unwrap();
+    after.generation = RouteGeneration::new(3).unwrap();
+    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
+        panic!("delegated")
+    };
+    routes[1].scope = range(128, 192);
+    routes[1].target = RouteTarget::Child(ChildAuthority {
+        responsibility: child.input().responsibility,
+        group: child.input().authority,
+        epoch: child.input().epoch,
+    });
+    routes.push(RouteEntry {
+        scope: range(192, 256),
+        target: RouteTarget::Group(group(20)),
+    });
+    let after = ResponsibilityManifest::new(after).unwrap();
+    let intent = TransferIntent::insert_retained_child(
+        before.clone(),
+        after.clone(),
+        InsertionChild::from_creation(child.clone(), &created).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(&mut d, 202, intent.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+    let mut hint = source_hint(&first, 150);
+    hint.epoch = before.input().epoch;
+    hint.generation = before.input().generation;
+    hint.scope = range(128, 256);
+    let write = encode_routed(
+        hint,
+        &[150],
+        &encode_add(&[150], 5, b"second", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    commit(&mut s, 6, write);
+    let old = s.export(op(200), 65536).unwrap();
+    let fenced = commit(&mut s, 202, intent.encode(100000).unwrap());
+    assert!(
+        matches!(fenced.outcome,RoutedOutcome::ScopeFenced(f) if f.fence.epoch==before.input().epoch)
+    );
+    let ScopedSourceRead::Frozen(Some(status)) = s
+        .read_at(s.applied_index(), ScopedSourceQuery::Frozen(op(202)))
+        .unwrap()
+    else {
+        panic!("frozen")
+    };
+    let mut target = Target::new(
+        group(22),
+        op(202),
+        intent.clone(),
+        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
+        Policy,
+        TargetLimits {
+            import_bytes: 32768,
+            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let boot = target.bootstrap_command(100000).unwrap();
+    commit(&mut target, 202, boot);
+    let import = TargetImport::new(
+        op(202),
+        intent.clone(),
+        group(22),
+        vec![SourceImport {
+            fence: status.fence.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image: s.export(op(202), 65536).unwrap(),
+            digest: status.digest,
+        }],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let bytes = target.import_command(&import, 100000).unwrap();
+    commit(&mut target, 202, bytes);
+    let publication = TransferPublication::new(
+        op(202),
+        intent.clone(),
+        vec![SourceFenceEvidence::from_scoped_status(
+            ConfigurationId::new(1).unwrap(),
+            status,
+            &intent,
+        )
+        .unwrap()],
+        vec![
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
+                .unwrap(),
+        ],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    assert_eq!(
+        commit(&mut d, 203, publication.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(after.input().generation)
+    );
+    let decision = d
+        .transfer_publication_at(d.applied_index(), op(202))
+        .unwrap()
+        .unwrap();
+    let activation = target
+        .activation_command(
+            &TargetActivation {
+                metadata_configuration: ConfigurationId::new(1).unwrap(),
+                decision: decision.clone(),
+            },
+            100000,
+        )
+        .unwrap();
+    commit(&mut target, 202, activation);
+    let adoption = RetainedGrantAdoption {
+        metadata_configuration: ConfigurationId::new(1).unwrap(),
+        decision,
+    };
+    let bytes = adoption.encode(100000).unwrap();
+    commit(&mut s, 301, bytes.clone());
+    assert_eq!(s.grant(), &after);
+    assert_eq!(s.export(op(200), 65536).unwrap(), old);
+    let cp = s.checkpoint(100000).unwrap();
+    let mut reopened = retained_source(&first);
+    reopened
+        .restore_checkpoint(3, s.applied_index(), &cp)
+        .unwrap();
+    s = reopened;
+    assert!(
+        matches!(commit(&mut s,301,bytes).outcome,RoutedOutcome::GrantAdopted(f) if f.epoch==after.input().epoch)
+    );
+    let mut hint = source_hint(&first, 200);
+    hint.epoch = after.input().epoch;
+    hint.generation = after.input().generation;
+    hint.scope = range(192, 256);
+    assert_eq!(
+        s.read_at(
+            s.applied_index(),
+            ScopedSourceQuery::Data(RoutedQuery {
+                hint,
+                key: vec![200],
+                query: vec![200]
+            })
+        )
+        .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Served(16))
+    );
+    let write = encode_routed(
+        hint,
+        &[200],
+        &encode_add(&[200], 11, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(&mut s,2,write).outcome,RoutedOutcome::Applied(r) if r.duplicate));
+    assert_eq!(s.export(op(200), 65536).unwrap(), old);
+    let hint = RouteHint {
+        responsibility: child.input().responsibility,
+        group: group(22),
+        application: child.input().application,
+        scheme: child.input().scheme,
+        scope: child.input().scope,
+        bucket: 150,
+        epoch: child.input().epoch,
+        generation: child.input().generation,
+    };
+    assert_eq!(
+        target
+            .read_at(
+                target.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![150],
+                    query: vec![150]
+                })
+            )
+            .unwrap(),
+        TargetRead::Data(5)
+    );
+    let write = encode_routed(
+        hint,
+        &[150],
+        &encode_add(&[150], 5, b"second", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(&mut target,6,write).outcome,TargetOutcome::Applied(r) if r.duplicate));
+    commit(&mut s, 999, encode_fence(after.input().epoch));
+    assert_eq!(s.fence().unwrap().epoch, after.input().epoch);
+    let cp = s.checkpoint(100000).unwrap();
+    let mut reopened = retained_source(&first);
+    reopened
+        .restore_checkpoint(3, s.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(reopened.fence(), s.fence());
+    assert_eq!(reopened.export(op(200), 65536).unwrap(), old);
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn adoption_frame_cuts_recover_original_grant_or_exact_new_epoch_with_exports() {
+    use support::{Fault, ModelIo};
+    use voteboat::{log::*, native::log_store::*};
+    let (_, _, intent, adoption) = handoff(false);
+    let command = adoption.encode(100000).unwrap();
+    let limits = LogLimits::default();
+    let seed = || {
+        let io = ModelIo::default();
+        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+        support::append(
+            &mut log,
+            vec![LogMutation::Create(support::bootstrap(20, 3))],
+        );
+        let state = log.state(group(20)).unwrap();
+        let app = retained_source(&intent);
+        support::append(
+            &mut log,
+            vec![support::update(
+                &state,
+                1,
+                5,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![
+                        entry(1, 100, app.bootstrap_command(100000).unwrap()),
+                        entry(2, 1, data_at(&intent, 1, 7)),
+                        entry(3, 2, data_at(&intent, 200, 11)),
+                        entry(4, 200, intent.encode(100000).unwrap()),
+                        entry(5, 3, data_at(&intent, 200, 2)),
+                    ],
+                }),
+            )],
+        );
+        (io, log)
+    };
+    let (_, log) = seed();
+    let mutation = support::update(
+        &log.state(group(20)).unwrap(),
+        1,
+        6,
+        Some(Suffix {
+            from: 6,
+            entries: vec![entry(6, 300, command.clone())],
+        }),
+    );
+    let frame = NativeLogCodec
+        .encode_batch(3, std::slice::from_ref(&mutation), limits)
+        .unwrap();
+    let (mut old, mut complete) = (false, false);
+    for fault in (0..=frame.len()).map(Fault::Append).chain([
+        Fault::Sync,
+        Fault::PublishBefore,
+        Fault::PublishAfter,
+    ]) {
+        let (io, mut log) = seed();
+        io.0.borrow_mut().fault = fault;
+        if let Ok(tickets) = log.append_batch(vec![mutation.clone()]) {
+            assert!(log.barrier(&tickets).is_err());
+        }
+        drop(log);
+        io.0.borrow_mut().power_loss();
+        let log = NativeLogStore::recover(io, support::identity(1), limits).unwrap();
+        let state = log.state(group(20)).unwrap();
+        let mut app = retained_source(&intent);
+        app.apply_batch(
+            &state
+                .entries
+                .into_iter()
+                .filter(|e| e.index <= state.commit_index)
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
+        if state.commit_index == 5 {
+            old = true;
+            assert_eq!(app.grant(), intent.before());
+            assert_eq!(
+                app.read_at(5, ScopedSourceQuery::Grant(op(300))).unwrap(),
+                ScopedSourceRead::Grant(None)
+            );
+        } else {
+            complete = true;
+            assert_eq!(state.commit_index, 6);
+            assert_eq!(app.grant(), intent.after());
+            assert!(
+                matches!(app.read_at(6,ScopedSourceQuery::Grant(op(300))).unwrap(),ScopedSourceRead::Grant(Some(s)) if s.index==6)
+            );
+        }
+        let image = app.export(op(200), 65536).unwrap();
+        assert_eq!(image.source_applied(), 4);
+        let mut hint = source_hint(&intent, 200);
+        hint.epoch = app.grant().input().epoch;
+        hint.generation = app.grant().input().generation;
+        if state.commit_index == 6 {
+            hint.scope = range(128, 256);
+        }
+        let bytes = encode_routed(
+            hint,
+            &[200],
+            &encode_add(&[200], 3, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        commit(&mut app, 4, bytes);
+        assert_eq!(
+            app.read_at(
+                app.applied_index(),
+                ScopedSourceQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![200],
+                    query: vec![200]
+                })
+            )
+            .unwrap(),
+            ScopedSourceRead::Data(RoutedRead::Served(16))
+        );
+        let retry = commit(&mut app, 300, command.clone());
+        assert!(
+            matches!(retry.outcome,RoutedOutcome::GrantAdopted(s) if s.index==if state.commit_index==6 {6} else {7})
+        );
+        assert_eq!(app.export(op(200), 65536).unwrap(), image);
+        let cp = app.checkpoint(100000).unwrap();
+        let mut recovered = retained_source(&intent);
+        recovered
+            .restore_checkpoint(3, app.applied_index(), &cp)
+            .unwrap();
+        assert_eq!(recovered.grant(), intent.after());
+        assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
+    }
+    assert!(old && complete);
+}
+
+#[test]
+fn adoption_profiles_corrupt_ledgers_and_wrong_original_evidence_refuse_atomically() {
+    let (_, s, intent, adoption) = handoff(false);
+    let cp = s.checkpoint(100000).unwrap();
+    let mut recovered = retained_source(&intent);
+    for end in 0..cp.len() {
+        assert!(recovered
+            .restore_checkpoint(3, s.applied_index(), &cp[..end])
+            .is_err());
+        assert_eq!(recovered.applied_index(), 0);
+    }
+    let command = adoption.encode(100000).unwrap();
+    let offset = cp
+        .windows(command.len())
+        .position(|w| w == command.as_slice())
+        .unwrap();
+    let mut wrong = cp.clone();
+    wrong[offset - 12..offset - 4].copy_from_slice(&3u64.to_le_bytes());
+    assert!(recovered
+        .restore_checkpoint(3, s.applied_index(), &wrong)
+        .is_err());
+    let mut legacy = source(&intent);
+    assert!(legacy
+        .restore_checkpoint(3, s.applied_index(), &cp)
+        .is_err());
+    let boot = legacy.bootstrap_command(100000).unwrap();
+    commit(&mut legacy, 100, boot);
+    assert!(legacy
+        .validate_proposal(op(300), &command, std::iter::empty())
+        .is_err());
+    assert!(s.clone().with_retained_grants().is_err());
+    let mut unready = retained_source(&intent);
+    let boot = unready.bootstrap_command(100000).unwrap();
+    commit(&mut unready, 100, boot);
+    assert!(unready
+        .validate_proposal(op(300), &command, std::iter::empty())
+        .is_err());
+    let before = unready.checkpoint(100000).unwrap();
+    assert!(unready.apply_batch(&[entry(2, 300, command)]).is_err());
+    assert_eq!(unready.checkpoint(100000).unwrap(), before);
+    let r = source(&intent).routed().clone();
+    let budget = MAX_SCOPED_SOURCE_CHECKPOINT_BYTES
+        - r.readiness_requirements().snapshot_bytes
+        - 30
+        - (100 + 36 + voteboat::transfer::MAX_TRANSFER_INTENT_BYTES) * r.scoped_fence_limit();
+    let full = Source::new(r, budget)
+        .unwrap_or_else(|_| panic!("budget"))
+        .with_retained_insertion()
+        .unwrap_or_else(|_| panic!("binding"));
+    assert!(full.with_retained_grants().is_err());
+    commit(&mut unready, 1, data_at(&intent, 1, 7));
+    commit(&mut unready, 2, data_at(&intent, 200, 11));
+    commit(&mut unready, 200, intent.encode(100000).unwrap());
+    let mut hint = source_hint(&intent, 200);
+    hint.epoch = intent.after().input().epoch;
+    hint.generation = intent.after().input().generation;
+    hint.scope = range(128, 256);
+    let data = encode_routed(
+        hint,
+        &[200],
+        &encode_add(&[200], 2, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    let command = adoption.encode(100000).unwrap();
+    assert!(unready
+        .validate_proposal(op(3), &data, [(op(300), command.as_slice())].into_iter())
+        .is_ok());
+    assert!(unready
+        .validate_proposal(
+            op(3),
+            &data_at(&intent, 200, 2),
+            [(op(300), command.as_slice())].into_iter()
+        )
+        .is_err());
+    assert_eq!(unready.grant(), intent.before());
+    commit(
+        &mut unready,
+        999,
+        encode_fence(intent.before().input().epoch),
+    );
+    assert!(unready
+        .validate_proposal(op(300), &command, std::iter::empty())
+        .is_err());
+    let original = recovered.checkpoint(100000).unwrap();
+    assert!(recovered
+        .restore_checkpoint(2, s.applied_index(), &cp)
+        .is_err());
+    assert_eq!(recovered.checkpoint(100000).unwrap(), original);
 }

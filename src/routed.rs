@@ -70,9 +70,19 @@ pub enum RoutedOutcome<R> {
     Bootstrapped,
     Fenced(OwnershipFence),
     ScopeFenced(ScopedOwnershipFence),
+    GrantAdopted(RetainedGrantStatus),
     Applied(R),
     Rejected(RoutingError),
     OperationConflict,
+}
+/// Original local committed retained-grant outcome; remote use requires quorum provenance.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RetainedGrantStatus {
+    pub operation: OperationId,
+    pub index: u64,
+    pub transfer: OperationId,
+    pub epoch: OwnershipEpoch,
+    pub generation: RouteGeneration,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RoutedReceipt<R> {
@@ -268,6 +278,12 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     pub(crate) fn has_data_operation(&self, operation: OperationId) -> bool {
         self.history.contains_key(&operation)
     }
+    pub(crate) fn has_semantic_index(&self, index: u64) -> bool {
+        self.history.values().any(|s| s.index == index)
+            || self.initialized.is_some_and(|(_, i)| i == index)
+            || self.scope_fences.iter().any(|f| f.fence.index == index)
+            || self.fence.is_some_and(|f| f.index == index)
+    }
     pub fn fence(&self) -> Option<OwnershipFence> {
         self.fence
     }
@@ -311,13 +327,21 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         }
     }
     pub fn check_context(&self, hint: &RouteHint, key: &[u8]) -> Result<(), RoutingError> {
+        self.check_grant_context(&self.grant, hint, key)
+    }
+    pub(crate) fn check_grant_context(
+        &self,
+        grant: &ResponsibilityManifest,
+        hint: &RouteHint,
+        key: &[u8],
+    ) -> Result<(), RoutingError> {
         if !self.is_initialized() {
             return Err(RoutingError::WrongOwner);
         }
         if self.fence.is_some() {
             return Err(RoutingError::Fenced);
         }
-        check_owner(&self.grant, self.local, hint, key, &self.policy)?;
+        check_owner(grant, self.local, hint, key, &self.policy)?;
         if self
             .scope_fences
             .iter()
@@ -326,6 +350,13 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             return Err(RoutingError::Fenced);
         }
         Ok(())
+    }
+    pub(crate) fn original_hint(&self, mut hint: RouteHint) -> Result<RouteHint, RoutingError> {
+        let route = self.grant.select(hint.bucket)?;
+        hint.scope = route.scope;
+        hint.epoch = self.grant.input().epoch;
+        hint.generation = self.grant.input().generation;
+        Ok(hint)
     }
     fn request<'a>(&self, bytes: &'a [u8]) -> Result<Command<'a>, ApplicationError> {
         let request = decode(bytes, self.limits.payload_bytes)?;
