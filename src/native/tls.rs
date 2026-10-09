@@ -108,7 +108,7 @@ impl NativeTlsConfig {
     /// Select one exact native message format (1–4) for future sessions.
     /// Peers must select the same version; there is no automatic downgrade.
     pub fn with_wire_version(mut self, version: u16) -> Result<Self, SessionError> {
-        if !(1..=6).contains(&version) {
+        if !(1..=7).contains(&version) {
             return Err(SessionError::IncompatibleProtocol);
         }
         self.wire_version = version;

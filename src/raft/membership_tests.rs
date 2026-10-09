@@ -2402,6 +2402,28 @@ fn prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress(
         leader.event_connection_replicas(&event, 5).unwrap(),
         expected
     );
+    for rpc in [
+        Rpc::LearnerRepairSnapshot {
+            snapshot: snapshot.clone(),
+        },
+        Rpc::CommittedLearnerRepairSnapshot {
+            snapshot: snapshot.clone(),
+        },
+    ] {
+        let Event::Receive(mut message) = event.clone() else {
+            unreachable!()
+        };
+        message.rpc = rpc;
+        let repair = Event::Receive(message);
+        assert_eq!(
+            leader.event_effect_reservation(&repair, 100),
+            leader.reserve_effects(100, 5)
+        );
+        assert_eq!(
+            leader.event_connection_replicas(&repair, 5).unwrap(),
+            expected
+        );
+    }
     assert_eq!(leader.state(), &before);
 }
 

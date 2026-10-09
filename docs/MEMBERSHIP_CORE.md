@@ -378,3 +378,38 @@ Transition prefixes are seeded, and these are finite selected schedules. Existin
 trusted Node/executable administration supplies the placement path used by P6;
 general public mutation endpoints remain gated. No production protocol or default
 static ingress gate changed in this slice.
+
+### Committed stable checkpoint learner recovery (native format 7)
+
+`Raft::with_committed_snapshot_repair` and
+`NativeWireCodec::with_committed_snapshot_repair` explicitly select wire7.
+Native startup binds that exact version to the core/codec/peer roster. Formats1–6
+retain their contracts. `CommittedLearnerRepairSnapshot` is a distinct RPC: a
+stable candidate offers only its own pinned, locally committed checkpoint whose
+membership equals its current membership. No candidate suffix or purported future
+commit index is exported. Offers go to current exact voters; a recipient decides
+whether the sender is already a voter it trusts in its own committed old view.
+
+The recipient must be an exact committed stable learner with no accepted
+membership change. The image must validate the same bootstrap/group, strictly
+newer configuration/index, preserved operation IDs and exact current voter
+assignments for sender and recipient. An image cannot authorize its own sender:
+a newly promoted sender unknown as an old-view voter is refused. This explicitly
+uses the existing authenticated non-Byzantine committed snapshot trust model;
+it is not a cryptographic commitment certificate. Arbitrary host state claims or
+Byzantine peers remain outside that model.
+
+Existing application validation, immutable publication, pinning, atomic WAL
+binding and restoration precede a successful reply. Installation recovers the
+image's committed prefix; the repair reply itself is never quorum replication,
+a ballot or read authority. The candidate checks its exact current request,
+configuration, peer and checkpoint boundary, then sends ordinary Vote. It must
+still obtain the current policy's durable ballots and persist its leader no-op.
+Lost completion/restart restores durable membership and application before voting.
+
+A candidate whose accepted final is newer than its committed joint checkpoint
+cannot export an uncommitted final image. Bridging that head from the earlier
+joint image, forced native-network final-checkpoint schedules, and broader
+membership fault histories remain separate validation/implementation work.
+No persistent format or backend migration is introduced. All peers must agree
+on wire7; stop/restart a deployment together when changing the selected wire mode.

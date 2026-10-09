@@ -329,7 +329,9 @@ pub fn message_cost(
             }
             class
         }
-        Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
+        Rpc::Snapshot { snapshot }
+        | Rpc::LearnerRepairSnapshot { snapshot }
+        | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
             add(size_of::<crate::snapshot::Snapshot>())?;
             add(snapshot.application.capacity())?;
             if let Some(membership) = &snapshot.metadata.membership {

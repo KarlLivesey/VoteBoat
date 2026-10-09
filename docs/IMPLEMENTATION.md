@@ -7726,3 +7726,123 @@ Historical promotion recovery after compaction remains unimplemented by this
 path. Live credential revocation, arbitrary failures, broader P4/P5/P6/P7,
 macOS/separate-host and performance gates remain. Full P0–P7 stays active;
 P8/Windows remain deferred and CI stays background feedback.
+
+## Slice118 schema plan — committed final checkpoint learner recovery
+
+Previous goal turn was progress: slice117 is committed/pushed and original broad
+lifecycle validation reached terminal success. Current worktree is clean. Inspection
+confirms a final checkpoint retains validated membership/operation IDs but not the
+old learner assignment; attempting to reconstruct it from operation IDs would
+invent evidence. Existing ordinary authorized Snapshot already trusts an exact
+locally assigned voter to supply committed checkpoint data in the authenticated
+non-Byzantine model. Preserve that provenance explicitly for candidate recovery.
+
+Data/API: add separately selected committed-checkpoint learner repair capability,
+new RPC and negotiated native wire7, retaining wire1–6 behavior. Source must be a
+current exact voter with a pinned locally committed stable checkpoint whose
+membership equals its current accepted membership. It offers only that image to
+current voters. It does not guess which peers retain an old view. Receiver must
+be an exact committed stable learner, with no accepted membership change, and
+must already recognize the authenticated sender as an old-view voter. The image
+must validate the same bootstrap/group, strictly newer configuration and boundary,
+preserved operation identities, and exact receiver/sender current voter stores.
+A newly promoted sender unknown as an old voter is refused. This is trusted
+non-Byzantine committed state transfer, not a Byzantine commitment certificate or
+permission to install an uncommitted candidate suffix.
+
+Ownership/state: candidate emits scoped SnapshotRequired from its existing bounded
+repair request map. Pinned image load must match the local WAL anchor and current
+campaign/view. Receiver uses existing snapshot validation/publication/pin/WAL and
+application restoration dependencies. Only then can a repair reply escape. The
+reply matches term/configuration/context/exact peer and checkpoint boundary; it
+resends ordinary Vote, never counts as a ballot or grants leader/read authority.
+Crash discards volatile cursors; durable checkpoint/membership/application recovery
+precedes eligibility. Role/view/session changes invalidate old requests. Old mode
+refuses the new RPC; no disk format, persisted cursor or extra resource owner.
+
+Acceptance: final checkpoint after promotion and compaction, old-view learner
+installation and ordinary election, lost completion/restart, schema/identity/
+unknown-old-voter/configuration/operation-history refusals, wire7 truncation/size/
+older-codec refusal, native WAL fault dependency checks, native startup negotiation
+and local Clippy. Public inventory and recovery documentation must name the new
+capability. Full arbitrary-fault/recursive and native network schedules stay
+explicit until executed; no full P4 release inferred from these selected checks.
+
+Mini plan: current committed-final checkpoint recovery (P4) depends on authenticated
+old-view provenance and existing snapshot barriers, completes with the checks above.
+Next is forced native TCP/QUIC compacted-promotion receipt-loss/election histories
+(P4), depending on the new negotiated mode and an actual selected snapshot boundary;
+completion requires restore-before-ballot plus WAL/checkpoint reopen. Following is
+remote new-voter partial-progress/revocation conformance (P4/P6), depending on both
+retained and compacted recovery; check stale session/readiness, retirement and
+application retry preservation. Macro full P0–P7 remains active; static service
+use stays independent, P8/Windows deferred, CI background feedback.
+
+### Slice118 implemented evidence and scope review
+
+Implemented explicit `Raft::with_committed_snapshot_repair`, native wire7 codec/
+TLS/startup selection and distinct `CommittedLearnerRepairSnapshot`. The counter
+member/import assembly now selects7 consistently. Default static wire1 and
+explicit library formats2–6 retain their receive protocols. No disk format,
+persisted cursor, durability token or provider owner was added. Incoming snapshot
+repair now participates in prospective effect/connection reservations; both old
+and new repair variants are checked by the existing pure reservation regression.
+
+The candidate offers only a pinned committed stable checkpoint matching its
+current membership. The receiver's already trusted old-view voter is required;
+an image cannot self-authorize an unknown promoted sender. Exact request-bound
+checkpoint replies resend ordinary Vote; ordinary durable ballots/no-op still
+establish leadership. Installation recovers committed snapshot state through
+existing provider/WAL/application barriers. Offers are bounded but can reach
+already-updated current voters, which refuse the learner-only RPC; this adds
+recovery traffic and has not been performance-tuned or benchmarked.
+
+Actual local Linux validation:
+- All 37 member_recovery tests passed. Four new tests cover final checkpoint
+  compaction/install, restore-before-ballot and ordinary election, lost completion
+  recovery, unknown old-view sender and other identity/scope/history refusals,
+  explicit wire7 bounds/truncation/older-codec refusal, and refusing to export an
+  uncommitted final checkpoint. The existing every-byte native WAL binding fault
+  test now also runs the committed-final image and checks old-or-whole recovery.
+  Snapshot images in that fault fixture use the host snapshot provider; no new
+  full native-file cross-provider power-loss claim is inferred.
+- All 130 effect_owner tests passed (23.05s), including extended generic Node
+  rejection of unselected wire7/no-peer mode before persistence or service work.
+- All 60 all-feature library tests, 14 secure tests and 14 wire tests passed.
+  Secure negotiation includes7 and both6/7 mismatch directions.
+- Both existing native counter-service interruption histories passed with TCP/
+  QUIC wire7 peers (13.33s). They validate selection and existing histories, not
+  forced execution of the new committed-final snapshot branch.
+- Core-only/all-target compilation, core-only library tests, all-feature/all-target
+  Clippy with warnings denied, formatting and the 78-contract inventory passed.
+
+A new dependency is explicit: a candidate may have an accepted final head while
+its committed checkpoint still contains joint membership. The safe export gate
+refuses an uncommitted final image, but this implementation does not yet bridge
+that head from the older committed joint checkpoint. The new source-gate test
+records that boundary; do not weaken it to manufacture final commitment. The
+next deliverable must handle the actual joint image under its old-view authority
+and historical request scope, then force native-network checkpoint histories.
+
+Updated mini plan (linked to macro safe online membership P4):
+1. Current — committed stable final checkpoint mode, implemented above. Purpose:
+   recover a promoted learner after final history is compacted. Dependencies:
+   pinned committed source image, trusted old-view voter and existing snapshot/
+   WAL/application contracts. Completion checks/evidence are listed above; forced
+   native-network and broader policy/failure evidence are still separate gates.
+2. Next — accepted-final/committed-joint checkpoint bridge plus forced TCP/QUIC
+   recovery. Purpose: cover both actual checkpoint boundaries without exporting
+   an uncommitted final. Dependencies: retained snapshot joint provenance, exact
+   historical request binding and wire7 assembly. Completion: lost reply/restart,
+   source/receiver identity refusals, restored application before ballots, native
+   election/application and WAL/checkpoint reopen. Advances P4/P1 recovery.
+3. Following — remote new-voter interruption/revocation and retirement histories.
+   Purpose: validate original session/target/readiness lifetime across partial
+   progress. Dependencies: retained-log and both checkpoint recovery paths.
+   Completion: stale session/readiness refusal, promotion/retirement and preserved
+   operation/application retry identity. Advances P4/P6 safe service operations.
+
+Macro P0–P7 stays active with all previous ledger gaps; static service remains
+usable independently. No general P4 release/proof, recursive/arbitrary faults,
+macOS/separate-host execution or performance claim. P8/Windows deferred; CI stays
+background feedback.

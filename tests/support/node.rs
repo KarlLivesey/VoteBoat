@@ -1131,7 +1131,7 @@ fn constructor_requires_connections_for_rollback_reachable_recovered_learners() 
 
 #[test]
 fn member_receive_modes_require_selected_wire_before_node_service_or_persistence() {
-    for mode in 0..3 {
+    for mode in 0..4 {
         for networking in [false, true] {
             let mut p = parts(1, networking);
             let id = p.local.owner.identity();
@@ -1150,6 +1150,7 @@ fn member_receive_modes_require_selected_wire_before_node_service_or_persistence
                 let core = match mode {
                     0 => core.with_batched_joint_repair(),
                     1 => core.with_snapshot_joint_repair(),
+                    2 => core.with_committed_snapshot_repair(),
                     _ => core.with_configuration_replication(),
                 };
                 shard.register(core).unwrap();

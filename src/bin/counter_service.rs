@@ -40,7 +40,7 @@ voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
-recover-member explicitly verifies existing membership journals and selects wire format 6 on all peers.\n\
+recover-member explicitly verifies existing membership journals and selects wire format 7 on all peers.\n\
 enroll is an offline trusted handoff; stop source and destination before use and preserve files on failure.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
 PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\

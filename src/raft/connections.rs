@@ -147,7 +147,9 @@ impl Raft {
                         }
                     }
                 }
-                Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
+                Rpc::Snapshot { snapshot }
+                | Rpc::LearnerRepairSnapshot { snapshot }
+                | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
                     if let Some(membership) = &snapshot.metadata.membership {
                         for (node, store) in membership.replicas() {
                             add(node, store)?;

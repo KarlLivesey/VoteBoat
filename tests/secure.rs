@@ -752,7 +752,7 @@ mod tls {
     fn explicit_wire_versions_are_exact_authenticated_and_do_not_mutate_shared_configs() {
         let original = config(1);
         assert_eq!(original.wire_version(), 1);
-        for version in [2, 3, 4, 5, 6] {
+        for version in [2, 3, 4, 5, 6, 7] {
             assert_eq!(
                 original
                     .clone()
@@ -771,7 +771,7 @@ mod tls {
                 b"versioned partial stream"
             );
         }
-        for version in [0, 7, u16::MAX] {
+        for version in [0, 8, u16::MAX] {
             assert_eq!(
                 original.clone().with_wire_version(version).err(),
                 Some(SessionError::IncompatibleProtocol)
@@ -787,6 +787,8 @@ mod tls {
             (5, 4),
             (5, 6),
             (6, 5),
+            (6, 7),
+            (7, 6),
         ] {
             let (mut a, mut b) = versioned_sessions(7, a_version, b_version);
             let mut rejected = false;

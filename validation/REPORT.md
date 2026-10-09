@@ -2705,3 +2705,33 @@ are its broad lifecycle results, not retrospective new-repair validation.
 No full proof, arbitrary fault/revocation, post-final historical snapshot repair,
 macOS/separate-host or performance claim. Full P0–P7 remains unfinished and active;
 P8 and Windows deferred. See docs/IMPLEMENTATION.md for linked current/next plans.
+
+## Slice118 — explicit committed stable checkpoint learner recovery
+
+Linux execution: 37 member_recovery tests (four new), 130 effect_owner tests,
+60 all-feature library tests, 14 secure and 14 wire tests passed. Native WAL
+binding every-byte append plus sync/publication faults now cover both joint and
+committed-final checkpoint images, recovering the old or complete boundary with
+matching application state; the snapshot provider in those fixtures is host-owned.
+The new mode's host history compacts the final prefix, installs/restores before
+reply/ballot, completes ordinary election, and separately recovers a lost install
+completion. Unknown-as-old-voter promoted senders, missing prior operation IDs,
+invalid identities/scope/boundaries and unselected mode are refused.
+
+Both native counter-service interruption histories passed using TCP/QUIC wire7
+peers (13.33s). This confirms startup/codec/session selection and those existing
+histories; it does not force the new committed-final snapshot transfer. Secure
+negotiation explicitly tests7 and6/7 mismatch in both directions; the new wire
+RPC rejects every truncation, small size ceilings and format6 encoding/decoding.
+Core-only/all-target compilation, core-only library tests, formatting,
+all-feature/all-target Clippy and 78-contract inventory validation passed.
+
+No persistent format changed. Native snapshots/WAL/application barriers remain
+mandatory; no repair response counts as a ballot. This uses authenticated
+non-Byzantine old-view-voter committed snapshot provenance, not a Byzantine or
+transferable commitment certificate. An accepted-final head with an earlier
+committed-joint checkpoint correctly refuses to export an uncommitted final;
+bridging from that actual joint image and forced native-network checkpoint
+histories are next. Missing trusted old-view source remains unavailable. Full
+P0–P7 remains active with previous scope/fault/platform/performance gates, P8 and
+Windows deferred, CI background.

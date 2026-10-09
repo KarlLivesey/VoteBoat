@@ -16,23 +16,66 @@
 use super::*;
 
 impl Raft {
+    /// Explicit wire7 capability. Only a receiver's already trusted old-view
+    /// voter may supply a locally committed stable checkpoint after promotion.
+    pub fn with_committed_snapshot_repair(mut self) -> Self {
+        self = self.with_snapshot_joint_repair();
+        self.committed_snapshot_repair = true;
+        self
+    }
     /// Select during assembly with a compatible codec/transport (native wire 6).
     /// Only local committed, pinned checkpoint images can escape this path.
     pub fn with_snapshot_joint_repair(mut self) -> Self {
         self.batched_joint_repair = true;
         self.snapshot_joint_repair = true;
+        self.committed_snapshot_repair = false;
         self.repair_requests.clear();
         self
     }
 
     pub(super) fn repair_snapshot_messages(&mut self) -> Result<Option<Vec<Effect>>, RaftError> {
-        let Some(joint) = self.membership().joint() else {
-            return Ok(None);
-        };
         let Some(reference) = self.durable.snapshot else {
             return Ok(None);
         };
         let Some(base) = self.durable.snapshot_membership.as_deref() else {
+            return Ok(None);
+        };
+        if self.committed_snapshot_repair && self.membership().joint().is_none() {
+            if base != self.membership()
+                || base.voter_store(self.node) != Some(self.binding.identity)
+                || reference.index > self.durable.commit_index
+            {
+                return Ok(None);
+            }
+            let peers = base
+                .stable()
+                .voter_stores()
+                .keys()
+                .copied()
+                .filter(|node| *node != self.node)
+                .collect::<Vec<_>>();
+            let mut effects = Vec::new();
+            for peer in peers {
+                let context = self.context()?;
+                self.repair_requests.insert(
+                    peer,
+                    Replication {
+                        context,
+                        configuration: self.membership().id(),
+                        start: 0,
+                        end: reference.index,
+                        snapshot: Some(reference),
+                    },
+                );
+                effects.push(Effect::SnapshotRequired {
+                    to: peer,
+                    context,
+                    reference,
+                });
+            }
+            return Ok(Some(effects));
+        }
+        let Some(joint) = self.membership().joint() else {
             return Ok(None);
         };
         if self.membership().stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
@@ -99,8 +142,14 @@ impl Raft {
             sent.configuration,
             to,
             context,
-            Rpc::LearnerRepairSnapshot {
-                snapshot: Box::new(snapshot),
+            if self.committed_snapshot_repair && self.membership().joint().is_none() {
+                Rpc::CommittedLearnerRepairSnapshot {
+                    snapshot: Box::new(snapshot),
+                }
+            } else {
+                Rpc::LearnerRepairSnapshot {
+                    snapshot: Box::new(snapshot),
+                }
             },
         ))])
     }
@@ -109,8 +158,12 @@ impl Raft {
         &mut self,
         mut message: Message,
     ) -> Result<Vec<Effect>, RaftError> {
-        let Rpc::LearnerRepairSnapshot { snapshot } = &message.rpc else {
-            unreachable!()
+        let (snapshot, final_checkpoint) = match &message.rpc {
+            Rpc::LearnerRepairSnapshot { snapshot } => (snapshot, false),
+            Rpc::CommittedLearnerRepairSnapshot { snapshot } if self.committed_snapshot_repair => {
+                (snapshot, true)
+            }
+            _ => return Err(RaftError::InvalidMessage),
         };
         let meta = &snapshot.metadata;
         let Some(incoming) = meta.membership.as_deref() else {
@@ -133,7 +186,7 @@ impl Raft {
             || committed.voter_store(message.from) != Some(message.sender.identity)
             || meta.bootstrap != self.durable.bootstrap
             || meta.validate().is_err()
-            || incoming.stable() != committed.stable()
+            || (!final_checkpoint && incoming.stable() != committed.stable())
             || !incoming.operations().is_superset(committed.operations())
             || snapshot.application.is_empty()
             || snapshot.application.len() > self.limits.max_snapshot_bytes
@@ -142,7 +195,18 @@ impl Raft {
         {
             return Err(RaftError::InvalidMessage);
         }
-        if let Some(joint) = incoming.joint() {
+        if final_checkpoint {
+            if incoming.joint().is_some()
+                || incoming.id() != message.configuration
+                || incoming.id() <= committed.id()
+                || incoming.last_configuration_index() <= committed.last_configuration_index()
+                || meta.index <= self.durable.commit_index
+                || incoming.voter_store(self.node) != Some(self.binding.identity)
+                || incoming.voter_store(message.from) != Some(message.sender.identity)
+            {
+                return Err(RaftError::InvalidMessage);
+            }
+        } else if let Some(joint) = incoming.joint() {
             if joint.id != message.configuration
                 || joint.next.voter_stores().get(&self.node) != Some(&self.binding.identity)
             {

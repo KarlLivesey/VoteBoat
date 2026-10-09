@@ -107,8 +107,8 @@ target/debug/voteboat-counter serve recover-member /your/data/node1 1 43000 /you
 ```
 
 Use node 2/3 with their own directories, and append `--transport quic` for QUIC.
-This mode selects exact wire format 6, including membership reception and the
-existing learner repair protocols. Ordinary `create` and `recover` retain wire
+This mode selects exact wire format 7, including membership reception, retained
+learner repair and committed stable checkpoint learner recovery. Ordinary `create` and `recover` retain wire
 format 1 and static recovery semantics; incompatible wire selections cannot form
 peer sessions. Stop the participating processes before switching their mode.
 
@@ -359,7 +359,7 @@ NativeMemberStartup provides the native assembly for an already durably assigned
 learner or changed member. Wrap a NativeStartup in Recover mode with a bounded
 provisioned_stores map of exact node/store identities, then call
 open_with_protocol with TCP/TLS or QUIC, a fresh application and the explicit host
-wake/clock. Select membership wire format 2–6; witness controls require at least 3,
+wake/clock. Select membership wire format 2–7; witness controls require at least 3,
 multi-batch repair selects 5 and snapshot repair selects 6. NativeStartup's
 original static open methods retain their existing rejection of dynamic journals.
 
@@ -766,3 +766,11 @@ the deadline. Cancellation never undoes a persisted configuration. Fixed-field
 preparation/cancellation diagnostics expose progress but confer no authority.
 These selected TCP/QUIC peer histories do not cover arbitrary revocation timing
 or historical promotion repair after compaction.
+
+Slice118 changes explicit member/import peer mode to exact wire7; restart all
+participating peers together when upgrading from6. Static create/recover and the
+separate authenticated client command protocol retain their existing selection.
+Wire7 adds committed stable checkpoint learner recovery under the documented
+old-view-voter trust checks; disk formats are unchanged. Existing interruption
+histories were rerun with TCP and QUIC wire7 peers. Forced network execution of
+the new final-checkpoint path remains a separate acceptance history.

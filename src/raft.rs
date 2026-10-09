@@ -38,6 +38,10 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    /// Committed stable checkpoint from an authenticated old-view voter (wire7).
+    CommittedLearnerRepairSnapshot {
+        snapshot: Box<Snapshot>,
+    },
     /// Historical committed checkpoint repair to an exact old-view learner.
     LearnerRepairSnapshot {
         snapshot: Box<Snapshot>,
@@ -294,6 +298,7 @@ pub struct Raft {
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
     snapshot_joint_repair: bool,
+    committed_snapshot_repair: bool,
     configuration_replication: bool,
     request_sequence: u64,
     last_batch: u64,
@@ -495,6 +500,7 @@ impl Raft {
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
+            committed_snapshot_repair: false,
             configuration_replication: false,
             request_sequence: 0,
             last_batch: 0,
@@ -606,7 +612,9 @@ impl Raft {
                         }
                     }
                 }
-                Rpc::Snapshot { snapshot } => {
+                Rpc::Snapshot { snapshot }
+                | Rpc::LearnerRepairSnapshot { snapshot }
+                | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
                     if let Some(base) = &snapshot.metadata.membership {
                         peers = peers.max(base.replicas().count());
                     } else {
@@ -1501,7 +1509,10 @@ impl Raft {
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
     fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
-        if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
+        if matches!(
+            m.rpc,
+            Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
+        ) {
             return self.receive_repair_snapshot(m);
         }
         if matches!(
@@ -1642,7 +1653,8 @@ impl Raft {
         match &m.rpc {
             Rpc::LearnerRepair { .. }
             | Rpc::LearnerRepaired { .. }
-            | Rpc::LearnerRepairSnapshot { .. } => unreachable!(),
+            | Rpc::LearnerRepairSnapshot { .. }
+            | Rpc::CommittedLearnerRepairSnapshot { .. } => unreachable!(),
             Rpc::AuthorityRequest { .. }
             | Rpc::AuthorityReply { .. }
             | Rpc::LearnerReadinessRequest(_)

@@ -1821,6 +1821,275 @@ mod joint_repair {
         (log, core, request)
     }
 
+    fn final_snapshot_source() -> (HostLogStore, Raft, Message) {
+        let mut log = HostLogStore::new(2);
+        prepare(&mut log, true, true);
+        let mut core = Raft::recover_member(
+            node(2),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap()
+        .with_committed_snapshot_repair();
+        let mut application = Counter::new(100).unwrap();
+        application.apply_batch(core.replay_committed()).unwrap();
+        let mut images = support::snapshot::HostSnapshots::new();
+        images.identity.store = identity(2);
+        images.binding = log.binding();
+        let reference = checkpoint_application(&core, &application, &mut images)
+            .unwrap()
+            .reference();
+        compact_replica(&mut core, &mut log, &mut images, &application, reference).unwrap();
+        assert!(core.state().entries.is_empty());
+        assert_eq!(core.membership().id(), cid(4));
+        let effects = core.step(Event::Campaign).unwrap();
+        let effects = persist(&mut core, &mut log, effects);
+        let (context, reference) = effects
+            .into_iter()
+            .find_map(|effect| match effect {
+                Effect::SnapshotRequired {
+                    to,
+                    context,
+                    reference,
+                } if to == node(4) => Some((context, reference)),
+                _ => None,
+            })
+            .unwrap();
+        let request =
+            one(supply_snapshot(&core, &mut images, node(4), context, reference).unwrap());
+        assert!(matches!(
+            request.rpc,
+            Rpc::CommittedLearnerRepairSnapshot { .. }
+        ));
+        (log, core, request)
+    }
+
+    #[test]
+    fn final_checkpoint_repair_restores_before_ballot_and_survives_lost_completion() {
+        for lose_completion in [false, true] {
+            let (mut sender_log, mut sender, request) = final_snapshot_source();
+            let codec =
+                NativeWireCodec::with_committed_snapshot_repair(WireLimits::default()).unwrap();
+            let request = roundtrip(&codec, &request);
+            let mut log = HostLogStore::new(4);
+            let mut receiver = destination(&mut log).with_committed_snapshot_repair();
+            let mut images = support::snapshot::HostSnapshots::new();
+            images.identity.store = identity(4);
+            images.binding = log.binding();
+            let mut app = Counter::new(100).unwrap();
+            app.apply_batch(receiver.replay_committed()).unwrap();
+            let effects = receiver.step(Event::Receive(request)).unwrap();
+            let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
+                panic!("stage")
+            };
+            assert!(!receiver.local_voter());
+            assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+            let effects =
+                stage_snapshot_effect(&mut receiver, &mut log, &mut images, &app, stage.clone())
+                    .unwrap();
+            let [Effect::SnapshotInstalled(reference)] = effects.as_slice() else {
+                panic!("restore")
+            };
+            assert_eq!(app.applied_index(), 1);
+            assert_eq!(receiver.step(Event::Campaign), Err(RaftError::Busy));
+            if lose_completion {
+                app = Counter::new(100).unwrap();
+                receiver = recover_member_replica(node(4), group(1), &log, &mut images, &mut app)
+                    .unwrap()
+                    .0;
+                assert!(receiver.local_voter());
+                assert_eq!(receiver.role(), Role::Follower);
+                assert_eq!(app.applied_index(), reference.index);
+            } else {
+                let ack = one(finish_snapshot_install(
+                    &mut receiver,
+                    &log,
+                    &mut images,
+                    &mut app,
+                    *reference,
+                )
+                .unwrap());
+                let mut stale = ack.clone();
+                stale.context.sequence += 1;
+                assert!(sender
+                    .step(Event::Receive(roundtrip(&codec, &stale)))
+                    .unwrap()
+                    .is_empty());
+                assert_eq!(sender.role(), Role::Candidate);
+                let vote = one(sender
+                    .step(Event::Receive(roundtrip(&codec, &ack)))
+                    .unwrap());
+                assert!(matches!(vote.rpc, Rpc::Vote { .. }));
+                assert_eq!(sender.role(), Role::Candidate);
+                assert_eq!(sender.state().commit_index, 3);
+                let effects = receiver
+                    .step(Event::Receive(roundtrip(&codec, &vote)))
+                    .unwrap();
+                let ballot = one(persist(&mut receiver, &mut log, effects));
+                assert!(matches!(ballot.rpc, Rpc::Voted { granted: true }));
+                let effects = sender.step(Event::Receive(ballot)).unwrap();
+                assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+                let _ = persist(&mut sender, &mut sender_log, effects);
+                assert_eq!(sender.role(), Role::Leader);
+            }
+            assert_eq!(receiver.membership().id(), cid(4));
+            assert_eq!(app.applied_index(), 3);
+        }
+    }
+
+    #[test]
+    fn committed_checkpoint_repair_refuses_untrusted_sources_and_regressions() {
+        let (_, _, request) = final_snapshot_source();
+        for defect in 0..10 {
+            let mut log = HostLogStore::new(4);
+            let mut receiver = destination(&mut log);
+            if defect != 0 {
+                receiver = receiver.with_committed_snapshot_repair();
+            }
+            let before = receiver.state().clone();
+            let mut bad = request.clone();
+            match defect {
+                0 => (), // no new capability selected
+                1 => bad.sender.identity = identity(99),
+                2 => bad.context.origin.session = StoreSession::new(99).unwrap(),
+                3 => bad.configuration = cid(99),
+                4 => bad.term = 0,
+                _ => {
+                    let Rpc::CommittedLearnerRepairSnapshot { snapshot } = &mut bad.rpc else {
+                        unreachable!()
+                    };
+                    let old = snapshot.metadata.membership.as_ref().unwrap();
+                    match defect {
+                        5 => snapshot.application.clear(),
+                        6 => snapshot.metadata.bootstrap = bootstrap(2, 3),
+                        7 => {
+                            let operations = old
+                                .operations()
+                                .iter()
+                                .copied()
+                                .filter(|op| *op != OperationId::new(2).unwrap())
+                                .collect();
+                            snapshot.metadata.membership = Some(Box::new(
+                                Membership::from_checkpoint(
+                                    old.stable().clone(),
+                                    None,
+                                    old.last_configuration_index(),
+                                    operations,
+                                    snapshot.metadata.index,
+                                )
+                                .unwrap(),
+                            ));
+                        }
+                        8 => {
+                            // This store is a valid promoted voter in the image,
+                            // but was a learner in the receiver's trusted old view.
+                            let replacement = configuration(4, &[1, 2, 4, 5], &[3]);
+                            snapshot.metadata.membership = Some(Box::new(
+                                Membership::from_checkpoint(
+                                    replacement,
+                                    None,
+                                    old.last_configuration_index(),
+                                    old.operations().clone(),
+                                    snapshot.metadata.index,
+                                )
+                                .unwrap(),
+                            ));
+                            bad.from = node(5);
+                            bad.sender.identity = identity(5);
+                            bad.context.origin = bad.sender;
+                        }
+                        _ => snapshot.metadata.index = 1,
+                    }
+                }
+            }
+            assert!(
+                receiver.step(Event::Receive(bad)).is_err(),
+                "defect {defect}"
+            );
+            assert_eq!(receiver.state(), &before);
+            assert!(!receiver.local_voter());
+            assert!(!receiver.has_pending_dependency());
+        }
+    }
+
+    #[test]
+    fn accepted_final_cannot_export_an_uncommitted_final_checkpoint() {
+        let mut log = HostLogStore::new(2);
+        prepare(&mut log, true, false);
+        let mut core = Raft::recover_member(
+            node(2),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap()
+        .with_committed_snapshot_repair();
+        let mut app = Counter::new(100).unwrap();
+        app.apply_batch(core.replay_committed()).unwrap();
+        let mut images = support::snapshot::HostSnapshots::new();
+        images.identity.store = identity(2);
+        images.binding = log.binding();
+        let reference = checkpoint_application(&core, &app, &mut images)
+            .unwrap()
+            .reference();
+        assert_eq!(reference.index, 2);
+        compact_replica(&mut core, &mut log, &mut images, &app, reference).unwrap();
+        assert_eq!(core.membership().id(), cid(4));
+        assert!(core
+            .state()
+            .snapshot_membership
+            .as_ref()
+            .unwrap()
+            .joint()
+            .is_some());
+        let effects = core.step(Event::Campaign).unwrap();
+        let effects = persist(&mut core, &mut log, effects);
+        assert!(!effects
+            .iter()
+            .any(|effect| matches!(effect, Effect::SnapshotRequired { .. })));
+        assert!(effects.iter().any(|effect| matches!(
+            effect,
+            Effect::Send(Message {
+                rpc: Rpc::Vote { .. },
+                ..
+            })
+        )));
+    }
+
+    #[test]
+    fn wire_seven_checkpoint_repair_is_bounded_and_refuses_older_protocols() {
+        let (_, _, request) = final_snapshot_source();
+        let scope = WireScope {
+            from: request.from,
+            sender: request.sender,
+            to: request.to,
+        };
+        let codec = NativeWireCodec::with_committed_snapshot_repair(WireLimits::default()).unwrap();
+        let frame = codec
+            .encode_batch(scope, std::slice::from_ref(&request))
+            .unwrap();
+        assert_eq!(
+            codec.decode_batch(scope, &frame).unwrap(),
+            vec![request.clone()]
+        );
+        for cut in 0..frame.len() {
+            assert!(codec.decode_batch(scope, &frame[..cut]).is_err());
+        }
+        let old = NativeWireCodec::with_snapshot_repair(WireLimits::default()).unwrap();
+        assert!(old
+            .encode_batch(scope, std::slice::from_ref(&request))
+            .is_err());
+        assert!(old.decode_batch(scope, &frame).is_err());
+        let narrow = NativeWireCodec::with_committed_snapshot_repair(WireLimits {
+            max_snapshot_bytes: 1,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        assert!(narrow.encode_batch(scope, &[request]).is_err());
+        assert!(narrow.decode_batch(scope, &frame).is_err());
+    }
+
     #[test]
     fn configuration_replication_snapshot_waits_for_application_before_normal_ack() {
         let (_, _, mut request) = snapshot_source(true);
@@ -2055,82 +2324,91 @@ mod joint_repair {
 
     #[test]
     fn snapshot_repair_wal_crashes_never_release_ack_or_partly_promote() {
-        let (_, _, request) = snapshot_source(true);
-        // Obtain the exact binding-record length from a successful public-path
-        // installation, then tear every byte of that same native record.
-        let mut baseline = HostLogStore::new(4);
-        let mut core = destination(&mut baseline);
-        let before = core.state().clone();
-        let mut images = support::snapshot::HostSnapshots::new();
-        images.identity.store = identity(4);
-        images.binding = baseline.binding();
-        let application = Counter::new(100).unwrap();
-        let stage = core.step(Event::Receive(request.clone())).unwrap();
-        let [Effect::StageSnapshot(stage)] = stage.as_slice() else {
-            panic!("stage")
-        };
-        stage_snapshot_effect(
-            &mut core,
-            &mut baseline,
-            &mut images,
-            &application,
-            stage.clone(),
-        )
-        .unwrap();
-        let after = core.state();
-        let frame = NativeLogCodec
-            .encode_batch(
-                1,
-                &[LogMutation::Update(LogUpdate {
-                    group: group(1),
-                    expected_revision: before.revision,
-                    hard_state: after.hard_state,
-                    commit_index: after.commit_index,
-                    suffix: None,
-                    snapshot: after.snapshot,
-                    snapshot_membership: after.snapshot_membership.clone(),
-                })],
-                LogLimits::default(),
-            )
-            .unwrap();
-        let faults = (0..=frame.len()).map(Fault::Append).chain([
-            Fault::Sync,
-            Fault::PublishBefore,
-            Fault::PublishAfter,
-        ]);
-        for fault in faults {
-            let io = ModelIo::default();
-            let mut log =
-                NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
-            let mut core = destination(&mut log);
+        for request in [snapshot_source(true).2, final_snapshot_source().2] {
+            let checkpoint_index = match &request.rpc {
+                Rpc::LearnerRepairSnapshot { snapshot }
+                | Rpc::CommittedLearnerRepairSnapshot { snapshot } => snapshot.metadata.index,
+                _ => unreachable!(),
+            };
+            // Obtain the exact binding-record length from a successful public-path
+            // installation, then tear every byte of that same native record.
+            let mut baseline = HostLogStore::new(4);
+            let mut core = destination(&mut baseline).with_committed_snapshot_repair();
+            let before = core.state().clone();
             let mut images = support::snapshot::HostSnapshots::new();
             images.identity.store = identity(4);
-            images.binding = log.binding();
-            let effects = core.step(Event::Receive(request.clone())).unwrap();
-            let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
+            images.binding = baseline.binding();
+            let application = Counter::new(100).unwrap();
+            let stage = core.step(Event::Receive(request.clone())).unwrap();
+            let [Effect::StageSnapshot(stage)] = stage.as_slice() else {
                 panic!("stage")
             };
-            io.0.borrow_mut().fault = fault;
-            assert!(stage_snapshot_effect(
+            stage_snapshot_effect(
                 &mut core,
-                &mut log,
+                &mut baseline,
                 &mut images,
                 &application,
-                stage.clone()
+                stage.clone(),
             )
-            .is_err());
-            assert!(core.is_fenced());
-            drop(log);
-            io.0.borrow_mut().power_loss();
-            let log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
-            let mut application = Counter::new(100).unwrap();
-            let (core, _) =
-                recover_member_replica(node(4), group(1), &log, &mut images, &mut application)
-                    .unwrap();
-            assert!([1, 34].contains(&core.state().commit_index));
-            assert_eq!(application.applied_index(), core.state().commit_index);
-            assert_eq!(core.local_voter(), core.state().commit_index == 34);
-            assert_eq!(core.role(), Role::Follower);
+            .unwrap();
+            let after = core.state();
+            let frame = NativeLogCodec
+                .encode_batch(
+                    1,
+                    &[LogMutation::Update(LogUpdate {
+                        group: group(1),
+                        expected_revision: before.revision,
+                        hard_state: after.hard_state,
+                        commit_index: after.commit_index,
+                        suffix: None,
+                        snapshot: after.snapshot,
+                        snapshot_membership: after.snapshot_membership.clone(),
+                    })],
+                    LogLimits::default(),
+                )
+                .unwrap();
+            let faults = (0..=frame.len()).map(Fault::Append).chain([
+                Fault::Sync,
+                Fault::PublishBefore,
+                Fault::PublishAfter,
+            ]);
+            for fault in faults {
+                let io = ModelIo::default();
+                let mut log =
+                    NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+                let mut core = destination(&mut log).with_committed_snapshot_repair();
+                let mut images = support::snapshot::HostSnapshots::new();
+                images.identity.store = identity(4);
+                images.binding = log.binding();
+                let effects = core.step(Event::Receive(request.clone())).unwrap();
+                let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
+                    panic!("stage")
+                };
+                io.0.borrow_mut().fault = fault;
+                assert!(stage_snapshot_effect(
+                    &mut core,
+                    &mut log,
+                    &mut images,
+                    &application,
+                    stage.clone()
+                )
+                .is_err());
+                assert!(core.is_fenced());
+                drop(log);
+                io.0.borrow_mut().power_loss();
+                let log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
+                let mut application = Counter::new(100).unwrap();
+                let (core, _) =
+                    recover_member_replica(node(4), group(1), &log, &mut images, &mut application)
+                        .unwrap();
+                assert!([1, checkpoint_index].contains(&core.state().commit_index));
+                assert_eq!(application.applied_index(), core.state().commit_index);
+                assert_eq!(
+                    core.local_voter(),
+                    core.state().commit_index == checkpoint_index
+                );
+                assert_eq!(core.role(), Role::Follower);
+            }
         }
     }
 

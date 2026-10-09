@@ -68,6 +68,10 @@ impl NativeWireCodec {
     pub fn with_snapshot_repair(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 6)
     }
+    /// Explicit format 7 adds committed stable checkpoint learner recovery.
+    pub fn with_committed_snapshot_repair(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 7)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -249,11 +253,18 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
                 term = entry.term;
             }
         }
-        Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
-            if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. })
-                && (version < 6
-                    || snapshot.metadata.membership.is_none()
-                    || m.context.origin != m.sender)
+        Rpc::Snapshot { snapshot }
+        | Rpc::LearnerRepairSnapshot { snapshot }
+        | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
+            if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) && version < 7 {
+                return Err(WireError::UnsupportedVersion(version));
+            }
+            if matches!(
+                m.rpc,
+                Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
+            ) && (version < 6
+                || snapshot.metadata.membership.is_none()
+                || m.context.origin != m.sender)
             {
                 return Err(WireError::InvalidMessage("snapshot repair version/context"));
             }
@@ -501,7 +512,9 @@ impl<'a> Encoder<'a> {
             {
                 return Err(WireError::TooLarge)
             }
-            Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot }
+            Rpc::Snapshot { snapshot }
+            | Rpc::LearnerRepairSnapshot { snapshot }
+            | Rpc::CommittedLearnerRepairSnapshot { snapshot }
                 if snapshot.application.len() > self.limits.max_snapshot_bytes
                     || snapshot.metadata.bootstrap.policy.voters().len()
                         > self.limits.policy.max_voters
@@ -622,7 +635,9 @@ impl<'a> Encoder<'a> {
             }
             Rpc::ReadProbe => self.u8(4),
             Rpc::ReadAck => self.u8(5),
-            Rpc::Snapshot { snapshot } | Rpc::LearnerRepairSnapshot { snapshot } => {
+            Rpc::Snapshot { snapshot }
+            | Rpc::LearnerRepairSnapshot { snapshot }
+            | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
                 if snapshot.application.len() > self.limits.max_snapshot_bytes {
                     return Err(WireError::TooLarge);
                 }
@@ -636,13 +651,17 @@ impl<'a> Encoder<'a> {
                 }
                 let explicit_base =
                     meta.membership.is_some() || meta.bootstrap.configuration != m.configuration;
-                self.u8(if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
-                    16
-                } else if explicit_base {
-                    9
-                } else {
-                    6
-                })?;
+                self.u8(
+                    if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) {
+                        17
+                    } else if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
+                        16
+                    } else if explicit_base {
+                        9
+                    } else {
+                        6
+                    },
+                )?;
                 if explicit_base {
                     self.u64(meta.bootstrap.configuration.get())?;
                 }
@@ -1079,8 +1098,11 @@ impl<'a> Decoder<'a> {
             },
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
-            kind @ (6 | 9 | 16) => {
-                if (kind == 9 && version < 2) || (kind == 16 && version < 6) {
+            kind @ (6 | 9 | 16 | 17) => {
+                if (kind == 9 && version < 2)
+                    || (kind == 16 && version < 6)
+                    || (kind == 17 && version < 7)
+                {
                     return Err(WireError::InvalidMessage("RPC kind"));
                 }
                 let bootstrap_configuration = if kind != 6 {
@@ -1146,7 +1168,9 @@ impl<'a> Decoder<'a> {
                     },
                     application: bytes.to_vec(),
                 });
-                if kind == 16 {
+                if kind == 17 {
+                    Rpc::CommittedLearnerRepairSnapshot { snapshot }
+                } else if kind == 16 {
                     Rpc::LearnerRepairSnapshot { snapshot }
                 } else {
                     Rpc::Snapshot { snapshot }

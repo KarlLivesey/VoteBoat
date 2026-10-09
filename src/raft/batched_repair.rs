@@ -26,7 +26,9 @@ impl Raft {
         self
     }
     pub(crate) fn learner_repair_wire_version(&self) -> Option<u16> {
-        if self.snapshot_joint_repair {
+        if self.committed_snapshot_repair {
+            Some(7)
+        } else if self.snapshot_joint_repair {
             Some(6)
         } else if self.batched_joint_repair {
             Some(5)
@@ -185,6 +187,16 @@ impl Raft {
             matching_term,
         } = message.rpc
         {
+            let committed_checkpoint = self.committed_snapshot_repair
+                && self.membership().joint().is_none()
+                && self.repair_requests.get(&message.from).is_some_and(|sent| {
+                    sent.snapshot.is_some()
+                        && sent.snapshot == self.durable.snapshot
+                        && sent.configuration == self.membership().id()
+                        && self.durable.snapshot_membership.as_deref() == Some(self.membership())
+                        && self.membership().voter_store(message.from)
+                            == Some(message.sender.identity)
+                });
             let historical = self
                 .repair_requests
                 .get(&message.from)
@@ -199,7 +211,8 @@ impl Raft {
                 || (self.membership().stable().learners().get(&message.from)
                     != Some(&message.sender.identity)
                     && historical.as_ref().map(|(_, _, store)| *store)
-                        != Some(message.sender.identity))
+                        != Some(message.sender.identity)
+                    && !committed_checkpoint)
             {
                 return Err(RaftError::WrongIdentity);
             }
@@ -245,7 +258,9 @@ impl Raft {
             if sent.context != message.context || sent.configuration != message.configuration {
                 return Ok(Vec::new());
             }
-            let joint_index = if sent.snapshot.is_some() {
+            let joint_index = if committed_checkpoint {
+                sent.end
+            } else if sent.snapshot.is_some() {
                 self.membership()
                     .joint()
                     .ok_or(RaftError::InvalidMessage)?

@@ -93,3 +93,17 @@ candidate that was not an old-view voter cannot use this path to self-authorize.
 If compaction removed the historical promotion, this retained-log path sends no
 repair; ordinary elections remain available. Recovery of that lagging learner
 from a historical checkpoint after final is still an explicit release gate.
+
+### Wire7 committed stable checkpoint mode
+
+The retained-log limitation above remains true for formats5/6. The separately
+selected wire7 mode can restore a committed stable final checkpoint from an
+already trusted old-view voter after the promotion log was compacted away. See
+[the exact source/receiver contract](MEMBERSHIP_CORE.md#committed-stable-checkpoint-learner-recovery-native-format-7).
+NativeMemberStartup selects the matching core/codec for wire7; the counter
+executable's explicit member/import modes now select7 on all peers. Existing
+library assemblies selecting6 retain their old behavior. Disk formats are unchanged.
+Host-provider restore/lost-completion, ordinary ballot, protocol/refusal and native
+WAL fault evidence is recorded in slice118. Existing interrupted TCP/QUIC service
+histories pass under7, but do not force this new checkpoint path; that native
+history and the accepted-final/older-joint checkpoint bridge remain open.

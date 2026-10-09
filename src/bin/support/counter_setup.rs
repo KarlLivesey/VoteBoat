@@ -165,7 +165,7 @@ pub fn configuration(
         private_key: material(&tls.join(format!("node{id}-key.der")), 65536)?,
     }))?;
     if explicit {
-        credentials = checked(credentials.with_wire_version(6))?;
+        credentials = checked(credentials.with_wire_version(7))?;
     }
     let mut retained_peer_bytes = 0usize;
     let config = NativeStartup {
@@ -268,7 +268,7 @@ pub fn enroll(
         .provisioned_stores
         .get(&node(source_node))
         .ok_or("source node missing from deployment")?;
-    config.startup.tls = checked(config.startup.tls.with_wire_version(6))?;
+    config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
     let mut destination_app = application()?;
     let mut source_app = application()?;
     let log = checked(NativeLogStore::recover(
@@ -328,7 +328,7 @@ pub fn open(
     let opened = if member {
         // Explicit recovery only: provisioned routes do not establish assignment.
         // The native member constructor verifies the authoritative WAL/checkpoint.
-        config.startup.tls = checked(config.startup.tls.with_wire_version(6))?;
+        config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
         config.open_with_protocol(protocol, app, wake, MonoTime(0))
     } else {
         config
