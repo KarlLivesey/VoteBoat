@@ -8032,3 +8032,113 @@ operation, stale authority refusal and cleanup across its chosen boundaries.
 Following remains the next concrete directory authority/ownership lifecycle
 operation (P5/P6), selected from the existing ledger with its own state/fencing,
 partial-progress/restart and no-dual-owner checks before implementation.
+
+## Slice121 schema plan — command-channel observations precede execution
+
+Previous goal turn was progress: tested learner restart slice120 was committed
+and pushed (d7c2128). Worktree is clean. Inspection found the counter service
+polls queued Node configuration execution and ticks prepared targets before
+polling the existing command TLS session. A close notification already readable
+at the iteration boundary can therefore remain unobserved during authorization.
+
+Data/API: no new schema, helper, provider or public API. Move the existing bounded
+accept/input/output/session poll and exact pending-ticket cancellation block to
+the beginning of the serialized owner iteration, before Node poll/authorization
+and administration tick. A newly parsed command keeps its original phase/target;
+its existing queued admission runs through the same live authorization closure.
+Expired deadline or observed channel failure clears pending observation/target/
+proofs and queues readiness cancellation before execution. Output bytes produced
+by this iteration flush in the following one; bounded connection credits stay
+owned until flush/removal. Exactly one bounded command poll per iteration.
+
+Ownership/failure: keep original cancel_client/cancel_read/cancel_remote paths,
+queued configuration ownership and unknown outcome semantics. Cancellation does
+not retract already accepted persistence. Socket closure arriving after the
+channel poll remains an asynchronous later observation, not a promise of atomic
+remote disconnect. Existing operation-ID status/retry resolves partial progress.
+Shutdown begins only after its reply connection is released, as before. Keep
+monotonic polling and worker ownership unchanged. Credential policy live reload
+and external issuer rotation remain unsupported, not inferred from this change.
+
+Acceptance: full native counter_service integration suite covering bounded
+partial input/output, client deadlines, authenticated roles, remote provisioned
+and client-supplied configuration, TCP/QUIC preparing close/deadline and unread
+commit/restart/dedup histories, shutdown and recovery. All-target Clippy and
+format/inventory checks. This is polling-order correction and existing native
+schedule evidence, not a complete concurrent revocation model.
+
+Mini plan: current command observation ordering (P4/P1), dependencies above,
+completes with native suite/acceptance. Next: remote prepared target interruption
+across authority/leadership changes (P4/P6), depends on ordered observation and
+exact immutable target; completes with stale authority refusal, original operation
+status/retry and bounded cleanup at chosen boundaries. Following: select the next
+missing directory authority/ownership operation (P5/P6) from the ledger, depending
+on fencing/transfer contracts; specify restart/partial-progress/no-dual-owner
+checks before implementation. Macro P0–P7 remains active; P8/Windows deferred.
+
+Slice121 native extension schema: after explicit close/deadline cancellation,
+keep the prospective voter offline, submit a separate immutable promotion target
+and observe its preparing-readiness phase. Kill and wait for that command-serving
+process, discard the unread client, then reopen its existing member store before
+requiring election (both current voters are required by this fixture). The lost
+volatile target must remain absent locally after reopen and after the learner
+returns; no automatic resubmission. A separate explicitly retried original target
+still completes. Inspect all final WAL membership operation sets to exclude the
+lost preparation. This selected process kill is before proposal admission; it
+cannot demonstrate rollback of accepted persistence or a general crash schedule.
+
+### Slice121 implemented evidence and macro review
+
+Moved the existing command accept/session/input/output and exact cancellation
+block ahead of service execution authorization/administration tick. This is one
+bounded command poll per owner iteration, with no new helper/API/provider or
+persistent format. Observed TLS closure/deadline now clears the requesting
+channel and its target before queued membership execution can consult it.
+Already accepted persistence and unknown operation outcomes retain their previous
+semantics. Packets arriving after the channel poll remain later observations.
+
+Extended both native remote configuration interruption histories: while learner3
+is offline, operation17015 reaches readiness preparation; kill/wait/reopen the
+serving voter at its existing member files before election. Original client is
+unread. Local status remains inconclusive absence after reopen and learner
+return. Explicit retry of operation17012 completes promotion, and the existing
+unread-commit failover/retry/conflict/application checks still run. Recovered
+membership operation sets on all three files exclude both abandoned17015 and
+closed17011. Absence is not claimed as a transferable nonacceptance certificate;
+this fixture forced preparation before admission through an offline required
+learner. No rollback of accepted configuration is inferred.
+
+Linux validation: the full 33-test counter_service suite passed on the changed
+production polling order (13.33s). After extending the two interruption histories,
+both passed (20.21s), with 31 unchanged tests filtered. Final all-feature/all-target
+Clippy -D warnings, formatting, diff whitespace and 78-contract inventory passed.
+These runs are separate evidence, not a claim that the full suite was rerun after
+the test-only extension. No arbitrary scheduler/remote revocation proof, macOS or
+separate-host execution/performance claim; live credential rotation remains open.
+
+Macro review: P4/P1 command observation/preparation slice is complete for these
+selected boundaries. Broader P4/P6 fault schedules remain explicit. The next
+user-visible implementation moves to the missing P5 dynamic creation path:
+chapter07 requires a metadata-committed creation intent with unique group
+incarnation and exact initial configuration, then durable assigned-node bootstrap
+before election. Existing directory plans alone are not that protocol. Full
+P0–P7 remains active; usable static service stays independent; P8/Windows deferred.
+
+Updated linked mini plan:
+1. Completed command observation/preparation (P4/P1): purpose, dependencies,
+   state/cleanup and completed checks above.
+2. Next — authorized durable group creation intent (P5/P0). Purpose: create a
+   new responsibility/group under metadata authority rather than startup-only
+   configuration. Dependencies: inspect existing directory journal, typed group
+   identities/incarnations, configuration validation and public bootstrap seam.
+   Completion: specify/implement exact intent/operation identity, idempotent
+   repeat and conflicting intent refusal, bounded checkpoint/replay and crash
+   publication checks; an intent alone must not admit elections or serving.
+3. Following — assigned-node bootstrap from committed creation intent (P5/P1).
+   Purpose: make the creation intent usable by a real newly assigned group.
+   Dependencies: prior durable metadata intent plus selected native stores and
+   authenticated exact assignment. Completion: durable exact bootstrap before
+   election, restart/idempotence/conflict refusal and native application progress;
+   namespace publication must not activate an unready group. Record the concrete
+   state/failure schema before editing. Existing deletion/reparenting, directory
+   authority movement and P6/P7 scope are retained in the baseline ledger.

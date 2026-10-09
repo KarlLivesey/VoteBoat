@@ -2767,6 +2767,28 @@ fn interrupted_native_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configuration-status", "17012"])
         .contains("inconclusive_local_absence"));
+    let abandoned = UnobservedCommand::send(
+        &cluster,
+        leader,
+        "configure-record joint 17015 3 4 5 - m:3 v:1 v:2 v:3",
+    );
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration operation=17015 preparing_learner=3",
+    );
+    // The prepared target has no live learner proof and cannot be proposed.
+    // Reopen the killed serving voter before asking for election: this current
+    // two-voter policy requires both voters, independent of the future target.
+    let mut preparing = cluster.children[leader - 1].take().unwrap();
+    preparing.kill().unwrap();
+    preparing.wait().unwrap();
+    abandoned.disconnect();
+    cluster.start(leader, "recover-member");
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17015"])
+        .contains("inconclusive_local_absence"));
     cluster.start(3, "recover-member");
     // A new live learner cannot resurrect a canceled target without a new request.
     assert!(cluster
@@ -2774,6 +2796,9 @@ fn interrupted_native_configuration_history(quic: bool) {
         .contains("inconclusive_local_absence"));
     assert!(cluster
         .ok(leader, &["configuration-status", "17012"])
+        .contains("inconclusive_local_absence"));
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17015"])
         .contains("inconclusive_local_absence"));
     assert!(cluster
         .ok(
@@ -2840,6 +2865,9 @@ fn interrupted_native_configuration_history(quic: bool) {
         assert!(!membership
             .operations()
             .contains(&OperationId::new(17011).unwrap()));
+        assert!(!membership
+            .operations()
+            .contains(&OperationId::new(17015).unwrap()));
     }
     fs::remove_dir_all(&cluster.root).unwrap();
 }

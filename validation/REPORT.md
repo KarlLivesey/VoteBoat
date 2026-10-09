@@ -2793,3 +2793,34 @@ This is selected graceful learner restart and embedding evidence, not process
 kill/power loss, live remote credential rotation or universal membership safety.
 Remote target interruption/revocation and broader P4/P6/P7, platform/fault and
 performance gates remain. Full P0–P7 active, P8/Windows deferred.
+
+## Slice121 — observe requesting channel before membership execution
+
+Linux: full 33-test counter_service integration suite passed on the reordered
+production owner loop (13.33s). The two subsequently extended TCP/QUIC interruption
+histories passed separately (20.21s; 31 unchanged tests filtered). Final
+all-feature/all-target Clippy -D warnings, format, diff whitespace and 78-contract
+inventory checks passed. No new API/provider, protocol or persistent format.
+
+The existing bounded command poll/cancellation block now precedes Node execution
+authorization and prepared-target tick. Observed close/deadline clears the exact
+pending channel/target before that iteration executes queued membership work;
+late-arriving packets remain asynchronous. Accepted durable work is not undone.
+The full suite includes native command authorization, partial I/O/deadlines,
+remote provisioned/client targets, lifecycle/recovery/retry, TCP/QUIC close and
+unread-commit failover, shutdown and actual file recovery. Existing finite tests
+do not force every possible close-versus-execution timing; no universal race
+proof is claimed from this ordering review.
+
+The added histories force promotion preparation with the required learner
+offline, kill/wait/reopen the command-serving voter at its actual native files,
+and require local absence of the abandoned operation before/after learner return.
+Explicit fresh target request completes; original unread committed record retry,
+conflict refusal, Counter dedup and all-three-store membership reopen still pass.
+Recovered operation sets exclude abandoned preparation17015 and closed17011.
+This selected process loss occurs before admission, not during persistence; it
+cannot certify cancellation or rollback of accepted records.
+
+Broader remote revocation/partial-progress, arbitrary faults, macOS/separate-host
+and performance gates remain. Full P0–P7 active; next implementation targets the
+P5 metadata-authorized creation intent/bootstrap gap. P8/Windows deferred.

@@ -289,53 +289,8 @@ fn serve(
     let mut shutdown_started = None;
     loop {
         let time = now(start);
-        let result = if let Some(admin) = administration.as_ref() {
-            service.poll_with_configuration_authorization(
-                time,
-                NodePollBudget::default(),
-                |core, proposal| {
-                    if admin.remote() {
-                        let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
-                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
-                            .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
-                        live.stream.authorize(access.as_ref(), group(), "configure", time)
-                            .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
-                    }
-                    admin
-                        .authorize(core.state().bootstrap.group, core.membership(), proposal)
-                },
-            )
-        } else {
-            service.poll(time, NodePollBudget::default())
-        };
-        // Diagnostics run after poll and cannot replace its original result.
-        let _ = observer.record_bounded(NodeObservation::from_poll(
-            owner,
-            time,
-            service.state(),
-            &result,
-        ));
-        let progress = checked(result)?;
-        if let Some(replica) = progress.replica {
-            for step in replica.steps {
-                // Client/read errors are reported through their exact output tickets.
-                if let Some(error) = step.error {
-                    eprintln!("event: {error:?}");
-                }
-            }
-        }
-        outputs(&mut service, &mut connection)?;
-        if let Some(admin) = administration.as_mut() {
-            admin.tick(&mut service, quit)?;
-            if let Some(reply) = admin.take_reply() {
-                if let Some(c) = connection
-                    .as_mut()
-                    .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
-                {
-                    c.reply(reply);
-                }
-            }
-        }
+        // Observe command closure/deadline and cancel its exact pending work
+        // before this iteration can authorize queued membership execution.
         if !quit && connection.is_none() {
             match listener.accept() {
                 Ok((stream, _)) => {
@@ -442,6 +397,54 @@ fn serve(
                 }
             }
             connection = None;
+        }
+
+        let result = if let Some(admin) = administration.as_ref() {
+            service.poll_with_configuration_authorization(
+                time,
+                NodePollBudget::default(),
+                |core, proposal| {
+                    if admin.remote() {
+                        let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
+                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
+                            .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                        live.stream.authorize(access.as_ref(), group(), "configure", time)
+                            .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                    }
+                    admin
+                        .authorize(core.state().bootstrap.group, core.membership(), proposal)
+                },
+            )
+        } else {
+            service.poll(time, NodePollBudget::default())
+        };
+        // Diagnostics run after poll and cannot replace its original result.
+        let _ = observer.record_bounded(NodeObservation::from_poll(
+            owner,
+            time,
+            service.state(),
+            &result,
+        ));
+        let progress = checked(result)?;
+        if let Some(replica) = progress.replica {
+            for step in replica.steps {
+                // Client/read errors are reported through their exact output tickets.
+                if let Some(error) = step.error {
+                    eprintln!("event: {error:?}");
+                }
+            }
+        }
+        outputs(&mut service, &mut connection)?;
+        if let Some(admin) = administration.as_mut() {
+            admin.tick(&mut service, quit)?;
+            if let Some(reply) = admin.take_reply() {
+                if let Some(c) = connection
+                    .as_mut()
+                    .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
+                {
+                    c.reply(reply);
+                }
+            }
         }
         if quit && connection.is_none() && shutdown_started.is_none() {
             service.begin_shutdown();
