@@ -18,11 +18,13 @@ use super::*;
 pub enum RoutedControlQuery<Q> {
     Data(RoutedQuery<Q>),
     Fence,
+    ParentAdoption(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum RoutedControlRead<R> {
     Data(RoutedRead<R>),
     Fence(Option<OwnershipFence>),
+    ParentAdoption(Option<ParentGrantStatus>),
 }
 /// A read view, not another ownership guard or checkpoint format. Serving and
 /// foreign use still require the original Node quorum read and host authentication.
@@ -126,6 +128,9 @@ where
         match q {
             RoutedControlQuery::Data(q) => self.0.read_at(required, q).map(RoutedControlRead::Data),
             RoutedControlQuery::Fence => Ok(RoutedControlRead::Fence(self.0.fence())),
+            RoutedControlQuery::ParentAdoption(op) => Ok(RoutedControlRead::ParentAdoption(
+                self.0.parent_adoption(op),
+            )),
         }
     }
 }
@@ -138,7 +143,7 @@ where
     fn query_bytes(&self, q: &Self::Query, max: usize) -> Result<usize, ApplicationError> {
         match q {
             RoutedControlQuery::Data(q) => self.0.query_bytes(q, max),
-            RoutedControlQuery::Fence => Ok(0),
+            RoutedControlQuery::Fence | RoutedControlQuery::ParentAdoption(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
@@ -148,7 +153,7 @@ where
                 .read_result_bound(q)?
                 .checked_sub(size_of::<RoutedRead<A::ReadResult>>())
                 .ok_or(ApplicationError::ReceiptBudget)?,
-            RoutedControlQuery::Fence => 0,
+            RoutedControlQuery::Fence | RoutedControlQuery::ParentAdoption(_) => 0,
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -161,7 +166,7 @@ where
     ) -> Result<usize, ApplicationError> {
         match r {
             RoutedControlRead::Data(r) => self.0.read_result_bytes(r, max),
-            RoutedControlRead::Fence(_) => Ok(0),
+            RoutedControlRead::Fence(_) | RoutedControlRead::ParentAdoption(_) => Ok(0),
         }
     }
 }

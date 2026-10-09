@@ -25,13 +25,20 @@ pub(crate) enum Command<'a> {
     },
     Fence(OwnershipEpoch),
     ScopeFence(OwnershipEpoch, BucketRange),
+    ParentAdopt(&'a [u8]),
 }
 pub(crate) fn decode(bytes: &[u8], max_payload: usize) -> Result<Command<'_>, ApplicationError> {
     if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
         return Err(ApplicationError::InvalidCommand);
     }
-    if bytes.starts_with(b"VBROWN01") || bytes.starts_with(b"VBROWN02") {
+    if bytes.starts_with(b"VBROWN01")
+        || bytes.starts_with(b"VBROWN02")
+        || bytes.starts_with(b"VBROWN03")
+    {
         return Ok(Command::Bootstrap(bytes));
+    }
+    if bytes.starts_with(b"VBRPAD01") {
+        return Ok(Command::ParentAdopt(bytes));
     }
     if let Some(inner) = bytes.strip_prefix(b"VBRSCF01") {
         let mut r = Reader::new(inner);

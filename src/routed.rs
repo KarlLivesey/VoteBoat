@@ -23,8 +23,14 @@ use std::{
 pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 mod control_reads;
+mod parent_adoption;
 pub use codec::{encode_fence, encode_routed, encode_scope_fence};
 pub use control_reads::{RoutedControlQuery, RoutedControlRead, RoutedControlReads};
+use parent_adoption::ParentAdoptionRecord;
+pub use parent_adoption::{
+    OwnerParentAdoption, ParentGrantStatus, MAX_PARENT_ADOPTIONS, MAX_PARENT_ADOPTION_BYTES,
+    PARENT_ADOPTING_ROUTED_SCHEMA,
+};
 
 pub const ROUTED_APPLICATION_SCHEMA: u64 = 1;
 pub const SCOPED_ROUTED_APPLICATION_SCHEMA: u64 = 2;
@@ -73,6 +79,7 @@ pub enum RoutedOutcome<R> {
     Fenced(OwnershipFence),
     ScopeFenced(ScopedOwnershipFence),
     GrantAdopted(RetainedGrantStatus),
+    ParentAdopted(ParentGrantStatus),
     Applied(R),
     Rejected(RoutingError),
     OperationConflict,
@@ -143,6 +150,8 @@ pub struct RoutedApplication<A, P> {
     scope_fences: Vec<ScopedOwnershipFence>,
     history: BTreeMap<OperationId, Semantic>,
     semantic_bytes: usize,
+    parent_adoption_limit: usize,
+    parent_adoptions: Vec<ParentAdoptionRecord>,
 }
 impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A, P> {
     #[allow(clippy::result_large_err)] // Return the original owned application and grant.
@@ -214,6 +223,8 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             scope_fences: Vec::new(),
             history: BTreeMap::new(),
             semantic_bytes: 0,
+            parent_adoption_limit: 0,
+            parent_adoptions: Vec::new(),
         })
     }
     /// Select schema2 before bootstrap. Retains ownership of the original object
@@ -223,6 +234,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         if maximum == 0
             || maximum > MAX_MANIFEST_ROUTES
             || self.scope_limit != 0
+            || self.parent_adoption_limit != 0
             || self.inner.applied_index() != 0
             || self.initialized.is_some()
             || self.fence.is_some()
@@ -285,6 +297,10 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             || self.initialized.is_some_and(|(_, i)| i == index)
             || self.scope_fences.iter().any(|f| f.fence.index == index)
             || self.fence.is_some_and(|f| f.index == index)
+            || self
+                .parent_adoptions
+                .iter()
+                .any(|a| a.status.index == index)
     }
     pub fn fence(&self) -> Option<OwnershipFence> {
         self.fence
@@ -307,7 +323,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: if self.scope_limit == 0 {
+            application_schema: if self.parent_adoption_limit != 0 {
+                PARENT_ADOPTING_ROUTED_SCHEMA
+            } else if self.scope_limit == 0 {
                 ROUTED_APPLICATION_SCHEMA
             } else {
                 SCOPED_ROUTED_APPLICATION_SCHEMA
@@ -315,7 +333,12 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             command_bytes: self
                 .binding
                 .len()
-                .max(DATA_HEADER + MAX_ROUTING_KEY_BYTES + self.limits.payload_bytes),
+                .max(DATA_HEADER + MAX_ROUTING_KEY_BYTES + self.limits.payload_bytes)
+                .max(if self.parent_adoption_limit == 0 {
+                    0
+                } else {
+                    MAX_PARENT_ADOPTION_BYTES
+                }),
             snapshot_bytes: 94
                 + self.binding.len()
                 + self.limits.inner_checkpoint_bytes
@@ -325,6 +348,11 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
                     0
                 } else {
                     2 + 36 * self.scope_limit
+                }
+                + if self.parent_adoption_limit == 0 {
+                    0
+                } else {
+                    2 + self.parent_adoption_limit * (28 + MAX_PARENT_ADOPTION_BYTES)
                 },
         }
     }
@@ -365,6 +393,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         if matches!(request, Command::ScopeFence(_, _)) && self.scope_limit == 0 {
             return Err(ApplicationError::InvalidCommand);
         }
+        if matches!(request, Command::ParentAdopt(_)) && self.parent_adoption_limit == 0 {
+            return Err(ApplicationError::InvalidCommand);
+        }
         if let Command::Bootstrap(binding) = request {
             if binding != self.binding {
                 return Err(ApplicationError::InvalidCommand);
@@ -376,6 +407,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     fn semantic_conflict(&self, operation: OperationId, key: &[u8], payload: &[u8]) -> bool {
         self.initialized.is_some_and(|(op, _)| op == operation)
+            || self.parent_operation(operation)
             || self.scoped_operation(operation)
             || self.fence.is_some_and(|f| f.operation == operation)
             || self
@@ -445,6 +477,7 @@ where
                         if next.initialized.is_some_and(|(op, _)| op != *operation)
                             || next.history.contains_key(operation)
                             || next.scoped_operation(*operation)
+                            || next.parent_operation(*operation)
                             || next.fence.is_some_and(|f| f.operation == *operation)
                         {
                             Some(RoutedOutcome::OperationConflict)
@@ -459,6 +492,7 @@ where
                         } else if next.initialized.is_some_and(|(op, _)| op == *operation)
                             || next.history.contains_key(operation)
                             || next.scoped_operation(*operation)
+                            || next.parent_operation(*operation)
                         {
                             Some(RoutedOutcome::OperationConflict)
                         } else if let Some(fence) = next.fence {
@@ -526,6 +560,9 @@ where
                             next.scope_fences.push(f);
                             Some(RoutedOutcome::ScopeFenced(f))
                         }
+                    }
+                    Command::ParentAdopt(bytes) => {
+                        Some(next.apply_parent_adoption(*operation, entry.index, bytes)?)
                     }
                     Command::Data { hint, key, payload } => {
                         if let Err(error) = next.check_context(&hint, key) {
@@ -607,7 +644,7 @@ where
     P: PartitionPolicy + Clone,
 {
     fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
-        if self.scope_limit != 0 {
+        if self.scope_limit != 0 || self.parent_adoption_limit != 0 {
             let mut next = self.clone();
             let receipts = next.apply_batch(entries)?;
             let mut bound = receipts
@@ -666,7 +703,7 @@ where
         bytes: &[u8],
         pending: impl Iterator<Item = (OperationId, &'a [u8])>,
     ) -> Result<usize, ApplicationError> {
-        if self.scope_limit != 0 {
+        if self.scope_limit != 0 || self.parent_adoption_limit != 0 {
             if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -779,6 +816,7 @@ where
                 size_of::<Self::Receipt>()
             }
             Command::ScopeFence(_, _) => return Err(ApplicationError::InvalidCommand),
+            Command::ParentAdopt(_) => return Err(ApplicationError::InvalidCommand),
             Command::Fence(epoch) => {
                 if epoch != self.grant.input().epoch
                     || self.history.contains_key(&operation)
@@ -866,7 +904,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.scope_limit == 0 {
+        if self.parent_adoption_limit != 0 {
+            PARENT_ADOPTING_ROUTED_SCHEMA
+        } else if self.scope_limit == 0 {
             ROUTED_APPLICATION_SCHEMA
         } else {
             SCOPED_ROUTED_APPLICATION_SCHEMA
@@ -890,12 +930,29 @@ where
                 0
             } else {
                 2 + 36 * self.scope_fences.len()
+            }
+            + if self.parent_adoption_limit == 0 {
+                0
+            } else {
+                2 + self
+                    .parent_adoptions
+                    .iter()
+                    .map(|a| {
+                        28 + a
+                            .command
+                            .encode(MAX_PARENT_ADOPTION_BYTES)
+                            .expect("checked command")
+                            .len()
+                    })
+                    .sum::<usize>()
             };
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.scope_limit == 0 {
+        bytes.extend(if self.parent_adoption_limit != 0 {
+            b"VBROUT03"
+        } else if self.scope_limit == 0 {
             b"VBROUT01"
         } else {
             b"VBROUT02"
@@ -935,6 +992,16 @@ where
             bytes.extend(&semantic.key);
             bytes.extend(&semantic.payload);
         }
+        if self.parent_adoption_limit != 0 {
+            bytes.extend((self.parent_adoptions.len() as u16).to_le_bytes());
+            for a in &self.parent_adoptions {
+                let command = a.command.encode(MAX_PARENT_ADOPTION_BYTES)?;
+                bytes.extend(a.status.operation.get().to_le_bytes());
+                bytes.extend(a.status.index.to_le_bytes());
+                bytes.extend((command.len() as u32).to_le_bytes());
+                bytes.extend(command);
+            }
+        }
         Ok(bytes)
     }
     fn restore_checkpoint(
@@ -952,7 +1019,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.scope_limit == 0 {
+                != if self.parent_adoption_limit != 0 {
+                    b"VBROUT03"
+                } else if self.scope_limit == 0 {
                     b"VBROUT01"
                 } else {
                     b"VBROUT02"
@@ -1109,6 +1178,56 @@ where
                 previous = operation.get();
                 history.insert(operation, semantic);
             }
+            let mut adoptions = Vec::new();
+            let mut active = if self.parent_adoption_limit == 0 {
+                self.grant.clone()
+            } else {
+                self.bootstrap_grant()?
+            };
+            if self.parent_adoption_limit != 0 {
+                let count = usize::from(r.u16()?);
+                if count > self.parent_adoption_limit {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                adoptions
+                    .try_reserve_exact(count)
+                    .map_err(|_| ApplicationError::InvalidCheckpoint)?;
+                let mut last = 0;
+                let mut ops = BTreeSet::new();
+                for _ in 0..count {
+                    let operation = r.operation()?;
+                    let index = r.u64()?;
+                    let n = r.u32()? as usize;
+                    let command = OwnerParentAdoption::decode(r.take(n)?)?;
+                    let Some((initial, initial_index)) = initialized else {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    };
+                    if operation == initial
+                        || history.contains_key(&operation)
+                        || !ops.insert(operation)
+                        || index <= initial_index
+                        || index <= last
+                        || index > applied
+                        || indices.contains(&index)
+                        || fence.is_some_and(|f| f.operation == operation || index >= f.index)
+                        || command.before() != &active
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    active = command.after();
+                    adoptions.push(ParentAdoptionRecord {
+                        status: ParentGrantStatus {
+                            operation,
+                            index,
+                            metadata_operation: command.decision.operation,
+                            metadata_index: command.decision.index,
+                            generation: active.input().generation,
+                        },
+                        command,
+                    });
+                    last = index;
+                }
+            }
             if !r.done() {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
@@ -1117,6 +1236,8 @@ where
             next.scope_fences = scope_fences;
             next.history = history;
             next.semantic_bytes = retained;
+            next.parent_adoptions = adoptions;
+            next.grant = active;
             Ok(next)
         };
         let next = restore().map_err(|_| ApplicationError::InvalidCheckpoint)?;

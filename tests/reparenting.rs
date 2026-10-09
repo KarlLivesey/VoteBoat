@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #[path = "transfer_source/fixtures.rs"]
 mod fixture;
+#[path = "reparenting/owner.rs"]
+mod owner_adoption;
 mod support;
 use fixture::*;
 use voteboat::{

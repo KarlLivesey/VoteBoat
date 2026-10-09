@@ -138,8 +138,13 @@ Slice154b adds atomic same-authority reparenting of a live child and locally kno
 subtree into an exact vacancy. One metadata commit updates both parent routes and
 the child binding; data owners keep serving at the same epoch. Cycle/depth and
 pending lifecycle checks, exact retries, partial cache refresh and native journal
-cuts are exercised. Owner grant adoption for later transfers and cross-authority
-movement remain required. See [local reparenting](REPARENTING.md).
+cuts are exercised. Slice154c adds original full-owner parent adoption: a selected
+RoutedApplication schema3 and TransferSource preserve the immutable bootstrap,
+data/retries/outbox and original parent-change results across repeated changes,
+restart and later full split. Actual metadata publication/target activation and
+every-byte adoption/freeze journal cuts are checked. Scoped retained and imported
+owner-family composition, cross-authority movement and native network reparenting
+remain required. See [local reparenting](REPARENTING.md).
 
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC

@@ -4224,3 +4224,48 @@ This evidence validates the local metadata branch only. Original owner grant
 adoption, guarded cross-authority reparenting and their native service histories
 remain required. The full P0–P7 objective is active; macOS, broader faults and
 remaining roadmap scope are not inferred from these Linux finite checks.
+
+## Slice154c — original full-owner parent adoption
+
+Opt-in RoutedApplication schema3 binds the original startup grant and a lifetime
+limit of up to64 parent changes. VBRPAD01 carries the original local ReparentStatus
+and metadata configuration. Exact before/after derivation preserves concrete
+owner, epoch, application data and retry/outbox history. Fixed ParentGrantStatus
+and quorum-read projections retain the original operation/index after subsequent
+changes or full fencing. Commands are host-authenticated observations, not
+commitment certificates. Separate control capacity survives ordinary exhaustion.
+
+TransferSource composes the selected inner schema. Recovery restores the inner
+grant before checking its frozen intent; validating against the startup grant
+first would reject a valid later split. An original adoption retry after F advances
+only the outer applied prefix and cannot change the frozen images.
+
+Actual checks on Linux:
+
+- 72 focused all-feature tests pass: reparenting14, routed14, scoped_source5,
+  transfer_source7, transfer_target9, transfer_activation9 and delegation14.
+  The routed run excludes101 unchanged native socket histories. Shared build8.08s;
+  suite times0.07/0.66/0.24/0.27/0.17/0.51/0.28s in execution order.
+- Core-only reparenting11, routed13 and transfer_source7 pass after3.53s build;
+  suite times0.23/0.33/0.50s.
+- Actual application history uses committed metadata reparenting, owner adoption,
+  fresh-original-factory checkpoint restore, reserved split, F, two imports,
+  metadata/parent publication and both target activations. Both original retries
+  remain duplicates with original outbox entries. Source adoption retries after F
+  preserve original status and export digests across another checkpoint restore.
+- Native ModelIo cuts every byte of adoption and subsequent freeze journal frames
+  and fails sync/publication. Recovery sees the old or complete state, original
+  data/outbox and original adoption index; exports stay at F. These are storage
+  model/application histories, not new socket or arbitrary-power-loss evidence.
+- Strict command truncation, full ordinary-capacity control admission, pending
+  order, conflicts, stale grants, atomic batch failures, checkpoint truncations,
+  corrupted record indexes/operations/counts, profile and immutable-binding
+  mismatch, and repeated restore into already-adopted state pass.
+- All-feature/all-target Clippy -D warnings passes. It first found a fixed test
+  Vec that should be an array; that fixture was corrected. Formatting, whitespace
+  and81-contract inventory checks pass.
+
+This completes selected original full-owner adoption. Scoped retained and
+activated/imported owner families, guarded cross-authority movement and native
+network reparenting remain. The full P0–P7 objective, macOS and broader scope/gates
+stay active; this evidence does not close full reparenting154.

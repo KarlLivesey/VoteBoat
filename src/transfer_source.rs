@@ -44,12 +44,14 @@ pub struct SourceExportCommitment {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SourceQuery<Q> {
+    ParentAdoption(OperationId),
     Data(RoutedQuery<Q>),
     Freeze,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Inline layout is charged by read_result_bound.
 pub enum SourceRead<R> {
+    ParentAdoption(Option<ParentGrantStatus>),
     Data(RoutedRead<R>),
     Freeze(Option<SourceFreezeStatus>),
 }
@@ -250,6 +252,7 @@ where
                 encode_fence(self.routed.grant().input().epoch)
             } else {
                 match decode(bytes, self.routed.limits().payload_bytes)? {
+                    Command::ParentAdopt(_) if self.routed.parent_adoption_limit() != 0 => {}
                     Command::Data { key, payload, .. } => {
                         if self.routed.application().command_key(payload)? != key {
                             return Err(ApplicationError::InvalidCommand);
@@ -307,14 +310,21 @@ where
             }
             let (projected, intent) = next.projected(entry)?;
             if let Some(fence) = next.fence() {
-                if let EntryPayload::Command { operation, .. } = entry.payload {
-                    let outcome = if operation == fence.operation
-                        && intent.as_ref() == next.intent.as_ref()
-                    {
-                        RoutedOutcome::Fenced(fence)
-                    } else {
-                        RoutedOutcome::Rejected(RoutingError::Fenced)
-                    };
+                if let EntryPayload::Command {
+                    operation,
+                    ref bytes,
+                } = entry.payload
+                {
+                    let outcome =
+                        if let Some(status) = next.routed.parent_adoption_retry(operation, bytes) {
+                            RoutedOutcome::ParentAdopted(status)
+                        } else if operation == fence.operation
+                            && intent.as_ref() == next.intent.as_ref()
+                        {
+                            RoutedOutcome::Fenced(fence)
+                        } else {
+                            RoutedOutcome::Rejected(RoutingError::Fenced)
+                        };
                     receipts.push(RoutedReceipt {
                         index: entry.index,
                         operation,
@@ -419,9 +429,13 @@ where
         };
         let (projected, _) = next.projected(&entry)?;
         if next.fence().is_some() {
-            if next.frozen_intent() != next.projected(&entry)?.1.as_ref()
-                || next.fence().is_none_or(|f| f.operation != operation)
-                || !bytes.starts_with(b"VBSFREE1")
+            if next
+                .routed
+                .parent_adoption_retry(operation, bytes)
+                .is_none()
+                && (next.frozen_intent() != next.projected(&entry)?.1.as_ref()
+                    || next.fence().is_none_or(|f| f.operation != operation)
+                    || !bytes.starts_with(b"VBSFREE1"))
             {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -485,15 +499,19 @@ where
         }
         let inner_applied = r.u64()?;
         let len = r.u32()? as usize;
-        let intent = if len == 0 {
-            None
-        } else {
-            Some(self.checked_intent(r.take(len)?)?)
-        };
+        let intent_bytes = r.take(len)?;
         let len = r.u32()? as usize;
         let mut next = self.clone();
-        next.routed
-            .restore_checkpoint(ROUTED_APPLICATION_SCHEMA, inner_applied, r.take(len)?)?;
+        next.routed.restore_checkpoint(
+            self.routed.schema_version(),
+            inner_applied,
+            r.take(len)?,
+        )?;
+        let intent = if intent_bytes.is_empty() {
+            None
+        } else {
+            Some(next.checked_intent(intent_bytes)?)
+        };
         if !r.done()
             || inner_applied > applied
             || next.routed.fence().is_some() != intent.is_some()
@@ -539,6 +557,9 @@ where
             return Err(ApplicationError::NotApplied);
         }
         match query {
+            SourceQuery::ParentAdoption(op) => {
+                Ok(SourceRead::ParentAdoption(self.routed.parent_adoption(op)))
+            }
             SourceQuery::Data(query) => self
                 .routed
                 .read_at(required.min(self.routed.applied_index()), query)
@@ -577,11 +598,12 @@ where
     fn query_bytes(&self, query: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match query {
             SourceQuery::Data(q) => self.routed.query_bytes(q, limit),
-            SourceQuery::Freeze => Ok(0),
+            SourceQuery::Freeze | SourceQuery::ParentAdoption(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
+            SourceQuery::ParentAdoption(_) => 0,
             SourceQuery::Data(q) => self
                 .routed
                 .read_result_bound(q)?
@@ -606,6 +628,7 @@ where
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            SourceRead::ParentAdoption(_) => 0,
             SourceRead::Data(r) => self.routed.read_result_bytes(r, limit)?,
             SourceRead::Freeze(s) => s.as_ref().map_or(0, |s| {
                 s.intent.retained_bytes() - size_of::<TransferIntent>()

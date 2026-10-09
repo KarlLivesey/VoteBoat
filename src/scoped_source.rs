@@ -477,7 +477,9 @@ where
                             bytes.clone()
                         }
                     }
-                    Command::Bootstrap(_) => return Err(ApplicationError::InvalidCommand),
+                    Command::Bootstrap(_) | Command::ParentAdopt(_) => {
+                        return Err(ApplicationError::InvalidCommand)
+                    }
                 }
             };
             if let EntryPayload::Command { bytes, .. } = &mut projected.payload {
