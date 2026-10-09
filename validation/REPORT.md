@@ -4311,3 +4311,42 @@ local history. Clippy removed an unnecessary clone of a Copy query.
 This closes preparation/cancellation only. Cross-authority commit/publication,
 owner-family adoption and native complete-move resumption remain154d. Full P0–P7,
 macOS and the other declared roadmap gates remain active.
+
+## Slice154d2 — committed cross-authority metadata movement
+
+Explicit Directory schema13 adds commit, local participant publication, all-party
+completion and successful release over the original prepared plan. Coordinator
+commit is exclusive with cancellation; original local evidence is checked rather
+than accepted as a foreign assertion. Guards stay held until all original
+participant publications are bound to the same decision. Each of the three
+changed manifests advances one generation; epochs, physical owners, descendants
+and application state remain unchanged.
+
+Actual Linux validation:
+
+- 106 focused all-feature tests pass: guards14, reparenting14, directory31,
+  delegation14, deletion12, insertion11 and retained_insertion10. Shared build2.80s;
+  suites finish in0.06/0.16/0.09/2.34/1.16/0.59/1.05s in execution order.
+- Core-only guards12/reparenting11/directory27 pass (50 tests), after4.53s build.
+- Three-authority movement checks both partial publication orders, bounded
+  old/new routing refusals, unchanged physical owner, original data retries/new
+  writes and unchanged metadata while writing. A subsequent reverse move can
+  prepare and commit after all original guards release.
+- The successful path exhausts ordinary history before commit, publication,
+  completion and release. All phases use their reserved control capacity.
+- Missing/changed original guards, coordinator-fact mismatch, early release,
+  missing/changed publication evidence, commit/cancel exclusion, strict codecs,
+  old profiles, atomic failed batches and every snapshot truncation are checked.
+- Native ModelIo cuts every byte of coordinator decision/completion and
+  participant publication/release frames, plus sync/publication failures. Fresh
+  replay and checkpoint restore retain old or complete local phases, original
+  observations/indexes and exact retries. This does not establish arbitrary crash
+  or native network complete-move coverage.
+- All-feature/all-target Clippy -D warnings passes. Constant envelope assertions
+  were moved into compile-time checks as requested by Clippy. Formatting,
+  whitespace and81-contract inventory checks pass.
+
+This completes the metadata commit protocol. Native cache refresh and original
+owner adoption across authorities remain next154d3, together with a complete
+native TCP/QUIC resumption history. Wider owner families, macOS and full P0–P7
+scope remain open; no complete reparenting-service claim is made here.

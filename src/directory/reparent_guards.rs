@@ -30,7 +30,9 @@ impl Directory {
     }
     pub(super) fn guarded_state_preserved(&self, before: &Self) -> bool {
         before.guarded_manifests.keys().all(|id| {
-            self.manifests.get(id) == before.manifests.get(id) && self.idle_for_reparent(*id)
+            (self.manifests.get(id) == before.manifests.get(id)
+                || self.checked_reparent_update(before, *id))
+                && self.idle_for_reparent(*id)
         })
     }
     pub(super) fn prepare_reparent(
@@ -118,6 +120,8 @@ impl Directory {
         c: CancelReparent,
     ) -> bool {
         operation != c.guard
+            && !self.reparent_publications.contains_key(&c.guard)
+            && !self.reparent_decisions.contains_key(&c.guard)
             && self.guarded_operations.contains(&c.guard)
             && self
                 .reparent_guard_at(self.applied, c.guard)
@@ -181,7 +185,11 @@ impl Directory {
         c: ReleaseReparentGuard,
     ) -> bool {
         let s = c.decision;
-        if operation == s.guard || c.encode().is_err() {
+        if operation == s.guard
+            || c.encode().is_err()
+            || self.reparent_publications.contains_key(&s.guard)
+            || self.reparent_decisions.contains_key(&s.guard)
+        {
             return false;
         }
         if let Ok(Some(old)) = self.reparent_cancellation_at(self.applied, s.guard) {
@@ -253,6 +261,10 @@ impl Directory {
                 | DirectoryOutcome::ChildSlotRetired(_)
                 | DirectoryOutcome::Reparented
                 | DirectoryOutcome::ReparentGuarded
+                | DirectoryOutcome::ReparentCommitted
+                | DirectoryOutcome::ReparentPublished
+                | DirectoryOutcome::ReparentCompleted
+                | DirectoryOutcome::ReparentReleased
                 | DirectoryOutcome::ReparentCancelled
         ) {
             return Err(ApplicationError::InvalidCommand);

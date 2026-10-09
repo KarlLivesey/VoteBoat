@@ -12,7 +12,7 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Bounded ancestry/subtree guards for a future cross-authority reparent decision.
+//! Bounded ancestry/subtree guards for cross-authority reparent decisions.
 //! Quorum observations are caller authenticated; encodings are not certificates.
 use crate::{
     application::*,
@@ -244,6 +244,39 @@ impl CrossReparentPlan {
         }
         p.validate()?;
         Ok(p)
+    }
+    /// Exact old-parent, new-parent and child manifests after this move.
+    pub fn updated_manifests(&self) -> [ResponsibilityManifest; 3] {
+        let mut old = self.old_parent().clone().into_input();
+        let mut new = self.new_parent().clone().into_input();
+        let mut child = self.child().clone().into_input();
+        for (m, target) in [
+            (&mut old, RouteTarget::Vacant),
+            (
+                &mut new,
+                RouteTarget::Child(ChildAuthority {
+                    responsibility: child.responsibility,
+                    group: child.authority,
+                    epoch: child.epoch,
+                }),
+            ),
+        ] {
+            let ExecutionMode::Delegated(routes) = &mut m.execution else {
+                unreachable!("checked plan")
+            };
+            routes
+                .iter_mut()
+                .find(|r| r.scope == child.scope)
+                .expect("checked selector")
+                .target = target;
+            m.generation = RouteGeneration::new(m.generation.get() + 1).unwrap();
+        }
+        child.parent = Some(ParentAuthority {
+            responsibility: new.responsibility,
+            group: new.authority,
+        });
+        child.generation = RouteGeneration::new(child.generation.get() + 1).unwrap();
+        [old, new, child].map(|m| ResponsibilityManifest::new(m).expect("checked reparent shape"))
     }
     pub fn digest(&self) -> ContentDigest {
         ContentDigest::sha256(

@@ -153,6 +153,12 @@ cancellation tombstones reject delayed prepare. Original result/checkpoint repla
 and every-byte coordinator/participant journal failures are exercised. The next
 phase must add commit/publication; these guards alone cannot move a child.
 
+Slice154d2 adds schema13 commit/publication and completion after every participant
+has published. Actual three-authority routes, both publication orders, unchanged
+data-owner service/retries and native journal cuts across all new phases pass.
+The remaining cross-authority integration is native cache refresh, owner grant
+adoption for later transfers and complete native TCP/QUIC service recovery.
+
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
 WAL/checkpoint two-authority recursive deletion histories pass original unread

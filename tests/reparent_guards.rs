@@ -866,3 +866,6 @@ fn creation_reservations_and_local_reparent_cannot_bypass_guards() {
         DirectoryOutcome::Reparented
     );
 }
+
+#[path = "reparent_guards/commit.rs"]
+mod committed;

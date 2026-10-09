@@ -131,3 +131,40 @@ The follow-on publication phase must bind all original guards and serialize its
 commit/cancel decision at the coordinator before any participant changes a route.
 That phase, owner adoption across authority boundaries and native network
 complete-move recovery remain required work.
+
+Committed cross-authority metadata movement is available through pristine
+`Directory::with_cross_authority_reparenting()` (schema13). Schema12 retains
+its preparation/cancellation-only behavior. Schema13 uses the same guarded plan
+and coordinator-first preparation described above, followed by:
+
+1. Collect `ReparentGuardEvidence` from every participating authority's original
+   quorum status. Propose `CommitReparent` to the coordinator with the complete
+   canonical set. Its irreversible decision also publishes that authority's
+   affected manifests. Cancellation is then forbidden.
+2. Read `DirectoryQuery::ReparentDecision(guard)`. Authenticate that coordinator
+   observation and propose `PublishReparent` to each other participant. Each must
+   match its original local guard and original coordinator fact. Only its own
+   old-parent/new-parent/child manifests change. All guards remain held.
+3. Collect each original `ReparentPublicationStatus` through its authority's
+   quorum and construct `ReparentPublicationEvidence`. Propose `FinishReparent`
+   with the complete set to the coordinator. It verifies the common decision
+   digest and original local publication before recording completion and releasing
+   its own guard.
+4. Authenticate `DirectoryQuery::ReparentCompletion(guard)` and propose
+   `ReleaseCommittedReparent` to the remaining participants. A participant must
+   already have published the same decision. Exact retries preserve original
+   results; a new operation ID does not obtain another reserved completion slot.
+
+The two reserved control slots cover first publication and final release even
+when ordinary history is exhausted. Restart reconstructs the current phase and
+original observations. A missing authority can delay publication or release;
+other participants do not infer success from a timeout. Mixed old/new routing
+views may refuse until refreshed, while the original physical data owner and epoch
+stay unchanged.
+
+Current tests cover actual three-authority metadata routes and ordinary original
+owner service, plus byte-level native journal failures. NativeManifestCache's
+cross-authority parent refresh, data-owner adoption of this decision for later
+transfers, and a complete native TCP/QUIC service history remain integration work.
+The existing same-authority cache/adoption selectors do not silently enable those
+new paths.

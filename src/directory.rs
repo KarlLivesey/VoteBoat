@@ -20,7 +20,9 @@
 //! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
 //! reserves fresh identities but cannot bootstrap groups or activate ownership.
 mod child_slots;
+mod reparent_commit;
 mod reparent_guards;
+use crate::reparent_commit::*;
 mod reparenting;
 use crate::reparent_guard::*;
 use crate::reparenting::*;
@@ -279,6 +281,10 @@ pub enum DirectoryOutcome {
     DeletionIntentRecorded,
     Deleted(RouteGeneration),
     ChildSlotRetired(RouteGeneration),
+    ReparentCommitted,
+    ReparentPublished,
+    ReparentCompleted,
+    ReparentReleased,
     ReparentGuarded,
     ReparentCancelled,
     Reparented,
@@ -290,6 +296,10 @@ enum Request {
     RetireChildSlot(RetireChildSlot),
     Reparent(ReparentPlan),
     ReparentGuard(PrepareReparent),
+    CommitReparent(CommitReparent),
+    PublishReparent(PublishReparent),
+    FinishReparent(FinishReparent),
+    ReleaseCommitted(ReleaseCommittedReparent),
     CancelReparent(CancelReparent),
     ReleaseReparent(ReleaseReparentGuard),
     Deletion(DeletionIntent),
@@ -345,6 +355,10 @@ pub struct Directory {
     child_slot_retirement: bool,
     local_reparenting: bool,
     reparent_guards: bool,
+    cross_reparenting: bool,
+    reparent_decisions: BTreeMap<OperationId, OperationId>,
+    reparent_publications: BTreeMap<OperationId, OperationId>,
+    reparent_completions: BTreeMap<OperationId, OperationId>,
     guarded_manifests: BTreeMap<ResponsibilityIdentity, OperationId>,
     guarded_operations: BTreeSet<OperationId>,
     reparent_cancellations: BTreeMap<OperationId, OperationId>,
@@ -396,6 +410,10 @@ impl Directory {
             child_slot_retirement: false,
             local_reparenting: false,
             reparent_guards: false,
+            cross_reparenting: false,
+            reparent_decisions: BTreeMap::new(),
+            reparent_publications: BTreeMap::new(),
+            reparent_completions: BTreeMap::new(),
             guarded_manifests: BTreeMap::new(),
             guarded_operations: BTreeSet::new(),
             reparent_cancellations: BTreeMap::new(),
@@ -503,6 +521,13 @@ impl Directory {
         next.reparent_guards = true;
         Ok(next)
     }
+    /// Select schema13 before bootstrap for committed cross-authority movement.
+    #[allow(clippy::result_large_err)]
+    pub fn with_cross_authority_reparenting(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_reparent_guards()?;
+        next.cross_reparenting = true;
+        Ok(next)
+    }
     fn control_command_limit(&self) -> usize {
         if self.namespace_deletion {
             MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
@@ -535,7 +560,7 @@ impl Directory {
         self.limits.operations.min(MAX_DIRECTORY_MANIFESTS) * self.control_command_limit()
     }
     pub fn reserved_publication_bytes(&self) -> usize {
-        self.guarded_operations.len() * 2 * MAX_REPARENT_COMPLETION_BYTES
+        self.reparent_reserved_bytes()
             + (self.deletions.len() - self.deletion_publications.len())
                 * MAX_DELETION_COMPLETION_BYTES
             + self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
@@ -567,7 +592,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.reparent_guards {
+        bytes.extend(if self.cross_reparenting {
+            b"VBDINI13"
+        } else if self.reparent_guards {
             b"VBDINI12"
         } else if self.local_reparenting {
             b"VBDINI11"
@@ -621,6 +648,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINI10")
             || bytes.starts_with(b"VBDINI11")
             || bytes.starts_with(b"VBDINI12")
+            || bytes.starts_with(b"VBDINI13")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -630,7 +658,15 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if self.reparent_guards && bytes.starts_with(b"VBXRGR01") {
+            if self.cross_reparenting && bytes.starts_with(b"VBXRCM01") {
+                CommitReparent::decode(bytes).map(Request::CommitReparent)
+            } else if self.cross_reparenting && bytes.starts_with(b"VBXRPU01") {
+                PublishReparent::decode(bytes).map(Request::PublishReparent)
+            } else if self.cross_reparenting && bytes.starts_with(b"VBXRFI01") {
+                FinishReparent::decode(bytes).map(Request::FinishReparent)
+            } else if self.cross_reparenting && bytes.starts_with(b"VBXRRL01") {
+                ReleaseCommittedReparent::decode(bytes).map(Request::ReleaseCommitted)
+            } else if self.reparent_guards && bytes.starts_with(b"VBXRGR01") {
                 PrepareReparent::decode(bytes).map(Request::ReparentGuard)
             } else if self.reparent_guards && bytes.starts_with(b"VBXRCN01") {
                 CancelReparent::decode(bytes).map(Request::CancelReparent)
@@ -1366,7 +1402,11 @@ impl Directory {
                 || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
                 || matches!(&command,Request::DelegationCancellation(c) if self.cancellation_permitted(c))
                 || matches!(&command,Request::CancelReparent(c) if self.cancel_reparent_permitted(operation,*c))
-                || matches!(&command,Request::ReleaseReparent(c) if self.guarded_operations.contains(&c.decision.guard) && self.release_reparent_permitted(operation,*c));
+                || matches!(&command,Request::ReleaseReparent(c) if self.guarded_operations.contains(&c.decision.guard) && self.release_reparent_permitted(operation,*c))
+                || matches!(&command,Request::CommitReparent(c) if self.commit_reparent_permitted(operation,c))
+                || matches!(&command,Request::PublishReparent(c) if self.publish_reparent_permitted(operation,c))
+                || matches!(&command,Request::FinishReparent(c) if self.finish_reparent_permitted(operation,c))
+                || matches!(&command,Request::ReleaseCommitted(c) if self.release_committed_permitted(operation,*c));
             if !control
                 && (self.remaining_operations() == 0
                     || self.history_bytes + bytes.len() > self.limits.history_bytes)
@@ -1379,6 +1419,10 @@ impl Directory {
             let guarded_before = (!self.guarded_manifests.is_empty()).then(|| self.clone());
             let mut outcome = match command {
                 Request::ReparentGuard(p) => self.prepare_reparent(operation, p),
+                Request::CommitReparent(c) => self.commit_reparent(index, operation, c),
+                Request::PublishReparent(c) => self.publish_reparent(operation, c),
+                Request::FinishReparent(c) => self.finish_reparent(operation, c),
+                Request::ReleaseCommitted(c) => self.release_committed_reparent(operation, c),
                 Request::CancelReparent(c) => self.cancel_reparent(index, operation, c),
                 Request::ReleaseReparent(c) => self.release_reparent(operation, c),
                 Request::RetireChildSlot(r) => self.retire_child_slot(r),
@@ -1409,7 +1453,16 @@ impl Directory {
                     outcome = DirectoryOutcome::LifecycleBusy;
                 }
             }
-            if control && matches!(outcome, DirectoryOutcome::ReparentCancelled) {
+            if control
+                && matches!(
+                    outcome,
+                    DirectoryOutcome::ReparentCancelled
+                        | DirectoryOutcome::ReparentCommitted
+                        | DirectoryOutcome::ReparentPublished
+                        | DirectoryOutcome::ReparentCompleted
+                        | DirectoryOutcome::ReparentReleased
+                )
+            {
                 self.reparent_controls.insert(operation);
             }
             self.history.insert(
@@ -1597,7 +1650,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.reparent_guards {
+        if self.cross_reparenting {
+            CROSS_REPARENT_DIRECTORY_SCHEMA
+        } else if self.reparent_guards {
             REPARENT_GUARD_DIRECTORY_SCHEMA
         } else if self.local_reparenting {
             LOCAL_REPARENT_DIRECTORY_SCHEMA
@@ -1635,7 +1690,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.reparent_guards {
+        bytes.extend(if self.cross_reparenting {
+            b"VBDIR013"
+        } else if self.reparent_guards {
             b"VBDIR012"
         } else if self.local_reparenting {
             b"VBDIR011"
@@ -1695,7 +1752,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.reparent_guards {
+                != if self.cross_reparenting {
+                    b"VBDIR013"
+                } else if self.reparent_guards {
                     b"VBDIR012"
                 } else if self.local_reparenting {
                     b"VBDIR011"
@@ -1752,6 +1811,7 @@ impl CheckpointStateMachine for Directory {
             next.child_slot_retirement = self.child_slot_retirement;
             next.local_reparenting = self.local_reparenting;
             next.reparent_guards = self.reparent_guards;
+            next.cross_reparenting = self.cross_reparenting;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

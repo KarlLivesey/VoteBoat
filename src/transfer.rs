@@ -325,6 +325,9 @@ pub struct TransferIntentStatus {
 pub enum DirectoryQuery {
     Reparent(OperationId),
     ReparentGuard(OperationId),
+    ReparentDecision(OperationId),
+    ReparentPublication(OperationId),
+    ReparentCompletion(OperationId),
     ReparentCancellation(OperationId),
     RetiredChildSlot(OperationId),
     DeletionIntent(OperationId),
@@ -342,6 +345,9 @@ pub enum DirectoryQuery {
 pub enum DirectoryRead {
     Reparent(Option<crate::reparenting::ReparentStatus>),
     ReparentGuard(Option<crate::reparent_guard::ReparentGuardStatus>),
+    ReparentDecision(Option<crate::reparent_commit::ReparentDecisionStatus>),
+    ReparentPublication(Option<crate::reparent_commit::ReparentPublicationStatus>),
+    ReparentCompletion(Option<crate::reparent_commit::ReparentCompletionStatus>),
     ReparentCancellation(Option<crate::reparent_guard::ReparentCancellationStatus>),
     RetiredChildSlot(Option<crate::child_slots::RetiredChildSlotStatus>),
     DeletionIntent(Option<crate::deletion::DeletionIntentStatus>),
@@ -425,6 +431,18 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::ReparentDecision(operation) => self
+                .0
+                .reparent_decision_at(required, operation)
+                .map(DirectoryRead::ReparentDecision),
+            DirectoryQuery::ReparentPublication(operation) => self
+                .0
+                .reparent_publication_at(required, operation)
+                .map(DirectoryRead::ReparentPublication),
+            DirectoryQuery::ReparentCompletion(operation) => self
+                .0
+                .reparent_completion_at(required, operation)
+                .map(DirectoryRead::ReparentCompletion),
             DirectoryQuery::ReparentGuard(operation) => self
                 .0
                 .reparent_guard_at(required, operation)
@@ -486,6 +504,21 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::ReparentDecision(op) => self
+                    .0
+                    .reparent_decision_at(self.applied_index(), *op)?
+                    .map_or(0, |s| {
+                        s.retained_bytes()
+                            - size_of::<crate::reparent_commit::ReparentDecisionStatus>()
+                    }),
+                DirectoryQuery::ReparentPublication(op) => {
+                    self.0.reparent_publication_at(self.applied_index(), *op)?;
+                    0
+                }
+                DirectoryQuery::ReparentCompletion(op) => {
+                    self.0.reparent_completion_at(self.applied_index(), *op)?;
+                    0
+                }
                 DirectoryQuery::ReparentGuard(op) => self
                     .0
                     .reparent_guard_at(self.applied_index(), *op)?
@@ -572,6 +605,10 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::ReparentDecision(s) => s.as_ref().map_or(0, |s| {
+                s.retained_bytes() - size_of::<crate::reparent_commit::ReparentDecisionStatus>()
+            }),
+            DirectoryRead::ReparentPublication(_) | DirectoryRead::ReparentCompletion(_) => 0,
             DirectoryRead::ReparentCancellation(_) => 0,
             DirectoryRead::ReparentGuard(s) => s.as_ref().map_or(0, |s| {
                 s.plan.retained_bytes() - size_of::<crate::reparent_guard::CrossReparentPlan>()
