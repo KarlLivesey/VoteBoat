@@ -1251,7 +1251,8 @@
       ],
       "native": "NativeBytePartition: stable unsigned single-byte bucket scheme 1/version 1; native and host caches pass the same checked core resolver.",
       "conformance": [
-        "tests/routing.rs", "tests/delegation.rs"
+        "tests/routing.rs",
+        "tests/delegation.rs"
       ],
       "scope": "Synchronous deterministic 256-bucket routing, immutable checked Single/Partitioned/Delegated manifests, distinct responsibility incarnation/ownership epoch/route generation, disjoint full coverage and bounded 32-visit traversal. Provider results and parent/child identity/authority/scope/epoch bindings are checked. Route hints cannot grant authority; check_owner requires caller-supplied local committed/applied ownership at admission and application. Host cache/policy injection and all-bucket/refusal/fence tests pass. No replicated directory, Node command integration, network discovery, durable fence/import/activation or parent-outage child-write evidence yet."
     },
@@ -1267,7 +1268,8 @@
       ],
       "native": "NativeManifestCache: explicit caller-owned BTreeMap hints, bounded count and retained value/route capacity, atomic owned admission/replacement and generation-scoped invalidation.",
       "conformance": [
-        "tests/routing.rs", "tests/delegation.rs"
+        "tests/routing.rs",
+        "tests/delegation.rs"
       ],
       "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch ownership mapping edits/reactivation and capacity overflow reject. An authenticated newer generation may refresh child locator epochs with unchanged ranges, child identities, groups and parent ownership; child epochs cannot regress. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage."
     },
@@ -1476,15 +1478,29 @@
       "design_id": "C05/C15",
       "public_contract": "RetirementGuard<S> / RetirableOwner / RetirementProof / RetentionRelease / TargetActivationEvidence / RetirementStatus",
       "operations": [
-        "new", "from_status", "encode", "decode", "retirement_command",
-        "validate_proposal", "apply_batch", "owner", "status", "freeze_status",
-        "retired_lineage", "export_target", "read_at", "checkpoint",
-        "restore_checkpoint", "readiness_requirements"
+        "new",
+        "from_status",
+        "encode",
+        "decode",
+        "retirement_command",
+        "validate_proposal",
+        "apply_batch",
+        "owner",
+        "status",
+        "freeze_status",
+        "retired_lineage",
+        "export_target",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "readiness_requirements"
       ],
       "native": "Core retirement guard over source/target applications, ordinary Node admission/read/checkpoint seams and the same authoritative native WAL/snapshot binding. Host scope providers remain injectable; local fence authority is sealed.",
       "conformance": [
-        "tests/retirement.rs", "tests/retirement/fixtures.rs",
-        "tests/retirement/host.rs", "tests/retirement/storage.rs",
+        "tests/retirement.rs",
+        "tests/retirement/fixtures.rs",
+        "tests/retirement/host.rs",
+        "tests/retirement/storage.rs",
         "tests/routed/retirement.rs"
       ],
       "scope": "Complete matching publication and all required target activation observations plus an explicit trusted host release of external retention promises gate ordered committed retirement. Drops live provider/import payloads, retains fences, source commitments, decision/release and original activation lineage. Exact retries retain R; other owner operations cannot revive service. Versioned bounded proof/command/checkpoint formats, atomic restore and host resource lifetime checks. Both original and later sources have native-file interrupted-publication, replay and physical WAL reclamation evidence. TCP/QUIC three-replica WAL/checkpoint histories cover original split source retirement, lost receipts and target retries with source offline. No discovery of external pins, automatic cleanup/resumer, unwrapped deployment migration, later-source native-network retirement, delegated-parent lifecycle, arbitrary-power-loss, mixed-version, macOS or separate-host claim."
@@ -1492,9 +1508,30 @@
     {
       "design_id": "C05/C15",
       "public_contract": "DelegationPlan / DelegationBinding / DelegationReservationStatus / DelegationCompletion / DelegationPublicationStatus / DelegationDecline / DelegationDeclineStatus / DelegationCancellation / DelegationCancellationStatus",
-      "operations": ["new", "encode", "decode", "retained_bytes", "child_intent", "intent", "delegation_reservation_at", "delegation_publication_at", "delegation_decline_at", "delegation_cancellation_at"],
+      "operations": [
+        "new",
+        "encode",
+        "decode",
+        "retained_bytes",
+        "child_intent",
+        "intent",
+        "delegation_reservation_at",
+        "delegation_publication_at",
+        "delegation_decline_at",
+        "delegation_cancellation_at"
+      ],
       "native": "Checked parent reservation/completion requests in the existing Directory application journal, public application/read/admission/checkpoint seams and same authoritative storage binding. No new provider/worker.",
-      "conformance": ["tests/delegation.rs", "tests/delegation/fixtures.rs", "tests/delegation/repeat.rs", "tests/delegation/cancellation.rs", "tests/directory.rs", "tests/transfer_publication.rs", "tests/routed/delegation.rs", "tests/routed/delegation_repeat.rs", "tests/routed/delegation_cancel.rs"],
+      "conformance": [
+        "tests/delegation.rs",
+        "tests/delegation/fixtures.rs",
+        "tests/delegation/repeat.rs",
+        "tests/delegation/cancellation.rs",
+        "tests/directory.rs",
+        "tests/transfer_publication.rs",
+        "tests/routed/delegation.rs",
+        "tests/routed/delegation_repeat.rs",
+        "tests/routed/delegation_cancel.rs"
+      ],
       "scope": "One delegated parent's generation and bounded final control history are reserved before child fencing. VBTINT02 binds exact child manifests, operation and authenticated parent reservation facts; decode recomputes content binding. Complete child publication gates parent route epoch update, leaving parent ownership epoch/ancestry stable. Same-group metadata validates actual local retained facts. Original outcomes, locks and control capacity survive journal replay/checkpoint. Five downstream deterministic split/provenance/routing/codec/capacity tests plus two child-locator/cache regressions; foreign observations remain authenticated host obligations. Four selected TCP/QUIC WAL/checkpoint split histories reopen six three-replica groups after every committed phase, survive parent outages, retain unchanged grandparent locators, and commit target retries/new writes with ancestors and old source stopped. A downstream deterministic split/merge/split composition restores fresh targets from retained original child intents, preserves retries/outbox, refuses stale intents/wrong freeze operations and leaves old owners fenced; parent own epoch and grandparent locator stay stable. Four selected native TCP/QUIC WAL/checkpoint split/merge/split histories reopen all created groups after each of 20 later phases, including partial merge fencing and parent outages; final child-only retries/new writes survive with metadata/old owners stopped. Six deterministic cancellation tests cover permanent child refusal before a successful intent, parent release from exact committed refusal, unchanged manifests, fresh compatible transfer 202 with imported retries, both commit orders, same-group provenance, original outcomes, bounded codecs/query accounting and exhausted ordinary/pending control history. Successful child intents always require forward recovery. Two selected native cancellation histories pass: TCP/TLS WAL and QUIC checkpoint recovery, including source continuity during parent outage, exact refusal/cancellation retries and receipt loss, all eleven fresh-transfer reopen phases, committed-intent refusal rejection, and final target data/retry recovery. This is selected coverage, not the full transport/storage cross-product. No namespace creation/deletion/reparenting, parent data migration, arbitrary-fault, mixed-version, macOS or separate-host claim."
     },
     {
@@ -1661,14 +1698,16 @@
         "apply_batch",
         "read_at",
         "checkpoint",
-        "restore_checkpoint"
+        "restore_checkpoint",
+        "with_namespace_transfers"
       ],
       "native": "Common replicated Directory schema3 publication and CreatedNamespace guard over RoutedApplication, selected application/partition contracts and existing native WAL/snapshot/owning Node. No extra provider/runtime.",
       "conformance": [
         "tests/namespace_creation.rs",
-        "tests/routed/creation.rs"
+        "tests/routed/creation.rs",
+        "tests/namespace_creation/transfer.rs"
       ],
-      "scope": "Fresh independent root namespace only: original committed creation reservation plus exact plan/configuration/ready index, bounded reserved publication control, committed target activation before any data service. Host application/partition injection; canonical bounded codecs, full ordinary capacity completion, schema/checkpoint refusal, atomic restore/control-index consistency and receipt allocation accounting. Every torn native activation frame plus sync/publication model faults. Selected TCP/QUIC ready/publish/activate checkpoint reopen and metadata-offline retry histories; unread original tickets and partial publication/activation owner-abort WAL-only replay, actual quorum/laggard commit boundaries and exact per-replica phase recovery. Foreign authentication/commitment remains an explicit trusted host obligation; digest/status are not remote certificates. No live schema upgrade, creation RPC/CLI, recursive insertion into existing covered scope, source transfer lifecycle, deletion/reparenting, hardware power-loss or macOS claim."
+      "scope": "Fresh independent root namespace only: original committed creation reservation plus exact plan/configuration/ready index, bounded reserved publication control, committed target activation before any data service. Host application/partition injection; canonical bounded codecs, full ordinary capacity completion, schema/checkpoint refusal, atomic restore/control-index consistency and receipt allocation accounting. Every torn native activation frame plus sync/publication model faults. Selected TCP/QUIC ready/publish/activate checkpoint reopen and metadata-offline retry histories; unread original tickets and partial publication/activation owner-abort WAL-only replay, actual quorum/laggard commit boundaries and exact per-replica phase recovery. Foreign authentication/commitment remains an explicit trusted host obligation; digest/status are not remote certificates. No live schema upgrade, creation RPC/CLI, recursive insertion into existing covered scope, source transfer lifecycle, deletion/reparenting, hardware power-loss or macOS claim. Opt-in fresh Directory schema4 additionally accepts successfully published namespace current manifests into existing transfer metadata admission; constructed-fact conformance covers reserved control completion, lock/retry/checkpoint recovery and repeated split/merge metadata publication. Schemas1–3 retain historical outcomes and cross-schema/live upgrades refuse. Actual created-owner source lifecycle remains unsupported."
     }
   ],
   "not_yet_implemented": [

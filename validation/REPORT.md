@@ -2961,3 +2961,22 @@ claim of rollback. Source freeze/export for fresh namespaces, recursive selector
 insertion and broader original P0–P7 gaps remain open. P8/Windows deferred; Linux
 loopback execution does not establish macOS or separate-host behavior.
 Final format, whitespace and80-contract inventory validation passed.
+
+## Slice127 — schema4 created namespace transfer metadata
+
+Executed Linux, cargo +stable with --locked --offline. All-feature directory31,
+namespace8 and transfer-publication7 passed (0.11s,0.16s,0.04s; build7.56s).
+Core-only namespace7 passed0.07s, build4.11s. All-feature/all-target Clippy with
+-D warnings passed6.63s. Initial new fixture compilation failed on private range
+fields; use of existing public start()/end() accessors resolved it. Early tests
+before schema binding passed but were superseded by schema4 histories after
+inspection found command-history replay compatibility must be preserved.
+
+Three new constructed-fact metadata histories cover publication-before-transfer,
+unknown/incarnation/authority/current-generation rejection, retained failed retry,
+reserved control at ordinary exhaustion, pending locks/checkpoint recovery, exact
+original decisions, repeated split/merge after restore, unchanged anchor/initial
+namespace publication, schema3 historical refusal replay, live/cross-schema refusal
+and all truncated schema4 checkpoint inputs with atomic restore. No actual native
+schema4 deployment, created-owner freeze/export/import, hardware fault, macOS or
+separate-host claim. Source-capable created namespace composition remains next.

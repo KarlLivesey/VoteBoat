@@ -8630,3 +8630,85 @@ coverage, alias/cycle refusal and partial-progress resumption. Existing deletion
 reparenting/directory authority movement and all other phase-ledger gaps stay active.
 P8/Windows deferred, CI background feedback.
 Final slice126 format, whitespace and80-contract inventory checks passed.
+
+## Slice127 schema plan — created namespace transfer eligibility
+
+The previous explanatory turn made no implementation progress; the current clean
+worktree still has slice126. Inspection identifies a prerequisite to the planned
+created-namespace source path: begin_transfer only admits bootstrap-plan identities,
+even after schema3 publishes a new namespace. Fix this metadata admission boundary
+before composing its source guard; a source fence without an admissible metadata
+intent cannot complete the P5/P6 usable ownership lifecycle.
+
+Shape: no new command, provider or evidence type. In opt-in schema4 a responsibility is known
+if it is in the immutable bootstrap plan OR the directory's successfully published
+manifest map. Exact authority, current before-manifest, lifecycle exclusion, target
+reservation and reserved publication capacity checks remain mandatory. Merely
+reserving a creation intent does not make the new responsibility known. Ordinary
+publication cannot invent a namespace. Restrict this slice to begin_transfer;
+delegated-parent admission follows the future recursive insertion protocol.
+
+Schema review before completion found checkpoint history re-executes commands,
+so broadening schema3 admission would reinterpret old rejected transfer intents.
+Bind the capability before bootstrap with with_namespace_transfers(), schema4,
+VBDINIT4/VBDIR004. Preserve schemas1–3 behavior and refuse live/cross-schema recovery.
+The first check failed to compile because the test used private BucketRange fields;
+use the existing public start()/end() accessors, with no contract redesign.
+
+Transitions/ownership: published fresh namespace -> recorded transfer intent ->
+checked source/target evidence publication -> updated owner. Directory owns these
+metadata transitions; it does not manufacture target readiness or source fences.
+Existing ordered history replay reconstructs dynamic manifests before subsequent
+intent/publication records. Failure/cleanup: retries retain original decisions,
+pending transfer keeps its lock and control reservation across checkpoint restore,
+and malformed checkpoint restore remains atomic. No activation or unfreeze bypass.
+
+Mini plan: current127 (P5/P6) depends on schema3 namespace publication; completion
+checks cover unpublished/unknown/stale/wrong-authority refusal, pending recovery,
+exact publication and repeated movement after recovery, and legacy directory tests.
+Next: source-capable created namespace assembly (P5/P6), dependent on127 and existing
+TransferSource; choose capability before initialization, check durable freeze and
+exact-boundary export/retry lineage with activation retained on recovery. Following:
+recursive insertion into covered selectors (P5/P6), dependent on source capability
+and checked parent/child publication; check complete coverage, no dual owner,
+alias/cycle refusal and partial-progress recovery. The macro milestones and full
+P0–P7 objective remain intact; P8/Windows deferred, CI background feedback.
+
+## Slice127 implemented — schema-bound dynamic namespace transfer metadata
+
+Added Directory::with_namespace_transfers() selected only before bootstrap. Schema4
+includes namespace creation and permits transfer admission for successfully
+published namespaces in the current manifest map, with exact authority/generation,
+existing locks, group exclusion and control reservations intact. Bootstrap-plan
+responsibilities retain the existing path. Schemas1–3 retain their previous command
+semantics and formats; initialization/checkpoint bindings refuse cross-schema use.
+This separate schema is necessary because history replay re-executes original
+commands and must not turn an old schema3 refusal into a successful transfer.
+
+Three new deterministic metadata histories cover unpublished/unknown/incarnation/
+wrong-authority/stale refusal, failed original retry after later namespace publication,
+ordinary-capacity exhaustion with reserved transfer publication, pending checkpoint
+lock/reservation recovery, exact original intent/decision retries, split publication
+followed by merge after recovery, unchanged anchor and initial namespace publication,
+schema3 historical-refusal recovery, live/cross-schema refusal and every truncated
+schema4 checkpoint without partial restore. Source/import facts are constructed
+fixtures for metadata conformance; actual source freeze/export/target activation
+for created namespaces is still unimplemented. No new native provider or storage
+design was added, and no actual native schema4 history is claimed yet.
+
+Linux all-feature namespace8, directory31 and transfer-publication7 passed (0.16s,
+0.11s, 0.04s), build7.56s. Initial test compile used private range fields and failed;
+the focused fix used the existing public range accessors. Pre-schema review tests
+passed but were superseded by the schema4 tests. Remaining final checks are recorded
+below on completion.
+
+Macro review: created namespaces now have a bound metadata transfer path, moving
+P5/P6 toward usable dynamic ownership. Current127 complete under metadata checks;
+next is source-capable created namespace assembly chosen before initialization,
+dependent on127 and existing TransferSource, with activation/fence/export/retry
+recovery checks. Following is recursive insertion into covered selectors, dependent
+on that source capability and checked parent/child publication, with coverage,
+alias/cycle refusal and no-dual-owner partial-progress recovery. All original P0–P7
+gaps remain active; P8/Windows deferred, macOS/separate-host unverified, CI background.
+Final slice127 core-only namespace7 passed0.07s (build4.11s), all-feature/all-target
+Clippy -D warnings passed6.63s, format/whitespace and80-contract inventory passed.

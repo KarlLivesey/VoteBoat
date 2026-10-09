@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 mod support;
+#[path = "namespace_creation/transfer.rs"]
+mod transfer;
 use support::*;
 use voteboat::{
     application::*, directory::*, identity::*, log::*, namespace_creation::*,
@@ -90,7 +92,9 @@ fn commit<A: StateMachine>(a: &mut A, op: u128, b: Vec<u8>) -> A::Receipt {
         .remove(0)
 }
 fn reserve(ops: usize) -> (Directory, NamespacePlan) {
-    let mut d = directory(ops);
+    reserve_directory(directory(ops))
+}
+fn reserve_directory(mut d: Directory) -> (Directory, NamespacePlan) {
     let boot = d.bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES).unwrap();
     commit(&mut d, 1, boot);
     commit(

@@ -112,6 +112,22 @@ replica. This selects schema3, `VBDINIT3` and `VBDIR003`; schema1/2 histories ke
 their existing formats. Cross-mode initialization/replay/restore refuses; no live
 schema upgrade or mixed-version deployment is supplied.
 
+For fresh metadata groups that need ownership transfers of created namespaces,
+select `Directory::with_namespace_transfers()` instead. It includes namespace
+creation and binds schema4, `VBDINIT4` and `VBDIR004` before bootstrap. Schema4
+admits the published namespace's exact current manifest to the existing transfer
+intent/publication protocol, preserving lifecycle locks, target exclusion and
+reserved control capacity. A creation reservation alone is insufficient. Schema3
+retains its original refusal for namespaces absent from the bootstrap plan; its
+checkpoints replay historical commands and must not reinterpret those refusals.
+There is no live schema3-to-4 upgrade. Select the same schema on every replica.
+
+The schema4 conformance histories in `tests/namespace_creation/transfer.rs` use
+constructed source/import facts to test metadata reservation, publication, split/
+merge retry and checkpoint recovery. They do not demonstrate actual created-owner
+fencing or target import. `CreatedNamespace` still wraps a fixed RoutedApplication;
+source-capable activation-guard assembly remains the next implementation step.
+
 `NamespacePlan` binds the original `GroupCreationStatus` to a fresh independent
 root manifest: parent=None, epoch/generation1, matching application adapter,
 Single reserved group and Empty mode. The reservation's existing parent authorizes

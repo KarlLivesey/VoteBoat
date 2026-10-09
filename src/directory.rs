@@ -36,6 +36,7 @@ use std::{
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
 pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
+pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -309,6 +310,7 @@ pub struct Directory {
     initialized: bool,
     group_creation: bool,
     namespace_creation: bool,
+    namespace_transfers: bool,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
@@ -343,6 +345,7 @@ impl Directory {
             initialized: false,
             group_creation: false,
             namespace_creation: false,
+            namespace_transfers: false,
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
@@ -372,6 +375,15 @@ impl Directory {
     pub fn with_namespace_creation(self) -> Result<Self, (ApplicationError, Self)> {
         let mut next = self.with_group_creation()?;
         next.namespace_creation = true;
+        Ok(next)
+    }
+    /// Select schema4 before bootstrap, allowing published fresh namespaces to
+    /// enter the existing transfer protocol. No live upgrade from schemas1–3:
+    /// their historical transfer refusals must retain the same replay outcome.
+    #[allow(clippy::result_large_err)]
+    pub fn with_namespace_transfers(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_namespace_creation()?;
+        next.namespace_transfers = true;
         Ok(next)
     }
     /// Local applied diagnostic, not a distributed linearizable directory read.
@@ -415,7 +427,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_creation {
+        bytes.extend(if self.namespace_transfers {
+            b"VBDINIT4"
+        } else if self.namespace_creation {
             b"VBDINIT3"
         } else if self.group_creation {
             b"VBDINIT2"
@@ -442,6 +456,7 @@ impl Directory {
         if bytes.starts_with(b"VBDINIT1")
             || bytes.starts_with(b"VBDINIT2")
             || bytes.starts_with(b"VBDINIT3")
+            || bytes.starts_with(b"VBDINIT4")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -561,7 +576,9 @@ impl Directory {
         }
         let before = intent.before().input();
         if before.authority != self.plan.authority
-            || !self.plan.manifests.contains_key(&before.responsibility)
+            || (!self.plan.manifests.contains_key(&before.responsibility)
+                && !(self.namespace_transfers
+                    && self.manifests.contains_key(&before.responsibility)))
         {
             return DirectoryOutcome::UnknownResponsibility;
         }
@@ -1204,7 +1221,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.namespace_creation {
+        if self.namespace_transfers {
+            NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.namespace_creation {
             NAMESPACE_DIRECTORY_APPLICATION_SCHEMA
         } else if self.group_creation {
             CREATION_DIRECTORY_APPLICATION_SCHEMA
@@ -1224,7 +1243,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.namespace_creation {
+        bytes.extend(if self.namespace_transfers {
+            b"VBDIR004"
+        } else if self.namespace_creation {
             b"VBDIR003"
         } else if self.group_creation {
             b"VBDIR002"
@@ -1266,7 +1287,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.namespace_creation {
+                != if self.namespace_transfers {
+                    b"VBDIR004"
+                } else if self.namespace_creation {
                     b"VBDIR003"
                 } else if self.group_creation {
                     b"VBDIR002"
@@ -1294,6 +1317,7 @@ impl CheckpointStateMachine for Directory {
             let mut next = Self::new(self.plan.clone(), self.limits).map_err(|(e, _)| e)?;
             next.group_creation = self.group_creation;
             next.namespace_creation = self.namespace_creation;
+            next.namespace_transfers = self.namespace_transfers;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;
