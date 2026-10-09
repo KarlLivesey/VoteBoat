@@ -2514,3 +2514,50 @@ P8/Windows deferred; CI background.
 
 The new peer-driver transient discovery/backoff test also passed core-only (1/1),
 without native/TLS features.
+
+## Slice 112 — responsibility-authority discovery and cached child independence
+
+Executed Linux checks:
+
+- Routing all-features 13/13, core-only 9/9 and native without TLS 13/13 pass.
+  Downstream manifest source/cache injection checks exact missing-path lookup,
+  wrong source/manifest, expiry, lookup/cache budgets, minimum epoch/generation,
+  fenced route refusal and independently closable shared source views. Warm child
+  resolution bypasses the closed source after parent removal.
+- Focused native TCP/TLS and QUIC parent-independence histories 2/2 pass, each
+  exercising WAL and checkpoint variants. Actual Directory quorum-read tickets
+  and outcomes populate NativeAuthorityDiscovery; the common discovery consumer
+  supplies routes for real child proposals/reads, retries, checkpoint and restart.
+  Source and parent roles are closed before child service continues. No ancestor
+  commit is inserted in the child path.
+- The final focused rerun also passes read-binding/group/request checks, live
+  duplicate idempotency, invalidated/older read replay refusal, fresh observation
+  replacement, stale-epoch refusal, exact old-observation invalidation, expiry
+  without duplicate renewal and original rejected route-vector pointer retention.
+- Directory suite 22/22 passes. The broader full routed lifecycle run remains
+  live at this record; it is not counted as passed. Native histories serialize
+  their socket/worker topologies. Preserve the running process and record its
+  eventual terminal result separately; do not restart solely for output silence.
+- Final all-feature/all-target Clippy with warnings denied, fmt/diff and inventory
+  pass (77 contract records).
+
+The schema was refined after real-path inspection: last-barrier equality alone
+could not reject replay of a different older completed read at the same index/term.
+The native provider now binds to an exact ReadInvocationBinding and consumes the
+original ticket with a bounded highest sequence. Out-of-order older completed
+reads can be rejected as stale hints and refreshed through a new read. A script
+constant-reassignment error initially left test call sites using the old argument
+shape; compilation identified missing ticket arguments. The script/call sites
+were fixed directly before successful focused execution.
+
+This is explicit refresh from trusted host-local completed Directory reads, not
+an externally signed proof or automatic remote fetcher. ReadOutcome/tickets must
+come from the original completed host invocation. Native observation IDs are
+provider-local and discarded at replacement/restart; source reconstruction is
+empty and explicit. Payloads use existing bounded cache/manifest admission;
+observation metadata is bounded by retained manifest count. Fresh successful-None
+source results invalidate a matching previous source observation, without proving
+arbitrary namespace retirement; that branch was inspected, not independently
+fault-injected in this slice. Existing target admission/apply/fencing remains the
+authority. No wire/WAL/Raft change, macOS/separate-host, performance, arbitrary-
+fault or complete P0–P7 claim. P8/Windows deferred; full goal remains active.

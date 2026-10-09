@@ -720,3 +720,253 @@ fn cache_accounts_successful_replacement_and_separate_incarnations() {
     assert_eq!(cache.usage().bytes, expected_bytes);
     assert!(cache.get(responsibility(2)).is_some());
 }
+
+#[derive(Clone)]
+struct HostDiscovery {
+    entries: Vec<ResponsibilityManifest>,
+    calls: std::rc::Rc<std::cell::Cell<usize>>,
+    closed: bool,
+    expired: bool,
+    wrong_source: bool,
+    wrong_manifest: bool,
+}
+impl ManifestDiscovery for HostDiscovery {
+    fn lookup(
+        &mut self,
+        request: ManifestLookup,
+        _: voteboat::runtime::MonoTime,
+    ) -> Result<ManifestObservation, ManifestDiscoveryError> {
+        self.calls.set(self.calls.get() + 1);
+        if self.closed {
+            return Err(ManifestDiscoveryError::Closed);
+        }
+        let manifest = self
+            .entries
+            .iter()
+            .find(|m| m.input().responsibility == request.locator.responsibility)
+            .ok_or(ManifestDiscoveryError::Missing)?
+            .clone();
+        let locator = if self.wrong_source {
+            AuthorityLocator {
+                authority: group(999),
+                ..request.locator
+            }
+        } else {
+            request.locator
+        };
+        Ok(ManifestObservation {
+            locator,
+            observation: ManifestObservationId::new(1).unwrap(),
+            manifest: if self.wrong_manifest {
+                self.entries[0].clone()
+            } else {
+                manifest
+            },
+            expires_at: voteboat::runtime::MonoTime(if self.expired { 0 } else { 100 }),
+        })
+    }
+    fn invalidate(&mut self, _: AuthorityLocator, _: ManifestObservationId) -> bool {
+        false
+    }
+    fn close(&mut self) {
+        self.closed = true;
+    }
+}
+struct FetchCache {
+    view: HostView,
+    capacity: usize,
+}
+impl ManifestCache for FetchCache {
+    fn get(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
+        self.view.get(id)
+    }
+    fn admit(
+        &mut self,
+        value: ResponsibilityManifest,
+    ) -> Result<(), (RoutingError, ResponsibilityManifest)> {
+        if self.view.entries.len() >= self.capacity {
+            return Err((RoutingError::Capacity, value));
+        }
+        self.view.entries.push(value);
+        Ok(())
+    }
+    fn invalidate(&mut self, id: ResponsibilityIdentity, g: RouteGeneration) -> bool {
+        let Some(i) = self
+            .view
+            .entries
+            .iter()
+            .position(|m| m.input().responsibility == id && m.input().generation == g)
+        else {
+            return false;
+        };
+        self.view.entries.remove(i);
+        true
+    }
+    fn limits(&self) -> ManifestCacheLimits {
+        self.view.limits()
+    }
+    fn usage(&self) -> ManifestCacheUsage {
+        self.view.usage()
+    }
+}
+fn fetch_fixture() -> (FetchCache, HostDiscovery) {
+    (
+        FetchCache {
+            view: HostView {
+                entries: vec![],
+                wrong_lookup: false,
+            },
+            capacity: 3,
+        },
+        HostDiscovery {
+            entries: fixture(),
+            calls: Default::default(),
+            closed: false,
+            expired: false,
+            wrong_source: false,
+            wrong_manifest: false,
+        },
+    )
+}
+fn fetch_request(id: u128, key: &[u8], lookups: usize) -> DiscoverRouteRequest<'_> {
+    DiscoverRouteRequest {
+        start: ManifestLookup {
+            locator: AuthorityLocator {
+                responsibility: responsibility(id),
+                authority: group(id),
+            },
+            minimum_epoch: None,
+            minimum_generation: None,
+        },
+        key,
+        max_hops: 2,
+        lookups,
+        now: voteboat::runtime::MonoTime(0),
+    }
+}
+#[test]
+fn downstream_authority_discovery_fills_only_needed_path_and_cached_child_ignores_closed_source() {
+    let (mut cache, mut source) = fetch_fixture();
+    let hint = resolve_discovered(
+        &mut cache,
+        &HostPolicy,
+        &mut source,
+        fetch_request(1, &[10], 2),
+    )
+    .unwrap();
+    assert_eq!(hint.group, group(20));
+    assert_eq!(source.calls.get(), 2);
+    assert!(cache.get(responsibility(3)).is_none());
+    let mut shared = source.clone();
+    source.close();
+    assert!(shared
+        .lookup(
+            fetch_request(1, &[10], 1).start,
+            voteboat::runtime::MonoTime(0)
+        )
+        .is_ok());
+    shared.close();
+    cache.invalidate(responsibility(1), RouteGeneration::new(1).unwrap());
+    assert_eq!(
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(2, &[10], 0)
+        )
+        .unwrap(),
+        hint
+    );
+    assert_eq!(source.calls.get(), 3, "cache hit performs no source call");
+    let mut stale = fetch_request(2, &[10], 0);
+    stale.start.minimum_epoch = Some(OwnershipEpoch::new(2).unwrap());
+    assert_eq!(
+        resolve_discovered(&mut cache, &HostPolicy, &mut source, stale),
+        Err(ManifestDiscoveryError::Routing(
+            RoutingError::EpochRegression
+        ))
+    );
+    let mut stale_generation = fetch_request(2, &[10], 0);
+    stale_generation.start.minimum_generation = Some(RouteGeneration::new(2).unwrap());
+    assert_eq!(
+        resolve_discovered(&mut cache, &HostPolicy, &mut source, stale_generation),
+        Err(ManifestDiscoveryError::Routing(
+            RoutingError::StaleGeneration
+        ))
+    );
+    cache.invalidate(responsibility(2), RouteGeneration::new(1).unwrap());
+    assert_eq!(
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(2, &[10], 0)
+        ),
+        Err(ManifestDiscoveryError::BudgetExhausted(responsibility(2)))
+    );
+}
+#[test]
+fn discovered_manifests_validate_source_identity_expiry_budget_and_fenced_state() {
+    for mode in 0..3 {
+        let (mut cache, mut source) = fetch_fixture();
+        source.expired = mode == 0;
+        source.wrong_source = mode == 1;
+        source.wrong_manifest = mode == 2;
+        let error = resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(2, &[10], 1),
+        )
+        .unwrap_err();
+        assert_eq!(
+            error,
+            match mode {
+                0 => ManifestDiscoveryError::Expired,
+                1 => ManifestDiscoveryError::WrongAuthority,
+                _ => ManifestDiscoveryError::WrongIdentity,
+            }
+        );
+        assert_eq!(cache.usage().manifests, 0);
+    }
+    let (mut cache, mut source) = fetch_fixture();
+    assert_eq!(
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(1, &[10], 1)
+        ),
+        Err(ManifestDiscoveryError::BudgetExhausted(responsibility(2)))
+    );
+    assert_eq!(source.calls.get(), 1);
+    let mut fenced = source.entries[1].clone().into_input();
+    fenced.state = ResponsibilityState::Fenced;
+    source.entries[1] = manifest(fenced);
+    assert_eq!(
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(1, &[10], 1)
+        ),
+        Err(ManifestDiscoveryError::Routing(RoutingError::Fenced))
+    );
+    assert_eq!(
+        cache.get(responsibility(2)).unwrap().input().state,
+        ResponsibilityState::Fenced
+    );
+    let (mut cache, mut source) = fetch_fixture();
+    cache.capacity = 1;
+    assert_eq!(
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut source,
+            fetch_request(1, &[10], 2)
+        ),
+        Err(ManifestDiscoveryError::Routing(RoutingError::Capacity))
+    );
+    assert_eq!(cache.usage().manifests, 1);
+    assert_eq!(source.entries.len(), 3);
+}

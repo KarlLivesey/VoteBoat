@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 pub mod administration;
 pub mod admission;
+pub mod authority_discovery;
 pub mod authorization;
 pub mod buffer;
 #[cfg(feature = "tls")]

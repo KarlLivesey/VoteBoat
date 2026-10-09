@@ -7119,3 +7119,124 @@ requirements remain active; no performance, macOS or separate-host claim.
    fencing. Advances P4/P5 and macro online membership/recursive responsibilities.
 
 Full P0–P7 remains active; P8/Windows remain deferred and CI stays background.
+
+## Slice112 schema plan — bounded responsibility authority discovery
+
+P0/P5 C17 adds ManifestDiscovery::lookup/invalidate/close for exact
+AuthorityLocator(responsibility incarnation, directory group incarnation), bounded
+ManifestLookup minimum epoch/generation, and owned ManifestObservation with a
+separate volatile observation ID/expiry. A common resolve_discovered helper first
+uses the existing checked cached path; only an exact miss triggers lookup. It
+derives child authority/epoch from that checked path, validates source/manifest/
+expiry/capacity, admits through ManifestCache and reruns the existing resolver.
+Lookup count is bounded by caller budget and maximum32 path visits. No network,
+DNS, blocking refresh or unbounded retry is hidden in the helper.
+
+NativeAuthorityDiscovery owns bounded NativeManifestCache floors plus fixed
+observation metadata. Trusted hosts feed completed Directory ReadOutcome values;
+only successful quorum-backed read results with matching barrier group and exact
+manifest authority/responsibility enter it. Read index/term cannot regress; an
+identical read barrier cannot renew expiry or undo invalidation. Fresh read
+observations may refresh unchanged manifest generations without a directory
+mutation. Native cache admission retains existing immutable lineage, schema,
+generation and ownership-epoch constraints. Invalidation names observation ID,
+so an old failure cannot discard a newer read observation. Close affects only
+that provider; restart starts empty and refetches via ordinary reads. Bounded
+native publish rejection returns the original read outcome/manifest allocation.
+
+TTL controls discovery admission, not cached route authority or an ongoing read
+lease. Existing RoutedApplication admission/apply checks and durable source
+fences remain authoritative. Fenced manifests may be cached but cannot resolve
+an active route. Missing directory results do not fabricate a new namespace or
+prove arbitrary retirement; dynamic deletion remains a separate requirement.
+
+Acceptance: downstream source through checked discovery/cache consumer, wrong
+source/identity/epoch, expired observations, lookup budget, original refusal,
+conditional invalidation/close, fenced paths and cached child success with source
+offline. Native real Directory quorum reads -> observation -> discovered route ->
+child write/read/checkpoint/restart, preserving parent-offline independence over
+TCP/QUIC and existing split/merge/retirement regressions. Finite native observation
+checks cover replayed read barrier, stale manifest and exact invalidation; no
+external signed directory protocol or automatic remote fetch is claimed.
+
+### Slice112 schema refinement before validation
+
+The real native histories pass, but inspection found that retaining only the last
+ReadBarrier could allow replay of a different older barrier at the same committed
+index/term. Avoid an unbounded barrier history: bind NativeAuthorityDiscovery to
+one exact ReadInvocationBinding and require the original completed invocation
+ticket alongside its outcome. Validate binding/group/request, retain a single
+highest sequence and each observation's sequence, and reject older/equal replay
+except exact still-live idempotency. Out-of-order older completions may be dropped
+as stale hints; they do not alter committed state. Restart/rebinding constructs a
+new provider and refetches. This fixed metadata dependency is needed to make
+bounded replay refusal true without changing Raft or adding a replay journal.
+
+### Slice112 implemented evidence and macro review
+
+Implemented public ManifestDiscovery/ManifestLookup/ManifestObservation and the
+resolve_discovered consumer. It fills only exact missing segments of the existing
+checked route, derives child authority/epoch from that path and admits through the
+same public cache. Source, identity, minimum epoch/generation, expiry, lookup count
+and retained-byte bounds are checked. Cached child paths do not consult discovery.
+NativeAuthorityDiscovery consumes original completed Directory read tickets and
+outcomes, validates reader binding/group/request and keeps a bounded highest-read
+sequence plus native manifest floors. Duplicate live reads are idempotent without
+renewal; invalidated/expired/older replay refuses. Fresh original reads refresh
+unchanged manifests. Observation-specific invalidation preserves newer reads.
+Native rejection returns the original outcome/manifest allocation. Closed discovery
+does not close Node/read/transport workers or alter target ownership checks.
+
+Actual Linux checks so far: routing all-features13/13, core-only9/9 and native
+without TLS13/13 pass. Focused real TCP/QUIC directory-to-discovered-child histories
+2/2 pass, each covering WAL and checkpoint recovery. Final added assertions check
+native expiry without duplicate renewal and original rejected route-vector pointer;
+those focused histories and final all-target/all-feature Clippy were rerun and pass.
+Directory suite22/22 passes. Full routed lifecycle regression run remains live;
+its final result is recorded separately below when terminal. fmt/diff and inventory77
+pass. No consensus, wire or persistent format change.
+
+The schema was refined after inspection to use original read-invocation binding/
+sequence, avoiding replay-history growth at unchanged commit index/term. One edit
+script stopped before updating test call sites because of a constant reassignment;
+compilation reported the missing ticket arguments. The script and call sites were
+fixed directly, and the actual histories then passed. No protocol rewrite or
+unchanged-failure cycling was used. The successful-None observation path invalidates
+a matching prior source observation while returning Missing; dynamic namespace
+retirement is not inferred from that absence.
+
+Macro review: P0/P5 now have public/native peer and responsibility-authority discovery
+seams with actual native consumers. Static service use and parent-independent child
+writes remain available. This is explicit observation refresh through existing
+quorum reads, not an automated remote discovery protocol or dynamic namespace
+lifecycle. Signed external issuer integration, live executable refresh, namespace
+creation/deletion/reparenting and movement of a directory's own data remain open.
+P4 generic envelopes/public mutation ingress, P6 broader retention/interruptions and
+P7 measured tuning/platform/fault gates remain in BASELINE_ACCEPTANCE.md. These
+initial discovery seams do not complete P0 or P5. Full P0–P7 remains active;
+P8/Windows remain deferred, CI background.
+
+### Linked mini plan after slice112
+
+1. Current — bounded responsibility-authority discovery (implemented above).
+   Purpose: resolve missing authorized manifests while keeping warm children usable
+   without parent/source calls. Dependencies: existing quorum reads, read tickets,
+   ManifestCache and checked routed ownership. Completion checks: downstream source
+   injection, epoch/generation/expiry/fence/budget refusal, original-read replay and
+   actual native parent-offline write/read/checkpoint/restart histories plus relevant
+   lifecycle regressions. Advances P0/P5 and macro recursive responsibilities/routing.
+2. Next — C18 bounded placement planning through committed authorization.
+   Purpose: recommend useful replica placement without turning live load into quorum
+   weights or authoritative membership. Dependencies: existing ReplicaPlacement,
+   PlacementAuthorizer, fixed policy and learner/joint/final administration; inspect
+   those contracts before choosing proposal shape. Completion checks: bounded
+   deterministic candidate scoring/proposals, stale-store/domain/capacity rejection
+   and real native consumer retaining readiness and joint consensus gates. Advances
+   macro online membership/recursive placement (P4/P5).
+3. Following — P4 generic application envelope and public mutation ingress audit.
+   Purpose: expose useful safe administration beyond trusted fixed counter startup
+   plans. Dependencies: actual application capacity contracts, C15 admission, C21
+   principal/scope checks, placement authorization and existing configuration limits.
+   Completion checks: concrete bounds at every admission/apply/checkpoint path,
+   before-persist refusal, authorized native transition and faulted restart evidence.
+   Advances macro online membership and cross-cutting P0, retaining static usability.

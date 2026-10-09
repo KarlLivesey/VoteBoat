@@ -371,7 +371,9 @@ prefaces and handshakes, checks identity/generation before returning a session,
 and retains canceled/expired dialing until actual completion. Native 100-group
 histories use one long-lived connector per node and explicitly drain/join their
 dial workers. See [connection establishment](docs/CONNECTIONS.md). Embedded hosts can select
-[bounded peer discovery](docs/DISCOVERY.md) through `DiscoveryConnector` without
+[bounded peer discovery](docs/DISCOVERY.md) through `DiscoveryConnector` and
+[responsibility-authority discovery](docs/AUTHORITY_DISCOVERY.md) through
+`ManifestDiscovery`/`resolve_discovered`, without
 changing provisioned peer trust or committed membership. Local
 client/read/result admission and peer driving are composed by the owning node
 facade. Native filesystem/provider setup remains explicit.

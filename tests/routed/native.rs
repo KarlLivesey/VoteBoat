@@ -371,6 +371,39 @@ where
     });
     result
 }
+fn directory_observation(
+    nodes: &mut [Node<Directory>],
+    clock: &Instant,
+    id: ResponsibilityIdentity,
+) -> (
+    ReadInvocationTicket,
+    ReadOutcome<Option<ResponsibilityManifest>>,
+) {
+    for _ in 0..4 {
+        nodes[0]
+            .read(group(1), id)
+            .unwrap_or_else(|_| panic!("directory read rejected"));
+        let mut result = None;
+        drive(nodes, clock, |ns| {
+            while let Some(reply) = ns[0].poll_read() {
+                let ticket = reply.ticket();
+                result = Some((
+                    ticket,
+                    ns[0]
+                        .complete_read(reply)
+                        .unwrap_or_else(|_| panic!("directory completion")),
+                ));
+            }
+            result.is_some()
+        });
+        let outcome = result.unwrap();
+        if matches!(&outcome.1, ReadOutcome::Read { result: Ok(_), .. }) {
+            return outcome;
+        }
+        campaign(nodes, clock, 1);
+    }
+    panic!("directory observation repeatedly unavailable")
+}
 fn close<A>(
     mut nodes: Vec<Node<A>>,
     clock: &Instant,
@@ -554,12 +587,151 @@ fn parent_independence(protocol: NativePeerProtocol, compact: bool) {
         bytes: 64 * 1024,
     })
     .unwrap();
+    let mut discovery = voteboat::native::authority_discovery::NativeAuthorityDiscovery::new(
+        ManifestCacheLimits {
+            manifests: 8,
+            bytes: 64 * 1024,
+        },
+        60_000,
+        parents[0].local().reads.binding(),
+        MonoTime(0),
+    )
+    .unwrap();
+    let lookup = |id| ManifestLookup {
+        locator: AuthorityLocator {
+            responsibility: responsibility(id),
+            authority: group(1),
+        },
+        minimum_epoch: None,
+        minimum_generation: None,
+    };
     for id in 1..=5 {
-        let manifest = read(&mut parents, &clock, 1, responsibility(id)).unwrap();
-        cache.admit(manifest).unwrap();
+        let query = lookup(id);
+        let (ticket, outcome) = directory_observation(&mut parents, &clock, responsibility(id));
+        if id == 1 {
+            let ReadOutcome::Read {
+                barrier,
+                result: Ok(Some(manifest)),
+            } = outcome
+            else {
+                panic!("manifest observation");
+            };
+            let original = || ReadOutcome::Read {
+                barrier,
+                result: Ok(Some(manifest.clone())),
+            };
+            let mut expired = voteboat::native::authority_discovery::NativeAuthorityDiscovery::new(
+                ManifestCacheLimits {
+                    manifests: 1,
+                    bytes: 64 * 1024,
+                },
+                1,
+                parents[0].local().reads.binding(),
+                MonoTime(0),
+            )
+            .unwrap();
+            expired
+                .observe(query, ticket, original(), MonoTime(0))
+                .unwrap();
+            assert_eq!(
+                expired.lookup(query, MonoTime(1)).err(),
+                Some(ManifestDiscoveryError::Expired)
+            );
+            assert_eq!(
+                expired
+                    .observe(query, ticket, original(), MonoTime(1))
+                    .unwrap_err()
+                    .0,
+                ManifestDiscoveryError::StaleObservation
+            );
+            let first = discovery
+                .observe(query, ticket, original(), MonoTime(0))
+                .unwrap();
+            assert_eq!(
+                discovery
+                    .observe(query, ticket, original(), MonoTime(0))
+                    .unwrap(),
+                first
+            );
+            let mut wrong = query;
+            wrong.locator.authority = group(999);
+            let rejected = original();
+            let pointer = match &rejected {
+                ReadOutcome::Read {
+                    result: Ok(Some(m)),
+                    ..
+                } => match &m.input().execution {
+                    ExecutionMode::Delegated(entries) => entries.as_ptr(),
+                    _ => panic!("root routes"),
+                },
+                _ => panic!("read result"),
+            };
+            let (error, returned) = discovery
+                .observe(wrong, ticket, rejected, MonoTime(0))
+                .unwrap_err();
+            assert_eq!(error, ManifestDiscoveryError::WrongAuthority);
+            match returned {
+                ReadOutcome::Read {
+                    result: Ok(Some(m)),
+                    ..
+                } => match &m.input().execution {
+                    ExecutionMode::Delegated(entries) => assert_eq!(entries.as_ptr(), pointer),
+                    _ => panic!("returned root routes"),
+                },
+                _ => panic!("returned read result"),
+            }
+            assert!(discovery.invalidate(query.locator, first));
+            assert_eq!(
+                discovery
+                    .observe(query, ticket, original(), MonoTime(1))
+                    .unwrap_err()
+                    .0,
+                ManifestDiscoveryError::StaleObservation
+            );
+            let (fresh_ticket, fresh) =
+                directory_observation(&mut parents, &clock, responsibility(id));
+            let next = discovery
+                .observe(query, fresh_ticket, fresh, MonoTime(1))
+                .unwrap();
+            assert_ne!(first, next);
+            assert_eq!(
+                discovery
+                    .observe(query, ticket, original(), MonoTime(1))
+                    .unwrap_err()
+                    .0,
+                ManifestDiscoveryError::StaleObservation
+            );
+            assert!(!discovery.invalidate(query.locator, first));
+            let mut newer = query;
+            newer.minimum_epoch = Some(OwnershipEpoch::new(2).unwrap());
+            assert_eq!(
+                discovery.lookup(newer, MonoTime(1)).err(),
+                Some(ManifestDiscoveryError::Routing(
+                    RoutingError::EpochRegression
+                ))
+            );
+        } else {
+            discovery
+                .observe(query, ticket, outcome, MonoTime(1))
+                .unwrap();
+        }
     }
-    let orders = resolve(&cache, &HostPolicy, responsibility(1), &[10], 3).unwrap();
-    let jobs = resolve(&cache, &HostPolicy, responsibility(1), &[200], 3).unwrap();
+    let request = |key| DiscoverRouteRequest {
+        start: lookup(1),
+        key,
+        max_hops: 3,
+        lookups: 3,
+        now: MonoTime(1),
+    };
+    let orders =
+        resolve_discovered(&mut cache, &HostPolicy, &mut discovery, request(&[10])).unwrap();
+    let jobs =
+        resolve_discovered(&mut cache, &HostPolicy, &mut discovery, request(&[200])).unwrap();
+    discovery.close(); // Subsequent child operation cannot depend on this source.
+    assert_eq!(
+        discovery.lookup(lookup(1), MonoTime(1)).err(),
+        Some(ManifestDiscoveryError::Closed)
+    );
     assert_ne!(orders.group, jobs.group);
     let orders_grant = cache.get(responsibility(2)).unwrap().clone();
     let jobs_grant = cache.get(responsibility(3)).unwrap().clone();
@@ -599,11 +771,35 @@ fn parent_independence(protocol: NativePeerProtocol, compact: bool) {
     cache.invalidate(responsibility(5), RouteGeneration::new(1).unwrap());
     assert!(resolve(&cache, &HostPolicy, responsibility(1), &[10], 3).is_err());
     assert_eq!(
-        resolve(&cache, &HostPolicy, responsibility(2), &[10], 1).unwrap(),
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut discovery,
+            DiscoverRouteRequest {
+                start: lookup(2),
+                key: &[10],
+                max_hops: 1,
+                lookups: 0,
+                now: MonoTime(1)
+            }
+        )
+        .unwrap(),
         orders
     );
     assert_eq!(
-        resolve(&cache, &HostPolicy, responsibility(3), &[200], 1).unwrap(),
+        resolve_discovered(
+            &mut cache,
+            &HostPolicy,
+            &mut discovery,
+            DiscoverRouteRequest {
+                start: lookup(3),
+                key: &[200],
+                max_hops: 1,
+                lookups: 0,
+                now: MonoTime(1)
+            }
+        )
+        .unwrap(),
         jobs
     );
     for (nodes, g, hint, key, delta) in [

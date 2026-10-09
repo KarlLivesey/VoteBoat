@@ -1580,13 +1580,30 @@
         "tests/support/peer_driver.rs"
       ],
       "scope": "Exact already-provisioned stable peer hints with nonzero generations and monotonic expiry; native bounded fixed-size entries retain invalidation/expiry floors, reject conflicts/stale publication and return rejected input. Public wrapper checks peer/address/expiry before dial, preserves original refusal and exact accepted attempt lifetime, invalidates only used generations on failure, bypasses lookup for accept and suppresses invalidation on cancel/close. PeerDriver retries transient discovery misses under existing roster backoff and deadlines. No implicit DNS/network/worker, trust provision, membership/owner authority, durable cache or hot executable refresh. Actual native TCP/TLS failed-hint/refresh/authentication/drain history; authority resolution and QUIC discovery execution remain separate."
+    },
+    {
+      "design_id": "C17",
+      "public_contract": "ManifestDiscovery / ManifestLookup / ManifestObservation / resolve_discovered",
+      "operations": [
+        "lookup",
+        "invalidate",
+        "close",
+        "resolve_discovered",
+        "NativeAuthorityDiscovery::observe"
+      ],
+      "native": "NativeAuthorityDiscovery over bounded NativeManifestCache, original completed Directory read binding/tickets and fixed observation metadata",
+      "conformance": [
+        "tests/routing.rs",
+        "tests/routed/native.rs"
+      ],
+      "scope": "Bounded nonblocking source for exact responsibility/directory incarnations, minimum epoch/generation and expiring provider-local observations. Common native/host consumer fills only missing checked route segments under lookup/path budgets and normal cache admission; cached child routes bypass source/parent. Native observe validates original read binding/group/request, bounds replay with highest accepted sequence, rejects regressing index/term, preserves original rejection allocation, retains manifest floors and invalidates only exact observations. Fresh original reads refresh unchanged manifests; duplicates do not renew. Actual Directory quorum-read to discovered TCP/QUIC child write/checkpoint/restart histories preserve parent independence. No automatic remote fetch, external signed proof, owner activation, namespace recreation or persistent authority; observation IDs end with provider lifetime."
     }
   ],
   "not_yet_implemented": [
     "automatic-wal-maintenance-scheduling",
     "incremental-segment-cleaning-and-general-retention",
     "client-disk-and-connection-admission-policy",
-    "responsibility-authority-discovery-and-live-endpoint-refresh",
+    "automatic-remote-authority-discovery-and-live-endpoint-refresh",
     "observability-latency-and-budgeted-events",
     "native-configuration-service-endpoints",
     "live-credential-rotation-and-durable-authorization-audit",
