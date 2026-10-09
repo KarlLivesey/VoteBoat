@@ -301,3 +301,6 @@ impl LogStore for HostLogStore {
         Ok(result)
     }
 }
+
+#[cfg(feature = "native")]
+pub mod retirement_storage;

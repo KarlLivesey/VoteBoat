@@ -703,3 +703,6 @@ fn nested_insertion_checks_remaining_hops_before_reserving_parent() {
         );
     }
 }
+
+#[path = "nested_continuity.rs"]
+mod continuity;

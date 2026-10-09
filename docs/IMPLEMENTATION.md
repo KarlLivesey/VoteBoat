@@ -14,8 +14,8 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; recursive insertion into existing selectors, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
-| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; cross-authority/retained-scope insertion, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
+| P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
@@ -111,19 +111,20 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Native nested insertion recovery (current slice133, P1/P5/P6).** Purpose:
-   verify a previously activated child can hand real data to fresh grandchildren.
-   Dependencies:132 full-map parent reservation and existing assigned native owners.
-   Completion: TCP/QUIC x WAL/checkpoint, unread phase results, exact reopen/retry,
-   stale/updated parent routing, independent activation and ancestor-offline service
-   with unchanged metadata/source files. Executed evidence is recorded below.
-2. **Nested subsequent lifecycle continuity (next, P5/P6).** Purpose: preserve
-   original lineage through later movement and authorized cleanup. Dependencies:
-   native nested recovery, existing split/merge and retention-authorized retirement.
-   Completion: subsequent nested split/merge/retirement preserves original imported
-   operations/outbox through interrupted phases and refuses premature reclamation.
+1. **Nested subsequent lifecycle continuity (current slice134, P5/P6).** Purpose:
+   carry an inserted grandchild through later split/merge and authorized cleanup.
+   Dependencies:132/133, delegated transfer and retirement contracts. Completion:
+   actual nested lineage, partial activation/refusal, fresh checkpoint recovery and
+   exact retries at each phase; native-file interrupted retirement/reclaim preserves
+   tombstones, original activation and imported operations/outbox. Evidence below.
+2. **Native later movement recovery (next, P1/P5/P6).** Purpose: validate the
+   same subsequent movement with actual assigned networked owners. Dependencies:
+   133 native nested setup,134 continuation and existing retirement guard assembly.
+   Completion: selected TCP/QUIC interrupted split/merge phases, partial fencing and
+   exact restart/retry, parent locator refresh and source/ancestor-independent writes;
+   keep native-file retirement evidence distinct from networked retirement evidence.
 3. **Full baseline gap audit and next required path (following, P0–P7).** Purpose:
-   connect the lifecycle evidence to remaining user-visible baseline requirements.
+   connect lifecycle evidence to remaining user-visible baseline requirements.
    Dependencies: nested continuity and original roadmap/acceptance ledger.
    Completion: review deletion/reparenting, metadata authority movement, retention,
    admission/mutation, tuning and platform/fault gates against actual evidence;
@@ -9294,3 +9295,96 @@ the full baseline gap audit and next required complete path. CI is not a gate.
 
 Final slice133 format, whitespace and80-contract inventory passed; all validation
 handles are terminal. No CI gate used. Full goal remains active.
+
+## Slice134 schema plan — nested subsequent split/merge and retirement
+
+Previous goal turn progressed:133 committed/pushed99159b7; current tree clean.
+Current deliverable advances P5/P6: take actual root and nested insertion lineage
+through a later grandchild split and compatible merge, then retain durable
+retirement tombstones. Dependencies:132/133 checked insertion, existing delegated
+handoff/retention proof contracts and native retirement interruption fixture.
+Next: native later-movement phase recovery; following: full baseline gap audit
+and next required path. The macro scope remains full P0–P7; P8/Windows deferred.
+
+Data/API: schema6 Directory; original schema3 child21 and schema4 grandchildren
+31/32 constructed inside RetirementGuard before bootstrap. Record each guarded
+owner's exact application LogEntries and immutable fresh constructor. Ordinary
+later targets41/42/43 preserve responsibility31 and original nested activation
+lineage. One manifest-aware test route helper must select physical partition scope
+rather than mistake the whole responsibility scope for a target's owned range.
+
+Transitions: actual root import/publication/activation -> child21 write/fence ->
+nested import/publication/parent refresh/activation -> grandchild31 split41/42 ->
+compatible merge43. Parent reservations bind exact current child/parent manifests;
+completion refreshes child locators while root ancestry remains stable. Every
+accepted state-changing phase checkpoints/reconstructs a fresh schema-bound owner
+or directory, compares exact retained facts and retries original bytes. Partial
+source fencing leaves other sources active, targets non-serving; publication
+alone never activates. Imported operations/outbox are checked after each move.
+
+Retirement requires complete matching target activation and scoped host retention
+release; timeout/metadata publication alone does not permit dropping data. Keep
+original activation lineage and final fence after provider payload removal.
+Refuse partial activation, wrong release boundary/source, foreign original binding
+and premature retirement without mutation. Test exact retirement retry, restored
+retired checkpoints and absence of old provider data.
+
+Native evidence: reuse the existing actual FileLogIo/FileSnapshotIo retirement
+fixture, generalized only to accept a fresh-owner closure and arbitrary target
+identity. Extract that test helper to tests/support to avoid duplicating its
+interrupted publication/replay/reclaim checks. Exercise actual schema4 nested
+source trace at sealed-unpublished, before-manifest and lost-manifest-completion
+cuts, then publish retired checkpoint, reclaim log, reopen and compare tombstone,
+fence/activation lineage. This helper is needed for the same P6 cleanup acceptance;
+no production API/protocol/provider change is planned. This is finite deterministic
+and native-file evidence, not native network subsequent movement or power-loss proof.
+
+## Slice134 — inserted-grandchild later split/merge and retirement
+
+Test-only guarded owner composition starts before bootstrap and performs actual
+root insertion then nested insertion. It moves responsibility31 from original
+schema4 grandchild31 into ordinary targets41/42, then merges their compatible
+scopes into43 using exact current parent reservations and locator completions.
+Accepted phase commands restore fresh schema-bound checkpoints and retry original
+bytes, comparing retained lifecycle outcomes rather than the new receipt index.
+Partial merge fencing leaves the other source readable. Publication alone leaves
+targets NotActive; incomplete activation evidence refuses source retirement.
+
+Original child21 and grandchild31 retire under scoped explicit host retention
+releases and complete retained activation evidence, including retained historical
+evidence after later movement. Ordinary split owners retire after merge. Exact
+retirement retries and checkpoint restoration keep fences/original activation
+lineage while provider payload disappears. Wrong source/fence/partial-target proof
+and cross-owner tombstone restore refuse without mutation. Imported operations1/81
+and later82 survive the next move with exact original outcomes; new83 adds data,
+with four outbox records in merged43. Sibling32 retains80; root manifest stays
+unchanged and final root-to-grandchild routing resolves exact merged/sibling grants.
+
+Shared native retirement helper is extracted from the existing tests; fresh-owner
+closure and target identity are generalized without production changes. Actual
+schema4 nested-source command trace exercises sealed-unpublished, before-manifest
+publication and lost-completion cuts using FileLogIo/FileSnapshotIo. Recovery uses
+the log-authoritative previous snapshot plus retirement replay, then publishes a
+retired checkpoint, reclaims WAL and reopens without provider data. Original
+source/ordinary-target native-file regression tests pass after helper extraction.
+
+33 related all-feature tests passed: delegation14 (0.07s), insertion7 (3.02s),
+retirement7 (0.12s), repeat5 (0.36s). Core-only insertion6 passed2.90s. Initial
+fixture compile found a temporary route borrow, missing scope trait and incorrect
+source-status accessor; each was corrected locally. First acceptance exposed
+comparison of outer receipt indices on retry: changed to exact underlying retained
+outcome, explicitly checking the retry receipt advances. Focused continuation
+then passed0.07s; final strengthened payload-removal check result follows.
+All-feature/all-target Clippy -D warnings passed1.21s before that final assertion.
+
+This proves finite deterministic/checkpoint composition and selected single-replica
+native-file persistence cuts; it does not validate networked later movement,
+networked retirement, arbitrary faults/power loss, cross-authority/retained-scope
+insertion, macOS or separate-host deployment. General retention remains an explicit
+host contract. No production protocol/store/runtime/API change. Full P0–P7 stays
+active, P8/Windows deferred, original pack immutable and RPL-1.5 retained. Macro
+review: P5/P6 gain subsequent nested lifecycle evidence; all original gaps remain.
+Next native later-movement acceptance, then full-gap audit/next required path.
+Final strengthened continuation passed0.07s; final all-feature/all-target Clippy
+-D warnings passed1.73s. Format, whitespace and80-contract inventory passed.
+All validation handles terminal; no CI gate used. Full goal remains active.

@@ -312,3 +312,13 @@ stay unchanged. Original source activation lineage and immutable creation bindin
 survive. Subsequent nested movement/retirement,
 cross-authority/retained-scope insertion, arbitrary faults and macOS/separate-host
 execution remain open.
+
+Slice134 checks subsequent grandchild split and compatible merge with actual
+retained nested activation lineage, original retries/outbox, parent refresh and
+root routing. Owners select RetirementGuard before their first command. Partial
+activation and incorrect retention scope refuse cleanup; complete retained
+activation evidence plus explicit host retention release permits payload removal
+while fence/activation tombstones remain. Selected schema4 source native-file
+publication interruption/replay/reclamation is exercised through the same shared
+fixture as ordinary retirement. Networked subsequent movement/retirement remains
+the next deliverable, with broader lifecycle/platform gates still open.

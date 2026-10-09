@@ -3156,3 +3156,53 @@ the full baseline gap audit and next required complete path. CI is not a gate.
 
 Final slice133 format, whitespace and80-contract inventory passed; all validation
 handles are terminal. No CI gate used. Full goal remains active.
+
+## Slice134 — inserted-grandchild later split/merge and retirement
+
+Test-only guarded owner composition starts before bootstrap and performs actual
+root insertion then nested insertion. It moves responsibility31 from original
+schema4 grandchild31 into ordinary targets41/42, then merges their compatible
+scopes into43 using exact current parent reservations and locator completions.
+Accepted phase commands restore fresh schema-bound checkpoints and retry original
+bytes, comparing retained lifecycle outcomes rather than the new receipt index.
+Partial merge fencing leaves the other source readable. Publication alone leaves
+targets NotActive; incomplete activation evidence refuses source retirement.
+
+Original child21 and grandchild31 retire under scoped explicit host retention
+releases and complete retained activation evidence, including retained historical
+evidence after later movement. Ordinary split owners retire after merge. Exact
+retirement retries and checkpoint restoration keep fences/original activation
+lineage while provider payload disappears. Wrong source/fence/partial-target proof
+and cross-owner tombstone restore refuse without mutation. Imported operations1/81
+and later82 survive the next move with exact original outcomes; new83 adds data,
+with four outbox records in merged43. Sibling32 retains80; root manifest stays
+unchanged and final root-to-grandchild routing resolves exact merged/sibling grants.
+
+Shared native retirement helper is extracted from the existing tests; fresh-owner
+closure and target identity are generalized without production changes. Actual
+schema4 nested-source command trace exercises sealed-unpublished, before-manifest
+publication and lost-completion cuts using FileLogIo/FileSnapshotIo. Recovery uses
+the log-authoritative previous snapshot plus retirement replay, then publishes a
+retired checkpoint, reclaims WAL and reopens without provider data. Original
+source/ordinary-target native-file regression tests pass after helper extraction.
+
+33 related all-feature tests passed: delegation14 (0.07s), insertion7 (3.02s),
+retirement7 (0.12s), repeat5 (0.36s). Core-only insertion6 passed2.90s. Initial
+fixture compile found a temporary route borrow, missing scope trait and incorrect
+source-status accessor; each was corrected locally. First acceptance exposed
+comparison of outer receipt indices on retry: changed to exact underlying retained
+outcome, explicitly checking the retry receipt advances. Focused continuation
+then passed0.07s; final strengthened payload-removal check result follows.
+All-feature/all-target Clippy -D warnings passed1.21s before that final assertion.
+
+This proves finite deterministic/checkpoint composition and selected single-replica
+native-file persistence cuts; it does not validate networked later movement,
+networked retirement, arbitrary faults/power loss, cross-authority/retained-scope
+insertion, macOS or separate-host deployment. General retention remains an explicit
+host contract. No production protocol/store/runtime/API change. Full P0–P7 stays
+active, P8/Windows deferred, original pack immutable and RPL-1.5 retained. Macro
+review: P5/P6 gain subsequent nested lifecycle evidence; all original gaps remain.
+Next native later-movement acceptance, then full-gap audit/next required path.
+Final strengthened continuation passed0.07s; final all-feature/all-target Clippy
+-D warnings passed1.73s. Format, whitespace and80-contract inventory passed.
+All validation handles terminal; no CI gate used. Full goal remains active.
