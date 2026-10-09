@@ -232,3 +232,68 @@ group controls vary without a reliable gain. The original startup TCP serial
 candidate p99 is 311.801 ms versus baseline 478.658 ms (one sample each), still
 above the predeclared 250 ms target. These finite closed-loop results do not prove
 sustainable offered-load capacity or a general latency improvement.
+
+## Scheduled offered load
+
+The shared native benchmark also accepts an optional offered rate:
+
+```sh
+cargo +stable build --release --example native_benchmark --all-features --locked --offline
+./target/release/examples/native_benchmark FRESH_ROOT tcp 120 8 8 --offered 4
+./target/release/examples/native_benchmark OTHER_FRESH_ROOT quic 240 8 8 --offered 48
+```
+
+These commands schedule 120 offers over 30 seconds and 240 over 5 seconds.
+RATE is 1–100000 offers/second, count/window/groups retain existing bounds, and
+the intended offering horizon is capped at 300 seconds. Warm-up is separate.
+A reactor turn handles at most 64 due offers. Lateness never resets the schedule:
+`offers.csv` records every ID's intended start, actual dispatch/decision and
+terminal time. Its fixed count bounds retained history. A full global client
+window or per-group ceiling ceil(window/groups) produces `window_refused`, with
+no deferred client retry queue. Other rows distinguish no ready leader, admission
+refusal, NotProposed, Applied and Unknown. Reasons are diagnostics with comma and
+newline characters normalized to `|`.
+
+The summary counts offered, admitted and useful Applied outcomes separately.
+`applied_during_ops_s` uses completions strictly before the intended offering
+horizon; `applied_total_ops_s` includes completed drain work over the full measured
+elapsed time. `admitted_ops_s` also uses that full elapsed denominator. Separate
+admitted-during, applied-drain, late-decision and backlog-at-horizon counts expose
+catch-up/drain rather than hiding it in one rate. Backlog at the horizon counts
+admitted tickets dispatched before the boundary but completed at or after it.
+Dispatch p99 includes every offer; useful-operation p99 is from intended time,
+while service p99 starts at actual dispatch. No successful Applied outcomes means
+those two latency percentiles are `NA`, never a zero-latency result.
+
+Drain has a separate 120-second limit. Unknown/pending/invalid outcomes invalidate
+successful summary publication; raw rows and `failure.txt` retain diagnostic state
+and cleanup results. Cancellation only stops observation and does not roll back a
+possibly committed operation. `run.txt` retains configuration even for failed runs.
+Successful summaries still require every group's exact known values, all-replica
+and quorum reads, explicit joins/reopen and original first/last successful
+historical retry results. Refused offer IDs leave holes; expected values come from
+actual Applied receipts, not from the last offered ID. Recovery/retry operations
+are excluded from useful measurement counts.
+
+The same independent checker accepts offered runs and archived prefixes ending
+in `.txt`, `.offers.csv` and `.storage.csv`:
+
+```sh
+node validation/check-native-benchmark.mjs --storage RUN_DIRECTORY...
+node validation/check-offered.test.mjs
+```
+
+It reconciles every offer's classification and intended time, retained-window
+history (including actual load behind window refusals), per-group applied values,
+horizon/drain counts, rate/latency arithmetic and the existing storage counters.
+The original four/five-argument closed-loop modes remain available. Offered mode
+adds no production API/provider/format/timer change. Finite low/high offered-rate
+illustrations do not establish sustainable capacity, maintenance performance or a
+passed p99 budget; those require longer, representative, repeatable measurements.
+
+[Slice-104 raw evidence](../validation/performance/slice104/README.md) records
+four complete TCP/QUIC low/high offered-rate runs plus the original CLI correctness
+checks. Independent analysis prints admitted-during and transient applied-drain
+rates separately. Both 30-second low-rate samples admit every offer; higher-rate
+samples expose actual window refusals. They establish the mode and its accounting,
+not sustainable maintenance capacity or a passed p99 budget.

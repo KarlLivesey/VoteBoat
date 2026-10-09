@@ -1,0 +1,15 @@
+fixture: 2 scheduled offers, 1 admissions, 1 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=2 admitted_during=1.000 applied_during=1 applied_drain=NA applied_total=1 ops/s; window_refused=1 backlog_at_horizon=0
+✔ one actual retained request explains a refused scheduled offer (1.967507ms)
+✔ reject coordinated omission from shifted intended start (0.824426ms)
+✔ reject phantom window refusal after earlier completion (0.464172ms)
+✔ reject falsely certified unknown outcome (2.335034ms)
+✔ reject unaccounted applied value and altered pending maximum (1.018464ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.254143

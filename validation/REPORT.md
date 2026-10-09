@@ -2193,3 +2193,40 @@ remains background feedback.
 
 Final native-only shared-barrier tests also pass (8/8), as do formatting/diff
 checks and the unchanged 71-contract inventory.
+
+## Slice 104 — bounded scheduled offered-load benchmark
+
+Benchmark-only --offered RATE extends the existing shared Node assembly. Fixed
+intended start times expose dispatch lateness; bounded global/per-group retained
+clients cause explicit dropped offers rather than a delayed retry queue. Rows
+include admissions/refusals, Applied, NotProposed and Unknown; unknown/pending/
+invalid outcomes prevent successful summary publication. Known Applied histories
+account for refused-ID holes. Complete all-replica values/quorum reads, joins,
+reopen and original historical retry outcomes remain successful-publication gates.
+No production API/provider/format/timer/resource change; the Node inventory records
+selected evidence without adding a public contract.
+
+Six new schedule/ledger/history/diagnostic tests plus the existing real-file
+observer test pass with all features and TLS-only (7/7 each). Five independent
+negative checker tests pass. All-target/all-feature Clippy with warnings denied
+passes. Original startup TCP and shared QUIC closed-loop paths also pass complete
+one-operation correctness/recovery checks; timing is not performance evidence.
+The updated checker passes all 16 slice103 shared and both serial archived cases.
+
+Four sequential single-host/eight-group release cases pass exact raw checks and
+full values/reads/recovery/retry/joins, with zero extra retries and no uncertain
+outcomes. TCP/QUIC at 4 offers/s over 30 s admit/apply all 120 and refuse none;
+p99 1454.546/1091.054 ms. At 48 offers/s over 5 s, TCP applies 40/240 and refuses
+200 (8 applied in drain); QUIC applies 121/240 and refuses 119 (3 in drain).
+Horizon applied rates 6.400/23.600 ops/s, total rates 7.428/23.474; p99
+1691.862/506.619 ms. All scheduled offers are retained in raw rows; no offered or
+physically appended count is relabeled as useful Applied throughput. Raw and
+independent arithmetic/histogram/ticket evidence are in validation/performance/slice104.
+
+No concurrent compilation/bulk build work ran during performance measurements.
+Current kernel 7.2.9-2-cachyos differs from slice103's recorded 7.2.9-1. These are
+one-sample finite illustrations, with uncontrolled desktop/filesystem load and no
+deliberate maintenance/fault injection: no sustainable-capacity, transport-speed,
+fixed-p99, macOS or separate-host claim. The 250 ms TCP serial target remains
+unmet; compatibility runs do not replace it. Full P0–P7 remains active, including
+earlier phase gaps; P8/Windows are deferred and CI remains background feedback.

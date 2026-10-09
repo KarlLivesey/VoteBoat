@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Sustainable/offered-load/maintenance measurements, fixed-p99 tuning and broader platform/fault evidence remain |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded scheduled offered-load/refusal/drain evidence added; sustainable/maintenance measurements, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
@@ -6388,3 +6388,121 @@ was relaxed to accept the multi-group throughput gain.
 
 Final native-only shared-barrier tests also pass (8/8), as do formatting/diff
 checks and the unchanged 71-contract inventory.
+
+### Slice 104 mini schema — bounded scheduled offered load
+
+Previous goal turn made progress: 5c94569 committed/pushed shared native barriers,
+crash conformance and repeated raw comparisons; the 250 ms TCP serial p99 gate is
+still unmet. Current P7 deliverable is a benchmark mode exposing load refused by
+bounded clients and intended-start latency. Next: longer maintenance/recovery load
+and fixed-budget attribution/tuning, then remaining P0–P7 requirement reconciliation.
+These advance measured capacity/operational usability without replacing earlier
+membership/lifecycle/platform/fault requirements or promoting P8 research.
+
+Extend only the native benchmark, not production contracts/timers/resources.
+CLI: existing shared arguments plus --offered RATE (1..100000 offers/second),
+count/window/groups bounds unchanged; cap intended offering duration at 300 s.
+The offering horizon is count/rate, with offer i intended at i/rate from the
+measurement epoch. Process at most 64 due offers per reactor turn. Clock lateness
+never shifts intended times; record actual decision/admission and terminal times.
+No unbounded pending client queue: global WINDOW and ceil(WINDOW/GROUPS) per-group
+limits cause explicit dropped/refused offers. Every scheduled ID retains its own
+row (bounded by the existing count ceiling), including window/no-leader/admission
+refusal, NotProposed and Unknown outcomes. Accepted tickets remain keyed by exact
+replica/ticket binding; terminal observation releases only that pending slot.
+
+Warm-up remains separate. Report offering-horizon and drain rates separately,
+useful Applied receipts during the horizon versus after it, end-to-end latency
+from intended time and service latency from admission, backlog at horizon and
+maximum pending. Drain has its own 120 s bound. Unknown/pending/failure outcomes
+remain diagnostic and invalidate a successful performance summary; cancellation
+is observation cleanup and never evidence of non-commit. Preserve raw rows and
+failure reason before returning an invalid run. Explicit shutdown/join is attempted
+after measurement errors; cleanup failure must also remain visible.
+
+For fully known outcomes, derive per-group expected counts from warm-up plus
+actually Applied IDs (refused IDs leave holes). Verify receipt values/indices in
+per-group log order, all-replica values and quorum reads, close/join, reopen and
+exact first/last successful historical retry outcomes; recovery adds no new useful
+measurement operations. Successful summary publication stays after those gates.
+The original closed-loop CLI/result contract remains compatible. Storage observer
+snapshots retain the same forwarding/authority contract; no new provider seam.
+
+Acceptance: deterministic tests cover schedule rounding/lateness, bounded global
+and group windows, exact scoped completion/unknown bookkeeping and hole-aware
+receipt histories. Independent raw checks must reconcile every offer/outcome,
+intended/actual timing, bounded pending events, horizon/drain counts and latency/
+rate arithmetic, plus existing storage checks. Run real TCP/QUIC below/above load
+illustrations with full recovery/retry/joins. These finite samples establish the
+mode, not stable sustainable capacity, a passed p99 budget or maintenance coverage.
+
+### Slice 104 implemented — scheduled offered load with honest refusal/drain accounting
+
+The benchmark-only mode implements the schema above through the existing shared
+Node/LogStore/JournalIo assembly. Every offer keeps its intended schedule and
+actual decision/terminal times. Global/per-group pending limits cause explicit
+refusals without a postponed client queue. Exact ticket identities retain slots
+until their own completion; unknown/pending/invalid histories prevent successful
+summary publication. Diagnostic rows precede validation/cleanup failure. Expected
+values derive from actual Applied histories, allowing refused-ID holes; recovery
+and original historical retries remain mandatory before a successful summary.
+No production provider/API/format/resource/timer change or new public seam.
+
+Six new deterministic tests plus the existing actual-file observer test pass with
+all features and TLS-only. They cover missed/rounded schedules, global and group
+windows, wrong replica/binding scope without releasing another slot, unknown
+rejection, refused-ID holes/log histories, no-sample percentiles and combined work/
+cleanup errors. Five independent checker tests reject coordinated omission, false
+window refusals, unknown successes, wrong values and maximum-pending corruption.
+All-target/all-feature Clippy with warnings denied passes. The original startup
+TCP and shared QUIC CLIs pass full recovery/retry/join correctness runs (one
+measured operation, the shared case retaining warm-up-only groups); their timing
+is not target evidence. All 16 slice103 shared histories and both serial histories
+still pass the updated raw checker.
+
+Four sequential release cases use eight groups/window 8, 64 separate warm-up
+commands and identical benchmark timers/providers/resources. TCP/QUIC low cases
+schedule 120 offers over 30 s at 4/s, admit/apply all 120, refuse none and have zero
+backlog at the horizon. Intended-start p99 is 1454.546/1091.054 ms. High cases offer
+240 over 5 s at 48/s: TCP admits/applies 40, refuses 200, applies 32 before the
+horizon and 8 during 384.976 ms drain; QUIC admits/applies 121, refuses 119, applies
+118 before the horizon and 3 during 154.721 ms drain. Applied horizon rates are
+6.400/23.600 ops/s, total rates 7.428/23.474, p99 1691.862/506.619 ms. Unknown,
+NotProposed, no-leader and provider-admission refusals are zero; all full recovery/
+retry/join gates pass with zero extra retries. Independent raw outcome/history/
+window/horizon/drain/latency/rate and joined storage checks pass for every case.
+
+This establishes the offered-load path and visible bounded overload, not stable
+sustainable capacity, a transport speed advantage or a passed p99 budget. There
+is one sample/case, no deliberate maintenance/fault injection, and desktop/device
+load is uncontrolled. Compilation/bulk build work was excluded from measurement.
+The kernel is now 7.2.9-2-cachyos, differing from slice103's recorded 7.2.9-1; no
+before/after timing comparison is made. Raw artifacts, arithmetic, source/executable
+hashes, environment and limits are in validation/performance/slice104. The original
+250 ms TCP serial target remains unmet; short compatibility runs do not replace it.
+Full P0–P7 and all prior phase gaps remain active; P8 remains deferred.
+
+### Next linked mini plan — maintenance evidence, then fixed-budget tuning
+
+1. Finish current slice: final formatting/diff/inventory checks, archive all raw
+   evidence and commit/push. Purpose: a reproducible offered-load foundation for
+   P7 operational capacity. Dependencies: exact bounded ledger, known-outcome
+   recovery and passing checks above. Completion: reproducible artifacts, clean
+   committed state and no production contract regression; not full P7 completion.
+2. Exercise longer offered load with actual public Node checkpoint/compaction and
+   recovery work active. Purpose: expose interference currently absent from these
+   samples and advance P7's maintenance/recovery acceptance. Dependencies: this
+   generator and existing snapshot/reclamation contracts. Before editing, sketch
+   exact checkpoint request/completion ownership, bounded overlapping maintenance,
+   retained recovery boundaries and failure cleanup. Completion: useful outcomes,
+   explicit refusals/backlog/p99, actual maintenance completions and full reopen/
+   historical retries reconcile; failed schedules remain visible. Do not silently
+   raise the 250 ms serial target or substitute a drain burst for sustainable rate.
+3. Use that attribution to implement the next measured, invariant-preserving
+   fixed-budget improvement and reconcile the remaining P0–P7 requirement ledger.
+   Purpose: move from finite illustrations toward the full baseline's acceptance.
+   Dependencies: repeatable maintenance/overload results and the actual design
+   roadmap/phase gaps, not slice counts. Completion checks must cover intended
+   platform/fault scope, exact durability/recovery and matched p99 settings; earlier
+   membership/recursive lifecycle gaps stay open until their own evidence closes
+   them. P8/Windows remain deferred and CI stays background feedback.

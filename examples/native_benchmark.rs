@@ -58,6 +58,8 @@ type Replica<
 >;
 #[path = "benchmark/observe.rs"]
 mod observe;
+#[path = "benchmark/offered.rs"]
+mod offered;
 const WARMUP: usize = 64;
 fn checked<T, E: std::fmt::Debug>(v: Result<T, E>) -> Result<T, Failure> {
     v.map_err(|e| format!("{e:?}").into())
@@ -408,19 +410,34 @@ fn verify<L: LogStore + Send + 'static>(
     groups: usize,
     last: &BTreeMap<GroupIdentity, u64>,
 ) -> Result<(), Failure> {
+    let expected = (1..=groups)
+        .map(|g| {
+            (
+                group_id(g),
+                if total >= g {
+                    ((total - g) / groups + 1) as i64
+                } else {
+                    0
+                },
+            )
+        })
+        .collect();
+    verify_expected(replicas, clock, &expected, last)
+}
+fn verify_expected<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    expected: &BTreeMap<GroupIdentity, i64>,
+    last: &BTreeMap<GroupIdentity, u64>,
+) -> Result<(), Failure> {
     until(replicas, clock, |ns| {
         Ok(last.iter().all(|(g, index)| {
             ns.iter()
                 .all(|n| n.local().applications[g].applied_index() >= *index)
         }))
     })?;
-    for g in 1..=groups {
-        let group = group_id(g);
-        let expected = if total >= g {
-            ((total - g) / groups + 1) as i64
-        } else {
-            0
-        };
+    for (&group, &expected) in expected {
+        let g = group.id.get();
         let last_index = last[&group];
         for n in replicas.iter() {
             if checked(n.local().applications[&group].read_applied(last_index))? != expected {
@@ -553,16 +570,16 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 }
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    if !(4..=5).contains(&args.len()) {
+    if !matches!(args.len(), 4 | 5 | 7) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32)]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32) [--offered RATE(1..100000)]]"
                 .into(),
         );
     }
     let [root, protocol, operations, window] = &args[..4] else {
         unreachable!()
     };
-    let shared = args.len() == 5;
+    let shared = args.len() >= 5;
     let groups = if shared { args[4].parse::<usize>()? } else { 1 };
     if !(1..=32).contains(&groups) {
         return Err("group count out of bounds".into());
@@ -578,6 +595,16 @@ fn main() -> Result<(), Failure> {
     if !(1..=50000).contains(&count) || !(1..=32).contains(&window) {
         return Err("count/window out of bounds".into());
     }
+    let offered_rate = if args.len() == 7 {
+        if args[5] != "--offered" {
+            return Err("expected --offered RATE".into());
+        }
+        let rate = args[6].parse::<usize>()?;
+        offered::validate(count, rate)?;
+        Some(rate)
+    } else {
+        None
+    };
     let capacity = count + WARMUP;
     if capacity.div_ceil(groups) + 64 > LogLimits::default().max_entries_per_group {
         return Err(
@@ -593,6 +620,7 @@ fn main() -> Result<(), Failure> {
         window,
         groups,
         shared,
+        offered_rate,
     };
     if shared {
         run(config, &clock, |mode| {
@@ -611,12 +639,16 @@ struct RunConfig<'a> {
     window: usize,
     groups: usize,
     shared: bool,
+    offered_rate: Option<usize>,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,
     clock: &Instant,
     open_cluster: impl Fn(NativeOpenMode) -> Result<(Vec<Replica<L>>, Vec<observe::Trace>), Failure>,
 ) -> Result<(), Failure> {
+    if let Some(rate) = config.offered_rate {
+        return offered::run(config, rate, clock, open_cluster);
+    }
     let RunConfig {
         root,
         protocol,
@@ -624,6 +656,7 @@ fn run<L: LogStore + Send + 'static>(
         window,
         groups,
         shared,
+        offered_rate: _,
     } = config;
     let capacity = count + WARMUP;
     std::fs::create_dir(root)?;
