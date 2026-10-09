@@ -17,6 +17,8 @@ use support::*;
 use voteboat::{
     application::*, directory::*, identity::*, log::*, placement::PlacementRequirements, routing::*,
 };
+#[path = "directory/creation.rs"]
+mod creation;
 #[path = "directory/transfer.rs"]
 mod transfer;
 fn id(value: u128) -> ResponsibilityIdentity {
@@ -509,6 +511,9 @@ mod native {
             Self::open_plan(root, recover, plan())
         }
         fn open_plan(root: &Path, recover: bool, plan: DirectoryPlan) -> Self {
+            Self::open_plan_mode(root, recover, plan, false)
+        }
+        fn open_plan_mode(root: &Path, recover: bool, plan: DirectoryPlan, creation: bool) -> Self {
             let mut replicas = BTreeMap::new();
             for n in 1..=3 {
                 let path = root.join(n.to_string());
@@ -557,6 +562,11 @@ mod native {
                     },
                 )
                 .unwrap();
+                if creation {
+                    app = app
+                        .with_group_creation()
+                        .unwrap_or_else(|_| panic!("fresh mode"));
+                }
                 let (core, _) =
                     recover_replica(node(n), group(1), &log, &mut snapshots, &mut app).unwrap();
                 replicas.insert(
@@ -716,6 +726,77 @@ mod native {
             self.pump();
         }
     }
+    #[test]
+    fn native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen() {
+        let root = std::env::temp_dir().join(format!(
+            "voteboat-creation-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir(&root).unwrap();
+        let mut cluster = Cluster::open_plan_mode(&root, false, plan(), true);
+        cluster.act(1, Event::Campaign);
+        cluster.pump();
+        let bytes = cluster.replicas[&node(1)]
+            .app
+            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap();
+        cluster.propose_bytes(1, 1_000_000, bytes);
+        cluster.propose(1, 1, manifests()[0].clone(), None);
+        cluster.blocked.insert(node(2));
+        let intent = super::creation::intent();
+        let bytes = intent.encode(MAX_GROUP_CREATION_BYTES).unwrap();
+        assert_eq!(
+            cluster.propose_bytes(1, 10, bytes.clone()).outcome,
+            DirectoryOutcome::CreationReserved
+        );
+        let status = cluster.replicas[&node(1)]
+            .app
+            .group_creation_at(0, group(100))
+            .unwrap();
+        assert!(cluster.replicas[&node(2)]
+            .app
+            .group_creation_at(0, group(100))
+            .unwrap()
+            .is_none());
+        // Discard original receipt; preserve only native committed files/images.
+        for n in [1, 3] {
+            cluster.checkpoint(n);
+        }
+        drop(cluster);
+        let mut cluster = Cluster::open_plan_mode(&root, true, plan(), true);
+        cluster.act(3, Event::Campaign);
+        cluster.pump();
+        let retry = cluster.propose_bytes(3, 10, bytes);
+        assert!(retry.duplicate);
+        assert_eq!(retry.outcome, DirectoryOutcome::CreationReserved);
+        let mut conflict = intent.clone();
+        conflict.mode = GroupCreationMode::Staging;
+        assert_eq!(
+            cluster
+                .propose_bytes(3, 10, conflict.encode(MAX_GROUP_CREATION_BYTES).unwrap())
+                .outcome,
+            DirectoryOutcome::OperationConflict
+        );
+        cluster.act(3, Event::Heartbeat);
+        cluster.pump();
+        for r in cluster.replicas.values() {
+            assert_eq!(
+                r.app
+                    .group_creation_at(r.core.state().commit_index, group(100))
+                    .unwrap(),
+                status
+            );
+            assert!(r.app.manifest(id(50)).is_none());
+            assert_eq!(r.app.manifest(id(1)), Some(&manifests()[0]));
+        }
+        drop(cluster);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
     #[test]
     fn native_transfer_intent_survives_lost_observation_snapshot_catchup_and_reopen() {
         use voteboat::transfer::*;

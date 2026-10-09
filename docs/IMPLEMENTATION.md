@@ -8142,3 +8142,100 @@ Updated linked mini plan:
    namespace publication must not activate an unready group. Record the concrete
    state/failure schema before editing. Existing deletion/reparenting, directory
    authority movement and P6/P7 scope are retained in the baseline ledger.
+
+## Slice122 schema plan — metadata group creation intent
+
+Previous goal turn was progress: slice121 committed/pushed8558765. Worktree clean.
+Directory currently publishes trusted startup grants, transfer/delegation history;
+no dynamic creation journal exists. Add the creation reservation before native
+bootstrap, rather than treating a new startup file as metadata commitment.
+
+Data/API: public GroupCreationIntent binds metadata authority, existing local
+parent responsibility/exact route generation, fresh child responsibility identity,
+exact Bootstrap (group incarnation/configuration/policy/voter-store map), target
+application adapter/version, and Empty versus Staging mode. Versioned bounded
+portable command codec uses validated recursive policies, bounded node/store
+counts and canonical voter order. Directory consumes it as an ordinary deduplicated
+committed application command, records its operation/index/bytes, and reserves
+child/group identities. Existing/stale parent, foreign authority, known group ID
+(including other incarnation), known child ID and lifecycle-busy parent refuse.
+No namespace route, manifest publication, election or serving permission escapes.
+
+Ownership/recovery: use existing Directory ordinary history count/byte admission,
+batch clone/atomic apply, checkpoint command replay and selected Raft/WAL barriers.
+Index is the applied metadata index, not a foreign transferable certificate.
+Local group_creation_at(required,group) is an applied-prefix status; callers need
+the metadata quorum read/authentication contract before treating it as remote
+committed authority. Reserve maps store operation IDs referencing retained history;
+no unbounded duplicate payload cache. Repeated original operation/bytes returns
+its original outcome; conflicting bytes return OperationConflict. Reservation
+cannot replace any existing/unreachable group or bypass fencing with a new
+incarnation. Empty/staging initialization is recorded, not executed in this slice.
+
+Acceptance: portable codec every truncation, trailing bytes, invalid policy/store
+bindings, capacity and identity errors; parent/generation/authority/identity
+refusals, original retries/conflicts; atomic invalid batch; checkpoint replay and
+lost observation; host/native WAL recovery of metadata record where practical.
+Next native bootstrap must verify committed exact intent and durably create the
+assigned group before campaign; this slice cannot claim complete dynamic service.
+Mini plan current creation journal (P5/P0), dependencies/completion above; next
+assigned-node bootstrap from committed exact intent (P5/P1) with idempotent native
+reopen/conflict/crash checks; following namespace publication/activation (P5/P6),
+dependent on bootstrap readiness and existing ownership rules, checked by no
+route to an unready group and retained retry lineage. Full P0–P7 stays active;
+all prior ledger gaps retained, P8/Windows deferred.
+
+Slice122 compatibility schema review: creation adds executable persistent commands,
+so advertising the unchanged application schema would permit misleading mixed-
+version readiness. Add explicit Directory::with_group_creation before any apply.
+Legacy default retains schema1/init/checkpoint formats and refuses creation.
+Selected creation mode advertises schema2 and binds VBDINIT2/VBDIR002; recovery
+requires the same selected mode. No automatic upgrade/downgrade or weaker fallback.
+This capability is needed for safe deployment/version binding, not a second
+storage/provider. Cross-mode bootstrap/checkpoint replay must refuse without
+mutation. The native conformance fixture selects mode2 on all metadata replicas.
+
+### Slice122 implemented evidence and macro review
+
+Added public GroupCreationIntent/Mode/Status and bounded portable VBGCRT01 codec.
+Directory explicitly selected with_group_creation before apply advertises schema2
+and binds VBDINIT2/VBDIR002 initialization/checkpoint records. Default schema1 is
+unchanged and cannot accept creation; cross-mode init/replay/checkpoint refuses.
+Original owned Directory is returned on late selection rejection. No implicit
+upgrade, fallback, group/election/serving authority or namespace route is added.
+
+An exact applied parent/generation under the local authority can reserve fresh
+responsibility and group identities with initial recursive policy/voter stores,
+application adapter/version and empty/staging mode. Existing identities/routes,
+other incarnations of a known ID, lifecycle-busy parent, stale generation and
+foreign authority refuse. Compact identity/operation pairs index existing bounded
+ordinary history without duplicating payloads or decoding every prior intent on
+admission. Original operation/bytes preserve outcome/status; changed content and
+new operations reusing reservations conflict. Atomic batch/checkpoint replay
+reconstructs reservations. group_creation_at is local applied status, not a
+foreign commitment certificate; unsupported legacy mode fails closed.
+
+Linux executed: 60 all-feature library and 31 directory tests passed (0.06s/0.12s);
+27 core-only directory tests passed (0.04s). Nine new tests include all codec
+truncations and finite mutation/canonical checks, explicit unbounded policy/store
+counts/duplicate voter order refusal, identity/authority/generation and transfer
+lock refusal, retries/conflicts, pending history admission, invalid batch atomicity,
+all checkpoint truncations and cross-mode recovery. Native three-Raft-core actual
+file history loses a committed reservation observation, compacts, reopens and
+snapshot-catches-up a lagging replica; original status/retry survive without any
+new responsibility manifest. This transport is deterministic in-memory delivery,
+not a native TCP/QUIC creation history. Native journal ModelIo covers every frame
+append cut plus sync/publication faults and modeled unsynced-byte loss, recovering
+old or complete exact intent. All-feature/all-target Clippy -D warnings, format,
+diff whitespace and 78-contract inventory passed. Initial code version-width and
+schema-fixture errors were fixed; a library UDP bind denied in the sandbox was
+rerun with native-socket permission and passed. No unsupported green-run claim.
+
+Macro P5 creation reservation is implemented; end-to-end creation remains open.
+Assigned-node durable bootstrap and namespace publication/activation are the next
+linked mini items from the schema plan, with exact committed intent/assignment,
+operation conflict, restart and no-unready-serving checks. Existing directory
+schema1 stays usable; no live schema upgrade/mixed-version deployment claim.
+Deletion/reparenting, directory authority movement, broader P4/P6 lifecycle and
+P7/platform/fault gaps remain. Full P0–P7 active; P8/Windows deferred. See
+GROUP_CREATION.md and validation/REPORT.md for scope/evidence boundaries.

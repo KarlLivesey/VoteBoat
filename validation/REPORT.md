@@ -2824,3 +2824,36 @@ cannot certify cancellation or rollback of accepted records.
 Broader remote revocation/partial-progress, arbitrary faults, macOS/separate-host
 and performance gates remain. Full P0–P7 active; next implementation targets the
 P5 metadata-authorized creation intent/bootstrap gap. P8/Windows deferred.
+
+## Slice122 — opt-in metadata creation reservation journal
+
+Linux: 60 all-feature library tests, 31 directory tests (nine new), and 27
+core-only directory tests passed (0.06s/0.12s/0.04s). All-feature/all-target Clippy
+-D warnings, formatting, diff whitespace and 78-contract inventory checks passed.
+The existing library UDP bind first failed for sandbox PermissionDenied; the same
+suite with native socket permission passed. Earlier version-width/schema-fixture
+and Clippy test-style errors were corrected before final validation.
+
+Public bounded creation intents bind exact metadata parent/generation, fresh
+responsibility/group identity, initial recursive voter/store configuration,
+application adapter and empty/staging mode. Schema2/init2/checkpoint2 is explicitly
+selected before apply; default schema1 remains unchanged, refuses new commands,
+and cannot downgrade/upgrade through recovery. Cross-mode application/checkpoint
+failures leave destination state unchanged. Ordinary history budgets, identity
+reservation/refusal, original retries/conflicts, parent transfer lock, atomic
+invalid batch and checkpoint/truncation replay are directly tested.
+
+Native three-core Raft with actual file WAL/checkpoints commits the reservation,
+loses the observation, compacts, reopens, elects and snapshot-catches-up the lagging
+replica while preserving original status. Delivery in this fixture is modeled,
+not native TCP/QUIC. Separate native ModelIo storage histories cut every creation
+append frame byte and fail sync/publication before/after; after modeled power loss,
+recovery sees the old committed metadata state or the complete intent and no new
+manifest/serving authority. This is finite fault evidence, not arbitrary crash or
+formal protocol proof.
+
+No assigned-node bootstrap, namespace activation, remote commitment certificate,
+live schema upgrade or mixed-version deployment is released. Local creation status
+requires separately established authenticated metadata quorum-read authority for
+foreign use. Full P0–P7 remains active with previous ledger gaps; next is native
+exact-intent bootstrap before election. P8/Windows remain deferred.

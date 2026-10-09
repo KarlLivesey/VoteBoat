@@ -12,23 +12,27 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Replicated static-ownership directory application over ordinary Raft entries.
+//! Replicated directory publication and opt-in creation reservations.
 //!
 //! Initial assignments are an explicit trusted bootstrap plan. Publish commands
 //! cannot transfer ownership, fence a source or activate a target. Host-controlled
 //! authorization remains required before proposal. Durable progress comes solely
-//! from the existing Raft/WAL/application/checkpoint contracts.
+//! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
+//! reserves fresh identities but cannot bootstrap groups or activate ownership.
+pub mod creation;
 use crate::delegation::*;
 use crate::routing::codec::*;
 use crate::transfer::{TransferIntent, TransferIntentStatus};
 use crate::transfer_publication::*;
 use crate::{application::*, identity::*, log::*, routing::*};
+pub use creation::*;
 use std::{
     collections::{BTreeMap, BTreeSet},
     mem::size_of,
 };
 
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
+pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -238,6 +242,8 @@ impl DirectoryCommand {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryOutcome {
     Initialized,
+    CreationReserved,
+    CreationConflict,
     Published(RouteGeneration),
     GenerationMismatch,
     UnknownResponsibility,
@@ -257,6 +263,7 @@ pub enum DirectoryOutcome {
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
     Bootstrap,
+    Create(GroupCreationIntent),
     Publish(DirectoryCommand),
     Transfer(TransferIntent),
     Publication(TransferPublication),
@@ -295,9 +302,11 @@ pub struct Directory {
     limits: DirectoryLimits,
     applied: u64,
     initialized: bool,
+    group_creation: bool,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
     history_bytes: usize,
+    creations: BTreeMap<GroupIdentity, (ResponsibilityIdentity, OperationId)>,
     control_bytes: usize,
     publications: BTreeMap<OperationId, OperationId>,
     /// Locks reference existing bounded history rather than duplicate manifests.
@@ -325,9 +334,11 @@ impl Directory {
             limits,
             applied: 0,
             initialized: false,
+            group_creation: false,
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
             history_bytes: 0,
+            creations: BTreeMap::new(),
             control_bytes: 0,
             publications: BTreeMap::new(),
             transfers: BTreeMap::new(),
@@ -337,6 +348,15 @@ impl Directory {
             delegation_declines: BTreeMap::new(),
             delegation_cancellations: BTreeMap::new(),
         })
+    }
+    /// Select before bootstrap. Schema2 history cannot be opened as legacy1.
+    #[allow(clippy::result_large_err)]
+    pub fn with_group_creation(mut self) -> Result<Self, (ApplicationError, Self)> {
+        if self.applied != 0 || self.initialized || !self.history.is_empty() {
+            return Err((ApplicationError::InvalidCommand, self));
+        }
+        self.group_creation = true;
+        Ok(self)
     }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
@@ -372,7 +392,11 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBDINIT1");
+        bytes.extend(if self.group_creation {
+            b"VBDINIT2"
+        } else {
+            b"VBDINIT1"
+        });
         put_group(&mut bytes, self.plan.authority);
         bytes.extend((self.limits.operations as u32).to_le_bytes());
         bytes.extend((self.limits.history_bytes as u64).to_le_bytes());
@@ -390,7 +414,7 @@ impl Directory {
         if bytes.len() > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
-        if bytes.starts_with(b"VBDINIT1") {
+        if bytes.starts_with(b"VBDINIT1") || bytes.starts_with(b"VBDINIT2") {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -399,7 +423,12 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if bytes.starts_with(b"VBTINT01") || bytes.starts_with(b"VBTINT02") {
+            if bytes.starts_with(b"VBGCRT01") {
+                if !self.group_creation {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                GroupCreationIntent::decode(bytes).map(Request::Create)
+            } else if bytes.starts_with(b"VBTINT01") || bytes.starts_with(b"VBTINT02") {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01") {
                 TransferPublication::decode(bytes).map(Request::Publication)
@@ -418,7 +447,7 @@ impl Directory {
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: DIRECTORY_APPLICATION_SCHEMA,
+            application_schema: self.schema_version(),
             command_bytes: MAX_DIRECTORY_CONTROL_BYTES.max(46 + self.plan.encoded_len()),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
@@ -934,6 +963,7 @@ impl Directory {
             }
             let outcome = match command {
                 Request::Publish(command) => self.publish(command),
+                Request::Create(intent) => self.reserve_group_creation(operation, intent),
                 Request::Transfer(intent) => self.begin_transfer(operation, intent),
                 Request::Publication(publication) => self.complete_transfer(operation, publication),
                 Request::Delegation(plan) => self.begin_delegation(operation, plan),
@@ -1127,7 +1157,11 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        DIRECTORY_APPLICATION_SCHEMA
+        if self.group_creation {
+            CREATION_DIRECTORY_APPLICATION_SCHEMA
+        } else {
+            DIRECTORY_APPLICATION_SCHEMA
+        }
     }
     fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
         // Unique commands in first-application order reconstruct manifests and
@@ -1141,7 +1175,11 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBDIR001");
+        bytes.extend(if self.group_creation {
+            b"VBDIR002"
+        } else {
+            b"VBDIR001"
+        });
         bytes.extend(self.applied.to_le_bytes());
         bytes.extend((self.limits.operations as u32).to_le_bytes());
         bytes.extend((self.limits.history_bytes as u64).to_le_bytes());
@@ -1176,7 +1214,12 @@ impl CheckpointStateMachine for Directory {
         }
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
-            if reader.take(8)? != b"VBDIR001"
+            if reader.take(8)?
+                != if self.group_creation {
+                    b"VBDIR002"
+                } else {
+                    b"VBDIR001"
+                }
                 || reader.u64()? != applied
                 || reader.u32()? as usize != self.limits.operations
                 || reader.u64()? != self.limits.history_bytes as u64
@@ -1196,6 +1239,7 @@ impl CheckpointStateMachine for Directory {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
             let mut next = Self::new(self.plan.clone(), self.limits).map_err(|(e, _)| e)?;
+            next.group_creation = self.group_creation;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;
