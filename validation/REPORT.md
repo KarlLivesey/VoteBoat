@@ -3326,3 +3326,46 @@ startup critical-path attribution then a cause-supported safe fix. P0–P7 activ
 P8/Windows deferred, RPL-1.5 retained, original pack preserved, CI background.
 
 Final example all-feature Clippy -D warnings passed1.12s. All handles terminal.
+
+## Slice138 — optional native journal timings and startup attribution
+
+Actual source changes introduce fixed-size optional native FileLogIo timing
+readers and explicit static startup selection, retaining JournalIo results,
+durability dependencies, formats and default construction. No callbacks or
+persistent metric authority. Default/member/legacy connector paths remain untimed.
+
+Executed2 public-interface timing/failure tests plus9 log-store conformance/crash
+tests pass, store execution0.02s after1.74s compile. Native library filter5 tests
+pass0.06s after8.08s compile including replacement interruption and saturating
+metrics. Example16 tests pass0.03s after7.62s build. All-feature/all-target
+check6.69s,Clippy -D warnings8.34s,core-only check3.28s pass. Native-only timing
+checks2/2 pass after8.45s build. Release example build14.31s. Initial compile
+missed the connector builder's None tuple option; fixed locally. Initial fault
+assertion wrongly rejected recovery of complete synced bytes after publication
+failure; corrected to the existing unknown-outcome contract. Failed barrier
+releases no durability receipt and leaves in-process durable state unchanged.
+
+Sequential unchanged TCP/TLS startup reference workloads on Linux/Btrfs:
+
+- Marked journal diagnostic:46.337179s,5.525ops/s,p99756.731330ms; actual native
+  measurement-stage sync means19.64/21.37/22.04ms and full manifest means
+  37.53/39.96/39.31ms,512/511/511 calls each. Stable join snapshots retained.
+- Separate uninstrumented reference:41.720369s,6.136ops/s,p99734.953838ms.
+
+Both exit0,recover320,verify original retries and join all workers. Both raw
+256-receipt history/window/timing checks pass. Journal validator accepts complete
+stage arithmetic; fixed acceptance checker refuses diagnostic flag (exit1),
+then correctly fails uninstrumented250ms numeric gate (exit1). Empty diagnostic
+gate JSON is refusal output. No build overlapped measurement. No preferred rerun,
+throughput improvement, sustainable capacity or controlled overhead claim.
+Neither run lost leadership; publication is a measured cost, not proof of all
+critical-path or earlier leadership-change causes. Timed QUIC and macOS were not
+newly executed. Power loss is not inferred from process/file tests.
+
+Three journal-validator tests pass12.85ms; six fixed-gate tests pass11.05ms.
+Format/whitespace and80-contract inventory pass. Performance/slice138 retains raw
+samples, journal snapshots, source/binary hashes and contexts; public host paths
+are redacted and hardware reproduction is limited by omitted private inventory.
+Next investigate recoverable bounded manifest publication without dropping required
+sync/selection dependencies. Full P0–P7 active, RPL-1.5 retained, pack preserved,
+P8/Windows deferred, CI background.

@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice138-tcp-diagnostic",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "58c56caa15c1391a0402679c8e2bd8b51c32b82a",
+  "executable_sha256": "2b3e06a138b77acb277e2a782f7107f4e8d7409268ee6baf14124f8c1a87f94f",
+  "summary_sha256": "58bdfd50904f2e67017c97e62cfe98067c70cda8f79a8055c21acaca9a1d6e92",
+  "samples_sha256": "889d3cadd5ed5441b246a2e431096cf1ea19d38d4d370f8d8ae1c89ca448af3a"
+}

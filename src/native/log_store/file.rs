@@ -14,8 +14,9 @@
 // rights and limitations under the RPL.
 //! Two bounded journal slots and an atomic durable CURRENT selection. Legacy
 //! stores without CURRENT continue using log.wal/MANIFEST until first cleaning.
-use super::JournalIo;
+use super::{JournalIo, JournalTimings};
 use crate::native::vote_store::crc32c;
+use std::time::Instant;
 use std::{
     fs::{self, File, OpenOptions},
     io::{self, Read, Seek, SeekFrom, Write},
@@ -27,8 +28,27 @@ pub struct FileLogIo {
     log: File,
     _lock: File,
     generation: u64,
+    timings: Option<JournalTimings>,
 }
 impl FileLogIo {
+    /// Attach native diagnostics before handing this file to a store/worker.
+    /// This changes no durability, format, lifetime or JournalIo result.
+    pub fn with_timings(mut self, timings: JournalTimings) -> Self {
+        self.timings = Some(timings);
+        self
+    }
+    fn timed<T>(
+        &mut self,
+        operation: usize,
+        call: impl FnOnce(&mut Self) -> io::Result<T>,
+    ) -> io::Result<T> {
+        let start = self.timings.as_ref().map(|_| Instant::now());
+        let result = call(self);
+        if let (Some(start), Some(timing)) = (start, &self.timings) {
+            timing.record(operation, start.elapsed(), result.is_ok());
+        }
+        result
+    }
     pub fn create(directory: impl AsRef<Path>) -> io::Result<Self> {
         let directory = directory.as_ref().to_owned();
         match fs::create_dir(&directory) {
@@ -68,6 +88,7 @@ impl FileLogIo {
             log,
             _lock: lock,
             generation: 0,
+            timings: None,
         })
     }
     pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
@@ -108,6 +129,7 @@ impl FileLogIo {
             log,
             _lock: lock,
             generation,
+            timings: None,
         })
     }
     // The callback injects primitive-boundary errors in native file tests. It
@@ -238,27 +260,32 @@ impl JournalIo for FileLogIo {
         Ok(b)
     }
     fn append(&mut self, bytes: &[u8]) -> io::Result<()> {
-        self.log.seek(SeekFrom::End(0))?;
-        self.log.write_all(bytes)
+        self.timed(0, |this| {
+            this.log.seek(SeekFrom::End(0))?;
+            this.log.write_all(bytes)
+        })
     }
     fn sync_log(&mut self) -> io::Result<()> {
-        self.log.sync_all()
+        self.timed(1, |this| this.log.sync_all())
     }
     fn truncate_log(&mut self, length: u64) -> io::Result<()> {
         self.log.set_len(length)
     }
     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
-        let staging = self.directory.join("MANIFEST.tmp");
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&staging)?;
-        file.write_all(bytes)?;
-        file.sync_all()?;
-        fs::rename(staging, self.directory.join(manifest_name(self.generation)))?;
-        sync_directory(&self.directory)
+        self.timed(2, |this| {
+            let staging = this.directory.join("MANIFEST.tmp");
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(&staging)?;
+            file.write_all(bytes)?;
+            file.sync_all()?;
+            fs::rename(staging, this.directory.join(manifest_name(this.generation)))?;
+            sync_directory(&this.directory)
+        })
     }
+
     fn supports_replacement(&self) -> bool {
         true
     }

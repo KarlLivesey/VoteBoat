@@ -1,0 +1,26 @@
+<workspace>/validation/performance/slice138/tcp-diagnostic: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: instrumented diagnostic is not the uninstrumented acceptance reference
++ actual - expected
+
++ 'true'
+- undefined
+
+    at classifySerial (file://<workspace>/validation/check-serial-gate.mjs:33:12)
+    at main (file://<workspace>/validation/check-serial-gate.mjs:93:20)
+    at file://<workspace>/validation/check-serial-gate.mjs:97:90
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'true',
+  expected: undefined,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

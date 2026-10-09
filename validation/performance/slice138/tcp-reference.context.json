@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice138-tcp-reference",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "58c56caa15c1391a0402679c8e2bd8b51c32b82a",
+  "executable_sha256": "2b3e06a138b77acb277e2a782f7107f4e8d7409268ee6baf14124f8c1a87f94f",
+  "summary_sha256": "f8fee4451088d63262a7069dd52a12e682ed952ef60c4ff98306f39cd711755b",
+  "samples_sha256": "4f056fcc011f150f686b0b37ab1e4fc65048b302397e21f3b9fd0e84e0de6b76"
+}

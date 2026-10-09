@@ -55,8 +55,10 @@ operation retries must return their original historical outcomes and leave the
 value unchanged after every replica applies. Recovery-only leadership uncertainty
 can trigger up to four identical retry attempts per operation; extra attempts
 are explicitly reported as `recovery_retries` and logged outside the measured
-interval. Other verification failures invalidate the run. A final join completes
-before raw samples and the successful summary are published.
+interval. Other verification failures invalidate the run. The measured sample CSV is retained before subsequent verification/recovery;
+a final join completes before the successful summary is published. Failed
+warmup/measurement runs retain partial diagnostic histories and attempt explicit
+worker shutdown without becoming successful measurements.
 
 This is a closed-loop local baseline. It does not estimate open-loop offered-load
 latency, client-network latency, separate-host durability/fault isolation or
@@ -366,3 +368,15 @@ TCP maintenance includes verified paused-follower snapshot catch-up; QUIC's
 paused case fails that gate and is retained. A separate QUIC run verifies
 maintenance without the pause. These are selected finite observations, with
 all failed/preliminary cases kept separate and the fixed-p99 target still unmet.
+
+## Startup journal diagnostic mode
+
+Append `--journal-timings` to the four-argument startup command to retain
+`journal.csv` phase snapshots of actual native file append, log-sync and
+manifest-publication calls. It uses the same startup assembly and timers, with
+optional fixed-size atomic timing handles; no observer callback or per-operation
+artifact I/O. Logical LogStore counts are unavailable on this assembly (zero).
+The summary includes `journal_timings=true`, and the fixed serial acceptance
+checker rejects that diagnostic in place of the uninstrumented reference.
+Parallel worker time sums overlap; these timings attribute file work, not every
+client critical-path dependency or separate-host capacity.

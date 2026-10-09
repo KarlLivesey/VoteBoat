@@ -1562,20 +1562,24 @@
     },
     {
       "design_id": "C19",
-      "public_contract": "Observer / NodeObservation / NodeCounters / CounterSnapshot",
+      "public_contract": "Observer / NodeObservation / NodeCounters / CounterSnapshot; native JournalTimings / JournalTimingSnapshot",
       "operations": [
         "record_bounded",
         "snapshot_counters",
         "close",
-        "NodeObservation::from_poll"
+        "NodeObservation::from_poll",
+        "JournalTimings::snapshot",
+        "FileLogIo::with_timings",
+        "NativeStartup::open_with_journal_timings"
       ],
-      "native": "NativeCounterObserver, explicitly selected by the host and counter service; no I/O, clocks, locks, threads or event queue",
+      "native": "NativeCounterObserver, explicitly selected by the host and counter service; no I/O, clocks, locks, threads or event queue; separately selected fixed-size atomic native file-call timing reader",
       "conformance": [
         "tests/observability.rs",
         "tests/support/node.rs",
-        "tests/counter_service.rs"
+        "tests/counter_service.rs",
+        "tests/journal_timings.rs"
       ],
-      "scope": "Fixed-cardinality volatile post-poll counters bound to exact RuntimeOwner and nonregressing host time. Saturating arithmetic, rejection without mutation, copy snapshot export and scoped permanent close. Host providers use the same public interface; shared views remain independent. A refusing observer cannot change original Node writes, reads or shutdown. Real three-process TCP/TLS and QUIC histories expose metrics, preserve values and original retries across full worker joins/reopen, and start fresh counters without startup replay deliveries. Node/core do not invoke diagnostics. No durable or quorum authority, successful-client count, arbitrary callback sandbox, per-group history, latency attribution or external exporter integration is claimed."
+      "scope": "Fixed-cardinality volatile post-poll counters bound to exact RuntimeOwner and nonregressing host time. Saturating arithmetic, rejection without mutation, copy snapshot export and scoped permanent close. Host providers use the same public interface; shared views remain independent. A refusing observer cannot change original Node writes, reads or shutdown. Real three-process TCP/TLS and QUIC histories expose metrics, preserve values and original retries across full worker joins/reopen, and start fresh counters without startup replay deliveries. Node/core do not invoke diagnostics. No durable or quorum authority, successful-client count, arbitrary callback sandbox, per-group history, full critical-path attribution or external exporter integration is claimed. Slice138 optional native JournalTimings counts append/log-sync/manifest calls, errors and elapsed/max durations in saturating fixed-size atomics. Static startup explicitly selects a host-owned handle; default construction has no timing handle or clock reads. No callbacks, persisted metrics, durability tokens, coherent concurrent snapshot or full critical-path attribution. Real public JournalIo/LogStore tests preserve exact tickets, stale-barrier rejection, failed-publication errors, format-compatible untimed recovery and reader lifetime. Complete synced bytes can recover after a failed publication result, without any barrier receipt escaping."
     },
     {
       "design_id": "C14",

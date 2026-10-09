@@ -69,6 +69,12 @@ pub struct NativeMemberStartup {
     pub startup: NativeStartup,
     pub provisioned_stores: BTreeMap<NodeId, StoreIdentity>,
 }
+/// Explicit native file diagnostic selection; no service or durability authority.
+pub struct NativeStartupTimings {
+    pub protocol: NativePeerProtocol,
+    pub timers: TimerConfig,
+    pub journal: JournalTimings,
+}
 enum StartupAuthorization {
     Static,
     Member(BTreeMap<NodeId, StoreIdentity>),
@@ -229,6 +235,7 @@ impl NativeMemberStartup {
             (
                 StartupAuthorization::Member(self.provisioned_stores),
                 timers,
+                None,
             ),
         )
     }
@@ -493,7 +500,7 @@ impl NativeStartup {
             let listener = TcpListener::bind(self.listen)?;
             build(
                 self,
-                (StartupAuthorization::Static, TimerConfig::default()),
+                (StartupAuthorization::Static, TimerConfig::default(), None),
                 &mut application,
                 &mut cleanup,
                 wake,
@@ -545,7 +552,31 @@ impl NativeStartup {
             app,
             wake,
             now,
-            (StartupAuthorization::Static, timers),
+            (StartupAuthorization::Static, timers, None),
+        )
+    }
+    /// Open the same static native assembly with optional file-call timing.
+    pub fn open_with_journal_timings<A>(
+        self,
+        options: NativeStartupTimings,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.open_with_protocol_as(
+            options.protocol,
+            app,
+            wake,
+            now,
+            (
+                StartupAuthorization::Static,
+                options.timers,
+                Some(options.journal),
+            ),
         )
     }
     fn open_with_protocol_as<A>(
@@ -554,13 +585,13 @@ impl NativeStartup {
         app: A,
         wake: Arc<dyn WorkerWake>,
         now: MonoTime,
-        options: (StartupAuthorization, TimerConfig),
+        options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
     ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
     where
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        let (authorization, timers) = options;
+        let (authorization, timers, timings) = options;
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
         let result = (|| {
@@ -590,7 +621,7 @@ impl NativeStartup {
                     let listener = TcpListener::bind(self.listen)?;
                     build(
                         self,
-                        (authorization, timers),
+                        (authorization, timers, timings),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -618,7 +649,7 @@ impl NativeStartup {
                     let socket = std::net::UdpSocket::bind(self.listen)?;
                     build(
                         self,
-                        (authorization, timers),
+                        (authorization, timers, timings),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -657,7 +688,7 @@ impl NativeStartup {
 }
 fn build<A, C: StartupConnector>(
     config: NativeStartup,
-    options: (StartupAuthorization, TimerConfig),
+    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
@@ -674,11 +705,20 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    let (authorization, timers) = options;
+    let (authorization, timers, timings) = options;
     let create = config.mode == NativeOpenMode::Create;
+    let io = if create {
+        FileLogIo::create(&config.directory)?
+    } else {
+        FileLogIo::open(&config.directory)?
+    };
+    let io = match timings {
+        Some(timings) => io.with_timings(timings),
+        None => io,
+    };
     let store = if create {
         let mut store = checked(NativeLogStore::create(
-            FileLogIo::create(&config.directory)?,
+            io,
             config.store,
             LogLimits::default(),
         ))?;
@@ -687,11 +727,7 @@ where
         checked(store.barrier(&tickets))?;
         store
     } else {
-        NativeLogStore::recover(
-            FileLogIo::open(&config.directory)?,
-            config.store,
-            LogLimits::default(),
-        )?
+        NativeLogStore::recover(io, config.store, LogLimits::default())?
     };
     let state = store.state(config.bootstrap.group)?;
     if state.bootstrap != config.bootstrap {

@@ -18,7 +18,7 @@ test('fixed p99 boundary distinguishes equality and actual numeric refusal', () 
     assert.equal(classifySerial({ ...reference, p99_us: '249999' }).passed, true);
 });
 test('fast results from a different topology/window/assembly cannot satisfy the reference gate', () => {
-    for (const [key, value] of [['protocol','Quic'],['assembly','shared'],['groups','8'],['window','8'],['operations','128'],['warmup','0'],['leader_placement','1:2'],['mode','offered'],['heartbeat_ms','100']]) {
+    for (const [key, value] of [['protocol','Quic'],['assembly','shared'],['groups','8'],['window','8'],['operations','128'],['warmup','0'],['leader_placement','1:2'],['mode','offered'],['journal_timings','true'],['heartbeat_ms','100']]) {
         assert.throws(() => classifySerial({ ...reference, [key]:value }), key);
     }
 });

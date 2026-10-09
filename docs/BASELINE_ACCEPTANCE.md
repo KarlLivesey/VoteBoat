@@ -54,7 +54,7 @@ component-contracts.json and its linked contract document.
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
 | C17 discovery | PeerDiscovery/DiscoveryConnector; ManifestDiscovery/resolve_discovered and NativeAuthorityDiscovery from original Directory quorum reads; tests/discovery.rs, tests/connect.rs, tests/routing.rs, tests/routed/native.rs | Initial peer-address and responsibility-authority observation seams. Automatic remote fetch/refresh, dynamic executable endpoints and discovery-selected QUIC peer establishment remain; source hints cannot activate owners. |
 | C18 placement | PlacementAuthorizer plus PlacementPlanner/plan_learner and native bounded deterministic learner selection; tests/placement_planning.rs and executable TCP/QUIC membership histories, slice113 | Initial learner placement only. Automatic voter replacement/removal, global rebalancing, measured sample collection and resource reservations remain; recommendations cannot activate membership. |
-| C19 observability | New Observer / NativeCounterObserver, post-poll capture and local service metrics | Fixed volatile counts only. No timer/queue/disk latency attribution, per-group event history or external exporter integration claim. |
+| C19 observability | Observer / NativeCounterObserver, post-poll capture, local service metrics and optional native JournalTimings | Fixed post-poll counts plus explicitly selected native append/log-sync/manifest timings (slice138). No full critical-path attribution, general timer/queue telemetry, per-group event history or exporter claim. |
 | C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | Authenticated configure OPERATION_ID submits provisioned exact intents with live execution reauthorization (slice115). configure-record now parses full targets under operator-provisioned policy (slice116); exact retained retries/conflicts and compacted-history refusal are checked. Broad ingress fault-release remains open. Generic envelopes pass the shared execution-time application gate where implemented. |
 | C21 authorization | PrincipalCredentials / ServiceAuthorizer / checked session gate and NativeServiceAccess; optional mutual-TLS counter command mode; tests/authorization.rs and tests/counter_service.rs, slice110 | Initial group-scoped reader/writer/admin gate. Live credential rotation, external issuer integration, durable principal audit and broad ingress fault-release remain. Provisioned-intent and client-target Configure consume this same session gate. Unflagged command mode stays trusted plaintext loopback. |
 | C22 integrity/compression | Checked native WAL/wire/snapshot framing, CRC and content digests internally | No selectable integrity/compression provider; optional compression is not enabled. |
@@ -68,8 +68,9 @@ results. The static-membership networked service and Rust embedding remain
 independent of online-change and lifecycle acceptance work.
 
 1. Slice137 implements benchmark failure retention and selected real failure
-   cleanup. Next attribute the unchanged startup serial disk critical path,
-   including any observed leadership-change failure (P1/P7).
+   cleanup;138 adds marked startup file timings and separate uninstrumented
+   reference. Next investigate measured manifest-publication cost while retaining
+   every durability dependency and original p99 gate (P1/P7).
 2. Implement a measured, contract-preserving fix and repeat matched disk-backed
    measurements against the original250ms p99 and recovery gates (P1/P7).
 3. Continue the unresolved lifecycle/admission/platform ledger: networked

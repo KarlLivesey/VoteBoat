@@ -30,6 +30,7 @@ export function verifyContext(context, summaryHash, samplesHash) {
 export function classifySerial(summary) {
     assert.equal(summary.protocol, 'TcpTls', 'reference transport must be TCP/TLS');
     assert.equal(summary.assembly, 'startup', 'reference uses native startup assembly');
+    assert.equal(summary.journal_timings, undefined, 'instrumented diagnostic is not the uninstrumented acceptance reference');
     assert.equal(summary.mode, undefined, 'offered/other modes cannot replace the serial gate');
     assert.equal(summary.leader_placement, '1:1', 'reference starts with replica 1 leading');
     const integer = (key, expected) => {

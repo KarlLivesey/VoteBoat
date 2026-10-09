@@ -24,7 +24,9 @@ use std::{collections::BTreeMap, io};
 
 mod checkpoint;
 mod file;
+mod timing;
 pub use file::FileLogIo;
+pub use timing::{JournalCallTiming, JournalTimingSnapshot, JournalTimings};
 
 const HEADER: usize = 32;
 const TRAILER: usize = 16;

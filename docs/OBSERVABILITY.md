@@ -64,3 +64,28 @@ runs three-process TCP/TLS and QUIC metrics/write/read/retry histories, closes/
 joins workers and reopens stores; new counters start without replay deliveries
 while original retries and values survive. These are finite conformance histories,
 not a performance or full protocol proof.
+
+## Optional native journal timing
+
+`native::log_store::JournalTimings` is a fixed-size, volatile native file
+measurement handle, separate from the post-poll Observer contract. Explicitly
+attach it with `FileLogIo::with_timings`, or pass `NativeStartupTimings` to static
+`NativeStartup::open_with_journal_timings`. The host retains a clone and reads
+`snapshot()`; dropping that clone never closes files or workers. The default
+file path retains no timing handle and performs no timing clock reads.
+
+Append, log sync and complete manifest publication each expose completed call
+count, error count, elapsed nanoseconds and maximum duration. Updates saturate;
+there are no callbacks, queues, exporters or per-group labels. Current-state
+snapshots may interleave with updates; read after worker join for stable totals.
+These counters do not acknowledge an operation, identify a durable prefix or
+bind a provider completion. Parallel worker durations overlap and cannot simply
+be added to calculate client critical-path latency. Creation/replacement and
+snapshot-file costs are outside these three call categories.
+
+`native_benchmark ... --journal-timings` selects the startup-only diagnostic
+assembly with the original timers and durability. Its summary is explicitly
+marked; `journal.csv` contains phase snapshots, with logical LogStore counters
+unavailable (zero), rather than fabricated. The fixed serial acceptance checker
+rejects marked diagnostic runs. A separate uninstrumented reference is required
+for performance acceptance.

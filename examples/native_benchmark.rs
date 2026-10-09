@@ -106,6 +106,7 @@ fn tls(n: u64) -> NativeTlsConfig {
     })
     .unwrap()
 }
+#[cfg(test)]
 fn open(
     root: &Path,
     mode: NativeOpenMode,
@@ -113,6 +114,16 @@ fn open(
     capacity: usize,
     clock: &Instant,
 ) -> Result<Vec<Replica>, Failure> {
+    open_recorded(root, mode, protocol, capacity, clock, false).map(|(nodes, _)| nodes)
+}
+fn open_recorded(
+    root: &Path,
+    mode: NativeOpenMode,
+    protocol: NativePeerProtocol,
+    capacity: usize,
+    clock: &Instant,
+    record: bool,
+) -> Result<(Vec<Replica>, Vec<observe::Trace>), Failure> {
     let reservations = (0..3)
         .map(|_| {
             (0..32)
@@ -142,6 +153,7 @@ fn open(
     };
     drop(reservations);
     let mut replicas = Vec::new();
+    let mut traces = Vec::new();
     for n in 1..=3 {
         let config = NativeStartup {
             directory: root.join(format!("replica{n}")),
@@ -167,18 +179,32 @@ fn open(
             entropy_seed: n + 17,
             limits: NodeLimits::default(),
         };
-        match config.open_with_protocol_and_timers(
-            protocol,
-            TimerConfig {
-                heartbeat_ms: 50,
-                election_min_ms: 1000,
-                election_spread_ms: 1000,
-                expirations_per_poll: 32,
-            },
-            checked(Counter::new(capacity))?,
-            Arc::new(ThreadWake::current()),
-            MonoTime(clock.elapsed().as_millis() as u64),
-        ) {
+        let timers = TimerConfig {
+            heartbeat_ms: 50,
+            election_min_ms: 1000,
+            election_spread_ms: 1000,
+            expirations_per_poll: 32,
+        };
+        let app = checked(Counter::new(capacity))?;
+        let wake = Arc::new(ThreadWake::current());
+        let now = MonoTime(clock.elapsed().as_millis() as u64);
+        let opened = if record {
+            let timing = voteboat::native::log_store::JournalTimings::default();
+            traces.push(observe::Trace::journal(timing.clone()));
+            config.open_with_journal_timings(
+                NativeStartupTimings {
+                    protocol,
+                    timers,
+                    journal: timing,
+                },
+                app,
+                wake,
+                now,
+            )
+        } else {
+            config.open_with_protocol_and_timers(protocol, timers, app, wake, now)
+        };
+        match opened {
             Ok(r) => replicas.push(r),
             Err(mut e) => {
                 let deadline = Instant::now() + Duration::from_secs(10);
@@ -192,7 +218,7 @@ fn open(
             }
         }
     }
-    Ok(replicas)
+    Ok((replicas, traces))
 }
 #[derive(Default)]
 struct PollTotals {
@@ -631,10 +657,17 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
     Ok(OpenOptions::new().create_new(true).write(true).open(path)?)
 }
 fn main() -> Result<(), Failure> {
-    let args = std::env::args().skip(1).collect::<Vec<_>>();
+    let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+    let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
+    if journal_timings {
+        args.pop();
+        if args.len() != 4 {
+            return Err("journal timings require startup reference mode".into());
+        }
+    }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -712,7 +745,7 @@ fn main() -> Result<(), Failure> {
         })
     } else {
         run(config, &clock, |mode| {
-            open(root, mode, protocol, capacity, &clock).map(|nodes| (nodes, Vec::new()))
+            open_recorded(root, mode, protocol, capacity, &clock, journal_timings)
         })
     }
 }
@@ -763,7 +796,12 @@ fn run<L: LogStore + Send + 'static>(
         },
     ) {
         Ok(result) => result,
-        Err(error) => return failure::cleanup(replicas, clock, root, error),
+        Err(error) => {
+            if !shared {
+                observe::retain_journal(root, &mut storage, "warmup_failure", &traces);
+            }
+            return failure::cleanup(replicas, clock, root, error);
+        }
     };
     let warmup_last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
     verify(&mut replicas, clock, WARMUP, groups, &warmup_last)?;
@@ -797,7 +835,12 @@ fn run<L: LogStore + Send + 'static>(
         },
     ) {
         Ok(result) => result,
-        Err(error) => return failure::cleanup(replicas, clock, root, error),
+        Err(error) => {
+            if !shared {
+                observe::retain_journal(root, &mut storage, "measurement_failure", &traces);
+            }
+            return failure::cleanup(replicas, clock, root, error);
+        }
     };
     failure::write_samples(&mut csv, &measured.samples)?;
     observe::capture(&mut storage, "after_measurement", &traces);
@@ -840,6 +883,8 @@ fn run<L: LogStore + Send + 'static>(
     observe::capture(&mut storage, "after_recover_join", &recovered_traces);
     if shared {
         observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
+    } else if !traces.is_empty() {
+        observe::write_csv(&mut exclusive(&root.join("journal.csv"))?, &storage)?;
     }
     let mut latency = measured
         .samples
@@ -849,7 +894,12 @@ fn run<L: LogStore + Send + 'static>(
     latency.sort_unstable();
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
     let election_ms = if shared { 10000 } else { 1000 };
-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}\n",
+    let diagnostic = if !shared && !traces.is_empty() {
+        " journal_timings=true"
+    } else {
+        ""
+    };
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic}\n",
         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;

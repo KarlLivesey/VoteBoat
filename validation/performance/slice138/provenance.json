@@ -1,0 +1,21 @@
+{
+  "source_base": "58c56ca",
+  "changes": "optional fixed-size native timing handle, explicit static startup selection and benchmark diagnostic flag",
+  "platform": "Linux",
+  "filesystem": "btrfs",
+  "roots": [
+    "target/bench-slice138-tcp-diagnostic",
+    "target/bench-slice138-tcp-reference"
+  ],
+  "measurement": "three replicas on one host/device; no CPU/device reservation; no overlapping build or bulk work; same 256/window1/64warmup startup TCP timers/durability",
+  "sha256": {
+    "Cargo.lock": "532a0f956d683a1f35701ce838c35ede07b4bf98ceb5305370b34a27427b7ae8",
+    "src/native/log_store.rs": "85be6a4662b68d19adfb172c3810961ba1160fbc45e8bd2cb868e12e7d5c8e85",
+    "src/native/log_store/file.rs": "a584bf1a1acdff64e8a73e5eb5b4b523d4ae6d917eace01162fe9edc429fe081",
+    "src/native/log_store/timing.rs": "6661e57c2ba97d9788647c13a3bb9afbf3cb6d4a318016598e70c248da2c586f",
+    "src/native/startup.rs": "b0c47aadda897f4eaa557750b0c34b483a945c746508b4919b34c23d8e2eda60",
+    "examples/native_benchmark.rs": "31daaef5fe7a558aab16d21fff0c297906066e146e41cad4dc8fe4f581a4a95e",
+    "examples/benchmark/observe.rs": "d05c988967fee3b9ec76dbc44757a4c7457ccacd712d6084ed934f775b2c1f25",
+    "target/release/examples/native_benchmark": "2b3e06a138b77acb277e2a782f7107f4e8d7409268ee6baf14124f8c1a87f94f"
+  }
+}

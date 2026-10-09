@@ -111,24 +111,22 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Failed-history retention (current slice137, P1/P7).** Purpose: preserve
-   completed receipts, unresolved requests, poll totals and replica state when
-   native benchmark progress fails. Dependencies:136 demonstrated failure, current
-   workload/drive/close contracts. Completion: partial-history checks, real native
-   failure with explicit cleanup, unchanged complete reference validation; no
-   successful summary for a failed history or measurement-path diagnostic I/O.
-2. **Startup critical-path attribution (next, P1/P7).** Purpose: distinguish
-   disk barrier/manifest, owner and peer progress costs before changing production.
-   Dependencies:137 retained failures and review of startup provider composition.
-   Completion: schema/contracts sketch, transparent bounded instrumentation that
-   preserves original durability and failure behavior, measured stage evidence
-   for the serial reference, and any observed leadership-change diagnosis.
-3. **Cause-supported improvement and matched acceptance (following, P1/P7).**
-   Purpose: improve the durable service at the original correctness/p99 budget.
-   Dependencies: item2 measured cause and affected provider invariants. Completion:
-   smallest justified fix, appropriate crash/conformance regression and matched
-   original250ms gate. Preserve all other P0–P7 ledger gaps; if evidence changes
-   scope, update the macro/mini plan instead of guessing or relaxing acceptance.
+1. **Startup file attribution (current slice138, P1/P7).** Purpose: measure
+   actual append/log-sync/manifest calls without substituting a shared assembly.
+   Dependencies:137 failure retention, native JournalIo/startup contracts.
+   Completion: optional fixed-size native reader, exact result/format/lifetime and
+   crash tests, marked diagnostic with raw stage validation, separate unchanged
+   reference, no diagnostic substitution for original250ms acceptance.
+2. **Cause-supported improvement (next, P1/P7).** Purpose: reduce demonstrated
+   cost while preserving all durability dependencies. Dependencies:138 stage
+   evidence plus remaining critical-path uncertainty. Completion: small explicit
+   dependency/restart schema, targeted crash/conformance regressions and useful
+   real service result; do not remove a sync/publication because a counter is high.
+3. **Matched acceptance and remaining baseline gaps (following, P0–P7).**
+   Purpose: verify improvement at original correctness/p99 and continue lifecycle/
+   admission/platform work. Dependencies:item2 justified change. Completion:
+   matched uninstrumented reference and original250ms gate, honest failure reporting
+   and requirement ledger review. Every unfulfilled P0–P7 requirement stays active.
 
 ### How the current work fits globally
 
@@ -9658,3 +9656,99 @@ fix. Macro P1/P7 advances, all other baseline gaps remain, full goal active.
 
 Final slice137 example Clippy all-features -D warnings passed1.12s; all
 measurement/test/check handles terminal. No CI gate or full-goal completion claim.
+
+## Slice138 schema plan — optional native journal timings
+
+Previous137 progressed/pushed58c56ca; tree clean at start. Read README and design
+chapters02/03/04/07/11/17 plus component contracts before this native I/O change.
+External syscall tracing tools are unavailable locally. Do not substitute the
+shared assembly's longer election timers or performance results for startup.
+
+Smallest path: optional fixed-cardinality native JournalTimings handle shared by
+FileLogIo and a host reader, explicitly passed through a new startup options
+method. No new callback/provider, file format, global registry, worker or policy.
+Existing JournalIo is still the platform seam; counters are native diagnostic
+state, not a replacement durability mechanism. Append/log-sync/manifest-publication
+record completed call count, elapsed/max nanoseconds and errors in saturating
+atomics. Default file construction retains no timing handle or clock reads.
+Snapshots during work may be non-atomic diagnostic views; drain/join provides
+stable totals. Neither counts nor durations are durability tokens/watermarks.
+
+API/state: host creates handle; FileLogIo::with_timings attaches it before moving
+into NativeLogStore/worker. Static NativeStartup accepts protocol/timers/handle
+as one explicit options value, preserving all existing validation, cleanup and
+provider types. Host reader clones outlive node shutdown; no observer code can
+block or change an I/O result. Results/errors from actual file operations remain
+unchanged. Record after the operation, including failed manifest staging. No
+allocation or file I/O in timing updates. Restart gets a fresh reader unless the
+host deliberately shares cumulative diagnostics; no persisted metric identity.
+
+Benchmark startup returns three timing readers through its existing trace shape;
+record before/after measurement and both joins in a separate journal CSV. Logical
+LogStore counts remain unavailable on startup, never fabricated from file counts.
+Enablement adds bounded timing overhead, so diagnostic runs are labelled and
+must not certify uninstrumented capacity. Startup timers/durability/window stay
+unchanged. Aggregate parallel worker durations are not the critical path itself.
+
+Acceptance: downstream real-file JournalIo/LogStore test preserves exact tickets,
+error results, reopen state and host-owned handle lifetime; failed publication
+increments diagnostic errors without exposing a durable state. Default and timed
+file modes remain format-compatible. Reuse native file crash tests; example tests
+and real startup TCP reference validate shutdown/recovery with timing selected.
+Next: analyze measured stage costs and select a cause-supported safe change;
+following: original fixed250ms and correctness acceptance plus remaining ledger.
+Full P0–P7 active, P8/Windows deferred, CI background. This advances P1/P7 and
+native C04/C19 diagnostics, not broad observability completion.
+
+## Slice138 implemented — optional native journal attribution
+
+FileLogIo optionally retains a host-owned JournalTimings reader; append, log-sync
+and full manifest publication record completed calls/errors/elapsed/max durations
+in fixed-size saturating atomics. No callbacks, new worker, queue, persistent
+format or durability authority. Default construction performs no timing clock
+reads. The existing JournalIo seam and native provider results remain unchanged.
+Static NativeStartup::open_with_journal_timings selects this explicitly through
+NativeStartupTimings; existing static/member/connector wrappers select None.
+Readers survive shutdown; concurrent snapshots are non-atomic diagnostic views,
+while joined workers supply stable totals. C19 inventory/documentation records
+this narrow native timing extension without claiming broad telemetry completion.
+
+Benchmark flag --journal-timings selects only startup mode and keeps original
+1000–1999ms elections. Journal CSV includes actual three-replica stage snapshots;
+logical LogStore counts are unavailable (zero). Marked summaries are refused by
+the fixed serial acceptance checker. Failure-stage journal retention is best
+effort and cannot replace the original workload error. A complete diagnostic
+needs independent raw receipt verification and stage validation. New journal
+checker tests reject missing/duplicate stages, regressions, errors and fabricated
+logical counters. It checks recorded arithmetic, not hardware durability.
+
+Actual checks:2 downstream timing tests and9 log-store tests pass (1.74s compile,
+0.02s store execution);5 selected native library tests pass0.06s after8.08s
+compile, including replacement interruption and saturation. Example16 tests
+pass0.03s after7.62s build. All-feature/all-target check6.69s and Clippy -D warnings
+8.34s pass. Core-only check3.28s; native-only timing tests2/2 after8.45s build.
+Release build14.31s. Initial compile missed a legacy connector builder's None
+option; focused fix made. Initial fault test expected synced bytes to vanish;
+corrected to existing permitted recovery with no barrier receipt or in-process
+durable-state exposure, without changing storage behavior.
+
+Sequential Linux/Btrfs diagnostic/reference runs, no overlapping compilation:
+diagnostic46.337179s,5.525ops/s,p99756.731330ms,recovered320/retries/joins valid;
+reference41.720369s,6.136ops/s,p99734.953838ms,recovered320/retries/joins valid.
+Raw256-receipt validation passes for both. Diagnostic is correctly refused as an
+acceptance substitute; uninstrumented250ms numeric gate fails. Neither run lost
+leadership. File mean synchronization19.64–22.04ms and manifest publication
+37.53–39.96ms,512/511/511 calls each during measurement. Publication is the larger
+recorded file cost; parallel sums cannot establish full client critical-path
+causality or explain all p99 outliers. No throughput gain/capacity claim.
+
+Public raw/sample/journal/context/source/binary evidence retained in
+validation/performance/slice138, without private host paths/inventory. Three
+journal checker tests pass12.85ms; six fixed-gate tests pass11.05ms; format,
+whitespace and80-contract inventory checks pass. TCP timing assembly exercised;
+QUIC timing compiles but was not newly executed. macOS and power loss remain
+unvalidated. Next investigate recoverable bounded manifest publication as the
+measured cost, with an explicit dependency/restart/failure schema before editing;
+never remove a sync because its counter is high. Following matched original
+correctness/250ms acceptance and remaining baseline lifecycle/admission/platform
+work. Macro P1/P7 advances; full P0–P7 active, P8/Windows deferred, CI background.

@@ -40,13 +40,34 @@ pub(super) struct Totals {
     groups: BTreeMap<u128, u64>,
 }
 #[derive(Clone, Default)]
-pub(super) struct Trace(Arc<Mutex<Totals>>);
+pub(super) struct Trace(
+    Arc<Mutex<Totals>>,
+    Option<voteboat::native::log_store::JournalTimings>,
+);
 impl Trace {
+    pub(super) fn journal(timing: voteboat::native::log_store::JournalTimings) -> Self {
+        Self(Arc::default(), Some(timing))
+    }
     fn update(&self, f: impl FnOnce(&mut Totals)) {
         f(&mut self.0.lock().expect("benchmark trace poisoned"));
     }
     pub(super) fn snapshot(&self) -> Totals {
-        self.0.lock().expect("benchmark trace poisoned").clone()
+        let mut totals = self.0.lock().expect("benchmark trace poisoned").clone();
+        if let Some(timing) = &self.1 {
+            let snapshot = timing.snapshot();
+            totals.io_append_calls = snapshot.append.calls;
+            totals.io_append_ns = snapshot.append.elapsed_ns.into();
+            totals.sync_calls = snapshot.log_sync.calls;
+            totals.sync_ns = snapshot.log_sync.elapsed_ns.into();
+            totals.publish_calls = snapshot.manifest.calls;
+            totals.publish_ns = snapshot.manifest.elapsed_ns.into();
+            totals.errors = snapshot
+                .append
+                .errors
+                .saturating_add(snapshot.log_sync.errors)
+                .saturating_add(snapshot.manifest.errors);
+        }
+        totals
     }
 }
 pub(super) struct ObservedIo<I> {
@@ -207,6 +228,23 @@ pub(super) fn write_csv(
     }
     file.sync_all()?;
     Ok(())
+}
+pub(super) fn retain_journal(
+    root: &Path,
+    snapshots: &mut Vec<(String, usize, Totals)>,
+    stage: &str,
+    traces: &[Trace],
+) {
+    if traces.is_empty() {
+        return;
+    }
+    capture(snapshots, stage, traces);
+    let result = (|| -> Result<(), Failure> {
+        write_csv(&mut exclusive(&root.join("journal.csv"))?, snapshots)
+    })();
+    if let Err(error) = result {
+        eprintln!("journal diagnostic retention failed: {error}");
+    }
 }
 pub(super) fn capture(snapshots: &mut Vec<(String, usize, Totals)>, stage: &str, traces: &[Trace]) {
     for (i, trace) in traces.iter().enumerate() {
