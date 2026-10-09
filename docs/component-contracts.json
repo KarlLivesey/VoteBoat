@@ -1644,6 +1644,31 @@
         "tests/routed/creation.rs"
       ],
       "scope": "Offline caller-owned assigned bootstrap only. Exact bounded metadata status, assigned node/store/application and immutable provenance precede selected WAL Create/barrier; typed durable absence refuses pending/fenced stores. Host replacements consume the same checked helper. Exact retry preserves progressed groups; conflicts and existing unbound groups refuse. Real metadata file history/reopen/campaign, every torn bootstrap WAL frame and five actual file publication observation boundaries. One native creation record per selected directory. Selected TCP/QUIC created-service histories in tests/routed/creation.rs cover partial assigned provisioning, metadata reopen/retry, recursive target quorum, child checkpoint/reopen/dedup and unchanged offline metadata WALs. No hidden runtime, remote cryptographic certificate, namespace/serving permission or creation RPC/CLI."
+    },
+    {
+      "design_id": "C05/C20",
+      "public_contract": "NamespacePlan / NamespacePublication / NamespacePublicationStatus / CreatedNamespace<A,P>",
+      "operations": [
+        "with_namespace_creation",
+        "validate",
+        "encode",
+        "decode",
+        "from_status",
+        "namespace_publication_at",
+        "initialization_command",
+        "activation_command",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint"
+      ],
+      "native": "Common replicated Directory schema3 publication and CreatedNamespace guard over RoutedApplication, selected application/partition contracts and existing native WAL/snapshot/owning Node. No extra provider/runtime.",
+      "conformance": [
+        "tests/namespace_creation.rs",
+        "tests/routed/creation.rs"
+      ],
+      "scope": "Fresh independent root namespace only: original committed creation reservation plus exact plan/configuration/ready index, bounded reserved publication control, committed target activation before any data service. Host application/partition injection; canonical bounded codecs, full ordinary capacity completion, schema/checkpoint refusal, atomic restore/control-index consistency and receipt allocation accounting. Every torn native activation frame plus sync/publication model faults. Selected TCP/QUIC ready/publish/activate checkpoint reopen and metadata-offline retry histories. Foreign authentication/commitment remains an explicit trusted host obligation; digest/status are not remote certificates. No live schema upgrade, creation RPC/CLI, recursive insertion into existing covered scope, source transfer lifecycle, deletion/reparenting, hardware power-loss or macOS claim."
     }
   ],
   "not_yet_implemented": [

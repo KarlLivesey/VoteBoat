@@ -201,6 +201,12 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     pub fn is_initialized(&self) -> bool {
         self.initialized.is_some()
     }
+    pub(crate) fn initialization(&self) -> Option<(OperationId, u64)> {
+        self.initialized
+    }
+    pub(crate) fn has_data_operation(&self, operation: OperationId) -> bool {
+        self.history.contains_key(&operation)
+    }
     pub fn fence(&self) -> Option<OwnershipFence> {
         self.fence
     }

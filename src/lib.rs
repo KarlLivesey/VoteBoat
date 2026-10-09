@@ -53,3 +53,4 @@ pub mod transfer_source;
 pub mod transfer_target;
 
 pub mod group_creation;
+pub mod namespace_creation;

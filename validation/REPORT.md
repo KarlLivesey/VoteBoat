@@ -2899,3 +2899,44 @@ a creation RPC/CLI, arbitrary interruption or hardware power-loss coverage. Expl
 snapshot create/recover is caller-owned; partial initialization remains a separate
 recovery case. Linux loopback does not establish macOS or separate-host operation.
 Final format, whitespace and 79-contract inventory checks passed.
+
+## Slice125 — fresh independent namespace creation
+
+All-feature directory31/namespace3 passed0.13/0.06s; core-only directory27/namespace3
+passed0.06/0.06s. Following focused receipt/index fixes, core-only namespace3 passed
+0.04s and all-feature namespace4 passed0.15s. Host cases cover canonical/truncated
+codecs, full ordinary directory budget with reserved successful control, mismatch,
+retry/schema/checkpoint refusal, atomic restore/control indices, non-serving data
+admission/apply/read, exact activation and original data retries. A receipt capacity
+regression checks retained allocation against the declared bound.
+
+Actual native TCP/QUIC creation124 regression histories2 passed1.41s. New namespace
+histories2 passed1.82s, checkpoint/reopen ready, publish and activation state, obtain
+target readiness through original quorum reads, preserve publication/data retry
+outcomes and keep exact per-node metadata WALs unchanged during offline operation.
+Native ModelIo covers every activation frame append cut and sync/publication faults
+with unsynced loss/recovery: actual Raft replay either retains non-serving readiness
+or exact activation; original retry converges. No arbitrary power-failure or full
+protocol proof claim. Fresh independent root namespaces only; source export/freeze,
+recursive insertion, deletion/reparenting and directory authority movement remain.
+
+Initial native ProviderViolation was a new guard receipt Vec capacity exceeding its
+bound; exact command-count allocation fixes it without weakening validation. First
+fixture fields and two Clippy findings were corrected. A filtered test invocation
+compiled directory/namespace but ran zero tests for them; subsequent unfiltered
+runs above provide actual evidence. All-feature/all-target Clippy and core-only new
+target Clippy -D warnings passed before the final envelope regression addition;
+final outcomes follow below. Foreign authentication/commitment is a trusted host
+obligation, never proved by constructible digests/status. No live schema upgrade,
+creation endpoint, macOS or separate-host execution claim.
+Final all-feature namespace5 passed0.15s, including a valid4096-voter policy/store
+map whose creation command exceeds the old control-command envelope. Final
+all-feature/all-target Clippy -D warnings, format/whitespace and80-contract inventory
+passed. Final core-only result follows below.
+Final core-only namespace4 passed0.06s. Native WAL fault test is feature-gated and
+covered by the all-feature namespace5 run. No remote CI gate was used.
+Final TCP/QUIC namespace histories2 passed1.88s, build5.13s, including a quorum-read
+of the published manifest and exact client cache resolution before target activation.
+All-feature/all-target Clippy -D warnings, format/whitespace and80-contract inventory
+passed after this addition. Cached routing remains a hint; target guard enforces
+its own committed activation/ownership state.

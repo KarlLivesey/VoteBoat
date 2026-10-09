@@ -294,3 +294,336 @@ fn tcp_created_group_resumes_partial_assignment_and_runs_with_metadata_offline()
 fn quic_created_group_resumes_partial_assignment_and_runs_with_metadata_offline() {
     created_service(NativePeerProtocol::Quic);
 }
+
+use voteboat::namespace_creation::*;
+fn namespace_directory() -> Directory {
+    directory()
+        .with_namespace_creation()
+        .unwrap_or_else(|_| panic!("schema3"))
+}
+fn namespace_service(protocol: NativePeerProtocol) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-namespace-service-{}-{protocol:?}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let targets = configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover);
+    let intent = GroupCreationIntent {
+        authority: group(1),
+        parent: responsibility(1),
+        expected: RouteGeneration::new(1).unwrap(),
+        responsibility: responsibility(50),
+        bootstrap: targets[0].bootstrap.clone(),
+        application: grant().input().application,
+        mode: GroupCreationMode::Empty,
+    };
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        protocol,
+        namespace_directory,
+    );
+    campaign(&mut parents, &clock, 1);
+    let boot = namespace_directory()
+        .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+        .unwrap();
+    assert_eq!(
+        propose(&mut parents, &clock, 1, 10000, boot).outcome,
+        DirectoryOutcome::Initialized
+    );
+    let parent_manifest = manifests()[0].clone();
+    propose(
+        &mut parents,
+        &clock,
+        1,
+        10001,
+        DirectoryCommand {
+            expected: None,
+            manifest: parent_manifest.clone(),
+        }
+        .encode(MAX_DIRECTORY_COMMAND_BYTES)
+        .unwrap(),
+    );
+    assert_eq!(
+        propose(
+            &mut parents,
+            &clock,
+            1,
+            10002,
+            intent.encode(MAX_GROUP_CREATION_BYTES).unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let creation = parents[0].local().applications[&group(1)]
+        .group_creation_at(0, group(100))
+        .unwrap()
+        .unwrap();
+    let mut m = grant().into_input();
+    m.responsibility = responsibility(50);
+    m.parent = None;
+    m.execution = ExecutionMode::Single(group(100));
+    let plan = NamespacePlan {
+        creation: creation.clone(),
+        manifest: ResponsibilityManifest::new(m).unwrap(),
+    };
+    std::fs::create_dir_all(root.join("100")).unwrap();
+    for c in &targets {
+        let verified = VerifiedGroupCreation::verify(
+            &LocalCreationAuthority {
+                core: parents[0].local().owner.core(group(1)).unwrap(),
+                directory: &parents[0].local().applications[&group(1)],
+            },
+            creation.clone(),
+            c.node,
+            c.store,
+            intent.application,
+        )
+        .unwrap();
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&c.directory).unwrap(),
+            c.store,
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
+        establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: c.store,
+                group: group(100),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    }
+    let fresh = || {
+        CreatedNamespace::new(
+            plan.clone(),
+            Counter::new(64).unwrap(),
+            HostPolicy,
+            limits(),
+        )
+        .unwrap_or_else(|_| panic!("created namespace"))
+    };
+    let mut nodes = open(targets, &clock, protocol, fresh);
+    campaign(&mut nodes, &clock, 100);
+    let mut hint = super::super::hint(4);
+    hint.responsibility = responsibility(50);
+    hint.group = group(100);
+    let query = || {
+        NamespaceQuery::Data(RoutedQuery {
+            hint,
+            key: vec![4],
+            query: (),
+        })
+    };
+    let bytes = encode_routed(hint, &[4], &7i64.to_le_bytes(), 1024).unwrap();
+    assert!(nodes[0].local().applications[&group(100)]
+        .validate_proposal(OperationId::new(20000).unwrap(), &bytes, std::iter::empty())
+        .is_err());
+    assert_eq!(
+        read(&mut nodes, &clock, 100, query()),
+        NamespaceRead::NotActive
+    );
+    let init = fresh()
+        .initialization_command(MAX_ROUTED_COMMAND_BYTES)
+        .unwrap();
+    assert_eq!(
+        propose(&mut nodes, &clock, 100, 10002, init).outcome,
+        NamespaceOutcome::Ready
+    );
+    let NamespaceRead::Status(ready) = read(&mut nodes, &clock, 100, NamespaceQuery::Status) else {
+        panic!("ready status")
+    };
+    let publication = NamespacePublication::from_status(&plan, ready).unwrap();
+    for n in &mut nodes {
+        n.control(group(100), NodeControl::Checkpoint).unwrap();
+    }
+    drive(&mut nodes, &clock, |ns| {
+        ns.iter().all(|n| {
+            n.local()
+                .owner
+                .core(group(100))
+                .unwrap()
+                .state()
+                .base_index()
+                == n.local().applications[&group(100)].applied_index()
+        })
+    });
+    close(nodes, &clock, 100, || {
+        drive(&mut parents, &clock, |_| true);
+    });
+    let mut nodes = open(
+        configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 100);
+    assert_eq!(
+        read(&mut nodes, &clock, 100, query()),
+        NamespaceRead::NotActive
+    );
+    campaign(&mut parents, &clock, 1);
+    let pub_bytes = publication.encode(MAX_NAMESPACE_PUBLICATION_BYTES).unwrap();
+    assert_eq!(
+        propose(&mut parents, &clock, 1, 10003, pub_bytes.clone()).outcome,
+        DirectoryOutcome::NamespacePublished(RouteGeneration::new(1).unwrap())
+    );
+    let status = parents[0].local().applications[&group(1)]
+        .namespace_publication_at(0, creation.operation)
+        .unwrap()
+        .unwrap();
+    for n in &mut parents {
+        n.control(group(1), NodeControl::Checkpoint).unwrap();
+    }
+    drive(&mut parents, &clock, |ns| {
+        ns.iter().all(|n| {
+            n.local().owner.core(group(1)).unwrap().state().base_index()
+                == n.local().applications[&group(1)].applied_index()
+        })
+    });
+    close(parents, &clock, 1, || {
+        drive(&mut nodes, &clock, |_| true);
+    });
+    let mut parents = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        namespace_directory,
+    );
+    campaign(&mut parents, &clock, 1);
+    assert!(propose(&mut parents, &clock, 1, 10003, pub_bytes).duplicate);
+    assert_eq!(
+        parents[0].local().applications[&group(1)]
+            .namespace_publication_at(0, creation.operation)
+            .unwrap(),
+        Some(status.clone())
+    );
+    assert_eq!(
+        parents[0].local().applications[&group(1)].manifest(responsibility(1)),
+        Some(&parent_manifest)
+    );
+    assert_eq!(
+        parents[0].local().applications[&group(1)].manifest(responsibility(50)),
+        Some(&plan.manifest)
+    );
+    let observed = read(&mut parents, &clock, 1, responsibility(50)).unwrap();
+    let mut cache = NativeManifestCache::new(ManifestCacheLimits {
+        manifests: 1,
+        bytes: 4096,
+    })
+    .unwrap();
+    cache.admit(observed).unwrap();
+    assert_eq!(
+        resolve(&cache, &HostPolicy, responsibility(50), &[4], 1).unwrap(),
+        hint
+    );
+    let parent_ids = parents
+        .iter()
+        .map(|n| n.local().owner.core(group(1)).unwrap().local_node())
+        .collect::<Vec<_>>();
+    let parent_logs = parent_ids
+        .into_iter()
+        .zip(close(parents, &clock, 1, || {
+            drive(&mut nodes, &clock, |_| true);
+        }))
+        .collect::<BTreeMap<_, _>>();
+    campaign(&mut nodes, &clock, 100);
+    assert_eq!(
+        read(&mut nodes, &clock, 100, query()),
+        NamespaceRead::NotActive
+    );
+    let activation = nodes[0].local().applications[&group(100)]
+        .activation_command(&status, 2000)
+        .unwrap();
+    assert_eq!(
+        propose(&mut nodes, &clock, 100, 10003, activation.clone()).outcome,
+        NamespaceOutcome::Activated
+    );
+    let original = propose(&mut nodes, &clock, 100, 20000, bytes.clone());
+    assert!(matches!(
+        original.outcome,
+        NamespaceOutcome::Data(RoutedReceipt {
+            outcome: RoutedOutcome::Applied(CounterReceipt {
+                outcome: CounterOutcome::Value(7),
+                duplicate: false,
+                ..
+            }),
+            ..
+        })
+    ));
+    assert_eq!(
+        read(&mut nodes, &clock, 100, query()),
+        NamespaceRead::Data(RoutedRead::Served(7))
+    );
+    for n in &mut nodes {
+        n.control(group(100), NodeControl::Checkpoint).unwrap();
+    }
+    drive(&mut nodes, &clock, |ns| {
+        ns.iter().all(|n| {
+            n.local()
+                .owner
+                .core(group(100))
+                .unwrap()
+                .state()
+                .base_index()
+                == n.local().applications[&group(100)].applied_index()
+        })
+    });
+    close(nodes, &clock, 100, || {});
+    let mut nodes = open(
+        configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        protocol,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 100);
+    assert_eq!(
+        propose(&mut nodes, &clock, 100, 10003, activation).outcome,
+        NamespaceOutcome::Activated
+    );
+    let retry = propose(&mut nodes, &clock, 100, 20000, bytes);
+    assert!(matches!(
+        retry.outcome,
+        NamespaceOutcome::Data(RoutedReceipt {
+            outcome: RoutedOutcome::Applied(CounterReceipt {
+                outcome: CounterOutcome::Value(7),
+                duplicate: true,
+                ..
+            }),
+            ..
+        })
+    ));
+    assert_eq!(
+        read(&mut nodes, &clock, 100, query()),
+        NamespaceRead::Data(RoutedRead::Served(7))
+    );
+    close(nodes, &clock, 100, || {});
+    for n in 1..=3 {
+        let log = NativeLogStore::recover(
+            FileLogIo::open(root.join(format!("1/{n}"))).unwrap(),
+            support::identity(n),
+            LogLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            parent_logs[&support::node(n as u64)],
+            log.state(group(1)).unwrap()
+        );
+    }
+    std::fs::remove_dir_all(root).unwrap();
+}
+#[test]
+fn tcp_namespace_ready_publish_activate_survives_reopen_and_metadata_outage() {
+    namespace_service(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage() {
+    namespace_service(NativePeerProtocol::Quic);
+}

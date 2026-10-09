@@ -290,6 +290,12 @@ impl Directory {
         {
             return DirectoryOutcome::CreationConflict;
         }
+        if self.namespace_creation
+            && self.reserved_publication_bytes() + MAX_NAMESPACE_PUBLICATION_BYTES
+                > self.control_history_capacity()
+        {
+            return DirectoryOutcome::TransferControlBusy;
+        }
         self.creations.insert(group, (child, operation));
         DirectoryOutcome::CreationReserved
     }

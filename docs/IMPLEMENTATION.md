@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Namespace creation activation, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; recursive insertion into existing selectors, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -8409,3 +8409,136 @@ publication contract. Deletion/reparenting, directory authority movement and all
 other original P0–P7 gaps stay active. P8/Windows deferred; macOS and separate-host
 execution unverified, CI background feedback.
 Final slice124 format, whitespace and 79-contract inventory checks passed.
+
+## Slice125 schema plan — fresh independent namespace publication
+
+Previous goal turn was progress:123/124 are pushed b9e342f/fa6fa0e; worktree clean.
+Contract review found that each existing bucket route completely covers its scope.
+Attaching a new child by editing those routes would transfer an existing owner and
+must use fencing/import. GroupCreationIntent also has no selector/namespace shape.
+Do not manufacture a new empty owner for an existing range. The current deliverable
+therefore adds explicit fresh independent namespace publication, while recursive
+insertion into an existing selector remains a separate P5/P6 transfer requirement.
+This is an added supported path, not a reduction of the original goal.
+
+Data/API: NamespacePlan binds exact reserved GroupCreationStatus to a fresh root
+ResponsibilityManifest (parent=None, initial epoch/generation, Single reserved group,
+matching adapter, Empty mode). The reservation's parent is the administrative
+creation anchor, not a routing-parent edge for this independent namespace. Target
+readiness names the exact plan digest, original metadata operation/index, target
+configuration and committed application initialization index. NamespacePublication
+carries this evidence plus the checked fresh manifest. Authenticating foreign
+commitment remains the trusted non-Byzantine host obligation, as for transfers.
+
+Directory explicitly opts into schema3 before bootstrap, with distinct init and
+checkpoint magic; schemas1/2 unchanged and no live upgrade. New publication must
+match actual retained creation reservation and cannot edit existing routes. Keep
+one successful publication per reservation, replayable from existing history and
+using bounded reserved control capacity so ordinary history exhaustion cannot
+strand creation. It adds one new independent manifest; bounded catalogue limits
+remain enforced. Publication itself grants no target service.
+
+Target API/state: a CreatedNamespace guard over the existing RoutedApplication
+uses the same application/partition contracts. Its committed initialization binds
+plan and existing empty routed bootstrap; it returns NotActive for data/read until
+an exact matching metadata publication is committed in its own activation record.
+Normal data then uses the existing owner checks without metadata access. Ready and
+activation control operations cannot collide with client operations. Checkpoint
+contains exact plan/binding, control history and inner checkpoint; restore checks
+all boundaries atomically. No hidden store, worker, socket or provider is needed.
+
+Failure/ownership: lost readiness/publication/activation observations retry exact
+facts; partial progress stays non-serving; no delete-on-timeout, rollback or old
+owner replacement. Independent namespace identity is fresh; existing namespace
+routes and owners remain untouched. Native file owners retain existing lifetimes.
+
+Mini current (P0/P5/P6): committed fresh namespace publication/activation; dependencies
+are123 bootstrap and124 native embedding. Checks: malformed/wrong reservation,
+plan/config/index/mode refusal, full ordinary capacity control progress, retry/
+conflict/checkpoint/schema refusal, pre-activation admission/apply/read refusal,
+and post-activation ordinary owner checks. Next (P1/P5/P6): actual TCP/QUIC histories
+across ready/publish/activate reopen boundaries with metadata offline after activation;
+completion requires preserved original data retries and no-unready service. Following
+(P5/P6): integrate safe recursive insertion/transfer using explicit source fencing,
+not independent namespace aliases; checks must cover no duplicate owner and resume
+across authority transitions. Full P0–P7 remains active, P8/Windows deferred.
+
+## Slice125 implemented — fresh namespace ready/publish/activate
+
+Added explicit opt-in Directory schema3 with VBDINIT3/VBDIR003; schemas1/2 retain
+formats. NamespacePlan binds the exact reserved creation history to a fresh root
+namespace (parent=None, initial epoch/generation, Single group, matching adapter,
+Empty mode). The existing creation parent is an administrative anchor here, not a
+routing-parent edge. This distinction is explicit because current route maps fully
+cover their selectors. No existing namespace route/owner is changed by this path;
+recursive insertion still requires fencing/transfer and remains in the full goal.
+
+NamespacePublication binds exact plan digest, reservation operation/index, target
+configuration and ready index. Schema3 verifies actual retained reservation, fresh
+catalogue identity and bounded manifest count, journals original publication, and
+uses a reserved control pool even at full ordinary history. Existing metadata-only
+updates can refresh this published fresh namespace without changing ownership.
+CreatedNamespace<A,P> wraps RoutedApplication, commits exact plan/initial application
+binding, refuses data admission/apply/read before activation, and commits activation
+tied to exact publication. Repeated controls retain original indices; client/control
+ID collisions refuse. Atomic checkpoint restore validates original ready index
+against inner initialization and rejects activation-index or operation collisions.
+The same host application/partition contracts and native providers are used; no
+additional runtime, store, wire protocol or provider was introduced.
+
+Executed Linux: core-only namespace3/directory27 initially passed (0.06/0.06s);
+all-feature directory31/namespace3 passed (0.13/0.06s). After receipt regression and
+native fault additions, core-only namespace3 passed0.04s and all-feature namespace4
+passed0.15s. Native TCP/QUIC created-group124 regression histories2 passed1.41s;
+new actual TCP/QUIC namespace histories2 passed1.82s. New histories checkpoint/reopen
+after readiness, metadata publication and activation, stay NotActive before activation,
+preserve original publication/data retries and keep each metadata WAL unchanged
+while the activated namespace operates offline. Native ModelIo injects every torn
+activation frame and sync/publication faults, loses unsynced bytes and replays actual
+Raft committed state: recovery is non-serving old state or exact activation; original
+activation retry converges without resetting application state. These are selected
+Linux schedules, not arbitrary hardware power-failure/distributed proof claims.
+
+Failed checks and focused fixes: first fixture omitted three RouteHint fields;
+filled the existing checked shape. Clippy identified an unnecessary usize conversion
+and a bounded cold control enum; removed conversion and kept documented inline
+control decoding. Initial native runs failed the owning application's ProviderViolation
+gate because Vec::new receipt growth retained more than declared bound. Replaced it
+with exact command-count allocation and added explicit retained-capacity regression;
+no provider gate was weakened. Corrected filtering so directory/namespace tests
+actually ran, rather than claiming their zero-test filtered compile as execution.
+Reviewed checkpoint restore also tightened ready/activation index and ID checks,
+with corrupt-field regression cases.
+
+Directory creation deployment envelope now includes MAX_GROUP_CREATION_BYTES:
+valid large policy/store intents can exceed the previous control-command bound.
+The configured application/history/provider envelopes still determine admission;
+no automatic large-wire configuration is implied. Final added large-policy envelope
+regression, inventory and lint outcomes are recorded below.
+
+Macro review: fresh independent namespace creation now has a complete selected
+ready/publish/activate path. Current mini item (P0/P5/P6) and its linked native
+integration item (P1/P5/P6) are implemented under the scope above. Next mini item:
+creation lifecycle fault strengthening (P5/P6), dependent on these persisted phases;
+check interruption/lost observations around metadata publication and target activation
+with exact retries, before broadening source lifecycle. Following: general source
+freeze/export for freshly activated namespaces (P5/P6), dependent on persisted
+activation and existing transfer contracts; checks require durable fencing, preserved
+retry lineage, original publication authentication and no-dual-owner recovery.
+Next after that: recursive insertion under existing selectors (P5/P6), dependent on
+source fencing and atomic parent/child publication; checks must preserve complete
+coverage, reject aliases/cycles and resume partial progress. Windows/P8 deferred,
+macOS/separate-host unverified; deletion/reparenting, metadata authority movement
+and every prior P0–P7 gap remain active. CI remains background feedback.
+
+Final slice125 checks: all-feature namespace5 passed0.15s (including4096-voter
+valid-policy/store-map envelope regression); all-feature/all-target Clippy -D warnings
+passed. Final format/whitespace and 80-contract inventory passed. Core-only final
+namespace count and result are recorded after its completion below.
+Final core-only namespace4 passed0.06s; no native fault test is compiled in that
+feature set. All recorded checks are terminal and passed; no remote CI gate used.
+Final native history addition quorum-reads the published namespace manifest and
+resolves it through NativeManifestCache/resolve to the exact target hint before
+activation. Both TCP/QUIC histories passed1.88s, build5.13s; all-feature/all-target
+Clippy -D warnings, format/whitespace and80-contract inventory passed afterward.
+This closes the client routing step without adding authority to the hint/cache.

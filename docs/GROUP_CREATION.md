@@ -8,7 +8,7 @@ reopen. Cross-mode replay/checkpoint restore fails closed; this is not live upgr
 or mixed-version support.
 
 `GroupCreationIntent` encodes a bounded `VBGCRT01` command containing metadata
-authority, existing parent responsibility and exact generation, fresh child
+authority, existing parent responsibility and exact generation, fresh
 responsibility, exact group/bootstrap configuration and recursive voter/store
 map, target application adapter/version, and empty or staging initialization.
 Host authorization and placement validation remain required before proposal.
@@ -48,8 +48,8 @@ static provenance, not another consensus log. The initial native binding provide
 holds one creation per selected directory; sharing a WAL among multiple newly
 created groups needs a separately scoped binding provider. Store open/creation and
 snapshot initialization are explicit caller responsibilities. A bootstrap receipt
-grants neither namespace publication nor serving authority. Native owning-service
-creation remains the next integration gate. Imported groups must remain non-serving
+grants neither namespace publication nor serving authority. Native direct-group owning-service
+creation is exercised below. Imported groups must remain non-serving
 until the existing import/publication/activation protocol authorizes them. A creation
 intent cannot replace an unreachable owner or discard its data.
 
@@ -64,8 +64,8 @@ authority/log/binding replacements, refusal, exact retry, preserved progressed s
 and every torn native bootstrap frame plus barrier/publication faults. Native file
 unit tests reopen at five binding publication boundaries and reject altered bytes;
 these are observation-loss tests, not hardware power-loss simulation. Separate
-modeled journal faults include unsynced-byte loss. No arbitrary crash schedules,
-TCP/QUIC created-service startup or namespace activation claim is made.
+modeled journal faults include unsynced-byte loss. That bootstrap evidence does not establish arbitrary crash schedules. Separate
+native service and fresh namespace evidence is recorded below.
 
 ## Native direct-group embedding path
 
@@ -104,3 +104,60 @@ original operation/outcome, changed bytes conflict, and a new write succeeds.
 Every metadata replica's WAL remains exactly unchanged during child operation.
 These are selected Linux loopback schedules, not arbitrary interruption or power
 failure coverage; no namespace activation or macOS execution is claimed.
+
+## Fresh independent namespace publication and activation
+
+Select `Directory::with_namespace_creation()` before bootstrap on every metadata
+replica. This selects schema3, `VBDINIT3` and `VBDIR003`; schema1/2 histories keep
+their existing formats. Cross-mode initialization/replay/restore refuses; no live
+schema upgrade or mixed-version deployment is supplied.
+
+`NamespacePlan` binds the original `GroupCreationStatus` to a fresh independent
+root manifest: parent=None, epoch/generation1, matching application adapter,
+Single reserved group and Empty mode. The reservation's existing parent authorizes
+the administrative creation intent. It is explicitly not a routing-parent edge
+for this new independent namespace. Existing namespace selectors/routes stay
+unchanged. Inserting a recursive child into an already covered selector still
+requires source fencing and transfer; this path cannot replace that protocol.
+
+`CreatedNamespace<A,P>` wraps the existing RoutedApplication and host application/
+partition contracts. Its initialization command binds the full plan, selected
+limits and initial application checkpoint. Committed initialization produces
+readiness but keeps data writes and linearizable reads non-serving. `NamespaceQuery`
+includes an explicit status read; use the normal quorum-read path to obtain original
+committed ready facts. `NamespacePublication::from_status` checks the plan digest
+and target-ready index. Configuration and metadata creation operation/index remain
+bound to the exact original intent.
+
+The schema3 directory accepts publication only for its exact retained reservation
+and a previously unknown namespace. It reserves bounded control space when creating
+the intent so ordinary operation/history exhaustion cannot strand valid publication.
+The publication records the fresh manifest and original outcome; retry/checkpoint
+replay reconstruct them. It does not activate the target. Once the authenticated
+committed `NamespacePublicationStatus` is verified, the target commits its own exact
+activation command and only then serves through ordinary routed owner checks.
+Initialization and activation IDs cannot be reused as client operations. Control
+retries preserve their original ready/activation indices across checkpoint recovery.
+
+These constructible plan/status/digest values verify structure and exact binding;
+they do not authenticate a foreign group or prove commitment. Trusted non-Byzantine
+hosts must authenticate target-ready and metadata-publication observations and
+restrict control commands before proposal, exactly as for existing transfer
+commands. Do not expose an unrestricted client command channel as administration.
+There is no creation RPC/CLI or automatic remote authority verifier in this slice.
+
+Fresh namespaces currently use fixed ownership under this guard. They do not yet
+participate in general source export/freeze, deletion/reparenting or recursive
+selector insertion. Such work remains in the full P5/P6 goal. Imported/Staging
+creation remains distinct and is rejected by this fresh-empty plan.
+
+`tests/namespace_creation.rs` covers exhausted ordinary directory capacity,
+publication mismatch/refusal, canonical/truncated plan/publication/checkpoint
+formats, schema refusal, non-serving admission/apply/read, exact activation,
+operation collision, original data retries, receipt capacity and checkpoint control
+index consistency. Native ModelIo cuts every activation WAL frame byte and injects
+sync/publication faults with unsynced loss/reopen. Two native TCP/QUIC histories in
+`tests/routed/creation.rs` checkpoint/reopen after readiness, publication and activation,
+retain original publication/data retry results and keep metadata WALs unchanged
+while the activated namespace operates offline. These are selected Linux schedules,
+not a full distributed proof or arbitrary hardware power-failure coverage.

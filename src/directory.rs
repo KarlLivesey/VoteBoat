@@ -20,7 +20,9 @@
 //! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
 //! reserves fresh identities but cannot bootstrap groups or activate ownership.
 pub mod creation;
+mod namespace;
 use crate::delegation::*;
+use crate::namespace_creation::*;
 use crate::routing::codec::*;
 use crate::transfer::{TransferIntent, TransferIntentStatus};
 use crate::transfer_publication::*;
@@ -33,6 +35,7 @@ use std::{
 
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
+pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
 pub const MAX_DIRECTORY_HISTORY_BYTES: usize = 64 * 1024 * 1024;
@@ -244,6 +247,7 @@ pub enum DirectoryOutcome {
     Initialized,
     CreationReserved,
     CreationConflict,
+    NamespacePublished(RouteGeneration),
     Published(RouteGeneration),
     GenerationMismatch,
     UnknownResponsibility,
@@ -264,6 +268,7 @@ pub enum DirectoryOutcome {
 enum Request {
     Bootstrap,
     Create(GroupCreationIntent),
+    Namespace(NamespacePublication),
     Publish(DirectoryCommand),
     Transfer(TransferIntent),
     Publication(TransferPublication),
@@ -303,6 +308,8 @@ pub struct Directory {
     applied: u64,
     initialized: bool,
     group_creation: bool,
+    namespace_creation: bool,
+    namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
     history: BTreeMap<OperationId, History>,
     history_bytes: usize,
@@ -335,6 +342,8 @@ impl Directory {
             applied: 0,
             initialized: false,
             group_creation: false,
+            namespace_creation: false,
+            namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
             history: BTreeMap::new(),
             history_bytes: 0,
@@ -358,6 +367,13 @@ impl Directory {
         self.group_creation = true;
         Ok(self)
     }
+    /// Select schema3 before bootstrap; no live upgrade from schemas1/2.
+    #[allow(clippy::result_large_err)]
+    pub fn with_namespace_creation(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_group_creation()?;
+        next.namespace_creation = true;
+        Ok(next)
+    }
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -373,7 +389,8 @@ impl Directory {
             - (self.history.len()
                 - self.publications.len()
                 - self.delegation_publications.len()
-                - self.delegation_cancellations.len())
+                - self.delegation_cancellations.len()
+                - self.namespace_publications.len())
     }
     /// Extra bounded control pool; successful publications never use ordinary history.
     pub fn control_history_capacity(&self) -> usize {
@@ -382,6 +399,12 @@ impl Directory {
     pub fn reserved_publication_bytes(&self) -> usize {
         self.transfers.len() * MAX_TRANSFER_PUBLICATION_BYTES
             + self.delegations.len() * MAX_DIRECTORY_CONTROL_BYTES
+            + if self.namespace_creation {
+                (self.creations.len() - self.namespace_publications.len())
+                    * MAX_NAMESPACE_PUBLICATION_BYTES
+            } else {
+                0
+            }
     }
     /// Commit this exact plan/capacity binding before any publication. It uses
     /// an ordinary operation ID and retains its original request/result. Large
@@ -392,7 +415,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.group_creation {
+        bytes.extend(if self.namespace_creation {
+            b"VBDINIT3"
+        } else if self.group_creation {
             b"VBDINIT2"
         } else {
             b"VBDINIT1"
@@ -414,7 +439,10 @@ impl Directory {
         if bytes.len() > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
-        if bytes.starts_with(b"VBDINIT1") || bytes.starts_with(b"VBDINIT2") {
+        if bytes.starts_with(b"VBDINIT1")
+            || bytes.starts_with(b"VBDINIT2")
+            || bytes.starts_with(b"VBDINIT3")
+        {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -423,7 +451,12 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if bytes.starts_with(b"VBGCRT01") {
+            if bytes.starts_with(b"VBNSPUB1") {
+                if !self.namespace_creation {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                NamespacePublication::decode(bytes).map(Request::Namespace)
+            } else if bytes.starts_with(b"VBGCRT01") {
                 if !self.group_creation {
                     return Err(ApplicationError::InvalidCommand);
                 }
@@ -448,7 +481,13 @@ impl Directory {
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
             application_schema: self.schema_version(),
-            command_bytes: MAX_DIRECTORY_CONTROL_BYTES.max(46 + self.plan.encoded_len()),
+            command_bytes: MAX_DIRECTORY_CONTROL_BYTES
+                .max(46 + self.plan.encoded_len())
+                .max(if self.group_creation {
+                    MAX_GROUP_CREATION_BYTES
+                } else {
+                    0
+                }),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
                 + 56 * self.limits.operations
@@ -462,7 +501,12 @@ impl Directory {
         if self.transfers.contains_key(&id) || self.delegations.contains_key(&id) {
             return DirectoryOutcome::LifecycleBusy;
         }
-        let Some(grant) = self.plan.manifests.get(&id) else {
+        let Some(grant) = self
+            .plan
+            .manifests
+            .get(&id)
+            .or_else(|| self.manifests.get(&id))
+        else {
             return DirectoryOutcome::UnknownResponsibility;
         };
         if let Some(prior) = self.manifests.get(&id) {
@@ -950,6 +994,7 @@ impl Directory {
             )
         } else {
             let control = matches!(&command,Request::Publication(p) if self.publication_permitted(p))
+                || matches!(&command,Request::Namespace(p) if self.namespace_permitted(p))
                 || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
                 || matches!(&command,Request::DelegationCancellation(c) if self.cancellation_permitted(c));
             if !control
@@ -964,6 +1009,7 @@ impl Directory {
             let outcome = match command {
                 Request::Publish(command) => self.publish(command),
                 Request::Create(intent) => self.reserve_group_creation(operation, intent),
+                Request::Namespace(p) => self.complete_namespace(operation, p),
                 Request::Transfer(intent) => self.begin_transfer(operation, intent),
                 Request::Publication(publication) => self.complete_transfer(operation, publication),
                 Request::Delegation(plan) => self.begin_delegation(operation, plan),
@@ -1067,6 +1113,7 @@ impl ProposalAdmission for Directory {
                 return Ok(());
             }
             let lifecycle = match request {
+                Request::Namespace(p) if self.namespace_permitted(&p) => Some(p.creation),
                 Request::Publication(p) if self.publication_permitted(&p) => Some(p.operation()),
                 Request::DelegationCompletion(c) if self.delegation_permitted(&c) => {
                     Some(c.reservation)
@@ -1157,7 +1204,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.group_creation {
+        if self.namespace_creation {
+            NAMESPACE_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.group_creation {
             CREATION_DIRECTORY_APPLICATION_SCHEMA
         } else {
             DIRECTORY_APPLICATION_SCHEMA
@@ -1175,7 +1224,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.group_creation {
+        bytes.extend(if self.namespace_creation {
+            b"VBDIR003"
+        } else if self.group_creation {
             b"VBDIR002"
         } else {
             b"VBDIR001"
@@ -1215,7 +1266,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.group_creation {
+                != if self.namespace_creation {
+                    b"VBDIR003"
+                } else if self.group_creation {
                     b"VBDIR002"
                 } else {
                     b"VBDIR001"
@@ -1240,6 +1293,7 @@ impl CheckpointStateMachine for Directory {
             }
             let mut next = Self::new(self.plan.clone(), self.limits).map_err(|(e, _)| e)?;
             next.group_creation = self.group_creation;
+            next.namespace_creation = self.namespace_creation;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;
