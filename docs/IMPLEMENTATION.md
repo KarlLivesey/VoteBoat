@@ -111,29 +111,25 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Constrained outbound admission (current, C15/P0/P2).** Slice109 introduces
-   public AdmissionPolicy/AdmissionLease and a finite shareable native bulk budget
-   used by NativeOutbound after mandatory checks. Purpose: usable host workload
-   admission without relaxing limits or consuming reserved control. Dependencies:
-   existing queue ownership, exact ticket completion and slice108 frame lifetime.
-   Completion: downstream/native policy and lease conformance, both queue/batch
-   destruction orders, permissive/refusing-policy hard limits, native transport/
-   shared-runtime and real TCP/QUIC service regressions. General client/disk/
-   connection/shared-buffer policy and fairness remain separate requirements.
-2. **Service-principal authorization (next, C21/P0/P4).** Purpose: gate exposed
-   service mutations by principal/scope independently of peer identity and voting
-   membership. Dependencies: existing trusted admin/enrollment/application call
-   sites; define a small schema before adding credentials/gates. Completion:
-   public/native bounded integration, explicit unsupported/refused cases, scope
-   separation, restart/expiry tests as applicable and no authority over quorum or
-   ownership. Existing trusted loopback behavior must remain explicit.
-3. **Bounded discovery/resolution (following, C17/P0/P5).** Purpose: usable host
-   peer/authority hints beyond static endpoint maps. Dependencies: inspect current
-   connector/manifest-cache contracts and C21 source authorization. Completion:
-   real native/public resolve/invalidate/retry call site, bounded attempts/cache
-   and stale/foreign/retired-source tests. Hints cannot create membership, bypass
-   fences or grant ownership. Remaining baseline/platform/lifecycle/P7 requirements
-   stay in the linked acceptance map; this is no replacement for the full goal.
+1. **Source-capable created namespace (current slice128, P5/P6).** Purpose:
+   let freshly created namespaces enter the existing safe split/merge protocol.
+   Dependencies: schema4 metadata transfer admission and existing TransferSource/
+   staged-target contracts. Completion: exact pre-initialization owner binding,
+   activation gate, actual fence/export/import/publication/activation with retained
+   retries/outbox, checkpoint provenance and torn-frame fence recovery. Implemented
+   evidence and executed results are recorded in slice128 below.
+2. **Native created-namespace transfer (next, P1/P5/P6).** Purpose: demonstrate the
+   source-capable path through actual TCP/QUIC owners. Dependencies: slice128 and
+   existing native creation/transfer fixtures. Completion: quorum-observed phases,
+   WAL/checkpoint reopen, original receipt-loss retries, metadata outage and no old
+   owner service after fencing. This remains planned, not implied by deterministic
+   or existing fixed-owner network histories.
+3. **Recursive insertion into covered selectors (following, P5/P6).** Purpose:
+   add recursive child ownership to existing data without losing selector coverage.
+   Dependencies: source-capable transfer and checked parent/child publication.
+   Completion: complete coverage, alias/cycle rejection, durable fencing, no dual
+   owner and resumable partial publication/activation. Original deletion/reparenting,
+   authority movement, broader P0–P7/platform/fault/performance gaps remain active.
 
 ### How the current work fits globally
 
@@ -8712,3 +8708,98 @@ alias/cycle refusal and no-dual-owner partial-progress recovery. All original P0
 gaps remain active; P8/Windows deferred, macOS/separate-host unverified, CI background.
 Final slice127 core-only namespace7 passed0.07s (build4.11s), all-feature/all-target
 Clippy -D warnings passed6.63s, format/whitespace and80-contract inventory passed.
+
+## Slice128 schema plan — source-capable created namespace guard
+
+Previous goal turn progressed:127 committed/pushed065a538 and current worktree clean.
+Current deliverable advances P5/P6 by selecting an existing TransferSource owner
+under the namespace readiness/activation guard before initialization. Reuse the
+actual source protocol; do not duplicate fences, scope exports or quorum evidence.
+Generalize the guard's core owner through a sealed contract implemented only by
+RoutedApplication and TransferSource, retaining host A/P provider composition.
+Existing CreatedNamespace<A,P> remains the default fixed owner; an explicit source
+alias/constructor consumes a fresh TransferSource and exact NamespacePlan, returning
+original owned inputs on refusal. No active guard may be unwrapped or upgraded.
+
+Shape: preserve fixed guard schema1/VBNINIT1/VBNCHK01 binding. Source guard selects
+schema2/VBNINIT2/VBNCHK02 and binds the source bootstrap including its export budget.
+Keep namespace ready/activation status and receipt envelope; generic owner query/read
+wrappers preserve fixed NamespaceQuery/NamespaceRead aliases and provide explicit
+source query/read aliases. Owner access is immutable. The sealed contract permits
+only routed data for fixed owners and routed data or existing VBSFREE1 for source
+owners; raw owner bootstrap/fence bypasses refuse. Namespace activation gates all
+owner commands. Original creation/activation operation IDs stay reserved.
+
+State: initialize -> ready but non-serving -> committed exact namespace activation
+-> serving -> existing committed source freeze -> permanently fenced/exportable.
+The source tracks its outer applied prefix while routed data stays exactly at F.
+Outer control retries after F cannot revive or advance data. Recovery checks exact
+owner binding, original readiness/activation provenance, fence after activation,
+reserved control IDs absent from data/fence history and source's own export checks.
+Foreign directory intent/staging/activation observations still require authenticated
+quorum-backed host verification. Local checkpoint/digest is not such authorization.
+
+Acceptance: fixed histories remain compatible; source guard refuses preactivation
+read/write/freeze and control bypass, preserves exact first ready/activation/fence,
+exports actual scope state/retries/outbox at F, recovers fenced without service and
+hands exports to existing staged targets for checked import/publication/activation.
+Exercise bounded receipt/query accounting, malformed/cross-owner checkpoints and
+atomic restoration; local relevant tests and native fault evidence follow scope.
+Mini current128 depends on127 plus existing source/target contracts. Next: actual
+TCP/QUIC created-namespace transfer phase/reopen histories (P1/P5/P6), dependent on128,
+checking original receipts and no dual owner with metadata outages. Following:
+recursive insertion into covered selectors (P5/P6), dependent on source capability
+and parent/child publication, checking coverage/alias/cycle/partial progress. Full
+P0–P7 stays active; P8/Windows deferred and CI stays background feedback.
+
+## Slice128 implemented — created namespace source guard composition
+
+Generalized CreatedNamespace with a defaulted sealed core owner type; fixed
+CreatedNamespace<A,P> keeps schema1 and original binding/checkpoint/query/read shape.
+CreatedNamespaceSource<A,P>::from_source consumes a fresh existing TransferSource
+and exact plan, binds schema2/VBNINIT2/VBNCHK02 plus export budget, and returns
+original inputs on refusal. Host A/P application/scope/partition contracts remain
+composable. NamespaceOwner is sealed to the existing routed/source guards, not a
+replaceable fencing provider. No live upgrade/unwrap of an established owner.
+
+Source commands use the same namespace activation gate and reserved control IDs.
+Raw source/routed bootstrap or routed fence bypass refuses. Existing source code
+owns committed freeze, exact-F exports and frozen outer-prefix progress. Readiness/
+activation provenance remains historical after freeze; exact control retries do not
+revive data. Recovery checks source binding/state plus readiness/activation and
+fence-after-activation/control-ID exclusion. Namespace query/read aliases expose the
+source's explicit frozen status, and bounds account owner query/read payloads and
+application receipts while source freeze has only inline result storage.
+
+Four new histories cover preactivation data/read/freeze refusal, provider key
+mismatch/control bypass, actual two-range exports and staged-target imports,
+non-serving imported targets, metadata publication/activation, imported duplicate
+results/outbox continuity and frozen source control retries/reopen. Pending freeze/
+data ordering, bounded pending counts/receipts/query results, export-budget refusal,
+progressed-owner refusal, cross-owner schema/init bindings, every truncated source
+checkpoint and corrupt control/fence provenance fail closed/atomically. The native
+ModelIo history cuts every source fence frame plus sync/publication faults, replays
+actual Raft committed prefixes to serving-old or exact-fenced state, then retries
+and preserves the original export boundary. This is selected native codec/storage
+model fault evidence, not hardware power loss or an actual source network history.
+
+Executed Linux final all-feature namespace12, source7, target9, publication7 and
+activation9 passed (0.39s,0.40s,0.20s,0.03s,0.12s), build2.12s. Core-only namespace10
+passed0.44s, build8.44s. Existing actual TCP/QUIC creation histories6 passed4.81s,
+build12.18s, preserving fixed-owner partial/reopen/unread-result behavior. Initial
+production check failed on missing module imports/receipt trait bound; focused
+imports/bound fixed it. New fixture compilation failed on the TargetStatus field
+name and an unused scope import; corrected to existing activated and removed that
+import. No runtime test failed. Final Clippy/format/whitespace/inventory are recorded
+below after completion.
+
+Macro review: fresh namespaces can now participate in selected actual state-machine
+split handoff, with source and target authority guards retained, advancing P5/P6.
+Current128 complete under these checks; next actual native TCP/QUIC source transfer
+phase/reopen histories depend on128; following recursive insertion depends on source
+handoff and checked parent/child publication. These do not erase deletion/reparenting,
+authority movement, retention, membership, tuning and broader original phase gaps.
+The top linked mini plan now reflects this sequence. Full P0–P7 stays active;
+P8/Windows deferred, macOS/separate-host unverified, CI remains background feedback.
+Final slice128 all-feature/all-target Clippy -D warnings passed3.04s; format,
+whitespace and80-contract inventory checks passed. All recorded checks terminal.

@@ -2980,3 +2980,30 @@ namespace publication, schema3 historical refusal replay, live/cross-schema refu
 and all truncated schema4 checkpoint inputs with atomic restore. No actual native
 schema4 deployment, created-owner freeze/export/import, hardware fault, macOS or
 separate-host claim. Source-capable created namespace composition remains next.
+
+## Slice128 — source-capable created namespace guard
+
+Linux cargo +stable --locked --offline: final all-feature namespace12/source7/
+target9/publication7/activation9 passed (0.39/0.40/0.20/0.03/0.12s), build2.12s.
+Core-only namespace10 passed0.44s, build8.44s. Existing actual TCP/QUIC created
+service/namespace histories6 passed4.81s, build12.18s after generic owner assembly.
+Clippy all-features/all-targets -D warnings passed6.08s before final target read
+assertion; final check recorded below. Initial checks failed for missing owner
+module imports/receipt bound and a fixture TargetStatus field/unused import; focused
+fixes compiled. No runtime test failed; earlier namespace12 passed0.50s.
+
+New deterministic histories use actual existing TransferSource, BucketCounter and
+TransferTarget: namespace initialization/publication/activation, source data/freeze,
+exact-F exports, two target imports remaining non-serving, checked metadata transfer
+publication and activation, duplicate/outbox lineage and fenced-source reopen.
+Control/bootstrap/fence bypass, key mismatch, preactivation freeze/read/write,
+reserved IDs, pending order/budgets, source export budget and owner/checkpoint
+provenance refusal are checked. Every source checkpoint truncation restores
+atomically. A NativeLogStore/ModelIo fence-frame history exercises all append cuts,
+sync and publish-before/after faults, actual Raft committed replay, active-old or
+fenced-complete observations and exact original retry/export recovery. These are
+selected deterministic/storage-model histories; new source-capable actual network
+phase/reopen validation is next. Existing fixed-owner network histories remain
+regression evidence. No complete lifecycle-proof/hardware/macOS/separate-host claim.
+Final slice128 Clippy all-features/all-targets -D warnings passed3.04s; format,
+whitespace and80-contract inventory passed. All checks terminal; CI not a gate.

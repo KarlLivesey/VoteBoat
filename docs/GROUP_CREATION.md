@@ -126,7 +126,7 @@ The schema4 conformance histories in `tests/namespace_creation/transfer.rs` use
 constructed source/import facts to test metadata reservation, publication, split/
 merge retry and checkpoint recovery. They do not demonstrate actual created-owner
 fencing or target import. `CreatedNamespace` still wraps a fixed RoutedApplication;
-source-capable activation-guard assembly remains the next implementation step.
+source-capable activation-guard assembly is described below.
 
 `NamespacePlan` binds the original `GroupCreationStatus` to a fresh independent
 root manifest: parent=None, epoch/generation1, matching application adapter,
@@ -186,3 +186,49 @@ stores before WAL-only reopen. Exact retries repair the lagging replica and reta
 original phase indices/outcomes. Assertions compare actual quorum and laggard WAL
 commit prefixes to the phase boundary. This is distinct from hardware power loss;
 accepted native I/O can finish after owner abort.
+
+## Source-capable created namespaces
+
+Choose `CreatedNamespaceSource<A,P>::from_source(plan, source)` before any namespace
+initialization. Construct `source` with the existing `TransferSource::new(routed,
+export_bytes)` over a fresh `RoutedApplication` whose group/grant exactly match the
+plan. The application implements the existing scope, checkpoint and bounded result
+contracts; the partition provider remains injectable. Constructor refusal returns
+the original plan and source. It refuses progressed owners and mismatched bindings.
+The same creation/namespace publication protocol supplies readiness and activation.
+
+This selects guard schema2, `VBNINIT2` and `VBNCHK02`; the binding includes the source
+bootstrap/export budget. Fixed `CreatedNamespace<A,P>` remains schema1 with identical
+initialization/checkpoint formats. No fixed-to-source live upgrade, cross-owner
+checkpoint restore or replacement of an established namespace is supplied. Metadata
+schema4 is required to record transfer intents for dynamically created namespaces.
+
+`CreatedNamespace` now has a defaulted core owner type parameter. Its sealed
+`NamespaceOwner` contract admits only existing `RoutedApplication` and `TransferSource`
+guards; host application/partition providers cannot replace core activation/fencing.
+`owner()` exposes an immutable selected owner. Fixed `NamespaceQuery`/`NamespaceRead`
+remain aliases for the original routed shape; `SourceNamespaceQuery`/`SourceNamespaceRead`
+wrap existing `SourceQuery`/`SourceRead`, including explicit frozen status.
+
+Before namespace activation, owner reads/writes and source freeze remain non-serving.
+After activation, propose the existing `TransferSource::freeze_command` through the
+outer namespace guard under the authenticated trusted host's verified metadata
+intent/target staging. Raw owner bootstrap and unbound routed fence commands refuse.
+Original namespace creation/activation operation IDs cannot become data or freeze
+IDs. On a committed fence, source routed/application state remains exactly at F
+while the source/namespace outer applied prefix can advance. Exports come from
+`owner().export_target` and retain the existing digest/scope/retry/outbox checks.
+Ready/activation status is historical provenance after fencing, not serving permission.
+Use the guarded data read and frozen-status query when deciding current service state.
+
+Recovery validates owner format/binding, source recovery, readiness/activation indices,
+fence strictly after activation and control operation exclusion. Exact control/freeze
+retries retain original facts without reinitializing a frozen owner. Selected
+deterministic tests hand actual exports to staged targets, publish the checked
+transfer, activate both targets, and verify imported retry/outbox continuity. The
+native ModelIo test cuts every fence frame and exercises sync/publication failures:
+recovery observes either the old active owner or complete fence, and exact retry
+converges to the original export boundary. Existing TCP/QUIC fixed-owner creation
+histories pass after guard generalization; source-capable native network phase/reopen
+histories are the next slice. No arbitrary-fault, macOS, separate-host, recursive
+insertion or complete lifecycle-proof claim is made by these selected histories.

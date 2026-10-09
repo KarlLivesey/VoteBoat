@@ -19,9 +19,14 @@ use crate::{
     raft::ReadinessRequirements,
     routed::codec::{decode, Command},
     routed::*,
+    scope::ScopeStateMachine,
+    transfer_source::TransferSource,
 };
 use std::mem::size_of;
 pub const CREATED_NAMESPACE_SCHEMA: u64 = 1;
+pub const CREATED_NAMESPACE_SOURCE_SCHEMA: u64 = 2;
+mod owner;
+pub use owner::NamespaceOwner;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum NamespaceOutcome<R> {
     Ready,
@@ -51,21 +56,27 @@ impl<R: ApplicationReceipt> ApplicationReceipt for NamespaceReceipt<R> {
     }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum NamespaceQuery<Q> {
+pub enum NamespaceOwnerQuery<Q> {
     Status,
-    Data(RoutedQuery<Q>),
+    Data(Q),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum NamespaceRead<R> {
+pub enum NamespaceOwnerRead<R> {
     Status(NamespaceStatus),
     NotActive,
-    Data(RoutedRead<R>),
+    Data(R),
 }
+pub type NamespaceQuery<Q> = NamespaceOwnerQuery<RoutedQuery<Q>>;
+pub type NamespaceRead<R> = NamespaceOwnerRead<RoutedRead<R>>;
+pub type SourceNamespaceQuery<Q> = NamespaceOwnerQuery<crate::transfer_source::SourceQuery<Q>>;
+pub type SourceNamespaceRead<R> = NamespaceOwnerRead<crate::transfer_source::SourceRead<R>>;
+pub type CreatedNamespaceSource<A, P> = CreatedNamespace<A, P, TransferSource<A, P>>;
 #[derive(Clone)]
-pub struct CreatedNamespace<A, P> {
+pub struct CreatedNamespace<A, P, O = RoutedApplication<A, P>> {
     plan: NamespacePlan,
     digest: ContentDigest,
-    inner: RoutedApplication<A, P>,
+    inner: O,
+    providers: std::marker::PhantomData<fn() -> (A, P)>,
     binding: Vec<u8>,
     inner_bootstrap: Vec<u8>,
     ready: Option<u64>,
@@ -128,6 +139,7 @@ where
         binding.extend((inner_bootstrap.len() as u32).to_le_bytes());
         binding.extend(&inner_bootstrap);
         Ok(Self {
+            providers: std::marker::PhantomData,
             digest: plan.digest().expect("validated plan"),
             plan,
             inner,
@@ -137,11 +149,74 @@ where
             activation: None,
         })
     }
+}
+impl<A, P> CreatedNamespaceSource<A, P>
+where
+    A: ScopeStateMachine + BoundedStateMachine,
+    A::Receipt: ApplicationReceipt,
+    P: PartitionPolicy + Clone,
+{
+    /// Select source capability before initialization. Refusal returns the
+    /// original owned plan/source. No live upgrade of a fixed owner is supplied.
+    #[allow(clippy::result_large_err)]
+    pub fn from_source(
+        plan: NamespacePlan,
+        source: TransferSource<A, P>,
+    ) -> Result<Self, (ApplicationError, NamespacePlan, TransferSource<A, P>)> {
+        let prepare = || -> Result<(Vec<u8>, Vec<u8>), ApplicationError> {
+            let encoded = plan.encode(MAX_NAMESPACE_PLAN_BYTES)?;
+            if source.applied_index() != 0
+                || source.routed().is_initialized()
+                || source.routed().fence().is_some()
+                || source.routed().grant() != &plan.manifest
+                || source.routed().local() != plan.creation.intent.bootstrap.group
+            {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let inner_bootstrap = source.bootstrap_command(MAX_ROUTED_COMMAND_BYTES)?;
+            let len = 16 + encoded.len() + inner_bootstrap.len();
+            if len > MAX_ROUTED_COMMAND_BYTES {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let mut binding = Vec::with_capacity(len);
+            binding.extend(b"VBNINIT2");
+            binding.extend((encoded.len() as u32).to_le_bytes());
+            binding.extend(encoded);
+            binding.extend((inner_bootstrap.len() as u32).to_le_bytes());
+            binding.extend(&inner_bootstrap);
+            Ok((binding, inner_bootstrap))
+        };
+        let (binding, inner_bootstrap) = match prepare() {
+            Ok(b) => b,
+            Err(e) => return Err((e, plan, source)),
+        };
+        Ok(Self {
+            digest: plan.digest().expect("validated plan"),
+            plan,
+            inner: source,
+            providers: std::marker::PhantomData,
+            binding,
+            inner_bootstrap,
+            ready: None,
+            activation: None,
+        })
+    }
+}
+impl<A, P, O> CreatedNamespace<A, P, O>
+where
+    A: CheckpointStateMachine + BoundedStateMachine,
+    A::Receipt: ApplicationReceipt,
+    P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P>,
+{
+    pub fn owner(&self) -> &O {
+        &self.inner
+    }
     pub fn plan(&self) -> &NamespacePlan {
         &self.plan
     }
     pub fn routed(&self) -> &RoutedApplication<A, P> {
-        &self.inner
+        self.inner.routed_owner()
     }
     pub fn status(&self) -> NamespaceStatus {
         NamespaceStatus {
@@ -188,7 +263,7 @@ where
         if b.len() > MAX_ROUTED_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
-        if b.starts_with(b"VBNINIT1") {
+        if b.starts_with(b"VBNINIT1") || b.starts_with(b"VBNINIT2") {
             if b != self.binding {
                 return Err(ApplicationError::InvalidCommand);
             }
@@ -205,19 +280,16 @@ where
                 publication,
             }))
         } else {
-            if !matches!(
-                decode(b, self.inner.limits().payload_bytes)?,
-                Command::Data { .. }
-            ) {
+            if !self.inner.owner_command(b)? {
                 return Err(ApplicationError::InvalidCommand);
             }
             Ok(Request::Data(b))
         }
     }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
-        let r = self.inner.readiness_requirements();
+        let r = self.inner.owner_requirements();
         ReadinessRequirements {
-            application_schema: CREATED_NAMESPACE_SCHEMA,
+            application_schema: O::SCHEMA,
             command_bytes: r
                 .command_bytes
                 .max(self.binding.len())
@@ -236,11 +308,12 @@ where
                 .is_some_and(|a| a.1.operation == op)
     }
 }
-impl<A, P> StateMachine for CreatedNamespace<A, P>
+impl<A, P, O> StateMachine for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + BoundedStateMachine,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P>,
 {
     type Receipt = NamespaceReceipt<A::Receipt>;
     fn validate_group(&self, g: GroupIdentity) -> Result<(), ApplicationError> {
@@ -273,10 +346,14 @@ where
                         if *operation != next.plan.creation.operation {
                             NamespaceOutcome::OperationConflict
                         } else {
-                            projected.payload = EntryPayload::Command {
-                                operation: *operation,
-                                bytes: next.inner_bootstrap.clone(),
-                            };
+                            // A frozen source retains the original readiness;
+                            // replaying its owner bootstrap must not revive it.
+                            if next.ready.is_none() || next.routed().fence().is_none() {
+                                projected.payload = EntryPayload::Command {
+                                    operation: *operation,
+                                    bytes: next.inner_bootstrap.clone(),
+                                };
+                            }
                             if next.ready.is_none() {
                                 next.ready = Some(e.index);
                             }
@@ -309,7 +386,9 @@ where
             }
             let mut inner = next.inner.apply_batch(std::slice::from_ref(&projected))?;
             if let Some((operation, mut outcome)) = result {
-                if matches!(outcome, NamespaceOutcome::Ready) {
+                if matches!(outcome, NamespaceOutcome::Ready)
+                    && matches!(projected.payload, EntryPayload::Command { .. })
+                {
                     if inner.len() != 1
                         || !matches!(inner.remove(0).outcome, RoutedOutcome::Bootstrapped)
                     {
@@ -336,11 +415,12 @@ where
         Ok(receipts)
     }
 }
-impl<A, P> BoundedStateMachine for CreatedNamespace<A, P>
+impl<A, P, O> BoundedStateMachine for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + BoundedStateMachine,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P>,
 {
     fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
         let mut projected = Vec::with_capacity(entries.len());
@@ -352,32 +432,34 @@ where
                 commands += 1;
                 p.payload = EntryPayload::Noop;
                 if let Request::Data(b) = self.request(bytes)? {
-                    let Command::Data { payload, .. } =
-                        decode(b, self.inner.limits().payload_bytes)?
-                    else {
-                        unreachable!()
-                    };
-                    data += 1;
-                    p.payload = EntryPayload::Command {
-                        operation: *operation,
-                        bytes: payload.to_vec(),
-                    };
+                    if let Some(payload) = self.inner.application_payload(b)? {
+                        data += 1;
+                        p.payload = EntryPayload::Command {
+                            operation: *operation,
+                            bytes: payload.to_vec(),
+                        };
+                    }
                 }
             }
             projected.push(p);
         }
-        let inner = self.inner.application().receipt_bytes_bound(&projected)?;
+        let inner = self
+            .inner
+            .routed_owner()
+            .application()
+            .receipt_bytes_bound(&projected)?;
         inner
             .checked_sub(data * size_of::<A::Receipt>())
             .and_then(|n| n.checked_add(commands * size_of::<Self::Receipt>()))
             .ok_or(ApplicationError::ReceiptBudget)
     }
 }
-impl<A, P> ProposalAdmission for CreatedNamespace<A, P>
+impl<A, P, O> ProposalAdmission for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + ProposalAdmission,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P> + ProposalAdmission,
 {
     fn validate_proposal<'a>(
         &self,
@@ -399,8 +481,10 @@ where
                 if op != self.plan.creation.operation {
                     return Err(ApplicationError::InvalidCommand);
                 }
-                self.inner
-                    .validate_proposal(op, &self.inner_bootstrap, data.into_iter())?;
+                if self.routed().fence().is_none() {
+                    self.inner
+                        .validate_proposal(op, &self.inner_bootstrap, data.into_iter())?;
+                }
                 Ok(size_of::<Self::Receipt>())
             }
             Request::Activate(s) => {
@@ -422,49 +506,51 @@ where
         }
     }
 }
-impl<A, P> ReadableStateMachine for CreatedNamespace<A, P>
+impl<A, P, O> ReadableStateMachine for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + BoundedStateMachine + ReadableStateMachine,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P> + ReadableStateMachine,
 {
-    type Query = NamespaceQuery<A::Query>;
-    type ReadResult = NamespaceRead<A::ReadResult>;
+    type Query = NamespaceOwnerQuery<O::Query>;
+    type ReadResult = NamespaceOwnerRead<O::ReadResult>;
     fn read_at(&self, index: u64, q: Self::Query) -> Result<Self::ReadResult, ApplicationError> {
         if index > self.applied_index() {
             return Err(ApplicationError::NotApplied);
         }
         match q {
-            NamespaceQuery::Status => Ok(NamespaceRead::Status(self.status())),
-            NamespaceQuery::Data(q) => {
+            NamespaceOwnerQuery::Status => Ok(NamespaceOwnerRead::Status(self.status())),
+            NamespaceOwnerQuery::Data(q) => {
                 if self.activation.is_none() {
-                    Ok(NamespaceRead::NotActive)
+                    Ok(NamespaceOwnerRead::NotActive)
                 } else {
-                    self.inner.read_at(index, q).map(NamespaceRead::Data)
+                    self.inner.read_at(index, q).map(NamespaceOwnerRead::Data)
                 }
             }
         }
     }
 }
-impl<A, P> BoundedReadableStateMachine for CreatedNamespace<A, P>
+impl<A, P, O> BoundedReadableStateMachine for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + BoundedStateMachine + BoundedReadableStateMachine,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P> + BoundedReadableStateMachine,
 {
     fn query_bytes(&self, q: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match q {
-            NamespaceQuery::Status => Ok(0),
-            NamespaceQuery::Data(q) => self.inner.query_bytes(q, limit),
+            NamespaceOwnerQuery::Status => Ok(0),
+            NamespaceOwnerQuery::Data(q) => self.inner.query_bytes(q, limit),
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match q {
-            NamespaceQuery::Status => 0,
-            NamespaceQuery::Data(q) => self
+            NamespaceOwnerQuery::Status => 0,
+            NamespaceOwnerQuery::Data(q) => self
                 .inner
                 .read_result_bound(q)?
-                .checked_sub(size_of::<RoutedRead<A::ReadResult>>())
+                .checked_sub(size_of::<O::ReadResult>())
                 .ok_or(ApplicationError::ReceiptBudget)?,
         };
         size_of::<Self::ReadResult>()
@@ -477,24 +563,25 @@ where
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         match r {
-            NamespaceRead::Data(r) => self.inner.read_result_bytes(r, limit),
+            NamespaceOwnerRead::Data(r) => self.inner.read_result_bytes(r, limit),
             _ => Ok(0),
         }
     }
 }
-impl<A, P> CheckpointStateMachine for CreatedNamespace<A, P>
+impl<A, P, O> CheckpointStateMachine for CreatedNamespace<A, P, O>
 where
     A: CheckpointStateMachine + BoundedStateMachine,
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
+    O: NamespaceOwner<A, P>,
 {
     fn schema_version(&self) -> u64 {
-        CREATED_NAMESPACE_SCHEMA
+        O::SCHEMA
     }
     fn checkpoint(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self
             .inner
-            .checkpoint(self.inner.readiness_requirements().snapshot_bytes)?;
+            .checkpoint(self.inner.owner_requirements().snapshot_bytes)?;
         let activation = self
             .activation
             .as_ref()
@@ -506,7 +593,7 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut b = Vec::with_capacity(len);
-        b.extend(b"VBNCHK01");
+        b.extend(O::CHECKPOINT_MAGIC);
         b.extend(self.applied_index().to_le_bytes());
         b.extend((self.binding.len() as u32).to_le_bytes());
         b.extend(&self.binding);
@@ -531,7 +618,7 @@ where
         applied: u64,
         b: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != CREATED_NAMESPACE_SCHEMA {
+        if schema != O::SCHEMA {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if b.len() > self.readiness_requirements().snapshot_bytes {
@@ -539,7 +626,7 @@ where
         }
         let mut next = self.clone();
         let mut r = Reader::new(b);
-        if r.take(8)? != b"VBNCHK01" || r.u64()? != applied {
+        if r.take(8)? != O::CHECKPOINT_MAGIC || r.u64()? != applied {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let len = r.u32()? as usize;
@@ -576,13 +663,19 @@ where
         next.inner
             .restore_checkpoint(schema, applied, r.take(len)?)?;
         if !r.done()
-            || next.inner.initialization() != next.ready.map(|i| (next.plan.creation.operation, i))
+            || next.inner.routed_owner().initialization()
+                != next.ready.map(|i| (next.plan.creation.operation, i))
             || next
                 .activation
                 .as_ref()
-                .is_some_and(|a| next.inner.has_data_operation(a.1.operation))
+                .is_some_and(|a| next.inner.routed_owner().has_data_operation(a.1.operation))
             || next.activation.is_none()
-                && next.inner.remaining_operations() != next.inner.limits().operations
+                && next.inner.routed_owner().remaining_operations()
+                    != next.inner.routed_owner().limits().operations
+            || next.routed().fence().is_some_and(|f| {
+                next.activation.as_ref().is_none_or(|a| f.index <= a.0)
+                    || next.reserved(f.operation)
+            })
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }

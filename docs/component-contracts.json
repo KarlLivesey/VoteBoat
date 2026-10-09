@@ -1684,9 +1684,11 @@
     },
     {
       "design_id": "C05/C20",
-      "public_contract": "NamespacePlan / NamespacePublication / NamespacePublicationStatus / CreatedNamespace<A,P>",
+      "public_contract": "NamespacePlan / NamespacePublication / NamespacePublicationStatus / CreatedNamespace<A,P,O> / CreatedNamespaceSource<A,P> / NamespaceOwner / NamespaceOwnerQuery / NamespaceOwnerRead",
       "operations": [
         "with_namespace_creation",
+        "from_source",
+        "owner",
         "validate",
         "encode",
         "decode",
@@ -1705,9 +1707,10 @@
       "conformance": [
         "tests/namespace_creation.rs",
         "tests/routed/creation.rs",
-        "tests/namespace_creation/transfer.rs"
+        "tests/namespace_creation/transfer.rs",
+        "tests/namespace_creation/source.rs"
       ],
-      "scope": "Fresh independent root namespace only: original committed creation reservation plus exact plan/configuration/ready index, bounded reserved publication control, committed target activation before any data service. Host application/partition injection; canonical bounded codecs, full ordinary capacity completion, schema/checkpoint refusal, atomic restore/control-index consistency and receipt allocation accounting. Every torn native activation frame plus sync/publication model faults. Selected TCP/QUIC ready/publish/activate checkpoint reopen and metadata-offline retry histories; unread original tickets and partial publication/activation owner-abort WAL-only replay, actual quorum/laggard commit boundaries and exact per-replica phase recovery. Foreign authentication/commitment remains an explicit trusted host obligation; digest/status are not remote certificates. No live schema upgrade, creation RPC/CLI, recursive insertion into existing covered scope, source transfer lifecycle, deletion/reparenting, hardware power-loss or macOS claim. Opt-in fresh Directory schema4 additionally accepts successfully published namespace current manifests into existing transfer metadata admission; constructed-fact conformance covers reserved control completion, lock/retry/checkpoint recovery and repeated split/merge metadata publication. Schemas1–3 retain historical outcomes and cross-schema/live upgrades refuse. Actual created-owner source lifecycle remains unsupported."
+      "scope": "Fresh independent root namespace only: original committed creation reservation plus exact plan/configuration/ready index, bounded reserved publication control, committed target activation before any data service. Host application/partition injection; canonical bounded codecs, full ordinary capacity completion, schema/checkpoint refusal, atomic restore/control-index consistency and receipt allocation accounting. Every torn native activation frame plus sync/publication model faults. Selected TCP/QUIC ready/publish/activate checkpoint reopen and metadata-offline retry histories; unread original tickets and partial publication/activation owner-abort WAL-only replay, actual quorum/laggard commit boundaries and exact per-replica phase recovery. Foreign authentication/commitment remains an explicit trusted host obligation; digest/status are not remote certificates. No live schema upgrade, creation RPC/CLI, recursive insertion into existing covered scope, deletion/reparenting, hardware power-loss or macOS claim. Opt-in fresh Directory schema4 additionally accepts successfully published namespace current manifests into existing transfer metadata admission; constructed-fact conformance covers reserved control completion, lock/retry/checkpoint recovery and repeated split/merge metadata publication. Schemas1–3 retain historical outcomes and cross-schema/live upgrades refuse. Explicit CreatedNamespaceSource over existing TransferSource selects guard schema2 before initialization; sealed NamespaceOwner composition retains fixed schema1 binding and aliases. Actual deterministic fence/export/staged-target import/publication/activation preserves retry/outbox lineage; every torn native ModelIo fence frame plus sync/publication faults recovers active-or-fenced and exact retry. Source capability/readiness/activation/fence provenance, reserved control IDs, bounded queries/receipts, budget/key/bypass refusal and atomic/cross-owner checkpoint recovery are checked. Existing TCP/QUIC fixed-owner histories pass; source-capable native network transfer histories remain next, with broader recursive/lifecycle/platform proof gaps retained."
     }
   ],
   "not_yet_implemented": [
