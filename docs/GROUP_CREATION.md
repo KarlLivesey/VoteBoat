@@ -66,3 +66,41 @@ unit tests reopen at five binding publication boundaries and reject altered byte
 these are observation-loss tests, not hardware power-loss simulation. Separate
 modeled journal faults include unsynced-byte loss. No arbitrary crash schedules,
 TCP/QUIC created-service startup or namespace activation claim is made.
+
+## Native direct-group embedding path
+
+The existing native owning startup composes with offline creation without a new
+worker or provisioning endpoint:
+
+1. Commit the schema2 Directory reservation and obtain the exact status from
+   authenticated committed metadata history. Check the target adapter assignment
+   with `VerifiedGroupCreation::verify`.
+2. Explicitly create or recover the selected `NativeLogStore<FileLogIo>` and open
+   `FileCreationBindings` in that directory. Run `establish_created_group`; retain
+   files on uncertain errors and retry the same intent after recovery.
+3. Explicitly initialize the empty `NativeSnapshotStore<FileSnapshotIo>` with the
+   same target group/store identity, or recover its existing manifest. Never reset
+   an existing snapshot store. Keep partial initialization as a recovery case.
+4. Drop offline file owners, then select `NativeStartup` with `Recover`, the exact
+   reserved bootstrap and provisioned peer credentials/endpoints. Open the normal
+   application through `open_with_protocol` for TCP/TLS or QUIC.
+5. Use the owning Node's existing campaign/propose/read/checkpoint/shutdown paths.
+   Creation metadata is historical bootstrap authority; ordinary group operations
+   do not require ancestor writes or a live metadata group.
+
+This is direct group embedding. A routed responsibility still needs a separately
+validated publication/activation; this recipe does not grant namespace ownership.
+Empty initialization is exercised here. Staging/import and a creation RPC/CLI are
+separate contracts. A missing/corrupt snapshot manifest after partial initialization
+must be inspected; this recipe does not silently fall back to recreating files.
+
+`cargo +stable test --locked --offline --all-features --test routed native::creation`
+runs actual TCP and QUIC histories. They commit metadata reservation, provision two
+assigned stores, reopen metadata and retry the original reservation, recover those
+two stores and finish the third, then stop metadata. The created recursive-quorum
+three-node service elects, writes, reads, checkpoints, closes and reopens; exact
+bootstrap retry preserves each progressed WAL, application retry preserves its
+original operation/outcome, changed bytes conflict, and a new write succeeds.
+Every metadata replica's WAL remains exactly unchanged during child operation.
+These are selected Linux loopback schedules, not arbitrary interruption or power
+failure coverage; no namespace activation or macOS execution is claimed.

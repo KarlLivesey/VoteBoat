@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Namespace creation activation, deletion/reparenting and metadata authority movement remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -8333,3 +8333,79 @@ active. P8/Windows deferred, macOS/separate-host unverified, CI background feedb
 Final slice123 checks: core-only group_creation Clippy -D warnings, format,
 whitespace and 79-contract inventory all passed. Inventory formatting changes to
 unrelated records were removed before commit.
+
+## Slice124 schema plan — created native service integration
+
+Slice123 made progress and is committed/pushed b9e342f; no live build remains.
+Current deliverable advances P1/P5: exercise the existing selected-provider creation
+and NativeStartup::Recover path as a real three-replica TCP/QUIC embedding service.
+No new helper/provider is needed: offline establish_created_group, explicit native
+snapshot initialization and existing owning Node already compose this path.
+
+Shape: opt-in schema2 native Directory reserves child50/group100 with exact recursive
+bootstrap and Counter adapter. LocalCreationAuthority consumes actual committed
+owner/core history. Each target has its assigned WAL/binding and explicit empty
+snapshot store. NativeStartup recovers these same files into owning Node<Counter>;
+this is direct group embedding, not a routed namespace ownership grant.
+
+Transitions/ownership: commit reservation over native metadata network; provision
+only two targets; shut down/reopen metadata and retry original reservation; recover
+those two targets unchanged and provision the remaining target. Drop offline store
+locks before owning startup. Stop metadata; campaign/write/read/checkpoint the child,
+close/drain workers, reopen binding/WAL to retry exact bootstrap without reset, then
+recover native service and original application dedup. Immutable historical status
+remains valid while metadata is unavailable; no per-write ancestor dependency.
+
+Failure/cleanup: all files survive lost reservation observation/partial assignment;
+never remove a possibly provisioned target on error. Existing close/drain helper
+owns socket/workers before reopen. No automatic rollback, import, namespace route
+or activation is added. Staging remains separate from this Empty-only direct-group
+history. This integration must not be described as a new creation RPC/CLI endpoint.
+
+Acceptance: TCP and QUIC actual network reservation/election/commands; lagging or
+altered metadata refusal already covered123; exact reservation retry after metadata
+reopen, recursive target quorum, assigned files/reopen/session changes, no target
+log reset, committed operation dedup after checkpoint/reopen, and unchanged parent
+logs while child operates offline. Next mini item is namespace publication/activation
+(P5/P6), dependent on exact bootstrap plus application/owner readiness and checked
+routing transition; completion requires no-unready-serving, exact publication and
+partial-progress retry. Following item is creation lifecycle fault coverage (P5/P6),
+dependent on that publication contract, checking interruption around each authority
+transition. All original P0–P7 gaps stay active, P8/Windows deferred.
+
+## Slice124 implemented — created TCP/QUIC embedding service
+
+No new production helper was necessary. Existing offline selected-provider bootstrap,
+explicit native snapshot initialization and NativeStartup::Recover compose the new
+three-replica group into the existing owning Node. Added two native histories in
+tests/routed/creation.rs: actual TCP/TLS and QUIC metadata reservation, partial
+(two of three) assigned provisioning, metadata close/reopen and original reservation
+retry, recovery of those two stores plus third creation, recursive target quorum,
+metadata-offline election/write/read/checkpoint/close/reopen, exact creation retry
+without resetting progressed WALs, preserved original application operation/outcome,
+changed-byte conflict and new writes. Exact per-node metadata WALs stay unchanged
+while the child runs. Group creation still publishes no child manifest.
+
+Executed Linux final focused histories2 passed in1.35s (build8.78s), all-feature/
+all-target Clippy -D warnings passed. First run reached semantic dedup after both
+network reopen histories but failed an incorrect test assertion that Counter retry
+receipts carry the original entry index. Existing Counter contract names the current
+applied entry and preserves operation/outcome; corrected the test accordingly,
+without changing application semantics. Final history compares exact per-node WALs,
+not interchangeable replica states. These tests use actual loopback sockets and
+native worker/file ownership; they are selected schedules, not arbitrary power-loss
+or broad partial snapshot initialization tests. Native direct-group embedding
+recipe is documented in GROUP_CREATION.md; no creation RPC/CLI or namespace authority
+is claimed. Inventory remains79 contracts with this additional conformance path.
+
+Macro review: P5 metadata reservation and assigned durable/native owning-service
+bootstrap are implemented. Current mini item (P1/P5) completed under the recorded
+checks. Next remains namespace publication/activation (P5/P6), dependent on target
+application/ownership readiness and a checked exact reservation-to-manifest/parent
+transition; completion checks must reject unready/mismatched publication and serving,
+cover original retries and partial-progress recovery. Following remains interruption
+coverage across those creation authority transitions (P5/P6), dependent on the
+publication contract. Deletion/reparenting, directory authority movement and all
+other original P0–P7 gaps stay active. P8/Windows deferred; macOS and separate-host
+execution unverified, CI background feedback.
+Final slice124 format, whitespace and 79-contract inventory checks passed.

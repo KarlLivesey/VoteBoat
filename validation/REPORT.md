@@ -2879,3 +2879,23 @@ creation authority protocol, owning-service integration and multi-creation share
 WAL binding remain outside this evidence. Full P0–P7 remains active.
 Core-only group_creation Clippy -D warnings, format/whitespace and 79-contract
 inventory validation also passed. No macOS/separate-host execution claim.
+
+## Slice124 — actual TCP/QUIC created service from committed reservation
+
+Final selected native histories2 passed in1.35s, build8.78s. Both native protocols
+commit schema2 metadata intent, provision two assigned replicas, close/reopen
+metadata, recover exact original reservation, preserve those two WALs and create
+the remaining assigned replica. A recursive-quorum three-node Counter service
+then elects, writes, reads, checkpoints, closes and reopens with metadata offline.
+Exact creation retries preserve each progressed target WAL. Original application
+operation/outcome/dedup survive; changed command bytes conflict and new writes work.
+Each corresponding metadata replica WAL is exactly unchanged during child operation.
+All-feature/all-target Clippy -D warnings passed. Initial index assertion failure
+was a test misunderstanding of Counter's current-applied-entry receipt contract;
+production Counter semantics were not changed to make it pass.
+
+These are direct-group owning-service embedding histories, not namespace activation,
+a creation RPC/CLI, arbitrary interruption or hardware power-loss coverage. Explicit
+snapshot create/recover is caller-owned; partial initialization remains a separate
+recovery case. Linux loopback does not establish macOS or separate-host operation.
+Final format, whitespace and 79-contract inventory checks passed.

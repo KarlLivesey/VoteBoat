@@ -1640,9 +1640,10 @@
       "conformance": [
         "tests/group_creation.rs",
         "tests/directory.rs",
-        "src/native/group_creation.rs"
+        "src/native/group_creation.rs",
+        "tests/routed/creation.rs"
       ],
-      "scope": "Offline caller-owned assigned bootstrap only. Exact bounded metadata status, assigned node/store/application and immutable provenance precede selected WAL Create/barrier; typed durable absence refuses pending/fenced stores. Host replacements consume the same checked helper. Exact retry preserves progressed groups; conflicts and existing unbound groups refuse. Real metadata file history/reopen/campaign, every torn bootstrap WAL frame and five actual file publication observation boundaries. One native creation record per selected directory. No hidden runtime, remote cryptographic certificate, namespace/serving permission or TCP/QUIC created-service gate."
+      "scope": "Offline caller-owned assigned bootstrap only. Exact bounded metadata status, assigned node/store/application and immutable provenance precede selected WAL Create/barrier; typed durable absence refuses pending/fenced stores. Host replacements consume the same checked helper. Exact retry preserves progressed groups; conflicts and existing unbound groups refuse. Real metadata file history/reopen/campaign, every torn bootstrap WAL frame and five actual file publication observation boundaries. One native creation record per selected directory. Selected TCP/QUIC created-service histories in tests/routed/creation.rs cover partial assigned provisioning, metadata reopen/retry, recursive target quorum, child checkpoint/reopen/dedup and unchanged offline metadata WALs. No hidden runtime, remote cryptographic certificate, namespace/serving permission or creation RPC/CLI."
     }
   ],
   "not_yet_implemented": [
