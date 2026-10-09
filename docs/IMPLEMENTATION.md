@@ -7958,3 +7958,77 @@ Linked mini plan after slice119:
    scope transfer evidence; select the smallest complete missing operation.
    Completion: record its concrete API/state schema and demonstrate restart,
    partial-progress and no-dual-owner checks before claiming that operation.
+
+## Slice120 schema plan — learner restart invalidates promotion readiness
+
+Previous goal turn was progress: slice119 was tested, committed and pushed as
+b195a46. Current worktree is clean. Existing native administration histories
+already cover held readiness reply cancellation, queued authorization revocation,
+lost configuration observation, finalization and file reopen. Add the missing
+actual learner-store restart boundary, rather than duplicating those checks.
+
+Data/API: retain the original ConfigurationProposal and ReadyLearner captured
+from the authenticated native session. Close/reclaim only the learner owner,
+reopen its existing native WAL/snapshot files at the same address and identity,
+and require a strictly different StoreSession in the leader's authenticated
+roster. Submit the original proposal with the old readiness/session; exact live
+binding checks must return NotProposed(AuthenticationRequired), without a
+membership/log transition. Cancel the old readiness round, acquire new native
+readiness and replace only the proof/authenticated binding. Preserve original
+configuration operation/target and application operation IDs.
+
+Ownership/failure: no new API/provider or production helper is needed. Reuse the
+existing bounded native owners and poll/close contracts. Reopen must join/release
+the learner's old actual stores first. Transport reconnection may change its
+secure generation; the test requires the persisted store-open session to change.
+Old proof is not a ballot or a serving lease. Fresh proof does not bypass queued
+execution authorization, journal validation or joint/final commit barriers.
+Acceptance: TCP/QUIC old-proof refusal, unchanged durable leader state, fresh
+proof promotion/finalization, retirement of node3, original application duplicate
+receipt and native WAL/checkpoint/application reopen. This is selected graceful
+learner restart evidence, not power loss or general remote credential rotation.
+
+Mini plan: current restart/readiness history advances P4/P1 and depends on exact
+live bindings and the existing administration fixture; completes with acceptance
+above. Next: remote target/session interruption and retirement across authority
+changes (P4/P6), depends on these restart checks and authenticated command ingress;
+complete with original operation/target preservation, refused stale authority and
+bounded cleanup. Following: inspect/select the next missing directory authority
+or ownership lifecycle operation (P5/P6), dependent on existing fencing/transfer
+contracts; specify its concrete state schema and no-dual-owner/restart checks
+before implementation. Full P0–P7 remains active; P8/Windows deferred.
+
+### Slice120 implemented evidence
+
+Added two native TCP/QUIC administration histories for readiness across actual
+learner store reopen. Both preserve the original promotion record/operation,
+refuse its old session-bound proof before any leader log change, acquire fresh
+readiness, commit joint/final, demote former voter3 to learner, and preserve the
+original application duplicate receipt/value through native checkpoint/file
+reopen. The production contract already enforces this case; no production/API
+change was necessary. Existing queued authorization revocation, canceled held
+readiness reply and canceled configuration observation are exercised in the same
+histories. The generic success driver was not weakened: expected stale-proof
+errors are checked against the exact admission/operation ticket separately.
+
+Linux: all 50 native_member_startup tests passed (6.05s); all-feature/all-target
+Clippy -D warnings, formatting, diff whitespace and 78-contract inventory checks
+passed. Negative control temporarily removed only the execution-time live peer
+binding comparison: the TCP regression failed immediately when stale readiness
+published a membership transition (0.17s). Source was restored and its absence
+from the final diff verified before the complete successful native run. The first
+focused run hit the generic driver's no-error assertion on the expected refusal;
+the focused exact-ticket assertion corrected the fixture without changing the
+production behavior or excusing unrelated errors.
+
+Macro review: advances P4/P1 native session-bound promotion evidence. It does
+not close broader remote command revocation/partial-progress schedules, general
+P4/P6 lifecycle release, arbitrary faults, macOS/separate-host execution or
+performance. All prior ledger gaps and full P0–P7 stay active; P8/Windows deferred.
+Mini plan current slice is complete against its schema above. Next remains remote
+immutable target/session interruption and voter retirement (P4/P6), depending on
+native live proof and command authority checks; completion needs exact original
+operation, stale authority refusal and cleanup across its chosen boundaries.
+Following remains the next concrete directory authority/ownership lifecycle
+operation (P5/P6), selected from the existing ledger with its own state/fencing,
+partial-progress/restart and no-dual-owner checks before implementation.

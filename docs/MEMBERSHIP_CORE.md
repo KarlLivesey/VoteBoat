@@ -445,3 +445,17 @@ checks remain in force. Host regression covers batch/joint-image/final-image
 requests and state preservation; the native witness recovery assertion remains
 strict. This handles transport delay across promotion, without reviving learner
 authority or allowing a repair acknowledgement to become a ballot.
+
+### Readiness across a native learner restart (slice120)
+
+TCP/QUIC conformance now captures readiness, closes/reclaims the learner's actual
+native owner and reopens its existing WAL/checkpoint files. The leader must see
+the same exact store identity with a new StoreSession. The original proposal's
+proof is refused at execution as NotProposed(AuthenticationRequired), with its
+exact admission/operation ticket and no leader log/membership mutation. Fresh
+readiness preserves the original configuration target/operation; normal joint
+and final commit then promote node2 and demote node3. Original application retry
+receipts and current state survive checkpoint and actual file reopen. The initial
+stable learner assignment is seeded. This is graceful native learner restart,
+not power-loss or live remote credential rotation evidence. No production API,
+wire/storage format or provider changes are needed for this covered boundary.

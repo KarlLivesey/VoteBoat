@@ -2765,3 +2765,31 @@ the focused correction and checkpoint changes together.
 No new provider or persistent format. Older mismatching stable checkpoint,
 broader membership/lifecycle/fault schedules, macOS/separate-host evidence and
 performance remain incomplete. Full P0–P7 stays active; P8/Windows deferred.
+
+## Slice120 — session-bound readiness after actual native learner restart
+
+Linux final run: 50 native_member_startup tests passed (6.05s), including two new
+TCP/QUIC histories. All-feature/all-target Clippy -D warnings, formatting, diff
+whitespace and 78-contract inventory checks passed. No production API/provider,
+wire or storage format changed; existing checks cover this boundary.
+
+The test captures native readiness, closes/reclaims the learner actual workers
+and stores, reopens the same WAL/checkpoint files/address/identity, and waits for
+the leader to authenticate a different StoreSession. The original proof yields
+NotProposed(AuthenticationRequired) for its exact admission/operation ticket;
+leader log/state remain unchanged. Fresh readiness preserves the original
+configuration target/ID, finishes joint/final, demotes former voter3 to learner,
+and retains original Counter duplicate outcome and current value through native
+checkpoint and file reopen. Existing cancellation/queued plan revocation checks
+also run in these histories. Initial stable learner assignment remains seeded.
+
+A negative control removing only Node's live peer binding comparison failed at
+unauthorized leader membership publication (0.17s). Production source restored;
+complete successful run above used the original gate. An initial fixture failure
+on the expected refused admin step was corrected with exact-ticket assertions;
+no broad driver error exemption was added.
+
+This is selected graceful learner restart and embedding evidence, not process
+kill/power loss, live remote credential rotation or universal membership safety.
+Remote target interruption/revocation and broader P4/P6/P7, platform/fault and
+performance gates remain. Full P0–P7 active, P8/Windows deferred.

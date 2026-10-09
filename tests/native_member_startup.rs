@@ -43,7 +43,7 @@ mod recursive;
 #[path = "native_member_startup/checkpoint_final.rs"]
 mod checkpoint_final;
 
-fn administrative_promotion(protocol: NativePeerProtocol) {
+fn administrative_promotion(protocol: NativePeerProtocol, restart_learner: bool) {
     use voteboat::outbound::OutboundQueue;
     type Service = NativeNode<Counter, NativeServiceConnector>;
     fn drive(
@@ -154,6 +154,7 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
             config
         })
         .collect::<Vec<_>>();
+    let addresses = endpoints.each_ref().map(|endpoint| endpoint.0);
     drop(endpoints);
     let mut nodes = configs
         .into_iter()
@@ -325,7 +326,7 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
         .unwrap()
         .peer
         .store;
-    let proposal = ConfigurationProposal {
+    let mut proposal = ConfigurationProposal {
         record: joint,
         requirements,
         readiness: vec![PromotionReadiness {
@@ -374,6 +375,132 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
         nodes[0].local().owner.core(group()).unwrap().state(),
         &before
     );
+    if restart_learner {
+        let old_binding = proposal.readiness[0].authenticated;
+        close(nodes.remove(1));
+        let (mut config, _) = startup(&directory.join("2"), 2, &[1, 2, 3]);
+        config.startup.tls = config.startup.tls.with_wire_version(6).unwrap();
+        config.startup.listen = addresses[1];
+        for (peer, route) in &mut config.startup.peers {
+            route.address = addresses[peer.get() as usize - 1];
+        }
+        nodes.insert(1, open(config, protocol).unwrap());
+        drive(&mut nodes, &allowed, clock, |nodes| {
+            nodes[0]
+                .peers()
+                .unwrap()
+                .roster()
+                .binding(node(2))
+                .is_some_and(|binding| binding.peer.store != old_binding)
+        });
+        let fresh_binding = nodes[0]
+            .peers()
+            .unwrap()
+            .roster()
+            .binding(node(2))
+            .unwrap()
+            .peer
+            .store;
+        assert_eq!(fresh_binding.identity, old_binding.identity);
+        assert_ne!(fresh_binding.session, old_binding.session);
+        let before = nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .state()
+            .clone();
+        let stale = nodes[0]
+            .configure(ConfigurationRequest {
+                group: group(),
+                proposal: proposal.clone(),
+            })
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            let progress = nodes[0]
+                .poll_with_configuration_authorization(
+                    MonoTime(clock.elapsed().as_millis() as u64),
+                    NodePollBudget::default(),
+                    |core, proposal| allowed.authorize(group(), core.membership(), proposal),
+                )
+                .unwrap();
+            if let Some(replica) = progress.replica {
+                for step in replica.steps {
+                    if let Some(error) = step.error {
+                        assert_eq!(step.admission, Some(stale.admission()));
+                        assert_eq!(step.operation, Some(stale.operation()));
+                        assert!(step.proposed.is_none());
+                        assert_eq!(
+                            error,
+                            ConfigurationProposalError::AuthenticationRequired.into()
+                        );
+                    }
+                }
+            }
+            assert_eq!(
+                nodes[0].local().owner.core(group()).unwrap().state(),
+                &before,
+                "stale readiness cannot publish a membership transition"
+            );
+            if let Some(result) = nodes[0].poll_configuration() {
+                assert_eq!(result.ticket, stale);
+                assert_eq!(
+                    result.outcome,
+                    ConfigurationOutcome::NotProposed(
+                        ConfigurationProposalError::AuthenticationRequired.into()
+                    )
+                );
+                break;
+            }
+            assert!(Instant::now() < deadline, "stale proof must be refused");
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        assert_eq!(
+            nodes[0].local().owner.core(group()).unwrap().state(),
+            &before
+        );
+        assert!(!nodes[1].local().owner.core(group()).unwrap().local_voter());
+        nodes[0].cancel_learner_readiness(group()).unwrap();
+        drive(&mut nodes, &allowed, clock, |nodes| {
+            nodes[0]
+                .local()
+                .owner
+                .core(group())
+                .unwrap()
+                .ready_learner()
+                .is_none()
+        });
+        nodes[0]
+            .request_learner_readiness(group(), node(2), requirements)
+            .unwrap();
+        drive(&mut nodes, &allowed, clock, |nodes| {
+            nodes[0]
+                .local()
+                .owner
+                .core(group())
+                .unwrap()
+                .ready_learner()
+                .is_some()
+        });
+        let ready = nodes[0]
+            .local()
+            .owner
+            .core(group())
+            .unwrap()
+            .ready_learner()
+            .unwrap()
+            .clone();
+        assert_eq!(ready.binding(), fresh_binding);
+        assert_ne!(
+            ready.request().context,
+            proposal.readiness[0].ready.request().context
+        );
+        proposal.readiness = vec![PromotionReadiness {
+            ready,
+            authenticated: fresh_binding,
+        }];
+    }
     let lost = nodes[0]
         .configure(ConfigurationRequest {
             group: group(),
@@ -446,6 +573,33 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
                 .all(|n| n.local().applications[&group()].read_applied(index) == Ok(8))
         })
     });
+    if restart_learner {
+        let retry = nodes[0]
+            .propose(ClientRequest {
+                group: group(),
+                operation: OperationId::new(899).unwrap(),
+                bytes: 1i64.to_le_bytes().to_vec(),
+            })
+            .unwrap();
+        let mut completed = false;
+        drive(&mut nodes, &allowed, clock, |nodes| {
+            while let Some(output) = nodes[0].poll_client() {
+                assert_eq!(output.ticket(), retry);
+                let ClientOutcome::Applied { receipt, .. } =
+                    nodes[0].complete_client(output).unwrap()
+                else {
+                    panic!("original operation retry");
+                };
+                assert!(receipt.duplicate);
+                assert_eq!(receipt.outcome, CounterOutcome::Value(1));
+                completed = true;
+            }
+            completed
+        });
+        assert!(nodes
+            .iter()
+            .all(|n| n.local().applications[&group()].read_applied(applied.unwrap()) == Ok(8)));
+    }
     nodes[0].control(group(), NodeControl::Checkpoint).unwrap();
     drive(&mut nodes, &allowed, clock, |nodes| {
         nodes[0]
@@ -502,12 +656,21 @@ fn administrative_promotion(protocol: NativePeerProtocol) {
 }
 #[test]
 fn authorized_native_promotion_lost_receipt_resumption_and_file_recovery_tcp() {
-    administrative_promotion(NativePeerProtocol::TcpTls);
+    administrative_promotion(NativePeerProtocol::TcpTls, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic() {
-    administrative_promotion(NativePeerProtocol::Quic);
+    administrative_promotion(NativePeerProtocol::Quic, false);
+}
+#[test]
+fn native_promotion_refuses_restarted_learner_readiness_tcp() {
+    administrative_promotion(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn native_promotion_refuses_restarted_learner_readiness_quic() {
+    administrative_promotion(NativePeerProtocol::Quic, true);
 }
 fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
