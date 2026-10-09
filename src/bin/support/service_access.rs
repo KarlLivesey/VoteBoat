@@ -290,8 +290,12 @@ impl Channel {
                 generation,
             } => {
                 checked(session.poll(now, SessionPollBudget::default()))?;
-                if session.state() != SessionState::Ready {
-                    return Ok(false);
+                match session.state() {
+                    SessionState::Handshaking => return Ok(false),
+                    SessionState::Closing | SessionState::Closed | SessionState::Failed => {
+                        return Err("closed service channel".into())
+                    }
+                    SessionState::Ready => (),
                 }
                 if context.is_none() {
                     *context = Some(CredentialContext {

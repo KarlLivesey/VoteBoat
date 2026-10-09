@@ -357,8 +357,10 @@ fn serve(
             }
         }
         let mut remove = false;
+        let mut remove_reason = "channel";
         if let Some(c) = &mut connection {
             if Instant::now() >= c.deadline {
+                remove_reason = "deadline";
                 remove = true;
             } else {
                 match c.stream.poll(
@@ -434,7 +436,7 @@ fn serve(
                     }
                     Pending::Configure(_) => {
                         if let Some(admin) = administration.as_mut() {
-                            admin.cancel_remote(&mut service)?;
+                            admin.cancel_remote(&mut service, remove_reason)?;
                         }
                     }
                 }

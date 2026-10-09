@@ -71,3 +71,25 @@ authority, sender identity or promotion readiness. Public service mutation
 endpoints and the complete remote lifecycle release remain gated.
 An attached configuration or newer scope alone cannot self-authorize a learner.
 Linux checks do not establish macOS execution or performance.
+
+## Retained promotion repair after final configuration
+
+With batched joint repair selected (native wire5, also selected by wire6 snapshot
+repair), a stable candidate can recover an exact lagging promoted learner using
+a retained committed historical joint. The candidate must be an exact old-view
+voter and a current voter; the peer must be the exact old learner promoted by that
+joint and still assigned as a current voter. The candidate sends bounded batches
+only through that joint, scoped to its historical configuration. Receiver checks
+remain the ordinary strict pre-election learner checks; persistence precedes its
+reply. No repair reply is a ballot, quorum acknowledgement or commitment receipt.
+Only a subsequent ordinary Vote/Voted under the candidate's current configuration
+can complete election. A matching historical response observing a higher term
+steps down and persists that term without importing the response's configuration.
+
+The volatile request context is campaign/session scoped. Lost observation and
+restart rebuild the transfer from durable history; matching overlap is preserved.
+Wrong identities and stale contexts cannot supply progress. A newly promoted
+candidate that was not an old-view voter cannot use this path to self-authorize.
+If compaction removed the historical promotion, this retained-log path sends no
+repair; ordinary elections remain available. Recovery of that lagging learner
+from a historical checkpoint after final is still an explicit release gate.

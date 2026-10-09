@@ -400,9 +400,20 @@ impl Administration {
         }
         self.reply.take()
     }
-    pub fn cancel_remote(&mut self, service: &mut Service) -> Result<(), Failure> {
+    pub fn cancel_remote(&mut self, service: &mut Service, reason: &str) -> Result<(), Failure> {
         if !self.remote {
             return Ok(());
+        }
+        if let Some(operation) = self.requested {
+            eprintln!(
+                "administration observation_cancelled operation={} phase={} reason={reason}",
+                operation.get(),
+                if self.pending.is_some() {
+                    "configuration_queued"
+                } else {
+                    "preparing"
+                }
+            );
         }
         if let Some(ticket) = self.pending {
             checked(service.cancel_configuration(ticket))?;
@@ -587,11 +598,17 @@ impl Administration {
                 {
                     self.waiting = None;
                 }
-            } else if service
-                .request_learner_readiness(group(), *id, self.requirements())
-                .is_ok()
-            {
-                self.waiting = Some((*id, Instant::now()));
+            } else {
+                let admitted = service
+                    .request_learner_readiness(group(), *id, self.requirements())
+                    .is_ok();
+                if self.remote {
+                    eprintln!("administration operation={} preparing_learner={} readiness_admitted={admitted}",
+                        proposal.record.operation.get(), id.get());
+                }
+                if admitted {
+                    self.waiting = Some((*id, Instant::now()));
+                }
             }
             return Ok(());
         }

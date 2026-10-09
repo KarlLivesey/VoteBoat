@@ -7603,3 +7603,126 @@ split checkpoint recovery passed; no terminal full-suite pass is claimed.
    Completion checks: offline-target refusal, catch-up, stale-session/readiness
    refusal, successful promotion/retirement and checkpoint/restart with original
    operation/application retry identities. Advances macro safe online membership.
+
+## Slice117 schema plan — native interrupted configuration observation
+
+Previous turn was progress: slice116 committed/pushed bounded full-target ingress
+with exact/conflicting retry and restart evidence. Current audit found Channel::poll
+returns not-ready even for clean TLS Closing/Closed, retaining a pending command
+until its five-second deadline. Distinguish Handshaking from terminal channel
+states; terminal state cancels observation through the existing remote cleanup.
+No consensus/storage design changes.
+
+Add fixed-field operator diagnostics for preparing_learner and remote observation
+cancellation (operation, preparing/configuration-queued phase, channel/deadline
+reason). These are needed to establish an actual preparation boundary for native
+interruption tests and diagnose operator-visible stalled promotion; they grant no
+authority, are not durability receipts and contain no request payload/credentials.
+No hidden test hook or new worker/provider is added.
+
+A test-owned native mutual-TLS command channel sends the real bounded request but
+never reads its application reply. Existing executable APIs first demote voter3
+to a prepared learner, stop it, then submit a promotion while it is offline. An
+observed preparation-attempt event establishes preparation before configure/persistence.
+Clean TLS close must cancel with channel reason; an open silent channel must cancel
+with deadline reason. Restart learner3 and check neither canceled target activates
+without a fresh administrator request. A fresh exact request then exercises remote
+readiness, joint/final commitment and preserved application retries.
+
+For receipt loss after commitment, send another learner record, observe its exact
+committed configuration result in the owner log without reading the client reply,
+kill the leader, then recover/retry the original record through a successor and
+restarted peer. Assert exact duplicate/conflict behavior, membership operation
+identity preservation and absence of canceled operations in recovered native WAL.
+Bounded target/receipt retention remains existing one-command/one-ticket limits;
+cleanup releases readiness/target/wait ownership, never durable work. Acceptance
+runs both TCP/TLS and QUIC Raft-peer variants with authenticated TCP command
+channels. This is a selected phase history, not every socket-loss timing or live
+credential rotation/revocation, new-store enrollment, arbitrary faults or complete
+P4/P6 release.
+
+### Slice117 dependency finding and repair schema
+
+The preceding explanatory turn made no implementation progress. This turn
+revalidated the worktree and original process handles: older broad lifecycle
+run21618 is still live and yielded additional passing histories; focused handles
+87588/38402 are missing, so their terminal results are not claimed. A fresh native
+TCP interrupted-ingress history passed (one test, 8.74s). Earlier failed QUIC WAL
+inspection showed survivor2 accepted configuration6/committed5 while survivor3
+remained a committed configuration3 learner, missing promotion joint7/final8.
+The existing pre-election repair only considers an active joint, leaving the
+stable-final survivor unable to restore the lagging learner's voting eligibility.
+This changes the next P4 dependency; neither waiting for all replicas before
+leader loss nor removing that failure schedule is an acceptable fix.
+
+Repair schema: reuse bounded wire5 LearnerRepair and its unchanged receiver
+validation. A stable candidate may select a retained, committed historical joint
+only when its exact store was an old-view voter and remains a current voter, and
+the peer's exact old learner store was promoted and remains a current voter.
+Request configuration is the historical joint ID; response context must match the
+current campaign's retained request. Repair carries only the prefix through that
+joint, never commit authority. Ordinary durable Vote/Voted and the current policy
+still determine election. Existing active-joint/snapshot repair remains intact.
+Volatile requests clear on role/term/configuration/restart changes as before.
+Missing compacted historical evidence refuses this path; historical snapshot
+repair after final remains a separate explicit gate. No new provider or seam.
+Acceptance: deterministic final-history/candidate/learner regression with lost
+repair observation, stale/context/identity refusals and unchanged commit indexes,
+existing core repair suite, native interrupted TCP/QUIC histories, local Clippy.
+
+Mini plan: current is this exact retained-history election repair and interrupted
+observation validation (P4 safe membership); it depends on historical exact store
+bindings and existing wire5/persistence and completes only with the checks above.
+Next is historical promotion repair after compaction (P4): inspect retained
+checkpoint provenance and define safe recovery, then test lost replies/restart;
+missing evidence must remain unavailable. Following is broader remote new-voter
+partial-progress conformance (P4/P6): depends on both retained-log and compacted
+recovery, checks stale sessions, refusal, promotion/retirement and preserved
+application retries. Macro usable static service remains independent; full P0–P7
+and its previous gaps remain active, P8/Windows deferred.
+
+### Slice117 implemented evidence and limitations
+
+Implemented prompt terminal-TLS observation cleanup and fixed-field preparation/
+cancellation diagnostics. The preparation diagnostic records attempts even when
+an offline peer has no authenticated binding to admit a readiness round. The
+first TCP fixture incorrectly waited only for successful readiness admission;
+this was fixed by observing actual preparation rather than assuming admission.
+The initial deterministic final-history fixture incorrectly completed a
+LeaderAppend on a recovered follower without leader replication cursors; the
+fixture now installs an explicitly committed journal boundary through the normal
+persistence validator before examining election. No production rule was weakened.
+
+Retained historical committed promotion repair now survives final activation,
+uses exact old/current store assignments and the historical joint request scope,
+and restores only a matching prefix through that joint. A subsequent ordinary
+ballot is required. Higher-term historical responses need the exact admitted
+context and persist the term before exposure. No wire/storage format or public
+provider seam changed. Campaign work and buffers remain bounded by retained log,
+replica and batch ceilings; no automatic forever-history retention was added.
+
+Actual local validation:
+- 51 core membership tests passed, including three new deterministic histories:
+  final-to-lagging-learner repair with lost acknowledgement/both owners restarted,
+  exact context/identity/duplicate checks and an ordinary durable election;
+  higher-term persistence; old-voter-source and missing-compacted-evidence gates.
+- Negative control: substituting the HEAD pre-fix batched_repair implementation
+  while retaining the corrected regression failed at the explicit missing-repair
+  expectation. The new implementation was restored; the regression passed.
+- All 33 downstream member_recovery tests passed, including native WAL failures,
+  secure TCP/QUIC exchange and existing wire5/wire6 repair/snapshot histories.
+- Both new native interrupted counter-service histories passed on TCP/QUIC,
+  repeated after higher-term handling (13.29s latest run). Their reopened WALs
+  preserve committed configuration/application operation identities and exclude
+  canceled preparation operations. Selected close/deadline/unread-reply timing
+  is evidence, not arbitrary fault/revocation coverage.
+- All-feature/all-target Clippy, formatting and 78-contract inventory checks
+  passed. Core-only focused regression also passed.
+- Original run21618 reached terminal success: directory22, routed54 (2641.76s),
+  routing13. This older binary validates its original broad lifecycle histories;
+  it is not silently treated as execution of the new repair implementation.
+
+Historical promotion recovery after compaction remains unimplemented by this
+path. Live credential revocation, arbitrary failures, broader P4/P5/P6/P7,
+macOS/separate-host and performance gates remain. Full P0–P7 stays active;
+P8/Windows remain deferred and CI stays background feedback.

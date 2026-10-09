@@ -41,40 +41,82 @@ impl Raft {
                 return Ok(effects);
             }
         }
-        let Some(joint) = self.membership().joint() else {
-            return Ok(Vec::new());
-        };
-        if self.membership().stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
-            || self.durable.entry_at(joint.index).is_none()
-        {
-            return Ok(Vec::new());
-        }
-        let start = self
-            .durable
-            .membership_at(joint.index - 1)
-            .map_err(|_| RaftError::InvalidRecovery)?
-            .last_configuration_index()
-            .max(self.durable.base_index())
-            + 1;
-        let peers = joint
-            .next
-            .voter_stores()
-            .iter()
-            .filter(|(node, store)| self.membership().stable().learners().get(node) == Some(store))
-            .map(|(node, _)| *node)
+        let peers = self
+            .membership()
+            .replicas()
+            .map(|(node, _)| node)
             .collect::<Vec<_>>();
         let mut effects = Vec::new();
         for peer in peers {
-            effects.extend(self.repair_batch(peer, start)?);
+            if let Some((joint, start, _)) = self.repair_joint(peer, None)? {
+                let EntryPayload::Configuration(record) = &joint.payload else {
+                    unreachable!()
+                };
+                let ConfigurationChange::Joint { id, .. } = record.change else {
+                    unreachable!()
+                };
+                effects.extend(self.repair_batch(peer, start, id)?);
+            }
         }
         Ok(effects)
     }
 
-    fn repair_batch(&mut self, peer: NodeId, start: u64) -> Result<Vec<Effect>, RaftError> {
-        let Some(joint) = self.membership().joint() else {
-            return Ok(Vec::new());
-        };
-        let Some(joint) = self.durable.entry_at(joint.index).cloned() else {
+    // Historical repair retains the exact old-view voter/learner relationship.
+    // A repair acknowledgement never supplies ballot or commit authority.
+    fn repair_joint(
+        &self,
+        peer: NodeId,
+        configuration: Option<ConfigurationId>,
+    ) -> Result<Option<(LogEntry, u64, StoreIdentity)>, RaftError> {
+        for entry in self.durable.entries.iter().rev() {
+            let EntryPayload::Configuration(record) = &entry.payload else {
+                continue;
+            };
+            let ConfigurationChange::Joint { id, next } = &record.change else {
+                continue;
+            };
+            if configuration.is_some_and(|wanted| wanted != *id) {
+                continue;
+            }
+            if let Some(active) = self.membership().joint() {
+                if active.index != entry.index {
+                    continue;
+                }
+            } else if entry.index > self.durable.commit_index
+                || self.membership().voter_store(self.node) != Some(self.binding.identity)
+            {
+                continue;
+            }
+            let old = self
+                .durable
+                .membership_at(entry.index - 1)
+                .map_err(|_| RaftError::InvalidRecovery)?;
+            let Some(&store) = old.stable().learners().get(&peer) else {
+                continue;
+            };
+            if old.joint().is_some()
+                || old.stable().voter_stores().get(&self.node) != Some(&self.binding.identity)
+                || next.voter_stores().get(&peer) != Some(&store)
+                || self.membership().voter_store(peer) != Some(store)
+            {
+                continue;
+            }
+            let start = old
+                .last_configuration_index()
+                .max(self.durable.base_index())
+                + 1;
+            return Ok(Some((entry.clone(), start, store)));
+        }
+        Ok(None)
+    }
+
+    fn repair_batch(
+        &mut self,
+        peer: NodeId,
+        start: u64,
+        configuration: ConfigurationId,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let Some((joint, _, _)) = self.repair_joint(peer, Some(configuration))? else {
             return Ok(Vec::new());
         };
         let previous_index = start - 1;
@@ -114,13 +156,14 @@ impl Raft {
             peer,
             Replication {
                 context,
-                configuration: self.membership().id(),
+                configuration,
                 start,
                 end,
                 snapshot: None,
             },
         );
-        Ok(vec![Effect::Send(self.message(
+        Ok(vec![Effect::Send(self.scoped_message(
+            configuration,
             peer,
             context,
             Rpc::LearnerRepair {
@@ -142,16 +185,51 @@ impl Raft {
             matching_term,
         } = message.rpc
         {
+            let historical = self
+                .repair_requests
+                .get(&message.from)
+                .filter(|sent| sent.snapshot.is_none())
+                .map(|sent| self.repair_joint(message.from, Some(sent.configuration)))
+                .transpose()?
+                .flatten();
             if message.to != self.node
                 || message.from == self.node
                 || message.group != self.durable.bootstrap.group
                 || message.context.origin != self.binding
-                || self.membership().stable().learners().get(&message.from)
+                || (self.membership().stable().learners().get(&message.from)
                     != Some(&message.sender.identity)
+                    && historical.as_ref().map(|(_, _, store)| *store)
+                        != Some(message.sender.identity))
             {
                 return Err(RaftError::WrongIdentity);
             }
             if message.term > self.durable.hard_state.term {
+                if message.configuration != self.membership().id() {
+                    // A historical reply cannot pass the ordinary current-head
+                    // response gate. Observe only its exact admitted context,
+                    // without importing its old configuration or prefix claim.
+                    if !self.repair_requests.get(&message.from).is_some_and(|sent| {
+                        sent.context == message.context
+                            && sent.configuration == message.configuration
+                    }) {
+                        return Ok(Vec::new());
+                    }
+                    self.clear_reads();
+                    self.role = Role::Follower;
+                    self.vote_context = None;
+                    self.requests.clear();
+                    self.repair_requests.clear();
+                    return self.persist(
+                        HardState {
+                            term: message.term,
+                            voted_for: None,
+                        },
+                        self.durable.commit_index,
+                        None,
+                        After::Reply,
+                        None,
+                    );
+                }
                 message.rpc = Rpc::Appended {
                     success: false,
                     matching_index,
@@ -167,11 +245,14 @@ impl Raft {
             if sent.context != message.context || sent.configuration != message.configuration {
                 return Ok(Vec::new());
             }
-            let joint_index = self
-                .membership()
-                .joint()
-                .ok_or(RaftError::InvalidMessage)?
-                .index;
+            let joint_index = if sent.snapshot.is_some() {
+                self.membership()
+                    .joint()
+                    .ok_or(RaftError::InvalidMessage)?
+                    .index
+            } else {
+                historical.ok_or(RaftError::InvalidMessage)?.0.index
+            };
             if (success && matching_index != sent.end)
                 || matching_index >= joint_index && !success
                 || self.durable.term_at(matching_index) != Some(matching_term)
@@ -195,7 +276,7 @@ impl Raft {
             if matching_index < sent.start {
                 return Ok(Vec::new());
             }
-            return self.repair_batch(message.from, matching_index + 1);
+            return self.repair_batch(message.from, matching_index + 1, sent.configuration);
         }
         let Rpc::LearnerRepair {
             joint,

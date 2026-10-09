@@ -2569,3 +2569,286 @@ fn client_supplied_configuration_targets_are_checked_and_recovered_tcp() {
 fn client_supplied_configuration_targets_are_checked_and_recovered_quic() {
     client_supplied_configuration_history(true);
 }
+
+/// A real authenticated command channel whose application reply is never read.
+/// TLS polling can buffer ciphertext/plaintext; that is not client observation.
+struct UnobservedCommand {
+    session: voteboat::native::tls::NativeTlsSession<std::net::TcpStream>,
+    socket: std::net::TcpStream,
+    start: Instant,
+}
+impl UnobservedCommand {
+    fn send(cluster: &Cluster, target: usize, command: &str) -> Self {
+        use std::io::Write;
+        use voteboat::{identity::*, native::tls::*, runtime::MonoTime, secure::*};
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let config = NativeTlsConfig::new(TlsCredentials {
+            roots: vec![fs::read(fixtures.join("ca.der")).unwrap()],
+            certificate_chain: vec![fs::read(fixtures.join("node3.der")).unwrap()],
+            private_key: fs::read(fixtures.join("node3-key.der")).unwrap(),
+        })
+        .unwrap();
+        let identity = |number: u64, client: bool| {
+            let namespace = if client { 1u64 << 63 } else { 1u64 << 62 };
+            PeerIdentity {
+                node: NodeId::new(namespace | number).unwrap(),
+                store: StoreIdentity {
+                    id: StoreId::new((1u128 << 127) | u128::from(namespace | number)).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+            }
+        };
+        let mut stream =
+            std::net::TcpStream::connect((Ipv4Addr::LOCALHOST, cluster.base + 100 + target as u16))
+                .unwrap();
+        stream.write_all(b"3\n").unwrap();
+        stream.set_nonblocking(true).unwrap();
+        let socket = stream.try_clone().unwrap();
+        let local = identity(3, true);
+        let start = Instant::now();
+        let mut session = NativeTlsSession::client(
+            stream,
+            &config,
+            LocalIdentity {
+                node: local.node,
+                store: StoreBinding {
+                    identity: local.store,
+                    session: StoreSession::new(1).unwrap(),
+                },
+            },
+            TlsPeer {
+                identity: identity(target as u64, false),
+                certificate: fs::read(fixtures.join(format!("node{target}.der"))).unwrap(),
+                server_name: format!("node{target}.voteboat.test"),
+            },
+            SecureSessionGeneration::new(1).unwrap(),
+            SessionLimits::default(),
+            MonoTime(0),
+        )
+        .unwrap();
+        let bytes = format!("{command}\n").into_bytes();
+        assert!(bytes.len() <= 256);
+        let mut sent = 0;
+        loop {
+            assert!(
+                start.elapsed() < Duration::from_secs(5),
+                "command send timed out"
+            );
+            session
+                .poll(
+                    MonoTime(start.elapsed().as_millis() as u64),
+                    SessionPollBudget::default(),
+                )
+                .unwrap();
+            if session.state() == SessionState::Ready && sent < bytes.len() {
+                match session.write_plaintext(&bytes[sent..]) {
+                    Ok(n) => sent += n,
+                    Err(SessionError::WouldBlock) => (),
+                    other => panic!("command send failed: {other:?}"),
+                }
+            }
+            if sent == bytes.len() && session.is_flushed() {
+                break;
+            }
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        Self {
+            session,
+            socket,
+            start,
+        }
+    }
+    fn close_notify(&mut self) {
+        use voteboat::{runtime::MonoTime, secure::*};
+        self.session.close();
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !self.session.is_flushed() {
+            assert!(Instant::now() < deadline, "TLS close did not flush");
+            let result = self.session.poll(
+                MonoTime(self.start.elapsed().as_millis() as u64),
+                SessionPollBudget::default(),
+            );
+            assert!(result.is_ok() || self.session.is_flushed(), "{result:?}");
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+        // Keep the TCP handle open: server cancellation must observe TLS close,
+        // rather than a TCP EOF or the original command deadline.
+    }
+    fn disconnect(self) {
+        let _ = self.socket.shutdown(std::net::Shutdown::Both);
+    }
+}
+fn wait_administration_event(cluster: &Cluster, id: usize, event: &str) {
+    let deadline = Instant::now() + Duration::from_secs(12);
+    let path = cluster.root.join(format!("{id}-recover-member.log"));
+    loop {
+        let text = fs::read_to_string(&path).unwrap();
+        if text.contains(event) {
+            return;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "missing {event}; logs at {path:?}: {text}"
+        );
+        std::thread::park_timeout(Duration::from_millis(5));
+    }
+}
+fn interrupted_native_configuration_history(quic: bool) {
+    use voteboat::identity::*;
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    let access = cluster.root.join("interruption-access.txt");
+    fs::write(&access, "voteboat-service-access-v1 1\n3 admin 1 1\n").unwrap();
+    cluster.command_access = Some(access);
+    cluster.command_principal = Some(3);
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    cluster.leader();
+    assert!(authenticated_write(&cluster, &["add", "17000", "42"]).contains("Value(42)"));
+    cluster.stop();
+    let policy = cluster.root.join("interruption-policy.txt");
+    fs::write(
+        &policy,
+        "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\n",
+    )
+    .unwrap();
+    cluster.admin_plan = Some(policy);
+    cluster.targets_admin = true;
+    for id in 1..=3 {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    cluster.ok(
+        leader,
+        &["configure-record", "joint 17010 1 2 3 3 m:2 v:1 v:2"],
+    );
+    cluster.ok(leader, &["configure-record", "final 17010 2 3"]);
+    let mut learner = cluster.children[2].take().unwrap();
+    learner.kill().unwrap();
+    learner.wait().unwrap();
+    let leader = cluster.leader();
+    let mut closed = UnobservedCommand::send(
+        &cluster,
+        leader,
+        "configure-record joint 17011 3 4 5 - m:3 v:1 v:2 v:3",
+    );
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration operation=17011 preparing_learner=3",
+    );
+    closed.close_notify();
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration observation_cancelled operation=17011 phase=preparing reason=channel",
+    );
+    closed.disconnect();
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17011"])
+        .contains("inconclusive_local_absence"));
+    let expired = UnobservedCommand::send(
+        &cluster,
+        leader,
+        "configure-record joint 17012 3 4 5 - m:3 v:1 v:2 v:3",
+    );
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration operation=17012 preparing_learner=3",
+    );
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration observation_cancelled operation=17012 phase=preparing reason=deadline",
+    );
+    expired.disconnect();
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17012"])
+        .contains("inconclusive_local_absence"));
+    cluster.start(3, "recover-member");
+    // A new live learner cannot resurrect a canceled target without a new request.
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17011"])
+        .contains("inconclusive_local_absence"));
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17012"])
+        .contains("inconclusive_local_absence"));
+    assert!(cluster
+        .ok(
+            leader,
+            &["configure-record", "joint 17012 3 4 5 - m:3 v:1 v:2 v:3"]
+        )
+        .contains("committed_index="));
+    assert!(cluster
+        .ok(leader, &["configure-record", "final 17012 4 5"])
+        .contains("committed_index="));
+    let record = "learners 17013 5 6 - m:3 v:1 v:2 v:3";
+    let lost = UnobservedCommand::send(&cluster, leader, &format!("configure-record {record}"));
+    wait_administration_event(
+        &cluster,
+        leader,
+        "administration operation=17013 outcome=Committed(",
+    );
+    // The original client has never read plaintext. Kill after observed durable
+    // commitment, then resolve the identical record through a different leader.
+    let mut failed = cluster.children[leader - 1].take().unwrap();
+    failed.kill().unwrap();
+    failed.wait().unwrap();
+    lost.disconnect();
+    let replacement = cluster.leader();
+    assert_ne!(replacement, leader);
+    assert!(authenticated_write(&cluster, &["add", "17014", "0"]).contains("Value(42)"));
+    assert!(cluster
+        .ok(replacement, &["configure-record", record])
+        .contains("duplicate=true"));
+    let conflict = cluster.request(
+        replacement,
+        &["configure-record", "learners 17013 5 99 - m:3 v:1 v:2 v:3"],
+    );
+    assert!(String::from_utf8(conflict.stdout)
+        .unwrap()
+        .contains("conflicts with retained record"));
+    cluster.start(leader, "recover-member");
+    assert!(cluster
+        .ok(replacement, &["add", "17000", "42"])
+        .contains("duplicate=true"));
+    assert_eq!(cluster.ok(replacement, &["read"]), "OK value=42\n");
+    cluster.stop();
+    for id in 1..=3 {
+        let state = recovered_state_for(
+            &cluster.root.join(id.to_string()),
+            id as u64,
+            StoreIdentity {
+                id: StoreId::new(id as u128).unwrap(),
+                incarnation: StoreIncarnation::new(1).unwrap(),
+            },
+            42,
+            (17000, 42),
+        );
+        let membership = state.membership_at(state.commit_index).unwrap();
+        assert_eq!(membership.id().get(), 6);
+        assert!(membership.joint().is_none());
+        assert_eq!(membership.stable().voter_stores().len(), 3);
+        assert!(membership.stable().learners().is_empty());
+        for operation in [17010, 17012, 17013] {
+            assert!(membership
+                .operations()
+                .contains(&OperationId::new(operation).unwrap()));
+        }
+        assert!(!membership
+            .operations()
+            .contains(&OperationId::new(17011).unwrap()));
+    }
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn native_configuration_close_deadline_and_unread_commit_recover_tcp() {
+    interrupted_native_configuration_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn native_configuration_close_deadline_and_unread_commit_recover_quic() {
+    interrupted_native_configuration_history(true);
+}

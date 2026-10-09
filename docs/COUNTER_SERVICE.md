@@ -754,3 +754,15 @@ refusal and another fresh client-supplied operation after restart. The original
 automatic and provisioned-intent modes retain separate regression coverage.
 Arbitrary disconnect/revocation timing, remote new-voter fault schedules, broader
 platform/fault evidence and complete administration release remain open.
+
+Selected native interruption evidence (slice117) now includes clean TLS close
+while the TCP socket remains open, a silent-channel deadline during offline
+learner preparation, explicit resubmission after learner restart, and leader loss
+after a committed record but before the client reads its reply. Exact retry and
+conflicting reuse are checked after successor election; reopened WALs retain the
+committed operations and omit canceled preparation operations. Clean terminal TLS
+state promptly releases remote observation rather than occupying the slot until
+the deadline. Cancellation never undoes a persisted configuration. Fixed-field
+preparation/cancellation diagnostics expose progress but confer no authority.
+These selected TCP/QUIC peer histories do not cover arbitrary revocation timing
+or historical promotion repair after compaction.

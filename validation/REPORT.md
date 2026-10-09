@@ -2676,3 +2676,32 @@ revocation, remote new-voter fault schedules, P4/P5/P6/P7 and platform/performan
 release gates remain open. Full P0–P7 active; P8/Windows deferred. The older broad
 routed lifecycle run21618 remains live with additional QUIC delegated checkpoint
 recovery passed; no terminal suite result is inferred.
+
+## Slice117 — interrupted administration and retained promotion repair
+
+Linux local evidence: 51 core membership tests; all 33 tests/member_recovery.rs
+histories (including native wire5/wire6, WAL/barrier failures, TCP/TLS and QUIC);
+both new native counter-service close/deadline/unread-commit histories (13.29s
+latest); focused core-only final-promotion regression; all-feature/all-target
+Clippy with warnings denied; formatting and 78-contract inventory checks passed.
+A negative control restored the pre-fix batched_repair source temporarily and the
+corrected deterministic regression failed at missing historical repair, then
+passed with the implementation restored. An initial fixture error used leader
+append completion on a follower; setup now explicitly persists the committed
+final boundary before exercising the real election.
+
+The native QUIC failure identified a stable-final survivor and a learner missing
+the committed promotion, unable to elect after leader loss. The fix reuses the
+bounded LearnerRepair receiver contract with retained committed historical joint
+and exact old/current stores. Repair never advances commitment or replaces the
+ordinary durable ballot. Tests retain missing-compacted-history refusal, source
+eligibility, restart/lost reply, stale context and identity checks, and higher-term
+persistence. Clean TLS closure now cancels observation promptly while the TCP
+socket remains open; deadline and lost client reply do not undo durable work.
+
+Original long run21618 is now terminal successful: directory22, routed54,
+routing13. Routed runtime was 2641.76s. It used the original older binary; these
+are its broad lifecycle results, not retrospective new-repair validation.
+No full proof, arbitrary fault/revocation, post-final historical snapshot repair,
+macOS/separate-host or performance claim. Full P0–P7 remains unfinished and active;
+P8 and Windows deferred. See docs/IMPLEMENTATION.md for linked current/next plans.

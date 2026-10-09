@@ -3416,3 +3416,205 @@ fn connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_perm
         .unwrap()
         .contains_key(&node(4)));
 }
+
+fn finalized_repair_pair() -> (Raft, Raft) {
+    let (mut source, receiver) = retained_repair_pair(130, 0);
+    let joint_index = source.state().last_index();
+    committed_fixture(&mut source, joint_index);
+    let entry = LogEntry {
+        index: joint_index + 1,
+        term: 1,
+        payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+            operation: operation(101),
+            expected: cid(3),
+            change: ConfigurationChange::Final { id: cid(4) },
+        })),
+    };
+    let effects = source
+        .persist(
+            source.durable.hard_state,
+            joint_index + 1,
+            Some(Suffix {
+                from: entry.index,
+                entries: vec![entry],
+            }),
+            After::Commit,
+            None,
+        )
+        .unwrap();
+    durable(&mut source, effects);
+    assert!(source.membership().joint().is_none());
+    source = source.with_batched_joint_repair();
+    (source, receiver)
+}
+
+#[test]
+fn stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot() {
+    let (mut source, mut receiver) = finalized_repair_pair();
+    let joint_index = source.state().last_index() - 1;
+    let effects = source.step(Event::Campaign).unwrap();
+    let mut request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|effect| match effect {
+            Effect::Send(m) if m.to == node(4) && matches!(m.rpc, Rpc::LearnerRepair { .. }) => {
+                Some(m)
+            }
+            _ => None,
+        })
+        .expect("finalized candidate must recover the lagging promoted learner");
+    // Lose the first durable repair reply and restart both volatile owners.
+    let effects = receiver.step(Event::Receive(request)).unwrap();
+    let lost_ack = one_reply(durable(&mut receiver, effects));
+    let restart = |core: Raft, id| {
+        let mut binding = core.binding;
+        binding.session = StoreSession::new(2).unwrap();
+        Raft::recover_member(node(id), binding, core.state().clone(), core.limits).unwrap()
+    };
+    source = restart(source, 2).with_batched_joint_repair();
+    receiver = restart(receiver, 4);
+    let effects = source.step(Event::Campaign).unwrap();
+    request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|effect| match effect {
+            Effect::Send(m) if m.to == node(4) && matches!(m.rpc, Rpc::LearnerRepair { .. }) => {
+                Some(m)
+            }
+            _ => None,
+        })
+        .unwrap();
+    assert_eq!(
+        source.step(Event::Receive(lost_ack)),
+        Err(RaftError::WrongIdentity)
+    );
+    let mut batches = 0;
+    loop {
+        assert_eq!(request.configuration, cid(3));
+        let before = receiver.state().clone();
+        let effects = receiver.step(Event::Receive(request)).unwrap();
+        assert_eq!(receiver.state(), &before);
+        let ack = one_reply(durable(&mut receiver, effects));
+        let mut stale = ack.clone();
+        stale.context.sequence += 1;
+        assert!(source.step(Event::Receive(stale)).unwrap().is_empty());
+        let mut foreign = ack.clone();
+        foreign.sender.identity = store(99);
+        assert_eq!(
+            source.step(Event::Receive(foreign)),
+            Err(RaftError::WrongIdentity)
+        );
+        let next = one_reply(source.step(Event::Receive(ack.clone())).unwrap());
+        let duplicate = source.step(Event::Receive(ack));
+        if matches!(next.rpc, Rpc::Vote { .. }) {
+            assert_eq!(duplicate, Err(RaftError::WrongIdentity));
+        } else {
+            assert!(duplicate.unwrap().is_empty());
+        }
+        assert_eq!(source.role(), Role::Candidate);
+        assert_eq!(source.state().commit_index, joint_index + 1);
+        assert_eq!(receiver.state().commit_index, 2);
+        batches += 1;
+        if matches!(next.rpc, Rpc::Vote { .. }) {
+            assert_eq!(next.configuration, cid(4));
+            assert!(receiver.local_voter());
+            assert_eq!(receiver.state().last_index(), joint_index);
+            let effects = receiver.step(Event::Receive(next)).unwrap();
+            let ballot = one_reply(durable(&mut receiver, effects));
+            assert!(matches!(ballot.rpc, Rpc::Voted { granted: true }));
+            let effects = source.step(Event::Receive(ballot)).unwrap();
+            durable(&mut source, effects);
+            assert_eq!(source.role(), Role::Leader);
+            break;
+        }
+        request = next;
+        assert!(batches < 4);
+    }
+    assert_eq!(batches, 3);
+}
+
+#[test]
+fn historical_repair_higher_term_needs_exact_context_and_durable_observation() {
+    let (mut source, mut receiver) = finalized_repair_pair();
+    let effects = source.step(Event::Campaign).unwrap();
+    let request = durable(&mut source, effects)
+        .into_iter()
+        .find_map(|effect| match effect {
+            Effect::Send(m) if m.to == node(4) && matches!(m.rpc, Rpc::LearnerRepair { .. }) => {
+                Some(m)
+            }
+            _ => None,
+        })
+        .unwrap();
+    let effects = receiver.step(Event::Receive(request)).unwrap();
+    let mut reply = one_reply(durable(&mut receiver, effects));
+    reply.term += 1;
+    let before = source.state().clone();
+    let mut stale = reply.clone();
+    stale.context.sequence += 1;
+    assert!(source.step(Event::Receive(stale)).unwrap().is_empty());
+    assert_eq!(source.state(), &before);
+    assert_eq!(source.role(), Role::Candidate);
+    let effects = source.step(Event::Receive(reply.clone())).unwrap();
+    assert_eq!(source.role(), Role::Follower);
+    assert_eq!(source.state(), &before);
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert!(durable(&mut source, effects).is_empty());
+    assert_eq!(source.state().hard_state.term, reply.term);
+    assert_eq!(source.state().hard_state.voted_for, None);
+    assert_eq!(source.state().commit_index, before.commit_index);
+    assert_eq!(source.membership().id(), cid(4));
+}
+
+#[test]
+fn historical_repair_requires_old_voter_source_and_retained_promotion_evidence() {
+    let (source, _) = finalized_repair_pair();
+    let mut promoted = Raft::recover_member(
+        node(4),
+        StoreBinding {
+            identity: store(4),
+            session: StoreSession::new(1).unwrap(),
+        },
+        source.state().clone(),
+        source.limits,
+    )
+    .unwrap()
+    .with_batched_joint_repair();
+    let effects = promoted.step(Event::Campaign).unwrap();
+    let effects = durable(&mut promoted, effects);
+    assert!(!effects.iter().any(|effect| matches!(
+        effect,
+        Effect::Send(Message {
+            rpc: Rpc::LearnerRepair { .. },
+            ..
+        })
+    )));
+    let mut compacted = source;
+    let reference = SnapshotRef {
+        store: store(2),
+        group: compacted.state().bootstrap.group,
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: cid(4),
+        index: compacted.state().commit_index,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 128,
+        checksum: 7,
+    };
+    let effects = compacted.begin_compact(reference).unwrap();
+    durable(&mut compacted, effects);
+    let effects = compacted.step(Event::Campaign).unwrap();
+    let effects = durable(&mut compacted, effects);
+    assert!(effects.iter().any(|effect| matches!(
+        effect,
+        Effect::Send(Message {
+            rpc: Rpc::Vote { .. },
+            ..
+        })
+    )));
+    assert!(!effects.iter().any(|effect| matches!(
+        effect,
+        Effect::Send(Message {
+            rpc: Rpc::LearnerRepair { .. },
+            ..
+        })
+    )));
+}
