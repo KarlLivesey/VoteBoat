@@ -990,3 +990,6 @@ mod retained;
 
 #[path = "deletion.rs"]
 mod deletion;
+
+#[path = "reparenting.rs"]
+mod reparenting;

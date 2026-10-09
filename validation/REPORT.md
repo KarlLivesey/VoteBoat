@@ -4372,3 +4372,24 @@ Exact original retries and exported-image digests survive restart. Journal
 recovery sees old or complete states. Prior schema1–3 tests continue to pass.
 No new native TCP/QUIC complete-move history or macOS execution is claimed;
 those and other owner-family integrations remain outstanding.
+
+
+### Slice154d4 — native complete cross-authority move/restart histories
+
+All four TCP/TLS and QUIC WAL-only/checkpoint cases pass in46.59s after1.45s
+rebuild (115 unrelated routed tests filtered). Three independent three-replica
+metadata groups and one three-replica original data owner execute real proposals
+and original quorum reads. Each metadata phase loses the first result, joins
+workers, reopens actual files, compares original statuses/indexes and retries the
+same successful operation. Cache refresh comes from the original metadata read;
+partial publication refuses inconsistent routing.
+
+The data owner adopts the completed move, loses/reconstructs its original result,
+and later restarts/writes/reads/retries with every metadata authority offline.
+All replicas retain the new parent, original retry/outbox entries and later writes.
+Stopped metadata files and recovered GroupLogs remain unchanged. Late metadata
+recovery retains all original guard/decision/publication/completion observations.
+All-target/all-feature Clippy -D warnings, formatting/whitespace and the81-contract
+inventory pass. Production code is unchanged in this slice; earlier application
+and byte-cut checks were not rerun. These finite joined-abort histories do not
+claim hardware power-loss, arbitrary faults, macOS, or other owner-family support.

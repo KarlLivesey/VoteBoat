@@ -175,3 +175,10 @@ activations preserve retries/outbox and source fencing. Every-byte native
 adoption/freeze journal cuts and old-profile refusal pass. Complete TCP/QUIC
 move-and-restart service, other owner families and broader platform/fault evidence
 remain open; this does not mark all reparenting or P5/P6 complete.
+
+Slice154d4 supplies the selected original full-owner native composition:
+four TCP/TLS and QUIC WAL/checkpoint histories move a child across three metadata
+authorities, recover each phase's unread result, adopt the owner grant and restart
+that owner with all metadata stopped. Original observations/retries/outbox and
+unchanged stopped metadata files/GroupLogs are checked. Retained/scoped/imported
+owners, macOS and broader faults remain; full P5/P6 is not thereby complete.

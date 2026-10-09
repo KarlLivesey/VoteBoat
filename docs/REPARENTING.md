@@ -190,5 +190,10 @@ Tests cover completed three-authority metadata movement, native cache refresh,
 original full-owner adoption/restart and a subsequent reserved two-target split
 under the new parent, including target activation, original retries/outbox and
 source fencing. Every-byte native adoption/freeze journal cuts retain old or
-complete owner states. A complete native TCP/QUIC move-and-restart service history
-and other owner families remain integration work.
+complete owner states. Four native TCP/TLS and QUIC histories now run the complete move through
+original quorum reads and real proposals, reopen each metadata phase after an
+unread result from either WAL or checkpoint, and recover the owner independently
+with all metadata authorities offline. Original retries/outbox persist and
+stopped metadata files/logs do not change during owner service. These are finite
+joined owner-abort histories, not a general power-loss/fault proof. Retained/scoped
+and imported owner families and broader platform/fault coverage remain work.
