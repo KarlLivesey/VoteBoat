@@ -285,6 +285,7 @@ fn maximum_256_route_publication_fits_native_command_envelope() {
         })
         .collect();
     let source = SourceFenceEvidence {
+        scope: None,
         fence,
         configuration: ConfigurationId::new(1).unwrap(),
         intent_digest: ContentDigest::sha256(&intent.encode(32768).unwrap()),
@@ -347,6 +348,7 @@ fn maximum_256_source_merge_publication_fits_native_command_envelope() {
                 digest,
             });
             SourceFenceEvidence {
+                scope: None,
                 fence,
                 configuration: ConfigurationId::new(1).unwrap(),
                 intent_digest,

@@ -22,7 +22,7 @@ pub(crate) use insertion::{insertion_len, put_insertion, read_insertion};
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;
-pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 5;
+pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 6;
 
 /// Exact before/after manifests for a conservative whole-responsibility split
 /// or compatible merge. Sources and targets are distinct concrete groups.
@@ -33,6 +33,7 @@ pub struct TransferIntent {
     after: ResponsibilityManifest,
     delegation: Option<crate::delegation::DelegationBinding>,
     insertion: Option<Vec<InsertionChild>>,
+    retained: bool,
 }
 impl TransferIntent {
     #[allow(clippy::result_large_err)]
@@ -51,6 +52,7 @@ impl TransferIntent {
             after,
             delegation: None,
             insertion: None,
+            retained: false,
         })
     }
     pub(crate) fn validate_shape(
@@ -162,9 +164,16 @@ impl TransferIntent {
             after,
             delegation: Some(binding),
             insertion: None,
+            retained: false,
         })
     }
+    pub fn is_retained_insertion(&self) -> bool {
+        self.retained
+    }
     pub fn sources(&self) -> Vec<RouteEntry> {
+        if self.retained {
+            return vec![self.retained_source().expect("checked retained mapping")];
+        }
         Self::groups(&self.before).expect("checked intent")
     }
     pub fn targets(&self) -> Vec<RouteEntry> {
@@ -189,33 +198,37 @@ impl TransferIntent {
             + manifest_len(&self.before)
             + manifest_len(&self.after)
             + self.delegation.map_or(0, |_| 120)
-            + self.insertion.as_ref().map_or(0, |c| insertion_len(c));
+            + self.insertion.as_ref().map_or(0, |c| insertion_len(c))
+            + usize::from(self.retained);
         if len > max_bytes || len > MAX_TRANSFER_INTENT_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(
-            if self.insertion.is_some()
-                && self
-                    .before
-                    .input()
-                    .parent
-                    .is_some_and(|p| p.group != self.before.input().authority)
-            {
-                b"VBTINT05"
-            } else if self.insertion.is_some() && self.delegation.is_some() {
-                b"VBTINT04"
-            } else if self.insertion.is_some() {
-                b"VBTINT03"
-            } else if self.delegation.is_some() {
-                b"VBTINT02"
-            } else {
-                b"VBTINT01"
-            },
-        );
+        bytes.extend(if self.retained {
+            b"VBTINT06"
+        } else if self.insertion.is_some()
+            && self
+                .before
+                .input()
+                .parent
+                .is_some_and(|p| p.group != self.before.input().authority)
+        {
+            b"VBTINT05"
+        } else if self.insertion.is_some() && self.delegation.is_some() {
+            b"VBTINT04"
+        } else if self.insertion.is_some() {
+            b"VBTINT03"
+        } else if self.delegation.is_some() {
+            b"VBTINT02"
+        } else {
+            b"VBTINT01"
+        });
         for m in [&self.before, &self.after] {
             bytes.extend((manifest_len(m) as u32).to_le_bytes());
             put_manifest(&mut bytes, m);
+        }
+        if self.retained {
+            bytes.push(u8::from(self.delegation.is_some()));
         }
         if let Some(binding) = self.delegation {
             binding.write(&mut bytes);
@@ -236,6 +249,7 @@ impl TransferIntent {
             && tag != b"VBTINT03"
             && tag != b"VBTINT04"
             && tag != b"VBTINT05"
+            && tag != b"VBTINT06"
         {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -243,11 +257,24 @@ impl TransferIntent {
         let before = read_manifest(r.take(len)?)?;
         let len = r.u32()? as usize;
         let after = read_manifest(r.take(len)?)?;
-        let delegation = if tag == b"VBTINT02" || tag == b"VBTINT04" || tag == b"VBTINT05" {
-            Some(crate::delegation::DelegationBinding::read(&mut r)?)
-        } else {
-            None
-        };
+        let retained_bound = tag == b"VBTINT06" && r.boolean()?;
+        let delegation =
+            if retained_bound || tag == b"VBTINT02" || tag == b"VBTINT04" || tag == b"VBTINT05" {
+                Some(crate::delegation::DelegationBinding::read(&mut r)?)
+            } else {
+                None
+            };
+        if tag == b"VBTINT06" {
+            let children = read_insertion(&mut r)?;
+            if children.len() != 1 || !r.done() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let child = children.into_iter().next().expect("one child");
+            return match delegation {
+                Some(b) => Self::delegated_retained(before, after, child, b),
+                None => Self::insert_retained_child(before, after, child).map_err(|e| e.0),
+            };
+        }
         if tag == b"VBTINT03" || tag == b"VBTINT04" || tag == b"VBTINT05" {
             let children = read_insertion(&mut r)?;
             if !r.done() {

@@ -425,3 +425,13 @@ be followed by an explicit checked retained-grant adoption that cannot reopen th
 frozen range. Provider import alone supplies staging data and grants no service.
 Next152 composes that complete protocol over TCP/QUIC; selected source WAL-model
 faults do not establish an end-to-end networked partial transfer.
+
+Slice151c adds opt-in schema8 retained-child insertion: one fresh Staging child
+receives a strict source subrange while metadata preserves the remainder on the
+original group. Explicit intent/plan/scoped-publication tags preserve old formats;
+actual creation and original fence/import facts precede atomic publication and
+child activation. Root/foreign nested data/retry/checkpoint paths, all old-directory
+profile refusals, pre-intent cancellation and native intent-frame faults pass.
+The source still retains its E1 grant; fresh E2 hints refuse until checked source
+binding/grant adoption151d. Complete native partial service evidence follows152.
+This advances P5/P6 without closing the full lifecycle or platform/fault/P7 gates.

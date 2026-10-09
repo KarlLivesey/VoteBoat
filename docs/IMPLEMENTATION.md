@@ -162,9 +162,13 @@ its selected native acceptance passes. General retention and broader faults rema
    and target activation plus150's authority evidence. Completion: a checked
    mixed ownership transition, no overlap/gaps, original retry/outbox lineage and
    named partial-progress/recovery checks. Scoped source guard151a is implemented;
-   immutable exact-boundary source exports151b are implemented. Checked mixed
-   retained/delegated intent/publication, retained-grant adoption and target
-   activation remain current work within151. Schema is sketched before edits.
+   immutable exact-boundary source exports151b are implemented. Slice151c implements
+   mixed intent/publication and target activation with actual data/retry recovery.
+   Current151d binds the source fence to the original metadata intent and adopts
+   its checked retained grant at the new epoch; without this, fresh retained-route
+   hints refuse. Completion checks include exact original-image/history retention,
+   no thaw/authority expansion and checkpoint/replay/partial-progress refusal.
+   Schema is sketched before edits; native service evidence stays next152.
 10. **Native retained-scope composition (next152, P1/P5/P6).** Purpose:
    make151 usable in real service work. Dependencies:151's accepted ownership
    shape and existing native nodes. Completion: routed writes/reads/retries in
@@ -10914,3 +10918,94 @@ Final151b original-export retention through a later whole fence/snapshot/recover
 passes1/1 in0.00s after2.17s build. Final all-feature/all-target Clippy -D warnings
 passes0.69s. Formatting, whitespace and81-contract inventory pass. All execution
 handles terminal; no CI gate used. Retained insertion and the full goal remain open.
+
+Slice151c schema before edits: add an explicitly tagged retained-child insertion
+intent and directory schema8, preserving schemas1–7 and original full-move codecs.
+The bounded operation inserts one fresh Staging child within a current concrete
+source range and retains the original group outside that range. Root and checked
+parent-bound nested/foreign insertion use the same shape; existing children remain
+exactly unchanged. One moved range matches151b's immutable per-operation image;
+repeated/general partial composition remains within the full goal, not an exclusion.
+Validate before/after identity/generation, exact per-bucket route preservation,
+fresh child creation and residual ownership. Derive sources from the moved range,
+not the whole source grant; targets remain only fresh imported owners. A distinct
+VBTINT06/VBDPLAN4 binding and retained digest domain prevent old shapes from admitting
+this change. VBTPUB02 carries explicit scoped evidence; full-source facts cannot
+silently stand in for scoped facts. Original Source Frozen status supplies exact
+scope/F/digest through authenticated host quorum provenance. Directory checks
+actual local Staging records, intent locks and imports, then atomically publishes
+mixed parent/fresh child; parent locator refresh follows the original decision.
+Target staging/import/activation uses the existing durable gate and actual child
+grant. Old directory envelopes and wrapped completion/decline/cancellation also
+refuse new intents. Checkpoints reconstruct exact locks/decisions; accepted intents
+stay forward-only after fencing. Acceptance: actual scoped-source/target data
+handoff, original retries/outbox, publication and non-serving/activation checks,
+legacy downgrade/profile refusal, checkpoint/replay and native intent-frame faults.
+Retained source still needs explicit checked grant adoption at the new epoch;
+that remains next within151 before152 native service composition. No narrower
+whole-source relocation replaces retained ownership or the original P0–P7 scope.
+Slice151c bootstrap admission correction: new schema8 emitted VBDINIT8 but the
+explicit bootstrap reader still listed only1–7. Actual test/backtrace locates
+NotApplied at initial Directory bootstrap, before any transfer. Add the exact
+new tag to that reader; preserve old tags and exact binding comparison. No leader,
+protocol phase or broad recovery rewrite is needed.
+
+
+## Slice151c — checked mixed ownership publication and child activation
+
+Directory schema8 is explicitly selected before bootstrap; VBDINIT8/VBDIR008,
+VBTINT06, VBDPLAN4 and VBTPUB02 separate the retained operation from full-source
+handoff. A single fresh Staging child receives a strict subrange of the concrete
+source; remaining direct ownership and existing child selectors stay exact.
+Root and parent-bound foreign nested constructors validate original identities,
+epoch/generation, authority, scope and residual ownership. Source coverage now
+names only the moved range. Original local creation records and reserved control
+IDs remain mandatory. Scoped publication evidence names the original range/F/
+image digest explicitly; a full-source fact cannot substitute. Values establish
+shape/content, while authenticated foreign quorum provenance remains a host duty.
+The existing target stage/import/activation gate composes the actual child grant.
+No new runtime/provider/storage owner or automatic cleanup is introduced.
+
+Actual BucketCounter handoffs preserve imported operation1/value7/outbox1; a fresh
+child write reaches9 while retained source key200 reaches13. Metadata publication
+atomically installs the mixed parent and fresh child. Original intent/publication
+and target activation survive checkpoints/retries; the foreign parent refreshes
+its original child locator. Targets stay non-serving until activation. Original
+source frozen image remains unchanged after retained writes/checkpoint. Fresh
+E2 retained hints intentionally still reject against the original E1 grant:
+checked source-intent binding and retained-grant adoption are next151d, required
+before complete partial service or native152 composition can be claimed.
+
+New codecs reject every truncation and old-tag downgrade; schemas1–7 refuse
+new intent/publication and wrapped completion/decline/cancellation without changing
+checkpoint state. Actual unknown creation and altered residual ownership refuse.
+The existing manifest validator already refuses fragmented duplicate children;
+one new test wrongly assumed such a manifest could be constructed. Correct that
+fixture to assert its existing contract, with no production change. Pre-intent
+child refusal cancels the original parent reservation and recovers exact retries;
+after accepted intent, decline returns LifecycleBusy and preserves the intent.
+Native ModelIo cuts every intent-frame byte and injects sync/publication failure:
+replay recovers original Staging creation and either no intent or its exact durable
+record, never published child authority. Exact original retry then establishes or
+returns that same record. This is finite I/O-model evidence, not physical-power
+or arbitrary-fault proof. The schema8 bootstrap-reader omission was corrected at
+its explicit tag, as recorded above.
+
+Earlier all-feature check passes5.55s; existing delegation14/14 and insertion11/11
+pass0.06s/3.19s after8.48s build. Post-bootstrap-fix new2/2 and publication7/7 pass
+0.00s/0.04s after3.37s build. Expanded all-feature namespace12/12, retained4/4 and
+publication7/7 pass0.57s/0.25s/0.04s after3.91s build. Core-only retained3/3 and
+publication7/7 pass0.02s/0.04s after4.24s build. Clippy all-feature/all-target
+-D warnings passes10.34s. Added cancellation final retained5/5 pass0.16s after
+1.11s build. Final metadata and changed-test checks follow below.
+
+Macro review:151c advances recursive responsibility and split/merge milestones;
+it does not close either. Current151d supplies checked source binding/adoption,
+next152 native TCP/QUIC partial recovery, following153 deletion. Their purposes,
+dependencies and checks remain linked above. Full P0–P7 stays active, including
+broader membership/lifecycle, metadata movement, platform/fault and P7 gaps.
+Linux local evidence, macOS execution pending, Windows/P8 deferred, CI background,
+RPL-1.5 and ignored original pack preserved. No unchanged performance loop added.
+Final151c core-only retained4/4 pass0.02s after1.16s build. Final Clippy all-feature/
+all-target -D warnings passes1.54s; cargo formatting, whitespace and81-contract
+inventory pass. All process handles terminal; current151 remains incomplete.

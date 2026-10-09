@@ -3832,3 +3832,36 @@ execution pending, Windows/P8 deferred, CI background, RPL-1.5/pack preserved.
 Final151b whole-fence export retention/snapshot recovery1/1 passes0.00s after2.17s
 build. Final all-feature/all-target Clippy -D warnings0.69s, formatting, whitespace
 and81-contract inventory pass. All execution handles terminal; no CI gate used.
+
+## Slice151c — retained-child metadata publication and target activation
+
+Schema8/VBTINT06/VBDPLAN4/VBTPUB02 bind an explicit one-fresh-child subrange
+transition; old directory schemas/formats remain selected separately. Actual local
+Staging creation and original scoped source image/fence/import evidence precede
+atomic mixed manifest publication. Deterministic root and foreign-parent nested
+handoffs preserve real BucketCounter values/retries/outbox through checkpoint/
+replay and activation. Fresh targets never serve before activation; retained source
+still serves its E1 grant and rejects fresh E2 hints until next151d checked source
+binding/adoption. No complete partial service or foreign certificate is claimed.
+
+Every new codec truncation and old-tag downgrade refuses. Schemas1–7 reject plain
+and wrapped partial commands without checkpoint changes. Unknown actual creation,
+changed residual owner and full-source evidence substitution refuse. Existing
+manifest validation rejects duplicate fragmented child selectors; an initial test
+incorrectly unwrapped that known rejection and was corrected at the fixture only.
+Pre-intent decline/cancel and exact recovery/retry pass; accepted intent remains
+forward-only. Native ModelIo every intent-frame byte and sync/manifest faults
+recover original creation plus no intent or its exact durable record, never child
+publication; subsequent exact original retry establishes/returns that record.
+
+Existing delegation14/14 and insertion11/11 pass0.06s/3.19s after8.48s build.
+Post-bootstrap-reader correction new2/2 and publication7/7 pass0.00s/0.04s after
+3.37s build. Expanded namespace12/12, retained4/4 and publication7/7 pass
+0.57s/0.25s/0.04s after3.91s build. Final added cancellation retained5/5 pass
+0.16s after1.11s build; core-only final4/4 pass0.02s after1.16s build.
+Final Clippy all-feature/all-target -D warnings passes1.54s (previous10.34s).
+Formatting, whitespace and81-contract inventory pass. All process handles terminal.
+Finite local application/I/O-model evidence; native network composition152,
+retained source binding/adoption151d and original broader P0–P7 gaps remain open.
+No unchanged socket/performance loop or remote CI gate was added. Linux checks;
+macOS execution pending, Windows/P8 deferred, RPL-1.5/ignored pack preserved.

@@ -39,6 +39,7 @@ pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
 pub const INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 5;
 pub const RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 6;
+pub const RETAINED_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 8;
 pub const CROSS_AUTHORITY_INSERTION_DIRECTORY_APPLICATION_SCHEMA: u64 = 7;
 pub const MAX_DIRECTORY_MANIFESTS: usize = 256;
 pub const MAX_DIRECTORY_OPERATIONS: usize = 4096;
@@ -317,6 +318,7 @@ pub struct Directory {
     responsibility_insertion: bool,
     recursive_insertion: bool,
     cross_authority_insertion: bool,
+    retained_insertion: bool,
     insertion_creations: BTreeSet<OperationId>,
     namespace_publications: BTreeMap<OperationId, OperationId>,
     manifests: BTreeMap<ResponsibilityIdentity, ResponsibilityManifest>,
@@ -356,6 +358,7 @@ impl Directory {
             responsibility_insertion: false,
             recursive_insertion: false,
             cross_authority_insertion: false,
+            retained_insertion: false,
             insertion_creations: BTreeSet::new(),
             namespace_publications: BTreeMap::new(),
             manifests: BTreeMap::new(),
@@ -419,6 +422,14 @@ impl Directory {
         next.cross_authority_insertion = true;
         Ok(next)
     }
+    /// Select schema8 before bootstrap for scoped child insertion with retained service.
+    #[allow(clippy::result_large_err)]
+    pub fn with_retained_insertion(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_cross_authority_insertion()?;
+        next.retained_insertion = true;
+        Ok(next)
+    }
+
     /// Local applied diagnostic, not a distributed linearizable directory read.
     pub fn manifest(&self, id: ResponsibilityIdentity) -> Option<&ResponsibilityManifest> {
         self.manifests.get(&id)
@@ -462,7 +473,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.cross_authority_insertion {
+        bytes.extend(if self.retained_insertion {
+            b"VBDINIT8"
+        } else if self.cross_authority_insertion {
             b"VBDINIT7"
         } else if self.recursive_insertion {
             b"VBDINIT6"
@@ -501,6 +514,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINIT5")
             || bytes.starts_with(b"VBDINIT6")
             || bytes.starts_with(b"VBDINIT7")
+            || bytes.starts_with(b"VBDINIT8")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -525,13 +539,17 @@ impl Directory {
                 || (self.responsibility_insertion && bytes.starts_with(b"VBTINT03"))
                 || (self.recursive_insertion && bytes.starts_with(b"VBTINT04"))
                 || (self.cross_authority_insertion && bytes.starts_with(b"VBTINT05"))
+                || (self.retained_insertion && bytes.starts_with(b"VBTINT06"))
             {
                 TransferIntent::decode(bytes).map(Request::Transfer)
-            } else if bytes.starts_with(b"VBTPUB01") {
+            } else if bytes.starts_with(b"VBTPUB01")
+                || (self.retained_insertion && bytes.starts_with(b"VBTPUB02"))
+            {
                 TransferPublication::decode(bytes).map(Request::Publication)
             } else if bytes.starts_with(b"VBDPLAN1")
                 || (self.recursive_insertion && bytes.starts_with(b"VBDPLAN2"))
                 || (self.cross_authority_insertion && bytes.starts_with(b"VBDPLAN3"))
+                || (self.retained_insertion && bytes.starts_with(b"VBDPLAN4"))
             {
                 DelegationPlan::decode(bytes).map(Request::Delegation)
             } else if bytes.starts_with(b"VBDCOMP1") {
@@ -552,6 +570,9 @@ impl Directory {
             Request::DelegationCancellation(c) => Some(c.decline.decline.intent()),
             _ => None,
         };
+        if !self.retained_insertion && intent.is_some_and(TransferIntent::is_retained_insertion) {
+            return Err(ApplicationError::InvalidCommand);
+        }
         if !self.cross_authority_insertion
             && intent.is_some_and(TransferIntent::cross_authority_insertion)
         {
@@ -1390,7 +1411,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.cross_authority_insertion {
+        if self.retained_insertion {
+            RETAINED_INSERTION_DIRECTORY_APPLICATION_SCHEMA
+        } else if self.cross_authority_insertion {
             CROSS_AUTHORITY_INSERTION_DIRECTORY_APPLICATION_SCHEMA
         } else if self.recursive_insertion {
             RECURSIVE_INSERTION_DIRECTORY_APPLICATION_SCHEMA
@@ -1418,7 +1441,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.cross_authority_insertion {
+        bytes.extend(if self.retained_insertion {
+            b"VBDIR008"
+        } else if self.cross_authority_insertion {
             b"VBDIR007"
         } else if self.recursive_insertion {
             b"VBDIR006"
@@ -1468,7 +1493,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.cross_authority_insertion {
+                != if self.retained_insertion {
+                    b"VBDIR008"
+                } else if self.cross_authority_insertion {
                     b"VBDIR007"
                 } else if self.recursive_insertion {
                     b"VBDIR006"
@@ -1508,6 +1535,7 @@ impl CheckpointStateMachine for Directory {
             next.responsibility_insertion = self.responsibility_insertion;
             next.recursive_insertion = self.recursive_insertion;
             next.cross_authority_insertion = self.cross_authority_insertion;
+            next.retained_insertion = self.retained_insertion;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

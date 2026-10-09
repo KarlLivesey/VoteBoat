@@ -28,11 +28,60 @@ pub const MAX_TRANSFER_PUBLICATION_BYTES: usize = 64 * 1024;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SourceFenceEvidence {
     pub fence: OwnershipFence,
+    pub scope: Option<BucketRange>,
     pub configuration: ConfigurationId,
     pub intent_digest: ContentDigest,
     pub exports: Vec<SourceExportCommitment>,
 }
 impl SourceFenceEvidence {
+    /// Bind an authenticated original scoped quorum status to the committed intent.
+    /// This checks shape/content, never foreign authentication or a certificate.
+    #[allow(clippy::result_large_err)]
+    pub fn from_scoped_status(
+        configuration: ConfigurationId,
+        status: crate::scoped_source::ScopedExportStatus,
+        intent: &TransferIntent,
+    ) -> Result<Self, (ApplicationError, crate::scoped_source::ScopedExportStatus)> {
+        let validate = || -> Result<Self, ApplicationError> {
+            if !intent.is_retained_insertion() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let sources = intent.sources();
+            let targets = intent.targets();
+            let f = status.fence.fence;
+            if sources.len() != 1
+                || targets.len() != 1
+                || sources[0].target != RouteTarget::Group(f.group)
+                || sources[0].scope != status.fence.scope
+                || f.responsibility != intent.before().input().responsibility
+                || f.epoch != intent.before().input().epoch
+                || f.index == 0
+                || f.index == u64::MAX
+                || !intent.permits_operation(f.operation)
+                || status.schema == 0
+                || status.payload_bytes == 0
+                || status.payload_bytes > crate::scope::MAX_SCOPE_IMAGE_BYTES
+            {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            let RouteTarget::Group(target) = targets[0].target else {
+                return Err(ApplicationError::InvalidCommand);
+            };
+            Ok(Self {
+                fence: f,
+                scope: Some(status.fence.scope),
+                configuration,
+                intent_digest: ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?),
+                exports: vec![SourceExportCommitment {
+                    target,
+                    scope: status.fence.scope,
+                    digest: status.digest,
+                }],
+            })
+        };
+        validate().map_err(|e| (e, status))
+    }
+
     #[allow(clippy::result_large_err)] // Preserve original observation on rejection.
     pub fn from_status(
         configuration: ConfigurationId,
@@ -42,11 +91,12 @@ impl SourceFenceEvidence {
             Ok(b) => b,
             Err(e) => return Err((e, status)),
         };
-        if status.exports.capacity() > MAX_SCOPE_FACTS {
+        if status.intent.is_retained_insertion() || status.exports.capacity() > MAX_SCOPE_FACTS {
             return Err((ApplicationError::InvalidCommand, status));
         }
         Ok(Self {
             fence: status.fence,
+            scope: None,
             configuration,
             intent_digest: ContentDigest::sha256(&bytes),
             exports: status.exports,
@@ -119,7 +169,13 @@ impl TransferPublication {
             let digest = ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?);
             for (source, route) in sources.iter().zip(&old) {
                 let f = source.fence;
-                if route.target != RouteTarget::Group(f.group)
+                if source.scope
+                    != if intent.is_retained_insertion() {
+                        Some(route.scope)
+                    } else {
+                        None
+                    }
+                    || route.target != RouteTarget::Group(f.group)
                     || f.operation != operation
                     || f.responsibility != intent.before().input().responsibility
                     || f.epoch != intent.before().input().epoch
@@ -228,7 +284,14 @@ impl TransferPublication {
             + self
                 .sources
                 .iter()
-                .map(|s| 74 + 60 * s.exports.len())
+                .map(|s| {
+                    74 + 60 * s.exports.len()
+                        + if self.intent.is_retained_insertion() {
+                            4
+                        } else {
+                            0
+                        }
+                })
                 .sum::<usize>()
             + self
                 .targets
@@ -239,12 +302,19 @@ impl TransferPublication {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(b"VBTPUB01");
+        bytes.extend(if self.intent.is_retained_insertion() {
+            b"VBTPUB02"
+        } else {
+            b"VBTPUB01"
+        });
         bytes.extend(self.operation.get().to_le_bytes());
         bytes.extend((intent.len() as u32).to_le_bytes());
         bytes.extend(intent);
         bytes.extend((self.sources.len() as u16).to_le_bytes());
         for source in &self.sources {
+            if let Some(scope) = source.scope {
+                put_range(&mut bytes, scope);
+            }
             put_group(&mut bytes, source.fence.group);
             bytes.extend(source.fence.index.to_le_bytes());
             bytes.extend(source.configuration.get().to_le_bytes());
@@ -279,15 +349,24 @@ impl TransferPublication {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut r = Reader::new(bytes);
-        if r.take(8)? != b"VBTPUB01" {
+        let tag = r.take(8)?;
+        if tag != b"VBTPUB01" && tag != b"VBTPUB02" {
             return Err(ApplicationError::InvalidCommand);
         }
         let operation = r.operation()?;
         let len = r.u32()? as usize;
         let intent = TransferIntent::decode(r.take(len)?)?;
+        if intent.is_retained_insertion() != (tag == b"VBTPUB02") {
+            return Err(ApplicationError::InvalidCommand);
+        }
         let n = count(&mut r)?;
         let mut sources = Vec::with_capacity(n);
         for _ in 0..n {
+            let scope = if tag == b"VBTPUB02" {
+                Some(r.range()?)
+            } else {
+                None
+            };
             let fence = fence(&mut r, operation, &intent)?;
             let configuration = config(&mut r)?;
             let intent_digest = digest(&mut r)?;
@@ -301,6 +380,7 @@ impl TransferPublication {
                 });
             }
             sources.push(SourceFenceEvidence {
+                scope,
                 fence,
                 configuration,
                 intent_digest,

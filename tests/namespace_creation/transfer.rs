@@ -70,6 +70,7 @@ fn evidence(intent: &TransferIntent, operation: OperationId) -> TransferPublicat
                 unreachable!()
             };
             SourceFenceEvidence {
+                scope: None,
                 fence: OwnershipFence {
                     operation,
                     group,
