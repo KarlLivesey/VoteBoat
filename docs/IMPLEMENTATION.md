@@ -111,21 +111,18 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Staging synchronization experiment (current slice139, P1/P7).** Purpose:
-   test the measured publication cost with unchanged manifest/selection format.
-   Dependencies:138 file attribution and JournalIo recovery contract. Completion:
-   initial/legacy/reclaimed primitive-cut tests, store failure regression and
-   sequential hash-verified control/candidate runs with all recovery checks.
-   Retain production change only if evidence justifies it; failed experiments
-   still retain useful native publication crash regressions and raw evidence.
-2. **Native nested retirement (next, P1/P6).** Purpose: retire and reclaim an
-   actual previously assigned nested source after its networked later transfer,
-   preserving tombstones/retries and refusing stale service. Dependencies:134
-   native-file retirement,135 networked nested movement and existing retention
-   release/RetirementGuard contracts. Completion: own schema and native public
-   path with lost results/reopen/retirement checkpoint/reclamation, exact retained
-   source lineage, no dual owner and continued successor service. This closes a
-   remaining lifecycle gap instead of repeating unsuccessful performance trials.
+1. **Native assigned nested-source retirement (current slice141, P1/P6).**
+   Purpose: retire and reclaim assigned group31 after its next split, preserving
+   lineage/retries and refusing stale service. Dependencies:140 initial guarded
+   profile,135 networked movement and exact host retention release. Completion:
+   unread retirement abort/reopen, quorum result/retry, pinned retired checkpoint
+   and reclaim, exact lineage, no dual owner and ancestor-offline successor writes.
+2. **Native nested merged-source retirement (next, P1/P6).** Purpose: finish
+   the corresponding selected merge cleanup path for41/42 while43 serves.
+   Dependencies:item1 guarded shared fixture, complete601 publication/activation
+   and per-source retention release. Completion: partial retirement/reopen does
+   not revive either source, both exact lineages survive checkpoint/reclaim,
+   original imported retries/outbox and new writes continue at43.
 3. **Broader baseline validation and measured runtime work (following, P0–P7).**
    Purpose: keep native lifecycle acceptance tied to the complete original goal.
    Dependencies:item2 evidence plus baseline ledger. Completion: review remaining
@@ -9916,3 +9913,81 @@ checkpoint/reclaim plus ancestor-offline successor service. Reuse the profile
 for subsequent targets before bootstrap and keep retirement queries/receipts
 typed, outside the live-owner extraction helper. Entire P0–P7 remains active,
 including prior admission/lifecycle/platform/P7 gaps; P8/Windows deferred.
+
+## Slice141 schema plan — retire assigned nested31 after its networked split
+
+Previous140 progressed/pushed9f81b96; clean tree revalidated. Extend the existing
+Moves fixture through the same test-only profile, selecting guards for31/32 and
+later41/42 before bootstrap. This reuses actual creation reservations/bindings
+and publication facts; raw histories remain the default. Add a consumed-result
+setup mode so the retirement history does not leave unrelated unread completions
+charged. Existing phase interruption histories retain unread mode.
+
+Data/API: derive RetirementProof from authenticated quorum reads of501 publication,
+all41/42 activation statuses, metadata configuration and31's exact freeze F. Host
+release names31/501/F and a distinct release ID. Check omitted target and wrong
+freeze release refusal before any retirement effect. Capture original activation
+lineage from the live owner, then propose retirement under freeze operation501.
+Only committed/applied R permits provider release. Retire all three replicas,
+leave the accepted client result unread, abort/join owners and reopen the same
+initial guarded factory. Quorum status, freeze and exact retirement retry must
+return the original result; owner reads/exports/data admission must refuse.
+
+For checkpoint histories, publish and verify the retired snapshot and log base
+before Node::reclaim. Poll exact reclaim tickets; require reduced WAL bytes and
+no retained application commands below the retired checkpoint. Reopen again with
+owner absent and exact lineage/freeze/status. WAL histories retain R for replay.
+No snapshot seal or elapsed time substitutes for an authoritative pinned reference.
+Stop metadata, ancestors and retired31;41/42 and sibling32 serve original retry
+IDs and new writes with unchanged stopped durable files and imported outbox.
+Creation bindings remain byte-identical. Close/join every live worker before
+cleanup. Tests do not inject physical power loss or establish general retention.
+
+Acceptance: TCP/TLS and QUIC x WAL/checkpoint selected native retirement histories,
+raw TCP later split/merge regression, all-feature/all-target Clippy, format and
+inventory. Current/next/following mini plan is updated above; macro fullP0–P7
+unchanged, no milestone completed, P8/Windows deferred and CI background.
+
+## Slice141 implemented — actual assigned nested-source retirement and reclaim
+
+Shared Moves fixture now selects the initial profile for later sources/targets
+and supports consumed setup results; raw interruption histories retain unread
+mode. New history uses actual reserved/assigned grandchild31 from recursive
+insertion, splits31 into41/42 and observes every phase for no dual owner before
+retirement. Native reopen before retirement preserves all501 lifecycle facts and
+original300 activation. No production API/provider/format or migration changed.
+
+Complete quorum-observed publication/activation plus exact host release authorizes
+retirement. Missing target and wrong freeze release refuse. Actual accepted
+retirement result remains unread (client charge verified) while all three replicas
+apply; owners abort and selected workers return their stores before reopen.
+Retirement tail replays from WAL or the older live checkpoint, preserving exact R,
+freeze, original activation lineage and assigned creation bindings. Quorum status,
+freeze and retirement retry agree; owner reads/exports/data admission refuse.
+Checkpoint cases publish/verify the retired boundary, poll exact reclaim requests
+with reduced WAL bytes, then reopen with no retained application commands.
+
+Metadata, original ancestors and retired31 are stopped while41/42 and sibling32
+serve imported original IDs and new writes; exact values and outbox counts hold,
+and stopped durable files are unchanged. Final31 reopen retains retirement after
+successor progress. This is the selected actual assigned nested split cleanup,
+not both later merged-source retirement, general external retention registry or
+full recursive lifecycle coverage. Physical power-loss/macOS/separate-host remain
+unvalidated; no performance inference.
+
+Four TCP/TLS and QUIC x WAL/checkpoint tests pass267.38s after14.09s compile.
+Existing raw TCP later split/merge20-phase unread/reopen/retry regression passes
+163.33s after1.13s compile. Other raw combinations were not rerun. All-feature/
+all-target Clippy -D warnings passes5.06s; format/whitespace and80-contract inventory
+pass. Initial compile found one unconverted restart factory in the generic test
+fixture; fixed that factory directly. No broad rewrite or preferred test rerun.
+All test/check handles terminal; Linux local execution only, CI background.
+
+Macro review: selected P1/P6 cleanup evidence strengthens safe split/merge; no
+full milestone or phase completion. Current141 delivered; next142 is selected
+nested merge cleanup for41/42 into43, with per-source releases, partial retirement
+recovery, exact activation lineages and checkpoint/reclaim plus continued imported
+retry/outbox service. Following full baseline ledger review selects the next
+resource/fairness/discovery/platform/fault path with its own schema, preserving
+P7 fixed250ms/sustainable-capacity gaps. Full P0–P7 stays active; P8/Windows deferred,
+RPL-1.5 retained and original pack preserved.

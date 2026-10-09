@@ -73,7 +73,8 @@ retirement; lost client completion is recovered through quorum status. WAL and
 checkpoint/reclamation reopen preserve fences, and a target serves original
 retries with the old source offline. This native network coverage retires the
 original split source; later activated-source retirement currently has
-deterministic and native-file evidence. These finite Linux tests are not machine
+deterministic and native-file evidence, extended by the assigned nested-source
+network histories below. These finite Linux tests are not machine
 power-loss, arbitrary-fault, macOS or separate-host proof. Recursive lifecycle,
 general retention and broader P7 validation remain outstanding.
 
@@ -82,6 +83,24 @@ their first bootstrap. Four guarded network histories cover TCP/TLS and QUIC,
 WAL and checkpoint recovery, ten unread lifecycle cuts and two unread activation
 cuts per history. They retain actual creation bindings, imported operation IDs,
 outbox state and original activation while serving with ancestors offline. This
-is evidence for the live guard profile through nested insertion and recovery;
-it does not yet retire those nested targets or reclaim their storage. The next
-history must move their ownership and establish the exact retirement proof.
+is evidence for the live guard profile through nested insertion and recovery.
+Those insertion histories do not retire targets; the later path below supplies
+the ownership movement and exact retirement proof.
+
+Four `tests/routed/nested_retirement.rs` histories now split actual assigned
+grandchild31 into41/42, then retire31 using the complete quorum-observed
+publication/activation facts and exact host retention release. Guards are selected
+before bootstrap throughout this path. Missing-target and wrong-freeze proofs
+refuse. The retirement completion stays unread through native owner abort/join;
+reopen preserves the exact freeze, retirement result and original activation
+lineage. Owner queries, exports and data admission refuse; exact retries recover R.
+
+TCP/TLS and QUIC each exercise WAL replay and replay from an older live checkpoint
+with retirement in its retained tail. The latter then publishes a verified retired
+checkpoint, reclaims through exact Node request completions with reduced WAL bytes,
+and reopens with no retained application commands. New owners41/42 and sibling32
+serve imported retries/new writes and retain outbox state while metadata, ancestors
+and retired31 are offline with unchanged durable files. Actual assigned31 creation
+bindings remain identical. These selected Linux histories do not establish
+cleanup of both later merge sources, general retention registry, mixed-version
+migration, macOS, separate-host or physical power-loss behavior.

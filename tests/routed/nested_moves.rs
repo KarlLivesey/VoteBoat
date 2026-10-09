@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 use super::*;
 type Application = target_fixture::Target;
-type Nodes = Vec<Node<Application>>;
+type Nodes<P> = Vec<Node<<P as TargetProfile>::Application>>;
 fn groups(operation: u128) -> (&'static [u128], &'static [u128]) {
     match operation {
         501 => (&[31], &[41, 42]),
@@ -42,6 +42,13 @@ fn later(intent: &TransferIntent, g: u128, operation: u128) -> Application {
         target_fixture::limits(),
     )
     .unwrap_or_else(|e| panic!("binding {:?}", e.0))
+}
+fn profile_later<P: TargetProfile>(
+    intent: &TransferIntent,
+    g: u128,
+    operation: u128,
+) -> P::Application {
+    P::wrap(later(intent, g, operation))
 }
 fn route(m: &ResponsibilityManifest, key: u8) -> RouteHint {
     let (g, scope) = match &m.input().execution {
@@ -108,15 +115,16 @@ struct State {
     sources: Vec<(u128, TargetStatus, Option<SourceFreezeStatus>)>,
     targets: Vec<(u128, Option<TargetStatus>)>,
 }
-struct Moves {
-    base: Nested,
-    later: BTreeMap<u128, Nodes>,
+struct Moves<P: TargetProfile = Raw> {
+    base: Nested<P>,
+    later: BTreeMap<u128, Nodes<P>>,
     root: ResponsibilityManifest,
     original: TargetStatus,
+    keep_unread: bool,
 }
-impl Moves {
+impl<P: TargetProfile> Moves<P> {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
-        let mut base: Nested = Nested::new(protocol, checkpoint);
+        let mut base: Nested<P> = Nested::new(protocol, checkpoint);
         let b = data(base.plan.before(), 21, 40, 3);
         let r = propose_recovering(&mut base.source, &base.clock, 21, 81, b);
         assert!(
@@ -147,24 +155,25 @@ impl Moves {
                 metadata_configuration: Self::configuration(&base.parent, 1),
                 decision: state.publication.clone().unwrap(),
             };
-            let b = base.targets[i][0].local().applications[&group(g)]
+            let b = P::owner(&base.targets[i][0].local().applications[&group(g)])
                 .activation_command(&activation, 100000)
                 .unwrap();
-            let r = propose_recovering(&mut base.targets[i], &base.clock, g, 300, b);
+            let r = propose_target::<P>(&mut base.targets[i], &base.clock, g, 300, b);
             assert!(matches!(r.outcome, TargetOutcome::Activated(_)));
             let m = intent.target_manifest(group(g)).unwrap();
             let key = if g == 31 { 1 } else { 80 };
             assert_eq!(
-                split::observe(&mut base.targets[i], &base.clock, g, query(m, g, key)),
+                observe_target::<P>(&mut base.targets[i], &base.clock, g, query(m, g, key)),
                 TargetRead::Data(if g == 31 { 7 } else { 5 })
             );
         }
-        let original = base.targets[0][0].local().applications[&group(31)].status();
+        let original = P::owner(&base.targets[0][0].local().applications[&group(31)]).status();
         Self {
             base,
             later: BTreeMap::new(),
             root: state.parent,
             original,
+            keep_unread: true,
         }
     }
     fn configuration<A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine>(
@@ -183,7 +192,7 @@ impl Moves {
             .bootstrap
             .configuration
     }
-    fn nodes(&mut self, g: u128) -> &mut Nodes {
+    fn nodes(&mut self, g: u128) -> &mut Nodes<P> {
         match g {
             31 => &mut self.base.targets[0],
             32 => &mut self.base.targets[1],
@@ -230,7 +239,7 @@ impl Moves {
                         configuration(&self.base.root, g, &[1, 2, 3], mode),
                         &self.base.clock,
                         self.base.protocol,
-                        || later(&intent, g, operation),
+                        || profile_later::<P>(&intent, g, operation),
                     );
                     self.later.insert(g, ns);
                 }
@@ -261,12 +270,12 @@ impl Moves {
             .iter()
             .map(|&g| {
                 let TargetRead::Status(s) =
-                    split::observe(self.nodes(g), &clock, g, TargetQuery::Status)
+                    observe_target::<P>(self.nodes(g), &clock, g, TargetQuery::Status)
                 else {
                     panic!("source status")
                 };
                 let TargetRead::Freeze(f) =
-                    split::observe(self.nodes(g), &clock, g, TargetQuery::Freeze)
+                    observe_target::<P>(self.nodes(g), &clock, g, TargetQuery::Freeze)
                 else {
                     panic!("source fence")
                 };
@@ -279,7 +288,7 @@ impl Moves {
             .map(|&g| {
                 let s = if self.later.contains_key(&g) {
                     let TargetRead::Status(s) =
-                        split::observe(self.nodes(g), &clock, g, TargetQuery::Status)
+                        observe_target::<P>(self.nodes(g), &clock, g, TargetQuery::Status)
                     else {
                         panic!("target status")
                     };
@@ -309,7 +318,8 @@ impl Moves {
         bytes: Vec<u8>,
         done: impl Fn(&LifecycleDirectory) -> bool,
     ) {
-        unread(
+        deliver(
+            self.keep_unread,
             &mut self.base.parent,
             &self.base.clock,
             1,
@@ -326,7 +336,16 @@ impl Moves {
         done: impl Fn(&Application) -> bool,
     ) {
         let clock = self.base.clock;
-        unread(self.nodes(g), &clock, g, operation, bytes, done);
+        let keep_unread = self.keep_unread;
+        deliver(
+            keep_unread,
+            self.nodes(g),
+            &clock,
+            g,
+            operation,
+            bytes,
+            |a| done(P::owner(a)),
+        );
     }
     fn resume(&mut self, operation: u128) -> Option<Retry> {
         let s = self.observed(operation);
@@ -405,7 +424,7 @@ impl Moves {
         }
         for (g, _, f) in &s.sources {
             if f.is_none() {
-                let b = self.nodes(*g)[0].local().applications[&group(*g)]
+                let b = P::owner(&self.nodes(*g)[0].local().applications[&group(*g)])
                     .freeze_command(&intent, 65536, 100000)
                     .unwrap();
                 self.target_command(*g, operation, b.clone(), |a| a.fence().is_some());
@@ -424,9 +443,10 @@ impl Moves {
                     let f = f.as_ref().unwrap();
                     if let Some(e) = f.exports.iter().find(|e| e.target == group(*g)) {
                         let configuration = Self::configuration(self.nodes(*source), *source);
-                        let image = self.nodes(*source)[0].local().applications[&group(*source)]
-                            .export_target(group(*g), 65536)
-                            .unwrap();
+                        let image =
+                            P::owner(&self.nodes(*source)[0].local().applications[&group(*source)])
+                                .export_target(group(*g), 65536)
+                                .unwrap();
                         images.push(SourceImport {
                             fence: f.fence,
                             configuration,
@@ -437,7 +457,7 @@ impl Moves {
                 }
                 let import = TargetImport::new(op, intent.clone(), group(*g), images)
                     .unwrap_or_else(|e| panic!("import {:?}", e.0));
-                let b = self.nodes(*g)[0].local().applications[&group(*g)]
+                let b = P::owner(&self.nodes(*g)[0].local().applications[&group(*g)])
                     .import_command(&import, 100000)
                     .unwrap();
                 self.target_command(*g, operation, b.clone(), |a| a.status().imported.is_some());
@@ -519,7 +539,7 @@ impl Moves {
                     metadata_configuration: Self::configuration(&self.base.parent, 1),
                     decision: decision.clone(),
                 };
-                let b = self.nodes(g)[0].local().applications[&group(g)]
+                let b = P::owner(&self.nodes(g)[0].local().applications[&group(g)])
                     .activation_command(&a, 100000)
                     .unwrap();
                 self.target_command(g, operation, b.clone(), |a| a.status().activated.is_some());
@@ -595,7 +615,7 @@ impl Moves {
                 (1, if *g == 41 { 9 } else { 7 })
             };
             assert_eq!(
-                split::observe(self.nodes(*g), &clock, *g, request_query(before, key)),
+                observe_target::<P>(self.nodes(*g), &clock, *g, request_query(before, key)),
                 if f.is_some() {
                     TargetRead::Rejected(RoutingError::Fenced)
                 } else {
@@ -621,7 +641,7 @@ impl Moves {
                 };
                 let active = t.as_ref().unwrap().activated.is_some();
                 assert_eq!(
-                    split::observe(
+                    observe_target::<P>(
                         self.nodes(*g),
                         &clock,
                         *g,
@@ -688,7 +708,7 @@ impl Moves {
                 configuration_for(&self.base.root, g),
                 &self.base.clock,
                 self.base.protocol,
-                || target(&original, g),
+                || profile_target::<P>(&original, g),
             );
         }
         for g in keys {
@@ -700,7 +720,7 @@ impl Moves {
                     configuration_for(&self.base.root, g),
                     &self.base.clock,
                     self.base.protocol,
-                    || later(&intent, g, operation),
+                    || profile_later::<P>(&intent, g, operation),
                 ),
             );
         }
@@ -724,7 +744,7 @@ impl Moves {
         } else {
             let clock = self.base.clock;
             campaign(self.nodes(r.group), &clock, r.group);
-            let receipt = propose_recovering(
+            let receipt = propose_target::<P>(
                 self.nodes(r.group),
                 &clock,
                 r.group,
@@ -761,15 +781,15 @@ impl Moves {
     ) {
         let clock = self.base.clock;
         campaign(self.nodes(g), &clock, g);
-        let r = propose_recovering(self.nodes(g), &clock, g, id, request_data(m, key, delta));
+        let r = propose_target::<P>(self.nodes(g), &clock, g, id, request_data(m, key, delta));
         assert!(
             matches!(r.outcome,TargetOutcome::Applied(v) if v.duplicate==duplicate&&v.outcome==BucketOutcome::Value(value))
         );
     }
 }
-fn history(protocol: NativePeerProtocol, checkpoint: bool) {
+fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Moves::new(protocol, checkpoint);
+    let mut rig = Moves::<P>::new(protocol, checkpoint);
     for operation in [501, 601] {
         let (sources, targets) = groups(operation);
         let phases = std::iter::once(Phase::Reserve)
@@ -877,7 +897,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         configuration_for(&rig.base.root, 31),
         &rig.base.clock,
         protocol,
-        || target(&original, 31),
+        || profile_target::<P>(&original, 31),
     );
     let split = rig.bound(501);
     for g in [41, 42] {
@@ -887,7 +907,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
                 configuration_for(&rig.base.root, g),
                 &rig.base.clock,
                 protocol,
-                || later(&split, g, 501),
+                || profile_later::<P>(&split, g, 501),
             ),
         );
     }
@@ -897,14 +917,14 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let clock = rig.base.clock;
     for (key, value) in [(1, 9), (40, 7)] {
         assert_eq!(
-            split::observe(rig.nodes(43), &clock, 43, request_query(&m, key)),
+            observe_target::<P>(rig.nodes(43), &clock, 43, request_query(&m, key)),
             TargetRead::Data(value)
         );
     }
     assert!(rig
         .nodes(43)
         .iter()
-        .all(|n| n.local().applications[&group(43)]
+        .all(|n| P::owner(&n.local().applications[&group(43)])
             .application()
             .outbox()
             .count()
@@ -916,7 +936,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     };
     for g in [31, 41, 42] {
         let TargetRead::Freeze(Some(_)) =
-            split::observe(rig.nodes(g), &clock, g, TargetQuery::Freeze)
+            observe_target::<P>(rig.nodes(g), &clock, g, TargetQuery::Freeze)
         else {
             panic!("source fence")
         };
@@ -926,19 +946,22 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
 }
 #[test]
 fn tcp_nested_later_moves_recover_unread_phases_from_wal() {
-    history(NativePeerProtocol::TcpTls, false)
+    history::<Raw>(NativePeerProtocol::TcpTls, false)
 }
 #[test]
 fn tcp_nested_later_moves_recover_unread_phases_from_checkpoint() {
-    history(NativePeerProtocol::TcpTls, true)
+    history::<Raw>(NativePeerProtocol::TcpTls, true)
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_nested_later_moves_recover_unread_phases_from_wal() {
-    history(NativePeerProtocol::Quic, false)
+    history::<Raw>(NativePeerProtocol::Quic, false)
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_nested_later_moves_recover_unread_phases_from_checkpoint() {
-    history(NativePeerProtocol::Quic, true)
+    history::<Raw>(NativePeerProtocol::Quic, true)
 }
+
+#[path = "nested_retirement.rs"]
+mod retirement;

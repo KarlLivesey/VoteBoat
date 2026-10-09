@@ -3435,3 +3435,30 @@ and fixed directly. All handles terminal. This is Linux pre-retirement live-guar
 evidence, not networked nested retirement/reclamation, macOS, power-loss or broad
 protocol proof. Next test actual later transfer and retirement of assigned31;
 full P0–P7 and prior gaps remain active, P8/Windows deferred, CI background.
+
+## Slice141 — assigned nested31 network retirement, replay and reclamation
+
+Executed cargo +stable test --all-features --test routed assigned_nested_retirement
+--locked --offline -- --test-threads=1 --nocapture:4/4 pass267.38s after14.09s
+compile. TCP/TLS and QUIC each cover WAL and older-live-checkpoint retirement-tail
+replay for actual assigned grandchild31 after501 split into41/42. Shared guarded
+factory is selected before bootstrap; no hot wrapper installation.
+
+Checks include complete quorum publication/activation, missing-target/wrong-freeze
+proof refusal, accepted client request still charged/unread during native owner
+abort/join, exact retirement R/freeze/activation lineage on all replicas and quorum
+reads/retry, absent owner/refused exports/reads/data, immutable creation binding,
+pinned retired checkpoint and exact reclaim tickets/reduced WAL bytes, no retained
+application commands, and retired checkpoint reopen. Metadata/ancestors/31 stop
+while41/42 and sibling32 serve imported retries/new writes with exact values/outbox
+and unchanged stopped files. Final31 reopen preserves the retirement after writes.
+
+Existing raw tcp_nested_later_moves_recover_unread_phases_from_wal:1/1 passes
+163.33s after1.13s compile, covering split/merge20-phase abort/reopen/retry through
+the shared fixture. Other raw combinations not rerun. All-feature/all-target
+Clippy -D warnings passes5.06s; cargo fmt check, git diff --check and80-contract
+inventory pass. One compile-only generic restart factory mismatch was fixed at
+its cause. All handles terminal. Selected Linux histories do not establish both
+merged-source cleanup, general retention registry, physical power loss, macOS,
+separate-host or broad protocol proof. Full P0–P7 and previous gaps remain active;
+P8/Windows deferred; CI background; no performance claim.
