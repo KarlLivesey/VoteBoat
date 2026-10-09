@@ -127,9 +127,15 @@ receives cannot borrow control reserve. Native/downstream saturation, rollback,
 concurrency, flush/abort and invalid declaration tests execute that path. This
 closes this selected resource gap, not per-owner/receive/connection fairness.
 
-Next inspect and implement bounded per-owner shared bulk isolation/admission
-using explicit owned views, keeping reserved control independent. Follow with
-real native Node shared-resource overload/fault histories. Retain original P0–P7
+Slice144 adds selected per-authenticated-peer Bulk quotas with checked
+non-overbooking and bounded owner registrations. Same-store reconnects retain
+held frame credits; different store incarnations use separate slots. Public
+native/downstream tests cover other-peer Data delivery under quota pressure,
+Control headroom, delayed flush, registration lifetime, concurrent reconnect
+holders and exact failure/drop rollback. These host-attested pressure fixtures
+are not an encrypted Node load claim. Default service selection is unchanged.
+Next run real native Node shared-resource overload/fault histories, then select
+the next outstanding path from the acceptance ledger. Retain original P0–P7
 scope: wider lifecycle/configuration/discovery/placement/platform/fault and P7
 fixed250ms/sustainable-throughput gates stay active. No new performance runs or
-macOS execution in143. Windows/P8 stay deferred and CI remains background.
+macOS execution in143–144. Windows/P8 stay deferred and CI remains background.

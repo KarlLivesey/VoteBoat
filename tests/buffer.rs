@@ -326,3 +326,247 @@ fn legacy_default_cannot_claim_a_reserve_without_class_implementation() {
         assert_eq!(pool.usage(), BufferUsage::default());
     }
 }
+
+fn owner(peer: u64) -> BufferOwner {
+    use voteboat::identity::*;
+    BufferOwner {
+        local_node: NodeId::new(1).unwrap(),
+        local_store: StoreId::new(1).unwrap(),
+        local_incarnation: StoreIncarnation::new(1).unwrap(),
+        peer_node: NodeId::new(peer).unwrap(),
+        peer_store: StoreId::new(peer.into()).unwrap(),
+        peer_incarnation: StoreIncarnation::new(1).unwrap(),
+    }
+}
+fn owner_config() -> (BufferLimits, BufferLimits, BufferOwnerLimits) {
+    (
+        BufferLimits {
+            reserved_bytes: 128,
+            leases: 5,
+        },
+        BufferLimits {
+            reserved_bytes: 32,
+            leases: 1,
+        },
+        BufferOwnerLimits {
+            owners: 2,
+            bulk: BufferLimits {
+                reserved_bytes: 48,
+                leases: 2,
+            },
+        },
+    )
+}
+fn owner_lifetimes(root: impl BufferPool + Clone) {
+    assert!(matches!(root.acquire(1, 0), Err(BufferError::InvalidOwner)));
+    assert!(matches!(
+        root.acquire_class(BufferClass::Control, 1, 0),
+        Err(BufferError::InvalidOwner)
+    ));
+    let mut a = root.clone();
+    let mut b = root.clone();
+    a.bind_owner(owner(2)).unwrap();
+    b.bind_owner(owner(3)).unwrap();
+    assert_eq!(a.bind_owner(owner(3)), Err(BufferError::InvalidOwner));
+    let held_a = a.acquire(48, 1).unwrap();
+    assert!(matches!(a.acquire(1, 0), Err(BufferError::Overloaded)));
+    let mut reconnect = root.clone();
+    reconnect.bind_owner(owner(2)).unwrap();
+    assert!(matches!(
+        reconnect.acquire(1, 0),
+        Err(BufferError::Overloaded)
+    ));
+    let held_b = b.acquire(48, 1).unwrap();
+    let control = a.acquire_class(BufferClass::Control, 32, 1).unwrap();
+    assert_eq!(root.usage().reserved_bytes, 128);
+    // All total capacity is held: failed owner reservation must roll back.
+    drop(held_b);
+    let huge_control = b.acquire_class(BufferClass::Control, 48, 0).unwrap();
+    assert!(matches!(b.acquire(1, 0), Err(BufferError::Overloaded)));
+    drop(huge_control);
+    let b1 = b.acquire(24, 0).unwrap();
+    let b2 = b.acquire(24, 0).unwrap();
+    assert!(matches!(b.acquire(1, 0), Err(BufferError::Overloaded)));
+    drop((b1, b2));
+    a.close();
+    assert!(matches!(a.acquire(1, 0), Err(BufferError::Closed)));
+    drop((a, reconnect));
+    let mut c = root.clone();
+    assert_eq!(c.bind_owner(owner(4)), Err(BufferError::Overloaded));
+    drop(held_a);
+    // A control frame retains registration even without owner bulk charges.
+    assert_eq!(c.bind_owner(owner(4)), Err(BufferError::Overloaded));
+    drop(control);
+    let mut changed = owner(2);
+    changed.peer_incarnation = voteboat::identity::StoreIncarnation::new(2).unwrap();
+    c.bind_owner(changed).unwrap();
+    let final_frame = c.acquire(48, 0).unwrap();
+    drop((c, b));
+    assert_eq!(root.usage().reserved_bytes, 48);
+    drop(final_frame);
+    assert_eq!(root.usage(), BufferUsage::default());
+    let mut last = root.clone();
+    last.bind_owner(owner(4)).unwrap();
+    let one = last.acquire(1, 0).unwrap();
+    let two = last.acquire(1, 0).unwrap();
+    assert!(matches!(last.acquire(1, 0), Err(BufferError::Overloaded)));
+    drop((one, two));
+    assert_eq!(root.usage(), BufferUsage::default());
+}
+#[test]
+fn downstream_owner_isolation_reconnect_and_registration_lifetimes() {
+    let (total, reserve, owners) = owner_config();
+    owner_lifetimes(support::buffer::HostPool::with_owner_limits(
+        total, reserve, owners,
+    ));
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_owner_isolation_reconnect_and_registration_lifetimes() {
+    let (total, reserve, owners) = owner_config();
+    owner_lifetimes(
+        voteboat::native::buffer::NativeBufferPool::new_with_owner_limits(total, reserve, owners)
+            .unwrap(),
+    );
+}
+#[test]
+fn owner_configuration_rejects_overbooking_and_overflow() {
+    let (total, reserve, mut owners) = owner_config();
+    for n in [0, 3, 1025, usize::MAX] {
+        owners.owners = n;
+        assert_eq!(
+            owners.validate(total, reserve),
+            Err(BufferError::InvalidLimits)
+        );
+    }
+    owners.owners = 2;
+    owners.bulk.reserved_bytes = usize::MAX;
+    assert_eq!(
+        owners.validate(total, reserve),
+        Err(BufferError::InvalidLimits)
+    );
+    owners.bulk.reserved_bytes = 48;
+    owners.bulk.leases = 3;
+    assert_eq!(
+        owners.validate(total, reserve),
+        Err(BufferError::InvalidLimits)
+    );
+}
+#[cfg(feature = "native")]
+#[test]
+fn native_owner_allocation_failure_returns_all_three_budgets() {
+    use voteboat::native::buffer::NativeBufferPool;
+    let total = BufferLimits {
+        reserved_bytes: usize::MAX,
+        leases: 3,
+    };
+    let reserve = BufferLimits {
+        reserved_bytes: 1,
+        leases: 1,
+    };
+    let owners = BufferOwnerLimits {
+        owners: 1,
+        bulk: BufferLimits {
+            reserved_bytes: usize::MAX - 1,
+            leases: 2,
+        },
+    };
+    let mut pool = NativeBufferPool::new_with_owner_limits(total, reserve, owners).unwrap();
+    pool.bind_owner(owner(2)).unwrap();
+    assert!(matches!(
+        pool.acquire(usize::MAX - 1, usize::MAX - 1),
+        Err(BufferError::AllocationFailed)
+    ));
+    assert_eq!(pool.usage(), BufferUsage::default());
+    assert_eq!(pool.bulk_usage(), BufferUsage::default());
+    assert_eq!(pool.owner_usage(), Some(BufferUsage::default()));
+    let held = pool.acquire(1, 1).unwrap();
+    drop(held);
+    assert_eq!(pool.owner_usage(), Some(BufferUsage::default()));
+}
+
+#[cfg(feature = "native")]
+#[test]
+fn concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota() {
+    use std::sync::{Arc, Barrier};
+    use voteboat::native::buffer::NativeBufferPool;
+    let root = NativeBufferPool::new_with_owner_limits(
+        BufferLimits {
+            reserved_bytes: 17,
+            leases: 17,
+        },
+        BufferLimits {
+            reserved_bytes: 1,
+            leases: 1,
+        },
+        BufferOwnerLimits {
+            owners: 2,
+            bulk: BufferLimits {
+                reserved_bytes: 8,
+                leases: 8,
+            },
+        },
+    )
+    .unwrap();
+    let mut a = root.clone();
+    let mut b = root.clone();
+    a.bind_owner(owner(2)).unwrap();
+    b.bind_owner(owner(3)).unwrap();
+    let barrier = Arc::new(Barrier::new(9));
+    let mut workers = Vec::new();
+    for _ in 0..8 {
+        let view = a.clone();
+        let barrier = barrier.clone();
+        workers.push(std::thread::spawn(move || {
+            let held = view.acquire(1, 1).unwrap();
+            barrier.wait();
+            barrier.wait();
+            drop(held);
+        }));
+    }
+    barrier.wait();
+    let mut reconnect = root.clone();
+    reconnect.bind_owner(owner(2)).unwrap();
+    assert!(matches!(
+        reconnect.acquire(1, 0),
+        Err(BufferError::Overloaded)
+    ));
+    let other = b.acquire(8, 1).unwrap();
+    let control = b.acquire_class(BufferClass::Control, 1, 1).unwrap();
+    assert_eq!(root.usage().reserved_bytes, 17);
+    drop((other, control));
+    barrier.wait();
+    for worker in workers {
+        worker.join().unwrap();
+    }
+    assert_eq!(root.usage(), BufferUsage::default());
+    assert_eq!(a.owner_usage(), Some(BufferUsage::default()));
+}
+#[test]
+fn unsupported_owner_declaration_refuses_binding() {
+    struct Declared(support::buffer::HostPool);
+    impl BufferPool for Declared {
+        type Buffer = support::buffer::HostBuffer;
+        fn limits(&self) -> BufferLimits {
+            self.0.limits()
+        }
+        fn usage(&self) -> BufferUsage {
+            self.0.usage()
+        }
+        fn acquire(&self, r: usize, n: usize) -> Result<Self::Buffer, BufferError> {
+            self.0.acquire(r, n)
+        }
+        fn owner_limits(&self) -> Option<BufferOwnerLimits> {
+            Some(owner_config().2)
+        }
+        fn close(&mut self) {
+            self.0.close();
+        }
+    }
+    let mut pool = Declared(support::buffer::HostPool::new(128, 5));
+    assert_eq!(
+        pool.bind_owner(owner(2)),
+        Err(BufferError::ProviderViolation)
+    );
+    assert_eq!(pool.usage(), BufferUsage::default());
+}

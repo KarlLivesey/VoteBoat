@@ -111,23 +111,45 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Shared encoded control reserve (current slice143, P0/P2).** Purpose:
+1. **Shared encoded control reserve (completed slice143, P0/P2).** Purpose:
    keep bulk shared frames from exhausting protocol-control send capacity.
    Dependencies:108 public buffer contract and109 independent outbound admission.
    Completion: native/downstream byte/slot saturation and lifetime/rollback,
    actual transport class dispatch/delayed flush/abort, constructor refusal and
    existing transport/wire/core-only/QUIC regression checks.
-2. **Per-owner shared bulk isolation/admission (next, P0/P2).** Purpose: preserve
+2. **Per-owner shared bulk isolation/admission (completed slice144, P0/P2).** Purpose: preserve
    unrelated owner progress while one owner pressures shared resources.
    Dependencies:item1 reserve, I10/C14/C15 contracts and explicit owned views.
    Completion: bounded hot-owner admission cannot borrow protected control or
    prevent the configured unrelated owner from progressing; exact credit return
    and partial-failure/close behavior use public host/native seams.
-3. **Native Node shared-resource overload/fault history (following, P1/P2).**
+3. **Native Node shared-resource overload/fault history (next slice145, P1/P2).**
    Purpose: demonstrate the composed policy in real service work.
    Dependencies:item2 selected resource/transport contracts and native assembly.
    Completion: writes/reads/original retries survive selected peer/group pressure,
    restart and clean shutdown, with bounded accounting and no fabricated delivery.
+4. **Acceptance-ledger gap selection (following146, P0–P7).** Purpose: choose
+   the next missing user-visible baseline path from current evidence rather than
+   adding generic prerequisites. Dependencies:145 composed pressure results and
+   BASELINE_ACCEPTANCE. Completion: one prioritized missing path with exact
+   schema, failure/cleanup checks and its service/membership/lifecycle milestone.
+
+Slice144 schema before implementation: optional C14 owner policy declares a finite
+owner count and identical per-owner bulk byte/lease ceilings, whose checked sum
+must fit the global bulk remainder. Owner identity includes local/remote node and
+store incarnation, excluding connection generation so reconnect cannot reset held
+credits. Authenticated transport binds a cloned pool view before accepting frames;
+unbound selected views fail closed. Cold binding uses a bounded weak registry and
+nonblocking lock; frame paths retain atomic budgets and never acquire that lock.
+Every frame retains its owner registration; only Bulk charges its owner budget.
+Dropping the last view cannot recycle an identity while an accepted frame remains.
+Acquisition rolls back owner/bulk/total partial reservations; allocation failure
+uses the same Drop cleanup. These are volatile resource identities, not durable
+consensus facts. Acceptance: isolation, reconnect, identity/registry exhaustion,
+close/drop, allocation rollback, constructor binding and existing regressions.
+Next145 exercises the policy in native Node pressure; following146 selects the
+next outstanding baseline gap from the acceptance ledger with actual evidence.
+Both advance usable service/embedding and broader validation, retaining P0–P7.
 
 
 ### How the current work fits globally
@@ -10175,3 +10197,51 @@ schema/rollback/lifetime checks before edit. General lifecycle/retention, broade
 configuration/discovery/placement/platform/fault and original P7 fixed250ms /
 sustainable-capacity gaps remain. P8/Windows deferred, CI background, RPL-1.5
 retained and original design pack preserved.
+
+## Slice144 — selected per-authenticated-peer bulk quotas
+
+Previous goal turn explained P8 and made no implementation progress; this turn
+revalidated the clean authoritative worktree and resumed the existing P0/P2 path.
+No milestone or original scope was narrowed. Public C14 version3 now supplies
+BufferOwner/BufferOwnerLimits, optional owner declaration and binding through the
+same native/downstream contract. Checked byte/lease quota sums reject overbooking,
+zero/overflow and more than1024 owner slots. Native transport validates full-duplex
+capacity and binds the authenticated local/peer node and store incarnations before
+any frames. Connection/store-session generations do not reset held accounting.
+Native binding uses a bounded weak registry with cold try_lock; accepted frames
+retain registrations and Bulk retains per-owner credits. Unbound selected views,
+wrong-owner rebinding and exhausted registration slots refuse. Acquisition/drop
+keeps owner/bulk/total rollback and view-scoped close; default constructors retain
+previous behavior. No core, wire or persistent format changes and no durability
+claim follows from these volatile identities.
+
+Native/downstream conformance covers a saturated owner alongside another owner's
+full quota, reconnect sharing, Control retention of registry slots, exact last-frame
+cleanup, incarnation replacement, byte/slot exhaustion, allocation-capacity failure
+and total-budget rollback. Eight concurrent same-owner holders leave unrelated
+bulk/control capacity. Native transport with independent host pools and host-attested
+sessions demonstrates actual other-peer encoded Data delivery with short I/O,
+held channel flush, original queue completion, refused hot-peer batch, reconnect,
+Control admission and wrong-owner consumed-session cleanup. Selected factory quota
+validation refuses insufficient byte/slot full-duplex capacity without leasing.
+These sessions are test attestations, not new cryptographic load evidence.
+
+Executed all-feature buffer13 tests pass0.01s after1.83s final build. Transport
+initial25:24 pass, real TCP/TLS test refused loopback bind under sandbox; unchanged
+real test passes0.02s with socket permission. Added owner-quota constructor test
+has separate passing evidence below. Wire14 pass0.44s; default real QUIC framed
+transport1 passes0.01s after2.01s build. Core-only buffer6/transport1/wire1 pass
+0.00s after4.86s build. All-feature/all-target Clippy -D warnings passes8.30s then
+final0.52s after the last test addition. Two initial compiler errors were exact
+StoreBinding.identity nesting and u64→u128 fixture ID construction; focused fixes
+preceded successful checks. Format/diff and80-contract inventory checks pass.
+
+Next145 must exercise the selected policy through native Node encrypted pressure,
+restart and clean worker shutdown. No startup/CLI quota default, per-group fairness,
+receive deadline, connection preemption, performance improvement, macOS execution
+or broad failure proof is claimed. Control can compete for total capacity. Full
+P0–P7 and all earlier acceptance-ledger gaps remain active; P8/Windows deferred,
+RPL-1.5 retained and the original pack preserved. Macro plan unchanged because
+this contract advances service/embedding isolation without completing a milestone.
+Final owner full-duplex refusal test1/1 passes0.00s after1.38s build; all handles
+are terminal. Updated audit/acceptance/inventory retain the broader missing gates.

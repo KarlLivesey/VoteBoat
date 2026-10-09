@@ -353,6 +353,149 @@ mod native {
         pool.close();
         assert!(qa.is_drained());
     }
+    fn isolated_owners<P: voteboat::buffer::BufferPool + Clone>(pool: P) {
+        use voteboat::{buffer::*, native::transport::NativeTransportFactory};
+        let owner = |peer| {
+            let b = binding(1, peer);
+            BufferOwner {
+                local_node: b.local.node,
+                local_store: b.local.store.identity.id,
+                local_incarnation: b.local.store.identity.incarnation,
+                peer_node: b.peer.node,
+                peer_store: b.peer.store.identity.id,
+                peer_incarnation: b.peer.store.identity.incarnation,
+            }
+        };
+        let max = TransportLimits::default().send_frame_bytes;
+        let mut occupied = pool.clone();
+        occupied.bind_owner(owner(2)).unwrap();
+        let blocker = occupied.acquire(2 * max, 0).unwrap();
+        let mut factory = NativeTransportFactory::new(codec(), TransportLimits::default())
+            .unwrap()
+            .with_buffers(pool.clone())
+            .unwrap();
+        let (mut sa, _remote_a) = sessions(7);
+        sa.binding.generation = SecureSessionGeneration::new(2).unwrap();
+        let incoming_a = sa.incoming.clone();
+        let mut qa = queue(1);
+        let mut a = factory.build(sa, &qa).unwrap();
+        poll(&mut a);
+        assert_eq!(incoming_a.lock().unwrap().reads, 0);
+        let data = |peer| {
+            let mut m = message(1, peer, 11);
+            m.rpc = Rpc::Append {
+                previous_index: 0,
+                previous_term: 0,
+                entries: vec![support::entry(1, 1, 7)],
+                leader_commit: 0,
+            };
+            m
+        };
+        let refused = a.submit(batch(&mut qa, vec![data(2)])).unwrap_err();
+        assert_eq!(refused.reason, TransportError::Overloaded);
+        assert_eq!(refused.batch.messages, vec![data(2)]);
+        qa.complete(*refused.batch, LocalSendResult::Cancelled)
+            .unwrap();
+        let (mut sb, mut remote_b) = sessions(7);
+        sb.binding = binding(1, 3);
+        remote_b.binding = binding(3, 1);
+        let outgoing = sb.outgoing.clone();
+        outgoing.lock().unwrap().flushed = false;
+        let mut qb = queue(1);
+        let mut b = factory.build(sb, &qb).unwrap();
+        let mut receiver =
+            NativePeerTransport::new(remote_b, codec(), &queue(3), TransportLimits::default())
+                .unwrap();
+        b.submit(batch(&mut qb, vec![data(3)])).unwrap();
+        for _ in 0..1000 {
+            poll(&mut b);
+            poll(&mut receiver);
+            if receiver.received_info().is_some() {
+                break;
+            }
+        }
+        assert_eq!(receiver.take_received().unwrap().messages, vec![data(3)]);
+        assert!(!b.usage().completion);
+        assert_eq!(pool.usage().reserved_bytes, 4 * max);
+        // A still has its entire bulk quota held; protected Control may send.
+        a.submit(batch(&mut qa, vec![message(1, 2, 12)])).unwrap();
+        assert_eq!(pool.usage().reserved_bytes, 5 * max);
+        a.abort();
+        let done = a.take_send().unwrap();
+        qa.complete(done.batch, done.result).unwrap();
+        outgoing.lock().unwrap().flushed = true;
+        poll(&mut b);
+        let done = b.take_send().unwrap();
+        assert_eq!(done.result, LocalSendResult::Sent);
+        qb.complete(done.batch, done.result).unwrap();
+        // Wrong already-bound owner refuses construction without plaintext.
+        let (mut wrong, _remote) = sessions(7);
+        wrong.binding = binding(1, 3);
+        let output = wrong.outgoing.clone();
+        assert!(matches!(
+            NativePeerTransport::with_buffers(
+                wrong,
+                codec(),
+                &queue(1),
+                TransportLimits::default(),
+                occupied.clone()
+            ),
+            Err(TransportError::Buffer(BufferError::InvalidOwner))
+        ));
+        assert!(output.lock().unwrap().broken);
+        b.abort();
+        receiver.abort();
+        drop((blocker, occupied, a, b, factory));
+        assert_eq!(pool.usage(), BufferUsage::default());
+        assert!(qa.is_drained() && qb.is_drained());
+    }
+    #[test]
+    fn native_owner_quota_preserves_other_peer_and_reconnect_credits() {
+        use voteboat::{buffer::*, native::buffer::NativeBufferPool};
+        let max = TransportLimits::default().send_frame_bytes;
+        isolated_owners(
+            NativeBufferPool::new_with_owner_limits(
+                BufferLimits {
+                    reserved_bytes: 5 * max,
+                    leases: 5,
+                },
+                BufferLimits {
+                    reserved_bytes: max,
+                    leases: 1,
+                },
+                BufferOwnerLimits {
+                    owners: 2,
+                    bulk: BufferLimits {
+                        reserved_bytes: 2 * max,
+                        leases: 2,
+                    },
+                },
+            )
+            .unwrap(),
+        );
+    }
+    #[test]
+    fn downstream_owner_quota_preserves_other_peer_and_reconnect_credits() {
+        use voteboat::buffer::*;
+        let max = TransportLimits::default().send_frame_bytes;
+        isolated_owners(support::buffer::HostPool::with_owner_limits(
+            BufferLimits {
+                reserved_bytes: 5 * max,
+                leases: 5,
+            },
+            BufferLimits {
+                reserved_bytes: max,
+                leases: 1,
+            },
+            BufferOwnerLimits {
+                owners: 2,
+                bulk: BufferLimits {
+                    reserved_bytes: 2 * max,
+                    leases: 2,
+                },
+            },
+        ));
+    }
     fn protected_control<P: voteboat::buffer::BufferPool + Clone>(mut pool: P) {
         use voteboat::{buffer::*, native::transport::NativeTransportFactory};
         let max = TransportLimits::default().send_frame_bytes;
@@ -471,6 +614,44 @@ mod native {
         .unwrap();
         protected_control(pool.clone());
         assert_eq!(pool.bulk_usage(), BufferUsage::default());
+    }
+    #[test]
+    fn owner_factory_refuses_insufficient_full_duplex_quota_without_leasing() {
+        use voteboat::{
+            buffer::*,
+            native::{buffer::NativeBufferPool, transport::NativeTransportFactory},
+        };
+        let max = TransportLimits::default().send_frame_bytes;
+        for bulk in [
+            BufferLimits {
+                reserved_bytes: 2 * max - 1,
+                leases: 2,
+            },
+            BufferLimits {
+                reserved_bytes: 2 * max,
+                leases: 1,
+            },
+        ] {
+            let pool = NativeBufferPool::new_with_owner_limits(
+                BufferLimits {
+                    reserved_bytes: 5 * max,
+                    leases: 5,
+                },
+                BufferLimits {
+                    reserved_bytes: max,
+                    leases: 1,
+                },
+                BufferOwnerLimits { owners: 2, bulk },
+            )
+            .unwrap();
+            assert!(matches!(
+                NativeTransportFactory::new(codec(), TransportLimits::default())
+                    .unwrap()
+                    .with_buffers(pool.clone()),
+                Err(TransportError::InvalidLimits)
+            ));
+            assert_eq!(pool.usage(), BufferUsage::default());
+        }
     }
     #[test]
     fn shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing() {

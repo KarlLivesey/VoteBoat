@@ -3523,3 +3523,33 @@ terminal. No new startup/CLI reserve option or selected-reserve Node load test, 
 shared load/performance, full per-owner/receive/connection fairness, macOS or general
 fault proof. Full P0–P7 active; broader ledger and fixed250ms/sustainable-capacity
 P7 gaps retained; P8/Windows deferred, CI background.
+
+## Slice144 — owner-aware encoded-frame budgets
+
+C14 contract3 selected quotas are non-overbooked and bounded to1024 live node/store
+owner registrations. Authenticated native transport binds before frame admission;
+reconnects share existing held quotas independent of connection generation. Native
+and independent downstream providers retain registration through every accepted
+frame and charge only Bulk against owner counters. Global reserve behavior and
+legacy defaults remain. No wire/persistence/core change or new durability fact.
+
+Actual all-feature buffer13 pass0.01s; wire14 pass0.44s. Transport initial25 had
+24 passing host/native tests and one sandbox PermissionDenied loopback bind;
+unchanged real TCP/TLS test separately passes0.02s with socket permission. Selected
+owner test histories show unrelated-peer Data delivery under held hot-peer quota,
+short I/O/delayed flush, reconnect, Control reservation, refused original batch
+and wrong-owner constructor/session-drop cleanup. A final added full-duplex owner
+quota refusal test is separately recorded below. Default QUIC frame regression1
+passes0.01s. Buffer tests include held-registration/control lifetimes, byte/slot
+pressure, overflow/non-overbooking, allocation-failure rollback, exact cleanup and
+eight concurrent same-owner holders alongside unrelated owner progress.
+
+Core-only buffer6/transport1/wire1 pass0.00s. All-feature/all-target Clippy -D
+warnings8.30s and final0.52s pass; format/diff and80-contract inventory pass.
+Initial nested StoreBinding field access and fixture integer-type compile errors
+were corrected locally before successful tests. No selected encrypted Node load,
+startup policy option, per-group/receive/connection fairness, performance, macOS or
+universal failure proof. All prior phase gaps remain and the full P0–P7 goal is
+active; P8/Windows deferred, CI background feedback.
+Final selected owner full-duplex byte/slot constructor refusal1/1 passes0.00s
+(after1.38s build), no frame leases. All execution handles are terminal.

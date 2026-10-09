@@ -1584,7 +1584,7 @@
     },
     {
       "design_id": "C14",
-      "public_contract": "BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage",
+      "public_contract": "BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits",
       "operations": [
         "acquire",
         "acquire_class",
@@ -1594,7 +1594,9 @@
         "capacity",
         "limits",
         "usage",
-        "close"
+        "close",
+        "owner_limits",
+        "bind_owner"
       ],
       "native": "NativeBufferPool / NativeFrameBuffer, used by NativePeerTransport and selectable NativeSharedTransportFactory",
       "conformance": [
@@ -1605,7 +1607,7 @@
         "tests/quic.rs",
         "tests/counter_service.rs"
       ],
-      "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, per-owner/receive/connection fairness, or performance claim. Contract version2 adds optional declared control byte/lease reserve and class-aware acquisition, fail-closed compatibility defaults for unsupported reserve declarations. Explicit native reserved selection uses total/restricted-bulk counters with bounded rollback; default native selection retains total-only counter operations. Actual validated batch contents select Control, mixed/data/background and unclassified receive use Bulk. Constructor validates protected max-send capacity plus full-duplex bulk remainder. Independent host/native saturation, concurrent owners, allocation overflow, delayed flush/abort and malformed declaration tests exercise the same public seam. No control deadline/preemption or automatic Node/service shared-reserve selection."
+      "scope": "Owned finite maximum-byte/lease reservations with lazy initial allocation, prefix-preserving growth, exact Drop credit return and independent shared-view close. Native bounded atomic acquisition; no cache, thread or global allocator. Default per-connection two-frame pools preserve existing constructors; explicit host pools compose through native factory and transport. Native codec sizes without a frame allocation and encodes into the lease. Short I/O and channel flush retain send storage; decoded receipt, failure, abort, drop and rejection release the appropriate leases without releasing original outbound queue credits. Receive overload consumes no plaintext; send overload preserves peer-driver retry semantics. Host-codec compatibility defaults use separate bounded temporary Vec encoding. No WAL/snapshot/application buffer integration, universal allocator budget, per-owner/receive/connection fairness, or performance claim. Contract version2 adds optional declared control byte/lease reserve and class-aware acquisition, fail-closed compatibility defaults for unsupported reserve declarations. Explicit native reserved selection uses total/restricted-bulk counters with bounded rollback; default native selection retains total-only counter operations. Actual validated batch contents select Control, mixed/data/background and unclassified receive use Bulk. Constructor validates protected max-send capacity plus full-duplex bulk remainder. Independent host/native saturation, concurrent owners, allocation overflow, delayed flush/abort and malformed declaration tests exercise the same public seam. No control deadline/preemption or automatic Node/service shared-reserve selection. Contract version3 adds optional non-overbooked finite per-authenticated-peer bulk quotas. Native bounded weak registry uses cold try_lock only; frame acquisition/drop remains atomic with exact owner/bulk/total rollback. Every accepted frame retains owner registration, Bulk alone charges owner credits, and reconnects to the same node/store incarnations reuse held budgets. Unbound selected views and owner rebinds refuse. Native transport validates full-duplex owner capacity and binds authenticated identity before leasing. Public downstream/native lifetime, concurrent reconnect, independent peer data progress, allocation rollback and constructor rejection tests pass. Per-group fairness, receive deadlines, connection preemption, encrypted shared-pressure Node history and automatic startup selection remain unclaimed."
     },
     {
       "design_id": "C15",

@@ -1,4 +1,4 @@
-# Owned transport buffers, contract version 2
+# Owned transport buffers, contract version 3
 
 `buffer::BufferPool` provisions owned `FrameBuffer` leases. A request names its
 maximum reserved bytes and initial visible length. Rejection transfers nothing;
@@ -12,7 +12,7 @@ This is a Rust contract; wire and persistent formats are unchanged.
 Cloning shares counters. Closing a view permanently refuses its new acquisitions;
 other views and accepted leases remain valid. Allocation is lazy: reserving a
 1 MiB frame with a 24-byte header initially allocates 24 bytes. Leases free their
-storage before returning credits. There is no cache, thread, lock, singleton or
+storage before returning credits. There is no cache, thread, singleton or
 process allocator replacement. Reservation contention has a finite retry bound
 and may refuse with Overloaded. Diagnostic usage fields are individually sampled,
 not a coherent concurrent snapshot. The byte budget counts Vec capacity; allocator
@@ -91,6 +91,40 @@ An undersized shared pool can stall connections holding idle receive reservation
 Hosts must provision/admit connections accordingly; constrained policy integration
 is the next slice. Existing per-connection defaults preserve previous full-duplex
 frame capacity.
+
+Version3 adds `BufferOwner`, `BufferOwnerLimits`, `owner_limits` and `bind_owner`.
+`NativeBufferPool::new_with_owner_limits(total, reserve, owners)` explicitly
+selects at most1024 owner registrations with fixed per-owner Bulk ceilings.
+Checked quota sums must fit the global bulk remainder; overbooking is rejected.
+Transport requires each quota to fit full-duplex maximum frames and two leases.
+Native transport binds its view to the authenticated local/peer node and store
+identities before accepting frames. Connection and store-session generations do
+not change this accounting identity: reconnecting to the same store incarnation
+shares old held credits. Different store incarnations use different slots.
+These identities grant no authorization or voter permission.
+
+Unbound selected views refuse all frame acquisitions with InvalidOwner. Bound
+views cannot change owner; clones retain that owner. Factory roots should remain
+unbound so each accepted connection can select its actual authenticated peer.
+Closing one view leaves other views/frames valid. Every accepted frame, including
+Control, retains its owner registration until Drop. Bulk frames alone charge the
+owner byte/lease counters. Cold binding uses try_lock over a bounded weak registry;
+contention returns Overloaded and poisoning returns ProviderViolation. Expired
+registrations are pruned on binding. Frame acquisition/drop do not lock this map.
+Owner, restricted-bulk and total acquisition roll back partial failure precisely.
+Allocation failure releases all accepted credits. The default unselected path
+creates no registry, and compatibility binding defaults refuse unsupported owner
+declarations. Volatile quotas restart empty and carry no durability evidence.
+
+This provides bulk headroom against another configured peer's bulk pressure.
+Control can still compete for total capacity, and simultaneous connections for
+one owner compete for its quota. It promises no receive deadline, per-group
+fairness, connection preemption or automatic service selection. Slice144 public
+native/downstream tests cover reconnection with held leases, retained registration,
+other-peer data progress, control reserve, delayed flush, abort, wrong-owner
+constructor refusal, allocation rollback and concurrent same-owner holders.
+Those selected transport sessions are host attestations; real encrypted Node
+pressure is the next deliverable, not evidence supplied by these fixtures.
 
 # Codec provisioning and evidence
 

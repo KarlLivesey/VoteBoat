@@ -13,7 +13,11 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Independent downstream pool; no native implementation internals.
-use std::{cell::Cell, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    rc::{Rc, Weak},
+};
 use voteboat::buffer::*;
 #[derive(Clone)]
 pub struct HostPool {
@@ -23,6 +27,9 @@ pub struct HostPool {
     reserve: Option<BufferLimits>,
     bulk: Rc<Cell<BufferUsage>>,
     calls: Rc<Cell<[usize; 2]>>,
+    owners: Option<BufferOwnerLimits>,
+    registry: Rc<RefCell<BTreeMap<BufferOwner, Weak<Cell<BufferUsage>>>>>,
+    owner: Option<(BufferOwner, Rc<Cell<BufferUsage>>)>,
 }
 impl HostPool {
     pub fn new(bytes: usize, leases: usize) -> Self {
@@ -36,6 +43,9 @@ impl HostPool {
             reserve: None,
             bulk: Rc::new(Cell::new(BufferUsage::default())),
             calls: Rc::new(Cell::new([0; 2])),
+            owners: None,
+            registry: Rc::new(RefCell::new(BTreeMap::new())),
+            owner: None,
         }
     }
     pub fn with_control_reserve(bytes: usize, leases: usize, reserve: BufferLimits) -> Self {
@@ -47,12 +57,24 @@ impl HostPool {
     pub fn class_calls(&self) -> [usize; 2] {
         self.calls.get()
     }
+    pub fn with_owner_limits(
+        total: BufferLimits,
+        reserve: BufferLimits,
+        owners: BufferOwnerLimits,
+    ) -> Self {
+        owners.validate(total, reserve).unwrap();
+        let mut pool = Self::with_control_reserve(total.reserved_bytes, total.leases, reserve);
+        pool.owners = Some(owners);
+        pool
+    }
 }
 pub struct HostBuffer {
     bytes: Vec<u8>,
     reservation: usize,
     usage: Rc<Cell<BufferUsage>>,
     bulk: Option<Rc<Cell<BufferUsage>>>,
+    owner: Option<Rc<Cell<BufferUsage>>>,
+    charge_owner: bool,
 }
 impl AsRef<[u8]> for HostBuffer {
     fn as_ref(&self) -> &[u8] {
@@ -76,7 +98,9 @@ impl FrameBuffer for HostBuffer {
             return Err(BufferError::TooLarge);
         }
         if len > self.bytes.capacity() {
-            self.bytes.reserve_exact(len - self.bytes.len());
+            self.bytes
+                .try_reserve_exact(len - self.bytes.len())
+                .map_err(|_| BufferError::AllocationFailed)?;
         }
         self.bytes.resize(len, 0);
         Ok(())
@@ -95,6 +119,13 @@ impl Drop for HostBuffer {
             usage.leases -= 1;
             bulk.set(usage);
         }
+        if self.charge_owner {
+            let owner = self.owner.as_ref().unwrap();
+            let mut usage = owner.get();
+            usage.reserved_bytes -= self.reservation;
+            usage.leases -= 1;
+            owner.set(usage);
+        }
     }
 }
 impl BufferPool for HostPool {
@@ -107,6 +138,43 @@ impl BufferPool for HostPool {
     }
     fn control_reserve(&self) -> Option<BufferLimits> {
         self.reserve
+    }
+    fn owner_limits(&self) -> Option<BufferOwnerLimits> {
+        self.owners
+    }
+    fn bind_owner(&mut self, owner: BufferOwner) -> Result<(), BufferError> {
+        let Some(limits) = self.owners else {
+            return Ok(());
+        };
+        if self.closed {
+            return Err(BufferError::Closed);
+        }
+        if owner.local_node == owner.peer_node {
+            return Err(BufferError::InvalidOwner);
+        }
+        if let Some((existing, _)) = &self.owner {
+            return if *existing == owner {
+                Ok(())
+            } else {
+                Err(BufferError::InvalidOwner)
+            };
+        }
+        let mut registry = self
+            .registry
+            .try_borrow_mut()
+            .map_err(|_| BufferError::Overloaded)?;
+        if let Some(budget) = registry.get(&owner).and_then(Weak::upgrade) {
+            self.owner = Some((owner, budget));
+            return Ok(());
+        }
+        registry.retain(|_, budget| budget.strong_count() != 0);
+        if registry.len() == limits.owners {
+            return Err(BufferError::Overloaded);
+        }
+        let budget = Rc::new(Cell::new(BufferUsage::default()));
+        registry.insert(owner, Rc::downgrade(&budget));
+        self.owner = Some((owner, budget));
+        Ok(())
     }
     fn acquire(&self, reservation: usize, initial_len: usize) -> Result<HostBuffer, BufferError> {
         self.acquire_class(BufferClass::Bulk, reservation, initial_len)
@@ -128,6 +196,28 @@ impl BufferPool for HostPool {
             return Err(BufferError::TooLarge);
         }
         let mut usage = self.usage.get();
+        let owner = if self.owners.is_some() {
+            Some(
+                self.owner
+                    .as_ref()
+                    .ok_or(BufferError::InvalidOwner)?
+                    .1
+                    .clone(),
+            )
+        } else {
+            None
+        };
+        if class == BufferClass::Bulk {
+            if let Some(owner) = &owner {
+                let used = owner.get();
+                let cap = self.owners.unwrap().bulk;
+                if used.leases >= cap.leases
+                    || reservation > cap.reserved_bytes - used.reserved_bytes
+                {
+                    return Err(BufferError::Overloaded);
+                }
+            }
+        }
         if usage.leases == self.limits.leases
             || reservation > self.limits.reserved_bytes - usage.reserved_bytes
         {
@@ -153,11 +243,21 @@ impl BufferPool for HostPool {
         usage.leases += 1;
         usage.reserved_bytes += reservation;
         self.usage.set(usage);
+        if class == BufferClass::Bulk {
+            if let Some(owner) = &owner {
+                let mut used = owner.get();
+                used.leases += 1;
+                used.reserved_bytes += reservation;
+                owner.set(used);
+            }
+        }
         let mut buffer = HostBuffer {
             bytes: Vec::new(),
             reservation,
             usage: self.usage.clone(),
             bulk: bulk.map(|_| self.bulk.clone()),
+            owner,
+            charge_owner: class == BufferClass::Bulk && self.owners.is_some(),
         };
         buffer.resize(initial_len)?;
         Ok(buffer)

@@ -38,6 +38,19 @@ fn validate_pool(pool: &impl BufferPool, limits: TransportLimits) -> Result<(), 
             return Err(TransportError::InvalidLimits);
         }
     }
+    if let Some(owners) = pool.owner_limits() {
+        let reserve = pool
+            .control_reserve()
+            .ok_or(TransportError::InvalidLimits)?;
+        owners
+            .validate(total, reserve)
+            .map_err(TransportError::Buffer)?;
+        if owners.bulk.reserved_bytes < limits.send_frame_bytes + limits.receive_frame_bytes
+            || owners.bulk.leases < 2
+        {
+            return Err(TransportError::InvalidLimits);
+        }
+    }
     Ok(())
 }
 
@@ -147,7 +160,7 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
         codec: C,
         outbound_queue: &(impl OutboundQueue + ?Sized),
         limits: TransportLimits,
-        buffers: P,
+        mut buffers: P,
     ) -> Result<Self, TransportError> {
         let limits = limits.validate()?;
         validate_pool(&buffers, limits)?;
@@ -173,6 +186,16 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
         {
             return Err(TransportError::IncompatibleCodec);
         }
+        buffers
+            .bind_owner(BufferOwner {
+                local_node: binding.local.node,
+                local_store: binding.local.store.identity.id,
+                local_incarnation: binding.local.store.identity.incarnation,
+                peer_node: binding.peer.node,
+                peer_store: binding.peer.store.identity.id,
+                peer_incarnation: binding.peer.store.identity.incarnation,
+            })
+            .map_err(TransportError::Buffer)?;
         Ok(Self {
             buffers,
             session: Some(session),

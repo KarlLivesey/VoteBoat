@@ -14,9 +14,10 @@
 // rights and limitations under the RPL.
 //! Finite, shareable reservations with lazily allocated owned Vec storage.
 use crate::buffer::*;
+use std::collections::BTreeMap;
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
-    Arc,
+    Arc, Mutex, TryLockError, Weak,
 };
 #[derive(Default)]
 struct Budget {
@@ -36,8 +37,30 @@ pub struct NativeBufferPool {
     limits: BufferLimits,
     closed: bool,
     control_reserve: Option<BufferLimits>,
+    registry: Option<Arc<OwnerRegistry>>,
+    owner: Option<(BufferOwner, Arc<Budget>)>,
+}
+struct OwnerRegistry {
+    limits: BufferOwnerLimits,
+    budgets: Mutex<BTreeMap<BufferOwner, Weak<Budget>>>,
 }
 impl NativeBufferPool {
+    pub fn new_with_owner_limits(
+        total: BufferLimits,
+        reserve: BufferLimits,
+        owners: BufferOwnerLimits,
+    ) -> Result<Self, BufferError> {
+        owners.validate(total, reserve)?;
+        let mut pool = Self::new_with_control_reserve(total, reserve)?;
+        pool.registry = Some(Arc::new(OwnerRegistry {
+            limits: owners,
+            budgets: Mutex::new(BTreeMap::new()),
+        }));
+        Ok(pool)
+    }
+    pub fn owner_usage(&self) -> Option<BufferUsage> {
+        self.owner.as_ref().map(|(_, budget)| budget.usage())
+    }
     pub fn new(limits: BufferLimits) -> Result<Self, BufferError> {
         Ok(Self::build(limits.validate()?, None))
     }
@@ -58,6 +81,8 @@ impl NativeBufferPool {
             limits,
             closed: false,
             control_reserve,
+            registry: None,
+            owner: None,
         }
     }
     /// Restricted bulk reservations; zero when no reserve was selected.
@@ -115,6 +140,7 @@ pub struct NativeFrameBuffer {
     reservation: usize,
     bulk: bool,
     credits: Arc<Credits>,
+    owner: Option<Arc<Budget>>,
 }
 impl AsRef<[u8]> for NativeFrameBuffer {
     fn as_ref(&self) -> &[u8] {
@@ -152,6 +178,9 @@ impl Drop for NativeFrameBuffer {
         self.credits.total.release(self.reservation);
         if self.bulk {
             self.credits.bulk.release(self.reservation);
+            if let Some(owner) = &self.owner {
+                owner.release(self.reservation);
+            }
         }
     }
 }
@@ -165,6 +194,43 @@ impl BufferPool for NativeBufferPool {
     }
     fn control_reserve(&self) -> Option<BufferLimits> {
         self.control_reserve
+    }
+    fn owner_limits(&self) -> Option<BufferOwnerLimits> {
+        self.registry.as_ref().map(|r| r.limits)
+    }
+    fn bind_owner(&mut self, owner: BufferOwner) -> Result<(), BufferError> {
+        let Some(registry) = &self.registry else {
+            return Ok(());
+        };
+        if self.closed {
+            return Err(BufferError::Closed);
+        }
+        if owner.local_node == owner.peer_node {
+            return Err(BufferError::InvalidOwner);
+        }
+        if let Some((existing, _)) = self.owner {
+            return if existing == owner {
+                Ok(())
+            } else {
+                Err(BufferError::InvalidOwner)
+            };
+        }
+        let mut budgets = registry.budgets.try_lock().map_err(|e| match e {
+            TryLockError::WouldBlock => BufferError::Overloaded,
+            TryLockError::Poisoned(_) => BufferError::ProviderViolation,
+        })?;
+        if let Some(budget) = budgets.get(&owner).and_then(Weak::upgrade) {
+            self.owner = Some((owner, budget));
+            return Ok(());
+        }
+        budgets.retain(|_, budget| budget.strong_count() != 0);
+        if budgets.len() >= registry.limits.owners {
+            return Err(BufferError::Overloaded);
+        }
+        let budget = Arc::new(Budget::default());
+        budgets.insert(owner, Arc::downgrade(&budget));
+        self.owner = Some((owner, budget));
+        Ok(())
     }
     fn acquire(&self, reservation: usize, initial_len: usize) -> Result<Self::Buffer, BufferError> {
         self.acquire_class(BufferClass::Bulk, reservation, initial_len)
@@ -183,12 +249,34 @@ impl BufferPool for NativeBufferPool {
             return Err(BufferError::TooLarge);
         }
         let bulk = class == BufferClass::Bulk && self.control_reserve.is_some();
+        let owner = if self.registry.is_some() {
+            Some(
+                self.owner
+                    .as_ref()
+                    .ok_or(BufferError::InvalidOwner)?
+                    .1
+                    .clone(),
+            )
+        } else {
+            None
+        };
         if bulk {
-            self.credits.bulk.acquire(reservation, self.bulk_limits())?;
+            if let Some(owner) = &owner {
+                owner.acquire(reservation, self.registry.as_ref().unwrap().limits.bulk)?;
+            }
+            if let Err(error) = self.credits.bulk.acquire(reservation, self.bulk_limits()) {
+                if let Some(owner) = &owner {
+                    owner.release(reservation);
+                }
+                return Err(error);
+            }
         }
         if let Err(error) = self.credits.total.acquire(reservation, self.limits) {
             if bulk {
                 self.credits.bulk.release(reservation);
+                if let Some(owner) = &owner {
+                    owner.release(reservation);
+                }
             }
             return Err(error);
         }
@@ -197,6 +285,7 @@ impl BufferPool for NativeBufferPool {
             reservation,
             bulk,
             credits: self.credits.clone(),
+            owner,
         };
         buffer.resize(initial_len)?;
         Ok(buffer)
