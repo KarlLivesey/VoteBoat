@@ -215,5 +215,27 @@ already handed off. Schemas1–3 and their immutable inner guards remain separat
 
 Deterministic/checkpoint and native frame-cut tests cover retained handoff,
 local/cross parent adoption, later retained handoff, historical exports and full
-fencing. Imported-owner support and complete native parent-move histories for
-these families remain outstanding.
+fencing. Complete native parent-move service histories for these families remain
+outstanding.
+
+Imported owners may now select `TransferTarget::with_parent_adoption(maximum)`
+before bootstrap (schema5, VBTSOWN4/VBTRGT06). This accepts the same local and
+cross-authority observations and exposes `grant()` and
+`TargetQuery::ParentAdoption`. The original intent, bootstrap, import, activation,
+retry history and outbox stay intact. New data operations and subsequent full
+transfers use the current grant. Exact adoption retries return their original
+status after another move or a later full fence.
+
+The independent lifetime reserve is bounded by the total64MiB snapshot ceiling;
+unsupported limits fail at profile selection. Checkpoint restore replays the
+ordered, digested grant chain after original activation and before any full
+fence. Retirement keeps original activation and the final grant in an inert
+tombstone, verifying both against the exact source proof, including moves back
+to the original parent. It discards imported data and the parent command ledger.
+Legacy profiles retain their existing encodings.
+
+Imported-owner tests supply canonical metadata observations at the trusted-host
+seam and exercise actual import/activation, local/cross moves, ordinary service,
+later merge, retirement, restart, malformed histories and every native journal
+byte cut. They do not establish native TCP/QUIC parent-move service composition
+for this new profile; that remains the next part of154e.

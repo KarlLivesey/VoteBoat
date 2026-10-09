@@ -19,7 +19,7 @@ use crate::{
     log::*,
     routed::{
         codec::{decode, Command},
-        OwnershipFence, RoutedQuery,
+        OwnershipFence, ParentGrantStatus, RoutedQuery,
     },
     routing::{codec::*, *},
     scope::*,
@@ -28,6 +28,8 @@ use crate::{
     transfer_source::{SourceExportCommitment, SourceFreezeStatus},
 };
 use std::mem::size_of;
+mod parent;
+pub use parent::PARENT_TRANSFER_TARGET_SCHEMA;
 
 pub const TRANSFER_TARGET_SCHEMA: u64 = 2;
 pub const INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 3;
@@ -266,6 +268,7 @@ pub struct TargetStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TargetOutcome<R = ()> {
+    ParentAdopted(ParentGrantStatus),
     Activated(ActivationStatus),
     Frozen(OwnershipFence),
     Applied(R),
@@ -297,6 +300,7 @@ impl<R: ApplicationReceipt> ApplicationReceipt for TargetReceipt<R> {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum TargetQuery<Q> {
+    ParentAdoption(OperationId),
     Status,
     Freeze,
     Data(RoutedQuery<Q>),
@@ -304,6 +308,7 @@ pub enum TargetQuery<Q> {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Inline status is charged by read_result_bound.
 pub enum TargetRead<R> {
+    ParentAdoption(Option<ParentGrantStatus>),
     Status(TargetStatus),
     Freeze(Option<SourceFreezeStatus>),
     NotActive,
@@ -341,6 +346,9 @@ pub struct TransferTarget<A, P> {
     imported: Option<ImportRecord>,
     activated: Option<ActivationRecord>,
     frozen: Option<FreezeRecord>,
+    parent_limit: usize,
+    parents: Vec<parent::ParentRecord>,
+    active_grant: ResponsibilityManifest,
     applied: u64,
 }
 impl<A, P> TransferTarget<A, P>
@@ -414,6 +422,10 @@ where
         Ok(Self {
             group,
             operation,
+            active_grant: intent
+                .target_manifest(group)
+                .expect("checked target")
+                .clone(),
             intent,
             inner,
             policy,
@@ -423,6 +435,8 @@ where
             imported: None,
             activated: None,
             frozen: None,
+            parent_limit: 0,
+            parents: Vec::new(),
             applied: 0,
         })
     }
@@ -504,11 +518,7 @@ where
     }
     fn check_freeze(&self, intent: &TransferIntent, budget: usize) -> Result<(), ApplicationError> {
         if self.activated.is_none()
-            || intent.before()
-                != self
-                    .intent
-                    .target_manifest(self.group)
-                    .expect("checked target")
+            || intent.before() != self.grant()
             || budget == 0
             || budget > MAX_SCOPE_IMAGE_BYTES
         {
@@ -724,6 +734,9 @@ where
         } else if bytes.starts_with(b"VBTFRZ01") {
             self.freeze_request(bytes)?;
             Ok(None)
+        } else if parent::is_parent(bytes) && self.parent_limit != 0 {
+            crate::routed::parent_adoption::ParentAdoptionCommand::decode(bytes, true)?;
+            Ok(None)
         } else {
             match decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)? {
                 Command::Data { key, payload, .. } if self.inner.command_key(payload)? == key => {
@@ -765,14 +778,20 @@ where
                 .binding
                 .len()
                 .max(44 + self.limits.import_bytes)
-                .max(MAX_TARGET_ACTIVATION_BYTES),
+                .max(MAX_TARGET_ACTIVATION_BYTES)
+                .max(if self.parent_limit == 0 {
+                    0
+                } else {
+                    crate::routed::MAX_CROSS_PARENT_ADOPTION_BYTES
+                }),
             snapshot_bytes: 112
                 + MAX_TARGET_FREEZE_BYTES
                 + MAX_TARGET_ACTIVATION_BYTES
                 + self.binding.len()
                 + 44
                 + self.limits.import_bytes
-                + self.limits.application_checkpoint_bytes,
+                + self.limits.application_checkpoint_bytes
+                + self.parent_reserve(),
         }
     }
 }
@@ -813,7 +832,11 @@ where
             let mut provider_advanced = false;
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
                 let import = next.request(bytes)?;
-                let outcome = if let Some(record) = &next.frozen {
+                let outcome = if parent::is_parent(bytes) {
+                    next.apply_parent(*operation, entry.index, bytes)?
+                } else if next.parent_adoption(*operation).is_some() {
+                    TargetOutcome::OperationConflict
+                } else if let Some(record) = &next.frozen {
                     if *operation == record.fence.operation && *bytes == record.bytes {
                         TargetOutcome::Frozen(record.fence)
                     } else {
@@ -936,15 +959,9 @@ where
                     else {
                         return Err(ApplicationError::InvalidCommand);
                     };
-                    if let Err(error) = check_owner(
-                        next.intent
-                            .target_manifest(next.group)
-                            .expect("checked target"),
-                        next.group,
-                        &hint,
-                        key,
-                        &next.policy,
-                    ) {
+                    if let Err(error) =
+                        check_owner(next.grant(), next.group, &hint, key, &next.policy)
+                    {
                         TargetOutcome::Rejected(error)
                     } else {
                         let projected = LogEntry {
@@ -1011,6 +1028,7 @@ where
                 if next.activated.is_some()
                     && next.frozen.is_none()
                     && *operation != next.operation
+                    && next.parent_adoption(*operation).is_none()
                     && bytes.starts_with(b"VBRCMD01")
                 {
                     let Command::Data { hint, key, payload } =
@@ -1018,17 +1036,7 @@ where
                     else {
                         return Err(ApplicationError::InvalidCommand);
                     };
-                    if check_owner(
-                        next.intent
-                            .target_manifest(next.group)
-                            .expect("checked target"),
-                        next.group,
-                        &hint,
-                        key,
-                        &next.policy,
-                    )
-                    .is_ok()
-                    {
+                    if check_owner(next.grant(), next.group, &hint, key, &next.policy).is_ok() {
                         let projected = LogEntry {
                             index: entry.index,
                             term: entry.term,
@@ -1096,19 +1104,15 @@ where
             else {
                 return Err(ApplicationError::InvalidCommand);
             };
-            if next.activated.is_none() || next.frozen.is_some() || operation == next.operation {
+            if next.activated.is_none()
+                || next.frozen.is_some()
+                || operation == next.operation
+                || next.parent_adoption(operation).is_some()
+            {
                 return Err(ApplicationError::InvalidCommand);
             }
-            check_owner(
-                next.intent
-                    .target_manifest(next.group)
-                    .expect("checked target"),
-                next.group,
-                &hint,
-                key,
-                &next.policy,
-            )
-            .map_err(|_| ApplicationError::InvalidCommand)?;
+            check_owner(next.grant(), next.group, &hint, key, &next.policy)
+                .map_err(|_| ApplicationError::InvalidCommand)?;
             let inner = next
                 .inner
                 .validate_proposal(operation, payload, std::iter::empty())?;
@@ -1152,7 +1156,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
+        if self.parent_limit != 0 {
+            PARENT_TRANSFER_TARGET_SCHEMA
+        } else if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
             RECURSIVE_INSERTION_TRANSFER_TARGET_SCHEMA
         } else if self.intent.insertion_children().is_some() {
             INSERTION_TRANSFER_TARGET_SCHEMA
@@ -1173,21 +1179,27 @@ where
             .as_ref()
             .map_or(&[][..], |r| r.bytes.as_slice());
         let freeze = self.frozen.as_ref().map_or(&[][..], |r| r.bytes.as_slice());
-        let len =
-            100 + self.binding.len() + import.len() + activation.len() + freeze.len() + inner.len();
+        let parents = self.parent_checkpoint()?;
+        let len = 100
+            + self.binding.len()
+            + import.len()
+            + activation.len()
+            + freeze.len()
+            + inner.len()
+            + parents.len();
         if len > max_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(
-            if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
-                b"VBTRGT05"
-            } else if self.intent.insertion_children().is_some() {
-                b"VBTRGT04"
-            } else {
-                b"VBTRGT03"
-            },
-        );
+        bytes.extend(if self.parent_limit != 0 {
+            b"VBTRGT06"
+        } else if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
+            b"VBTRGT05"
+        } else if self.intent.insertion_children().is_some() {
+            b"VBTRGT04"
+        } else {
+            b"VBTRGT03"
+        });
         bytes.extend(self.applied_index().to_le_bytes());
         bytes.extend((self.binding.len() as u32).to_le_bytes());
         bytes.extend(&self.binding);
@@ -1221,6 +1233,7 @@ where
         bytes.extend(self.inner.schema_version().to_le_bytes());
         bytes.extend((inner.len() as u32).to_le_bytes());
         bytes.extend(inner);
+        bytes.extend(parents);
         Ok(bytes)
     }
     fn restore_checkpoint(
@@ -1231,8 +1244,9 @@ where
     ) -> Result<(), ApplicationError> {
         let insertion = self.intent.insertion_children().is_some();
         let recursive = insertion && self.intent.delegation().is_some();
-        if (insertion && schema != self.schema_version())
-            || (!insertion && schema != TRANSFER_TARGET_SCHEMA && schema != 1)
+        let parent = self.parent_limit != 0;
+        if ((insertion || parent) && schema != self.schema_version())
+            || (!insertion && !parent && schema != TRANSFER_TARGET_SCHEMA && schema != 1)
         {
             return Err(ApplicationError::UnsupportedSchema);
         }
@@ -1241,11 +1255,15 @@ where
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        let frozen_format = tag == b"VBTRGT03" || tag == b"VBTRGT04" || tag == b"VBTRGT05";
-        if (recursive && tag != b"VBTRGT05")
-            || (!recursive && tag == b"VBTRGT05")
-            || (insertion && !recursive && tag != b"VBTRGT04")
-            || (!insertion && tag == b"VBTRGT04")
+        let frozen_format =
+            tag == b"VBTRGT03" || tag == b"VBTRGT04" || tag == b"VBTRGT05" || tag == b"VBTRGT06";
+        if (parent && tag != b"VBTRGT06")
+            || (!parent && tag == b"VBTRGT06")
+            || (!parent
+                && ((recursive && tag != b"VBTRGT05")
+                    || (!recursive && tag == b"VBTRGT05")
+                    || (insertion && !recursive && tag != b"VBTRGT04")
+                    || (!insertion && tag == b"VBTRGT04")))
             || (schema >= TRANSFER_TARGET_SCHEMA) != frozen_format
         {
             return Err(ApplicationError::UnsupportedSchema);
@@ -1321,8 +1339,7 @@ where
         let mut next = self.clone();
         next.inner
             .restore_checkpoint(inner_schema, inner_applied, r.take(len)?)?;
-        if !r.done()
-            || next.inner.applied_index() != inner_applied
+        if next.inner.applied_index() != inner_applied
             || next.inner.contains_operation(next.operation)
         {
             return Err(ApplicationError::InvalidCheckpoint);
@@ -1339,6 +1356,10 @@ where
                 status: Self::activation_status(activation_index, activation_bytes, &activation),
             })
         };
+        next.restore_parents(&mut r, applied, freeze_index)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
         next.frozen = if freeze_bytes.is_empty() {
             None
         } else {
@@ -1346,6 +1367,7 @@ where
             let operation =
                 OperationId::new(freeze_operation).ok_or(ApplicationError::InvalidCheckpoint)?;
             if operation == next.operation
+                || next.parent_adoption(operation).is_some()
                 || next.inner.contains_operation(operation)
                 || !intent.permits_operation(operation)
             {
@@ -1388,6 +1410,13 @@ where
             return Err(ApplicationError::NotApplied);
         }
         match query {
+            TargetQuery::ParentAdoption(op) => {
+                if self.parent_limit == 0 {
+                    Err(ApplicationError::UnsupportedSchema)
+                } else {
+                    Ok(TargetRead::ParentAdoption(self.parent_adoption(op)))
+                }
+            }
             TargetQuery::Status => Ok(TargetRead::Status(self.status())),
             TargetQuery::Freeze => self.freeze_status().map(TargetRead::Freeze),
             TargetQuery::Data(query) => {
@@ -1398,9 +1427,7 @@ where
                     return Ok(TargetRead::NotActive);
                 }
                 if let Err(error) = check_owner(
-                    self.intent
-                        .target_manifest(self.group)
-                        .expect("checked target"),
+                    self.grant(),
                     self.group,
                     &query.hint,
                     &query.key,
@@ -1423,7 +1450,7 @@ where
 {
     fn query_bytes(&self, query: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match query {
-            TargetQuery::Status | TargetQuery::Freeze => Ok(0),
+            TargetQuery::Status | TargetQuery::Freeze | TargetQuery::ParentAdoption(_) => Ok(0),
             TargetQuery::Data(q) => {
                 if q.key.capacity() > MAX_ROUTING_KEY_BYTES || q.key.capacity() > limit {
                     return Err(ApplicationError::ReceiptBudget);
@@ -1438,6 +1465,7 @@ where
     }
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
+            TargetQuery::ParentAdoption(_) => 0,
             TargetQuery::Freeze => self.frozen.as_ref().map_or(0, |r| {
                 r.intent.retained_bytes() - size_of::<TransferIntent>()
                     + self
@@ -1473,7 +1501,7 @@ where
                 .imported
                 .as_ref()
                 .map_or(0, |i| i.sources.capacity() * size_of::<ImportedSource>()),
-            TargetRead::NotActive | TargetRead::Rejected(_) => 0,
+            TargetRead::NotActive | TargetRead::Rejected(_) | TargetRead::ParentAdoption(_) => 0,
             TargetRead::Data(r) => self.inner.read_result_bytes(r, limit)?,
         };
         if bytes > limit {
@@ -1508,10 +1536,26 @@ where
             .activated
             .as_ref()
             .ok_or(ApplicationError::NotApplied)?;
-        let mut bytes = Vec::with_capacity(12 + record.bytes.len());
+        let mut grant = Vec::new();
+        if self.parent_limit != 0 {
+            put_manifest(&mut grant, self.grant());
+        }
+        let mut bytes = Vec::with_capacity(
+            12 + record.bytes.len()
+                + if self.parent_limit != 0 {
+                    12 + grant.len()
+                } else {
+                    0
+                },
+        );
         bytes.extend(record.status.index.to_le_bytes());
         bytes.extend((record.bytes.len() as u32).to_le_bytes());
         bytes.extend(&record.bytes);
+        if self.parent_limit != 0 {
+            bytes.extend(b"VBTPARN1");
+            bytes.extend((grant.len() as u32).to_le_bytes());
+            bytes.extend(grant);
+        }
         Ok(bytes)
     }
     fn validate_retirement_source(
@@ -1519,11 +1563,13 @@ where
         status: &SourceFreezeStatus,
     ) -> Result<(), ApplicationError> {
         self.validate_group(status.fence.group)?;
-        if status.intent.before()
-            != self
-                .intent
-                .target_manifest(self.group)
-                .expect("checked target")
+        let original = self
+            .intent
+            .target_manifest(self.group)
+            .expect("checked target");
+        if status.intent.before() != original
+            && (self.parent_limit == 0
+                || !parent::same_owner_lineage(status.intent.before(), original))
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -1541,8 +1587,7 @@ where
         let index = r.u64()?;
         let len = r.u32()? as usize;
         let activation = self.activation(r.take(len)?)?;
-        if !r.done()
-            || activation.decision.publication.operation() != self.operation
+        if activation.decision.publication.operation() != self.operation
             || activation.decision.publication.intent() != &self.intent
         {
             return Err(ApplicationError::InvalidCheckpoint);
@@ -1556,6 +1601,44 @@ where
             .ok_or(ApplicationError::InvalidCheckpoint)?;
         if index <= evidence.imported.index || index >= fence_index {
             return Err(ApplicationError::InvalidCheckpoint);
+        }
+        if self.parent_limit != 0 {
+            if r.take(8)? != b"VBTPARN1" {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            let len = r.u32()? as usize;
+            let grant = read_manifest(r.take(len)?)?;
+            let original = self
+                .intent
+                .target_manifest(self.group)
+                .expect("checked target");
+            if !parent::same_owner_lineage(&grant, original) {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+        }
+        if !r.done() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+    fn validate_retirement_evidence(
+        &self,
+        status: &SourceFreezeStatus,
+        lineage: &[u8],
+    ) -> Result<(), ApplicationError> {
+        self.validate_retirement_source(status)?;
+        self.validate_retirement_lineage(lineage, status.fence.index)?;
+        if self.parent_limit != 0 {
+            let mut r = Reader::new(lineage);
+            r.u64()?;
+            let len = r.u32()? as usize;
+            r.take(len)?;
+            r.take(8)?;
+            let len = r.u32()? as usize;
+            let grant = read_manifest(r.take(len)?)?;
+            if &grant != status.intent.before() {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
         }
         Ok(())
     }

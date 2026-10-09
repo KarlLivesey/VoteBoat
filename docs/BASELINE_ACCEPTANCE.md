@@ -187,4 +187,7 @@ Slice154e1 adds retained/scoped schema4 parent changes while preserving an order
 mixed grant history, immutable earlier scope exports and original data/control
 retries. Local/cross moves, a subsequent retained handoff, independent control
 capacity, strict recovery and native parent/full-fence frame cuts pass. Imported
-owners and native parent-move composition for these families remain open.
+owner implementation is now added by154e2: TransferTarget schema5 preserves
+original import/activation while accepting bounded local/cross parent changes,
+later full transfer and retirement/reopen. Owner tests and native journal cuts
+pass; native parent-move service composition for these families remains open.

@@ -4422,3 +4422,31 @@ while schema4 selects a tagged bounded history and advertises its larger reserve
 This is selected application/checkpoint/native-journal evidence. Imported owners
 and native parent-move service for these families remain open; the four network
 checks above are legacy-profile regressions, not proof of new-profile movement.
+
+### Slice154e2 — imported owner parent adoption
+
+Actual Linux validation:85 distinct focused all-feature tests pass: imported
+parent4, transfer target9, activation9, repeated transfer5, retirement7, retained
+insertion14, scoped source5, reparenting14 and reparent guards18. Final imported
+suite4 finishes in1.67s. Core-only imported3 and retirement5 pass. Four existing
+TCP/TLS and QUIC retirement WAL/checkpoint regressions pass in29.33s after8.85s
+build (115 other routed tests filtered). All-target/all-feature Clippy -D warnings,
+formatting/whitespace and81-contract inventory checks pass.
+
+New checks cover real source data import and activation, supplied canonical
+local/cross metadata observations, independent parent history despite exhausted
+ordinary operation capacity, original retry/outbox preservation, repeated moves,
+later two-source merge/activation, retirement/reopen and exact original facts.
+Every checkpoint truncation, bad record bytes and semantic changes with recomputed
+digests refuse atomically. Final-grant lineage must match the exact retirement
+source, including round trips to the original parent. Native ModelIo tests cut
+every parent-adoption and later freeze frame byte and inject sync/publication
+faults; recovery yields only complete original or new state and retains exports.
+
+This slice does not add a new TCP/QUIC parent-move integration history: the four
+network runs above are old-profile regressions. Initial fixtures tried unreserved
+nested intents/later-generation directory bootstraps; corrected fixtures use the
+public host-observation seam without weakening those production checks. Actual
+metadata protocol/recovery tests remain separately covered by reparent_guards.
+New-profile native family service composition, macOS and the remaining roadmap
+are still open.

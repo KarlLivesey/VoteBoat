@@ -134,8 +134,10 @@ metadata authority movement156 remain the next two capability deliverables.
    earlier retry/outbox/export evidence, later movement and restart, and selected
    native service recovery for these families. This advances recursive routing
    and split/merge. Retained/scoped schema4 adoption154e1 now has application,
-   checkpoint and native journal evidence; imported-owner adaptation154e2 and
-   native parent-move composition for these families remain. Full reparenting154
+   checkpoint and native journal evidence. Imported-owner adaptation154e2 now
+   includes local/cross observation adoption, later merge/retirement and native
+   journal recovery; native parent-move service composition remains for both
+   families. Full reparenting154
    stays open.
 2. **155, activated partial sources (next; P5/P6).** Let an imported child
    delegate part of its scope and retain the remainder. Depends on original
@@ -12157,3 +12159,77 @@ do not yet establish native parent movement for schema4.
 Next is imported-owner parent adoption154e2, then native composition for the
 remaining families. Activated partial sources155, metadata authority movement156,
 macOS and full P0–P7 scope remain active; this does not complete all reparenting.
+
+## Slice154e2 schema sketch — imported owner parent changes (planned)
+
+Add a pristine opt-in TransferTarget schema5, binding VBTSOWN4 and checkpoint
+VBTRGT06. Keep the original transfer intent, import, activation and bootstrap
+immutable. A bounded ordered parent ledger derives the current grant; reuse the
+existing checked local/cross commands and ParentGrantStatus. Reserve command and
+snapshot capacity at selection, capped at64MiB, independently of data history.
+Only activated, unfenced owners accept new changes with an exact current before
+grant; exact retries return their original status even after a later full fence.
+Reject bootstrap/data/fence identity collisions and conflicting or stale moves.
+Ordinary data and later transfer fences use the derived grant. Recovery checks
+record ordering after activation and before the original fence, operation IDs,
+digests, profile binding and the complete grant chain before changing live state.
+
+Retirement must still remove payloads after transfer. Retain the original
+activation plus final owner-preserving grant in the small inert tombstone, and
+validate that grant jointly against the retirement source status; do not retain
+all imported data or parent commands just to prove a retired owner cannot serve.
+Old profiles retain their exact wire/checkpoint/lineage bytes. No new durability
+domain: grants/status escape only after this owner's committed applied log;
+foreign observations remain authenticated by the host as for existing profiles.
+
+Acceptance: real imported activation -> local/cross adoption -> checkpoint/reopen
+-> ordinary writes/retries and later transfer/freeze, immutable original control
+facts, independent capacity, pending ordering, malformed/atomic restore refusal,
+byte-cut journal replay and retirement/reopen. Next: native family composition
+for154e, then imported partial sources155 and metadata authority movement156.
+
+## Slice154e2 — imported owner parent moves and retirement continuity
+
+Implemented explicit pristine TransferTarget::with_parent_adoption(maximum),
+schema5 with VBTSOWN4/VBTRGT06. The current grant follows a bounded ordered
+parent-command ledger; the original bootstrap/intent/import/activation remain
+unchanged. Local and completed cross-authority observations use the existing
+checked codecs and fixed ParentGrantStatus. Parent history has independent
+lifetime capacity with total snapshot selection capped at64MiB. Data routing,
+later freeze and source exports use the current grant. Original parent retries
+survive later moves and full fences without changing frozen payloads.
+
+Checkpoint replay checks profile binding, original activation, exact chained
+before/after grants, ordered indexes after activation and before F, semantic ID
+collisions and per-record SHA-256. Restore commits only a complete checked copy.
+Retirement retains the original activation plus a single final grant in an inert
+tombstone, including a round trip to the original parent at a newer generation.
+The sealed RetirableOwner contract now checks lineage and source status together;
+the final grant must match the exact frozen-source proof. The bounded lineage
+ceiling grows by one manifest/tag; no provider data or parent command history is
+retained after retirement. Old profile formats remain unchanged.
+
+Four owner conformance tests cover actual source export/import/activation,
+local/cross adoption, original retry/outbox preservation, subsequent two-source
+merge and activation, retirement/reopen, multiple parent changes, full ordinary
+history with independent control reserve, pending ordering, conflicts, every
+checkpoint truncation, and semantic mutations with recomputed record digests.
+Every-byte native adoption and later full-freeze journal cuts plus sync/publication
+faults recover only the original or complete state. These tests supply canonical
+metadata observations at the trusted-host seam; they do not run a fresh metadata
+network protocol. Initial fixture attempts wrongly used unreserved nested intents
+and later-generation directory bootstraps. The fixture now uses the public typed
+observation seam and preserves the existing production refusals.
+
+Actual Linux validation:85 distinct focused all-feature cases pass across
+imported parent4, transfer target9, activation9, repeat transfer5, retirement7,
+retained insertion14, scoped source5, reparenting14 and reparent guards18. The
+final four-case imported suite completes in1.67s. Core-only imported3/retirement5
+pass. Four existing TCP/TLS and QUIC retirement WAL/checkpoint regressions pass
+in29.33s (115 unrelated cases filtered). These are old-profile network regressions,
+not new-profile parent-move service evidence. All-target/all-feature Clippy
+-D warnings, formatting/whitespace and81-contract inventory checks pass.
+Macro review:154e now has both owner implementations. Next is native service
+composition for these profiles;155 imported partial sources and156 metadata
+authority movement remain the next two capabilities. The full P0–P7 goal remains
+active; this is not full reparenting or roadmap completion.

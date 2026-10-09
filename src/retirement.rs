@@ -23,7 +23,8 @@ use std::mem::size_of;
 pub const RETIREMENT_GUARD_SCHEMA: u64 = 1;
 pub const MAX_RETIREMENT_PROOF_BYTES: usize = 128 * 1024;
 pub const MAX_RETIREMENT_COMMAND_BYTES: usize = 44 + MAX_RETIREMENT_PROOF_BYTES;
-pub const MAX_RETIREMENT_LINEAGE_BYTES: usize = 12 + MAX_TARGET_ACTIVATION_BYTES;
+pub const MAX_RETIREMENT_LINEAGE_BYTES: usize =
+    24 + MAX_TARGET_ACTIVATION_BYTES + crate::routing::MAX_MANIFEST_BYTES;
 
 /// Explicit host release of backup/application recovery promises for this exact cut.
 /// This does not discover or override external retention pins.
@@ -252,6 +253,16 @@ where
         bytes: &[u8],
         fence_index: u64,
     ) -> Result<(), ApplicationError>;
+    /// Validate the retained lineage against the exact frozen source as one
+    /// evidence unit. Implementations with mutable owner grants bind both here.
+    fn validate_retirement_evidence(
+        &self,
+        status: &SourceFreezeStatus,
+        lineage: &[u8],
+    ) -> Result<(), ApplicationError> {
+        self.validate_retirement_source(status)?;
+        self.validate_retirement_lineage(lineage, status.fence.index)
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RetirementStatus {
@@ -499,7 +510,7 @@ where
                         return Err(ApplicationError::InvalidCommand);
                     }
                     next.initial
-                        .validate_retirement_lineage(&lineage, proof.release.fence_index)?;
+                        .validate_retirement_evidence(&proof.source_status()?, &lineage)?;
                     let status = Self::status_for(entry.index, bytes, &proof);
                     next.retired = Some(RetiredRecord {
                         status,
@@ -719,9 +730,7 @@ where
             }
             next.initial.validate_group(proof.release.source)?;
             next.initial
-                .validate_retirement_source(&proof.source_status()?)?;
-            next.initial
-                .validate_retirement_lineage(lineage, proof.release.fence_index)?;
+                .validate_retirement_evidence(&proof.source_status()?, lineage)?;
             let status = Self::status_for(index, body, &proof);
             next.retired = Some(RetiredRecord {
                 status,
