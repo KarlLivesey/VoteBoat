@@ -1,0 +1,78 @@
+# Baseline acceptance map
+
+This maps chapter 12's P0–P7 exit conditions and chapter 17's component catalogue
+to current source and recorded execution evidence. It is a working requirement
+ledger, not a completion certificate or a substitute for the detailed normative
+contracts, invariant catalogue, or failure schedules. Source inspection is not an
+executed test. Historical execution is recorded in validation/REPORT.md and raw
+performance artifacts; this slice executes only its changed observability paths.
+RPL-1.5 is retained. The original full goal remains active.
+
+## Roadmap exits
+
+| Requirement | Existing implementation / direct evidence | What remains unproven or missing |
+| --- | --- | --- |
+| P0 public identities, policies, virtual time/storage and composable lifetimes | identity/quorum/contracts/runtime modules; downstream providers in tests/support; tests/runtime.rs, tests/log_store.rs, tests/observability.rs | Several catalogue seams below are missing or partial; selected deterministic schedules are not a complete arbitrary-fault simulator. |
+| P1 durable three-node service, elections/repair/snapshots/reads/retries | src/raft.rs, native WAL/snapshot providers, owning Node and counter executable; tests/raft.rs, tests/snapshot.rs, tests/counter_service.rs; slices105–106 retain successful and failed repair experiments | General faulted-history coverage and macOS/separate-host execution remain. Long QUIC forced-snapshot experiment fails its selected-group boundary gate; buffered host-poll stalls cannot guarantee a snapshot is necessary. |
+| P2 shared Multi-Raft and bounded fair overload isolation | shared Node/Shard/TimedShard, WAL/transport workers, bounded ingress/outbound/consumer ownership; tests/runtime.rs hundred-group histories and tests/support/native_node.rs | Broader scale/workload/failure evidence and multi-shard operational deployment remain; no claim of unbounded scale. |
+| P3 fixed recursive policy at all quorum sites | quorum.rs, membership-aware Raft; tests/quorum.rs, tests/raft.rs recursive reads, tests/snapshot.rs recursive catch-up, tests/activation_model.rs | Finite policy/activation models do not prove the complete protocol; relevant site audit and recorded P4 fault evidence must remain linked. Live policy hot reload stays forbidden. |
+| P4 membership survives election, rollback, restart and partial delivery with exact activation | membership journal/snapshots, learners/readiness, Node administration, NativeMemberStartup; tests/membership.rs, tests/member_recovery.rs, tests/native_member_startup/recursive.rs, tests/support/peer_fault.rs | Generic application envelope/capacity and general public mutation ingress remain gated. Trusted executable administration exists. Broader schedules remain, rather than treating one tested transition as universal safety. |
+| P5 selective placement, cached routing and durable delegation without ancestor writes | routing/directory/routed application, placement authorization; tests/routed/native.rs and tests/routed/delegation*.rs; recorded parent-outage histories | General discovery/resolution and placement planning are partial; dynamic namespace creation/deletion/reparenting and moving a metadata authority's own data remain outside implemented paths. |
+| P6 fenced split/import/publication/activation/merge, retry lineage and recoverable pause | public scope adapter; TransferSource/Target/Publication, RetirementGuard and delegated transfer journal; tests/transfer_*.rs, tests/routed/{split,merge,repeat,retirement,delegation_repeat,delegation_cancel}.rs | Selected phase/reopen ledgers do not cover every interruption/composition; general external retention and recursive directory ownership lifecycle remain. No thaw-after-fence or unsafe forced replacement. |
+| P7 multiple local lanes, batching, reclamation, recovery throttling and sustainable improvement at fixed p99 | native shared barriers/reclaim, attribution/offered-load/maintenance harness; tests/shared_barrier.rs, tests/log_reclaim.rs, validation/performance/slice103–106 | 250ms TCP serial p99 gate remains unmet. Finite runs do not prove sustainable capacity. Operational multi-lane placement, controlled recovery throttling, broader devices/platform/fault evidence remain. |
+
+macOS and Linux are targets; current local execution is Linux. Windows is
+deferred by the user. CI remains background feedback and is not a merge gate.
+P8 logical voters, striped single-group WAL and broader transactions remain
+research; they are not substituted for a missing baseline requirement.
+
+## Component catalogue coverage
+
+Design IDs are pointers, not conformance evidence. Some older inventory entries
+used C08 for the wire seam and omitted C23 from the scope adapter. This slice
+corrects those metadata associations after checking the actual implementations.
+Each provider's operations, limits and conformance paths remain in
+component-contracts.json and its linked contract document.
+
+| Catalogue ID | Current public/native path | Coverage limit / next requirement |
+| --- | --- | --- |
+| C01 log | LogStore / NativeLogStore; VoteStore narrow voting seam | General retention/segmented cleaning remains. |
+| C02 durability | Exact LogTicket barriers and worker completions bound to LogStore | No independent assertions or maximum-as-prefix fallback. |
+| C03 snapshots | SnapshotStore/Retention/Worker/Router and native providers | Selected crash/restart evidence; retain partial-install and membership checks. |
+| C04 platform I/O | JournalIo, SnapshotIo, VoteIo and native files/codecs | No alternate platform adapter claimed; macOS not executed locally. |
+| C05 application | StateMachine, admission/read/checkpoint, bounded routers, counter and scope applications | Generic application deployment envelopes remain gated where bounds are unavailable. |
+| C06 transport | PeerTransport/Factory, PeerDriver/Roster/Connector and TCP/TLS/QUIC | Supported combinations only; local send progress never means remote durability. |
+| C07 wire | WireCodec / NativeWireCodec, negotiated version/capacity checks | Correct inventory association; no Protobuf/gRPC adapter claimed. |
+| C08 persistent codec | LogCodec, VoteLogCodec, SnapshotCodec and native implementations | Format compatibility distinct from Rust trait compatibility. |
+| C09 secure session | SecureSession / native rustls sessions and QUIC | Established cryptography; service authorization remains separate C21. |
+| C10 scheduler | ReadyScheduler, Shard/TimedShard, EffectOwner/Node, native ready queue | Broader multi-shard deployment evidence remains. |
+| C11 timers | TimerService / native deadlines and explicit generations | Native lateness/owner tests exist; general telemetry remains partial. |
+| C12 clock | Clock / host-injected MonoTime and native clock | No implicit wall clock in the core. |
+| C13 entropy | ElectionEntropy / native jitter and deterministic doubles | Not a credential or cryptographic identity source. |
+| C14 buffers | Internal bounded owned Vec buffers and queue byte accounting | Public BufferPool plus native provider integrated in asynchronous ownership is missing. A standalone unused pool would not close this. |
+| C15 admission | Core hard ceilings, ProposalAdmission, client/read/queue reservations | General host admission-policy seam remains missing; policy cannot bypass hard ceilings. |
+| C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
+| C17 discovery | ManifestCache and directory/routed lookup | General peer/authority hint resolver with bounded retries/invalidation is missing. |
+| C18 placement | PlacementAuthorizer and native declared deployments | Scoring/planning/move proposals are missing; recommendations cannot activate membership. |
+| C19 observability | New Observer / NativeCounterObserver, post-poll capture and local service metrics | Fixed volatile counts only. No timer/queue/disk latency attribution, per-group event history or external exporter integration claim. |
+| C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | General public mutation endpoint and generic envelopes remain gated. |
+| C21 authorization | Transport identities and explicit placement/admin validation | No general principal/credential/scope/refresh/audit provider seam; trusted loopback controls are not remote service authorization. |
+| C22 integrity/compression | Checked native WAL/wire/snapshot framing, CRC and content digests internally | No selectable integrity/compression provider; optional compression is not enabled. |
+| C23 scope transfer | ScopeStateMachine/ScopeImage, BucketCounter and source/target adapters | Core retains fence/publication/activation authority. Broader recursive lifecycle remains partial. |
+| C24 transactions | One-group command/state-machine ordering; no cross-group transaction service | Optional higher layer remains unsupported; do not add global coordination to normal writes. Broader transactions stay P8. |
+
+## Next usable path
+
+1. Finish C19's bounded initial service/Rust slice with actual integration and
+   conformance; keep richer telemetry gaps explicit.
+2. Sketch C14 against existing codec/transport buffer ownership, then implement
+   a pool only with a real native call site and a downstream replacement. Check
+   cross-instance lifetimes, credits, failed admission and shutdown before changing
+   public transport shapes. This advances P0/P2 composition and bounded operation.
+3. Introduce C15's constrained host admission policy against existing hard limits,
+   using C14 ownership where needed. Test refusal/release/retained async ownership
+   and prove policy cannot admit past core ceilings. This advances usable overload
+   control, not live quorum-weight tuning.
+
+These are linked deliverables, not a redefinition of the full goal. P4/P6/P7,
+platform/fault and the remaining supporting catalogue gaps stay in this ledger.

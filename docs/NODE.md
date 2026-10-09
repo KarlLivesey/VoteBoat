@@ -40,6 +40,11 @@ Supply time, provider wakeups/readiness and fair polling from the host. Read-onl
 `local()` and `peers()` expose existing timer/deadline, limits and usage views;
 no background polling is implied.
 
+Hosts can record the returned result through the public `Observer` contract
+after polling. The native service selects `NativeCounterObserver`; the Node
+does not own or invoke it, and refusal never changes the original result.
+See [bounded observations](OBSERVABILITY.md) for lifetime, limits and export.
+
 `propose` and `read` preserve the original request/query on rejection. Client
 proposal admission still validates syntax/dedup capacity twice; applied results
 still require the exact committed entry/application receipt. Reads still require

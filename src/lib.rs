@@ -25,6 +25,7 @@ pub mod log;
 pub mod membership;
 #[cfg(feature = "native")]
 pub mod native;
+pub mod observability;
 pub mod outbound;
 pub mod placement;
 pub mod quorum;

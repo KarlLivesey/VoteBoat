@@ -192,6 +192,10 @@ proposal commitment or physical failure-domain validation.
 
 ## Write, retry and read
 
+For local process counters, run `voteboat-counter client BASE_PORT NODE metrics`.
+These counters reset on restart and are labelled `evidence=local_volatile`;
+they do not establish quorum or durability. See [observability](OBSERVABILITY.md).
+
 Inspect local roles if needed:
 
 ```sh

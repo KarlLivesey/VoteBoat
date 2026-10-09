@@ -2308,3 +2308,37 @@ No production/benchmark behavior, protocol, format, provider or timer change.
 These deterministic schedules do not reconstruct the live QUIC history or prove
 arbitrary-fault safety. Long QUIC acceptance and earlier baseline/platform/p99
 gaps remain open. FullP0–P7 stays active; P8/Windows deferred, CI background.
+
+## Slice 107 — bounded public/native observability and service metrics
+
+Public Observer receives fixed Copy post-poll NodeObservation and exports a Copy
+CounterSnapshot. NativeCounterObserver uses bounded fixed-cardinality saturating
+counters, exact owner/time validation and scoped close, with no I/O, clock reads,
+locks, threads, event queue or persistent state. Node/core do not invoke it;
+observer failure cannot substitute for the original poll result. The executable
+uses the same public seam for normal/admin polling and local volatile metrics.
+
+Executed checks:
+
+- Observer conformance: 3/3 all-features and 2/2 core/contracts-only; independent host
+  shared views, native fixed storage, binding/session/lane/generation/time/close
+  rejection, saturation and failed-poll capture.
+- Owning Node with overloaded/closed host diagnostics: 1/1 core/contracts-only;
+  original write/read outcomes and graceful shutdown remain correct.
+- Real three-process metrics/recovery/retry histories: 2/2 TCP/TLS and QUIC;
+  local counters increase, full joins/reopen preserve values/original retries,
+  and fresh no-quorum startup counters exclude replay delivery. TCP-only build
+  independently passes its 1/1 history.
+- Existing complete executable membership lifecycle: 2/2 TCP/TLS and QUIC;
+  enrollment/promotion/retirement/restart preserve the updated admin poll branch.
+- All-target/all-feature Clippy with warnings denied passes.
+
+The first process attempts failed because the restarted listener was queried
+before readiness. The fixture now awaits a real successful metrics response under
+its deadline; production timers/semantics were unchanged. No performance tests
+were rerun and no performance gain or zero-overhead claim follows. Baseline map
+covers roadmap exits/catalogue pointers but is not a complete normative safety
+or arbitrary-fault audit. Inventory adds the initial C19 seam (72 contracts),
+corrects wire/scope design associations, and retains richer telemetry/missing
+catalogue requirements. Full P0–P7 remains active; existing long QUIC catch-up,
+fixed-p99, platform/lifecycle gaps remain. P8/Windows deferred, CI background.

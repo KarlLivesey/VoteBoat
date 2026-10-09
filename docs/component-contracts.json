@@ -752,7 +752,7 @@
       "scope": "Version-1 same-peer owned batches, node/peer request/message/capacity-byte ceilings, control reserves, snapshot ceilings, fair peer/class visits and credit retention through local completion. PeerTransport consumes dispatched batches and returns them for exact completion after buffer release. Local completion is not a Raft acknowledgement or persistent delivery claim."
     },
     {
-      "design_id": "C08",
+      "design_id": "C07",
       "public_contract": "WireCodec",
       "operations": [
         "format_version",
@@ -1142,7 +1142,7 @@
       "scope": "Exact group incarnation and replica store assignments, minimum voting domains excluding learners, optional survival of each single voting-domain loss evaluated using actual validated weighted/recursive policies. Current stable, accepted joint target and proposed configuration checked; final cannot skip old/new constraints. Trusted operator labels do not certify physical independence. Fixed 4096-replica/64-domain ceilings, unique exact stores and feasible nonzero domain minimum; constructor denial returns original assignments. Synchronous bounded checks retain no requests or receipts and create no durability effect/generation/watermark. Caller reconstructs policy on restart; queued requests recheck selected policy at execution. Placement cannot waive core journal/readiness or provider-capacity obligations. NativeAdministrationPlan composition also exercises TCP/QUIC promotion, joint/final commitment and native file recovery from a prepared initial learner; broader faulted lifecycle remains required. C18 authorization subset only: eligible-host planning, scoring and move proposals remain pending. Slice 76 executable TCP/QUIC histories start from the original bootstrap without seeded configuration records, commit learner addition and promotion of exact store 404/incarnation 7 through trusted plans, retry real offline checkpoint enrollment, deny promotion while the target is offline, and retire absent original voter 1 after a fresh survivor-quorum write. Native checkpoints/reopen preserve exact final voters 2/4, all six operation identities and Counter deduplication while retired routes are omitted. QUIC exercises a majority-wrapped weighted 2/1/2 promotion policy. Maintenance stops and that specific failed-voter schedule do not prove the remaining broad fault-release gates."
     },
     {
-      "design_id": "C06/C08/C10/C20",
+      "design_id": "C06/C07/C10/C20",
       "public_contract": "ConfigurationWireRequirements / ConfigurationWireCapacity / WireFootprint",
       "operations": [
         "WireCodec::configuration_capacity",
@@ -1324,7 +1324,7 @@
       "scope": "One trusted fixed responsibility grant/local group; exact committed bootstrap binding, admission/apply ownership rechecks, key/payload semantic retries, bounded pending/history and nested receipt/read accounting. One-way applied source fence refuses queued data and reads and survives checkpoint/replay; it is not a P6 transfer certificate. Native three-level directory/child histories use distinct child replica sets, remove ancestor caches and stop all parent replicas, then write/read/retry and recover WAL-only/compacted children with unchanged parent WAL state. Changed grants/limits reject recovery. Host injection covers allocated receipt/query/result storage and inner group constraints. No dynamic ownership activation/import/merge, group multiplexing, general authorization service or directory wire endpoint; Linux loopback evidence only."
     },
     {
-      "design_id": "C01/C20",
+      "design_id": "C01/C20/C23",
       "public_contract": "ScopeStateMachine / ScopeImage / BucketCounter<P>",
       "operations": [
         "scope",
@@ -1376,7 +1376,7 @@
       "scope": "Contract 2: bounded exact whole-responsibility split/merge intent. Top-level VBTINT01 remains unchanged; VBTINT02 adds a checked content binding to an authenticated committed parent reservation for a delegated child. Unbound child intents refuse. Local responsibility/target and parent-generation/control reservations plus original outcomes reconstruct through schema-1 journal replay. LifecycleDirectory exposes bounded quorum reservation/completion queries alongside existing handoff status. Selected deterministic delegated split/routing/checkpoint tests and existing top-level native recovery evidence; foreign provenance remains authenticated host input. No native delegated phase/reopen, arbitrary-fault, namespace creation/deletion/reparenting or mixed-version claim."
     },
     {
-      "design_id": "C05/C15",
+      "design_id": "C05/C15/C23",
       "public_contract": "TransferSource<A,P> / SourceFreezeStatus / SourceQuery / SourceRead / SourceExportCommitment",
       "operations": [
         "new",
@@ -1401,7 +1401,7 @@
       "scope": "Bootstrap-bound aggregate lifetime export budget, exact payload/envelope key check, committed irreversible local source fence, routed state frozen at F while wrapper applied prefix progresses. Immutable exact-boundary exports and quorum-readable local status survive WAL-only/checkpoint recovery through real three-node TCP/QUIC histories. Trusted host verifies foreign directory intent and target staging; no cryptographic certificate, committed target import, directory publication/activation, delegated-parent coordination or complete transfer proof. No new worker/store owner. Quorum-readable status now derives per-target SHA-256 commitments from immutable scope images, binding schema/scheme/range/F/length/content; bounded status metadata is charged without changing source checkpoint format. Selected complete top-level split composition now reopens all four three-replica native groups after each committed phase over TCP/QUIC (WAL/checkpoint), reconstructs next actions from fresh quorum status and activates both targets with source permanently fenced; this is graceful committed-boundary recovery, not arbitrary power-loss, automatic resumption or recursive/merge proof. Selected compatible two-source merge composition covers partial fencing, offline-source pause, complete original retry/outbox import, conflicting-ID atomic refusal and TCP/QUIC committed-phase WAL/checkpoint recovery. Activation uses retained publication/import with old sources offline. This does not cover repeated activated-target movement, recursive coordination, retirement or arbitrary faults."
     },
     {
-      "design_id": "C05/C15",
+      "design_id": "C05/C15/C23",
       "public_contract": "TransferTarget<A,P> / TargetImport / SourceImport / TargetLimits / TargetStatus / ImportStatus / TargetReceipt / TargetQuery / TargetRead / TargetActivation / ActivationStatus",
       "operations": [
         "new",
@@ -1482,6 +1482,23 @@
       "native": "Checked parent reservation/completion requests in the existing Directory application journal, public application/read/admission/checkpoint seams and same authoritative storage binding. No new provider/worker.",
       "conformance": ["tests/delegation.rs", "tests/delegation/fixtures.rs", "tests/delegation/repeat.rs", "tests/delegation/cancellation.rs", "tests/directory.rs", "tests/transfer_publication.rs", "tests/routed/delegation.rs", "tests/routed/delegation_repeat.rs", "tests/routed/delegation_cancel.rs"],
       "scope": "One delegated parent's generation and bounded final control history are reserved before child fencing. VBTINT02 binds exact child manifests, operation and authenticated parent reservation facts; decode recomputes content binding. Complete child publication gates parent route epoch update, leaving parent ownership epoch/ancestry stable. Same-group metadata validates actual local retained facts. Original outcomes, locks and control capacity survive journal replay/checkpoint. Five downstream deterministic split/provenance/routing/codec/capacity tests plus two child-locator/cache regressions; foreign observations remain authenticated host obligations. Four selected TCP/QUIC WAL/checkpoint split histories reopen six three-replica groups after every committed phase, survive parent outages, retain unchanged grandparent locators, and commit target retries/new writes with ancestors and old source stopped. A downstream deterministic split/merge/split composition restores fresh targets from retained original child intents, preserves retries/outbox, refuses stale intents/wrong freeze operations and leaves old owners fenced; parent own epoch and grandparent locator stay stable. Four selected native TCP/QUIC WAL/checkpoint split/merge/split histories reopen all created groups after each of 20 later phases, including partial merge fencing and parent outages; final child-only retries/new writes survive with metadata/old owners stopped. Six deterministic cancellation tests cover permanent child refusal before a successful intent, parent release from exact committed refusal, unchanged manifests, fresh compatible transfer 202 with imported retries, both commit orders, same-group provenance, original outcomes, bounded codecs/query accounting and exhausted ordinary/pending control history. Successful child intents always require forward recovery. Two selected native cancellation histories pass: TCP/TLS WAL and QUIC checkpoint recovery, including source continuity during parent outage, exact refusal/cancellation retries and receipt loss, all eleven fresh-transfer reopen phases, committed-intent refusal rejection, and final target data/retry recovery. This is selected coverage, not the full transport/storage cross-product. No namespace creation/deletion/reparenting, parent data migration, arbitrary-fault, mixed-version, macOS or separate-host claim."
+    },
+    {
+      "design_id": "C19",
+      "public_contract": "Observer / NodeObservation / NodeCounters / CounterSnapshot",
+      "operations": [
+        "record_bounded",
+        "snapshot_counters",
+        "close",
+        "NodeObservation::from_poll"
+      ],
+      "native": "NativeCounterObserver, explicitly selected by the host and counter service; no I/O, clocks, locks, threads or event queue",
+      "conformance": [
+        "tests/observability.rs",
+        "tests/support/node.rs",
+        "tests/counter_service.rs"
+      ],
+      "scope": "Fixed-cardinality volatile post-poll counters bound to exact RuntimeOwner and nonregressing host time. Saturating arithmetic, rejection without mutation, copy snapshot export and scoped permanent close. Host providers use the same public interface; shared views remain independent. A refusing observer cannot change original Node writes, reads or shutdown. Real three-process TCP/TLS and QUIC histories expose metrics, preserve values and original retries across full worker joins/reopen, and start fresh counters without startup replay deliveries. Node/core do not invoke diagnostics. No durable or quorum authority, successful-client count, arbitrary callback sandbox, per-group history, latency attribution or external exporter integration is claimed."
     }
   ],
   "not_yet_implemented": [
@@ -1490,7 +1507,7 @@
     "buffers",
     "admission-policy",
     "discovery",
-    "observability",
+    "observability-latency-and-budgeted-events",
     "native-configuration-service-endpoints",
     "authorization",
     "compression",

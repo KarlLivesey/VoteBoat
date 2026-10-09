@@ -1977,3 +1977,79 @@ fn trickled_reply_cannot_extend_the_clients_absolute_routing_deadline() {
     );
     std::fs::remove_dir_all(&cluster.root).unwrap();
 }
+
+fn metrics_history(quic: bool) {
+    fn metrics(cluster: &Cluster, id: usize) -> BTreeMap<String, u64> {
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let reply = loop {
+            let output = cluster.request(id, &["metrics"]);
+            if output.status.success() {
+                break String::from_utf8(output.stdout).unwrap();
+            }
+            assert!(
+                Instant::now() < deadline,
+                "metrics endpoint did not become ready"
+            );
+            std::thread::sleep(Duration::from_millis(10));
+        };
+        assert!(reply.starts_with("OK evidence=local_volatile "), "{reply}");
+        assert!(reply.len() < 1024);
+        reply
+            .split_whitespace()
+            .skip(2)
+            .map(|field| {
+                let (key, value) = field.split_once('=').unwrap();
+                (key.to_string(), value.parse().unwrap())
+            })
+            .collect()
+    }
+    let mut cluster = Cluster::new();
+    cluster.quic = quic;
+    for id in 1..=3 {
+        cluster.start(id, "create");
+    }
+    let leader = cluster.leader();
+    let before = metrics(&cluster, leader);
+    assert!(before["polls"] > 0);
+    assert!(cluster.ok(leader, &["add", "1", "7"]).contains("Value(7)"));
+    assert!(cluster
+        .ok(leader, &["add", "1", "7"])
+        .contains("duplicate=true"));
+    assert!(cluster.ok(leader, &["read"]).contains("value=7"));
+    let after = metrics(&cluster, leader);
+    for (key, value) in &before {
+        assert!(after[key] >= *value, "{key}");
+    }
+    assert!(after["applications"] > before["applications"]);
+    assert!(after["persistence_batches"] > before["persistence_batches"]);
+    assert!(after["peer_received"] > before["peer_received"]);
+    let old_first = metrics(&cluster, 1);
+    cluster.stop();
+    // With no quorum, this restarted process cannot apply a new term's no-op.
+    // Recovery replay is outside poll diagnostics, so the new collector starts
+    // with zero application deliveries while durable application state survives.
+    cluster.start(1, "recover");
+    let fresh = metrics(&cluster, 1);
+    assert!(fresh["store_session"] > old_first["store_session"]);
+    assert_eq!(fresh["applications"], 0);
+    for id in 2..=3 {
+        cluster.start(id, "recover");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "1", "7"])
+        .contains("duplicate=true"));
+    assert!(cluster.ok(leader, &["read"]).contains("value=7"));
+    assert!(cluster.ok(leader, &["add", "2", "3"]).contains("Value(10)"));
+    cluster.stop();
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries() {
+    metrics_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn native_quic_metrics_are_volatile_and_preserve_recovery_and_retries() {
+    metrics_history(true);
+}

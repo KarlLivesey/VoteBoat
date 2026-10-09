@@ -1834,3 +1834,99 @@ fn selected_transport_capacity_rechecks_version_and_roster_budgets_before_persis
         shutdown(&mut n);
     }
 }
+
+#[test]
+fn refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown() {
+    use voteboat::observability::*;
+    struct Refusing {
+        snapshot: CounterSnapshot,
+        attempts: usize,
+    }
+    impl Observer for Refusing {
+        fn record_bounded(&mut self, _: NodeObservation) -> Result<(), ObservationError> {
+            self.attempts += 1;
+            Err(if self.snapshot.closed {
+                ObservationError::Closed
+            } else {
+                ObservationError::Overloaded
+            })
+        }
+        fn snapshot_counters(&self) -> CounterSnapshot {
+            self.snapshot
+        }
+        fn close(&mut self) {
+            self.snapshot.closed = true;
+        }
+    }
+    fn poll(n: &mut Boat, observer: &mut Refusing) {
+        let result = n.poll(MonoTime(0), NodePollBudget::default());
+        let sample =
+            NodeObservation::from_poll(n.local().owner.identity(), MonoTime(0), n.state(), &result);
+        assert_eq!(
+            observer.record_bounded(sample),
+            Err(if observer.snapshot.closed {
+                ObservationError::Closed
+            } else {
+                ObservationError::Overloaded
+            })
+        );
+        result.unwrap();
+    }
+    let mut n = elected();
+    let mut observer = Refusing {
+        snapshot: CounterSnapshot {
+            owner: n.local().owner.identity(),
+            sampled_at: None,
+            state: None,
+            counters: NodeCounters::default(),
+            closed: false,
+        },
+        attempts: 0,
+    };
+    let ticket = n.propose(request(1)).unwrap();
+    let mut completed = false;
+    for _ in 0..100 {
+        poll(&mut n, &mut observer);
+        if let Some(output) = n.poll_client() {
+            assert_eq!(output.ticket(), ticket);
+            assert!(matches!(
+                n.complete_client(output).unwrap(),
+                ClientOutcome::Applied { .. }
+            ));
+            completed = true;
+            break;
+        }
+    }
+    assert!(completed);
+    assert_eq!(n.local().applications[&group(1)].read_applied(2), Ok(7));
+    let ticket = n.read(group(1), ()).unwrap();
+    let mut completed = false;
+    for _ in 0..100 {
+        poll(&mut n, &mut observer);
+        if let Some(output) = n.poll_read() {
+            assert_eq!(output.ticket(), ticket);
+            assert!(matches!(
+                n.complete_read(output).unwrap(),
+                ReadOutcome::Read { result: Ok(7), .. }
+            ));
+            completed = true;
+            break;
+        }
+    }
+    assert!(completed);
+    observer.close();
+    n.begin_shutdown();
+    for _ in 0..100 {
+        poll(&mut n, &mut observer);
+        if n.is_drained() {
+            break;
+        }
+    }
+    assert!(n.is_drained());
+    assert!(n.local().persistence.closed);
+    assert!(observer.attempts > 0);
+    assert_eq!(
+        observer.snapshot_counters().counters,
+        NodeCounters::default()
+    );
+}

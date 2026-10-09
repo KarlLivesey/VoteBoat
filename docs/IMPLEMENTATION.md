@@ -19,6 +19,10 @@ record claims that unimplemented phases already work.
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
+[Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
+component catalogue entries to source/evidence and explicit unresolved work.
+It is a working ledger, not a completion certificate.
+
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
 in the background without gating changes or implementation progress. Local tests
 should follow the changed contract, without repeatedly running unrelated checks.
@@ -107,29 +111,30 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Buffered compaction fault evidence (current, P1/P7).** Slice 106 separates
-   retained log delivery from a dropped-message partition using existing public
-   core/storage/application seams. Purpose: explain what a host-poll pause can
-   establish and preserve recovery/retry safety, advancing broader validation.
-   Dependencies: slice105 per-predicate diagnostics and SnapshotCluster.
-   Completion: explicit host/native-file schedules, full native close/reopen and
-   historical retry, independent rejection of another group's install, and raw
-   failed QUIC diagnostics retained. No benchmark gate is weakened.
-2. **Baseline acceptance reconciliation (next, P0–P7).** Map each roadmap exit
-   condition and component catalogue obligation to direct implementation/evidence.
-   Purpose: choose the next missing baseline deliverable across the full macro
-   plan rather than accumulate benchmarks. Dependencies: chapters12/17, the
-   inventory and phase ledger. Completion: requirement/evidence links with exact
-   unresolved checks, followed by a named bounded implementation slice. Optional
-   adapters/P8 must not become prerequisites or substitute for baseline work.
-3. **Close the selected baseline gap (following).** Implement the behavior or
-   conformance selected by that reconciliation. Purpose: make the requested final
-   state more complete, advancing its mapped macro milestone. Dependencies:
-   explicit API/state/ownership/restart schema and existing native/public seams.
-   Completion: the named acceptance condition passes with relevant local fault
-   checks. If P7 tuning is selected, declare workload/p99 before comparison and
-   require improvement at unchanged durability; the 250 ms serial gate remains
-   open. macOS/separate-host and broader lifecycle/membership gaps stay explicit.
+1. **Bounded observability and baseline map (current, P0/P2).** Slice107
+   introduces Observer/NativeCounterObserver and actual local service metrics.
+   Purpose: complete an initial C19 public/native path and improve the usable
+   service/Rust embedding while making remaining requirements inspectable.
+   Dependencies: returned NodeProgress, exact RuntimeOwner and chapter12/17 audit.
+   Completion: host/native lifetime/budget/error tests, refusing observer beside
+   real Node operations, TCP/QUIC process recovery/retries/metrics and explicit
+   limits in BASELINE_ACCEPTANCE.md. Initial counters do not close richer telemetry.
+2. **Integrated buffer provisioning (next, C14/P0/P2).** Add a public BufferPool
+   and native bounded provider at a real codec/transport ownership boundary.
+   Purpose: let hosts share bounded memory without a hardcoded allocator or an
+   unused helper, advancing composition/overload isolation. Dependencies: inspect
+   existing owned batches and byte reservations, then sketch acquire/transfer/
+   release across rejection, accepted send/receive, cancellation and shutdown.
+   Completion: native path uses the same seam as a downstream replacement; exact
+   credits/lifetimes survive delayed work and dropping another host view.
+3. **Constrained admission policy (following, C15/P0/P2).** Make host policy
+   selection explicit while retaining mandatory hard ceilings and control reserve.
+   Purpose: usable workload admission rather than live quorum-weight changes.
+   Dependencies: current client/queue reservations and integrated buffer ownership.
+   Completion: real native/public admission call site, reject-before-ownership,
+   exact retained/released credits and tests showing a permissive policy cannot
+   exceed core limits or starve reserved control. All remaining baseline/platform/
+   lifecycle/P7 requirements stay open in the linked acceptance map.
 
 ### How the current work fits globally
 
@@ -6697,3 +6702,94 @@ unpassed; its exact transport history remains unresolved. Full P0–P7 and all
 baseline/platform/fixed-p99 gaps stay active; next mini deliverable reconciles
 baseline requirements to concrete evidence before choosing the next missing
 implementation slice. P8/Windows remain deferred and CI is background feedback.
+
+### Slice 107 schema — baseline acceptance map and bounded node observability
+
+Previous turn was progress: 5e7d942 pushed explicit buffered-compaction native
+restart histories. Review of chapter 12 exits and chapter 17 catalogue finds real
+missing supporting seams (including C14 buffers, C19 observability and C21
+service authorization); inventory design IDs alone are not evidence of behavior.
+Current slice closes a bounded part of C19 with a native/public observer actually
+used by the service, rather than another standalone helper. It advances macro
+usable service/Rust embedding and broader validation. Full P0–P7 remains active.
+
+Data/API: fixed-size NodeObservation derived from the already returned poll
+result, RuntimeOwner, host-supplied MonoTime and post-poll NodeState; fixed numeric
+counters only, no payloads, group labels, dynamic strings or retained event queue.
+Public Observer records one borrowed-free Copy sample, exports a Copy counter
+snapshot and closes only its own scope. NativeCounterObserver implements the
+same seam with saturating counters, exact owner binding, monotonic sample time
+and permanent local close. It creates no files, sockets, threads, locks or hidden
+clock. Observation/error/export is diagnostic only, never durable evidence or
+leadership/read authority. Failed polls count as failures with no fabricated
+partial progress; repeated sampling counts repeatedly and is not deduplicated.
+
+Ownership/state: host calls observer after Node poll returns. The Node and core
+never own/invoke diagnostics or await export. Accepted samples update bounded
+in-memory counters synchronously; wrong owner, regressed time and closed scope
+reject without mutating the snapshot. Snapshot remains exportable after close.
+Restart creates a fresh observer for the runtime owner; counters are volatile and
+not replayed from WAL. A host can wrap a bounded/shared external metrics owner;
+closing one view must not close unrelated host users. No observer failure changes
+Node's original result or recovery state.
+
+Service: explicitly select NativeCounterObserver, record through Observer after
+each poll (including failures), then process the original result unchanged.
+Local trusted `metrics` command exports fixed counters with evidence=local_volatile;
+it performs no consensus operation and makes no quorum/health guarantee. Existing
+status/read/write/admin behavior stays unchanged. No service log on every poll.
+
+Acceptance: downstream observer implementation/conformance, wrong binding/session/
+generation, clock regression, saturation, close/export and independent shared
+views; a refusing observer alongside a real owning-Node write/read/shutdown must
+not affect outcomes. Actual three-process service metrics increase through writes,
+reads/retries, expose no persistent claim and reset after restart. Relevant local
+core/native/TLS/QUIC checks, inventory and documentation. No performance gain claim.
+Next: complete requirement/evidence map and select the next missing baseline
+slice; following: implement its schema/contract/fault checks. P8/Windows deferred,
+macOS/separate-host and fixed-p99 remain unresolved, CI background feedback.
+
+### Slice 107 implemented — bounded observable service and baseline map
+
+Added public Observer, fixed NodeObservation/NodeCounters/CounterSnapshot and
+explicit ObservationError, with NativeCounterObserver implementing the same
+seam used by host providers. Native collection is fixed-size, saturating and
+bound to exact RuntimeOwner/nonregressing time; closed/wrong-owner/time-reversed
+samples do not mutate state. Snapshot exports a Copy value and remains readable
+after scoped close. Host sinks may refuse Overloaded without retained work.
+Node/core do not call an observer; hosts record after poll and preserve its result.
+No new authority token, durable watermark, format, queue, clock or resource owner.
+
+The counter executable now explicitly records normal and administrative poll
+results and exposes local `metrics` with evidence=local_volatile, store session
+and fixed counters. Startup replay is not counted as new application delivery;
+restart starts fresh counters. No metrics claim establishes quorum, durability
+or successful client work. Richer latency/per-group events/export integrations
+remain missing. The new baseline acceptance map connects all P0–P7 exits and
+24 catalogue entries to implementation/evidence and unresolved work. Corrected
+wire/scope inventory design-ID associations after checking actual paths; metadata
+is not conformance proof. Inventory now has 72 implemented contracts, including
+this bounded initial C19 scope.
+
+Three observer tests pass all-features and two core/contracts-only; they cover
+host/native scope, shared views, binding/session/lane/generation rejection, clock
+regression, saturation, exported lifetime and failed-result capture. One owning-
+Node test passes core/contracts-only with overloaded/closed observations beside
+real writes, quorum reads and graceful shutdown. Two actual three-process service
+metrics histories pass over TCP/TLS and QUIC: counters increase through useful
+work, full worker shutdown/reopen preserves values/original retries, and a fresh
+process with no quorum has zero new application deliveries and a new store session.
+TCP-only feature build passes its metrics history separately. Existing complete
+executable enrollment/promotion/retirement/restart histories also pass both
+transports (2/2), preserving the updated administration polling branch. All-target/
+all-feature Clippy with warnings denied passes.
+
+Initial metrics process tests exposed a fixture readiness race: spawn returns
+before the restarted command listener is ready. The focused fix waits for an
+actual successful read-only metrics reply under a bounded deadline, with no
+production timing changes. A compile import and lint-only assertion were also
+corrected before final validation. No performance, macOS/separate-host, complete
+fault proof or full-baseline completion claim. Existing long QUIC/p99/lifecycle
+and catalogue gaps stay open. Next linked mini deliverables are integrated C14
+buffers then constrained C15 admission; no unused provider qualifies. Full P0–P7
+stays active, P8/Windows deferred and CI background feedback.

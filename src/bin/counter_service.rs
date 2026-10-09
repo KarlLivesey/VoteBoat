@@ -28,11 +28,12 @@ use std::{
 };
 use voteboat::membership::ConfigurationResumeAction;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
+use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
-voteboat-counter client BASE_PORT NODE status|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
@@ -81,9 +82,19 @@ fn ports(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     }
     Ok((base, id))
 }
-fn command(service: &mut Service, command: &str, quit: &mut bool) -> Result<Phase, String> {
+fn command(
+    service: &mut Service,
+    observer: &impl Observer,
+    command: &str,
+    quit: &mut bool,
+) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
+        ["metrics"] => {
+            let snapshot = observer.snapshot_counters();
+            let c = snapshot.counters;
+            format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures)
+        }
         ["configuration-status", operation] => {
             let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
                 .ok_or("invalid operation ID")?;
@@ -145,7 +156,7 @@ fn command(service: &mut Service, command: &str, quit: &mut bool) -> Result<Phas
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {
@@ -224,6 +235,8 @@ fn serve(
     listener.set_nonblocking(true)?;
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
+    let owner = service.local().owner.identity();
+    let mut observer = NativeCounterObserver::new(owner);
     let start = Instant::now();
     println!(
         "ready node={id} peer={peer_address} transport={protocol:?} command=127.0.0.1:{}",
@@ -233,19 +246,28 @@ fn serve(
     let mut quit = false;
     let mut shutdown_started = None;
     loop {
-        let progress = if let Some(admin) = administration.as_ref() {
-            checked(service.poll_with_configuration_authorization(
-                now(start),
+        let time = now(start);
+        let result = if let Some(admin) = administration.as_ref() {
+            service.poll_with_configuration_authorization(
+                time,
                 NodePollBudget::default(),
                 |core, proposal| {
                     admin
                         .plan
                         .authorize(core.state().bootstrap.group, core.membership(), proposal)
                 },
-            ))?
+            )
         } else {
-            checked(service.poll(now(start), NodePollBudget::default()))?
+            service.poll(time, NodePollBudget::default())
         };
+        // Diagnostics run after poll and cannot replace its original result.
+        let _ = observer.record_bounded(NodeObservation::from_poll(
+            owner,
+            time,
+            service.state(),
+            &result,
+        ));
+        let progress = checked(result)?;
         if let Some(replica) = progress.replica {
             for step in replica.steps {
                 // Client/read errors are reported through their exact output tickets.
@@ -302,7 +324,7 @@ fn serve(
                                     if s.trim_end_matches('\n').contains('\n') {
                                         return Err("one command per connection".into());
                                     }
-                                    command(&mut service, s, &mut quit)
+                                    command(&mut service, &observer, s, &mut quit)
                                 });
                                 match result {
                                     Ok(phase) => c.phase = phase,
@@ -343,6 +365,7 @@ fn serve(
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
+    observer.close();
     setup::join(service)?;
     println!("stopped node={id} workers_joined=true");
     Ok(())
