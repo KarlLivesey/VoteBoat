@@ -67,8 +67,9 @@ See BASELINE_AUDIT.md for the slice136 requirement review and fresh reference
 results. The static-membership networked service and Rust embedding remain
 independent of online-change and lifecycle acceptance work.
 
-1. Retain partial benchmark receipts/outcomes and diagnose the unchanged serial
-   disk critical path, including the failed leadership-change run (P1/P7).
+1. Slice137 implements benchmark failure retention and selected real failure
+   cleanup. Next attribute the unchanged startup serial disk critical path,
+   including any observed leadership-change failure (P1/P7).
 2. Implement a measured, contract-preserving fix and repeat matched disk-backed
    measurements against the original250ms p99 and recovery gates (P1/P7).
 3. Continue the unresolved lifecycle/admission/platform ledger: networked

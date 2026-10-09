@@ -337,7 +337,17 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let preparation = (|| {
         campaign(&mut replicas, clock, groups)?;
         eprintln!("phase=warmup protocol={protocol:?} mode=offered");
-        let warmup = workload(&mut replicas, clock, 1, WARMUP, window, groups)?;
+        let warmup = workload(
+            &mut replicas,
+            clock,
+            Workload {
+                first: 1,
+                count: WARMUP,
+                window,
+                groups,
+                diagnostic: Some((root, "warmup")),
+            },
+        )?;
         let last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
         verify(&mut replicas, clock, WARMUP, groups, &last)?;
         let placement = (1..=groups)

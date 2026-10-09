@@ -111,27 +111,24 @@ delegated-child split. Slices 95–97 add native delegated split and repeated
 split/merge/split phase recovery. Slice 98 adds before-intent reservation recovery;
 its selected native acceptance passes. General retention and broader faults remain.
 
-1. **Baseline audit and fixed reference gate (slice136, P0–P7).** Purpose:
-   tie actual lifecycle/service evidence to all original requirements and measure
-   the unchanged P7 gate. Dependencies:135, chapter12/17/11 and existing native
-   benchmark. Completion: code/evidence audit, retained success/failure artifacts,
-   exact-workload raw/context/numeric checker and recorded validation. Implemented
-   evidence: BASELINE_AUDIT.md; disk B recovery passes but432ms p99 fails250ms;
-   disk A unknown outcome remains a failure. This does not complete P7.
-2. **Failure retention and critical-path diagnosis (next, P1/P7).** Purpose:
-   distinguish why the serial disk path is slow and why A lost leadership before
-   changing production. Dependencies:136 raw failures, existing benchmark and
-   observer/storage contracts. Completion: schema sketch, partial receipts and
-   unknown outcomes retained on failure, stage attribution without weakening the
-   recovery gate, focused tests and fresh matched disk evidence. The diagnostic
-   is necessary because the current failure path discards accumulated samples.
+1. **Failed-history retention (current slice137, P1/P7).** Purpose: preserve
+   completed receipts, unresolved requests, poll totals and replica state when
+   native benchmark progress fails. Dependencies:136 demonstrated failure, current
+   workload/drive/close contracts. Completion: partial-history checks, real native
+   failure with explicit cleanup, unchanged complete reference validation; no
+   successful summary for a failed history or measurement-path diagnostic I/O.
+2. **Startup critical-path attribution (next, P1/P7).** Purpose: distinguish
+   disk barrier/manifest, owner and peer progress costs before changing production.
+   Dependencies:137 retained failures and review of startup provider composition.
+   Completion: schema/contracts sketch, transparent bounded instrumentation that
+   preserves original durability and failure behavior, measured stage evidence
+   for the serial reference, and any observed leadership-change diagnosis.
 3. **Cause-supported improvement and matched acceptance (following, P1/P7).**
-   Purpose: improve usable durable service at the original correctness/p99 budget.
-   Dependencies: measured cause from item2 and relevant provider invariants.
-   Completion: smallest justified fix, crash/conformance regression appropriate
-   to the changed contract and matched original250ms reference gate; record
-   failures honestly and retain all other P0–P7 requirements. If evidence calls
-   for another cause investigation, update the mini plan rather than guess a fix.
+   Purpose: improve the durable service at the original correctness/p99 budget.
+   Dependencies: item2 measured cause and affected provider invariants. Completion:
+   smallest justified fix, appropriate crash/conformance regression and matched
+   original250ms gate. Preserve all other P0–P7 ledger gaps; if evidence changes
+   scope, update the macro/mini plan instead of guessing or relaxing acceptance.
 
 ### How the current work fits globally
 
@@ -9585,3 +9582,79 @@ replaced before pushing, so sensitive artifacts are absent from published histor
 Six direct Node tests pass10.83ms, including path-kind/traversal checks; actual B
 raw checking still passes and numeric gate still fails with exit1. No production
 code or measurement was changed.
+
+## Slice137 schema plan — retained failed benchmark history
+
+Previous slice136 progressed and is pushed115767a; current tree clean. This
+bounded P1/P7 diagnostic slice addresses the demonstrated loss of evidence on
+Unknown(LeadershipChanged), not a speculative production optimization. Macro
+P0–P7 remains intact. Existing startup API fixes the concrete storage provider;
+shared observer totals cannot be substituted for startup attribution. First
+retain failures, then use that evidence to design startup attribution.
+
+Data/API: benchmark-only failure artifact contains phase, original error,
+completed useful-write samples with existing CSV shape, unresolved ticket IDs,
+replica role/term/commit/applied state and accumulated poll totals. The drive loop
+keeps totals even on error; existing until callers retain their contract. Artifact
+writes occur after measured work stops, so no per-operation file sync enters the
+reference workload. Memory stays bounded by requested count/window; no retries,
+timeout changes or unknown-to-applied conversion. No summary or numeric acceptance
+is emitted on failure. Original completed samples remain after later verification
+failure by writing them before verification/recovery.
+
+Ownership/failure: workload borrows nodes, run owns them. On warmup/measurement
+failure retain artifacts, attempt normal close/join and report cleanup failure
+without hiding the original error. Diagnostics are best effort: writing failure
+must not turn a failed history into success or conceal its cause. Artifact roots
+are exclusive per run. Tests use synthetic partial histories and injected loop
+failure; actual native run checks complete reference behavior and raw rejection
+of retained incomplete histories. Partial histories are not recovery proofs.
+
+Mini plan current: failed-history retention (P1/P7), depends on136 failure and
+existing sample/drive/close helpers, completes with meaningful artifact/error
+checks and a fresh native reference. Next: startup critical-path attribution
+(P1/P7), depends on retained states and provider contract review, completion
+requires stage timing without changing durability and measured cause evidence.
+Following: cause-supported fix and matched original250ms/recovery acceptance;
+retain every other baseline ledger gap and update macro scope if evidence changes.
+
+## Slice137 implemented — retained failed benchmark history
+
+Benchmark-only drive now exposes accumulated poll totals to workload failure
+handling. Completed useful-write samples and unresolved ticket IDs are retained
+in phase-specific CSVs, with original error and replica term/role/commit/applied
+state. File writes occur after failure or measured completion, never per command
+inside the measured loop. A failure emits no summary and is never converted into
+a retry/success. Owned warmup/measurement failures attempt normal shutdown/join
+and record cleanup separately without hiding the original error. Successful
+sample CSV now precedes verification/recovery, preserving it if those later
+steps fail. Offered warmup uses the same recorder and existing owned cleanup.
+
+This is a benchmark helper, not a new production seam. Memory remains bounded
+by count/window. Artifacts are diagnostic, not storage tokens or proof an unknown
+operation was applied. Writing failures retain the original error via stderr;
+phase-specific files use exclusive creation. Startup storage attribution remains
+unimplemented here, rather than using shared-assembly counters as its evidence.
+Broader preparation/verification/recovery failure cleanup is not newly claimed.
+
+Three meaningful new tests: synthetic partial history preserves one valid
+receipt and unknown error plus pending request, refuses overwrite/path escape,
+and creates no summary; injected observation failure retains poll count and
+original error; real TCP/TLS three-replica history applies one operation then
+refuses ID2 at DedupCapacity, retains the applied prefix/three replica states,
+joins workers and returns the exact original error. Final example suite16/16
+passed0.02s after3.50s compile. Initial compile .get() on u64 term was corrected
+locally. Release example build6.16s succeeded.
+
+Fresh unchanged disk reference completed52.394331s,4.886ops/s,p99854.999704ms,
+recovered320 with original retries/worker joins verified. Raw256-receipt checker
+passes; fixed250ms gate fails exit1. This finite run is not a performance gain,
+capacity proof or controlled comparison with136. Source/binary hashes and raw
+results recorded in validation/performance/slice137 without private host paths/
+metadata. Six gate tests pass10.82ms; format/inventory checks pass. Production
+Rust, timers, durability and reference workload unchanged. Current deliverable
+closes loss of diagnostic evidence; next startup attribution, then measured safe
+fix. Macro P1/P7 advances, all other baseline gaps remain, full goal active.
+
+Final slice137 example Clippy all-features -D warnings passed1.12s; all
+measurement/test/check handles terminal. No CI gate or full-goal completion claim.

@@ -56,6 +56,8 @@ type Replica<
     NativeServiceConnector,
     voteboat::native::transport::NativeTransportFactory<voteboat::native::wire::NativeWireCodec>,
 >;
+#[path = "benchmark/failure.rs"]
+mod failure;
 #[path = "benchmark/observe.rs"]
 mod observe;
 #[path = "benchmark/offered.rs"]
@@ -251,12 +253,21 @@ fn until<L: LogStore + Send + 'static>(
     clock: &Instant,
     mut done: impl FnMut(&mut [Replica<L>]) -> Result<bool, Failure>,
 ) -> Result<PollTotals, Failure> {
-    let deadline = Instant::now() + Duration::from_secs(120);
     let mut totals = PollTotals::default();
+    drive(replicas, clock, &mut totals, &mut done)?;
+    Ok(totals)
+}
+fn drive<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    totals: &mut PollTotals,
+    mut done: impl FnMut(&mut [Replica<L>]) -> Result<bool, Failure>,
+) -> Result<(), Failure> {
+    let deadline = Instant::now() + Duration::from_secs(120);
     loop {
-        poll(replicas, clock, &mut totals)?;
+        poll(replicas, clock, totals)?;
         if done(replicas)? {
-            return Ok(totals);
+            return Ok(());
         }
         if Instant::now() > deadline {
             return Err("native progress timed out; retained run is invalid".into());
@@ -319,21 +330,33 @@ struct Measurement {
     max_inflight: usize,
     polls: PollTotals,
 }
-fn workload<L: LogStore + Send + 'static>(
-    replicas: &mut [Replica<L>],
-    clock: &Instant,
+struct Workload<'a> {
     first: usize,
     count: usize,
     window: usize,
     groups: usize,
+    diagnostic: Option<(&'a Path, &'a str)>,
+}
+fn workload<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    spec: Workload<'_>,
 ) -> Result<Measurement, Failure> {
+    let Workload {
+        first,
+        count,
+        window,
+        groups,
+        diagnostic,
+    } = spec;
     let start = Instant::now();
     let mut sent = 0;
     let mut pending = BTreeMap::new();
     let mut group_pending = BTreeMap::<GroupIdentity, usize>::new();
     let mut samples = Vec::with_capacity(count);
     let mut max_inflight = 0;
-    let polls = until(replicas, clock, |ns| {
+    let mut polls = PollTotals::default();
+    let result = drive(replicas, clock, &mut polls, |ns| {
         while sent < count && pending.len() < window {
             let operation = (first + sent) as u128;
             let submitted = start.elapsed().as_nanos();
@@ -402,7 +425,29 @@ fn workload<L: LogStore + Send + 'static>(
             }
         }
         Ok(samples.len() == count)
-    })?;
+    });
+    if let Err(error) = result {
+        if let Some((root, phase)) = diagnostic {
+            let unresolved = pending
+                .values()
+                .map(|(ticket, submitted)| {
+                    (ticket.group.id.get(), ticket.operation.get(), *submitted)
+                })
+                .collect::<Vec<_>>();
+            if let Err(retain) = failure::retain(
+                root,
+                phase,
+                &error.to_string(),
+                &samples,
+                &unresolved,
+                &polls,
+                replicas,
+            ) {
+                eprintln!("failed to retain diagnostic: {retain}; original failure: {error}");
+            }
+        }
+        return Err(error);
+    }
     Ok(Measurement {
         elapsed: start.elapsed(),
         samples,
@@ -706,7 +751,20 @@ fn run<L: LogStore + Send + 'static>(
     let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
     campaign(&mut replicas, clock, groups)?;
     eprintln!("phase=warmup protocol={protocol:?} window={window}");
-    let warmup = workload(&mut replicas, clock, 1, WARMUP, window, groups)?;
+    let warmup = match workload(
+        &mut replicas,
+        clock,
+        Workload {
+            first: 1,
+            count: WARMUP,
+            window,
+            groups,
+            diagnostic: Some((root, "warmup")),
+        },
+    ) {
+        Ok(result) => result,
+        Err(error) => return failure::cleanup(replicas, clock, root, error),
+    };
     let warmup_last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
     verify(&mut replicas, clock, WARMUP, groups, &warmup_last)?;
     let placement = (1..=groups)
@@ -727,7 +785,21 @@ fn run<L: LogStore + Send + 'static>(
         .join(",");
     eprintln!("phase=measurement operations={count} groups={groups} leaders={placement}");
     observe::capture(&mut storage, "before_measurement", &traces);
-    let measured = workload(&mut replicas, clock, WARMUP + 1, count, window, groups)?;
+    let measured = match workload(
+        &mut replicas,
+        clock,
+        Workload {
+            first: WARMUP + 1,
+            count,
+            window,
+            groups,
+            diagnostic: Some((root, "measurement")),
+        },
+    ) {
+        Ok(result) => result,
+        Err(error) => return failure::cleanup(replicas, clock, root, error),
+    };
+    failure::write_samples(&mut csv, &measured.samples)?;
     observe::capture(&mut storage, "after_measurement", &traces);
     let last = boundaries(
         warmup
@@ -769,24 +841,6 @@ fn run<L: LogStore + Send + 'static>(
     if shared {
         observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
     }
-    writeln!(
-        csv,
-        "operation,submitted_ns,completed_ns,latency_ns,applied_index,value,group"
-    )?;
-    for s in &measured.samples {
-        writeln!(
-            csv,
-            "{},{},{},{},{},{},{}",
-            s.operation,
-            s.submitted_ns,
-            s.completed_ns,
-            s.completed_ns - s.submitted_ns,
-            s.index,
-            s.value,
-            s.group.id.get()
-        )?;
-    }
-    csv.sync_all()?;
     let mut latency = measured
         .samples
         .iter()

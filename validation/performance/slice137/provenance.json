@@ -1,0 +1,15 @@
+{
+  "source_base": "115767a",
+  "changes": "benchmark diagnostic only; no production source changes",
+  "platform": "Linux",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice137-tcp-serial",
+  "measurement": "three replicas on one host; no exclusive reservation; no overlapping build/bulk work; unchanged startup TCP 256 window1 64 warmup",
+  "sha256": {
+    "Cargo.lock": "532a0f956d683a1f35701ce838c35ede07b4bf98ceb5305370b34a27427b7ae8",
+    "examples/native_benchmark.rs": "a72443c2e7fc13de55c588727cce81c09df68fa728925673a587ea13d3d32591",
+    "examples/benchmark/failure.rs": "b68195a9d2d0f9c4f7ac6171219f333ac4abd2d948644b10cc214164eef5bfc8",
+    "examples/benchmark/offered.rs": "d4ba5dbf2c5079609514e7bb8ab83e975052dd5b6002d59dda7ec3bc822cc407",
+    "target/release/examples/native_benchmark": "de8239b8a97ccd1cc862ff4ef17d812819b6304488bbae0363c17872c15a04dd"
+  }
+}

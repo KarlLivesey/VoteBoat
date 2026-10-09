@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice137-tcp-serial",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "115767a52d57a2bdf071c88a3509860abd789137",
+  "executable_sha256": "de8239b8a97ccd1cc862ff4ef17d812819b6304488bbae0363c17872c15a04dd",
+  "summary_sha256": "ce18da6a88b8d0891016d1a05201c26df752618e37280fb54f6ffc7d19df5506",
+  "samples_sha256": "0838832859d32aea6a660a26ec1fd224a836f71b369bbc48945ae329728650d5"
+}

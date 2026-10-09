@@ -3297,3 +3297,32 @@ the actual workspace-relative benchmark root. Summary/sample/binary hashes and
 measurements are unchanged. Independent hardware reproduction is limited by this
 redaction. Six final direct Node tests pass10.83ms; B actual raw validator passes
 and fixed numeric gate still correctly exits1 after context revision.
+
+## Slice137 — retained native benchmark failures
+
+No production Rust change. Benchmark drive/workload now retains partial valid
+receipts, unresolved tickets, original errors, poll totals and replica state on
+warmup/measurement failure, followed by explicit owned cleanup. Diagnostic I/O
+occurs after measurement stops; incomplete runs cannot produce a success summary.
+Complete samples precede verification/recovery. This does not infer applied state
+from unknown outcomes or add timing/durability relaxation.
+
+Actual tests: example all-features16/16 pass, final0.02s after3.50s build. Three
+new tests validate synthetic unknown history/no summary/exclusive files, injected
+loop failure totals, and real three-node TCP/TLS applied-prefix plus DedupCapacity
+refusal with exact original error and all workers joined. Initial compile used
+.get() on u64 term; focused correction made. Earlier15-test run also passed;
+no claim of complete production fault coverage. Release build success6.16s.
+
+One fresh Btrfs Linux startup TCP/TLS reference (same3 replicas,64 warmup,256
+8-byte commands,window1,timers/durability): exit0,52.394331s,4.886ops/s,
+p99854.999704ms,recovered320,retries verified,workers joined. Independent raw
+checker passes256 receipts/window/history/timing. Fixed250ms numerical gate
+correctly returns failure exit1. No tuning gain, sustainable-capacity or cause
+claim. Raw/source/binary evidence in performance/slice137, private workspace path
+redacted in archived checker stdout. No overlapping build during measurement.
+Six gate/context tests pass10.82ms; format and80-contract inventory pass. Next
+startup critical-path attribution then a cause-supported safe fix. P0–P7 active;
+P8/Windows deferred, RPL-1.5 retained, original pack preserved, CI background.
+
+Final example all-feature Clippy -D warnings passed1.12s. All handles terminal.
