@@ -245,23 +245,13 @@ fn serve(
 ) -> Result<(), Failure> {
     let (protocol, plan_path, access_path, admin_mode) = options;
     let remote = admin_mode != administration::Mode::Automatic;
-    if remote && (access_path.is_none() || plan_path.is_none()) {
-        return Err("remote administration requires service access and provisioned plan".into());
-    }
-    let create = match mode {
-        "create" => true,
-        "recover" | "recover-member" => false,
-        _ => return Err("expected create, recover or recover-member".into()),
-    };
-    if matches!(input, setup::PeerInput::Deployment(_)) && mode != "recover-member" {
-        return Err(
-            "explicit deployment requires recover-member; enrollment uses enroll create|recover"
-                .into(),
-        );
-    }
-    if plan_path.is_some() && mode != "recover-member" {
-        return Err("administration plan requires recover-member".into());
-    }
+    let create = checked_service_mode(
+        mode,
+        &input,
+        remote,
+        access_path.is_some(),
+        plan_path.is_some(),
+    )?;
     let config = setup::configuration(root, id, base, tls, create, input)?;
     let access = access_path
         .map(|path| service_access::Access::load(path, tls, config.startup.tls.clone()))
@@ -292,148 +282,37 @@ fn serve(
         // Observe command closure/deadline and cancel its exact pending work
         // before this iteration can authorize queued membership execution.
         if !quit && connection.is_none() {
-            match listener.accept() {
-                Ok((stream, _)) => {
-                    stream.set_nonblocking(true)?;
-                    command_generation = command_generation
-                        .checked_add(1)
-                        .ok_or("command generation exhausted")?;
-                    connection = Some(Connection {
-                        stream: service_access::Channel::server(stream, access.is_some()),
-                        phase: Phase::Input {
-                            bytes: [0; 256],
-                            len: 0,
-                        },
-                        deadline: Instant::now() + Duration::from_secs(5),
-                    });
-                }
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
-                Err(e) => return Err(e.into()),
-            }
+            connection = accept_connection(&listener, access.is_some(), &mut command_generation)?;
         }
-        let mut remove = false;
-        let mut remove_reason = "channel";
-        if let Some(c) = &mut connection {
-            if Instant::now() >= c.deadline {
-                remove_reason = "deadline";
-                remove = true;
-            } else {
-                match c.stream.poll(
-                    access.as_ref(),
-                    command_local,
-                    SecureSessionGeneration::new(command_generation).unwrap(),
-                    time,
-                ) {
-                    Err(_) => remove = true,
-                    Ok(false) => (),
-                    Ok(true) => match &mut c.phase {
-                        Phase::Input { bytes, len } => match c.stream.read(&mut bytes[*len..]) {
-                            Ok(0) => remove = true,
-                            Ok(n) => {
-                                *len += n;
-                                if bytes[..*len].contains(&b'\n') {
-                                    let input = std::str::from_utf8(&bytes[..*len])
-                                        .map_err(|_| "invalid UTF-8".to_string());
-                                    let result = input.and_then(|s| {
-                                        if s.trim_end_matches('\n').contains('\n') {
-                                            return Err("one command per connection".into());
-                                        }
-                                        c.stream.authorize(access.as_ref(), group(), s, time)?;
-                                        command(
-                                            &mut service,
-                                            &observer,
-                                            s,
-                                            &mut administration,
-                                            &mut quit,
-                                        )
-                                    });
-                                    match result {
-                                        Ok(phase) => c.phase = phase,
-                                        Err(e) => c.reply(format!("ERR {e}")),
-                                    }
-                                } else if *len == bytes.len() {
-                                    c.reply("ERR command too long".into());
-                                }
-                            }
-                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
-                            Err(_) => remove = true,
-                        },
-                        Phase::Output { bytes, sent } => {
-                            if *sent < bytes.len() {
-                                match c.stream.write(&bytes[*sent..]) {
-                                    Ok(0) => remove = true,
-                                    Ok(n) => *sent += n,
-                                    Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
-                                    Err(_) => remove = true,
-                                }
-                            }
-                            remove |= *sent == bytes.len() && c.stream.is_flushed();
-                        }
-                        Phase::Pending(_) => (),
-                    },
-                }
-            }
-        }
-        if remove {
-            // Deadline and TLS/channel failure release the same pending host
-            // ticket; cancellation cannot undo an already committed command.
-            if let Some(Connection {
-                phase: Phase::Pending(p),
-                ..
-            }) = &connection
-            {
-                match *p {
-                    Pending::Write(t) => {
-                        checked(service.cancel_client(t))?;
-                    }
-                    Pending::Read(t) => {
-                        checked(service.cancel_read(t))?;
-                    }
-                    Pending::Configure(_) => {
-                        if let Some(admin) = administration.as_mut() {
-                            admin.cancel_remote(&mut service, remove_reason)?;
-                        }
-                    }
-                }
-            }
+        let remove_reason = connection.as_mut().and_then(|c| {
+            c.poll(
+                access.as_ref(),
+                command_local,
+                SecureSessionGeneration::new(command_generation).unwrap(),
+                time,
+                |s| command(&mut service, &observer, s, &mut administration, &mut quit),
+            )
+        });
+
+        if let Some(remove_reason) = remove_reason {
+            cancel_connection(
+                &mut service,
+                &mut administration,
+                &connection,
+                remove_reason,
+            )?;
             connection = None;
         }
 
-        let result = if let Some(admin) = administration.as_ref() {
-            service.poll_with_configuration_authorization(
-                time,
-                NodePollBudget::default(),
-                |core, proposal| {
-                    if admin.remote() {
-                        let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
-                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
-                            .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
-                        live.stream.authorize(access.as_ref(), group(), "configure", time)
-                            .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
-                    }
-                    admin
-                        .authorize(core.state().bootstrap.group, core.membership(), proposal)
-                },
-            )
-        } else {
-            service.poll(time, NodePollBudget::default())
-        };
-        // Diagnostics run after poll and cannot replace its original result.
-        let _ = observer.record_bounded(NodeObservation::from_poll(
-            owner,
+        poll_service(
+            &mut service,
+            &mut observer,
+            administration.as_ref(),
+            &connection,
+            access.as_ref(),
             time,
-            service.state(),
-            &result,
-        ));
-        let progress = checked(result)?;
-        if let Some(replica) = progress.replica {
-            for step in replica.steps {
-                // Client/read errors are reported through their exact output tickets.
-                if let Some(error) = step.error {
-                    eprintln!("event: {error:?}");
-                }
-            }
-        }
+            owner,
+        )?;
         outputs(&mut service, &mut connection)?;
         if let Some(admin) = administration.as_mut() {
             admin.tick(&mut service, quit)?;
@@ -465,59 +344,13 @@ fn serve(
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
-    let mut protocol = NativePeerProtocol::TcpTls;
-    let mut transport_selected = false;
-    let mut deployment = None;
-    let mut admin_plan = None;
-    let mut service_access = None;
-    let mut remote_admin = administration::Mode::Automatic;
-    while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
-        let flag = args[args.len() - 2].as_str();
-        if !matches!(
-            flag,
-            "--transport"
-                | "--deployment"
-                | "--admin-plan"
-                | "--remote-admin-plan"
-                | "--remote-admin-policy"
-                | "--service-access"
-        ) {
-            break;
-        }
-        let value = args.pop().unwrap();
-        match args.pop().unwrap().as_str() {
-            "--transport" if !transport_selected && args[0] == "serve" => {
-                transport_selected = true;
-                protocol = match value.as_str() {
-                    "tcp" => NativePeerProtocol::TcpTls,
-                    #[cfg(feature = "quic")]
-                    "quic" => NativePeerProtocol::Quic,
-                    #[cfg(not(feature = "quic"))]
-                    "quic" => {
-                        return Err("QUIC support requires building with --features quic".into())
-                    }
-                    _ => return Err("expected --transport tcp or --transport quic".into()),
-                };
-            }
-            "--deployment" if deployment.is_none() => {
-                deployment = Some(std::path::PathBuf::from(value))
-            }
-            flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
-                if admin_plan.is_none() && args[0] == "serve" =>
-            {
-                remote_admin = match flag {
-                    "--remote-admin-plan" => administration::Mode::Provisioned,
-                    "--remote-admin-policy" => administration::Mode::Targets,
-                    _ => administration::Mode::Automatic,
-                };
-                admin_plan = Some(std::path::PathBuf::from(value))
-            }
-            "--service-access" if service_access.is_none() && args[0] == "serve" => {
-                service_access = Some(std::path::PathBuf::from(value));
-            }
-            _ => return Err("duplicate or unsupported startup option".into()),
-        }
-    }
+    let StartupOptions {
+        protocol,
+        deployment,
+        admin_plan,
+        service_access,
+        remote_admin,
+    } = startup_options(&mut args)?;
     match args.as_slice() {
         [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
             if enroll_arg == "enroll" && rest.len() <= 1 =>
@@ -578,4 +411,263 @@ fn main() -> Result<(), Failure> {
         }
         _ => Err(HELP.into()),
     }
+}
+
+impl Connection {
+    fn poll(
+        &mut self,
+        access: Option<&service_access::Access>,
+        local: voteboat::secure::LocalIdentity,
+        generation: SecureSessionGeneration,
+        time: MonoTime,
+        mut command: impl FnMut(&str) -> Result<Phase, String>,
+    ) -> Option<&'static str> {
+        let mut remove = false;
+        let mut remove_reason = "channel";
+        if Instant::now() >= self.deadline {
+            remove_reason = "deadline";
+            remove = true;
+        } else {
+            match self.stream.poll(access, local, generation, time) {
+                Err(_) => remove = true,
+                Ok(false) => (),
+                Ok(true) => match &mut self.phase {
+                    Phase::Input { bytes, len } => match self.stream.read(&mut bytes[*len..]) {
+                        Ok(0) => remove = true,
+                        Ok(n) => {
+                            *len += n;
+                            if bytes[..*len].contains(&b'\n') {
+                                let input = std::str::from_utf8(&bytes[..*len])
+                                    .map_err(|_| "invalid UTF-8".to_string());
+                                let result = input.and_then(|s| {
+                                    if s.trim_end_matches('\n').contains('\n') {
+                                        return Err("one command per connection".into());
+                                    }
+                                    self.stream.authorize(access, group(), s, time)?;
+                                    command(s)
+                                });
+                                match result {
+                                    Ok(phase) => self.phase = phase,
+                                    Err(e) => self.reply(format!("ERR {e}")),
+                                }
+                            } else if *len == bytes.len() {
+                                self.reply("ERR command too long".into());
+                            }
+                        }
+                        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                        Err(_) => remove = true,
+                    },
+                    Phase::Output { bytes, sent } => {
+                        if *sent < bytes.len() {
+                            match self.stream.write(&bytes[*sent..]) {
+                                Ok(0) => remove = true,
+                                Ok(n) => *sent += n,
+                                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                                Err(_) => remove = true,
+                            }
+                        }
+                        remove |= *sent == bytes.len() && self.stream.is_flushed();
+                    }
+                    Phase::Pending(_) => (),
+                },
+            }
+        }
+        remove.then_some(remove_reason)
+    }
+}
+fn cancel_connection(
+    service: &mut Service,
+    administration: &mut Option<administration::Administration>,
+    connection: &Option<Connection>,
+    remove_reason: &str,
+) -> Result<(), Failure> {
+    // Deadline and TLS/channel failure release the same pending host
+    // ticket; cancellation cannot undo an already committed command.
+    if let Some(Connection {
+        phase: Phase::Pending(p),
+        ..
+    }) = connection
+    {
+        match *p {
+            Pending::Write(t) => {
+                checked(service.cancel_client(t))?;
+            }
+            Pending::Read(t) => {
+                checked(service.cancel_read(t))?;
+            }
+            Pending::Configure(_) => {
+                if let Some(admin) = administration.as_mut() {
+                    admin.cancel_remote(service, remove_reason)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+struct StartupOptions {
+    protocol: NativePeerProtocol,
+    deployment: Option<std::path::PathBuf>,
+    admin_plan: Option<std::path::PathBuf>,
+    service_access: Option<std::path::PathBuf>,
+    remote_admin: administration::Mode,
+}
+fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
+    let mut protocol = NativePeerProtocol::TcpTls;
+    let mut transport_selected = false;
+    let mut deployment = None;
+    let mut admin_plan = None;
+    let mut service_access = None;
+    let mut remote_admin = administration::Mode::Automatic;
+    while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
+        let flag = args[args.len() - 2].as_str();
+        if !matches!(
+            flag,
+            "--transport"
+                | "--deployment"
+                | "--admin-plan"
+                | "--remote-admin-plan"
+                | "--remote-admin-policy"
+                | "--service-access"
+        ) {
+            break;
+        }
+        let value = args.pop().unwrap();
+        match args.pop().unwrap().as_str() {
+            "--transport" if !transport_selected && args[0] == "serve" => {
+                transport_selected = true;
+                protocol = match value.as_str() {
+                    "tcp" => NativePeerProtocol::TcpTls,
+                    #[cfg(feature = "quic")]
+                    "quic" => NativePeerProtocol::Quic,
+                    #[cfg(not(feature = "quic"))]
+                    "quic" => {
+                        return Err("QUIC support requires building with --features quic".into())
+                    }
+                    _ => return Err("expected --transport tcp or --transport quic".into()),
+                };
+            }
+            "--deployment" if deployment.is_none() => {
+                deployment = Some(std::path::PathBuf::from(value))
+            }
+            flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
+                if admin_plan.is_none() && args[0] == "serve" =>
+            {
+                remote_admin = match flag {
+                    "--remote-admin-plan" => administration::Mode::Provisioned,
+                    "--remote-admin-policy" => administration::Mode::Targets,
+                    _ => administration::Mode::Automatic,
+                };
+                admin_plan = Some(std::path::PathBuf::from(value))
+            }
+            "--service-access" if service_access.is_none() && args[0] == "serve" => {
+                service_access = Some(std::path::PathBuf::from(value));
+            }
+            _ => return Err("duplicate or unsupported startup option".into()),
+        }
+    }
+    Ok(StartupOptions {
+        protocol,
+        deployment,
+        admin_plan,
+        service_access,
+        remote_admin,
+    })
+}
+
+fn poll_service(
+    service: &mut Service,
+    observer: &mut NativeCounterObserver,
+    administration: Option<&administration::Administration>,
+    connection: &Option<Connection>,
+    access: Option<&service_access::Access>,
+    time: MonoTime,
+    owner: RuntimeOwner,
+) -> Result<(), Failure> {
+    let result = if let Some(admin) = administration {
+        service.poll_with_configuration_authorization(
+                time,
+                NodePollBudget::default(),
+                |core, proposal| {
+                    if admin.remote() {
+                        let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
+                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
+                            .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                        live.stream.authorize(access, group(), "configure", time)
+                            .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
+                    }
+                    admin
+                        .authorize(core.state().bootstrap.group, core.membership(), proposal)
+                },
+            )
+    } else {
+        service.poll(time, NodePollBudget::default())
+    };
+    // Diagnostics run after poll and cannot replace its original result.
+    let _ = observer.record_bounded(NodeObservation::from_poll(
+        owner,
+        time,
+        service.state(),
+        &result,
+    ));
+    let progress = checked(result)?;
+    if let Some(replica) = progress.replica {
+        for step in replica.steps {
+            // Client/read errors are reported through their exact output tickets.
+            if let Some(error) = step.error {
+                eprintln!("event: {error:?}");
+            }
+        }
+    }
+    Ok(())
+}
+fn accept_connection(
+    listener: &TcpListener,
+    authenticated: bool,
+    generation: &mut u64,
+) -> Result<Option<Connection>, Failure> {
+    match listener.accept() {
+        Ok((stream, _)) => {
+            stream.set_nonblocking(true)?;
+            *generation = generation
+                .checked_add(1)
+                .ok_or("command generation exhausted")?;
+            Ok(Some(Connection {
+                stream: service_access::Channel::server(stream, authenticated),
+                phase: Phase::Input {
+                    bytes: [0; 256],
+                    len: 0,
+                },
+                deadline: Instant::now() + Duration::from_secs(5),
+            }))
+        }
+        Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => Ok(None),
+        Err(e) => Err(e.into()),
+    }
+}
+
+fn checked_service_mode(
+    mode: &str,
+    input: &setup::PeerInput<'_>,
+    remote: bool,
+    has_access: bool,
+    has_plan: bool,
+) -> Result<bool, Failure> {
+    if remote && (!has_access || !has_plan) {
+        return Err("remote administration requires service access and provisioned plan".into());
+    }
+    let create = match mode {
+        "create" => true,
+        "recover" | "recover-member" => false,
+        _ => return Err("expected create, recover or recover-member".into()),
+    };
+    if matches!(input, setup::PeerInput::Deployment(_)) && mode != "recover-member" {
+        return Err(
+            "explicit deployment requires recover-member; enrollment uses enroll create|recover"
+                .into(),
+        );
+    }
+    if has_plan && mode != "recover-member" {
+        return Err("administration plan requires recover-member".into());
+    }
+    Ok(create)
 }

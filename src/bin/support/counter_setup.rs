@@ -91,70 +91,10 @@ pub fn configuration(
         .map(|n| (node(n), store_id(n)))
         .collect::<BTreeMap<_, _>>();
     if let PeerInput::Legacy(Some(path)) = input {
-        addresses.clear();
-        let data = material(path, 4096)?;
-        for line in std::str::from_utf8(&data)?.lines() {
-            let words = line.split_whitespace().collect::<Vec<_>>();
-            let [id, address, name] = words.as_slice() else {
-                return Err("expected NODE SOCKET_ADDRESS TLS_SERVER_NAME".into());
-            };
-            let id: u64 = id.parse()?;
-            if !(1..=3).contains(&id)
-                || addresses
-                    .insert(node(id), (address.parse()?, name.to_string()))
-                    .is_some()
-            {
-                return Err("invalid or duplicate endpoint node".into());
-            }
-        }
-        if addresses.len() != 3 {
-            return Err("exactly three peer endpoints required".into());
-        }
+        load_legacy_endpoints(path, &mut addresses)?;
     }
     if let PeerInput::Deployment(path) = input {
-        addresses.clear();
-        stores.clear();
-        let data = material(path, 65536)?;
-        let mut lines = std::str::from_utf8(&data)?.lines();
-        if lines.next() != Some("voteboat-deployment-v1") {
-            return Err("expected voteboat-deployment-v1 header".into());
-        }
-        let mut identities = std::collections::BTreeSet::new();
-        let mut sockets = std::collections::BTreeSet::new();
-        for line in lines {
-            if stores.len() >= 1024 {
-                return Err("deployment exceeds 1024 replicas".into());
-            }
-            let words = line.split_whitespace().collect::<Vec<_>>();
-            let [number, store, incarnation, address, name] = words.as_slice() else {
-                return Err(
-                    "expected NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME"
-                        .into(),
-                );
-            };
-            let number: u64 = number.parse()?;
-            let store = StoreIdentity {
-                id: StoreId::new(store.parse()?).ok_or("invalid store ID")?,
-                incarnation: StoreIncarnation::new(incarnation.parse()?)
-                    .ok_or("invalid store incarnation")?,
-            };
-            let address: SocketAddr = address.parse()?;
-            if !(1..=MAX_NODE).contains(&number)
-                || address.port() == 0
-                || address.ip().is_unspecified()
-                || name.len() > 253
-                || rustls::pki_types::ServerName::try_from(*name).is_err()
-                || !identities.insert((store.id, store.incarnation))
-                || !sockets.insert(address)
-                || stores.insert(node(number), store).is_some()
-            {
-                return Err("invalid or duplicate deployment identity/endpoint".into());
-            }
-            addresses.insert(node(number), (address, name.to_string()));
-        }
-        if !stores.contains_key(&node(id)) {
-            return Err("local node missing from deployment".into());
-        }
+        load_deployment(path, id, &mut addresses, &mut stores)?;
     }
     let voters = (1..=3)
         .map(|n| (node(n), store_id(n)))
@@ -383,4 +323,78 @@ pub fn join(service: Service) -> Result<(), Failure> {
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
+}
+
+type PeerAddresses = BTreeMap<NodeId, (SocketAddr, String)>;
+fn load_legacy_endpoints(path: &Path, addresses: &mut PeerAddresses) -> Result<(), Failure> {
+    addresses.clear();
+    let data = material(path, 4096)?;
+    for line in std::str::from_utf8(&data)?.lines() {
+        let words = line.split_whitespace().collect::<Vec<_>>();
+        let [id, address, name] = words.as_slice() else {
+            return Err("expected NODE SOCKET_ADDRESS TLS_SERVER_NAME".into());
+        };
+        let id: u64 = id.parse()?;
+        if !(1..=3).contains(&id)
+            || addresses
+                .insert(node(id), (address.parse()?, name.to_string()))
+                .is_some()
+        {
+            return Err("invalid or duplicate endpoint node".into());
+        }
+    }
+    if addresses.len() != 3 {
+        return Err("exactly three peer endpoints required".into());
+    }
+    Ok(())
+}
+fn load_deployment(
+    path: &Path,
+    id: u64,
+    addresses: &mut PeerAddresses,
+    stores: &mut BTreeMap<NodeId, StoreIdentity>,
+) -> Result<(), Failure> {
+    addresses.clear();
+    stores.clear();
+    let data = material(path, 65536)?;
+    let mut lines = std::str::from_utf8(&data)?.lines();
+    if lines.next() != Some("voteboat-deployment-v1") {
+        return Err("expected voteboat-deployment-v1 header".into());
+    }
+    let mut identities = std::collections::BTreeSet::new();
+    let mut sockets = std::collections::BTreeSet::new();
+    for line in lines {
+        if stores.len() >= 1024 {
+            return Err("deployment exceeds 1024 replicas".into());
+        }
+        let words = line.split_whitespace().collect::<Vec<_>>();
+        let [number, store, incarnation, address, name] = words.as_slice() else {
+            return Err(
+                "expected NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME".into(),
+            );
+        };
+        let number: u64 = number.parse()?;
+        let store = StoreIdentity {
+            id: StoreId::new(store.parse()?).ok_or("invalid store ID")?,
+            incarnation: StoreIncarnation::new(incarnation.parse()?)
+                .ok_or("invalid store incarnation")?,
+        };
+        let address: SocketAddr = address.parse()?;
+        if !(1..=MAX_NODE).contains(&number)
+            || address.port() == 0
+            || address.ip().is_unspecified()
+            || name.len() > 253
+            || rustls::pki_types::ServerName::try_from(*name).is_err()
+            || !identities.insert((store.id, store.incarnation))
+            || !sockets.insert(address)
+            || stores.insert(node(number), store).is_some()
+        {
+            return Err("invalid or duplicate deployment identity/endpoint".into());
+        }
+        addresses.insert(node(number), (address, name.to_string()));
+    }
+    if !stores.contains_key(&node(id)) {
+        return Err("local node missing from deployment".into());
+    }
+    Ok(())
 }

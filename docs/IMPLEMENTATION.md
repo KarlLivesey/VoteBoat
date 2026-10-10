@@ -13893,3 +13893,36 @@ comprising5 executable,8 example and227 integration-test diagnostics. This is
 still a failed whole-repository lint result. Prior39/112 reports were partial
 fail-fast runs, not total counts. Next clean the runnable service's five findings,
 then examples and integration fixtures, preserving their failure histories.
+
+### Counter executable lint cleanup — schema plan
+
+Preserve CLI grammar, deployment limits, TLS authorization and command deadlines.
+Separate legacy/deployment parsing from service configuration. Separate admin
+result consumption, trusted proposal selection and learner-readiness collection;
+retain original tick order and cancellation. Separate bounded connection I/O
+from service polling so close/deadline cancellation still precedes execution-time
+configuration authorization. Parse trailing startup options separately from
+command dispatch. No wire, provider, access rule or retry semantics change.
+Acceptance: executable recovery/enrollment/admin/authenticated TCP/QUIC tests,
+CLI refusal cases, formatting and strict executable Clippy. This advances mini
+item1 and the usable service/online-membership macro milestones.
+
+## Counter executable lint cleanup — implemented evidence
+
+Separated legacy/deployment endpoint parsing, startup-option parsing and mode
+validation. Administration now consumes completions, selects the trusted proposal
+and collects learner readiness in distinct phases. Connection accept/read/write
+and cancellation are separate from authorized service polling. Input deadlines,
+exact-ticket cancellation, observer ordering, TLS authorization and CLI output
+remain unchanged. No new provider or protocol.
+
+Strict executable Clippy passes with all features and with TLS-only features.
+All33 counter_service process tests pass with all features, including TCP/QUIC
+restart, enrollment, authenticated commands, configuration cancellation and
+unread-commit recovery. Formatting/whitespace pass. The complete strict
+--keep-going all-target/all-feature check still fails with235 distinct remaining
+diagnostics:8 in examples and227 in integration tests. None remain in the
+library, its inline tests or the executable. Thresholds and deny levels are
+unchanged. Next within mini item1: clean the example setup/workload functions,
+then bounded groups of shared integration fixtures and their test histories;
+rerun the affected targets. The wider goal remains active.

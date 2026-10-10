@@ -428,7 +428,7 @@ impl Administration {
         }
         Ok(())
     }
-    pub fn tick(&mut self, service: &mut Service, shutting_down: bool) -> Result<(), Failure> {
+    fn consume_results(&mut self, service: &mut Service) -> Result<(), Failure> {
         while let Some(result) = service.poll_configuration() {
             if self.pending != Some(result.ticket) {
                 return Err("unrecognized administration ticket".into());
@@ -480,10 +480,12 @@ impl Administration {
                 }
             }
         }
-        if shutting_down || self.stopped || self.pending.is_some() || Instant::now() < self.next {
-            return Ok(());
-        }
-        self.next = Instant::now() + Duration::from_millis(250);
+        Ok(())
+    }
+    fn next_proposal(
+        &mut self,
+        service: &Service,
+    ) -> Result<Option<(ConfigurationProposal, Vec<NodeId>)>, Failure> {
         let core = service
             .local()
             .owner
@@ -491,14 +493,14 @@ impl Administration {
             .ok_or("missing administration group")?;
         if core.role() != Role::Leader || !core.local_voter() {
             self.proofs.clear();
-            return Ok(());
+            return Ok(None);
         }
         let state = core.state();
         if state.commit_index == 0
             || state.term_at(state.commit_index) != Some(state.hard_state.term)
         {
             self.proofs.clear();
-            return Ok(());
+            return Ok(None);
         }
         let mut selected = self.target.clone();
         for intent in self
@@ -509,12 +511,12 @@ impl Administration {
             match checked(service.configuration_status(group(), intent.operation))?.resume_action()
             {
                 ConfigurationResumeAction::Completed => continue,
-                ConfigurationResumeAction::WaitForCommit => return Ok(()),
+                ConfigurationResumeAction::WaitForCommit => return Ok(None),
                 ConfigurationResumeAction::Finalize(record) => {
                     if !self.intents().contains(&record) {
                         self.stopped = true;
                         eprintln!("administration blocked: final record absent from trusted plan");
-                        return Ok(());
+                        return Ok(None);
                     }
                     selected = Some(record);
                     break;
@@ -534,7 +536,7 @@ impl Administration {
                 ));
             }
             eprintln!("administration historical operations completed; inspect configuration-status for local evidence");
-            return Ok(());
+            return Ok(None);
         };
         // Validate before spending readiness work. Local absence alone grants no
         // authority: this exact record came from the operator's startup file.
@@ -543,9 +545,9 @@ impl Administration {
             eprintln!(
                 "administration blocked: expected configuration differs from local accepted head"
             );
-            return Ok(());
+            return Ok(None);
         }
-        let mut proposal = ConfigurationProposal {
+        let proposal = ConfigurationProposal {
             record,
             readiness: Vec::new(),
             requirements: self.requirements(),
@@ -553,7 +555,7 @@ impl Administration {
         if let Err(error) = self.authorize(group(), core.membership(), &proposal) {
             self.stopped = true;
             eprintln!("administration blocked: {error:?}");
-            return Ok(());
+            return Ok(None);
         }
         let required = match &proposal.record.change {
             ConfigurationChange::Joint { next, .. } => next
@@ -564,6 +566,19 @@ impl Administration {
                 .collect::<Vec<_>>(),
             _ => Vec::new(),
         };
+        Ok(Some((proposal, required)))
+    }
+    fn collect_readiness(
+        &mut self,
+        service: &mut Service,
+        proposal: &ConfigurationProposal,
+        required: &[NodeId],
+    ) -> Result<bool, Failure> {
+        let core = service
+            .local()
+            .owner
+            .core(group())
+            .ok_or("missing administration group")?;
         let peers = service.peers().ok_or("missing administration peers")?;
         self.proofs.retain(|id, proof| {
             required.contains(id)
@@ -610,9 +625,23 @@ impl Administration {
                     self.waiting = Some((*id, Instant::now()));
                 }
             }
-            return Ok(());
+            return Ok(false);
         }
         self.waiting = None;
+        Ok(true)
+    }
+    pub fn tick(&mut self, service: &mut Service, shutting_down: bool) -> Result<(), Failure> {
+        self.consume_results(service)?;
+        if shutting_down || self.stopped || self.pending.is_some() || Instant::now() < self.next {
+            return Ok(());
+        }
+        self.next = Instant::now() + Duration::from_millis(250);
+        let Some((mut proposal, required)) = self.next_proposal(service)? else {
+            return Ok(());
+        };
+        if !self.collect_readiness(service, &proposal, &required)? {
+            return Ok(());
+        }
         proposal.readiness = required.iter().map(|id| self.proofs[id].clone()).collect();
         match service.configure(ConfigurationRequest {
             group: group(),
