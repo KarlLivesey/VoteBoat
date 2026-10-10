@@ -134,6 +134,16 @@ remain explicit host assembly. See [the roster contract](PEER_ROSTER.md).
 
 ## Configuration envelope admission
 
+The [selected provider review218](../validation/baseline/slice218/README.md)
+runs shared three-group histories against an independent downstream logical-frame
+transport and the native transport over controlled HostSessions. It checks
+original tickets through partial progress, held flush, terminal slots, receive
+ordering, close/abort and replacement-queue rejection. The same assertions catch
+an intentionally early completion. The host model shares the public codec for
+sizing; it does not independently implement encrypted framing or OS I/O. Native
+prefix/byte/real-TCP tests remain separate. This partially reviews all twelve
+operations without claiming arbitrary provider certification or macOS liveness.
+
 PeerTransportFactory::configuration_capacity is a synchronous borrowed check
 against the selected codec and transport. Its default returns
 UnsupportedConfigurationAdmission; static send/receive behavior is unchanged.

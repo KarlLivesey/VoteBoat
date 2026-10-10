@@ -3,6 +3,71 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "PeerTransport",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/native/shared_contract.rs", "symbol": "independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership"},
+        {"file": "tests/native/shared_contract.rs", "symbol": "native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership"},
+        {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"}
+      ],
+      "operations": [
+        {
+          "names": ["security", "binding", "state", "limits", "usage"],
+          "obligation": "Expose the selected authenticated connection identity, lifecycle state and finite frame/decoded ceilings. Report retained send/completion/decoded ownership separately. Aborted accepted work releases its transport frame before its original queue lease.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "bounded_poll"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"}
+          ],
+          "remaining": ["The independent host provider is a bounded logical-frame test model with trusted test attestation, not cryptographic or OS I/O evidence. The native provider uses controlled HostSessions. Physical allocation accounting, all limit combinations and arbitrary downstream providers are not certified."]
+        },
+        {
+          "names": ["submit", "take_send"],
+          "obligation": "Rejected admission returns the exact original ticket/messages with no transport mutation. One accepted batch, including its unconsumed terminal completion, occupies the send slot. Partial writes and held local flush retain original ownership. Sent/Failed returns exactly once; only completing that exact original batch releases queue credits, and a replacement queue generation refuses it.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "rejected"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "invalid_admission"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"}
+          ],
+          "remaining": ["Selected control-message batches cover three groups and original queue generations. Full bulk/snapshot pressure, ticket exhaustion, all send-failure positions and restart/network uncertainty combinations remain. Local Sent and logical receipt never establish quorum durability."]
+        },
+        {
+          "names": ["poll"],
+          "obligation": "Validate poll budgets before progress. Bound reported plaintext calls/read/write bytes separately, retain accepted work across zero budgets and reject invalid budgets without mutation. A held flush prevents terminal completion even after complete remote decode.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "bounded_poll"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "invalid_admission"},
+            {"file": "tests/transport.rs", "symbol": "zero_and_single_call_budgets_preserve_bidirectional_progress"}
+          ],
+          "remaining": ["Shared histories use zero/three-call budgets and seven-byte progress; the separate one-call bidirectional check covers native transport only. Session syscall budgets, wall-clock responsiveness, real TCP/QUIC cadence and the cause of macOS stalls require separate evidence. Poll counts need not match providers."]
+        },
+        {
+          "names": ["received_info", "take_received"],
+          "obligation": "Publish only complete validated batches with exact stable connection/class/count/capacity metadata. Keep the occupied decoded slot unchanged while a later frame waits. Taking returns the original ordered messages once and releases decoded accounting. Validated input survives a later local abort.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "take"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "draining"},
+            {"file": "tests/transport.rs", "symbol": "malformed_or_partial_frame_never_leaks_a_message"}
+          ],
+          "remaining": ["Independent host modeling transfers logical frames and uses the public native codec for sizing; it does not independently validate encrypted byte framing. Malformed-prefix and decode checks are native-only. Wider ingress/reconnect and changed-binding interleavings remain."]
+        },
+        {
+          "names": ["close", "abort"],
+          "obligation": "Close refuses new sends, retains the accepted original batch until all bytes and local flush finish, and leaves terminal observations available. Abort fails accepted partial work, drops its transport frame and preserves already validated receive observations; original external queue credit remains until exact completion.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "draining"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"},
+            {"file": "tests/transport.rs", "symbol": "send_failure_and_transport_drop_release_pool_without_destroying_other_view"}
+          ],
+          "remaining": ["Shared traces cover selected held-flush close and partial-write abort points. Drop/shared-pool observations are native-only; every channel-close failure, completed-slot/partial-read combination and arbitrary host cleanup schedule remains unproven."]
+        }
+      ]
+    },
+    {
       "public_contract": "TimerService",
       "status": "partial",
       "runners": [

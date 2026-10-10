@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice218 reviews PeerTransport's twelve operations through selected shared
+independent-host/native ownership and mixed-group progress checks. All-feature/
+default transport31 and core-only1 pass; the checker detects early completion
+before flush. The partial ledger now has8 contracts/57 operations and100
+unreviewed contracts, with21 metadata cases passing. This advances composition,
+not production batching or macOS liveness. Actual preceding-source0d80216 CI
+passes Ubuntu166/19/21 and fails macOS counter161/5 before later targets run.
+Retained QUIC deadline/candidate/Busy observations select the next functional
+progress investigation; no broad security expansion is included.
+
 Slice214 adds bounded current driver/roster/outbound observations to the existing
 numeric metrics and failure-only fixture status/timing probes. Actual TCP/QUIC
 metric/recovery checks pass2 and the counter target passes162; final scoped,

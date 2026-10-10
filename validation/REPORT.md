@@ -1,5 +1,22 @@
 # Validation report — slice 35
 
+PeerTransport ownership review: [slice218](baseline/slice218/README.md). Shared
+bounded mixed-group histories run against an independent logical-frame downstream
+transport and the native provider over controlled host sessions. They preserve
+original queue tickets, partial bytes, held flush, terminal slots, receive order,
+close/abort and old-generation completion rejection. The same checker detects an
+intentionally early completion. All-feature/default transport31 and core-only1
+pass;21 partial-ledger metadata cases pass. Initial helper-name compile failure
+and a sandbox-only real-socket refusal remain in raw logs; final socket-enabled
+transport31 passes. Formatting and all four strict Clippy profiles pass with
+zero diagnostics through the enabled hook. This is selected public-contract evidence, not a production
+liveness change, independent encrypted framing or complete provider certification.
+The terminal preceding-source0d80216 run passes Ubuntu166/19/21, while macOS
+counter161/5 fails before later targets execute. All five failures are QUIC;
+raw deadlines, Busy and candidate/queued-peer observations remain unresolved.
+Full P0–P7/platform/performance acceptance stays open; security expansion remains
+with the user's Daybreak work.
+
 Original drain caller continuation: [slice217](baseline/slice217/README.md).
 The previous single-attempt caller fails the scripted explicit absence followed
 by confirmed original success. The final caller repeats one bound invocation at

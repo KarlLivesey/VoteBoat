@@ -14,10 +14,10 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 7);
-    assert.equal(report.reviewed_operations, 45);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 7);
-    for (const name of ['TimerService', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease']) {
+    assert.equal(report.reviewed_contracts, 8);
+    assert.equal(report.reviewed_operations, 57);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 8);
+    for (const name of ['PeerTransport', 'TimerService', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
 });
@@ -39,7 +39,10 @@ for (const [name, mutate] of [
     ['missing admission assertion', d => { admissionReview(d).operations[0].assertions = []; }],
     ['missing timer operation', d => { review(d, 'TimerService').operations.pop(); }],
     ['missing timer assertion', d => { review(d, 'TimerService').operations[0].assertions = []; }],
-    ['missing timer limitation', d => { review(d, 'TimerService').operations[0].remaining = []; }]
+    ['missing timer limitation', d => { review(d, 'TimerService').operations[0].remaining = []; }],
+    ['missing transport operation', d => { review(d, 'PeerTransport').operations.pop(); }],
+    ['missing transport assertion', d => { review(d, 'PeerTransport').operations[0].assertions = []; }],
+    ['missing transport limitation', d => { review(d, 'PeerTransport').operations[0].remaining = []; }]
 ]) {
     test(`rejects ${name}`, () => {
         const changed = structuredClone(ledger);

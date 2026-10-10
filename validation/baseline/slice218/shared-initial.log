@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0618]: expected function, found `voteboat::native::outbound::NativeOutbound`
+   --> tests/native/shared_contract.rs:28:21
+    |
+ 27 |         let queue = queue(1);
+    |             ----- `queue` has type `voteboat::native::outbound::NativeOutbound`
+ 28 |         let other = queue(2);
+    |                     ^^^^^---
+    |                     |
+    |                     call expression requires function
+    |
+   ::: tests/transport.rs:253:5
+    |
+253 |     fn queue(id: u64) -> NativeOutbound {
+    |     ----------------------------------- this function of the same name is available here, but it's shadowed by the local binding
+
+For more information about this error, try `rustc --explain E0618`.
+error: could not compile `voteboat` (test "transport") due to 1 previous error

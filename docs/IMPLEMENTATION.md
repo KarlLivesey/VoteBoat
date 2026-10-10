@@ -415,8 +415,33 @@ targets run. Raw logs and terminal state remain in slice217. The FIN correction
 has finite local progress evidence but does not establish macOS acceptance or
 explain every queued-group stall; current caller changes inherit no platform pass.
 
+Implemented218 executes the linked PeerTransport review with an independent
+logical-frame downstream provider and native transport over controlled host
+sessions. Shared three-group ordering/ownership, finite budgets, held flush,
+close/abort and original-generation checks pass; the same checker detects an
+early-flush completion. Final all-feature/default transport31 and core-only1
+pass. The first compile failed on a shadowed helper name; the first full run has
+30 passes and one sandbox socket refusal, followed by all31 passing with socket
+access. Neither failure is a production liveness defect. Ledger references cover
+8 partial contracts/57 operations, leaving100 contracts unreviewed; all21 metadata
+cases pass. These selected assertions do not certify arbitrary replacements.
+Final formatting and all four strict all-target Clippy profiles pass with zero
+diagnostics through the enabled hook; no threshold or allowance changes.
+Macro review218 advances P0 composition and establishes shared-group ownership
+checks before P2 batching work. It does not change production progress or close
+macOS/P7 acceptance. Broad security remains the user's Daybreak work.
+
+The0d80216 run38051334047 is terminal: Ubuntu counter166/directory19/transfer21
+pass; macOS counter161/5 fails before later targets run. The five QUIC histories
+cover assignment authentication deadline, missing configuration_queued after
+preparing expiry, two shared-group candidate/deadline stalls and a Busy handoff
+proposal. Postfailure diagnostics retain exact bound-peer queues and terms; poll
+durations still do not measure owner inter-poll intervals. Raw logs/state remain
+in slice218. These are previous-source platform results, not validation of new
+test/provider code or evidence that all five failures have the same cause.
+
 Current: diagnose macOS remaining group liveness/preparation failures using
-the actual cf7bf90 run above and its queued-peer/timing observations. Later targets on
+the actual0d80216 run above and its queued-peer/timing observations. Later targets on
 failing counter jobs were not run. Depend on retained logs, new
 failure-only queue/binding/timing observations and shared-group session/owner
 contracts. Identify the earliest failed
@@ -426,18 +451,16 @@ checks locally plus the supported platform run, rather than increasing timeouts
 or accepting all unknown outcomes. This advances the usable service and P2/P4
 platform recovery; CI continues in the background.
 
-Next: review the unreviewed PeerTransport contract from the108-entry inventory,
-including original send-ticket ownership, ordered decoded batches, flush progress
-and finite poll/queue budgets. Relate an independently controlled shared-group
-control trace to the native single-frame progress path before changing batching
-or adding a helper; this is needed for the P2 queued-group liveness milestone.
-Document actual ownership/budget/recovery obligations.
-Run the same independently modeled traces against a downstream host replacement
-and the native provider, including failed admission/terminal cleanup. Completion
-requires cause-detecting assertions and scoped ledger evidence, not merely a
-green metadata check. This advances P0 composition and depends on existing public
-seams/shared conformance patterns;101 entries currently remain unreviewed after
-the TimerService review while background platform diagnostics run.
+Next: exercise actual mixed-group framed QUIC progress under a controlled owner
+cadence, building on218's original-ticket/terminal-slot checks and216's session
+FIN trace. Compare separately submitted original group batches with one existing
+multiplexed batch before choosing a production batching change. This is needed
+to distinguish frame/flush serialization from timer or ownership defects in the
+P2 queued-group milestone. Preserve fixed budgets, stream/ACK ownership and
+ordinary Raft timers; keep virtual-cadence results distinct from measured macOS
+scheduling. Completion requires a retained cause-specific failure and focused
+correction if demonstrated, plus original shared-group service checks. It
+advances usable-service/P2/P7 progress; full platform acceptance still follows.
 
 Following: complete the next supported-platform operational acceptance profile
 once the reproduced liveness defect is corrected. Depend on the actual operator
@@ -448,6 +471,44 @@ requires terminal observed outcomes under the original deadlines and recorded
 identities, not an enlarged timeout or omitted failing history. This advances
 the usable service macro milestone; separate-host provisioning and broader faults
 remain explicit rather than silently counted as complete.
+
+### Slice218 schema plan — shared-group transport ownership and bounded progress
+
+Purpose/dependency: execute the linked PeerTransport review. A batching change
+must preserve original queue tickets, finite poll budgets and observable terminal
+slots; existing shared-lifetime tests replace policies/buffers but still use the
+native transport. An independent test transport is needed to check these public
+obligations before changing the P2 shared-group path. This advances P0 composition
+and the usable-service/P2 milestone while macOS diagnosis continues in parallel.
+
+Data/API: use the existing public PeerTransport contract, boxed providers and
+actual NativeOutbound-owned tickets. Add a test-only downstream transport with a
+bounded single-frame logical pipe, explicit byte-progress counters and a held
+flush flag. It independently implements transport state/ownership; the public
+native codec supplies frame sizing, not transport progress. Run the same finite
+mixed-group histories against it and NativePeerTransport over controlled host
+SecureSessions. This model is not encrypted framing, OS scheduling or macOS
+evidence, and does not claim identical poll counts across implementations.
+
+Transitions/ownership: rejected batches return their exact original ticket and
+messages. Accepted -> partial write -> all bytes written -> local flush -> one
+terminal completion; the completion continues to occupy the send slot until
+taken. Queue credits survive every phase until exact queue completion. Receive
+is partial -> full validated batch -> stable metadata/decoded slot -> take;
+groups/messages remain ordered inside and across frames. Zero and small budgets
+must bound plaintext work. Close drains; abort fails accepted work, releases its
+frame before returning the original batch, and keeps validated receive evidence.
+Replacement queues reject old-generation completions; no restart reconstructs
+volatile transport tickets or turns local send evidence into durable Raft votes.
+
+Acceptance: shared traces check three groups in one frame, a second frame behind
+a held receive, original rejection/terminal ownership, zero/finite budgets,
+held flush, close/abort and stale queue generations. A deliberately early-flush
+completion must fail the same shared checker. Record only the twelve reviewed
+operations' selected obligations and their remaining work. Run affected transport
+tests, metadata checks and formatting/four strict Clippy profiles at zero; retain
+actual background platform outcomes separately. No production batching, timeout,
+security expansion or new public seam is planned in this bounded slice.
 
 ### Slice217 schema plan — original caller continuation after absent drain record
 

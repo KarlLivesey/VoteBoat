@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.75s
+     Running tests/transport.rs (target/debug/deps/transport-13ef8df91ec05a1c)
+
+running 3 tests
+test native::shared_contract::shared_checker_detects_completion_before_local_flush ... ok
+test native::shared_contract::independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership ... ok
+test native::shared_contract::native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s
+
