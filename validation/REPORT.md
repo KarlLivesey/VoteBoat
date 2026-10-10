@@ -1,5 +1,17 @@
 # Validation report
 
+Shared buffer provider obligations: [slice231](baseline/slice231/README.md).
+The same independent owner/reservation/byte oracle checks32 seeds of256 actions
+per host/native provider plus deterministic quota, control, closure and owner-slot
+boundaries. Broken usage reporting and nonzero growth fail the checker. All-feature
+provider26/buffer13/transport35/wire15/QUIC15 pass; default and native-only13/26,
+core-only6/11 pass. Formatting/four strict profiles remain zero. Inventory108 and
+all24 actual metadata tests pass:9 partial reviews/68 operations,99 unreviewed
+contracts. No production behavior or security change, arbitrary-provider
+certification or general concurrent-lifetime proof. Previous7a1f710 operator CI
+is in progress, not current-source acceptance. Full P0–P7 and original250ms P7,
+operator/platform/deployment and generated/combined fault requirements stay open.
+
 Original transfer startup recovery: [slice230](baseline/slice230/README.md).
 Exact original-record continuation and shared bounded election discovery pass
 five scripted checks and actual TCP/QUIC leadership-loss/recovery histories.

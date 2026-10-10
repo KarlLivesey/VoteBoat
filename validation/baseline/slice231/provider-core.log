@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.71s
+     Running tests/buffer.rs (target/debug/deps/buffer-c478a349ba9451cb)
+
+running 6 tests
+test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+test independent_downstream_pool_contract_without_native ... ok
+test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+test unsupported_owner_declaration_refuses_binding ... ok
+test owner_configuration_rejects_overbooking_and_overflow ... ok
+test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-dda7fda5b64439ba)
+
+running 11 tests
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

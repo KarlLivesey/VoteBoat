@@ -918,6 +918,187 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/buffer.rs",
+          "symbol": "host_buffer_generated_owner_class_and_byte_lifetimes"
+        },
+        {
+          "file": "tests/provider_conformance/buffer.rs",
+          "symbol": "native_buffer_generated_owner_class_and_byte_lifetimes"
+        },
+        {
+          "file": "tests/provider_conformance/buffer_mutants.rs",
+          "symbol": "shared_buffer_checker_detects_early_credit_release"
+        },
+        {
+          "file": "tests/provider_conformance/buffer_mutants.rs",
+          "symbol": "shared_buffer_checker_detects_nonzero_growth"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "limits",
+            "usage",
+            "control_reserve",
+            "owner_limits"
+          ],
+          "obligation": "For the selected finite profile, declarations remain stable across shared views. Sequential usage equals the reservations and lease count of live owned buffers, independent of visible byte length or originating view closure. Bulk cannot consume declared control headroom.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "verify"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "usage"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "quota_boundaries"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            }
+          ],
+          "remaining": [
+            "The shared profile has 168 bytes, seven leases, 24-byte/one-lease control headroom and two 72-byte/three-lease owner quotas. Concurrent diagnostic samples need not be an atomic snapshot of both fields; universal allocator/RSS accounting and every profile are not established."
+          ]
+        },
+        {
+          "names": [
+            "bind_owner"
+          ],
+          "obligation": "Selected views bind before acquisition, refuse invalid or changed owners and share reconnect reservations for exact node/store incarnations. Closed views refuse binding. Both live views and held buffers, including Control buffers without bulk charges, pin finite owner registrations until their final release.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "bind"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "registered"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "owner_lifetimes"
+            }
+          ],
+          "remaining": [
+            "Generated histories vary peer node/incarnation and selected invalid identities. Every identity-field mutation, registry contention and arbitrary concurrent reconnect schedules remain unproven; accounting identity grants no authorization."
+          ]
+        },
+        {
+          "names": [
+            "acquire",
+            "acquire_class"
+          ],
+          "obligation": "Reserve the maximum requested bytes and one lease before handing off an owned buffer. Refusal retains no partial owner/bulk/total charges. Selected Bulk acquisitions respect both byte and lease quotas, default acquire remains Bulk, and Control uses only available total capacity. Initial allocation stays within reservation; invalid or unbound views do not transfer ownership.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "acquire"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "refusal"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "quota_boundaries"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "native_owner_allocation_failure_returns_all_three_budgets"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "legacy_default_cannot_claim_a_reserve_without_class_implementation"
+            }
+          ],
+          "remaining": [
+            "Native allocation-overflow and unsupported declarations have separate existing checks, not an independent host allocator fault adapter. The selected uncontended shared model does not certify every concurrent pressure/failure schedule or bounded execution of arbitrary provider callbacks."
+          ]
+        },
+        {
+          "names": [
+            "resize",
+            "reservation",
+            "capacity"
+          ],
+          "obligation": "The owned reservation remains fixed while resize preserves the old prefix, zeroes newly exposed bytes and bounds actual capacity. Oversize resize refuses without changing bytes or credits. Mutable and immutable views expose the same storage and length. Shrink/regrow cannot resurrect stale truncated bytes.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "resize"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "write"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "verify"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_mutants.rs",
+              "symbol": "shared_buffer_checker_detects_nonzero_growth"
+            }
+          ],
+          "remaining": [
+            "Finite buffers are at most 168 reserved bytes. These checks do not establish allocation counts, all allocation-failure positions, storage-destruction ordering or zero abstraction overhead."
+          ]
+        },
+        {
+          "names": [
+            "close"
+          ],
+          "obligation": "Close stops new work on that view without closing siblings or revoking its accepted buffers. Buffers remain mutable after original views are dropped and return exact charges only on final Drop. Closing all views and then releasing every buffer leaves zero live credits and allows fresh owner registration.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "close"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "finish"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_mutants.rs",
+              "symbol": "shared_buffer_checker_detects_early_credit_release"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota"
+            }
+          ],
+          "remaining": [
+            "Shared histories use cloneable host/native views and 32 seeds of 256 sequential actions per provider plus deterministic boundaries. Existing native thread/transport integration is selected evidence, not a proof of all concurrent lifetimes, system-wide shutdown or arbitrary providers."
+          ]
+        }
+      ]
     }
   ]
 }

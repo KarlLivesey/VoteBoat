@@ -1,0 +1,26 @@
+Base: 7a1f7102924608d9fea6ed70824c0bdc2c09623c
+
+Initial selected checks, before deterministic quota-boundary expansion:
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --test provider_conformance buffer_
+
+Final validation at source.sha256:
+cargo +stable test --locked --offline --all-features --test provider_conformance
+cargo +stable test --locked --offline --all-features --test buffer --test transport --test wire --test quic
+cargo +stable test --locked --offline --no-default-features --test provider_conformance --test buffer
+cargo +stable test --locked --offline --no-default-features --features native --test provider_conformance --test buffer
+cargo +stable test --locked --offline --test provider_conformance --test buffer
+node validation/check-provider-conformance.mjs
+node --test --test-reporter=spec validation/check-provider-conformance.test.mjs
+node validation/check-inventory.mjs
+.githooks/pre-push
+sha256sum --check validation/baseline/slice231/source.sha256
+git diff --check
+
+Background previous-source observation:
+gh run view 38063611738 --json status,conclusion,headSha,jobs
+
+The initial metadata runner lacked a real permitted child worker; its file-level
+summary is retained separately. Final Node worker, QUIC loopback and git/network
+actions use the required sandbox permission. Feature configurations run
+sequentially; push repeats the enabled formatting/four strict Clippy hook.

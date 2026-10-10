@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-70ab728b605d1ee5)
+
+running 4 tests
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test buffer_cases::native_buffer_generated_owner_class_and_byte_lifetimes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.01s
+

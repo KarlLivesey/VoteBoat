@@ -1,5 +1,17 @@
 # Baseline acceptance map
 
+Slice231 adds the shared BufferPool/FrameBuffer operation review with an actual
+independent host/native ownership-and-byte oracle:32 seeds of256 actions each
+plus deterministic control/quota/view/owner-slot boundaries. Broken usage and
+growth providers fail the same checker. All-feature provider26/buffer13/transport35/
+wire15/QUIC15, default/native-only13/26 and core-only6/11 pass. Formatting and all
+four strict profiles stay zero. Inventory108 and actual metadata24 pass;9 partial
+reviews cover68 operations,99 contracts remain unreviewed. See
+[slice231](../validation/baseline/slice231/README.md). No production/security
+change or blanket concurrency/provider certification. Previous7a1f710 operator CI
+is actually in progress. Original250ms P7, operator/platform/deployment and broader
+generated/combined faults/full P0–P7 remain open; Daybreak owns security review.
+
 Slice230 closes the selected transfer startup assumptions with explicit identical
 request continuation after exact native LeadershipChanged and repeated bounded
 leader discovery. A role remains a hint; the interruption cut first completes

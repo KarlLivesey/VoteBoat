@@ -803,16 +803,34 @@ of wider operator acceptance. Provider obligations, generated/combined fault
 histories, deployment/platform coverage and original250ms P7 remain open.
 Security review remains the user's Daybreak work.
 
-Current: review the next uncovered replacement-provider operation set through
-shared downstream/native checks. Purpose: make the promised mix-and-match Rust
-interfaces assessable, not add another prerequisite to using the service.
-Depend on the existing108-entry inventory and8 partial reviews/57 operations;
-choose a bounded contract with a concrete ownership/failure obligation. Completion
-requires actual shared checks, refusal/cleanup evidence and explicit remaining
-limitations, not only a valid metadata reference. This advances P0 composition;
-no expanded security/fuzz corpus or automatic certification claim.
+Implemented231: one independent live-reservation/owner/byte oracle runs against
+the existing public HostPool and NativeBufferPool. Each executes32 seeds of256
+sequential actions plus deterministic byte/lease/control boundaries. Unbound and
+closed views, invalid/rebound identities, exact reconnect charges, owner-slot
+retention by Bulk and Control, resize/shrink/regrow, preserved failure bytes,
+mutable accepted buffers after view drop and final credit/registration release
+are checked. Broken zero-usage reporting and nonzero growth fail the same checker.
+No production provider/API/runtime/storage or security behavior changes.
 
-Next: choose a P7 candidate that preserves all required durability work.
+Full shared providers26 and all-feature buffer13/transport35/wire15/QUIC15 pass.
+Default and native-only buffer13/provider26 pass; core-only buffer6/provider11
+pass without native providers. All24 actual Node metadata tests and108 inventory
+paths pass; the ledger now has9 partial reviews/68 operations,99 contracts still
+unreviewed. Formatting/four strict profiles finish zero. See
+[slice231](../validation/baseline/slice231/README.md) for exact source hashes,
+commands and the weak initial sandbox metadata observation. Finite sequential
+and existing selected thread/transport histories are not general certification,
+all allocator-failure schedules or complete concurrent-lifetime proof.
+
+Macro review231 completes the selected buffer ownership deliverable within P0
+composition. The same existing production seam remains available to Rust hosts;
+no adapter catalogue or further provider audit becomes a prerequisite to service
+use. Original P7 gate, operator/platform/deployment and generated/combined fault
+requirements remain open. Full P0–P7 stays active; Daybreak owns security review.
+Previous-source230 operator run38063611738 at7a1f710 is actually in progress on
+Ubuntu/macOS at this observation; no terminal or current-source CI pass is claimed.
+
+Current: choose a P7 candidate that preserves all required durability work.
 Purpose: advance measured tuning with the unchanged250ms original serial gate.
 Depend on222/228's actual physical/timing evidence and229's rejected staging-only
 trial; reread the required design chapters before changing the storage design.
@@ -821,7 +839,7 @@ recovery/retry/join histories and the unchanged raw-validated reference gate.
 No weaker file sync, optimistic voter evidence, replacement workload or causal
 speedup from uncontrolled shared-host comparisons.
 
-Following: resolve the evidenced original drain confirmation boundary. Purpose:
+Next: resolve the evidenced original drain confirmation boundary. Purpose:
 advance P4 operator recovery/platform acceptance without blocking static service.
 Depend on terminal229's exact19701 ERR NOT_LEADER, original durable drain record
 and current confirmation/routing contracts. Completion requires a native forced
@@ -829,6 +847,53 @@ leader-change history, exact original plan/operation preservation and terminal
 conflict/error refusal, recovery/retry/join evidence and zero strict diagnostics.
 Select the smallest demonstrated cause before editing; do not infer commit/read
 readiness from a role or widen deadlines. Background CI is feedback, not a gate.
+
+Following: broaden actual-core generated membership-transition histories.
+Purpose: advance chapter11/P0/P3/P4 validation beyond ordinary-majority schedules
+and selected deterministic membership cuts. Depend on existing RaftCore/model-I/O
+fixture, scoped durability tokens, current Joint/Final policy tests and recoverable
+configuration records. Completion requires bounded seed/action replay, actual
+configuration transitions under delayed/reordered completion and partition/reopen,
+independent committed-prefix/policy checks and retained minimal failing traces.
+Do not replace the core with a reference model or claim arbitrary schedule proof;
+reuse existing drivers before adding a harness. This does not block static service.
+
+### Slice231 schema plan — shared buffer ownership histories
+
+Purpose/dependencies: complete the next selected P0 provider-operation review,
+using existing BufferPool/FrameBuffer version3 and independent HostPool/native
+providers. The contract is already usable; this adds assessable ownership/failure
+evidence, not an adapter or prerequisite to service use. Existing lifetime cases
+cover selected traces; add one shared bounded model for combined owner registration,
+class budgets, view closure and mutable buffer lifetime. Chapter17 and the design
+component-contract sheet have been reviewed. No consensus/storage redesign.
+
+Data/API: private test-only oracle stores view closure/bound BufferOwner identities
+and held class/reservation/owner/expected bytes. Predict limits from declared
+total/control/two-owner quotas and live views plus held buffers, not provider
+internals. Same finite action histories run against public downstream HostPool
+and NativeBufferPool. New metadata names all11 operations and remains partial.
+No public seam, production dependency, owner, format or capability change.
+
+Transitions/ownership: binding and reconnect share held owner charges; a closed
+or dropped view cannot release buffers, close siblings or permit new work.
+Control buffers retain owner registration while charging only total capacity;
+Bulk consumes owner/global bulk/total budgets. Refusal changes none of them.
+Resize preserves prefix, zeroes growth and cannot change reservation/credits;
+failed oversize growth preserves bytes. Drop removes only the exact buffer's
+charges and permits eventual owner-slot reuse. All state is volatile; no token
+grants delivery, durability, membership or authority. No new restart protocol.
+
+Acceptance: bounded replayable generated histories independently compare exact
+live usage, stable declarations, acquire/refusal, bind/rebind/owner-slot lifetime,
+byte contents and capacity after every action. Include deterministic prelude for
+closed-view survival, quota pressure and owner-slot pinning so random coverage
+cannot replace those checks. Deliberately broken accounting/growth providers
+must fail the same checker. Retain existing transport/codec ownership integration
+and native-only allocation/thread checks; no claim of all concurrent schedules,
+universal allocator accounting or arbitrary provider certification. Run default,
+core-only/native-only provider checks plus relevant all-feature integration;
+keep fmt/four strict profiles zero. Security review remains with Daybreak.
 
 ### Slice230 schema plan — original transfer startup after leadership changes
 
