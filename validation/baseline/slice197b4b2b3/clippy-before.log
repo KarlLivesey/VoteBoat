@@ -1,0 +1,61 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: large size difference between variants
+  --> src/bin/support/drain_service.rs:13:1
+   |
+13 | / pub enum Driver {
+14 | |     Single(drain_commands::Driver),
+   | |     ------------------------------ the largest variant contains at least 1056 bytes
+15 | |     Multi(group_drain::Driver),
+   | |     -------------------------- the second-largest variant contains at least 576 bytes
+16 | | }
+   | |_^ the entire enum is at least 1056 bytes
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#large_enum_variant
+   = note: `-D clippy::large-enum-variant` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::large_enum_variant)]`
+help: consider boxing the large fields or introducing indirection in some other way to reduce the total size of the enum
+   |
+14 -     Single(drain_commands::Driver),
+14 +     Single(Box<drain_commands::Driver>),
+   |
+
+error: this function has too many lines (110/100)
+   --> src/bin/counter_service.rs:430:1
+    |
+430 | / fn serve(
+431 | |     mode: &str,
+432 | |     root: &Path,
+433 | |     id: u64,
+...   |
+437 | |     options: &StartupOptions,
+438 | | ) -> Result<(), Failure> {
+    | |________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+    = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: this function has too many lines (101/100)
+   --> src/bin/counter_service.rs:726:5
+    |
+726 | /     fn poll(
+727 | |         &mut self,
+728 | |         access: Option<&service_access::ActiveAccess>,
+729 | |         local: voteboat::secure::LocalIdentity,
+...   |
+733 | |         mut command: impl FnMut(&str) -> Result<Phase, String>,
+734 | |     ) -> Option<&'static str> {
+    | |_____________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+
+error: this function has too many lines (102/100)
+    --> src/bin/counter_service.rs:1039:1
+     |
+1039 | fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+
+error: could not compile `voteboat` (bin "voteboat-counter") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 4 previous errors

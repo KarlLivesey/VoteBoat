@@ -33,8 +33,14 @@ mod diagnostics;
 mod drain_commands;
 #[path = "support/drain_runner.rs"]
 mod drain_runner;
+#[path = "support/drain_service.rs"]
+mod drain_service;
 #[path = "support/group_command.rs"]
 mod group_command;
+#[path = "support/group_drain.rs"]
+mod group_drain;
+#[path = "support/group_drain_plan.rs"]
+mod group_drain_plan;
 #[path = "support/group_setup.rs"]
 mod group_setup;
 #[path = "support/leadership_commands.rs"]
@@ -104,7 +110,9 @@ Multi-group data service: --groups FILE requires --service-access; see docs/MULT
 Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
 Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
 Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
-Multi-group leadership: --groups FILE --leadership-maintenance enabled; use the same group prefix for move-leader, leadership-status, resume-leadership and cancel-leadership.";
+Multi-group leadership: --groups FILE --leadership-maintenance enabled; use the same group prefix for move-leader, leadership-status, resume-leadership and cancel-leadership.\n\
+Multi-group drain: --node-drain enabled on all peers, --group-drain-plan FILE on the source, plus group administration and maintenance profiles.\n\
+Commands: drain-node SEQUENCE OP; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP; drain-group SEQUENCE OP OFFSET. See docs/MAINTENANCE.md.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
@@ -269,7 +277,7 @@ fn outputs(
     service: &mut Service,
     connection: &mut Option<Connection>,
     leadership: &mut leadership_set::Leaders,
-    drain: &mut Option<drain_commands::Driver>,
+    drain: &mut Option<drain_service::Driver>,
 ) -> Result<(), Failure> {
     while let Some(output) = service.poll_client() {
         let original_ticket = output.ticket();
@@ -318,7 +326,7 @@ struct PreparedService {
     listener: TcpListener,
     peer_address: std::net::SocketAddr,
     discovery: Option<command_discovery::Source>,
-    drain: Option<drain_commands::Driver>,
+    drain: Option<drain_service::Driver>,
 }
 fn prepare_service(
     mode: &str,
@@ -358,20 +366,7 @@ fn prepare_service(
         },
     )?;
     let administration = options.administration(&config.provisioned_stores)?;
-    let drain_plan = options
-        .membership_drain
-        .as_deref()
-        .map(|path| {
-            drain_commands::load_plan(
-                path,
-                &config.provisioned_stores,
-                administration
-                    .as_ref()
-                    .ok_or("missing membership administration")?
-                    .get(group())?,
-            )
-        })
-        .transpose()?;
+    let drain_plan = options.drain_plan(&config.provisioned_stores, administration.as_ref())?;
     if let Some(plan) = &drain_plan {
         let owner = checked(plan.record(1))?.owner;
         if owner.node != config.startup.node || owner.store != config.startup.store {
@@ -390,6 +385,17 @@ fn prepare_service(
     {
         return Err("administration group absent from startup manifest".into());
     }
+    if let Some(plan) = &drain_plan {
+        if options.groups.is_some()
+            && (plan.assignments().len() != prepared.group_count()
+                || plan
+                    .assignments()
+                    .iter()
+                    .any(|g| !prepared.contains(g.group)))
+        {
+            return Err("group drain must cover the complete startup group set".into());
+        }
+    }
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
     let mut service = prepared.open(
@@ -400,7 +406,15 @@ fn prepare_service(
     options.configure_maintenance(&mut service)?;
     let drain = options
         .node_drain
-        .then(|| drain_commands::Driver::open(&mut service, root, create, drain_plan))
+        .then(|| {
+            drain_service::Driver::open(
+                &mut service,
+                root,
+                create,
+                drain_plan,
+                options.groups.is_some(),
+            )
+        })
         .transpose()?;
     if let Some(source) = discovery.as_mut() {
         source.bind_session(service.local().owner.identity().store.session.get());
@@ -425,6 +439,13 @@ fn serve(
     options: &StartupOptions,
 ) -> Result<(), Failure> {
     let prepared = prepare_service(mode, root, id, base, tls, input, options)?;
+    run_service(prepared, id, options.protocol)
+}
+fn run_service(
+    prepared: PreparedService,
+    id: u64,
+    protocol: NativePeerProtocol,
+) -> Result<(), Failure> {
     let mut service = prepared.service;
     // Declare after service: error exits join the credential worker before
     // releasing the service's exclusive data-directory ownership.
@@ -433,11 +454,11 @@ fn serve(
     let mut administration = prepared.administration;
     let listener = prepared.listener;
     let peer_address = prepared.peer_address;
-    let protocol = options.protocol;
     let owner = service.local().owner.identity();
     let mut observer = Diagnostics::new(owner).map_err(|e| format!("diagnostic setup: {e:?}"))?;
     let command_local = service_access::server_local(id, owner.store.session);
     let discovery = prepared.discovery;
+    let drain_scopes = drain.as_ref().map_or_else(Vec::new, |d| d.scopes(&service));
     let mut command_generation = 0u64;
     let start = Instant::now();
     println!(
@@ -468,6 +489,7 @@ fn serve(
             c.poll(
                 access,
                 command_local,
+                &drain_scopes,
                 SecureSessionGeneration::new(command_generation).unwrap(),
                 time,
                 |s| {
@@ -532,7 +554,7 @@ fn serve(
 }
 fn finish_service(
     service: Service,
-    mut drain: Option<drain_commands::Driver>,
+    mut drain: Option<drain_service::Driver>,
     mut credentials: credential_reload::Credentials,
     mut observer: Diagnostics,
     id: u64,
@@ -551,12 +573,12 @@ fn advance_leadership(
     service: &mut Service,
     connection: &mut Option<Connection>,
     leadership: &mut leadership_set::Leaders,
-    drain: &mut Option<drain_commands::Driver>,
+    drain: &mut Option<drain_service::Driver>,
     quit: bool,
 ) -> Result<(), Failure> {
     outputs(service, connection, leadership, drain)?;
     if let Some(drain) = drain {
-        drain.tick(service, leadership.get_mut(group())?, connection)?;
+        drain.tick(service, leadership, connection)?;
     }
     leadership.advance_cancel(service, connection);
     leadership.tick(service, quit)
@@ -598,7 +620,7 @@ fn advance_administration(
 fn maintenance_command(
     service: &mut Service,
     leadership: &mut leadership_set::Leaders,
-    drain: &mut Option<drain_commands::Driver>,
+    drain: &mut Option<drain_service::Driver>,
     input: &str,
     quit: &mut bool,
 ) -> Option<Result<Phase, String>> {
@@ -607,20 +629,18 @@ fn maintenance_command(
         Err(error) => return Some(Err(error)),
     };
     let words = selected.text.split_whitespace().collect::<Vec<_>>();
-    if drain_commands::is_command(words.first().copied()) {
+    if drain_service::is_command(words.first().copied()) {
         return Some(
             drain
                 .as_mut()
                 .ok_or_else(|| "drain requires --node-drain enabled".into())
-                .and_then(|d| {
-                    d.command(service, leadership.get_mut(selected.group)?, &words, quit)
-                }),
+                .and_then(|d| d.command(service, leadership, &words, quit)),
         );
     }
     if !leadership_commands::is_command(words.first().copied()) {
         return None;
     }
-    if drain.as_ref().is_some_and(drain_commands::Driver::busy) {
+    if drain.as_ref().is_some_and(drain_service::Driver::busy) {
         return Some(Err("drain publication in progress".into()));
     }
     Some(
@@ -706,6 +726,7 @@ impl Connection {
         &mut self,
         access: Option<&service_access::ActiveAccess>,
         local: voteboat::secure::LocalIdentity,
+        drain_scopes: &[GroupIdentity],
         generation: SecureSessionGeneration,
         time: MonoTime,
         mut command: impl FnMut(&str) -> Result<Phase, String>,
@@ -741,10 +762,11 @@ impl Connection {
                                         return Err("one command per connection".into());
                                     }
                                     let selected = group_command::parse(s)?;
-                                    self.stream.authorize(
+                                    drain_service::authorize(
+                                        &self.stream,
                                         access,
-                                        selected.group,
-                                        selected.text,
+                                        &selected,
+                                        drain_scopes,
                                         time,
                                     )?;
                                     command(s)
@@ -854,8 +876,30 @@ struct StartupOptions {
     membership_drain: Option<std::path::PathBuf>,
     groups: Option<std::path::PathBuf>,
     group_admin_plans: Option<std::path::PathBuf>,
+    group_drain_plan: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn drain_plan(
+        &self,
+        stores: &std::collections::BTreeMap<NodeId, StoreIdentity>,
+        administration: Option<&administration_set::Administrations>,
+    ) -> Result<Option<voteboat::drain::MembershipDrainPlan>, Failure> {
+        if let Some(path) = &self.group_drain_plan {
+            return group_drain_plan::load(path, stores, administration).map(Some);
+        }
+        self.membership_drain
+            .as_deref()
+            .map(|path| {
+                drain_commands::load_plan(
+                    path,
+                    stores,
+                    administration
+                        .ok_or("missing membership administration")?
+                        .get(group())?,
+                )
+            })
+            .transpose()
+    }
     fn administration(
         &self,
         stores: &std::collections::BTreeMap<NodeId, StoreIdentity>,
@@ -881,6 +925,9 @@ impl StartupOptions {
             .transpose()
     }
     fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
+        if self.group_drain_plan.is_some() && (self.groups.is_none() || !self.node_drain) {
+            return Err("--group-drain-plan requires --groups and --node-drain enabled".into());
+        }
         if self.group_admin_plans.is_some()
             && (self.groups.is_none() || self.service_access.is_none())
         {
@@ -889,10 +936,9 @@ impl StartupOptions {
         if self.groups.is_some()
             && (self.service_access.is_none()
                 || self.admin_plan.is_some()
-                || self.node_drain
                 || self.discovery_peers.is_some())
         {
-            return Err("--groups requires --service-access; multi-group administration uses --group-admin-plans; drain and discovery profiles are not yet supported".into());
+            return Err("--groups requires --service-access; multi-group administration uses --group-admin-plans; discovery profiles are not yet supported".into());
         }
         if self.leadership_maintenance
             && (self.service_access.is_none()
@@ -975,7 +1021,18 @@ fn is_startup_option(flag: &str) -> bool {
             | "--membership-drain"
             | "--groups"
             | "--group-admin-plans"
+            | "--group-drain-plan"
     )
+}
+fn parse_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
+    match value {
+        "tcp" => Ok(NativePeerProtocol::TcpTls),
+        #[cfg(feature = "quic")]
+        "quic" => Ok(NativePeerProtocol::Quic),
+        #[cfg(not(feature = "quic"))]
+        "quic" => Err("QUIC support requires building with --features quic".into()),
+        _ => Err("expected --transport tcp or --transport quic".into()),
+    }
 }
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut protocol = NativePeerProtocol::TcpTls;
@@ -993,6 +1050,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut membership_drain = None;
     let mut groups = None;
     let mut group_admin_plans = None;
+    let mut group_drain_plan = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !is_startup_option(flag) {
@@ -1000,6 +1058,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         }
         let value = args.pop().unwrap();
         match args.pop().unwrap().as_str() {
+            "--group-drain-plan" if group_drain_plan.is_none() && args[0] == "serve" => {
+                group_drain_plan = Some(std::path::PathBuf::from(value));
+            }
             "--group-admin-plans" if group_admin_plans.is_none() && args[0] == "serve" => {
                 group_admin_plans = Some(std::path::PathBuf::from(value));
             }
@@ -1008,16 +1069,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             }
             "--transport" if !transport_selected && args[0] == "serve" => {
                 transport_selected = true;
-                protocol = match value.as_str() {
-                    "tcp" => NativePeerProtocol::TcpTls,
-                    #[cfg(feature = "quic")]
-                    "quic" => NativePeerProtocol::Quic,
-                    #[cfg(not(feature = "quic"))]
-                    "quic" => {
-                        return Err("QUIC support requires building with --features quic".into())
-                    }
-                    _ => return Err("expected --transport tcp or --transport quic".into()),
-                };
+                protocol = parse_protocol(&value)?;
             }
             "--deployment" if deployment.is_none() => {
                 deployment = Some(std::path::PathBuf::from(value))
@@ -1074,6 +1126,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         membership_drain,
         groups,
         group_admin_plans,
+        group_drain_plan,
     })
 }
 

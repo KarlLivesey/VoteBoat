@@ -417,6 +417,7 @@ impl Channel {
                 | "configuration-status"
                 | "leadership-status"
                 | "drain-status"
+                | "drain-group"
                 | "credential-status"
                 | "discover",
             ) => ServiceAction::Inspect,

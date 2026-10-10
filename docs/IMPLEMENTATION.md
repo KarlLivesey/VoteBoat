@@ -88,7 +88,7 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-The zero-diagnostic baseline and pre-push enforcement are complete. Keep all three
+The zero-diagnostic baseline and pre-push enforcement are complete. Keep all four
 strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
@@ -134,9 +134,114 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
 | Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
 | Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
-| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Group-bound membership and leadership commands are implemented in197b4b2b1/2, with validation recorded below. Next compose bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Complete multi-group drain remains planned work. |
+| Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
+| Current197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4b2b3 schema plan — complete source-side multi-group drain
+
+The first four-test focused run exposed an intermittent absence of the new
+intent, while the114-test service sweep passed. The setup demotes the source
+to a learner before creating its retained assignment, but previously checked
+only the leader's finalization receipt and process readiness. Those do not
+establish this replica's original committed configuration. Wait for the
+source's exact committed final record before shutdown and after reopen, so the
+unobserved start exercises a valid original plan. Keep the failed run and add
+the expected phase to timeout diagnostics; do not relax start admission.
+
+The broader rerun exposed an older replacement test's fixed-node assumption:
+node1 logged preparation of original operation19751 for absent learner4,
+while the test waited only for node2. Readiness can begin on the old leader
+before handoff completes. Observe that same exact event across the voters;
+keep the existing assertions that no configuration is committed before the
+learner starts and that recovery requires its exact replacement store. This
+changes test observation only, not the handoff or membership protocol.
+
+A following sweep exposed two existing restart-fixture gaps. The joint
+retirement fixture inspected node1's recovered value after only a quorum
+receipt; its failed directory contains create/shutdown logs but no later
+membership profile, locating the failure before retirement begins. Require
+all replicas to learn the commit before that all-replica inspection. The
+interrupted single-group runner correctly returned its documented bounded
+UNKNOWN configuration deadline after source/target restart. That test now
+permits one explicit rerun of the identical sequence/operation only for that
+exact result; ordinary runner tests still require their first attempt to
+succeed. Neither change increases production deadlines or changes outcomes.
+
+Compose the existing MembershipDrainPlan, native drain journal and Node drain
+gate into the shared counter service. A bounded group-drain manifest references
+the existing per-group voter plans and names unchanged retained-learner
+assignments. Validate exact stores, scope coverage, shared source/operation and
+provisioned administration records before opening node resources. Keep original
+plan digests and journal records unchanged; do not infer safe stopping from
+counts or cached progress. Existing single-group drain behavior stays available.
+
+The multi-group source owns one journal publication worker. Start publishes the
+complete immutable intent before restoring the Node admission/campaign gate or
+returning success. Recovery verifies the original full plan and restores its
+gate before polling. Publication failure fails the service closed; shutdown
+joins the worker before releasing directory ownership. Cancel publishes the
+same intent's cancelled phase before reopening the local gate. It cannot undo
+remote membership or leadership operations. Resume reobserves the original
+intent; no automatic source stop occurs after restart.
+
+Expose existing drain-node/status/resume/cancel/stop with a bounded drain-group
+row query for original group/target/configuration identities. Authenticate
+node-wide actions against every local group; one group grant cannot authorize
+another. Stop requires the existing membership_drain_ready check over all
+actual assignments, final committed state and owned-work quiescence. Per-group
+configuration and handoff remain the existing authenticated commands.
+
+Acceptance: native TCP/WAL and QUIC/checkpoint source restart after partial
+group evacuation, original-plan mismatch/omission refusal, incomplete stop
+refusal, all-group permission checks, cancellation and surviving writes/retries.
+This completes the source operator controls in197b4b2b (P2/P4); the next
+deliverable connects the bounded foreground runner, followed by198 assignment
+listing and199 actual Linux/macOS operator recovery. Full P0–P7 stays active.
+
+### Slice197b4b2b3 implementation and validation
+
+The multi-group counter profile now accepts a complete original drain manifest,
+including voter evacuations and unchanged source-learner assignments. Existing
+per-group plans supply the exact handoff stores and joint/final records. Input
+is limited to256 sorted unique assignments,64KiB per file,1MiB total input and
+the existing4MiB retained plan limit. Scope, owner and provisioned records are
+checked before node resources open. Each referenced file is parsed from the
+same bounded bytes that were charged to the input budget.
+
+Source start/status/resume/cancel/stop commands and one-row `drain-group`
+inspection use the existing journal and Node gate. Every node-wide action
+checks every local group's permission. One publication worker owns the journal;
+successful publication precedes gate restoration and receipt, and failed
+publication exits closed. Original plans are required after restart, including
+cancelled intent. Cancellation reopens only local admission; it does not roll
+back remote leadership or membership changes. Stop uses the Node's complete
+assignment, committed-configuration, application and owned-work readiness
+check. There is no new persistence format, public provider or consensus path.
+
+Six focused tests pass: TCP/WAL and QUIC/checkpoint partial evacuation,
+original-plan and cancellation recovery, publication failure, invalid scope/
+coverage, and count/file/aggregate input bounds. They preserve source shutdown
+and surviving data retries/writes. The replacement-drain TCP/QUIC tests also
+pass after replacing a fixed-node readiness observation with the same exact
+operation/learner event on any voter. Initial module/size findings, startup
+readiness, an unobserved-start failure and the replacement observation failure
+are retained with final logs in
+[slice197b4b2b3](../validation/baseline/slice197b4b2b3/README.md).
+
+Final local validation passes114 service tests and nine command unit tests;
+the service suite takes51.41s. Formatting, strict Clippy across all four
+supported profiles, warnings-denied API docs and105-contract inventory metadata
+checks pass. Source hashes and all earlier observed failures are retained.
+This is not a new full-crate sweep or macOS result.
+
+Macro review: this completes the source controls within coordinated drain197;
+the foreground multi-group runner remains current, followed by assignment
+listing198 and Linux/macOS operator evidence199. Broader baseline fault,
+platform and performance requirements remain unchanged. The complete P0–P7
+goal remains active; these are selected Linux histories, not a full release
+or arbitrary power-loss proof.
 
 ### Slice197b4b2b2 schema plan — group-bound leadership execution
 

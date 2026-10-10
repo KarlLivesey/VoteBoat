@@ -181,7 +181,7 @@ fn malformed_group_manifests_and_incompatible_profiles_create_no_store() {
     }
     fs::write(c.groups.as_ref().unwrap(), GROUPS).unwrap();
     c.node_drain = true;
-    refused(&mut c, "multi-group administration");
+    refused(&mut c, "requires --leadership-maintenance");
     assert!(!c.root.join("1").exists());
 }
 

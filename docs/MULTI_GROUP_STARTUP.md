@@ -93,9 +93,10 @@ across explicit leader rejections. An interrupted write remains unknown: retry
 the same complete command. Different groups may reuse an operation ID.
 
 Unprefixed existing commands retain their original group1 scope. Node controls
-such as `quit` do not accept a group prefix. Multi-group drain
-execution and endpoint-discovery profiles are not yet connected to this
-executable mode; incompatible options are rejected before startup.
+such as `quit` do not accept a group prefix. The [multi-group drain controls](MAINTENANCE.md#multi-group-source-controls)
+operate on the complete local assignment set. The endpoint-discovery profile
+is not yet connected to this executable mode; incompatible options are rejected
+before startup.
 WAL maintenance and automatic checkpoints operate through the existing shared
 Node. Single-group invocations remain available without `--groups`.
 
@@ -159,4 +160,15 @@ Different groups may reuse an operation ID. A cancellation in one group cannot
 cancel another group's same-ID handoff. Restart resumes durable pending work;
 completed records remain idempotent. The existing group administration plans
 also use schema2 readiness requirements in this profile. This enables individual
-group handoffs; coordinated node drain remains separate work.
+group handoffs. Multi-group source drain controls are available as described
+below; the foreground multi-group automation runner remains separate work.
+
+## Multi-group source drain
+
+Use `--node-drain enabled` on all peers with the maintenance profile. On the
+source, add `--group-drain-plan FILE`; voter entries require the corresponding
+`--group-admin-plans` records. The original full plan binds every local
+assignment, including groups where the source is already a learner. Start,
+status, resume, cancellation and checked stop operate on that complete plan.
+Per-group leadership and membership commands perform the individual moves.
+See [the plan grammar and operator sequence](MAINTENANCE.md#multi-group-source-controls).

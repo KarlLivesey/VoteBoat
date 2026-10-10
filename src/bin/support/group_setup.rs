@@ -104,6 +104,12 @@ fn bootstrap(line: &str, stores: &BTreeMap<NodeId, StoreIdentity>) -> Result<Boo
     })
 }
 impl Prepared {
+    pub fn group_count(&self) -> usize {
+        match self {
+            Self::Single(_) => 1,
+            Self::Multi(_, applications) => applications.len(),
+        }
+    }
     pub fn contains(&self, group: GroupIdentity) -> bool {
         match self {
             Self::Single(config) => config.startup.bootstrap.group == group,

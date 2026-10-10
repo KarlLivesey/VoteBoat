@@ -53,14 +53,30 @@ pub fn load(
     stores: &BTreeMap<NodeId, StoreIdentity>,
     administration: &crate::administration::Administration,
 ) -> Result<MembershipDrainPlan, Failure> {
+    load_for(path, stores, administration, group())
+}
+pub fn load_for(
+    path: &Path,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+    administration: &crate::administration::Administration,
+    group: GroupIdentity,
+) -> Result<MembershipDrainPlan, Failure> {
     let mut bytes = Vec::new();
     std::fs::File::open(path)?
         .take(65537)
         .read_to_end(&mut bytes)?;
+    parse_for(&bytes, stores, administration, group)
+}
+pub fn parse_for(
+    bytes: &[u8],
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+    administration: &crate::administration::Administration,
+    group: GroupIdentity,
+) -> Result<MembershipDrainPlan, Failure> {
     if bytes.len() > 65536 {
         return Err("drain plan exceeds64KiB".into());
     }
-    let mut lines = std::str::from_utf8(&bytes)?.lines();
+    let mut lines = std::str::from_utf8(bytes)?.lines();
     if lines.next() != Some("voteboat-counter-drain-v1") {
         return Err("expected voteboat-counter-drain-v1".into());
     }
@@ -98,7 +114,7 @@ pub fn load(
         owner,
         operation,
         vec![DrainMembershipGroup {
-            group: group(),
+            group,
             original,
             handoff,
             change: PlannedVoterChange { joint, finalize },

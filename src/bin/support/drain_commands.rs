@@ -19,6 +19,7 @@ mod plan;
 #[path = "drain_commands/validation.rs"]
 mod validation;
 pub use plan::load as load_plan;
+pub use plan::parse_for as parse_plan_for;
 use validation::{handoff, retained_configuration};
 
 struct Attempt {

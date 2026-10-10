@@ -1,0 +1,21 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0583]: file not found for module `commands`
+ --> src/bin/support/group_drain.rs:6:1
+  |
+6 | mod commands;
+  | ^^^^^^^^^^^^^
+  |
+  = help: to create the module `commands`, create file "src/bin/support/commands.rs" or "src/bin/support/commands/mod.rs"
+  = note: if there is a `mod commands` elsewhere in the crate already, import it with `use crate::...` instead
+
+error[E0599]: no method named `command` found for mutable reference `&mut group_drain::Driver` in the current scope
+  --> src/bin/support/drain_service.rs:22:121
+   |
+22 | ...?, words, quit), Self::Multi(d) => d.command(service, words, quit) }
+   |                                         ^^^^^^^ method not found in `&mut group_drain::Driver`
+
+Some errors have detailed explanations: E0583, E0599.
+For more information about an error, try `rustc --explain E0583`.
+error: could not compile `voteboat` (bin "voteboat-counter") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 2 previous errors

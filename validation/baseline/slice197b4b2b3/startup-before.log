@@ -1,0 +1,38 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.82s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... FAILED
+test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... FAILED
+test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... FAILED
+
+failures:
+
+---- group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready stdout ----
+
+thread 'group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready' (793268) panicked at tests/counter_service/group_drain.rs:99:9:
+assertion failed: String::from_utf8_lossy(&output.stdout).contains("AUTHORIZATION")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready stdout ----
+
+thread 'group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready' (793267) panicked at tests/counter_service/group_drain.rs:99:9:
+assertion failed: String::from_utf8_lossy(&output.stdout).contains("AUTHORIZATION")
+
+---- group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart stdout ----
+
+thread 'group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart' (793266) panicked at tests/counter_service.rs:345:9:
+node 3 ["drain-node", "1", "19701"]:  Error: "node unavailable before connection"
+
+service log:
+
+
+failures:
+    group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart
+    group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+    group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 108 filtered out; finished in 1.19s
+
+error: test failed, to rerun pass `--test counter_service`

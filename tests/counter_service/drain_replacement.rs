@@ -193,7 +193,7 @@ fn replacement_history(quic: bool) {
             .spawn()
             .unwrap()
     };
-    wait_administration_event(&c, 2, "administration operation=19751 preparing_learner=4");
+    wait_replacement_preparation(&c);
     assert!(drain::wait_status(&c, 1, "ready=false").contains("phase=Active"));
     for id in 1..=3 {
         assert!(c
@@ -239,6 +239,26 @@ fn replacement_history(quic: bool) {
     assert!(authenticated_write(&c, &["add", "19772", "3"]).contains("duplicate=true"));
     assert!(authenticated_write(&c, &["add", "19773", "1"]).contains("Value(11)"));
     c.stop();
+}
+
+fn wait_replacement_preparation(c: &Cluster) {
+    // Readiness may start on the old leader before its handoff completes.
+    // The original operation and absent learner are the test's invariant.
+    let deadline = Instant::now() + Duration::from_secs(12);
+    loop {
+        let logs = (1..=3).map(|id| c.service_log(id)).collect::<Vec<_>>();
+        if logs
+            .iter()
+            .any(|log| log.contains("administration operation=19751 preparing_learner=4"))
+        {
+            return;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "missing replacement readiness: {logs:?}"
+        );
+        std::thread::park_timeout(Duration::from_millis(5));
+    }
 }
 #[test]
 fn maintenance_replacement_drain_waits_for_exact_learner_tcp() {

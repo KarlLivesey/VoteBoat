@@ -30,6 +30,9 @@ fn setup(quic: bool) -> (Cluster, voteboat::membership::Membership) {
     assert!(cluster
         .ok(leader, &["add", "18000", "42"])
         .contains("Value(42)"));
+    // The fixture inspects node1's local recovery next. A quorum receipt does
+    // not establish that every follower has learned this commit yet.
+    wait_committed(&cluster, leader);
     cluster.stop();
     let saved = state(&cluster, 1, 42);
     let membership = saved.membership_at(saved.commit_index).unwrap();

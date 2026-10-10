@@ -99,6 +99,15 @@ not a complete operator workflow.
 | resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194b authenticated split resumption. Slice195 checks every native split phase over TCP/WAL and QUIC/checkpoints plus admitted fence/publication reply loss. | Broader lifecycle profiles, phase-internal power loss and combined membership cuts; membership resumption already exists. |
 | retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
 
+Slices197b4b2a–197b4b2b3 add authenticated multi-group data, membership and
+leadership commands plus complete source-side drain controls. The drain binds
+the original mixed voter/retained-learner inventory, persists before receipt,
+restores before polling and checks all-assignment readiness before stop.
+Selected TCP/WAL and QUIC/checkpoint source recovery, all-group permissions,
+bounded manifest input and failed publication are exercised. The foreground
+multi-group runner, assignment listing and broader platform/fault acceptance
+remain open; these commands do not close those ledger entries.
+
 Mutations must retain durable operation IDs and generation/authorization checks.
 Previews must not reserve resources, fence sources or act as durability evidence.
 Peer credential rotation, full persisted admin audit, complete core metrics and

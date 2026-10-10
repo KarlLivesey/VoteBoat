@@ -376,5 +376,87 @@ Voter-only plans keep their original digest. Plans containing retained groups
 use a distinct digest domain binding all original configurations and roles.
 The journal format is unchanged; after restart reload the exact mixed plan.
 Omitting a learner group or substituting its configuration fails verification.
-The single-group counter plan file and commands still expose voter evacuation
-only; these mixed-role APIs currently serve Rust hosts.
+The single-group counter plan file exposes voter evacuation only. The
+multi-group executable manifest below also supports retained learner assignments.
+
+## Multi-group source controls
+
+Start every peer with `--groups FILE --service-access ACCESS
+--leadership-maintenance enabled --node-drain enabled`. Add
+`--group-admin-plans FILE` for the voter changes. On the source, also select
+`--group-drain-plan FILE`. These profiles must match on recovery; existing plain
+counter data cannot be changed into the maintenance profile by adding a flag.
+
+The master file binds the complete original local assignment set:
+
+```text
+voteboat-counter-group-drain-v1
+operation 19701
+source 3 3 1
+retained 1 1 3 3 m:2 v:1 v:2
+voter 7 3 seven.drain
+voter 8 2 eight.drain
+```
+
+`source NODE STORE INCARNATION` must be the local source. Each sorted, unique
+row is either `voter GROUP INCARNATION PLAN_FILE` or
+`retained GROUP INCARNATION CONFIGURATION LEARNERS POLICY`. Learners use the
+existing comma-separated node grammar; the example retains node3 in group1's
+committed configuration3. A retained row must already assign the exact source
+as a learner. It performs no membership change.
+
+Voter paths are relative to the master file. Each uses the existing
+`voteboat-counter-drain-v1` grammar with the same source and drain operation;
+its joint/final records must match that group's provisioned administration
+plan. For example, `seven.drain`:
+
+```text
+voteboat-counter-drain-v1
+operation 19701
+source 3 3 1
+handoff 1 1 1
+original 9 - m:3 v:1 v:2 v:3
+joint 7001 9 10 11 3 m:2 v:1 v:2
+final 7001 10 11
+```
+
+The master and each referenced file are limited to64KiB, the complete input
+to1MiB and the retained plan to4MiB. This executable accepts at most256
+assignments. All existing credential/grant limits also apply. Missing, extra,
+duplicate or mismatched groups fail before opening node resources.
+
+Send these commands with authenticated `client BASE SOURCE ...`:
+
+1. `drain-node SEQUENCE OP` publishes the complete immutable intent before
+   acknowledging it and gating new local work. All original configurations
+   must be committed and stable at first acceptance.
+2. `drain-group SEQUENCE OP OFFSET` returns one original assignment, its target
+   and configuration operation where applicable, and its currently observed
+   completion. Offsets are zero-based; iterate the reported group count.
+3. For each voter group, use the existing group-prefixed `move-leader`,
+   `leadership-status`, `configure` and `configuration-status` commands at
+   that group's appropriate leader, preserving original operation IDs. Commit
+   both joint and final membership records. Retained groups need no move.
+4. `drain-status SEQUENCE OP` reports local durable intent and `ready`.
+   `drain-stop SEQUENCE OP` stops only after the source's authoritative
+   all-assignment readiness and owned-work checks succeed. Individual row
+   counts are not a stop certificate.
+
+Every node-wide drain command requires its normal group1 permission plus the
+corresponding permission for every local group. An administrator of group1
+alone cannot start, cancel or stop another group's node-wide maintenance.
+Status remains local evidence, not a remote quorum certificate.
+
+After interruption, recover with the identical master and original per-group
+plans, then `resume-drain SEQUENCE OP` to inspect the recovered intent and
+continue the same individual moves. Recovery restores the durable gate before
+normal polling and never automatically stops the source. Omitting or changing
+a recorded plan is refused. Journal publication failure terminates the service
+without a successful receipt; preserve its files and recover before retrying.
+
+`cancel-drain SEQUENCE OP` durably reopens the local admission/campaign gate.
+It does not undo membership or leadership operations already sent elsewhere.
+Keep original records when resolving any uncertain remote result. Cancellation
+survives restart; these commands do not delete or reclaim the source's storage.
+The existing `drain-run` is the single-group runner; automated multi-group
+foreground orchestration is the next deliverable.
