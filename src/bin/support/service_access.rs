@@ -173,6 +173,7 @@ pub struct ClientAccess {
     local: LocalIdentity,
     peers: BTreeMap<u64, TlsPeer>,
     pub principal: PrincipalId,
+    next_session: std::cell::Cell<u64>,
 }
 impl ClientAccess {
     pub fn load(directory: &Path, principal: u64, targets: &[Endpoint]) -> Result<Self, Failure> {
@@ -224,6 +225,7 @@ impl ClientAccess {
             local,
             peers,
             principal: PrincipalId::new(principal).unwrap(),
+            next_session: std::cell::Cell::new(1),
         })
     }
 }
@@ -260,12 +262,21 @@ impl Channel {
         target: u64,
         now: MonoTime,
     ) -> Result<Self, Failure> {
+        let generation = SecureSessionGeneration::new(config.next_session.get())
+            .ok_or("client session generation exhausted")?;
+        config.next_session.set(
+            config
+                .next_session
+                .get()
+                .checked_add(1)
+                .ok_or("client session generation exhausted")?,
+        );
         let session = checked(NativeTlsSession::client(
             stream,
             &config.tls,
             config.local,
             config.peers[&target].clone(),
-            SecureSessionGeneration::new(1).unwrap(),
+            generation,
             SessionLimits::default(),
             now,
         ))?;

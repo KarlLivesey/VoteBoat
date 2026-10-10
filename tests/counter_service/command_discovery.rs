@@ -46,11 +46,32 @@ fn prepared(quic: bool) -> Cluster {
     c.discover_via = Some(1);
     c
 }
+// Readiness is a direct authenticated status exchange, independent of the
+// discovery behavior whose refusal the following tests intend to exercise.
+fn wait_for_source(c: &mut Cluster) {
+    let source = c.discover_via.take();
+    let deadline = Instant::now() + Duration::from_secs(20);
+    loop {
+        let out = c.request(1, &["status"]);
+        if out.status.success() {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "source not ready: {}\n{}",
+            String::from_utf8_lossy(&out.stderr),
+            c.service_log(1)
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+    c.discover_via = source;
+}
 fn history(quic: bool) {
     let mut c = prepared(quic);
     for id in 1..=3 {
         c.start(id, "create");
     }
+    wait_for_source(&mut c);
     let leader = c.leader();
     for id in 1..=3 {
         assert!(c.ok(id, &["status"]).contains("OK role="));
@@ -103,6 +124,7 @@ fn discovery_failure_never_submits_a_command_or_uses_stale_addresses() {
     for id in 1..=3 {
         c.start(id, "create");
     }
+    wait_for_source(&mut c);
     c.ok(1, &["status"]);
     let out = c.request(2, &["add", "18802", "99"]);
     assert!(!out.status.success());
@@ -135,6 +157,7 @@ fn discovery_is_opt_in_and_requires_authentication_before_opening_storage() {
     for id in 1..=3 {
         c.start(id, "create");
     }
+    wait_for_source(&mut c);
     let out = c.request(1, &["add", "18804", "99"]);
     assert!(!out.status.success());
     assert!(String::from_utf8_lossy(&out.stderr).contains("discovery upgrade refused"));
@@ -170,6 +193,7 @@ fn discovery_scope_and_startup_validation_fail_before_submission() {
     for id in 1..=3 {
         c.start(id, "create");
     }
+    wait_for_source(&mut c);
     c.command_principal = Some(1);
     let out = c.request(1, &["add", "18805", "99"]);
     assert!(!out.status.success());

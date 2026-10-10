@@ -5452,3 +5452,15 @@ Formatting and all three strict Clippy profiles are clean; see
 The older macOS job114126028727 at1b460ef separately reported two failures;
 its saved excerpt is evidence of unresolved platform work, not this slice passing
 on macOS or proof of the cause. Broader P0–P7 acceptance remains open.
+
+## Slice190 — executable recursive metadata lookup
+
+The route CLI uses bounded authenticated authority discovery and the existing
+checked resolver. All13 Directory executable tests pass (TCP/QUIC),11 pass with
+default features, and all65 counter regressions pass after explicit test-source
+readiness. Tests include three-authority traversal, stale/incorrect observations,
+missing required paths, leader loss and interrupted leaf reads. Formatting and
+all three strict all-target Clippy profiles have zero diagnostics. Exact commands,
+failures, corrections, source hashes and limits are in
+[slice190](baseline/slice190/README.md). No current macOS/separate-host or complete
+P0–P7 validation is claimed; the original P7 latency requirement remains open.

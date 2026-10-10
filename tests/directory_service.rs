@@ -252,7 +252,11 @@ fn initialize(c: &mut Cluster) -> usize {
     assert!(c.ok(leader, &["initialize"]).contains("Initialized"));
     let missing = c.lookup(leader).output().unwrap();
     assert!(!missing.status.success());
-    assert!(String::from_utf8_lossy(&missing.stderr).contains("Missing"));
+    assert!(
+        String::from_utf8_lossy(&missing.stderr).contains("Missing"),
+        "unexpected unpublished lookup failure: {}",
+        String::from_utf8_lossy(&missing.stderr)
+    );
     assert!(c.ok(leader, &["publish", "101"]).contains("Published"));
     leader
 }
@@ -356,3 +360,6 @@ fn invalid_metadata_plan_is_rejected_before_storage_or_tls() {
         assert!(!c.root.join("1").exists());
     }
 }
+
+#[path = "directory_service/routes.rs"]
+mod routes;

@@ -76,7 +76,7 @@ cause and revise this sketch before another material change.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. |
-| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup; recursive executable routing and placement orchestration remain. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Placement orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
 
@@ -115,9 +115,87 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: authenticated remote command endpoints187 | Make the existing durable service usable from explicitly configured remote clients; advances P1/P5 deployment. | Existing command TLS/access policy, bounded CLI routing and provisioned certificate pins. | TCP/QUIC executable clusters use selected listeners, enforce permissions/TLS names and retain retries/recovery; six new tests and the full60-test service suite pass. Separate-machine validation remains open. |
 | Completed188: executable endpoint discovery | Resolve current command addresses through the public authenticated protocol; advances P1/P5 deployment. | Independent command pins, bounded startup endpoint view and NativeRemotePeerDiscovery/Responder. | Full64-test service run plus all5 discovery tests pass; stale addresses, source identity, permissions, scope, startup refusal and checkpoint/retry recovery are exercised. Manifest authority remains separate. |
 | Completed189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
-| Current190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
-| Next191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
-| Following192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+| Completed190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
+| Current191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
+| Next192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+| Following193: measured durability performance | Address the remaining original P7 latency gate without weakening durability. |192 evidence audit;181 publication costs;183 failed overlap experiment; explicit eligible-append and barrier/heartbeat traces. | Reproduce original committed/applied workload, recovery/retries and fixed250ms p99 criteria; accept a change only with both safety and comparative evidence. |
+
+### Slice190 implementation and acceptance record
+
+Added the executable route command with explicit authority-to-endpoint mapping,
+independent TLS pins, byte-partition scheme1 and optional root epoch/generation
+floors. The map selects connections only. The CLI composes the existing public
+ManifestDiscovery, NativeRemoteManifestDiscovery, NativeManifestCache and checked
+resolver; no private consensus or storage path was added. Leader status only
+selects a candidate. Every missing manifest still requires an authenticated
+quorum-backed read. A final route remains a hint and cannot activate ownership.
+
+The private polled adapter retains one remote source/read and bounded caches,
+rotates unavailable endpoints under a128-probe/ten-second budget, closes prior
+sources on authority changes and preserves provider-local observation identity
+across reconnections. Shared ClientAccess now allocates fresh local TLS session
+generations for each connection. Only requested path segments are fetched;
+known child locators work with unavailable ancestors. No persistent cache,
+automatic write routing, new dependency, format or durability token was added.
+
+Failed checks and corrections are retained in validation/baseline/slice190.
+Initial new fixtures used incorrect certificate DNS names; TLS correctly refused
+them. Wrong-authority rejection closes the session, and stale-floor refusal may
+reach the probe budget before the deadline; assertions now match those bounded
+outcomes while requiring no successful hint. Two counter discovery cases exposed
+startup races. They now wait for direct authenticated source readiness before
+asserting discovery-stage behavior; no production retry/permission rule changed.
+An existing QUIC unpublished-manifest check failed once without its actual error;
+added diagnostic output and subsequent passes do not establish that failure's
+cause.
+
+Actual validation: all13 Directory executable tests pass in25.19s; the default
+TCP/TLS build passes11 in22.50s. Three independent three-voter authorities cover
+cold TCP/QUIC traversal, required-path-only lookup, known-child independence,
+hop/epoch/generation bounds, wrong parent/scope/schema, incorrect authority/TLS
+mapping, missing manifests, leader loss and an interrupted accepted leaf read.
+All65 counter-service regressions pass in66.52s after the shared TLS change and
+fixture correction. Formatting, strict all-target Clippy default/all/core-only,
+and the95-contract inventory check pass. Logs, commands and final source hashes
+are in validation/baseline/slice190. No lint threshold or warning was suppressed.
+
+Macro review: P5 now has an executable cold recursive lookup. The mini plan
+advances to191 placement execution, then192 full acceptance reconciliation and
+193 evidence-selected P7 work. The original fixed250ms p99 gate, broader combined
+fault schedules and current macOS/separate-host evidence remain incomplete.
+The earlier baseline175 remains live at the host observation; CI38022391223 has
+an active Ubuntu job and an older macOS failure, while50a32e6 CI is pending.
+These are not current-source completion evidence. The full P0–P7 goal stays active.
+
+### Slice190 schema plan — bounded recursive executable discovery
+
+Data/API: add route to voteboat-directory. An explicit authority map contains
+GROUP INCARNATION NODE ADDRESS TLS_NAME, bounded to32 authorities/64 rows/32KiB.
+Load at most64 distinct independently pinned node identities with consistent
+TLS names and the existing1MiB pin limit. Select byte-partition scheme1, root
+locator, optional root epoch/generation floors, and1..32 hops. The map chooses
+connections only; manifests still come from authenticated quorum reads.
+
+Progress: a private ManifestDiscovery adapter queues missing lookups without
+blocking. The CLI poll loop performs bounded connection/status probes outside
+lookup, then uses NativeRemoteManifestDiscovery and resolve_discovered. Status
+selects a candidate only. Keep one live session/read, one ten-second invocation
+deadline, two-second read attempts, a finite128-probe budget and retry spacing.
+An authority transition releases the prior session; accepted read cancellation
+is consumed locally and the original server retains/drains its Node work.
+Successful parent segments remain in a bounded per-invocation manifest cache.
+
+Failure/restart: no route on missing mapping, wrong identity/scope/lineage,
+unsupported partition scheme, stale floor, hop overflow or partial remote
+failure. Never substitute local state for a quorum reply. Only explicit retryable
+unavailability/attempt expiry rotates read candidates; authentication/protocol
+errors are terminal. No persisted cache, new durability token or authority
+activation. Each ClientAccess issues fresh local connection generations.
+
+Acceptance: real three-level authority chains over TCP/QUIC, unpublished and
+unused branches, epoch/parent mismatch, bounded hops, wrong source mapping/TLS,
+known-child lookup with its parent stopped, and interrupted required leaf reads.
+Keep counter and metadata regressions plus all three strict lint profiles clean.
 
 ### Slice189 implementation and acceptance record
 

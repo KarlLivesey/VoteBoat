@@ -1,0 +1,8 @@
+Read-only host observation during slice190:
+Baseline175 cargo PID1526695 elapsed1:17:17, live.
+Its routed PID1580417 elapsed1:15:21, CPU17:47, live.
+This earlier-source run cannot certify slice190; it was not restarted.
+CI38022391223 (older1b460ef): formatting/lint success, Ubuntu in progress,
+macOS failure. The macOS result predates the186 error/clock repairs.
+Latest queried committed head50a32e6, CI38025080914: pending.
+No current-source macOS/separate-host or full-suite completion claim.

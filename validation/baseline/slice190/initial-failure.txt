@@ -1,0 +1,22 @@
+Initial all-feature Directory run: 5 passed, 6 failed in5.98s.
+All live route cases failed before a lookup with:
+Error: "authority authentication/connection failed: authentication failed"
+The authority-map fixture used DNS names node1/node2/node3, while the
+independently provisioned certificates require nodeN.voteboat.test.
+Corrected only the fixture names; did not loosen TLS validation or retry
+an authentication refusal. The wrong-name test continues to require refusal.
+
+The second Directory run passed9/12. The wrong-authority case is correctly
+closed by the server and reaches the client as Session(Truncated), not a
+serialized WrongAuthority reply. The below-floor case can reach its128-probe
+budget before its10-second deadline; both are intentional finite refusals.
+Assertions now require these actual boundaries and no successful hint.
+The existing QUIC publication test once failed its unpublished-Missing
+assertion without printing the actual error. Added diagnostic text; isolated
+rerun passed, as did the complete13-test run. This is not proof of its cause.
+
+The first full counter run passed63/65 in68.42s. One discovery test performed a
+status request before its source was ready (connection/authentication refusal,
+empty service log). Another asserted the expected permission-stage refusal
+without waiting for startup. Added bounded direct authenticated source readiness
+before discovery-specific assertions; no production retry semantics weakened.

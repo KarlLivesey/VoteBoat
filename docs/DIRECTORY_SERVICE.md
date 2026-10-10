@@ -78,7 +78,7 @@ ID/incarnation. Readers, writers and administrators with the matching authority
 scope may query. An unpublished responsibility returns Missing. Loss of quorum
 cannot be replaced by local state or liveness. `lookup` prints the selected
 manifest's identity, generation, epoch and execution mode; it is one lookup,
-not automatic recursive routing or permission to serve data.
+not permission to serve data. For recursive traversal, use `route` below.
 
 Clients can append `--command-peers FILE` for explicit non-default command
 addresses and independently pinned TLS names. The complete connection, command
@@ -86,6 +86,50 @@ upgrade and lookup share a ten-second deadline. Server connections also have a
 ten-second deadline and one outstanding request. The owner drains accepted
 reads and their underlying Node credits after disconnect before accepting a
 new command. The `manifest read accepted` diagnostic identifies that boundary.
+
+## Resolve a hierarchy
+
+Provide command endpoints and pinned TLS names for each metadata authority:
+
+```text
+voteboat-authorities-v1
+42 1 1 127.0.0.1:43101 node1.voteboat.test
+42 1 2 127.0.0.1:43102 node2.voteboat.test
+42 1 3 127.0.0.1:43103 node3.voteboat.test
+43 1 1 127.0.0.1:44101 node1.voteboat.test
+43 1 2 127.0.0.1:44102 node2.voteboat.test
+43 1 3 127.0.0.1:44103 node3.voteboat.test
+```
+
+Each row is authority group, incarnation, node, command address and TLS name.
+Provision matching server certificate pins in the client TLS directory. A node
+identity reused in multiple authorities must use the same certificate and TLS
+name. Addresses may differ. The map is bounded to32 authorities,64 endpoints
+and32KiB. It supplies connection choices, never committed ownership.
+
+For byte-partition scheme1/version1, resolve key10 starting at responsibility10
+in authority42:
+
+```sh
+target/debug/voteboat-directory route /your/client-tls 1 42 1 10 1 10 authorities.txt
+```
+
+The client discovers missing path segments with authenticated quorum reads and
+uses the public checked resolver. It probes candidate leaders, follows only the
+selected child path and verifies each child's authority, parent, epoch, scope
+and partition scheme. Unrelated branches need no connection. Output identifies
+the final execution group and includes `hint_only=true`: servers must still
+check committed ownership before admitting or applying work.
+
+Use `--max-hops N` (1..32, default32), `--min-epoch N` or
+`--min-generation N` for root observation constraints. A known child locator
+can be the starting point without contacting its parent. All authorities on the
+selected path must be provisioned and the principal must have read permission.
+The client has one outstanding remote read,64-manifest/256KiB caches, at most128
+connection probes and one ten-second invocation deadline. Each read attempt is
+bounded to two seconds. Explicit unavailability rotates candidates; identity,
+protocol, missing-manifest and lineage errors fail without returning a partial
+route. Cache contents are per invocation; there is no persisted fallback.
 
 ## Recovery and scope
 
@@ -106,7 +150,7 @@ bounds are checked before opening storage. It does not expose lifecycle commands
 or advertise Directory's larger lifecycle/membership readiness envelope.
 
 Credential policy is loaded at startup; live reload is not provided by this
-binary. Recursive multi-authority lookup, placement orchestration and lifecycle
-administration remain subsequent work. The native acceptance tests are local
+binary. Placement orchestration and lifecycle administration remain subsequent
+work. The native acceptance tests are local
 multiprocess TCP/QUIC histories; separate-host and current macOS validation remain
 open. The full P0–P7 roadmap is not complete.

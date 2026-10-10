@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Native replicated metadata authority with explicit trusted initial grants.
+#[path = "support/authority_endpoints.rs"]
+mod authority_endpoints;
 #[path = "support/command_client.rs"]
 mod command_client;
 #[path = "support/command_endpoints.rs"]
@@ -25,6 +27,10 @@ mod directory_connection;
 mod directory_owner;
 #[path = "support/directory_plan.rs"]
 mod directory_plan;
+#[path = "support/route_client.rs"]
+mod route_client;
+#[path = "support/route_discovery.rs"]
+mod route_discovery;
 #[path = "support/service_access.rs"]
 mod service_access;
 #[path = "support/service_setup.rs"]
@@ -45,7 +51,7 @@ use voteboat::{
     runtime::*,
 };
 type Node = NativeNode<Directory, NativeServiceConnector>;
-const HELP: &str = "voteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]";
+const HELP: &str = "voteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
 fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
@@ -197,6 +203,7 @@ fn main() -> Result<(), Failure> {
         [verb, rest @ ..] if verb == "serve" => serve(rest),
         [verb, rest @ ..] if verb == "client" => directory_client::command(rest),
         [verb, rest @ ..] if verb == "lookup" => directory_client::lookup(rest),
+        [verb, rest @ ..] if verb == "route" => route_client::route(rest),
         [arg] if arg == "--help" => {
             println!("{HELP}");
             Ok(())
