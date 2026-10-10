@@ -32,6 +32,17 @@ impl Default for SnapshotRouterLimits {
         }
     }
 }
+/// Additional limits for readiness and snapshot transfer/install preparation.
+/// Local checkpoint publication and reconciliation retain the global limits.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SnapshotRecoveryLimits {
+    /// Maximum accepted recovery jobs awaiting router completion.
+    pub requests: usize,
+    /// Aggregate declared image capacity, twice the worker allowance for
+    /// readiness (loaded anchor plus application checkpoint), once otherwise.
+    /// This is not a bandwidth limit or the owner's total memory reservation.
+    pub image_bytes: usize,
+}
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotRouteError {
     InvalidLimits,
@@ -63,6 +74,7 @@ struct Pending {
     lease: EffectLease,
     request: SnapshotWorkTicket,
     allowance: usize,
+    recovery_bytes: usize,
 }
 /// Fixed bounded coordination, with a construction-selected public worker. Owns
 /// original effect leases through accepted snapshot work. It creates no worker,
@@ -73,6 +85,7 @@ pub struct SnapshotRouter {
     owner: RuntimeOwner,
     worker: SnapshotWorkerBinding,
     limits: SnapshotRouterLimits,
+    recovery: SnapshotRecoveryLimits,
     pending: BTreeMap<u64, Pending>,
     last_admission: u64,
 }
@@ -82,6 +95,23 @@ impl SnapshotRouter {
         worker: SnapshotWorkerBinding,
         limits: SnapshotRouterLimits,
     ) -> Result<Self, SnapshotRouteError> {
+        Self::new_with_recovery_limits(
+            owner,
+            worker,
+            limits,
+            SnapshotRecoveryLimits {
+                requests: limits.requests.min(4),
+                image_bytes: limits.max_image_bytes.saturating_mul(2),
+            },
+        )
+    }
+    /// Select volatile recovery admission without changing worker ownership.
+    pub fn new_with_recovery_limits(
+        owner: RuntimeOwner,
+        worker: SnapshotWorkerBinding,
+        limits: SnapshotRouterLimits,
+        recovery: SnapshotRecoveryLimits,
+    ) -> Result<Self, SnapshotRouteError> {
         if owner.store != worker.store {
             return Err(SnapshotRouteError::WrongWorker);
         }
@@ -89,6 +119,10 @@ impl SnapshotRouter {
             || limits.requests > 65536
             || limits.max_image_bytes == 0
             || limits.max_image_bytes as u128 > 4 * 1024 * 1024 * 1024u128
+            || recovery.requests == 0
+            || recovery.requests > limits.requests
+            || recovery.image_bytes == 0
+            || recovery.image_bytes as u128 > 8 * 1024 * 1024 * 1024u128
         {
             return Err(SnapshotRouteError::InvalidLimits);
         }
@@ -96,6 +130,7 @@ impl SnapshotRouter {
             owner,
             worker,
             limits,
+            recovery,
             pending: BTreeMap::new(),
             last_admission: 0,
         })
@@ -104,6 +139,17 @@ impl SnapshotRouter {
         SnapshotRouterUsage {
             requests: self.pending.len(),
             image_bytes: self.pending.values().map(|p| p.allowance).sum(),
+        }
+    }
+    pub fn recovery_limits(&self) -> SnapshotRecoveryLimits {
+        self.recovery
+    }
+    /// Includes completed worker work whose original router receipt is pending.
+    pub fn recovery_usage(&self) -> SnapshotRouterUsage {
+        let recovery = self.pending.values().filter(|p| p.recovery_bytes > 0);
+        SnapshotRouterUsage {
+            requests: recovery.clone().count(),
+            image_bytes: recovery.map(|p| p.recovery_bytes).sum(),
         }
     }
     pub fn owner(&self) -> RuntimeOwner {
@@ -167,6 +213,7 @@ impl SnapshotRouter {
         if allowance == 0 || allowance > self.limits.max_image_bytes {
             return Err(SnapshotRouteError::TooLarge);
         }
+        self.check_recovery_budget(&lease.effect, allowance)?;
         if let Effect::StageSnapshot(message) = &lease.effect {
             if let Rpc::Snapshot { snapshot } = &message.rpc {
                 if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
@@ -265,12 +312,14 @@ impl SnapshotRouter {
             });
         }
         self.last_admission = request.sequence;
+        let recovery_bytes = recovery_cost(&lease.effect, allowance);
         self.pending.insert(
             request.sequence,
             Pending {
                 lease,
                 request,
                 allowance,
+                recovery_bytes,
             },
         );
         Ok(request)
@@ -372,6 +421,7 @@ impl SnapshotRouter {
                         lease: *rejected.lease,
                         request: p.request,
                         allowance: p.allowance,
+                        recovery_bytes: p.recovery_bytes,
                     },
                 );
             }
@@ -397,5 +447,35 @@ impl SnapshotRouter {
                 .map_err(|e| SnapshotRouteError::Owner(e.reason))?;
         }
         Ok(())
+    }
+    fn check_recovery_budget(
+        &self,
+        effect: &Effect,
+        allowance: usize,
+    ) -> Result<(), SnapshotRouteError> {
+        let cost = recovery_cost(effect, allowance);
+        if cost == 0 {
+            return Ok(());
+        }
+        if cost > self.recovery.image_bytes {
+            return Err(SnapshotRouteError::TooLarge);
+        }
+        let usage = self.recovery_usage();
+        if usage.requests >= self.recovery.requests
+            || cost > self.recovery.image_bytes.saturating_sub(usage.image_bytes)
+        {
+            return Err(SnapshotRouteError::Overloaded);
+        }
+        Ok(())
+    }
+}
+
+fn recovery_cost(effect: &Effect, allowance: usize) -> usize {
+    match effect {
+        Effect::VerifyLearnerReadiness(_) => allowance.saturating_mul(2),
+        Effect::StageSnapshot(_)
+        | Effect::SnapshotRequired { .. }
+        | Effect::SnapshotInstalled(_) => allowance,
+        _ => 0,
     }
 }

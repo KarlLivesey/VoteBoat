@@ -460,16 +460,23 @@ mod native {
             let mut stream = TcpStream::connect(c.listener_addr().unwrap().unwrap()).unwrap();
             stream.write_all(magic).unwrap();
             stream.write_all(&peer.to_le_bytes()).unwrap();
-            for _ in 0..4 {
+            stream.set_nonblocking(true).unwrap();
+            let deadline = Instant::now() + Duration::from_secs(2);
+            loop {
                 assert!(step(&mut c, 0).is_empty());
+                assert_eq!(c.usage().requests, 1);
+                assert_eq!(c.usage().handshaking, 0);
+                match stream.read(&mut [0]) {
+                    Ok(0) => break,
+                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => (),
+                    result => panic!("invalid hint socket was not closed cleanly: {result:?}"),
+                }
+                assert!(Instant::now() < deadline, "invalid hint socket stayed open");
+                thread::park_timeout(Duration::from_millis(1));
             }
             assert_eq!(c.usage().anonymous, 0);
             assert_eq!(c.usage().requests, 1);
             assert_eq!(c.usage().handshaking, 0);
-            stream
-                .set_read_timeout(Some(Duration::from_secs(5)))
-                .unwrap();
-            assert_eq!(stream.read(&mut [0]).unwrap(), 0);
         }
         assert!(c.cancel(ticket(1, 2, 1)));
         assert!(matches!(

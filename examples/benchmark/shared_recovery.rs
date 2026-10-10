@@ -21,6 +21,7 @@ struct Harness {
     protocol: NativePeerProtocol,
     bootstraps: Vec<Bootstrap>,
     addresses: BTreeMap<u64, std::net::SocketAddr>,
+    recovery: Option<SnapshotRecoveryLimits>,
 }
 impl Harness {
     fn new(protocol: NativePeerProtocol) -> Self {
@@ -62,6 +63,7 @@ impl Harness {
             protocol,
             bootstraps,
             addresses,
+            recovery: None,
         }
     }
     fn open(&self, n: u64, mode: NativeOpenMode) -> Replica<SharedLog> {
@@ -74,7 +76,7 @@ impl Harness {
             bootstraps: &self.bootstraps,
             addresses: &self.addresses,
         }
-        .open_replica(n)
+        .open_replica_with_recovery(n, self.recovery)
         .unwrap()
         .0
     }
@@ -176,8 +178,72 @@ fn checkpoint_survivors(
         .collect()
 }
 
-fn history(protocol: NativePeerProtocol) {
-    let h = Harness::new(protocol);
+fn repair(h: &Harness, replicas: &mut [Replica<SharedLog>], forced: &BTreeMap<GroupIdentity, u64>) {
+    let mut totals = PollTotals::default();
+    for g in 1..=GROUPS {
+        replicas[0]
+            .control(group_id(g), NodeControl::Campaign)
+            .unwrap();
+    }
+    let mut foreground = None;
+    let mut applied = false;
+    let mut peak = 0;
+    drive(replicas, &h.clock, &mut totals, |ns| {
+        let mut active = false;
+        for n in ns.iter() {
+            let router = &n.local().snapshots.as_ref().unwrap().router;
+            let usage = router.recovery_usage();
+            let limits = router.recovery_limits();
+            assert!(usage.requests <= limits.requests);
+            assert!(usage.image_bytes <= limits.image_bytes);
+            peak = peak.max(usage.requests);
+            active |= usage.requests > 0;
+        }
+        if h.recovery.is_some() && foreground.is_none() && active {
+            if let Ok(n) = leader(ns, group_id(GROUPS)) {
+                let ticket = ns[n]
+                    .propose(ClientRequest {
+                        group: group_id(GROUPS),
+                        operation: OperationId::new(900_001).unwrap(),
+                        bytes: 0i64.to_le_bytes().to_vec(),
+                    })
+                    .map_err(|e| format!("foreground refused: {:?}", e.reason))?;
+                foreground = Some((n, ticket));
+            }
+        }
+        if let Some((n, ticket)) = &foreground {
+            if let Some(output) = ns[*n].poll_client() {
+                assert_eq!(output.ticket(), *ticket);
+                let result = checked(ns[*n].complete_client(output).map_err(|e| e.reason))?;
+                assert!(matches!(result, ClientOutcome::Applied { receipt, .. }
+                    if receipt.outcome == CounterOutcome::Value(2) && !receipt.duplicate));
+                applied = true;
+            }
+        }
+        let local = ns[2].local();
+        let repaired = forced.iter().all(|(g, bound)| {
+            local.owner.core(*g).unwrap().state().base_index() >= *bound
+                && local.applications[g].applied_index() >= *bound
+                && local.applications[g].read_applied(*bound) == Ok(2)
+        });
+        Ok(repaired && (h.recovery.is_none() || applied))
+    })
+    .unwrap();
+    assert!(totals.snapshot_installs[2] >= GROUPS);
+    if h.recovery.is_some() {
+        assert_eq!(peak, 1);
+        assert!(applied);
+    }
+}
+
+fn history(protocol: NativePeerProtocol, bounded: bool) {
+    let mut h = Harness::new(protocol);
+    if bounded {
+        h.recovery = Some(SnapshotRecoveryLimits {
+            requests: 1,
+            image_bytes: 128 * 1024 * 1024,
+        });
+    }
     let mut replicas = h.all(NativeOpenMode::Create);
     campaign(&mut replicas, &h.clock, GROUPS).unwrap();
     let first = write_round(&h, &mut replicas, 1);
@@ -203,22 +269,7 @@ fn history(protocol: NativePeerProtocol) {
                 < *bound
         );
     }
-    let mut totals = PollTotals::default();
-    for g in 1..=GROUPS {
-        replicas[0]
-            .control(group_id(g), NodeControl::Campaign)
-            .unwrap();
-    }
-    drive(&mut replicas, &h.clock, &mut totals, |ns| {
-        let local = ns[2].local();
-        Ok(forced.iter().all(|(g, bound)| {
-            local.owner.core(*g).unwrap().state().base_index() >= *bound
-                && local.applications[g].applied_index() >= *bound
-                && local.applications[g].read_applied(*bound) == Ok(2)
-        }))
-    })
-    .unwrap();
-    assert!(totals.snapshot_installs[2] >= GROUPS);
+    repair(&h, &mut replicas, &forced);
     verify(&mut replicas, &h.clock, 2 * GROUPS, GROUPS, &last).unwrap();
     for g in 1..=GROUPS {
         assert_eq!(retry(&mut replicas, &h.clock, g, 1, GROUPS).unwrap(), 0);
@@ -262,10 +313,20 @@ fn history(protocol: NativePeerProtocol) {
 
 #[test]
 fn tcp_each_stale_group_requires_snapshot_after_transport_restart() {
-    history(NativePeerProtocol::TcpTls);
+    history(NativePeerProtocol::TcpTls, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_each_stale_group_requires_snapshot_after_transport_restart() {
-    history(NativePeerProtocol::Quic);
+    history(NativePeerProtocol::Quic, false);
+}
+
+#[test]
+fn tcp_recovery_quota_drains_eight_groups_with_foreground_writes() {
+    history(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_recovery_quota_drains_eight_groups_with_foreground_writes() {
+    history(NativePeerProtocol::Quic, true);
 }

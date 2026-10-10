@@ -351,6 +351,13 @@ struct ClusterSetup<'a> {
 }
 impl ClusterSetup<'_> {
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
+        self.open_replica_with_recovery(n, None)
+    }
+    fn open_replica_with_recovery(
+        &self,
+        n: u64,
+        recovery: Option<SnapshotRecoveryLimits>,
+    ) -> Result<(Replica<SharedLog>, Trace), Failure> {
         let Self {
             root,
             mode,
@@ -405,11 +412,13 @@ impl ClusterSetup<'_> {
             Default::default(),
         ))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
+        let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
+        workers.limit_recovery(recovery)?;
         let Workers {
             owner,
             persistence,
             snapshots: snapshot_workers,
-        } = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
+        } = workers;
         let connector = connector(n, local, &remote, addresses, protocol, wake, now)?;
         let parts = NodeParts {
             local: NodeLocalParts {
@@ -454,6 +463,19 @@ struct Workers {
     owner: EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>,
     persistence: NativeLogWorker<SharedLog>,
     snapshots: NodeSnapshots<NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>>,
+}
+impl Workers {
+    fn limit_recovery(&mut self, limits: Option<SnapshotRecoveryLimits>) -> Result<(), Failure> {
+        if let Some(limits) = limits {
+            self.snapshots.router = checked(SnapshotRouter::new_with_recovery_limits(
+                self.owner.identity(),
+                self.snapshots.worker.binding(),
+                SnapshotRouterLimits::default(),
+                limits,
+            ))?;
+        }
+        Ok(())
+    }
 }
 fn spawn_workers(
     log: SharedLog,

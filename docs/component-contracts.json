@@ -678,6 +678,9 @@
       "public_contract": "SnapshotRouter",
       "operations": [
         "new",
+        "new_with_recovery_limits",
+        "recovery_limits",
+        "recovery_usage",
         "submit",
         "deliver",
         "usage",
@@ -686,9 +689,12 @@
       ],
       "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
       "conformance": [
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "tests/snapshot_routes/recovery_budget.rs",
+        "tests/learners.rs",
+        "examples/benchmark/shared_recovery.rs"
       ],
-      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Explicit volatile recovery request and capacity quotas gate preparation before extra owner reservation; readiness charges two image allowances. Original receipts retain credit through worker completion until router delivery or fenced discard. Local checkpoint publication/reconciliation remain under global owner/router/worker limits. Selected host pressure/stale/failure/checkpoint tests and native TCP/QUIC eight-group forced repair with foreground writes and reopen validate this admission seam; no bandwidth, latency or preemption guarantee."
     },
     {
       "design_id": "C12",

@@ -4990,3 +4990,27 @@ bounded wall deadline while virtual time remains0; timeout/cancel and queue/
 ticket/socket-close assertions are unchanged. The full connect target passes
 14/14 locally. The failed job excerpt is retained; fresh macOS validation is
 still outstanding.
+
+### Slice162 — bounded recovery preparation
+
+The public SnapshotRouter now supports independent recovery request/capacity
+admission before preparing images, with exact receipt lifetime and retained
+credits. Local checkpoint publication and reconciliation retain their global
+budgets. Readiness accounts for both loaded and application images. Five new
+host tests cover rejection, retry, stale completion, provider failure, fenced
+cleanup and concurrent checkpoint progress. All136 effect-owner tests pass.
+
+All24 learner tests pass, including native readiness with exact two-image
+accounting. All20 native benchmark tests pass, including two new TCP/QUIC
+histories with eight forcibly stale groups, a one-job recovery quota, foreground
+applied write, quorum reads, duplicate receipts and complete restart. Strict
+Clippy is zero in both configurations; formatting, warnings-denied API docs
+and89-record inventory metadata checks pass. See
+[slice162 evidence](baseline/slice162/README.md) for logs, commands and limits.
+
+Previousd36fc71's macOS run passed the fragmented-preface fix but exposed a
+separate fixed-poll-count invalid-hint assumption. The fixture now waits for
+actual socket closure at unchanged virtual time while checking request and
+handshake state; all14 connect tests are checked locally. Fresh macOS CI remains
+unverified. This establishes selected admission/progress behavior, not bandwidth
+or tail-latency guarantees or complete P0–P7 acceptance.

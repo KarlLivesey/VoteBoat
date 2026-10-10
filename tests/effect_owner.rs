@@ -2929,6 +2929,7 @@ fn closing_drains_accepted_work_and_disarms_automatic_timers() {
 mod snapshot_routes {
     use super::*;
     use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
+    mod recovery_budget;
     pub(super) struct Worker {
         binding: SnapshotWorkerBinding,
         sequence: u64,

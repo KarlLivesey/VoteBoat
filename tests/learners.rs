@@ -1124,10 +1124,7 @@ mod native_exchange {
             let lease = self.owner.take_effect().unwrap().unwrap();
             assert!(matches!(lease.effect, Effect::VerifyLearnerReadiness(_)));
             let visit = lease.ticket.visit;
-            let ticket = self
-                .router
-                .submit(&mut self.owner, &mut self.worker, lease, &self.app)
-                .unwrap();
+            let ticket = self.submit_readiness(lease);
             assert!(self.owner.core(group(1)).unwrap().has_pending_dependency());
             // Polling is deliberately withheld. Provider completion cannot release
             // the original visit or its credits, and another group still runs.
@@ -1169,6 +1166,7 @@ mod native_exchange {
                 .deliver(&mut self.owner, &mut self.app, event, MonoTime(0))
                 .unwrap();
             assert_eq!(self.router.usage().requests, 0);
+            assert_eq!(self.router.recovery_usage(), SnapshotRouterUsage::default());
             assert!(!self.owner.core(group(1)).unwrap().has_pending_dependency());
             let lease = self.owner.take_effect().unwrap().unwrap();
             let Effect::Send(reply) = lease.effect else {
@@ -1188,6 +1186,54 @@ mod native_exchange {
             self.leader.step(Event::Receive(reply)).unwrap();
             assert_eq!(self.leader.ready_learner().is_some(), capable);
             assert_eq!(self.worker.usage(), SnapshotWorkUsage::default());
+        }
+        fn submit_readiness(&mut self, lease: EffectLease) -> SnapshotWorkTicket {
+            let allowance = self.worker.load_reservation(group(1)).unwrap();
+            self.router = SnapshotRouter::new_with_recovery_limits(
+                self.owner.identity(),
+                self.worker.binding(),
+                SnapshotRouterLimits::default(),
+                SnapshotRecoveryLimits {
+                    requests: 1,
+                    image_bytes: allowance,
+                },
+            )
+            .unwrap();
+            let reserved = self.owner.usage().reserved_bytes;
+            let rejected = self
+                .router
+                .submit(&mut self.owner, &mut self.worker, lease, &self.app)
+                .unwrap_err();
+            assert_eq!(rejected.reason, SnapshotRouteError::TooLarge);
+            assert_eq!(self.owner.usage().reserved_bytes, reserved);
+            assert_eq!(self.worker.usage().requests, 0);
+            self.router = SnapshotRouter::new_with_recovery_limits(
+                self.owner.identity(),
+                self.worker.binding(),
+                SnapshotRouterLimits::default(),
+                SnapshotRecoveryLimits {
+                    requests: 1,
+                    image_bytes: 2 * allowance,
+                },
+            )
+            .unwrap();
+            let ticket = self
+                .router
+                .submit(
+                    &mut self.owner,
+                    &mut self.worker,
+                    *rejected.lease,
+                    &self.app,
+                )
+                .unwrap();
+            assert_eq!(
+                self.router.recovery_usage(),
+                SnapshotRouterUsage {
+                    requests: 1,
+                    image_bytes: 2 * allowance
+                }
+            );
+            ticket
         }
         fn wait_snapshot(&mut self) -> SnapshotWorkEvent {
             let clock = Instant::now();

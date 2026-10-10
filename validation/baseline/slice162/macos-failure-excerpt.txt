@@ -1,0 +1,33 @@
+2026-10-10T02:22:20.6526040Z running 14 tests
+2026-10-10T02:22:20.6536870Z test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+2026-10-10T02:22:20.6537530Z test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+2026-10-10T02:22:20.6538240Z test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+2026-10-10T02:22:20.6598090Z test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+2026-10-10T02:22:20.6701110Z test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+2026-10-10T02:22:20.6709470Z test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... FAILED
+2026-10-10T02:22:20.6711390Z test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+2026-10-10T02:22:20.6874250Z test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+2026-10-10T02:22:20.7134360Z test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+2026-10-10T02:22:20.7137330Z test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+2026-10-10T02:22:20.7202080Z test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+2026-10-10T02:22:20.7204360Z test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+2026-10-10T02:22:20.7827120Z test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+2026-10-10T02:22:20.8305470Z test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+2026-10-10T02:22:20.8305880Z 
+2026-10-10T02:22:20.8305980Z failures:
+2026-10-10T02:22:20.8306080Z 
+2026-10-10T02:22:20.8306430Z ---- native::invalid_hint_drops_socket_without_consuming_authorized_attempt stdout ----
+2026-10-10T02:22:20.8307250Z 
+2026-10-10T02:22:20.8307660Z thread 'native::invalid_hint_drops_socket_without_consuming_authorized_attempt' (26204) panicked at tests/connect.rs:466:13:
+2026-10-10T02:22:20.8308130Z assertion `left == right` failed
+2026-10-10T02:22:20.8308430Z   left: 1
+2026-10-10T02:22:20.8308610Z  right: 0
+2026-10-10T02:22:20.8308910Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026-10-10T02:22:20.8309650Z 
+2026-10-10T02:22:20.8309650Z 
+2026-10-10T02:22:20.8309770Z failures:
+2026-10-10T02:22:20.8310050Z     native::invalid_hint_drops_socket_without_consuming_authorized_attempt
+2026-10-10T02:22:20.8310350Z 
+2026-10-10T02:22:20.8310630Z test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+2026-10-10T02:22:20.8311310Z 
+2026-10-10T02:22:20.8311640Z error: test failed, to rerun pass `--test connect`

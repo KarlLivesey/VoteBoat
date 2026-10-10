@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: bounded recovery scheduling | Close a concrete shared-runtime resource gap; advances P2/P7 operational recovery. | Review existing snapshot/maintenance budgets and retained offered-load evidence; select the missing shared budget rather than add a parallel scheduler. | Record a schema plan, then show recovering groups make progress within declared limits while healthy groups retain service; include shutdown/cancellation and actual failure evidence. |
-| Next: shared admission/provider conformance | Extend the resource-lifetime evidence for P0/P2 and Rust embedding. | The recovery-budget contract and existing host/native resource ownership; choose a concrete uncovered failure from the catalogue. | A host-substituted provider exercises exhaustion, accepted work, cancellation and independent shutdown with exact ownership and no lost credits. |
-| Following: faulted history verification | Improve P0/P1 evidence for successful and unknown write/read outcomes. | Existing actual-core fault harness and recorded operation identities/outcomes; preserve reproducible seeds and scope. | A bounded reproducible fault history is checked against the declared single-group order, with failures retained and no success inferred solely from a test count. |
+| Current: shared admission/provider conformance | Extend resource-lifetime evidence for P0/P2 and Rust embedding. | Completed recovery-budget contract162 and existing host/native ownership; select a concrete uncovered provider failure from the catalogue. | Host-substituted provider exhaustion, accepted work, cancellation and independent shutdown preserve exact ownership without lost credits. |
+| Next: faulted history verification | Improve P0/P1 evidence for successful and unknown write/read outcomes. | Existing actual-core fault harness and recorded operation identities/outcomes; reproducible seeds. | Check a bounded fault history against the declared single-group order; retain failures and distinguish unknown from success. |
+| Following: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger plus source and actual local/CI results. | Identify a concrete unresolved requirement and its smallest complete path; record data/API, state, ownership, failure/restart and acceptance plan before implementation. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -15080,3 +15080,103 @@ retained with this slice. Both final strict lint profiles and formatting remain
 required and unchanged; this local pass does not establish corrected macOS
 execution. The prior run did pass the earlier QUIC mailbox correction before
 reaching this separate TCP-preface fixture.
+
+### 162 bounded recovery admission — schema plan
+
+Previous goal turn was progress:161 is committed asd36fc71, with authenticated
+new-voter interruption/recovery and zero strict lint. Existing broad test runs
+remain live. Review finds SnapshotWorker already has queue/byte/control limits,
+but SnapshotRouter has only a request count and per-image maximum: recovery
+preparation can clone/validate several large images before worker backpressure.
+Do not add a second scheduler or change quorum/activation semantics.
+
+Add public SnapshotRecoveryLimits (request count and aggregate capacity-costed
+image allowance) and a constructor selecting them on the existing router.
+The original constructor selects bounded defaults from its existing limits.
+Track the recovery class in each original pending record; charge before preparing
+or submitting work. Classify readiness, received snapshot staging, send loads
+and install loads as recovery. Local checkpoint publication/reconciliation use
+the existing global router/worker/owner limits, not this extra recovery quota.
+This is concurrent work/memory admission, not I/O bandwidth or latency guarantees.
+
+Refusal returns the exact lease with no added owner reservation or worker call;
+a per-image cost larger than the selected budget is permanently TooLarge.
+Accepted credits remain until exact router delivery or explicit fenced discard,
+including completed-but-unobserved work. Stale events release nothing. Provider
+refusal consumes no recovery slot. No durable token/watermark/generation is added;
+reconstruct the volatile budget on startup and drain original leases normally.
+Explicit limits remain replaceable-provider compatible; no hidden thread/store.
+
+Checks: host worker count/byte pressure before preparation, exact refusal/retry,
+retained/stale-completion accounting, failure cleanup and checkpoint admission
+while recovery is capped. Then selected real native multi-group recovery under a
+small quota, with unrelated writes, read/retry/reopen and unchanged durability
+requirements. Existing snapshot/owner and native benchmark recovery regressions
+plus both strict lint profiles. This advances P2/P7 bounded recovery and C10/C15;
+shared admission/provider coverage and faulted-history verification follow.
+
+### 162 implemented — bounded recovery preparation
+
+SnapshotRouter now accepts explicit SnapshotRecoveryLimits and reports the
+outstanding recovery request/capacity usage. The original constructor selects
+at most four recovery jobs and twice its per-image maximum. Readiness charges
+two worker image allowances (loaded anchor plus application checkpoint); other
+recovery jobs charge one. Local checkpoint publication/reconciliation consume
+only the existing global router/owner/worker limits. No thread, scheduler,
+durable format, quorum rule or activation condition changes.
+
+Admission checks precede image preparation and added owner reservation. A
+permanent over-budget image returns TooLarge; occupied capacity returns
+Overloaded with the original lease. Provider refusal takes no recovery credit.
+Worker completion alone does not release credit: exact router delivery or
+explicit failed-owner discard does. Stale completions leave credit unchanged.
+The quota is volatile and reconstructed empty on restart; it limits concurrent
+preparation and retained declared capacity, not bandwidth or service latency.
+
+Five new downstream host tests verify independent count/byte pressure,
+completed-but-unobserved work, stale events, exact retry, permanent refusal,
+provider rejection, fenced cleanup and checkpoint publication plus reconciliation
+while recovery remains charged. The full136 effect-owner tests pass in20.46s.
+The24 learner tests pass in0.34s, including native TCP/QUIC readiness checks that
+reject a single-image budget before preparation, then complete under the exact
+two-image budget with stale-completion and closing-owner checks.
+
+Two added native histories force all eight groups through snapshot repair by
+compacting survivors beyond the stopped follower and reopening every transport.
+TCP and QUIC both retain a maximum of one recovery job per replica, admit and
+complete a foreground write while recovery is active, retain original duplicate
+receipts, perform quorum reads, then reopen original files and check again.
+All20 native benchmark tests pass in6.20s. This is selected Linux process/recovery
+evidence, not physical power-loss proof, a fixed-p99 claim or macOS validation.
+
+The first host test driver incorrectly assumed its deliberately one-request WAL
+worker could accept two groups' persists; it now retains only Overloaded leases
+and retries them after exact worker completion. The initial all-feature lint
+also caught an oversized benchmark constructor; optional quota selection now
+belongs to its existing Workers assembly. No lint suppression or production
+retry broadening was used. Both strict profiles subsequently pass with zero
+diagnostics. Full command evidence is in validation/baseline/slice162.
+
+Macro review: this closes the selected P2/P7 pre-preparation recovery admission
+gap, not the remaining performance/fault roadmap. Shared host/provider lifecycle
+conformance becomes the next current deliverable; faulted history verification
+follows, then a requirement-by-requirement baseline evidence review selects the
+next unresolved dependency. No P0–P7 completion is claimed.
+
+162 CI follow-up schema: macOS job114107977833 on the previousd36fc71 passes
+fragmented-preface coverage but fails invalid_hint_drops_socket at anonymous
+usage1 versus0 after four immediate polls. Replace that fixed count with a
+bounded loop observing the actual invalid socket close, while asserting the
+original authorized request remains and no TLS handshake begins. Keep virtual
+time0, test every existing invalid hint, and retain exact cancellation checks.
+No production transport or timeout change; the socket close is the acceptance
+condition, not an initially empty anonymous queue. This removes a fixture's
+kernel scheduling assumption. Run the complete connect target locally; macOS
+still requires its next actual run.
+
+162 CI correction result: all14 connect tests pass locally in0.04s with the
+actual-close wait. The final all-feature strict lint remains zero; the core
+profile and warnings-denied API docs pass. New macOS execution is still pending.
+The previous full-sweep process handles are absent when checked this turn and
+none of their partial logs proves full completion; they are no longer described
+as live. The focused results above are the evidence for this changed slice.
