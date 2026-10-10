@@ -1,0 +1,71 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
+     Running tests/native_member_startup.rs (target/debug/deps/native_member_startup-10232005ef270231)
+
+running 50 tests
+test create_and_static_wire_are_rejected_before_filesystem_changes ... ok
+test committed_retirement_releases_old_peer_requirements_without_weakening_static_startup ... ok
+test quic_member_late_failure_joins_workers_and_releases_resources ... ok
+test missing_checkpoint_data_prevents_member_exposure ... ok
+test native_snapshot_enrollment_retries_and_reopens_tcp_learner ... ok
+test native_snapshot_enrollment_retries_and_reopens_quic_learner ... ok
+test quic_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_tcp ... ok
+test quic_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test recovery_requires_committed_local_assignment_and_all_rollback_peer_credentials ... ok
+test quic_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test native_promotion_refuses_restarted_learner_readiness_tcp ... ok
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic ... ok
+test recursive::quic_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test quic_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test recursive::quic_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test recursive::tcp_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test tcp_member_late_failure_joins_workers_and_releases_resources ... ok
+test tcp_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test recursive::tcp_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test quic_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test tcp_promoted_leader_loss_refuses_compacted_witness ... ok
+test tcp_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test tcp_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test tcp_promoted_leader_loss_requires_retained_restored_witness ... ok
+test tcp_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test tcp_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test quic_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test quic_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test quic_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test quic_native_joint_repair_catches_up_multiple_batches ... ok
+test quic_native_snapshot_repair_recovers_compacted_joint ... ok
+test quic_promoted_leader_loss_refuses_compacted_witness ... ok
+test quic_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+test tcp_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test tcp_native_joint_repair_catches_up_multiple_batches ... ok
+test tcp_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test tcp_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test tcp_native_snapshot_repair_recovers_compacted_joint ... ok
+test tcp_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+test quic_promoted_leader_loss_requires_retained_restored_witness ... ok
+test native_promotion_refuses_restarted_learner_readiness_quic ... FAILED
+
+failures:
+
+---- native_promotion_refuses_restarted_learner_readiness_quic stdout ----
+
+thread 'native_promotion_refuses_restarted_learner_readiness_quic' (3422661) panicked at tests/native_member_startup.rs:1258:9:
+administrative progress timed out: ["node=NodeId(1) phase=Running failure=None term=3 config=ConfigurationId(10) commit=4 owner=EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } persistence=WorkerUsage { requests: 0, units: 0, bytes: 0 } clients=ClientUsage { requests: 0, bytes: 0 } reads=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true outbound=OutboundUsage { batches: 1, messages: 1, bytes: 512 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None)) snapshots=Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 }))", "node=NodeId(2) phase=Running failure=None term=3 config=ConfigurationId(10) commit=4 owner=EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } persistence=WorkerUsage { requests: 0, units: 0, bytes: 0 } clients=ClientUsage { requests: 0, bytes: 0 } reads=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true outbound=OutboundUsage { batches: 1, messages: 1, bytes: 512 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None)) snapshots=Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 }))", "node=NodeId(3) phase=Running failure=None term=3 config=ConfigurationId(10) commit=4 owner=EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } persistence=WorkerUsage { requests: 0, units: 0, bytes: 0 } clients=ClientUsage { requests: 0, bytes: 0 } reads=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true outbound=OutboundUsage { batches: 2, messages: 2, bytes: 1024 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None)) snapshots=Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 }))"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native_promotion_refuses_restarted_learner_readiness_quic
+
+test result: FAILED. 49 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.21s
+
+error: test failed, to rerun pass `--test native_member_startup`

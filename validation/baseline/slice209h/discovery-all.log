@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.45s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 11 tests
+test discovery::prepared_member_rejects_create_before_creating_files ... ok
+test discovery::prepared_shared_groups_reject_missing_application_before_creating_files ... ok
+test discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application ... ok
+test discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts ... ok
+test discovery::abandoned_prepared_startup_closes_workers_and_releases_listener ... ok
+test discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::tcp_prepared_member_recovers_with_host_discovery ... ok
+test discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::quic_prepared_member_recovers_with_host_discovery ... ok
+test discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 32 filtered out; finished in 0.72s
+

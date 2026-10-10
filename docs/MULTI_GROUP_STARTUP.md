@@ -21,6 +21,15 @@ recovery can restore later membership, including learner assignments. Use a
 member-capable wire version (at least2) and compatible peer configurations.
 The original single-group startup APIs retain their existing behavior.
 
+For host-discovered peer endpoints, call `prepare_for_discovery` with the same
+protocol, timers, application map, wake and time. It returns `NativeNodeParts`
+after native recovery and worker setup. Wrap the returned peer connector in
+`DiscoveryConnector`, then pass the parts and original limits/time to
+`Node::from_parts`. All groups retain one shared store and their independent
+application state. See [discovery composition and cleanup](NODE.md#driving-and-service-ownership).
+This opts QUIC Dial addresses into discovery while preserving peer pins and
+Accept routes; ordinary `open` keeps configured-address routing.
+
 ## Persistence and recovery
 
 `Create` writes all original bootstraps in one bounded batch and completes its

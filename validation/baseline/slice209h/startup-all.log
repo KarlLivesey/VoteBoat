@@ -1,0 +1,107 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.52s
+     Running tests/native_member_startup.rs (target/debug/deps/native_member_startup-10232005ef270231)
+
+running 50 tests
+test create_and_static_wire_are_rejected_before_filesystem_changes ... ok
+test native_snapshot_enrollment_retries_and_reopens_quic_learner ... ok
+test committed_retirement_releases_old_peer_requirements_without_weakening_static_startup ... ok
+test quic_member_late_failure_joins_workers_and_releases_resources ... ok
+test missing_checkpoint_data_prevents_member_exposure ... ok
+test native_snapshot_enrollment_retries_and_reopens_tcp_learner ... ok
+test quic_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_tcp ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test quic_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test recovery_requires_committed_local_assignment_and_all_rollback_peer_credentials ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test quic_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test native_promotion_refuses_restarted_learner_readiness_tcp ... ok
+test quic_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic ... ok
+test recursive::tcp_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test recursive::quic_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test recursive::quic_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test recursive::tcp_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test tcp_member_late_failure_joins_workers_and_releases_resources ... ok
+test tcp_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test quic_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test native_promotion_refuses_restarted_learner_readiness_quic ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test tcp_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test tcp_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test tcp_promoted_leader_loss_refuses_compacted_witness ... ok
+test tcp_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test tcp_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test tcp_promoted_leader_loss_requires_retained_restored_witness ... ok
+test quic_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test quic_native_snapshot_repair_recovers_compacted_joint ... ok
+test quic_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test quic_native_joint_repair_catches_up_multiple_batches ... ok
+test quic_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test quic_promoted_leader_loss_refuses_compacted_witness ... ok
+test quic_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+test tcp_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test tcp_native_joint_repair_catches_up_multiple_batches ... ok
+test tcp_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test tcp_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test tcp_native_snapshot_repair_recovers_compacted_joint ... ok
+test tcp_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+test quic_promoted_leader_loss_requires_retained_restored_witness ... ok
+
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.45s
+
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 43 tests
+test discovery::prepared_member_rejects_create_before_creating_files ... ok
+test discovery::prepared_shared_groups_reject_missing_application_before_creating_files ... ok
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application ... ok
+test discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test discovery::abandoned_prepared_startup_closes_workers_and_releases_listener ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::tcp_prepared_member_recovers_with_host_discovery ... ok
+test discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic ... ok
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::quic_prepared_member_recovers_with_host_discovery ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints ... ok
+test discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+test multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.58s
+

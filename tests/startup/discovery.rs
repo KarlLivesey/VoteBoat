@@ -22,6 +22,12 @@ use voteboat::{
 };
 type Boat = NativeNode<HostApplication, DiscoveryConnector<NativeServiceConnector, Source>>;
 type Hints = Rc<BTreeMap<NodeId, (PeerIdentity, SocketAddr)>>;
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Profile {
+    Static,
+    Member,
+    Multi,
+}
 struct Source {
     hints: Hints,
     calls: Rc<Cell<usize>>,
@@ -58,8 +64,10 @@ impl PeerDiscovery for Source {
 struct Cluster {
     directory: PathBuf,
     addresses: Vec<SocketAddr>,
+    reservations: Vec<Option<(std::net::TcpListener, std::net::UdpSocket)>>,
     bootstrap: Bootstrap,
     protocol: NativePeerProtocol,
+    profile: Profile,
     hints: Hints,
     nodes: Vec<Boat>,
     closed: Vec<Rc<Cell<bool>>>,
@@ -112,19 +120,68 @@ impl Cluster {
                 .map(|(i, (&node, &store))| (node, (PeerIdentity { node, store }, addresses[i])))
                 .collect(),
         );
-        drop(reservations);
         let directory = root();
         std::fs::create_dir(&directory).unwrap();
         Self {
             directory,
             addresses,
+            reservations: reservations.into_iter().map(Some).collect(),
             bootstrap,
             protocol,
+            profile: Profile::Static,
             hints,
             nodes: Vec::new(),
             closed: Vec::new(),
             calls: Vec::new(),
             clock: Instant::now(),
+        }
+    }
+    fn groups(&self) -> Vec<Bootstrap> {
+        let count = if self.profile == Profile::Multi { 3 } else { 1 };
+        (0..count)
+            .map(|i| {
+                let mut bootstrap = self.bootstrap.clone();
+                bootstrap.group.id = GroupId::new(77 + i).unwrap();
+                bootstrap
+            })
+            .collect()
+    }
+    fn prepare(
+        &self,
+        config: NativeStartup,
+    ) -> NativeNodeParts<HostApplication, NativeServiceConnector> {
+        let timers = TimerConfig {
+            election_min_ms: 10_000,
+            election_spread_ms: 1_000,
+            ..Default::default()
+        };
+        let wake = Arc::new(ThreadWake::current());
+        match self.profile {
+            Profile::Multi => {
+                let groups = self.groups();
+                NativeMultiStartup {
+                    startup: config,
+                    additional_groups: groups[1..].to_vec(),
+                    provisioned_stores: self.bootstrap.voter_stores.clone(),
+                }
+                .prepare_for_discovery(
+                    self.protocol,
+                    timers,
+                    groups.iter().map(|b| (b.group, app())).collect(),
+                    wake,
+                    MonoTime(0),
+                )
+                .unwrap()
+            }
+            Profile::Member if config.mode == NativeOpenMode::Recover => NativeMemberStartup {
+                startup: config,
+                provisioned_stores: self.bootstrap.voter_stores.clone(),
+            }
+            .prepare_for_discovery(self.protocol, timers, app(), wake, MonoTime(0))
+            .unwrap(),
+            _ => config
+                .prepare_for_discovery(self.protocol, timers, app(), wake, MonoTime(0))
+                .unwrap(),
         }
     }
     fn open(&mut self, mode: NativeOpenMode) -> Vec<StoreSession> {
@@ -137,7 +194,11 @@ impl Cluster {
                 &self.bootstrap,
                 id,
                 mode,
-                1,
+                if self.profile == Profile::Static {
+                    1
+                } else {
+                    8
+                },
             );
             // Accept addresses remain real; only outgoing defaults are stale.
             for (&peer, route) in &mut config.peers {
@@ -146,19 +207,17 @@ impl Cluster {
                 }
             }
             let limits = config.limits;
-            let parts = config
-                .prepare_for_discovery(
-                    self.protocol,
-                    TimerConfig {
-                        election_min_ms: 10_000,
-                        election_spread_ms: 1_000,
-                        ..Default::default()
-                    },
-                    app(),
-                    Arc::new(ThreadWake::current()),
-                    MonoTime(0),
-                )
-                .unwrap();
+            // Keep later endpoints reserved while earlier stores/workers open.
+            drop(self.reservations[id - 1].take());
+            let parts = self.prepare(config);
+            assert_eq!(parts.local.owner.groups().count(), self.groups().len());
+            for bootstrap in self.groups() {
+                let core = parts.local.owner.core(bootstrap.group).unwrap();
+                assert_eq!(core.storage_binding(), parts.local.owner.identity().store);
+                if self.profile == Profile::Multi && mode == NativeOpenMode::Recover {
+                    assert!(core.state().base_index() > 0);
+                }
+            }
             sessions.push(parts.local.owner.identity().store.session);
             let closed = Rc::new(Cell::new(false));
             let calls = Rc::new(Cell::new(0));
@@ -174,11 +233,16 @@ impl Cluster {
             self.closed.push(closed);
             self.calls.push(calls);
         }
-        self.nodes[0]
-            .control(group(), NodeControl::Campaign)
-            .unwrap();
+        for bootstrap in self.groups() {
+            self.nodes[0]
+                .control(bootstrap.group, NodeControl::Campaign)
+                .unwrap();
+        }
         self.until(|c| {
-            c.nodes[0].local().owner.core(group()).unwrap().role() == voteboat::raft::Role::Leader
+            c.groups().iter().all(|b| {
+                c.nodes[0].local().owner.core(b.group).unwrap().role()
+                    == voteboat::raft::Role::Leader
+            })
         });
         sessions
     }
@@ -200,9 +264,18 @@ impl Cluster {
         }
     }
     fn write(&mut self, operation: u128, delta: i64, expected: i64) -> CounterReceipt {
+        self.write_group(group(), operation, delta, expected)
+    }
+    fn write_group(
+        &mut self,
+        group: GroupIdentity,
+        operation: u128,
+        delta: i64,
+        expected: i64,
+    ) -> CounterReceipt {
         let ticket = self.nodes[0]
             .propose(ClientRequest {
-                group: group(),
+                group,
                 operation: OperationId::new(operation).unwrap(),
                 bytes: delta.to_le_bytes().to_vec(),
             })
@@ -220,11 +293,27 @@ impl Cluster {
             }
             result.is_some()
                 && c.nodes.iter().all(|n| {
-                    let a = &n.local().applications[&group()];
+                    let a = &n.local().applications[&group];
                     a.0.read_applied(a.applied_index()) == Ok(expected)
                 })
         });
         result.unwrap()
+    }
+    fn checkpoint(&mut self) {
+        for bootstrap in self.groups() {
+            for node in &mut self.nodes {
+                node.control(bootstrap.group, NodeControl::Checkpoint)
+                    .unwrap();
+            }
+        }
+        self.until(|c| {
+            c.nodes.iter().all(|n| {
+                c.groups()
+                    .iter()
+                    .all(|b| n.local().owner.core(b.group).unwrap().state().base_index() > 0)
+                    && n.local().snapshots.as_ref().unwrap().router.is_drained()
+            })
+        });
     }
     fn close(&mut self) {
         for n in &mut self.nodes {
@@ -314,8 +403,9 @@ fn finish(
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn history(protocol: NativePeerProtocol) {
+fn history(protocol: NativePeerProtocol, profile: Profile) {
     let mut cluster = Cluster::new(protocol);
+    cluster.profile = profile;
     let before = cluster.open(NativeOpenMode::Create);
     assert_eq!(cluster.write(1, 7, 7).outcome, CounterOutcome::Value(7));
     assert_eq!(cluster.write(2, 3, 10).outcome, CounterOutcome::Value(10));
@@ -333,12 +423,121 @@ fn history(protocol: NativePeerProtocol) {
 }
 #[test]
 fn tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts() {
-    history(NativePeerProtocol::TcpTls);
+    history(NativePeerProtocol::TcpTls, Profile::Static);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts() {
-    history(NativePeerProtocol::Quic);
+    history(NativePeerProtocol::Quic, Profile::Static);
+}
+
+#[test]
+fn tcp_prepared_member_recovers_with_host_discovery() {
+    history(NativePeerProtocol::TcpTls, Profile::Member);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_prepared_member_recovers_with_host_discovery() {
+    history(NativePeerProtocol::Quic, Profile::Member);
+}
+
+fn multi_history(protocol: NativePeerProtocol) {
+    let mut cluster = Cluster::new(protocol);
+    cluster.profile = Profile::Multi;
+    let before = cluster.open(NativeOpenMode::Create);
+    for (i, b) in cluster.groups().iter().enumerate() {
+        let delta = 7 + i as i64;
+        assert_eq!(
+            cluster.write_group(b.group, 1, delta, delta).outcome,
+            CounterOutcome::Value(delta)
+        );
+        assert_eq!(
+            cluster.write_group(b.group, 2, 3, delta + 3).outcome,
+            CounterOutcome::Value(delta + 3)
+        );
+    }
+    assert!(cluster.calls[0].get() >= 2);
+    cluster.checkpoint();
+    cluster.close();
+    let after = cluster.open(NativeOpenMode::Recover);
+    assert!(before.iter().zip(after).all(|(a, b)| *a != b));
+    for (i, b) in cluster.groups().iter().enumerate() {
+        let delta = 7 + i as i64;
+        let receipt = cluster.write_group(b.group, 1, delta, delta + 3);
+        assert!(receipt.duplicate);
+        assert_eq!(receipt.outcome, CounterOutcome::Value(delta));
+        assert!(cluster.write_group(b.group, 2, 3, delta + 3).duplicate);
+        assert_eq!(
+            cluster.write_group(b.group, 3, 5, delta + 8).outcome,
+            CounterOutcome::Value(delta + 8)
+        );
+    }
+    cluster.close();
+    std::fs::remove_dir_all(cluster.directory).unwrap();
+}
+#[test]
+fn tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts() {
+    multi_history(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts() {
+    multi_history(NativePeerProtocol::Quic);
+}
+
+#[test]
+fn prepared_member_rejects_create_before_creating_files() {
+    let directory = root();
+    let mut config = config(directory.clone(), NativeOpenMode::Create);
+    config.tls = config.tls.with_wire_version(8).unwrap();
+    let mut rejected = NativeMemberStartup {
+        provisioned_stores: config.bootstrap.voter_stores.clone(),
+        startup: config,
+    }
+    .prepare_for_discovery(
+        NativePeerProtocol::TcpTls,
+        TimerConfig::default(),
+        app(),
+        Arc::new(ThreadWake::current()),
+        MonoTime(0),
+    )
+    .err()
+    .unwrap();
+    assert_eq!(rejected.reason.stage, "configuration");
+    assert_eq!(rejected.application.as_ref().unwrap().applied_index(), 0);
+    assert!(rejected.try_cleanup().unwrap());
+    assert!(!directory.exists());
+}
+
+#[test]
+fn prepared_shared_groups_reject_missing_application_before_creating_files() {
+    let directory = root();
+    let mut config = config(directory.clone(), NativeOpenMode::Create);
+    config.tls = config.tls.with_wire_version(8).unwrap();
+    let mut second = config.bootstrap.clone();
+    second.group.id = GroupId::new(78).unwrap();
+    let mut rejected = NativeMultiStartup {
+        provisioned_stores: config.bootstrap.voter_stores.clone(),
+        startup: config,
+        additional_groups: vec![second],
+    }
+    .prepare_for_discovery(
+        NativePeerProtocol::TcpTls,
+        TimerConfig::default(),
+        [(group(), app())].into(),
+        Arc::new(ThreadWake::current()),
+        MonoTime(0),
+    )
+    .err()
+    .unwrap();
+    assert_eq!(rejected.reason.stage, "configuration");
+    assert_eq!(rejected.application.as_ref().unwrap().len(), 1);
+    assert_eq!(
+        rejected.application.as_ref().unwrap()[&group()].applied_index(),
+        0
+    );
+    assert!(rejected.try_cleanup().unwrap());
+    assert!(!directory.exists());
 }
 
 #[test]

@@ -363,6 +363,13 @@ fn open(
     config: NativeMemberStartup,
     protocol: NativePeerProtocol,
 ) -> Result<NativeNode<Counter, NativeServiceConnector>, Box<NativeStartupRejected<Counter>>> {
+    open_at(config, protocol, MonoTime(0))
+}
+fn open_at(
+    config: NativeMemberStartup,
+    protocol: NativePeerProtocol,
+    now: MonoTime,
+) -> Result<NativeNode<Counter, NativeServiceConnector>, Box<NativeStartupRejected<Counter>>> {
     let opened = config.open_with_protocol_and_timers(
         protocol,
         TimerConfig {
@@ -373,12 +380,12 @@ fn open(
         },
         Counter::new(100).unwrap(),
         Arc::new(ThreadWake::current()),
-        MonoTime(0),
+        now,
     );
     if let Ok(n) = &opened {
         if let Some(token) = n.local().owner.deadline(group()) {
             assert_eq!(token.kind, TimerKind::Election);
-            assert!((1000..2000).contains(&token.deadline.0));
+            assert!((now.0 + 1000..now.0 + 2000).contains(&token.deadline.0));
         }
     }
     opened
@@ -1564,17 +1571,38 @@ fn restart_admin_learner(
     protocol: NativePeerProtocol,
 ) {
     let old_binding = proposal.readiness[0].authenticated;
+    let term = nodes[0]
+        .local()
+        .owner
+        .core(group())
+        .unwrap()
+        .state()
+        .hard_state
+        .term;
+    nodes[1].begin_shutdown();
+    admin_drive(nodes, allowed, clock, |nodes| nodes[1].is_drained());
     close(
         nodes.remove(1),
         MonoTime(clock.elapsed().as_millis() as u64),
     );
+    let leader = nodes[0].local().owner.core(group()).unwrap();
+    assert_eq!(leader.role(), Role::Leader);
+    assert_eq!(leader.state().hard_state.term, term);
     let (mut config, _) = startup(&directory.join("2"), 2, &[1, 2, 3]);
     config.startup.tls = config.startup.tls.with_wire_version(6).unwrap();
     config.startup.listen = addresses[1];
     for (peer, route) in &mut config.startup.peers {
         route.address = addresses[peer.get() as usize - 1];
     }
-    nodes.insert(1, open(config, protocol).unwrap());
+    nodes.insert(
+        1,
+        open_at(
+            config,
+            protocol,
+            MonoTime(clock.elapsed().as_millis() as u64),
+        )
+        .unwrap(),
+    );
     admin_drive(nodes, allowed, clock, |nodes| {
         nodes[0]
             .peers()

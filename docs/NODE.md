@@ -57,6 +57,10 @@ accepted work.
 
 For a static group that needs discovered peer addresses, call
 `NativeStartup::prepare_for_discovery(protocol, timers, application, wake, now)`.
+`NativeMemberStartup` provides the same method for member recovery, and
+`NativeMultiStartup` accepts the complete application map instead of one app.
+Member recovery keeps its Recover-only requirement; multi-group preparation
+keeps its exact original group inventory and shared store.
 It performs the normal native bootstrap/recovery and returns `NativeNodeParts`
 before constructing the Node. Read the recovered local identity from
 `parts.local.owner.identity()` when provisioning an authenticated discovery
@@ -79,9 +83,8 @@ On preparation failure, use the returned `NativeStartupRejected::try_cleanup`
 until complete before reopening files. On success, the caller owns every part:
 assemble and shut down the Node, or close the unused owner/connector/workers and
 join them explicitly. Rejection from `Node::from_parts` returns those original
-parts; it does not close the host's discovery source. The prepared method
-currently covers static single-group startup; member/multi-group convenience
-preparation and automatic executable source-session provisioning are separate.
+parts; it does not close the host's discovery source. Automatic executable
+source-session provisioning remains separate.
 
 The serialized host calls `poll(now, NodePollBudget)`. Both local and network
 budgets and monotonic time are validated before either driver does work. Peer

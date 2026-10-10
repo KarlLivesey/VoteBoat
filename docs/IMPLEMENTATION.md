@@ -131,7 +131,9 @@ volatile/restart semantics. Completed209f composes source-session repair with
 the owning TCP/TLS Node, healthy-quorum writes and original receipt recovery.
 Completed209g exposes static native preparation for host discovery composition,
 with TCP/TLS and QUIC downstream startup/reopen and cleanup evidence.
-Current209 continues broader native peer-source provisioning and combined long-lived
+Completed209h extends that same preparation to member recovery and shared
+multi-group startup, with TCP/QUIC receipt, checkpoint and cleanup evidence.
+Current209 continues executable peer-source provisioning and combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -150,6 +152,84 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209h schema plan — member and shared-group discovery preparation
+
+Extend the existing prepare_for_discovery composition point to NativeMemberStartup
+and NativeMultiStartup. Member preparation must retain Recover-only validation,
+provisioned store checks and verified membership restoration. Multi-group
+preparation must retain its exact original group/application inventory, one
+authoritative shared store, checkpoint restoration and the same cleanup owner.
+Existing open/rotation wrappers continue to construct ordinary configured-address
+Nodes through the common prepared parts. Only explicit discovery preparation
+opts QUIC Dial addresses into discovery; pins and Accept routes remain fixed.
+
+Reuse the downstream startup discovery fixture for member recovery and three
+shared groups, with different values per group, checkpoint/reopen, original
+receipts and clean worker shutdown over TCP/TLS and QUIC. Check wrong member
+mode and incomplete multi-group inventory before files are created. This closes
+the remaining native startup profile inconsistency under209/P0/P2/P5; it is not
+automatic discovery source authentication, executable configuration or a new
+membership protocol. The next work remains combined recursive movement, then
+provider obligations and reproduced platform failures from the linked plan.
+
+209h fixture amendment: the first all-feature discovery and broad startup runs
+pass, but default startup reports AddrInUse in shared-group preparation. The
+fixture previously dropped all three TCP/UDP reservations before opening any
+stores/workers, exposing later endpoints throughout earlier node construction.
+Retain each unused reservation until immediately before that node's preparation.
+This narrows the allocation/bind window without retrying or suppressing startup
+errors. Repeat the failed default target and the affected all-feature discovery
+histories; retain the original failure. No production bind behavior is changed.
+
+209h regression amendment: a subsequent native-member sweep reports the QUIC
+restarted-learner readiness test timed out with all replicas at term3/config10.
+That fixture blocks the healthy nodes while closing only the learner, then uses
+zero as the reopened learner's time origin. Keep all nodes polling while the
+learner drains, detach/join only after it is drained, and reopen at the current
+host time. Preserve the existing timeout and stale-proof/commit assertions;
+check leader/term continuity across the controlled shutdown. This isolates the
+intended old-session readiness refusal from an accidental polling outage. Run
+both focused restart histories and the full startup/member regression again.
+
+### Slice209h implemented — member and shared-group discovery preparation
+
+NativeMemberStartup and NativeMultiStartup now expose prepare_for_discovery.
+They reuse their existing verified recovery, member authorization, shared WAL,
+snapshot and worker paths and return owned NativeNodeParts before final Node
+validation. Member mode remains Recover-only. Multi-group preparation requires
+the complete sorted original group/application inventory and provisioned stores.
+Ordinary open and credential-rotation startup retain configured routing and
+their existing late-rejection cleanup. Explicit QUIC discovery preparation can
+use discovered Dial addresses without changing pins or Accept routes.
+
+Six new downstream tests add TCP/QUIC member receipt recovery and shared
+three-group checkpoint/reopen histories. Each group uses the same operation IDs
+with distinct data; old receipts and current values survive fresh store sessions.
+Every group is bound to the same local store, actual recovered checkpoint bases
+are checked, and source/connector/log/snapshot owners drain and join. Invalid
+member Create and incomplete multi-group applications return their original
+applications before creating files. Existing five discovery tests still pass.
+
+Validation is retained in validation/baseline/slice209h. Initial all-feature
+startup/member checks pass93 tests. A default run exposed an endpoint-reservation
+window in the new fixture; unused reservations now survive until each node binds.
+A later sweep exposed a pre-existing QUIC learner-restart timeout during isolated
+shutdown. The fixture now polls healthy voters while draining the learner and
+reopens at the current clock; leader/term continuity is asserted, and existing
+stale-proof refusal plus joint/final commitment checks remain. Both focused
+TCP/QUIC restart tests, the final93-test all-feature sweep and the independent
+57-test default member/startup sweep pass. Formatting
+and all four strict Clippy profiles pass with zero diagnostics. The108-entry
+inventory and13 obligation metadata checks pass; this adds operations to existing
+contracts without claiming another reviewed obligation family.
+
+Macro review: native Rust discovery preparation now covers static/member/shared
+startup. Executable source-session bootstrap and combined recursive movement
+remain current209 work; provider obligation review and reproduced platform
+acceptance remain the next two deliverables. Full P0–P7 stays active. These are
+Linux process/reopen histories, not macOS, separate-host or physical power-loss
+acceptance. No protocol, persistent format or ownership authority changes.
 
 ### Slice209g implemented — native preparation for host discovery
 

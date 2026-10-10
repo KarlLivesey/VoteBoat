@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209h extends prepare_for_discovery to member recovery and shared multi-group
+startup. Member preparation preserves Recover-only validation and provisioned
+stores; shared preparation preserves the exact group/application inventory and
+one WAL. TCP/QUIC histories preserve original receipts through member recovery,
+and three independently valued groups recover verified checkpoints with fresh
+store sessions and joined workers. Invalid member mode and missing applications
+refuse before files. An initial default-test AddrInUse failure is retained; the
+fixture now retains unused port reservations until each node's preparation.
+Automatic executable source bootstrap, combined recursive movement and the
+remaining provider/platform/performance obligations remain open.
+
 Slice209g adds NativeStartup::prepare_for_discovery for static Rust hosts. The
 normal recovery/worker path returns native parts for host discovery injection;
 final Node validation remains mandatory. Discovered QUIC Dial addresses are

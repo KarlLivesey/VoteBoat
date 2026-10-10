@@ -244,6 +244,35 @@ impl NativeMemberStartup {
             ),
         )
     }
+    /// Prepare an existing member's native parts for host discovery composition.
+    /// Recover-only membership, exact store and startup cleanup checks are unchanged.
+    /// The caller owns the returned parts and final Node::from_parts validation.
+    pub fn prepare_for_discovery<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.startup.prepare_with_protocol_as(
+            protocol,
+            app,
+            wake,
+            now,
+            (
+                StartupAuthorization::Member(self.provisioned_stores),
+                timers,
+                None,
+                None,
+            ),
+            true,
+        )
+    }
 }
 #[derive(Debug)]
 pub struct NativeStartupError {
@@ -1233,32 +1262,6 @@ where
     })
 }
 
-fn assemble<A, C: StartupConnector>(
-    config: NativeStartup,
-    options: (StartupAuthorization, TimerConfig),
-    prepared: &mut PreparedStartup<A>,
-    cleanup: &mut Cleanup,
-    wake: Arc<dyn WorkerWake>,
-    now: MonoTime,
-    connector: impl FnOnce(
-        &NativeStartup,
-        &BTreeMap<NodeId, StoreIdentity>,
-        LocalIdentity,
-        Arc<dyn WorkerWake>,
-        &mut Cleanup,
-    ) -> Result<C, NativeStartupError>,
-) -> Result<NativeNode<A, C>, NativeStartupError>
-where
-    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
-    A::Receipt: ApplicationReceipt,
-{
-    let limits = config.limits;
-    let parts = assemble_parts(config, options, prepared, cleanup, wake, now, connector)?;
-    NativeNode::from_parts(parts, limits, now).map_err(|rejected| {
-        prepared.applications = reject_parts(*rejected.parts, cleanup);
-        error("node assembly", rejected.reason)
-    })
-}
 fn reject_parts<A, C: StartupConnector>(
     mut parts: NativeNodeParts<A, C>,
     cleanup: &mut Cleanup,

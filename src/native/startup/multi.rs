@@ -135,6 +135,51 @@ impl NativeMultiStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        let limits = self.startup.limits;
+        let parts = self.prepare_as(options, applications, wake, now, false)?;
+        NativeNode::from_parts(parts, limits, now).map_err(|rejected| {
+            let mut cleanup = Cleanup::default();
+            let applications = reject_parts(*rejected.parts, &mut cleanup);
+            Box::new(NativeStartupRejected {
+                reason: error("node assembly", rejected.reason),
+                application: Some(applications),
+                cleanup,
+            })
+        })
+    }
+    /// Prepare one shared native store and all original groups for host discovery.
+    /// Ownership and cleanup match NativeStartup::prepare_for_discovery. QUIC
+    /// permits discovered Dial addresses; pins and Accept addresses remain fixed.
+    pub fn prepare_for_discovery<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        applications: BTreeMap<GroupIdentity, A>,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeMultiStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.prepare_as((protocol, timers, None), applications, wake, now, true)
+    }
+    fn prepare_as<A>(
+        self,
+        options: (
+            NativePeerProtocol,
+            TimerConfig,
+            Option<NativePeerRotationStartup>,
+        ),
+        applications: BTreeMap<GroupIdentity, A>,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+        discovered_dials: bool,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeMultiStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
         let (protocol, timers, rotation) = options;
         let mut cleanup = Cleanup::default();
         let mut prepared = PreparedStartup {
@@ -165,7 +210,7 @@ impl NativeMultiStartup {
                 &authorization,
                 &mut prepared,
             )?;
-            assemble(
+            assemble_parts(
                 self.startup,
                 (authorization, timers),
                 &mut prepared,
@@ -174,7 +219,14 @@ impl NativeMultiStartup {
                 now,
                 |config, stores, local, wake, cleanup| {
                     socket
-                        .connect(config, stores, local, wake, cleanup, now)
+                        .connect(
+                            config,
+                            stores,
+                            local,
+                            wake,
+                            cleanup,
+                            (now, discovered_dials),
+                        )
                         .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
                 },
             )
@@ -225,8 +277,11 @@ impl Socket {
         local: LocalIdentity,
         wake: Arc<dyn WorkerWake>,
         cleanup: &mut Cleanup,
-        now: MonoTime,
+        timing: (MonoTime, bool),
     ) -> Result<NativeServiceConnector, NativeStartupError> {
+        let (now, discovered_dials) = timing;
+        #[cfg(not(feature = "quic"))]
+        let _ = discovered_dials;
         match self {
             Self::Tcp(listener) => {
                 tcp_connector(config, stores, local, listener, wake, cleanup, now)
@@ -238,7 +293,12 @@ impl Socket {
                     .into_iter()
                     .map(|(n, p)| (n, (config.peers[&n].address, p)))
                     .collect();
-                crate::native::quic_connect::NativeQuicConnector::new(
+                let make = if discovered_dials {
+                    crate::native::quic_connect::NativeQuicConnector::new_with_discovered_dials
+                } else {
+                    crate::native::quic_connect::NativeQuicConnector::new
+                };
+                make(
                     NativeConnectConfig {
                         local,
                         limits: ConnectLimits::default(),

@@ -1,0 +1,25 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: variant `Member` is never constructed
+  --> tests/startup/discovery.rs:28:5
+   |
+26 | enum Profile {
+   |      ------- variant in this enum
+27 |     Static,
+28 |     Member,
+   |     ^^^^^^
+   |
+   = note: `Profile` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+   = note: `-D dead-code` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: method `checkpoint` is never used
+   --> tests/startup/discovery.rs:299:8
+    |
+ 76 | impl Cluster {
+    | ------------ method in this implementation
+...
+299 |     fn checkpoint(&mut self) {
+    |        ^^^^^^^^^^
+
+error: could not compile `voteboat` (test "startup") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
