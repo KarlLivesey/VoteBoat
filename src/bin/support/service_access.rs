@@ -415,6 +415,7 @@ impl Channel {
                 | "events"
                 | "maintenance"
                 | "configuration-status"
+                | "leadership-status"
                 | "credential-status"
                 | "discover",
             ) => ServiceAction::Inspect,
@@ -424,7 +425,8 @@ impl Channel {
             Some("quit") => ServiceAction::Shutdown,
             Some(
                 "configure" | "configure-record" | "reload-access" | "initialize" | "publish"
-                | "grant" | "transfer-step" | "transfer-export",
+                | "grant" | "transfer-step" | "transfer-export" | "move-leader"
+                | "resume-leadership" | "cancel-leadership",
             ) => ServiceAction::Configure,
             _ => return Err("unknown authorized command".into()),
         };

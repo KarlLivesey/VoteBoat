@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.71s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 6 tests
+test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 70 filtered out; finished in 7.18s
+

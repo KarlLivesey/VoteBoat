@@ -91,7 +91,7 @@ not a complete operator workflow.
 | inspect-route | Public resolve/check_owner and executable directory route190. | Broader operational integration; route hint is not write authority. |
 | list-assigned-groups | Public EffectOwner/TimedShard::groups and groups_after over local assignments. | Executable operator command remains missing; reuse these existing cursors rather than adding another inventory abstraction. |
 | drain-node | Runtime close/drain primitives exist. | No coordinated stop-placement, leadership move and membership maintenance workflow. Shutdown alone does not fulfill this. |
-| move-leader | Slice196a supplies the core;196b1 adds durable original-ID Rust maintenance, Node controls and selected native TCP/QUIC restart/status histories. | Authenticated executable commands and disconnected-client histories remain196b2. Signal emission alone is not success; terminal records describe historical completion. |
+| move-leader | Slice196a supplies the core;196b1 adds durable original-ID Rust maintenance, Node controls and selected native TCP/QUIC restart/status histories. | Slice196b2 adds authenticated start/status/resume/cancel in the explicit counter schema2/wire8 profile, including TCP/QUIC recovery and lost/disconnected waits. General multi-group drain and broader profiles remain; terminal records describe historical completion. |
 | add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
 | change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
 | split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
@@ -207,10 +207,10 @@ a passing test count.
    and authenticated native split start/status/resumption. Slice195 checks native
    phase-boundary restarts and lost fence/publication replies using those contracts.
    Slice196a supplies the targeted handoff primitive;196b1 adds durable Rust
-   operation tracking.196b2 must still provide authenticated operator execution.
+   operation tracking;196b2 adds authenticated counter-profile operator execution.
    Broader lifecycle profiles remain open; do not create another ownership engine.
-   Leadership transfer, coordinated node drain and the assignment-list command
-   remain separate required operator work; public assignment iteration exists.
+   Coordinated node drain and the assignment-list command
+   remain required operator work; public assignment iteration exists.
 2. Retain P7's original fixed250ms gate. The saved183 control is873.492994ms
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as

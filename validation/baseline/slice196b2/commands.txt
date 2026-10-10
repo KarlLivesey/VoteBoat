@@ -1,0 +1,8 @@
+cargo +stable test --locked --offline --all-features --test counter_service leadership:: -- --nocapture
+cargo +stable test --locked --offline --all-features --bin voteboat-counter --bin voteboat-directory --bin voteboat-transfer --test counter_service --test directory_service --test transfer_service --test leadership_maintenance
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+sha256sum -c validation/baseline/slice196b2/sources.sha256

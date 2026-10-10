@@ -12,6 +12,11 @@ plaintext; `--service-access FILE` requires authenticated, scoped
 commands. See [principal permissions and client flags](AUTHORIZATION.md).
 An explicit [remote command endpoint](#remote-command-endpoints) requires that authentication.
 
+An opt-in [leadership maintenance profile](MAINTENANCE.md#authenticated-counter-executable)
+adds authenticated move/status/resume/cancel commands with durable original IDs.
+It requires a new schema2/wire8 deployment; existing plain counter data is not
+automatically converted.
+
 ## Start three processes
 
 From the repository root, install the pinned Rust toolchain and fetch dependencies

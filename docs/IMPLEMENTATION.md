@@ -75,7 +75,7 @@ cause and revise this sketch before another material change.
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
-| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. |
+| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; coordinated drain197 remains open. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
@@ -124,9 +124,10 @@ strict profiles clean while advancing the remaining capability work.
 | Completed195: operator-driven split recovery cuts | Validate the new operator path at durability boundaries; advances P4/P6 fault acceptance. |194 execution, original operation IDs and guarded native applications. | Both TCP/WAL and QUIC/checkpoint histories pass all10 phase boundaries plus lost fence/publication replies; source refusal, staged-target refusal and independent active-child retries/new writes are checked. Phase-internal power loss, combined membership and broader profiles remain open. |
 | Completed196a: deterministic targeted handoff | Supply the protocol primitive needed for maintenance; advances P4 and chapter09. | Existing quorum, durable replication/election contracts and exact wire capability selection. | Host-driven stable/recursive elections, catch-up and ballot persistence boundaries, restart/cancellation/identity/membership refusals; wire8 encoding and exact TCP/QUIC session selection. This is not a durable administrative operation. |
 | Completed196b1: durable Rust maintenance | Preserve original intent/status through the existing group log and checkpoints; advances P4/chapter09 and usable embedding. |196a, opt-in application composition, Node result ownership and execution-time proposal context. | Bounded records, original-ID retries/cancellation, host context rechecks, every-byte torn journal records, and native TCP/WAL and QUIC/checkpoint pending/completed recovery plus fresh quorum status. |
-| Current196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
-| Next197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
-| Following198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
+| Completed196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
+| Current197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
+| Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
+| Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances the broader P0–P7 validation milestone. | Completed maintenance196, drain197 and assignment198; actual Linux/macOS execution, pinned source and recorded transport profiles. | Record executable TCP/QUIC recovery and interruption results for each platform; preserve failing schedules and exact revisions. CI remains background feedback, not a prerequisite for continued feature work. |
 
 The192 audit changes the immediate order: chapter09 still has missing operator
 capabilities, so close a usable preview/execution path before another performance
@@ -165,6 +166,84 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice196b2 implemented evidence — authenticated maintenance commands
+
+The existing counter executable now offers move-leader, leadership-status,
+resume-leadership and cancel-leadership over its authenticated command channel.
+The explicit --leadership-maintenance enabled profile selects Maintenance<Counter>,
+application schema2, wire8 and 64 retained operation records on every replica.
+The old plain counter profile and command formats remain usable. No implicit
+migration, new persistence owner, runtime dependency or core protocol is added.
+
+The executable application adapter forwards context checks, ordered application,
+checkpoint, query and receipt bounds. The host driver retains one internal
+client ticket and one original intent/term attempt with a five-second deadline.
+Expiry and shutdown cancel exact local waits; durable Pending records permit
+restart/resume. Admin is required for mutation; Inspect permits fresh quorum
+status. An old terminal cancellation retry reads its original outcome through
+a quorum and cannot stop a newer handoff. Completion remains historical.
+
+Six focused actual-process tests pass: TCP/WAL and QUIC/checkpoint pending
+restart, completed restart, original-ID retries and target data writes; denied
+reader/writer mutations; deadline/resume/cancel; lost Begin reply; accepted
+status close/deadline cleanup; incompatible plain data refusal and original
+profile recovery. All76 counter service tests pass after preserving the original
+configuration client's exact unknown-outcome wording. Formatting and strict
+all/default/no-default Clippy are clean; all100 contract metadata records pass.
+All106 affected regression executions pass: binary6, counter service76,
+directory service13, durable maintenance6 and transfer service5. These counts
+overlap the focused histories. Commands and results are in
+validation/baseline/slice196b2, with the failed iterations retained.
+
+Macro review: the chapter09 targeted maintenance workflow is usable in Rust and
+in the explicit counter executable profile. This does not complete the online
+membership milestone, full operator surface, platform validation or P7. The
+executable profile does not combine a membership administration plan; generic
+multi-group drain remains197, followed by assignment listing198 and platform
+operator recovery evidence199. No arbitrary power-loss, general recursive/joint
+handoff, other lifecycle application-wrapper, macOS or separate-host claim.
+
+### Slice196b2 schema plan — authenticated executable maintenance
+
+Previous goal turn was progress: fe882d6 committed/pushed the tested Rust
+workflow and its evidence. The current deliverable exposes it on the existing
+counter executable; next197 drain and following198 assignment listing retain
+their macro links and acceptance criteria above.
+
+An explicit --leadership-maintenance enabled profile selects Maintenance<Counter>
+with a distinct application schema and wire8 on every replica. A small executable
+application enum delegates the existing Counter profile unchanged and forwards
+all maintenance context checks. It is needed to use the existing authenticated
+command server, worker ownership and shutdown path without a duplicate service.
+Existing stores are never automatically converted; incompatible replay/checkpoints
+must fail. The enabled profile requires service access at startup.
+
+Commands: move-leader OP CONFIG TARGET STORE INC records an exact intent (source
+comes from the local leader for a new operation, original source for retries).
+leadership-status OP uses a fresh Node read; resume-leadership OP re-enables one
+bounded local attempt and reads status; cancel-leadership OP cancels exact local
+quiescence before proposing the original durable cancellation. Mutations require
+Admin; status requires Inspect. A pending record is durable authorization to
+attempt the recorded handoff after restart. One local driver retains at most one
+internal ClientTicket, one attempt identity/term, and a deadline. Timeout stops
+local retry, releases transfer quiescence, and preserves the original Pending
+record. Resume never invents a replacement operation. Completion is committed
+only by the exact target through the existing context checks. Completed status
+is historical, never proof of current leadership.
+
+The command connection owns its original write/read ticket; closure, TLS failure
+and deadline cancel the exact wait, not a committed intent. The driver consumes
+its own completion separately and drains/cancels it at shutdown. No new durable
+watermark, generation, worker, dependency or log format is introduced. Cancel
+racing with target completion returns the winner's original terminal record.
+
+Acceptance: actual authenticated TCP and QUIC executable histories for start,
+status, resume, cancel, target writes and unchanged original retries; denied
+reader/writer mutations; pending and terminal restart; lost command replies and
+bounded disconnected waits; profile mismatch refusal; existing service tests,
+formatting and all three strict Clippy configurations remain clean. Performance,
+macOS, general multi-group drain and full P0–P7 acceptance remain separate.
 
 ### Slice196b1 implemented evidence — durable Rust maintenance
 

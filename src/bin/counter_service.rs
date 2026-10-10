@@ -21,10 +21,14 @@ mod command_client;
 mod command_discovery;
 #[path = "support/command_endpoints.rs"]
 mod command_endpoints;
+#[path = "support/counter_application.rs"]
+mod counter_application;
 #[path = "support/credential_reload.rs"]
 mod credential_reload;
 #[path = "support/diagnostics.rs"]
 mod diagnostics;
+#[path = "support/leadership_commands.rs"]
+mod leadership_commands;
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/placement_format.rs"]
@@ -78,12 +82,15 @@ Endpoint discovery: client ... --discover-via NODE --command-peers FILE --servic
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
+Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
+Commands: move-leader OP CONFIG TARGET STORE INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
     Read(ReadInvocationTicket),
     Configure(OperationId),
+    CancelLeadership(voteboat::maintenance::LeadershipRecord),
 }
 enum Phase {
     Input {
@@ -222,7 +229,7 @@ fn command(
                 .propose(ClientRequest {
                     group: group(),
                     operation,
-                    bytes: delta.to_le_bytes().to_vec(),
+                    bytes: service.local().applications[&group()].data(delta)?,
                 })
                 .map_err(|r| match r.reason {
                     ClientError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
@@ -231,7 +238,7 @@ fn command(
             return Ok(Phase::Pending(Pending::Write(ticket)));
         }
         ["read"] => {
-            let ticket = service.read(group(), ()).map_err(|r| match r.reason {
+            let ticket = service.read(group(), counter_application::Query::Data(())).map_err(|r| match r.reason {
                 ReadInvocationError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
                 other => format!("{other:?}"),
             })?;
@@ -256,19 +263,22 @@ fn command(
         sent: 0,
     })
 }
-fn outputs(service: &mut Service, connection: &mut Option<Connection>) -> Result<(), Failure> {
+fn outputs(
+    service: &mut Service,
+    connection: &mut Option<Connection>,
+    leadership: &mut leadership_commands::Driver,
+) -> Result<(), Failure> {
     while let Some(output) = service.poll_client() {
-        let ticket = Pending::Write(output.ticket());
+        let original_ticket = output.ticket();
+        let ticket = Pending::Write(original_ticket);
         let result = checked(service.complete_client(output).map_err(|r| r.reason))?;
+        leadership.complete(original_ticket, &result);
         if let Some(c) = connection
             .as_mut()
             .filter(|c| matches!(c.phase, Phase::Pending(p) if p == ticket))
         {
             c.reply(match result {
-                ClientOutcome::Applied { receipt, .. } => format!(
-                    "OK outcome={:?} duplicate={}",
-                    receipt.outcome, receipt.duplicate
-                ),
+                ClientOutcome::Applied { receipt, .. } => leadership_commands::receipt(&receipt),
                 ClientOutcome::NotProposed(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
                 ClientOutcome::NotProposed(e) => format!("ERR not_proposed={e:?}"),
                 ClientOutcome::Unknown(e) => {
@@ -287,7 +297,7 @@ fn outputs(service: &mut Service, connection: &mut Option<Connection>) -> Result
             c.reply(match result {
                 ReadOutcome::Read {
                     result: Ok(value), ..
-                } => format!("OK value={value}"),
+                } => leadership_commands::read(&value),
                 ReadOutcome::NotRead(RaftError::NotLeader) => "ERR NOT_LEADER".into(),
                 other => format!("ERR {other:?}"),
             });
@@ -328,6 +338,9 @@ fn prepare_service(
         access_path.is_some(),
         plan_path.is_some(),
     )?;
+    if options.leadership_maintenance && (access_path.is_none() || plan_path.is_some()) {
+        return Err("leadership maintenance requires --service-access and a separate profile without an administration plan".into());
+    }
     let config = setup::configuration(root, id, base, tls, create, input)?;
     let credentials = credential_reload::Credentials::load(
         root,
@@ -347,7 +360,12 @@ fn prepare_service(
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
     let peer_address = config.startup.listen;
-    let mut service = setup::open(config, protocol, mode == "recover-member")?;
+    let mut service = setup::open(
+        config,
+        protocol,
+        mode == "recover-member",
+        options.leadership_maintenance,
+    )?;
     options.configure_maintenance(&mut service)?;
     if let Some(source) = discovery.as_mut() {
         source.bind_session(service.local().owner.identity().store.session.get());
@@ -392,6 +410,7 @@ fn serve(
     let mut connection: Option<Connection> = None;
     let mut quit = false;
     let mut shutdown_started = None;
+    let mut leadership = leadership_commands::Driver::default();
     loop {
         let time = now(start);
         if credentials.poll() {
@@ -415,6 +434,10 @@ fn serve(
                 SecureSessionGeneration::new(command_generation).unwrap(),
                 time,
                 |s| {
+                    if leadership_commands::is_command(s.split_whitespace().next()) {
+                        return leadership
+                            .command(&mut service, &s.split_whitespace().collect::<Vec<_>>());
+                    }
                     command(
                         &mut service,
                         &observer,
@@ -449,7 +472,9 @@ fn serve(
             time,
             owner,
         )?;
-        outputs(&mut service, &mut connection)?;
+        outputs(&mut service, &mut connection, &mut leadership)?;
+        leadership.advance_cancel(&mut service, &mut connection);
+        leadership.tick(&mut service, quit)?;
         advance_administration(&mut service, &mut administration, &mut connection, quit)?;
         if quit && connection.is_none() && shutdown_started.is_none() {
             service.begin_shutdown();
@@ -664,6 +689,7 @@ fn finish_connection(
         ..
     }) = connection
     {
+        eprintln!("command observation_cancelled pending={p:?} reason={remove_reason}");
         match *p {
             Pending::Write(t) => {
                 checked(service.cancel_client(t))?;
@@ -671,6 +697,7 @@ fn finish_connection(
             Pending::Read(t) => {
                 checked(service.cancel_read(t))?;
             }
+            Pending::CancelLeadership(_) => (),
             Pending::Configure(_) => {
                 if let Some(admin) = administration.as_mut() {
                     admin.cancel_remote(service, remove_reason)?;
@@ -690,6 +717,7 @@ struct StartupOptions {
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
+    leadership_maintenance: bool,
 }
 impl StartupOptions {
     fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
@@ -717,6 +745,13 @@ impl StartupOptions {
         Ok(())
     }
 }
+fn positive_option(value: &str, name: &str) -> Result<u64, Failure> {
+    let n = value.parse::<u64>()?;
+    if n == 0 {
+        return Err(format!("{name} must be positive").into());
+    }
+    Ok(n)
+}
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut protocol = NativePeerProtocol::TcpTls;
     let mut transport_selected = false;
@@ -728,6 +763,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut remote_admin = administration::Mode::Automatic;
     let mut wal_reclaim_ms = None;
     let mut checkpoint_entries = None;
+    let mut leadership_maintenance = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
@@ -742,6 +778,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--discovery-peers"
                 | "--wal-reclaim-ms"
                 | "--checkpoint-entries"
+                | "--leadership-maintenance"
         ) {
             break;
         }
@@ -783,18 +820,18 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 command_listen = Some(value.parse()?);
             }
             "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
-                let interval: u64 = value.parse()?;
-                if interval == 0 {
-                    return Err("WAL reclaim interval must be positive".into());
+                wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
+            }
+            "--leadership-maintenance"
+                if leadership_maintenance.is_none() && args[0] == "serve" =>
+            {
+                if value != "enabled" {
+                    return Err("expected --leadership-maintenance enabled".into());
                 }
-                wal_reclaim_ms = Some(interval);
+                leadership_maintenance = Some(true);
             }
             "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
-                let entries: u64 = value.parse()?;
-                if entries == 0 {
-                    return Err("checkpoint entry threshold must be positive".into());
-                }
-                checkpoint_entries = Some(entries);
+                checkpoint_entries = Some(positive_option(&value, "checkpoint entry threshold")?);
             }
             _ => return Err("duplicate or unsupported startup option".into()),
         }
@@ -809,6 +846,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         remote_admin,
         wal_reclaim_ms,
         checkpoint_entries,
+        leadership_maintenance: leadership_maintenance.unwrap_or(false),
     })
 }
 

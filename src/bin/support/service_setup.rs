@@ -176,7 +176,9 @@ where
     let opened = if member {
         // Explicit recovery only: provisioned routes do not establish assignment.
         // The native member constructor verifies the authoritative WAL/checkpoint.
-        config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
+        if config.startup.tls.wire_version() < 7 {
+            config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
+        }
         config.open_with_protocol(protocol, app, wake, MonoTime(0))
     } else {
         config

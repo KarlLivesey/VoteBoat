@@ -1,0 +1,36 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 6 tests
+
+thread 'leadership::disconnected_and_expired_status_waits_release_original_tickets' (3670414) panicked at tests/counter_service.rs:2499:46:
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test leadership::disconnected_and_expired_status_waits_release_original_tickets ... FAILED
+test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+
+thread 'leadership::authenticated_cancel_deadline_and_permission_boundaries' (3670410) panicked at tests/counter_service.rs:295:9:
+node 3 ["cancel-leadership", "96100"]: ERR not_proposed=Busy
+ Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+service log: ready node=3 peer=127.0.0.1:10003 transport=TcpTls command=127.0.0.1:10103
+leadership status admitted operation=96100
+leadership status admitted operation=96100
+leadership local attempt expired; durable intent remains pending
+leadership status admitted operation=96100
+
+test leadership::authenticated_cancel_deadline_and_permission_boundaries ... FAILED
+
+failures:
+
+failures:
+    leadership::authenticated_cancel_deadline_and_permission_boundaries
+    leadership::disconnected_and_expired_status_waits_release_original_tickets
+
+test result: FAILED. 4 passed; 2 failed; 0 ignored; 0 measured; 70 filtered out; finished in 6.57s
+
+error: test failed, to rerun pass `--test counter_service`

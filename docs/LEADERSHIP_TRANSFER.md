@@ -3,8 +3,9 @@
 The deterministic Raft core exposes `Event::TransferLeadership` with an
 operation ID, exact target node/store and expected configuration. This is a
 volatile protocol primitive. [Durable Rust maintenance](MAINTENANCE.md) now
-wraps it with replicated intent/status; the authenticated executable
-`move-leader` command remains slice196b2.
+wraps it with replicated intent/status. The authenticated counter executable
+exposes `move-leader`, status, resume and cancel through an explicit profile;
+see [commands and limits](MAINTENANCE.md#authenticated-counter-executable).
 
 The source must be the current leader in a committed stable configuration. It
 refuses self-transfer, learners, unknown/replaced stores and joint or uncommitted
@@ -41,8 +42,10 @@ version8 on every peer. Versions1–7 reject the new RPC; defaults are unchanged
 and there is no downgrade. Native startup supports explicit version8 for both
 TCP/TLS and QUIC. Session-version matching and ordinary native startup recovery
 are tested separately from the deterministic handoff histories. Slice196b1 also
-exercises the durable Rust workflow over native TCP/QUIC. Executable command
-and disconnect histories remain part of196b2.
+exercises the durable Rust workflow over native TCP/QUIC. Slice196b2 adds actual
+authenticated executable TCP/QUIC recovery, cancellation and disconnected status
+waits. This does not complete coordinated node drain or general multi-group
+operator orchestration.
 
 See [slice196a evidence](../validation/baseline/slice196a/README.md) for the
 tested boundaries and limitations. No persistent Raft/application format or

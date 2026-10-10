@@ -47,6 +47,8 @@ mod history;
 mod history_checker;
 #[path = "counter_service/joint_retirement.rs"]
 mod joint_retirement;
+#[path = "counter_service/leadership.rs"]
+mod leadership;
 #[path = "counter_service/maintenance.rs"]
 mod maintenance;
 #[path = "counter_service/new_voter.rs"]
@@ -94,6 +96,7 @@ struct Cluster {
     quic: bool,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
+    leadership_maintenance: bool,
 }
 impl Cluster {
     fn new() -> Self {
@@ -161,6 +164,7 @@ impl Cluster {
             quic: false,
             wal_reclaim_ms: None,
             checkpoint_entries: None,
+            leadership_maintenance: false,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -199,6 +203,9 @@ impl Cluster {
         }
         if let Some(interval) = self.wal_reclaim_ms {
             command.arg("--wal-reclaim-ms").arg(interval.to_string());
+        }
+        if self.leadership_maintenance {
+            command.args(["--leadership-maintenance", "enabled"]);
         }
         if let Some(entries) = self.checkpoint_entries {
             command.arg("--checkpoint-entries").arg(entries.to_string());

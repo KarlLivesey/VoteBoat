@@ -50,6 +50,52 @@ retry, target data writes, version refusal and quorum status. Application tests
 cover malformed/checkpoint input, full capacity and torn native journal records.
 See [evidence](../validation/baseline/slice196b1/README.md).
 
-The authenticated executable `move-leader`, status/resume commands and their
-disconnect tests remain slice196b2. The full maintenance milestone196 is not
-complete until that operator path is implemented and tested.
+## Authenticated counter executable
+
+On a new three-node cluster, append these options to **every** serve command:
+
+```text
+--service-access ACCESS_FILE --leadership-maintenance enabled
+```
+
+Use the same options on recovery. This explicitly selects counter application
+schema2, wire8 and 64 permanent maintenance records. The existing plain counter
+profile stays schema1. Do not enable the new profile on existing plain data or
+mix the profiles between replicas. The executable currently accepts this profile
+without a membership administration plan; the generic Rust wrapper supports
+other host assemblies. There is no automatic migration or history eviction.
+
+Use the ordinary authenticated client flags, selecting a current leader node:
+
+```text
+client BASE NODE move-leader OP CONFIG TARGET STORE INC --service-tls TLS_DIR --principal ADMIN
+client BASE NODE leadership-status OP --service-tls TLS_DIR --principal READER
+client BASE NODE resume-leadership OP --service-tls TLS_DIR --principal ADMIN
+client BASE NODE cancel-leadership OP --service-tls TLS_DIR --principal ADMIN
+```
+
+`OP` is a nonzero u128. `CONFIG` is the expected stable configuration; `TARGET`,
+`STORE` and `INC` are the exact target identity, not an endpoint. For the initial
+demo configuration, CONFIG and INC are 1 and STORE equals TARGET. New intent
+binds the current source; retries preserve its original recorded source.
+The automatic `client ... auto` route still accepts only data read/add commands.
+
+Start returns the applied Pending record, not handoff success. All replicas can
+resume that durable intent after restart. Each local leader gets one attempt per
+intent/term, bounded to five seconds, including an internal completion wait.
+Timeout releases local quiescence and request ownership, preserving Pending.
+Resume authorizes another local attempt and returns a fresh status read. Status
+requires Inspect permission; the other three commands require Admin.
+
+Cancel stops the local attempt before proposing the durable cancellation. If
+completion wins the race, cancellation returns the original Completed record.
+Retrying an already terminal cancellation uses a fresh read and leaves other
+operations alone. Disconnecting a command releases its wait; it cannot undo an
+already committed intent. Preserve the operation ID and exact fields on unknown
+outcomes, then query a current leader. A Completed record is historical evidence,
+not a promise that its target is still leader.
+
+Slice196b2 tests use actual authenticated TCP/QUIC service processes, pending and
+terminal restart, a killed target, lost replies, denied mutations, disconnected
+and expired status waits, and incompatible plain data. See
+[executable evidence](../validation/baseline/slice196b2/README.md).

@@ -21,7 +21,7 @@ use voteboat::{
     log::*,
     native::{connect::*, node::*, startup::*},
 };
-pub type Service = NativeNode<Counter, NativeServiceConnector>;
+pub type Service = NativeNode<super::counter_application::Application, NativeServiceConnector>;
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
@@ -124,6 +124,12 @@ pub fn open(
     config: NativeMemberStartup,
     protocol: NativePeerProtocol,
     member: bool,
+    maintenance: bool,
 ) -> Result<Service, Failure> {
-    super::service_setup::open_application(config, protocol, member, application()?)
+    let mut config = config;
+    if maintenance {
+        config.startup.tls = checked(config.startup.tls.with_wire_version(8))?;
+    }
+    let app = super::counter_application::Application::new(application()?, maintenance)?;
+    super::service_setup::open_application(config, protocol, member, app)
 }

@@ -1,7 +1,7 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
-Latest focused implementation evidence: [slice196b1 durable Rust maintenance](baseline/slice196b1/README.md).
+Latest focused implementation evidence: [slice196b2 authenticated leadership maintenance](baseline/slice196b2/README.md).
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete

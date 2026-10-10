@@ -1,9 +1,22 @@
 # Baseline audits
 
-Latest implementation: [slice196b1](#slice196b1--durable-rust-maintenance).
+Latest implementation: [slice196b2](#slice196b2--authenticated-leadership-maintenance).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice196b2 — authenticated leadership maintenance
+
+An explicit counter schema2/wire8 profile exposes authenticated start/status/
+resume/cancel over the existing command owner. Six focused TCP/QUIC tests cover
+pending and terminal restart, original identities/data retries, permission
+boundaries, bounded cancellation, lost replies and incompatible plain data.
+All106 affected test executions pass, including76 counter-service tests and
+the directory/transfer regressions; strict formatting/Clippy checks pass.
+See [scope and recorded validation](../validation/baseline/slice196b2/README.md).
+The profile currently excludes a membership administration plan. Coordinated
+multi-group drain, assignment listing, broader faults/platforms and P7 remain
+separate requirements; no full P0–P7 completion is claimed.
 
 ## Slice196b1 — durable Rust maintenance
 

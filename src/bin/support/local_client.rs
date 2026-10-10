@@ -65,6 +65,13 @@ fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
         .is_some_and(|c| c == "configure" || c == "configure-record")
     {
         println!("UNKNOWN {reason}; retry the same configuration operation ID and record");
+    } else if command.first().is_some_and(|c| {
+        matches!(
+            c.as_str(),
+            "move-leader" | "resume-leadership" | "cancel-leadership"
+        )
+    }) {
+        println!("UNKNOWN {reason}; retry the same administrative operation ID and record");
     } else {
         println!("ERR {reason}");
     }
