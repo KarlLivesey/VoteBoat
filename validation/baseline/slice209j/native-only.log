@@ -1,0 +1,33 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.19s
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-a63a353355012f6c)
+
+running 25 tests
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::reconnect::close_drains_accepted_ticket_without_publishing_late_success ... ok
+test host::reconnect::constructor_rejection_preserves_pending_owners_and_monotonic_time ... ok
+test host::reconnect::constructor_returns_original_owners_for_invalid_configuration_and_binding ... ok
+test host::idle_disconnect_releases_session_and_retains_cache_and_generation_floor ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::reconnect::malformed_rejection_is_not_retried ... ok
+test host::reconnect::deadline_and_poll_error_retain_original_ticket_until_actual_receipt ... ok
+test host::reconnect::invalid_time_and_zero_budget_do_not_submit_or_change_pending_work ... ok
+test host::reconnect::retry_consumes_only_reserved_generations_and_stops_at_exhaustion ... ok
+test host::reconnect::wrong_completion_ticket_or_session_binding_fences_the_source ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::replayed_positive_cannot_renew_an_invalidated_lease ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+test short_io_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test host::reconnect::owning_discovery_connector_reconnects_source_without_manual_resolver_polling ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

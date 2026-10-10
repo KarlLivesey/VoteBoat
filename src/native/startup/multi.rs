@@ -164,6 +164,27 @@ impl NativeMultiStartup {
     {
         self.prepare_as((protocol, timers, None), applications, wake, now, true)
     }
+    /// Prepare shared discovery parts with the same durable peer-rotation binding as open.
+    pub fn prepare_discovery_with_peer_rotation<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        applications: BTreeMap<GroupIdentity, A>,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeMultiStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.prepare_as(
+            (rotation.protocol, timers, Some(rotation)),
+            applications,
+            wake,
+            now,
+            true,
+        )
+    }
     fn prepare_as<A>(
         self,
         options: (

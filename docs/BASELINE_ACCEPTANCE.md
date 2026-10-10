@@ -1,5 +1,17 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209j connects counter startup to an explicit authenticated peer source over
+the public driven discovery contract. Native static/member/shared-group
+preparation retains durable credential checks; the wrapper forwards live peer
+replacement. Eight new TCP/QUIC executable histories cover stale configured
+outgoing routes, source outage, member and shared-group key rotation, original
+receipts, malformed startup refusal and unavailable-source shutdown. QUIC
+histories verify persisted snapshot boundaries before reopen. Idle source
+connections release their socket while retaining cache floors; host checks
+cover pending ownership, old/foreign-session attachment and stale hints.
+Combined recursive movement, durable discovery-floor policy and the broader
+provider/platform/performance obligations remain open.
+
 Slice209i adds an explicit executable source profile for exact Raft peer
 node/store/incarnation mappings. The authenticated responder and update/restart
 semantics are shared with existing command discovery, while synthetic command

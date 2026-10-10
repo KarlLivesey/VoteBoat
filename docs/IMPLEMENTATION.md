@@ -135,7 +135,11 @@ Completed209h extends that same preparation to member recovery and shared
 multi-group startup, with TCP/QUIC receipt, checkpoint and cleanup evidence.
 Completed209i supplies an authenticated executable source for exact Raft
 node/store/incarnation hints, keeping command-service identities separate.
-Current209 continues executable peer-source provisioning and combined long-lived
+Completed209j connects counter startup to that source through the public driven
+connector. Static/member/shared-group TCP/QUIC histories cover stale configured
+dials, source outage, peer-key replacement, WAL/checkpoint reopen and original
+receipts. Source trust and cache restart policy remain explicit host inputs.
+Current209 continues combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -154,6 +158,87 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209j schema plan — executable consumes authenticated peer discovery
+
+The counter command listener admits one connection at a time. After each source
+lookup, detach the idle authenticated session while retaining cache floors;
+otherwise discovery would monopolize operator admission. Reattach only with a
+later authenticated session in the same local store lifetime. Never detach an
+accepted request. Verify cached lookup, reconnect identity/generation refusal,
+and command availability between queries.
+
+Add an opt-in bounded --peer-discovery FILE profile for counter startup. The
+file binds one numeric source endpoint, source node/TLS name, principal and TLS
+directory. Parse and load trust before store creation. After native recovery,
+bind the source client lifetime to that recovered store session; one owned
+native dial worker connects, then the existing principal selector/TLS/discover
+upgrade runs in bounded poll steps. Keep initial connection, retries, deadlines
+and shutdown in the same caller-driven DiscoveryDriver; preserve the remote
+cache across later authenticated sessions. Missing sources must not block
+opening or prevent commands/shutdown; data dials await fresh exact hints under
+their original deadlines. No fallback to stale configured Dial addresses.
+
+Reuse DiscoveryConnector for data and preserve the public optional credential
+control through it. A native selected-connector wrapper retains the existing
+executable Node type; no alternative consensus or transport path. Prepared
+static/member/multi startup gains a credential-checked preparation option so
+discovery does not bypass existing durable peer-rotation startup checks. Close
+drains the source dial worker as well as the native data connector; failed final
+assembly returns/closes the exact owned parts. Source connection and TLS
+generations stay separate from data and hints, with fresh local store-session
+binding after restart. The source profile is not itself persisted or rotated
+by peer-key commands; its independently loaded pins remain host-owned trust.
+
+Acceptance: actual executable TCP/QUIC data dials use an authenticated source
+despite stale configured Dial routes; source disconnect/reconnect and whole
+process WAL/checkpoint reopen preserve original operation receipts. Reject
+malformed profiles before files; test unavailable source and prompt shutdown.
+Exercise static/member/shared group and existing credential commands through
+the same composition. This completes the consuming executable path under209;
+combined recursive movement then uses it. Provider obligation review and
+reproduced platform acceptance remain the next linked macro deliverables.
+
+### Slice209j implemented — counter startup consumes exact peer hints
+
+The opt-in `--peer-discovery FILE` path validates a bounded source/principal/TLS
+profile before opening storage. It prepares the existing native parts for
+static/member/shared-group service, binds the client to the recovered store
+session and wraps the selected data connector with public driven discovery.
+Optional peer-credential controls forward to the existing guarded connector;
+credential-checked preparation retains the durable startup record validation.
+Data uses provisioned peer identities and pins with discovered outgoing numeric
+addresses. Incoming routes and local listeners remain explicit configuration.
+
+One owned dial worker plus bounded selector/TLS/upgrade steps obtains the source
+session during Node polling. Failed sources back off without fencing unrelated
+data or local commands. Completed lookups release their source socket while
+retaining cache floors; a new public idle-disconnect/attach pair rejects pending
+detachment and wrong local/source/session identities. Closed source work drains
+before its worker is joined and the native connector can be reclaimed. No new
+consensus, persistent format or discovery authority is introduced. Source trust
+is independent of peer-key commands, and cache floors remain volatile.
+
+Eight new executable histories pass locally: TCP/QUIC stale-dial startup and
+source loss; TCP/QUIC member and three-group startup with actual key replacement;
+unavailable-source local commands/shutdown; and five malformed profile refusals
+before files. QUIC recovery checks the actual persisted snapshot references
+cover each selected group's committed operations before reopening and retrying
+the original IDs. A new host test rejects idle detachment with a pending request,
+retains a cached hint, rejects old/foreign-session attachment and refuses a lower
+hint generation after replacement. The final all-feature regression passes152
+counter-service,50 member-startup,28 remote-discovery and43 startup tests (273
+total). Formatting, all four strict Clippy profiles and warnings-denied API
+documentation pass. The108-entry inventory and13 provider-ledger metadata
+checks pass. The five default-feature executable discovery cases and25
+native-only remote-discovery cases pass in sequential feature runs.
+Feature-profile evidence is retained in
+[slice209j](../validation/baseline/slice209j/README.md).
+
+Macro review: executable source consumption is implemented. Combined recursive
+movement with endpoint refresh remains the next209 deliverable. Provider
+obligation review and current platform acceptance follow; persistent discovery
+floors, broader faults and P7 gates are not closed by these histories.
 
 ### Slice209i implemented — exact peer identities in the executable source
 

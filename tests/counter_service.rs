@@ -79,6 +79,8 @@ mod membership_drain;
 mod new_voter;
 #[path = "counter_service/peer_credentials.rs"]
 mod peer_credentials;
+#[path = "counter_service/peer_discovery.rs"]
+mod peer_discovery;
 #[path = "counter_service/placement.rs"]
 mod placement;
 #[path = "counter_service/quorum.rs"]
@@ -118,6 +120,7 @@ struct Cluster {
     command_peers: Option<PathBuf>,
     remote_commands: bool,
     discovery_peers: Option<PathBuf>,
+    peer_discovery: Option<PathBuf>,
     discover_via: Option<u64>,
     tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
@@ -193,6 +196,7 @@ impl Cluster {
             command_peers: None,
             remote_commands: false,
             discovery_peers: None,
+            peer_discovery: None,
             discover_via: None,
             tls: None,
             listeners,
@@ -289,6 +293,9 @@ impl Cluster {
         }
         if let Some(path) = &self.discovery_peers {
             command.arg("--discovery-peers").arg(path);
+        }
+        if let Some(path) = &self.peer_discovery {
+            command.arg("--peer-discovery").arg(path);
         }
         if self.remote_commands {
             command

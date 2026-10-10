@@ -170,7 +170,7 @@ fn load_tls(
 }
 pub struct ClientAccess {
     tls: NativeTlsConfig,
-    local: LocalIdentity,
+    pub(super) local: LocalIdentity,
     peers: BTreeMap<u64, TlsPeer>,
     pub principal: PrincipalId,
     next_session: std::cell::Cell<u64>,
@@ -381,6 +381,13 @@ impl Channel {
         }
     }
     pub fn poll_client(&mut self, now: MonoTime) -> Result<bool, Failure> {
+        self.poll_client_with_budget(now, SessionPollBudget::default())
+    }
+    pub(super) fn poll_client_with_budget(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<bool, Failure> {
         match self {
             Self::Plain(_) => Ok(true),
             Self::Tls { session, .. } => {
@@ -388,7 +395,7 @@ impl Channel {
                     session
                         .as_mut()
                         .ok_or("missing TLS session")?
-                        .poll(now, SessionPollBudget::default()),
+                        .poll(now, budget),
                 )?;
                 Ok(session.as_ref().unwrap().state() == SessionState::Ready)
             }

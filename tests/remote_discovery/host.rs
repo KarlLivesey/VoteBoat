@@ -599,3 +599,51 @@ fn buffer_reply(
         server.poll(now, SessionPollBudget::default()).unwrap();
     }
 }
+
+#[test]
+fn idle_disconnect_releases_session_and_retains_cache_and_generation_floor() {
+    let (mut client, mut server) = client_server();
+    server.source_mut().hint = Some(hint(3, 2, 50_000));
+    client.resolve(peer(3), MonoTime(0)).unwrap_err();
+    assert!(!client.disconnect_idle());
+    assert!(client.pending().is_some());
+    let (done, now) = scenario::drive(&mut client, &mut server, MonoTime(0));
+    let known = done.result.unwrap();
+    assert!(client.disconnect_idle());
+    assert!(client.source_failed());
+    assert_eq!(client.resolve(peer(3), now), Ok(known));
+    let (old, _) = pair();
+    let (error, returned) = client.attach_session(old).err().unwrap();
+    assert_eq!(error, DiscoveryError::WrongBinding.into());
+    assert!(!returned.closed);
+    let (mut wrong, _) = pair();
+    wrong.binding.generation = voteboat::identity::SecureSessionGeneration::new(2).unwrap();
+    wrong.binding.local.store.session = voteboat::identity::StoreSession::new(2).unwrap();
+    assert_eq!(
+        client.attach_session(wrong).err().unwrap().0,
+        DiscoveryError::WrongBinding.into()
+    );
+    assert!(client.invalidate(peer(3), known.generation));
+    let (mut a, mut b) = pair();
+    a.binding.generation = voteboat::identity::SecureSessionGeneration::new(2).unwrap();
+    b.binding.generation = a.binding.generation;
+    assert!(client.attach_session(a).ok().unwrap().is_none());
+    let mut replacement = NativeDiscoveryResponder::new(
+        b,
+        peer(1),
+        HostHints {
+            hint: Some(hint(3, 1, now.0 + 50_000)),
+            calls: 0,
+            closed: false,
+        },
+        RemoteDiscoveryConfig::default(),
+        now,
+    )
+    .ok()
+    .unwrap();
+    client.resolve(peer(3), now).unwrap_err();
+    let (done, _) = scenario::drive(&mut client, &mut replacement, now);
+    assert_eq!(done.result, Err(DiscoveryError::StaleGeneration.into()));
+    client.close();
+    assert!(!client.disconnect_idle());
+}

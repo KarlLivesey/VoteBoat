@@ -1,0 +1,32 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0364]: `open` is only public within the crate, and cannot be re-exported outside
+  --> src/bin/support/peer_discovery.rs:23:9
+   |
+23 | pub use assembly::open;
+   |         ^^^^^^^^^^^^^^
+   |
+note: consider marking `open` as `pub` in the imported module
+  --> src/bin/support/peer_discovery.rs:23:9
+   |
+23 | pub use assembly::open;
+   |         ^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0364`.
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: methods `bind_session` and `local` are never used
+   --> src/bin/support/service_access.rs:179:19
+    |
+178 | impl ClientAccess {
+    | ----------------- methods in this implementation
+179 |     pub(super) fn bind_session(&mut self, session: StoreSession) {
+    |                   ^^^^^^^^^^^^
+...
+182 |     pub(super) fn local(&self) -> LocalIdentity {
+    |                   ^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: could not compile `voteboat` (bin "voteboat-directory") due to 1 previous error
+error: could not compile `voteboat` (bin "voteboat-counter") due to 1 previous error

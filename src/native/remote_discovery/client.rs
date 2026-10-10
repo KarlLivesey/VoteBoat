@@ -88,10 +88,19 @@ impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
             drop(self.channel.take_session());
         }
     }
-    pub(super) fn attach_session(
-        &mut self,
-        session: S,
-    ) -> Result<Option<S>, (RemoteDiscoveryError, S)> {
+    /// Release an idle source connection while retaining validated cache floors.
+    /// Accepted requests must finish or be cancelled and drained first.
+    pub fn disconnect_idle(&mut self) -> bool {
+        if self.closed || self.pending.is_some() {
+            return false;
+        }
+        self.fail_source();
+        self.retire_failed_session();
+        true
+    }
+    /// Attach a later authenticated session after failure or idle disconnection.
+    /// Retains cache floors and returns the prior session if it is still owned.
+    pub fn attach_session(&mut self, session: S) -> Result<Option<S>, (RemoteDiscoveryError, S)> {
         if self.closed || !self.failed || self.pending.is_some() {
             return Err((DiscoveryError::Unavailable.into(), session));
         }

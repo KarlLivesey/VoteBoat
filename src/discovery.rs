@@ -109,3 +109,34 @@ pub trait DiscoveryDriver: PeerDiscovery {
     fn discovery_pending(&self) -> bool;
     fn discovery_deadline(&self) -> Option<MonoTime>;
 }
+
+impl<T: PeerDiscovery + ?Sized> PeerDiscovery for Box<T> {
+    fn resolve(
+        &mut self,
+        peer: PeerIdentity,
+        now: MonoTime,
+    ) -> Result<PeerEndpointHint, DiscoveryError> {
+        (**self).resolve(peer, now)
+    }
+    fn invalidate(&mut self, peer: PeerIdentity, generation: HintGeneration) -> bool {
+        (**self).invalidate(peer, generation)
+    }
+    fn close(&mut self) {
+        (**self).close();
+    }
+}
+impl<T: DiscoveryDriver + ?Sized> DiscoveryDriver for Box<T> {
+    fn poll_discovery(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<(), DiscoveryError> {
+        (**self).poll_discovery(now, budget)
+    }
+    fn discovery_pending(&self) -> bool {
+        (**self).discovery_pending()
+    }
+    fn discovery_deadline(&self) -> Option<MonoTime> {
+        (**self).discovery_deadline()
+    }
+}

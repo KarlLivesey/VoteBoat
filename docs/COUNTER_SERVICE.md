@@ -224,9 +224,41 @@ consumer's configuration; a returned address cannot provision a new peer.
 
 The same `discovery-status` and administrator-only `discovery-update` commands
 apply. Updates preserve identities and TLS names and remain volatile. Save the
-matching peer file and generation before restart. This supplies a peer source
-for Rust hosts; automatic consumption by the counter's own Raft startup remains
-separate work. Use command v1/v2 files with the existing `client --discover-via`.
+matching peer file and generation before restart. Use command v1/v2 files with
+the existing `client --discover-via`.
+
+To use a peer source for the counter's own Raft connections, add
+`--peer-discovery consumer.txt` to `serve`:
+
+```text
+voteboat-peer-discovery-client-v1
+source 3 127.0.0.1:43103 node3.voteboat.test
+principal 3
+tls /your/discovery-client-tls
+```
+
+This file is limited to4KiB and has exactly these four lines. Relative TLS paths
+are resolved against the file's directory. The TLS directory contains `ca.der`,
+the principal's `node3.der`/`node3-key.der`, and the source's pinned certificate
+named for its node number. Source and principal numbers may differ. The source
+must authorize that principal for Inspect and advertise exact provisioned Raft
+store identities using the peer-source format above.
+
+The source connection always uses TCP/TLS; discovered Raft connections use the
+selected TCP/TLS or QUIC transport. Startup still needs the normal peer identity,
+certificate, listener and incoming-route configuration. Only outgoing Dial
+addresses are discovered; missing/unavailable hints never fall back to the
+configured outgoing address. A missing source does not prevent startup or local
+status/shutdown commands, but peers needing it cannot establish a connection.
+
+Node polling owns bounded connection attempts and lookup progress. After each
+lookup it releases the source connection so other clients can use the command
+listener, retaining validated hints until expiry. Further lookups reconnect.
+Static, recovered-member and shared-group profiles support this option, including
+`--peer-credentials`; peer-key replacement does not replace the independently
+loaded discovery credentials. Restart loads the file afresh, with a new local
+store session and empty cache. Preserve the source's saved generation/addresses
+across its restart; client cache floors are not durable.
 
 Executable TCP/QUIC cluster tests use wildcard listeners and non-default loopback
 ports, verify access denial and TLS-name rejection, then preserve same-ID retries

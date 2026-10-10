@@ -55,6 +55,8 @@ mod leadership_set;
 mod local_client;
 #[path = "support/peer_credentials.rs"]
 mod peer_credentials;
+#[path = "support/peer_discovery.rs"]
+mod peer_discovery;
 #[path = "support/placement_format.rs"]
 mod placement_format;
 #[path = "support/placement_input.rs"]
@@ -101,7 +103,7 @@ PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
-Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
+Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID. Raft peer discovery: serve ... --peer-discovery FILE; see docs/COUNTER_SERVICE.md.\n\
 Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS. Updates are local volatile hints; persist the v2 startup file separately.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
@@ -379,21 +381,17 @@ fn prepare_service(
     options: &StartupOptions,
 ) -> Result<PreparedService, Failure> {
     let protocol = options.protocol;
-    let plan_path = options.admin_plan.as_deref();
     let access_path = options.service_access.as_deref();
-    let admin_mode = options.remote_admin;
     let command_address =
         command_endpoints::listener(options.command_listen, access_path.is_some(), base, id)?;
     let mut discovery =
         command_discovery::Source::load(options.discovery_peers.as_deref(), access_path.is_some())?;
-    let remote = admin_mode != administration::Mode::Automatic;
-    let create = checked_service_mode(
-        mode,
-        &input,
-        remote,
-        access_path.is_some(),
-        plan_path.is_some(),
-    )?;
+    let source = options
+        .peer_discovery
+        .as_deref()
+        .map(peer_discovery::Prepared::load)
+        .transpose()?;
+    let create = options.checked_mode(mode, &input)?;
     options.validate_profiles(root)?;
     let mut config = setup::configuration(root, id, base, tls, create, input)?;
     let peers = options.prepare_peer_credentials(&mut config, mode)?;
@@ -440,11 +438,14 @@ fn prepare_service(
     }
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
-    let mut service = prepared.open(
+    let rotation = peers.as_ref().map(|p| p.startup(protocol));
+    let mut service = peer_discovery::open(
+        prepared,
         protocol,
         mode == "recover-member",
         options.leadership_maintenance,
-        peers.as_ref().map(|p| p.startup(protocol)),
+        rotation,
+        source,
     )?;
     options.configure_maintenance(&mut service)?;
     let drain = options
@@ -945,6 +946,7 @@ struct StartupOptions {
     peer_credentials: Option<std::path::PathBuf>,
     command_listen: Option<SocketAddr>,
     discovery_peers: Option<std::path::PathBuf>,
+    peer_discovery: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
@@ -956,6 +958,15 @@ struct StartupOptions {
     group_drain_plan: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn checked_mode(&self, mode: &str, input: &setup::PeerInput<'_>) -> Result<bool, Failure> {
+        checked_service_mode(
+            mode,
+            input,
+            self.remote_admin != administration::Mode::Automatic,
+            self.service_access.is_some(),
+            self.admin_plan.is_some(),
+        )
+    }
     fn prepare_peer_credentials(
         &self,
         config: &mut voteboat::native::startup::NativeMemberStartup,
@@ -1118,6 +1129,7 @@ fn is_startup_option(flag: &str) -> bool {
             | "--service-access"
             | "--command-listen"
             | "--discovery-peers"
+            | "--peer-discovery"
             | "--wal-reclaim-ms"
             | "--checkpoint-entries"
             | "--leadership-maintenance"
@@ -1148,6 +1160,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut peer_credentials = None;
     let mut command_listen = None;
     let mut discovery_peers = None;
+    let mut peer_discovery = None;
     let mut remote_admin = administration::Mode::Automatic;
     let mut wal_reclaim_ms = None;
     let mut checkpoint_entries = None;
@@ -1183,11 +1196,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
                 if admin_plan.is_none() && args[0] == "serve" =>
             {
-                remote_admin = match flag {
-                    "--remote-admin-plan" => administration::Mode::Provisioned,
-                    "--remote-admin-policy" => administration::Mode::Targets,
-                    _ => administration::Mode::Automatic,
-                };
+                remote_admin = administration_mode(flag);
                 admin_plan = Some(std::path::PathBuf::from(value))
             }
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
@@ -1198,6 +1207,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             }
             "--discovery-peers" if discovery_peers.is_none() && args[0] == "serve" => {
                 discovery_peers = Some(std::path::PathBuf::from(value));
+            }
+            "--peer-discovery" if peer_discovery.is_none() && args[0] == "serve" => {
+                peer_discovery = Some(std::path::PathBuf::from(value));
             }
             "--command-listen" if command_listen.is_none() && args[0] == "serve" => {
                 command_listen = Some(value.parse()?);
@@ -1228,6 +1240,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         peer_credentials,
         command_listen,
         discovery_peers,
+        peer_discovery,
         remote_admin,
         wal_reclaim_ms,
         checkpoint_entries,
@@ -1238,6 +1251,14 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         group_admin_plans,
         group_drain_plan,
     })
+}
+
+fn administration_mode(flag: &str) -> administration::Mode {
+    match flag {
+        "--remote-admin-plan" => administration::Mode::Provisioned,
+        "--remote-admin-policy" => administration::Mode::Targets,
+        _ => administration::Mode::Automatic,
+    }
 }
 
 fn poll_service(

@@ -717,7 +717,10 @@ pub enum NativePeerProtocol {
 }
 /// Construction-selected connector for applications offering both native protocols.
 /// The boxed session still implements the same public SecureSession contract.
+pub type NativeDiscoveredConnector =
+    DiscoveryConnector<NativeServiceConnector, Box<dyn crate::discovery::DiscoveryDriver>>;
 pub enum NativeServiceConnector {
+    Discovered(Box<NativeDiscoveredConnector>),
     Tcp(Box<NativePeerConnector>),
     RotatingTcp(Box<super::peer_credentials::RotatingPeerConnector<NativePeerConnector>>),
     #[cfg(feature = "quic")]
@@ -740,7 +743,9 @@ impl super::peer_credentials::NativePeerMaterialProvider for NativeServiceConnec
         (ConnectError, super::peer_credentials::NativePeerMaterial),
     > {
         match self {
-            Self::RotatingTcp(_) => Err((ConnectError::InvalidRequest, material)),
+            Self::Discovered(_) | Self::RotatingTcp(_) => {
+                Err((ConnectError::InvalidRequest, material))
+            }
             #[cfg(feature = "quic")]
             Self::RotatingQuic(_) => Err((ConnectError::InvalidRequest, material)),
             Self::Tcp(connector) => connector.replace_material(material),
@@ -750,6 +755,26 @@ impl super::peer_credentials::NativePeerMaterialProvider for NativeServiceConnec
     }
 }
 impl NativeServiceConnector {
+    /// Attach an explicitly owned source before any data requests are accepted.
+    /// Rejection returns both owners; closed sources must drain their own work.
+    pub fn with_discovery(
+        self,
+        source: Box<dyn crate::discovery::DiscoveryDriver>,
+        now: MonoTime,
+    ) -> Result<
+        Self,
+        (
+            ConnectError,
+            Self,
+            Box<dyn crate::discovery::DiscoveryDriver>,
+        ),
+    > {
+        if matches!(self, Self::Discovered(_)) {
+            return Err((ConnectError::InvalidRequest, self, source));
+        }
+        DiscoveryConnector::new_driven(self, source, now).map(|c| Self::Discovered(Box::new(c)))
+    }
+
     /// Enable generation guards before any connections are admitted.
     /// A rejected connector is returned unchanged for normal owner cleanup.
     pub fn with_peer_rotation(
@@ -773,6 +798,13 @@ impl NativeServiceConnector {
     /// QUIC has no connector worker; transferred sessions own their socket leases.
     pub fn into_dialer(self) -> Result<Option<NativeTcpDialer>, Box<Self>> {
         match self {
+            Self::Discovered(c) => match c.into_parts() {
+                Ok((connector, source)) => {
+                    drop(source);
+                    connector.into_dialer()
+                }
+                Err(c) => Err(Box::new(Self::Discovered(c))),
+            },
             Self::RotatingTcp(c) => match c.into_inner() {
                 Ok(c) => Self::Tcp(Box::new(c)).into_dialer(),
                 Err(c) => Err(Box::new(Self::RotatingTcp(Box::new(c)))),
@@ -798,10 +830,17 @@ impl NativeServiceConnector {
     }
 }
 impl PeerConnector for NativeServiceConnector {
+    fn is_drained(&self) -> bool {
+        match self {
+            Self::Discovered(c) => c.is_drained(),
+            _ => self.usage().requests == 0 && self.usage().anonymous == 0,
+        }
+    }
     type Endpoint = SocketAddr;
     type Session = Box<dyn SecureSession>;
     fn supports_peer(&self, peer: PeerIdentity) -> bool {
         match self {
+            Self::Discovered(c) => c.supports_peer(peer),
             Self::Tcp(c) => c.supports_peer(peer),
             Self::RotatingTcp(c) => c.supports_peer(peer),
             #[cfg(feature = "quic")]
@@ -812,6 +851,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn local(&self) -> LocalIdentity {
         match self {
+            Self::Discovered(c) => c.local(),
             Self::Tcp(c) => c.local(),
             Self::RotatingTcp(c) => c.local(),
             #[cfg(feature = "quic")]
@@ -822,6 +862,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn limits(&self) -> ConnectLimits {
         match self {
+            Self::Discovered(c) => c.limits(),
             Self::Tcp(c) => c.limits(),
             Self::RotatingTcp(c) => c.limits(),
             #[cfg(feature = "quic")]
@@ -832,6 +873,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn usage(&self) -> ConnectUsage {
         match self {
+            Self::Discovered(c) => c.usage(),
             Self::Tcp(c) => c.usage(),
             Self::RotatingTcp(c) => c.usage(),
             #[cfg(feature = "quic")]
@@ -842,6 +884,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn next_deadline(&self) -> Option<MonoTime> {
         match self {
+            Self::Discovered(c) => c.next_deadline(),
             Self::Tcp(c) => c.next_deadline(),
             Self::RotatingTcp(c) => c.next_deadline(),
             #[cfg(feature = "quic")]
@@ -856,6 +899,7 @@ impl PeerConnector for NativeServiceConnector {
         now: MonoTime,
     ) -> Result<(), ConnectRejected<SocketAddr>> {
         match self {
+            Self::Discovered(c) => c.submit(r, now),
             Self::Tcp(c) => c.submit(r, now),
             Self::RotatingTcp(c) => c.submit(r, now),
             #[cfg(feature = "quic")]
@@ -866,6 +910,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn cancel(&mut self, t: ConnectTicket) -> bool {
         match self {
+            Self::Discovered(c) => c.cancel(t),
             Self::Tcp(c) => c.cancel(t),
             Self::RotatingTcp(c) => c.cancel(t),
             #[cfg(feature = "quic")]
@@ -891,6 +936,7 @@ impl PeerConnector for NativeServiceConnector {
                 .collect()
         }
         match self {
+            Self::Discovered(c) => c.poll(now, b),
             Self::Tcp(c) => c.poll(now, b).map(boxed),
             Self::RotatingTcp(c) => c.poll(now, b).map(boxed),
             #[cfg(feature = "quic")]
@@ -901,6 +947,7 @@ impl PeerConnector for NativeServiceConnector {
     }
     fn close(&mut self) {
         match self {
+            Self::Discovered(c) => c.close(),
             Self::Tcp(c) => c.close(),
             Self::RotatingTcp(c) => c.close(),
             #[cfg(feature = "quic")]
@@ -915,6 +962,7 @@ impl PeerCredentialControl for NativeServiceConnector {
     type Credentials = super::peer_credentials::NativePeerMaterial;
     fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration> {
         match self {
+            Self::Discovered(c) => c.credential_generation(),
             Self::RotatingTcp(c) => c.credential_generation(),
             #[cfg(feature = "quic")]
             Self::RotatingQuic(c) => c.credential_generation(),
@@ -928,6 +976,7 @@ impl PeerCredentialControl for NativeServiceConnector {
         material: Self::Credentials,
     ) -> Result<Self::Credentials, (ConnectError, Self::Credentials)> {
         match self {
+            Self::Discovered(c) => c.replace_peer_credentials(expected, replacement, material),
             Self::RotatingTcp(c) => c.replace_peer_credentials(expected, replacement, material),
             #[cfg(feature = "quic")]
             Self::RotatingQuic(c) => c.replace_peer_credentials(expected, replacement, material),

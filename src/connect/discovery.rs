@@ -427,3 +427,24 @@ impl<C: PeerConnector<Endpoint = SocketAddr>, R: PeerDiscovery> PeerConnector
         self.connector.close();
     }
 }
+
+impl<C: PeerCredentialControl<Endpoint = SocketAddr>, R: PeerDiscovery> PeerCredentialControl
+    for DiscoveryConnector<C, R>
+{
+    type Credentials = C::Credentials;
+    fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration> {
+        self.connector.credential_generation()
+    }
+    fn replace_peer_credentials(
+        &mut self,
+        expected: crate::authorization::CredentialGeneration,
+        replacement: crate::authorization::CredentialGeneration,
+        material: Self::Credentials,
+    ) -> Result<Self::Credentials, (ConnectError, Self::Credentials)> {
+        if self.closed {
+            return Err((ConnectError::Closed, material));
+        }
+        self.connector
+            .replace_peer_credentials(expected, replacement, material)
+    }
+}

@@ -75,6 +75,28 @@ pub(super) fn wrap(
 }
 
 impl NativeStartup {
+    /// Prepare discovery composition with the same durable credential checks as open.
+    pub fn prepare_discovery_with_peer_rotation<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.prepare_with_protocol_as(
+            rotation.protocol,
+            app,
+            wake,
+            now,
+            (StartupAuthorization::Static, timers, None, Some(rotation)),
+            true,
+        )
+    }
     /// Start with guarded peer connections after checking the exact durable
     /// credential record. The host prepares and publishes later journal entries
     /// off-thread before calling Node::replace_peer_credentials.
@@ -104,6 +126,33 @@ impl NativeStartup {
     }
 }
 impl NativeMemberStartup {
+    /// Prepare recovered member parts without bypassing the recorded credential binding.
+    pub fn prepare_discovery_with_peer_rotation<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.startup.prepare_with_protocol_as(
+            rotation.protocol,
+            app,
+            wake,
+            now,
+            (
+                StartupAuthorization::Member(self.provisioned_stores),
+                timers,
+                None,
+                Some(rotation),
+            ),
+            true,
+        )
+    }
     /// Member recovery with the same credential checks and revocation leases.
     /// Provisioned identities and credential records do not authorize membership.
     pub fn open_with_peer_rotation<A>(

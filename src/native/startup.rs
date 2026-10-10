@@ -375,6 +375,7 @@ impl StartupConnector for NativePeerConnector {
 impl StartupConnector for NativeServiceConnector {
     fn reject(self, cleanup: &mut Cleanup) {
         match self {
+            Self::Discovered(_) => unreachable!("startup has not attached host discovery"),
             Self::RotatingTcp(mut c) => {
                 c.close();
                 let c = c

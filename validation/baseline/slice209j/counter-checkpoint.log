@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 8 tests
+test peer_discovery::malformed_peer_discovery_client_refuses_before_store_creation ... ok
+test peer_discovery::unavailable_peer_source_does_not_block_commands_or_shutdown ... ok
+test peer_discovery::executable_consumes_peer_discovery_and_recovers_tcp ... ok
+test peer_discovery::discovered_member_recovery_and_peer_rotation_tcp ... ok
+test peer_discovery::discovered_member_recovery_and_peer_rotation_quic ... ok
+test peer_discovery::discovered_shared_groups_and_peer_rotation_tcp ... ok
+test peer_discovery::discovered_shared_groups_and_peer_rotation_quic ... ok
+test peer_discovery::executable_consumes_peer_discovery_and_recovers_quic ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 144 filtered out; finished in 7.26s
+
