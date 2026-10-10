@@ -644,20 +644,43 @@ the recorded failure. Source224 platform feedback is live at the retained state
 and contains no225 diagnostic. Full P0–P7/P7/provider/fault/deployment acceptance
 remain open; broad security stays with Daybreak.
 
-Current: resolve the recorded original-runner/resume boundaries and collect
-matching shutdown platform evidence. Purpose: advance usable-service/P4 operator
-acceptance. Depend on223's held-step regression and terminal222's exact19701
-runner deadline/96100 follower refusal, original durable intent, source identity
-and fixed budgets. Trace each failed boundary before editing; do not infer one
-common cause or successful execution from UNKNOWN/NOT_LEADER. Completion requires
-exact original records/receipts through interruption/restart, actual clean joins,
-bounded cause-specific TCP/QUIC checks and matching macOS evidence. No new security
-work or timer widening; CI stays background and other work continues while it runs.
-The selected resume caller is now corrected224. Implemented225 adds the missing
-failure-only bound/context distinction without changing the original UNKNOWN.
-Collect actual matching19701 macOS context to attribute which bound and command
-stop progress before editing scheduling or caller recognition; no budget increase.
-Keep making progress on the next independent mini item while CI runs.
+Implemented226: the fixture now retains its original19750 source and observes
+quorum-confirmed Completed before starting19701. Merely discovering the target
+as Leader is insufficient. Real forced-source-change TCP/QUIC checks exercise
+completion followed by an accepted Active drain, cancellation, original data
+retry and clean stop. Counter177 passes before the final read-policy spelling
+cleanup; final affected membership7/read-policy4 and default membership5 pass.
+The exact three read-transient responses now explicitly apply to leadership-status
+as well as resume, with modified/unrelated responses remaining terminal. Actual
+commands/source hashes and intermediate/final validation scope are retained.
+Production behavior, synchronization, admission limits and deadlines are unchanged.
+Formatting and all four strict all-target Clippy profiles finish at zero through
+the enabled hook; it also remains enabled for push.
+
+Terminal225 Ubuntu175/22/21 passes. macOS172/3 stops before directory/transfer:
+19701 changed-plan setup receives Applied/Busy; killed QUIC runner fails before
+its Active journal exists;17015 never records its expected preparing event. The
+Maintenance contract refuses a new intent while another remains Pending, and the
+old fixture could return before19750 completion. The missing-Active failure is
+consistent with that race but its runner log was not retrieved, so it is not a
+separate proved cause. No budget diagnostic fired in this run. Earlier19701
+expiry remains unclassified; these failures cannot establish its bound or fix.
+
+Macro review226 keeps the static service usable and advances selected P4 fixture
+ordering without broadening production protocol or Daybreak's security scope.
+Matching macOS/operator, broader provider/fault/deployment, original P7 and full
+P0–P7 acceptance remain open. Local success does not close those obligations.
+
+Current: resolve remaining cause-specific operator admission/recovery boundaries.
+Purpose: advance usable-service/P4 acceptance. Depend on223–226 native shutdown,
+original-intent routing/completion, terminal225 exact failures and fixed budgets.
+For17015, inspect the actual selected endpoint/admission result before assuming
+one unobserved send reached preparing; do not replay an accepted request under a
+new identity. Collect matching226 macOS results and the original runner bound if
+it recurs. Completion requires original immutable records/receipts, TCP/QUIC
+interruption/restart and clean joins, with matching platform evidence. No timer
+widening, generic UNKNOWN retry or security expansion. Continue the independent
+next item while CI runs; online drain acceptance does not block static use.
 
 Next: attribute the failed P7 gate to exact durability operations before selecting
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
@@ -677,6 +700,38 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice226 schema plan — finish fixture preparation before starting a drain
+
+Purpose/dependencies: matching225 macOS fails earlier than the runner budget:
+one killed QUIC runner never observes an Active journal, and the changed-plan
+history receives Applied/Busy for19701. Maintenance correctly refuses a new
+intent while another is Pending. The fixture's19750 preparation handoff currently
+returns as soon as its target becomes Leader, before replicated completion. This
+is a concrete prerequisite for its next19701 intent, not new production behavior.
+Advance usable-service/P4 while keeping the original P7 investigation next.
+
+Data/API: keep the original19750 source, configuration1, target/store/incarnation,
+same caller deadline, and existing explicit transient responses. Once a move is
+accepted, observe its exact operation through the current leader's quorum read;
+only Completed with the expected identity and source now leading permits fixture
+return. No new operation, timeout increase, blanket UNKNOWN recognition or
+provider seam. A failed/unobserved move retains its original identity.
+
+Transitions/ownership: leader discovery is volatile routing information. Pending
+is a replicated intent, Completed is the required previous-operation boundary.
+The fixture owns no additional server worker; request channels close normally,
+and existing Cluster drop/stop retains child cleanup. Refusal/deadline remains a
+failed setup rather than a successful drain. Restart and immutable drain-plan
+checks remain in the original histories.
+
+Acceptance: exercise a forced source change over real TCP/QUIC, verify exact19750
+Completed quorum evidence before a subsequent drain, and run original runner/
+changed-plan/reopen histories with retained data and clean joins. Keep all four
+strict profiles and formatting zero. Retain terminal225 logs separately:
+Ubuntu175/22/21 passes; macOS172/3 stops before later suites. Its independent
+17015 missing preparing event requires a separate admission-boundary check; this
+slice does not call either it or the earlier19701 budget fixed without evidence.
 
 ### Slice225 schema plan — attribute the original runner budget boundary
 

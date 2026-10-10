@@ -1,0 +1,23 @@
+Preceding source: 41b22371c5c6e8c6469f2056b9688e925e916516
+gh run view 38057634479 --json status,conclusion,jobs
+gh run view 38057634479 --job 114229461133 --log
+gh run view 38057634479 --job 114229461274 --log
+
+Intermediate fixture correction; hashes in counter-all-source.sha256:
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --test counter_service prepared_source_completes_previous_handoff -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service
+
+Final explicit leadership-status policy; hashes in final-source.sha256:
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --test counter_service membership_drain
+cargo +stable test --locked --offline --all-features --test counter_service leadership::follower
+cargo +stable test --locked --offline --test counter_service membership_drain
+.githooks/pre-push
+git diff --check
+sha256sum --check validation/baseline/slice226/final-source.sha256
+
+Loopback/network/git operations run with the required sandbox permission.
+All service-spawning feature builds were sequential. Full intermediate counter177
+is kept separate from final targeted checks; unaffected suites were not repeated.
+The actual push repeats the enabled formatting/four-profile strict hook.

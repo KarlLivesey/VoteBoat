@@ -2358,7 +2358,7 @@ fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation()
 fn retryable_leader_response(args: &[&str], text: &str) -> bool {
     match args {
         ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
-        ["resume-leadership", _] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
+        ["resume-leadership" | "leadership-status", _] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
         ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n"),
         ["cancel-leadership", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n" | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n" | "ERR Unavailable(LeadershipChanged)\n"),

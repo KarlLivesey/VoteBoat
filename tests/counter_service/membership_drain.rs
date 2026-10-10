@@ -1,14 +1,52 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+#[path = "membership_drain/preparation.rs"]
+mod preparation;
+
+fn preparation_identity(text: &str, original: usize, target: usize) {
+    for field in [
+        "operation=19750 ".to_owned(),
+        "configuration=1 ".to_owned(),
+        format!("source={original} "),
+        format!("target={target} "),
+        format!("target_store={target} "),
+        "target_incarnation=1 ".to_owned(),
+    ] {
+        assert!(text.contains(&field), "missing {field}: {text}");
+    }
+}
 
 fn prepare_source_leader(c: &mut Cluster, source: usize) {
     let target = source.to_string();
     let end = Instant::now() + Duration::from_secs(15);
+    let mut original = None;
     loop {
         let leader = c.leader();
-        if leader == source {
+        if leader == source && original.is_none() {
             return;
+        }
+        if let Some(original) = original {
+            // A target can become Leader before its completion record applies.
+            // Do not submit19701 while the preparation intent is still Pending.
+            let output = c.request(leader, &["leadership-status", "19750"]);
+            let text = String::from_utf8(output.stdout).unwrap();
+            if output.status.success() {
+                preparation_identity(&text, original, source);
+                assert!(text.contains("evidence=quorum_read"), "{text}");
+                if leader == source && text.contains("phase=Completed") {
+                    return;
+                }
+            } else {
+                assert!(
+                    retryable_leader_response(&["leadership-status", "19750"], &text),
+                    "preparation observation: {text} {}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+            }
+            assert!(Instant::now() < end, "preparation not completed: {text}");
+            std::thread::park_timeout(Duration::from_millis(20));
+            continue;
         }
         let output = c.request(
             leader,
@@ -16,15 +54,8 @@ fn prepare_source_leader(c: &mut Cluster, source: usize) {
         );
         let text = String::from_utf8(output.stdout).unwrap();
         if output.status.success() {
-            for field in [
-                "operation=19750 ".to_owned(),
-                "configuration=1 ".to_owned(),
-                format!("target={source} "),
-                format!("target_store={source} "),
-                "target_incarnation=1 ".to_owned(),
-            ] {
-                assert!(text.contains(&field), "missing {field}: {text}");
-            }
+            preparation_identity(&text, leader, source);
+            original = Some(leader);
         } else {
             assert!(
                 matches!(
@@ -36,6 +67,9 @@ fn prepare_source_leader(c: &mut Cluster, source: usize) {
                 "original source preparation: {text} {}",
                 String::from_utf8_lossy(&output.stderr)
             );
+            if text.starts_with("UNKNOWN ") {
+                original = Some(leader);
+            }
         }
         assert!(
             Instant::now() < end,

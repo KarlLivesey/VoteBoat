@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.10s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 7 tests
+test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+test membership_drain::preparation::prepared_source_completes_previous_handoff_before_new_drain_tcp ... ok
+test membership_drain::preparation::prepared_source_completes_previous_handoff_before_new_drain_quic ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 170 filtered out; finished in 4.12s
+

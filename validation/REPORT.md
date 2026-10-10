@@ -1,4 +1,17 @@
-# Validation report — slice 35
+# Validation report
+
+Preparation completion: [slice226](baseline/slice226/README.md). The counter
+fixture retains original19750 and waits for its Completed quorum read before
+starting19701. Forced TCP/QUIC source-change checks pass; full counter177 passes
+before the final explicit read-policy naming cleanup, then final membership7/
+read-policy4/default membership5 pass. Original records/retry/join checks remain;
+production behavior and budgets are unchanged. Formatting/four strict profiles
+stay zero. Terminal225 Ubuntu175/22/21 passes; macOS172/3 fails before later
+suites: one19701 Applied/Busy, a killed runner missing Active, and17015 missing
+preparing. The old preparation boundary admits Pending overlap; the missing-Active
+cause is not independently proved. No budget diagnostic fires, so earlier runner
+expiry remains unclassified. Matching226/macOS, full P0–P7/P7/provider/fault/
+deployment stay open; Daybreak owns the broader security review.
 
 Runner bound attribution: [slice225](baseline/slice225/README.md). The existing
 budget refusal emits local volatile identity/target/command/remaining/elapsed

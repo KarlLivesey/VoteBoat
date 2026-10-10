@@ -68,10 +68,9 @@ fn explicit_resume_follower_and_read_refusals_allow_original_endpoint_selection(
         "ERR NotRead(ReadNotReady)\n",
         "ERR Unavailable(LeadershipChanged)\n",
     ] {
-        assert!(retryable_leader_response(
-            &["resume-leadership", "96500"],
-            text
-        ));
+        for command in ["resume-leadership", "leadership-status"] {
+            assert!(retryable_leader_response(&[command, "96500"], text));
+        }
     }
 }
 
@@ -87,9 +86,8 @@ fn resume_modified_or_unrelated_failures_remain_terminal() {
         "OK partial\n",
         "",
     ] {
-        assert!(!retryable_leader_response(
-            &["resume-leadership", "96500"],
-            text
-        ));
+        for command in ["resume-leadership", "leadership-status"] {
+            assert!(!retryable_leader_response(&[command, "96500"], text));
+        }
     }
 }
