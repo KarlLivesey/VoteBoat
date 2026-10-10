@@ -169,47 +169,7 @@ fn finish(
             SourceFenceEvidence::from_status(cfg, status).unwrap(),
         )
     };
-    let mut targets = Vec::new();
-    for route in i.targets() {
-        let RouteTarget::Group(g) = route.target else {
-            panic!("target group")
-        };
-        let mut successor = Target::new(
-            g,
-            operation,
-            i.clone(),
-            BucketCounter::new(route.scope, Policy, bucket_limits()).unwrap(),
-            Policy,
-            TargetLimits {
-                import_bytes: 32768,
-                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|_| panic!("successor"));
-        let b = successor.bootstrap_command(200000).unwrap();
-        commit(&mut successor, operation.get(), b);
-        let image = if partial {
-            t.export_scoped(operation, 65536).unwrap()
-        } else {
-            t.export_target(g, 65536).unwrap()
-        };
-        let digest = ContentDigest::scope_image(&image);
-        let import = TargetImport::new(
-            operation,
-            i.clone(),
-            g,
-            vec![SourceImport {
-                fence,
-                configuration: cfg,
-                image,
-                digest,
-            }],
-        )
-        .unwrap();
-        let b = successor.import_command(&import, 200000).unwrap();
-        commit(&mut successor, operation.get(), b);
-        targets.push(successor);
-    }
+    let mut targets = import_successors(t, i, operation, fence, partial, cfg);
     let publication = TransferPublication::new(
         operation,
         i.clone(),
@@ -314,42 +274,7 @@ fn completed(partial: bool) -> Completed {
     let b = data(&m.child, 100, 9);
     record_target(&mut m.child, &mut m.child_log, 44, b);
     m.child = reopen(&m.child, &m.first, partial);
-    let scoped = if partial {
-        let before = m.child.grant().clone();
-        let c = create_child(&mut m.target, &m.child);
-        let mut after = before.clone().into_input();
-        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-        after.execution = ExecutionMode::Delegated(vec![
-            RouteEntry {
-                scope: range(0, 64),
-                target: RouteTarget::Child(ChildAuthority {
-                    responsibility: rid(30),
-                    group: group(9),
-                    epoch: OwnershipEpoch::new(1).unwrap(),
-                }),
-            },
-            RouteEntry {
-                scope: range(64, 128),
-                target: RouteTarget::Group(group(21)),
-            },
-        ]);
-        let p = DelegationPlan::retained_insertion(
-            manifest(&m.target, 10),
-            before,
-            ResponsibilityManifest::new(after).unwrap(),
-            c,
-            op(2000),
-        )
-        .unwrap();
-        let (i, r) = reserve(&mut m.target, p, 6000);
-        let (children, _) = finish(&mut m.target, &mut m.child, &mut m.child_log, &i, &r, true);
-        assert_eq!(children[0].application().value(&[1]), Ok(7));
-        m.child = reopen(&m.child, &m.first, true);
-        Some(m.child.export_scoped(op(2000), 65536).unwrap())
-    } else {
-        None
-    };
+    let scoped = prepare_scoped_child(&mut m, partial);
     let before = m.child.grant().clone();
     let mut after = before.clone().into_input();
     after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
@@ -646,7 +571,7 @@ fn imported_retirement_requires_the_exact_ordered_metadata_history() {
 #[test]
 #[cfg(feature = "native")]
 fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::native::log_store::*;
     for partial in [false, true] {
         let m = moved_with(Some(partial));
@@ -654,50 +579,10 @@ fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history()
         let command = a.encode(MAX_METADATA_ADOPTION_BYTES).unwrap();
         let c = completed(partial);
         for retire in [false, true] {
-            let (base, entry, first) = if retire {
-                let mut guard = RetirementGuard::new(selected(&c.first, partial))
-                    .unwrap_or_else(|_| panic!("guard"));
-                guard.apply_batch(&c.log).unwrap();
-                let b = guard
-                    .retirement_command(&c.proof, MAX_RETIREMENT_COMMAND_BYTES)
-                    .unwrap();
-                (
-                    c.log.clone(),
-                    entry(c.owner.applied_index() + 1, 3000, b),
-                    c.first.clone(),
-                )
-            } else {
-                (
-                    m.child_log.clone(),
-                    entry(4, 701, command.clone()),
-                    m.first.clone(),
-                )
-            };
+            let (base, entry, first) = metadata_fault_prefix(&c, &m, partial, retire, &command);
             let last = entry.index;
             let limits = LogLimits::default();
-            let seed = || {
-                let io = ModelIo::default();
-                let mut store =
-                    NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-                support::append(
-                    &mut store,
-                    vec![LogMutation::Create(support::bootstrap(21, 3))],
-                );
-                let state = store.state(group(21)).unwrap();
-                support::append(
-                    &mut store,
-                    vec![support::update(
-                        &state,
-                        1,
-                        last - 1,
-                        Some(Suffix {
-                            from: 1,
-                            entries: base.clone(),
-                        }),
-                    )],
-                );
-                (io, store)
-            };
+            let seed = || seed_imported_metadata(&base, last, limits);
             let (_, store) = seed();
             let mutation = support::update(
                 &store.state(group(21)).unwrap(),
@@ -784,4 +669,162 @@ fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history()
             assert!(old && complete);
         }
     }
+}
+
+fn import_successors(
+    t: &Target,
+    i: &TransferIntent,
+    operation: OperationId,
+    fence: voteboat::routed::OwnershipFence,
+    partial: bool,
+    cfg: ConfigurationId,
+) -> Vec<Target> {
+    let mut targets = Vec::new();
+    for route in i.targets() {
+        let RouteTarget::Group(g) = route.target else {
+            panic!("target group")
+        };
+        let mut successor = Target::new(
+            g,
+            operation,
+            i.clone(),
+            BucketCounter::new(route.scope, Policy, bucket_limits()).unwrap(),
+            Policy,
+            TargetLimits {
+                import_bytes: 32768,
+                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|_| panic!("successor"));
+        let b = successor.bootstrap_command(200000).unwrap();
+        commit(&mut successor, operation.get(), b);
+        let image = if partial {
+            t.export_scoped(operation, 65536).unwrap()
+        } else {
+            t.export_target(g, 65536).unwrap()
+        };
+        let digest = ContentDigest::scope_image(&image);
+        let import = TargetImport::new(
+            operation,
+            i.clone(),
+            g,
+            vec![SourceImport {
+                fence,
+                configuration: cfg,
+                image,
+                digest,
+            }],
+        )
+        .unwrap();
+        let b = successor.import_command(&import, 200000).unwrap();
+        commit(&mut successor, operation.get(), b);
+        targets.push(successor);
+    }
+
+    targets
+}
+
+fn prepare_scoped_child(m: &mut Moved, partial: bool) -> Option<voteboat::scope::ScopeImage> {
+    let scoped = if partial {
+        let before = m.child.grant().clone();
+        let c = create_child(&mut m.target, &m.child);
+        let mut after = before.clone().into_input();
+        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+        after.execution = ExecutionMode::Delegated(vec![
+            RouteEntry {
+                scope: range(0, 64),
+                target: RouteTarget::Child(ChildAuthority {
+                    responsibility: rid(30),
+                    group: group(9),
+                    epoch: OwnershipEpoch::new(1).unwrap(),
+                }),
+            },
+            RouteEntry {
+                scope: range(64, 128),
+                target: RouteTarget::Group(group(21)),
+            },
+        ]);
+        let p = DelegationPlan::retained_insertion(
+            manifest(&m.target, 10),
+            before,
+            ResponsibilityManifest::new(after).unwrap(),
+            c,
+            op(2000),
+        )
+        .unwrap();
+        let (i, r) = reserve(&mut m.target, p, 6000);
+        let (children, _) = finish(&mut m.target, &mut m.child, &mut m.child_log, &i, &r, true);
+        assert_eq!(children[0].application().value(&[1]), Ok(7));
+        m.child = reopen(&m.child, &m.first, true);
+        Some(m.child.export_scoped(op(2000), 65536).unwrap())
+    } else {
+        None
+    };
+
+    scoped
+}
+
+#[cfg(feature = "native")]
+fn seed_imported_metadata(
+    base: &[LogEntry],
+    last: u64,
+    limits: LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::native::log_store::*;
+    let io = ModelIo::default();
+    let mut store = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut store,
+        vec![LogMutation::Create(support::bootstrap(21, 3))],
+    );
+    let state = store.state(group(21)).unwrap();
+    support::append(
+        &mut store,
+        vec![support::update(
+            &state,
+            1,
+            last - 1,
+            Some(Suffix {
+                from: 1,
+                entries: base.to_vec(),
+            }),
+        )],
+    );
+    (io, store)
+}
+
+#[cfg(feature = "native")]
+fn metadata_fault_prefix(
+    c: &Completed,
+    m: &Moved,
+    partial: bool,
+    retire: bool,
+    command: &[u8],
+) -> (Vec<LogEntry>, LogEntry, TransferIntent) {
+    let (base, entry, first) = if retire {
+        let mut guard =
+            RetirementGuard::new(selected(&c.first, partial)).unwrap_or_else(|_| panic!("guard"));
+        guard.apply_batch(&c.log).unwrap();
+        let b = guard
+            .retirement_command(&c.proof, MAX_RETIREMENT_COMMAND_BYTES)
+            .unwrap();
+        (
+            c.log.clone(),
+            entry(c.owner.applied_index() + 1, 3000, b),
+            c.first.clone(),
+        )
+    } else {
+        (
+            m.child_log.clone(),
+            entry(4, 701, command.to_vec()),
+            m.first.clone(),
+        )
+    };
+
+    (base, entry, first)
 }

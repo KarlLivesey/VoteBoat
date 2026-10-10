@@ -92,9 +92,9 @@ Current priority is restoring and maintaining zero repository-wide lint diagnost
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: strict lint cleanup | Keep all implemented milestones maintainable; separate oversized test histories into explicit phases without changing behavior. | Existing fixtures, fault schedules and assertions. | Formatting plus all-target Clippy with all features and no default features both report zero; affected tests pass. |
-| Next: enforced local pre-push checks | Preserve that baseline during normal development across all milestones. | Both strict profiles clean. | Tracked hook runs formatting and both profiles, blocks a failing check, and is installed for this checkout. |
-| Then: resume metadata authority movement156 | Advance recursive responsibilities and split/merge while preserving the usable static service. | Clean baseline and existing154/155 contracts. | Bounded schema plan, real data/retry/restart evidence and strict local checks for each slice. |
+| Completed: strict lint cleanup | Keep all implemented milestones maintainable; separate oversized test histories into explicit phases without changing behavior. | Existing fixtures, fault schedules and assertions. | Formatting plus all-target Clippy with all features and no default features both report zero; affected tests pass. |
+| Completed: enforced local pre-push checks | Preserve that baseline during normal development across all milestones. | Both strict profiles clean. | Tracked hook runs formatting and both profiles, blocks a failing check, and is installed for this checkout. |
+| Next implementation: resume metadata authority movement156 | Advance recursive responsibilities and split/merge while preserving the usable static service. | Clean baseline and existing154/155 contracts. | Bounded schema plan, real data/retry/restart evidence and strict local checks for each slice. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -14395,3 +14395,83 @@ member-recovery38, snapshot-worker14, namespace-creation12 and insertion11.
 All assertions in these changed files were retained. Formatting and whitespace
 checks passed. This is partial cleanup evidence, not a clean-repository claim.
 The requested pre-push hook is still pending both strict profiles reaching zero.
+
+### Reparent guard and imported-owner cleanup — schema plan
+
+Keep the existing state machines and fault schedules intact. Name the preparation,
+publication, release, route/data retry, checkpoint-rejection and retirement phases
+in test helpers. Pass owned fixtures or explicit mutable references across these
+boundaries; native recovery must still drop the writer before power loss and
+replay only the committed prefix. No production contracts change. Acceptance:
+strict target scans, complete affected suites and unchanged assertion inventory.
+This advances the current zero-diagnostic mini-plan item across routing and
+split/merge evidence.
+
+### Retained insertion history cleanup — schema plan
+
+Separate intent validation, source freeze/import, metadata publication, target
+activation and retained-source adoption. Keep the original grant and exported
+image through every checkpoint/reopen. Helpers carry the existing owned state;
+no phase may activate before publication or lose the retained source's retry
+history. Native journal helpers retain exact prefix, boundary and fault lists.
+Acceptance: complete retained-insertion suite, strict lint and assertion inventory.
+
+### Executable service histories — schema plan
+
+Separate deployment fixture construction, durable membership inspection,
+placement planning, authentication refusal and cancellation/receipt-loss phases.
+Cluster continues owning child processes, ports and directories; cleanup and
+restart order remain unchanged. Keep exact configuration IDs, command retries,
+TLS identities and deadlines. Acceptance: service integration suite and strict
+all-target scans, with unchanged assertions.
+
+### Native membership startup cleanup — schema plan
+
+Keep protocol, endpoints, clocks and node ownership explicit between preparation,
+readiness, admission refusal, recovery and shutdown phases. Lift local drive/setup
+helpers out of oversized histories and give every phase its original fixed
+acceptance conditions. Preserve held ingress, stale session proofs, quorum
+requirements, checkpoint boundaries and recovery values. Tests must still own
+all live nodes until their original close/abandon points. Acceptance: complete
+native startup suite, unchanged assertions and both strict repository scans.
+
+### Pre-push checks — schema plan and baseline
+
+The tracked `.githooks/pre-push` runs from the repository root and stops on the
+first failing command: formatting, strict all-feature Clippy, then strict
+no-default-feature Clippy. It uses the same locked/offline/all-target commands
+as local validation and CI. Install through repository-local `core.hooksPath`;
+there are no existing custom hooks or hook-path settings to preserve here.
+Acceptance: both real strict profiles report zero, a real local Git push invokes
+all three checks, and injected failures in each check prevent remote updates.
+
+Both strict repository profiles reached zero diagnostics before hook installation.
+Formatting and whitespace checks pass. The changed reparent-guard, imported-parent,
+retained-insertion and counter-service suites passed18,4,38 and33 tests respectively.
+Native membership-startup regression execution is still in progress.
+
+### Zero baseline and pre-push enforcement — verified
+
+Both complete commands exited0 with no diagnostics, and formatting passed:
+
+```sh
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+```
+
+All143 affected integration tests passed: reparent guards18, imported parents4,
+retained insertion38, counter service33 and native membership startup50. The
+assertion inventory is unchanged in every modified Rust file. There are no new
+lint allowances, threshold changes or production behavior changes.
+
+Installed repository-local `core.hooksPath=.githooks`. The actual hook passed
+against this checkout. Temporary local Git repositories verified a successful
+push invokes all three exact commands, and separately injected failures in
+formatting, all-feature Clippy and no-default-feature Clippy each refuse the
+push without changing the destination ref. The README documents installation
+for another clone, and AGENTS.md requires keeping the hook enabled.
+
+The immediate quality milestone is complete. The macro feature scope is
+unchanged; metadata authority movement156 remains the next implementation
+deliverable. No feature-completion claim is inferred from this lint cleanup.

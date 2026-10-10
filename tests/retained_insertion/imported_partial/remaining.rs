@@ -159,37 +159,7 @@ fn completed(split: bool) -> Completed {
     t = reopen(&t, &first, 2);
     assert_eq!(t.checkpoint(400000).unwrap(), live);
     assert!(matches!(read(&t, 100), TargetRead::Rejected(_)));
-    let mut successors = Vec::new();
-    for g in if split { vec![40, 41] } else { vec![40] } {
-        let mut c = child(&i, g);
-        let b = c.bootstrap_command(200000).unwrap();
-        commit(&mut c, 3000, b);
-        let image = t.export_target(group(g), 65536).unwrap();
-        assert_eq!(
-            image.scope(),
-            i.targets()
-                .into_iter()
-                .find(|r| r.target == RouteTarget::Group(group(g)))
-                .unwrap()
-                .scope
-        );
-        let digest = ContentDigest::scope_image(&image);
-        let import = TargetImport::new(
-            op(3000),
-            i.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: status.fence,
-                configuration: cfg,
-                image,
-                digest,
-            }],
-        )
-        .unwrap();
-        let b = c.import_command(&import, 200000).unwrap();
-        commit(&mut c, 3000, b);
-        successors.push(c);
-    }
+    let mut successors = import_remaining_successors(&t, &i, &status, split, cfg);
     let p = TransferPublication::new(
         op(3000),
         i.clone(),
@@ -346,22 +316,7 @@ fn remaining_moves_reject_changed_children_reused_groups_and_legacy_profiles() {
     assert!(legacy
         .validate_proposal(op(6002), &encoded, std::iter::empty())
         .is_err());
-    let mut root_before = t.grant().clone().into_input();
-    root_before.parent = None;
-    let mut root_after = after.clone().into_input();
-    root_after.parent = None;
-    let root_before = ResponsibilityManifest::new(root_before).unwrap();
-    let root = TransferIntent::move_remaining(
-        root_before,
-        ResponsibilityManifest::new(root_after).unwrap(),
-    )
-    .unwrap();
-    assert!(root.delegation().is_none());
-    assert_eq!(
-        TransferIntent::decode(&root.encode(200000).unwrap()).unwrap(),
-        root
-    );
-    assert!(TransferIntent::move_remaining(t.grant().clone(), after.clone()).is_err());
+    check_root_remaining(&t, &after);
     for group_id in [
         group(21),
         GroupIdentity {
@@ -420,25 +375,7 @@ fn remaining_moves_reject_changed_children_reused_groups_and_legacy_profiles() {
     assert!(legacy
         .restore_checkpoint(14, d.applied_index(), &cp)
         .is_err());
-    let mut fresh = directory(before(false), false);
-    for end in 0..cp.len() {
-        assert!(fresh
-            .restore_checkpoint(14, d.applied_index(), &cp[..end])
-            .is_err());
-    }
-    assert_eq!(fresh.applied_index(), 2);
-    let mut target = child(&i, 40);
-    let boot = target.bootstrap_command(200000).unwrap();
-    commit(&mut target, 3000, boot);
-    let cp = target.checkpoint(400000).unwrap();
-    for end in 0..cp.len() {
-        assert!(child(&i, 40)
-            .restore_checkpoint(7, target.applied_index(), &cp[..end])
-            .is_err());
-    }
-    assert!(child(&i, 40)
-        .restore_checkpoint(2, target.applied_index(), &cp)
-        .is_err());
+    check_remaining_checkpoints(&d, &i, &cp);
     t = reopen(&t, &first, 2);
     assert_eq!(read(&t, 100), TargetRead::Data(9));
 }
@@ -538,3 +475,86 @@ fn interrupted_remaining_freeze_preserves_only_a_complete_owner_boundary() {
 
 #[path = "remaining/retirement.rs"]
 mod retirement;
+
+fn import_remaining_successors(
+    t: &Target,
+    i: &TransferIntent,
+    status: &voteboat::transfer_source::SourceFreezeStatus,
+    split: bool,
+    cfg: ConfigurationId,
+) -> Vec<Target> {
+    let mut successors = Vec::new();
+    for g in if split { vec![40, 41] } else { vec![40] } {
+        let mut c = child(i, g);
+        let b = c.bootstrap_command(200000).unwrap();
+        commit(&mut c, 3000, b);
+        let image = t.export_target(group(g), 65536).unwrap();
+        assert_eq!(
+            image.scope(),
+            i.targets()
+                .into_iter()
+                .find(|r| r.target == RouteTarget::Group(group(g)))
+                .unwrap()
+                .scope
+        );
+        let digest = ContentDigest::scope_image(&image);
+        let import = TargetImport::new(
+            op(3000),
+            i.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: status.fence,
+                configuration: cfg,
+                image,
+                digest,
+            }],
+        )
+        .unwrap();
+        let b = c.import_command(&import, 200000).unwrap();
+        commit(&mut c, 3000, b);
+        successors.push(c);
+    }
+
+    successors
+}
+
+fn check_root_remaining(t: &Target, after: &ResponsibilityManifest) {
+    let mut root_before = t.grant().clone().into_input();
+    root_before.parent = None;
+    let mut root_after = after.clone().into_input();
+    root_after.parent = None;
+    let root_before = ResponsibilityManifest::new(root_before).unwrap();
+    let root = TransferIntent::move_remaining(
+        root_before,
+        ResponsibilityManifest::new(root_after).unwrap(),
+    )
+    .unwrap();
+    assert!(root.delegation().is_none());
+    assert_eq!(
+        TransferIntent::decode(&root.encode(200000).unwrap()).unwrap(),
+        root
+    );
+    assert!(TransferIntent::move_remaining(t.grant().clone(), after.clone()).is_err());
+}
+
+fn check_remaining_checkpoints(d: &Directory, i: &TransferIntent, cp: &[u8]) {
+    let mut fresh = directory(before(false), false);
+    for end in 0..cp.len() {
+        assert!(fresh
+            .restore_checkpoint(14, d.applied_index(), &cp[..end])
+            .is_err());
+    }
+    assert_eq!(fresh.applied_index(), 2);
+    let mut target = child(i, 40);
+    let boot = target.bootstrap_command(200000).unwrap();
+    commit(&mut target, 3000, boot);
+    let cp = target.checkpoint(400000).unwrap();
+    for end in 0..cp.len() {
+        assert!(child(i, 40)
+            .restore_checkpoint(7, target.applied_index(), &cp[..end])
+            .is_err());
+    }
+    assert!(child(i, 40)
+        .restore_checkpoint(2, target.applied_index(), &cp)
+        .is_err());
+}

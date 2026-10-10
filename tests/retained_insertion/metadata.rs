@@ -158,43 +158,7 @@ fn moved_with(profile: Option<bool>) -> Moved {
         )
         .unwrap();
     record_target(&mut child, &mut child_log, 200, activation);
-    let plan = d.source().plan(group(9)).unwrap();
-    let command = d.source().freeze_command(&plan, 100000).unwrap();
-    commit(&mut d, 700, command);
-    let image = d.source().export(1000000).unwrap();
-    let mut target = MetadataServingTarget::new(
-        metadata_source(profile.is_some()),
-        plan.clone(),
-        op(700),
-        ConfigurationId::new(1).unwrap(),
-        ConfigurationId::new(2).unwrap(),
-    )
-    .unwrap();
-    let command = target.bootstrap_command(100000).unwrap();
-    commit(&mut target, 700, command);
-    let command = target
-        .import_command(&image, ConfigurationId::new(1).unwrap(), 1000000)
-        .unwrap();
-    commit(&mut target, 700, command);
-    let command = d
-        .publication_command(
-            target.status().target.imported.unwrap(),
-            ConfigurationId::new(2).unwrap(),
-            100000,
-        )
-        .unwrap();
-    commit(&mut d, 700, command);
-    let command = target
-        .activation_command(d.publication().unwrap(), 100000)
-        .unwrap();
-    commit(&mut target, 700, command);
-    assert!(d.source().directory().is_none());
-    let adoption = OwnerMetadataAdoption::new(
-        plan,
-        first.before().input().responsibility,
-        target.status().activation.unwrap(),
-    )
-    .unwrap();
+    let (adoption, target) = move_metadata_authority(d, &first, profile);
     Moved {
         owner,
         first,
@@ -281,122 +245,9 @@ fn retained_owner_metadata_move_keeps_exports_and_supports_later_retained_transf
     );
     let bytes = write(&owner, 150, 5);
     commit(&mut owner, 6, bytes);
-    let current = owner.grant().clone();
-    let mut child = current.clone().into_input();
-    child.responsibility = rid(22);
-    child.parent = Some(ParentAuthority {
-        responsibility: current.input().responsibility,
-        group: group(9),
-    });
-    child.scope = range(128, 192);
-    child.epoch = OwnershipEpoch::new(1).unwrap();
-    child.generation = RouteGeneration::new(1).unwrap();
-    child.execution = ExecutionMode::Single(group(22));
-    let child = ResponsibilityManifest::new(child).unwrap();
-    let creation = GroupCreationIntent {
-        authority: group(9),
-        parent: current.input().responsibility,
-        expected: current.input().generation,
-        responsibility: rid(22),
-        bootstrap: support::bootstrap(22, 3),
-        application: current.input().application,
-        mode: GroupCreationMode::Staging,
-    };
-    commit(&mut target, 22, creation.encode(100000).unwrap());
-    let MetadataServingRead::Creation(Some(created)) = target
-        .read_at(
-            target.applied_index(),
-            MetadataServingQuery::Creation(group(22)),
-        )
-        .unwrap()
-    else {
-        panic!("creation")
-    };
-    let created = GroupCreationStatus {
-        operation: created.operation,
-        index: created.index,
-        intent: GroupCreationIntent::decode(&created.intent).unwrap(),
-    };
-    let mut after = current.clone().into_input();
-    after.epoch = OwnershipEpoch::new(current.input().epoch.get() + 1).unwrap();
-    after.generation = RouteGeneration::new(current.input().generation.get() + 1).unwrap();
-    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
-        panic!("delegated")
-    };
-    routes[1] = RouteEntry {
-        scope: range(128, 192),
-        target: RouteTarget::Child(ChildAuthority {
-            responsibility: rid(22),
-            group: group(9),
-            epoch: child.input().epoch,
-        }),
-    };
-    routes.push(RouteEntry {
-        scope: range(192, 256),
-        target: RouteTarget::Group(group(20)),
-    });
-    let intent = TransferIntent::insert_retained_child(
-        current,
-        ResponsibilityManifest::new(after).unwrap(),
-        InsertionChild::from_creation(child, &created).unwrap(),
-    )
-    .unwrap();
-    commit(&mut target, 202, intent.encode(100000).unwrap());
+    let intent = reserve_metadata_child(&mut target, &owner);
     commit(&mut owner, 202, intent.encode(100000).unwrap());
-    let status = frozen(&owner, 202);
-    let mut child = Target::new(
-        group(22),
-        op(202),
-        intent.clone(),
-        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
-        Policy,
-        TargetLimits {
-            import_bytes: 32768,
-            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-        },
-    )
-    .unwrap_or_else(|_| panic!("child"));
-    let bytes = child.bootstrap_command(100000).unwrap();
-    commit(&mut child, 202, bytes);
-    let import = TargetImport::new(
-        op(202),
-        intent.clone(),
-        group(22),
-        vec![SourceImport {
-            fence: status.fence.fence,
-            configuration: ConfigurationId::new(1).unwrap(),
-            image: owner.export(op(202), 65536).unwrap(),
-            digest: status.digest,
-        }],
-    )
-    .unwrap();
-    let bytes = child.import_command(&import, 100000).unwrap();
-    commit(&mut child, 202, bytes);
-    let publication = TransferPublication::new(
-        op(202),
-        intent.clone(),
-        vec![SourceFenceEvidence::from_scoped_status(
-            ConfigurationId::new(1).unwrap(),
-            status,
-            &intent,
-        )
-        .unwrap()],
-        vec![
-            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), child.status())
-                .unwrap(),
-        ],
-    )
-    .unwrap();
-    commit(&mut target, 203, publication.encode(100000).unwrap());
-    let MetadataServingRead::Directory(DirectoryRead::Publication(Some(decision))) = target
-        .read_at(
-            target.applied_index(),
-            MetadataServingQuery::Directory(DirectoryQuery::Publication(op(202))),
-        )
-        .unwrap()
-    else {
-        panic!("publication")
-    };
+    let (mut child, decision) = publish_metadata_child(&mut target, &owner, &intent);
     let later = RetainedGrantAdoption {
         metadata_configuration: ConfigurationId::new(2).unwrap(),
         decision: decision.clone(),
@@ -412,40 +263,7 @@ fn retained_owner_metadata_move_keeps_exports_and_supports_later_retained_transf
         )
         .unwrap();
     commit(&mut child, 202, bytes);
-    let m = child.grant().input();
-    let hint = RouteHint {
-        responsibility: m.responsibility,
-        group: group(22),
-        application: m.application,
-        scheme: m.scheme,
-        scope: m.scope,
-        bucket: 150,
-        epoch: m.epoch,
-        generation: m.generation,
-    };
-    assert_eq!(
-        child
-            .read_at(
-                child.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint,
-                    key: vec![150],
-                    query: vec![150],
-                })
-            )
-            .unwrap(),
-        TargetRead::Data(5)
-    );
-    let retry = encode_routed(
-        hint,
-        &[150],
-        &encode_add(&[150], 5, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(
-        matches!(commit(&mut child, 6, retry).outcome, TargetOutcome::Applied(r) if r.duplicate)
-    );
+    check_metadata_child(&mut child);
     assert_eq!(owner.grant(), intent.after());
     owner = reopen(&owner, &first);
     assert_eq!(owner.grant(), intent.after());
@@ -464,29 +282,7 @@ fn metadata_adoption_profiles_pending_work_and_checkpoint_failures_are_atomic() 
         ..
     } = moved();
     let bytes = adoption.encode(MAX_METADATA_ADOPTION_BYTES).unwrap();
-    for limit in [0, MAX_PARENT_ADOPTIONS] {
-        let old = retained_source(&first);
-        let boot = old.bootstrap_command(100000).unwrap();
-        let (err, returned) = old.with_metadata_authority_adoption(limit).err().unwrap();
-        assert_eq!(err, ApplicationError::InvalidCommand);
-        assert_eq!(returned.bootstrap_command(100000).unwrap(), boot);
-    }
-    for profile in 0..3 {
-        let mut old = match profile {
-            0 => retained_source(&first),
-            1 => retained_source(&first)
-                .with_parent_adoption(2)
-                .unwrap_or_else(|_| panic!("parent")),
-            _ => retained_source(&first)
-                .with_parent_slot_adoption(2)
-                .unwrap_or_else(|_| panic!("slots")),
-        };
-        let boot = old.bootstrap_command(100000).unwrap();
-        commit(&mut old, 100, boot);
-        let checkpoint = old.checkpoint(1000000).unwrap();
-        assert!(old.apply_batch(&[entry(2, 701, bytes.clone())]).is_err());
-        assert_eq!(old.checkpoint(1000000).unwrap(), checkpoint);
-    }
+    check_metadata_profiles(&first, &bytes);
     let before = owner.checkpoint(1000000).unwrap();
     let index = owner.applied_index();
     assert!(owner
@@ -525,39 +321,7 @@ fn metadata_adoption_profiles_pending_work_and_checkpoint_failures_are_atomic() 
         .apply_batch(&[entry(owner.applied_index() + 1, 701, altered)])
         .is_err());
     assert_eq!(owner.checkpoint(1000000).unwrap(), checkpoint);
-    let mut restore = selected(&first, 2);
-    let clean = restore.checkpoint(1000000).unwrap();
-    for end in (0..checkpoint.len())
-        .step_by(19)
-        .chain(std::iter::once(checkpoint.len() - 1))
-    {
-        assert!(restore
-            .restore_checkpoint(
-                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA,
-                owner.applied_index(),
-                &checkpoint[..end]
-            )
-            .is_err());
-        assert_eq!(restore.checkpoint(1000000).unwrap(), clean);
-    }
-    for profile in 0..3 {
-        let mut old = match profile {
-            0 => retained_source(&first),
-            1 => retained_source(&first)
-                .with_parent_adoption(2)
-                .unwrap_or_else(|_| panic!("parent")),
-            _ => retained_source(&first)
-                .with_parent_slot_adoption(2)
-                .unwrap_or_else(|_| panic!("slots")),
-        };
-        assert!(old
-            .restore_checkpoint(
-                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA,
-                owner.applied_index(),
-                &checkpoint
-            )
-            .is_err());
-    }
+    check_metadata_checkpoints(&first, &owner, &checkpoint);
     owner = reopen(&owner, &first);
     let epoch = owner.grant().input().epoch;
     commit(&mut owner, 900, encode_fence(epoch));
@@ -709,3 +473,275 @@ fn record_target(
 }
 #[path = "metadata/imported.rs"]
 mod imported;
+
+fn move_metadata_authority(
+    mut d: MetadataPublishingSource,
+    first: &TransferIntent,
+    profile: Option<bool>,
+) -> (OwnerMetadataAdoption, MetadataServingTarget) {
+    let plan = d.source().plan(group(9)).unwrap();
+    let command = d.source().freeze_command(&plan, 100000).unwrap();
+    commit(&mut d, 700, command);
+    let image = d.source().export(1000000).unwrap();
+    let mut target = MetadataServingTarget::new(
+        metadata_source(profile.is_some()),
+        plan.clone(),
+        op(700),
+        ConfigurationId::new(1).unwrap(),
+        ConfigurationId::new(2).unwrap(),
+    )
+    .unwrap();
+    let command = target.bootstrap_command(100000).unwrap();
+    commit(&mut target, 700, command);
+    let command = target
+        .import_command(&image, ConfigurationId::new(1).unwrap(), 1000000)
+        .unwrap();
+    commit(&mut target, 700, command);
+    let command = d
+        .publication_command(
+            target.status().target.imported.unwrap(),
+            ConfigurationId::new(2).unwrap(),
+            100000,
+        )
+        .unwrap();
+    commit(&mut d, 700, command);
+    let command = target
+        .activation_command(d.publication().unwrap(), 100000)
+        .unwrap();
+    commit(&mut target, 700, command);
+    assert!(d.source().directory().is_none());
+    let adoption = OwnerMetadataAdoption::new(
+        plan,
+        first.before().input().responsibility,
+        target.status().activation.unwrap(),
+    )
+    .unwrap();
+
+    (adoption, target)
+}
+
+fn reserve_metadata_child(target: &mut MetadataServingTarget, owner: &Source) -> TransferIntent {
+    let current = owner.grant().clone();
+    let mut child = current.clone().into_input();
+    child.responsibility = rid(22);
+    child.parent = Some(ParentAuthority {
+        responsibility: current.input().responsibility,
+        group: group(9),
+    });
+    child.scope = range(128, 192);
+    child.epoch = OwnershipEpoch::new(1).unwrap();
+    child.generation = RouteGeneration::new(1).unwrap();
+    child.execution = ExecutionMode::Single(group(22));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let creation = GroupCreationIntent {
+        authority: group(9),
+        parent: current.input().responsibility,
+        expected: current.input().generation,
+        responsibility: rid(22),
+        bootstrap: support::bootstrap(22, 3),
+        application: current.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    commit(target, 22, creation.encode(100000).unwrap());
+    let MetadataServingRead::Creation(Some(created)) = target
+        .read_at(
+            target.applied_index(),
+            MetadataServingQuery::Creation(group(22)),
+        )
+        .unwrap()
+    else {
+        panic!("creation")
+    };
+    let created = GroupCreationStatus {
+        operation: created.operation,
+        index: created.index,
+        intent: GroupCreationIntent::decode(&created.intent).unwrap(),
+    };
+    let mut after = current.clone().into_input();
+    after.epoch = OwnershipEpoch::new(current.input().epoch.get() + 1).unwrap();
+    after.generation = RouteGeneration::new(current.input().generation.get() + 1).unwrap();
+    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
+        panic!("delegated")
+    };
+    routes[1] = RouteEntry {
+        scope: range(128, 192),
+        target: RouteTarget::Child(ChildAuthority {
+            responsibility: rid(22),
+            group: group(9),
+            epoch: child.input().epoch,
+        }),
+    };
+    routes.push(RouteEntry {
+        scope: range(192, 256),
+        target: RouteTarget::Group(group(20)),
+    });
+    let intent = TransferIntent::insert_retained_child(
+        current,
+        ResponsibilityManifest::new(after).unwrap(),
+        InsertionChild::from_creation(child, &created).unwrap(),
+    )
+    .unwrap();
+    commit(target, 202, intent.encode(100000).unwrap());
+
+    intent
+}
+
+fn publish_metadata_child(
+    target: &mut MetadataServingTarget,
+    owner: &Source,
+    intent: &TransferIntent,
+) -> (Target, TransferPublicationStatus) {
+    let status = frozen(owner, 202);
+    let mut child = Target::new(
+        group(22),
+        op(202),
+        intent.clone(),
+        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
+        Policy,
+        TargetLimits {
+            import_bytes: 32768,
+            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|_| panic!("child"));
+    let bytes = child.bootstrap_command(100000).unwrap();
+    commit(&mut child, 202, bytes);
+    let import = TargetImport::new(
+        op(202),
+        intent.clone(),
+        group(22),
+        vec![SourceImport {
+            fence: status.fence.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image: owner.export(op(202), 65536).unwrap(),
+            digest: status.digest,
+        }],
+    )
+    .unwrap();
+    let bytes = child.import_command(&import, 100000).unwrap();
+    commit(&mut child, 202, bytes);
+    let publication = TransferPublication::new(
+        op(202),
+        intent.clone(),
+        vec![SourceFenceEvidence::from_scoped_status(
+            ConfigurationId::new(1).unwrap(),
+            status,
+            intent,
+        )
+        .unwrap()],
+        vec![
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), child.status())
+                .unwrap(),
+        ],
+    )
+    .unwrap();
+    commit(target, 203, publication.encode(100000).unwrap());
+    let MetadataServingRead::Directory(DirectoryRead::Publication(Some(decision))) = target
+        .read_at(
+            target.applied_index(),
+            MetadataServingQuery::Directory(DirectoryQuery::Publication(op(202))),
+        )
+        .unwrap()
+    else {
+        panic!("publication")
+    };
+
+    (child, decision)
+}
+
+fn check_metadata_profiles(first: &TransferIntent, bytes: &[u8]) {
+    for limit in [0, MAX_PARENT_ADOPTIONS] {
+        let old = retained_source(first);
+        let boot = old.bootstrap_command(100000).unwrap();
+        let (err, returned) = old.with_metadata_authority_adoption(limit).err().unwrap();
+        assert_eq!(err, ApplicationError::InvalidCommand);
+        assert_eq!(returned.bootstrap_command(100000).unwrap(), boot);
+    }
+    for profile in 0..3 {
+        let mut old = match profile {
+            0 => retained_source(first),
+            1 => retained_source(first)
+                .with_parent_adoption(2)
+                .unwrap_or_else(|_| panic!("parent")),
+            _ => retained_source(first)
+                .with_parent_slot_adoption(2)
+                .unwrap_or_else(|_| panic!("slots")),
+        };
+        let boot = old.bootstrap_command(100000).unwrap();
+        commit(&mut old, 100, boot);
+        let checkpoint = old.checkpoint(1000000).unwrap();
+        assert!(old.apply_batch(&[entry(2, 701, bytes.to_vec())]).is_err());
+        assert_eq!(old.checkpoint(1000000).unwrap(), checkpoint);
+    }
+}
+
+fn check_metadata_checkpoints(first: &TransferIntent, owner: &Source, checkpoint: &[u8]) {
+    let mut restore = selected(first, 2);
+    let clean = restore.checkpoint(1000000).unwrap();
+    for end in (0..checkpoint.len())
+        .step_by(19)
+        .chain(std::iter::once(checkpoint.len() - 1))
+    {
+        assert!(restore
+            .restore_checkpoint(
+                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA,
+                owner.applied_index(),
+                &checkpoint[..end]
+            )
+            .is_err());
+        assert_eq!(restore.checkpoint(1000000).unwrap(), clean);
+    }
+    for profile in 0..3 {
+        let mut old = match profile {
+            0 => retained_source(first),
+            1 => retained_source(first)
+                .with_parent_adoption(2)
+                .unwrap_or_else(|_| panic!("parent")),
+            _ => retained_source(first)
+                .with_parent_slot_adoption(2)
+                .unwrap_or_else(|_| panic!("slots")),
+        };
+        assert!(old
+            .restore_checkpoint(
+                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA,
+                owner.applied_index(),
+                checkpoint
+            )
+            .is_err());
+    }
+}
+
+fn check_metadata_child(child: &mut Target) {
+    let m = child.grant().input();
+    let hint = RouteHint {
+        responsibility: m.responsibility,
+        group: group(22),
+        application: m.application,
+        scheme: m.scheme,
+        scope: m.scope,
+        bucket: 150,
+        epoch: m.epoch,
+        generation: m.generation,
+    };
+    assert_eq!(
+        child
+            .read_at(
+                child.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![150],
+                    query: vec![150],
+                })
+            )
+            .unwrap(),
+        TargetRead::Data(5)
+    );
+    let retry = encode_routed(
+        hint,
+        &[150],
+        &encode_add(&[150], 5, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(child, 6, retry).outcome, TargetOutcome::Applied(r) if r.duplicate));
+}

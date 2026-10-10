@@ -254,76 +254,8 @@ fn commit_publish_finish_and_release_move_real_routes_with_full_ordinary_history
             Some(decision.clone())
         );
     }
-    let done = completion(&mut nodes);
-    assert!(!nodes[0].reparent_guard_active(op(200)));
-    assert!(nodes[1].reparent_guard_active(op(200)));
-    let release = ReleaseCommittedReparent {
-        configuration: ConfigurationId::new(3).unwrap(),
-        completion: done,
-    }
-    .encode()
-    .unwrap();
-    for d in &mut nodes[1..] {
-        d.validate_proposal(op(501), &release, std::iter::empty())
-            .unwrap();
-        assert_eq!(
-            commit(d, 501, release.clone()).outcome,
-            DirectoryOutcome::ReparentReleased
-        );
-    }
-    for d in &mut nodes {
-        *d = reopen13(d, &p);
-        assert_eq!(d.remaining_operations(), 0);
-        assert_eq!(d.reserved_publication_bytes(), 0);
-        assert!(!d.reparent_guard_active(op(200)));
-        assert_eq!(
-            d.reparent_completion_at(d.applied_index(), op(200))
-                .unwrap(),
-            Some(done)
-        );
-    }
-    let view = View(expected.to_vec());
-    let hint = resolve(&view, &Policy, id(30), &[1], 3).unwrap();
-    assert_eq!(hint.group, group(21));
-    assert_eq!(
-        resolve(&view, &Policy, id(10), &[1], 3),
-        Err(RoutingError::Vacant)
-    );
-    let unchanged = nodes
-        .iter()
-        .map(|d| d.checkpoint(2000000).unwrap())
-        .collect::<Vec<_>>();
-    let retry = encode_routed(
-        hint,
-        &[1],
-        &encode_add(&[1], 7, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    let RoutedOutcome::Applied(receipt) = commit(&mut owner, 1, retry).outcome else {
-        panic!("original data retry")
-    };
-    assert!(receipt.duplicate);
-    assert_eq!(owner.application().outbox().count(), 1);
-    let next = encode_routed(
-        hint,
-        &[1],
-        &encode_add(&[1], 3, b"next", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(
-        commit(&mut owner, 2, next).outcome,
-        RoutedOutcome::Applied(_)
-    ));
-    assert_eq!(owner.application().outbox().count(), 2);
-    assert_eq!(
-        nodes
-            .iter()
-            .map(|d| d.checkpoint(2000000).unwrap())
-            .collect::<Vec<_>>(),
-        unchanged
-    );
+    nodes = release_completed_nodes(nodes, &p);
+    check_moved_data(&expected, &nodes, owner);
     let result = commit(
         &mut nodes[0],
         400,
@@ -331,29 +263,7 @@ fn commit_publish_finish_and_release_move_real_routes_with_full_ordinary_history
     );
     assert!(result.duplicate);
     assert_eq!(result.outcome, DirectoryOutcome::ReparentCommitted);
-    let read = LifecycleDirectory::new(nodes.remove(0));
-    let q = DirectoryQuery::ReparentDecision(op(200));
-    let r = read.read_at(read.applied_index(), q).unwrap();
-    assert!(read.read_result_bound(&q).unwrap() > std::mem::size_of::<DirectoryRead>());
-    assert!(read.read_result_bytes(&r, 0).is_err());
-    for q in [
-        DirectoryQuery::ReparentPublication(op(200)),
-        DirectoryQuery::ReparentCompletion(op(200)),
-    ] {
-        assert_eq!(
-            read.read_result_bound(&q).unwrap(),
-            std::mem::size_of::<DirectoryRead>()
-        );
-        assert_eq!(
-            read.read_result_bytes(&read.read_at(read.applied_index(), q).unwrap(), 0)
-                .unwrap(),
-            0
-        );
-        assert_eq!(
-            read.read_at(read.applied_index() + 1, q),
-            Err(ApplicationError::NotApplied)
-        );
-    }
+    check_completed_reads(LifecycleDirectory::new(nodes.remove(0)));
 }
 
 #[test]
@@ -397,74 +307,7 @@ fn missing_stale_or_changed_facts_and_early_release_are_rejected_without_publish
         .outcome,
         DirectoryOutcome::TransferEvidenceMismatch
     );
-    let early = ReleaseCommittedReparent {
-        configuration: ConfigurationId::new(3).unwrap(),
-        completion: ReparentCompletionStatus {
-            coordinator: group(1),
-            operation: op(500),
-            index: 99,
-            guard: op(200),
-            decision_digest: d.digest().unwrap(),
-        },
-    };
-    assert_eq!(
-        commit(&mut nodes[1], 413, early.encode().unwrap()).outcome,
-        DirectoryOutcome::TransferEvidenceMismatch
-    );
-    let mut wrong = d.clone();
-    wrong.commit.guards[1].index += 1;
-    assert_eq!(
-        commit(
-            &mut nodes[1],
-            414,
-            PublishReparent {
-                configuration: ConfigurationId::new(3).unwrap(),
-                decision: wrong
-            }
-            .encode(MAX_REPARENT_COMPLETION_BYTES)
-            .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferEvidenceMismatch
-    );
-    let mut wrong = d.clone();
-    wrong.commit.guards[0].configuration = ConfigurationId::new(4).unwrap();
-    assert_eq!(
-        commit(
-            &mut nodes[1],
-            415,
-            PublishReparent {
-                configuration: ConfigurationId::new(3).unwrap(),
-                decision: wrong
-            }
-            .encode(MAX_REPARENT_COMPLETION_BYTES)
-            .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferEvidenceMismatch
-    );
-    assert_eq!(nodes[1].manifest(id(30)), Some(p.new_parent()));
-    let local = nodes[0]
-        .reparent_publication_at(nodes[0].applied_index(), op(200))
-        .unwrap()
-        .unwrap();
-    let missing = FinishReparent::new(
-        op(200),
-        vec![
-            ReparentPublicationEvidence::from_status(ConfigurationId::new(3).unwrap(), local)
-                .unwrap(),
-        ],
-    )
-    .unwrap();
-    assert_eq!(
-        commit(
-            &mut nodes[0],
-            416,
-            missing.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferEvidenceMismatch
-    );
+    check_early_publication(&mut nodes, &d, &p);
     publish(&mut nodes, &d);
     for node in &mut nodes[1..] {
         assert_eq!(
@@ -482,31 +325,7 @@ fn missing_stale_or_changed_facts_and_early_release_are_rejected_without_publish
             DirectoryOutcome::TransferEvidenceMismatch
         );
     }
-    let mut pubs = nodes
-        .iter()
-        .map(|n| {
-            ReparentPublicationEvidence::from_status(
-                ConfigurationId::new(3).unwrap(),
-                n.reparent_publication_at(n.applied_index(), op(200))
-                    .unwrap()
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect::<Vec<_>>();
-    pubs[0].index += 1;
-    assert_eq!(
-        commit(
-            &mut nodes[0],
-            418,
-            FinishReparent::new(op(200), pubs)
-                .unwrap()
-                .encode(MAX_REPARENT_COMPLETION_BYTES)
-                .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferEvidenceMismatch
-    );
+    check_changed_publication(&mut nodes);
     let done = completion(&mut nodes);
     let mut stale = done;
     stale.index = d.index;
@@ -773,7 +592,7 @@ fn either_participant_publication_order_recovers_and_preserves_one_physical_owne
 #[cfg(feature = "native")]
 #[test]
 fn native_decision_publication_completion_and_release_cuts_keep_exact_phase_state() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (p, mut nodes, c) = prepared();
     let d = decide(&mut nodes, &c);
@@ -806,79 +625,9 @@ fn native_decision_publication_completion_and_release_cuts_keep_exact_phase_stat
     let limits = LogLimits::default();
     for g in [1, 3] {
         let ordinary = if g == 1 { 4 } else { 3 };
-        let prototype = fresh13(g, &p, ordinary);
-        let mut entries = vec![entry(1, 1000, prototype.bootstrap_command(200000).unwrap())];
-        for (i, m) in prototype.plan().manifests().enumerate() {
-            entries.push(entry(
-                2 + i as u64,
-                1001 + i as u128,
-                DirectoryCommand {
-                    expected: None,
-                    manifest: m.clone(),
-                }
-                .encode(200000)
-                .unwrap(),
-            ));
-        }
-        let guard_index = entries.len() as u64 + 1;
-        entries.push(entry(
-            guard_index,
-            200,
-            prepare(&p, if g == 1 { None } else { Some(coor) }),
-        ));
-        let first = guard_index + 1;
-        entries.push(entry(
-            first,
-            if g == 1 { 400 } else { 401 },
-            if g == 1 {
-                c.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap()
-            } else {
-                PublishReparent {
-                    configuration: ConfigurationId::new(3).unwrap(),
-                    decision: d.clone(),
-                }
-                .encode(MAX_REPARENT_COMPLETION_BYTES)
-                .unwrap()
-            },
-        ));
-        entries.push(entry(
-            first + 1,
-            if g == 1 { 500 } else { 501 },
-            if g == 1 {
-                finish.clone()
-            } else {
-                ReleaseCommittedReparent {
-                    configuration: ConfigurationId::new(3).unwrap(),
-                    completion: done,
-                }
-                .encode()
-                .unwrap()
-            },
-        ));
+        let (entries, first) = commit_journal(&p, g, coor, &c, &d, &finish, done);
         for boundary in [first, first + 1] {
-            let seed = || {
-                let io = ModelIo::default();
-                let mut log =
-                    NativeLogStore::create(io.clone(), support::identity(g), limits).unwrap();
-                support::append(
-                    &mut log,
-                    vec![LogMutation::Create(support::bootstrap(g, 3))],
-                );
-                let state = log.state(group(g)).unwrap();
-                support::append(
-                    &mut log,
-                    vec![support::update(
-                        &state,
-                        1,
-                        boundary - 1,
-                        Some(Suffix {
-                            from: 1,
-                            entries: entries[..boundary as usize - 1].to_vec(),
-                        }),
-                    )],
-                );
-                (io, log)
-            };
+            let seed = || seed_reparent_log(g, &entries, boundary, limits);
             let (_, log) = seed();
             let mutation = support::update(
                 &log.state(group(g)).unwrap(),
@@ -922,36 +671,7 @@ fn native_decision_publication_completion_and_release_cuts_keep_exact_phase_stat
                     old = true;
                     assert_eq!(state.commit_index, boundary - 1);
                 }
-                let published = state.commit_index >= first;
-                let released = state.commit_index > first;
-                assert_eq!(
-                    app.reparent_publication_at(app.applied_index(), op(200))
-                        .unwrap()
-                        .is_some(),
-                    published
-                );
-                assert_eq!(app.reparent_guard_active(op(200)), !released);
-                let id = if g == 1 { id(10) } else { id(11) };
-                let expected = if published {
-                    p.updated_manifests()
-                        .into_iter()
-                        .find(|m| m.input().responsibility == id)
-                        .unwrap()
-                } else {
-                    p.manifests()
-                        .iter()
-                        .find(|m| m.input().responsibility == id)
-                        .unwrap()
-                        .clone()
-                };
-                assert_eq!(app.manifest(id), Some(&expected));
-                app = reopen13(&app, &p);
-                let EntryPayload::Command { bytes, .. } = &entries[first as usize - 1].payload
-                else {
-                    unreachable!()
-                };
-                let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.clone());
-                assert_eq!(receipt.duplicate, published);
+                check_recovered_publication(app, &p, g, first, state.commit_index, &entries);
             }
             assert!(old && complete);
         }
@@ -960,3 +680,318 @@ fn native_decision_publication_completion_and_release_cuts_keep_exact_phase_stat
 
 #[path = "commit_owner.rs"]
 mod owner;
+
+fn check_moved_data(
+    expected: &[ResponsibilityManifest],
+    nodes: &[Directory],
+    mut owner: RoutedApplication<BucketCounter<Policy>, Policy>,
+) {
+    let view = View(expected.to_vec());
+    let hint = resolve(&view, &Policy, id(30), &[1], 3).unwrap();
+    assert_eq!(hint.group, group(21));
+    assert_eq!(
+        resolve(&view, &Policy, id(10), &[1], 3),
+        Err(RoutingError::Vacant)
+    );
+    let unchanged = nodes
+        .iter()
+        .map(|d| d.checkpoint(2000000).unwrap())
+        .collect::<Vec<_>>();
+    let retry = encode_routed(
+        hint,
+        &[1],
+        &encode_add(&[1], 7, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    let RoutedOutcome::Applied(receipt) = commit(&mut owner, 1, retry).outcome else {
+        panic!("original data retry")
+    };
+    assert!(receipt.duplicate);
+    assert_eq!(owner.application().outbox().count(), 1);
+    let next = encode_routed(
+        hint,
+        &[1],
+        &encode_add(&[1], 3, b"next", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(
+        commit(&mut owner, 2, next).outcome,
+        RoutedOutcome::Applied(_)
+    ));
+    assert_eq!(owner.application().outbox().count(), 2);
+    assert_eq!(
+        nodes
+            .iter()
+            .map(|d| d.checkpoint(2000000).unwrap())
+            .collect::<Vec<_>>(),
+        unchanged
+    );
+}
+
+fn check_completed_reads(read: LifecycleDirectory) {
+    let q = DirectoryQuery::ReparentDecision(op(200));
+    let r = read.read_at(read.applied_index(), q).unwrap();
+    assert!(read.read_result_bound(&q).unwrap() > std::mem::size_of::<DirectoryRead>());
+    assert!(read.read_result_bytes(&r, 0).is_err());
+    for q in [
+        DirectoryQuery::ReparentPublication(op(200)),
+        DirectoryQuery::ReparentCompletion(op(200)),
+    ] {
+        assert_eq!(
+            read.read_result_bound(&q).unwrap(),
+            std::mem::size_of::<DirectoryRead>()
+        );
+        assert_eq!(
+            read.read_result_bytes(&read.read_at(read.applied_index(), q).unwrap(), 0)
+                .unwrap(),
+            0
+        );
+        assert_eq!(
+            read.read_at(read.applied_index() + 1, q),
+            Err(ApplicationError::NotApplied)
+        );
+    }
+}
+
+fn check_early_publication(
+    nodes: &mut [Directory],
+    d: &ReparentDecisionStatus,
+    p: &CrossReparentPlan,
+) {
+    let early = ReleaseCommittedReparent {
+        configuration: ConfigurationId::new(3).unwrap(),
+        completion: ReparentCompletionStatus {
+            coordinator: group(1),
+            operation: op(500),
+            index: 99,
+            guard: op(200),
+            decision_digest: d.digest().unwrap(),
+        },
+    };
+    assert_eq!(
+        commit(&mut nodes[1], 413, early.encode().unwrap()).outcome,
+        DirectoryOutcome::TransferEvidenceMismatch
+    );
+    let mut wrong = d.clone();
+    wrong.commit.guards[1].index += 1;
+    assert_eq!(
+        commit(
+            &mut nodes[1],
+            414,
+            PublishReparent {
+                configuration: ConfigurationId::new(3).unwrap(),
+                decision: wrong
+            }
+            .encode(MAX_REPARENT_COMPLETION_BYTES)
+            .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferEvidenceMismatch
+    );
+    let mut wrong = d.clone();
+    wrong.commit.guards[0].configuration = ConfigurationId::new(4).unwrap();
+    assert_eq!(
+        commit(
+            &mut nodes[1],
+            415,
+            PublishReparent {
+                configuration: ConfigurationId::new(3).unwrap(),
+                decision: wrong
+            }
+            .encode(MAX_REPARENT_COMPLETION_BYTES)
+            .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferEvidenceMismatch
+    );
+    assert_eq!(nodes[1].manifest(id(30)), Some(p.new_parent()));
+    let local = nodes[0]
+        .reparent_publication_at(nodes[0].applied_index(), op(200))
+        .unwrap()
+        .unwrap();
+    let missing = FinishReparent::new(
+        op(200),
+        vec![
+            ReparentPublicationEvidence::from_status(ConfigurationId::new(3).unwrap(), local)
+                .unwrap(),
+        ],
+    )
+    .unwrap();
+    assert_eq!(
+        commit(
+            &mut nodes[0],
+            416,
+            missing.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferEvidenceMismatch
+    );
+}
+
+fn check_changed_publication(nodes: &mut [Directory]) {
+    let mut pubs = nodes
+        .iter()
+        .map(|n| {
+            ReparentPublicationEvidence::from_status(
+                ConfigurationId::new(3).unwrap(),
+                n.reparent_publication_at(n.applied_index(), op(200))
+                    .unwrap()
+                    .unwrap(),
+            )
+            .unwrap()
+        })
+        .collect::<Vec<_>>();
+    pubs[0].index += 1;
+    assert_eq!(
+        commit(
+            &mut nodes[0],
+            418,
+            FinishReparent::new(op(200), pubs)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferEvidenceMismatch
+    );
+}
+
+#[cfg(feature = "native")]
+fn commit_journal(
+    p: &CrossReparentPlan,
+    g: u128,
+    coor: ReparentGuardEvidence,
+    c: &CommitReparent,
+    d: &ReparentDecisionStatus,
+    finish: &[u8],
+    done: ReparentCompletionStatus,
+) -> (Vec<voteboat::log::LogEntry>, u64) {
+    let ordinary = if g == 1 { 4 } else { 3 };
+    let prototype = fresh13(g, p, ordinary);
+    let mut entries = vec![entry(1, 1000, prototype.bootstrap_command(200000).unwrap())];
+    for (i, m) in prototype.plan().manifests().enumerate() {
+        entries.push(entry(
+            2 + i as u64,
+            1001 + i as u128,
+            DirectoryCommand {
+                expected: None,
+                manifest: m.clone(),
+            }
+            .encode(200000)
+            .unwrap(),
+        ));
+    }
+    let guard_index = entries.len() as u64 + 1;
+    entries.push(entry(
+        guard_index,
+        200,
+        prepare(p, if g == 1 { None } else { Some(coor) }),
+    ));
+    let first = guard_index + 1;
+    entries.push(entry(
+        first,
+        if g == 1 { 400 } else { 401 },
+        if g == 1 {
+            c.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap()
+        } else {
+            PublishReparent {
+                configuration: ConfigurationId::new(3).unwrap(),
+                decision: d.clone(),
+            }
+            .encode(MAX_REPARENT_COMPLETION_BYTES)
+            .unwrap()
+        },
+    ));
+    entries.push(entry(
+        first + 1,
+        if g == 1 { 500 } else { 501 },
+        if g == 1 {
+            finish.to_vec()
+        } else {
+            ReleaseCommittedReparent {
+                configuration: ConfigurationId::new(3).unwrap(),
+                completion: done,
+            }
+            .encode()
+            .unwrap()
+        },
+    ));
+
+    (entries, first)
+}
+
+#[cfg(feature = "native")]
+fn check_recovered_publication(
+    mut app: Directory,
+    p: &CrossReparentPlan,
+    g: u128,
+    first: u64,
+    committed: u64,
+    entries: &[voteboat::log::LogEntry],
+) {
+    let published = committed >= first;
+    let released = committed > first;
+    assert_eq!(
+        app.reparent_publication_at(app.applied_index(), op(200))
+            .unwrap()
+            .is_some(),
+        published
+    );
+    assert_eq!(app.reparent_guard_active(op(200)), !released);
+    let id = if g == 1 { id(10) } else { id(11) };
+    let expected = if published {
+        p.updated_manifests()
+            .into_iter()
+            .find(|m| m.input().responsibility == id)
+            .unwrap()
+    } else {
+        p.manifests()
+            .iter()
+            .find(|m| m.input().responsibility == id)
+            .unwrap()
+            .clone()
+    };
+    assert_eq!(app.manifest(id), Some(&expected));
+    app = reopen13(&app, p);
+    let voteboat::log::EntryPayload::Command { bytes, .. } = &entries[first as usize - 1].payload
+    else {
+        unreachable!()
+    };
+    let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.clone());
+    assert_eq!(receipt.duplicate, published);
+}
+
+fn release_completed_nodes(mut nodes: Vec<Directory>, p: &CrossReparentPlan) -> Vec<Directory> {
+    let done = completion(&mut nodes);
+    assert!(!nodes[0].reparent_guard_active(op(200)));
+    assert!(nodes[1].reparent_guard_active(op(200)));
+    let release = ReleaseCommittedReparent {
+        configuration: ConfigurationId::new(3).unwrap(),
+        completion: done,
+    }
+    .encode()
+    .unwrap();
+    for d in &mut nodes[1..] {
+        d.validate_proposal(op(501), &release, std::iter::empty())
+            .unwrap();
+        assert_eq!(
+            commit(d, 501, release.clone()).outcome,
+            DirectoryOutcome::ReparentReleased
+        );
+    }
+    for d in &mut nodes {
+        *d = reopen13(d, p);
+        assert_eq!(d.remaining_operations(), 0);
+        assert_eq!(d.reserved_publication_bytes(), 0);
+        assert!(!d.reparent_guard_active(op(200)));
+        assert_eq!(
+            d.reparent_completion_at(d.applied_index(), op(200))
+                .unwrap(),
+            Some(done)
+        );
+    }
+
+    nodes
+}

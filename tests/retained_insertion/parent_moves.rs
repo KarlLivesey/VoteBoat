@@ -63,44 +63,7 @@ fn moved() -> (
         ],
     )
     .unwrap();
-    assert_eq!(
-        commit(
-            &mut d,
-            4000,
-            PrepareReparent {
-                plan: plan.clone(),
-                coordinator: None
-            }
-            .encode(MAX_REPARENT_PREPARE_BYTES)
-            .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::ReparentGuarded
-    );
-    let cfg = ConfigurationId::new(1).unwrap();
-    let evidence = ReparentGuardEvidence::from_status(
-        cfg,
-        &d.reparent_guard_at(d.applied_index(), op(4000))
-            .unwrap()
-            .unwrap(),
-    )
-    .unwrap();
-    for n in [&mut p, &mut destination] {
-        assert_eq!(
-            commit(
-                n,
-                4000,
-                PrepareReparent {
-                    plan: plan.clone(),
-                    coordinator: Some(evidence)
-                }
-                .encode(MAX_REPARENT_PREPARE_BYTES)
-                .unwrap()
-            )
-            .outcome,
-            DirectoryOutcome::ReparentGuarded
-        );
-    }
+    let cfg = prepare_parent_move(&mut d, &mut p, &mut destination, &plan);
     let guards = [&d, &p, &destination]
         .into_iter()
         .map(|n| {
@@ -143,43 +106,7 @@ fn moved() -> (
             DirectoryOutcome::ReparentPublished
         );
     }
-    let pubs = [&d, &p, &destination]
-        .into_iter()
-        .map(|n| {
-            ReparentPublicationEvidence::from_status(
-                cfg,
-                n.reparent_publication_at(n.applied_index(), op(4000))
-                    .unwrap()
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect();
-    assert_eq!(
-        commit(
-            &mut d,
-            4003,
-            FinishReparent::new(op(4000), pubs)
-                .unwrap()
-                .encode(MAX_REPARENT_COMPLETION_BYTES)
-                .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::ReparentCompleted
-    );
-    let completion = ReleaseCommittedReparent {
-        configuration: cfg,
-        completion: d
-            .reparent_completion_at(d.applied_index(), op(4000))
-            .unwrap()
-            .unwrap(),
-    };
-    for n in [&mut p, &mut destination] {
-        assert_eq!(
-            commit(n, 4004, completion.encode().unwrap()).outcome,
-            DirectoryOutcome::ReparentReleased
-        );
-    }
+    let completion = finish_parent_move(&mut d, &mut p, &mut destination, cfg);
     let adoption = CrossOwnerParentAdoption {
         plan,
         decision,
@@ -209,73 +136,7 @@ fn completed_cross_parent_move_preserves_scoped_exports_and_next_retained_handof
     s = reopen(&s, &first);
     assert_eq!(s.export(op(200), 65536).unwrap(), first_image);
     let before = s.grant().clone();
-    let mut child = before.clone().into_input();
-    child.responsibility = rid(22);
-    child.parent = Some(ParentAuthority {
-        responsibility: before.input().responsibility,
-        group: before.input().authority,
-    });
-    child.scope = range(128, 192);
-    child.epoch = OwnershipEpoch::new(1).unwrap();
-    child.generation = RouteGeneration::new(1).unwrap();
-    child.execution = ExecutionMode::Single(group(22));
-    let child = ResponsibilityManifest::new(child).unwrap();
-    let creation = GroupCreationIntent {
-        authority: before.input().authority,
-        parent: before.input().responsibility,
-        expected: before.input().generation,
-        responsibility: child.input().responsibility,
-        bootstrap: support::bootstrap(22, 3),
-        application: before.input().application,
-        mode: GroupCreationMode::Staging,
-    };
-    assert_eq!(
-        commit(&mut d, 22, creation.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::CreationReserved
-    );
-    let created = d
-        .group_creation_at(d.applied_index(), group(22))
-        .unwrap()
-        .unwrap();
-    let mut after = before.clone().into_input();
-    after.epoch = OwnershipEpoch::new(3).unwrap();
-    after.generation = RouteGeneration::new(before.input().generation.get() + 1).unwrap();
-    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
-        panic!("delegated")
-    };
-    routes[1].scope = range(128, 192);
-    routes[1].target = RouteTarget::Child(ChildAuthority {
-        responsibility: child.input().responsibility,
-        group: child.input().authority,
-        epoch: child.input().epoch,
-    });
-    routes.push(RouteEntry {
-        scope: range(192, 256),
-        target: RouteTarget::Group(group(20)),
-    });
-    let after = ResponsibilityManifest::new(after).unwrap();
-    let reservation = DelegationPlan::retained_insertion(
-        p.manifest(rid(600)).unwrap().clone(),
-        before.clone(),
-        after.clone(),
-        InsertionChild::from_creation(child.clone(), &created).unwrap(),
-        op(202),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(&mut p, 6000, reservation.encode(200000).unwrap()).outcome,
-        DirectoryOutcome::DelegationReserved
-    );
-    let intent = p
-        .delegation_reservation_at(p.applied_index(), op(6000))
-        .unwrap()
-        .unwrap()
-        .child_intent(ConfigurationId::new(1).unwrap())
-        .unwrap();
-    assert_eq!(
-        commit(&mut d, 202, intent.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
+    let (child, after, intent) = reserve_moved_child(&mut d, &mut p, &before);
     let mut hint = source_hint(&first, 150);
     hint.epoch = before.input().epoch;
     hint.generation = before.input().generation;
@@ -299,87 +160,7 @@ fn completed_cross_parent_move_preserves_scoped_exports_and_next_retained_handof
     else {
         panic!("frozen")
     };
-    let mut target = Target::new(
-        group(22),
-        op(202),
-        intent.clone(),
-        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
-        Policy,
-        TargetLimits {
-            import_bytes: 32768,
-            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-        },
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let boot = target.bootstrap_command(100000).unwrap();
-    commit(&mut target, 202, boot);
-    let import = TargetImport::new(
-        op(202),
-        intent.clone(),
-        group(22),
-        vec![SourceImport {
-            fence: status.fence.fence,
-            configuration: ConfigurationId::new(1).unwrap(),
-            image: s.export(op(202), 65536).unwrap(),
-            digest: status.digest,
-        }],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let bytes = target.import_command(&import, 100000).unwrap();
-    commit(&mut target, 202, bytes);
-    let publication = TransferPublication::new(
-        op(202),
-        intent.clone(),
-        vec![SourceFenceEvidence::from_scoped_status(
-            ConfigurationId::new(1).unwrap(),
-            status,
-            &intent,
-        )
-        .unwrap()],
-        vec![
-            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
-                .unwrap(),
-        ],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert_eq!(
-        commit(&mut d, 203, publication.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(after.input().generation)
-    );
-    let decision = d
-        .transfer_publication_at(d.applied_index(), op(202))
-        .unwrap()
-        .unwrap();
-    let completion = DelegationCompletion {
-        reservation: op(6000),
-        reservation_index: p
-            .delegation_reservation_at(p.applied_index(), op(6000))
-            .unwrap()
-            .unwrap()
-            .index,
-        parent_configuration: ConfigurationId::new(1).unwrap(),
-        child_configuration: ConfigurationId::new(1).unwrap(),
-        decision: decision.clone(),
-    };
-    assert!(matches!(
-        commit(&mut p, 6001, completion.encode(200000).unwrap()).outcome,
-        DirectoryOutcome::DelegationPublished(_)
-    ));
-    p = recover(&p);
-    assert!(p
-        .delegation_publication_at(p.applied_index(), op(6000))
-        .unwrap()
-        .is_some());
-    let activation = target
-        .activation_command(
-            &TargetActivation {
-                metadata_configuration: ConfigurationId::new(1).unwrap(),
-                decision: decision.clone(),
-            },
-            100000,
-        )
-        .unwrap();
-    commit(&mut target, 202, activation);
+    let (mut target, decision) = activate_moved_child(&mut d, &mut p, &s, &intent, &after, status);
     let adoption = RetainedGrantAdoption {
         metadata_configuration: ConfigurationId::new(1).unwrap(),
         decision,
@@ -397,62 +178,9 @@ fn completed_cross_parent_move_preserves_scoped_exports_and_next_retained_handof
     assert!(
         matches!(commit(&mut s,301,bytes).outcome,RoutedOutcome::GrantAdopted(f) if f.epoch==after.input().epoch)
     );
-    let mut hint = source_hint(&first, 200);
-    hint.epoch = after.input().epoch;
-    hint.generation = after.input().generation;
-    hint.scope = range(192, 256);
-    assert_eq!(
-        s.read_at(
-            s.applied_index(),
-            ScopedSourceQuery::Data(RoutedQuery {
-                hint,
-                key: vec![200],
-                query: vec![200]
-            })
-        )
-        .unwrap(),
-        ScopedSourceRead::Data(RoutedRead::Served(16))
-    );
-    let write = encode_routed(
-        hint,
-        &[200],
-        &encode_add(&[200], 11, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(commit(&mut s,2,write).outcome,RoutedOutcome::Applied(r) if r.duplicate));
+    check_remaining_parent_data(&mut s, &first, &after);
     assert_eq!(s.export(op(200), 65536).unwrap(), old);
-    let hint = RouteHint {
-        responsibility: child.input().responsibility,
-        group: group(22),
-        application: child.input().application,
-        scheme: child.input().scheme,
-        scope: child.input().scope,
-        bucket: 150,
-        epoch: child.input().epoch,
-        generation: child.input().generation,
-    };
-    assert_eq!(
-        target
-            .read_at(
-                target.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint,
-                    key: vec![150],
-                    query: vec![150]
-                })
-            )
-            .unwrap(),
-        TargetRead::Data(5)
-    );
-    let write = encode_routed(
-        hint,
-        &[150],
-        &encode_add(&[150], 5, b"second", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(commit(&mut target,6,write).outcome,TargetOutcome::Applied(r) if r.duplicate));
+    check_moved_child_retry(&mut target, &child);
     assert_eq!(commit(&mut s, 9000, b.clone()).outcome, adopted);
     assert!(matches!(
         commit(&mut s, 300, original.encode(200000).unwrap()).outcome,
@@ -555,7 +283,7 @@ fn parent_profile_replay_operation_reserve_and_malformed_mixed_history_are_atomi
 #[cfg(feature = "native")]
 #[test]
 fn mixed_retained_and_parent_journal_cuts_preserve_exports_and_later_full_fence() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (_, _, _, intent, retained, parent) = moved();
     let prototype = source_profile(&intent, true);
@@ -572,28 +300,7 @@ fn mixed_retained_and_parent_journal_cuts_preserve_exports_and_later_full_fence(
     ];
     let limits = LogLimits::default();
     for boundary in [7u64, 8] {
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(20, 3))],
-            );
-            let state = log.state(group(20)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    boundary - 1,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_moved_parent(&entries, boundary, limits);
         let (_, log) = seed();
         let mutation = support::update(
             &log.state(group(20)).unwrap(),
@@ -714,24 +421,7 @@ fn local_parent_adoption_has_independent_capacity_and_preserves_original_status(
             .unwrap()
             .unwrap(),
     };
-    let inner = RoutedApplication::new(
-        group(20),
-        child.clone(),
-        BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
-        Policy,
-        routed().limits(),
-    )
-    .unwrap_or_else(|_| panic!("source"))
-    .with_scoped_fencing(2)
-    .unwrap_or_else(|_| panic!("scoped"));
-    let mut s = Source::new(inner, 65536)
-        .unwrap_or_else(|_| panic!("source"))
-        .with_retained_insertion()
-        .unwrap_or_else(|_| panic!("bound"))
-        .with_retained_grants()
-        .unwrap_or_else(|_| panic!("grants"))
-        .with_parent_adoption(1)
-        .unwrap_or_else(|_| panic!("parents"));
+    let mut s = local_parent_source(&child);
     let boot = s.bootstrap_command(200000).unwrap();
     commit(&mut s, 100, boot);
     for n in 1..=32 {
@@ -777,4 +467,393 @@ fn local_parent_adoption_has_independent_capacity_and_preserves_original_status(
     commit(&mut s, 999, encode_fence(epoch));
     assert_eq!(commit(&mut s, 900, bytes).outcome, original);
     assert_eq!(s.routed().application().outbox().count(), 32);
+}
+
+fn prepare_parent_move(
+    d: &mut Directory,
+    p: &mut Directory,
+    destination: &mut Directory,
+    plan: &CrossReparentPlan,
+) -> ConfigurationId {
+    assert_eq!(
+        commit(
+            d,
+            4000,
+            PrepareReparent {
+                plan: plan.clone(),
+                coordinator: None
+            }
+            .encode(MAX_REPARENT_PREPARE_BYTES)
+            .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::ReparentGuarded
+    );
+    let cfg = ConfigurationId::new(1).unwrap();
+    let evidence = ReparentGuardEvidence::from_status(
+        cfg,
+        &d.reparent_guard_at(d.applied_index(), op(4000))
+            .unwrap()
+            .unwrap(),
+    )
+    .unwrap();
+    for n in [p, destination] {
+        assert_eq!(
+            commit(
+                n,
+                4000,
+                PrepareReparent {
+                    plan: plan.clone(),
+                    coordinator: Some(evidence)
+                }
+                .encode(MAX_REPARENT_PREPARE_BYTES)
+                .unwrap()
+            )
+            .outcome,
+            DirectoryOutcome::ReparentGuarded
+        );
+    }
+
+    cfg
+}
+
+fn finish_parent_move(
+    d: &mut Directory,
+    p: &mut Directory,
+    destination: &mut Directory,
+    cfg: ConfigurationId,
+) -> ReleaseCommittedReparent {
+    let pubs = [&*d, &*p, &*destination]
+        .into_iter()
+        .map(|n| {
+            ReparentPublicationEvidence::from_status(
+                cfg,
+                n.reparent_publication_at(n.applied_index(), op(4000))
+                    .unwrap()
+                    .unwrap(),
+            )
+            .unwrap()
+        })
+        .collect();
+    assert_eq!(
+        commit(
+            d,
+            4003,
+            FinishReparent::new(op(4000), pubs)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::ReparentCompleted
+    );
+    let completion = ReleaseCommittedReparent {
+        configuration: cfg,
+        completion: d
+            .reparent_completion_at(d.applied_index(), op(4000))
+            .unwrap()
+            .unwrap(),
+    };
+    for n in [p, destination] {
+        assert_eq!(
+            commit(n, 4004, completion.encode().unwrap()).outcome,
+            DirectoryOutcome::ReparentReleased
+        );
+    }
+
+    completion
+}
+
+fn reserve_moved_child(
+    d: &mut Directory,
+    p: &mut Directory,
+    before: &ResponsibilityManifest,
+) -> (
+    ResponsibilityManifest,
+    ResponsibilityManifest,
+    TransferIntent,
+) {
+    let mut child = before.clone().into_input();
+    child.responsibility = rid(22);
+    child.parent = Some(ParentAuthority {
+        responsibility: before.input().responsibility,
+        group: before.input().authority,
+    });
+    child.scope = range(128, 192);
+    child.epoch = OwnershipEpoch::new(1).unwrap();
+    child.generation = RouteGeneration::new(1).unwrap();
+    child.execution = ExecutionMode::Single(group(22));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let creation = GroupCreationIntent {
+        authority: before.input().authority,
+        parent: before.input().responsibility,
+        expected: before.input().generation,
+        responsibility: child.input().responsibility,
+        bootstrap: support::bootstrap(22, 3),
+        application: before.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    assert_eq!(
+        commit(d, 22, creation.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let created = d
+        .group_creation_at(d.applied_index(), group(22))
+        .unwrap()
+        .unwrap();
+    let mut after = before.clone().into_input();
+    after.epoch = OwnershipEpoch::new(3).unwrap();
+    after.generation = RouteGeneration::new(before.input().generation.get() + 1).unwrap();
+    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
+        panic!("delegated")
+    };
+    routes[1].scope = range(128, 192);
+    routes[1].target = RouteTarget::Child(ChildAuthority {
+        responsibility: child.input().responsibility,
+        group: child.input().authority,
+        epoch: child.input().epoch,
+    });
+    routes.push(RouteEntry {
+        scope: range(192, 256),
+        target: RouteTarget::Group(group(20)),
+    });
+    let after = ResponsibilityManifest::new(after).unwrap();
+    let reservation = DelegationPlan::retained_insertion(
+        p.manifest(rid(600)).unwrap().clone(),
+        before.clone(),
+        after.clone(),
+        InsertionChild::from_creation(child.clone(), &created).unwrap(),
+        op(202),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(p, 6000, reservation.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::DelegationReserved
+    );
+    let intent = p
+        .delegation_reservation_at(p.applied_index(), op(6000))
+        .unwrap()
+        .unwrap()
+        .child_intent(ConfigurationId::new(1).unwrap())
+        .unwrap();
+    assert_eq!(
+        commit(d, 202, intent.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+
+    (child, after, intent)
+}
+
+fn activate_moved_child(
+    d: &mut Directory,
+    p: &mut Directory,
+    s: &Source,
+    intent: &TransferIntent,
+    after: &ResponsibilityManifest,
+    status: ScopedExportStatus,
+) -> (Target, TransferPublicationStatus) {
+    let mut target = Target::new(
+        group(22),
+        op(202),
+        intent.clone(),
+        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
+        Policy,
+        TargetLimits {
+            import_bytes: 32768,
+            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let boot = target.bootstrap_command(100000).unwrap();
+    commit(&mut target, 202, boot);
+    let import = TargetImport::new(
+        op(202),
+        intent.clone(),
+        group(22),
+        vec![SourceImport {
+            fence: status.fence.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image: s.export(op(202), 65536).unwrap(),
+            digest: status.digest,
+        }],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let bytes = target.import_command(&import, 100000).unwrap();
+    commit(&mut target, 202, bytes);
+    let publication = TransferPublication::new(
+        op(202),
+        intent.clone(),
+        vec![SourceFenceEvidence::from_scoped_status(
+            ConfigurationId::new(1).unwrap(),
+            status,
+            intent,
+        )
+        .unwrap()],
+        vec![
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
+                .unwrap(),
+        ],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    assert_eq!(
+        commit(d, 203, publication.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(after.input().generation)
+    );
+    let decision = d
+        .transfer_publication_at(d.applied_index(), op(202))
+        .unwrap()
+        .unwrap();
+    let completion = DelegationCompletion {
+        reservation: op(6000),
+        reservation_index: p
+            .delegation_reservation_at(p.applied_index(), op(6000))
+            .unwrap()
+            .unwrap()
+            .index,
+        parent_configuration: ConfigurationId::new(1).unwrap(),
+        child_configuration: ConfigurationId::new(1).unwrap(),
+        decision: decision.clone(),
+    };
+    assert!(matches!(
+        commit(p, 6001, completion.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::DelegationPublished(_)
+    ));
+    *p = recover(p);
+    assert!(p
+        .delegation_publication_at(p.applied_index(), op(6000))
+        .unwrap()
+        .is_some());
+    let activation = target
+        .activation_command(
+            &TargetActivation {
+                metadata_configuration: ConfigurationId::new(1).unwrap(),
+                decision: decision.clone(),
+            },
+            100000,
+        )
+        .unwrap();
+    commit(&mut target, 202, activation);
+
+    (target, decision)
+}
+
+fn check_moved_child_retry(target: &mut Target, child: &ResponsibilityManifest) {
+    let hint = RouteHint {
+        responsibility: child.input().responsibility,
+        group: group(22),
+        application: child.input().application,
+        scheme: child.input().scheme,
+        scope: child.input().scope,
+        bucket: 150,
+        epoch: child.input().epoch,
+        generation: child.input().generation,
+    };
+    assert_eq!(
+        target
+            .read_at(
+                target.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![150],
+                    query: vec![150]
+                })
+            )
+            .unwrap(),
+        TargetRead::Data(5)
+    );
+    let write = encode_routed(
+        hint,
+        &[150],
+        &encode_add(&[150], 5, b"second", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(target,6,write).outcome,TargetOutcome::Applied(r) if r.duplicate));
+}
+
+#[cfg(feature = "native")]
+fn seed_moved_parent(
+    entries: &[voteboat::log::LogEntry],
+    boundary: u64,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(20, 3))],
+    );
+    let state = log.state(group(20)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn local_parent_source(child: &ResponsibilityManifest) -> Source {
+    let inner = RoutedApplication::new(
+        group(20),
+        child.clone(),
+        BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
+        Policy,
+        routed().limits(),
+    )
+    .unwrap_or_else(|_| panic!("source"))
+    .with_scoped_fencing(2)
+    .unwrap_or_else(|_| panic!("scoped"));
+    let s = Source::new(inner, 65536)
+        .unwrap_or_else(|_| panic!("source"))
+        .with_retained_insertion()
+        .unwrap_or_else(|_| panic!("bound"))
+        .with_retained_grants()
+        .unwrap_or_else(|_| panic!("grants"))
+        .with_parent_adoption(1)
+        .unwrap_or_else(|_| panic!("parents"));
+
+    s
+}
+
+fn check_remaining_parent_data(
+    s: &mut Source,
+    first: &TransferIntent,
+    after: &ResponsibilityManifest,
+) {
+    let mut hint = source_hint(first, 200);
+    hint.epoch = after.input().epoch;
+    hint.generation = after.input().generation;
+    hint.scope = range(192, 256);
+    assert_eq!(
+        s.read_at(
+            s.applied_index(),
+            ScopedSourceQuery::Data(RoutedQuery {
+                hint,
+                key: vec![200],
+                query: vec![200]
+            })
+        )
+        .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Served(16))
+    );
+    let write = encode_routed(
+        hint,
+        &[200],
+        &encode_add(&[200], 11, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(s,2,write).outcome,RoutedOutcome::Applied(r) if r.duplicate));
 }

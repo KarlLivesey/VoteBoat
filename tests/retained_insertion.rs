@@ -300,44 +300,7 @@ fn handoff_family(
     RetainedGrantAdoption,
 ) {
     let (mut d, mut p, intent) = setup_profile(foreign, parent_moves);
-    let bytes = intent.encode(100000).unwrap();
-    assert_eq!(&bytes[..8], b"VBTINT06");
-    assert_eq!(TransferIntent::decode(&bytes).unwrap(), intent);
-    for end in 0..bytes.len() {
-        assert!(TransferIntent::decode(&bytes[..end]).is_err());
-    }
-    for tag in [
-        b"VBTINT01",
-        b"VBTINT02",
-        b"VBTINT03",
-        b"VBTINT04",
-        b"VBTINT05",
-    ] {
-        let mut old = bytes.clone();
-        old[..8].copy_from_slice(tag);
-        assert!(TransferIntent::decode(&old).is_err());
-    }
-    refuse_legacy(intent.before().clone(), &bytes);
-    assert_eq!(
-        intent.sources(),
-        vec![RouteEntry {
-            scope: range(0, 128),
-            target: RouteTarget::Group(group(20))
-        }]
-    );
-    assert_eq!(
-        commit(&mut d, 200, bytes.clone()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
-    d = recover(&d);
-    assert_eq!(
-        d.transfer_intent_at(d.applied_index(), op(200))
-            .unwrap()
-            .unwrap()
-            .intent,
-        intent
-    );
-    assert!(commit(&mut d, 200, bytes).duplicate);
+    d = record_handoff_intent(d, &intent);
     let mut s = if parent_slots {
         retained_source(&intent)
             .with_parent_slot_adoption(4)
@@ -349,328 +312,17 @@ fn handoff_family(
     commit(&mut s, 100, boot);
     commit(&mut s, 1, data_at(&intent, 1, 7));
     commit(&mut s, 2, data_at(&intent, 200, 11));
-    let mut t = target(&intent);
-    let boot = t.bootstrap_command(100000).unwrap();
-    commit(&mut t, 200, boot);
-    let q = || {
-        TargetQuery::Data(RoutedQuery {
-            hint: target_hint(&intent),
-            key: vec![1],
-            query: vec![1],
-        })
-    };
-    assert_eq!(
-        t.read_at(t.applied_index(), q()).unwrap(),
-        TargetRead::NotActive
-    );
-    assert!(
-        TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status()).is_err()
-    );
-    commit(&mut s, 200, intent.encode(100000).unwrap());
-    let ScopedSourceRead::Frozen(Some(status)) = s
-        .read_at(s.applied_index(), ScopedSourceQuery::Frozen(op(200)))
-        .unwrap()
-    else {
-        panic!("source")
-    };
-    let evidence =
-        SourceFenceEvidence::from_scoped_status(ConfigurationId::new(1).unwrap(), status, &intent)
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert_eq!(evidence.scope, Some(range(0, 128)));
-    assert_eq!(
-        status.intent_digest,
-        Some(ContentDigest::sha256(&intent.encode(100000).unwrap()))
-    );
-    assert!(SourceFenceEvidence::from_status(
-        ConfigurationId::new(1).unwrap(),
-        voteboat::transfer_source::SourceFreezeStatus {
-            fence: status.fence.fence,
-            intent: intent.clone(),
-            exports: evidence.exports.clone()
-        }
-    )
-    .is_err());
-    let mut wrong_status = status;
-    wrong_status.fence.scope = range(0, 64);
-    assert!(SourceFenceEvidence::from_scoped_status(
-        ConfigurationId::new(1).unwrap(),
-        wrong_status,
-        &intent
-    )
-    .is_err());
-    let import = TargetImport::new(
-        op(200),
-        intent.clone(),
-        group(21),
-        vec![SourceImport {
-            fence: status.fence.fence,
-            configuration: ConfigurationId::new(1).unwrap(),
-            image: s.export(op(200), 65536).unwrap(),
-            digest: status.digest,
-        }],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let bytes = t.import_command(&import, 100000).unwrap();
-    commit(&mut t, 200, bytes);
-    assert_eq!(
-        t.read_at(t.applied_index(), q()).unwrap(),
-        TargetRead::NotActive
-    );
-    let ready = TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status())
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let publication = TransferPublication::new(
-        op(200),
-        intent.clone(),
-        vec![evidence.clone()],
-        vec![ready.clone()],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let pub_bytes = publication.encode(100000).unwrap();
-    assert_eq!(&pub_bytes[..8], b"VBTPUB02");
-    assert_eq!(
-        TransferPublication::decode(&pub_bytes).unwrap(),
-        publication
-    );
-    for end in 0..pub_bytes.len() {
-        assert!(TransferPublication::decode(&pub_bytes[..end]).is_err());
-    }
-    let mut old = pub_bytes.clone();
-    old[..8].copy_from_slice(b"VBTPUB01");
-    assert!(TransferPublication::decode(&old).is_err());
-    refuse_legacy(intent.before().clone(), &pub_bytes);
-    let mut wrong = evidence.clone();
-    wrong.scope = None;
-    assert!(
-        TransferPublication::new(op(200), intent.clone(), vec![wrong], vec![ready.clone()])
-            .is_err()
-    );
-    let mut wrong = evidence.clone();
-    wrong.scope = Some(range(64, 128));
-    assert!(TransferPublication::new(op(200), intent.clone(), vec![wrong], vec![ready]).is_err());
-    assert_eq!(
-        commit(&mut d, 201, pub_bytes.clone()).outcome,
-        DirectoryOutcome::TransferPublished(intent.after().input().generation)
-    );
-    d = recover(&d);
-    assert!(commit(&mut d, 201, pub_bytes).duplicate);
-    assert_eq!(
-        d.manifest(intent.before().input().responsibility),
-        Some(intent.after())
-    );
-    assert_eq!(d.manifest(rid(21)), intent.target_manifest(group(21)));
-    let decision = d
-        .transfer_publication_at(d.applied_index(), op(200))
-        .unwrap()
-        .unwrap();
-    if let Some(ref mut p) = p {
-        let reservation = p
-            .delegation_reservation_at(p.applied_index(), op(400))
-            .unwrap()
-            .unwrap();
-        let completion = DelegationCompletion {
-            reservation: op(400),
-            reservation_index: reservation.index,
-            parent_configuration: ConfigurationId::new(1).unwrap(),
-            child_configuration: ConfigurationId::new(1).unwrap(),
-            decision: decision.clone(),
-        };
-        refuse_legacy(parent(intent.before()), &completion.encode(100000).unwrap());
-        assert_eq!(
-            commit(p, 401, completion.encode(100000).unwrap()).outcome,
-            DirectoryOutcome::DelegationPublished(RouteGeneration::new(2).unwrap())
-        );
-        *p = recover(p);
-        let expected = RouteTarget::Child(ChildAuthority {
-            responsibility: intent.after().input().responsibility,
-            group: group(1),
-            epoch: intent.after().input().epoch,
-        });
-        assert_eq!(
-            p.manifest(rid(500)).unwrap().input().execution,
-            ExecutionMode::Delegated(vec![RouteEntry {
-                scope: intent.before().input().scope,
-                target: expected
-            }])
-        );
-    }
-    let cp = t.checkpoint(100000).unwrap();
-    let mut recovered = target(&intent);
-    recovered
-        .restore_checkpoint(t.schema_version(), t.applied_index(), &cp)
-        .unwrap();
-    t = recovered;
-    assert_eq!(
-        t.read_at(t.applied_index(), q()).unwrap(),
-        TargetRead::NotActive
-    );
-    let activation = TargetActivation {
-        metadata_configuration: ConfigurationId::new(1).unwrap(),
-        decision: decision.clone(),
-    };
-    let activation_bytes = t.activation_command(&activation, 100000).unwrap();
-    commit(&mut t, 200, activation_bytes.clone());
-    let cp = t.checkpoint(100000).unwrap();
-    let mut recovered = target(&intent);
-    recovered
-        .restore_checkpoint(t.schema_version(), t.applied_index(), &cp)
-        .unwrap();
-    t = recovered;
-    assert!(matches!(
-        commit(&mut t, 200, activation_bytes).outcome,
-        TargetOutcome::Activated(_)
-    ));
-    let write = |delta| {
-        encode_routed(
-            target_hint(&intent),
-            &[1],
-            &encode_add(&[1], delta, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap()
-    };
-    assert!(
-        matches!(commit(&mut t,1,write(7)).outcome,TargetOutcome::Applied(r) if r.duplicate&&r.outcome==BucketOutcome::Value(7))
-    );
-    assert_eq!(t.application().outbox().count(), 1);
-    assert!(matches!(commit(&mut t,30,write(2)).outcome,TargetOutcome::Applied(r) if !r.duplicate));
-    assert_eq!(
-        t.read_at(t.applied_index(), q()).unwrap(),
-        TargetRead::Data(9)
-    );
-    commit(&mut s, 3, data_at(&intent, 200, 2));
-    assert_eq!(
-        s.read_at(
-            s.applied_index(),
-            ScopedSourceQuery::Data(RoutedQuery {
-                hint: source_hint(&intent, 200),
-                key: vec![200],
-                query: vec![200]
-            })
-        )
-        .unwrap(),
-        ScopedSourceRead::Data(RoutedRead::Served(13))
-    );
-    assert_eq!(
-        s.read_at(
-            s.applied_index(),
-            ScopedSourceQuery::Data(RoutedQuery {
-                hint: source_hint(&intent, 1),
-                key: vec![1],
-                query: vec![1]
-            })
-        )
-        .unwrap(),
-        ScopedSourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
-    );
+    let (t, evidence, ready) = import_handoff_target(&mut s, &intent);
+    let decision = publish_handoff(&mut d, &mut p, &intent, evidence, ready);
+    activate_handoff_target(t, &intent, &decision);
+    check_handoff_source(&mut s, &intent);
     let adoption = RetainedGrantAdoption {
         metadata_configuration: ConfigurationId::new(1).unwrap(),
         decision: decision.clone(),
     };
-    let adoption_bytes = adoption.encode(100000).unwrap();
-    assert_eq!(
-        RetainedGrantAdoption::decode(&adoption_bytes).unwrap(),
-        adoption
-    );
-    for end in 0..adoption_bytes.len() {
-        assert!(RetainedGrantAdoption::decode(&adoption_bytes[..end]).is_err());
-    }
-    assert!(s
-        .validate_proposal(op(21), &adoption_bytes, std::iter::empty())
-        .is_err());
-    assert!(s
-        .validate_proposal(op(1), &adoption_bytes, std::iter::empty())
-        .is_err());
-    let r = commit(&mut s, 300, adoption_bytes.clone());
-    let RoutedOutcome::GrantAdopted(original) = r.outcome else {
-        panic!("adoption")
-    };
-    assert_eq!(s.grant(), intent.after());
-    assert_eq!(original.epoch, intent.after().input().epoch);
-    assert_eq!(
-        s.read_at(s.applied_index(), ScopedSourceQuery::Grant(op(300)))
-            .unwrap(),
-        ScopedSourceRead::Grant(Some(original))
-    );
-    let image = s.export(op(200), 65536).unwrap();
-    let cp = s.checkpoint(100000).unwrap();
-    let mut restored = if parent_slots {
-        retained_source(&intent)
-            .with_parent_slot_adoption(4)
-            .unwrap_or_else(|_| panic!("slots"))
-    } else {
-        source_profile(&intent, parent_moves)
-    };
-    restored
-        .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
-        .unwrap();
-    assert_eq!(restored.export(op(200), 65536).unwrap(), image);
-    assert_eq!(restored.grant(), intent.after());
-    assert!(
-        matches!(commit(&mut restored,300,adoption_bytes.clone()).outcome,RoutedOutcome::GrantAdopted(status) if status==original)
-    );
-    assert!(restored
-        .validate_proposal(op(301), &adoption_bytes, std::iter::empty())
-        .is_err());
-    let mut changed = adoption.clone();
-    changed.metadata_configuration = ConfigurationId::new(2).unwrap();
-    assert!(restored
-        .validate_proposal(
-            op(300),
-            &changed.encode(100000).unwrap(),
-            std::iter::empty()
-        )
-        .is_err());
-    assert!(restored
-        .validate_proposal(op(300), &data_at(&intent, 200, 1), std::iter::empty())
-        .is_err());
-    let mut fresh = source_hint(&intent, 200);
-    fresh.epoch = intent.after().input().epoch;
-    fresh.generation = intent.after().input().generation;
-    fresh.scope = range(128, 256);
-    assert_eq!(restored.check_context(&fresh, &[200]), Ok(()));
-    let mut moved = source_hint(&intent, 1);
-    moved.epoch = intent.after().input().epoch;
-    moved.generation = intent.after().input().generation;
-    moved.scope = range(0, 128);
-    assert_eq!(
-        restored.check_context(&moved, &[1]),
-        Err(RoutingError::WrongOwner)
-    );
-    assert_eq!(
-        restored.check_context(&source_hint(&intent, 200), &[200]),
-        Err(RoutingError::EpochMismatch)
-    );
-    let bytes = encode_routed(
-        fresh,
-        &[200],
-        &encode_add(&[200], 3, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(
-        matches!(commit(&mut restored,4,bytes).outcome,RoutedOutcome::Applied(r) if r.outcome==BucketOutcome::Value(16))
-    );
-    assert_eq!(
-        restored
-            .read_at(
-                restored.applied_index(),
-                ScopedSourceQuery::Data(RoutedQuery {
-                    hint: fresh,
-                    key: vec![200],
-                    query: vec![200]
-                })
-            )
-            .unwrap(),
-        ScopedSourceRead::Data(RoutedRead::Served(16))
-    );
-    assert_eq!(restored.export(op(200), 65536).unwrap(), image);
-    assert!(
-        matches!(commit(&mut restored,200,intent.encode(100000).unwrap()).outcome,RoutedOutcome::ScopeFenced(f) if f.fence.index==4 && f.fence.epoch==intent.before().input().epoch)
-    );
-    assert!(matches!(
-        commit(&mut restored, 5, data_at(&intent, 200, 100)).outcome,
-        RoutedOutcome::Rejected(RoutingError::EpochMismatch)
-    ));
+    let (mut restored, image) =
+        adopt_handoff_source(s, &intent, &adoption, parent_slots, parent_moves);
+    check_adopted_source(&mut restored, &intent, &image);
     let cp = restored.checkpoint(100000).unwrap();
     let mut reopened = if parent_slots {
         retained_source(&intent)
@@ -803,7 +455,7 @@ fn retained_intent_requires_actual_creation_and_preserves_remaining_routes() {
 #[cfg(feature = "native")]
 #[test]
 fn retained_intent_native_frame_cuts_recover_original_creation_and_exact_lock() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (d, _, intent) = setup(false);
     let creation = d
@@ -825,28 +477,7 @@ fn retained_intent_native_frame_cuts_recover_original_creation_and_exact_lock() 
         entry(3, 21, creation.intent.encode(100000).unwrap()),
     ];
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(1, 3))],
-        );
-        let state = log.state(group(1)).unwrap();
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                3,
-                Some(Suffix {
-                    from: 1,
-                    entries: prefix.clone(),
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_retained_intent(&prefix, limits);
     let (_, log) = seed();
     let state = log.state(group(1)).unwrap();
     let mutation = support::update(
@@ -1037,23 +668,7 @@ fn bound_source_intent_ids_profiles_and_checkpoint_links_fail_closed() {
     assert!(matches!(retried.outcome,RoutedOutcome::ScopeFenced(f) if f.fence.index==4));
     assert_eq!(s.export(op(200), 65536).unwrap(), image);
     let cp = s.checkpoint(1000000).unwrap();
-    let pristine_routed = source(&intent).routed().clone();
-    let requirements = pristine_routed.readiness_requirements();
-    let limit = MAX_SCOPED_SOURCE_CHECKPOINT_BYTES
-        - requirements.snapshot_bytes
-        - 30
-        - 100 * pristine_routed.scoped_fence_limit();
-    assert!(Source::new(pristine_routed.clone(), limit)
-        .unwrap_or_else(|_| panic!("budget"))
-        .with_retained_insertion()
-        .is_err());
-    let mut legacy = Source::new(pristine_routed, 65536).unwrap_or_else(|_| panic!("legacy"));
-    let boot = legacy.bootstrap_command(100000).unwrap();
-    commit(&mut legacy, 100, boot);
-    assert!(legacy.apply_batch(&[entry(2, 200, bytes.clone())]).is_err());
-    assert!(legacy
-        .restore_checkpoint(2, s.applied_index(), &cp)
-        .is_err());
+    check_bound_legacy_profile(&intent, &s, &cp, &bytes);
     let mut restored = source(&intent);
     for end in 0..cp.len() {
         assert!(restored
@@ -1091,53 +706,17 @@ fn bound_source_intent_ids_profiles_and_checkpoint_links_fail_closed() {
         &intent
     )
     .is_err());
-    let mut collided = source(&intent);
-    let boot = collided.bootstrap_command(100000).unwrap();
-    commit(&mut collided, 100, boot);
-    commit(&mut collided, 21, data_at(&intent, 1, 7));
-    let before = collided.checkpoint(1000000).unwrap();
-    assert!(collided
-        .validate_proposal(op(200), &bytes, std::iter::empty())
-        .is_err());
-    assert!(collided.apply_batch(&[entry(3, 200, bytes)]).is_err());
-    assert_eq!(collided.checkpoint(1000000).unwrap(), before);
-    assert!(collided.export(op(200), 65536).is_err());
+    check_collided_intent(&intent, bytes);
 }
 
 #[cfg(feature = "native")]
 #[test]
 fn bound_source_frame_cuts_recover_intent_fence_and_image_together() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (_, _, intent) = setup(false);
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(20, 3))],
-        );
-        let app = source(&intent);
-        let state = log.state(group(20)).unwrap();
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                3,
-                Some(Suffix {
-                    from: 1,
-                    entries: vec![
-                        entry(1, 100, app.bootstrap_command(100000).unwrap()),
-                        entry(2, 1, data_at(&intent, 1, 7)),
-                        entry(3, 2, data_at(&intent, 200, 11)),
-                    ],
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_bound_source(&intent, limits);
     let (_, log) = seed();
     let state = log.state(group(20)).unwrap();
     let mutation = support::update(
@@ -1226,61 +805,7 @@ fn retained_source(intent: &TransferIntent) -> Source {
 fn second_retained_child_keeps_old_child_exports_and_serves_latest_grant() {
     let (mut d, mut s, first, _) = handoff(false);
     let before = s.grant().clone();
-    let mut child = before.clone().into_input();
-    child.responsibility = rid(22);
-    child.parent = Some(ParentAuthority {
-        responsibility: before.input().responsibility,
-        group: before.input().authority,
-    });
-    child.scope = range(128, 192);
-    child.epoch = OwnershipEpoch::new(1).unwrap();
-    child.generation = RouteGeneration::new(1).unwrap();
-    child.execution = ExecutionMode::Single(group(22));
-    let child = ResponsibilityManifest::new(child).unwrap();
-    let creation = GroupCreationIntent {
-        authority: before.input().authority,
-        parent: before.input().responsibility,
-        expected: before.input().generation,
-        responsibility: child.input().responsibility,
-        bootstrap: support::bootstrap(22, 3),
-        application: before.input().application,
-        mode: GroupCreationMode::Staging,
-    };
-    assert_eq!(
-        commit(&mut d, 22, creation.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::CreationReserved
-    );
-    let created = d
-        .group_creation_at(d.applied_index(), group(22))
-        .unwrap()
-        .unwrap();
-    let mut after = before.clone().into_input();
-    after.epoch = OwnershipEpoch::new(3).unwrap();
-    after.generation = RouteGeneration::new(3).unwrap();
-    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
-        panic!("delegated")
-    };
-    routes[1].scope = range(128, 192);
-    routes[1].target = RouteTarget::Child(ChildAuthority {
-        responsibility: child.input().responsibility,
-        group: child.input().authority,
-        epoch: child.input().epoch,
-    });
-    routes.push(RouteEntry {
-        scope: range(192, 256),
-        target: RouteTarget::Group(group(20)),
-    });
-    let after = ResponsibilityManifest::new(after).unwrap();
-    let intent = TransferIntent::insert_retained_child(
-        before.clone(),
-        after.clone(),
-        InsertionChild::from_creation(child.clone(), &created).unwrap(),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(&mut d, 202, intent.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
+    let (child, after, intent) = reserve_second_child(&mut d, &before);
     let mut hint = source_hint(&first, 150);
     hint.epoch = before.input().epoch;
     hint.generation = before.input().generation;
@@ -1304,67 +829,7 @@ fn second_retained_child_keeps_old_child_exports_and_serves_latest_grant() {
     else {
         panic!("frozen")
     };
-    let mut target = Target::new(
-        group(22),
-        op(202),
-        intent.clone(),
-        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
-        Policy,
-        TargetLimits {
-            import_bytes: 32768,
-            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-        },
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let boot = target.bootstrap_command(100000).unwrap();
-    commit(&mut target, 202, boot);
-    let import = TargetImport::new(
-        op(202),
-        intent.clone(),
-        group(22),
-        vec![SourceImport {
-            fence: status.fence.fence,
-            configuration: ConfigurationId::new(1).unwrap(),
-            image: s.export(op(202), 65536).unwrap(),
-            digest: status.digest,
-        }],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let bytes = target.import_command(&import, 100000).unwrap();
-    commit(&mut target, 202, bytes);
-    let publication = TransferPublication::new(
-        op(202),
-        intent.clone(),
-        vec![SourceFenceEvidence::from_scoped_status(
-            ConfigurationId::new(1).unwrap(),
-            status,
-            &intent,
-        )
-        .unwrap()],
-        vec![
-            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
-                .unwrap(),
-        ],
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert_eq!(
-        commit(&mut d, 203, publication.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(after.input().generation)
-    );
-    let decision = d
-        .transfer_publication_at(d.applied_index(), op(202))
-        .unwrap()
-        .unwrap();
-    let activation = target
-        .activation_command(
-            &TargetActivation {
-                metadata_configuration: ConfigurationId::new(1).unwrap(),
-                decision: decision.clone(),
-            },
-            100000,
-        )
-        .unwrap();
-    commit(&mut target, 202, activation);
+    let (mut target, decision) = publish_second_child(&mut d, &s, &intent, status, &after);
     let adoption = RetainedGrantAdoption {
         metadata_configuration: ConfigurationId::new(1).unwrap(),
         decision,
@@ -1407,37 +872,7 @@ fn second_retained_child_keeps_old_child_exports_and_serves_latest_grant() {
     .unwrap();
     assert!(matches!(commit(&mut s,2,write).outcome,RoutedOutcome::Applied(r) if r.duplicate));
     assert_eq!(s.export(op(200), 65536).unwrap(), old);
-    let hint = RouteHint {
-        responsibility: child.input().responsibility,
-        group: group(22),
-        application: child.input().application,
-        scheme: child.input().scheme,
-        scope: child.input().scope,
-        bucket: 150,
-        epoch: child.input().epoch,
-        generation: child.input().generation,
-    };
-    assert_eq!(
-        target
-            .read_at(
-                target.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint,
-                    key: vec![150],
-                    query: vec![150]
-                })
-            )
-            .unwrap(),
-        TargetRead::Data(5)
-    );
-    let write = encode_routed(
-        hint,
-        &[150],
-        &encode_add(&[150], 5, b"second", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(commit(&mut target,6,write).outcome,TargetOutcome::Applied(r) if r.duplicate));
+    check_second_child_retry(&mut target, &child);
     commit(&mut s, 999, encode_fence(after.input().epoch));
     assert_eq!(s.fence().unwrap().epoch, after.input().epoch);
     let cp = s.checkpoint(100000).unwrap();
@@ -1452,40 +887,12 @@ fn second_retained_child_keeps_old_child_exports_and_serves_latest_grant() {
 #[cfg(feature = "native")]
 #[test]
 fn adoption_frame_cuts_recover_original_grant_or_exact_new_epoch_with_exports() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (_, _, intent, adoption) = handoff(false);
     let command = adoption.encode(100000).unwrap();
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(20, 3))],
-        );
-        let state = log.state(group(20)).unwrap();
-        let app = retained_source(&intent);
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                5,
-                Some(Suffix {
-                    from: 1,
-                    entries: vec![
-                        entry(1, 100, app.bootstrap_command(100000).unwrap()),
-                        entry(2, 1, data_at(&intent, 1, 7)),
-                        entry(3, 2, data_at(&intent, 200, 11)),
-                        entry(4, 200, intent.encode(100000).unwrap()),
-                        entry(5, 3, data_at(&intent, 200, 2)),
-                    ],
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_retained_adoption(&intent, limits);
     let (_, log) = seed();
     let mutation = support::update(
         &log.state(group(20)).unwrap(),
@@ -1702,3 +1109,742 @@ mod metadata;
 mod parent_moves;
 #[path = "retained_insertion/parent_slots.rs"]
 mod parent_slots;
+
+fn record_handoff_intent(mut d: Directory, intent: &TransferIntent) -> Directory {
+    let bytes = intent.encode(100000).unwrap();
+    assert_eq!(&bytes[..8], b"VBTINT06");
+    assert_eq!(TransferIntent::decode(&bytes).unwrap(), *intent);
+    for end in 0..bytes.len() {
+        assert!(TransferIntent::decode(&bytes[..end]).is_err());
+    }
+    for tag in [
+        b"VBTINT01",
+        b"VBTINT02",
+        b"VBTINT03",
+        b"VBTINT04",
+        b"VBTINT05",
+    ] {
+        let mut old = bytes.clone();
+        old[..8].copy_from_slice(tag);
+        assert!(TransferIntent::decode(&old).is_err());
+    }
+    refuse_legacy(intent.before().clone(), &bytes);
+    assert_eq!(
+        intent.sources(),
+        vec![RouteEntry {
+            scope: range(0, 128),
+            target: RouteTarget::Group(group(20))
+        }]
+    );
+    assert_eq!(
+        commit(&mut d, 200, bytes.clone()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+    d = recover(&d);
+    assert_eq!(
+        d.transfer_intent_at(d.applied_index(), op(200))
+            .unwrap()
+            .unwrap()
+            .intent,
+        *intent
+    );
+    assert!(commit(&mut d, 200, bytes).duplicate);
+
+    d
+}
+
+fn import_handoff_target(
+    s: &mut Source,
+    intent: &TransferIntent,
+) -> (Target, SourceFenceEvidence, TargetReadyEvidence) {
+    let mut t = target(intent);
+    let boot = t.bootstrap_command(100000).unwrap();
+    commit(&mut t, 200, boot);
+    let q = || {
+        TargetQuery::Data(RoutedQuery {
+            hint: target_hint(intent),
+            key: vec![1],
+            query: vec![1],
+        })
+    };
+    assert_eq!(
+        t.read_at(t.applied_index(), q()).unwrap(),
+        TargetRead::NotActive
+    );
+    assert!(
+        TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status()).is_err()
+    );
+    commit(s, 200, intent.encode(100000).unwrap());
+    let ScopedSourceRead::Frozen(Some(status)) = s
+        .read_at(s.applied_index(), ScopedSourceQuery::Frozen(op(200)))
+        .unwrap()
+    else {
+        panic!("source")
+    };
+    let evidence =
+        SourceFenceEvidence::from_scoped_status(ConfigurationId::new(1).unwrap(), status, intent)
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+    assert_eq!(evidence.scope, Some(range(0, 128)));
+    assert_eq!(
+        status.intent_digest,
+        Some(ContentDigest::sha256(&intent.encode(100000).unwrap()))
+    );
+    assert!(SourceFenceEvidence::from_status(
+        ConfigurationId::new(1).unwrap(),
+        voteboat::transfer_source::SourceFreezeStatus {
+            fence: status.fence.fence,
+            intent: intent.clone(),
+            exports: evidence.exports.clone()
+        }
+    )
+    .is_err());
+    let mut wrong_status = status;
+    wrong_status.fence.scope = range(0, 64);
+    assert!(SourceFenceEvidence::from_scoped_status(
+        ConfigurationId::new(1).unwrap(),
+        wrong_status,
+        intent
+    )
+    .is_err());
+    let import = TargetImport::new(
+        op(200),
+        intent.clone(),
+        group(21),
+        vec![SourceImport {
+            fence: status.fence.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image: s.export(op(200), 65536).unwrap(),
+            digest: status.digest,
+        }],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let bytes = t.import_command(&import, 100000).unwrap();
+    commit(&mut t, 200, bytes);
+    assert_eq!(
+        t.read_at(t.applied_index(), q()).unwrap(),
+        TargetRead::NotActive
+    );
+    let ready = TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status())
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+
+    (t, evidence, ready)
+}
+
+fn publish_handoff(
+    d: &mut Directory,
+    p: &mut Option<Directory>,
+    intent: &TransferIntent,
+    evidence: SourceFenceEvidence,
+    ready: TargetReadyEvidence,
+) -> TransferPublicationStatus {
+    let publication = TransferPublication::new(
+        op(200),
+        intent.clone(),
+        vec![evidence.clone()],
+        vec![ready.clone()],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let pub_bytes = publication.encode(100000).unwrap();
+    assert_eq!(&pub_bytes[..8], b"VBTPUB02");
+    assert_eq!(
+        TransferPublication::decode(&pub_bytes).unwrap(),
+        publication
+    );
+    for end in 0..pub_bytes.len() {
+        assert!(TransferPublication::decode(&pub_bytes[..end]).is_err());
+    }
+    let mut old = pub_bytes.clone();
+    old[..8].copy_from_slice(b"VBTPUB01");
+    assert!(TransferPublication::decode(&old).is_err());
+    refuse_legacy(intent.before().clone(), &pub_bytes);
+    let mut wrong = evidence.clone();
+    wrong.scope = None;
+    assert!(
+        TransferPublication::new(op(200), intent.clone(), vec![wrong], vec![ready.clone()])
+            .is_err()
+    );
+    let mut wrong = evidence.clone();
+    wrong.scope = Some(range(64, 128));
+    assert!(TransferPublication::new(op(200), intent.clone(), vec![wrong], vec![ready]).is_err());
+    assert_eq!(
+        commit(d, 201, pub_bytes.clone()).outcome,
+        DirectoryOutcome::TransferPublished(intent.after().input().generation)
+    );
+    *d = recover(d);
+    assert!(commit(d, 201, pub_bytes).duplicate);
+    assert_eq!(
+        d.manifest(intent.before().input().responsibility),
+        Some(intent.after())
+    );
+    assert_eq!(d.manifest(rid(21)), intent.target_manifest(group(21)));
+    let decision = d
+        .transfer_publication_at(d.applied_index(), op(200))
+        .unwrap()
+        .unwrap();
+    if let Some(p) = p {
+        let reservation = p
+            .delegation_reservation_at(p.applied_index(), op(400))
+            .unwrap()
+            .unwrap();
+        let completion = DelegationCompletion {
+            reservation: op(400),
+            reservation_index: reservation.index,
+            parent_configuration: ConfigurationId::new(1).unwrap(),
+            child_configuration: ConfigurationId::new(1).unwrap(),
+            decision: decision.clone(),
+        };
+        refuse_legacy(parent(intent.before()), &completion.encode(100000).unwrap());
+        assert_eq!(
+            commit(p, 401, completion.encode(100000).unwrap()).outcome,
+            DirectoryOutcome::DelegationPublished(RouteGeneration::new(2).unwrap())
+        );
+        *p = recover(p);
+        let expected = RouteTarget::Child(ChildAuthority {
+            responsibility: intent.after().input().responsibility,
+            group: group(1),
+            epoch: intent.after().input().epoch,
+        });
+        assert_eq!(
+            p.manifest(rid(500)).unwrap().input().execution,
+            ExecutionMode::Delegated(vec![RouteEntry {
+                scope: intent.before().input().scope,
+                target: expected
+            }])
+        );
+    }
+
+    decision
+}
+
+fn activate_handoff_target(
+    mut t: Target,
+    intent: &TransferIntent,
+    decision: &TransferPublicationStatus,
+) {
+    let cp = t.checkpoint(100000).unwrap();
+    let mut recovered = target(intent);
+    recovered
+        .restore_checkpoint(t.schema_version(), t.applied_index(), &cp)
+        .unwrap();
+    t = recovered;
+    assert_eq!(
+        t.read_at(
+            t.applied_index(),
+            TargetQuery::Data(RoutedQuery {
+                hint: target_hint(intent),
+                key: vec![1],
+                query: vec![1]
+            })
+        )
+        .unwrap(),
+        TargetRead::NotActive
+    );
+    let activation = TargetActivation {
+        metadata_configuration: ConfigurationId::new(1).unwrap(),
+        decision: decision.clone(),
+    };
+    let activation_bytes = t.activation_command(&activation, 100000).unwrap();
+    commit(&mut t, 200, activation_bytes.clone());
+    let cp = t.checkpoint(100000).unwrap();
+    let mut recovered = target(intent);
+    recovered
+        .restore_checkpoint(t.schema_version(), t.applied_index(), &cp)
+        .unwrap();
+    t = recovered;
+    assert!(matches!(
+        commit(&mut t, 200, activation_bytes).outcome,
+        TargetOutcome::Activated(_)
+    ));
+    let write = |delta| {
+        encode_routed(
+            target_hint(intent),
+            &[1],
+            &encode_add(&[1], delta, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap()
+    };
+    assert!(
+        matches!(commit(&mut t,1,write(7)).outcome,TargetOutcome::Applied(r) if r.duplicate&&r.outcome==BucketOutcome::Value(7))
+    );
+    assert_eq!(t.application().outbox().count(), 1);
+    assert!(matches!(commit(&mut t,30,write(2)).outcome,TargetOutcome::Applied(r) if !r.duplicate));
+    assert_eq!(
+        t.read_at(
+            t.applied_index(),
+            TargetQuery::Data(RoutedQuery {
+                hint: target_hint(intent),
+                key: vec![1],
+                query: vec![1]
+            })
+        )
+        .unwrap(),
+        TargetRead::Data(9)
+    );
+}
+
+fn check_handoff_source(s: &mut Source, intent: &TransferIntent) {
+    commit(s, 3, data_at(intent, 200, 2));
+    assert_eq!(
+        s.read_at(
+            s.applied_index(),
+            ScopedSourceQuery::Data(RoutedQuery {
+                hint: source_hint(intent, 200),
+                key: vec![200],
+                query: vec![200]
+            })
+        )
+        .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Served(13))
+    );
+    assert_eq!(
+        s.read_at(
+            s.applied_index(),
+            ScopedSourceQuery::Data(RoutedQuery {
+                hint: source_hint(intent, 1),
+                key: vec![1],
+                query: vec![1]
+            })
+        )
+        .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+}
+
+fn adopt_handoff_source(
+    mut s: Source,
+    intent: &TransferIntent,
+    adoption: &RetainedGrantAdoption,
+    parent_slots: bool,
+    parent_moves: bool,
+) -> (Source, voteboat::scope::ScopeImage) {
+    let adoption_bytes = adoption.encode(100000).unwrap();
+    assert_eq!(
+        RetainedGrantAdoption::decode(&adoption_bytes).unwrap(),
+        *adoption
+    );
+    for end in 0..adoption_bytes.len() {
+        assert!(RetainedGrantAdoption::decode(&adoption_bytes[..end]).is_err());
+    }
+    assert!(s
+        .validate_proposal(op(21), &adoption_bytes, std::iter::empty())
+        .is_err());
+    assert!(s
+        .validate_proposal(op(1), &adoption_bytes, std::iter::empty())
+        .is_err());
+    let r = commit(&mut s, 300, adoption_bytes.clone());
+    let RoutedOutcome::GrantAdopted(original) = r.outcome else {
+        panic!("adoption")
+    };
+    assert_eq!(s.grant(), intent.after());
+    assert_eq!(original.epoch, intent.after().input().epoch);
+    assert_eq!(
+        s.read_at(s.applied_index(), ScopedSourceQuery::Grant(op(300)))
+            .unwrap(),
+        ScopedSourceRead::Grant(Some(original))
+    );
+    let image = s.export(op(200), 65536).unwrap();
+    let cp = s.checkpoint(100000).unwrap();
+    let mut restored = if parent_slots {
+        retained_source(intent)
+            .with_parent_slot_adoption(4)
+            .unwrap_or_else(|_| panic!("slots"))
+    } else {
+        source_profile(intent, parent_moves)
+    };
+    restored
+        .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(restored.export(op(200), 65536).unwrap(), image);
+    assert_eq!(restored.grant(), intent.after());
+    assert!(
+        matches!(commit(&mut restored,300,adoption_bytes.clone()).outcome,RoutedOutcome::GrantAdopted(status) if status==original)
+    );
+    assert!(restored
+        .validate_proposal(op(301), &adoption_bytes, std::iter::empty())
+        .is_err());
+    let mut changed = adoption.clone();
+    changed.metadata_configuration = ConfigurationId::new(2).unwrap();
+    assert!(restored
+        .validate_proposal(
+            op(300),
+            &changed.encode(100000).unwrap(),
+            std::iter::empty()
+        )
+        .is_err());
+    assert!(restored
+        .validate_proposal(op(300), &data_at(intent, 200, 1), std::iter::empty())
+        .is_err());
+
+    (restored, image)
+}
+
+fn check_adopted_source(
+    restored: &mut Source,
+    intent: &TransferIntent,
+    image: &voteboat::scope::ScopeImage,
+) {
+    let mut fresh = source_hint(intent, 200);
+    fresh.epoch = intent.after().input().epoch;
+    fresh.generation = intent.after().input().generation;
+    fresh.scope = range(128, 256);
+    assert_eq!(restored.check_context(&fresh, &[200]), Ok(()));
+    let mut moved = source_hint(intent, 1);
+    moved.epoch = intent.after().input().epoch;
+    moved.generation = intent.after().input().generation;
+    moved.scope = range(0, 128);
+    assert_eq!(
+        restored.check_context(&moved, &[1]),
+        Err(RoutingError::WrongOwner)
+    );
+    assert_eq!(
+        restored.check_context(&source_hint(intent, 200), &[200]),
+        Err(RoutingError::EpochMismatch)
+    );
+    let bytes = encode_routed(
+        fresh,
+        &[200],
+        &encode_add(&[200], 3, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(
+        matches!(commit(restored,4,bytes).outcome,RoutedOutcome::Applied(r) if r.outcome==BucketOutcome::Value(16))
+    );
+    assert_eq!(
+        restored
+            .read_at(
+                restored.applied_index(),
+                ScopedSourceQuery::Data(RoutedQuery {
+                    hint: fresh,
+                    key: vec![200],
+                    query: vec![200]
+                })
+            )
+            .unwrap(),
+        ScopedSourceRead::Data(RoutedRead::Served(16))
+    );
+    assert_eq!(restored.export(op(200), 65536).unwrap(), *image);
+    assert!(
+        matches!(commit(restored,200,intent.encode(100000).unwrap()).outcome,RoutedOutcome::ScopeFenced(f) if f.fence.index==4 && f.fence.epoch==intent.before().input().epoch)
+    );
+    assert!(matches!(
+        commit(restored, 5, data_at(intent, 200, 100)).outcome,
+        RoutedOutcome::Rejected(RoutingError::EpochMismatch)
+    ));
+}
+
+#[cfg(feature = "native")]
+fn seed_retained_intent(
+    prefix: &[voteboat::log::LogEntry],
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(1, 3))],
+    );
+    let state = log.state(group(1)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            3,
+            Some(Suffix {
+                from: 1,
+                entries: prefix.to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+#[cfg(feature = "native")]
+fn seed_bound_source(
+    intent: &TransferIntent,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(20, 3))],
+    );
+    let app = source(intent);
+    let state = log.state(group(20)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            3,
+            Some(Suffix {
+                from: 1,
+                entries: vec![
+                    entry(1, 100, app.bootstrap_command(100000).unwrap()),
+                    entry(2, 1, data_at(intent, 1, 7)),
+                    entry(3, 2, data_at(intent, 200, 11)),
+                ],
+            }),
+        )],
+    );
+    (io, log)
+}
+
+#[cfg(feature = "native")]
+fn seed_retained_adoption(
+    intent: &TransferIntent,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(20, 3))],
+    );
+    let state = log.state(group(20)).unwrap();
+    let app = retained_source(intent);
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            5,
+            Some(Suffix {
+                from: 1,
+                entries: vec![
+                    entry(1, 100, app.bootstrap_command(100000).unwrap()),
+                    entry(2, 1, data_at(intent, 1, 7)),
+                    entry(3, 2, data_at(intent, 200, 11)),
+                    entry(4, 200, intent.encode(100000).unwrap()),
+                    entry(5, 3, data_at(intent, 200, 2)),
+                ],
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn check_bound_legacy_profile(intent: &TransferIntent, s: &Source, cp: &[u8], bytes: &[u8]) {
+    let pristine_routed = source(intent).routed().clone();
+    let requirements = pristine_routed.readiness_requirements();
+    let limit = MAX_SCOPED_SOURCE_CHECKPOINT_BYTES
+        - requirements.snapshot_bytes
+        - 30
+        - 100 * pristine_routed.scoped_fence_limit();
+    assert!(Source::new(pristine_routed.clone(), limit)
+        .unwrap_or_else(|_| panic!("budget"))
+        .with_retained_insertion()
+        .is_err());
+    let mut legacy = Source::new(pristine_routed, 65536).unwrap_or_else(|_| panic!("legacy"));
+    let boot = legacy.bootstrap_command(100000).unwrap();
+    commit(&mut legacy, 100, boot);
+    assert!(legacy
+        .apply_batch(&[entry(2, 200, bytes.to_vec())])
+        .is_err());
+    assert!(legacy.restore_checkpoint(2, s.applied_index(), cp).is_err());
+}
+
+fn check_collided_intent(intent: &TransferIntent, bytes: Vec<u8>) {
+    let mut collided = source(intent);
+    let boot = collided.bootstrap_command(100000).unwrap();
+    commit(&mut collided, 100, boot);
+    commit(&mut collided, 21, data_at(intent, 1, 7));
+    let before = collided.checkpoint(1000000).unwrap();
+    assert!(collided
+        .validate_proposal(op(200), &bytes, std::iter::empty())
+        .is_err());
+    assert!(collided.apply_batch(&[entry(3, 200, bytes)]).is_err());
+    assert_eq!(collided.checkpoint(1000000).unwrap(), before);
+    assert!(collided.export(op(200), 65536).is_err());
+}
+
+fn reserve_second_child(
+    d: &mut Directory,
+    before: &ResponsibilityManifest,
+) -> (
+    ResponsibilityManifest,
+    ResponsibilityManifest,
+    TransferIntent,
+) {
+    let mut child = before.clone().into_input();
+    child.responsibility = rid(22);
+    child.parent = Some(ParentAuthority {
+        responsibility: before.input().responsibility,
+        group: before.input().authority,
+    });
+    child.scope = range(128, 192);
+    child.epoch = OwnershipEpoch::new(1).unwrap();
+    child.generation = RouteGeneration::new(1).unwrap();
+    child.execution = ExecutionMode::Single(group(22));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let creation = GroupCreationIntent {
+        authority: before.input().authority,
+        parent: before.input().responsibility,
+        expected: before.input().generation,
+        responsibility: child.input().responsibility,
+        bootstrap: support::bootstrap(22, 3),
+        application: before.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    assert_eq!(
+        commit(d, 22, creation.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let created = d
+        .group_creation_at(d.applied_index(), group(22))
+        .unwrap()
+        .unwrap();
+    let mut after = before.clone().into_input();
+    after.epoch = OwnershipEpoch::new(3).unwrap();
+    after.generation = RouteGeneration::new(3).unwrap();
+    let ExecutionMode::Delegated(ref mut routes) = after.execution else {
+        panic!("delegated")
+    };
+    routes[1].scope = range(128, 192);
+    routes[1].target = RouteTarget::Child(ChildAuthority {
+        responsibility: child.input().responsibility,
+        group: child.input().authority,
+        epoch: child.input().epoch,
+    });
+    routes.push(RouteEntry {
+        scope: range(192, 256),
+        target: RouteTarget::Group(group(20)),
+    });
+    let after = ResponsibilityManifest::new(after).unwrap();
+    let intent = TransferIntent::insert_retained_child(
+        before.clone(),
+        after.clone(),
+        InsertionChild::from_creation(child.clone(), &created).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(d, 202, intent.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+
+    (child, after, intent)
+}
+
+fn publish_second_child(
+    d: &mut Directory,
+    s: &Source,
+    intent: &TransferIntent,
+    status: voteboat::scoped_source::ScopedExportStatus,
+    after: &ResponsibilityManifest,
+) -> (Target, TransferPublicationStatus) {
+    let mut target = Target::new(
+        group(22),
+        op(202),
+        intent.clone(),
+        BucketCounter::new(range(128, 192), Policy, bucket_limits()).unwrap(),
+        Policy,
+        TargetLimits {
+            import_bytes: 32768,
+            application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let boot = target.bootstrap_command(100000).unwrap();
+    commit(&mut target, 202, boot);
+    let import = TargetImport::new(
+        op(202),
+        intent.clone(),
+        group(22),
+        vec![SourceImport {
+            fence: status.fence.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image: s.export(op(202), 65536).unwrap(),
+            digest: status.digest,
+        }],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let bytes = target.import_command(&import, 100000).unwrap();
+    commit(&mut target, 202, bytes);
+    let publication = TransferPublication::new(
+        op(202),
+        intent.clone(),
+        vec![SourceFenceEvidence::from_scoped_status(
+            ConfigurationId::new(1).unwrap(),
+            status,
+            intent,
+        )
+        .unwrap()],
+        vec![
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
+                .unwrap(),
+        ],
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    assert_eq!(
+        commit(d, 203, publication.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(after.input().generation)
+    );
+    let decision = d
+        .transfer_publication_at(d.applied_index(), op(202))
+        .unwrap()
+        .unwrap();
+    let activation = target
+        .activation_command(
+            &TargetActivation {
+                metadata_configuration: ConfigurationId::new(1).unwrap(),
+                decision: decision.clone(),
+            },
+            100000,
+        )
+        .unwrap();
+    commit(&mut target, 202, activation);
+
+    (target, decision)
+}
+
+fn check_second_child_retry(target: &mut Target, child: &ResponsibilityManifest) {
+    let hint = RouteHint {
+        responsibility: child.input().responsibility,
+        group: group(22),
+        application: child.input().application,
+        scheme: child.input().scheme,
+        scope: child.input().scope,
+        bucket: 150,
+        epoch: child.input().epoch,
+        generation: child.input().generation,
+    };
+    assert_eq!(
+        target
+            .read_at(
+                target.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![150],
+                    query: vec![150]
+                })
+            )
+            .unwrap(),
+        TargetRead::Data(5)
+    );
+    let write = encode_routed(
+        hint,
+        &[150],
+        &encode_add(&[150], 5, b"second", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(commit(target,6,write).outcome,TargetOutcome::Applied(r) if r.duplicate));
+}

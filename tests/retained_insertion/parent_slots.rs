@@ -106,37 +106,7 @@ fn cross_move(d: &mut Directory) -> (Directory, CrossOwnerParentAdoption) {
         .outcome,
         DirectoryOutcome::ReparentGuarded
     );
-    let guards = [&*d, &p]
-        .into_iter()
-        .map(|n| {
-            ReparentGuardEvidence::from_status(
-                cfg,
-                &n.reparent_guard_at(n.applied_index(), op(4000))
-                    .unwrap()
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect();
-    assert_eq!(
-        commit(
-            d,
-            4001,
-            CommitReparent::new(op(4000), guards)
-                .unwrap()
-                .encode(MAX_REPARENT_COMPLETION_BYTES)
-                .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::ReparentCommitted
-    );
-    let decision = PublishReparent {
-        configuration: cfg,
-        decision: d
-            .reparent_decision_at(d.applied_index(), op(4000))
-            .unwrap()
-            .unwrap(),
-    };
+    let decision = decide_slot_move(d, &p, cfg);
     assert_eq!(
         commit(
             &mut p,
@@ -146,41 +116,7 @@ fn cross_move(d: &mut Directory) -> (Directory, CrossOwnerParentAdoption) {
         .outcome,
         DirectoryOutcome::ReparentPublished
     );
-    let publications = [&*d, &p]
-        .into_iter()
-        .map(|n| {
-            ReparentPublicationEvidence::from_status(
-                cfg,
-                n.reparent_publication_at(n.applied_index(), op(4000))
-                    .unwrap()
-                    .unwrap(),
-            )
-            .unwrap()
-        })
-        .collect();
-    assert_eq!(
-        commit(
-            d,
-            4003,
-            FinishReparent::new(op(4000), publications)
-                .unwrap()
-                .encode(MAX_REPARENT_COMPLETION_BYTES)
-                .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::ReparentCompleted
-    );
-    let completion = ReleaseCommittedReparent {
-        configuration: cfg,
-        completion: d
-            .reparent_completion_at(d.applied_index(), op(4000))
-            .unwrap()
-            .unwrap(),
-    };
-    assert_eq!(
-        commit(&mut p, 4004, completion.encode().unwrap()).outcome,
-        DirectoryOutcome::ReparentReleased
-    );
+    let completion = release_slot_move(d, &mut p, cfg);
     let observation = CrossOwnerParentAdoption {
         plan,
         decision,
@@ -241,63 +177,7 @@ fn reopen(s: &Source, mut fresh: Source) -> Source {
     fresh
 }
 fn later_transfer(d: &mut Directory, s: &mut Source) {
-    let before = s.grant().clone();
-    let mut c = before.clone().into_input();
-    c.responsibility = rid(22);
-    c.parent = Some(ParentAuthority {
-        responsibility: before.input().responsibility,
-        group: before.input().authority,
-    });
-    c.scope = range(128, 192);
-    c.epoch = OwnershipEpoch::new(1).unwrap();
-    c.generation = RouteGeneration::new(1).unwrap();
-    c.execution = ExecutionMode::Single(group(22));
-    let child = ResponsibilityManifest::new(c).unwrap();
-    let creation = GroupCreationIntent {
-        authority: before.input().authority,
-        parent: before.input().responsibility,
-        expected: before.input().generation,
-        responsibility: rid(22),
-        bootstrap: support::bootstrap(22, 3),
-        application: before.input().application,
-        mode: GroupCreationMode::Staging,
-    };
-    assert_eq!(
-        commit(d, 22, creation.encode(200000).unwrap()).outcome,
-        DirectoryOutcome::CreationReserved
-    );
-    let created = d
-        .group_creation_at(d.applied_index(), group(22))
-        .unwrap()
-        .unwrap();
-    let mut after = before.clone().into_input();
-    after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-    after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-    let ExecutionMode::Delegated(routes) = &mut after.execution else {
-        panic!("delegated")
-    };
-    routes[1] = RouteEntry {
-        scope: range(128, 192),
-        target: RouteTarget::Child(ChildAuthority {
-            responsibility: rid(22),
-            group: before.input().authority,
-            epoch: child.input().epoch,
-        }),
-    };
-    routes.push(RouteEntry {
-        scope: range(192, 256),
-        target: RouteTarget::Group(s.routed().local()),
-    });
-    let intent = TransferIntent::insert_retained_child(
-        before,
-        ResponsibilityManifest::new(after).unwrap(),
-        InsertionChild::from_creation(child, &created).unwrap(),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(d, 202, intent.encode(200000).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
+    let intent = reserve_slot_child(d, s);
     let bytes = write(s, 6, 150);
     commit(s, 202, intent.encode(200000).unwrap());
     let ScopedSourceRead::Frozen(Some(status)) = s
@@ -559,7 +439,7 @@ fn slot_provenance_pending_profiles_and_checkpoint_corruption_fail_closed() {
 #[cfg(feature = "native")]
 #[test]
 fn slot_journal_cuts_recover_original_or_complete_grant_and_immutable_export() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (mut d, _, _, intent, retained) = handoff_family(false, true, true);
     let (_, observation) = cross_move(&mut d);
@@ -578,28 +458,7 @@ fn slot_journal_cuts_recover_original_or_complete_grant_and_immutable_export() {
     ];
     let limits = LogLimits::default();
     for boundary in [7u64, 8] {
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(20, 3))],
-            );
-            let state = log.state(group(20)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    boundary - 1,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_slot_journal(&entries, boundary, limits);
         let (_, log) = seed();
         let mutation = support::update(
             &log.state(group(20)).unwrap(),
@@ -747,5 +606,178 @@ fn slot_capacity_and_pending_roundtrip_use_the_same_ordered_ledger() {
         }
         assert_eq!(commit(&mut s, 9000, first_bytes.clone()).outcome, status);
         write(&mut s, 7, 200);
+    }
+}
+
+fn release_slot_move(
+    d: &mut Directory,
+    p: &mut Directory,
+    cfg: ConfigurationId,
+) -> ReleaseCommittedReparent {
+    let publications = [&*d, &*p]
+        .into_iter()
+        .map(|n| {
+            ReparentPublicationEvidence::from_status(
+                cfg,
+                n.reparent_publication_at(n.applied_index(), op(4000))
+                    .unwrap()
+                    .unwrap(),
+            )
+            .unwrap()
+        })
+        .collect();
+    assert_eq!(
+        commit(
+            d,
+            4003,
+            FinishReparent::new(op(4000), publications)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::ReparentCompleted
+    );
+    let completion = ReleaseCommittedReparent {
+        configuration: cfg,
+        completion: d
+            .reparent_completion_at(d.applied_index(), op(4000))
+            .unwrap()
+            .unwrap(),
+    };
+    assert_eq!(
+        commit(p, 4004, completion.encode().unwrap()).outcome,
+        DirectoryOutcome::ReparentReleased
+    );
+
+    completion
+}
+
+fn reserve_slot_child(d: &mut Directory, s: &Source) -> TransferIntent {
+    let before = s.grant().clone();
+    let mut c = before.clone().into_input();
+    c.responsibility = rid(22);
+    c.parent = Some(ParentAuthority {
+        responsibility: before.input().responsibility,
+        group: before.input().authority,
+    });
+    c.scope = range(128, 192);
+    c.epoch = OwnershipEpoch::new(1).unwrap();
+    c.generation = RouteGeneration::new(1).unwrap();
+    c.execution = ExecutionMode::Single(group(22));
+    let child = ResponsibilityManifest::new(c).unwrap();
+    let creation = GroupCreationIntent {
+        authority: before.input().authority,
+        parent: before.input().responsibility,
+        expected: before.input().generation,
+        responsibility: rid(22),
+        bootstrap: support::bootstrap(22, 3),
+        application: before.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    assert_eq!(
+        commit(d, 22, creation.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let created = d
+        .group_creation_at(d.applied_index(), group(22))
+        .unwrap()
+        .unwrap();
+    let mut after = before.clone().into_input();
+    after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+    after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+    let ExecutionMode::Delegated(routes) = &mut after.execution else {
+        panic!("delegated")
+    };
+    routes[1] = RouteEntry {
+        scope: range(128, 192),
+        target: RouteTarget::Child(ChildAuthority {
+            responsibility: rid(22),
+            group: before.input().authority,
+            epoch: child.input().epoch,
+        }),
+    };
+    routes.push(RouteEntry {
+        scope: range(192, 256),
+        target: RouteTarget::Group(s.routed().local()),
+    });
+    let intent = TransferIntent::insert_retained_child(
+        before,
+        ResponsibilityManifest::new(after).unwrap(),
+        InsertionChild::from_creation(child, &created).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(d, 202, intent.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+
+    intent
+}
+
+#[cfg(feature = "native")]
+fn seed_slot_journal(
+    entries: &[voteboat::log::LogEntry],
+    boundary: u64,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(20, 3))],
+    );
+    let state = log.state(group(20)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn decide_slot_move(d: &mut Directory, p: &Directory, cfg: ConfigurationId) -> PublishReparent {
+    let guards = [&*d, p]
+        .into_iter()
+        .map(|n| {
+            ReparentGuardEvidence::from_status(
+                cfg,
+                &n.reparent_guard_at(n.applied_index(), op(4000))
+                    .unwrap()
+                    .unwrap(),
+            )
+            .unwrap()
+        })
+        .collect();
+    assert_eq!(
+        commit(
+            d,
+            4001,
+            CommitReparent::new(op(4000), guards)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::ReparentCommitted
+    );
+    PublishReparent {
+        configuration: cfg,
+        decision: d
+            .reparent_decision_at(d.applied_index(), op(4000))
+            .unwrap()
+            .unwrap(),
     }
 }

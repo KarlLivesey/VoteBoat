@@ -244,25 +244,7 @@ fn three_authority_preparation_cancellation_and_original_results_survive_restart
         commit(&mut a, 302, fake.encode().unwrap()).outcome,
         DirectoryOutcome::TransferEvidenceMismatch
     );
-    let view = LifecycleDirectory::new(a);
-    let q = DirectoryQuery::ReparentGuard(op(200));
-    let result = view.read_at(view.applied_index(), q).unwrap();
-    assert!(view.read_result_bound(&q).unwrap() > std::mem::size_of::<DirectoryRead>());
-    assert!(view.read_result_bytes(&result, 0).is_err());
-    assert_eq!(
-        view.read_at(view.applied_index() + 1, q),
-        Err(ApplicationError::NotApplied)
-    );
-    let q = DirectoryQuery::ReparentCancellation(op(200));
-    assert_eq!(
-        view.read_result_bound(&q).unwrap(),
-        std::mem::size_of::<DirectoryRead>()
-    );
-    assert_eq!(
-        view.read_result_bytes(&view.read_at(view.applied_index(), q).unwrap(), 0)
-            .unwrap(),
-        0
-    );
+    check_cancelled_reads(a);
 }
 #[test]
 fn cancelled_before_prepare_blocks_delayed_acquisition_and_reserves_completion() {
@@ -370,49 +352,7 @@ fn guarded_manifests_block_metadata_and_lifecycle_but_disjoint_metadata_and_data
         .outcome,
         DirectoryOutcome::Published(_)
     ));
-    let mut owner = RoutedApplication::new(
-        group(21),
-        p.child().clone(),
-        BucketCounter::new(range(0, 128), Policy, bucket_limits()).unwrap(),
-        Policy,
-        RoutedLimits {
-            operations: 32,
-            semantic_bytes: 8192,
-            payload_bytes: 1024,
-            inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-        },
-    )
-    .unwrap_or_else(|_| panic!("owner"));
-    let boot = owner.bootstrap_command(200000).unwrap();
-    commit(&mut owner, 100, boot);
-    let before = [a.applied_index(), c.applied_index()];
-    let hint = RouteHint {
-        responsibility: id(11),
-        group: group(21),
-        application: p.child().input().application,
-        scheme: p.child().input().scheme,
-        scope: p.child().input().scope,
-        bucket: 1,
-        epoch: p.child().input().epoch,
-        generation: p.child().input().generation,
-    };
-    let data = encode_routed(
-        hint,
-        &[1],
-        &encode_add(&[1], 7, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(
-        commit(&mut owner, 1, data.clone()).outcome,
-        RoutedOutcome::Applied(_)
-    ));
-    assert!(matches!(
-        commit(&mut owner, 1, data).outcome,
-        RoutedOutcome::Applied(_)
-    ));
-    assert_eq!(owner.application().outbox().count(), 1);
-    assert_eq!(before, [a.applied_index(), c.applied_index()]);
+    check_guarded_data_path(&p, &a, &c);
     a = reopen(&a, &p);
     assert_eq!(a.manifest(id(10)), Some(p.old_parent()));
     assert_eq!(a.manifest(id(50)).unwrap().input().generation.get(), 2);
@@ -660,7 +600,7 @@ fn profile_checkpoint_and_batch_failures_leave_no_partial_guards() {
 #[cfg(feature = "native")]
 #[test]
 fn native_guard_and_cancel_frames_recover_original_locks_or_complete_cancellation() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let p = fixture();
     let mut a = initial(1, &p, 16);
@@ -669,61 +609,9 @@ fn native_guard_and_cancel_frames_recover_original_locks_or_complete_cancellatio
     let limits = LogLimits::default();
     for g in [1, 3] {
         let ordinary = if g == 1 { 4 } else { 3 };
-        let prototype = fresh(g, &p, ordinary);
-        let mut entries = vec![entry(1, 1000, prototype.bootstrap_command(200000).unwrap())];
-        for (i, m) in prototype.plan().manifests().enumerate() {
-            entries.push(entry(
-                2 + i as u64,
-                1001 + i as u128,
-                DirectoryCommand {
-                    expected: None,
-                    manifest: m.clone(),
-                }
-                .encode(200000)
-                .unwrap(),
-            ));
-        }
-        let guard_index = entries.len() as u64 + 1;
-        let guard = prepare(&p, if g == 1 { None } else { Some(proof) });
-        entries.push(entry(guard_index, 200, guard.clone()));
-        entries.push(entry(
-            guard_index + 1,
-            if g == 1 { 300 } else { 301 },
-            if g == 1 {
-                CancelReparent { guard: op(200) }.encode()
-            } else {
-                ReleaseReparentGuard {
-                    configuration: ConfigurationId::new(3).unwrap(),
-                    decision,
-                }
-                .encode()
-                .unwrap()
-            },
-        ));
+        let (entries, guard_index, guard) = guard_journal(&p, g, ordinary, proof, decision);
         for boundary in [guard_index, guard_index + 1] {
-            let seed = || {
-                let io = ModelIo::default();
-                let mut log =
-                    NativeLogStore::create(io.clone(), support::identity(g), limits).unwrap();
-                support::append(
-                    &mut log,
-                    vec![LogMutation::Create(support::bootstrap(g, 3))],
-                );
-                let state = log.state(group(g)).unwrap();
-                support::append(
-                    &mut log,
-                    vec![support::update(
-                        &state,
-                        1,
-                        boundary - 1,
-                        Some(Suffix {
-                            from: 1,
-                            entries: entries[..boundary as usize - 1].to_vec(),
-                        }),
-                    )],
-                );
-                (io, log)
-            };
+            let seed = || seed_reparent_log(g, &entries, boundary, limits);
             let (_, log) = seed();
             let mutation = support::update(
                 &log.state(group(g)).unwrap(),
@@ -869,3 +757,148 @@ fn creation_reservations_and_local_reparent_cannot_bypass_guards() {
 
 #[path = "reparent_guards/commit.rs"]
 mod committed;
+
+fn check_cancelled_reads(a: Directory) {
+    let view = LifecycleDirectory::new(a);
+    let q = DirectoryQuery::ReparentGuard(op(200));
+    let result = view.read_at(view.applied_index(), q).unwrap();
+    assert!(view.read_result_bound(&q).unwrap() > std::mem::size_of::<DirectoryRead>());
+    assert!(view.read_result_bytes(&result, 0).is_err());
+    assert_eq!(
+        view.read_at(view.applied_index() + 1, q),
+        Err(ApplicationError::NotApplied)
+    );
+    let q = DirectoryQuery::ReparentCancellation(op(200));
+    assert_eq!(
+        view.read_result_bound(&q).unwrap(),
+        std::mem::size_of::<DirectoryRead>()
+    );
+    assert_eq!(
+        view.read_result_bytes(&view.read_at(view.applied_index(), q).unwrap(), 0)
+            .unwrap(),
+        0
+    );
+}
+
+fn check_guarded_data_path(p: &CrossReparentPlan, a: &Directory, c: &Directory) {
+    let mut owner = RoutedApplication::new(
+        group(21),
+        p.child().clone(),
+        BucketCounter::new(range(0, 128), Policy, bucket_limits()).unwrap(),
+        Policy,
+        RoutedLimits {
+            operations: 32,
+            semantic_bytes: 8192,
+            payload_bytes: 1024,
+            inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|_| panic!("owner"));
+    let boot = owner.bootstrap_command(200000).unwrap();
+    commit(&mut owner, 100, boot);
+    let before = [a.applied_index(), c.applied_index()];
+    let hint = RouteHint {
+        responsibility: id(11),
+        group: group(21),
+        application: p.child().input().application,
+        scheme: p.child().input().scheme,
+        scope: p.child().input().scope,
+        bucket: 1,
+        epoch: p.child().input().epoch,
+        generation: p.child().input().generation,
+    };
+    let data = encode_routed(
+        hint,
+        &[1],
+        &encode_add(&[1], 7, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(
+        commit(&mut owner, 1, data.clone()).outcome,
+        RoutedOutcome::Applied(_)
+    ));
+    assert!(matches!(
+        commit(&mut owner, 1, data).outcome,
+        RoutedOutcome::Applied(_)
+    ));
+    assert_eq!(owner.application().outbox().count(), 1);
+    assert_eq!(before, [a.applied_index(), c.applied_index()]);
+}
+
+#[cfg(feature = "native")]
+fn guard_journal(
+    p: &CrossReparentPlan,
+    g: u128,
+    ordinary: usize,
+    proof: ReparentGuardEvidence,
+    decision: ReparentCancellationStatus,
+) -> (Vec<voteboat::log::LogEntry>, u64, Vec<u8>) {
+    let prototype = fresh(g, p, ordinary);
+    let mut entries = vec![entry(1, 1000, prototype.bootstrap_command(200000).unwrap())];
+    for (i, m) in prototype.plan().manifests().enumerate() {
+        entries.push(entry(
+            2 + i as u64,
+            1001 + i as u128,
+            DirectoryCommand {
+                expected: None,
+                manifest: m.clone(),
+            }
+            .encode(200000)
+            .unwrap(),
+        ));
+    }
+    let guard_index = entries.len() as u64 + 1;
+    let guard = prepare(p, if g == 1 { None } else { Some(proof) });
+    entries.push(entry(guard_index, 200, guard.clone()));
+    entries.push(entry(
+        guard_index + 1,
+        if g == 1 { 300 } else { 301 },
+        if g == 1 {
+            CancelReparent { guard: op(200) }.encode()
+        } else {
+            ReleaseReparentGuard {
+                configuration: ConfigurationId::new(3).unwrap(),
+                decision,
+            }
+            .encode()
+            .unwrap()
+        },
+    ));
+
+    (entries, guard_index, guard)
+}
+
+#[cfg(feature = "native")]
+fn seed_reparent_log(
+    g: u128,
+    entries: &[voteboat::log::LogEntry],
+    boundary: u64,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(g), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(g, 3))],
+    );
+    let state = log.state(group(g)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}

@@ -104,14 +104,7 @@ fn completed_cross_move_adoption_keeps_data_retry_status_and_exact_profile_recov
     assert_eq!(owner.grant(), &a.after());
     assert_eq!(owner.bootstrap_command(200000).unwrap(), binding);
     let checkpoint = owner.checkpoint(200000).unwrap();
-    let mut recovered = selected(a.before(), 1);
-    let empty = recovered.checkpoint(200000).unwrap();
-    for end in 0..checkpoint.len() {
-        assert!(recovered
-            .restore_checkpoint(4, owner.applied_index(), &checkpoint[..end])
-            .is_err());
-        assert_eq!(recovered.checkpoint(200000).unwrap(), empty);
-    }
+    let mut recovered = check_truncated_owner_checkpoint(&a, &owner, &checkpoint);
     recovered
         .restore_checkpoint(4, owner.applied_index(), &checkpoint)
         .unwrap();
@@ -151,18 +144,7 @@ fn completed_cross_move_adoption_keeps_data_retry_status_and_exact_profile_recov
     assert!(local
         .restore_checkpoint(4, owner.applied_index(), &checkpoint)
         .is_err());
-    let mut corrupt = a.clone();
-    corrupt.child_publication.index = 0;
-    assert!(corrupt.encode(200000).is_err());
-    let mut corrupt = a.clone();
-    corrupt.completion.completion.index = corrupt.decision.decision.index;
-    assert!(corrupt.encode(200000).is_err());
-    let mut corrupt = a.clone();
-    corrupt.decision.decision.commit.guards.pop();
-    assert!(corrupt.encode(200000).is_err());
-    let mut corrupt = a.clone();
-    corrupt.child_publication.decision_digest = ContentDigest([0; 32]);
-    assert!(corrupt.encode(200000).is_err());
+    check_corrupt_adoption(&a);
 }
 
 #[cfg(feature = "native")]
@@ -300,64 +282,7 @@ fn cross_authority_adopted_source_restarts_and_splits_under_new_parent() {
         panic!("frozen")
     };
     s = source_reopen(&s, adoption.before());
-    let mut targets = Vec::new();
-    let mut ready = Vec::new();
-    for (g, start, end) in [(31, 0, 64), (32, 64, 128)] {
-        let mut target = TransferTarget::new(
-            group(g),
-            op(800),
-            intent.clone(),
-            BucketCounter::new(range(start, end), Policy, bucket_limits()).unwrap(),
-            Policy,
-            TargetLimits {
-                import_bytes: 65536,
-                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("target: {:?}", e.0));
-        let boot = target.bootstrap_command(200000).unwrap();
-        commit(&mut target, 800, boot);
-        let import = TargetImport::new(
-            op(800),
-            intent.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: frozen.fence,
-                configuration: cfg,
-                image: s.export_target(group(g), 65536).unwrap(),
-                digest: frozen
-                    .exports
-                    .iter()
-                    .find(|e| e.target == group(g))
-                    .unwrap()
-                    .digest,
-            }],
-        )
-        .unwrap_or_else(|e| panic!("import: {:?}", e.0));
-        let command = target.import_command(&import, 200000).unwrap();
-        commit(&mut target, 800, command);
-        ready.push(
-            TargetReadyEvidence::from_status(cfg, target.status())
-                .unwrap_or_else(|e| panic!("ready: {:?}", e.0)),
-        );
-        targets.push(target);
-    }
-    let publication = TransferPublication::new(
-        op(800),
-        intent.clone(),
-        vec![SourceFenceEvidence::from_status(cfg, frozen.clone())
-            .unwrap_or_else(|e| panic!("fence: {:?}", e.0))],
-        ready,
-    )
-    .unwrap_or_else(|e| panic!("publication: {:?}", e.0));
-    assert_eq!(
-        commit(&mut nodes[2], 801, publication.encode(200000).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(intent.after().input().generation)
-    );
-    let decision = nodes[2]
-        .transfer_publication_at(nodes[2].applied_index(), op(800))
-        .unwrap()
-        .unwrap();
+    let (mut targets, decision) = publish_split(&mut nodes, &s, &intent, &frozen, cfg);
     let reservation_index = nodes[1]
         .delegation_reservation_at(nodes[1].applied_index(), op(700))
         .unwrap()
@@ -413,43 +338,12 @@ fn cross_authority_adopted_source_restarts_and_splits_under_new_parent() {
         assert!(r.duplicate);
         assert_eq!(target.application().outbox().count(), 1);
     }
-    let frozen_cp = s.checkpoint(1000000).unwrap();
-    assert_eq!(
-        commit(&mut s, 300, adoption.encode(200000).unwrap()).outcome,
-        adopted
-    );
-    assert_eq!(s.fence(), Some(frozen.fence));
-    let RoutedOutcome::ParentAdopted(status) = adopted else {
-        unreachable!()
-    };
-    assert_eq!(
-        s.read_at(s.applied_index(), SourceQuery::ParentAdoption(op(300)))
-            .unwrap(),
-        SourceRead::ParentAdoption(Some(status))
-    );
-    s = source_reopen(&s, adoption.before());
-    assert_eq!(s.fence(), Some(frozen.fence));
-    assert_ne!(frozen_cp, s.checkpoint(1000000).unwrap()); // outer applied advances, frozen image does not
-    for g in [31, 32] {
-        assert_eq!(
-            ContentDigest::scope_image(&s.export_target(group(g), 65536).unwrap()),
-            frozen
-                .exports
-                .iter()
-                .find(|e| e.target == group(g))
-                .unwrap()
-                .digest
-        );
-    }
-    assert!(matches!(
-        commit(&mut s, 999, data(&adoption.after(), 1, 1)).outcome,
-        RoutedOutcome::Rejected(RoutingError::Fenced)
-    ));
+    check_adopted_frozen_source(s, &adoption, adopted, &frozen);
 }
 #[cfg(feature = "native")]
 #[test]
 fn native_cross_adoption_and_later_freeze_cuts_keep_exact_original_lineage() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (mut nodes, adoption) = moved();
     let intent = reserve_split(&mut nodes, &adoption);
@@ -462,29 +356,7 @@ fn native_cross_adoption_and_later_freeze_cuts_keep_exact_original_lineage() {
     ];
     let limits = LogLimits::default();
     for boundary in [3, 4] {
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log =
-                NativeLogStore::create(io.clone(), support::identity(21), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(21, 3))],
-            );
-            let state = log.state(group(21)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    boundary - 1,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_adoption_journal(&entries, boundary, limits);
         let (_, log) = seed();
         let mutation = support::update(
             &log.state(group(21)).unwrap(),
@@ -558,4 +430,181 @@ fn native_cross_adoption_and_later_freeze_cuts_keep_exact_original_lineage() {
         }
         assert!(old && complete);
     }
+}
+
+fn check_corrupt_adoption(a: &CrossOwnerParentAdoption) {
+    let mut corrupt = a.clone();
+    corrupt.child_publication.index = 0;
+    assert!(corrupt.encode(200000).is_err());
+    let mut corrupt = a.clone();
+    corrupt.completion.completion.index = corrupt.decision.decision.index;
+    assert!(corrupt.encode(200000).is_err());
+    let mut corrupt = a.clone();
+    corrupt.decision.decision.commit.guards.pop();
+    assert!(corrupt.encode(200000).is_err());
+    let mut corrupt = a.clone();
+    corrupt.child_publication.decision_digest = ContentDigest([0; 32]);
+    assert!(corrupt.encode(200000).is_err());
+}
+
+fn publish_split(
+    nodes: &mut [Directory],
+    s: &Source,
+    intent: &TransferIntent,
+    frozen: &SourceFreezeStatus,
+    cfg: ConfigurationId,
+) -> (
+    Vec<TransferTarget<BucketCounter<Policy>, Policy>>,
+    TransferPublicationStatus,
+) {
+    let mut targets = Vec::new();
+    let mut ready = Vec::new();
+    for (g, start, end) in [(31, 0, 64), (32, 64, 128)] {
+        let mut target = TransferTarget::new(
+            group(g),
+            op(800),
+            intent.clone(),
+            BucketCounter::new(range(start, end), Policy, bucket_limits()).unwrap(),
+            Policy,
+            TargetLimits {
+                import_bytes: 65536,
+                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|e| panic!("target: {:?}", e.0));
+        let boot = target.bootstrap_command(200000).unwrap();
+        commit(&mut target, 800, boot);
+        let import = TargetImport::new(
+            op(800),
+            intent.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: frozen.fence,
+                configuration: cfg,
+                image: s.export_target(group(g), 65536).unwrap(),
+                digest: frozen
+                    .exports
+                    .iter()
+                    .find(|e| e.target == group(g))
+                    .unwrap()
+                    .digest,
+            }],
+        )
+        .unwrap_or_else(|e| panic!("import: {:?}", e.0));
+        let command = target.import_command(&import, 200000).unwrap();
+        commit(&mut target, 800, command);
+        ready.push(
+            TargetReadyEvidence::from_status(cfg, target.status())
+                .unwrap_or_else(|e| panic!("ready: {:?}", e.0)),
+        );
+        targets.push(target);
+    }
+    let publication = TransferPublication::new(
+        op(800),
+        intent.clone(),
+        vec![SourceFenceEvidence::from_status(cfg, frozen.clone())
+            .unwrap_or_else(|e| panic!("fence: {:?}", e.0))],
+        ready,
+    )
+    .unwrap_or_else(|e| panic!("publication: {:?}", e.0));
+    assert_eq!(
+        commit(&mut nodes[2], 801, publication.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(intent.after().input().generation)
+    );
+    let decision = nodes[2]
+        .transfer_publication_at(nodes[2].applied_index(), op(800))
+        .unwrap()
+        .unwrap();
+
+    (targets, decision)
+}
+
+fn check_adopted_frozen_source(
+    mut s: Source,
+    adoption: &CrossOwnerParentAdoption,
+    adopted: RoutedOutcome<<BucketCounter<Policy> as StateMachine>::Receipt>,
+    frozen: &SourceFreezeStatus,
+) {
+    let frozen_cp = s.checkpoint(1000000).unwrap();
+    assert_eq!(
+        commit(&mut s, 300, adoption.encode(200000).unwrap()).outcome,
+        adopted
+    );
+    assert_eq!(s.fence(), Some(frozen.fence));
+    let RoutedOutcome::ParentAdopted(status) = adopted else {
+        unreachable!()
+    };
+    assert_eq!(
+        s.read_at(s.applied_index(), SourceQuery::ParentAdoption(op(300)))
+            .unwrap(),
+        SourceRead::ParentAdoption(Some(status))
+    );
+    s = source_reopen(&s, adoption.before());
+    assert_eq!(s.fence(), Some(frozen.fence));
+    assert_ne!(frozen_cp, s.checkpoint(1000000).unwrap()); // outer applied advances, frozen image does not
+    for g in [31, 32] {
+        assert_eq!(
+            ContentDigest::scope_image(&s.export_target(group(g), 65536).unwrap()),
+            frozen
+                .exports
+                .iter()
+                .find(|e| e.target == group(g))
+                .unwrap()
+                .digest
+        );
+    }
+    assert!(matches!(
+        commit(&mut s, 999, data(&adoption.after(), 1, 1)).outcome,
+        RoutedOutcome::Rejected(RoutingError::Fenced)
+    ));
+}
+
+#[cfg(feature = "native")]
+fn seed_adoption_journal(
+    entries: &[voteboat::log::LogEntry],
+    boundary: u64,
+    limits: voteboat::log::LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(21), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(21, 3))],
+    );
+    let state = log.state(group(21)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn check_truncated_owner_checkpoint(
+    a: &CrossOwnerParentAdoption,
+    owner: &Owner,
+    checkpoint: &[u8],
+) -> Owner {
+    let mut recovered = selected(a.before(), 1);
+    let empty = recovered.checkpoint(200000).unwrap();
+    for end in 0..checkpoint.len() {
+        assert!(recovered
+            .restore_checkpoint(4, owner.applied_index(), &checkpoint[..end])
+            .is_err());
+        assert_eq!(recovered.checkpoint(200000).unwrap(), empty);
+    }
+
+    recovered
 }

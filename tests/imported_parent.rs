@@ -354,54 +354,7 @@ fn imported_local_and_cross_moves_preserve_lineage_and_allow_later_transfer_and_
     for cross in [false, true] {
         let (i, mut targets, mut logs) = initial(cross, 4);
         let (b, moved) = move_command(i.after(), cross);
-        let original: Vec<_> = targets.iter().map(Target::status).collect();
-        for (j, t) in targets.iter_mut().enumerate() {
-            let g = 21 + j as u128;
-            let key = if j == 0 { 1 } else { 200 };
-            assert!(matches!(
-                tracked(t, &mut logs[j], 800, b.clone()).outcome,
-                TargetOutcome::ParentAdopted(_)
-            ));
-            *t = reopen(t, &i, 4);
-            assert_eq!(t.grant(), &moved);
-            assert_eq!(t.status(), original[j]);
-            let original_entries = logs[j][..3].to_vec();
-            let EntryPayload::Command { bytes: boot, .. } = &original_entries[0].payload else {
-                unreachable!()
-            };
-            assert_eq!(&t.bootstrap_command(200000).unwrap(), boot);
-            for e in &original_entries {
-                let EntryPayload::Command { bytes, .. } = &e.payload else {
-                    unreachable!()
-                };
-                assert!(matches!(
-                    tracked(t, &mut logs[j], 200, bytes.clone()).outcome,
-                    TargetOutcome::Staged { .. }
-                        | TargetOutcome::Imported { .. }
-                        | TargetOutcome::Activated(_)
-                ));
-            }
-            let before = t.application().outbox().count();
-            assert!(matches!(
-                tracked(
-                    t,
-                    &mut logs[j],
-                    1 + j as u128,
-                    data(&moved, g, key, if j == 0 { 7 } else { 11 })
-                )
-                .outcome,
-                TargetOutcome::Applied(_)
-            ));
-            assert_eq!(t.application().outbox().count(), before);
-            assert!(matches!(
-                tracked(t, &mut logs[j], 900 + j as u128, data(&moved, g, key, 3)).outcome,
-                TargetOutcome::Applied(_)
-            ));
-            assert_eq!(
-                t.read_at(t.applied_index(), query(&moved, g, key)).unwrap(),
-                TargetRead::Data(if j == 0 { 10 } else { 14 })
-            );
-        }
+        check_moved_targets(&i, &mut targets, &mut logs, &b, &moved);
         let next = merge_intent(&moved);
         let mut statuses = Vec::new();
         for (j, t) in targets.iter_mut().enumerate() {
@@ -483,52 +436,7 @@ fn imported_local_and_cross_moves_preserve_lineage_and_allow_later_transfer_and_
                 .unwrap(),
             TargetRead::Data(14)
         );
-        // Replay the exact owner history under retirement from its original template.
-        for (j, t) in targets.iter().enumerate() {
-            let mut guard = RetirementGuard::new(fresh(&i, 21 + j as u128, 4))
-                .unwrap_or_else(|e| panic!("{:?}", e.0));
-            // The wrapper is present from construction; replay every original input.
-            guard.apply_batch(&logs[j]).unwrap();
-            commit(&mut guard, 800, b.clone());
-            let s = guard.freeze_status().unwrap().unwrap();
-            assert_eq!(
-                guard
-                    .owner()
-                    .unwrap()
-                    .application()
-                    .checkpoint(65536)
-                    .unwrap(),
-                t.application().checkpoint(65536).unwrap()
-            );
-            let proof = RetirementProof {
-                metadata_configuration: cfg(),
-                decision: decision.clone(),
-                targets: vec![
-                    TargetActivationEvidence::from_status(cfg(), merged.status())
-                        .unwrap_or_else(|e| panic!("{:?}", e.0)),
-                ],
-                release: RetentionRelease {
-                    source: s.fence.group,
-                    operation: op(300),
-                    fence_index: s.fence.index,
-                    release: op(999),
-                },
-            };
-            let command = guard.retirement_command(&proof, 200000).unwrap();
-            commit(&mut guard, 300, command);
-            assert!(guard.owner().is_none());
-            let mut restored = RetirementGuard::new(fresh(&i, 21 + j as u128, 4))
-                .unwrap_or_else(|e| panic!("{:?}", e.0));
-            restored
-                .restore_checkpoint(
-                    guard.schema_version(),
-                    guard.applied_index(),
-                    &guard.checkpoint(1000000).unwrap(),
-                )
-                .unwrap();
-            assert_eq!(restored.freeze_status().unwrap(), Some(s));
-            assert!(restored.owner().is_none());
-        }
+        check_retired_targets(&i, &targets, &logs, &b, &decision, &merged);
     }
 }
 
@@ -537,39 +445,7 @@ fn imported_parent_reserve_pending_order_conflicts_and_checkpoint_rejection_are_
     let (i, mut targets, logs) = initial(true, 1);
     let (bytes, moved) = move_command(i.after(), true);
     let mut t = targets.remove(0);
-    for n in [0, 65, usize::MAX] {
-        assert!(fresh(&i, 21, 0).with_parent_adoption(n).is_err());
-    }
-    assert!(t.clone().with_parent_adoption(1).is_err());
-    let mut old = fresh(&i, 21, 0);
-    let old_boot = old.bootstrap_command(200000).unwrap();
-    commit(&mut old, 200, old_boot);
-    assert!(old
-        .validate_proposal(op(800), &bytes, std::iter::empty())
-        .is_err());
-    assert!(fresh(&i, 21, 1)
-        .validate_proposal(op(800), &bytes, std::iter::empty())
-        .is_err());
-    for id in [1, 200] {
-        assert!(t
-            .validate_proposal(op(id), &bytes, std::iter::empty())
-            .is_err());
-    }
-    assert!(t
-        .validate_proposal(op(800), &bytes, [(op(800), bytes.as_slice())].into_iter())
-        .is_ok());
-    assert!(t
-        .validate_proposal(op(801), &bytes, [(op(800), bytes.as_slice())].into_iter())
-        .is_err());
-    let original = t.checkpoint(1000000).unwrap();
-    let index = t.applied_index();
-    assert!(t
-        .apply_batch(&[
-            entry(index + 1, 800, bytes.clone()),
-            entry(index + 2, 1000, vec![0])
-        ])
-        .is_err());
-    assert_eq!(t.checkpoint(1000000).unwrap(), original);
+    check_adoption_admission(&i, &mut t, &bytes);
     // Fill the provider's ordinary operation reserve. Parent adoption has its own budget.
     for id in 100..131 {
         assert!(matches!(
@@ -610,87 +486,12 @@ fn imported_parent_reserve_pending_order_conflicts_and_checkpoint_rejection_are_
         commit(&mut t, 801, bytes.clone()).outcome,
         TargetOutcome::Rejected(RoutingError::WrongOwner)
     );
-    let updated = original_command.plan.updated_manifests();
-    let back_plan = CrossReparentPlan::new(
-        rid(600),
-        rid(500),
-        moved.input().responsibility,
-        updated.into_iter().collect(),
-    )
-    .unwrap();
-    // The independent lifetime budget is exhausted even for a valid reverse move.
-    let guards = back_plan
-        .authorities()
-        .into_iter()
-        .map(|authority| ReparentGuardEvidence {
-            authority,
-            configuration: cfg(),
-            operation: op(710),
-            index: 20,
-            digest: back_plan.digest(),
-        })
-        .collect();
-    let decision = PublishReparent {
-        configuration: cfg(),
-        decision: ReparentDecisionStatus {
-            coordinator: back_plan.coordinator(),
-            operation: op(711),
-            index: 21,
-            commit: CommitReparent::new(op(710), guards).unwrap(),
-        },
-    };
-    let digest = decision.decision.digest().unwrap();
-    let reverse = CrossOwnerParentAdoption {
-        plan: back_plan,
-        decision,
-        child_configuration: cfg(),
-        child_publication: ReparentPublicationStatus {
-            authority: group(1),
-            operation: op(711),
-            index: 21,
-            guard: op(710),
-            decision_digest: digest,
-        },
-        completion: ReleaseCommittedReparent {
-            configuration: cfg(),
-            completion: ReparentCompletionStatus {
-                coordinator: group(1),
-                operation: op(712),
-                index: 22,
-                guard: op(710),
-                decision_digest: digest,
-            },
-        },
-    }
-    .encode(200000)
-    .unwrap();
+    let reverse = reverse_adoption(&original_command, &moved);
     assert!(t
         .validate_proposal(op(802), &reverse, std::iter::empty())
         .is_err());
     let cp = t.checkpoint(1000000).unwrap();
-    let mut n = fresh(&i, 21, 1);
-    let pristine = n.checkpoint(1000000).unwrap();
-    for end in 0..cp.len() {
-        assert!(n
-            .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &cp[..end])
-            .is_err());
-        assert_eq!(n.checkpoint(1000000).unwrap(), pristine);
-    }
-    let record = cp.len() - bytes.len() - 60;
-    for offset in [record, record + 32, record + 48, record + 56, record + 60] {
-        let mut bad = cp.clone();
-        bad[offset] ^= 0xff;
-        assert!(n
-            .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &bad)
-            .is_err());
-        assert_eq!(n.checkpoint(1000000).unwrap(), pristine);
-    }
-    assert!(fresh(&i, 21, 0)
-        .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &cp)
-        .is_err());
-    assert!(fresh(&i, 21, 2)
-        .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &cp)
-        .is_err());
+    let mut n = check_parent_checkpoint_rejection(&i, &t, &cp, &bytes);
     n.restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &cp)
         .unwrap();
     assert_eq!(commit(&mut n, 800, bytes).outcome, adopted);
@@ -716,7 +517,7 @@ fn imported_parent_reserve_pending_order_conflicts_and_checkpoint_rejection_are_
 #[cfg(feature = "native")]
 #[test]
 fn imported_parent_and_later_fence_recover_at_every_native_journal_cut() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::native::log_store::*;
     let (i, _, logs) = initial(true, 2);
     let (bytes, moved) = move_command(i.after(), true);
@@ -730,28 +531,7 @@ fn imported_parent_and_later_fence_recover_at_every_native_journal_cut() {
     entries.push(entry(5, 300, f));
     let limits = LogLimits::default();
     for boundary in [4u64, 5] {
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(21, 3))],
-            );
-            let state = log.state(group(21)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    boundary - 1,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_parent_journal(&entries, boundary, limits);
         let (_, log) = seed();
         let mutation = support::update(
             &log.state(group(21)).unwrap(),
@@ -920,4 +700,279 @@ fn repeated_parent_chain_and_retirement_bind_the_final_grant() {
         commit(&mut other, 801, bytes).outcome,
         TargetOutcome::ParentAdopted(_)
     ));
+}
+
+fn check_moved_targets(
+    i: &TransferIntent,
+    targets: &mut [Target],
+    logs: &mut [Vec<LogEntry>],
+    b: &[u8],
+    moved: &ResponsibilityManifest,
+) {
+    let original: Vec<_> = targets.iter().map(Target::status).collect();
+    for (j, t) in targets.iter_mut().enumerate() {
+        let g = 21 + j as u128;
+        let key = if j == 0 { 1 } else { 200 };
+        assert!(matches!(
+            tracked(t, &mut logs[j], 800, b.to_vec()).outcome,
+            TargetOutcome::ParentAdopted(_)
+        ));
+        *t = reopen(t, i, 4);
+        assert_eq!(t.grant(), moved);
+        assert_eq!(t.status(), original[j]);
+        let original_entries = logs[j][..3].to_vec();
+        let EntryPayload::Command { bytes: boot, .. } = &original_entries[0].payload else {
+            unreachable!()
+        };
+        assert_eq!(&t.bootstrap_command(200000).unwrap(), boot);
+        for e in &original_entries {
+            let EntryPayload::Command { bytes, .. } = &e.payload else {
+                unreachable!()
+            };
+            assert!(matches!(
+                tracked(t, &mut logs[j], 200, bytes.clone()).outcome,
+                TargetOutcome::Staged { .. }
+                    | TargetOutcome::Imported { .. }
+                    | TargetOutcome::Activated(_)
+            ));
+        }
+        let before = t.application().outbox().count();
+        assert!(matches!(
+            tracked(
+                t,
+                &mut logs[j],
+                1 + j as u128,
+                data(moved, g, key, if j == 0 { 7 } else { 11 })
+            )
+            .outcome,
+            TargetOutcome::Applied(_)
+        ));
+        assert_eq!(t.application().outbox().count(), before);
+        assert!(matches!(
+            tracked(t, &mut logs[j], 900 + j as u128, data(moved, g, key, 3)).outcome,
+            TargetOutcome::Applied(_)
+        ));
+        assert_eq!(
+            t.read_at(t.applied_index(), query(moved, g, key)).unwrap(),
+            TargetRead::Data(if j == 0 { 10 } else { 14 })
+        );
+    }
+}
+
+fn check_retired_targets(
+    i: &TransferIntent,
+    targets: &[Target],
+    logs: &[Vec<LogEntry>],
+    b: &[u8],
+    decision: &TransferPublicationStatus,
+    merged: &Target,
+) {
+    // Replay the exact owner history under retirement from its original template.
+    for (j, t) in targets.iter().enumerate() {
+        let mut guard = RetirementGuard::new(fresh(i, 21 + j as u128, 4))
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+        // The wrapper is present from construction; replay every original input.
+        guard.apply_batch(&logs[j]).unwrap();
+        commit(&mut guard, 800, b.to_vec());
+        let s = guard.freeze_status().unwrap().unwrap();
+        assert_eq!(
+            guard
+                .owner()
+                .unwrap()
+                .application()
+                .checkpoint(65536)
+                .unwrap(),
+            t.application().checkpoint(65536).unwrap()
+        );
+        let proof = RetirementProof {
+            metadata_configuration: cfg(),
+            decision: decision.clone(),
+            targets: vec![
+                TargetActivationEvidence::from_status(cfg(), merged.status())
+                    .unwrap_or_else(|e| panic!("{:?}", e.0)),
+            ],
+            release: RetentionRelease {
+                source: s.fence.group,
+                operation: op(300),
+                fence_index: s.fence.index,
+                release: op(999),
+            },
+        };
+        let command = guard.retirement_command(&proof, 200000).unwrap();
+        commit(&mut guard, 300, command);
+        assert!(guard.owner().is_none());
+        let mut restored = RetirementGuard::new(fresh(i, 21 + j as u128, 4))
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+        restored
+            .restore_checkpoint(
+                guard.schema_version(),
+                guard.applied_index(),
+                &guard.checkpoint(1000000).unwrap(),
+            )
+            .unwrap();
+        assert_eq!(restored.freeze_status().unwrap(), Some(s));
+        assert!(restored.owner().is_none());
+    }
+}
+
+fn check_adoption_admission(i: &TransferIntent, t: &mut Target, bytes: &[u8]) {
+    for n in [0, 65, usize::MAX] {
+        assert!(fresh(i, 21, 0).with_parent_adoption(n).is_err());
+    }
+    assert!(t.clone().with_parent_adoption(1).is_err());
+    let mut old = fresh(i, 21, 0);
+    let old_boot = old.bootstrap_command(200000).unwrap();
+    commit(&mut old, 200, old_boot);
+    assert!(old
+        .validate_proposal(op(800), bytes, std::iter::empty())
+        .is_err());
+    assert!(fresh(i, 21, 1)
+        .validate_proposal(op(800), bytes, std::iter::empty())
+        .is_err());
+    for id in [1, 200] {
+        assert!(t
+            .validate_proposal(op(id), bytes, std::iter::empty())
+            .is_err());
+    }
+    assert!(t
+        .validate_proposal(op(800), bytes, [(op(800), bytes)].into_iter())
+        .is_ok());
+    assert!(t
+        .validate_proposal(op(801), bytes, [(op(800), bytes)].into_iter())
+        .is_err());
+    let original = t.checkpoint(1000000).unwrap();
+    let index = t.applied_index();
+    assert!(t
+        .apply_batch(&[
+            entry(index + 1, 800, bytes.to_vec()),
+            entry(index + 2, 1000, vec![0])
+        ])
+        .is_err());
+    assert_eq!(t.checkpoint(1000000).unwrap(), original);
+}
+
+fn reverse_adoption(
+    original_command: &CrossOwnerParentAdoption,
+    moved: &ResponsibilityManifest,
+) -> Vec<u8> {
+    let updated = original_command.plan.updated_manifests();
+    let back_plan = CrossReparentPlan::new(
+        rid(600),
+        rid(500),
+        moved.input().responsibility,
+        updated.into_iter().collect(),
+    )
+    .unwrap();
+    // The independent lifetime budget is exhausted even for a valid reverse move.
+    let guards = back_plan
+        .authorities()
+        .into_iter()
+        .map(|authority| ReparentGuardEvidence {
+            authority,
+            configuration: cfg(),
+            operation: op(710),
+            index: 20,
+            digest: back_plan.digest(),
+        })
+        .collect();
+    let decision = PublishReparent {
+        configuration: cfg(),
+        decision: ReparentDecisionStatus {
+            coordinator: back_plan.coordinator(),
+            operation: op(711),
+            index: 21,
+            commit: CommitReparent::new(op(710), guards).unwrap(),
+        },
+    };
+    let digest = decision.decision.digest().unwrap();
+    CrossOwnerParentAdoption {
+        plan: back_plan,
+        decision,
+        child_configuration: cfg(),
+        child_publication: ReparentPublicationStatus {
+            authority: group(1),
+            operation: op(711),
+            index: 21,
+            guard: op(710),
+            decision_digest: digest,
+        },
+        completion: ReleaseCommittedReparent {
+            configuration: cfg(),
+            completion: ReparentCompletionStatus {
+                coordinator: group(1),
+                operation: op(712),
+                index: 22,
+                guard: op(710),
+                decision_digest: digest,
+            },
+        },
+    }
+    .encode(200000)
+    .unwrap()
+}
+
+#[cfg(feature = "native")]
+fn seed_parent_journal(
+    entries: &[LogEntry],
+    boundary: u64,
+    limits: LogLimits,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::native::log_store::*;
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(21, 3))],
+    );
+    let state = log.state(group(21)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn check_parent_checkpoint_rejection(
+    i: &TransferIntent,
+    t: &Target,
+    cp: &[u8],
+    bytes: &[u8],
+) -> Target {
+    let mut n = fresh(i, 21, 1);
+    let pristine = n.checkpoint(1000000).unwrap();
+    for end in 0..cp.len() {
+        assert!(n
+            .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &cp[..end])
+            .is_err());
+        assert_eq!(n.checkpoint(1000000).unwrap(), pristine);
+    }
+    let record = cp.len() - bytes.len() - 60;
+    for offset in [record, record + 32, record + 48, record + 56, record + 60] {
+        let mut bad = cp.to_vec();
+        bad[offset] ^= 0xff;
+        assert!(n
+            .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), &bad)
+            .is_err());
+        assert_eq!(n.checkpoint(1000000).unwrap(), pristine);
+    }
+    assert!(fresh(i, 21, 0)
+        .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), cp)
+        .is_err());
+    assert!(fresh(i, 21, 2)
+        .restore_checkpoint(PARENT_TRANSFER_TARGET_SCHEMA, t.applied_index(), cp)
+        .is_err());
+
+    n
 }

@@ -308,6 +308,30 @@ fn history(protocol: NativePeerProtocol, joint_checkpoint: bool) {
     apply(&mut nodes, &clock, 902, 7, 18, false);
     apply(&mut nodes, &clock, 901, 11, 18, true);
     recursive::shutdown(nodes, &clock);
+    check_final_files(&root, checkpoint);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn tcp_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply() {
+    history(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply() {
+    history(NativePeerProtocol::Quic, true);
+}
+#[test]
+fn tcp_final_head_recovers_from_committed_final_checkpoint_after_lost_reply() {
+    history(NativePeerProtocol::TcpTls, false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_final_head_recovers_from_committed_final_checkpoint_after_lost_reply() {
+    history(NativePeerProtocol::Quic, false);
+}
+
+fn check_final_files(root: &Path, checkpoint: u64) {
     for local in [2, 3] {
         let path = root.join(local.to_string());
         let log = NativeLogStore::recover(
@@ -333,24 +357,4 @@ fn history(protocol: NativePeerProtocol, joint_checkpoint: bool) {
         assert_eq!(app.read_applied(core.state().commit_index), Ok(18));
         assert_eq!(core.state().base_index(), checkpoint);
     }
-    std::fs::remove_dir_all(root).unwrap();
-}
-
-#[test]
-fn tcp_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply() {
-    history(NativePeerProtocol::TcpTls, true);
-}
-#[cfg(feature = "quic")]
-#[test]
-fn quic_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply() {
-    history(NativePeerProtocol::Quic, true);
-}
-#[test]
-fn tcp_final_head_recovers_from_committed_final_checkpoint_after_lost_reply() {
-    history(NativePeerProtocol::TcpTls, false);
-}
-#[cfg(feature = "quic")]
-#[test]
-fn quic_final_head_recovers_from_committed_final_checkpoint_after_lost_reply() {
-    history(NativePeerProtocol::Quic, false);
 }

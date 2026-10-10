@@ -1009,7 +1009,7 @@ fn enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_cre
     }
 }
 fn deployment_history(quic: bool) {
-    use voteboat::{identity::*, log::*, membership::*, native::log_store::*};
+    use voteboat::identity::*;
     let mut cluster = Cluster::new();
     cluster.quic = quic;
     cluster.children.push(None); // Nodes 1, 2 and 4; node 3 has retired.
@@ -1018,74 +1018,9 @@ fn deployment_history(quic: bool) {
         id: StoreId::new(404).unwrap(),
         incarnation: StoreIncarnation::new(7).unwrap(),
     };
-    {
-        let _gate = fixture_gate();
-        for local in 1..=2 {
-            let mut log = NativeLogStore::recover(
-                FileLogIo::open(cluster.root.join(local.to_string())).unwrap(),
-                StoreIdentity {
-                    id: StoreId::new(local).unwrap(),
-                    incarnation: StoreIncarnation::new(1).unwrap(),
-                },
-                LogLimits::default(),
-            )
-            .unwrap();
-            let group = GroupIdentity {
-                id: GroupId::new(1).unwrap(),
-                incarnation: GroupIncarnation::new(1).unwrap(),
-            };
-            let state = log.state(group).unwrap();
-            let membership = state.membership_at(state.commit_index).unwrap();
-            let next = Configuration::new(
-                ConfigurationId::new(4).unwrap(),
-                membership.stable().policy().clone(),
-                membership.stable().voter_stores().clone(),
-                [(NodeId::new(4).unwrap(), fourth)].into(),
-            )
-            .unwrap();
-            let tickets = log
-                .append_batch(vec![LogMutation::Update(LogUpdate {
-                    group,
-                    expected_revision: state.revision,
-                    hard_state: state.hard_state,
-                    commit_index: 3,
-                    suffix: Some(Suffix {
-                        from: 3,
-                        entries: vec![LogEntry {
-                            index: 3,
-                            term: 1,
-                            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
-                                operation: OperationId::new(502).unwrap(),
-                                expected: ConfigurationId::new(3).unwrap(),
-                                change: ConfigurationChange::Learners(next),
-                            })),
-                        }],
-                    }),
-                    snapshot: None,
-                    snapshot_membership: None,
-                })])
-                .unwrap();
-            log.barrier(&tickets).unwrap();
-        }
-    }
+    seed_fourth_learner(&cluster, fourth);
     checkpoint_source(&cluster.root, 1, 700, 42);
-    let tls = cluster.root.join("tls");
-    fs::create_dir(&tls).unwrap();
-    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-    for name in [
-        "ca.der",
-        "node1.der",
-        "node1-key.der",
-        "node2.der",
-        "node2-key.der",
-    ] {
-        fs::copy(fixtures.join(name), tls.join(name)).unwrap();
-    }
-    // This deployment assigns the public alternative certificate to node 4 only;
-    // node 3 is absent. DNS names and Raft node IDs are independently checked.
-    fs::copy(fixtures.join("node3.der"), tls.join("node4.der")).unwrap();
-    fs::copy(fixtures.join("node3-key.der"), tls.join("node4-key.der")).unwrap();
-    cluster.tls = Some(tls);
+    configure_fourth_tls(&mut cluster);
     let declaration = format!("voteboat-deployment-v1\n1 1 1 127.0.0.1:{} node1.voteboat.test\n2 2 1 127.0.0.1:{} node2.voteboat.test\n4 404 7 127.0.0.1:{} node3.voteboat.test\n",
         cluster.base + 1, cluster.base + 2, cluster.base + 4);
     let path = cluster.root.join("deployment.txt");
@@ -1094,20 +1029,7 @@ fn deployment_history(quic: bool) {
     let destination = cluster.root.join("4");
     cluster.listeners.clear();
     cluster.udp_sockets.clear();
-    let unassigned = cluster.root.join("unassigned-4");
-    let refused = run(Command::new(BIN)
-        .args(["serve", "recover-member"])
-        .arg(&unassigned)
-        .arg("4")
-        .arg(cluster.base.to_string())
-        .arg(cluster.tls.as_ref().unwrap())
-        .arg("--deployment")
-        .arg(&path));
-    assert!(
-        !refused.status.success(),
-        "provisioning must not create member history"
-    );
-    assert!(!unassigned.exists());
+    refuse_unassigned_deployment(&cluster, &path);
     let created = cluster.enroll("create", 4, &destination, 1);
     assert!(
         created.status.success(),
@@ -1244,67 +1166,9 @@ fn finish_lifecycle_operation(cluster: &Cluster, ids: &[usize], operation: &str,
     }
 }
 fn complete_executable_membership_history(quic: bool) {
-    use voteboat::identity::*;
     let mut cluster = Cluster::new();
     cluster.quic = quic;
     cluster.children.push(None);
-    let store = |n: usize| StoreIdentity {
-        id: StoreId::new(if n == 4 { 404 } else { n as u128 }).unwrap(),
-        incarnation: StoreIncarnation::new(if n == 4 { 7 } else { 1 }).unwrap(),
-    };
-    let inspect = |cluster: &Cluster,
-                   ids: &[usize],
-                   configuration: u64,
-                   voters: &[u64],
-                   learners: &[u64],
-                   operations: &[u128],
-                   value: i64| {
-        for &id in ids {
-            let state = recovered_state_for(
-                &cluster.root.join(id.to_string()),
-                id as u64,
-                store(id),
-                value,
-                (700, 42),
-            );
-            let membership = state.membership_at(state.commit_index).unwrap();
-            assert_eq!(membership.id().get(), configuration);
-            assert!(membership.joint().is_none());
-            assert_eq!(
-                membership
-                    .stable()
-                    .voter_stores()
-                    .keys()
-                    .map(|n| n.get())
-                    .collect::<Vec<_>>(),
-                voters
-            );
-            assert_eq!(
-                membership
-                    .stable()
-                    .learners()
-                    .keys()
-                    .map(|n| n.get())
-                    .collect::<Vec<_>>(),
-                learners
-            );
-            for &operation in operations {
-                assert!(membership
-                    .operations()
-                    .contains(&OperationId::new(operation).unwrap()));
-            }
-            if matches!(configuration, 5 | 10) {
-                assert!(state.snapshot.is_some() && state.base_index() > 0);
-                let checkpoint_membership = state.membership_at(state.base_index()).unwrap();
-                assert_eq!(checkpoint_membership.id().get(), configuration);
-                for &operation in operations {
-                    assert!(checkpoint_membership
-                        .operations()
-                        .contains(&OperationId::new(operation).unwrap()));
-                }
-            }
-        }
-    };
     // All configuration history below comes from real executable proposals.
     // Start only the original public bootstrap, then select member recovery.
     for id in 1..=3 {
@@ -1323,99 +1187,18 @@ fn complete_executable_membership_history(quic: bool) {
     }
     finish_lifecycle_operation(&cluster, &[1, 2], "1001", "701");
     cluster.stop();
-    inspect(&cluster, &[1, 2], 4, &[1, 2], &[], &[1000, 1001], 42);
+    inspect_lifecycle(&cluster, &[1, 2], 4, &[1, 2], &[], &[1000, 1001], 42);
 
     // Node 3 is retired before its public test credential is assigned to node 4.
     // No two live peers share that credential. Store 4 has a distinct incarnation.
-    let tls = cluster.root.join("tls");
-    fs::create_dir(&tls).unwrap();
-    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-    for name in [
-        "ca.der",
-        "node1.der",
-        "node1-key.der",
-        "node2.der",
-        "node2-key.der",
-    ] {
-        fs::copy(fixtures.join(name), tls.join(name)).unwrap();
-    }
-    fs::copy(fixtures.join("node3.der"), tls.join("node4.der")).unwrap();
-    fs::copy(fixtures.join("node3-key.der"), tls.join("node4-key.der")).unwrap();
-    cluster.tls = Some(tls);
+    configure_fourth_tls(&mut cluster);
     let deployment = cluster.root.join("lifecycle.deployment");
     let declaration = format!("voteboat-deployment-v1\n1 1 1 127.0.0.1:{} node1.voteboat.test\n2 2 1 127.0.0.1:{} node2.voteboat.test\n4 404 7 127.0.0.1:{} node3.voteboat.test\n", cluster.base+1, cluster.base+2, cluster.base+4);
     fs::write(&deployment, &declaration).unwrap();
     cluster.deployment = Some(deployment.clone());
     let provisioned =
         "voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 4 4\n";
-    // Plan from actual recovered membership, then carry the ordinary record
-    // through the same trusted executable administration path as a Rust host.
-    let state = recovered_state_for(&cluster.root.join("1"), 1, store(1), 42, (700, 42));
-    let current = state.membership_at(state.commit_index).unwrap();
-    let candidates = [1usize, 2, 4].map(|n| voteboat::placement::PlacementCandidate {
-        node: NodeId::new(n as u64).unwrap(),
-        placement: voteboat::placement::ReplicaPlacement {
-            store: store(n),
-            domain: FailureDomainId::new(n as u64).unwrap(),
-        },
-        enabled: true,
-        free_bytes: 1024 * 1024,
-        free_replica_slots: 1,
-        load_permille: 100,
-    });
-    let authorizer = voteboat::native::placement::NativePlacementAuthorizer::new(
-        GroupIdentity {
-            id: GroupId::new(1).unwrap(),
-            incarnation: GroupIncarnation::new(1).unwrap(),
-        },
-        candidates.iter().map(|c| (c.node, c.placement)).collect(),
-        voteboat::placement::PlacementRequirements {
-            minimum_voting_domains: 2,
-            survive_any_single_domain_loss: false,
-        },
-    )
-    .unwrap();
-    let planned = voteboat::placement::plan_learner(
-        &voteboat::native::placement_planning::NativePlacementPlanner,
-        &authorizer,
-        voteboat::placement::PlacementRequest {
-            snapshot: voteboat::placement::PlacementSnapshot {
-                group: authorizer.group(),
-                configuration: current.id(),
-                generation: voteboat::placement::PlacementSampleGeneration::new(1).unwrap(),
-                observed_at: voteboat::runtime::MonoTime(0),
-                expires_at: voteboat::runtime::MonoTime(100),
-                candidates: &candidates,
-            },
-            current: &current,
-            now: voteboat::runtime::MonoTime(1),
-            minimum_free_bytes: 1024,
-        },
-        OperationId::new(1002).unwrap(),
-    )
-    .unwrap();
-    assert_eq!(planned.recommendation.node, NodeId::new(4).unwrap());
-    let voteboat::membership::ConfigurationChange::Learners(next) = &planned.record.change else {
-        panic!("planner changed voters");
-    };
-    assert_eq!(next.policy(), current.stable().policy());
-    assert_eq!(next.voter_stores(), current.stable().voter_stores());
-    let learners = next
-        .learners()
-        .keys()
-        .map(|n| n.get().to_string())
-        .collect::<Vec<_>>()
-        .join(",");
-    fs::write(
-        &plan,
-        format!(
-            "{provisioned}learners {} {} {} {learners} m:2 v:1 v:2\n",
-            planned.record.operation.get(),
-            planned.record.expected.get(),
-            next.id().get()
-        ),
-    )
-    .unwrap();
+    plan_fourth_learner(&cluster, &plan, provisioned);
     for id in [1, 2] {
         cluster.start(id, "recover-member");
     }
@@ -1424,64 +1207,11 @@ fn complete_executable_membership_history(quic: bool) {
         cluster.ok(id, &["checkpoint"]);
     }
     cluster.stop();
-    inspect(&cluster, &[1, 2], 5, &[1, 2], &[4], &[1000, 1001, 1002], 42);
-    let destination = cluster.root.join("4");
-    let enrolled = cluster.enroll("create", 4, &destination, 1);
-    assert!(
-        enrolled.status.success(),
-        "{}",
-        String::from_utf8_lossy(&enrolled.stderr)
-    );
-    let before = enrolled_state_for(&destination, 4, store(4));
-    assert!(before.snapshot.is_some());
-    assert!(cluster
-        .enroll("recover", 4, &destination, 1)
-        .status
-        .success());
-    assert_eq!(
-        enrolled_state_for(&destination, 4, store(4)),
-        before,
-        "lost enrollment receipt must not rewrite state"
-    );
+    inspect_lifecycle(&cluster, &[1, 2], 5, &[1, 2], &[4], &[1000, 1001, 1002], 42);
+    enroll_checkpointed_fourth(&cluster);
 
-    let policy = if quic {
-        "m:1 w:3 2 v:1 1 v:2 2 v:4"
-    } else {
-        "m:3 v:1 v:2 v:4"
-    };
-    fs::write(
-        &plan,
-        format!("{provisioned}joint 1003 5 6 7 - {policy}\nfinal 1003 6 7\n"),
-    )
-    .unwrap();
-    for id in [1, 2] {
-        cluster.start(id, "recover-member");
-    }
-    let leader = cluster.leader();
-    assert!(cluster
-        .ok(leader, &["add", "703", "0"])
-        .contains("Value(42)"));
-    // Enrollment alone is not live promotion readiness. With 4 offline, the
-    // old voters can still write, but must not accept the promotion intent.
-    // This also leaves a real post-import command for learner catch-up.
-    let unavailable_until = Instant::now() + Duration::from_secs(1);
-    while Instant::now() < unavailable_until {
-        for id in [1, 2] {
-            assert!(cluster
-                .wait_configuration_status(id, "1003")
-                .contains("action=inconclusive_local_absence"));
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    cluster.start(4, "recover-member");
-    finish_lifecycle_operation(&cluster, &[1, 2, 4], "1003", "703");
-    // Lose original voter 1 abruptly, then keep it absent through retirement.
-    let mut failed = cluster.children[0].take().unwrap();
-    failed.kill().unwrap();
-    failed.wait().unwrap();
-    finish_lifecycle_operation(&cluster, &[2, 4], "1003", "704");
-    cluster.stop();
-    inspect(
+    promote_fourth(&mut cluster, &plan, provisioned, quic);
+    inspect_lifecycle(
         &cluster,
         &[2, 4],
         7,
@@ -1500,7 +1230,7 @@ fn complete_executable_membership_history(quic: bool) {
         cluster.ok(id, &["checkpoint"]);
     }
     cluster.stop();
-    inspect(
+    inspect_lifecycle(
         &cluster,
         &[2, 4],
         10,
@@ -1534,7 +1264,7 @@ fn complete_executable_membership_history(quic: bool) {
         .contains("Value(43)"));
     assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
     cluster.stop();
-    inspect(
+    inspect_lifecycle(
         &cluster,
         &[2, 4],
         10,
@@ -1694,58 +1424,12 @@ fn replicated_history(quic: bool) {
         .wait_configuration_status(leader, query[1])
         .contains("action=inconclusive_local_absence"));
     if quic {
-        // Wait for the surviving peers' idle detection and fresh session lease,
-        // then prove the recovered former leader receives newly committed work.
-        assert!(cluster.routed(&["add", "3", "0"]).contains("Value(10)"));
-        let deadline = Instant::now() + Duration::from_secs(20);
-        loop {
-            let recovered = cluster.request(leader, &["status"]);
-            let active = cluster.request(replacement, &["status"]);
-            let committed = |bytes: &[u8]| {
-                String::from_utf8_lossy(bytes)
-                    .split("committed=")
-                    .nth(1)
-                    .and_then(|s| s.trim().parse::<u64>().ok())
-            };
-            if recovered.status.success()
-                && active.status.success()
-                && committed(&recovered.stdout)
-                    .is_some_and(|i| i > 0 && Some(i) == committed(&active.stdout))
-            {
-                break;
-            }
-            assert!(
-                Instant::now() < deadline,
-                "QUIC recovered peer failed to catch up; logs at {:?}",
-                cluster.root
-            );
-            std::thread::sleep(Duration::from_millis(10));
-        }
+        wait_recovered_quic(&cluster, leader, replacement);
     }
     // Checkpoint admission is asynchronous; shutdown drains admitted work.
     cluster.ok(replacement, &["checkpoint"]);
     cluster.stop();
-    {
-        let _gate = fixture_gate();
-        use voteboat::{identity::*, log::*, native::log_store::*};
-        let store = NativeLogStore::recover(
-            FileLogIo::open(cluster.root.join(replacement.to_string())).unwrap(),
-            StoreIdentity {
-                id: StoreId::new(replacement as u128).unwrap(),
-                incarnation: StoreIncarnation::new(1).unwrap(),
-            },
-            LogLimits::default(),
-        )
-        .unwrap();
-        let group = GroupIdentity {
-            id: GroupId::new(1).unwrap(),
-            incarnation: GroupIncarnation::new(1).unwrap(),
-        };
-        assert!(
-            store.state(group).unwrap().base_index() > 0,
-            "admitted checkpoint must drain durably"
-        );
-    }
+    check_drained_checkpoint(&cluster, replacement);
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
     let refused = run(Command::new(BIN)
         .args(["serve", "create"])
@@ -2206,30 +1890,7 @@ fn authenticated_command_history(quic: bool) {
         .request(leader, &["add", "11002", "100"])
         .status
         .success());
-    // A valid CA certificate with the wrong selected pin cannot impersonate reader1.
-    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
-    let spoof = cluster.root.join("spoof");
-    fs::create_dir(&spoof).unwrap();
-    for (from, to) in [
-        ("ca.der", "ca.der"),
-        ("node3.der", "node1.der"),
-        ("node3-key.der", "node1-key.der"),
-        ("node2.der", "node2.der"),
-    ] {
-        fs::copy(fixtures.join(from), spoof.join(to)).unwrap();
-    }
-    let denied = run(Command::new(BIN)
-        .args([
-            "client",
-            &cluster.base.to_string(),
-            "2",
-            "read",
-            "--service-tls",
-        ])
-        .arg(&spoof)
-        .args(["--principal", "1"]));
-    assert!(!denied.status.success());
-    assert!(String::from_utf8_lossy(&denied.stdout).contains("authentication"));
+    refuse_spoofed_reader(&cluster);
     cluster.command_principal = Some(3);
     assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
     cluster.ok(leader, &["checkpoint"]);
@@ -2465,37 +2126,7 @@ fn client_supplied_configuration_history(quic: bool) {
         cluster.start(id, "recover-member");
     }
     let leader = cluster.leader();
-    for principal in [1, 2] {
-        cluster.command_principal = Some(principal);
-        let denied = cluster.request(
-            leader,
-            &["configure-record", "learners 16001 1 2 - m:3 v:1 v:2 v:3"],
-        );
-        assert_eq!(
-            String::from_utf8(denied.stdout).unwrap(),
-            "ERR AUTHORIZATION\n"
-        );
-    }
-    cluster.command_principal = Some(3);
-    for malformed in [
-        "",
-        "learners",
-        "learners 0 1 2 - m:3 v:1 v:2 v:3",
-        "learners 16099 1 2 - m:16383 v:1",
-        "learners 16099 1 2 - m:3 v:1 v:1 v:3",
-        "learners 16099 1 2 - m:3 v:1 v:2 v:4",
-        "learners 16099 1 2 1,1 m:2 v:2 v:3",
-        "learners 16099 1 2 - m:3 v:1 v:2 v:3 trailing",
-        "joint 16099 1 2 3 - m:1 v:1", // Valid tree, violates placement.
-    ] {
-        let refused = cluster.request(leader, &["configure-record", malformed]);
-        let text = String::from_utf8(refused.stdout).unwrap();
-        assert!(!refused.status.success(), "accepted {malformed}: {text}");
-        assert!(text.starts_with("ERR "), "{text}");
-        assert!(cluster
-            .ok(leader, &["configuration-status", "16099"])
-            .contains("inconclusive_local_absence"));
-    }
+    refuse_invalid_configurations(&mut cluster, leader);
     let record = "learners 16001 1 2 - m:3 v:1 v:2 v:3";
     assert!(cluster
         .ok(leader, &["configure-record", record])
@@ -2694,7 +2325,6 @@ fn wait_administration_event(cluster: &Cluster, id: usize, event: &str) {
     }
 }
 fn interrupted_native_configuration_history(quic: bool) {
-    use voteboat::identity::*;
     let mut cluster = Cluster::new();
     cluster.quic = quic;
     let access = cluster.root.join("interruption-access.txt");
@@ -2728,45 +2358,7 @@ fn interrupted_native_configuration_history(quic: bool) {
     learner.kill().unwrap();
     learner.wait().unwrap();
     let leader = cluster.leader();
-    let mut closed = UnobservedCommand::send(
-        &cluster,
-        leader,
-        "configure-record joint 17011 3 4 5 - m:3 v:1 v:2 v:3",
-    );
-    wait_administration_event(
-        &cluster,
-        leader,
-        "administration operation=17011 preparing_learner=3",
-    );
-    closed.close_notify();
-    wait_administration_event(
-        &cluster,
-        leader,
-        "administration observation_cancelled operation=17011 phase=preparing reason=channel",
-    );
-    closed.disconnect();
-    assert!(cluster
-        .ok(leader, &["configuration-status", "17011"])
-        .contains("inconclusive_local_absence"));
-    let expired = UnobservedCommand::send(
-        &cluster,
-        leader,
-        "configure-record joint 17012 3 4 5 - m:3 v:1 v:2 v:3",
-    );
-    wait_administration_event(
-        &cluster,
-        leader,
-        "administration operation=17012 preparing_learner=3",
-    );
-    wait_administration_event(
-        &cluster,
-        leader,
-        "administration observation_cancelled operation=17012 phase=preparing reason=deadline",
-    );
-    expired.disconnect();
-    assert!(cluster
-        .ok(leader, &["configuration-status", "17012"])
-        .contains("inconclusive_local_absence"));
+    cancel_closed_and_expired(&cluster, leader);
     let abandoned = UnobservedCommand::send(
         &cluster,
         leader,
@@ -2828,19 +2420,215 @@ fn interrupted_native_configuration_history(quic: bool) {
     assert!(cluster
         .ok(replacement, &["configure-record", record])
         .contains("duplicate=true"));
-    let conflict = cluster.request(
-        replacement,
-        &["configure-record", "learners 17013 5 99 - m:3 v:1 v:2 v:3"],
-    );
-    assert!(String::from_utf8(conflict.stdout)
-        .unwrap()
-        .contains("conflicts with retained record"));
+    check_interrupted_record_conflict(&cluster, replacement);
     cluster.start(leader, "recover-member");
     assert!(cluster
         .ok(replacement, &["add", "17000", "42"])
         .contains("duplicate=true"));
     assert_eq!(cluster.ok(replacement, &["read"]), "OK value=42\n");
     cluster.stop();
+    check_interrupted_membership(&cluster);
+    fs::remove_dir_all(&cluster.root).unwrap();
+}
+#[test]
+fn native_configuration_close_deadline_and_unread_commit_recover_tcp() {
+    interrupted_native_configuration_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn native_configuration_close_deadline_and_unread_commit_recover_quic() {
+    interrupted_native_configuration_history(true);
+}
+
+fn seed_fourth_learner(cluster: &Cluster, fourth: voteboat::identity::StoreIdentity) {
+    use voteboat::{identity::*, log::*, membership::*, native::log_store::*};
+    {
+        let _gate = fixture_gate();
+        for local in 1..=2 {
+            let mut log = NativeLogStore::recover(
+                FileLogIo::open(cluster.root.join(local.to_string())).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(local).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                LogLimits::default(),
+            )
+            .unwrap();
+            let group = GroupIdentity {
+                id: GroupId::new(1).unwrap(),
+                incarnation: GroupIncarnation::new(1).unwrap(),
+            };
+            let state = log.state(group).unwrap();
+            let membership = state.membership_at(state.commit_index).unwrap();
+            let next = Configuration::new(
+                ConfigurationId::new(4).unwrap(),
+                membership.stable().policy().clone(),
+                membership.stable().voter_stores().clone(),
+                [(NodeId::new(4).unwrap(), fourth)].into(),
+            )
+            .unwrap();
+            let tickets = log
+                .append_batch(vec![LogMutation::Update(LogUpdate {
+                    group,
+                    expected_revision: state.revision,
+                    hard_state: state.hard_state,
+                    commit_index: 3,
+                    suffix: Some(Suffix {
+                        from: 3,
+                        entries: vec![LogEntry {
+                            index: 3,
+                            term: 1,
+                            payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                                operation: OperationId::new(502).unwrap(),
+                                expected: ConfigurationId::new(3).unwrap(),
+                                change: ConfigurationChange::Learners(next),
+                            })),
+                        }],
+                    }),
+                    snapshot: None,
+                    snapshot_membership: None,
+                })])
+                .unwrap();
+            log.barrier(&tickets).unwrap();
+        }
+    }
+}
+
+fn wait_recovered_quic(cluster: &Cluster, leader: usize, replacement: usize) {
+    // Wait for the surviving peers' idle detection and fresh session lease,
+    // then prove the recovered former leader receives newly committed work.
+    assert!(cluster.routed(&["add", "3", "0"]).contains("Value(10)"));
+    let deadline = Instant::now() + Duration::from_secs(20);
+    loop {
+        let recovered = cluster.request(leader, &["status"]);
+        let active = cluster.request(replacement, &["status"]);
+        let committed = |bytes: &[u8]| {
+            String::from_utf8_lossy(bytes)
+                .split("committed=")
+                .nth(1)
+                .and_then(|s| s.trim().parse::<u64>().ok())
+        };
+        if recovered.status.success()
+            && active.status.success()
+            && committed(&recovered.stdout)
+                .is_some_and(|i| i > 0 && Some(i) == committed(&active.stdout))
+        {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "QUIC recovered peer failed to catch up; logs at {:?}",
+            cluster.root
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+
+fn refuse_spoofed_reader(cluster: &Cluster) {
+    // A valid CA certificate with the wrong selected pin cannot impersonate reader1.
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    let spoof = cluster.root.join("spoof");
+    fs::create_dir(&spoof).unwrap();
+    for (from, to) in [
+        ("ca.der", "ca.der"),
+        ("node3.der", "node1.der"),
+        ("node3-key.der", "node1-key.der"),
+        ("node2.der", "node2.der"),
+    ] {
+        fs::copy(fixtures.join(from), spoof.join(to)).unwrap();
+    }
+    let denied = run(Command::new(BIN)
+        .args([
+            "client",
+            &cluster.base.to_string(),
+            "2",
+            "read",
+            "--service-tls",
+        ])
+        .arg(&spoof)
+        .args(["--principal", "1"]));
+    assert!(!denied.status.success());
+    assert!(String::from_utf8_lossy(&denied.stdout).contains("authentication"));
+}
+
+fn refuse_invalid_configurations(cluster: &mut Cluster, leader: usize) {
+    for principal in [1, 2] {
+        cluster.command_principal = Some(principal);
+        let denied = cluster.request(
+            leader,
+            &["configure-record", "learners 16001 1 2 - m:3 v:1 v:2 v:3"],
+        );
+        assert_eq!(
+            String::from_utf8(denied.stdout).unwrap(),
+            "ERR AUTHORIZATION\n"
+        );
+    }
+    cluster.command_principal = Some(3);
+    for malformed in [
+        "",
+        "learners",
+        "learners 0 1 2 - m:3 v:1 v:2 v:3",
+        "learners 16099 1 2 - m:16383 v:1",
+        "learners 16099 1 2 - m:3 v:1 v:1 v:3",
+        "learners 16099 1 2 - m:3 v:1 v:2 v:4",
+        "learners 16099 1 2 1,1 m:2 v:2 v:3",
+        "learners 16099 1 2 - m:3 v:1 v:2 v:3 trailing",
+        "joint 16099 1 2 3 - m:1 v:1", // Valid tree, violates placement.
+    ] {
+        let refused = cluster.request(leader, &["configure-record", malformed]);
+        let text = String::from_utf8(refused.stdout).unwrap();
+        assert!(!refused.status.success(), "accepted {malformed}: {text}");
+        assert!(text.starts_with("ERR "), "{text}");
+        assert!(cluster
+            .ok(leader, &["configuration-status", "16099"])
+            .contains("inconclusive_local_absence"));
+    }
+}
+
+fn cancel_closed_and_expired(cluster: &Cluster, leader: usize) {
+    let mut closed = UnobservedCommand::send(
+        cluster,
+        leader,
+        "configure-record joint 17011 3 4 5 - m:3 v:1 v:2 v:3",
+    );
+    wait_administration_event(
+        cluster,
+        leader,
+        "administration operation=17011 preparing_learner=3",
+    );
+    closed.close_notify();
+    wait_administration_event(
+        cluster,
+        leader,
+        "administration observation_cancelled operation=17011 phase=preparing reason=channel",
+    );
+    closed.disconnect();
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17011"])
+        .contains("inconclusive_local_absence"));
+    let expired = UnobservedCommand::send(
+        cluster,
+        leader,
+        "configure-record joint 17012 3 4 5 - m:3 v:1 v:2 v:3",
+    );
+    wait_administration_event(
+        cluster,
+        leader,
+        "administration operation=17012 preparing_learner=3",
+    );
+    wait_administration_event(
+        cluster,
+        leader,
+        "administration observation_cancelled operation=17012 phase=preparing reason=deadline",
+    );
+    expired.disconnect();
+    assert!(cluster
+        .ok(leader, &["configuration-status", "17012"])
+        .contains("inconclusive_local_absence"));
+}
+
+fn check_interrupted_membership(cluster: &Cluster) {
+    use voteboat::identity::*;
     for id in 1..=3 {
         let state = recovered_state_for(
             &cluster.root.join(id.to_string()),
@@ -2869,14 +2657,280 @@ fn interrupted_native_configuration_history(quic: bool) {
             .operations()
             .contains(&OperationId::new(17015).unwrap()));
     }
-    fs::remove_dir_all(&cluster.root).unwrap();
 }
-#[test]
-fn native_configuration_close_deadline_and_unread_commit_recover_tcp() {
-    interrupted_native_configuration_history(false);
+
+fn inspect_lifecycle(
+    cluster: &Cluster,
+    ids: &[usize],
+    configuration: u64,
+    voters: &[u64],
+    learners: &[u64],
+    operations: &[u128],
+    value: i64,
+) {
+    use voteboat::identity::*;
+
+    for &id in ids {
+        let state = recovered_state_for(
+            &cluster.root.join(id.to_string()),
+            id as u64,
+            lifecycle_store(id),
+            value,
+            (700, 42),
+        );
+        let membership = state.membership_at(state.commit_index).unwrap();
+        assert_eq!(membership.id().get(), configuration);
+        assert!(membership.joint().is_none());
+        assert_eq!(
+            membership
+                .stable()
+                .voter_stores()
+                .keys()
+                .map(|n| n.get())
+                .collect::<Vec<_>>(),
+            voters
+        );
+        assert_eq!(
+            membership
+                .stable()
+                .learners()
+                .keys()
+                .map(|n| n.get())
+                .collect::<Vec<_>>(),
+            learners
+        );
+        for &operation in operations {
+            assert!(membership
+                .operations()
+                .contains(&OperationId::new(operation).unwrap()));
+        }
+        if matches!(configuration, 5 | 10) {
+            assert!(state.snapshot.is_some() && state.base_index() > 0);
+            let checkpoint_membership = state.membership_at(state.base_index()).unwrap();
+            assert_eq!(checkpoint_membership.id().get(), configuration);
+            for &operation in operations {
+                assert!(checkpoint_membership
+                    .operations()
+                    .contains(&OperationId::new(operation).unwrap()));
+            }
+        }
+    }
 }
-#[cfg(feature = "quic")]
-#[test]
-fn native_configuration_close_deadline_and_unread_commit_recover_quic() {
-    interrupted_native_configuration_history(true);
+
+fn plan_fourth_learner(cluster: &Cluster, plan: &std::path::Path, provisioned: &str) {
+    use voteboat::identity::*;
+    // Plan from actual recovered membership, then carry the ordinary record
+    // through the same trusted executable administration path as a Rust host.
+    let state = recovered_state_for(
+        &cluster.root.join("1"),
+        1,
+        lifecycle_store(1),
+        42,
+        (700, 42),
+    );
+    let current = state.membership_at(state.commit_index).unwrap();
+    let candidates = [1usize, 2, 4].map(|n| voteboat::placement::PlacementCandidate {
+        node: NodeId::new(n as u64).unwrap(),
+        placement: voteboat::placement::ReplicaPlacement {
+            store: lifecycle_store(n),
+            domain: FailureDomainId::new(n as u64).unwrap(),
+        },
+        enabled: true,
+        free_bytes: 1024 * 1024,
+        free_replica_slots: 1,
+        load_permille: 100,
+    });
+    let authorizer = voteboat::native::placement::NativePlacementAuthorizer::new(
+        GroupIdentity {
+            id: GroupId::new(1).unwrap(),
+            incarnation: GroupIncarnation::new(1).unwrap(),
+        },
+        candidates.iter().map(|c| (c.node, c.placement)).collect(),
+        voteboat::placement::PlacementRequirements {
+            minimum_voting_domains: 2,
+            survive_any_single_domain_loss: false,
+        },
+    )
+    .unwrap();
+    let planned = voteboat::placement::plan_learner(
+        &voteboat::native::placement_planning::NativePlacementPlanner,
+        &authorizer,
+        voteboat::placement::PlacementRequest {
+            snapshot: voteboat::placement::PlacementSnapshot {
+                group: authorizer.group(),
+                configuration: current.id(),
+                generation: voteboat::placement::PlacementSampleGeneration::new(1).unwrap(),
+                observed_at: voteboat::runtime::MonoTime(0),
+                expires_at: voteboat::runtime::MonoTime(100),
+                candidates: &candidates,
+            },
+            current: &current,
+            now: voteboat::runtime::MonoTime(1),
+            minimum_free_bytes: 1024,
+        },
+        OperationId::new(1002).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(planned.recommendation.node, NodeId::new(4).unwrap());
+    let voteboat::membership::ConfigurationChange::Learners(next) = &planned.record.change else {
+        panic!("planner changed voters");
+    };
+    assert_eq!(next.policy(), current.stable().policy());
+    assert_eq!(next.voter_stores(), current.stable().voter_stores());
+    let learners = next
+        .learners()
+        .keys()
+        .map(|n| n.get().to_string())
+        .collect::<Vec<_>>()
+        .join(",");
+    fs::write(
+        plan,
+        format!(
+            "{provisioned}learners {} {} {} {learners} m:2 v:1 v:2\n",
+            planned.record.operation.get(),
+            planned.record.expected.get(),
+            next.id().get()
+        ),
+    )
+    .unwrap();
+}
+
+fn enroll_checkpointed_fourth(cluster: &Cluster) {
+    let destination = cluster.root.join("4");
+    let enrolled = cluster.enroll("create", 4, &destination, 1);
+    assert!(
+        enrolled.status.success(),
+        "{}",
+        String::from_utf8_lossy(&enrolled.stderr)
+    );
+    let before = enrolled_state_for(&destination, 4, lifecycle_store(4));
+    assert!(before.snapshot.is_some());
+    assert!(cluster
+        .enroll("recover", 4, &destination, 1)
+        .status
+        .success());
+    assert_eq!(
+        enrolled_state_for(&destination, 4, lifecycle_store(4)),
+        before,
+        "lost enrollment receipt must not rewrite state"
+    );
+}
+
+fn promote_fourth(cluster: &mut Cluster, plan: &std::path::Path, provisioned: &str, quic: bool) {
+    let policy = if quic {
+        "m:1 w:3 2 v:1 1 v:2 2 v:4"
+    } else {
+        "m:3 v:1 v:2 v:4"
+    };
+    fs::write(
+        plan,
+        format!("{provisioned}joint 1003 5 6 7 - {policy}\nfinal 1003 6 7\n"),
+    )
+    .unwrap();
+    for id in [1, 2] {
+        cluster.start(id, "recover-member");
+    }
+    let leader = cluster.leader();
+    assert!(cluster
+        .ok(leader, &["add", "703", "0"])
+        .contains("Value(42)"));
+    // Enrollment alone is not live promotion readiness. With 4 offline, the
+    // old voters can still write, but must not accept the promotion intent.
+    // This also leaves a real post-import command for learner catch-up.
+    let unavailable_until = Instant::now() + Duration::from_secs(1);
+    while Instant::now() < unavailable_until {
+        for id in [1, 2] {
+            assert!(cluster
+                .wait_configuration_status(id, "1003")
+                .contains("action=inconclusive_local_absence"));
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    cluster.start(4, "recover-member");
+    finish_lifecycle_operation(cluster, &[1, 2, 4], "1003", "703");
+    // Lose original voter 1 abruptly, then keep it absent through retirement.
+    let mut failed = cluster.children[0].take().unwrap();
+    failed.kill().unwrap();
+    failed.wait().unwrap();
+    finish_lifecycle_operation(cluster, &[2, 4], "1003", "704");
+    cluster.stop();
+}
+
+fn lifecycle_store(n: usize) -> voteboat::identity::StoreIdentity {
+    use voteboat::identity::*;
+    StoreIdentity {
+        id: StoreId::new(if n == 4 { 404 } else { n as u128 }).unwrap(),
+        incarnation: StoreIncarnation::new(if n == 4 { 7 } else { 1 }).unwrap(),
+    }
+}
+
+fn configure_fourth_tls(cluster: &mut Cluster) {
+    let tls = cluster.root.join("tls");
+    fs::create_dir(&tls).unwrap();
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+    for name in [
+        "ca.der",
+        "node1.der",
+        "node1-key.der",
+        "node2.der",
+        "node2-key.der",
+    ] {
+        fs::copy(fixtures.join(name), tls.join(name)).unwrap();
+    }
+    // This deployment assigns the public alternative certificate to node 4 only;
+    // node 3 is absent. DNS names and Raft node IDs are independently checked.
+    fs::copy(fixtures.join("node3.der"), tls.join("node4.der")).unwrap();
+    fs::copy(fixtures.join("node3-key.der"), tls.join("node4-key.der")).unwrap();
+    cluster.tls = Some(tls);
+}
+
+fn check_drained_checkpoint(cluster: &Cluster, replacement: usize) {
+    {
+        let _gate = fixture_gate();
+        use voteboat::{identity::*, log::*, native::log_store::*};
+        let store = NativeLogStore::recover(
+            FileLogIo::open(cluster.root.join(replacement.to_string())).unwrap(),
+            StoreIdentity {
+                id: StoreId::new(replacement as u128).unwrap(),
+                incarnation: StoreIncarnation::new(1).unwrap(),
+            },
+            LogLimits::default(),
+        )
+        .unwrap();
+        let group = GroupIdentity {
+            id: GroupId::new(1).unwrap(),
+            incarnation: GroupIncarnation::new(1).unwrap(),
+        };
+        assert!(
+            store.state(group).unwrap().base_index() > 0,
+            "admitted checkpoint must drain durably"
+        );
+    }
+}
+
+fn check_interrupted_record_conflict(cluster: &Cluster, replacement: usize) {
+    let conflict = cluster.request(
+        replacement,
+        &["configure-record", "learners 17013 5 99 - m:3 v:1 v:2 v:3"],
+    );
+    assert!(String::from_utf8(conflict.stdout)
+        .unwrap()
+        .contains("conflicts with retained record"));
+}
+
+fn refuse_unassigned_deployment(cluster: &Cluster, path: &std::path::Path) {
+    let unassigned = cluster.root.join("unassigned-4");
+    let refused = run(Command::new(BIN)
+        .args(["serve", "recover-member"])
+        .arg(&unassigned)
+        .arg("4")
+        .arg(cluster.base.to_string())
+        .arg(cluster.tls.as_ref().unwrap())
+        .arg("--deployment")
+        .arg(path));
+    assert!(
+        !refused.status.success(),
+        "provisioning must not create member history"
+    );
+    assert!(!unassigned.exists());
 }
