@@ -319,9 +319,12 @@ impl IndependentChild {
         let (g, hint, key, delta) = (self.group, self.hint, self.key, self.delta);
         let bytes =
             encode_routed(hint, &[key], &delta.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
-        assert!(
-            matches!(propose(nodes, clock, g, 1, bytes.clone()).outcome, RoutedOutcome::Applied(CounterReceipt {outcome: CounterOutcome::Value(v), duplicate: false, ..}) if v == delta)
-        );
+        let (receipt, uncertain) = propose_recovering_observed(nodes, clock, g, 1, bytes.clone());
+        assert_eq!(receipt.operation, OperationId::new(1).unwrap());
+        assert!(matches!(receipt.outcome,
+            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(value), duplicate, .. })
+                if value == delta && (!duplicate || uncertain)
+        ));
         assert!(matches!(
             propose(nodes, clock, g, 1, bytes).outcome,
             RoutedOutcome::Applied(CounterReceipt {
@@ -463,6 +466,10 @@ pub(super) fn run(protocol: NativePeerProtocol, compact: bool) {
     orders.bootstrap(&mut children, &clock);
     jobs.bootstrap(&mut other, &clock);
     // The host continues polling live children while the parent roles drain.
+    let stores = parents
+        .iter()
+        .map(|node| node.local().reads.binding().owner.store.identity)
+        .collect::<Vec<_>>();
     let parent_logs = close(parents, &clock, 1, || {
         drive(&mut children, &clock, |_| true);
         drive(&mut other, &clock, |_| true);
@@ -476,10 +483,12 @@ pub(super) fn run(protocol: NativePeerProtocol, compact: bool) {
     close(other, &clock, 30, || {});
     orders.recover(&root, &clock, protocol);
     jobs.recover(&root, &clock, protocol);
-    for (n, before) in (1..=3).zip(parent_logs) {
+    assert_eq!(stores.len(), parent_logs.len());
+    for (store, before) in stores.into_iter().zip(parent_logs) {
+        let id = store.id.get();
         let log = NativeLogStore::recover(
-            FileLogIo::open(root.join(format!("1/{n}"))).unwrap(),
-            support::identity(n),
+            FileLogIo::open(root.join(format!("1/{id}"))).unwrap(),
+            store,
             LogLimits::default(),
         )
         .unwrap();

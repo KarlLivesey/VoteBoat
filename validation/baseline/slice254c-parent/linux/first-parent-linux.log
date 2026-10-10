@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.51s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 2 tests
+test native::quic_child_writes_checkpoint_and_restart_without_parent_commits ... ok
+test native::tcp_child_writes_checkpoint_and_restart_without_parent_commits ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 174 filtered out; finished in 2.85s
+

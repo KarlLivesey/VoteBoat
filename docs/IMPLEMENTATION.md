@@ -25599,3 +25599,48 @@ store/operation identities and stopped-file recovery, explicit process/worker
 cleanup and both-host strict zero. Sketch the actual owned configuration, ports,
 processes, failure/restart and cleanup before launching; this is functional
 acceptance, not a new runtime, security pass or throughput/latency claim.
+
+254c parent pre-edit schema: unchanged-source Mac backtraces fail0/2 at
+IndependentChild::exercise's first operation1 write (parent_independence.rs323),
+after all metadata is shut down and both child groups were already bootstrapped.
+The result is accepted Unknown(LeadershipChanged), not a route/fence/application
+refusal. Reuse254b's existing four-attempt original-ID/content retry helper with
+its uncertainty witness for this positive call. Keep group20/delta7 and group30/
+delta11, exact hints/keys, first value, explicit next duplicate/value, quorum reads,
+parent-offline cache checks, original checkpoint cuts/cold retry, stopped parent
+logs and joined cleanup. Permit first duplicate only with an actually observed
+accepted uncertainty; known pre-admission NotLeader alone cannot justify it.
+No new data/API/generation, runtime, ancestor dependency, timer/deadline/quota or
+production change. Failure of any other outcome remains fatal. The original raw
+helper stays available for single-attempt/fault assertions. Acceptance: original
+named TCP/QUIC WAL/checkpoint parent histories on both hosts, affected source-loss
+histories, zero formatting/four strict profiles, source-linked before/after logs.
+Only change another positive call after its actual typed failure/caller is known.
+
+254c first correction: Linux2/0 and Mac1/1; original first child writes now pass
+both protocols and actual uncertainty can justify a duplicate first observation.
+Mac TCP reaches the final stopped-parent log equality at489: read store1 term2/
+revision17 is compared with a returned snapshot term1/revision16. The checker
+zips returned logs with synthetic1..3 positions, although the existing campaign
+helper can swap the actual ready winner into Vec index0. Correct this ownership
+mapping before considering storage changes: capture each parent's exact StoreIdentity
+in return order before close, require equal vector lengths, and recover its own
+id-named directory with that identity. Preserve full GroupLog equality; never
+search for any matching replica or ignore term/revision. This is the same existing
+parent-independence acceptance, no new helper/production/fixture poll-order change.
+Retain the first failed bodies/hash manifest, then run the original histories.
+
+Completed254c-parent: the focused uncertainty-aware first write plus exact frozen
+store-identity comparison pass the original TCP/QUIC parent-independent WAL and
+checkpoint histories2/0 on Linux and Mac. Before Mac0/2, first correction1/1 and
+final2/0 remain source-linked in [parent evidence](../validation/baseline/slice254c-parent/README.md).
+Formatting and all four strict profiles are zero on both,652 final build inputs
+verify. This is a positive caller/fixture correction, no production/interface/
+consensus/storage/deadline/quota change; raw helper and original assertions remain.
+Macro review254c-parent advances the existing P5 parent-offline usable-service
+acceptance, not the full P5/P6 milestone or broad Mac certificate.
+Current254c-remaining still resolves the originally reported namespace/delete/
+offline lifecycle failures from actual typed bodies or exact-input reproductions.
+Next255 functional release-gap audit and following256 separate-host usable service
+remain linked to their purposes, dependencies and completion checks above. Full
+goal stays active; do not substitute selected parent acceptance for those exits.

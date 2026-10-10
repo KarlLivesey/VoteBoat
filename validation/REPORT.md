@@ -1,5 +1,14 @@
 # Validation report
 
+Original parent-independent service retry/store ownership:
+[254c-parent](baseline/slice254c-parent/README.md). Mac0/2 first-child writes lose
+leadership; existing original-ID/content recovery then reaches1/1 with a frozen
+log compared against the wrong Vec-position store. Exact captured store identities
+retain full equality. Final original TCP/QUIC WAL/checkpoint histories2/0 pass on
+both platforms, formatting/four strict profiles zero and652 final inputs verified.
+No production/interface/timing change. This supersedes the selected parent failures
+reported in254 below; namespace/delete/other Mac full-suite failures remain open.
+
 Owned manifest source handoff: [slice254](baseline/slice254/README.md). Public idle
 replacement preserves owned old/rejected sources, accepted/cancelled reads,
 manifest/barrier floors and observation-ID uniqueness. Native local/remote forced

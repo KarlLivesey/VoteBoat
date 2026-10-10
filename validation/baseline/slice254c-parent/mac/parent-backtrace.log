@@ -1,0 +1,75 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 2 tests
+test native::quic_child_writes_checkpoint_and_restart_without_parent_commits ... FAILED
+test native::tcp_child_writes_checkpoint_and_restart_without_parent_commits ... FAILED
+
+failures:
+
+---- native::quic_child_writes_checkpoint_and_restart_without_parent_commits stdout ----
+
+thread 'native::quic_child_writes_checkpoint_and_restart_without_parent_commits' (17400023) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: Unknown(LeadershipChanged)
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::result::unwrap_failed
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/result.rs:1870:5
+   3: <core::result::Result<voteboat::routed::RoutedReceipt<voteboat::application::CounterReceipt>, routed::native::ProposalFailure>>::unwrap
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1231:23
+   4: routed::native::propose::<voteboat::routed::RoutedApplication<voteboat::application::Counter, routed::HostPolicy>>
+             at ./tests/routed/native.rs:248:56
+   5: <routed::native::parent_independence::IndependentChild>::exercise
+             at ./tests/routed/parent_independence.rs:323:22
+   6: routed::native::parent_independence::run
+             at ./tests/routed/parent_independence.rs:472:10
+   7: routed::native::quic_child_writes_checkpoint_and_restart_without_parent_commits
+             at ./tests/routed/native.rs:614:9
+   8: routed::native::quic_child_writes_checkpoint_and_restart_without_parent_commits::{closure#0}
+             at ./tests/routed/native.rs:612:69
+   9: <routed::native::quic_child_writes_checkpoint_and_restart_without_parent_commits::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  10: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+---- native::tcp_child_writes_checkpoint_and_restart_without_parent_commits stdout ----
+
+thread 'native::tcp_child_writes_checkpoint_and_restart_without_parent_commits' (17400024) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: Unknown(LeadershipChanged)
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::result::unwrap_failed
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/result.rs:1870:5
+   3: <core::result::Result<voteboat::routed::RoutedReceipt<voteboat::application::CounterReceipt>, routed::native::ProposalFailure>>::unwrap
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1231:23
+   4: routed::native::propose::<voteboat::routed::RoutedApplication<voteboat::application::Counter, routed::HostPolicy>>
+             at ./tests/routed/native.rs:248:56
+   5: <routed::native::parent_independence::IndependentChild>::exercise
+             at ./tests/routed/parent_independence.rs:323:22
+   6: routed::native::parent_independence::run
+             at ./tests/routed/parent_independence.rs:472:10
+   7: routed::native::tcp_child_writes_checkpoint_and_restart_without_parent_commits
+             at ./tests/routed/native.rs:607:9
+   8: routed::native::tcp_child_writes_checkpoint_and_restart_without_parent_commits::{closure#0}
+             at ./tests/routed/native.rs:605:68
+   9: <routed::native::tcp_child_writes_checkpoint_and_restart_without_parent_commits::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  10: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    native::quic_child_writes_checkpoint_and_restart_without_parent_commits
+    native::tcp_child_writes_checkpoint_and_restart_without_parent_commits
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 174 filtered out; finished in 10.97s
+
+error: test failed, to rerun pass `--test routed`
