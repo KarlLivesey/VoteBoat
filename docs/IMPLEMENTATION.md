@@ -94,20 +94,78 @@ admitted-cancel/source-loss recovery over TCP and QUIC. Completed199g adds bound
 automatic read failover. Completed199h corrects the historical-handoff acceptance
 assumption with target-loss and actual checkpoint recovery tests. These advance
 the usable Linux/macOS service milestone without closing platform acceptance.
-Newly completed
-run38036099346 also identifies five Linux directory-setup failures on explicit
-unknown initialization outcomes. Current199i will correct that demonstrated setup
-assumption using original-ID recovery before proceeding to202b. It depends on
-the directory initialization/publication contract and the retained exact logs;
-acceptance requires recovered original initialization/publication, no blanket
-retry of errors, and actual directory/recursive-routing tests. Next202b selects
+Completed199i corrects five recorded Linux directory-setup failures on explicit
+unknown initialization outcomes, with original-ID recovery, exact receipt
+validation and passing directory/recursive-routing tests. Current202b selects
 the next combined lifecycle/revocation schedule from the acceptance ledger;
 it depends on existing original-ID lifecycle and credential contracts and must
 preserve authoritative ownership plus retry state across the selected restart.
-Following201d extends the unreviewed provider obligations; it depends on the
+Next201d extends the unreviewed provider obligations; it depends on the
 existing inventory and shared conformance harness, and must connect each selected
 obligation to actual host/native assertions. This advances replaceable Rust
 embedding without treating a metadata count as provider certification.
+Following the provider slice, review the remaining peer credential rotation
+contract against the existing session/journal mechanism. Its purpose is safe
+operational key replacement; dependencies are authenticated peer identity,
+session revocation and restart reconstruction. Completion requires a concrete
+replacement API and TCP/QUIC rotation/restart checks, advancing the secure
+networked service milestone; do not claim completion from command-channel reload.
+
+### Slice199i implemented — original directory initialization recovery
+
+The directory fixtures retry only exact documented leadership-change/non-leader
+responses, at most four attempts, with the immutable plan's original operations
+100 and101. Success requires the exact operation, expected outcome and valid
+duplicate flag. Unrelated errors and malformed/mismatched receipts stop. No
+automatic production mutation retry or consensus/storage semantics change is
+introduced; production adds only an operation-scoped admission diagnostic.
+
+Two native histories interrupt initialization and publication after admission
+with both followers stopped, kill the waiting client and leader, then recover
+all replicas and resolve the original operations. This is an admitted-work cut,
+not evidence that the interrupted operation was committed before failure.
+Original retries deduplicate, authoritative manifest bytes and the immutable
+plan survive all-node restart, and QUIC checks a checkpoint through the committed
+prefix before reopening. Two policy checks cover bounded retries and rejection
+of unrelated failures or changed receipts.
+
+All four new checks pass. The complete directory/recursive-route target passes
+17 all-feature tests and14 default-feature tests. Formatting and all four strict
+Clippy profiles pass with zero diagnostics; source and command evidence is in
+validation/baseline/slice199i. Macro review: this closes the recorded directory
+setup assumption while platform acceptance and broader recovery remain open.
+The next deliverable is202b combined lifecycle/revocation, then201d provider
+conformance. Full P0–P7 remains active.
+
+### Slice199i schema plan — original directory bootstrap/publication recovery
+
+Completed run38036099346 at a41a6ec reports five Linux directory/recursive-route
+failures when initialize returns the documented UNKNOWN Unknown(LeadershipChanged).
+Initialization already uses the immutable plan's bootstrap operation100 and
+initial publication101; an unknown receipt does not authorize a different ID.
+Correct the setup assumption and add actual admitted-work interruption coverage.
+
+Data/API shape: use the existing initialize/publish commands and exact applied
+receipt fields. A bounded test-side dispatcher selects a current leader and
+retries only exact leadership-change/non-leader outcomes, at most four times,
+with the original arguments. Successful receipts must have the original
+operation, expected outcome and a valid duplicate flag. Other errors stop.
+The production CLI still exposes uncertainty without automatically retrying.
+
+Transitions: fresh directory -> bootstrap admitted while no quorum -> client and
+leader killed before reply -> all replicas recover -> original bootstrap applied
+or deduplicated; repeat for publication. Then verify authoritative manifest lookup,
+repeat both original operations, checkpoint/reopen and verify unchanged results.
+The original plan bytes must remain unchanged. Admission logging names the
+operation for an exact test cut but proves neither durability nor commitment.
+Use a bounded owned child client; killing its observation cannot undo admitted
+work. No second log, hidden runtime or consensus/storage change is needed.
+
+Acceptance: TCP/WAL and QUIC/checkpoint interrupted bootstrap/publication histories,
+exact original receipt recovery and duplicate retries; policy tests for bounded
+attempts and refusal of wrong receipts/unrelated failures; existing directory and
+recursive-route histories; formatting and all four strict Clippy profiles. Keep
+other platform failures separate, then advance to combined recovery202b.
 
 ### Slice199h schema plan — historical handoff after later leader loss
 

@@ -1,6 +1,12 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Directory initialization evidence: [slice199i](baseline/slice199i/README.md).
+Four new original-operation recovery/policy checks pass, as do the complete
+17-test all-feature and14-test default directory/recursive-route targets.
+Formatting and four strict Clippy profiles are clean. Admission interruption
+with no live quorum does not establish pre-failure commitment. Broader platform
+and lifecycle acceptance remains open.
 Historical-handoff evidence: [slice199h](baseline/slice199h/README.md), with two
 new executable target-loss histories. The original record, independent group
 scope and data survive retries and restart; QUIC includes actual checkpoint

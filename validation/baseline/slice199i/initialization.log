@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 4 tests
+test initialization::setup_retries_exact_leadership_loss_and_requires_original_applied_receipt ... ok
+test initialization::setup_is_bounded_and_rejects_unrelated_errors_or_changed_receipts ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_tcp ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_quic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 2.83s
+

@@ -273,7 +273,10 @@ fn initialize(c: &mut Cluster) -> usize {
     let denied = c.request(leader, 2, &["initialize"]);
     assert!(!denied.status.success());
     assert!(String::from_utf8_lossy(&denied.stdout).contains("AUTHORIZATION"));
-    assert!(c.ok(leader, &["initialize"]).contains("Initialized"));
+    assert!(initialization::command(c, &["initialize"])
+        .1
+        .contains("Initialized"));
+    let leader = c.leader();
     let missing = c.lookup(leader).fixture_output().unwrap();
     assert!(!missing.status.success());
     assert!(
@@ -281,7 +284,8 @@ fn initialize(c: &mut Cluster) -> usize {
         "unexpected unpublished lookup failure: {}",
         String::from_utf8_lossy(&missing.stderr)
     );
-    assert!(c.ok(leader, &["publish", "101"]).contains("Published"));
+    let (leader, receipt) = initialization::command(c, &["publish", "101"]);
+    assert!(receipt.contains("Published"));
     leader
 }
 fn history(quic: bool) {
@@ -300,9 +304,11 @@ fn history(quic: bool) {
     for id in 1..=3 {
         c.start(id, "recover");
     }
-    let leader = c.leader();
-    assert!(c.ok(leader, &["initialize"]).contains("duplicate=true"));
-    assert!(c.ok(leader, &["publish", "101"]).contains("duplicate=true"));
+    assert!(initialization::command(&mut c, &["initialize"])
+        .1
+        .contains("duplicate=true"));
+    let (leader, receipt) = initialization::command(&mut c, &["publish", "101"]);
+    assert!(receipt.contains("duplicate=true"));
     let r = c.lookup(leader).fixture_output().unwrap();
     assert!(
         r.status.success(),
@@ -394,5 +400,7 @@ fn invalid_metadata_plan_is_rejected_before_storage_or_tls() {
     }
 }
 
+#[path = "directory_service/initialization.rs"]
+mod initialization;
 #[path = "directory_service/routes.rs"]
 mod routes;

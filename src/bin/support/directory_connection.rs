@@ -213,7 +213,10 @@ impl Connection {
             operation,
             bytes,
         }) {
-            Ok(ticket) => self.phase = Phase::Pending(ticket),
+            Ok(ticket) => {
+                eprintln!("directory proposal admitted operation={}", operation.get());
+                self.phase = Phase::Pending(ticket);
+            }
             Err(rejected) => self.reply(format!("ERR {:?}", rejected.reason)),
         }
         Ok(())

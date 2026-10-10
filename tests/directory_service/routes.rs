@@ -90,10 +90,8 @@ fn publish(c: &mut Cluster) -> usize {
     for id in 1..=3 {
         c.start(id, "create");
     }
-    let leader = c.leader();
-    c.ok(leader, &["initialize"]);
-    c.ok(leader, &["publish", "101"]);
-    leader
+    initialization::command(c, &["initialize"]);
+    initialization::command(c, &["publish", "101"]).0
 }
 struct Tree {
     root: Cluster,

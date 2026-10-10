@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice199i resolves the recorded directory initialization test assumption using
+bounded retries of original plan operations100/101 on exact leadership outcomes.
+Four new checks cover receipt validation and admitted-work/client/leader loss
+over TCP/QUIC; original receipts, manifest and plan survive restart. QUIC also
+checks a checkpoint through the committed prefix. The complete directory target
+passes17 all-feature and14 default-feature tests, with formatting/four strict
+Clippy profiles clean. Production adds only an admission diagnostic; this is
+not a new mutation retry protocol or current-platform acceptance.
+
 Slice199h corrects the handoff tests' current-leader assumption: Completed is
 historical. New TCP/QUIC group histories kill the recorded target, observe the
 same receipt through another leader, retry original operations and recover

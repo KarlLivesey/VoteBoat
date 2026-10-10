@@ -1,0 +1,9 @@
+src/bin/support/directory_connection.rs: OK
+tests/directory_service.rs: OK
+tests/directory_service/routes.rs: OK
+tests/directory_service/initialization.rs: OK
+tests/directory_service/initialization/recovery.rs: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice199i/README.md: OK
