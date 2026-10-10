@@ -244,6 +244,11 @@ where
         max_bytes: usize,
     ) -> Result<crate::scope::ScopeImage, ApplicationError>;
     fn retirement_lineage(&self) -> Result<Vec<u8>, ApplicationError>;
+    /// Lifetime bound selected before bootstrap, including ownership changes.
+    /// Ordinary owners retain the original activation/parent-grant envelope.
+    fn retirement_lineage_bound(&self) -> usize {
+        MAX_RETIREMENT_LINEAGE_BYTES
+    }
     fn validate_retirement_source(
         &self,
         status: &SourceFreezeStatus,
@@ -444,9 +449,9 @@ where
             application_schema: RETIREMENT_GUARD_SCHEMA,
             command_bytes: inner.command_bytes.max(MAX_RETIREMENT_COMMAND_BYTES),
             snapshot_bytes: 80
-                + inner
-                    .snapshot_bytes
-                    .max(MAX_RETIREMENT_COMMAND_BYTES + MAX_RETIREMENT_LINEAGE_BYTES + 24),
+                + inner.snapshot_bytes.max(
+                    MAX_RETIREMENT_COMMAND_BYTES + self.initial.retirement_lineage_bound() + 24,
+                ),
         }
     }
 }
@@ -506,7 +511,7 @@ where
                         .as_ref()
                         .ok_or(ApplicationError::NotApplied)?
                         .retirement_lineage()?;
-                    if lineage.capacity() > MAX_RETIREMENT_LINEAGE_BYTES {
+                    if lineage.capacity() > next.initial.retirement_lineage_bound() {
                         return Err(ApplicationError::InvalidCommand);
                     }
                     next.initial
@@ -700,7 +705,7 @@ where
         let len = r.u32()? as usize;
         let body = r.take(len)?;
         let len = r.u32()? as usize;
-        if len > MAX_RETIREMENT_LINEAGE_BYTES {
+        if len > self.initial.retirement_lineage_bound() {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let lineage = r.take(len)?;

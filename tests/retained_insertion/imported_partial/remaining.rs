@@ -125,116 +125,154 @@ fn prepare_remaining(d: &mut Directory, t: &Target, split: bool) -> TransferInte
     ));
     i
 }
+struct Completed {
+    d: Directory,
+    t: Target,
+    first: TransferIntent,
+    intent: TransferIntent,
+    log: Vec<voteboat::log::LogEntry>,
+    successors: Vec<Target>,
+    decision: TransferPublicationStatus,
+    children: [Target; 2],
+    old_children: Vec<ResponsibilityManifest>,
+    frozen: Vec<u8>,
+}
+fn completed(split: bool) -> Completed {
+    let cfg = ConfigurationId::new(1).unwrap();
+    let (mut d, mut t, first, mut log) = initial_with_directory(2, directory);
+    let (child_a, _, _) = transfer(&mut d, &mut t, &mut log, 0, range(0, 64));
+    let (child_b, _, _) = transfer(&mut d, &mut t, &mut log, 1, range(64, 96));
+    let old_children: Vec<_> = [rid(30), rid(31)]
+        .into_iter()
+        .map(|id| d.manifest(id).unwrap().clone())
+        .collect();
+    let i = prepare_remaining(&mut d, &t, split);
+    let frozen = t.freeze_command(&i, 65536, 200000).unwrap();
+    assert!(matches!(
+        record(&mut t, &mut log, 3000, frozen.clone()),
+        TargetOutcome::Frozen(_)
+    ));
+    let status = t.freeze_status().unwrap().unwrap();
+    assert_eq!(status.exports.len(), if split { 2 } else { 1 });
+    assert!(status.exports.iter().all(|e| e.scope.start() >= 96));
+    let live = t.checkpoint(400000).unwrap();
+    t = reopen(&t, &first, 2);
+    assert_eq!(t.checkpoint(400000).unwrap(), live);
+    assert!(matches!(read(&t, 100), TargetRead::Rejected(_)));
+    let mut successors = Vec::new();
+    for g in if split { vec![40, 41] } else { vec![40] } {
+        let mut c = child(&i, g);
+        let b = c.bootstrap_command(200000).unwrap();
+        commit(&mut c, 3000, b);
+        let image = t.export_target(group(g), 65536).unwrap();
+        assert_eq!(
+            image.scope(),
+            i.targets()
+                .into_iter()
+                .find(|r| r.target == RouteTarget::Group(group(g)))
+                .unwrap()
+                .scope
+        );
+        let digest = ContentDigest::scope_image(&image);
+        let import = TargetImport::new(
+            op(3000),
+            i.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: status.fence,
+                configuration: cfg,
+                image,
+                digest,
+            }],
+        )
+        .unwrap();
+        let b = c.import_command(&import, 200000).unwrap();
+        commit(&mut c, 3000, b);
+        successors.push(c);
+    }
+    let p = TransferPublication::new(
+        op(3000),
+        i.clone(),
+        vec![SourceFenceEvidence::from_status(cfg, status).unwrap()],
+        successors
+            .iter()
+            .map(|c| TargetReadyEvidence::from_status(cfg, c.status()).unwrap())
+            .collect(),
+    )
+    .unwrap();
+    assert!(matches!(
+        commit(&mut d, 3001, p.encode(200000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(_)
+    ));
+    let decision = d
+        .transfer_publication_at(d.applied_index(), op(3000))
+        .unwrap()
+        .unwrap();
+    let b = DelegationCompletion {
+        reservation: op(6002),
+        reservation_index: d
+            .delegation_reservation_at(d.applied_index(), op(6002))
+            .unwrap()
+            .unwrap()
+            .index,
+        parent_configuration: cfg,
+        child_configuration: cfg,
+        decision: decision.clone(),
+    }
+    .encode(200000)
+    .unwrap();
+    assert!(matches!(
+        commit(&mut d, 6003, b).outcome,
+        DirectoryOutcome::DelegationPublished(_)
+    ));
+    for (j, c) in successors.iter_mut().enumerate() {
+        let b = c
+            .activation_command(
+                &TargetActivation {
+                    metadata_configuration: cfg,
+                    decision: decision.clone(),
+                },
+                200000,
+            )
+            .unwrap();
+        commit(c, 3000, b);
+        assert_eq!(c.schema_version(), REMAINING_TRANSFER_TARGET_SCHEMA);
+        let cp = c.checkpoint(400000).unwrap();
+        let mut fresh = child(&i, 40 + j as u128);
+        fresh
+            .restore_checkpoint(c.schema_version(), c.applied_index(), &cp)
+            .unwrap();
+        assert_eq!(fresh.status(), c.status());
+        *c = fresh;
+    }
+    Completed {
+        d,
+        t,
+        first,
+        intent: i,
+        log,
+        successors,
+        decision,
+        children: [child_a, child_b],
+        old_children,
+        frozen,
+    }
+}
 #[test]
 fn partial_imports_move_all_remaining_data_without_changing_earlier_children() {
     for split in [false, true] {
-        let cfg = ConfigurationId::new(1).unwrap();
-        let (mut d, mut t, first, mut log) = initial_with_directory(2, directory);
-        let (child_a, _, _) = transfer(&mut d, &mut t, &mut log, 0, range(0, 64));
-        let (child_b, _, _) = transfer(&mut d, &mut t, &mut log, 1, range(64, 96));
-        let old_children: Vec<_> = [rid(30), rid(31)]
-            .into_iter()
-            .map(|id| d.manifest(id).unwrap().clone())
-            .collect();
-        let i = prepare_remaining(&mut d, &t, split);
-        let frozen = t.freeze_command(&i, 65536, 200000).unwrap();
-        assert!(matches!(
-            record(&mut t, &mut log, 3000, frozen.clone()),
-            TargetOutcome::Frozen(_)
-        ));
-        let status = t.freeze_status().unwrap().unwrap();
-        assert_eq!(status.exports.len(), if split { 2 } else { 1 });
-        assert!(status.exports.iter().all(|e| e.scope.start() >= 96));
-        let live = t.checkpoint(400000).unwrap();
-        t = reopen(&t, &first, 2);
-        assert_eq!(t.checkpoint(400000).unwrap(), live);
-        assert!(matches!(read(&t, 100), TargetRead::Rejected(_)));
-        let mut successors = Vec::new();
-        for g in if split { vec![40, 41] } else { vec![40] } {
-            let mut c = child(&i, g);
-            let b = c.bootstrap_command(200000).unwrap();
-            commit(&mut c, 3000, b);
-            let image = t.export_target(group(g), 65536).unwrap();
-            assert_eq!(
-                image.scope(),
-                i.targets()
-                    .into_iter()
-                    .find(|r| r.target == RouteTarget::Group(group(g)))
-                    .unwrap()
-                    .scope
-            );
-            let digest = ContentDigest::scope_image(&image);
-            let import = TargetImport::new(
-                op(3000),
-                i.clone(),
-                group(g),
-                vec![SourceImport {
-                    fence: status.fence,
-                    configuration: cfg,
-                    image,
-                    digest,
-                }],
-            )
-            .unwrap();
-            let b = c.import_command(&import, 200000).unwrap();
-            commit(&mut c, 3000, b);
-            successors.push(c);
-        }
-        let p = TransferPublication::new(
-            op(3000),
-            i.clone(),
-            vec![SourceFenceEvidence::from_status(cfg, status).unwrap()],
-            successors
-                .iter()
-                .map(|c| TargetReadyEvidence::from_status(cfg, c.status()).unwrap())
-                .collect(),
-        )
-        .unwrap();
-        assert!(matches!(
-            commit(&mut d, 3001, p.encode(200000).unwrap()).outcome,
-            DirectoryOutcome::TransferPublished(_)
-        ));
-        let decision = d
-            .transfer_publication_at(d.applied_index(), op(3000))
-            .unwrap()
-            .unwrap();
-        let b = DelegationCompletion {
-            reservation: op(6002),
-            reservation_index: d
-                .delegation_reservation_at(d.applied_index(), op(6002))
-                .unwrap()
-                .unwrap()
-                .index,
-            parent_configuration: cfg,
-            child_configuration: cfg,
-            decision: decision.clone(),
-        }
-        .encode(200000)
-        .unwrap();
-        assert!(matches!(
-            commit(&mut d, 6003, b).outcome,
-            DirectoryOutcome::DelegationPublished(_)
-        ));
-        for (j, c) in successors.iter_mut().enumerate() {
-            let b = c
-                .activation_command(
-                    &TargetActivation {
-                        metadata_configuration: cfg,
-                        decision: decision.clone(),
-                    },
-                    200000,
-                )
-                .unwrap();
-            commit(c, 3000, b);
-            assert_eq!(c.schema_version(), REMAINING_TRANSFER_TARGET_SCHEMA);
-            let cp = c.checkpoint(400000).unwrap();
-            let mut fresh = child(&i, 40 + j as u128);
-            fresh
-                .restore_checkpoint(c.schema_version(), c.applied_index(), &cp)
-                .unwrap();
-            assert_eq!(fresh.status(), c.status());
-            *c = fresh;
-        }
+        let Completed {
+            d,
+            mut t,
+            first: _,
+            intent: i,
+            mut log,
+            mut successors,
+            children: [child_a, child_b],
+            old_children,
+            frozen,
+            ..
+        } = completed(split);
         let c = &mut successors[0];
         assert_eq!(c.application().value(&[100]), Ok(9));
         let m = i.after().input();
@@ -497,3 +535,6 @@ fn interrupted_remaining_freeze_preserves_only_a_complete_owner_boundary() {
     }
     assert!(old && complete);
 }
+
+#[path = "remaining/retirement.rs"]
+mod retirement;

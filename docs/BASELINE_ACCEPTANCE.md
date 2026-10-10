@@ -230,3 +230,13 @@ recovery pass. Native journal final-fence byte/sync/publication interruptions an
 old-profile/malformed-map refusal are checked. Partial-owner retirement lineage,
 native TCP/QUIC composition, metadata authority movement and wider requirements
 remain open; the complete P5/P6 exits are not inferred from this slice.
+
+
+Slice155b2 completes selected partial-import retirement: original activation and
+ordered compact grant history bind the final full-transfer source. Actual two-
+partial-transfer -> remaining relocation/split -> successor activation -> explicit
+release -> retirement/retry/checkpoint recovery passes. Mixed parent/slot lineage,
+truncation and rehashed-history refusal are checked. Native-file interrupted
+publication/tail recovery, verified retired checkpoint and physical WAL reclaim
+pass. This closes the selected embedding cleanup path, not native TCP/QUIC155b3,
+metadata-authority movement156 or the broader P5/P6/full-goal requirements.

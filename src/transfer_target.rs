@@ -1622,6 +1622,9 @@ where
         self.export_target(target, max_bytes)
     }
     fn retirement_lineage(&self) -> Result<Vec<u8>, ApplicationError> {
+        if self.partial.is_some() {
+            return self.partial_retirement_lineage();
+        }
         let record = self
             .activated
             .as_ref()
@@ -1648,6 +1651,10 @@ where
         }
         Ok(bytes)
     }
+    fn retirement_lineage_bound(&self) -> usize {
+        self.partial_retirement_bound()
+            .unwrap_or(crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES)
+    }
     fn validate_retirement_source(
         &self,
         status: &SourceFreezeStatus,
@@ -1657,6 +1664,23 @@ where
             .intent
             .target_manifest(self.group)
             .expect("checked target");
+        if self.partial.is_some() {
+            let mut grant = status.intent.before().clone().into_input();
+            if grant.epoch.get() < original.input().epoch.get()
+                || grant.generation.get() < original.input().generation.get()
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            grant.epoch = original.input().epoch;
+            grant.generation = original.input().generation;
+            grant.parent = original.input().parent;
+            grant.execution = original.input().execution.clone();
+            return if grant == *original.input() {
+                Ok(())
+            } else {
+                Err(ApplicationError::InvalidCheckpoint)
+            };
+        }
         if status.intent.before() != original
             && (self.parent_limit == 0
                 || !parent::same_owner_lineage(status.intent.before(), original))
@@ -1670,6 +1694,11 @@ where
         bytes: &[u8],
         fence_index: u64,
     ) -> Result<(), ApplicationError> {
+        if self.partial.is_some() {
+            return self
+                .partial_retirement_grant(bytes, fence_index)
+                .map(|_| ());
+        }
         if bytes.len() > crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -1717,6 +1746,15 @@ where
         lineage: &[u8],
     ) -> Result<(), ApplicationError> {
         self.validate_retirement_source(status)?;
+        if self.partial.is_some() {
+            return if self.partial_retirement_grant(lineage, status.fence.index)?
+                == *status.intent.before()
+            {
+                Ok(())
+            } else {
+                Err(ApplicationError::InvalidCheckpoint)
+            };
+        }
         self.validate_retirement_lineage(lineage, status.fence.index)?;
         if self.parent_limit != 0 {
             let mut r = Reader::new(lineage);

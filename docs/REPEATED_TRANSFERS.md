@@ -119,7 +119,8 @@ refusal and native journal interruption are also covered. Parent observations
 in that mixed-history owner test are supplied by the host fixture. New-profile
 TCP/QUIC service composition, later full-transfer retirement/reclamation and
 broader provider/failure/platform evidence remain155b and subsequent work.
-Partial-profile retirement lineage is not yet supported by RetirementGuard.
+Slice155b2 now supports partial-profile retirement lineage after complete
+remaining-data transfer and explicit retention release; see RETIREMENT.md.
 
 
 ## Moving the remaining range — slice155b1
@@ -143,6 +144,7 @@ alone. The original source stays fully fenced after this move.
 
 Tests compose imported data -> two partial delegations -> remaining relocation
 or split -> successor activation/new writes/retries and checkpoint recovery.
-Native journal cuts cover the final source fence. Retirement of the original
-partial owner and TCP/QUIC composition remain155b2/155b3; these tests do not imply
-that old images can already be reclaimed.
+Native journal cuts cover the final source fence. Slice155b2 now retires the
+original partial owner after successor activation and explicit retention release,
+with selected native-file reclamation evidence.
+TCP/QUIC composition remains155b3.

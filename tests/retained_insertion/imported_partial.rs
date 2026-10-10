@@ -631,6 +631,11 @@ fn partial_history_interleaves_parent_and_slot_changes_without_losing_import_lin
         TargetOutcome::GrantAdopted(_)
     ));
     assert_eq!(read(&t, 100), TargetRead::Data(9));
+    use voteboat::retirement::RetirableOwner;
+    let lineage = t.retirement_lineage().unwrap();
+    selected(&first, 2)
+        .validate_retirement_lineage(&lineage, t.applied_index() + 1)
+        .unwrap();
 }
 
 #[cfg(feature = "native")]

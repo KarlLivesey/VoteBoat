@@ -4569,3 +4569,31 @@ Final all-target/all-feature Clippy with warnings denied passes. Formatting,
 whitespace and the81-contract inventory check also pass. The inventory check
 validates metadata shape and paths; executed conformance is the test evidence
 above. All test and check sessions are terminal.
+
+
+## Slice155b2 — retirement of partially delegated imported owners
+
+Three new tests compose actual imported data, two partial delegations and a
+remaining relocation/split through successor activation, explicit retention
+release and retirement. They check exact original activation/compact lineage,
+retired retries/non-service, missing successor evidence, incompatible profiles,
+truncated checkpoints/lineage and rehashed index/operation discontinuities. The
+existing supplied parent/slot history additionally validates its compact lineage.
+
+The native-file case uses the generic retirement/storage conformance helper to
+interrupt retired snapshot publication before/after the manifest or abandon a
+sealed image. It recovers from the original pinned live snapshot plus committed
+retirement tail, then publishes/pins a verified retired base, reclaims old WAL
+and reopens without retained application commands. No hardware power-loss or
+new TCP/QUIC service execution is claimed.
+
+All64 cases pass in the six relevant all-feature targets: retained insertion30,
+retirement7, imported parent4, target9, repeated transfer5 and activation9. The
+same core-only targets pass. An initial test query named a nonexistent variant
+and was corrected to Status; no production contract was relaxed. The full goal
+stays active, with native service composition155b3 and metadata movement156 next.
+
+
+Final validation: all53 matching core-only cases pass. All-target/all-feature
+Clippy with warnings denied, formatting, whitespace and the81-contract inventory
+check pass. All test/check sessions are terminal; no remote CI result is required.

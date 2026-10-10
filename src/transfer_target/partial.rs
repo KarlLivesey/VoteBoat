@@ -77,7 +77,7 @@ where
 {
     /// Select before bootstrap, optionally after parent adoption. One unpublished
     /// partial transfer at a time; immutable exports have a finite lifetime budget.
-    /// Partial-profile retirement lineage is not yet supported by RetirementGuard.
+    /// Retirement retains the completed ownership history without export payloads.
     #[allow(clippy::result_large_err)]
     pub fn with_partial_delegation(
         mut self,
@@ -478,5 +478,163 @@ where
         }
         self.frozen = old_frozen;
         Ok(())
+    }
+}
+
+impl<A, P> TransferTarget<A, P>
+where
+    A: ScopeStateMachine + BoundedStateMachine,
+    A::Receipt: ApplicationReceipt,
+    P: PartitionPolicy + Clone,
+{
+    pub(super) fn partial_retirement_bound(&self) -> Option<usize> {
+        let p = self.partial.as_ref()?;
+        Some(
+            22 + MAX_TARGET_ACTIVATION_BYTES
+                + p.maximum * (60 + MAX_RETAINED_ADOPTION_BYTES)
+                + self.parent_limit * (60 + MAX_PARENT_SLOT_ADOPTION_BYTES),
+        )
+    }
+
+    pub(super) fn partial_retirement_lineage(&self) -> Result<Vec<u8>, ApplicationError> {
+        let p = self
+            .partial
+            .as_ref()
+            .ok_or(ApplicationError::UnsupportedSchema)?;
+        let activation = self
+            .activated
+            .as_ref()
+            .ok_or(ApplicationError::NotApplied)?;
+        if self.partial_pending() {
+            return Err(ApplicationError::NotApplied);
+        }
+        let changes: Vec<_> = p
+            .events
+            .iter()
+            .filter(|e| !matches!(e.outcome, Outcome::Frozen(_)))
+            .collect();
+        let len =
+            22 + activation.bytes.len() + changes.iter().map(|e| 60 + e.bytes.len()).sum::<usize>();
+        if len > self.partial_retirement_bound().unwrap() {
+            return Err(ApplicationError::ReceiptBudget);
+        }
+        let mut bytes = Vec::with_capacity(len);
+        bytes.extend(activation.status.index.to_le_bytes());
+        bytes.extend((activation.bytes.len() as u32).to_le_bytes());
+        bytes.extend(&activation.bytes);
+        bytes.extend(b"VBTPRTL1");
+        bytes.extend((changes.len() as u16).to_le_bytes());
+        for e in changes {
+            bytes.extend(digest(e.operation, e.index, &e.bytes, None).0);
+            bytes.extend(e.operation.get().to_le_bytes());
+            bytes.extend(e.index.to_le_bytes());
+            bytes.extend((e.bytes.len() as u32).to_le_bytes());
+            bytes.extend(&e.bytes);
+        }
+        Ok(bytes)
+    }
+
+    /// Reconstruct only authority history. No application payload or provider
+    /// operation is needed after retirement. Foreign observations retain the
+    /// same authenticated-host obligation as their original ordered adoption.
+    pub(super) fn partial_retirement_grant(
+        &self,
+        bytes: &[u8],
+        fence_index: u64,
+    ) -> Result<ResponsibilityManifest, ApplicationError> {
+        let p = self
+            .partial
+            .as_ref()
+            .ok_or(ApplicationError::UnsupportedSchema)?;
+        if bytes.len() > self.partial_retirement_bound().unwrap() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut r = Reader::new(bytes);
+        let mut previous = r.u64()?;
+        let len = r.u32()? as usize;
+        let activation = self.activation(r.take(len)?)?;
+        let publication = &activation.decision.publication;
+        if publication.operation() != self.operation || publication.intent() != &self.intent {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let imported = publication
+            .targets()
+            .iter()
+            .find(|t| t.group == self.group)
+            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        if previous <= imported.imported.index
+            || previous >= fence_index
+            || r.take(8)? != b"VBTPRTL1"
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let count = r.u16()? as usize;
+        if count > p.maximum + self.parent_limit {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut grant = self.intent.target_manifest(self.group).unwrap().clone();
+        let mut used = std::collections::BTreeSet::from([self.operation]);
+        let (mut transfers, mut parents) = (0, 0);
+        for _ in 0..count {
+            let hash = r.take(32)?;
+            let op = r.operation()?;
+            let index = r.u64()?;
+            let len = r.u32()? as usize;
+            if len > MAX_RETAINED_ADOPTION_BYTES.max(MAX_PARENT_SLOT_ADOPTION_BYTES)
+                || index <= previous
+                || index >= fence_index
+                || !used.insert(op)
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            let command = r.take(len)?;
+            if hash != digest(op, index, command, None).0 {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            if command.starts_with(b"VBSADP01") {
+                transfers += 1;
+                if transfers > p.maximum {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                let adoption = RetainedGrantAdoption::decode(command)?;
+                let pubn = &adoption.decision.publication;
+                let intent = pubn.intent();
+                let [source] = pubn.sources() else {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                };
+                if intent.before() != &grant
+                    || source.fence.group != self.group
+                    || source.fence.index <= previous
+                    || source.fence.index >= index
+                    || !used.insert(source.fence.operation)
+                {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                for child in intent
+                    .insertion_children()
+                    .ok_or(ApplicationError::InvalidCheckpoint)?
+                {
+                    if !used.insert(child.creation) {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                }
+                grant = intent.after().clone();
+            } else {
+                parents += 1;
+                if parents > self.parent_limit {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                let change = ParentAdoptionCommand::decode_scoped(command, true)?;
+                if change.before() != &grant || change.encode(len)? != command {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                grant = change.after();
+            }
+            previous = index;
+        }
+        if !r.done() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(grant)
     }
 }

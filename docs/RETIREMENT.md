@@ -41,8 +41,9 @@ without restoring service. Retired owners cannot thaw.
 The guard's schema-1 `VBRET001` checkpoint binds its initial configuration digest,
 applied prefix and either the live inner checkpoint or retired command/lineage.
 `VBRETC01` commands and `VBRETP01` proofs are versioned and bounded; proof bytes
-are capped at 128 KiB and lineage at the existing activation-command bound plus
-12 bytes. Readiness includes the larger control command/checkpoint requirements.
+are capped at 128 KiB. Legacy lineage uses the original activation/manifest
+bound; selected partial owners declare their larger, finite history envelope
+through `RetirableOwner::retirement_lineage_bound`. Readiness includes the larger control command/checkpoint requirements.
 Check command and snapshot capacity during assembly, before fencing a source.
 Restore validates the initial profile, source manifest, phase boundaries and
 lineage before replacing candidate state. Retired restore requires no old data.
@@ -120,3 +121,20 @@ ancestors/old sources offline,43 and sibling32 serve further writes with unchang
 stopped files and preserved imported operation IDs/outbox. Final source reopen
 remains retired. This is the selected41-before42 order and application profile;
 broader recursive lifecycle/fault coverage and external retention remain open.
+
+
+Partial imported owners now retire after their complete remaining-data handoff.
+Their VBTPRTL1 lineage retains the original activation and ordered completed
+retained publications plus parent/slot observations. Recovery checks each exact
+before/after grant, original scoped freeze ordering, command digest, control and
+creation IDs, configured lifetime counts and the final full-transfer grant.
+Application/import/export payloads are omitted and released with the live owner.
+The underlying scope provider remains replaceable through the same contracts.
+
+The guard uses the construction-time lineage bound for readiness, admission and
+restore. Old owner defaults and formats are unchanged. Tests cover actual two-
+partial-transfer then remaining relocation/split, explicit release, exact retired
+retry, rejected altered histories and native-file interrupted snapshot publication,
+retirement-tail replay, WAL reclamation and final retired reopen. Parent/slot
+lineage replay uses supplied observations. TCP/QUIC composition of this new partial
+retirement path remains155b3; wider fault/platform/retention coverage remains open.
