@@ -1,6 +1,12 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Snapshot provider evidence: [slice201b](baseline/slice201b/README.md), with30
+all-feature provider/snapshot checks,13 core-only checks,8 native-only checks,
+13 ledger checks and clean formatting/four strict Clippy profiles. Shared cases
+cover exact tickets/references, retained roots and file reopen; existing modeled
+crash tests remain separately identified. The ledger reviews3 contracts/21
+operations and leaves102 contracts unreviewed. This is not platform acceptance.
 Latest focused implementation evidence: [slice200 source retirement](baseline/slice200/README.md).
 Platform investigation and focused workflow: [slice199a](baseline/slice199a/README.md).
 The Ubuntu operator failure and locally verified routing repair are recorded in

@@ -71,6 +71,309 @@
           "remaining": ["General retention/segment policy and wider disk-full/device failure combinations."]
         }
       ]
+    },
+    {
+      "public_contract": "SnapshotStore",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshots_preserve_stages_exact_references_and_two_log_anchors"
+        },
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "identity",
+            "binding",
+            "limits"
+          ],
+          "obligation": "Identify the exact store/group incarnations and open session, with validated application/chunk bounds. Recovery keeps durable identity and changes the admission session.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Broader limit combinations and concurrent shared-resource pressure."
+          ]
+        },
+        {
+          "names": [
+            "begin"
+          ],
+          "obligation": "Admit one bounded stage for the selected group. Reject zero/oversized payloads, changed group, non-increasing history or occupied retained slots without altering the published image.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            }
+          ],
+          "remaining": [
+            "Generated metadata/membership and capacity combinations; native metadata encoding budgets have separate tests."
+          ]
+        },
+        {
+          "names": [
+            "write_chunk"
+          ],
+          "obligation": "Accept only the exact active ticket and ordered nonempty bounded chunks. Reject all changed identity/session/generation fields and wrong offset/size without consuming genuine work.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Generated chunk partitions and device failures beyond the existing native interruption suite."
+          ]
+        },
+        {
+          "names": [
+            "seal"
+          ],
+          "obligation": "Only a complete exact stage can be synchronized and sealed. Sealing does not publish or supersede the old root. Reject stale and repeated seals.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "abort_preserves_root"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "interrupted_chunks_seals_and_publication_recover_old_or_complete_new"
+            }
+          ],
+          "remaining": [
+            "Shared host conformance does not certify physical synchronization; future providers need their own device fault adapter."
+          ]
+        },
+        {
+          "names": [
+            "publish"
+          ],
+          "obligation": "Publish only the exact synchronized ticket, file length and checksum. Reject altered or foreign receipts without consuming the original stage. Preserve original metadata/data together; uncertainty fences native use until recovery.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "cross_store"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "interrupted_chunks_seals_and_publication_recover_old_or_complete_new"
+            }
+          ],
+          "remaining": [
+            "Broader membership/lifecycle compositions and alternative provider publication failures."
+          ]
+        },
+        {
+          "names": [
+            "abort"
+          ],
+          "obligation": "Discard only the exact active stage, before or after seal, without changing the published root. A stale session cannot cancel a fresh stage. Abort after publication is not rollback.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "abort_preserves_root"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Asynchronous worker cancellation is a distinct contract, not established by these synchronous cases."
+          ]
+        },
+        {
+          "names": [
+            "load"
+          ],
+          "obligation": "Return the verified published metadata/application pair or explicitly empty new store. Unpublished stages remain invisible after file close/reopen. Missing/corrupt durable state is an error.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_image"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "corruption_truncation_missing_data_and_identity_mismatch_fail_closed"
+            }
+          ],
+          "remaining": [
+            "File close/reopen is not hardware power-loss validation; native modeled failures and wider device tests remain distinct."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "SnapshotRetention",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshots_preserve_stages_exact_references_and_two_log_anchors"
+        },
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "latest_reference"
+          ],
+          "obligation": "Return the exact current published durable reference, independent of transient admission session. Reconciliation selects the authoritative pinned root or clears it.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Broader interrupted manifest updates and future backend recovery coverage."
+          ]
+        },
+        {
+          "names": [
+            "pin_for_log"
+          ],
+          "obligation": "Pin a verified exact published image before the caller records a durable log boundary. Repeated pins are idempotent; altered identity, generation, metadata, length or checksum cannot create an anchor. Anchored slots cannot be overwritten.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "cross_store"
+            }
+          ],
+          "remaining": [
+            "Cases supply the authoritative-log caller role; they do not themselves commit a WAL boundary."
+          ]
+        },
+        {
+          "names": [
+            "load_pinned"
+          ],
+          "obligation": "Retrieve the exact retained image even after another root is published and after file reopen. Reject every modified reference field and released anchor.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Further corruption of old retained slots and combined membership changes need wider device/fault coverage."
+          ]
+        },
+        {
+          "names": [
+            "reconcile_log"
+          ],
+          "obligation": "Select only the caller-supplied exact pinned durable-log reference and release other anchors. Reject unknown references or a pending stage without mutating pins/root. None releases all anchors and clears the root.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Caller must establish its authoritative durable log reference; general retention policy and combined interrupted WAL/manifest histories remain."
+          ]
+        }
+      ]
     }
   ]
 }

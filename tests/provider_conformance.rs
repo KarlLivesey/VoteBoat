@@ -2,9 +2,34 @@
 // Copyright (c) 2026 Karl Livesey
 #[path = "provider_conformance/log_store.rs"]
 mod cases;
+#[path = "provider_conformance/snapshot.rs"]
+mod snapshot_cases;
+#[cfg(feature = "native")]
+#[path = "provider_conformance/snapshot_native.rs"]
+mod snapshot_native;
 mod support;
 use support::*;
 use voteboat::log::LogStore;
+
+#[test]
+fn host_snapshots_preserve_stages_exact_references_and_two_log_anchors() {
+    let mut store = support::snapshot::HostSnapshots::new();
+    snapshot_cases::stage_identity_and_limits(&mut store);
+    snapshot_cases::abort_preserves_root(&mut store);
+    let pins = snapshot_cases::two_pins(&mut store);
+    snapshot_cases::reconcile(&mut store, pins);
+}
+
+#[test]
+fn host_snapshot_bindings_cannot_publish_or_pin_each_others_images() {
+    let mut first = support::snapshot::HostSnapshots::new();
+    let mut second = support::snapshot::HostSnapshots::new();
+    second.identity.store = identity(2);
+    second.binding.identity = identity(2);
+    snapshot_cases::cross_store(&mut first, &mut second);
+    drop(first);
+    snapshot_cases::assert_image(&mut second, 1);
+}
 
 #[test]
 fn host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native() {

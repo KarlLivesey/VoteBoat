@@ -502,6 +502,9 @@
       ],
       "native": "NativeSnapshotStore",
       "conformance": [
+        "tests/provider_conformance.rs",
+        "tests/provider_conformance/snapshot.rs",
+        "tests/provider_conformance/snapshot_native.rs",
         "tests/snapshot.rs",
         "examples/replicated_counter.rs",
         "tests/membership.rs"
@@ -519,6 +522,9 @@
       ],
       "native": "NativeSnapshotStore",
       "conformance": [
+        "tests/provider_conformance.rs",
+        "tests/provider_conformance/snapshot.rs",
+        "tests/provider_conformance/snapshot_native.rs",
         "tests/snapshot.rs",
         "examples/replicated_counter.rs",
         "tests/membership.rs",

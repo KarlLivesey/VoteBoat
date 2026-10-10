@@ -88,6 +88,19 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
+Completed refinement201b advances the P0/C03 replacement-provider milestone:
+exercise snapshot publication and retention through the same host/native cases.
+It depends on the existing SnapshotStore/Retention contracts and201a ledger;
+completion requires exact-token refusal without losing admitted work, bounded
+chunks, two retained roots, explicit reconciliation and actual-file reopen.
+Next201c reviews snapshot worker cancellation/completion ownership using those
+same durable roots; it depends on201b and completes when stale/canceled work
+cannot publish another owner's result. Following202 couples membership changes
+to older checkpoints and interrupted retention switches, using the existing
+membership journal and snapshot fault harness. Its check is recovered original
+configuration/data identity with stale authority refused. Current-platform199
+acceptance remains independent and open; none of these cases certify it.
+
 The zero-diagnostic baseline and pre-push enforcement are complete. Keep all four
 strict profiles clean while advancing the remaining capability work.
 
@@ -145,6 +158,58 @@ strict profiles clean while advancing the remaining capability work.
 | Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice201b schema plan — shared snapshot-provider obligations
+
+No production API or on-disk format changes are planned. Caller-owned providers
+implement the existing SnapshotStore and SnapshotRetention traits. Shared cases
+use bounded metadata/application values and exact returned tickets/receipts;
+they do not assume a native checksum algorithm or encoded file length.
+Stages advance begin → ordered chunks → synchronized seal → durable publication.
+Publication alone cannot release a log anchor. Pin both old and new roots, then
+reconcile only to the caller-supplied authoritative log reference; this test
+acts as that caller and does not infer a WAL commit from snapshot publication.
+
+Alter each ticket/reference identity field and both sealed-content fields;
+each invalid operation must fail without consuming the genuine stage or pins.
+Aborting a stage preserves the published root. A real native-file close/reopen
+must retain both acknowledged pins, discard an unpublished stage, change the
+session and refuse old admission tokens even with a new stage in flight.
+Exercise host/native shared cases and the existing snapshot failure suite,
+then run metadata validation, formatting and all strict Clippy profiles.
+Record actual-file reopen separately from simulated power-loss evidence.
+
+### Slice201b implemented — exact snapshot and retention conformance
+
+Five new provider tests execute common host/native-file cases. Altering any of
+six ticket fields or eleven durable-reference fields fails without consuming
+the real pending stage or retained image. Sealed length/checksum changes and
+cross-store publication fail while the legitimate sealed stages remain usable.
+Ordered/chunk/size limits, incomplete seals and duplicate publication are checked.
+Abort before or after seal keeps the published root. Both pinned generations
+remain readable after actual file reopen; authoritative reconciliation releases
+only the selected old/new anchors, and released roots remain absent after reopen.
+
+Three native file histories close with admitted, partially written or sealed
+unpublished work. Recovery keeps the original published/pinned data and changes
+the session; old write/seal/abort/publication tokens cannot consume a newly
+admitted stage. These are process close/reopen histories, not hardware power-loss
+claims. The existing snapshot suite separately exercises modeled torn writes,
+failed synchronization/publication, corruption and log-install failures.
+
+All-feature provider/snapshot tests pass30; core-only equivalents pass13;
+native-only provider tests pass8. Inventory checks and13 ledger checks pass.
+Formatting and all four strict Clippy profiles pass. Initial Clippy rejected a
+new test helper at cognitive complexity33/25; it was split at the staging versus
+publication boundary, without changing thresholds. Original failed logs and
+final checks are in validation/baseline/slice201b.
+
+The obligation ledger now reviews21 operations across LogStore, SnapshotStore
+and SnapshotRetention;102 other contracts remain unreviewed by this ledger,
+which is metadata rather than certification. No production APIs, codecs, native
+storage behavior or third-party adapters changed. Macro milestones remain open;
+the next focused conformance work is worker cancellation/completion ownership,
+followed by the planned combined membership/checkpoint recovery schedules.
 
 ### Slice206 implemented evidence and next review
 

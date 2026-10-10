@@ -1,4 +1,14 @@
-# Baseline acceptance map — review192, operator evidence updated206
+# Baseline acceptance map — review192, operator206 and provider201b evidence
+
+Slice201b adds shared SnapshotStore/Retention assertions for host and native-file
+providers: all six ticket fields, all eleven reference fields, sealed length and
+checksum, ordered/bounded writes, abort before/after seal, two retained anchors,
+exact reconciliation and file reopen with stale admissions. Thirty selected
+all-feature tests, thirteen core-only tests and eight native-only conformance
+tests pass. The ledger now reviews three contracts and21 operations;102 inventory
+contracts remain unreviewed by this ledger. Actual-file reopen and existing
+modeled crash/corruption tests are distinct evidence. No production storage
+behavior or full-platform acceptance changes are claimed.
 
 Slice206 corrects transfer setup's immediate-success assumption after a reported
 leadership change, retaining original initialization/grant IDs. New TCP/WAL and

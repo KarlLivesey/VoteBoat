@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-dda7fda5b64439ba)
+
+running 3 tests
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/snapshot.rs (target/debug/deps/snapshot-6a44d99726b64e24)
+
+running 10 tests
+test durable_pin_switch_conformance_with_host_provider ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

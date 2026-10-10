@@ -1,0 +1,44 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-70ab728b605d1ee5)
+
+running 8 tests
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test snapshot_native::file_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test snapshot_native::file_snapshots_preserve_same_contract_and_both_anchors_after_reopen ... ok
+test snapshot_native::file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions ... ok
+test native::model_log_store_satisfies_same_obligations_and_recovers_original_history ... ok
+test native::file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/snapshot.rs (target/debug/deps/snapshot-89a81fbb885046d3)
+
+running 22 tests
+test durable_pin_switch_conformance_with_host_provider ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+

@@ -11,10 +11,12 @@ const read = file => fs.readFileSync(new URL(file, root), 'utf8');
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 1);
-    assert.equal(report.reviewed_operations, 8);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 1);
-    assert.ok(!report.unreviewed_contracts.includes('LogStore'));
+    assert.equal(report.reviewed_contracts, 3);
+    assert.equal(report.reviewed_operations, 21);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 3);
+    for (const name of ['LogStore', 'SnapshotStore', 'SnapshotRetention']) {
+        assert.ok(!report.unreviewed_contracts.includes(name));
+    }
 });
 
 for (const [name, mutate] of [
@@ -27,7 +29,9 @@ for (const [name, mutate] of [
     ['missing test', d => { d.reviews[0].runners[0].symbol = 'invented'; }],
     ['escaping path', d => { d.reviews[0].runners[0].file = '../src/lib.rs'; }],
     ['false completion claim', d => { d.reviews[0].status = 'complete'; }],
-    ['missing limitation', d => { d.reviews[0].operations[0].remaining = []; }]
+    ['missing limitation', d => { d.reviews[0].operations[0].remaining = []; }],
+    ['missing snapshot operation', d => { d.reviews[1].operations.pop(); }],
+    ['missing retention assertion', d => { d.reviews[2].operations[0].assertions[0].symbol = 'invented'; }]
 ]) {
     test(`rejects ${name}`, () => {
         const changed = structuredClone(ledger);
