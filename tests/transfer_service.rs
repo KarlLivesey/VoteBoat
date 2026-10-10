@@ -28,6 +28,8 @@ mod peer_credentials;
 mod profiles;
 #[path = "transfer_service/retirement.rs"]
 mod retirement;
+#[path = "transfer_service/retirement_retry.rs"]
+mod retirement_retry;
 #[path = "transfer_service/revocation.rs"]
 mod revocation;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");

@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 3 tests
+test merge::tcp_operator_collects_both_images_before_importing_a_merge ... ok
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... ok
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 64.58s
+

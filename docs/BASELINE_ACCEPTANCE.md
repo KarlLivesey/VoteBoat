@@ -1,5 +1,18 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice213 aligns the merge retirement fixture with the documented original-release
+resumption contract. An exact leadership-change uncertainty permits at most four
+fixture attempts with unchanged source/release; other failures remain terminal.
+Three scripted checks and all21 all-feature transfer-service tests pass locally.
+Native merge now loses an admitted source20 retirement caller, reopens the groups
+and confirms the same release, keeping source21 independent. Original profile
+bytes and retirement records survive cold recovery/metadata outage. Production
+unknown-result semantics and deadlines remain unchanged; platform/fault gates
+remain open. Retained macOS node logs direct the next liveness investigation.
+Final default selections pass2 TCP merge and3 confirmation cases; formatting/
+four strict lints pass. Previous-source629db60 Ubuntu operators pass terminally;
+macOS remains live at observation, with no current-helper platform claim.
+
 Slice212 rejects contradictory local target stage/import/activation sequences
 in transient observations, preserving independent metadata publication indices.
 The corrected original-code regression fails on accepted missing staging;

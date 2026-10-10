@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-dd9e22fa20ce81be)
+
+running 3 tests
+test retirement_retry::retirement_confirmation_requires_original_quorum_status_and_stable_record ... ok
+test retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss ... ok
+test retirement_retry::retirement_confirmation_bounds_attempts_and_preserves_terminal_failures ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.04s
+

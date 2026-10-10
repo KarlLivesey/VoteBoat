@@ -1,0 +1,3 @@
+ready node=3 peer=127.0.0.1:16147 transport=Quic command=127.0.0.1:16247
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(21101)) reason=deadline
+administration observation_cancelled operation=21101 phase=preparing reason=deadline

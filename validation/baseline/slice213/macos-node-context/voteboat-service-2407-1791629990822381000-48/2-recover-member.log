@@ -1,0 +1,1 @@
+ready node=2 peer=127.0.0.1:16146 transport=Quic command=127.0.0.1:16246

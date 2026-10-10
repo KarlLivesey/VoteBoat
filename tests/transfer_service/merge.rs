@@ -143,29 +143,32 @@ fn retire(rig: &Cluster, source: &str, release: &str) -> Output {
     run(rig.client(0, 3, "client").args(["retire", source, release]))
 }
 fn retired(rig: &Cluster, source: &str, release: &str) -> String {
-    let out = retire(rig, source, release);
-    assert!(
-        out.status.success(),
-        "{} {}",
-        String::from_utf8_lossy(&out.stdout),
-        String::from_utf8_lossy(&out.stderr)
+    retirement_retry::retired(rig, source, release)
+}
+fn lose_retirement_reply(rig: &mut Cluster) {
+    let plan = plan(rig);
+    let proof = plan
+        .retirement_proof(
+            &observations(rig, &plan),
+            source_fixture::group(20),
+            source_fixture::op(700),
+        )
+        .unwrap();
+    support::interrupt_command(
+        rig,
+        20,
+        &[
+            "retire-group".into(),
+            hex(&proof
+                .encode(voteboat::retirement::MAX_RETIREMENT_PROOF_BYTES)
+                .unwrap()),
+        ],
     );
-    let text = String::from_utf8(out.stdout).unwrap();
-    assert!(
-        text.contains(&format!("source={source}")) && text.contains(&format!("release={release}")),
-        "{text}"
-    );
-    // A fresh read prefix can advance; the original retirement record cannot.
-    text.lines()
-        .find(|line| line.contains("retirement=retired"))
-        .unwrap()
-        .split_whitespace()
-        .filter(|field| !field.starts_with("read_index="))
-        .collect::<Vec<_>>()
-        .join(" ")
 }
 fn finish(mut rig: Cluster) {
+    let profile = fs::read(rig.root.join("profile")).unwrap();
     assert!(rig.operate("resume").contains("OK complete"));
+    lose_retirement_reply(&mut rig);
     let first = retired(&rig, "20", "700");
     assert!(rig
         .ok(21, &["retirement-status"])
@@ -185,6 +188,7 @@ fn finish(mut rig: Cluster) {
     rig.stop_group(1);
     assert_eq!(retired(&rig, "20", "700"), first);
     assert_eq!(retired(&rig, "21", "701"), second);
+    assert_eq!(fs::read(rig.root.join("profile")).unwrap(), profile);
     assert!(!retire(&rig, "21", "702").status.success());
     rig.stop_group(20);
     rig.stop_group(21);

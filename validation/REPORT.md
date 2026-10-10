@@ -1,5 +1,18 @@
 # Validation report — slice 35
 
+Original merge retirement: [slice213](baseline/slice213/README.md). The scripted
+explicit leadership-loss continuation fails the previous single-attempt fixture;
+the bounded original-source/release helper passes3 independent refusal/identity/
+status checks. All21 final all-feature transfer-service tests pass, including
+actual admitted-retirement caller loss, reopen and original release confirmation
+over TCP/QUIC. Source21 remains independent; profile and original retirement
+records survive cold recovery with metadata closed. No production retry policy
+or timer changes. Matching platform acceptance remains open; raw macOS node logs
+are retained to diagnose the next liveness failure.
+Final default TCP merge selection passes2 and scripted confirmation passes3;
+formatting/all-four strict lints pass. Previous-source629db60 Ubuntu operator job
+passes terminally, while its macOS job remains live at the retained observation.
+
 Transfer observation phase consistency: [slice212](baseline/slice212/README.md).
 The original decoder accepts a contradictory imported/activated target lacking
 staging. The new private check requires ordered local phases within the read

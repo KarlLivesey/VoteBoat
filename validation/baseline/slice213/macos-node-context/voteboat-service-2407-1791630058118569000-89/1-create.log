@@ -1,0 +1,2 @@
+ready node=1 peer=127.0.0.1:21393 transport=Quic command=127.0.0.1:21493
+stopped node=1 workers_joined=true

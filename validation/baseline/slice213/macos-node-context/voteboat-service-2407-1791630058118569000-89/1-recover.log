@@ -1,0 +1,6 @@
+ready node=1 peer=127.0.0.1:21393 transport=Quic command=127.0.0.1:21493
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(7), incarnation: GroupIncarnation(3) }, OperationId(7001)) reason=channel
+administration observation_cancelled operation=7001 phase=configuration_queued reason=channel
+administration operation=7001 outcome=Unknown(CancelledWait)
+leadership status admitted operation=19701
+administration operation=7001 outcome=Committed(ProposalPosition { index: 6, term: 181 })

@@ -263,18 +263,29 @@ Final default/core-only operation checks also pass12 each; formatting and all
 four strict Clippy configurations pass with zero diagnostics. Raw failures,
 passes and previous-source platform evidence are retained in slice212.
 
-Current: recover the original merge retirement across leadership uncertainty.
-Run38046741849/542428d has Ubuntu counter158/directory19 passing, but transfer
-17 pass/1 fail at merge retirement on exact Unknown(LeadershipChanged). Depend
-on the retained job log, retirement CLI/runner and original source/release
-contract. Identify whether the fixture or production resumption fails before
-editing. Completion requires an explicit uncertain-original-identity regression,
-exact terminal receipt checks and affected native histories locally; background
-platform evidence remains distinct. This advances P6 usable merge and the
-Linux/macOS service milestone without changing deadlines or accepting unrelated
-errors.
+Implemented213: the merge fixture's single-success retirement assumption fails
+the scripted explicit leadership-loss continuation, matching the retained Ubuntu
+run38046741849. A test-only helper repeats original source/release at most four
+times for only that exact output/error pair; unrelated failures stay terminal.
+Positive status requires exact original identity, a positive fence/retirement
+index and a quorum read covering it. Three scripted checks pass. Native merge
+histories now lose an admitted source20 retirement request, recover through the
+existing interruption fixture and confirm release700 without changing profile
+bytes. Source21 stays live until its independent release701. Exact original
+retirement records survive later cold recovery with metadata offline; target
+original retries/new writes remain checked. All21 all-feature transfer-service
+histories pass locally. An earlier selected3 trial also had a redundant second
+reopen, removed before the final full run; it is retained as an intermediate
+result. Production behavior/deadlines are unchanged. Matching platform acceptance
+is still open. Macro review213 advances selected P6 merge retirement recovery,
+not full P6/fault/platform closure; P0–P7 stays active.
+Final default TCP merge selection passes2 and default scripted confirmation
+passes3; formatting/four strict Clippy configurations pass with zero diagnostics.
+Run38047529334 on previous source629db60 subsequently has a passing Ubuntu
+operator job; macOS remains live at this observation. This is previous-source
+platform evidence, not validation of the current helper or global acceptance.
 
-Next: diagnose macOS remaining group liveness/preparation failures using actual
+Current: diagnose macOS remaining group liveness/preparation failures using actual
 run38046741849 evidence (counter153 pass/5 fail). Depend on retained logs and
 existing shared-group session/owner contracts. Identify the earliest failed
 transition, add bounded diagnostic evidence if necessary and reproduce a focused
@@ -283,13 +294,65 @@ checks locally plus the supported platform run, rather than increasing timeouts
 or accepting all unknown outcomes. This advances the usable service and P2/P4
 platform recovery; CI continues in the background.
 
-Following: select the next unreviewed replaceable provider contract from the
+Next: select the next unreviewed replaceable provider contract from the
 108-entry inventory and document its actual ownership/budget/recovery obligations.
 Run the same independently modeled traces against a downstream host replacement
 and the native provider, including failed admission/terminal cleanup. Completion
 requires cause-detecting assertions and scoped ledger evidence, not merely a
 green metadata check. This advances P0 composition and depends on existing public
 seams/shared conformance patterns;102 entries currently remain unreviewed.
+
+Following: complete the next supported-platform operational acceptance profile
+once the reproduced liveness defect is corrected. Depend on the actual operator
+job, checked deployment bindings and existing TCP/QUIC service commands. Verify
+write/read/retry, leader loss, cold restart and clean shutdown on Linux/macOS;
+keep separate-host deployment evidence distinct from runner loopback. Completion
+requires terminal observed outcomes under the original deadlines and recorded
+identities, not an enlarged timeout or omitted failing history. This advances
+the usable service macro milestone; separate-host provisioning and broader faults
+remain explicit rather than silently counted as complete.
+
+### Slice213 schema plan — original merge retirement after leadership loss
+
+The retained Ubuntu run38046741849 fails the merge fixture's first retirement
+call on exact UNKNOWN Unknown(LeadershipChanged). The production CLI and service
+documentation explicitly preserve the original profile/source/release, and the
+CLI queries an existing retirement before collecting new observations. Existing
+native split retirement tests already lose an admitted proposal and resume it.
+The mismatch is the merge fixture's single-success assumption, not evidence
+that an unknown write was refused or that retirement failed durably.
+
+Data/API: add one test-only confirmation helper needed to exercise this P6
+resumption contract. Inject an attempt receiving the original source/release;
+leave production commands, timers and unknown-result behavior unchanged. Initially
+retain the single-attempt behavior so a scripted explicit uncertainty followed by
+original confirmed status fails. Then bound fixture retries to four attempts,
+only for the exact observed leadership-change output and explicit same-release
+CLI error. Other unknown, authorization, storage and identity failures are
+terminal. A successful exit must include the exact source/incarnation/operation/
+release, positive fence/index and a quorum read prefix covering retirement.
+Normalize only read_index when comparing the original record across restart.
+
+Transitions: Unknown -> repeat original arguments -> confirmed original record
+or terminal refusal/exhaustion. No new release, source, profile or implicit force
+action. The helper owns only returned text; subprocess cleanup remains the
+existing run/spawn wait contract. Read-only confirmation may advance its prefix,
+but the retirement index/fence and other retained fields must not change. Capture
+profile bytes around native retirement/cold recovery to prove unchanged identity.
+Reuse the existing admitted-command interruption fixture after both merge-source
+fences and target activation: collect the real original-source retirement proof,
+remove its quorum, observe accepted proposal, kill the waiting caller and reopen
+all groups before repeating source20/release700. Source21 must remain live until
+its separate release701. This is needed to exercise uncertain retirement in an
+actual multi-source merge rather than only a scripted response.
+
+Acceptance: failing-before scripted continuation, fixed original-argument trace,
+four-attempt exhaustion, terminal unrelated failures and invalid positive status
+checks; native TCP/QUIC merge recovery and full transfer-service histories, then
+default feature selection sequentially and formatting/four strict lint profiles.
+These close the selected fixture contract mismatch and advance usable P6 merge;
+matching platform success and other macOS faults remain distinct. No broad
+security audit, expanded fuzz corpus or new provider seam is introduced.
 
 ### Slice212 schema plan — bounded transient observation decoding
 

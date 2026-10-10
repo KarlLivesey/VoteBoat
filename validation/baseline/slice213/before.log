@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 1 test
+test retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss ... FAILED
+
+failures:
+
+---- retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss stdout ----
+
+thread 'retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss' (197) panicked at tests/transfer_service/retirement_retry.rs:84:23:
+called `Result::unwrap()` on an `Err` value: "UNKNOWN Unknown(LeadershipChanged)\n Error: \"retirement outcome unknown; repeat the same profile, source and release\"\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test transfer_service`

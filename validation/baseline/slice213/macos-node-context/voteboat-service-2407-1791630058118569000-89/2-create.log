@@ -1,0 +1,4 @@
+ready node=2 peer=127.0.0.1:21394 transport=Quic command=127.0.0.1:21494
+administration operation=7001 outcome=Committed(ProposalPosition { index: 3, term: 1 })
+administration operation=7001 outcome=Committed(ProposalPosition { index: 4, term: 1 })
+stopped node=2 workers_joined=true
