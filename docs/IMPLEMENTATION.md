@@ -1246,7 +1246,7 @@ Keep the failed log, port-range/no-dual-bind/rebind assertions and actual suite
 concurrency. Validate the Linux-only case in the full default/all suites and
 formatting/four strict profiles; Mac does not compile this target_os=linux test.
 
-Current248: resolve actual bounded drain-runner observation progress. Purpose: complete
+Implemented248: resolve actual bounded drain-runner observation progress. Purpose: complete
 the original public membership/drain workflow over source loss. Depend on245 runner
 request-exhaustion evidence, original19701 identity, per-command request ownership
 and existing fixed absolute-deadline/request budgets. Select an actual state/
@@ -1255,7 +1255,66 @@ purpose. Completion requires original sequence/operation recovery, terminal owne
 request cleanup, exact final membership/data checks on Mac/Linux and zero lints.
 No performance/security detour or silent budget increase.
 
-Next249: close one required operator integration gap and reconcile functional
+248 schema before diagnostic editing: Runner owns explicit source/sequence/
+operation, authenticated endpoints, absolute45-second single-group deadline and
+128 exchanges (planned-single drains use the existing multi-group action path).
+Each exchange drops its command channel before the next; observed status is not
+commit authority. The current25ms loop repeatedly scans leaders, checks original
+configuration and handoff, then observes source readiness. Retained245/247 Mac
+failures exhaust128 exchanges well before45 seconds without showing the repeated
+phases. A temporary environment-selected trace will record target, command,
+remaining count and at most512 reply characters per already-bounded exchange.
+It adds no retry, admission, durable effect or authority and is retained as a
+diagnostic patch; remove it before final acceptance. Inspect actual native traces
+before choosing state progress/cadence changes. Preserve original IDs, deadlines,
+request counts, safe unknown/refusal classification and ready/stop authority.
+Acceptance requires a focused failed old-behavior history, original source-loss
+recovery/data/dedup/joins on Mac/Linux and zero formatting/four strict profiles.
+The separate247 shared-group startup AddrInUse remains unclassified; preserve its
+failed stores and inspect resource ownership independently rather than guessing
+that runner pacing repairs it.
+
+248 focused schema after actual trace: original interrupted TCP passes, QUIC
+fails1/1 in isolation. Its128 exchanges consume7764ms while elections and the
+same accepted Joint at index7 remain uncommitted (commit6); no ready source or
+stop receipt is observed. Spread observation rounds across the existing remaining
+time/request budget instead of a fixed25ms rescan. One private pause method uses
+the completed round's actual exchange cost and reserves one final stop exchange
+when computing available rounds. Subtract already-spent round time and honor the
+original absolute deadline, including spurious park wakeups. Poll actual source
+status before pausing so ready completion can stop immediately. This is command
+observation cadence, not a Raft timer/quorum or live policy change. Per-attempt
+5-second bounds and total45s/128 (multi120s/4096) remain unchanged. No authority is
+cached: every original assignment/configuration/handoff/readiness check still runs.
+Add an authenticated delayed-ready fixture that old25ms pacing exhausts too soon,
+checks exact source/sequence/operation and channel joins, and proves an unready
+source cannot stop or renew its deadline. Remove temporary tracing before final
+native/runtime acceptance; preserve it separately as diagnostic evidence.
+
+248 implemented evidence: [source-bound logs/patches](../validation/baseline/slice248/README.md)
+retain the original isolated TCP/QUIC1/1 diagnostic and old25ms compatibility-stub
+regression0/1. The trace shows7764ms exhaustion while elections and an accepted
+uncommitted Joint repeat, with no source readiness. The final private round pause
+uses actual exchange cost, remaining absolute budget and a final stop reservation;
+it introduces no durable effect, authority, timer or public provider seam. Final
+Linux all197/default138 counter and46/44 executable contracts pass. Mac all196/
+default137 counter and46 executable contracts pass, including both original
+interrupted-runner/source histories with exact19701 identity, journal/profile
+bytes, data/dedup and joins. Formatting/four strict profiles are zero on both;
+all647 Mac build inputs verify. Each host's executable feature builds are sequential.
+The200ms negative fixture's wrong completed-channel cleanup assumption and600ms
+non-discriminating old-cadence calibration remain recorded; final request-exhaustion
+coverage and existing actual absolute-deadline tests preserve their contracts.
+
+Macro review248 closes the selected source-loss drain-runner dependency for usable
+P4/P1 operations. It does not close every roadmap/platform/provider exit. The
+separate247 shared-group listener failure does not recur here, without a claimed
+kernel cause or bind-specific fix. Current249 now reconciles actual functional
+requirements before selecting another implementation; performance/security later,
+Windows/P8 deferred and full P0–P7 active. No broader prerequisite/helper chain is
+introduced by the cadence fix.
+
+Current249: close one required operator integration gap and reconcile functional
 requirements/platform evidence. Purpose: make the baseline feature boundary explicit.
 Depend on247/248 and chapter12/acceptance map. Select an actual missing capability
 before adding helpers. Completion requires public executable/Rust usage with
@@ -1263,13 +1322,23 @@ original-operation recovery/cleanup and source-bound evidence or an explicit
 remaining item for every required baseline feature and supported Mac/Linux workflow.
 Selected suites cannot certify full coverage; full P0–P7 remains active.
 
-Following250: implement a confirmed missing functional exit from249's audit.
+Next250: implement a confirmed missing functional exit from249's audit.
 Purpose: advance the baseline feature milestone rather than add speculative
 helpers. Depend on the original chapter12/17 requirements, public contracts and
 the concrete gap selected by249. State its schema and completion checks before
 editing; require usable Rust/executable behavior, recovery/cleanup and relevant
 Mac/Linux checks with zero diagnostics. A gap not yet inspected is planned work,
 not an absent implementation claim. Keep performance/security gates separate.
+
+Following251: verify the resulting baseline functional assembly across supported
+Mac/Linux Rust and executable configurations. Purpose: advance P0–P6/platform
+feature acceptance, keeping P7 tuning/security gates explicit. Depend on249's
+original requirement/contract/exit audit and250's confirmed change. Select relevant
+real native lifecycle/provider histories before declaring a broader milestone;
+inspect failures and preserve exact operation/cleanup contracts. Completion checks
+are the original functional exits, actual source-bound platform evidence and zero
+formatting/four strict profiles. Do not infer completion from this planned sweep
+or substitute performance/security work for a missing usable feature.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,

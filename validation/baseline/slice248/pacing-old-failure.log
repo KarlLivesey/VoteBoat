@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.32s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 1 test
+test drain_runner::pacing_tests::pending_rounds_preserve_request_budget_until_source_is_actually_ready ... FAILED
+
+failures:
+
+---- drain_runner::pacing_tests::pending_rounds_preserve_request_budget_until_source_is_actually_ready stdout ----
+drain_runner_budget evidence=local_volatile source=1 sequence=1 operation=2 target=1 command=drain-group requests_exhausted=true deadline_exhausted=false remaining=0 elapsed_ms=925
+
+thread 'drain_runner::pacing_tests::pending_rounds_preserve_request_budget_until_source_is_actually_ready' (1128204) panicked at src/bin/support/drain_runner/pacing_tests.rs:48:16:
+called `Result::unwrap()` on an `Err` value: "UNKNOWN drain runner budget expired; rerun the same sequence and operation"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    drain_runner::pacing_tests::pending_rounds_preserve_request_budget_until_source_is_actually_ready
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 45 filtered out; finished in 0.93s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

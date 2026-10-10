@@ -1,5 +1,18 @@
 # Validation report
 
+Bounded drain observation pacing: [slice248](baseline/slice248/README.md).
+Original Mac QUIC exhausts128 requests at7764ms while original configuration and
+election observations repeat; TCP passes in that isolated diagnostic. Round pacing
+now uses actual exchange cost and the remaining unchanged45s/128 or120s/4096
+budget, with no authority, core, timer, quorum or persistence changes. Old25ms
+fixture stub fails0/1 before readiness; final authenticated delayed-ready and
+unready budget refusal pass, with deadline/channel contracts retained. Linux
+counter197/default138 and executable46/44 pass; Mac counter196/default137 and
+executable46 pass at original concurrency. All647 Mac inputs verify. Formatting/
+four strict profiles are zero on both. Earlier247 listener failure does not recur;
+no kernel-cause attribution or bind-specific repair is claimed. Full P0–P7 remains
+active; functional/operator reconciliation precedes performance/security work.
+
 Configuration-loss serving precondition: [slice247](baseline/slice247/README.md).
 An actual read of42 on the exact selected endpoint qualifies the fixture before
 it deliberately kills quorum. Production/readiness/quorum/durability and original

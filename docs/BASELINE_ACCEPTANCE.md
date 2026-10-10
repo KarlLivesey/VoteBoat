@@ -1,5 +1,15 @@
 # Baseline acceptance map
 
+Bounded drain observation pacing: [slice248](../validation/baseline/slice248/README.md).
+Actual round cost spaces original observations across unchanged absolute/request
+budgets; no authority, timer, quorum or durability change. Final Linux counter197/
+default138 and Mac196/default137 pass, including original interrupted TCP/QUIC
+runner/source recovery; executable contracts46/44 Linux and46 Mac pass. Formatting/
+four strict profiles are zero and all647 Mac build inputs verify. The separate247
+listener failure is retained despite not recurring here. Selected finite operator
+acceptance advances; current249 audits original functional exits and confirms the
+next feature gap. Full P0–P7 and broader provider/platform obligations stay active.
+
 Configuration-loss serving precondition: [slice247](../validation/baseline/slice247/README.md).
 Actual exact-endpoint read authority precedes deliberate quorum loss, preserving
 original records and post-loss recovery checks. Linux all197/default138 and Mac

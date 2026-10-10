@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 2 tests
+test drain_runner::pacing_tests::unready_source_cannot_renew_the_deadline_or_request_stop ... FAILED
+test drain_runner::pacing_tests::pending_rounds_preserve_request_budget_until_source_is_actually_ready ... ok
+
+failures:
+
+---- drain_runner::pacing_tests::unready_source_cannot_renew_the_deadline_or_request_stop stdout ----
+drain_runner_budget evidence=local_volatile source=1 sequence=1 operation=2 target=1 command=drain-group requests_exhausted=false deadline_exhausted=true remaining=11 elapsed_ms=201
+
+thread '<unnamed>' (1126724) panicked at src/bin/support/drain_runner/recovery_tests.rs:76:10:
+called `Result::unwrap()` on an `Err` value: "Truncated"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'drain_runner::pacing_tests::unready_source_cannot_renew_the_deadline_or_request_stop' (1126722) panicked at src/bin/support/drain_runner/pacing_tests.rs:40:34:
+called `Result::unwrap()` on an `Err` value: Any { .. }
+
+
+failures:
+    drain_runner::pacing_tests::unready_source_cannot_renew_the_deadline_or_request_stop
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 44 filtered out; finished in 0.79s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

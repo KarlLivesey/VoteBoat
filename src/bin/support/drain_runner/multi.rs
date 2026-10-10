@@ -79,6 +79,8 @@ impl Runner {
             if current.ready {
                 break;
             }
+            let started = Instant::now();
+            let remaining_before = self.remaining;
             for (offset, assignment) in assignments.iter().enumerate() {
                 let row = self.multi_row(offset, original.groups)?;
                 if &row.assignment != assignment {
@@ -88,8 +90,10 @@ impl Runner {
                     self.advance_group(assignment)?;
                 }
             }
-            std::thread::park_timeout(Duration::from_millis(25));
             current = self.multi_status()?;
+            if !current.ready {
+                self.pause_round(started, remaining_before);
+            }
         }
         let text = self.source(&format!("drain-stop {} {}", self.sequence, self.operation))?;
         identity(&text, self.sequence, self.operation)?;

@@ -15,6 +15,9 @@ mod multi;
 #[path = "drain_runner/observation_tests.rs"]
 mod observation_tests;
 #[cfg(test)]
+#[path = "drain_runner/pacing_tests.rs"]
+mod pacing_tests;
+#[cfg(test)]
 #[path = "drain_runner/recovery_tests.rs"]
 mod recovery_tests;
 
@@ -153,6 +156,21 @@ impl Runner {
             self.start,
         ))
     }
+    fn pause_round(&self, started: Instant, remaining_before: usize) {
+        if self.remaining < 2 {
+            return;
+        }
+        let cost = remaining_before.saturating_sub(self.remaining).max(1);
+        // Spread the remaining observations over their existing time budget,
+        // reserving one exchange for the final stop request. Nothing is renewed.
+        let rounds = (self.remaining - 1) / cost + 1;
+        let interval = self.deadline.saturating_duration_since(started)
+            / u32::try_from(rounds).unwrap_or(u32::MAX);
+        let until = started + interval;
+        while let Some(wait) = until.checked_duration_since(Instant::now()) {
+            std::thread::park_timeout(wait);
+        }
+    }
     fn source(&mut self, command: &str) -> Result<String, Failure> {
         match self.exchange(self.source, command)? {
             Attempt::Reply(reply) => Ok(reply),
@@ -253,9 +271,13 @@ impl Runner {
             if current.ready {
                 break;
             }
+            let started = Instant::now();
+            let remaining_before = self.remaining;
             self.configure(original.configuration)?;
-            std::thread::park_timeout(Duration::from_millis(25));
             current = self.status()?;
+            if !current.ready {
+                self.pause_round(started, remaining_before);
+            }
         }
         let stopped = self.source(&format!("drain-stop {} {}", self.sequence, self.operation))?;
         identity(&stopped, self.sequence, self.operation)?;

@@ -1,0 +1,32 @@
+diff --git a/src/bin/support/drain_runner.rs b/src/bin/support/drain_runner.rs
+index 999a2e9..3c71f19 100644
+--- a/src/bin/support/drain_runner.rs
++++ b/src/bin/support/drain_runner.rs
+@@ -145,13 +145,25 @@ impl Runner {
+             );
+         }
+         self.remaining -= 1;
+-        Ok(local_client::exchange(
++        let attempt = local_client::exchange(
+             &self.endpoints[target],
+             format!("{command}\n").as_bytes(),
+             self.deadline.min(Instant::now() + Duration::from_secs(5)),
+             Some(&self.auth),
+             self.start,
+-        ))
++        );
++        if std::env::var_os("VOTEBOAT_DRAIN_TRACE").is_some() {
++            let reply = match &attempt {
++                Attempt::Reply(text) => text.chars().take(512).collect::<String>(),
++                Attempt::Unavailable => "Unavailable".into(),
++                Attempt::Interrupted(reason) => format!("Interrupted({reason})"),
++            };
++            eprintln!(
++                "drain_trace target={} remaining={} command={command:?} reply={reply:?}",
++                self.endpoints[target].node, self.remaining
++            );
++        }
++        Ok(attempt)
+     }
+     fn source(&mut self, command: &str) -> Result<String, Failure> {
+         match self.exchange(self.source, command)? {

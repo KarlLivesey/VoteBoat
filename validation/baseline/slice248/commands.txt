@@ -1,0 +1,39 @@
+Published base64aa793bf0e5f8af5da32ca438a1db5fd7f7cdd5.
+Readiness/request cadence changes only the counter executable's foreground
+runner. Core Raft, native storage/transport, configuration gates and typed Rust
+provider APIs are unchanged. No new public provider seam is added.
+
+Mac diagnostic: apply diagnostic.patch, verify diagnostic.sha256, then run
+VOTEBOAT_DRAIN_TRACE=1 cargo +stable test --locked --offline --all-features --test counter_service killed_ -- --nocapture
+The original interrupted TCP passes, QUIC exhausts128 requests at7764ms and fails.
+The temporary diagnostic bounds each reply excerpt to512 characters; it does not
+change admission, authority, synchronization, timers, request count or deadline.
+Remove the diagnostic patch before applying final source.patch. No final trace
+branch or environment option is installed.
+
+Linux old-cadence regression: retain the new helper signature/callers but replace
+only pause_round with the old fixed25ms park, then run
+cargo +stable test --locked --offline --all-features --bin voteboat-counter pending_rounds_preserve_request_budget_until_source_is_actually_ready
+Restore the final source immediately after this finite check. It is the old
+cadence compatibility stub, not a verbatim old tree. Final fixture ready-after2s,
+4s deadline,16 requests; old0/1 fails at925ms before source readiness. The earlier
+600ms fixture did not distinguish old cadence from actual handshake delay and
+passed; retain it as calibration, not failure evidence. The initial negative
+200ms fixture incorrectly assumed an authenticated channel would complete before
+deadline despite Truncated. Use a4-request unready cut for exact budget refusal;
+the existing actual stalled-observation test separately verifies absolute expiry.
+
+Final Linux and Mac, configurations sequential on each host:
+cargo +stable test --locked --offline --all-features --bin voteboat-counter --test counter_service
+cargo +stable test --locked --offline --test counter_service
+.githooks/pre-push
+Mac all-feature also includes --no-fail-fast; Linux default also includes
+--bin voteboat-counter --no-fail-fast.
+The hook checks formatting plus strict default/all/no-default/native-only Clippy.
+Mac uses installed Rust1.98.0 and task-owned checkout/test roots; all647 final
+source, fixtures and build inputs verify before execution. No host settings,
+test concurrency, elections, client deadlines or total request budgets change.
+
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+These metadata checks do not certify all contracts or all P0–P7 exits.
