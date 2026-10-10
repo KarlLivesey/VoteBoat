@@ -2484,7 +2484,25 @@
         "tests/support/node_drain.rs",
         "tests/startup/maintenance/drain.rs"
       ],
-      "scope": "Volatile one-way local maintenance gate with a sorted exact manifest of at most1024 assigned group identities and stable committed configuration IDs. Same request is idempotent; conflicting, missing, reordered, duplicate, stale or oversized manifests reject before admission changes. Ordinary proposal/read rejection preserves owned requests; explicit host-authorized maintenance paths retain ordinary application, quorum and shutdown checks. Each owner poll attempts at most32 campaign suppressions and retains admitted identities under backpressure. Disabling campaigns steps a candidate down after pending persistence, retains durable votes and replication, suppresses explicit and TimeoutNow campaigns and cancels stale election timers; leaders retain heartbeat/handoff. Status retains pending/leader/stale/fenced/core-work distinctions and outstanding client/read completions. It is an ephemeral local observation, not remote quorum, replica-removal or durable drain evidence. Recovery starts ungated; hosts must reapply durable intent before exposing work. Native TCP/QUIC three-replica histories hand off leadership, stop/join the gated source and write with the remaining two voters. Full durable drain orchestration, membership changes and executable commands remain197b."
+      "scope": "Volatile one-way local maintenance gate with a sorted exact manifest of at most1024 assigned group identities and stable committed configuration IDs. Same request is idempotent; conflicting, missing, reordered, duplicate, stale or oversized manifests reject before admission changes. Ordinary proposal/read rejection preserves owned requests; explicit host-authorized maintenance paths retain ordinary application, quorum and shutdown checks. Each owner poll attempts at most32 campaign suppressions and retains admitted identities under backpressure. Disabling campaigns steps a candidate down after pending persistence, retains durable votes and replication, suppresses explicit and TimeoutNow campaigns and cancels stale election timers; leaders retain heartbeat/handoff. Status retains pending/leader/stale/fenced/core-work distinctions and outstanding client/read completions. It is an ephemeral local observation, not remote quorum, replica-removal or durable drain evidence. Recovery starts ungated; hosts must reapply durable intent before exposing work. Native TCP/QUIC three-replica histories hand off leadership, stop/join the gated source and write with the remaining two voters. Full durable drain orchestration, membership changes and executable commands remain197b. Slice197b1 adds optional durable journal restoration and cancellation; the local gate can reopen after confirmed enable admissions. Recovered stale manifests keep all current assignments gated and report mismatch."
+    },
+    {
+      "design_id": "C10/C15/C20",
+      "public_contract": "DrainJournal / DrainRecord / DrainRecordIo / NativeDrainJournal / Node::restore_drain",
+      "operations": [
+        "publish",
+        "latest",
+        "NativeDrainJournal::new",
+        "NativeDrainJournal::recover",
+        "Node::restore_drain"
+      ],
+      "native": "Bounded versioned SHA-256 record over FileDrainRecord or host atomic record I/O; existing Node owner admissions restore the gate.",
+      "conformance": [
+        "tests/drain_journal.rs",
+        "tests/support/node_drain_recovery.rs",
+        "tests/startup/maintenance/drain_recovery.rs"
+      ],
+      "scope": "One latest record bound to exact NodeId/StoreIdentity, positive monotonic administrative sequence, original operation and sorted expected assignments (up to1024), Active or Cancelled. Exact retries preserve state; new sequences require cancellation. Sequence is not a consensus watermark or global audit log. Successful publication means durable atomic replacement; uncertainty fences the journal until reopen. Blocking file publication runs outside Node polling under host-exclusive directory ownership, with stage sync, rename and directory sync. Explicit recover requires a present valid record; missing required, corrupt, oversized, wrong-owner and invalid records refuse. Initial new may have no record. Frames bound reads to32880 bytes and validate lengths, reserved fields, identities, version and checksum. Node reads the verified nonblocking journal view, gates all current assignments even on manifest mismatch, and consumes exact tracked enable admissions before reopening on cancellation. Repeated and stale views cannot erase or replace a newer local record; ordinary accepted work remains owned through shutdown. Native TCP/WAL and QUIC/checkpoint histories reopen pending handoff and active gate, complete on the target, durably cancel, reopen and write normally. No automatic executable integration, remote availability/decommission proof, full operation history, generic membership orchestration, power-loss or macOS validation is claimed; those remain197b2 and broader platform work."
     }
   ],
   "not_yet_implemented": [

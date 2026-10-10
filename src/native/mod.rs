@@ -23,6 +23,7 @@ pub mod credential_journal;
 pub mod credentials;
 pub mod dial;
 pub mod discovery;
+pub mod drain_journal;
 pub mod log_store;
 pub mod lookup_discovery;
 #[cfg(feature = "tls")]

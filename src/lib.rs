@@ -27,6 +27,7 @@ pub mod deletion;
 pub mod dial;
 pub mod directory;
 pub mod discovery;
+pub mod drain;
 pub mod identity;
 pub mod log;
 pub mod maintenance;

@@ -1,0 +1,18 @@
+# Commands from repository root, in execution order. Logs in this directory.
+cargo +stable test --locked --offline --all-features --test drain_journal --test effect_owner drain
+cargo +stable test --locked --offline --all-features --test drain_journal
+cargo +stable test --locked --offline --all-features --test startup durable_drain
+cargo +stable test --locked --offline --all-features --test drain_journal --test effect_owner --test startup --test credential_journal
+# Explicit required-record recovery added after that regression:
+cargo +stable test --locked --offline --all-features --test drain_journal --test startup
+cargo +stable test --locked --offline --no-default-features --test effect_owner
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# Native socket tests use authorized loopback access; feature builds ran sequentially.
+# Additional exact accepted-persistence-dependency regression (after fixing fixture order):
+cargo +stable test --locked --offline --all-features --test effect_owner cancellation_waits_behind
+cargo +stable test --locked --offline --no-default-features --test effect_owner
+# Formatting and all three Clippy commands above were then rerun on final source.

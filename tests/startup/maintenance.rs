@@ -4,6 +4,8 @@ use super::*;
 use voteboat::{maintenance::*, native::connect::*, raft::*, secure::PeerIdentity};
 #[path = "maintenance/drain.rs"]
 mod drain;
+#[path = "maintenance/drain_recovery.rs"]
+mod drain_recovery;
 type Managed = NativeNode<Maintenance<HostApplication>, NativeServiceConnector>;
 static DIRECTORY: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 struct History {

@@ -126,9 +126,85 @@ strict profiles clean while advancing the remaining capability work.
 | Completed196b1: durable Rust maintenance | Preserve original intent/status through the existing group log and checkpoints; advances P4/chapter09 and usable embedding. |196a, opt-in application composition, Node result ownership and execution-time proposal context. | Bounded records, original-ID retries/cancellation, host context rechecks, every-byte torn journal records, and native TCP/WAL and QUIC/checkpoint pending/completed recovery plus fresh quorum status. |
 | Completed196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
 | Completed197a: local drain admission and campaign gate | Keep a replica from immediately campaigning after handing off; advances coordinated drain197, P4/P2 and chapter09. |196 leadership transfer, exact bounded assignment inventory and existing Node ownership. | Reject ordinary new work while preserving maintenance/replication; disable automatic, explicit and transfer-triggered campaigns; retain leader heartbeat until handoff. Report unresolved/stale groups and outstanding results. Local readiness is not remote quorum or durable completion. |
-| Current197b: durable coordinated drain | Expose recoverable operator drain through existing maintenance, membership and shutdown paths; advances P4/P2 and chapter09. |197a gates,196 durable operations, authenticated administration and placement/membership authorization. | Persist original identity and expected assignments before executing; recover interrupted plans, transfer eligible leaders and change membership as required; never call unavailable or stale groups safely drained. Join selected workers after verified conditions. |
+| Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
+| Current197b2: durable coordinated drain | Expose recoverable operator drain through existing maintenance, membership and shutdown paths; advances P4/P2 and chapter09. |197a gates,196 durable operations, authenticated administration and placement/membership authorization. | Persist original identity and expected assignments before executing; recover interrupted plans, transfer eligible leaders and change membership as required; never call unavailable or stale groups safely drained. Join selected workers after verified conditions. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b1 implementation evidence
+
+Added the public DrainJournal/DrainRecord contract and native bounded record
+provider with host-replaceable atomic I/O. Record publication is outside Node
+polling; successful publication follows stage write/sync, rename and directory
+sync. Uncertain failures fence until reopen. Initial creation and required
+recovery are explicit: missing required records, truncated/corrupt frames,
+invalid lengths/identities and wrong owners refuse rather than opening a gate.
+Only the latest local operation is retained; sequence is an administrative
+identity, never quorum evidence or a durable log prefix.
+
+Node::restore_drain gates every current assignment before recovered work,
+including when the persisted manifest is stale. Cancellation uses exact tracked
+owner admissions; an old queued disable cannot count as a completed enable.
+Ordinary admission reopens after all enables execute. Failed and superseded
+journal observations preserve the existing gate. Cancellation does not retract
+a separately delivered leadership signal or cancel a replicated handoff record.
+
+Fourteen new focused tests cover journal transitions, old/new recovery after
+uncertain writes, every truncation/corrupt byte, rechecksummed malformed records,
+maximum size, required missing records, host journal replacement, stale manifests,
+queued cancellation and native active/cancelled restart. The affected regression
+passes196 tests (credential journal4, drain journal6, Node168, startup18); after
+the required-record addition, all7 drain-journal and18 startup tests pass again.
+A separate accepted-durability-dependency test passes after correcting fixture
+priority ordering. The no-default Node regression passes163 tests. Counts overlap and remain finite
+histories. Commands, source digests and raw results are in
+validation/baseline/slice197b1. Formatting and the three strict profiles are
+checked against this slice; metadata checks cover102 contracts.
+
+Macro review:197b2 still must orchestrate placement/membership, durable completion,
+reconciliation and authenticated executable commands. The current deliverable
+makes local drain intent recoverable; it does not make local quiescence a remote
+availability certificate or complete drain197/P0–P7. Native cases use joined
+shutdown/reopen with pending replicated handoff and WAL/checkpoint recovery;
+arbitrary process kills, power loss, macOS and combined membership faults remain.
+
+### Slice197b1 schema plan — durable local intent and cancellation
+
+The preceding goal turn was progress:748a93e committed/pushed the local gate,
+18 focused tests and both required feature regression profiles. The next part
+of coordinated drain197 makes that gate recoverable; membership/placement and
+authenticated executable orchestration remain197b2, followed by assignment198
+and platform recovery199. This is required because restarting currently loses
+the gate and cancellation cannot yet safely reopen admission.
+
+A public DrainJournal stores one bounded latest DrainRecord: exact node/store
+identity, monotonically increasing local sequence, original operation and sorted
+expected assignments, and Active or Cancelled phase. Exact retries are unchanged;
+Active can only become Cancelled for the same intent; a new sequence requires a
+terminal predecessor. Sequence is an administrative identity, never a log prefix.
+NativeDrainJournal uses checked versioned records, SHA-256 integrity and explicit
+atomic record I/O; file publication synchronizes stage, rename and directory.
+Blocking I/O runs outside Node polling, under host-owned exclusive directory
+ownership. Uncertain publication fences the journal until reopen. Explicit recovery requires an existing record; missing and
+corrupt records both refuse recovery, distinct from initial creation. Host record-I/O and journal implementations use
+the same public contract, with no new runtime or background thread.
+
+Node restores only a confirmed journal view matching its exact store identity.
+Active recovery closes data admission and suppresses campaigning on every current
+assignment, even if the recorded manifest is stale; status reports the mismatch
+and cannot be ready. A durable cancellation queues explicit enable events and
+reopens data only after their exact tracked admissions execute successfully.
+Old queued disable events cannot masquerade as completed enables. Repeated
+observations do not enqueue duplicates. Existing handoff cancellation stays
+explicit: reopening admission cannot retract an already delivered signal.
+
+Checks: monotonic/idempotent transitions, conflicting/stale owner and sequence,
+rejected/uncertain writes, all truncated and corrupt frames, old-or-complete
+atomic publication, changed assignments on recovery, cancel before suppression,
+held dependency and stale admission tickets. Native TCP/QUIC histories reopen an
+active journal before polling, preserve the gate through handoff, cancel durably
+and reopen ordinary work. Full drain completion/membership remains197b2; local
+journal state alone never grants quorum, ownership or safe-decommission evidence.
 
 ### Slice197a implementation evidence
 

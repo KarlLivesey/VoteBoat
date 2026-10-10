@@ -198,6 +198,7 @@ pub struct Node<
     maintenance: WalMaintenanceStatus,
     checkpoints: CheckpointStatus,
     drain: Option<drain::LocalDrain>,
+    drain_history: Option<crate::drain::DrainRecord>,
 }
 impl<
         S: ReadyScheduler,
@@ -316,6 +317,7 @@ where
             maintenance: WalMaintenanceStatus::default(),
             checkpoints: CheckpointStatus::default(),
             drain: None,
+            drain_history: None,
         })
     }
     fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
@@ -934,6 +936,7 @@ where
                 |core, event| Self::authorize_configuration(network, core, event, authorize),
             )
             .map_err(NodeError::Replica)?;
+        self.observe_drain_gate(&replica.steps)?;
         self.checkpoints.observe(&self.local.owner, &replica.steps);
         self.configuration
             .observe(&self.local.owner, &replica.steps)

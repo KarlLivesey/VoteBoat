@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-use std::collections::BTreeSet;
+mod recovery;
+pub use recovery::*;
 
 pub const MAX_LOCAL_DRAIN_GROUPS: usize = 1024;
 const GROUPS_PER_POLL: usize = 32;
@@ -40,14 +41,18 @@ pub struct LocalDrainStatus {
     pub operation: OperationId,
     pub groups: Vec<(DrainGroup, DrainGroupState)>,
     pub outstanding_requests: usize,
+    pub assignments_match: bool,
+    pub resuming: bool,
     /// Ephemeral local observation only. Does not establish remote quorum,
     /// replica removal, durable operation completion or permission to stop.
     pub locally_quiescent: bool,
 }
 pub(super) struct LocalDrain {
     request: LocalDrainRequest,
-    queued: BTreeSet<GroupIdentity>,
+    gate_groups: Vec<GroupIdentity>,
+    queued: BTreeMap<GroupIdentity, (AdmissionTicket, bool)>,
     cursor: usize,
+    resuming: bool,
 }
 impl<
         S: ReadyScheduler,
@@ -66,8 +71,9 @@ where
 {
     /// Close ordinary client admission immediately, then disable campaigns in
     /// bounded owner polls. Existing leaders keep heartbeats for handoff.
-    /// This gate is one-way until shutdown. A recovered Node starts ungated:
-    /// reapply durable host intent before polling or accepting recovered work.
+    /// There is no unrecorded reset: release through `restore_drain` after a
+    /// durable cancellation, or shut down. A recovered Node starts ungated:
+    /// restore durable host intent before polling or accepting recovered work.
     pub fn begin_local_drain(&mut self, request: LocalDrainRequest) -> Result<(), LocalDrainError> {
         if self.state != NodeState::Running {
             return Err(LocalDrainError::Closed);
@@ -96,11 +102,7 @@ where
                 return Err(LocalDrainError::UnstableConfiguration);
             }
         }
-        self.drain = Some(LocalDrain {
-            request,
-            queued: BTreeSet::new(),
-            cursor: 0,
-        });
+        self.install_drain_gate(request, false);
         Ok(())
     }
 
@@ -120,7 +122,15 @@ where
             .collect::<Vec<_>>();
         let outstanding_requests =
             self.local.clients.usage().requests + self.local.reads.usage().requests;
+        let assignments_match = drain
+            .request
+            .groups
+            .iter()
+            .map(|g| g.group)
+            .eq(self.local.owner.groups());
         let locally_quiescent = self.state == NodeState::Running
+            && assignments_match
+            && !drain.resuming
             && outstanding_requests == 0
             && self.configuration.is_drained()
             && self.local.results.is_drained()
@@ -131,6 +141,8 @@ where
             operation: drain.request.operation,
             groups,
             outstanding_requests,
+            assignments_match,
+            resuming: drain.resuming,
             locally_quiescent,
         })
     }
@@ -139,16 +151,17 @@ where
         let Some(drain) = &mut self.drain else {
             return Ok(());
         };
-        for _ in 0..GROUPS_PER_POLL.min(drain.request.groups.len()) {
-            let group = drain.request.groups[drain.cursor].group;
-            if !drain.queued.contains(&group) {
-                match self
-                    .local
-                    .owner
-                    .admit(group, Event::SetCampaigning { enabled: false })
-                {
-                    Ok(()) => {
-                        drain.queued.insert(group);
+        for _ in 0..GROUPS_PER_POLL.min(drain.gate_groups.len()) {
+            let group = drain.gate_groups[drain.cursor];
+            if !drain.queued.contains_key(&group) {
+                match self.local.owner.admit_tracked(
+                    group,
+                    Event::SetCampaigning {
+                        enabled: drain.resuming,
+                    },
+                ) {
+                    Ok(ticket) => {
+                        drain.queued.insert(group, (ticket, false));
                     }
                     Err(rejected) if rejected.reason == RuntimeError::Overloaded => break,
                     Err(rejected) => {
@@ -156,7 +169,41 @@ where
                     }
                 }
             }
-            drain.cursor = (drain.cursor + 1) % drain.request.groups.len();
+            drain.cursor = (drain.cursor + 1) % drain.gate_groups.len();
+        }
+        Ok(())
+    }
+    fn install_drain_gate(&mut self, request: LocalDrainRequest, resuming: bool) {
+        self.drain = Some(LocalDrain {
+            request,
+            gate_groups: self.local.owner.groups().collect(),
+            queued: BTreeMap::new(),
+            cursor: 0,
+            resuming,
+        });
+    }
+    pub(super) fn observe_drain_gate(&mut self, steps: &[OwnerStep]) -> Result<(), NodeError> {
+        let Some(drain) = &mut self.drain else {
+            return Ok(());
+        };
+        for step in steps {
+            let Some(admission) = step.admission else {
+                continue;
+            };
+            if let Some((ticket, complete)) = drain.queued.get_mut(&admission.group) {
+                if *ticket == admission {
+                    if let Some(error) = &step.error {
+                        return Err(NodeError::Owner(EffectOwnerError::Consensus(error.clone())));
+                    }
+                    *complete = true;
+                }
+            }
+        }
+        if drain.resuming
+            && drain.queued.len() == drain.gate_groups.len()
+            && drain.queued.values().all(|(_, complete)| *complete)
+        {
+            self.drain = None;
         }
         Ok(())
     }

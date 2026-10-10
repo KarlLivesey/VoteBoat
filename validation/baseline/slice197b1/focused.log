@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.96s
+     Running tests/drain_journal.rs (target/debug/deps/drain_journal-7ca08b1b6cf053da)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-3639936cb54e2253)
+
+running 18 tests
+test closing_drains_accepted_work_and_disarms_automatic_timers ... ok
+test node_facade::automatic_maintenance::held_job_drains_on_shutdown_and_abort_retains_recovery_ticket ... ok
+test application_results::byte_ceiling_prevents_application_and_close_drains_without_closing_shared_app ... ok
+test node_facade::drain_recovery::recovered_stale_manifest_still_gates_every_actual_assignment ... ok
+test node_facade::node_retains_pin_checked_routes_across_live_poll_and_drain_and_rejects_withdrawal ... ok
+test node_facade::local_drain::membership_change_never_reuses_old_drain_configuration ... ok
+test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+test read_invocations::per_group_retention_budget_leaves_other_groups_and_close_drains_accepted_work ... ok
+test node_facade::local_drain::accepted_read_is_retained_until_its_completion_is_consumed ... ok
+test node_facade::local_drain::ordinary_requests_keep_their_ownership_and_maintenance_stays_available ... ok
+test node_facade::local_drain::accepted_work_is_not_lost_when_admission_closes ... ok
+test node_facade::drain_recovery::old_owner_and_superseded_journal_views_do_not_reopen_or_replace_a_gate ... ok
+test node_facade::local_drain::gate_is_idempotent_and_disables_every_assigned_follower ... ok
+test peer_driver::failed_local_owner_can_drain_network_and_cancel_held_ingress_without_core_access ... ok
+test node_facade::abort_preserves_earlier_success_and_network_remains_explicitly_drainable_without_core_access ... ok
+test node_facade::local_drain::exact_manifest_validation_has_no_partial_side_effects ... ok
+test node_facade::drain_recovery::cancellation_before_disable_executes_waits_for_exact_enable_admissions ... ok
+test node_facade::local_drain::queue_pressure_retries_suppression_without_failing_the_node ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 0.00s
+

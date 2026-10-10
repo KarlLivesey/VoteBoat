@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.36s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.76s
+

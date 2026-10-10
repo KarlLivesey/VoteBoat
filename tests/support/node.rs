@@ -24,6 +24,8 @@ use voteboat::outbound::*;
 mod automatic_checkpoints;
 #[path = "node_maintenance.rs"]
 mod automatic_maintenance;
+#[path = "node_drain_recovery.rs"]
+mod drain_recovery;
 #[path = "node_events.rs"]
 mod event_reporting;
 #[path = "node_drain.rs"]
