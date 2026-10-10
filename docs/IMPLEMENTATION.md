@@ -13864,3 +13864,32 @@ setup/delivery/assertion phases, then do the same for remaining integration
 fixtures and the embedding example. Preserve each history and assertion, and
 rerun those exact targets plus strict all-target/core checks. Native owner-family
 composition and public administration remain the next capability items.
+
+### Membership test lint cleanup — schema plan
+
+Keep the same histories, test names, assertions and deterministic inputs. Move
+reusable recovery/transport fixtures and distinct lost-delivery, snapshot-ack and
+retirement-receive phases into named private test helpers. Pass mutable cores and
+queues explicitly; preserve each durability completion and delivery order.
+Helpers must retain assertions, not hide failures or turn off lint. Acceptance:
+all library tests in all-feature/core profiles and strict Clippy for the test
+build, with remaining integration/example failures reported separately. This
+continues mini item1 and the consensus/membership evidence for P1/P3/P4.
+
+## Membership test lint cleanup — implemented evidence
+
+Separated recovery fixtures, dropped-repair campaigns, recursive effect delivery,
+snapshot-ack validation and retired-leader receive validation into private test
+helpers. Preserved all51 test cases and468 assertion sites in this module; no
+assertion or lint was removed. The all-feature library run passes64 tests and
+the core-only run passes51. An initial sandboxed run could not bind the QUIC test
+socket (63 passed, one permission failure); rerunning with native socket access
+passed all64. Formatting and whitespace checks pass.
+
+No library or inline-library-test diagnostics remain in the strict all-target
+run. Re-ran it with --keep-going so a failed target could not hide unstarted
+checks: the complete all-feature inventory reports240 distinct diagnostics,
+comprising5 executable,8 example and227 integration-test diagnostics. This is
+still a failed whole-repository lint result. Prior39/112 reports were partial
+fail-fast runs, not total counts. Next clean the runnable service's five findings,
+then examples and integration fixtures, preserving their failure histories.
