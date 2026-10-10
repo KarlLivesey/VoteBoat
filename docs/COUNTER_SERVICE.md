@@ -18,6 +18,8 @@ It requires a new schema2/wire8 deployment; existing plain counter data is not
 automatically converted.
 The optional [retained-replica drain commands](MAINTENANCE.md#retained-replica-node-drain)
 add durable maintenance/reboot with a restored admission gate.
+The [membership-drain workflow](MAINTENANCE.md#executable-membership-drain-workflow)
+combines an original plan file with authenticated joint/final configuration commands.
 
 ## Start three processes
 

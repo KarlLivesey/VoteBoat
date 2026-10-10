@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 7 tests
+test quorum_diagnostics::tests::maximum_weight_pages_fit_the_bounded_reply ... ok
+test drain_commands::validation::tests::retained_capacity_uses_recursive_policy_not_voter_count ... ok
+test quorum_diagnostics::tests::joint_views_require_both_policies_and_keep_parent_indexes_when_paged ... ok
+test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

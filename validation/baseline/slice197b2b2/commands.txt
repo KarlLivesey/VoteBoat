@@ -1,0 +1,14 @@
+# Repository root; socket/process tests use authorized native loopback access.
+cargo +stable check --locked --offline --all-targets --all-features
+cargo +stable test --locked --offline --all-features --test counter_service membership_drain:: -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service
+# After adding the malformed-file test and final startup owner validation:
+cargo +stable test --locked --offline --all-features --test counter_service membership_drain:: -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --all-features --bin voteboat-counter
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# The enabled pre-push hook repeats formatting and all three strict profiles.

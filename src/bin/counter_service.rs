@@ -88,6 +88,7 @@ Maintenance profile: serve ... --service-access FILE --leadership-maintenance en
 Commands: move-leader OP CONFIG TARGET STORE INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
 Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
+Membership drain: source uses --membership-drain FILE and all peers use --remote-admin-plan FILE; see docs/MAINTENANCE.md.\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -348,18 +349,7 @@ fn prepare_service(
         access_path.is_some(),
         plan_path.is_some(),
     )?;
-    if options.leadership_maintenance && (access_path.is_none() || plan_path.is_some()) {
-        return Err("leadership maintenance requires --service-access and a separate profile without an administration plan".into());
-    }
-    if options.node_drain && !options.leadership_maintenance {
-        return Err("--node-drain requires --leadership-maintenance enabled".into());
-    }
-    if !options.node_drain && root.join("drain.record").try_exists()? {
-        return Err(
-            "existing drain journal requires --node-drain enabled; preserve the recovery profile"
-                .into(),
-        );
-    }
+    options.validate_profiles(root)?;
     let config = setup::configuration(root, id, base, tls, create, input)?;
     let credentials = credential_reload::Credentials::load(
         root,
@@ -373,9 +363,33 @@ fn prepare_service(
     )?;
     let administration = plan_path
         .map(|path| {
-            administration::Administration::load(path, &config.provisioned_stores, admin_mode)
+            administration::Administration::load(
+                path,
+                &config.provisioned_stores,
+                admin_mode,
+                options.leadership_maintenance,
+            )
         })
         .transpose()?;
+    let drain_plan = options
+        .membership_drain
+        .as_deref()
+        .map(|path| {
+            drain_commands::load_plan(
+                path,
+                &config.provisioned_stores,
+                administration
+                    .as_ref()
+                    .ok_or("missing membership administration")?,
+            )
+        })
+        .transpose()?;
+    if let Some(plan) = &drain_plan {
+        let owner = checked(plan.record(1))?.owner;
+        if owner.node != config.startup.node || owner.store != config.startup.store {
+            return Err("drain plan belongs to another local owner".into());
+        }
+    }
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
     let peer_address = config.startup.listen;
@@ -388,7 +402,7 @@ fn prepare_service(
     options.configure_maintenance(&mut service)?;
     let drain = options
         .node_drain
-        .then(|| drain_commands::Driver::open(&mut service, root, create))
+        .then(|| drain_commands::Driver::open(&mut service, root, create, drain_plan))
         .transpose()?;
     if let Some(source) = discovery.as_mut() {
         source.bind_session(service.local().owner.identity().store.session.get());
@@ -812,8 +826,34 @@ struct StartupOptions {
     checkpoint_entries: Option<u64>,
     leadership_maintenance: bool,
     node_drain: bool,
+    membership_drain: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
+        if self.leadership_maintenance
+            && (self.service_access.is_none()
+                || self.admin_plan.is_some()
+                    && self.remote_admin != administration::Mode::Provisioned)
+        {
+            return Err("leadership maintenance requires --service-access; membership requires an explicitly requested --remote-admin-plan".into());
+        }
+        if self.node_drain && !self.leadership_maintenance {
+            return Err("--node-drain requires --leadership-maintenance enabled".into());
+        }
+        if self.membership_drain.is_some()
+            && (!self.node_drain || self.remote_admin != administration::Mode::Provisioned)
+        {
+            return Err("--membership-drain requires --node-drain and --remote-admin-plan".into());
+        }
+        if !self.node_drain && root.join("drain.record").try_exists()? {
+            return Err(
+            "existing drain journal requires --node-drain enabled; preserve the recovery profile"
+                .into(),
+        );
+        }
+        Ok(())
+    }
+
     fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
         if let Some(interval_ms) = self.wal_reclaim_ms {
             checked(
@@ -853,6 +893,24 @@ fn enabled_option(value: &str, name: &str) -> Result<bool, Failure> {
         Err(format!("expected {name} enabled").into())
     }
 }
+fn is_startup_option(flag: &str) -> bool {
+    matches!(
+        flag,
+        "--transport"
+            | "--deployment"
+            | "--admin-plan"
+            | "--remote-admin-plan"
+            | "--remote-admin-policy"
+            | "--service-access"
+            | "--command-listen"
+            | "--discovery-peers"
+            | "--wal-reclaim-ms"
+            | "--checkpoint-entries"
+            | "--leadership-maintenance"
+            | "--node-drain"
+            | "--membership-drain"
+    )
+}
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut protocol = NativePeerProtocol::TcpTls;
     let mut transport_selected = false;
@@ -866,23 +924,10 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut checkpoint_entries = None;
     let mut leadership_maintenance = None;
     let mut node_drain = None;
+    let mut membership_drain = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
-        if !matches!(
-            flag,
-            "--transport"
-                | "--deployment"
-                | "--admin-plan"
-                | "--remote-admin-plan"
-                | "--remote-admin-policy"
-                | "--service-access"
-                | "--command-listen"
-                | "--discovery-peers"
-                | "--wal-reclaim-ms"
-                | "--checkpoint-entries"
-                | "--leadership-maintenance"
-                | "--node-drain"
-        ) {
+        if !is_startup_option(flag) {
             break;
         }
         let value = args.pop().unwrap();
@@ -933,6 +978,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--node-drain" if node_drain.is_none() && args[0] == "serve" => {
                 node_drain = Some(enabled_option(&value, "--node-drain")?);
             }
+            "--membership-drain" if membership_drain.is_none() && args[0] == "serve" => {
+                membership_drain = Some(std::path::PathBuf::from(value));
+            }
             "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
                 checkpoint_entries = Some(positive_option(&value, "checkpoint entry threshold")?);
             }
@@ -951,6 +999,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         checkpoint_entries,
         leadership_maintenance: leadership_maintenance.unwrap_or(false),
         node_drain: node_drain.unwrap_or(false),
+        membership_drain,
     })
 }
 

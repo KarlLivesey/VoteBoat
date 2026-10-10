@@ -75,10 +75,48 @@ pub(super) fn tree<'a>(
     super::policy_input::tree(tokens, depth, remaining, MAX_NODE)
 }
 
-fn parse_record<'a>(
+pub(super) fn parse_configuration<'a>(
+    target: ConfigurationId,
+    mut tokens: impl Iterator<Item = &'a str>,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+) -> Result<Configuration, Failure> {
+    let learners = tokens.next().ok_or("missing learner list")?;
+    let mut assignments = BTreeMap::new();
+    if learners != "-" {
+        for item in learners.split(',') {
+            let id = node(item)?;
+            let store = *stores
+                .get(&id)
+                .ok_or("learner missing replica declaration")?;
+            if assignments.insert(id, store).is_some() {
+                return Err("duplicate learner".into());
+            }
+        }
+    }
+    let policy = checked(Policy::new(
+        tree(&mut tokens, 0, &mut 16384)?,
+        Limits::default(),
+    ))?;
+    let voters = policy
+        .voters()
+        .iter()
+        .map(|id| {
+            stores
+                .get(id)
+                .map(|store| (*id, *store))
+                .ok_or("voter missing replica declaration")
+        })
+        .collect::<Result<BTreeMap<_, _>, _>>()?;
+    if tokens.next().is_some() {
+        return Err("trailing configuration fields".into());
+    }
+    checked(Configuration::new(target, policy, voters, assignments))
+}
+
+pub(super) fn parse_record<'a>(
     kind: &str,
     mut tokens: impl Iterator<Item = &'a str>,
-    replicas: &BTreeMap<NodeId, ReplicaPlacement>,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
 ) -> Result<ConfigurationRecord, Failure> {
     let operation = OperationId::new(tokens.next().ok_or("missing operation")?.parse()?)
         .ok_or("invalid operation")?;
@@ -92,35 +130,7 @@ fn parse_record<'a>(
             } else {
                 id
             };
-            let learners = tokens.next().ok_or("missing learner list")?;
-            let mut assignments = BTreeMap::new();
-            if learners != "-" {
-                for item in learners.split(',') {
-                    let id = node(item)?;
-                    let store = replicas
-                        .get(&id)
-                        .ok_or("learner missing replica declaration")?
-                        .store;
-                    if assignments.insert(id, store).is_some() {
-                        return Err("duplicate learner".into());
-                    }
-                }
-            }
-            let policy = checked(Policy::new(
-                tree(&mut tokens, 0, &mut 16384)?,
-                Limits::default(),
-            ))?;
-            let voters = policy
-                .voters()
-                .iter()
-                .map(|id| {
-                    replicas
-                        .get(id)
-                        .map(|p| (*id, p.store))
-                        .ok_or("voter missing replica declaration")
-                })
-                .collect::<Result<BTreeMap<_, _>, _>>()?;
-            let next = checked(Configuration::new(target, policy, voters, assignments))?;
+            let next = parse_configuration(target, tokens.by_ref(), stores)?;
             if kind == "joint" {
                 ConfigurationChange::Joint { id, next }
             } else {
@@ -173,6 +183,7 @@ impl Administration {
         path: &Path,
         stores: &BTreeMap<NodeId, StoreIdentity>,
         mode: Mode,
+        maintenance: bool,
     ) -> Result<Self, Failure> {
         let remote = mode != Mode::Automatic;
         let mut data = Vec::new();
@@ -219,13 +230,18 @@ impl Administration {
             if records.len() >= MAX_ADMINISTRATION_INTENTS {
                 return Err("too many administration intents".into());
             }
-            records.push(parse_record(kind, tokens, &replicas)?);
+            let declared = replicas.iter().map(|(n, p)| (*n, p.store)).collect();
+            records.push(parse_record(kind, tokens, &declared)?);
         }
         // Vec growth can otherwise exceed the backend's retained-capacity ceiling.
         records.shrink_to_fit();
         let placement = NativePlacementAuthorizer::new(group(), replicas, requirements)
             .map_err(|(e, _)| format!("{e:?}"))?;
-        let requirements = application()?.readiness_requirements();
+        use voteboat::application::StateMachine;
+        let requirements =
+            super::counter_application::Application::new(application()?, maintenance)?
+                .deployment_requirements()
+                .ok_or("application has no deployment requirements")?;
         let (plan, dynamic) = if mode == Mode::Targets {
             (
                 None,
@@ -266,6 +282,9 @@ impl Administration {
     }
     fn intents(&self) -> &[ConfigurationRecord] {
         self.plan.as_ref().map_or(&[], |p| p.intents())
+    }
+    pub fn contains(&self, record: &ConfigurationRecord) -> bool {
+        self.intents().contains(record)
     }
     pub fn authorize(
         &self,
@@ -308,8 +327,13 @@ impl Administration {
         }
         let mut tokens = text.split_whitespace();
         let kind = tokens.next().ok_or("missing record kind")?;
-        let record =
-            parse_record(kind, tokens, policy.placement.replicas()).map_err(|e| e.to_string())?;
+        let stores = policy
+            .placement
+            .replicas()
+            .iter()
+            .map(|(n, p)| (*n, p.store))
+            .collect();
+        let record = parse_record(kind, tokens, &stores).map_err(|e| e.to_string())?;
         if record.retained_bytes() > MAX_ADMINISTRATION_BYTES {
             return Err("record retained budget".into());
         }

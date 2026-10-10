@@ -32,19 +32,26 @@ impl Driver {
         words: &[&str],
     ) -> Result<Phase, String> {
         let (sequence, operation) = identity(words)?;
-        let intent = validation::intent(service, words)?;
-        let record = DrainRecord {
-            owner: intent.source,
-            sequence,
-            request: LocalDrainRequest {
-                operation,
-                groups: vec![DrainGroup {
-                    group: group(),
-                    configuration: intent.request.configuration,
-                }],
-            },
-            phase: DrainPhase::Active,
-            plan: None,
+        let (record, intent) = if let Some(plan) = &self.plan {
+            plan::intent(plan, words, sequence, operation)?
+        } else {
+            let intent = validation::intent(service, words)?;
+            (
+                DrainRecord {
+                    owner: intent.source,
+                    sequence,
+                    request: LocalDrainRequest {
+                        operation,
+                        groups: vec![DrainGroup {
+                            group: group(),
+                            configuration: intent.request.configuration,
+                        }],
+                    },
+                    phase: DrainPhase::Active,
+                    plan: None,
+                },
+                intent,
+            )
         };
         if let Some(latest) = &self.latest {
             if latest.sequence == sequence && latest.request.operation == operation {
@@ -62,6 +69,15 @@ impl Driver {
         if self.attempt.is_some() || self.worker.is_some() || service.local_drain_status().is_some()
         {
             return Err("drain busy; inspect or cancel original identity".into());
+        }
+        if let Some(plan) = &self.plan {
+            let core = service.local().owner.core(group()).ok_or("missing group")?;
+            if core.membership().joint().is_some()
+                || core.membership().stable() != &plan.groups()[0].original
+                || core.membership().last_configuration_index() > core.state().commit_index
+            {
+                return Err("drain requires its original committed configuration".into());
+            }
         }
         if handoff(service, operation).is_some_and(|r| r.intent != intent) {
             return Err("conflicting handoff identity".into());
@@ -104,7 +120,16 @@ impl Driver {
                 if record.phase != DrainPhase::Active {
                     return Err("drain is cancelled".into());
                 }
-                retained_configuration(service, validation::configuration(&record)?)?;
+                if let Some(plan) = &self.plan {
+                    let core = service.local().owner.core(group()).ok_or("missing group")?;
+                    if core.membership().joint().is_some()
+                        || core.membership().stable() != &plan.groups()[0].original
+                    {
+                        return Ok(output(self.status(service)));
+                    }
+                } else {
+                    retained_configuration(service, validation::configuration(&record)?)?;
+                }
                 let handoff =
                     handoff(service, operation).ok_or("awaiting original replicated handoff")?;
                 leadership.retry(handoff);
@@ -138,6 +163,19 @@ impl Driver {
         if record.phase != DrainPhase::Active || self.worker.is_some() || self.attempt.is_some() {
             return Err("drain is not durably active".into());
         }
+        if let Some(plan) = &self.plan {
+            return if service
+                .membership_drain_ready(
+                    plan,
+                    self.journal.as_ref().ok_or("journal publication pending")?,
+                )
+                .map_err(|e| format!("{e:?}"))?
+            {
+                Ok(())
+            } else {
+                Err("planned membership drain is not locally ready".into())
+            };
+        }
         let configuration = validation::configuration(record)?;
         retained_configuration(service, configuration)?;
         let handoff = handoff(service, record.request.operation)
@@ -161,8 +199,8 @@ impl Driver {
             return "OK phase=Absent evidence=local_durable".into();
         };
         let local = service.local_drain_status();
-        format!("OK sequence={} operation={} phase={:?} ready={} resuming={} handoff={:?} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate",
+        format!("OK sequence={} operation={} phase={:?} ready={} resuming={} handoff={:?} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate membership_change={}",
             record.sequence, record.request.operation.get(), record.phase, self.ready(service).is_ok(),
-            local.as_ref().is_some_and(|s| s.resuming), handoff(service, record.request.operation).map(|r| r.phase), self.worker.is_some())
+            local.as_ref().is_some_and(|s| s.resuming), handoff(service, record.request.operation).map(|r| r.phase), self.worker.is_some(), self.plan.is_some())
     }
 }

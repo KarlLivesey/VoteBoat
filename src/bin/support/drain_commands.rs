@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-//! Retained-replica maintenance. Membership-changing drain remains separate.
+//! Durable local maintenance and an explicit membership-plan workflow.
 use super::{
     counter_application::Receipt,
     leadership_commands,
@@ -14,8 +14,11 @@ use voteboat::{
 };
 #[path = "drain_commands/commands.rs"]
 mod commands;
+#[path = "drain_commands/plan.rs"]
+mod plan;
 #[path = "drain_commands/validation.rs"]
 mod validation;
+pub use plan::load as load_plan;
 use validation::{handoff, retained_configuration};
 
 struct Attempt {
@@ -26,6 +29,7 @@ struct Attempt {
 }
 type Publication = JoinHandle<(NativeDrainJournal, Result<(), DrainJournalError>)>;
 pub struct Driver {
+    plan: Option<MembershipDrainPlan>,
     journal: Option<NativeDrainJournal>,
     latest: Option<DrainRecord>,
     attempt: Option<Attempt>,
@@ -50,7 +54,12 @@ impl Driver {
     pub fn busy(&self) -> bool {
         self.attempt.is_some() || self.worker.is_some()
     }
-    pub fn open(service: &mut Service, root: &Path, create: bool) -> Result<Self, Failure> {
+    pub fn open(
+        service: &mut Service,
+        root: &Path,
+        create: bool,
+        plan: Option<MembershipDrainPlan>,
+    ) -> Result<Self, Failure> {
         let core = service.local().owner.core(group()).ok_or("missing group")?;
         let owner = PeerIdentity {
             node: core.local_node(),
@@ -64,11 +73,10 @@ impl Driver {
         }
         .map_err(|(e, _)| format!("drain journal: {e:?}"))?;
         let latest = checked(journal.latest())?;
-        if latest.as_ref().is_some_and(|record| record.plan.is_some()) {
-            return Err("membership drain journal requires its original host plan; retained-replica profile cannot resume it".into());
-        }
+        plan::restore(plan.as_ref(), latest.as_ref(), owner)?;
         checked(service.restore_drain(&journal))?;
         Ok(Self {
+            plan,
             journal: Some(journal),
             latest,
             attempt: None,

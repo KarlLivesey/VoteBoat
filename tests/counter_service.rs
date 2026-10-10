@@ -53,6 +53,8 @@ mod joint_retirement;
 mod leadership;
 #[path = "counter_service/maintenance.rs"]
 mod maintenance;
+#[path = "counter_service/membership_drain.rs"]
+mod membership_drain;
 #[path = "counter_service/new_voter.rs"]
 mod new_voter;
 #[path = "counter_service/placement.rs"]
@@ -100,6 +102,7 @@ struct Cluster {
     checkpoint_entries: Option<u64>,
     leadership_maintenance: bool,
     node_drain: bool,
+    membership_drain: Option<(usize, PathBuf)>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -169,6 +172,7 @@ impl Cluster {
             checkpoint_entries: None,
             leadership_maintenance: false,
             node_drain: false,
+            membership_drain: None,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -213,6 +217,11 @@ impl Cluster {
         }
         if self.node_drain {
             command.args(["--node-drain", "enabled"]);
+        }
+        if let Some((owner, path)) = &self.membership_drain {
+            if *owner == id {
+                command.arg("--membership-drain").arg(path);
+            }
         }
         if let Some(entries) = self.checkpoint_entries {
             command.arg("--checkpoint-entries").arg(entries.to_string());

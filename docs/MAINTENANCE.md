@@ -61,9 +61,10 @@ On a new three-node cluster, append these options to **every** serve command:
 Use the same options on recovery. This explicitly selects counter application
 schema2, wire8 and 64 permanent maintenance records. The existing plain counter
 profile stays schema1. Do not enable the new profile on existing plain data or
-mix the profiles between replicas. The executable currently accepts this profile
-without a membership administration plan; the generic Rust wrapper supports
-other host assemblies. There is no automatic migration or history eviction.
+mix the profiles between replicas. Membership administration uses explicitly
+requested `--remote-admin-plan` operations and the wrapper's actual readiness
+requirements. Automatic administration is refused with this profile. There is
+no automatic migration or history eviction.
 
 Use the ordinary authenticated client flags, selecting a current leader node:
 
@@ -144,8 +145,8 @@ administration permits start/resume/cancel; shutdown permission permits stop.
 
 This profile retains the original replicas. It supports maintenance/reboot when
 the remaining configured voters can satisfy the policy. It rejects a required
-membership change. Executable membership changes and multi-group orchestration
-remain coordinated-drain work; these commands are not a decommissioning
+membership change. The planned workflow below supports executable membership
+changes. Multi-group orchestration remains work; these commands are not a decommissioning
 certificate. See [slice197b2a evidence](../validation/baseline/slice197b2a/README.md).
 
 ## Membership-aware drain in Rust
@@ -187,4 +188,44 @@ application catch-up and local quiescence. Only then should the host start the
 ordinary joined shutdown. This is local durable evidence, not a measurement of
 current remote availability. Removing the remaining learner is a later explicit
 membership operation. The retained-replica executable refuses a bound journal
-because it cannot reload this host plan. See [slice197b2b1 evidence](../validation/baseline/slice197b2b1/README.md).
+without an explicit plan file. See [slice197b2b1 evidence](../validation/baseline/slice197b2b1/README.md).
+
+## Executable membership-drain workflow
+
+Initialize all replicas using the maintenance profile and `--node-drain enabled`.
+Stop them, then use `recover-member` with the same options and an authenticated
+`--remote-admin-plan ADMIN_FILE` on every peer. Add `--membership-drain DRAIN_FILE`
+on the source only. Preserve both original files across recovery.
+
+Example drain file for source1, handoff2, and final voters2/3 with source1 retained
+as a learner:
+
+```text
+voteboat-counter-drain-v1
+operation 19701
+source 1 1 1
+handoff 2 2 1
+original 1 - m:3 v:1 v:2 v:3
+joint 19751 1 2 3 1 m:2 v:2 v:3
+final 19751 2 3
+```
+
+The admin file must contain those exact joint/final lines and the ordinary
+placement/replica declarations described in [service administration](COUNTER_SERVICE.md).
+Store identities must match deployment. Both files are bounded to64KiB; malformed
+or incompatible plans refuse startup. Changes to an active journal's plan refuse
+recovery. This is a single-group workflow using explicit operator steps:
+
+1. On the source leader, issue authenticated `drain-node 1 19701`. It persists
+   the bound intent before releasing handoff. Preserve the IDs after a lost reply.
+2. On the current leader, issue `configure 19751`; inspect
+   `configuration-status 19751`. Resume the same operation to finalize once the
+   joint configuration has committed. Every request requires live Admin authority.
+3. On the source, inspect `drain-status 1 19701`. Only `ready=true` permits
+   `drain-stop 1 19701`, which rechecks final membership and joins workers.
+
+After restart, `resume-drain` resumes any pending original handoff; configuration
+execution still needs the explicit request on the current leader. Cancellation
+only reopens the local gate; it does not restore removed voting rights. Restart
+never automatically stops the service. Source learner deletion, automatic
+multi-group coordination and replacement-promotion fault coverage remain open.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-fn cluster(quic: bool) -> Cluster {
+pub(super) fn cluster(quic: bool) -> Cluster {
     let mut c = Cluster::new();
     c.quic = quic;
     c.leadership_maintenance = true;
@@ -35,7 +35,7 @@ fn begin(c: &Cluster, source: usize, target: usize) -> String {
         ],
     )
 }
-fn wait_status(c: &Cluster, source: usize, expected: &str) -> String {
+pub(super) fn wait_status(c: &Cluster, source: usize, expected: &str) -> String {
     let end = Instant::now() + Duration::from_secs(15);
     loop {
         let output = c.request(source, &["drain-status", "1", "19701"]);
@@ -51,12 +51,12 @@ fn wait_status(c: &Cluster, source: usize, expected: &str) -> String {
         std::thread::sleep(Duration::from_millis(20));
     }
 }
-fn kill(c: &mut Cluster, id: usize) {
+pub(super) fn kill(c: &mut Cluster, id: usize) {
     let mut child = c.children[id - 1].take().unwrap();
     child.kill().unwrap();
     child.wait().unwrap();
 }
-fn joined(c: &mut Cluster, id: usize) {
+pub(super) fn joined(c: &mut Cluster, id: usize) {
     assert!(exited(c, id).success(), "{}", c.service_log(id));
     assert!(c.service_log(id).contains("workers_joined=true"));
 }
@@ -134,7 +134,7 @@ fn history(quic: bool) {
     assert_eq!(c.routed(&["read"]), "OK value=10\n");
     c.stop();
 }
-fn wait_manual_checkpoint(c: &Cluster, source: usize) {
+pub(super) fn wait_manual_checkpoint(c: &Cluster, source: usize) {
     let end = Instant::now() + Duration::from_secs(10);
     loop {
         let text = c.ok(source, &["maintenance"]);
