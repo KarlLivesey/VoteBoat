@@ -109,6 +109,16 @@ strict profiles clean while advancing the remaining capability work.
 | Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
 | Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
 
+### Slice182 schema plan — let background platform runs finish
+
+The observed runs at a446311 and ced34e8 were canceled by subsequent pushes,
+leaving full platform evidence perpetually incomplete. Keep the existing workflow
+concurrency group but disable cancellation of an in-progress run. This changes
+only scheduling: no required merge check, waiting in the development loop, matrix,
+permissions, test commands, timeout or hook change. Verify the narrow workflow
+diff and observe later job outcomes against their own source revisions. It does
+not turn historical or canceled jobs into current-source evidence.
+
 ### Slice181 schema plan — attribute the existing manifest publication cost
 
 P7's outstanding attribution gate needs the actual operations inside the largest
@@ -16654,3 +16664,14 @@ and the fixed-p99 gate remain open. Next is an evidence-selected synchronization
 barrier-count design preserving the authoritative recoverable boundary, before
 any benchmark acceptance claim; combined membership/lifecycle and deployment
 scope remain in the next linked deliverables. Full P0–P7 stays active.
+
+### Slice182 implemented evidence — background platform completion
+
+The platform-feedback workflow now uses cancel-in-progress:false in its existing
+branch concurrency group. Repeated pushes no longer request cancellation of an
+active run. Linux/macOS matrices, 90-minute test timeout, all three test profiles,
+strict formatting/Clippy commands, permissions and local pre-push enforcement
+remain unchanged. CI stays background feedback and no merge gate was added.
+The exact one-line workflow diff was inspected. This is a scheduling correction,
+not evidence that the still-running platform tests have passed. It advances the
+cross-cutting baseline validation work while P7 and remaining P0–P7 gaps stay open.
