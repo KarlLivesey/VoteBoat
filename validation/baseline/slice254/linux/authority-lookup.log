@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.87s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 10 tests
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_quic ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_tcp ... ok
+test native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 161 filtered out; finished in 6.49s
+

@@ -1,0 +1,3 @@
+core_host=0
+native_only_host=0
+default_host=0

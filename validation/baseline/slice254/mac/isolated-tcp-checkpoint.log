@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (<mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.71s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 1 test
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 170 filtered out; finished in 4.88s
+

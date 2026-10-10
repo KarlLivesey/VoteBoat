@@ -1,0 +1,29 @@
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.99s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 2 tests
+test native::quic_child_writes_checkpoint_and_restart_without_parent_commits ... FAILED
+test native::tcp_child_writes_checkpoint_and_restart_without_parent_commits ... FAILED
+
+failures:
+
+---- native::quic_child_writes_checkpoint_and_restart_without_parent_commits stdout ----
+
+thread 'native::quic_child_writes_checkpoint_and_restart_without_parent_commits' (17380042) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: Unknown(LeadershipChanged)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::tcp_child_writes_checkpoint_and_restart_without_parent_commits stdout ----
+
+thread 'native::tcp_child_writes_checkpoint_and_restart_without_parent_commits' (17380043) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: Unknown(LeadershipChanged)
+
+
+failures:
+    native::quic_child_writes_checkpoint_and_restart_without_parent_commits
+    native::tcp_child_writes_checkpoint_and_restart_without_parent_commits
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 174 filtered out; finished in 10.70s
+
+error: test failed, to rerun pass `--test routed`

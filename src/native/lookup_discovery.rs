@@ -138,6 +138,50 @@ impl<S: ManifestReadSource> NativeManifestLookup<S> {
     pub fn source_mut(&mut self) -> &mut S {
         &mut self.source
     }
+    /// Replace an idle read source, returning the old source intact on success.
+    /// Refusal returns the replacement and leaves this driver unchanged. The host
+    /// selects and continues polling both sources; this operation elects no leader.
+    /// Cancelled reads must reach their original terminal result before replacement.
+    /// Cached observations become unavailable, while version/barrier floors and
+    /// observation-ID uniqueness survive. New hints require fresh quorum reads.
+    pub fn replace_source(
+        &mut self,
+        source: S,
+        now: MonoTime,
+    ) -> Result<S, (ManifestDiscoveryError, S)> {
+        let check = self.check_source_replacement(&source, now);
+        if let Err(error) = check {
+            return Err((error, source));
+        }
+        let binding = source.binding();
+        if let Err(error) = self.cache.replace_binding(binding, now) {
+            return Err((error, source));
+        }
+        self.binding = binding;
+        self.negative = None;
+        self.now = now;
+        Ok(std::mem::replace(&mut self.source, source))
+    }
+    fn check_source_replacement(
+        &self,
+        source: &S,
+        now: MonoTime,
+    ) -> Result<(), ManifestDiscoveryError> {
+        if self.closed {
+            return Err(ManifestDiscoveryError::Closed);
+        }
+        if now < self.now {
+            return Err(ManifestDiscoveryError::TimeWentBack);
+        }
+        if self.source.binding() != self.binding || source.binding() == self.binding {
+            return Err(ManifestDiscoveryError::WrongAuthority);
+        }
+        if self.pending.is_some() || self.source.pending_reads() != 0 || source.pending_reads() != 0
+        {
+            return Err(ManifestDiscoveryError::Unavailable);
+        }
+        Ok(())
+    }
     pub fn pending(&self) -> Option<PendingManifestLookup> {
         self.pending
     }

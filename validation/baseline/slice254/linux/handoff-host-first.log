@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.07s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-c360dcacb5714b92)
+
+running 8 tests
+test native::construction_and_recovery_preserve_original_owned_source_and_ticket ... ok
+test handoff::untracked_old_and_replacement_reads_remain_owned_after_refusal ... ok
+test native::deadline_retains_accepted_source_work_until_actual_terminal_result ... ok
+test handoff::binding_clock_and_closed_refusals_leave_driver_and_replacement_intact ... ok
+test handoff::accepted_cancelled_reads_block_handoff_until_original_completion ... ok
+test downstream_original_read_source_contract_compiles_without_native ... ok
+test handoff::source_sequence_reset_does_not_reuse_observation_ids_or_renew_old_hints ... ok
+test handoff::source_handoff_retains_manifest_and_quorum_barrier_floors ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

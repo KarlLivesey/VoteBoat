@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.82s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 1 test
+test native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint ... FAILED
+
+failures:
+
+---- native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint stdout ----
+
+thread 'native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint' (17223013) panicked at tests/routed/lookup_discovery.rs:548:17:
+automatic lookup stalled: pending=None, peers=[(ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 3, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Leader, 3, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 3, 8, 0)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 170 filtered out; finished in 21.15s
+
+error: test failed, to rerun pass `--test routed`

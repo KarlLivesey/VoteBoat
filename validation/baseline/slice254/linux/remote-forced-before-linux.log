@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.48s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+test native::automatic_lookup::remote_manifest::remote_lookup_recovers_tcp_after_original_source_loses_authority ... FAILED
+
+failures:
+
+---- native::automatic_lookup::remote_manifest::remote_lookup_recovers_tcp_after_original_source_loses_authority stdout ----
+
+thread 'native::automatic_lookup::remote_manifest::remote_lookup_recovers_tcp_after_original_source_loses_authority' (3369870) panicked at tests/routed/remote_manifest.rs:70:17:
+remote lookup: ManifestRefreshCompletion { request: ManifestRefresh { binding: SessionBinding { local: LocalIdentity { node: NodeId(2), store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } }, peer: LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } }, generation: SecureSessionGeneration(1), wire_version: 1 }, sequence: 1, query: ManifestLookup { locator: AuthorityLocator { responsibility: ResponsibilityIdentity { id: ResponsibilityId(1), incarnation: ResponsibilityIncarnation(1) }, authority: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) } }, minimum_epoch: None, minimum_generation: None }, started_at: MonoTime(114), deadline: MonoTime(10114) }, result: Err(Timeout) }, pending=None, peers=[(ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 2, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Leader, 2, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 2, 8, 0)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::automatic_lookup::remote_manifest::remote_lookup_recovers_tcp_after_original_source_loses_authority
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 175 filtered out; finished in 10.12s
+
+error: test failed, to rerun pass `--test routed`

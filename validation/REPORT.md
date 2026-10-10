@@ -1,5 +1,24 @@
 # Validation report
 
+Owned manifest source handoff: [slice254](baseline/slice254/README.md). Public idle
+replacement preserves owned old/rejected sources, accepted/cancelled reads,
+manifest/barrier floors and observation-ID uniqueness. Native local/remote forced
+TCP/QUIC source-loss histories15/0 and related contracts31/0 pass on both hosts;
+core1/native-only9/default host9 also pass, with Linux default native8. Formatting
+and all four strict profiles are zero on both, with652 final build inputs verified.
+Controlled write/read admission, source-loss and missing-floor failures plus
+rejected candidates remain archived. Two additional original parent-independence
+histories pass on Linux and fail on Mac with raw positive LeadershipChanged;
+they remain a named next deliverable. No full routing/platform certificate.
+
+Original unchanged-source Linux full suite: [slice251](baseline/slice251/linux/README.md),
+1826 passed/0 failed/0 ignored on ba67c8c,647 inputs verified at start and terminal.
+The original Mac full suite remains live on its separate preserved source, with
+independent failures. Later test-only [application conformance252](baseline/slice252/README.md)
+and [controlled QUIC readiness253](baseline/slice253/README.md) have their own
+source-bound selected evidence. These do not inherit a full current-source result.
+Full P0–P7 stays active; performance tuning and Daybreak security follow features.
+
 Native fixture admission and exact quota-refusal witness:
 [slice250](baseline/slice250/README.md). Original ungated Mac175/4 initial catch-up
 failures, admitted178/1 staging failure and failed0/1 bounded staging wait remain.

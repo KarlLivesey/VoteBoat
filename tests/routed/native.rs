@@ -261,10 +261,34 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
+    propose_recovering_observed(nodes, clock, g, operation, bytes).0
+}
+#[derive(Clone, Copy, Debug)]
+enum ProposalFailure {
+    NotLeader,
+    Unknown(ClientUnknown),
+}
+// Only an accepted unknown outcome can explain a duplicate first observation.
+fn propose_recovering_observed<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: Vec<u8>,
+) -> (A::Receipt, bool)
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let mut uncertain = false;
     for _ in 0..4 {
         match propose_attempt(nodes, clock, g, operation, bytes.clone()) {
-            Ok(receipt) => return receipt,
-            Err(ClientUnknown::LeadershipChanged) => campaign(nodes, clock, g),
+            Ok(receipt) => return (receipt, uncertain),
+            Err(ProposalFailure::NotLeader) => campaign(nodes, clock, g),
+            Err(ProposalFailure::Unknown(ClientUnknown::LeadershipChanged)) => {
+                uncertain = true;
+                campaign(nodes, clock, g);
+            }
             Err(e) => panic!("group {g} operation {operation} unknown: {e:?}"),
         }
     }
@@ -276,18 +300,27 @@ fn propose_attempt<A>(
     g: u128,
     operation: u128,
     bytes: Vec<u8>,
-) -> Result<A::Receipt, ClientUnknown>
+) -> Result<A::Receipt, ProposalFailure>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    nodes[0]
-        .propose(ClientRequest {
-            group: group(g),
-            operation: OperationId::new(operation).unwrap(),
-            bytes,
-        })
-        .unwrap();
+    if let Err(rejected) = nodes[0].propose(ClientRequest {
+        group: group(g),
+        operation: OperationId::new(operation).unwrap(),
+        bytes,
+    }) {
+        if matches!(
+            rejected.reason,
+            ClientError::Consensus(voteboat::raft::RaftError::NotLeader)
+        ) {
+            return Err(ProposalFailure::NotLeader);
+        }
+        panic!(
+            "group {g} operation {operation} admission rejected: {:?}",
+            rejected.reason
+        );
+    }
     let mut receipt = None;
     let mut unknown = None;
     drive(nodes, clock, |ns| {
@@ -302,13 +335,13 @@ where
                 }
                 ClientOutcome::NotProposed(e) => {
                     if e == voteboat::raft::RaftError::NotLeader {
-                        unknown = Some(ClientUnknown::LeadershipChanged);
+                        unknown = Some(ProposalFailure::NotLeader);
                     } else {
                         panic!("group {g} operation {operation} not proposed: {e:?}")
                     }
                 }
                 ClientOutcome::Unknown(e) => {
-                    unknown = Some(e);
+                    unknown = Some(ProposalFailure::Unknown(e));
                 }
             }
         }
@@ -349,6 +382,7 @@ where
     }
     panic!("group {g} read repeatedly lost leadership");
 }
+#[track_caller]
 fn read_attempt<A>(
     nodes: &mut [Node<A>],
     clock: &Instant,
@@ -359,9 +393,15 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    nodes[0]
-        .read(group(g), query)
-        .unwrap_or_else(|_| panic!("read invocation rejected"));
+    if let Err(rejected) = nodes[0].read(group(g), query) {
+        if matches!(
+            rejected.reason,
+            ReadInvocationError::Consensus(voteboat::raft::RaftError::NotLeader)
+        ) {
+            return None;
+        }
+        panic!("read invocation rejected: {:?}", rejected.reason);
+    }
     let mut result = None;
     let mut changed = false;
     drive(nodes, clock, |ns| {

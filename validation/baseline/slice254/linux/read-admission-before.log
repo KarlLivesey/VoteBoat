@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.24s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+test native::automatic_lookup::metadata_requests_recover_exact_not_leader_admission ... FAILED
+
+failures:
+
+---- native::automatic_lookup::metadata_requests_recover_exact_not_leader_admission stdout ----
+
+thread 'native::automatic_lookup::metadata_requests_recover_exact_not_leader_admission' (2463585) panicked at tests/routed/lookup_discovery.rs:758:10:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::automatic_lookup::metadata_requests_recover_exact_not_leader_admission
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 173 filtered out; finished in 0.10s
+
+error: test failed, to rerun pass `--test routed`

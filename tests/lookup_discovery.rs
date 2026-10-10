@@ -21,6 +21,7 @@ struct HostReads {
     started: u64,
     cancelled: usize,
     ready: bool,
+    result: Option<ReadOutcome<Option<ResponsibilityManifest>>>,
 }
 impl HostReads {
     fn new() -> Self {
@@ -40,6 +41,7 @@ impl HostReads {
             started: 0,
             cancelled: 0,
             ready: false,
+            result: None,
         }
     }
 }
@@ -97,7 +99,9 @@ impl ManifestReadSource for HostReads {
             return Ok(None);
         }
         self.pending = None;
-        Ok(Some(ReadOutcome::Unavailable(ReadUnavailable::Cancelled)))
+        Ok(Some(self.result.take().unwrap_or(
+            ReadOutcome::Unavailable(ReadUnavailable::Cancelled),
+        )))
     }
     fn cancel(&mut self, ticket: ReadInvocationTicket) -> Result<(), ReadInvocationError> {
         assert_eq!(self.pending, Some(ticket));
@@ -233,3 +237,7 @@ mod native {
         assert_eq!(source.pending, Some(original.ticket));
     }
 }
+
+#[cfg(feature = "native")]
+#[path = "lookup_discovery/handoff.rs"]
+mod handoff;

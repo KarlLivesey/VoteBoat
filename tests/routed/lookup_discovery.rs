@@ -48,9 +48,10 @@ fn poll_nodes(source: &mut Node<Directory>, others: &mut [Node<Directory>], cloc
         node.poll(now(clock), budget).unwrap();
     }
 }
+#[track_caller]
 fn resolve_auto(
     driver: &mut NativeManifestLookup<Node<Directory>>,
-    others: &mut [Node<Directory>],
+    others: &mut Vec<Node<Directory>>,
     clock: &Instant,
     cache: &mut NativeManifestCache,
 ) -> RouteHint {
@@ -75,12 +76,59 @@ fn resolve_auto(
             },
         ) {
             Ok(hint) => return hint,
-            Err(ManifestDiscoveryError::Unavailable) => (),
+            Err(ManifestDiscoveryError::Unavailable) => {
+                handoff_ready_source(driver, others, now(clock));
+            }
             other => panic!("automatic route: {other:?}"),
         }
-        assert!(Instant::now() < deadline, "automatic lookup stalled");
+        if Instant::now() >= deadline {
+            let pending = driver.pending();
+            let peers = std::iter::once(&*driver.source_mut())
+                .chain(others.iter())
+                .map(|node| {
+                    let core = node.local().owner.core(group(1)).unwrap();
+                    (
+                        node.local().reads.binding(),
+                        core.role(),
+                        core.state().hard_state.term,
+                        core.state().commit_index,
+                        node.local().reads.usage().requests,
+                    )
+                })
+                .collect::<Vec<_>>();
+            panic!("automatic lookup stalled: pending={pending:?}, peers={peers:?}");
+        }
         std::thread::park_timeout(Duration::from_millis(1));
     }
+}
+fn source_ready(node: &Node<Directory>) -> bool {
+    let core = node.local().owner.core(group(1)).unwrap();
+    let state = core.state();
+    core.role() == voteboat::raft::Role::Leader
+        && state.term_at(state.commit_index) == Some(state.hard_state.term)
+}
+fn handoff_ready_source(
+    driver: &mut NativeManifestLookup<Node<Directory>>,
+    others: &mut Vec<Node<Directory>>,
+    now: MonoTime,
+) {
+    if driver.pending().is_some()
+        || driver.source_mut().local().reads.usage().requests != 0
+        || source_ready(driver.source_mut())
+    {
+        return;
+    }
+    let Some(index) = others
+        .iter()
+        .position(|node| node.local().reads.usage().requests == 0 && source_ready(node))
+    else {
+        return;
+    };
+    let replacement = others.remove(index);
+    let old = driver
+        .replace_source(replacement, now)
+        .unwrap_or_else(|(error, _)| panic!("idle source handoff: {error:?}"));
+    others.insert(index, old);
 }
 // Independent host source keeps the real Node read alive after cancellation.
 // This models best-effort cancellation with an actual late positive receipt.
@@ -138,7 +186,7 @@ fn initialized_directory(
         directory,
     );
     campaign(&mut nodes, clock, 1);
-    propose(
+    let bootstrap = propose_recovering(
         &mut nodes,
         clock,
         1,
@@ -147,12 +195,16 @@ fn initialized_directory(
             .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
             .unwrap(),
     );
+    assert_eq!(bootstrap.operation, OperationId::new(10000).unwrap());
+    assert_eq!(bootstrap.outcome, DirectoryOutcome::Initialized);
     for (i, manifest) in manifests().into_iter().enumerate() {
-        propose(
+        let generation = manifest.input().generation;
+        let operation = 10001 + i as u128;
+        let publication = propose_recovering(
             &mut nodes,
             clock,
             1,
-            10001 + i as u128,
+            operation,
             DirectoryCommand {
                 expected: None,
                 manifest,
@@ -160,6 +212,8 @@ fn initialized_directory(
             .encode(MAX_DIRECTORY_COMMAND_BYTES)
             .unwrap(),
         );
+        assert_eq!(publication.operation, OperationId::new(operation).unwrap());
+        assert_eq!(publication.outcome, DirectoryOutcome::Published(generation));
     }
     nodes
 }
@@ -319,13 +373,16 @@ fn serve_cached_child(
     let bytes =
         encode_routed(cached, &[10], &7i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap();
     for duplicate in [false, true] {
+        let (receipt, uncertain) =
+            propose_recovering_observed(children, clock, 20, 1, bytes.clone());
+        assert_eq!(receipt.operation, OperationId::new(1).unwrap());
         assert!(matches!(
-            propose(children, clock, 20, 1, bytes.clone()).outcome,
-            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate
+            receipt.outcome,
+            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate || (!duplicate && uncertain && d)
         ));
     }
     assert_eq!(
-        read(
+        read_recovering(
             children,
             clock,
             20,
@@ -395,7 +452,7 @@ fn recover_child(
     );
     campaign(&mut children, clock, 20);
     assert!(matches!(
-        propose(
+        propose_recovering(
             &mut children,
             clock,
             20,
@@ -409,23 +466,20 @@ fn recover_child(
             ..
         })
     ));
-    assert!(matches!(
-        propose(
-            &mut children,
-            clock,
-            20,
-            2,
-            encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap()
-        )
-        .outcome,
-        RoutedOutcome::Applied(CounterReceipt {
-            outcome: CounterOutcome::Value(10),
-            duplicate: false,
-            ..
-        })
+    let (receipt, uncertain) = propose_recovering_observed(
+        &mut children,
+        clock,
+        20,
+        2,
+        encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap(),
+    );
+    assert_eq!(receipt.operation, OperationId::new(2).unwrap());
+    assert!(matches!(receipt.outcome,
+        RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(10), duplicate, .. })
+            if !duplicate || uncertain
     ));
     assert_eq!(
-        read(
+        read_recovering(
             &mut children,
             clock,
             20,
@@ -499,11 +553,11 @@ where
         })
     });
 }
-fn service(protocol: NativePeerProtocol, compact: bool) {
+fn service(protocol: NativePeerProtocol, compact: bool, force_loss: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
-        "voteboat-automatic-routed-service-{}-{protocol:?}-{compact}",
+        "voteboat-automatic-routed-service-{}-{protocol:?}-{compact}-{force_loss}",
         std::process::id()
     ));
     std::fs::create_dir_all(&root).unwrap();
@@ -521,8 +575,21 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
     let source = parents.remove(0);
     let mut driver = NativeManifestLookup::new(source, limits(), 60_000, 10000, 1, now(&clock))
         .unwrap_or_else(|_| panic!("service lookup"));
+    if force_loss {
+        lose_local_authority(&mut driver, &mut parents, &clock);
+    }
+    let initial_binding = driver.source_mut().local().reads.binding();
     let mut cache = NativeManifestCache::new(limits()).unwrap();
     let route = resolve_auto(&mut driver, &mut parents, &clock, &mut cache);
+    if force_loss {
+        assert_ne!(driver.source_mut().local().reads.binding(), initial_binding);
+        let returned = parents
+            .iter()
+            .find(|node| node.local().reads.binding() == initial_binding)
+            .unwrap();
+        assert_eq!(returned.local().reads.usage().requests, 0);
+        assert!(source_ready(driver.source_mut()));
+    }
     let grant = cache.get(responsibility(2)).unwrap().clone();
     // An explicit stale-route signal invalidates only the observed generation.
     // Resolution then obtains another actual read instead of republishing a receipt.
@@ -543,7 +610,7 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
     );
     campaign(&mut children, &clock, 20);
     assert_eq!(
-        propose(
+        propose_recovering(
             &mut children,
             &clock,
             20,
@@ -592,13 +659,148 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
 #[test]
 fn automatic_routed_service_tcp_reopens_wal_and_checkpoint() {
     for compact in [false, true] {
-        service(NativePeerProtocol::TcpTls, compact);
+        service(NativePeerProtocol::TcpTls, compact, false);
     }
 }
 #[cfg(feature = "quic")]
 #[test]
 fn automatic_routed_service_quic_reopens_wal_and_checkpoint() {
     for compact in [false, true] {
-        service(NativePeerProtocol::Quic, compact);
+        service(NativePeerProtocol::Quic, compact, false);
     }
+}
+
+#[test]
+fn fixed_manifest_source_recovers_tcp_after_another_voter_wins() {
+    service(NativePeerProtocol::TcpTls, true, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn fixed_manifest_source_recovers_quic_after_another_voter_wins() {
+    service(NativePeerProtocol::Quic, true, true);
+}
+fn lose_local_authority(
+    driver: &mut NativeManifestLookup<Node<Directory>>,
+    others: &mut [Node<Directory>],
+    clock: &Instant,
+) {
+    let source = driver.source_mut();
+    let binding = source.local().reads.binding();
+    let term = source
+        .local()
+        .owner
+        .core(group(1))
+        .unwrap()
+        .state()
+        .hard_state
+        .term;
+    let candidate = others
+        .iter_mut()
+        .find(|node| {
+            node.local().owner.core(group(1)).unwrap().role() != voteboat::raft::Role::Leader
+        })
+        .unwrap();
+    candidate.control(group(1), NodeControl::Campaign).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(15);
+    loop {
+        poll_nodes(driver.source_mut(), others, clock);
+        let core = driver.source_mut().local().owner.core(group(1)).unwrap();
+        let lost =
+            core.role() == voteboat::raft::Role::Follower && core.state().hard_state.term > term;
+        let ready = others.iter().any(|node| {
+            let core = node.local().owner.core(group(1)).unwrap();
+            core.role() == voteboat::raft::Role::Leader
+                && core.state().hard_state.term > term
+                && core.state().term_at(core.state().commit_index)
+                    == Some(core.state().hard_state.term)
+        });
+        if lost && ready {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "other voter did not establish authority"
+        );
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    assert_eq!(driver.source_mut().local().reads.binding(), binding);
+    assert!(driver.pending().is_none());
+}
+
+#[test]
+fn metadata_requests_recover_exact_not_leader_admission() {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-metadata-admission-{}",
+        std::process::id()
+    ));
+    let mut nodes = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        NativePeerProtocol::TcpTls,
+        directory,
+    );
+    campaign(&mut nodes, &clock, 1);
+    nodes.swap(0, 1);
+    let operation = OperationId::new(4242).unwrap();
+    let bytes = directory()
+        .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+        .unwrap();
+    let refusal = nodes[0]
+        .propose(ClientRequest {
+            group: group(1),
+            operation,
+            bytes: bytes.clone(),
+        })
+        .unwrap_err();
+    assert!(matches!(
+        refusal.reason,
+        ClientError::Consensus(voteboat::raft::RaftError::NotLeader)
+    ));
+    assert_eq!(refusal.request.group, group(1));
+    assert_eq!(refusal.request.operation, operation);
+    assert_eq!(refusal.request.bytes, bytes);
+    assert!(nodes
+        .iter()
+        .all(|n| !n.local().applications[&group(1)].is_initialized()));
+    let receipt = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes.clone());
+    assert_eq!(receipt.operation, operation);
+    assert_eq!(receipt.outcome, DirectoryOutcome::Initialized);
+    let duplicate = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes);
+    assert_eq!(duplicate.operation, operation);
+    assert_eq!(duplicate.outcome, receipt.outcome);
+    assert!(duplicate.duplicate);
+    assert!(nodes
+        .iter()
+        .all(|n| n.local().applications[&group(1)].is_initialized()));
+    let nonleader = nodes
+        .iter()
+        .position(|n| {
+            n.local().owner.core(group(1)).unwrap().role() != voteboat::raft::Role::Leader
+        })
+        .unwrap();
+    nodes.swap(0, nonleader);
+    let query = responsibility(1);
+    let expected = nodes[0].local().applications[&group(1)]
+        .manifest(query)
+        .cloned();
+    assert_eq!(expected, None);
+    let refused_read = nodes[0].read(group(1), query).unwrap_err();
+    assert!(matches!(
+        refused_read.reason,
+        ReadInvocationError::Consensus(voteboat::raft::RaftError::NotLeader)
+    ));
+    assert_eq!(refused_read.group, group(1));
+    assert_eq!(refused_read.query, query);
+    assert_eq!(nodes[0].local().reads.usage().requests, 0);
+    assert_eq!(
+        read_recovering(&mut nodes, &clock, 1, query),
+        expected.clone()
+    );
+    assert!(nodes
+        .iter()
+        .all(|n| n.local().applications[&group(1)].manifest(query).cloned() == expected));
+    close(nodes, &clock, 1, || {});
+    std::fs::remove_dir_all(root).unwrap();
 }

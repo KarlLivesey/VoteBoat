@@ -1,0 +1,44 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 1 test
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint ... FAILED
+
+failures:
+
+---- native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint stdout ----
+
+thread 'native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint' (17204592) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: LeadershipChanged
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::result::unwrap_failed
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/result.rs:1870:5
+   3: <core::result::Result<voteboat::directory::DirectoryReceipt, voteboat::runtime::clients::ClientUnknown>>::unwrap
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1231:23
+   4: routed::native::propose::<voteboat::directory::Directory>
+             at ./tests/routed/native.rs:248:56
+   5: routed::native::automatic_lookup::initialized_directory
+             at ./tests/routed/lookup_discovery.rs:141:5
+   6: routed::native::automatic_lookup::service
+             at ./tests/routed/lookup_discovery.rs:510:23
+   7: routed::native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint
+             at ./tests/routed/lookup_discovery.rs:602:9
+   8: routed::native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint::{closure#0}
+             at ./tests/routed/lookup_discovery.rs:600:62
+   9: <routed::native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  10: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 170 filtered out; finished in 6.86s
+
+error: test failed, to rerun pass `--test routed`

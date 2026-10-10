@@ -1,0 +1,928 @@
+diff --git a/src/native/authority_discovery.rs b/src/native/authority_discovery.rs
+index 99c7e34..02fba8d 100644
+--- a/src/native/authority_discovery.rs
++++ b/src/native/authority_discovery.rs
+@@ -26,0 +27 @@ struct Observation {
++    source_generation: u64,
+@@ -36,0 +38 @@ pub struct NativeAuthorityDiscovery {
++    source_generation: u64,
+@@ -56,0 +59 @@ impl NativeAuthorityDiscovery {
++            source_generation: 0,
+@@ -61,0 +65,29 @@ impl NativeAuthorityDiscovery {
++    /// Change the read-ticket domain without forgetting manifest/barrier floors.
++    /// Generations and observation IDs are volatile and end with this provider.
++    pub(crate) fn replace_binding(
++        &mut self,
++        binding: ReadInvocationBinding,
++        now: MonoTime,
++    ) -> Result<(), ManifestDiscoveryError> {
++        if self.closed {
++            return Err(ManifestDiscoveryError::Closed);
++        }
++        if now < self.now {
++            return Err(ManifestDiscoveryError::TimeWentBack);
++        }
++        if binding == self.binding {
++            return Err(ManifestDiscoveryError::WrongAuthority);
++        }
++        let generation = self
++            .source_generation
++            .checked_add(1)
++            .ok_or(ManifestDiscoveryError::Exhausted)?;
++        for observation in self.observations.values_mut() {
++            observation.live = false;
++        }
++        self.binding = binding;
++        self.source_generation = generation;
++        self.highest_sequence = 0;
++        self.now = now;
++        Ok(())
++    }
+@@ -110,0 +143,3 @@ impl NativeAuthorityDiscovery {
++                    prior.barrier = *barrier;
++                    prior.sequence = ticket.sequence;
++                    prior.source_generation = self.source_generation;
+@@ -127 +162,4 @@ impl NativeAuthorityDiscovery {
+-            if *barrier == prior.barrier && ticket.sequence == prior.sequence {
++            if prior.source_generation == self.source_generation
++                && *barrier == prior.barrier
++                && ticket.sequence == prior.sequence
++            {
+@@ -198,0 +237 @@ impl NativeAuthorityDiscovery {
++                source_generation: self.source_generation,
+diff --git a/src/native/lookup_discovery.rs b/src/native/lookup_discovery.rs
+index 665ab18..97aebec 100644
+--- a/src/native/lookup_discovery.rs
++++ b/src/native/lookup_discovery.rs
+@@ -140,0 +141,44 @@ impl<S: ManifestReadSource> NativeManifestLookup<S> {
++    /// Replace an idle read source, returning the old source intact on success.
++    /// Refusal returns the replacement and leaves this driver unchanged. The host
++    /// selects and continues polling both sources; this operation elects no leader.
++    /// Cancelled reads must reach their original terminal result before replacement.
++    /// Cached observations become unavailable, while version/barrier floors and
++    /// observation-ID uniqueness survive. New hints require fresh quorum reads.
++    pub fn replace_source(
++        &mut self,
++        source: S,
++        now: MonoTime,
++    ) -> Result<S, (ManifestDiscoveryError, S)> {
++        let check = self.check_source_replacement(&source, now);
++        if let Err(error) = check {
++            return Err((error, source));
++        }
++        let binding = source.binding();
++        if let Err(error) = self.cache.replace_binding(binding, now) {
++            return Err((error, source));
++        }
++        self.binding = binding;
++        self.negative = None;
++        self.now = now;
++        Ok(std::mem::replace(&mut self.source, source))
++    }
++    fn check_source_replacement(
++        &self,
++        source: &S,
++        now: MonoTime,
++    ) -> Result<(), ManifestDiscoveryError> {
++        if self.closed {
++            return Err(ManifestDiscoveryError::Closed);
++        }
++        if now < self.now {
++            return Err(ManifestDiscoveryError::TimeWentBack);
++        }
++        if self.source.binding() != self.binding || source.binding() == self.binding {
++            return Err(ManifestDiscoveryError::WrongAuthority);
++        }
++        if self.pending.is_some() || self.source.pending_reads() != 0 || source.pending_reads() != 0
++        {
++            return Err(ManifestDiscoveryError::Unavailable);
++        }
++        Ok(())
++    }
+diff --git a/tests/lookup_discovery.rs b/tests/lookup_discovery.rs
+index 62360e5..48d3120 100644
+--- a/tests/lookup_discovery.rs
++++ b/tests/lookup_discovery.rs
+@@ -23,0 +24 @@ struct HostReads {
++    result: Option<ReadOutcome<Option<ResponsibilityManifest>>>,
+@@ -42,0 +44 @@ impl HostReads {
++            result: None,
+@@ -100 +102,3 @@ impl ManifestReadSource for HostReads {
+-        Ok(Some(ReadOutcome::Unavailable(ReadUnavailable::Cancelled)))
++        Ok(Some(self.result.take().unwrap_or(
++            ReadOutcome::Unavailable(ReadUnavailable::Cancelled),
++        )))
+@@ -235,0 +240,4 @@ mod native {
++
++#[cfg(feature = "native")]
++#[path = "lookup_discovery/handoff.rs"]
++mod handoff;
+diff --git a/tests/lookup_discovery/handoff.rs b/tests/lookup_discovery/handoff.rs
+new file mode 100644
+index 0000000..fc520e8
+--- /dev/null
++++ b/tests/lookup_discovery/handoff.rs
+@@ -0,0 +1,332 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++use super::*;
++use voteboat::{
++    log::{LogMutation, LogStore},
++    native::lookup_discovery::*,
++    placement::PlacementRequirements,
++    raft::{persist_effect, Effect, Event, Raft, ReadBarrier},
++};
++fn source(generation: u64) -> HostReads {
++    let mut source = HostReads::new();
++    source.binding.generation = ReadInvocationGeneration::new(generation).unwrap();
++    source
++}
++fn driver() -> NativeManifestLookup<HostReads> {
++    NativeManifestLookup::new(
++        source(1),
++        ManifestCacheLimits {
++            manifests: 1,
++            bytes: MAX_MANIFEST_BYTES,
++        },
++        100,
++        10,
++        5,
++        MonoTime(0),
++    )
++    .unwrap()
++}
++fn refused(
++    driver: &mut NativeManifestLookup<HostReads>,
++    replacement: HostReads,
++    now: MonoTime,
++    error: ManifestDiscoveryError,
++) -> HostReads {
++    let binding = driver.source_mut().binding;
++    let pending = driver.pending();
++    let started = driver.source_mut().started;
++    let replacement_binding = replacement.binding;
++    let replacement_pending = replacement.pending;
++    let (actual, replacement) = driver.replace_source(replacement, now).unwrap_err();
++    assert_eq!(actual, error);
++    assert_eq!(replacement.binding, replacement_binding);
++    assert_eq!(replacement.pending, replacement_pending);
++    assert_eq!(driver.source_mut().binding, binding);
++    assert_eq!(driver.source_mut().started, started);
++    assert_eq!(
++        driver.pending().map(|p| p.ticket),
++        pending.map(|p| p.ticket)
++    );
++    replacement
++}
++#[test]
++fn accepted_cancelled_reads_block_handoff_until_original_completion() {
++    let mut driver = driver();
++    driver.lookup(query(), MonoTime(0)).unwrap_err();
++    let original = driver.pending().unwrap().ticket;
++    let replacement = refused(
++        &mut driver,
++        source(2),
++        MonoTime(0),
++        ManifestDiscoveryError::Unavailable,
++    );
++    driver.cancel_pending().unwrap();
++    let replacement = refused(
++        &mut driver,
++        replacement,
++        MonoTime(1),
++        ManifestDiscoveryError::Unavailable,
++    );
++    assert_eq!(driver.source_mut().pending, Some(original));
++    assert_eq!(driver.source_mut().cancelled, 1);
++    driver.source_mut().ready = true;
++    assert!(matches!(
++        driver.poll(MonoTime(2)),
++        Err(ManifestLookupPollError::Discovery(
++            ManifestDiscoveryError::Cancelled
++        ))
++    ));
++    let old = driver.replace_source(replacement, MonoTime(2)).unwrap();
++    assert_eq!(old.binding, original.binding);
++    assert_eq!(old.pending, None);
++    assert_eq!(old.cancelled, 1);
++    assert_eq!(old.started, 1);
++    assert_eq!(driver.source_mut().started, 0);
++    // Replacement clears the old negative retry slot, but starts nothing itself.
++    assert_eq!(
++        driver.lookup(query(), MonoTime(2)).err(),
++        Some(ManifestDiscoveryError::Unavailable)
++    );
++    assert_eq!(driver.pending().unwrap().ticket.binding, source(2).binding);
++    assert_eq!(driver.next_deadline(), Some(MonoTime(12)));
++}
++#[test]
++fn untracked_old_and_replacement_reads_remain_owned_after_refusal() {
++    let mut driver = driver();
++    let mut replacement = source(2);
++    let ticket = replacement.submit(query()).unwrap();
++    let mut replacement = refused(
++        &mut driver,
++        replacement,
++        MonoTime(0),
++        ManifestDiscoveryError::Unavailable,
++    );
++    replacement.ready = true;
++    assert!(replacement.poll_result(ticket).unwrap().is_some());
++    let original = driver.source_mut().submit(query()).unwrap();
++    let replacement = refused(
++        &mut driver,
++        replacement,
++        MonoTime(0),
++        ManifestDiscoveryError::Unavailable,
++    );
++    assert!(driver.is_drained()); // A source-owned read still prohibits replacement.
++    assert_eq!(driver.source_mut().pending, Some(original));
++    driver.source_mut().ready = true;
++    assert!(driver.source_mut().poll_result(original).unwrap().is_some());
++    let old = driver.replace_source(replacement, MonoTime(1)).unwrap();
++    assert_eq!(old.started, 1);
++    assert_eq!(driver.source_mut().started, 1);
++}
++#[test]
++fn binding_clock_and_closed_refusals_leave_driver_and_replacement_intact() {
++    let mut driver = driver();
++    refused(
++        &mut driver,
++        source(1),
++        MonoTime(0),
++        ManifestDiscoveryError::WrongAuthority,
++    );
++    assert!(!driver.poll(MonoTime(5)).unwrap());
++    refused(
++        &mut driver,
++        source(2),
++        MonoTime(4),
++        ManifestDiscoveryError::TimeWentBack,
++    );
++    // Failed handoff did not advance the driver's clock.
++    assert!(!driver.poll(MonoTime(5)).unwrap());
++    driver.source_mut().binding = source(3).binding;
++    refused(
++        &mut driver,
++        source(2),
++        MonoTime(5),
++        ManifestDiscoveryError::WrongAuthority,
++    );
++    driver.source_mut().binding = source(1).binding;
++    driver.close();
++    refused(
++        &mut driver,
++        source(2),
++        MonoTime(5),
++        ManifestDiscoveryError::Closed,
++    );
++    assert_eq!(
++        driver.lookup(query(), MonoTime(5)).err(),
++        Some(ManifestDiscoveryError::Closed)
++    );
++}
++fn barrier(rounds: usize, request: u64) -> ReadBarrier {
++    let mut store = support::HostLogStore::new(1);
++    support::append(
++        &mut store,
++        vec![LogMutation::Create(support::bootstrap(1, 1))],
++    );
++    let mut core = Raft::recover(
++        support::node(1),
++        store.binding(),
++        store.state(support::group(1)).unwrap(),
++        store.limits(),
++    )
++    .unwrap();
++    for _ in 0..rounds {
++        let mut effects = std::collections::VecDeque::from(core.step(Event::Campaign).unwrap());
++        while let Some(effect) = effects.pop_front() {
++            match effect {
++                Effect::Persist(update) => {
++                    effects.extend(persist_effect(&mut core, &mut store, update).unwrap())
++                }
++                Effect::Committed(_) => (),
++                other => panic!("single-voter campaign: {other:?}"),
++            }
++        }
++    }
++    let effects = core
++        .step(Event::Read {
++            request: ReadRequestId::new(request).unwrap(),
++        })
++        .unwrap();
++    let [Effect::ReadReady(barrier)] = effects.as_slice() else {
++        panic!("single-voter read: {effects:?}")
++    };
++    core.finish_read(barrier, barrier.index()).unwrap();
++    *barrier
++}
++fn manifest(generation: u64) -> ResponsibilityManifest {
++    ResponsibilityManifest::new(ManifestInput {
++        responsibility: query().locator.responsibility,
++        parent: None,
++        authority: query().locator.authority,
++        application: ApplicationAdapter {
++            id: ApplicationAdapterId::new(1).unwrap(),
++            version: 1,
++        },
++        scheme: PartitionScheme {
++            id: RoutingSchemeId::new(1).unwrap(),
++            version: 1,
++        },
++        scope: BucketRange::new(0, 256).unwrap(),
++        epoch: OwnershipEpoch::new(1).unwrap(),
++        generation: RouteGeneration::new(generation).unwrap(),
++        placement: PlacementRequirements {
++            minimum_voting_domains: 1,
++            survive_any_single_domain_loss: false,
++        },
++        state: ResponsibilityState::Active,
++        execution: ExecutionMode::Single(support::group(1)),
++    })
++    .unwrap()
++}
++fn complete(
++    driver: &mut NativeManifestLookup<HostReads>,
++    barrier: ReadBarrier,
++    manifest: ResponsibilityManifest,
++    now: MonoTime,
++) -> Result<bool, ManifestLookupPollError> {
++    driver.lookup(query(), now).unwrap_err();
++    assert_eq!(driver.pending().unwrap().ticket.request, barrier.request());
++    driver.source_mut().ready = true;
++    driver.source_mut().result = Some(ReadOutcome::Read {
++        barrier,
++        result: Ok(Some(manifest)),
++    });
++    driver.poll(now)
++}
++#[test]
++fn source_sequence_reset_does_not_reuse_observation_ids_or_renew_old_hints() {
++    let mut driver = driver();
++    let barrier = barrier(1, 1);
++    complete(&mut driver, barrier, manifest(2), MonoTime(0)).unwrap();
++    let first = driver.lookup(query(), MonoTime(0)).unwrap();
++    let old = driver.replace_source(source(2), MonoTime(1)).unwrap();
++    assert_eq!(old.started, 1);
++    assert!(!driver.invalidate(first.locator, first.observation));
++    assert_eq!(
++        driver.lookup(query(), MonoTime(1)).err(),
++        Some(ManifestDiscoveryError::Unavailable)
++    );
++    assert_eq!(driver.source_mut().started, 1); // New source has its own ticket namespace.
++    driver.source_mut().ready = true;
++    driver.source_mut().result = Some(ReadOutcome::Read {
++        barrier,
++        result: Ok(Some(manifest(2))),
++    });
++    driver.poll(MonoTime(1)).unwrap();
++    let second = driver.lookup(query(), MonoTime(1)).unwrap();
++    assert_ne!(first.observation, second.observation);
++    assert_eq!(second.expires_at, MonoTime(101));
++    assert!(!driver.invalidate(first.locator, first.observation));
++    assert_eq!(
++        driver.lookup(query(), MonoTime(1)).unwrap().observation,
++        second.observation
++    );
++    assert!(driver.invalidate(second.locator, second.observation));
++}
++#[test]
++fn source_handoff_retains_manifest_and_quorum_barrier_floors() {
++    let mut driver = driver();
++    complete(&mut driver, barrier(2, 1), manifest(2), MonoTime(0)).unwrap();
++    let first = driver.lookup(query(), MonoTime(0)).unwrap();
++    driver.replace_source(source(2), MonoTime(1)).unwrap();
++    assert!(matches!(
++        complete(&mut driver, barrier(1, 1), manifest(2), MonoTime(1)),
++        Err(ManifestLookupPollError::Discovery(
++            ManifestDiscoveryError::StaleObservation
++        ))
++    ));
++    assert!(!driver.invalidate(first.locator, first.observation));
++    driver.replace_source(source(3), MonoTime(2)).unwrap();
++    assert!(matches!(
++        complete(&mut driver, barrier(3, 1), manifest(1), MonoTime(2)),
++        Err(ManifestLookupPollError::Discovery(
++            ManifestDiscoveryError::Routing(RoutingError::StaleGeneration)
++        ))
++    ));
++    driver.replace_source(source(4), MonoTime(3)).unwrap();
++    complete(&mut driver, barrier(3, 1), manifest(2), MonoTime(3)).unwrap();
++    let second = driver.lookup(query(), MonoTime(3)).unwrap();
++    assert_ne!(first.observation, second.observation);
++    assert_eq!(second.manifest, manifest(2));
++}
++
++#[test]
++fn missing_read_advances_retained_floor_before_source_handoff() {
++    let mut driver = driver();
++    complete(&mut driver, barrier(1, 1), manifest(2), MonoTime(0)).unwrap();
++    let first = driver.lookup(query(), MonoTime(0)).unwrap();
++    assert!(driver.invalidate(first.locator, first.observation));
++    driver.lookup(query(), MonoTime(1)).unwrap_err();
++    driver.source_mut().result = Some(ReadOutcome::Read {
++        barrier: barrier(3, 2),
++        result: Ok(None),
++    });
++    assert!(matches!(
++        driver.poll(MonoTime(1)),
++        Err(ManifestLookupPollError::Discovery(
++            ManifestDiscoveryError::Missing
++        ))
++    ));
++    driver.replace_source(source(2), MonoTime(2)).unwrap();
++    assert!(matches!(
++        complete(&mut driver, barrier(2, 1), manifest(2), MonoTime(2)),
++        Err(ManifestLookupPollError::Discovery(
++            ManifestDiscoveryError::StaleObservation
++        ))
++    ));
++    driver.replace_source(source(3), MonoTime(3)).unwrap();
++    complete(&mut driver, barrier(3, 1), manifest(2), MonoTime(3)).unwrap();
++    let second = driver.lookup(query(), MonoTime(3)).unwrap();
++    assert_ne!(first.observation, second.observation);
++}
+diff --git a/tests/routed/lookup_discovery.rs b/tests/routed/lookup_discovery.rs
+index cac50fe..d5d9f5c 100644
+--- a/tests/routed/lookup_discovery.rs
++++ b/tests/routed/lookup_discovery.rs
+@@ -50,0 +51 @@ fn poll_nodes(source: &mut Node<Directory>, others: &mut [Node<Directory>], cloc
++#[track_caller]
+@@ -53 +54 @@ fn resolve_auto(
+-    others: &mut [Node<Directory>],
++    others: &mut Vec<Node<Directory>>,
+@@ -78 +79,3 @@ fn resolve_auto(
+-            Err(ManifestDiscoveryError::Unavailable) => (),
++            Err(ManifestDiscoveryError::Unavailable) => {
++                handoff_ready_source(driver, others, now(clock));
++            }
+@@ -81 +84,17 @@ fn resolve_auto(
+-        assert!(Instant::now() < deadline, "automatic lookup stalled");
++        if Instant::now() >= deadline {
++            let pending = driver.pending();
++            let peers = std::iter::once(&*driver.source_mut())
++                .chain(others.iter())
++                .map(|node| {
++                    let core = node.local().owner.core(group(1)).unwrap();
++                    (
++                        node.local().reads.binding(),
++                        core.role(),
++                        core.state().hard_state.term,
++                        core.state().commit_index,
++                        node.local().reads.usage().requests,
++                    )
++                })
++                .collect::<Vec<_>>();
++            panic!("automatic lookup stalled: pending={pending:?}, peers={peers:?}");
++        }
+@@ -84,0 +104,29 @@ fn resolve_auto(
++fn source_ready(node: &Node<Directory>) -> bool {
++    let core = node.local().owner.core(group(1)).unwrap();
++    let state = core.state();
++    core.role() == voteboat::raft::Role::Leader
++        && state.term_at(state.commit_index) == Some(state.hard_state.term)
++}
++fn handoff_ready_source(
++    driver: &mut NativeManifestLookup<Node<Directory>>,
++    others: &mut Vec<Node<Directory>>,
++    now: MonoTime,
++) {
++    if driver.pending().is_some()
++        || driver.source_mut().local().reads.usage().requests != 0
++        || source_ready(driver.source_mut())
++    {
++        return;
++    }
++    let Some(index) = others
++        .iter()
++        .position(|node| node.local().reads.usage().requests == 0 && source_ready(node))
++    else {
++        return;
++    };
++    let replacement = others.remove(index);
++    let old = driver
++        .replace_source(replacement, now)
++        .unwrap_or_else(|(error, _)| panic!("idle source handoff: {error:?}"));
++    others.insert(index, old);
++}
+@@ -141 +189 @@ fn initialized_directory(
+-    propose(
++    let bootstrap = propose_recovering(
+@@ -149,0 +198,2 @@ fn initialized_directory(
++    assert_eq!(bootstrap.operation, OperationId::new(10000).unwrap());
++    assert_eq!(bootstrap.outcome, DirectoryOutcome::Initialized);
+@@ -151 +201,3 @@ fn initialized_directory(
+-        propose(
++        let generation = manifest.input().generation;
++        let operation = 10001 + i as u128;
++        let publication = propose_recovering(
+@@ -155 +207 @@ fn initialized_directory(
+-            10001 + i as u128,
++            operation,
+@@ -162,0 +215,2 @@ fn initialized_directory(
++        assert_eq!(publication.operation, OperationId::new(operation).unwrap());
++        assert_eq!(publication.outcome, DirectoryOutcome::Published(generation));
+@@ -321,0 +376,3 @@ fn serve_cached_child(
++        let (receipt, uncertain) =
++            propose_recovering_observed(children, clock, 20, 1, bytes.clone());
++        assert_eq!(receipt.operation, OperationId::new(1).unwrap());
+@@ -323,2 +380,2 @@ fn serve_cached_child(
+-            propose(children, clock, 20, 1, bytes.clone()).outcome,
+-            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate
++            receipt.outcome,
++            RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(7), duplicate: d, .. }) if d == duplicate || (!duplicate && uncertain && d)
+@@ -328 +385 @@ fn serve_cached_child(
+-        read(
++        read_recovering(
+@@ -398 +455 @@ fn recover_child(
+-        propose(
++        propose_recovering(
+@@ -412,14 +469,11 @@ fn recover_child(
+-    assert!(matches!(
+-        propose(
+-            &mut children,
+-            clock,
+-            20,
+-            2,
+-            encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap()
+-        )
+-        .outcome,
+-        RoutedOutcome::Applied(CounterReceipt {
+-            outcome: CounterOutcome::Value(10),
+-            duplicate: false,
+-            ..
+-        })
++    let (receipt, uncertain) = propose_recovering_observed(
++        &mut children,
++        clock,
++        20,
++        2,
++        encode_routed(fresh, &[10], &3i64.to_le_bytes(), MAX_ROUTED_COMMAND_BYTES).unwrap(),
++    );
++    assert_eq!(receipt.operation, OperationId::new(2).unwrap());
++    assert!(matches!(receipt.outcome,
++        RoutedOutcome::Applied(CounterReceipt { outcome: CounterOutcome::Value(10), duplicate, .. })
++            if !duplicate || uncertain
+@@ -428 +482 @@ fn recover_child(
+-        read(
++        read_recovering(
+@@ -502 +556 @@ where
+-fn service(protocol: NativePeerProtocol, compact: bool) {
++fn service(protocol: NativePeerProtocol, compact: bool, force_loss: bool) {
+@@ -506 +560 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
+-        "voteboat-automatic-routed-service-{}-{protocol:?}-{compact}",
++        "voteboat-automatic-routed-service-{}-{protocol:?}-{compact}-{force_loss}",
+@@ -523,0 +578,4 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
++    if force_loss {
++        lose_local_authority(&mut driver, &mut parents, &clock);
++    }
++    let initial_binding = driver.source_mut().local().reads.binding();
+@@ -525,0 +584,9 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
++    if force_loss {
++        assert_ne!(driver.source_mut().local().reads.binding(), initial_binding);
++        let returned = parents
++            .iter()
++            .find(|node| node.local().reads.binding() == initial_binding)
++            .unwrap();
++        assert_eq!(returned.local().reads.usage().requests, 0);
++        assert!(source_ready(driver.source_mut()));
++    }
+@@ -546 +613 @@ fn service(protocol: NativePeerProtocol, compact: bool) {
+-        propose(
++        propose_recovering(
+@@ -595 +662 @@ fn automatic_routed_service_tcp_reopens_wal_and_checkpoint() {
+-        service(NativePeerProtocol::TcpTls, compact);
++        service(NativePeerProtocol::TcpTls, compact, false);
+@@ -602 +669,56 @@ fn automatic_routed_service_quic_reopens_wal_and_checkpoint() {
+-        service(NativePeerProtocol::Quic, compact);
++        service(NativePeerProtocol::Quic, compact, false);
++    }
++}
++
++#[test]
++fn fixed_manifest_source_recovers_tcp_after_another_voter_wins() {
++    service(NativePeerProtocol::TcpTls, true, true);
++}
++#[cfg(feature = "quic")]
++#[test]
++fn fixed_manifest_source_recovers_quic_after_another_voter_wins() {
++    service(NativePeerProtocol::Quic, true, true);
++}
++fn lose_local_authority(
++    driver: &mut NativeManifestLookup<Node<Directory>>,
++    others: &mut [Node<Directory>],
++    clock: &Instant,
++) {
++    let source = driver.source_mut();
++    let binding = source.local().reads.binding();
++    let term = source
++        .local()
++        .owner
++        .core(group(1))
++        .unwrap()
++        .state()
++        .hard_state
++        .term;
++    let candidate = others
++        .iter_mut()
++        .find(|node| {
++            node.local().owner.core(group(1)).unwrap().role() != voteboat::raft::Role::Leader
++        })
++        .unwrap();
++    candidate.control(group(1), NodeControl::Campaign).unwrap();
++    let deadline = Instant::now() + Duration::from_secs(15);
++    loop {
++        poll_nodes(driver.source_mut(), others, clock);
++        let core = driver.source_mut().local().owner.core(group(1)).unwrap();
++        let lost =
++            core.role() == voteboat::raft::Role::Follower && core.state().hard_state.term > term;
++        let ready = others.iter().any(|node| {
++            let core = node.local().owner.core(group(1)).unwrap();
++            core.role() == voteboat::raft::Role::Leader
++                && core.state().hard_state.term > term
++                && core.state().term_at(core.state().commit_index)
++                    == Some(core.state().hard_state.term)
++        });
++        if lost && ready {
++            break;
++        }
++        assert!(
++            Instant::now() < deadline,
++            "other voter did not establish authority"
++        );
++        std::thread::park_timeout(Duration::from_millis(1));
+@@ -603,0 +726,80 @@ fn automatic_routed_service_quic_reopens_wal_and_checkpoint() {
++    assert_eq!(driver.source_mut().local().reads.binding(), binding);
++    assert!(driver.pending().is_none());
++}
++
++#[test]
++fn metadata_requests_recover_exact_not_leader_admission() {
++    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
++    let clock = Instant::now();
++    let root = std::env::temp_dir().join(format!(
++        "voteboat-metadata-admission-{}",
++        std::process::id()
++    ));
++    let mut nodes = open(
++        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
++        &clock,
++        NativePeerProtocol::TcpTls,
++        directory,
++    );
++    campaign(&mut nodes, &clock, 1);
++    nodes.swap(0, 1);
++    let operation = OperationId::new(4242).unwrap();
++    let bytes = directory()
++        .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
++        .unwrap();
++    let refusal = nodes[0]
++        .propose(ClientRequest {
++            group: group(1),
++            operation,
++            bytes: bytes.clone(),
++        })
++        .unwrap_err();
++    assert!(matches!(
++        refusal.reason,
++        ClientError::Consensus(voteboat::raft::RaftError::NotLeader)
++    ));
++    assert_eq!(refusal.request.group, group(1));
++    assert_eq!(refusal.request.operation, operation);
++    assert_eq!(refusal.request.bytes, bytes);
++    assert!(nodes
++        .iter()
++        .all(|n| !n.local().applications[&group(1)].is_initialized()));
++    let receipt = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes.clone());
++    assert_eq!(receipt.operation, operation);
++    assert_eq!(receipt.outcome, DirectoryOutcome::Initialized);
++    let duplicate = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes);
++    assert_eq!(duplicate.operation, operation);
++    assert_eq!(duplicate.outcome, receipt.outcome);
++    assert!(duplicate.duplicate);
++    assert!(nodes
++        .iter()
++        .all(|n| n.local().applications[&group(1)].is_initialized()));
++    let nonleader = nodes
++        .iter()
++        .position(|n| {
++            n.local().owner.core(group(1)).unwrap().role() != voteboat::raft::Role::Leader
++        })
++        .unwrap();
++    nodes.swap(0, nonleader);
++    let query = responsibility(1);
++    let expected = nodes[0].local().applications[&group(1)]
++        .manifest(query)
++        .cloned();
++    assert_eq!(expected, None);
++    let refused_read = nodes[0].read(group(1), query).unwrap_err();
++    assert!(matches!(
++        refused_read.reason,
++        ReadInvocationError::Consensus(voteboat::raft::RaftError::NotLeader)
++    ));
++    assert_eq!(refused_read.group, group(1));
++    assert_eq!(refused_read.query, query);
++    assert_eq!(nodes[0].local().reads.usage().requests, 0);
++    assert_eq!(
++        read_recovering(&mut nodes, &clock, 1, query),
++        expected.clone()
++    );
++    assert!(nodes
++        .iter()
++        .all(|n| n.local().applications[&group(1)].manifest(query).cloned() == expected));
++    close(nodes, &clock, 1, || {});
++    std::fs::remove_dir_all(root).unwrap();
+diff --git a/tests/routed/native.rs b/tests/routed/native.rs
+index fa6ef15..a08538b 100644
+--- a/tests/routed/native.rs
++++ b/tests/routed/native.rs
+@@ -263,0 +264,20 @@ where
++    propose_recovering_observed(nodes, clock, g, operation, bytes).0
++}
++#[derive(Clone, Copy, Debug)]
++enum ProposalFailure {
++    NotLeader,
++    Unknown(ClientUnknown),
++}
++// Only an accepted unknown outcome can explain a duplicate first observation.
++fn propose_recovering_observed<A>(
++    nodes: &mut [Node<A>],
++    clock: &Instant,
++    g: u128,
++    operation: u128,
++    bytes: Vec<u8>,
++) -> (A::Receipt, bool)
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    let mut uncertain = false;
+@@ -266,2 +286,6 @@ where
+-            Ok(receipt) => return receipt,
+-            Err(ClientUnknown::LeadershipChanged) => campaign(nodes, clock, g),
++            Ok(receipt) => return (receipt, uncertain),
++            Err(ProposalFailure::NotLeader) => campaign(nodes, clock, g),
++            Err(ProposalFailure::Unknown(ClientUnknown::LeadershipChanged)) => {
++                uncertain = true;
++                campaign(nodes, clock, g);
++            }
+@@ -279 +303 @@ fn propose_attempt<A>(
+-) -> Result<A::Receipt, ClientUnknown>
++) -> Result<A::Receipt, ProposalFailure>
+@@ -284,7 +308,16 @@ where
+-    nodes[0]
+-        .propose(ClientRequest {
+-            group: group(g),
+-            operation: OperationId::new(operation).unwrap(),
+-            bytes,
+-        })
+-        .unwrap();
++    if let Err(rejected) = nodes[0].propose(ClientRequest {
++        group: group(g),
++        operation: OperationId::new(operation).unwrap(),
++        bytes,
++    }) {
++        if matches!(
++            rejected.reason,
++            ClientError::Consensus(voteboat::raft::RaftError::NotLeader)
++        ) {
++            return Err(ProposalFailure::NotLeader);
++        }
++        panic!(
++            "group {g} operation {operation} admission rejected: {:?}",
++            rejected.reason
++        );
++    }
+@@ -305 +338 @@ where
+-                        unknown = Some(ClientUnknown::LeadershipChanged);
++                        unknown = Some(ProposalFailure::NotLeader);
+@@ -311 +344 @@ where
+-                    unknown = Some(e);
++                    unknown = Some(ProposalFailure::Unknown(e));
+@@ -351,0 +385 @@ where
++#[track_caller]
+@@ -362,3 +396,9 @@ where
+-    nodes[0]
+-        .read(group(g), query)
+-        .unwrap_or_else(|_| panic!("read invocation rejected"));
++    if let Err(rejected) = nodes[0].read(group(g), query) {
++        if matches!(
++            rejected.reason,
++            ReadInvocationError::Consensus(voteboat::raft::RaftError::NotLeader)
++        ) {
++            return None;
++        }
++        panic!("read invocation rejected: {:?}", rejected.reason);
++    }
+diff --git a/tests/routed/remote_manifest.rs b/tests/routed/remote_manifest.rs
+index 39a00ca..181d2bd 100644
+--- a/tests/routed/remote_manifest.rs
++++ b/tests/routed/remote_manifest.rs
+@@ -40 +40 @@ fn remote_route(
+-    others: &mut [Node<Directory>],
++    others: &mut Vec<Node<Directory>>,
+@@ -52,0 +53 @@ fn remote_route(
++        handoff_ready_source(server.source_mut(), others, t);
+@@ -55 +56,17 @@ fn remote_route(
+-            assert!(result.result.is_ok(), "{result:?}");
++            if result.result.is_err() {
++                let pending = server.source_mut().pending();
++                let peers = std::iter::once(&*server.source_mut().source_mut())
++                    .chain(others.iter())
++                    .map(|node| {
++                        let core = node.local().owner.core(group(1)).unwrap();
++                        (
++                            node.local().reads.binding(),
++                            core.role(),
++                            core.state().hard_state.term,
++                            core.state().commit_index,
++                            node.local().reads.usage().requests,
++                        )
++                    })
++                    .collect::<Vec<_>>();
++                panic!("remote lookup: {result:?}, pending={pending:?}, peers={peers:?}");
++            }
+@@ -124,0 +142 @@ fn finish_source(
++        handoff_ready_source(server.source_mut(), parents, now(clock));
+@@ -188 +206,15 @@ fn reject_stale_hint(route: RouteHint, children: &mut [Node<Child>], clock: &Ins
+-fn history(protocol: NativePeerProtocol) {
++// Compare each returned Node's exact frozen log with its own original files,
++// even when an owned source handoff changed the peer Vec order.
++fn verify_stopped_logs(root: &std::path::Path, stores: Vec<u128>, before: Vec<GroupLog>) {
++    assert_eq!(stores.len(), before.len());
++    for (store, log) in stores.into_iter().zip(before) {
++        let store = NativeLogStore::recover(
++            FileLogIo::open(root.join(format!("1/{store}"))).unwrap(),
++            support::identity(store),
++            LogLimits::default(),
++        )
++        .unwrap();
++        assert_eq!(store.state(group(1)).unwrap(), log);
++    }
++}
++fn history(protocol: NativePeerProtocol, force_loss: bool) {
+@@ -192 +224 @@ fn history(protocol: NativePeerProtocol) {
+-        "voteboat-remote-manifest-{}-{protocol:?}",
++        "voteboat-remote-manifest-{}-{protocol:?}-{force_loss}",
+@@ -197,0 +230,4 @@ fn history(protocol: NativePeerProtocol) {
++    if force_loss {
++        lose_local_authority(server.source_mut(), &mut parents, &clock);
++    }
++    let original_binding = server.source_mut().source_mut().local().reads.binding();
+@@ -199,0 +236,11 @@ fn history(protocol: NativePeerProtocol) {
++    if force_loss {
++        assert_ne!(
++            server.source_mut().source_mut().local().reads.binding(),
++            original_binding
++        );
++        let returned = parents
++            .iter()
++            .find(|node| node.local().reads.binding() == original_binding)
++            .unwrap();
++        assert_eq!(returned.local().reads.usage().requests, 0);
++    }
+@@ -237,0 +285,4 @@ fn history(protocol: NativePeerProtocol) {
++    let stores = parents
++        .iter()
++        .map(|node| node.local().reads.binding().owner.store.identity.id.get())
++        .collect::<Vec<_>>();
+@@ -265,9 +316 @@ fn history(protocol: NativePeerProtocol) {
+-    for (n, log) in before.into_iter().enumerate() {
+-        let store = NativeLogStore::recover(
+-            FileLogIo::open(root.join(format!("1/{}", n + 1))).unwrap(),
+-            support::identity((n + 1) as u128),
+-            LogLimits::default(),
+-        )
+-        .unwrap();
+-        assert_eq!(store.state(group(1)).unwrap(), log);
+-    }
++    verify_stopped_logs(&root, stores, before);
+@@ -278 +321 @@ fn tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing() {
+-    history(NativePeerProtocol::TcpTls);
++    history(NativePeerProtocol::TcpTls, false);
+@@ -283 +326,11 @@ fn quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing() {
+-    history(NativePeerProtocol::Quic);
++    history(NativePeerProtocol::Quic, false);
++}
++
++#[test]
++fn remote_lookup_recovers_tcp_after_original_source_loses_authority() {
++    history(NativePeerProtocol::TcpTls, true);
++}
++#[cfg(feature = "quic")]
++#[test]
++fn remote_lookup_recovers_quic_after_original_source_loses_authority() {
++    history(NativePeerProtocol::Quic, true);

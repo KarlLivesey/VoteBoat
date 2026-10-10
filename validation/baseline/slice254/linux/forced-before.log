@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.17s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+test native::automatic_lookup::fixed_manifest_source_recovers_tcp_after_another_voter_wins ... FAILED
+
+failures:
+
+---- native::automatic_lookup::fixed_manifest_source_recovers_tcp_after_another_voter_wins stdout ----
+
+thread 'native::automatic_lookup::fixed_manifest_source_recovers_tcp_after_another_voter_wins' (1981575) panicked at tests/routed/lookup_discovery.rs:551:17:
+automatic lookup stalled: pending=None, peers=[(ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 2, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Leader, 2, 8, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 2, 8, 0)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::automatic_lookup::fixed_manifest_source_recovers_tcp_after_another_voter_wins
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 172 filtered out; finished in 15.11s
+
+error: test failed, to rerun pass `--test routed`

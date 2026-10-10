@@ -1,0 +1,58 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (<mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.57s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-accbcacb9b691ea7)
+
+running 9 tests
+test downstream_original_read_source_contract_compiles_without_native ... ok
+test native::construction_and_recovery_preserve_original_owned_source_and_ticket ... ok
+test handoff::accepted_cancelled_reads_block_handoff_until_original_completion ... ok
+test handoff::untracked_old_and_replacement_reads_remain_owned_after_refusal ... ok
+test native::deadline_retains_accepted_source_work_until_actual_terminal_result ... ok
+test handoff::binding_clock_and_closed_refusals_leave_driver_and_replacement_intact ... ok
+test handoff::source_sequence_reset_does_not_reuse_observation_ids_or_renew_old_hints ... ok
+test handoff::missing_read_advances_retained_floor_before_source_handoff ... ok
+test handoff::source_handoff_retains_manifest_and_quorum_barrier_floors ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/manifest_mapping.rs (target/debug/deps/manifest_mapping-2d72eb12a24711b5)
+
+running 2 tests
+test host_mapping_uses_the_public_contract_without_native_features ... ok
+test default_mappings_accept_only_current_manifest_branches ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/remote_manifest.rs (target/debug/deps/remote_manifest-b80628dd9e1f7125)
+
+running 7 tests
+test wrong_source_authority_stale_generation_and_reconnect_are_checked ... ok
+test short_io_lookup_refresh_cancel_and_cache_during_outage ... ok
+test wire::malformed_or_wrong_authority_request_closes_selected_source ... ok
+test wire::lifetime_is_bounded_and_counted_from_request_admission ... ok
+test wire::zero_io_budget_defers_work_and_cache_capacity_preserves_existing_entries ... ok
+test wire::oversized_lengths_are_rejected_from_header_and_truncation_times_out ... ok
+test wire::malformed_headers_scope_sequence_and_manifest_never_enter_cache ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/routing.rs (target/debug/deps/routing-ebe3a9f371656a62)
+
+running 13 tests
+test malformed_modes_schemas_and_direct_cycles_are_refused ... ok
+test discovered_manifests_validate_source_identity_expiry_budget_and_fenced_state ... ok
+test coverage_is_complete_sorted_disjoint_and_rejections_preserve_owned_input ... ok
+test native::generation_epoch_lineage_conflicts_and_stale_invalidation_are_atomic ... ok
+test cache_accounts_successful_replacement_and_separate_incarnations ... ok
+test recursive_cycle_and_out_of_range_host_policy_fail_closed ... ok
+test local_owner_rechecks_command_context_and_fence_even_with_warm_route ... ok
+test downstream_authority_discovery_fills_only_needed_path_and_cached_child_ignores_closed_source ... ok
+test cache_provider_and_delegation_bindings_are_checked_by_core ... ok
+test native::capacity_rejection_returns_original_allocation_and_replacement_accounts_spare_capacity ... ok
+test recursive_paths_use_the_exact_visit_budget_and_composite_scopes ... ok
+test host_policy_and_view_resolve_every_bucket_with_per_group_ordering ... ok
+test native::native_cache_and_policy_preserve_warm_child_without_parent ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

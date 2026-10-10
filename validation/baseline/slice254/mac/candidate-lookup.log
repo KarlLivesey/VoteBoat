@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (<mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.63s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 10 tests
+test native::automatic_lookup::remote_manifest::quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_tcp ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_quic ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint ... FAILED
+test native::automatic_lookup::remote_manifest::tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline has been running for over 60 seconds
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+
+failures:
+
+---- native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint stdout ----
+
+thread 'native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint' (17212514) panicked at tests/routed/lookup_discovery.rs:81:9:
+automatic lookup stalled
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint
+
+test result: FAILED. 9 passed; 1 failed; 0 ignored; 0 measured; 161 filtered out; finished in 64.38s
+
+error: test failed, to rerun pass `--test routed`

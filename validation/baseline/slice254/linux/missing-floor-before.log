@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (<linux-worktree>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-c360dcacb5714b92)
+
+running 1 test
+test handoff::missing_read_advances_retained_floor_before_source_handoff ... FAILED
+
+failures:
+
+---- handoff::missing_read_advances_retained_floor_before_source_handoff stdout ----
+
+thread 'handoff::missing_read_advances_retained_floor_before_source_handoff' (3231212) panicked at tests/lookup_discovery/handoff.rs:322:5:
+assertion failed: matches!(complete(&mut driver, barrier(2, 1), manifest(2), MonoTime(2)),
+    Err(ManifestLookupPollError::Discovery(ManifestDiscoveryError::StaleObservation)))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    handoff::missing_read_advances_retained_floor_before_source_handoff
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test lookup_discovery`

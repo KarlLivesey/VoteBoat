@@ -1,0 +1,40 @@
+   Compiling voteboat v0.1.0 (<mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.92s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 10 tests
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint ... FAILED
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_quic ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_tcp has been running for over 60 seconds
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint has been running for over 60 seconds
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline has been running for over 60 seconds
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint ... FAILED
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_tcp ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+
+failures:
+
+---- native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint stdout ----
+
+thread 'native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint' (17231537) panicked at tests/routed/lookup_discovery.rs:552:17:
+automatic lookup stalled: pending=None, peers=[(ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 3, 9, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Leader, 3, 9, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 3, 9, 0)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint stdout ----
+
+thread 'native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint' (17231536) panicked at tests/routed/lookup_discovery.rs:552:17:
+automatic lookup stalled: pending=None, peers=[(ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 4, 9, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Follower, 4, 9, 0), (ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, Leader, 4, 9, 0)]
+
+
+failures:
+    native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint
+    native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint
+
+test result: FAILED. 8 passed; 2 failed; 0 ignored; 0 measured; 161 filtered out; finished in 80.62s
+
+error: test failed, to rerun pass `--test routed`

@@ -1962,6 +1962,27 @@ acceptance on both platforms or P7 gates. Current254b addresses explicit owned
 lookup source handoff; next254c retains the remaining original routing failures,
 then255 selects the smallest original required functional exit. Full goal active.
 
+254b concrete pre-edit schema: expose NativeManifestLookup::replace_source(S,
+MonoTime) -> Result<S, (ManifestDiscoveryError, S)> through the existing public
+ManifestReadSource contract. Host owns leader selection; successful replacement
+returns the old source unchanged. Refuse closed/backward/current binding mismatch,
+same binding, any accepted driver slot (including cancelled), or unresolved reads
+on either source before mutation. Clear the negative slot only on success. Retain
+cache manifest/epoch/generation and barrier-index/term floors, limits and lifetime;
+mark old observations dead, reset only source-specific sequence, and increment a
+checked volatile source generation. Duplicate recognition includes that generation;
+opaque observation IDs continue increasing, so old invalidation handles cannot
+invalidate a replacement. Generation is provider-local, reconstructed as zero by
+new construction; restart ends all old observation handles. No durable effect,
+watermark or consensus authority is introduced. Fresh hints require bound original
+quorum outcomes. A caller-owned Vec temporarily removes the selected ready Node,
+then reinserts returned old/rejected source at the same index, preserving ownership
+and polling/shutdown paths. Acceptance: independent host pending/cancel/clock/binding/
+closed/source-return tests; actual TCP/QUIC forced loss and stale handles; retained
+floors across handoff, unchanged original operations/cold retries/metadata-offline
+writes and reads; both platforms strict four-profile zero. Broader failed offline
+histories remain254c rather than a reason to broaden this API.
+
 Current254b schema direction — explicit owned lookup-source handoff (P5/P0 Rust
 embedding): the public driver fixes its original binding and cache observations
 are instance-local monotonically allocated IDs. Availability recovery should use
@@ -25464,3 +25485,117 @@ run and uncertain benefit. Do not repeat the same tuning without new evidence.
 The next linked deliverables remain combined P4/P6 faults and the deployment/
 full-scope audit. The original baseline175 process remains live at observation,
 and CI stays background feedback. Full P0–P7 remains active.
+
+254b floor check before native runs: an absent quorum read for an already observed
+responsibility must advance its retained barrier floor. Otherwise source handoff
+could accept a read below the most recent known absence. Add a focused independent
+host regression before changing that path; retain the original bounded observation
+entry, update only its barrier/sequence/source generation, and keep it unservable.
+No new entries, persistence or authority are introduced by a missing result.
+
+254b first source-matched handoff runs: host9/0 both hosts; Linux affected
+native13/0, Mac12/1. Both forced TCP/QUIC local-source loss histories and all
+local automatic service/cache/recovery cases pass on Mac. The remaining failure
+is remote_manifest TCP, first root refresh sequence1 with exact10s Timeout. Do
+not infer its cause merely from timeout or rerun unchanged. Add failure-only
+original source/peer binding/role/term/commit/pending-read diagnostic before
+selecting a fix. Related Linux contracts31/0, core1/0/native-only9/0 and all four
+strict/fmt zero. The attempted parent-independence module filter selected zero
+tests; use actual public test names before claiming parent checks.
+
+254b remote diagnostic selection passes1/0 on Mac; this does not identify or
+clear the preceding timeout cause. Schema for composing the same source handoff:
+remote transport identity remains the provisioned responder, while its owned
+lookup source may be another actual ready Directory voter in the same authority.
+All queries,10s protocol timeout,15s fixture deadline and original read credits
+remain. Add controlled real TCP/QUIC original-source leadership loss before any
+remote lookup, so a pinned-source failure can be proven independently of the
+intermittent timeout. Only after its negative check, let the responder host call
+the same idle owned handoff API; it never elects a leader. Keep old returned Node
+in the peer Vec, pair stopped logs with actual store IDs rather than Vec positions,
+and close/drain/return every source. Final cancel test still requires an accepted
+original read and terminal cancellation. Completion: forced loss selects a new
+actual source, original manifests/route/fencing and cached offline child behavior,
+exact unchanged stopped logs, native and independent host checks on both platforms
+and strict zero. This is the same P5/P0 deliverable, not a new remote protocol.
+
+254b controlled remote loss fails before composition0/1 on Linux with exact
+10s Timeout, no pending invocation, store1 Follower term2/commit8 and actual
+store2 Leader term2/commit8. This proves the pinned-source recovery gap under
+the controlled schedule; it does not retrospectively prove the earlier Mac
+timeout had that cause. Compose only the existing idle owned source API before
+responder polling, without changing protocol/timeout/budgets or source trust.
+The cancellation setup can also select an already ready source while no read
+is accepted; no Node work is discarded. Compare stopped logs by actual store
+identity now that source ownership can change Vec positions.
+
+254b composed fixture Clippy finds105/100 lines in its remote history. Extract
+only the actual store-ID/frozen-log verification into a named private assertion
+to preserve the same complete checks and keep the existing100-line threshold.
+This assertion is needed because successful source return changes Vec order;
+production contracts and thresholds remain unchanged.
+
+Completed254b evidence: public owned ManifestReadSource replacement is implemented
+with exact old/rejected source return, idle checks including cancelled/unresolved
+reads, atomic clock/binding/closed refusal, retained bounded manifest/barrier floors
+and monotonically allocated observation IDs. Checked volatile source generations
+separate duplicate domains; only read sequence/negative state reset. A controlled
+missing-read regression fails before advancing the known barrier floor and passes
+after the focused correction. No durable/wire/core/policy/dependency/timer/quota
+change. Independent host tests and actual TCP/QUIC local/remote responder source
+loss use the same public seam; actual original binding return, fresh quorum hints,
+cancellation/drain, parent-offline child behavior, cold retry lineage and exact
+store-ID/frozen-log comparison remain. See [254 evidence](../validation/baseline/slice254/README.md).
+
+Final254b selected acceptance: affected native15/0 and related host/mapping/routing/
+remote contracts31/0 on both Linux/Mac; core1/0/native-only9/0/default host9/0 on
+both; Linux default native8/0. Formatting and all four strict Clippy profiles are
+zero on both,652 final build inputs verify. Inventory108 and13 partial reviews/81
+operations still pass metadata checks; C17 is selected evidence, not a new full
+provider certification. Controlled write/read admission, forced local/remote loss
+and missing-floor negatives remain archived alongside rejected candidates. The
+Mac remote diagnostic rerun1/0 does not explain its preceding uncontrolled timeout.
+
+Additional original parent-independence acceptance remains open: Linux2/0, Mac0/2
+with raw positive Unknown(LeadershipChanged). Preserve these source-matched failures;
+no broad current-source platform/routing acceptance is claimed. Original251 Mac
+full run remains live, including a sampled repeat/checkpoint history making actual
+poll/cleanup progress; a sample is not a terminal or no-hang certificate. Original
+Mac source/build remains intact. Full original Linux1826/0 is archived separately.
+
+Macro review254b advances P0 Rust composition and P5 usable local/remote discovery:
+an explicit read-source lifecycle replaces election preparation in this owned
+caller, without granting read authority from readiness. It does not close P5/P6
+fault/platform acceptance or P7 gates. Full goal stays active, features first.
+
+Current254c — original positive parent/namespace/deletion recovery (P5/P6): purpose
+is functional Mac/Linux acceptance of the existing user-visible routing/lifecycle
+paths. Depend on254b's typed admission/uncertainty distinction and terminal251
+bodies or isolated exact-input reproductions. First sketch the actual caller of
+the two original parent Unknown(LeadershipChanged) failures; retain original IDs,
+bytes, first-receipt uncertainty evidence, explicit duplicate retries, quorum reads,
+phase cuts/fences and shutdown. Then work the originally reported namespace/delete/
+offline failures by their actual typed bodies. Completion: named failed histories
+and affected targets pass on both, with zero formatting/four strict profiles;
+a clean handoff subset is not this acceptance. No broad helper rewrite or timer
+change replaces a specific failed contract.
+
+Next255 — original functional release-gap audit (P0–P6): purpose is to select the
+smallest genuinely missing release exit from R01–R19 and the existing inventory,
+rather than mistake unreviewed evidence for an absent feature. Depend on254c and
+the original terminal251 results. Completion: source-linked implemented/planned
+coverage, named remaining functional exits and a concrete next schema/API/ownership/
+restart/refusal plan, with actual checks separated from planned work. P7/security/
+Windows remain outside this feature audit; no helper prerequisite without an exit.
+
+Following256 — separate-host usable service acceptance (first usable milestone):
+purpose is to demonstrate existing Rust/executable composition across Linux and
+the authorized Mac, beyond per-platform loopback tests. Depend on255's existing
+service configuration/identity/cleanup contracts and source-matched installed
+binaries. Use scoped temporary test processes and explicit provisioned TCP/QUIC
+peers, two Linux voters and one Mac voter, original-ID write/read/retry plus leader
+loss and cold recovery. Completion: real cross-host service results, preserved
+store/operation identities and stopped-file recovery, explicit process/worker
+cleanup and both-host strict zero. Sketch the actual owned configuration, ports,
+processes, failure/restart and cleanup before launching; this is functional
+acceptance, not a new runtime, security pass or throughput/latency claim.

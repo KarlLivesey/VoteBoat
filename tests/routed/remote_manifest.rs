@@ -37,7 +37,7 @@ fn local(id: u64) -> LocalIdentity {
 fn remote_route(
     client: &mut Remote,
     server: &mut Server,
-    others: &mut [Node<Directory>],
+    others: &mut Vec<Node<Directory>>,
     clock: &Instant,
     cache: &mut NativeManifestCache,
 ) -> RouteHint {
@@ -50,9 +50,26 @@ fn remote_route(
             | Err(ManifestLookupPollError::Discovery(ManifestDiscoveryError::Unavailable)) => (),
             other => panic!("source lookup: {other:?}"),
         }
+        handoff_ready_source(server.source_mut(), others, t);
         server.poll(t, SessionPollBudget::default()).unwrap();
         if let Some(result) = client.poll(t, SessionPollBudget::default()).unwrap() {
-            assert!(result.result.is_ok(), "{result:?}");
+            if result.result.is_err() {
+                let pending = server.source_mut().pending();
+                let peers = std::iter::once(&*server.source_mut().source_mut())
+                    .chain(others.iter())
+                    .map(|node| {
+                        let core = node.local().owner.core(group(1)).unwrap();
+                        (
+                            node.local().reads.binding(),
+                            core.role(),
+                            core.state().hard_state.term,
+                            core.state().commit_index,
+                            node.local().reads.usage().requests,
+                        )
+                    })
+                    .collect::<Vec<_>>();
+                panic!("remote lookup: {result:?}, pending={pending:?}, peers={peers:?}");
+            }
         }
         match resolve_discovered(
             cache,
@@ -122,6 +139,7 @@ fn finish_source(
     assert!(client.lookup(query(3), now(clock)).is_err());
     let deadline = Instant::now() + Duration::from_secs(5);
     while server.source_mut().pending().is_none() {
+        handoff_ready_source(server.source_mut(), parents, now(clock));
         server
             .poll(now(clock), SessionPollBudget::default())
             .unwrap();
@@ -185,18 +203,47 @@ fn reject_stale_hint(route: RouteHint, children: &mut [Node<Child>], clock: &Ins
         RoutedRead::Rejected(_)
     ));
 }
-fn history(protocol: NativePeerProtocol) {
+// Compare each returned Node's exact frozen log with its own original files,
+// even when an owned source handoff changed the peer Vec order.
+fn verify_stopped_logs(root: &std::path::Path, stores: Vec<u128>, before: Vec<GroupLog>) {
+    assert_eq!(stores.len(), before.len());
+    for (store, log) in stores.into_iter().zip(before) {
+        let store = NativeLogStore::recover(
+            FileLogIo::open(root.join(format!("1/{store}"))).unwrap(),
+            support::identity(store),
+            LogLimits::default(),
+        )
+        .unwrap();
+        assert_eq!(store.state(group(1)).unwrap(), log);
+    }
+}
+fn history(protocol: NativePeerProtocol, force_loss: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
-        "voteboat-remote-manifest-{}-{protocol:?}",
+        "voteboat-remote-manifest-{}-{protocol:?}-{force_loss}",
         std::process::id()
     ));
     std::fs::create_dir_all(&root).unwrap();
     let mut parents = initialized_directory(&root, &clock, protocol);
     let (mut client, mut server) = remote_pair(parents.remove(0), protocol, &clock);
+    if force_loss {
+        lose_local_authority(server.source_mut(), &mut parents, &clock);
+    }
+    let original_binding = server.source_mut().source_mut().local().reads.binding();
     let mut cache = NativeManifestCache::new(limits()).unwrap();
     let route = remote_route(&mut client, &mut server, &mut parents, &clock, &mut cache);
+    if force_loss {
+        assert_ne!(
+            server.source_mut().source_mut().local().reads.binding(),
+            original_binding
+        );
+        let returned = parents
+            .iter()
+            .find(|node| node.local().reads.binding() == original_binding)
+            .unwrap();
+        assert_eq!(returned.local().reads.usage().requests, 0);
+    }
     assert_eq!(route.group, group(20));
     assert_eq!(
         client.usage().manifests,
@@ -235,6 +282,10 @@ fn history(protocol: NativePeerProtocol) {
         RoutedOutcome::Bootstrapped
     );
     finish_source(server, &mut client, &mut parents, &clock);
+    let stores = parents
+        .iter()
+        .map(|node| node.local().reads.binding().owner.store.identity.id.get())
+        .collect::<Vec<_>>();
     let before = close(parents, &clock, 1, || {
         drive(&mut children, &clock, |_| true);
     });
@@ -262,23 +313,25 @@ fn history(protocol: NativePeerProtocol) {
         .unwrap();
     assert_eq!(closed.result, Err(ManifestDiscoveryError::Closed.into()));
     assert!(client.into_parts().is_ok());
-    for (n, log) in before.into_iter().enumerate() {
-        let store = NativeLogStore::recover(
-            FileLogIo::open(root.join(format!("1/{}", n + 1))).unwrap(),
-            support::identity((n + 1) as u128),
-            LogLimits::default(),
-        )
-        .unwrap();
-        assert_eq!(store.state(group(1)).unwrap(), log);
-    }
+    verify_stopped_logs(&root, stores, before);
     std::fs::remove_dir_all(root).unwrap();
 }
 #[test]
 fn tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing() {
-    history(NativePeerProtocol::TcpTls);
+    history(NativePeerProtocol::TcpTls, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing() {
-    history(NativePeerProtocol::Quic);
+    history(NativePeerProtocol::Quic, false);
+}
+
+#[test]
+fn remote_lookup_recovers_tcp_after_original_source_loses_authority() {
+    history(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn remote_lookup_recovers_quic_after_original_source_loses_authority() {
+    history(NativePeerProtocol::Quic, true);
 }

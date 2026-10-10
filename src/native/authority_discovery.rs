@@ -24,6 +24,7 @@ use std::collections::BTreeMap;
 struct Observation {
     id: ManifestObservationId,
     sequence: u64,
+    source_generation: u64,
     barrier: ReadBarrier,
     expires_at: MonoTime,
     live: bool,
@@ -34,6 +35,7 @@ pub struct NativeAuthorityDiscovery {
     lifetime_ms: u64,
     binding: ReadInvocationBinding,
     highest_sequence: u64,
+    source_generation: u64,
     next: u64,
     now: MonoTime,
     closed: bool,
@@ -54,10 +56,40 @@ impl NativeAuthorityDiscovery {
             lifetime_ms,
             binding,
             highest_sequence: 0,
+            source_generation: 0,
             next: 0,
             now,
             closed: false,
         })
+    }
+    /// Change the read-ticket domain without forgetting manifest/barrier floors.
+    /// Generations and observation IDs are volatile and end with this provider.
+    pub(crate) fn replace_binding(
+        &mut self,
+        binding: ReadInvocationBinding,
+        now: MonoTime,
+    ) -> Result<(), ManifestDiscoveryError> {
+        if self.closed {
+            return Err(ManifestDiscoveryError::Closed);
+        }
+        if now < self.now {
+            return Err(ManifestDiscoveryError::TimeWentBack);
+        }
+        if binding == self.binding {
+            return Err(ManifestDiscoveryError::WrongAuthority);
+        }
+        let generation = self
+            .source_generation
+            .checked_add(1)
+            .ok_or(ManifestDiscoveryError::Exhausted)?;
+        for observation in self.observations.values_mut() {
+            observation.live = false;
+        }
+        self.binding = binding;
+        self.source_generation = generation;
+        self.highest_sequence = 0;
+        self.now = now;
+        Ok(())
     }
     fn check_observation(
         &mut self,
@@ -108,6 +140,9 @@ impl NativeAuthorityDiscovery {
                     {
                         return Err(ManifestDiscoveryError::StaleObservation);
                     }
+                    prior.barrier = *barrier;
+                    prior.sequence = ticket.sequence;
+                    prior.source_generation = self.source_generation;
                     prior.live = false;
                 }
                 self.highest_sequence = ticket.sequence;
@@ -124,7 +159,10 @@ impl NativeAuthorityDiscovery {
             if barrier.index() < prior.barrier.index() || barrier.term() < prior.barrier.term() {
                 return Err(ManifestDiscoveryError::StaleObservation);
             }
-            if *barrier == prior.barrier && ticket.sequence == prior.sequence {
+            if prior.source_generation == self.source_generation
+                && *barrier == prior.barrier
+                && ticket.sequence == prior.sequence
+            {
                 if !prior.live
                     || now >= prior.expires_at
                     || self.cache.get(request.locator.responsibility) != Some(manifest)
@@ -196,6 +234,7 @@ impl NativeAuthorityDiscovery {
             Observation {
                 id,
                 sequence: ticket.sequence,
+                source_generation: self.source_generation,
                 barrier,
                 expires_at: MonoTime(now.0 + self.lifetime_ms),
                 live: true,
