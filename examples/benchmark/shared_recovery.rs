@@ -17,6 +17,8 @@ use super::*;
 const GROUPS: usize = 8;
 #[path = "shared_recovery/maintenance.rs"]
 mod maintenance;
+#[path = "shared_recovery/receive_pressure.rs"]
+mod receive_pressure;
 struct Harness {
     root: std::path::PathBuf,
     clock: Instant,
@@ -24,6 +26,7 @@ struct Harness {
     bootstraps: Vec<Bootstrap>,
     addresses: BTreeMap<u64, std::net::SocketAddr>,
     recovery: Option<SnapshotRecoveryLimits>,
+    ingress: IngressLimits,
 }
 impl Harness {
     fn new(protocol: NativePeerProtocol) -> Self {
@@ -66,6 +69,7 @@ impl Harness {
             bootstraps,
             addresses,
             recovery: None,
+            ingress: IngressLimits::default(),
         }
     }
     fn open(&self, n: u64, mode: NativeOpenMode) -> Replica<SharedLog> {
@@ -79,7 +83,7 @@ impl Harness {
             addresses: &self.addresses,
             lane: 1,
         }
-        .open_replica_with_recovery(n, self.recovery)
+        .open_profile_with_ingress(n, self.recovery, false, self.ingress)
         .unwrap()
         .0
     }

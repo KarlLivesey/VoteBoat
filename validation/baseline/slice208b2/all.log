@@ -1,0 +1,96 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 34 tests
+test failure::tests::drive_failure_keeps_poll_totals_and_original_error ... ok
+test failure::tests::partial_history_preserves_receipts_and_uncertainty_without_success_summary ... ok
+test offered::maintenance::tests::checkpoint_rejects_leader_term_store_session_and_reference_scope_changes ... ok
+test offered::maintenance::tests::checkpoint_admission_or_unfinished_snapshot_never_counts_as_completion ... ok
+test offered::maintenance::tests::late_start_still_retains_the_full_requested_pause_duration ... ok
+test offered::maintenance::tests::invalid_or_missed_pause_never_silently_becomes_a_shorter_outage ... ok
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test observe::tests::observer_preserves_real_store_rejection_and_durable_ticket_scope ... ok
+test offered::maintenance::tests::missed_opportunities_are_bounded_skips_and_must_all_be_reported_before_finish ... ok
+test offered::maintenance::tests::reclaim_requires_the_original_full_ticket_and_never_reports_failure_as_freed_bytes ... ok
+test offered::tests::group_window_can_refuse_before_global_window_is_full ... ok
+test offered::tests::missed_schedule_does_not_shift_intended_start_or_drop_due_ids ... ok
+test offered::tests::windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot ... ok
+test offered::tests::refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts ... ok
+test offered::tests::no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known ... ok
+test offered::tests::stage_failure_retains_both_work_and_cleanup_errors ... ok
+receive pressure files: /tmp/voteboat-shared-repair-2881184-TcpTls-1791622177214414836
+maintenance recovery files: /tmp/voteboat-shared-repair-2881184-TcpTls-1791622177214365303
+receive pressure files: /tmp/voteboat-shared-repair-2881184-Quic-1791622177215474819
+maintenance recovery files: /tmp/voteboat-shared-repair-2881184-Quic-1791622177214470560
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test failure::tests::native_capacity_failure_retains_applied_prefix_and_joins_workers ... ok
+protocol=TcpTls phase=initial-write
+protocol=Quic phase=initial-write
+protocol=TcpTls phase=survivor-write
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=3 groups=5 host_owner_threads=3 wal_workers=9 snapshot_workers=9 peer_endpoints=9 tcp_dial_workers=9 payload_bytes=8 recovered_value=75 warmup=64 operations=11 window=7 sum_lane_max_inflight=7 elapsed_ns=29460825 elapsed_s=0.029461 applied_ops_s=373.377 p99_ns=22352819 p99_us=22352.819 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+protocol=TcpTls phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+protocol=TcpTls phase=arm-recovery
+protocol=TcpTls assembly=static_lanes replicas=3 lanes=2 groups=4 host_owner_threads=2 wal_workers=6 snapshot_workers=6 peer_endpoints=6 tcp_dial_workers=6 payload_bytes=8 recovered_value=72 warmup=64 operations=8 window=4 sum_lane_max_inflight=4 elapsed_ns=22747863 elapsed_s=0.022748 applied_ops_s=351.681 p99_ns=12865902 p99_us=12865.902 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=TcpTls groups=8 snapshot_installs=8 peak_recovery=1 reclaimed_bytes=16007 snapshot_send_refusals=0
+protocol=TcpTls group=1 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=2 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=3 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=4 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=5 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=6 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=7 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=8 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic phase=survivor-write
+protocol=TcpTls group=1 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=2 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=3 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=4 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=5 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=6 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=7 prior_last=2 required_base=3 recovered_base=3
+protocol=TcpTls group=8 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic phase=automatic-checkpoint
+test shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+test shared::recovery::tcp_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+protocol=TcpTls receive_refusals=[0, 0, 164] peak_frames=3 peak_recovery=1 installs=8 foreground_during_catchup=8 writes=16 reads=16
+protocol=Quic assembly=static_lanes replicas=3 lanes=2 groups=4 host_owner_threads=2 wal_workers=6 snapshot_workers=6 peer_endpoints=6 tcp_dial_workers=0 payload_bytes=8 recovered_value=72 warmup=64 operations=8 window=4 sum_lane_max_inflight=4 elapsed_ns=24694443 elapsed_s=0.024694 applied_ops_s=323.960 p99_ns=14522847 p99_us=14522.847 recovery_retries=0 retry_verified=true workers_joined=true host_threads_joined=true heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000
+test lanes::tests::quic_two_lanes_share_groups_and_recover ... ok
+test shared::recovery::receive_pressure::tcp_receive_pressure_keeps_quorum_work_and_recovers_every_group ... ok
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=Quic groups=8 snapshot_installs=11 peak_recovery=1 reclaimed_bytes=16509 snapshot_send_refusals=6
+protocol=Quic group=1 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=2 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=3 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=4 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=5 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=6 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=7 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=8 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=1 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=2 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=3 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=4 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=5 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=6 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=7 prior_last=2 required_base=3 recovered_base=3
+protocol=Quic group=8 prior_last=2 required_base=3 recovered_base=3
+test shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+test shared::recovery::quic_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+protocol=Quic receive_refusals=[0, 0, 341] peak_frames=3 peak_recovery=1 installs=8 foreground_during_catchup=8 writes=16 reads=16
+test shared::recovery::receive_pressure::quic_receive_pressure_keeps_quorum_work_and_recovers_every_group ... ok
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... ok
+test shared::drain::tcp_mixed_voter_and_learner_assignments_resume_together ... ok
+test shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress ... ok
+test shared::drain::quic_mixed_voter_and_learner_assignments_resume_together ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.29s
+

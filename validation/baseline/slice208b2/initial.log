@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.31s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+receive pressure files: /tmp/voteboat-shared-repair-2871412-Quic-1791622137365137567
+receive pressure files: /tmp/voteboat-shared-repair-2871412-TcpTls-1791622137365143308
+
+thread 'shared::recovery::receive_pressure::tcp_receive_pressure_keeps_quorum_work_and_recovers_every_group' (2871414) panicked at examples/benchmark/shared_recovery/receive_pressure.rs:271:5:
+assertion failed: seen.installs[2] >= GROUPS
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::recovery::receive_pressure::tcp_receive_pressure_keeps_quorum_work_and_recovers_every_group ... FAILED
+
+thread 'shared::recovery::receive_pressure::quic_receive_pressure_keeps_quorum_work_and_recovers_every_group' (2871413) panicked at examples/benchmark/shared_recovery/receive_pressure.rs:271:5:
+assertion failed: seen.installs[2] >= GROUPS
+test shared::recovery::receive_pressure::quic_receive_pressure_keeps_quorum_work_and_recovers_every_group ... FAILED
+
+failures:
+
+failures:
+    shared::recovery::receive_pressure::quic_receive_pressure_keeps_quorum_work_and_recovers_every_group
+    shared::recovery::receive_pressure::tcp_receive_pressure_keeps_quorum_work_and_recovers_every_group
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 32 filtered out; finished in 5.92s
+
+error: test failed, to rerun pass `--example native_benchmark`

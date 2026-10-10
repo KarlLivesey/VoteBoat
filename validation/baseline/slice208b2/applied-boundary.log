@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.80s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+receive pressure files: /tmp/voteboat-shared-repair-2876961-Quic-1791622157751885610
+receive pressure files: /tmp/voteboat-shared-repair-2876961-TcpTls-1791622157751885550
+protocol=TcpTls receive_refusals=[0, 0, 172] peak_frames=3 peak_recovery=1 installs=8 foreground_during_catchup=8 writes=16 reads=16
+test shared::recovery::receive_pressure::tcp_receive_pressure_keeps_quorum_work_and_recovers_every_group ... ok
+protocol=Quic receive_refusals=[0, 0, 289] peak_frames=3 peak_recovery=1 installs=8 foreground_during_catchup=6 writes=16 reads=16
+test shared::recovery::receive_pressure::quic_receive_pressure_keeps_quorum_work_and_recovers_every_group ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 32 filtered out; finished in 6.81s
+

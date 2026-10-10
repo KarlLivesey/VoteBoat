@@ -417,6 +417,15 @@ impl ClusterSetup<'_> {
         recovery: Option<SnapshotRecoveryLimits>,
         member: bool,
     ) -> Result<(Replica<SharedLog>, Trace), Failure> {
+        self.open_profile_with_ingress(n, recovery, member, IngressLimits::default())
+    }
+    fn open_profile_with_ingress(
+        &self,
+        n: u64,
+        recovery: Option<SnapshotRecoveryLimits>,
+        member: bool,
+        ingress_limits: IngressLimits,
+    ) -> Result<(Replica<SharedLog>, Trace), Failure> {
         let Self {
             root,
             mode,
@@ -469,6 +478,7 @@ impl ClusterSetup<'_> {
             clients,
             reads,
         } = application_routers(owner_id, local)?;
+        let ingress = checked(IngressRouter::new(ingress.binding(), ingress_limits))?;
         let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
         let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;

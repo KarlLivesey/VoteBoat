@@ -1,5 +1,12 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice208b2 adds native TCP/QUIC eight-group receive-pressure histories:
+actual admission refusal under a three-frame cap,16 applied foreground writes,
+16 quorum reads, concurrent one-job snapshot recovery, full close/reopen and
+32 historical operation retries. All34 native example tests and the independent
+default TCP history pass; strict formatting/lint remains clean. These are bounded
+Linux histories; broad fault/platform and sustainable-performance gates remain.
+
 Slice208b1 fixes recurring shared receive-credit starvation in PeerDriver.
 Background-slot and data-message contention regressions fail with eight
 admissions for one peer and none for the other, then pass with four each.

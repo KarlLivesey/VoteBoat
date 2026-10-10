@@ -461,3 +461,30 @@ replicas compact beyond all eight stale follower prefixes. Reopening the actual
 native files requires a snapshot for each group; restored applications, exact
 retries and another full restart are checked. These are controlled recovery
 histories, not throughput measurements or substitutes for the polling-stall run.
+
+## Native receive-pressure acceptance
+
+Run the bounded native history independently of throughput measurements:
+
+```sh
+cargo +stable test --locked --offline --all-features --example native_benchmark receive_pressure -- --nocapture
+```
+
+Three real replicas share eight logical groups and use either TCP/TLS or QUIC.
+The history stops one follower, advances and compacts both survivors beyond its
+old suffix, closes all transports, and reopens files. Ingress has three frame
+slots, one reserved control slot and one background slot. Each replica permits
+one accepted snapshot recovery job. The stale receiver holds dispatch until an
+actual admission refusal occurs while its healthy majority remains active.
+
+Two waves perform sixteen applied writes and sixteen exact-ticket quorum reads:
+one while the stale receiver is held, another after its bounded dispatch resumes
+and snapshot recovery begins. The resumed stale owner gets one small execution
+turn per four host rounds; its receive dispatch permits one message per turn.
+All eight groups must reach both their durable and applied recovery boundaries.
+Every poll checks resource bounds. Full close/join/reopen then verifies all32
+original operation IDs against their historical results.
+
+These are finite overload/recovery acceptance histories, not throughput or
+latency measurements. Saved results and the initial recovery-observation fix
+are in `validation/baseline/slice208b2`.

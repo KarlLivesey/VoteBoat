@@ -1,5 +1,13 @@
 # Validation report — slice 35
 
+Native receive-pressure acceptance: [slice208b2](baseline/slice208b2/README.md).
+TCP/QUIC histories record actual refusal under three-frame ingress limits while
+performing16 foreground writes and16 quorum reads, then finish8 snapshot
+installs and verify32 original retries after restart. All34 native example
+regressions and1 default TCP test pass, as do formatting/four strict lint
+profiles. Initial core-base-only recovery assertions and their correction are
+retained separately; broader performance/platform acceptance stays open.
+
 Shared receive fairness: [slice208b1](baseline/slice208b/README.md). Two
 host-provider regressions fail before the cursor fix and pass afterward; a third
 checks held recovery input, reserved control admission and exact outbound

@@ -114,28 +114,94 @@ existing credential journal and prepared peer bundle; acceptance requires
 original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
 the secure networked service milestone;207a alone is not operational rollout.
-Completed208a fixes the selected TCP connection-phase starvation cases under
-one-call budgets, including interleaved zero-I/O polls. Completed208b1 fixes
-recurring shared receive-credit starvation and exercises held recovery input
-with independent control admission and outbound completion. Current208b2
-composes native control/recovery progress under competing peer/group traffic.
-Its purpose is to validate useful replicated progress under overload, beyond
-host admission alone; dependencies are the existing native pressure/recovery
-harness, hard limits and the two fairness fixes. Completion requires original
-foreground writes/reads, bounded resource use and lagging-replica recovery over
-TCP/QUIC under the declared pressure schedule, advancing P2/P7 isolation.
-Reuse the existing Node and pressure controls; add a helper only if needed to
-expose a specific missing observation, not another scheduler.
-Following that, integrate persistent discovery refresh against the existing
+Completed208a fixes selected TCP connection-phase starvation under one-call
+budgets. Completed208b1 fixes recurring shared receive-credit starvation and
+checks reserved control admission. Completed208b2 adds native TCP/QUIC overload
+histories with three receive frames, actual refusal, sixteen foreground writes
+and reads, all-eight-group forced snapshot recovery, full restart and original
+operation retries. These advance P2/P7 isolation without a general latency claim.
+
+Current209 integrates persistent discovery refresh against the existing
 authenticated endpoint/manifest source and bounded cache. Its purpose is usable
-reconnect after discovery changes; completion requires refreshed hints, stale
+reconnect after discovery changes; dependencies are existing discovery, exact
+peer pins and the fair reactor. Completion requires refreshed hints, stale
 generation refusal and parent-offline child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
-Then extend the next unreviewed public-provider obligations selected from the
+Next, extend the next unreviewed public-provider obligations selected from the
 contract ledger. Reuse host/native implementations and their injected failures;
 completion requires executable shared assertions for ownership, rejection and
 shutdown, not just metadata entries. This advances composable Rust embedding
 under P0/P2 without making a particular external backend a prerequisite.
+Following that, revisit the current Linux/macOS operator acceptance evidence.
+Select a reproduced remaining failure from the recorded platform runs, identify
+its underlying contract, fix it and run the affected histories locally plus the
+supported platform job. Depend on the existing operator fixtures and logs;
+completion is terminal passing evidence for the selected failure, not a claim
+that other platform failures disappeared. This advances the usable service and
+cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice208b2 implemented — native receive pressure with forced recovery
+
+The shared native recovery harness now accepts explicit ingress limits before
+starting its existing providers; original benchmark profiles retain defaults.
+New TCP/QUIC histories use three ingress frames with control reserve, one
+background slot and one accepted snapshot recovery job per replica. A held stale
+receiver must actually refuse admission while its healthy majority applies an
+eight-group write wave and finishes fresh quorum reads. Its bounded resumed
+polling then competes with another write/read wave while all eight stale groups
+recover from real snapshots. Both durable core and application boundaries must
+reach the compacted survivor boundary before recovery is counted complete.
+
+The initial run stopped at a core-base-only completion check before every
+application image was loaded. The focused correction strengthens that check;
+it does not relax install counts or bypass worker completion. Final all-feature
+runs observe TCP164/QUIC341 receive refusals, three retained frames, recovery
+peak1 and8 snapshot installs per protocol. All8 second-wave writes complete
+before all groups have caught up. Each history closes/joins all providers,
+reopens files and checks32 original operation IDs against their historical
+receipts, including the16 foreground writes. The two foreground phases also
+complete16 exact-ticket quorum reads. Every poll checks configured ingress,
+recovery, outbound and owner byte bounds.
+
+All34 native benchmark/example tests pass, including existing lane, drain and
+maintenance/recovery histories. The independent default-feature TCP pressure
+test passes, with152 refusals and8 installs. Formatting and all four strict
+Clippy profiles pass with zero diagnostics;106 inventory paths and13 metadata
+checks pass. Raw failures and results are in validation/baseline/slice208b2.
+This closes the selected208b native composition check and advances to209;
+broader workload/fault/platform acceptance and fixed-p99 tuning remain open.
+The full P0–P7 objective stays active.
+
+### Slice208b2 schema plan — native receive pressure and snapshot catch-up
+
+Reuse the eight-group native shared-WAL TCP/QUIC recovery harness. Its stopped
+third replica has an older durable suffix than both compacted survivors; close
+all channels and reopen all files before the pressure phase so buffered appends
+cannot substitute for recovery. Add only test-selected ingress limits to the
+existing assembly: three frames, one control reserve and one background slot.
+Retain the existing one-job snapshot recovery quota and all other provider
+contracts. No production API, storage or consensus change is planned.
+
+Poll all nodes while withholding only the stale node's ingress dispatch until
+an actual admission refusal is observed. The healthy majority must then apply
+one eight-group write wave and finish fresh quorum reads despite that held
+receiver. Resume its ingress at one message per poll, admit another write wave
+once a real snapshot recovery request is active, and require foreground replies
+before all eight stale groups have recovered. Check every poll's ingress,
+recovery, outbound and owner usage against construction-selected limits.
+
+The recovery completion check must include both the durable core boundary and
+the application applied boundary: installing a new WAL anchor precedes delivery
+of the application image. A core-base-only predicate can finish too early.
+
+Each foreground wave retains exact tickets, operation IDs, payloads and expected
+values; no retry with a new identity can turn a failed write into success. Finish
+all-group snapshot catch-up and quorum reads, close/join all workers, reopen and
+verify original baseline and foreground duplicates against historical receipts.
+Retain raw failures with the data directory. The test must observe pressure,
+not merely configure small limits, and must distinguish admission from applied
+recovery. This advances P2/P7 combined-load evidence; persistent discovery and
+provider obligations remain next, with broader fault/platform work still open.
 
 ### Slice208b1 implemented — shared receive-credit fairness
 
