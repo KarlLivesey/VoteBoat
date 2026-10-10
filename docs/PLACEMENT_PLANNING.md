@@ -1,4 +1,4 @@
-# Initial learner placement
+# Placement plans
 
 `PlacementPlanner` is the public synchronous recommendation seam. Native and
 host-supplied planners use `PlacementRequest` and the common `plan_learner`
@@ -40,6 +40,28 @@ from recovered membership, then enroll, catch up, promote, retire, checkpoint an
 restart through the existing trusted administration path. Candidate capacities in
 those tests are explicit fixtures, not measured device capacity.
 
-This initial C18 path does not implement automatic voter replacement/removal,
-global rebalancing, capacity reservations, a live sample collector or ownership
-movement. It adds no executable planning flag or public configuration endpoint.
+`plan_replacement` prepares an unused learner and a target policy that replaces
+one specified voter. Every recursive branch and edge weight is preserved. Admit
+the learner record, catch up the learner, then use a fresh sample and current
+membership with `plan_voter_change`. The target policy is an intention, not a
+guarantee that future placement authorization or readiness will pass.
+
+`plan_voter_change` accepts an explicitly chosen validated policy and returns
+joint/final records sharing one operation ID. Target voters must already have
+exact stores in the current voter or learner set. Promotion requires an enabled
+candidate, but no additional free slot or second copy's worth of free bytes.
+Unrelated learners remain. `RemovedVoters::RetainAsLearners` retains demoted
+voters; `RemovedVoters::Retire` excludes them from the final configuration.
+Removal does not permit early decommissioning. The joint record must commit
+before finalization, and normal retirement rules still apply afterward.
+
+The common gate checks history capacity and both new configuration IDs, then
+authorizes the joint record. Execution rechecks authorization and actual learner
+readiness; possession of a plan supplies neither. Persist accepted records and
+retry their original operation IDs/payloads. Plan again only for a new operation.
+The TCP/QUIC leader-demotion histories consume these native-authorized plans,
+including unread joint receipts, WAL/checkpoint recovery and finalization.
+
+These APIs do not implement automatic relocation orchestration, global
+rebalancing, capacity reservations, a live sample collector or ownership
+movement. They add no executable planning flag or public configuration endpoint.

@@ -1,0 +1,73 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running tests/membership.rs (target/debug/deps/membership-ea2037a743d2381a)
+
+running 32 tests
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test crash::configuration_range_and_admission_charge_owned_metadata ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test host_store_configuration_journal_conformance ... ok
+test crash::actual_files_reopen_resumable_joint_then_committed_final_status ... ok
+test native_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test configuration_snapshots::native::legacy_codec_capability_cannot_drop_membership_metadata ... ok
+test crash::final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test crash::physical_reclamation_preserves_joint_final_and_operation_reuse_guards ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test native_store_configuration_journal_conformance ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test configuration_snapshots::native::actual_files_preserve_joint_and_final_configuration_bases ... ok
+test wire_capability_does_not_bypass_live_core_configuration_refusal ... ok
+test crash::failed_configuration_barriers_fence_and_recover_without_fabricated_receipts ... ok
+test configuration_snapshots::native::native_configuration_snapshot_recovery_and_physical_reclaim_conformance ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+test crash::every_torn_configuration_and_replacement_frame_recovers_one_complete_state ... ok
+test configuration_snapshots::native::interrupted_snapshot_publication_never_exposes_a_partial_membership_base ... ok
+test configuration_snapshots::native::every_torn_wal_snapshot_switch_retains_the_selected_pinned_membership ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/placement.rs (target/debug/deps/placement-4e23522c0dd20e0c)
+
+running 8 tests
+test exact_group_incarnation_store_and_learner_assignment_are_required ... ok
+test administration_plan_binds_complete_intent_group_and_application_envelope ... ok
+test domain_counts_do_not_substitute_for_weighted_or_recursive_quorum_evaluation ... ok
+test learners_never_supply_voting_domain_count_or_quorum_survival ... ok
+test finalization_cannot_skip_the_accepted_joint_target_policy ... ok
+test placement_permission_does_not_waive_journal_grammar ... ok
+test invalid_or_oversized_plans_return_original_assignments ... ok
+test administration_plan_rejects_ambiguous_or_unbounded_intents_and_returns_inputs ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/placement_planning.rs (target/debug/deps/placement_planning-5749a08ce45a0039)
+
+running 13 tests
+test changes::existing_learner_promotion_needs_no_new_slot_and_denial_accepts_nothing ... ok
+test changes::replacement_preserves_recursive_edges_and_promotes_only_after_learner_admission ... ok
+test changes::invalid_promotion_and_stale_samples_fail_before_authorization ... ok
+test changes::native_replacement_selection_and_removal_respect_declared_failure_domains ... ok
+test common_gate_refuses_forged_provider_scope_sample_store_and_existing_or_disabled_nodes ... ok
+test changes::removal_explicitly_retires_or_retains_old_voters_and_preserves_unrelated_learners ... ok
+test downstream_planner_builds_only_an_authorized_learner_record_and_does_not_mutate_membership ... ok
+test invalid_or_stale_samples_fail_before_planner_or_authorizer ... ok
+test changes::replacement_replays_joint_before_final_and_retains_identity_through_checkpoint ... ok
+test changes::transition_operation_and_two_id_boundaries_fail_without_authorizing ... ok
+test native_rank_is_deterministic_domain_then_load_capacity_node_and_authorization_is_independent ... ok
+test joint_transition_history_exhaustion_and_id_overflow_refuse_before_recommendation ... ok
+test changes::replacement_and_voter_change_refuse_invalid_intent_and_full_history ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

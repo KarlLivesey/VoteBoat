@@ -66,6 +66,7 @@ pub enum PlacementPlanningError {
     NoCandidate,
     ProviderViolation,
     Exhausted,
+    InvalidTarget,
     Membership(MembershipError),
     Authorization(PlacementError),
 }
@@ -151,16 +152,7 @@ pub fn plan_learner<P: PlacementPlanner, A: PlacementAuthorizer>(
     operation: OperationId,
 ) -> Result<PlannedLearner, PlacementPlanningError> {
     request.validate()?;
-    if request.current.operations().contains(&operation) {
-        return Err(PlacementPlanningError::Membership(
-            MembershipError::ReusedOperation,
-        ));
-    }
-    if request.current.operations().len() >= MAX_CONFIGURATION_OPERATIONS {
-        return Err(PlacementPlanningError::Membership(
-            MembershipError::HistoryFull,
-        ));
-    }
+    validate_operation(request.current, operation)?;
     if request.current.stable().voter_stores().len() + request.current.stable().learners().len()
         >= crate::quorum::Limits::default().max_voters
     {
@@ -168,13 +160,7 @@ pub fn plan_learner<P: PlacementPlanner, A: PlacementAuthorizer>(
             MembershipError::InvalidConfiguration,
         ));
     }
-    let next = request
-        .current
-        .id()
-        .get()
-        .checked_add(1)
-        .and_then(ConfigurationId::new)
-        .ok_or(PlacementPlanningError::Exhausted)?;
+    let next = next_configuration(request.current.id())?;
     let recommendation = planner.select(request)?;
     if recommendation.group != request.snapshot.group
         || recommendation.configuration != request.current.id()
@@ -213,4 +199,31 @@ pub fn plan_learner<P: PlacementPlanner, A: PlacementAuthorizer>(
         recommendation,
         record,
     })
+}
+
+pub(super) fn validate_operation(
+    current: &Membership,
+    operation: OperationId,
+) -> Result<(), PlacementPlanningError> {
+    if current.operations().contains(&operation) {
+        return Err(PlacementPlanningError::Membership(
+            MembershipError::ReusedOperation,
+        ));
+    }
+    if current.operations().len() >= MAX_CONFIGURATION_OPERATIONS {
+        return Err(PlacementPlanningError::Membership(
+            MembershipError::HistoryFull,
+        ));
+    }
+    Ok(())
+}
+
+pub(super) fn next_configuration(
+    current: ConfigurationId,
+) -> Result<ConfigurationId, PlacementPlanningError> {
+    current
+        .get()
+        .checked_add(1)
+        .and_then(ConfigurationId::new)
+        .ok_or(PlacementPlanningError::Exhausted)
 }

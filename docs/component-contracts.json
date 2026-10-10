@@ -1925,19 +1925,23 @@
     },
     {
       "design_id": "C18",
-      "public_contract": "PlacementPlanner / PlacementRequest / plan_learner",
+      "public_contract": "PlacementPlanner / PlacementRequest / plan_learner / plan_replacement / plan_voter_change",
       "operations": [
         "select",
         "validate",
-        "plan_learner"
+        "plan_learner",
+        "plan_replacement",
+        "plan_voter_change"
       ],
       "native": "NativePlacementPlanner: stateless deterministic ranking over bounded explicit host samples; same common consumer as downstream planners.",
       "conformance": [
         "tests/placement_planning.rs",
         "tests/placement.rs",
-        "tests/counter_service.rs"
+        "tests/counter_service.rs",
+        "tests/placement_planning/changes.rs",
+        "tests/counter_service/joint_retirement.rs"
       ],
-      "scope": "Borrowed exact group/configuration/sample, monotonic freshness, unique bounded candidates/stores/domains and complete current assignments. Common consumer checks provider output, operation/configuration/replica capacity, preserves voters/policy/existing learners and invokes PlacementAuthorizer before returning one learner record. No I/O, asynchronous accepted work, durability effects, reservations or quorum weight changes. Actual TCP/QUIC executable membership histories consume a planner-produced record from recovered membership before enrollment/promotion/retirement/checkpoint/restart. Initial learner planning only; automatic voter replacement, global orchestration and live measured samples remain absent."
+      "scope": "Borrowed exact group/configuration/sample, monotonic freshness, unique bounded candidates/stores/domains and complete current assignments. Common consumer checks provider output, operation/configuration/replica capacity, preserves voters/policy/existing learners and invokes PlacementAuthorizer before returning one learner record. No I/O, asynchronous accepted work, durability effects, reservations or quorum weight changes. Actual TCP/QUIC executable membership histories consume a planner-produced record from recovered membership before enrollment/promotion/retirement/checkpoint/restart. Automatic relocation orchestration and live measured samples remain absent. Slice180 adds replacement learner preparation preserving recursive branches and weights, and explicit target-policy joint/final plans for existing exact voter/learner stores. Removed voters are explicitly retained as learners or retired. Current sample/history/ID and target eligibility checks precede authorization; promotion still requires ordinary runtime readiness. No committed-state mutation or automatic migration. Real TCP/QUIC leader-demotion/restart histories consume native-authorized removal plans."
     },
     {
       "design_id": "C20",

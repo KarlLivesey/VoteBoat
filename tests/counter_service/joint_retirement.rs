@@ -16,7 +16,7 @@
 use super::*;
 use voteboat::{identity::*, log::GroupLog};
 
-fn setup(quic: bool) -> Cluster {
+fn setup(quic: bool) -> (Cluster, voteboat::membership::Membership) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
     let access = cluster.root.join("joint-access.txt");
@@ -31,6 +31,8 @@ fn setup(quic: bool) -> Cluster {
         .ok(leader, &["add", "18000", "42"])
         .contains("Value(42)"));
     cluster.stop();
+    let saved = state(&cluster, 1, 42);
+    let membership = saved.membership_at(saved.commit_index).unwrap();
     let policy = cluster.root.join("joint-policy.txt");
     fs::write(
         &policy,
@@ -42,7 +44,7 @@ fn setup(quic: bool) -> Cluster {
     for id in 1..=3 {
         cluster.start(id, "recover-member");
     }
-    cluster
+    (cluster, membership)
 }
 
 fn state(cluster: &Cluster, id: usize, value: i64) -> GroupLog {
@@ -93,7 +95,7 @@ fn cut_leader(cluster: &mut Cluster, leader: usize, checkpoint: bool) {
     }
 }
 
-fn finish(cluster: &mut Cluster, leader: usize, joint: &str) {
+fn finish(cluster: &mut Cluster, leader: usize, joint: &str, finalize: &str) {
     assert!(cluster
         .ok(leader, &["configuration-status", "18001"])
         .contains("action=finalize_requires_authorization"));
@@ -102,10 +104,7 @@ fn finish(cluster: &mut Cluster, leader: usize, joint: &str) {
     let refused = cluster.request(leader, &["configure-record", &conflict]);
     assert!(!refused.status.success());
     assert!(String::from_utf8_lossy(&refused.stdout).contains("conflicts with retained record"));
-    assert!(
-        leader_request(cluster, &["configure-record", "final 18001 2 3"])
-            .contains("committed_index=")
-    );
+    assert!(leader_request(cluster, &["configure-record", finalize]).contains("committed_index="));
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         let complete = (1..=3).all(|id| {
@@ -221,24 +220,19 @@ fn unread_joint(cluster: &mut Cluster, original: usize, joint: &str) {
 }
 
 fn history(quic: bool, checkpoint: bool) {
-    let mut cluster = setup(quic);
+    let (mut cluster, membership) = setup(quic);
     let leader = cluster.leader();
     assert!(cluster
         .ok(leader, &["add", "18002", "0"])
         .contains("Value(42)"));
-    let voters = (1..=3)
-        .filter(|id| *id != leader)
-        .map(|id| format!("v:{id}"))
-        .collect::<Vec<_>>()
-        .join(" ");
-    let joint = format!("joint 18001 1 2 3 {leader} m:2 {voters}");
+    let (joint, finalize) = plan_removal(&membership, leader);
     unread_joint(&mut cluster, leader, &joint);
     cut_leader(&mut cluster, leader, checkpoint);
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);
     cluster.start(leader, "recover-member");
     cluster.wait_configuration_status(leader, "18001");
-    finish(&mut cluster, replacement, &joint);
+    finish(&mut cluster, replacement, &joint, &finalize);
     cluster.stop();
     verify_files(&cluster, leader);
     for id in 1..=3 {
@@ -254,6 +248,103 @@ fn history(quic: bool, checkpoint: bool) {
     cluster.stop();
     verify_files(&cluster, leader);
     fs::remove_dir_all(&cluster.root).unwrap();
+}
+
+fn plan_removal(current: &voteboat::membership::Membership, retiring: usize) -> (String, String) {
+    use voteboat::{
+        membership::ConfigurationChange, native::placement::NativePlacementAuthorizer,
+        placement::*, quorum::*,
+    };
+    let candidates = [1usize, 2, 3].map(|n| PlacementCandidate {
+        node: NodeId::new(n as u64).unwrap(),
+        placement: ReplicaPlacement {
+            store: lifecycle_store(n),
+            domain: FailureDomainId::new(n as u64).unwrap(),
+        },
+        enabled: true,
+        free_bytes: 0,
+        free_replica_slots: 0,
+        load_permille: 0,
+    });
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let authorizer = NativePlacementAuthorizer::new(
+        group,
+        candidates.iter().map(|c| (c.node, c.placement)).collect(),
+        PlacementRequirements {
+            minimum_voting_domains: 2,
+            survive_any_single_domain_loss: false,
+        },
+    )
+    .unwrap();
+    let policy = Policy::new(
+        Tree::Majority(
+            candidates
+                .iter()
+                .filter(|c| c.node.get() != retiring as u64)
+                .map(|c| Tree::Voter(c.node))
+                .collect(),
+        ),
+        Limits::default(),
+    )
+    .unwrap();
+    let plan = plan_voter_change(
+        &authorizer,
+        PlacementRequest {
+            snapshot: PlacementSnapshot {
+                group,
+                configuration: current.id(),
+                generation: PlacementSampleGeneration::new(1).unwrap(),
+                observed_at: voteboat::runtime::MonoTime(0),
+                expires_at: voteboat::runtime::MonoTime(100),
+                candidates: &candidates,
+            },
+            current,
+            now: voteboat::runtime::MonoTime(1),
+            minimum_free_bytes: 0,
+        },
+        policy,
+        RemovedVoters::RetainAsLearners,
+        OperationId::new(18001).unwrap(),
+    )
+    .unwrap();
+    let ConfigurationChange::Joint { id, next } = &plan.joint.change else {
+        panic!("not joint");
+    };
+    let voters = next
+        .policy()
+        .voters()
+        .iter()
+        .map(|n| format!("v:{}", n.get()))
+        .collect::<Vec<_>>()
+        .join(" ");
+    let learners = next
+        .learners()
+        .keys()
+        .map(|n| n.get().to_string())
+        .collect::<Vec<_>>()
+        .join(",");
+    assert_eq!(learners, retiring.to_string());
+    let ConfigurationChange::Final { id: final_id } = plan.finalize.change else {
+        panic!("not final");
+    };
+    (
+        format!(
+            "joint {} {} {} {} {learners} m:2 {voters}",
+            plan.joint.operation.get(),
+            plan.joint.expected.get(),
+            id.get(),
+            next.id().get()
+        ),
+        format!(
+            "final {} {} {}",
+            plan.finalize.operation.get(),
+            plan.finalize.expected.get(),
+            final_id.get()
+        ),
+    )
 }
 
 #[test]

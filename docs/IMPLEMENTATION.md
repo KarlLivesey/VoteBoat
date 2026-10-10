@@ -103,9 +103,43 @@ strict profiles clean while advancing the remaining capability work.
 | Parallel: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
 | Completed: static local lane composition178 | Exercise real independent local owners/stores using the public Node assembly; advances P2/P7. | Shared native benchmark, bounded static assignments, common phase boundaries. | Six lane tests and all28 benchmark tests; TCP/QUIC file reopen/retry checks; independent raw/window/storage checks. Finite release runs are not a sustainable improvement claim. |
 | Completed: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Deterministic read regression fails before the fix; all54 service histories and10 read-contract checks pass after it. Exact IDs/records are retained; unrelated errors remain terminal. |
+| Completed: placement replacement/removal plans180 | Close the learner-only C18 planning gap; advances P4/P5 composition and selective assignment. | Validated recursive policies, existing planner/authorizer, learner admission and joint/final records. | Host/native plans preserve tree structure, reject stale/unprepared/unauthorized targets and replay with correct joint/final timing; all54 service tests pass, including planner-produced TCP/QUIC demotion histories. No automatic activation. |
 | Current: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
-| Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances the deployment/composition macro scope. | Current requirement ledger and verified platform/fault evidence. | Check public/native placement and remote routing requirements against actual APIs; implement missing user-visible paths and validate them without treating diagnostics as full feature completion. |
+| Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+
+### Slice180 schema plan — replacement and removal without policy flattening
+
+C18 currently produces only learner additions. Move its missing concrete planning
+capability ahead of the performance experiment; this closes an explicit public
+composition gap without speculative storage changes. Macro scope remains P0–P7,
+including deployment/remote-routing gaps and the unmet fixed-p99 requirement.
+
+Add pure planning consumers over the existing PlacementPlanner/Authorizer seam.
+A replacement plan selects an unused learner through the current common gate,
+then derives a target policy by substituting exactly one existing voter leaf,
+preserving every branch and weight. It returns the learner record and target
+policy, not pre-authorized future membership. After learner admission/catch-up,
+a fresh request can plan a voter change to an explicitly validated target policy.
+That consumer derives exact stores only from current voters/learners, preserves
+unrelated learners, and explicitly either retains removed voters as learners or
+retires them. It returns linked joint/final records with one operation ID and
+checked increasing configuration IDs, after authorizing the joint proposal.
+
+Planning has no accepted work, I/O, new persistent format, durability token,
+generation or worker lifetime. Native ranking remains deterministic. Unknown or
+disabled promotions, stale samples, active transitions, reused operations and
+overflow fail before authorization. Returned records must still pass normal
+execution-time authorization/readiness; final cannot be appended before joint
+commitment. Restart recovers ordinary configuration records. Retry the original
+accepted record, never regenerate a new payload for the same operation ID.
+
+Acceptance: downstream and native planning; recursive weighted substitution;
+replacement through learner/joint/final replay and checkpoint reconstruction;
+removal with both retention choices; invalid-target, identity, history, capacity,
+authorization and ID-boundary refusal; unchanged borrowed state; both strict
+Clippy profiles and formatting. These are planning/replay checks, not new claims
+of remote readiness, physical relocation or complete fault coverage.
 
 ### Slice179 schema plan — read authority transitions and exact test retries
 
@@ -16501,3 +16535,45 @@ Raft or platform certification. The prior Ubuntu job failure remains preserved
 under slice178. At capture, a446311 CI platform jobs and the original baseline175
 processes still run; no terminal success is claimed. P7 controlled performance,
 remaining deployment capabilities and combined fault coverage remain active.
+
+### Slice180 implemented evidence — explicit voter placement plans
+
+The existing public placement seam now has two common pure consumers.
+`plan_replacement` returns an ordinary learner record plus a target policy that
+substitutes exactly one voter leaf, preserving recursive branches and weights.
+`plan_voter_change` derives exact stores from current voters/learners and returns
+linked joint/final records for an explicitly supplied validated policy. Removed
+voters are explicitly retained as learners or excluded from the final replica
+set. Unrelated learners remain; promoting an allocated learner consumes no new
+slot. Native and host authorizers use the same path. No new provider trait,
+worker, persistent state or durability receipt was introduced.
+
+Freshness, exact stores, enabled promotion targets, active joint state, operation
+history, reused IDs and both new configuration IDs are checked. The plan is not
+readiness or authority: normal Node admission still verifies current membership,
+authentication and live learner readiness. Finalization still requires joint
+commitment. Preserve original records for retries; restart uses existing journal
+and checkpoint membership recovery. Load never mutates weights.
+
+The native TCP/QUIC public leader-demotion histories now build their actual
+joint/final command records from recovered membership through this planner and
+NativePlacementAuthorizer. They still lose the leader's joint reply, interrupt
+with WAL/checkpoint recovery, finish the same operation, preserve application
+retries and exclude the demoted learner from subsequent elections.
+
+Validation: all13 planning,8 placement and32 membership tests pass with all
+features;11 planning and18 membership pass without defaults. All54 service tests
+pass in42.39s. Formatting, both strict all-target Clippy profiles, warning-denied
+documentation and95-contract inventory checks pass. Raw output, source hashes and
+scope are in validation/baseline/slice180. One initial test fixture incorrectly
+used an uncommitted boundary as a checkpoint; the corrected full-history replay
+checks the intended JointNotCommitted refusal without a production relaxation.
+
+Macro review: this advances P4/P5/C18 planning and selected service composition;
+automatic relocation/orchestration, measured sample collection/reservations,
+remote manifest fetching, current macOS/separate-host evidence, broader faults
+and the original P7 performance gate remain open. CI at sourcebase ced34e8 has a
+successful lint job and still-running Linux/macOS jobs at observation. The older
+baseline175 process remained live when inspected; it is not current-source
+validation. The linked mini plan returns to P7 measurement, then combined fault
+coverage and the full-scope deployment audit. The full P0–P7 goal remains active.

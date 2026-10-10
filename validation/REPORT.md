@@ -5376,3 +5376,20 @@ from the saved Ubuntu job. Ten core-only read-invocation tests pass, and format,
 both strict all-target Clippy profiles, docs and inventory checks pass. See
 baseline/slice179. This is selected current-source evidence, not a claim that the
 pending original full baseline or macOS jobs passed. P0–P7 scope remains active.
+
+## Slice180 — placement replacement/removal plans
+
+Common public planning consumers now prepare a replacement learner without
+flattening recursive policy, and generate explicit target-policy joint/final
+records using only current exact voter/learner stores. Both retirement choices
+are tested. Plans grant no readiness or commitment and cannot bypass ordinary
+Node admission or joint-commit timing.
+
+All13 planning,8 placement and32 membership tests pass with all features;
+11 planning and18 membership pass without defaults. All54 TCP/QUIC service tests
+pass in42.39s, including planner-produced native-authorized leader demotion,
+unread joint replies and WAL/checkpoint resumption. Formatting, both strict
+all-target Clippy profiles, warning-denied docs and95-contract inventory pass.
+Evidence: [slice180](baseline/slice180/README.md). These checks do not complete
+P0–P7 or establish automatic relocation, remote manifest fetching, physical
+power-loss safety, current macOS/separate-host coverage or the unmet P7 p99 gate.

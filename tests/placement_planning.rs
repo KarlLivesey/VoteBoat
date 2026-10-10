@@ -16,6 +16,8 @@ use std::{cell::Cell, collections::BTreeMap};
 use voteboat::{
     identity::*, log::Bootstrap, membership::*, placement::*, quorum::*, runtime::MonoTime,
 };
+#[path = "placement_planning/changes.rs"]
+mod changes;
 fn node(n: u64) -> NodeId {
     NodeId::new(n).unwrap()
 }

@@ -1,0 +1,43 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.83s
+     Running tests/membership.rs (target/debug/deps/membership-1d148cc12a00e6bc)
+
+running 18 tests
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test host_store_configuration_journal_conformance ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/placement_planning.rs (target/debug/deps/placement_planning-6f8b51d4c8e9a830)
+
+running 11 tests
+test changes::replacement_preserves_recursive_edges_and_promotes_only_after_learner_admission ... ok
+test changes::invalid_promotion_and_stale_samples_fail_before_authorization ... ok
+test changes::existing_learner_promotion_needs_no_new_slot_and_denial_accepts_nothing ... ok
+test downstream_planner_builds_only_an_authorized_learner_record_and_does_not_mutate_membership ... ok
+test changes::transition_operation_and_two_id_boundaries_fail_without_authorizing ... ok
+test changes::removal_explicitly_retires_or_retains_old_voters_and_preserves_unrelated_learners ... ok
+test common_gate_refuses_forged_provider_scope_sample_store_and_existing_or_disabled_nodes ... ok
+test invalid_or_stale_samples_fail_before_planner_or_authorizer ... ok
+test changes::replacement_replays_joint_before_final_and_retains_identity_through_checkpoint ... ok
+test changes::replacement_and_voter_change_refuse_invalid_intent_and_full_history ... ok
+test joint_transition_history_exhaustion_and_id_overflow_refuse_before_recommendation ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

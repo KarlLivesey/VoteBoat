@@ -16,6 +16,8 @@
 use crate::{identity::*, membership::*};
 mod planning;
 pub use planning::*;
+mod changes;
+pub use changes::*;
 
 pub const PLACEMENT_AUTHORIZATION_CONTRACT_VERSION: u32 = 1;
 
