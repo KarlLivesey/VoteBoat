@@ -552,6 +552,30 @@ impl Directory {
     pub fn plan(&self) -> &DirectoryPlan {
         &self.plan
     }
+    pub(crate) fn authority_move_view(
+        &self,
+    ) -> Result<Vec<ResponsibilityManifest>, ApplicationError> {
+        if !self.initialized
+            || self.manifests.is_empty()
+            || self.reserved_publication_bytes() != 0
+            || !self.guarded_operations.is_empty()
+        {
+            return Err(ApplicationError::NotApplied);
+        }
+        Ok(self.manifests.values().cloned().collect())
+    }
+    pub(crate) fn contains_operation(&self, operation: OperationId) -> bool {
+        self.history.contains_key(&operation)
+    }
+    pub(crate) fn has_bootstrap(&self) -> bool {
+        self.initialized
+    }
+    pub(crate) fn is_bootstrap_operation(&self, operation: OperationId) -> bool {
+        self.history.get(&operation).is_some_and(|h| {
+            h.outcome == DirectoryOutcome::Initialized
+                && self.bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES).as_ref() == Ok(&h.bytes)
+        })
+    }
     pub fn limits(&self) -> DirectoryLimits {
         self.limits
     }

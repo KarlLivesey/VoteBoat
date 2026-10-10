@@ -29,6 +29,7 @@ pub mod discovery;
 pub mod identity;
 pub mod log;
 pub mod membership;
+pub mod metadata_transfer;
 #[cfg(feature = "native")]
 pub mod native;
 pub mod observability;

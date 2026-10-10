@@ -249,3 +249,9 @@ data/retries and final successor writes are checked, including service with all
 metadata/old owners stopped and their durable files unchanged. Multi-target
 remaining-transfer network coverage, wider faults, macOS, authority movement156
 and the other P0–P7 exits remain open.
+
+Slice156a implements selected metadata source fencing and bounded original-domain
+checkpoint export. Seven downstream tests include native journal byte-cut recovery;
+source mutation/authoritative reads stop after F and exact retries/export persist.
+Target import/activation156b, live-owner/locator refresh and native composition156c
+are still required before claiming metadata-authority movement.

@@ -4628,3 +4628,32 @@ These are selected Linux loopback/native-file histories with one destination for
 the remaining range. They supplement the embedding split-destination and byte-
 cut fault tests; they do not establish arbitrary faults, hardware power loss,
 macOS, separate hosts or metadata-authority movement. The full goal remains active.
+
+## Slice156a — metadata authority source half
+
+All seven `metadata_transfer` tests pass with all features; the six non-native
+cases pass core-only. The new source profile binds its bootstrap and export
+budget, validates complete settled manifest views and rejects live lifecycle
+reservations, stale/pending changes and reused operation IDs. It freezes at F,
+retains the original directory checkpoint and provenance, refuses subsequent
+service and returns the exact original fence on retry. Exported directory replay
+retains original publication outcomes. Truncated/corrupt checkpoints, mismatched
+profiles, missing bootstrap and failed batches refuse atomically.
+
+The native ModelIo case injects every append-byte cut plus synchronization and
+publication failures into the actual native log codec/store fence record. Both
+old-unfrozen and complete-frozen recovery occur; exact retry yields the same
+image. This is modeled journal evidence, not hardware power loss or a networked
+metadata move. No destination authority is activated by156a.
+
+Related checks:31 all-feature directory tests,30 all-feature retained-insertion
+tests and27 core-only directory tests pass. All-target/all-feature Clippy with
+warnings denied passes. Formatting, whitespace and the updated contract inventory
+are checked separately. Initial fixture failures from the lifecycle wrapper's
+absent optional deployment envelope were corrected by using its underlying
+Directory's existing declared bound; no old profile behavior was relaxed.
+
+Final rejection-history checks preserve failed control IDs through snapshot/export,
+prevent ID reuse and retain successful freeze capacity after the failure ledger
+is full. The ledger digest is included in the source status. Final all-feature
+and core-only tests plus Clippy pass; all sessions are terminal.
