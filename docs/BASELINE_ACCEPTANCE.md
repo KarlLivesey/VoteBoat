@@ -1,12 +1,14 @@
-# Baseline acceptance map — review159, updated176
+# Baseline acceptance map — review159, updated177
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
 completion certificate**. Selected tests do not prove all schedules. Detailed
 historical results remain in IMPLEMENTATION.md, BASELINE_AUDIT.md and
 validation/REPORT.md; validation/baseline/slice159-160 retains fresh results and
-any failures. The old full all-feature sweeps have incomplete logs and their
-process handles are absent; they do not establish full completion. Slices162–167
+any failures. The original pre160 full all-feature sweep is now verified complete:
+74 target results,1186 tests, exit0. Its historical source scope is not a current
+full-suite pass. Baseline175 is still running with its original handle; repaired
+live output capture is documented in slice177. Slices162–167
 add recovery-budget, provider-lifetime, Counter client-history, automatic physical
 reclamation, automatic checkpoints and maintenance under held recovery pressure.
 Slice167 composes both maintenance policies with actual eight-group snapshot
@@ -16,7 +18,8 @@ held; then all stale groups recover and original retries survive another reopen.
 This covers the selected composition, not general fairness or a latency bound.
 Slice168 adds bounded post-poll operational history with host/native injection,
 explicit overflow/cursor gaps and scoped service export. No observer becomes
-consensus authority; latency and critical-path attribution remain unimplemented.
+consensus authority. Slice176 adds bounded poll and connection timing;
+per-group/critical-path attribution remains open.
 Slices169–171 add unresolved-creation cancellation, repair a native snapshot
 refusal/codec mismatch and exercise16 native cancellation/publication race
 schedules across owner loss, unread receipts and WAL/checkpoint recovery. The

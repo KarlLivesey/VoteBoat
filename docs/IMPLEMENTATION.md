@@ -99,9 +99,41 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: staged executable credential publication174 | Make command-credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Complete bundle validation, durable local preparation, monotonic publication, old-channel revocation, exact latest retry/status, malformed-file refusal and restart digest/generation checks. Peer rotation and full audit history remain open. |
 | Completed: peer closure recovery175 | Keep a healthy service running when a peer closes between poll and send admission; advances P1/C06 and platform validation. | Existing transport rejection ownership, roster backoff and connection generations. | Reproduced failure, exact-ticket retry after reconnect, unrelated-peer progress, invalid-binding refusal and all50 service histories. macOS execution of this revision and the earlier checkpoint timeout remain separate open checks. |
 | Completed: bounded duration diagnostics176 | Distinguish service poll cost and connection waiting; advances P7/C19. | Existing RuntimeOwner, host clocks and post-call observer contract. | Host/native ownership, clock, overflow and bucket checks; TCP/QUIC interrupted/completed connections, authenticated export and reset on restart. All52 service histories pass. No benchmark improvement inferred. |
+| Completed: quorum explanations177 | Explain unsatisfied recursive branches without conflating hypothetical IDs with live acknowledgements; advances P3/P4 operator support. | Validated Policy/JointPolicy and accepted membership inspection. | All512 nine-voter sets, weighted/joint branch evidence and bounded authorized TCP/QUIC pages; historical baseline159 exit0 recorded with its pre160 scope. |
 | Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
 | Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+
+### Slice177 schema plan — quorum explanations and recovered validation output
+
+Normative chapter09 lists explain-quorum: evaluate the configured tree and show
+unsatisfied branches, never flatten hierarchical votes. Existing Policy exposes
+only a boolean/frontier and the service lacks this inspection. Add a pure public
+explanation derived from the same validated tree; this is an operator capability,
+not a new quorum rule, membership effect or provider seam.
+
+Shape: bounded preorder rows carry parent index, voter/majority/weighted rule,
+parent-edge weight, observed/required/total weight and satisfaction. Internal
+observations count only satisfied immediate children. Unknown input IDs cannot
+help a leaf. Joint explanations retain both trees and require both results.
+No new persistent state or durability token; a result is hypothetical input,
+not authenticated acknowledgements or live health. The service reads its current
+accepted membership, reports configuration IDs, and exports at most16 rows in
+the existing reply budget. Pagination exposes view IDs so changed configurations
+cannot be silently interpreted as one view. Inspect authorization remains required.
+
+Acceptance: all512 nine-voter sets agree with existing evaluation; explicit
+five-live-voter failure, weighted/max-weight and joint cases identify unsatisfied
+branches. Stable/joint formatting and bounds are tested. Actual service queries
+work without a quorum and remain labelled hypothetical. No consensus mutation.
+
+The previous full159 sweep now has terminal exit0 and1186 passing tests, compiled
+before160. Its raw log is retained as historical evidence, not current-source
+proof. Baseline175 still runs. Moving its output across filesystems unlinked the
+writer's original file; a live tail now preserves that descriptor at
+/tmp/vb-slice175-live.log. No test was restarted. Next: finish actual platform/
+baseline outcomes; then P7's controlled performance gate, with the full P0–P7
+and combined-fault scope unchanged.
 
 ### Slice176 schema plan — bounded service latency diagnostics
 
@@ -16300,3 +16332,42 @@ gate, per-group tracing or additive critical-path attribution. Baseline175 still
 has no terminal result; CI175 passed lint and its Linux/macOS jobs were running
 at observation. Full P0–P7 remains active. The linked plan returns to actual
 baseline/platform outcomes, then controlled performance and combined fault gates.
+
+### Slice177 progress — quorum inspection and authoritative test observation
+
+Previous turn made progress at64ab37c. Rechecked live process identities and
+recovered the original159 handle from its saved metadata: session64351 exited0,
+with74 target results and1186 passing tests. That build predates160 and cannot
+validate subsequent work. Baseline175 remained live. Moving its log across
+filesystems during175 copied then unlinked the original rather than moving its
+open inode; reading the temporary copy hid later progress. A tail following the
+still-open descriptor now preserves /tmp/vb-slice175-live.log and exits with the
+original cargo process. No test was restarted. A ptrace attempt was refused by
+the host; descriptor inspection identified the issue without changing policy.
+
+Read chapter09's operator surface against current code. Added Policy::explain
+and JointPolicy::explain, retaining recursive threshold semantics in bounded
+preorder rows. Each row identifies its parent, rule, parent-edge weight and
+observed/required/total branch weight. Unknown IDs cannot contribute. A joint
+explanation keeps both independent trees and requires both roots. The result is
+diagnostic data, never an authenticated quorum certificate or mutable policy.
+
+The executable exposes `explain-quorum NODES OFFSET COUNT`, with at most16 rows,
+accepted stable/next configuration IDs and explicit hypothetical-node evidence.
+It works without a live quorum and requires existing Inspect authorization.
+Pagination preserves parent indexes; callers must compare configuration IDs
+between pages. Metrics formatting moved into the existing Diagnostics owner
+to preserve the command-dispatch size limit, without changing metric semantics.
+
+Linux checks:6 quorum tests pass with all features and with none,6 executable
+unit tests pass, and all54 service tests pass in42.78s. The new tests enumerate
+all512 nine-voter sets, identify the five-of-nine unsatisfied-site case, exercise
+maximum weights and joint policies, and bound formatted pages. Actual TCP/QUIC
+service checks run with only one voter started, verify the hypothetical label,
+unknown/invalid IDs, pagination, scope denial and reopen. Strict lint, formatting,
+docs and inventory evidence is recorded under validation/baseline/slice177.
+
+The full scope is unchanged: baseline175 and platform jobs are not declared
+complete; P7's fixed-p99/sustainable improvement and wider P0–P7 acceptance remain.
+The linked plan continues with actual baseline/platform outcomes, then measured
+performance and combined membership/lifecycle fault gates.

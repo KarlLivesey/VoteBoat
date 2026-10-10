@@ -40,8 +40,10 @@ impl Diagnostics {
             rejected_timings: 0,
         })
     }
-    pub fn snapshot_counters(&self) -> CounterSnapshot {
-        self.counters.snapshot_counters()
+    pub fn metrics(&self) -> String {
+        let snapshot = self.counters.snapshot_counters();
+        let c = snapshot.counters;
+        format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures)
     }
     pub fn record(&mut self, sample: NodeObservation) {
         let _ = self.counters.record_bounded(sample);

@@ -21,6 +21,8 @@ mod credential_reload;
 mod diagnostics;
 #[path = "support/local_client.rs"]
 mod local_client;
+#[path = "support/quorum_diagnostics.rs"]
+mod quorum_diagnostics;
 #[path = "support/service_access.rs"]
 mod service_access;
 #[path = "support/counter_setup.rs"]
@@ -44,6 +46,7 @@ voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SO
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
+voteboat-counter client BASE_PORT NODE explain-quorum NODES_CSV_OR_DASH OFFSET COUNT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
@@ -128,12 +131,9 @@ fn command(
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
         ["maintenance"] => maintenance_status(service),
         ["events", session, after, count] => observer.events(session, after, count)?,
-        ["metrics"] => {
-            let snapshot = observer.snapshot_counters();
-            let c = snapshot.counters;
-            format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures)
-        }
+        ["metrics"] => observer.metrics(),
         ["timings"] => observer.timings(),
+        ["explain-quorum", voters, offset, count] => quorum_diagnostics::explain(service, voters, offset, count)?,
         ["configuration-status", operation] => {
             let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
                 .ok_or("invalid operation ID")?;
@@ -216,7 +216,7 @@ fn command(
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, metrics, timings, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, timings, explain-quorum NODES OFFSET COUNT, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {

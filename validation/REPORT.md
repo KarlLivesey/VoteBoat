@@ -5317,3 +5317,31 @@ receipt or successful state-machine application. These aggregate distributions
 do not establish a benchmark improvement or an additive critical path. The live
 baseline175 process and CI175 platform jobs have no terminal result in this
 record; no full baseline, macOS or separate-host pass is inferred.
+
+## Slice177 — quorum explanations and recovered full-run evidence
+
+Recovered the original159 process handle from committed metadata. Its terminal
+result is exit0:74 target results and1186 passing tests. The complete raw output
+is retained in validation/baseline/slice177 with the original metadata and a
+summary. This build predates160 and is historical integration evidence only.
+
+Baseline175 is still live. The log move crossed filesystems, so the live writer
+kept an unlinked inode while /tmp held a stale copy. A reader now follows the
+original descriptor at /tmp/vb-slice175-live.log, with --pid tied to its cargo
+process. Fresh phase completions are observed. No tests were restarted; ptrace
+was unavailable and no host security setting was changed.
+
+The new Policy/JointPolicy explanation tests pass6/6 with all features and6/6
+without default features. They cover all512 nine-voter sets against existing
+evaluation, exact immediate-child weights, unknown IDs, maximum weights and
+joint root requirements. Six executable unit tests pass, including stable/joint
+pagination and maximum-size output. All54 service tests pass in42.78s. Two new
+TCP/QUIC histories verify local inspection without a voting quorum, bounded
+pages, hypothetical evidence, authorization and restart. Formatting, both strict
+all-target Clippy profiles, warning-denied docs and95-record metadata validation
+pass; source hashes and commands identify the tested revision contents.
+
+These are diagnostic views of supplied node IDs. They do not establish network
+liveness, authenticated/durable acknowledgements, or permission to commit. The
+quorum predicate and consensus protocol are unchanged. No current full-suite,
+macOS, separate-host or performance-gate success follows from the historical run.

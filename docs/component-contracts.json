@@ -1263,19 +1263,23 @@
     },
     {
       "design_id": "C05/C10/C20",
-      "public_contract": "Counter::readiness_requirements / Counter::validate_readiness_requirements / voteboat-counter configuration-status",
+      "public_contract": "Counter::readiness_requirements / Counter::validate_readiness_requirements / voteboat-counter configuration-status / Policy::explain / JointPolicy::explain / voteboat-counter explain-quorum",
       "operations": [
         "report configured lifetime application envelope",
         "validate declared schema and bounds",
-        "query local durable configuration status"
+        "query local durable configuration status",
+        "explain hypothetical IDs against stable and joint recursive quorum trees"
       ],
       "native": "Counter enforced retry capacity and existing Node durable observer exposed by the native local command endpoint.",
       "conformance": [
         "tests/application.rs",
         "tests/configuration_capacity.rs",
-        "tests/counter_service.rs"
+        "tests/counter_service.rs",
+        "tests/quorum/explanation.rs",
+        "tests/counter_service/quorum.rs",
+        "src/bin/support/quorum_diagnostics.rs"
       ],
-      "scope": "Counter envelope covers fixed eight-byte commands and 32+33*configured operation capacity checkpoint bytes independent of occupancy. Existing pending proposal admission/application/restore enforce capacity without retry eviction; service validates schema and payload limits before opening resources. Full 10000-operation checkpoint round-trips through wire versions 1\u20134. Configuration-status parses nonzero operation IDs and returns local durable committed/accepted phases and planning hints; local absence is inconclusive and follower observations are not quorum reads. No mutation or unbounded policy payload, new token/generation/watermark/format. Real TCP/QUIC service process histories query static local absence and restart; dynamic observer semantics are separately tested through Node. Growing membership metadata still needs selected configuration-capacity checks. Generic host envelope enforcement, service mutations and faulted remote lifecycle release remain pending. Slice 76 executable TCP/QUIC histories start from the original bootstrap without seeded configuration records, commit learner addition and promotion of exact store 404/incarnation 7 through trusted plans, retry real offline checkpoint enrollment, deny promotion while the target is offline, and retire absent original voter 1 after a fresh survivor-quorum write. Native checkpoints/reopen preserve exact final voters 2/4, all six operation identities and Counter deduplication while retired routes are omitted. QUIC exercises a majority-wrapped weighted 2/1/2 promotion policy. Maintenance stops and that specific failed-voter schedule do not prove the remaining broad fault-release gates."
+      "scope": "Counter envelope covers fixed eight-byte commands and 32+33*configured operation capacity checkpoint bytes independent of occupancy. Existing pending proposal admission/application/restore enforce capacity without retry eviction; service validates schema and payload limits before opening resources. Full 10000-operation checkpoint round-trips through wire versions 1\u20134. Configuration-status parses nonzero operation IDs and returns local durable committed/accepted phases and planning hints; local absence is inconclusive and follower observations are not quorum reads. No mutation or unbounded policy payload, new token/generation/watermark/format. Real TCP/QUIC service process histories query static local absence and restart; dynamic observer semantics are separately tested through Node. Growing membership metadata still needs selected configuration-capacity checks. Generic host envelope enforcement, service mutations and faulted remote lifecycle release remain pending. Slice 76 executable TCP/QUIC histories start from the original bootstrap without seeded configuration records, commit learner addition and promotion of exact store 404/incarnation 7 through trusted plans, retry real offline checkpoint enrollment, deny promotion while the target is offline, and retire absent original voter 1 after a fresh survivor-quorum write. Native checkpoints/reopen preserve exact final voters 2/4, all six operation identities and Counter deduplication while retired routes are omitted. QUIC exercises a majority-wrapped weighted 2/1/2 promotion policy. Maintenance stops and that specific failed-voter schedule do not prove the remaining broad fault-release gates. Slice177 adds pure bounded preorder quorum explanations with per-branch weights and parent indexes. Unknown IDs cannot contribute; joint views require both policies. Inspect-authorized service pages report accepted stable/next configuration IDs, at most16 rows and explicit hypothetical-node evidence. The result is not authenticated acknowledgements, live health, commitment or a configuration mutation."
     },
     {
       "design_id": "C01/C03/C06",

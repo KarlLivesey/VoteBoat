@@ -1,0 +1,11 @@
+{
+  "source": "baseline159-complete.log",
+  "command": "cargo +stable test --locked --offline --all-targets --all-features",
+  "session": 64351,
+  "exitCode": 0,
+  "compiledBeforeSlice160": true,
+  "sourceScope": "Original slice159 run; no current-revision claim",
+  "targetResults": 74,
+  "passed": 1186,
+  "failingResults": []
+}

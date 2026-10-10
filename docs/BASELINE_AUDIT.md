@@ -1,8 +1,29 @@
 # Baseline audits
 
-Latest implementation follow-up: [slice176](#slice176--bounded-duration-attribution).
+Latest implementation follow-up: [slice177](#slice177--quorum-explanations-and-verified-historical-baseline).
 Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
 Earlier reviews below retain their original revision and scope.
+
+## Slice177 — quorum explanations and verified historical baseline
+
+The original all-target/all-feature sweep recorded under slice159 has now exited
+successfully:74 target results and1186 passing tests. The binary predates160;
+this is historical integration evidence, not a current revision certificate.
+Its full log and original run metadata are retained under slice177. Baseline175
+still runs. The log moved during175 crossed filesystems, leaving the process
+writing to an unlinked inode; the temporary copy stopped updating. A reader on
+the original live descriptor now records /tmp/vb-slice175-live.log without a
+restart. Newer phase completions are visible again. Ptrace attachment was denied
+by the host and was unnecessary once the descriptor mismatch was identified.
+
+Chapter09's explain-quorum operation was absent. Policy/JointPolicy now expose
+bounded preorder explanations, including immediate-child weights and unsatisfied
+branches. The service exports Inspect-authorized pages of its accepted stable/
+next policies with explicit hypothetical-node evidence. These observations
+neither authenticate acknowledgements nor prove health, commitment or authority.
+All512 nine-voter sets match the existing evaluator; weighted/joint and native
+service inspection checks cover the new path. The broader baseline, platform,
+P7 performance and remaining P0–P7 requirements remain active.
 
 ## Slice176 — bounded duration attribution
 

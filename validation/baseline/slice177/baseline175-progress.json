@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-10-10T03:44:41.938Z",
+  "status": "running-not-terminal",
+  "testSession": 42300,
+  "cargoProcess": 1526695,
+  "testProcess": 1580417,
+  "readerSession": 46844,
+  "liveLog": "/tmp/vb-slice175-live.log",
+  "note": "Snapshot from the original writer descriptor; do not use stale cross-filesystem copy as live output."
+}

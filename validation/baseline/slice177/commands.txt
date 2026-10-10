@@ -1,0 +1,35 @@
+Starting revision: 64ab37c0cc02e90b5f4810cbfba32297598141f6
+
+Recovered historical run:
+  Original metadata: baseline159-run-metadata.json (copied from slice159-160).
+  cargo +stable test --locked --offline --all-targets --all-features
+  Session64351 returns exit0; original processes4075901/4109706 have exited.
+  baseline159-complete.log: 74 target results,1186 passing tests.
+  Compiled before160; this is NOT current-source validation.
+
+Still-live baseline175:
+  Original session42300, cargo1526695, routed1580417.
+  Moving the original log across filesystems copied/unlinked the writer's inode.
+  /tmp/vb-slice175-all-features.log is stale, not current output.
+  tail --pid=1526695 --sleep-interval=0.2 -c +1 -f /proc/1526695/fd/1 > /tmp/vb-slice175-live.log
+  Reader session46844 follows the original descriptor and exits with cargo.
+  No tests restarted. Ptrace attachment failed with Operation not permitted.
+
+Current-source checks, all pass:
+cargo +stable test --locked --offline --all-features --bin voteboat-counter --test quorum
+  quorum-final.log: 6 executable unit tests +6 quorum tests
+cargo +stable test --locked --offline --no-default-features --test quorum
+  quorum-core.log: 6 passed
+cargo +stable test --locked --offline --all-features --test counter_service
+  service-final.log: 54 passed,42.78s
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+  95 records, metadata/path validation only
+
+Retain initial Clippy size failure. Move metrics rendering to its existing
+Diagnostics owner rather than changing the threshold or suppressing the lint.
+source-sha256.txt identifies changed Rust files. CI status is a snapshot; no
+platform or complete P0–P7 result is implied by pending or historical evidence.

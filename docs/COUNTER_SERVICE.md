@@ -194,6 +194,25 @@ proposal commitment or physical failure-domain validation.
 
 ## Write, retry and read
 
+To explain the current configured quorum for hypothetical voter IDs:
+
+```sh
+voteboat-counter client BASE_PORT NODE explain-quorum 1,2 0 16
+```
+
+Use `-` for no IDs. The last two arguments are a zero-based row offset and count
+(1–16). The output reports accepted stable/next configuration IDs and
+`evidence=hypothetical_nodes`; it does not contact the listed voters or prove a
+live quorum. In a joint configuration both trees must be satisfied. Compare the
+configuration IDs across pages and restart inspection if they change.
+
+Rows are `index:parent:view:rule:edge_weight:observed/required/total:satisfied`.
+Only satisfied immediate children contribute their weight to a branch. Five
+IDs in a nine-voter hierarchy can therefore still fail if two required sites
+lack their own quorum. Unknown IDs do not contribute. This read-only command
+requires Inspect permission when authentication is enabled and works on a
+follower without a live quorum. It cannot change membership or authorize writes.
+
 For local process counters, run `voteboat-counter client BASE_PORT NODE metrics`.
 These counters reset on restart and are labelled `evidence=local_volatile`;
 they do not establish quorum or durability. See [observability](OBSERVABILITY.md).

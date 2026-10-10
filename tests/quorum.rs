@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 use std::collections::{BTreeMap, BTreeSet};
 use voteboat::{identity::NodeId, quorum::*};
+#[path = "quorum/explanation.rs"]
+mod explanation;
 fn n(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }

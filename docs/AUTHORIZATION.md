@@ -48,7 +48,7 @@ credentials or permissions. Apply at restart or use the explicit authenticated
 
 | Role | Commands |
 | --- | --- |
-| reader | status, metrics, timings, events, maintenance, configuration-status, credential-status, read |
+| reader | status, metrics, timings, events, maintenance, explain-quorum, configuration-status, credential-status, read |
 | writer | reader commands plus add |
 | admin | writer commands plus checkpoint, reload-access and quit |
 

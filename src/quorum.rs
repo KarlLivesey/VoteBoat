@@ -16,6 +16,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::identity::NodeId;
+mod explanation;
+pub use explanation::{JointExplanation, QuorumExplanation, QuorumNode, QuorumRule};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Tree {

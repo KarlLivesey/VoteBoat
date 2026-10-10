@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.30s
+     Running tests/quorum.rs (target/debug/deps/quorum-e66fae65c6109415)
+
+running 6 tests
+test explanation::five_of_nine_ids_do_not_hide_two_unsatisfied_sites ... ok
+test explanation::maximum_weights_and_joint_policies_preserve_separate_thresholds ... ok
+test validates_exact_membership_weights_depth_and_budgets ... ok
+test weighted_and_joint_predicates_are_strict ... ok
+test explanation::every_nine_voter_explanation_matches_reference_and_direct_branch_weights ... ok
+test every_nine_voter_quorum_intersects_and_frontier_matches_reference ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

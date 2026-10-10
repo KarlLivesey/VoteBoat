@@ -389,6 +389,7 @@ impl Channel {
                 "status"
                 | "metrics"
                 | "timings"
+                | "explain-quorum"
                 | "events"
                 | "maintenance"
                 | "configuration-status"

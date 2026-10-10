@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.13s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 6 tests
+test quorum_diagnostics::tests::maximum_weight_pages_fit_the_bounded_reply ... ok
+test quorum_diagnostics::tests::joint_views_require_both_policies_and_keep_parent_indexes_when_paged ... ok
+test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quorum.rs (target/debug/deps/quorum-4d45d81ac0d1d6e7)
+
+running 6 tests
+test explanation::five_of_nine_ids_do_not_hide_two_unsatisfied_sites ... ok
+test explanation::maximum_weights_and_joint_policies_preserve_separate_thresholds ... ok
+test validates_exact_membership_weights_depth_and_budgets ... ok
+test weighted_and_joint_predicates_are_strict ... ok
+test explanation::every_nine_voter_explanation_matches_reference_and_direct_branch_weights ... ok
+test every_nine_voter_quorum_intersects_and_frontier_matches_reference ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
