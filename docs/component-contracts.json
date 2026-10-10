@@ -2315,6 +2315,22 @@
         "src/bin/support/diagnostics.rs"
       ],
       "scope": "Fixed Copy event variants, exact RuntimeOwner and EventGeneration cursor binding, checked record/byte/page limits, preallocated native ring, monotonic accepted sequence and event time. Full native ring evicts oldest and reports discarded totals and exact cursor gaps. Invalid binding/future cursor/page/time/closed intake reject without mutation; sequence exhaustion preserves history. Copied bounded exports have independent lifetime; close preserves reads and affects only one view. Post-poll reporter emits at most five aggregate records, retains last successfully reported state and counts sink rejections without changing the original Node result. A failing host sink cannot change actual write/read/shutdown. Native service exposes bounded Inspect-authorized event pages, rejects old store-session cursors after restart and preserves original operation retries over TCP/TLS and QUIC. No durability/leadership authority, request payloads, strings, hidden I/O/export workers, per-group tracing or latency attribution. Host implementations must obey nonblocking resource contracts; arbitrary blocking/panicking code is not sandboxed."
+    },
+    {
+      "design_id": "C19",
+      "public_contract": "TimingObserver / TimingSample / TimingHistogram / TimingSnapshot",
+      "operations": [
+        "record_timing with fixed outcome categories and host-supplied monotonic durations",
+        "snapshot_timing with bounded histogram and percentile upper bound",
+        "close the local volatile view"
+      ],
+      "native": "NativeTimingObserver: four fixed-size histograms, no clock reads, locks, workers, I/O or per-sample allocation; counter service records outside Node polling and connection ownership.",
+      "conformance": [
+        "tests/observability/timing.rs",
+        "tests/counter_service/timing.rs",
+        "src/bin/support/diagnostics.rs"
+      ],
+      "scope": "Version1 post-boundary duration diagnostics. RuntimeOwner and monotonic sample times are checked; closed or exhausted sinks refuse without mutation. Zero and every u64 nanosecond duration fit65 logarithmic buckets. Percentiles are nearest-rank bucket upper bounds, not exact samples. Connection completion means locally flushed output, including error replies, not client receipt, successful application or durability. Interrupted connections are retained separately; restart resets the view. No per-group tracing, additive critical-path attribution or performance improvement is established."
     }
   ],
   "not_yet_implemented": [

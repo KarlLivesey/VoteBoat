@@ -12,53 +12,53 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Fixed-size native counters, selected explicitly by the host.
-mod events;
-mod timing;
-use crate::{observability::*, runtime::RuntimeOwner};
-pub use events::NativeEventObserver;
-pub use timing::NativeTimingObserver;
+//! Fixed memory timing sink with explicit runtime ownership and no clock reads.
+use crate::{
+    observability::*,
+    runtime::{MonoTime, RuntimeOwner},
+};
 
-pub struct NativeCounterObserver {
-    snapshot: CounterSnapshot,
+pub struct NativeTimingObserver {
+    owner: RuntimeOwner,
+    sampled_at: Option<MonoTime>,
+    histograms: [TimingHistogram; 4],
+    closed: bool,
 }
-impl NativeCounterObserver {
+impl NativeTimingObserver {
     pub fn new(owner: RuntimeOwner) -> Self {
         Self {
-            snapshot: CounterSnapshot {
-                owner,
-                sampled_at: None,
-                state: None,
-                counters: NodeCounters::default(),
-                closed: false,
-            },
+            owner,
+            sampled_at: None,
+            histograms: [TimingHistogram::default(); 4],
+            closed: false,
         }
     }
 }
-impl Observer for NativeCounterObserver {
-    fn record_bounded(&mut self, sample: NodeObservation) -> Result<(), ObservationError> {
-        if self.snapshot.closed {
+impl TimingObserver for NativeTimingObserver {
+    fn record_timing(&mut self, sample: TimingSample) -> Result<(), ObservationError> {
+        if self.closed {
             return Err(ObservationError::Closed);
         }
-        if sample.owner != self.snapshot.owner {
+        if sample.owner != self.owner {
             return Err(ObservationError::WrongOwner);
         }
-        if self
-            .snapshot
-            .sampled_at
-            .is_some_and(|t| sample.sampled_at < t)
-        {
+        if self.sampled_at.is_some_and(|t| t > sample.sampled_at) {
             return Err(ObservationError::ClockRegressed);
         }
-        self.snapshot.counters = self.snapshot.counters.saturating_add(sample.counters);
-        self.snapshot.sampled_at = Some(sample.sampled_at);
-        self.snapshot.state = Some(sample.state);
+        self.histograms[sample.kind as usize].record(sample.elapsed_ns)?;
+        self.sampled_at = Some(sample.sampled_at);
         Ok(())
     }
-    fn snapshot_counters(&self) -> CounterSnapshot {
-        self.snapshot
+    fn snapshot_timing(&self, kind: TimingKind) -> TimingSnapshot {
+        TimingSnapshot {
+            owner: self.owner,
+            sampled_at: self.sampled_at,
+            kind,
+            histogram: self.histograms[kind as usize],
+            closed: self.closed,
+        }
     }
     fn close(&mut self) {
-        self.snapshot.closed = true;
+        self.closed = true;
     }
 }

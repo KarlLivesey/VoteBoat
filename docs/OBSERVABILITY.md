@@ -65,6 +65,48 @@ joins workers and reopens stores; new counters start without replay deliveries
 while original retries and values survive. These are finite conformance histories,
 not a performance or full protocol proof.
 
+## Bounded duration histograms
+
+`TimingObserver` accepts host-measured durations after a local boundary returns.
+The native `NativeTimingObserver` uses four fixed65-bucket histograms and no
+clock reads, locks, worker, file I/O or per-sample allocation. The service selects
+this provider through the public contract; embeddings can supply their own sink.
+Every sample carries the full RuntimeOwner and a monotonic sample time. Foreign
+owners, regressed times, closed views and exhausted count/total fields refuse
+without mutation. Refusal never replaces the original service result.
+
+The four categories are completed/failed Node polls and completed/interrupted
+command connections. Poll duration brackets only Node polling. Connection time
+runs from socket acceptance through locally flushed reply or removal, including
+TLS, request input and waiting. Completed connections include error replies;
+they prove neither client receipt nor application success. Interrupted channels,
+including authentication failures and deadlines, have their own distribution.
+No request, principal, group label or payload is retained.
+
+The histogram stores count, total nanoseconds, minimum and maximum. Bucket zero
+contains zero; bucket i contains2^(i-1) through2^i-1 nanoseconds. The last covers
+through u64::MAX. `percentile_upper_ns` returns a nearest-rank **bucket upper
+bound**, not an exact percentile. Empty/invalid percentile requests return None;
+inconsistent externally constructed histogram counts also return None. Service
+duration conversion caps values at u64::MAX nanoseconds. Every operation has a
+fixed bound; snapshots are copies and close preserves the final readable view.
+
+```sh
+voteboat-counter client BASE_PORT NODE timings
+```
+
+This follower-safe local command requires Inspect permission when service
+authentication is enabled. It reports `unit=ns`, the current store session,
+rejected samples and four summaries with `p99_upper`; empty values are `NA`.
+The response is below the existing4096-byte reply limit. Its own connection is
+recorded only after that response flushes. Restart creates an empty collector
+under the new store session. These cumulative diagnostics cannot be added into
+a critical path or treated as a controlled throughput/latency benchmark.
+Per-group attribution, worker/queue decomposition and external exporters remain
+open work. Host/native boundary, overflow and clock tests are in
+`tests/observability/timing.rs`; actual TCP/QUIC interruption, authorization and
+restart histories are in `tests/counter_service/timing.rs`.
+
 ## Bounded operational history
 
 `EventObserver` is a separate public contract for fixed `OperationalEvent`

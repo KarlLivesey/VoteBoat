@@ -388,6 +388,7 @@ impl Channel {
             Some(
                 "status"
                 | "metrics"
+                | "timings"
                 | "events"
                 | "maintenance"
                 | "configuration-status"

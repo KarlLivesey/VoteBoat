@@ -5292,3 +5292,28 @@ is incomplete and predates this patch's build. Its active output is retained at
 /tmp/vb-slice175-all-features.log. Source hashes and command records distinguish
 that observation from the final-source selected tests. No complete baseline,
 macOS, separate-host or full-roadmap result is claimed.
+
+## Slice176 — bounded duration diagnostics
+
+The public TimingObserver contract is exercised through a downstream host sink
+and NativeTimingObserver. Ten observability tests pass with all features, seven
+with no default features and ten with native alone. Tests cover exact owner and
+generation, nonregressing time, closure, preserved rejected state, every power-of-
+two boundary, zero/u64::MAX durations, nearest-rank upper bounds, inconsistent
+histogram refusal and checked count/total exhaustion. Four executable unit tests
+pass, including maximum timing export below the4096-byte reply limit and visible
+sample rejection after closure.
+
+All52 Linux service tests pass in43.88s, including two new actual TCP/QUIC
+histories. A dropped pre-authentication connection increases interrupted timing;
+normal command connections increase completed timing. A principal scoped to a
+different group cannot inspect the distribution. A recovered service starts
+with an empty distribution and a higher store session. Formatting, both strict
+Clippy profiles, warning-denied docs and95-entry inventory validation pass.
+Artifacts and changed-source hashes are in validation/baseline/slice176.
+
+Connection completion is local flush, including error responses, not client
+receipt or successful state-machine application. These aggregate distributions
+do not establish a benchmark improvement or an additive critical path. The live
+baseline175 process and CI175 platform jobs have no terminal result in this
+record; no full baseline, macOS or separate-host pass is inferred.

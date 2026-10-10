@@ -98,9 +98,42 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: credential generation and session revocation173 | Revoke old authenticated connections when prepared credentials change; advances C09/C21 and Rust embedding. | Existing SecureSession/ServiceAuthorizer contracts and chapter09/17 audit. | Host/native ownership and callback checks, selected TCP/QUIC reauthentication, TLS key/pin replacement and exact failed native transport batches. Executable publication remains open. |
 | Completed: staged executable credential publication174 | Make command-credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Complete bundle validation, durable local preparation, monotonic publication, old-channel revocation, exact latest retry/status, malformed-file refusal and restart digest/generation checks. Peer rotation and full audit history remain open. |
 | Completed: peer closure recovery175 | Keep a healthy service running when a peer closes between poll and send admission; advances P1/C06 and platform validation. | Existing transport rejection ownership, roster backoff and connection generations. | Reproduced failure, exact-ticket retry after reconnect, unrelated-peer progress, invalid-binding refusal and all50 service histories. macOS execution of this revision and the earlier checkpoint timeout remain separate open checks. |
+| Completed: bounded duration diagnostics176 | Distinguish service poll cost and connection waiting; advances P7/C19. | Existing RuntimeOwner, host clocks and post-call observer contract. | Host/native ownership, clock, overflow and bucket checks; TCP/QUIC interrupted/completed connections, authenticated export and reset on restart. All52 service histories pass. No benchmark improvement inferred. |
 | Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
 | Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+
+### Slice176 schema plan — bounded service latency diagnostics
+
+Purpose: advance P7/C19 cost attribution while the baseline recovery sweep runs.
+Existing service counters report progress but cannot distinguish expensive Node
+polls from time waiting on authenticated command connections. This is directly
+observable through two existing host-owned boundaries; no new worker is needed.
+
+Shape: a public TimingObserver receives owner-bound monotonic samples for four
+fixed kinds: completed/failed Node polls and completed/interrupted command
+connections. A native provider keeps four fixed65-bucket nanosecond histograms,
+count/total/min/max, with approximate percentile upper bounds. Host code supplies
+durations; the deterministic core reads no clock. Wrong owner, regressed time,
+closed sink and exhausted counters refuse atomically. Read/export remains bounded.
+
+Ownership/transitions: one sink belongs to the service RuntimeOwner. Capture the
+poll start/end outside Node; capture connection start at accept and finish once
+the reply is fully locally flushed or the connection is removed. A completed
+connection means local transport completion, including error replies, not client
+receipt or application success. Interrupted admissions remain represented rather
+than silently dropping slow failures. Restart starts an empty new owner-bound
+view. Shutdown closes the sink; no durable token, authority or retry decision is
+introduced. Observer refusal cannot replace the service result.
+
+Acceptance: host/native conformance for ownership, timing, overflow and close;
+exact bucket boundaries/percentile upper bounds including zero and maximum;
+TCP/QUIC service export after writes and interrupted connections, with restart
+reset and authorization. Keep all lint profiles clean. This is neither per-group
+tracing nor a measured throughput/p99 improvement; those original gates remain.
+Current176 advances diagnostics; next finish the baseline/platform failure audit;
+then use reproducible P7 measurements to select tuning, preserving combined
+membership/lifecycle fault work in the macro scope.
 
 ### Slice175 schema plan — peer close between poll and submit
 
@@ -16231,3 +16264,39 @@ terminated on an observation timeout. Background CI at3b4d324 has passed lint;
 platform test jobs were still running at the recorded observation. The next
 mini-plan item retains those actual-result checks and the unresolved platform/
 deployment gates; fixed-p99 performance and combined lifecycle faults follow.
+
+### Slice176 progress — bounded poll and connection duration diagnostics
+
+Previous turn progressed:6f552c0 is pushed. The baseline175 handle remains live;
+the run's incomplete status was rechecked rather than restarted. While it runs,
+implemented the planned TimingObserver seam and NativeTimingObserver. Four fixed
+65-bucket distributions accept owner-bound host durations for completed/failed
+polls and completed/interrupted command connections. Counts, totals and buckets
+are checked before mutation; invalid owner/time, closed or exhausted views refuse.
+Percentile queries return named nearest-rank bucket upper bounds, including exact
+zero handling, rather than claiming raw-sample accuracy.
+
+The executable brackets Node polling outside the deterministic core and records
+each removed connection once from accept through local flush or interruption.
+`timings` uses existing Inspect authorization and reports counts/total/min/max/
+p99_upper plus rejected samples. Completed connections include error responses;
+neither completed connections nor successful polls imply application success,
+client receipt or remote durability. Shutdown preserves the local diagnostic
+snapshot; restart starts empty under the new store session. This adds no worker,
+queue, dependency, persistent format or protocol timing change.
+
+Linux evidence:10 observability tests,4 executable unit tests and all52 service
+tests pass. Core-only observability passes7 and native-only passes10. New real
+TCP/QUIC histories verify interrupted TLS-selection connections are counted,
+cross-scope access is denied, and recovered service timing starts empty. Unit
+checks cover all powers-of-two bucket boundaries, maximum values, percentile
+rounding, refused mutation and maximum-size export. Formatting, both strict
+all-target Clippy profiles, warning-denied docs and95-contract inventory pass.
+Initial test compilation used a nonexistent harness method and service extraction
+exceeded the function-size limit; corrected both without lint exceptions.
+
+These distributions advance C19/P7 diagnostics, not the fixed-p99 throughput exit
+gate, per-group tracing or additive critical-path attribution. Baseline175 still
+has no terminal result; CI175 passed lint and its Linux/macOS jobs were running
+at observation. Full P0–P7 remains active. The linked plan returns to actual
+baseline/platform outcomes, then controlled performance and combined fault gates.

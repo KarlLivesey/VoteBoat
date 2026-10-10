@@ -41,7 +41,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
-voteboat-counter client BASE_PORT NODE status|metrics|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
@@ -72,8 +72,17 @@ struct Connection {
     stream: service_access::Channel,
     phase: Phase,
     deadline: Instant,
+    started: Instant,
 }
 impl Connection {
+    fn observe_close(&self, observer: &mut Diagnostics, reason: &str, time: MonoTime) {
+        let kind = if reason == "complete" {
+            TimingKind::ConnectionCompleted
+        } else {
+            TimingKind::ConnectionInterrupted
+        };
+        observer.record_timing(kind, self.started.elapsed(), time);
+    }
     fn reply(&mut self, text: String) {
         self.phase = Phase::Output {
             bytes: format!("{text}\n").into_bytes(),
@@ -124,6 +133,7 @@ fn command(
             let c = snapshot.counters;
             format!("OK evidence=local_volatile store_session={} polls={} failed_polls={} owner_steps={} step_errors={} worker_events={} snapshot_events={} snapshot_installs={} persistence_batches={} applications={} peer_sends={} peer_received={} ingress_blocked={} connection_failures={}", snapshot.owner.store.session.get(), c.polls, c.failed_polls, c.owner_steps, c.step_errors, c.worker_events, c.snapshot_events, c.snapshot_installs, c.persistence_batches, c.applications, c.peer_sends, c.peer_received, c.ingress_blocked, c.connection_failures)
         }
+        ["timings"] => observer.timings(),
         ["configuration-status", operation] => {
             let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
                 .ok_or("invalid operation ID")?;
@@ -206,7 +216,7 @@ fn command(
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, metrics, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, timings, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {
@@ -376,11 +386,13 @@ fn serve(
         });
 
         if let Some(remove_reason) = remove_reason {
-            cancel_connection(
+            finish_connection(
                 &mut service,
                 &mut administration,
                 &connection,
                 remove_reason,
+                &mut observer,
+                time,
             )?;
             connection = None;
         }
@@ -537,7 +549,10 @@ impl Connection {
                                 Err(_) => remove = true,
                             }
                         }
-                        remove |= *sent == bytes.len() && self.stream.is_flushed();
+                        if *sent == bytes.len() && self.stream.is_flushed() {
+                            remove = true;
+                            remove_reason = "complete";
+                        }
                     }
                     Phase::Pending(_) => (),
                 },
@@ -546,12 +561,17 @@ impl Connection {
         remove.then_some(remove_reason)
     }
 }
-fn cancel_connection(
+fn finish_connection(
     service: &mut Service,
     administration: &mut Option<administration::Administration>,
     connection: &Option<Connection>,
     remove_reason: &str,
+    observer: &mut Diagnostics,
+    time: MonoTime,
 ) -> Result<(), Failure> {
+    if let Some(c) = connection {
+        c.observe_close(observer, remove_reason, time);
+    }
     // Deadline and TLS/channel failure release the same pending host
     // ticket; cancellation cannot undo an already committed command.
     if let Some(Connection {
@@ -702,6 +722,7 @@ fn poll_service(
     time: MonoTime,
     owner: RuntimeOwner,
 ) -> Result<(), Failure> {
+    let started = Instant::now();
     let result = if let Some(admin) = administration {
         service.poll_with_configuration_authorization(
                 time,
@@ -722,6 +743,12 @@ fn poll_service(
         service.poll(time, NodePollBudget::default())
     };
     // Diagnostics run after poll and cannot replace its original result.
+    let kind = if result.is_ok() {
+        TimingKind::PollCompleted
+    } else {
+        TimingKind::PollFailed
+    };
+    observer.record_timing(kind, started.elapsed(), time);
     observer.record(NodeObservation::from_poll(
         owner,
         time,
@@ -742,13 +769,15 @@ fn accept_connection(
             *generation = generation
                 .checked_add(1)
                 .ok_or("command generation exhausted")?;
+            let started = Instant::now();
             Ok(Some(Connection {
                 stream: service_access::Channel::server(stream, authenticated),
                 phase: Phase::Input {
                     bytes: [0; 256],
                     len: 0,
                 },
-                deadline: Instant::now() + Duration::from_secs(5),
+                deadline: started + Duration::from_secs(5),
+                started,
             }))
         }
         Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => Ok(None),

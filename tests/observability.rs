@@ -16,6 +16,8 @@ use std::{cell::RefCell, rc::Rc};
 use voteboat::{identity::*, observability::*, runtime::*};
 #[path = "observability/events.rs"]
 mod events;
+#[path = "observability/timing.rs"]
+mod timing;
 fn owner(id: u128) -> RuntimeOwner {
     RuntimeOwner {
         store: StoreBinding {

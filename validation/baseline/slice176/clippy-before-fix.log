@@ -1,0 +1,32 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0599]: no method named `wait_stopped` found for struct `Cluster` in the current scope
+  --> tests/counter_service/timing.rs:94:13
+   |
+94 |     cluster.wait_stopped(leader);
+   |             ^^^^^^^^^^^^ method not found in `Cluster`
+   |
+  ::: tests/counter_service.rs:67:1
+   |
+67 | struct Cluster {
+   | -------------- method `wait_stopped` not found for this struct
+
+error: this function has too many lines (101/100)
+   --> src/bin/counter_service.rs:323:1
+    |
+323 | / fn serve(
+324 | |     mode: &str,
+325 | |     root: &Path,
+326 | |     id: u64,
+...   |
+330 | |     options: &StartupOptions,
+331 | | ) -> Result<(), Failure> {
+    | |________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+    = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: could not compile `voteboat` (bin "voteboat-counter") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 1 previous error
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "counter_service") due to 1 previous error

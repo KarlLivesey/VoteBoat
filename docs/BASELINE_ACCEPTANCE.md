@@ -1,4 +1,4 @@
-# Baseline acceptance map — review159, updated175
+# Baseline acceptance map — review159, updated176
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
@@ -88,7 +88,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | Broader mappings/automatic split policy; no hidden global ordering. |
 | C17 discovery | PeerDiscovery/DiscoveryConnector, ManifestDiscovery/ManifestReadSource, NativeManifestLookup/AuthorityDiscovery | Slice160 adds public read mappings and automatic lookup across selected native metadata moves/restarts. Slice172 adds native authenticated endpoint fetch/retry/cancel/reconnect through PeerDiscovery, with TCP/TLS and QUIC evidence. External manifest protocols and executable integration remain. Hints never activate owners. |
 | C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking | General voter replacement/removal, measured sample collection/reservations and global rebalancing. Recommendations never change membership alone. |
-| C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Per-group tracing, latency/queue/critical-path attribution and external exporter integration remain. |
+| C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver, TimingObserver/NativeTimingObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Slice176 adds bounded poll/connection duration distributions, including interrupted connections and restart reset. Per-group tracing, queue/critical-path decomposition and external exporter integration remain. |
 | C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Selected new-store interruption/recovery161 is exercised; broader ingress, revocation and combined failures remain. Native configuration endpoints exist and must not be listed wholly missing. |
 | C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, peer rotation and broader revocation schedules remain. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Preserve this distinction. |

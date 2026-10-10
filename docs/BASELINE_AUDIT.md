@@ -1,8 +1,19 @@
 # Baseline audits
 
-Latest implementation follow-up: [slice175](#slice175--platform-closure-and-live-validation-follow-up).
+Latest implementation follow-up: [slice176](#slice176--bounded-duration-attribution).
 Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
 Earlier reviews below retain their original revision and scope.
+
+## Slice176 — bounded duration attribution
+
+The service now exposes four bounded histograms through the public TimingObserver
+seam: completed/failed polls and completed/interrupted connections. Durations are
+measured in host code outside the deterministic core; the sink checks owner/time
+and retains no dynamic labels. Percentiles are bucket upper bounds. All52 service
+tests pass locally, with separate host/native, boundary, authorization and restart
+checks. This closes a selected C19 diagnostic gap, not P7's controlled throughput
+and fixed-p99 gate or per-group/critical-path attribution. Baseline175 is still
+live and CI175 platform results remain outstanding at the recorded observation.
 
 ## Slice175 — platform closure and live validation follow-up
 

@@ -1,0 +1,32 @@
+Starting revision: 6f552c0b097624a4ab98aeb029b1387735d5a449
+Changed Rust file hashes: source-sha256.txt
+
+Final-source checks:
+cargo +stable test --locked --offline --all-features --test observability
+  observability-final.log: 10 passed
+cargo +stable test --locked --offline --no-default-features --test observability
+  core-final.log: 7 passed
+cargo +stable test --locked --offline --no-default-features --features native --test observability
+  native-final.log: 10 passed
+cargo +stable test --locked --offline --all-features --bin voteboat-counter --test observability
+  host-native.log: 4 executable unit tests, 10 observability tests
+cargo +stable test --locked --offline --all-features --test counter_service
+  service-final.log: 52 passed, 43.88s
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+  95 contracts: metadata and path validation, not protocol proof
+
+Initial failed compilation/Clippy logs are retained. A test called a nonexistent
+Cluster helper; existing Cluster::stop is used instead. Service lifecycle
+accounting is kept in Connection::observe_close and finish_connection to preserve
+the function-size limit. No lint threshold or assertion was weakened.
+
+Baseline175 still has a live handle (42300), writing to
+/tmp/vb-slice175-all-features.log. It began at3b4d324, predates these changes and
+cannot prove this revision. No full-suite final result is claimed here.
+gh run view 38021189302 --json jobs,headSha,status,conclusion
+  ci175-status.json: previous revision, lint passed, platform jobs in progress.
+No new benchmark measurement or macOS execution is inferred from these checks.

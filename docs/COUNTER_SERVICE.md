@@ -200,6 +200,9 @@ they do not establish quorum or durability. See [observability](OBSERVABILITY.md
 For bounded recent operational events, use `client BASE_PORT NODE events 0 0 16`,
 then continue with the returned session and next cursor. Events reset on restart;
 overflow and cursor gaps are reported explicitly.
+Use `client BASE_PORT NODE timings` for local poll and connection duration
+summaries. These include interrupted connections and label approximate p99 bucket
+upper bounds; they reset on restart and do not measure successful-write latency.
 
 Inspect local roles if needed:
 

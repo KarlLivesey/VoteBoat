@@ -14,7 +14,7 @@
 // rights and limitations under the RPL.
 //! Explicit process-local diagnostics; no sink runs inside Node polling.
 use voteboat::{
-    native::observability::{NativeCounterObserver, NativeEventObserver},
+    native::observability::{NativeCounterObserver, NativeEventObserver, NativeTimingObserver},
     observability::*,
     runtime::*,
 };
@@ -23,6 +23,8 @@ pub struct Diagnostics {
     counters: NativeCounterObserver,
     events: NativeEventObserver,
     reporter: EventReporter,
+    timings: NativeTimingObserver,
+    rejected_timings: u64,
 }
 impl Diagnostics {
     pub fn new(owner: RuntimeOwner) -> Result<Self, EventError> {
@@ -34,6 +36,8 @@ impl Diagnostics {
             counters: NativeCounterObserver::new(owner),
             events: NativeEventObserver::new(binding, EventLimits::default())?,
             reporter: EventReporter::new(binding),
+            timings: NativeTimingObserver::new(owner),
+            rejected_timings: 0,
         })
     }
     pub fn snapshot_counters(&self) -> CounterSnapshot {
@@ -46,6 +50,42 @@ impl Diagnostics {
     pub fn close(&mut self) {
         self.counters.close();
         self.events.close();
+        self.timings.close();
+    }
+    pub fn record_timing(
+        &mut self,
+        kind: TimingKind,
+        elapsed: std::time::Duration,
+        time: MonoTime,
+    ) {
+        let sample = TimingSample {
+            owner: self.counters.snapshot_counters().owner,
+            sampled_at: time,
+            kind,
+            elapsed_ns: elapsed.as_nanos().min(u128::from(u64::MAX)) as u64,
+        };
+        if self.timings.record_timing(sample).is_err() {
+            self.rejected_timings = self.rejected_timings.saturating_add(1);
+        }
+    }
+    pub fn timings(&self) -> String {
+        let owner = self.counters.snapshot_counters().owner;
+        let mut reply = format!("OK evidence=local_volatile unit=ns store_session={} rejected={} percentile=bucket_upper_bound", owner.store.session.get(), self.rejected_timings);
+        for kind in TimingKind::ALL {
+            let h = self.timings.snapshot_timing(kind).histogram;
+            use std::fmt::Write;
+            write!(
+                &mut reply,
+                " {kind:?}={},sum:{},min:{},max:{},p99_upper:{}",
+                h.count,
+                h.total_ns,
+                optional_ns(h.min_ns),
+                optional_ns(h.max_ns),
+                optional_ns(h.percentile_upper_ns(9900))
+            )
+            .unwrap();
+        }
+        reply
     }
     pub fn events(&self, session: &str, after: &str, count: &str) -> Result<String, String> {
         let session = session
@@ -81,6 +121,9 @@ impl Diagnostics {
             page.window.latest_sequence, page.window.discarded, page.missed, next, self.reporter.rejected_events(), records))
     }
 }
+fn optional_ns(value: Option<u64>) -> String {
+    value.map_or_else(|| "NA".into(), |n| n.to_string())
+}
 fn render(record: &EventRecord) -> String {
     let data = match record.event.kind {
         EventKind::StateChanged { previous, current } => format!("state:{previous:?}:{current:?}"),
@@ -106,6 +149,46 @@ fn render(record: &EventRecord) -> String {
 mod tests {
     use super::*;
     use voteboat::identity::*;
+    #[test]
+    fn maximum_timing_values_fit_reply_and_closed_sink_reports_loss() {
+        let owner = RuntimeOwner {
+            store: StoreBinding {
+                identity: StoreIdentity {
+                    id: StoreId::new(1).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+                session: StoreSession::new(1).unwrap(),
+            },
+            lane: ExecutionLaneId::new(1).unwrap(),
+            generation: RuntimeGeneration::new(1).unwrap(),
+        };
+        let mut diagnostics = Diagnostics::new(owner).unwrap();
+        for kind in TimingKind::ALL {
+            diagnostics.record_timing(kind, std::time::Duration::MAX, MonoTime(u64::MAX));
+        }
+        let reply = diagnostics.timings();
+        assert!(reply.len() < 4096);
+        assert_eq!(reply.matches("p99_upper:18446744073709551615").count(), 4);
+        assert!(!reply.contains("Some("));
+        let before = diagnostics
+            .timings
+            .snapshot_timing(TimingKind::PollCompleted)
+            .histogram;
+        diagnostics.close();
+        diagnostics.record_timing(
+            TimingKind::PollCompleted,
+            std::time::Duration::ZERO,
+            MonoTime(u64::MAX),
+        );
+        assert!(diagnostics.timings().contains("rejected=1"));
+        assert_eq!(
+            diagnostics
+                .timings
+                .snapshot_timing(TimingKind::PollCompleted)
+                .histogram,
+            before
+        );
+    }
     #[test]
     fn maximum_value_pages_fit_client_reply_budget_and_report_loss() {
         let owner = RuntimeOwner {

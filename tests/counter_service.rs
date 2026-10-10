@@ -47,6 +47,8 @@ mod joint_retirement;
 mod maintenance;
 #[path = "counter_service/new_voter.rs"]
 mod new_voter;
+#[path = "counter_service/timing.rs"]
+mod timing;
 
 fn fixture_gate() -> std::sync::MutexGuard<'static, ()> {
     STORE_SPAWN.lock().unwrap_or_else(|e| e.into_inner())

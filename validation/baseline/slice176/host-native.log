@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.24s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 4 tests
+test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/observability.rs (target/debug/deps/observability-49c2c9e6d956107e)
+
+running 10 tests
+test capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls ... ok
+test downstream_observer_conformance_and_shared_scope_close ... ok
+test events::reporter_bounds_kinds_and_refusal_preserves_state_change_for_retry ... ok
+test events::native_event_conformance_and_construction_limits ... ok
+test events::host_event_conformance_and_shared_view_independence ... ok
+test native_observer_conformance_has_fixed_storage_and_independent_instances ... ok
+test timing::host_timing_sink_conforms ... ok
+test timing::invalid_percentiles_inconsistent_counts_and_exhaustion_are_explicit ... ok
+test timing::native_timing_sink_conforms_and_restart_is_empty ... ok
+test timing::timing_buckets_cover_zero_every_power_boundary_and_maximum ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

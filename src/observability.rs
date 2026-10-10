@@ -14,8 +14,10 @@
 // rights and limitations under the RPL.
 //! Bounded, volatile post-poll diagnostics; never consensus or durability evidence.
 mod events;
+mod timing;
 use crate::runtime::{MonoTime, NodeError, NodeProgress, NodeState, RuntimeOwner};
 pub use events::*;
+pub use timing::*;
 
 /// Fixed cardinality, saturating event counts. These are returned progress, not
 /// durable/apply watermarks, client success counts or complete I/O attribution.
@@ -124,7 +126,7 @@ pub enum ObservationError {
     WrongOwner,
     ClockRegressed,
     Closed,
-    /// Host sink has no bounded capacity; this sample was not retained.
+    /// Sink has no remaining capacity or accounting range; sample not retained.
     Overloaded,
 }
 
