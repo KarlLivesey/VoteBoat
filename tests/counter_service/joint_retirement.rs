@@ -97,13 +97,13 @@ fn finish(cluster: &mut Cluster, leader: usize, joint: &str) {
     assert!(cluster
         .ok(leader, &["configuration-status", "18001"])
         .contains("action=finalize_requires_authorization"));
-    assert!(leader_write(cluster, &["configure-record", joint]).contains("duplicate=true"));
+    assert!(leader_request(cluster, &["configure-record", joint]).contains("duplicate=true"));
     let conflict = joint.replacen("1 2 3", "1 2 99", 1);
     let refused = cluster.request(leader, &["configure-record", &conflict]);
     assert!(!refused.status.success());
     assert!(String::from_utf8_lossy(&refused.stdout).contains("conflicts with retained record"));
     assert!(
-        leader_write(cluster, &["configure-record", "final 18001 2 3"])
+        leader_request(cluster, &["configure-record", "final 18001 2 3"])
             .contains("committed_index=")
     );
     let deadline = Instant::now() + Duration::from_secs(15);

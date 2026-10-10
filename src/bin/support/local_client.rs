@@ -12,7 +12,8 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Bounded local routing. Only an explicit NotLeader proves a sent write was not proposed.
+//! Bounded local routing. Writes require explicit non-acceptance; retried reads
+//! always request a new quorum barrier.
 use super::{
     service_access::{Channel, ClientAccess},
     setup::Failure,
@@ -136,6 +137,14 @@ fn exchange(
         }
     }
 }
+fn retryable_reply(command: &[String], response: &str) -> bool {
+    response == NOT_LEADER
+        || command == ["read"]
+            && matches!(
+                response,
+                "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"
+            )
+}
 fn terminal(response: String) -> Result<(), Failure> {
     print!("{response}");
     if response.starts_with("OK ") {
@@ -221,9 +230,7 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
             }
             match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
                 Attempt::Unavailable => (),
-                Attempt::Reply(response)
-                    if response == NOT_LEADER
-                        || command == ["read"] && response == "ERR NotRead(ReadNotReady)\n" => {}
+                Attempt::Reply(response) if retryable_reply(command, &response) => {}
                 Attempt::Reply(response) => return terminal(response),
                 Attempt::Interrupted(reason) => return interrupted(command, reason),
             }

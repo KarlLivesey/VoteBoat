@@ -1,8 +1,20 @@
 # Baseline audits
 
-Latest implementation follow-up: [slice178](#slice178--static-local-lanes-and-current-platform-failures).
+Latest implementation follow-up: [slice179](#slice179--read-authority-transitions).
 Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
 Earlier reviews below retain their original revision and scope.
+
+## Slice179 — read authority transitions
+
+The saved Ubuntu177 failures exposed a read-routing gap and test histories that
+assumed a leader observation remained authoritative for the next command. Auto
+read now retries exactly ReadNotReady/LeadershipChanged with a fresh invocation,
+under the existing bounds. Explicit node selection and write-uncertainty behavior
+are unchanged. A deterministic fake-peer regression fails before the fix; all54
+service histories and10 core read-invocation checks pass locally afterward.
+Positive test retries retain exact IDs/payloads/configuration records; the actual
+unread-commit and crash cuts remain intact. Lint/format/docs/inventory are clean.
+Pending original baseline and platform jobs are not treated as completed evidence.
 
 ## Slice178 — static local lanes and current platform failures
 

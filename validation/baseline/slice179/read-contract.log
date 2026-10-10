@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.87s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 10 tests
+test read_invocations::lagging_ready_read_retries_and_cancelled_wait_does_not_execute_query ... ok
+test read_invocations::cancellation_before_read_step_keeps_capacity_and_cancels_ready_without_catchup ... ok
+test read_invocations::stale_queued_read_step_returns_exact_not_read_and_id_exhaustion_never_wraps ... ok
+test read_invocations::admission_correlates_original_queries_and_retains_credits_through_consumer ... ok
+test read_invocations::failed_construction_returns_selected_execution_owner_and_held_result ... ok
+test read_invocations::current_output_bound_is_revalidated_before_executing_an_admitted_query ... ok
+test read_invocations::fresh_owner_uses_live_core_read_floor_and_abort_preserves_completed_success ... ok
+test read_invocations::per_group_retention_budget_leaves_other_groups_and_close_drains_accepted_work ... ok
+test read_invocations::queued_cancel_is_exact_and_cannot_cancel_a_subsequent_read ... ok
+test read_invocations::runtime_rejection_preserves_original_query_without_spending_ticket ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 139 filtered out; finished in 0.00s
+

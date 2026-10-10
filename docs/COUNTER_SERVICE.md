@@ -251,8 +251,9 @@ application completion; a live process or local applied value is insufficient.
 Followers reject service writes/reads. Automatic routing retries the exact original
 command after a failed connection attempt or the explicit `ERR NOT_LEADER`
 reply (including an invocation rejected before proposal execution). For reads,
-it also retries the exact `ERR NotRead(ReadNotReady)` refusal, obtaining a fresh
-quorum barrier on the next attempt. It stops on
+it also retries the exact `ERR NotRead(ReadNotReady)` and
+`ERR Unavailable(LeadershipChanged)` responses, obtaining a fresh quorum barrier
+on the next attempt. Explicit node selection returns either response directly. It stops on
 Unknown, incomplete/invalid replies, connected I/O failures, or other errors. It
 never automatically resends an uncertain write to another node. A lost write
 reply prints Unknown; retry manually using the same operation ID and delta.

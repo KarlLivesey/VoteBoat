@@ -102,9 +102,38 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: quorum explanations177 | Explain unsatisfied recursive branches without conflating hypothetical IDs with live acknowledgements; advances P3/P4 operator support. | Validated Policy/JointPolicy and accepted membership inspection. | All512 nine-voter sets, weighted/joint branch evidence and bounded authorized TCP/QUIC pages; historical baseline159 exit0 recorded with its pre160 scope. |
 | Parallel: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
 | Completed: static local lane composition178 | Exercise real independent local owners/stores using the public Node assembly; advances P2/P7. | Shared native benchmark, bounded static assignments, common phase boundaries. | Six lane tests and all28 benchmark tests; TCP/QUIC file reopen/retry checks; independent raw/window/storage checks. Finite release runs are not a sustainable improvement claim. |
-| Current: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Reproduce or inject the observed leadership/readiness changes, preserve identical write/configuration requests, reject unrelated errors and pass the affected local service histories. |
-| Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
-| Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+| Completed: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Deterministic read regression fails before the fix; all54 service histories and10 read-contract checks pass after it. Exact IDs/records are retained; unrelated errors remain terminal. |
+| Current: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
+| Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+| Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances the deployment/composition macro scope. | Current requirement ledger and verified platform/fault evidence. | Check public/native placement and remote routing requirements against actual APIs; implement missing user-visible paths and validate them without treating diagnostics as full feature completion. |
+
+### Slice179 schema plan — read authority transitions and exact test retries
+
+The saved432a6e9 Ubuntu job failed three histories on concrete transient replies:
+NotRead(ReadNotReady), Unavailable(LeadershipChanged), and a configuration sent
+to a previously observed leader. Status is a hint, not authority for a later
+request. Current auto read retries only the first refusal and NOT_LEADER.
+
+Shape: keep the same command/reply protocol. Auto read may retry exactly those
+two read outcomes plus NOT_LEADER under its existing100-round/10-second bound.
+Each attempt creates a new quorum read; no cached read barrier or local-value
+fallback is introduced. Write and administrative uncertainty semantics remain
+unchanged. Explicitly addressed commands continue returning their first reply.
+No new persistent state, durability token, generation or provider seam.
+
+The affected process-test histories must reselect a current leader on exact
+known transitions and reuse identical operation IDs, payloads and configuration
+records. Keep raw/unobserved commands in the fault schedules to preserve their
+intended lost-receipt boundaries. Other errors remain failures; no blanket retry
+or timeout increase. A deterministic fake-peer regression must fail before the
+client change, then check exact command bytes, fresh next-peer attempt, direct
+mode behavior and refusal of other/partial errors. Run all service histories and
+both strict lint profiles; record actual platform outcomes separately.
+
+This advances P1/P4 usable service recovery. Next: original controlled P7
+performance/cost gates, then selected combined lifecycle/membership schedules.
+The existing full baseline remains under observation and the full P0–P7 scope
+is unchanged.
 
 ### Slice178 schema plan — real bounded local lane composition
 
@@ -16439,3 +16468,36 @@ these failures are not declared fixed by the lane work. The next slice addresses
 those exact authority races with unchanged operation identities. At capture,
 macOS and the original baseline175 process still run. Their pending output is
 not final validation. The full P0–P7 scope remains active.
+
+
+## Slice179 — read authority transitions and service test recovery
+
+Auto read now retries the exact Unavailable(LeadershipChanged) outcome as well as
+ReadNotReady and NOT_LEADER. Every retry submits the original read afresh under
+the existing100-round/10-second limit. There is no cached barrier, stale-value
+fallback or change to consensus/storage. Explicitly addressed reads retain their
+first-result behavior. Writes still stop on uncertainty, including this read-only
+response if it is returned to a write.
+
+The deterministic fake-peer regression failed before the change with the exact
+Ubuntu response and passes afterward. It checks both allowed read transitions,
+identical command bytes and terminal behavior for stale/failed/canceled/aborted,
+unknown, altered and partial responses. Direct-node behavior and uncertain-write
+no-reroute checks remain. The affected native member and configuration histories
+now select current authority for each positive request, preserving exact IDs and
+records; raw unobserved fault injections still enforce lost-receipt boundaries.
+The shared test helper is restricted to command-specific known retry outcomes.
+
+Actual local validation:54 service tests passed in42.83s, including both native
+configuration interruption histories, joint/final member recovery and TCP/QUIC
+new-store readiness/joint recovery. Ten existing core read-invocation contract
+tests pass. Formatting, both strict all-target Clippy profiles, docs and the
+95-entry inventory check pass. Evidence and source hashes are in
+validation/baseline/slice179. A helper rename initially missed two test call sites;
+they were corrected without changing test semantics or relaxing lints.
+
+This fixes the diagnosed client/test handling gaps; it is not a new complete
+Raft or platform certification. The prior Ubuntu job failure remains preserved
+under slice178. At capture, a446311 CI platform jobs and the original baseline175
+processes still run; no terminal success is claimed. P7 controlled performance,
+remaining deployment capabilities and combined fault coverage remain active.

@@ -5362,3 +5362,17 @@ fixed-p99 improvement. One/two-lane TCP p99 is706.891026/1075.042194ms; two-lane
 QUIC p99 is1058.867266ms. The original serial250ms gate remains open. Ubuntu CI
 for432a6e9 failed three service authority-race histories; raw output is retained
 and no fix is inferred. macOS and baseline175 remain pending at capture.
+
+
+## Slice179 — exact read-transition retries
+
+The fake-peer read regression reproduces Unavailable(LeadershipChanged) before
+the client change. Auto read now obtains a fresh invocation for that exact reply;
+explicit reads and uncertain writes retain their previous terminal behavior.
+Malformed, partial and other errors do not trigger the new retry path.
+
+All54 local service tests pass in42.83s, including the three histories diagnosed
+from the saved Ubuntu job. Ten core-only read-invocation tests pass, and format,
+both strict all-target Clippy profiles, docs and inventory checks pass. See
+baseline/slice179. This is selected current-source evidence, not a claim that the
+pending original full baseline or macOS jobs passed. P0–P7 scope remains active.

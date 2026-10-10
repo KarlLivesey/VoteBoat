@@ -668,10 +668,8 @@ fn member_service_history(quic: bool) {
                 .wait_configuration_status(id, "500")
                 .contains(expected));
         }
-        assert!(cluster
-            .ok(leader, &["add", "700", "42"])
-            .contains("Value(42)"));
-        assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+        assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("Value(42)"));
+        assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=42\n");
         // Configuration intake remains closed even in explicit member mode.
         assert!(!cluster
             .request(leader, &["configure", "501"])
@@ -703,11 +701,9 @@ fn member_service_history(quic: bool) {
         for id in 1..=3 {
             cluster.start(id, "recover-member");
         }
-        let leader = cluster.leader();
-        assert!(cluster
-            .ok(leader, &["add", "700", "42"])
-            .contains("duplicate=true"));
-        assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+        cluster.leader();
+        assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("duplicate=true"));
+        assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=42\n");
         for id in 1..=3 {
             assert!(cluster
                 .wait_configuration_status(id, "500")
@@ -1717,6 +1713,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         Some(b"UNKNOWN LeadershipChanged\n".as_slice()),
         Some(b"ERR Overloaded\n".as_slice()),
         Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
+        Some(b"ERR Unavailable(LeadershipChanged)\n".as_slice()),
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
@@ -1747,15 +1744,25 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
     }
 }
 #[test]
-fn automatic_read_retries_only_the_exact_read_not_ready_refusal() {
+fn automatic_read_retries_only_exact_quorum_transition_replies() {
     for reply in [
         b"ERR NotRead(ReadNotReady)\n".as_slice(),
+        b"ERR Unavailable(LeadershipChanged)\n",
         b"ERR NotRead(StaleRead)\n",
+        b"ERR Unavailable(OwnerFailed)\n",
+        b"ERR Unavailable(Cancelled)\n",
+        b"ERR Unavailable(Aborted)\n",
+        b"UNKNOWN LeadershipChanged\n",
+        b"ERR Unavailable(LeadershipChanged) trailing\n",
+        b"ERR Unavailable(LeadershipChanged)",
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(reply));
         let second = cluster.take_listener(102);
-        if reply == b"ERR NotRead(ReadNotReady)\n" {
+        if matches!(
+            reply,
+            b"ERR NotRead(ReadNotReady)\n" | b"ERR Unavailable(LeadershipChanged)\n"
+        ) {
             let second = reply_peer(second, Some(b"OK value=7\n"));
             assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
             assert_eq!(second.join().unwrap(), b"read\n");
@@ -1770,14 +1777,16 @@ fn automatic_read_retries_only_the_exact_read_not_ready_refusal() {
         assert_eq!(first.join().unwrap(), b"read\n");
         fs::remove_dir_all(&cluster.root).unwrap();
     }
-    let mut cluster = Cluster::new();
-    let first = reply_peer(
-        cluster.take_listener(101),
-        Some(b"ERR NotRead(ReadNotReady)\n"),
-    );
-    assert!(!cluster.request(1, &["read"]).status.success());
-    assert_eq!(first.join().unwrap(), b"read\n");
-    fs::remove_dir_all(&cluster.root).unwrap();
+    for reply in [
+        b"ERR NotRead(ReadNotReady)\n".as_slice(),
+        b"ERR Unavailable(LeadershipChanged)\n",
+    ] {
+        let mut cluster = Cluster::new();
+        let first = reply_peer(cluster.take_listener(101), Some(reply));
+        assert!(!cluster.request(1, &["read"]).status.success());
+        assert_eq!(first.join().unwrap(), b"read\n");
+        fs::remove_dir_all(&cluster.root).unwrap();
+    }
 }
 
 #[test]
@@ -2207,7 +2216,15 @@ fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation()
 
 // Select a current leader; preserve exact arguments on documented uncertainty.
 // Administration has no CLI auto mode.
-fn leader_write(cluster: &mut Cluster, args: &[&str]) -> String {
+fn retryable_leader_response(args: &[&str], text: &str) -> bool {
+    match args {
+        ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
+        ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
+        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n"),
+        _ => false,
+    }
+}
+fn leader_request(cluster: &mut Cluster, args: &[&str]) -> String {
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
         let leader = cluster.leader();
@@ -2217,7 +2234,7 @@ fn leader_write(cluster: &mut Cluster, args: &[&str]) -> String {
             return text;
         }
         assert!(
-            text == "ERR NOT_LEADER\n" || text.starts_with("UNKNOWN LeadershipChanged;"),
+            retryable_leader_response(args, &text),
             "{args:?}: {text} {}",
             String::from_utf8_lossy(&output.stderr)
         );
@@ -2260,8 +2277,10 @@ fn client_supplied_configuration_history(quic: bool) {
     let leader = cluster.leader();
     refuse_invalid_configurations(&mut cluster, leader);
     let record = "learners 16001 1 2 - m:3 v:1 v:2 v:3";
-    assert!(leader_write(&mut cluster, &["configure-record", record]).contains("committed_index="));
-    assert!(leader_write(&mut cluster, &["configure-record", record]).contains("duplicate=true"));
+    assert!(
+        leader_request(&mut cluster, &["configure-record", record]).contains("committed_index=")
+    );
+    assert!(leader_request(&mut cluster, &["configure-record", record]).contains("duplicate=true"));
     let leader = cluster.leader();
     let conflict = cluster.request(
         leader,
@@ -2271,15 +2290,16 @@ fn client_supplied_configuration_history(quic: bool) {
         .unwrap()
         .contains("conflicts with retained record"));
     let joint = "joint 16003 2 3 4 - w:3 1 v:1 1 v:2 1 v:3";
-    assert!(leader_write(&mut cluster, &["configure-record", joint]).contains("committed_index="));
-    assert!(leader_write(&mut cluster, &["configure-record", joint]).contains("duplicate=true"));
+    assert!(leader_request(&mut cluster, &["configure-record", joint]).contains("committed_index="));
+    assert!(leader_request(&mut cluster, &["configure-record", joint]).contains("duplicate=true"));
     let final_record = "final 16003 3 4";
     assert!(
-        leader_write(&mut cluster, &["configure-record", final_record])
+        leader_request(&mut cluster, &["configure-record", final_record])
             .contains("committed_index=")
     );
     assert!(
-        leader_write(&mut cluster, &["configure-record", final_record]).contains("duplicate=true")
+        leader_request(&mut cluster, &["configure-record", final_record])
+            .contains("duplicate=true")
     );
     for id in 1..=3 {
         cluster.ok(id, &["checkpoint"]);
@@ -2297,7 +2317,7 @@ fn client_supplied_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configuration-status", "16001"])
         .contains("action=completed"));
-    assert!(leader_write(
+    assert!(leader_request(
         &mut cluster,
         &[
             "configure-record",
@@ -2534,15 +2554,16 @@ fn interrupted_native_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configuration-status", "17015"])
         .contains("inconclusive_local_absence"));
-    assert!(cluster
-        .ok(
-            leader,
-            &["configure-record", "joint 17012 3 4 5 - m:3 v:1 v:2 v:3"]
-        )
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure-record", "final 17012 4 5"])
-        .contains("committed_index="));
+    assert!(leader_request(
+        &mut cluster,
+        &["configure-record", "joint 17012 3 4 5 - m:3 v:1 v:2 v:3"]
+    )
+    .contains("committed_index="));
+    assert!(
+        leader_request(&mut cluster, &["configure-record", "final 17012 4 5"])
+            .contains("committed_index=")
+    );
+    let leader = cluster.leader();
     let record = "learners 17013 5 6 - m:3 v:1 v:2 v:3";
     let lost = UnobservedCommand::send(&cluster, leader, &format!("configure-record {record}"));
     wait_administration_event(
@@ -2559,9 +2580,7 @@ fn interrupted_native_configuration_history(quic: bool) {
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);
     assert!(authenticated_write(&cluster, &["add", "17014", "0"]).contains("Value(42)"));
-    assert!(cluster
-        .ok(replacement, &["configure-record", record])
-        .contains("duplicate=true"));
+    assert!(leader_request(&mut cluster, &["configure-record", record]).contains("duplicate=true"));
     check_interrupted_record_conflict(&cluster, replacement);
     cluster.start(leader, "recover-member");
     assert!(authenticated_write(&cluster, &["add", "17000", "42"]).contains("duplicate=true"));

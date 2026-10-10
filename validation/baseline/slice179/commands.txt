@@ -1,0 +1,25 @@
+Base: a4463116fbdf0f3c83e33aad08dee59395c6bdc0 plus source-sha256.txt.
+
+Before fix:
+cargo +stable test --locked --offline --all-features --test counter_service automatic_read_retries_only_exact_quorum_transition_replies -- --exact --nocapture
+  Fails on ERR Unavailable(LeadershipChanged), as in Ubuntu177.
+
+After fix:
+cargo +stable test --locked --offline --all-features --test counter_service automatic_ -- --nocapture
+  Seven selected tests pass (includes four maintenance tests matching the filter).
+cargo +stable test --locked --offline --all-features --test counter_service
+  All54 pass,42.83s; includes final malformed/partial reply cases and all affected histories.
+cargo +stable test --locked --offline --no-default-features --test effect_owner read_invocations
+  Ten pass; existing bounded invocation/cancellation/stale authority contracts.
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+  95 entries.
+
+The earlier Ubuntu failure log is retained at ../slice178/ci-ubuntu.log.
+Current a446311 platform jobs remain in progress in ci-status.json.
+Original baseline175: session42300, cargo1526695/routed1580417 confirmed live.
+baseline175-progress.log is only a snapshot of its original compiled run.
+No test restart, timeout increase, disabled assertion or weakened lint.

@@ -31,7 +31,7 @@ fn setup(quic: bool) -> Cluster {
         cluster.start(id, "create");
     }
     cluster.leader();
-    assert!(leader_write(&mut cluster, &["add", "700", "42"]).contains("Value(42)"));
+    assert!(leader_request(&mut cluster, &["add", "700", "42"]).contains("Value(42)"));
     cluster.stop();
     let plan = cluster.root.join("new-voter.plan");
     let original =
@@ -141,7 +141,7 @@ fn interrupted_preparation(cluster: &mut Cluster) {
         cluster.start(id, "recover-member");
     }
     cluster.leader();
-    assert!(leader_write(cluster, &["add", "19000", "0"]).contains("Value(42)"));
+    assert!(leader_request(cluster, &["add", "19000", "0"]).contains("Value(42)"));
     let leader = cluster.leader();
     let unread = UnobservedCommand::send(cluster, leader, &format!("configure-record {JOINT}"));
     wait_administration_event(
@@ -165,15 +165,15 @@ fn interrupted_preparation(cluster: &mut Cluster) {
     cluster.leader();
     phase(cluster, &[1, 2], "inconclusive_local_absence");
     cluster.start(4, "recover-member");
-    assert!(leader_write(cluster, &["add", "19000", "0"]).contains("duplicate=true"));
+    assert!(leader_request(cluster, &["add", "19000", "0"]).contains("duplicate=true"));
     catch_up(cluster);
     phase(cluster, MEMBERS, "inconclusive_local_absence");
 }
 
 fn interrupted_joint(cluster: &mut Cluster, checkpoint: bool) {
-    assert!(leader_write(cluster, &["configure-record", JOINT]).contains("committed_index="));
+    assert!(leader_request(cluster, &["configure-record", JOINT]).contains("committed_index="));
     phase(cluster, MEMBERS, "action=finalize_requires_authorization");
-    assert!(leader_write(cluster, &["configure-record", JOINT]).contains("duplicate=true"));
+    assert!(leader_request(cluster, &["configure-record", JOINT]).contains("duplicate=true"));
     stop_member(cluster, 4, checkpoint);
     let saved = enrolled_state_for(&cluster.root.join("4"), 4, lifecycle_store(4));
     let membership = saved.membership_at(saved.commit_index).unwrap();
@@ -204,7 +204,7 @@ fn interrupted_joint(cluster: &mut Cluster, checkpoint: bool) {
     cluster.start(4, "recover-member");
     finish_lifecycle_operation(cluster, MEMBERS, OPERATION, "19002");
     unread.disconnect();
-    assert!(leader_write(cluster, &["configure-record", FINAL]).contains("duplicate=true"));
+    assert!(leader_request(cluster, &["configure-record", FINAL]).contains("duplicate=true"));
 }
 
 fn history(quic: bool, checkpoint: bool) {
@@ -213,8 +213,8 @@ fn history(quic: bool, checkpoint: bool) {
     interrupted_preparation(&mut cluster);
     eprintln!("new-voter quic={quic} checkpoint={checkpoint} joint");
     interrupted_joint(&mut cluster, checkpoint);
-    assert!(leader_write(&mut cluster, &["add", "19003", "1"]).contains("Value(43)"));
-    assert_eq!(leader_write(&mut cluster, &["read"]), "OK value=43\n");
+    assert!(leader_request(&mut cluster, &["add", "19003", "1"]).contains("Value(43)"));
+    assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=43\n");
     catch_up(&mut cluster);
     cluster.stop();
     inspect_lifecycle(
@@ -230,11 +230,11 @@ fn history(quic: bool, checkpoint: bool) {
         cluster.start(id, "recover-member");
     }
     assert!(matches!(cluster.leader(), 2 | 4));
-    assert!(leader_write(&mut cluster, &["configure-record", FINAL]).contains("duplicate=true"));
-    let original = leader_write(&mut cluster, &["add", "700", "42"]);
+    assert!(leader_request(&mut cluster, &["configure-record", FINAL]).contains("duplicate=true"));
+    let original = leader_request(&mut cluster, &["add", "700", "42"]);
     assert!(original.contains("duplicate=true") && original.contains("Value(42)"));
-    assert!(leader_write(&mut cluster, &["add", "19003", "1"]).contains("duplicate=true"));
-    assert_eq!(leader_write(&mut cluster, &["read"]), "OK value=43\n");
+    assert!(leader_request(&mut cluster, &["add", "19003", "1"]).contains("duplicate=true"));
+    assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=43\n");
     cluster.stop();
     inspect_lifecycle(
         &cluster,

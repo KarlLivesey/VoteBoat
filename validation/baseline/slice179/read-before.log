@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 1 test
+
+thread 'automatic_read_retries_only_exact_quorum_transition_replies' (1901795) panicked at tests/counter_service.rs:285:9:
+["read"]: ERR Unavailable(LeadershipChanged)
+ Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test automatic_read_retries_only_exact_quorum_transition_replies ... FAILED
+
+failures:
+
+failures:
+    automatic_read_retries_only_exact_quorum_transition_replies
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 53 filtered out; finished in 0.02s
+
+error: test failed, to rerun pass `--test counter_service`

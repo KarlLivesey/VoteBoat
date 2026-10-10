@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 7 tests
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test automatic_read_retries_only_exact_quorum_transition_replies ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 47 filtered out; finished in 1.85s
+
