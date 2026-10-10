@@ -255,6 +255,8 @@ checkpoint export. Seven downstream tests include native journal byte-cut recove
 source mutation/authoritative reads stop after F and exact retries/export persist.
 Slice156b1 adds bounded non-serving target staging/import with original-domain
 history and independent local phase indices. Five target cases cover provenance,
-checkpoint/retry and native journal interruptions. Publication/activation156b2,
-live-owner/locator refresh and native composition156c are still required before
-claiming metadata-authority movement.
+checkpoint/retry and native journal interruptions. Publication/activation156b2
+adds a writable destination with original history and bounded new-command replay,
+plus selected native journal fault evidence. Live owner/locator refresh, repeated
+movement and native TCP/QUIC composition156c are still required before claiming
+complete metadata-authority movement.

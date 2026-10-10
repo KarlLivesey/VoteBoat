@@ -2001,6 +2001,56 @@
         "tests/metadata_transfer/target.rs"
       ],
       "scope": "Slice156b1 binds a pristine source profile, canonical complete plan, transfer operation and source configuration before staging. Bounded import verifies the original checkpoint and rejection ledger without relabelling source authority or indices. Target-local stage/import indices remain separate from source F and historical command outcomes. Exact retries preserve original results; changed imports, malformed/truncated checkpoints, wrong bindings and rehashed invalid provenance refuse atomically. Pending admission uses the same transition path. Native ModelIo every-byte/sync/publication interruptions recover staged or complete imported history. Historical inspection is not active directory service. This profile has no activation or mutation service. Source publication, writable destination base, live-owner/locator refresh, native socket composition and broader platform/fault evidence remain open."
+    },
+    {
+      "design_id": "C05/C15/C23",
+      "public_contract": "MetadataPublishingSource / MetadataPublicationStatus",
+      "operations": [
+        "new",
+        "bootstrap_command",
+        "source",
+        "profile",
+        "publication_command",
+        "publication",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "readiness_requirements"
+      ],
+      "native": "Explicit source publication profile over the existing source guard, journal, checkpoint and runtime contracts.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/activation.rs"
+      ],
+      "scope": "Slice156b2 selects a publishing source before bootstrap. A bounded committed publication binds the exact frozen source status, imported destination status, source profile, configuration observations and original source publication index. The source remains fenced, preserves the original export and replays exact publication outcomes. Checkpoint reconstruction validates the source image and publication binding. Admission simulates pending operations; invalid batches restore atomically. Original foreign quorum observations require host authentication. Downstream tests include complete activation, mismatched/truncated evidence and every-byte native journal publication faults with old-or-complete recovery. This source profile does not implement repeated metadata moves or owner/locator refresh."
+    },
+    {
+      "design_id": "C05/C15/C23",
+      "public_contract": "MetadataServingTarget / MetadataActivationStatus / MetadataCreationRead",
+      "operations": [
+        "new",
+        "bootstrap_command",
+        "import_command",
+        "activation_command",
+        "status",
+        "historical_directory",
+        "imported_image",
+        "decode",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "readiness_requirements"
+      ],
+      "native": "Explicit destination activation profile over the existing target import, directory, application and native/host persistence contracts.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/activation.rs"
+      ],
+      "scope": "Slice156b2 binds the publishing source profile and both configurations before target staging. Only a matching committed source publication permits activation. The original source image/history remains immutable. A private writable Directory base preserves inherited allocation reservations and operation outcomes while applying checked authority/reference/generation changes; a bounded local command tail is replayed separately during checkpoint recovery. Historical results explicitly name source authority/index; creation observations carry bounded canonical intent bytes. New writes and actual namespace readiness/publication after activation, inherited identity refusal, exact retries, malformed checkpoints, pending order, atomic batches and native every-byte activation/later-write journal faults are tested. No live-owner/locator adoption, second metadata export, TCP/QUIC composition, arbitrary failure or platform completion is claimed."
     }
   ],
   "not_yet_implemented": [

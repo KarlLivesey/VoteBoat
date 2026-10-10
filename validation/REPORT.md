@@ -4677,3 +4677,29 @@ or hardware power loss. No destination activation is claimed.
 All-target/all-feature Clippy with `-D warnings` passes. Publication, a writable
 destination base, owner/locator refresh and end-to-end native composition remain.
 Formatting, whitespace and the83-contract inventory/path check also pass.
+
+## Slice156b2 — published metadata activation
+
+The all-feature `metadata_transfer` target passes17 tests; core-only passes14.
+Five added tests cover source publication and target activation with distinct
+original/local indices, pre-activation refusal, source fencing, original history
+and failure IDs, exact retries and a later metadata write. An inherited creation
+remains reserved across the move; new namespace creation performs actual target
+initialization/readiness and metadata publication, followed by checkpoint/retry.
+
+Wrong configurations/profiles, changed publications, truncated commands and
+checkpoints, inherited-ID replay collisions and partial application batches
+refuse. The namespace fixture initially used a mismatched initialization ID;
+correcting it to the original creation ID respected the existing contract.
+
+The new native ModelIo test cuts every append byte plus sync/publication
+boundaries separately for source publication, destination activation and a later
+destination metadata write. Old and complete outcomes both occur; exact retry
+resumes, source images stay immutable and activation survives checkpoint recovery.
+This is actual native codec/store execution with modelled I/O, not a native socket
+deployment or hardware power-loss experiment.
+
+All-target/all-feature Clippy with warnings denied passes. Full live-owner and
+locator adoption, repeated metadata moves, TCP/QUIC composition, macOS and wider
+fault coverage remain; these tests do not complete P5/P6 or the overall goal.
+Formatting, whitespace and the85-contract inventory/path check pass.

@@ -492,3 +492,6 @@ fn rejected_control_ids_survive_recovery_and_do_not_exhaust_the_success_reserve(
 
 #[path = "metadata_transfer/target.rs"]
 mod target;
+
+#[path = "metadata_transfer/activation.rs"]
+mod activation;

@@ -342,7 +342,7 @@ impl MetadataAuthorityTarget {
         }))
     }
 }
-fn put_status(bytes: &mut Vec<u8>, s: MetadataSourceStatus) {
+pub(super) fn put_status(bytes: &mut Vec<u8>, s: MetadataSourceStatus) {
     put_group(bytes, s.source);
     put_group(bytes, s.target);
     bytes.extend(s.operation.get().to_le_bytes());
@@ -353,7 +353,7 @@ fn put_status(bytes: &mut Vec<u8>, s: MetadataSourceStatus) {
     bytes.extend(s.rejected_digest.0);
     bytes.extend((s.image_bytes as u64).to_le_bytes());
 }
-fn read_status(r: &mut Reader<'_>) -> Result<MetadataSourceStatus, ApplicationError> {
+pub(super) fn read_status(r: &mut Reader<'_>) -> Result<MetadataSourceStatus, ApplicationError> {
     Ok(MetadataSourceStatus {
         source: r.group()?,
         target: r.group()?,

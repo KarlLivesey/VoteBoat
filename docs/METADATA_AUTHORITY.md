@@ -1,8 +1,8 @@
 # Moving metadata authority
 
-Source fencing and non-serving target import are implemented. Publication,
-activation and live-owner refresh remain; an imported image alone does not
-authorize a new metadata group.
+Source fencing, import, publication and destination activation are implemented
+for Rust embedding. Live-owner/locator refresh, repeated moves and native socket
+composition remain; an imported image alone does not authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction
@@ -62,8 +62,24 @@ The target validates image/plan/rejection digests, bootstrap, complete manifests
 and original indices; no directory command may occupy the source fence or a
 rejected-control index. Changed imports and wrong construction bindings refuse.
 
-This target profile accepts no activation or directory service. The next slice
-must add checked source publication and a writable destination base without
-rewriting historical provenance. Selected tests cover truncated/corrupt imports,
-atomic recovery and every native import-frame byte cut; socket composition and
-live-owner/locator refresh remain later work.
+This basic target profile accepts no activation or directory service. Select
+`MetadataPublishingSource` and `MetadataServingTarget` before bootstrap for the
+complete publication/activation path. After import, propose the source wrapper's
+`publication_command` with the verified import and destination configuration.
+Obtain its committed publication, then propose the destination wrapper's
+`activation_command`. Both commands retain exact original results on retry.
+
+Activation creates a private writable base with updated authority, local
+references and generations. It preserves allocation reservations and original
+operation outcomes. Checkpoints keep the original image and a bounded tail of
+new destination commands; recovery reconstructs both domains. `Directory` queries
+serve current manifests after activation. Inherited operation queries/receipts
+are explicitly marked historical with the source identity; `Creation` queries
+likewise name the original authority and return bounded encoded intents.
+
+The source remains fenced after publication. New metadata writes and namespace
+creation after activation are covered, as are original retries, checkpoint
+truncation and native journal interruption of publication, activation and a later
+write. These are selected embedding/modelled-journal tests; data-owner grants,
+parent/child locators, a second metadata move and TCP/QUIC service composition
+remain work for the next slice.

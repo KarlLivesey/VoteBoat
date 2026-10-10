@@ -570,6 +570,51 @@ impl Directory {
     pub(crate) fn contains_command_at(&self, index: u64) -> bool {
         self.history.values().any(|history| history.index == index)
     }
+    // Only the metadata wrapper may persist this derived base. The original
+    // plan/history remain allocation and retry records in their source domain.
+    pub(crate) fn metadata_base(
+        &self,
+        plan: &crate::metadata_transfer::MetadataMovePlan,
+        index: u64,
+    ) -> Result<Self, ApplicationError> {
+        if self.plan.authority != plan.source()
+            || self.authority_move_view()?.as_slice() != plan.manifests()
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let mut next = self.clone();
+        next.plan.authority = plan.target();
+        next.manifests = plan
+            .updated_manifests()
+            .into_iter()
+            .map(|m| (m.input().responsibility, m))
+            .collect();
+        next.applied = index;
+        Ok(next)
+    }
+    pub(crate) fn metadata_advance(&mut self, index: u64) -> Result<(), ApplicationError> {
+        if index < self.applied {
+            return Err(ApplicationError::IndexGap);
+        }
+        self.applied = index;
+        Ok(())
+    }
+    pub(crate) fn historical_outcome(
+        &self,
+        operation: OperationId,
+        bytes: &[u8],
+    ) -> Option<(u64, DirectoryOutcome)> {
+        self.history.get(&operation).map(|h| {
+            (
+                h.index,
+                if h.bytes == bytes {
+                    h.outcome
+                } else {
+                    DirectoryOutcome::OperationConflict
+                },
+            )
+        })
+    }
     pub(crate) fn has_bootstrap(&self) -> bool {
         self.initialized
     }
