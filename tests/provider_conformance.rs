@@ -7,6 +7,12 @@ mod snapshot_cases;
 #[cfg(feature = "native")]
 #[path = "provider_conformance/snapshot_native.rs"]
 mod snapshot_native;
+#[cfg(feature = "native")]
+#[path = "provider_conformance/snapshot_worker.rs"]
+mod snapshot_worker_cases;
+#[cfg(feature = "native")]
+#[path = "provider_conformance/snapshot_worker_native.rs"]
+mod snapshot_worker_native;
 mod support;
 use support::*;
 use voteboat::log::LogStore;

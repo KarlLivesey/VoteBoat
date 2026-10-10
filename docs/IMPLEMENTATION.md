@@ -93,7 +93,7 @@ exercise snapshot publication and retention through the same host/native cases.
 It depends on the existing SnapshotStore/Retention contracts and201a ledger;
 completion requires exact-token refusal without losing admitted work, bounded
 chunks, two retained roots, explicit reconciliation and actual-file reopen.
-Next201c reviews snapshot worker cancellation/completion ownership using those
+Completed201c reviews snapshot worker cancellation/completion ownership using those
 same durable roots; it depends on201b and completes when stale/canceled work
 cannot publish another owner's result. Following202 couples membership changes
 to older checkpoints and interrupted retention switches, using the existing
@@ -155,9 +155,75 @@ strict profiles clean while advancing the remaining capability work.
 | Completed205: bounded source observation recovery | Repeat only original-ID status/assignment reads after unavailable or interrupted exchange; advances usable maintenance/P2/P4. |204 attempt budgets, authenticated command exchange and existing source response validation. | Seven new tests exercise withheld replies, unchanged offsets, stalled authentication, request/deadline exhaustion and terminal rejection; the nine native single-/multi-group histories pass. Source mutations retain explicit unknown outcomes. |
 | Completed204: bounded configuration reply recovery | Keep an uncertain configuration attempt inside the original single-/multi-group drain budget; advances usable maintenance/P4. | Original immutable drain plans, journal observation, idempotent configuration commands and shared authenticated exchange. | An authenticated withheld-reply regression fails before and passes after; exhausted requests cannot reach shutdown; rejection/identity checks, actual TCP/QUIC replacement and single-/multi-group recovery histories pass. Broader platform acceptance199 remains open. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
-| Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
+| Current201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. |201a–c review30 operations across log, snapshot, retention and worker contracts, with shared cases and core-only owner checks.101 contracts remain unreviewed by this ledger; extend it without claiming metadata validation certifies implementations. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice201c schema plan — snapshot worker ownership and close
+
+The prior201b turn made progress:54a73ad adds shared exact-token and retained-root
+checks. Current source inspection confirms SnapshotWorker has close/drain, not
+per-request cancellation. Discarding an observation cannot roll back accepted
+publication. This slice uses the existing public worker envelope and stores;
+no new production API or provider is needed. Shared cases will run on the native
+worker with host and file stores, while core-only owner tests cover forged
+completion envelopes through the existing deterministic host worker.
+
+Data shape is the original SnapshotWorkTicket plus VisitTicket, bounded image
+and optional authoritative durable reference. Accepted work remains charged
+until terminal poll; close rejects further submissions and completes accepted
+jobs. All returned work on rejection must preserve the original image buffer.
+Owner/router rejection of each altered worker/visit identity field must retain
+the true pending lease, leave the application unchanged and keep the owner live.
+An accepted publication can outlive its discarded owner observation; recovered
+file stores must retain its valid pin. Follow-up readiness/load/reconcile jobs
+must report the original reference and exact image under a fresh worker binding.
+
+Acceptance: shared host/file worker cases, core-only forged-envelope cases,
+existing worker/owner failure and receipt-loss suites, ledger/inventory checks,
+formatting and four strict Clippy profiles. New worker coverage advances P0/C03
+and Rust embedding; next202 tests combined older-checkpoint/membership recovery.
+Following platform199 targets concrete remaining native service failures using
+actual Linux/macOS results. None of these tests substitute for that acceptance.
+
+### Slice201c implemented — worker lifetime and exact completion envelopes
+
+Two new shared-case runners exercise NativeSnapshotWorker with host and native
+file stores through SnapshotWorker. They check stable assigned-group capacities,
+wrong-scope and overloaded rejection returning the original image allocation,
+strictly increasing admission tickets, zero-poll retention, per-completion credit
+release, idempotent close and draining accepted publications after observation
+is abandoned. Reclaimed stores are used under a fresh worker generation; file
+stores first close/reopen. Readiness, send/install loads and reconciliation return
+the same pinned data and original references. Close is not mutation rollback.
+
+A new core-only router test changes each of13 fields across work and visit
+envelopes. Every obsolete failure is rejected before the current owner is fenced
+or its real lease/image reservation is consumed. The original completion still
+produces the required WAL persistence effect; it does not apply the snapshot or
+send a successful installation acknowledgement prematurely.
+
+Validation:195 all-feature checks (171 owner,10 provider,14 snapshot worker),173
+core-only checks (165 owner,3 provider,5 snapshot worker),24 native-only checks
+(10 provider,14 snapshot worker),13 ledger checks, inventory, formatting and all
+four strict Clippy profiles pass. An initial missing test-module import was fixed;
+a restricted-sandbox full-owner run passed165 cases but could not bind sockets in
+six native cases. The full run with socket permission passed all171. Both original
+outputs are retained, separate from final successful evidence.
+The shared drain case accepts either inter-group completion order. Its final
+refinement triggered Clippy26/25; separating admission and drain checks restored
+zero diagnostics. Both all-feature and native-only provider suites were rerun
+after that refinement; the prior owner/worker evidence remains unchanged.
+
+The ledger now reviews30 operations across4 contracts, leaving101 unreviewed;
+this is not provider certification. No production code, API or format changed.
+Next202 remains combined membership/checkpoint recovery; platform199 is open.
+Completed older platform run38035161148 at6f26bc1 is retained in this slice:
+Ubuntu121/122 counter histories passed; cancel-leadership returned an explicit
+unknown leadership-change result. macOS114/122 passed, with eight QUIC failures
+covering authentication/reply deadlines, readiness, membership and leadership.
+Neither run reaches a successful full suite. Later pending/live runs were only
+observed by exact identity, not declared successful or restarted.
 
 ### Slice201b schema plan — shared snapshot-provider obligations
 

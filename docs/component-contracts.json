@@ -549,6 +549,9 @@
       ],
       "native": "NativeSnapshotWorker<S: SnapshotRetention + Send>",
       "conformance": [
+        "tests/provider_conformance/snapshot_worker.rs",
+        "tests/provider_conformance/snapshot_worker_native.rs",
+        "tests/snapshot_routes/envelopes.rs",
         "tests/snapshot_worker.rs",
         "tests/support/snapshot.rs",
         "tests/effect_owner.rs",

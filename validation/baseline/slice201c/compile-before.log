@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0433]: cannot find module or crate `support` in this scope
+  --> tests/provider_conformance/snapshot_worker_native.rs:55:29
+   |
+55 |             let mut store = support::snapshot::HostSnapshots::new();
+   |                             ^^^^^^^ use of unresolved module or unlinked crate `support`
+   |
+   = help: if you wanted to use a crate named `support`, use `cargo add support` to add it to your `Cargo.toml`
+help: consider importing this struct
+   |
+ 3 + use crate::snapshot::HostSnapshots;
+   |
+help: if you import `HostSnapshots`, refer to it directly
+   |
+55 -             let mut store = support::snapshot::HostSnapshots::new();
+55 +             let mut store = HostSnapshots::new();
+   |
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `voteboat` (test "provider_conformance") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

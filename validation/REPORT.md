@@ -1,6 +1,13 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Worker conformance evidence: [slice201c](baseline/slice201c/README.md), with195
+all-feature,173 core-only and24 native-only checks. Shared host/file worker cases
+verify close/drain, original rejected-buffer ownership and recovered queries;
+all13 altered work/visit envelope fields preserve the real live owner lease.
+The ledger now reviews4 contracts/30 operations, leaving101 unreviewed. Prior
+platform38035161148 logs retain one Ubuntu and eight macOS counter failures at
+6f26bc1; current platform acceptance remains open.
 Snapshot provider evidence: [slice201b](baseline/slice201b/README.md), with30
 all-feature provider/snapshot checks,13 core-only checks,8 native-only checks,
 13 ledger checks and clean formatting/four strict Clippy profiles. Shared cases

@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice201c adds shared worker close/drain/query cases with host/native-file stores
+and a core-only router test for all13 altered work/visit identity fields. Current
+selected checks pass195 all-feature,173 core-only and24 native-only tests, plus
+13 ledger checks and all strict lint profiles. Four contracts/30 operations now
+have reviewed obligations;101 remain unreviewed by this ledger. Closing a worker
+drains accepted publication; dropping observation does not roll it back. Older
+6f26bc1 platform failures are captured separately and do not establish current
+platform acceptance. The native file checks establish process reopen behavior,
+not hardware power-loss coverage.
+
 Slice201b adds shared SnapshotStore/Retention assertions for host and native-file
 providers: all six ticket fields, all eleven reference fields, sealed length and
 checksum, ordered/bounded writes, abort before/after seal, two retained anchors,

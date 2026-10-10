@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-9633f5cd8d4d32f4)
+
+running 10 tests
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test snapshot_native::file_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test snapshot_native::file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions ... ok
+test snapshot_native::file_snapshots_preserve_same_contract_and_both_anchors_after_reopen ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_use_host_snapshot_contracts ... ok
+test native::model_log_store_satisfies_same_obligations_and_recovers_original_history ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_survive_native_file_reopen ... ok
+test native::file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

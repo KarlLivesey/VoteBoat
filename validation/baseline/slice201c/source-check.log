@@ -1,0 +1,14 @@
+tests/provider_conformance.rs: OK
+tests/provider_conformance/snapshot_worker.rs: OK
+tests/provider_conformance/snapshot_worker_native.rs: OK
+tests/snapshot_routes/envelopes.rs: OK
+tests/effect_owner.rs: OK
+tests/snapshot_worker.rs: OK
+tests/support/snapshot.rs: OK
+src/snapshot_worker.rs: OK
+src/native/snapshot_worker.rs: OK
+src/runtime/snapshots.rs: OK
+docs/provider-conformance.json: OK
+docs/component-contracts.json: OK
+validation/check-provider-conformance.mjs: OK
+validation/check-provider-conformance.test.mjs: OK

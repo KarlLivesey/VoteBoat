@@ -1,0 +1,704 @@
+Rust on macos-latest	Set up job	﻿2026-10-10T07:41:33.4501560Z Current runner version: '2.337.0'
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4522030Z ##[group]Runner Image Provisioner
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4522620Z Hosted Compute Agent
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4523000Z Version: 20260828.587
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4523460Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4524390Z Build Date: 2026-08-28T16:44:25Z
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4524900Z Worker ID: {21dba49a-1316-4b58-9b6b-b98adf6f8d5b}
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4525410Z Azure Region: westus
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4525790Z ##[endgroup]
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4526820Z ##[group]Operating System
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4527270Z macOS
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4527590Z 26.6.2
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4527910Z 25G83
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4528260Z ##[endgroup]
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4528610Z ##[group]Runner Image
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4528980Z Image: macos-26-arm64
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4530330Z Version: 20260907.0351.1
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4531130Z Included Software: https://github.com/actions/runner-images/blob/macos-26-arm64/20260907.0351/images/macos/macos-26-arm64-Readme.md
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4532470Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-26-arm64%2F20260907.0351
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4533220Z ##[endgroup]
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4534080Z ##[group]GITHUB_TOKEN Permissions
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4535730Z Contents: read
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4536090Z Metadata: read
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4536510Z ##[endgroup]
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4538340Z Secret source: Actions
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4538920Z Cache mode: write
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4539480Z Prepare workflow directory
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4823960Z Prepare all required actions
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.4864040Z Getting action download info
+Rust on macos-latest	Set up job	2026-10-10T07:41:33.7633960Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Rust on macos-latest	Set up job	2026-10-10T07:41:34.1661450Z Complete job name: Rust on macos-latest
+Rust on macos-latest	Run actions/checkout@v4	﻿2026-10-10T07:41:34.2319250Z ##[group]Run actions/checkout@v4
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2319880Z with:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2320230Z   repository: KarlLivesey/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2323220Z   token: ***
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2323590Z   ssh-strict: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2323920Z   ssh-user: git
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2324250Z   persist-credentials: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2324610Z   clean: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2324950Z   sparse-checkout-cone-mode: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2325340Z   fetch-depth: 1
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2325670Z   fetch-tags: false
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2326010Z   show-progress: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2326340Z   lfs: false
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2326660Z   submodules: false
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2327000Z   set-safe-directory: true
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2327380Z   allow-unsafe-pr-checkout: false
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.2327870Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.6926440Z Syncing repository: KarlLivesey/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.6928310Z ##[group]Getting Git version info
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.6930660Z Working directory is '/Users/runner/work/VoteBoat/VoteBoat'
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.6931980Z [command]/opt/homebrew/bin/git version
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7489690Z git version 2.55.0
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7513420Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7547730Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/7465a806-e58c-48c5-8dd8-619988e9b85e/.gitconfig'
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7550190Z Temporarily overriding HOME='/Users/runner/work/_temp/7465a806-e58c-48c5-8dd8-619988e9b85e' before making global git config changes
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7552030Z Adding repository directory to the temporary git global config as a safe directory
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7553730Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/VoteBoat/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7677170Z Deleting the contents of '/Users/runner/work/VoteBoat/VoteBoat'
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7684610Z ##[group]Initializing the repository
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.7691960Z [command]/opt/homebrew/bin/git init /Users/runner/work/VoteBoat/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8014910Z hint: Using 'master' as the name for the initial branch. This default branch name
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8016240Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8017920Z hint: to use in all of your new repositories, which will suppress this warning,
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8020790Z hint: call:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8022010Z hint:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8027940Z hint: 	git config --global init.defaultBranch <name>
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8036040Z hint:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8037300Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8038940Z hint: 'development'. The just-created branch can be renamed via this command:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8039990Z hint:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8041850Z hint: 	git branch -m <name>
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8042450Z hint:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8043210Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8044460Z Initialized empty Git repository in /Users/runner/work/VoteBoat/VoteBoat/.git/
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8046630Z [command]/opt/homebrew/bin/git remote add origin https://github.com/KarlLivesey/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8137240Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8142010Z ##[group]Disabling automatic garbage collection
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8143090Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8233730Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8236800Z ##[group]Setting up auth
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8237710Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.8339050Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.9825630Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:34.9901890Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.1234950Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.1541210Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.3182740Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.3311300Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.3463950Z ##[group]Fetching the repository
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:35.3509610Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +6f26bc1620ebc1f8a52ba21984c60bde6ba7fccc:refs/remotes/origin/main
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3107350Z From https://github.com/KarlLivesey/VoteBoat
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3110110Z  * [new ref]         6f26bc1620ebc1f8a52ba21984c60bde6ba7fccc -> origin/main
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3114560Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3115710Z ##[group]Determining the checkout info
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3118520Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3127920Z [command]/opt/homebrew/bin/git sparse-checkout disable
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3256420Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3400960Z ##[group]Checking out the ref
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.3402930Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.6262140Z Switched to a new branch 'main'
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.6277810Z branch 'main' set up to track 'origin/main'.
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.6293870Z ##[endgroup]
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.6445500Z [command]/opt/homebrew/bin/git log -1 --format=%H
+Rust on macos-latest	Run actions/checkout@v4	2026-10-10T07:41:36.6533840Z 6f26bc1620ebc1f8a52ba21984c60bde6ba7fccc
+Rust on macos-latest	Install pinned Rust toolchain	﻿2026-10-10T07:41:36.6829390Z ##[group]Run rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:36.6831990Z ^[[36;1mrustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy^[[0m
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:36.6892000Z shell: /bin/bash -e {0}
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:36.6893180Z ##[endgroup]
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:36.8513050Z info: syncing channel updates for 1.98.1-aarch64-apple-darwin
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:37.0987890Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:37.1001410Z info: downloading 5 components
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:45.3586440Z 
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:45.4346070Z info: self-update is disabled for this build of rustup
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:45.4347790Z   1.98.1-aarch64-apple-darwin installed - rustc 1.98.1 (48a229cea 2026-09-01)
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:45.4378230Z info: any updates to rustup will need to be fetched with your system package manager
+Rust on macos-latest	Install pinned Rust toolchain	2026-10-10T07:41:45.4378940Z 
+Rust on macos-latest	Run cargo fetch --locked	﻿2026-10-10T07:41:45.4807710Z ##[group]Run cargo fetch --locked
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:45.4808310Z ^[[36;1mcargo fetch --locked^[[0m
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:45.4937130Z shell: /bin/bash -e {0}
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:45.4938500Z ##[endgroup]
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:45.7618430Z     Updating crates.io index
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.1476480Z  Downloading crates ...
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2180480Z   Downloaded zeroize v1.9.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2360760Z   Downloaded untrusted v0.9.0
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2448550Z   Downloaded subtle v2.6.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2485430Z   Downloaded wasm-bindgen-shared v0.2.129
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2653330Z   Downloaded wasm-bindgen-macro v0.2.129
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2714440Z   Downloaded futures-core v0.3.34
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.2891590Z   Downloaded windows-targets v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3051640Z   Downloaded cfg-if v1.0.5
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3195490Z   Downloaded futures-task v0.3.34
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3374560Z   Downloaded rustc-hash v2.1.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3488060Z   Downloaded rand_core v0.10.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3593430Z   Downloaded cpufeatures v0.3.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3702060Z   Downloaded lru-slab v0.1.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3819290Z   Downloaded web-time v1.1.0
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.3959860Z   Downloaded unicode-ident v1.0.26
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4104770Z   Downloaded rustversion v1.0.23
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4207430Z   Downloaded slab v0.4.12
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4312000Z   Downloaded pin-project-lite v0.2.17
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4373620Z   Downloaded shlex v2.0.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4375620Z   Downloaded find-msvc-tools v0.1.14
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4386180Z   Downloaded thiserror v2.0.21
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4590860Z   Downloaded thiserror-impl v2.0.21
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4643530Z   Downloaded rand_pcg v0.10.2
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4677410Z   Downloaded chacha20 v0.10.2
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4814730Z   Downloaded rustls-pki-types v1.15.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4909500Z   Downloaded quote v1.0.47
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.4980710Z   Downloaded proc-macro2 v1.0.107
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5046470Z   Downloaded once_cell v1.21.4
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5121350Z   Downloaded getrandom v0.2.17
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5203430Z   Downloaded wasi v0.11.1+wasi-snapshot-preview1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5262530Z   Downloaded tracing-core v0.1.36
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5322250Z   Downloaded tinyvec v1.13.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5415730Z   Downloaded getrandom v0.4.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5556700Z   Downloaded r-efi v6.0.0
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5699640Z   Downloaded bytes v1.12.1
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5777960Z   Downloaded rustls-webpki v0.103.15
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5840180Z   Downloaded wasm-bindgen v0.2.129
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.5961870Z   Downloaded bumpalo v3.20.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6028430Z   Downloaded cc v1.6.0
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6117010Z   Downloaded rand v0.10.3
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6201270Z   Downloaded wasm-bindgen-macro-support v0.2.129
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6249560Z   Downloaded js-sys v0.3.106
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6332640Z   Downloaded futures-util v0.3.34
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.6822180Z   Downloaded quinn-proto v0.11.19
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.7026290Z   Downloaded rustls v0.23.45
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.7300660Z   Downloaded syn v3.0.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.7544580Z   Downloaded windows_x86_64_gnullvm v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.7806880Z   Downloaded windows_aarch64_gnullvm v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.7919760Z   Downloaded tracing v0.1.44
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.8429150Z   Downloaded windows_i686_gnullvm v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.8549330Z   Downloaded windows_x86_64_msvc v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.8736990Z   Downloaded windows_aarch64_msvc v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.8934310Z   Downloaded windows_x86_64_gnu v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.9233810Z   Downloaded windows_i686_msvc v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:46.9402980Z   Downloaded libc v0.2.190
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:47.1087100Z   Downloaded windows_i686_gnu v0.52.6
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:47.1448040Z   Downloaded ring v0.17.14
+Rust on macos-latest	Run cargo fetch --locked	2026-10-10T07:41:47.3317890Z   Downloaded windows-sys v0.52.0
+Rust on macos-latest	Run cargo test --locked --offline --all-features	﻿2026-10-10T07:41:47.5559340Z ##[group]Run cargo test --locked --offline --all-features
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.5559810Z ^[[36;1mcargo test --locked --offline --all-features^[[0m
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.5604890Z shell: /bin/bash -e {0}
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.5605250Z ##[endgroup]
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.8867940Z    Compiling libc v0.2.190
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.8884670Z    Compiling find-msvc-tools v0.1.14
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:47.8886990Z    Compiling shlex v2.0.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:48.3151410Z    Compiling cfg-if v1.0.5
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:48.3527440Z    Compiling cc v1.6.0
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:48.3858170Z    Compiling proc-macro2 v1.0.107
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:49.9211640Z    Compiling ring v0.17.14
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:52.8537250Z    Compiling quote v1.0.47
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:53.0660650Z    Compiling unicode-ident v1.0.26
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:53.7167520Z    Compiling rand_core v0.10.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:53.7407920Z    Compiling getrandom v0.2.17
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:53.8615050Z    Compiling once_cell v1.21.4
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.0477080Z    Compiling zeroize v1.9.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.0659460Z    Compiling getrandom v0.4.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.1746840Z    Compiling untrusted v0.9.0
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.2495610Z    Compiling rustls-pki-types v1.15.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.2690380Z    Compiling syn v3.0.6
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.6232150Z    Compiling rustls v0.23.45
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:54.8009780Z    Compiling thiserror v2.0.21
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:55.2297960Z    Compiling tracing-core v0.1.36
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:55.9420060Z    Compiling chacha20 v0.10.2
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:56.1896940Z    Compiling pin-project-lite v0.2.17
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:56.2543500Z    Compiling subtle v2.6.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:56.3776490Z    Compiling tracing v0.1.44
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:56.5293650Z    Compiling thiserror-impl v2.0.21
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:56.6109670Z    Compiling rand v0.10.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:57.2905170Z    Compiling rand_pcg v0.10.2
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:57.4143330Z    Compiling slab v0.4.12
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:57.5445790Z    Compiling lru-slab v0.1.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:57.6309570Z    Compiling bytes v1.12.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:57.9100890Z    Compiling tinyvec v1.13.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:58.1735240Z    Compiling rustc-hash v2.1.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:41:59.7799850Z    Compiling rustls-webpki v0.103.15
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:42:03.1341430Z    Compiling quinn-proto v0.11.19
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:42:05.4092670Z    Compiling voteboat v0.1.0 (/Users/runner/work/VoteBoat/VoteBoat)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.8803060Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 2m 47s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9556340Z      Running unittests src/lib.rs (target/debug/deps/voteboat-5b310d631d235113)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9703900Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9708340Z running 71 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9825880Z test native::dial::tests::dropping_owner_cancels_queue_and_stops_worker_after_active_call_returns ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9987430Z test native::dial::tests::panicked_worker_reports_every_accepted_ticket_once_and_fences_admission ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:34.9990790Z test native::dial::tests::cancellation_retains_active_and_queued_slots_until_actual_worker_receipts ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.0003500Z test native::log_store::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.0010310Z test native::log_store::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.0015260Z test native::log_store::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.0647060Z test native::group_creation::tests::immutable_file_binding_recovers_each_publication_boundary_and_rejects_other_bytes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.1284060Z test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.1385110Z test native::log_store::timing::tests::publication_step_totals_saturate_independently ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.1422470Z test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.1439120Z test native::observability::events::tests::exhausted_sequence_preserves_state ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2382920Z test native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2384350Z test native::vote_store::tests::crc_castagnoli_check_vector ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2408850Z test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2416010Z test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2440350Z test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2512610Z test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2520210Z test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2538860Z test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2550670Z test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2562480Z test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2570370Z test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2579080Z test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2591160Z test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2597840Z test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2602940Z test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2621130Z test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2630520Z test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2634940Z test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2638580Z test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2670790Z test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2702830Z test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2729600Z test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2737890Z test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2748810Z test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2759730Z test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2763280Z test raft::membership_tests::leadership::real_learner_and_joint_views_refuse_transfer_without_changing_membership ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2764260Z test raft::membership_tests::leadership::uncommitted_configuration_and_in_flight_configuration_changes_cannot_overlap_transfer ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2767700Z test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2775190Z test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2782150Z test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2788900Z test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2806100Z test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2817080Z test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2819170Z test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2823550Z test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2830240Z test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2831790Z test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2837880Z test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2839670Z test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2853410Z test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2859610Z test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2868190Z test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2878040Z test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2880480Z test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2892930Z test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2900520Z test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2911370Z test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2916860Z test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2925890Z test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2945540Z test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.2952150Z test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3171690Z test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3176530Z test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3179690Z test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3185520Z test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3188920Z test runtime::maintenance::tests::deadline_exhaustion_stops_instead_of_wrapping_or_spinning ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3189690Z test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:35.3190200Z test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:36.3258980Z test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5073700Z test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5075070Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5076150Z test result: ok. 71 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.54s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5076630Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5085800Z      Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-4a7bd055a9db79a3)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5222460Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5223160Z running 20 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5283600Z test assignment_listing::tests::maximum_identity_page_and_inventory_are_bounded ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5284560Z test assignment_listing::tests::cursor_rejects_changed_identity_inventory_and_configuration ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5286860Z test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5311280Z test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5319160Z test drain_commands::validation::tests::retained_capacity_uses_recursive_policy_not_voter_count ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5358640Z test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5360700Z test drain_runner::multi::actions::tests::only_known_authority_transitions_return_to_observation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5361680Z test drain_runner::multi::actions::tests::handoff_receipts_must_match_original_bound_target_and_operation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5367010Z test drain_runner::multi::rows::tests::progress_binds_identity_active_phase_count_and_plan_digest ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5394920Z test drain_runner::multi::rows::tests::assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5395860Z test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5396930Z test drain_runner::recovery_tests::invalid_configuration_transport_is_not_hidden_by_retry ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5397560Z test drain_runner::recovery_tests::uncertain_configuration_attempts_require_observation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5398230Z test drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5398980Z test drain_runner::tests::exhausted_runner_budgets_refuse_before_connection ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5399750Z test drain_runner::tests::source_progress_rejects_wrong_duplicate_missing_and_non_membership_fields ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5400510Z test quorum_diagnostics::tests::joint_views_require_both_policies_and_keep_parent_indexes_when_paged ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:39.5401220Z test quorum_diagnostics::tests::maximum_weight_pages_fit_the_bounded_reply ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:44.7461240Z test drain_runner::recovery_tests::configuration_reply_timeout_cannot_replenish_request_budget_or_stop_source ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0255270Z test drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0257120Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0258690Z test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.50s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0260280Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0263850Z      Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-51b669cef99f5741)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0419460Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.0423420Z running 2 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:45.1630610Z test route_discovery::tests::authority_authentication_cannot_extend_the_lookup_deadline ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5680930Z test route_discovery::tests::authority_authentication_timeout_preserves_remaining_lookup_budget ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5781310Z      Running unittests src/bin/transfer_service.rs (target/debug/deps/voteboat_transfer-2d22602a75068542)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5781890Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5822740Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.53s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5846220Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5854110Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5860420Z running 3 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5862090Z test profile::tests::merge_plan_rejects_overlapping_identities_and_invalid_boundaries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5864060Z test profile::tests::merge_profile_rejects_mislabeled_missing_and_conflicting_bindings ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5885960Z test binding::tests::source_binding_is_required_immutable_and_fail_closed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5887070Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5889440Z test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5893270Z      Running tests/activation_model.rs (target/debug/deps/activation_model-c8e7cff713555f53)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.5893830Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6004900Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6007130Z running 4 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6007910Z test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6008670Z test election_receipts_need_exact_durable_promises_across_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6009320Z test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6610090Z test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6610500Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6610850Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6611190Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6612680Z      Running tests/admission.rs (target/debug/deps/admission-2d5b3c5bdb8f2b45)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6712810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6713390Z running 8 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6735930Z test downstream_owned_lease_survives_shared_view_close_and_clone_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6737480Z test native::closed_policy_refuses_bulk_but_cannot_block_control_or_close_another_queue ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6739450Z test native::abandoned_batch_holds_queue_reservation_until_owner_queue_is_dropped ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6741360Z test native::failed_queue_construction_never_reserves_or_closes_the_host_policy ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6743040Z test native::host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6744650Z test native::native_shared_budget_rolls_back_each_dimension_and_preserves_last_owner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6746320Z test native::permissive_policy_cannot_cross_node_peer_background_or_control_reserves ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6874960Z test native::concurrent_native_policy_views_never_leak_partial_reservations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6875790Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6876350Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6878890Z      Running tests/application.rs (target/debug/deps/application-935cef9c1a839ad6)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.6879350Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7012840Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7014260Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7033100Z test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7042570Z test conflicting_operation_content_never_changes_the_original_effect ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7044730Z test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7047220Z test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7048400Z test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7051400Z test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7053040Z test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7059750Z test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7062180Z test retries_return_the_original_result_without_reapplying ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7095690Z      Running tests/authorization.rs (target/debug/deps/authorization-828295009978d62f)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7098760Z test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7099550Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7099850Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7101460Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7232510Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7233230Z running 4 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7242190Z test downstream_credentials_and_policy_pass_same_checked_scope_gate_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7242960Z test native::native_plan_scope_epoch_expiry_close_and_refresh_snapshots_are_checked ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7243720Z test native::invalid_native_plan_returns_original_allocation_without_changing_other_views ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7244430Z test simulator_unready_and_changed_host_sessions_never_pass_authorization ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7244890Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7245210Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7245500Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7245990Z      Running tests/ballot_model.rs (target/debug/deps/ballot_model-93edbd5d23f3ef2b)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7344870Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:46.7345640Z running 2 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:47.1151090Z test negative_controls_find_erased_promise_early_reply_and_store_reuse_counterexamples ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:47.9978740Z test bounded_local_membership_ballot_model_checks_all_reachable_states ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0081860Z      Running tests/ballots.rs (target/debug/deps/ballots-8bcd549c14c3840c)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0082370Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0140030Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0200030Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0300730Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0411750Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0515580Z test host_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0618560Z test ballot_origin_is_checked_on_recovery_without_granting_current_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0721430Z test host_removal_and_compaction_keep_the_historical_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0763830Z test native::failed_ballot_barriers_and_image_replacement_never_erase_a_durable_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0866340Z test native::host_decoder_cannot_publish_structurally_invalid_ballot_recovery ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0899450Z test native::native_image_and_restart_preserve_removed_candidate_after_compaction ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0914720Z test native::native_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0915910Z test native::written_ballot_is_not_durable_and_every_torn_vote_frame_recovers_one_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.0916920Z test native::actual_native_file_restart_keeps_ballot_origin_after_full_image_reclaim ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.2866040Z test native::historical_ballot_image_rejects_torn_corrupt_and_invalid_origins ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.2968070Z      Running tests/buffer.rs (target/debug/deps/buffer-9c0f66758c6c95f7)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.2968560Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3004620Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3006440Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3010830Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3013650Z running 13 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3030130Z test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3045270Z test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3046790Z test concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3047700Z test independent_downstream_pool_contract_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3049540Z test concurrent_bulk_owners_cannot_take_control_headroom ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3050550Z test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3051580Z test native_owned_leases_survive_view_close_and_release_exact_shared_credits ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3054630Z test native_owner_allocation_failure_returns_all_three_budgets ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3055870Z test native_protected_bytes_and_slots_roll_back_exactly ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3056760Z test native_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3057650Z test owner_configuration_rejects_overbooking_and_overflow ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3058380Z test unsupported_owner_declaration_refuses_binding ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3195540Z test native_pool_bounds_concurrent_owners_and_returns_all_credits ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3195980Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3196250Z test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3197330Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3198270Z      Running tests/child_slots.rs (target/debug/deps/child_slots-a0199cf8e2d1d589)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3346560Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3347680Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3503410Z test deleting_an_all_vacant_parent_needs_no_fictional_owner_or_child_obligations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3514780Z test live_local_child_and_mismatched_original_facts_cannot_retire_a_slot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3515480Z test foreign_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3516130Z test native_cache_accepts_only_monotonic_trusted_child_retirement ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3516710Z test local_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3517340Z test retirement_preserves_pending_creation_publication_path ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3518010Z test retirement_serializes_with_parent_lifecycle_and_uses_bounded_ordinary_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3518670Z test successive_slot_retirements_replay_vacant_manifests_and_keep_identities_reserved ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.3524440Z test vacancy_codecs_and_original_directory_profiles_fail_closed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4861020Z test retirement_native_journal_cuts_recover_only_original_or_completed_routes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4924730Z      Running tests/configuration_capacity.rs (target/debug/deps/configuration_capacity-2e3d72a6127cb948)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4925240Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4925770Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4926210Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4982050Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.4982400Z running 5 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.5027280Z test native_count_matches_real_frames_and_exact_decode_and_frame_boundaries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.5028850Z test selected_native_transport_factory_preserves_codec_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.5029830Z test unsupported_formats_policy_limits_and_invalid_envelopes_reject ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.5030430Z test checkpoint_operation_history_is_charged_before_another_configuration ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6746860Z test full_service_counter_retry_history_fits_selected_native_wire_versions ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6848090Z      Running tests/connect.rs (target/debug/deps/connect-d46487687a30b7db)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6848530Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6902620Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6903340Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6903400Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6903510Z running 15 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6904000Z test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6905340Z test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.6906520Z test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.7444110Z test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.7624170Z test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.7966210Z test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.8067820Z test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.8170620Z test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.8880820Z test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.8982430Z test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.9485460Z test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.9587560Z test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.9588330Z test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:48.9991290Z test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0493570Z      Running tests/counter_service.rs (target/debug/deps/counter_service-e6ec83c06bc1cc6b)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0494250Z test native::remote_discovery_drives_real_pinned_target_dial ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0595000Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0670790Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0671280Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0671340Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.0671520Z running 122 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:49.2313460Z test assignments::single_group_inventory_does_not_require_a_leader ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:52.4198860Z test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:53.2965330Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:53.4725330Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:53.5087390Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:53.7271240Z test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:44:56.2123680Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:02.4389050Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:06.3913970Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:09.3208240Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:10.5034160Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:11.3086250Z test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:12.3210020Z test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:13.3281950Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:13.3382230Z test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:13.3791550Z test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:13.3890020Z test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:13.3915890Z test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:16.8080110Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:16.8659870Z test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:20.4243900Z test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:21.1268710Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:21.2148450Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:22.7883910Z test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:23.4575580Z test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:24.0892550Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:24.3362300Z test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:25.0884540Z test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:25.5802320Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:26.7036390Z test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:28.3047950Z test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:32.8437210Z test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:43.5751790Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:44.5992140Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:49.5830660Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:49.6570570Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:53.0367260Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:54.8081820Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:55.0526980Z test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:55.1220460Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:57.3274090Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:57.7209460Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:45:58.7451350Z test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:01.2316510Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:03.3535440Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:06.7591500Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:11.8024180Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:11.9201660Z test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:12.1458910Z test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:15.1839880Z test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:15.7007240Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:18.2901990Z test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:24.5031610Z test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:24.5846770Z test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:24.9495730Z test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:47.0053070Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:48.1964970Z test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:51.1780740Z test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:51.6513220Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:46:59.2528710Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:21.2987130Z test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:24.9819110Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic has been running for over 60 seconds
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:29.0947900Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:29.1612200Z test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:32.7409020Z test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:38.7360070Z test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:38.8161400Z test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:38.8396980Z test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:39.1988140Z test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:47.2841300Z test groups::authenticated_group_commands_quic_recover_independent_histories ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:49.3228950Z test history::quic_faulted_client_histories_are_linearizable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:49.3428030Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:49.4052050Z test invalid_administration_is_rejected_before_store_open ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:49.4515180Z test invalid_deployment_is_rejected_before_store_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:49.4547540Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:47:56.1208560Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:06.4035680Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:11.8156590Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:16.0796300Z test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:17.6618820Z test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:20.2465550Z test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:22.4789190Z test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:23.7913840Z test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:24.8054600Z test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:26.3091970Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:26.9297130Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:28.4471710Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:28.4577450Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:28.4684550Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:28.7009780Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:30.2097220Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:33.0584240Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:34.9488200Z test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:35.8755870Z test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:35.8777790Z test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:35.9092190Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:37.7293330Z test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:41.4315330Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:42.9063790Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:49.0936730Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:48:59.5540270Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:02.1326370Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:05.6822780Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:05.7057470Z test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:15.7409770Z test placement::generated_placement_executes_and_recovers_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:23.5842820Z test placement::generated_placement_executes_and_recovers_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:23.5997190Z test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:23.6233340Z test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:26.7221050Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:27.7020920Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:28.7037550Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:28.7126940Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:29.2023680Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:34.6834230Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:34.8746100Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:37.4380860Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:38.9477410Z test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:40.2800070Z test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:42.9110460Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint has been running for over 60 seconds
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:43.6376540Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:49.4396800Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:49.9392350Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:50.4432830Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3640850Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3641460Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3641790Z failures:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3641920Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3642400Z ---- assignments::assignment_pages_quic_bind_permissions_membership_and_reopen stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3666380Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3666980Z thread 'assignments::assignment_pages_quic_bind_permissions_membership_and_reopen' (61355) panicked at tests/counter_service/assignments.rs:36:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3668340Z original retry status=exit status: 1 stdout="UNKNOWN reply deadline expired; retry the same operation ID and delta\n" stderr=Error: "request interrupted after connection; automatic routing stopped"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3669060Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3669730Z node1=ready node=1 peer=127.0.0.1:10001 transport=Quic command=127.0.0.1:10101
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3689610Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3689900Z node2=ready node=2 peer=127.0.0.1:10002 transport=Quic command=127.0.0.1:10102
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3690170Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3690430Z node3=ready node=3 peer=127.0.0.1:10003 transport=Quic command=127.0.0.1:10103
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3690740Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3690980Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3691310Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3691610Z ---- drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3692000Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3692490Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic' (64847) panicked at tests/counter_service/drain_replacement.rs:256:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3694020Z missing replacement readiness: ["ready node=1 peer=127.0.0.1:16657 transport=Quic command=127.0.0.1:16757\n", "ready node=2 peer=127.0.0.1:16658 transport=Quic command=127.0.0.1:16758\n", "ready node=3 peer=127.0.0.1:16659 transport=Quic command=127.0.0.1:16759\n"]
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3698360Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3698700Z ---- group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3699100Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3699490Z thread 'group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope' (68590) panicked at tests/counter_service.rs:2052:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3700230Z UNKNOWN authentication deadline expired; retry the same operation ID and delta
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3700640Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3700640Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3701010Z ---- group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3701620Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3702200Z thread 'group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready' (69814) panicked at tests/counter_service/groups.rs:42:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3702980Z group 7: ready node=1 peer=127.0.0.1:19473 transport=Quic command=127.0.0.1:19573
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3703470Z administration operation=7001 outcome=Unknown(LeadershipChanged)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3703770Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3703780Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3704100Z ---- group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3704530Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3708640Z thread 'group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints' (73743) panicked at tests/counter_service/groups.rs:42:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3709990Z group 8: ready node=1 peer=127.0.0.1:20625 transport=Quic command=127.0.0.1:20725
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3710660Z leadership local attempt expired; durable intent remains pending
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3710890Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3710970Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3711250Z ---- group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3711660Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3712180Z thread 'group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic' (73144) panicked at tests/counter_service/group_drain_runner.rs:116:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3713200Z OK evidence=local_durable operation=7001 committed_prefix=14 durable_last=14 committed=NotFoundLocally accepted=NotFoundLocally action=inconclusive_local_absence
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3714010Z ; ready node=1 peer=127.0.0.1:20369 transport=Quic command=127.0.0.1:20469
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3715170Z leadership status admitted operation=19701
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3717010Z command observation_cancelled pending=Write(ClientTicket { binding: ClientRouterBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ClientRouterGeneration(1) }, sequence: 13, group: GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(2) }, operation: OperationId(19701) }) reason=deadline
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3719280Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3719290Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3719570Z ---- groups::authenticated_group_commands_quic_recover_independent_histories stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3719930Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3720420Z thread 'groups::authenticated_group_commands_quic_recover_independent_histories' (76448) panicked at tests/counter_service.rs:376:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3721140Z ["group", "7", "3", "read"]: ERR authentication deadline expired
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3721700Z  Error: "request interrupted after connection; automatic routing stopped"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3721970Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3721970Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3722260Z ---- group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3722630Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3722890Z error: test failed, to rerun pass `--test counter_service`
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3723530Z thread 'group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic' (70762) panicked at tests/counter_service/group_drain_runner.rs:24:5:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3724360Z  Error: "UNKNOWN source request: authentication deadline expired; preserve original drain identity"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3724810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3724810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3724810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3724910Z failures:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3725210Z     assignments::assignment_pages_quic_bind_permissions_membership_and_reopen
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3725820Z     drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3726400Z     group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3727000Z     group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3727680Z     group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3754770Z     group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3756400Z     group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3757310Z     groups::authenticated_group_commands_quic_recover_independent_histories
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3757640Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3758040Z test result: FAILED. 114 passed; 8 failed; 0 ignored; 0 measured; 0 filtered out; finished in 305.30s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3758700Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T07:49:54.3823840Z ##[error]Process completed with exit code 101.
+Rust on macos-latest	Post Run actions/checkout@v4	﻿2026-10-10T07:49:54.4118870Z Post job cleanup.
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8168290Z [command]/opt/homebrew/bin/git version
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8379630Z git version 2.55.0
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8405280Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/189eae48-f0b4-4bdf-9ae8-e4c2432ae71c/.gitconfig'
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8412520Z Temporarily overriding HOME='/Users/runner/work/_temp/189eae48-f0b4-4bdf-9ae8-e4c2432ae71c' before making global git config changes
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8413310Z Adding repository directory to the temporary git global config as a safe directory
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8416690Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/VoteBoat/VoteBoat
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8531990Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.8598290Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.9517180Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.9578250Z http.https://github.com/.extraheader
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.9591670Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:54.9659940Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:55.0385080Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Rust on macos-latest	Post Run actions/checkout@v4	2026-10-10T07:49:55.0438350Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Rust on macos-latest	Complete job	﻿2026-10-10T07:49:55.1187810Z Cleaning up orphan processes
+Rust on macos-latest	Complete job	2026-10-10T07:49:55.5840450Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

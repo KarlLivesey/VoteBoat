@@ -374,6 +374,159 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "SnapshotWorker",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/snapshot_worker_native.rs",
+          "symbol": "shared_worker_close_and_queries_use_host_snapshot_contracts"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_worker_native.rs",
+          "symbol": "shared_worker_close_and_queries_survive_native_file_reopen"
+        },
+        {
+          "file": "tests/snapshot_routes/envelopes.rs",
+          "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+        },
+        {
+          "file": "tests/snapshot_worker.rs",
+          "symbol": "downstream_worker_selection_rejection_stale_envelope_and_failure"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "binding"
+          ],
+          "obligation": "Fixed authoritative WAL store/session and worker generation scope every accepted ticket. Visit identity and original request must match before an owner consumes a completion.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_routes/envelopes.rs",
+              "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+            }
+          ],
+          "remaining": [
+            "Future external worker implementations need the same cases; callers must choose a fresh generation."
+          ]
+        },
+        {
+          "names": [
+            "limits",
+            "load_reservation",
+            "checkpoint_bytes"
+          ],
+          "obligation": "Validate configured bounds and report stable selected-group image/application allowances. Unassigned groups report no allowance and are refused before I/O.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "admission_rejects_wrong_scope_and_excess_capacity_without_progress"
+            }
+          ],
+          "remaining": [
+            "Broader combinations of allocation capacity, load bounds and provider scratch memory."
+          ]
+        },
+        {
+          "names": [
+            "usage"
+          ],
+          "obligation": "Retain request/image credits until terminal polling, including after close and while a result awaits observation. Release only the completed request; return zero usage when drained.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "bulk_snapshot_loads_leave_control_capacity_for_installation"
+            }
+          ],
+          "remaining": [
+            "General fairness and pressure across additional shared executors."
+          ]
+        },
+        {
+          "names": [
+            "submit"
+          ],
+          "obligation": "Return the exact original work and image allocation on rejection. Admit one request per group with nonzero increasing scoped sequence; reject foreign bindings, unassigned groups and post-close work without changing usage.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "admission_rejects_wrong_scope_and_excess_capacity_without_progress"
+            }
+          ],
+          "remaining": [
+            "Cancellation is not rollback: this contract has no per-request cancellation method."
+          ]
+        },
+        {
+          "names": [
+            "poll"
+          ],
+          "obligation": "Return bounded exact request/visit completions. Publication pins and verifies actual data before success; readiness/load/reconcile preserve exact references. Obsolete envelopes cannot release a live owner lease or fence its current core.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "wait"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "recovered_queries"
+            },
+            {
+              "file": "tests/snapshot_routes/envelopes.rs",
+              "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "async_snapshot_short_write_sync_publication_pin_and_panic_fail_closed"
+            }
+          ],
+          "remaining": [
+            "Existing native failures are selected histories; future providers need independent crash/failure adapters and wider combined schedules."
+          ]
+        },
+        {
+          "names": [
+            "close",
+            "is_drained"
+          ],
+          "obligation": "Stop new admissions, retain and drain accepted work, and do not roll back acknowledged publication when the owner observation is discarded. Native reclaim joins its own worker and returns the selected stores only after terminal polling.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_worker_native.rs",
+              "symbol": "shared_worker_close_and_queries_survive_native_file_reopen"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "native_worker_uses_host_stores_and_retains_credits_until_terminal_poll"
+            }
+          ],
+          "remaining": [
+            "The new shared worker cases use the native executor with host/file stores; the core-only downstream worker exercises separate envelope/failure cases. Shared external executor lifetime remains provider-specific."
+          ]
+        }
+      ]
     }
   ]
 }
