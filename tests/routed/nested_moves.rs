@@ -349,52 +349,15 @@ impl<P: TargetProfile> Moves<P> {
     }
     fn resume(&mut self, operation: u128) -> Option<Retry> {
         let s = self.observed(operation);
-        let op = source_fixture::op(operation);
         if s.reservation.is_none() {
-            let mut after = s.child.clone().into_input();
-            after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-            after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-            after.execution = if operation == 501 {
-                ExecutionMode::Partitioned(vec![
-                    RouteEntry {
-                        scope: source_fixture::range(0, 32),
-                        target: RouteTarget::Group(group(41)),
-                    },
-                    RouteEntry {
-                        scope: source_fixture::range(32, 64),
-                        target: RouteTarget::Group(group(42)),
-                    },
-                ])
-            } else {
-                ExecutionMode::Single(group(43))
-            };
-            let p = DelegationPlan::new(
-                s.parent,
-                s.child,
-                ResponsibilityManifest::new(after).unwrap(),
-                op,
-            )
-            .unwrap();
-            let b = p.encode(100000).unwrap();
-            self.metadata_command(operation - 1, b.clone(), |a| {
-                a.directory()
-                    .delegation_reservation_at(a.applied_index(), source_fixture::op(operation - 1))
-                    .unwrap()
-                    .is_some()
-            });
-            return Some(Retry {
-                phase: Phase::Reserve,
-                group: 1,
-                operation: operation - 1,
-                bytes: b,
-            });
+            return self.reserve(s, operation);
         }
         let intent = self.bound(operation);
         if s.intent.is_none() {
             let b = intent.encode(100000).unwrap();
             self.metadata_command(operation, b.clone(), |a| {
                 a.directory()
-                    .transfer_intent_at(a.applied_index(), op)
+                    .transfer_intent_at(a.applied_index(), source_fixture::op(operation))
                     .unwrap()
                     .is_some()
             });
@@ -405,22 +368,9 @@ impl<P: TargetProfile> Moves<P> {
                 bytes: b,
             });
         }
-        assert_eq!(s.intent.unwrap().intent, intent);
-        for (g, status) in &s.targets {
-            if status.as_ref().unwrap().staged_index.is_none() {
-                let b = later(&intent, *g, operation)
-                    .bootstrap_command(100000)
-                    .unwrap();
-                self.target_command(*g, operation, b.clone(), |a| {
-                    a.status().staged_index.is_some()
-                });
-                return Some(Retry {
-                    phase: Phase::Stage(*g),
-                    group: *g,
-                    operation,
-                    bytes: b,
-                });
-            }
+        assert_eq!(s.intent.as_ref().unwrap().intent, intent);
+        if let Some(retry) = self.stage_targets(&s, operation, &intent) {
+            return Some(retry);
         }
         for (g, _, f) in &s.sources {
             if f.is_none() {
@@ -436,77 +386,11 @@ impl<P: TargetProfile> Moves<P> {
                 });
             }
         }
-        for (g, status) in &s.targets {
-            if status.as_ref().unwrap().imported.is_none() {
-                let mut images = Vec::new();
-                for (source, _, f) in &s.sources {
-                    let f = f.as_ref().unwrap();
-                    if let Some(e) = f.exports.iter().find(|e| e.target == group(*g)) {
-                        let configuration = Self::configuration(self.nodes(*source), *source);
-                        let image =
-                            P::owner(&self.nodes(*source)[0].local().applications[&group(*source)])
-                                .export_target(group(*g), 65536)
-                                .unwrap();
-                        images.push(SourceImport {
-                            fence: f.fence,
-                            configuration,
-                            image,
-                            digest: e.digest,
-                        });
-                    }
-                }
-                let import = TargetImport::new(op, intent.clone(), group(*g), images)
-                    .unwrap_or_else(|e| panic!("import {:?}", e.0));
-                let b = P::owner(&self.nodes(*g)[0].local().applications[&group(*g)])
-                    .import_command(&import, 100000)
-                    .unwrap();
-                self.target_command(*g, operation, b.clone(), |a| a.status().imported.is_some());
-                return Some(Retry {
-                    phase: Phase::Import(*g),
-                    group: *g,
-                    operation,
-                    bytes: b,
-                });
-            }
+        if let Some(retry) = self.import_targets(&s, operation, &intent) {
+            return Some(retry);
         }
         if s.publication.is_none() {
-            let sources = s
-                .sources
-                .iter()
-                .map(|(g, _, f)| {
-                    SourceFenceEvidence::from_status(
-                        Self::configuration(self.nodes(*g), *g),
-                        f.clone().unwrap(),
-                    )
-                    .unwrap_or_else(|e| panic!("source {:?}", e.0))
-                })
-                .collect();
-            let targets = s
-                .targets
-                .iter()
-                .map(|(g, t)| {
-                    TargetReadyEvidence::from_status(
-                        Self::configuration(self.nodes(*g), *g),
-                        t.clone().unwrap(),
-                    )
-                    .unwrap_or_else(|e| panic!("target {:?}", e.0))
-                })
-                .collect();
-            let p = TransferPublication::new(op, intent, sources, targets)
-                .unwrap_or_else(|e| panic!("publication {:?}", e.0));
-            let b = p.encode(100000).unwrap();
-            self.metadata_command(operation + 1, b.clone(), |a| {
-                a.directory()
-                    .transfer_publication_at(a.applied_index(), op)
-                    .unwrap()
-                    .is_some()
-            });
-            return Some(Retry {
-                phase: Phase::Publish,
-                group: 1,
-                operation: operation + 1,
-                bytes: b,
-            });
+            return self.publish(&s, operation, intent);
         }
         let decision = s.publication.unwrap();
         if s.completion.is_none() {
@@ -552,6 +436,185 @@ impl<P: TargetProfile> Moves<P> {
             }
         }
         None
+    }
+    fn stage_targets(
+        &mut self,
+        s: &State,
+        operation: u128,
+        intent: &TransferIntent,
+    ) -> Option<Retry> {
+        for (g, status) in &s.targets {
+            if status.as_ref().unwrap().staged_index.is_none() {
+                let b = later(intent, *g, operation)
+                    .bootstrap_command(100000)
+                    .unwrap();
+                self.target_command(*g, operation, b.clone(), |a| {
+                    a.status().staged_index.is_some()
+                });
+                return Some(Retry {
+                    phase: Phase::Stage(*g),
+                    group: *g,
+                    operation,
+                    bytes: b,
+                });
+            }
+        }
+        None
+    }
+    fn reserve(&mut self, s: State, operation: u128) -> Option<Retry> {
+        let op = source_fixture::op(operation);
+        let mut after = s.child.clone().into_input();
+        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+        after.execution = if operation == 501 {
+            ExecutionMode::Partitioned(vec![
+                RouteEntry {
+                    scope: source_fixture::range(0, 32),
+                    target: RouteTarget::Group(group(41)),
+                },
+                RouteEntry {
+                    scope: source_fixture::range(32, 64),
+                    target: RouteTarget::Group(group(42)),
+                },
+            ])
+        } else {
+            ExecutionMode::Single(group(43))
+        };
+        let p = DelegationPlan::new(
+            s.parent,
+            s.child,
+            ResponsibilityManifest::new(after).unwrap(),
+            op,
+        )
+        .unwrap();
+        let b = p.encode(100000).unwrap();
+        self.metadata_command(operation - 1, b.clone(), |a| {
+            a.directory()
+                .delegation_reservation_at(a.applied_index(), source_fixture::op(operation - 1))
+                .unwrap()
+                .is_some()
+        });
+        Some(Retry {
+            phase: Phase::Reserve,
+            group: 1,
+            operation: operation - 1,
+            bytes: b,
+        })
+    }
+    fn import_targets(
+        &mut self,
+        s: &State,
+        operation: u128,
+        intent: &TransferIntent,
+    ) -> Option<Retry> {
+        let op = source_fixture::op(operation);
+        for (g, status) in &s.targets {
+            if status.as_ref().unwrap().imported.is_none() {
+                let mut images = Vec::new();
+                for (source, _, f) in &s.sources {
+                    let f = f.as_ref().unwrap();
+                    if let Some(e) = f.exports.iter().find(|e| e.target == group(*g)) {
+                        let configuration = Self::configuration(self.nodes(*source), *source);
+                        let image =
+                            P::owner(&self.nodes(*source)[0].local().applications[&group(*source)])
+                                .export_target(group(*g), 65536)
+                                .unwrap();
+                        images.push(SourceImport {
+                            fence: f.fence,
+                            configuration,
+                            image,
+                            digest: e.digest,
+                        });
+                    }
+                }
+                let import = TargetImport::new(op, intent.clone(), group(*g), images)
+                    .unwrap_or_else(|e| panic!("import {:?}", e.0));
+                let b = P::owner(&self.nodes(*g)[0].local().applications[&group(*g)])
+                    .import_command(&import, 100000)
+                    .unwrap();
+                self.target_command(*g, operation, b.clone(), |a| a.status().imported.is_some());
+                return Some(Retry {
+                    phase: Phase::Import(*g),
+                    group: *g,
+                    operation,
+                    bytes: b,
+                });
+            }
+        }
+        None
+    }
+    fn publish(&mut self, s: &State, operation: u128, intent: TransferIntent) -> Option<Retry> {
+        let op = source_fixture::op(operation);
+        let sources = s
+            .sources
+            .iter()
+            .map(|(g, _, f)| {
+                SourceFenceEvidence::from_status(
+                    Self::configuration(self.nodes(*g), *g),
+                    f.clone().unwrap(),
+                )
+                .unwrap_or_else(|e| panic!("source {:?}", e.0))
+            })
+            .collect();
+        let targets = s
+            .targets
+            .iter()
+            .map(|(g, t)| {
+                TargetReadyEvidence::from_status(
+                    Self::configuration(self.nodes(*g), *g),
+                    t.clone().unwrap(),
+                )
+                .unwrap_or_else(|e| panic!("target {:?}", e.0))
+            })
+            .collect();
+        let p = TransferPublication::new(op, intent, sources, targets)
+            .unwrap_or_else(|e| panic!("publication {:?}", e.0));
+        let b = p.encode(100000).unwrap();
+        self.metadata_command(operation + 1, b.clone(), |a| {
+            a.directory()
+                .transfer_publication_at(a.applied_index(), op)
+                .unwrap()
+                .is_some()
+        });
+        Some(Retry {
+            phase: Phase::Publish,
+            group: 1,
+            operation: operation + 1,
+            bytes: b,
+        })
+    }
+    fn check_targets(&mut self, s: &State, intent: &TransferIntent) {
+        let clock = self.base.clock;
+        for (g, t) in &s.targets {
+            let (key, value) = if *g == 42 {
+                (40, 3)
+            } else {
+                (1, if *g == 43 { 9 } else { 7 })
+            };
+            let active = t.as_ref().unwrap().activated.is_some();
+            assert_eq!(
+                observe_target::<P>(
+                    self.nodes(*g),
+                    &clock,
+                    *g,
+                    request_query(intent.after(), key)
+                ),
+                if active {
+                    TargetRead::Data(value)
+                } else {
+                    TargetRead::NotActive
+                }
+            );
+            if !active {
+                assert!(self.nodes(*g)[0]
+                    .propose(ClientRequest {
+                        group: group(*g),
+                        operation: source_fixture::op(9999),
+                        bytes: request_data(intent.after(), key, 1)
+                    })
+                    .is_err());
+            }
+        }
     }
     fn check(&mut self, operation: u128, s: &State) {
         assert_eq!(s.root, self.root);
@@ -633,36 +696,7 @@ impl<P: TargetProfile> Moves<P> {
             }
         }
         if let Some(intent) = intent {
-            for (g, t) in &s.targets {
-                let (key, value) = if *g == 42 {
-                    (40, 3)
-                } else {
-                    (1, if *g == 43 { 9 } else { 7 })
-                };
-                let active = t.as_ref().unwrap().activated.is_some();
-                assert_eq!(
-                    observe_target::<P>(
-                        self.nodes(*g),
-                        &clock,
-                        *g,
-                        request_query(intent.after(), key)
-                    ),
-                    if active {
-                        TargetRead::Data(value)
-                    } else {
-                        TargetRead::NotActive
-                    }
-                );
-                if !active {
-                    assert!(self.nodes(*g)[0]
-                        .propose(ClientRequest {
-                            group: group(*g),
-                            operation: source_fixture::op(9999),
-                            bytes: request_data(intent.after(), key, 1)
-                        })
-                        .is_err());
-                }
-            }
+            self.check_targets(s, &intent);
         }
     }
     fn stop(&mut self) {
@@ -787,40 +821,8 @@ impl<P: TargetProfile> Moves<P> {
         );
     }
 }
-fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Moves::<P>::new(protocol, checkpoint);
-    for operation in [501, 601] {
-        let (sources, targets) = groups(operation);
-        let phases = std::iter::once(Phase::Reserve)
-            .chain([Phase::Intent])
-            .chain(targets.iter().copied().map(Phase::Stage))
-            .chain(sources.iter().copied().map(Phase::Fence))
-            .chain(targets.iter().copied().map(Phase::Import))
-            .chain([Phase::Publish, Phase::Refresh])
-            .chain(targets.iter().copied().map(Phase::Activate));
-        for phase in phases {
-            eprintln!("nested moves {protocol:?} checkpoint={checkpoint} operation={operation} phase={phase:?}");
-            let r = rig.resume(operation).unwrap();
-            assert_eq!(r.phase, phase);
-            let s = rig.observed(operation);
-            rig.check(operation, &s);
-            rig.restart();
-            let recovered = rig.observed(operation);
-            assert_eq!(recovered, s);
-            rig.check(operation, &recovered);
-            rig.retry(&r, &s);
-            assert_eq!(rig.observed(operation), s);
-        }
-        assert!(rig.resume(operation).is_none());
-        let s = rig.observed(operation);
-        if operation == 501 {
-            rig.write(41, &s.child, 1, 1, 7, 7, true);
-            rig.write(42, &s.child, 81, 40, 3, 3, true);
-            rig.write(41, &s.child, 82, 1, 2, 9, false);
-        }
-    }
-    let final_state = rig.observed(601);
+fn verify_independent_service<P: TargetProfile>(rig: &mut Moves<P>, final_state: &State) {
+    let checkpoint = rig.base.checkpoint;
     let m = final_state.child.clone();
     if checkpoint {
         split::compact(&mut rig.base.parent, &rig.base.clock, 1);
@@ -879,6 +881,43 @@ fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
         .unwrap();
         assert_eq!(logs.state(group(1)).unwrap(), metadata_logs[&c.node]);
     }
+}
+fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let mut rig = Moves::<P>::new(protocol, checkpoint);
+    for operation in [501, 601] {
+        let (sources, targets) = groups(operation);
+        let phases = std::iter::once(Phase::Reserve)
+            .chain([Phase::Intent])
+            .chain(targets.iter().copied().map(Phase::Stage))
+            .chain(sources.iter().copied().map(Phase::Fence))
+            .chain(targets.iter().copied().map(Phase::Import))
+            .chain([Phase::Publish, Phase::Refresh])
+            .chain(targets.iter().copied().map(Phase::Activate));
+        for phase in phases {
+            eprintln!("nested moves {protocol:?} checkpoint={checkpoint} operation={operation} phase={phase:?}");
+            let r = rig.resume(operation).unwrap();
+            assert_eq!(r.phase, phase);
+            let s = rig.observed(operation);
+            rig.check(operation, &s);
+            rig.restart();
+            let recovered = rig.observed(operation);
+            assert_eq!(recovered, s);
+            rig.check(operation, &recovered);
+            rig.retry(&r, &s);
+            assert_eq!(rig.observed(operation), s);
+        }
+        assert!(rig.resume(operation).is_none());
+        let s = rig.observed(operation);
+        if operation == 501 {
+            rig.write(41, &s.child, 1, 1, 7, 7, true);
+            rig.write(42, &s.child, 81, 40, 3, 3, true);
+            rig.write(41, &s.child, 82, 1, 2, 9, false);
+        }
+    }
+    let final_state = rig.observed(601);
+    let m = final_state.child.clone();
+    verify_independent_service(&mut rig, &final_state);
     // Reopen every original binding, including owners stopped before final writes.
     rig.base.parent = open(
         configuration_for(&rig.base.root, 1),

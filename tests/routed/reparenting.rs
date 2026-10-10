@@ -311,12 +311,7 @@ impl Rig {
         );
     }
 }
-fn run(protocol: NativePeerProtocol, checkpoint: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut r = Rig::new(protocol, checkpoint);
-    let p = plan();
-    let original_hint =
-        resolve(&r.cache, &source_fixture::Policy, fixture::id(10), &[1], 3).unwrap();
+fn prepare_reparent(r: &mut Rig, p: &CrossReparentPlan) -> Vec<ReparentGuardEvidence> {
     r.phase(
         1,
         200,
@@ -355,8 +350,13 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
             ReparentGuardEvidence::from_status(r.config(g), &s).unwrap()
         })
         .collect();
-    r.write(2, 1, original_hint);
-    assert_eq!(r.value(original_hint), 8);
+    guards
+}
+fn commit_reparent(
+    r: &mut Rig,
+    p: &CrossReparentPlan,
+    guards: Vec<ReparentGuardEvidence>,
+) -> CrossOwnerParentAdoption {
     r.phase(
         1,
         400,
@@ -431,13 +431,24 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     for g in [2, 3] {
         r.phase(g, 501, completed.encode().unwrap());
     }
-    let adoption = CrossOwnerParentAdoption {
+    CrossOwnerParentAdoption {
         plan: p.clone(),
         decision: publication,
         child_configuration: r.config(3),
         child_publication: child_publication.unwrap(),
         completion: completed,
-    };
+    }
+}
+fn run(protocol: NativePeerProtocol, checkpoint: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let mut r = Rig::new(protocol, checkpoint);
+    let p = plan();
+    let original_hint =
+        resolve(&r.cache, &source_fixture::Policy, fixture::id(10), &[1], 3).unwrap();
+    let guards = prepare_reparent(&mut r, &p);
+    r.write(2, 1, original_hint);
+    assert_eq!(r.value(original_hint), 8);
+    let adoption = commit_reparent(&mut r, &p, guards);
     let bytes = adoption.encode(MAX_CROSS_PARENT_ADOPTION_BYTES).unwrap();
     campaign(&mut r.owner, &r.clock, 21);
     phase_write(true, &mut r.owner, &r.clock, 21, 300, bytes.clone());

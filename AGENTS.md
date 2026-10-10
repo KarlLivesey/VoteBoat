@@ -27,3 +27,9 @@ avoid cycling through broad rewrites or repeating unchanged verification.
 Prioritize a usable networked service and Rust embedding before completing the
 full roadmap. Keep that full goal active, but do not make online membership or
 split/merge prerequisites for a usable static-membership release.
+
+Keep formatting and Clippy clean after every change. Run
+`cargo +stable fmt --all -- --check` and
+`cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings`.
+Zero diagnostics is the acceptance condition; a clean subset is not a clean
+repository. Fix the causes rather than weakening lint levels or thresholds.

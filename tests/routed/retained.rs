@@ -157,6 +157,180 @@ struct Retained {
     creation: GroupCreationStatus,
     bindings: BTreeMap<NodeId, Vec<u8>>,
 }
+fn initialize_source(
+    root: &std::path::Path,
+    clock: &Instant,
+    protocol: NativePeerProtocol,
+    foreign: bool,
+    parent_moves: bool,
+) -> Vec<Node<Source>> {
+    let mut source_nodes = open(
+        configuration(root, 20, &[1, 2, 3], NativeOpenMode::Create),
+        clock,
+        protocol,
+        || source_profile(foreign, parent_moves),
+    );
+    campaign(&mut source_nodes, clock, 20);
+    propose_recovering(
+        &mut source_nodes,
+        clock,
+        20,
+        100,
+        source_profile(foreign, parent_moves)
+            .bootstrap_command(100000)
+            .unwrap(),
+    );
+    propose_recovering(&mut source_nodes, clock, 20, 1, source_fixture::data(1, 7));
+    propose_recovering(
+        &mut source_nodes,
+        clock,
+        20,
+        2,
+        source_fixture::data(200, 11),
+    );
+    source_nodes
+}
+fn reserve_target(
+    metadata_nodes: &mut [Node<LifecycleDirectory>],
+    configs: &[NativeStartup],
+    clock: &Instant,
+    foreign: bool,
+) -> (GroupCreationIntent, GroupCreationStatus) {
+    let request = GroupCreationIntent {
+        authority: group(1),
+        parent: before(foreign).input().responsibility,
+        expected: RouteGeneration::new(1).unwrap(),
+        responsibility: fixture::id(21),
+        bootstrap: configs[0].bootstrap.clone(),
+        application: before(foreign).input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    campaign(metadata_nodes, clock, 1);
+    assert_eq!(
+        propose_recovering(
+            metadata_nodes,
+            clock,
+            1,
+            21,
+            request.encode(100000).unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::CreationReserved
+    );
+    let _ = observe(
+        metadata_nodes,
+        clock,
+        1,
+        DirectoryQuery::Manifest(before(foreign).input().responsibility),
+    );
+    let core = metadata_nodes[0].local().owner.core(group(1)).unwrap();
+    let creation = metadata_nodes[0].local().applications[&group(1)]
+        .directory()
+        .group_creation_at(core.state().commit_index, group(21))
+        .unwrap()
+        .unwrap();
+    (request, creation)
+}
+fn retained_shape(
+    foreign: bool,
+    creation: &GroupCreationStatus,
+) -> (ResponsibilityManifest, InsertionChild) {
+    let mut child = before(foreign).into_input();
+    child.responsibility = fixture::id(21);
+    child.parent = Some(ParentAuthority {
+        responsibility: before(foreign).input().responsibility,
+        group: group(1),
+    });
+    child.scope = source_fixture::range(0, 128);
+    child.execution = ExecutionMode::Single(group(21));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let mut after = before(foreign).into_input();
+    after.epoch = OwnershipEpoch::new(2).unwrap();
+    after.generation = RouteGeneration::new(2).unwrap();
+    after.execution = ExecutionMode::Delegated(vec![
+        RouteEntry {
+            scope: child.input().scope,
+            target: RouteTarget::Child(ChildAuthority {
+                responsibility: child.input().responsibility,
+                group: group(1),
+                epoch: child.input().epoch,
+            }),
+        },
+        RouteEntry {
+            scope: source_fixture::range(128, 256),
+            target: RouteTarget::Group(group(20)),
+        },
+    ]);
+    let after = ResponsibilityManifest::new(after).unwrap();
+    let child = InsertionChild::from_creation(child, creation).unwrap();
+    (after, child)
+}
+fn initialize_parent(
+    root: &std::path::Path,
+    clock: &Instant,
+    protocol: NativePeerProtocol,
+    checkpoint: bool,
+    parent_moves: bool,
+    after: ResponsibilityManifest,
+    child: InsertionChild,
+) -> (Vec<Node<LifecycleDirectory>>, TransferIntent) {
+    let mut parent_nodes = open(
+        configuration(root, 100, &[1, 2, 3], NativeOpenMode::Create),
+        clock,
+        protocol,
+        || retained_parent_profile(parent_moves),
+    );
+    initialize(&mut parent_nodes, clock, 100, fixture::parent());
+    let plan = DelegationPlan::retained_insertion(
+        fixture::parent(),
+        before(true),
+        after,
+        child,
+        source_fixture::op(200),
+    )
+    .unwrap();
+    let bytes = plan.encode(100000).unwrap();
+    campaign(&mut parent_nodes, clock, 100);
+    phase_write(true, &mut parent_nodes, clock, 100, 400, bytes.clone());
+    let DirectoryRead::DelegationReservation(Some(original)) = observe(
+        &mut parent_nodes,
+        clock,
+        100,
+        DirectoryQuery::DelegationReservation(source_fixture::op(400)),
+    ) else {
+        panic!("reservation")
+    };
+    if checkpoint {
+        compact(&mut parent_nodes, clock, 100);
+    }
+    creation::abandon(parent_nodes, 100);
+    parent_nodes = open(
+        configuration(root, 100, &[1, 2, 3], NativeOpenMode::Recover),
+        clock,
+        protocol,
+        || retained_parent_profile(parent_moves),
+    );
+    campaign(&mut parent_nodes, clock, 100);
+    assert!(propose_recovering(&mut parent_nodes, clock, 100, 400, bytes).duplicate);
+    assert_eq!(
+        observe(
+            &mut parent_nodes,
+            clock,
+            100,
+            DirectoryQuery::DelegationReservation(source_fixture::op(400))
+        ),
+        DirectoryRead::DelegationReservation(Some(original.clone()))
+    );
+    let cfg = parent_nodes[0]
+        .local()
+        .owner
+        .core(group(100))
+        .unwrap()
+        .membership()
+        .id();
+    let intent = original.child_intent(cfg).unwrap();
+    (parent_nodes, intent)
+}
 impl Retained {
     fn new(protocol: NativePeerProtocol, checkpoint: bool, foreign: bool) -> Self {
         Self::profile(protocol, checkpoint, foreign, false, "legacy")
@@ -181,64 +355,9 @@ impl Retained {
             || metadata_profile(foreign, parent_moves),
         );
         initialize(&mut metadata_nodes, &clock, 1, before(foreign));
-        let mut source_nodes = open(
-            configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
-            &clock,
-            protocol,
-            || source_profile(foreign, parent_moves),
-        );
-        campaign(&mut source_nodes, &clock, 20);
-        propose_recovering(
-            &mut source_nodes,
-            &clock,
-            20,
-            100,
-            source_profile(foreign, parent_moves)
-                .bootstrap_command(100000)
-                .unwrap(),
-        );
-        propose_recovering(&mut source_nodes, &clock, 20, 1, source_fixture::data(1, 7));
-        propose_recovering(
-            &mut source_nodes,
-            &clock,
-            20,
-            2,
-            source_fixture::data(200, 11),
-        );
+        let source_nodes = initialize_source(&root, &clock, protocol, foreign, parent_moves);
         let configs = configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover);
-        let request = GroupCreationIntent {
-            authority: group(1),
-            parent: before(foreign).input().responsibility,
-            expected: RouteGeneration::new(1).unwrap(),
-            responsibility: fixture::id(21),
-            bootstrap: configs[0].bootstrap.clone(),
-            application: before(foreign).input().application,
-            mode: GroupCreationMode::Staging,
-        };
-        campaign(&mut metadata_nodes, &clock, 1);
-        assert_eq!(
-            propose_recovering(
-                &mut metadata_nodes,
-                &clock,
-                1,
-                21,
-                request.encode(100000).unwrap()
-            )
-            .outcome,
-            DirectoryOutcome::CreationReserved
-        );
-        let _ = observe(
-            &mut metadata_nodes,
-            &clock,
-            1,
-            DirectoryQuery::Manifest(before(foreign).input().responsibility),
-        );
-        let core = metadata_nodes[0].local().owner.core(group(1)).unwrap();
-        let creation = metadata_nodes[0].local().applications[&group(1)]
-            .directory()
-            .group_creation_at(core.state().commit_index, group(21))
-            .unwrap()
-            .unwrap();
+        let (request, creation) = reserve_target(&mut metadata_nodes, &configs, &clock, foreign);
         for c in &configs[..2] {
             establish(&metadata_nodes, c, &creation);
         }
@@ -274,91 +393,20 @@ impl Retained {
             .iter()
             .map(|c| (c.node, establish(&metadata_nodes, c, &creation)))
             .collect();
-        let mut child = before(foreign).into_input();
-        child.responsibility = fixture::id(21);
-        child.parent = Some(ParentAuthority {
-            responsibility: before(foreign).input().responsibility,
-            group: group(1),
-        });
-        child.scope = source_fixture::range(0, 128);
-        child.execution = ExecutionMode::Single(group(21));
-        let child = ResponsibilityManifest::new(child).unwrap();
-        let mut after = before(foreign).into_input();
-        after.epoch = OwnershipEpoch::new(2).unwrap();
-        after.generation = RouteGeneration::new(2).unwrap();
-        after.execution = ExecutionMode::Delegated(vec![
-            RouteEntry {
-                scope: child.input().scope,
-                target: RouteTarget::Child(ChildAuthority {
-                    responsibility: child.input().responsibility,
-                    group: group(1),
-                    epoch: child.input().epoch,
-                }),
-            },
-            RouteEntry {
-                scope: source_fixture::range(128, 256),
-                target: RouteTarget::Group(group(20)),
-            },
-        ]);
-        let after = ResponsibilityManifest::new(after).unwrap();
-        let child = InsertionChild::from_creation(child, &creation).unwrap();
+        let (after, child) = retained_shape(foreign, &creation);
         let mut parent_nodes = Vec::new();
         let intent = if foreign {
-            parent_nodes = open(
-                configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Create),
+            let (nodes, intent) = initialize_parent(
+                &root,
                 &clock,
                 protocol,
-                || retained_parent_profile(parent_moves),
-            );
-            initialize(&mut parent_nodes, &clock, 100, fixture::parent());
-            let plan = DelegationPlan::retained_insertion(
-                fixture::parent(),
-                before(foreign),
+                checkpoint,
+                parent_moves,
                 after,
                 child,
-                source_fixture::op(200),
-            )
-            .unwrap();
-            let bytes = plan.encode(100000).unwrap();
-            campaign(&mut parent_nodes, &clock, 100);
-            phase_write(true, &mut parent_nodes, &clock, 100, 400, bytes.clone());
-            let DirectoryRead::DelegationReservation(Some(original)) = observe(
-                &mut parent_nodes,
-                &clock,
-                100,
-                DirectoryQuery::DelegationReservation(source_fixture::op(400)),
-            ) else {
-                panic!("reservation")
-            };
-            if checkpoint {
-                compact(&mut parent_nodes, &clock, 100);
-            }
-            creation::abandon(parent_nodes, 100);
-            parent_nodes = open(
-                configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover),
-                &clock,
-                protocol,
-                || retained_parent_profile(parent_moves),
             );
-            campaign(&mut parent_nodes, &clock, 100);
-            assert!(propose_recovering(&mut parent_nodes, &clock, 100, 400, bytes).duplicate);
-            assert_eq!(
-                observe(
-                    &mut parent_nodes,
-                    &clock,
-                    100,
-                    DirectoryQuery::DelegationReservation(source_fixture::op(400))
-                ),
-                DirectoryRead::DelegationReservation(Some(original.clone()))
-            );
-            let cfg = parent_nodes[0]
-                .local()
-                .owner
-                .core(group(100))
-                .unwrap()
-                .membership()
-                .id();
-            original.child_intent(cfg).unwrap()
+            parent_nodes = nodes;
+            intent
         } else {
             TransferIntent::insert_retained_child(before(foreign), after, child).unwrap()
         };
@@ -643,8 +691,13 @@ fn source_read(
         }),
     )
 }
-fn activate(rig: &mut Retained) -> (Facts, Vec<u8>, voteboat::scope::ScopeImage) {
-    let foreign = rig.foreign;
+fn prepare_scoped_import(
+    rig: &mut Retained,
+) -> (
+    ScopedExportStatus,
+    voteboat::scope::ScopeImage,
+    ConfigurationId,
+) {
     rig.phase(1, 200, rig.intent.encode(100000).unwrap());
     assert_eq!(
         child_read(&mut rig.target, &rig.clock),
@@ -700,6 +753,100 @@ fn activate(rig: &mut Retained) -> (Facts, Vec<u8>, voteboat::scope::ScopeImage)
         child_read(&mut rig.target, &rig.clock),
         TargetRead::NotActive
     );
+    (frozen, image, source_configuration)
+}
+fn complete_parent(
+    rig: &mut Retained,
+    original_parent: ParentFacts,
+    metadata_configuration: ConfigurationId,
+    decision: &TransferPublicationStatus,
+) {
+    let reservation = original_parent.reservation.unwrap();
+    let completion = DelegationCompletion {
+        reservation: reservation.operation,
+        reservation_index: reservation.index,
+        parent_configuration: rig.parent[0]
+            .local()
+            .owner
+            .core(group(100))
+            .unwrap()
+            .membership()
+            .id(),
+        child_configuration: metadata_configuration,
+        decision: decision.clone(),
+    };
+    rig.phase(
+        100,
+        401,
+        completion.encode(MAX_DELEGATION_COMPLETION_BYTES).unwrap(),
+    );
+    let parent = rig.facts().parent.unwrap();
+    let mut expected = fixture::parent().into_input();
+    expected.generation = RouteGeneration::new(2).unwrap();
+    expected.execution = ExecutionMode::Delegated(vec![RouteEntry {
+        scope: expected.scope,
+        target: RouteTarget::Child(ChildAuthority {
+            responsibility: rig.intent.after().input().responsibility,
+            group: group(1),
+            epoch: rig.intent.after().input().epoch,
+        }),
+    }]);
+    assert_eq!(
+        parent.manifest,
+        ResponsibilityManifest::new(expected).unwrap()
+    );
+    assert_eq!(parent.publication.unwrap().completion, completion);
+    assert_eq!(parent.reservation, Some(reservation));
+}
+fn write_while_metadata_stopped(rig: &mut Retained, original: &Facts, bytes: &[u8]) {
+    assert_eq!(child_read(&mut rig.target, &rig.clock), TargetRead::Data(7));
+    campaign(&mut rig.target, &rig.clock, 21);
+    let r = propose_recovering(&mut rig.target, &rig.clock, 21, 200, bytes.to_vec());
+    assert!(
+        matches!(r.outcome,TargetOutcome::Activated(ref s) if Some(s)==original.target.activated.as_ref())
+    );
+    let r = propose_recovering(&mut rig.target, &rig.clock, 21, 1, data(child_hint(), 1, 7));
+    assert!(
+        matches!(r.outcome,TargetOutcome::Applied(r) if r.duplicate && r.outcome==BucketOutcome::Value(7))
+    );
+    let r = propose_recovering(
+        &mut rig.target,
+        &rig.clock,
+        21,
+        30,
+        data(child_hint(), 1, 2),
+    );
+    assert!(
+        matches!(r.outcome,TargetOutcome::Applied(r) if !r.duplicate && r.outcome==BucketOutcome::Value(9))
+    );
+    campaign(&mut rig.source, &rig.clock, 20);
+    let r = propose_recovering(
+        &mut rig.source,
+        &rig.clock,
+        20,
+        2,
+        data(retained_hint(), 200, 11),
+    );
+    assert!(matches!(r.outcome,RoutedOutcome::Applied(r) if r.duplicate));
+    let r = propose_recovering(
+        &mut rig.source,
+        &rig.clock,
+        20,
+        3,
+        data(retained_hint(), 200, 3),
+    );
+    assert!(
+        matches!(r.outcome,RoutedOutcome::Applied(r) if !r.duplicate && r.outcome==BucketOutcome::Value(14))
+    );
+    assert!(rig.target.iter().all(|n| n.local().applications[&group(21)]
+        .application()
+        .outbox()
+        .count()
+        == 2));
+}
+fn activate(rig: &mut Retained) -> (Facts, Vec<u8>, voteboat::scope::ScopeImage) {
+    let foreign = rig.foreign;
+    let (frozen, image, source_configuration) = prepare_scoped_import(rig);
     let facts = rig.facts();
     let target_configuration = rig.target[0]
         .local()
@@ -731,43 +878,12 @@ fn activate(rig: &mut Retained) -> (Facts, Vec<u8>, voteboat::scope::ScopeImage)
         .id();
     let decision = facts.decision.unwrap();
     if foreign {
-        let original_parent = facts.parent.unwrap();
-        let reservation = original_parent.reservation.unwrap();
-        let completion = DelegationCompletion {
-            reservation: reservation.operation,
-            reservation_index: reservation.index,
-            parent_configuration: rig.parent[0]
-                .local()
-                .owner
-                .core(group(100))
-                .unwrap()
-                .membership()
-                .id(),
-            child_configuration: metadata_configuration,
-            decision: decision.clone(),
-        };
-        rig.phase(
-            100,
-            401,
-            completion.encode(MAX_DELEGATION_COMPLETION_BYTES).unwrap(),
+        complete_parent(
+            rig,
+            facts.parent.unwrap(),
+            metadata_configuration,
+            &decision,
         );
-        let parent = rig.facts().parent.unwrap();
-        let mut expected = fixture::parent().into_input();
-        expected.generation = RouteGeneration::new(2).unwrap();
-        expected.execution = ExecutionMode::Delegated(vec![RouteEntry {
-            scope: expected.scope,
-            target: RouteTarget::Child(ChildAuthority {
-                responsibility: rig.intent.after().input().responsibility,
-                group: group(1),
-                epoch: rig.intent.after().input().epoch,
-            }),
-        }]);
-        assert_eq!(
-            parent.manifest,
-            ResponsibilityManifest::new(expected).unwrap()
-        );
-        assert_eq!(parent.publication.unwrap().completion, completion);
-        assert_eq!(parent.reservation, Some(reservation));
     }
     let adoption = RetainedGrantAdoption {
         metadata_configuration,
@@ -827,50 +943,7 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool, foreign: bool) {
     } else {
         None
     };
-    assert_eq!(child_read(&mut rig.target, &rig.clock), TargetRead::Data(7));
-    campaign(&mut rig.target, &rig.clock, 21);
-    let r = propose_recovering(&mut rig.target, &rig.clock, 21, 200, bytes.clone());
-    assert!(
-        matches!(r.outcome,TargetOutcome::Activated(ref s) if Some(s)==original.target.activated.as_ref())
-    );
-    let r = propose_recovering(&mut rig.target, &rig.clock, 21, 1, data(child_hint(), 1, 7));
-    assert!(
-        matches!(r.outcome,TargetOutcome::Applied(r) if r.duplicate && r.outcome==BucketOutcome::Value(7))
-    );
-    let r = propose_recovering(
-        &mut rig.target,
-        &rig.clock,
-        21,
-        30,
-        data(child_hint(), 1, 2),
-    );
-    assert!(
-        matches!(r.outcome,TargetOutcome::Applied(r) if !r.duplicate && r.outcome==BucketOutcome::Value(9))
-    );
-    campaign(&mut rig.source, &rig.clock, 20);
-    let r = propose_recovering(
-        &mut rig.source,
-        &rig.clock,
-        20,
-        2,
-        data(retained_hint(), 200, 11),
-    );
-    assert!(matches!(r.outcome,RoutedOutcome::Applied(r) if r.duplicate));
-    let r = propose_recovering(
-        &mut rig.source,
-        &rig.clock,
-        20,
-        3,
-        data(retained_hint(), 200, 3),
-    );
-    assert!(
-        matches!(r.outcome,RoutedOutcome::Applied(r) if !r.duplicate && r.outcome==BucketOutcome::Value(14))
-    );
-    assert!(rig.target.iter().all(|n| n.local().applications[&group(21)]
-        .application()
-        .outbox()
-        .count()
-        == 2));
+    write_while_metadata_stopped(&mut rig, &original, &bytes);
     assert_eq!(
         rig.source[0].local().applications[&group(20)]
             .export(source_fixture::op(200), 65536)

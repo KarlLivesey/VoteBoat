@@ -105,6 +105,49 @@ fn retire(
 fn check(rig: &mut Moves<Guarded>, r: &RetiredSource) {
     recovered(rig, r.status, &r.frozen, &r.lineage, &r.bytes);
 }
+fn serve_after_retirement(rig: &mut Moves<Guarded>, before: &State) {
+    let clock = rig.base.clock;
+    creation::abandon(std::mem::take(&mut rig.base.parent), 1);
+    creation::abandon(std::mem::take(&mut rig.base.source), 21);
+    creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
+    let mut stopped = BTreeMap::new();
+    for g in [1, 21, 31, 41, 42] {
+        stopped.extend(durable_files(&rig.base.root.join(g.to_string())));
+    }
+    for (id, key, delta, value) in [(1, 1, 7, 7), (81, 40, 3, 3), (82, 1, 2, 9), (83, 40, 4, 7)] {
+        rig.write(43, &before.child, id, key, delta, value, true);
+    }
+    rig.write(43, &before.child, 84, 1, 1, 10, false);
+    rig.write(32, &before.sibling, 80, 80, 5, 5, true);
+    rig.write(32, &before.sibling, 85, 80, 1, 6, false);
+    for (g, m, key, value, outbox) in [
+        (43, &before.child, 1, 10, 5),
+        (43, &before.child, 40, 7, 5),
+        (32, &before.sibling, 80, 6, 2),
+    ] {
+        assert_eq!(
+            observe_target::<Guarded>(rig.nodes(g), &clock, g, request_query(m, key)),
+            TargetRead::Data(value)
+        );
+        drive(rig.nodes(g), &clock, |ns| {
+            ns.iter().all(|n| {
+                Guarded::owner(&n.local().applications[&group(g)])
+                    .application()
+                    .outbox()
+                    .count()
+                    == outbox
+            })
+        });
+    }
+    let mut after = BTreeMap::new();
+    for g in [1, 21, 31, 41, 42] {
+        after.extend(durable_files(&rig.base.root.join(g.to_string())));
+    }
+    assert_eq!(after, stopped);
+    let mut old = durable_files(&rig.base.root.join("20"));
+    old.extend(durable_files(&rig.base.root.join("22")));
+    assert_eq!(old, rig.base.stopped);
+}
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut rig = Moves::<Guarded>::new(protocol, checkpoint);
@@ -187,46 +230,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             r.status.source.id.get(),
         );
     }
-    creation::abandon(std::mem::take(&mut rig.base.parent), 1);
-    creation::abandon(std::mem::take(&mut rig.base.source), 21);
-    creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
-    let mut stopped = BTreeMap::new();
-    for g in [1, 21, 31, 41, 42] {
-        stopped.extend(durable_files(&rig.base.root.join(g.to_string())));
-    }
-    for (id, key, delta, value) in [(1, 1, 7, 7), (81, 40, 3, 3), (82, 1, 2, 9), (83, 40, 4, 7)] {
-        rig.write(43, &before.child, id, key, delta, value, true);
-    }
-    rig.write(43, &before.child, 84, 1, 1, 10, false);
-    rig.write(32, &before.sibling, 80, 80, 5, 5, true);
-    rig.write(32, &before.sibling, 85, 80, 1, 6, false);
-    for (g, m, key, value, outbox) in [
-        (43, &before.child, 1, 10, 5),
-        (43, &before.child, 40, 7, 5),
-        (32, &before.sibling, 80, 6, 2),
-    ] {
-        assert_eq!(
-            observe_target::<Guarded>(rig.nodes(g), &clock, g, request_query(m, key)),
-            TargetRead::Data(value)
-        );
-        drive(rig.nodes(g), &clock, |ns| {
-            ns.iter().all(|n| {
-                Guarded::owner(&n.local().applications[&group(g)])
-                    .application()
-                    .outbox()
-                    .count()
-                    == outbox
-            })
-        });
-    }
-    let mut after = BTreeMap::new();
-    for g in [1, 21, 31, 41, 42] {
-        after.extend(durable_files(&rig.base.root.join(g.to_string())));
-    }
-    assert_eq!(after, stopped);
-    let mut old = durable_files(&rig.base.root.join("20"));
-    old.extend(durable_files(&rig.base.root.join("22")));
-    assert_eq!(old, rig.base.stopped);
+    serve_after_retirement(&mut rig, &before);
     for r in [&first, &second] {
         reopen(&mut rig, r.status.source.id.get(), &initial);
         check(&mut rig, r);

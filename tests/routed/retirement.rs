@@ -40,6 +40,214 @@ fn status(nodes: &mut [Node<target_fixture::Target>], clock: &Instant, g: u128) 
     };
     s
 }
+struct RetirementCluster {
+    parent: Vec<Node<LifecycleDirectory>>,
+    source: Vec<Node<Source>>,
+    targets: [Vec<Node<target_fixture::Target>>; 2],
+}
+impl RetirementCluster {
+    fn new(root: &std::path::Path, clock: &Instant, protocol: NativePeerProtocol) -> Self {
+        let parent = open(
+            configuration(root, 1, &[1, 2, 3], NativeOpenMode::Create),
+            clock,
+            protocol,
+            metadata,
+        );
+        let source = open(
+            configuration(root, 20, &[1, 2, 3], NativeOpenMode::Create),
+            clock,
+            protocol,
+            fresh,
+        );
+        let targets = [
+            open(
+                configuration(root, 21, &[1, 2, 3], NativeOpenMode::Create),
+                clock,
+                protocol,
+                target_fixture::fresh,
+            ),
+            open(
+                configuration(root, 22, &[1, 2, 3], NativeOpenMode::Create),
+                clock,
+                protocol,
+                || target_fixture::fresh_for(22),
+            ),
+        ];
+        Self {
+            parent,
+            source,
+            targets,
+        }
+    }
+    fn initialize(&mut self, clock: &Instant) -> SourceFreezeStatus {
+        campaign(&mut self.parent, clock, 1);
+        propose_recovering(
+            &mut self.parent,
+            clock,
+            1,
+            1000,
+            metadata().directory().bootstrap_command(65536).unwrap(),
+        );
+        propose_recovering(
+            &mut self.parent,
+            clock,
+            1,
+            1001,
+            DirectoryCommand {
+                expected: None,
+                manifest: source_fixture::grant(),
+            }
+            .encode(32768)
+            .unwrap(),
+        );
+        propose_recovering(
+            &mut self.parent,
+            clock,
+            1,
+            200,
+            source_fixture::intent().encode(32768).unwrap(),
+        );
+        campaign(&mut self.source, clock, 20);
+        for (id, bytes) in [
+            (
+                100,
+                source_fixture::fresh().bootstrap_command(65536).unwrap(),
+            ),
+            (1, source_fixture::data(1, 7)),
+            (2, source_fixture::data(200, 11)),
+            (200, source_fixture::freeze()),
+        ] {
+            propose_recovering(&mut self.source, clock, 20, id, bytes);
+        }
+        let RetirementRead::Freeze(Some(frozen)) =
+            observe(&mut self.source, clock, 20, RetirementQuery::Freeze)
+        else {
+            panic!("source freeze")
+        };
+        frozen
+    }
+    fn import_targets(
+        &mut self,
+        clock: &Instant,
+        configuration: ConfigurationId,
+    ) -> Vec<TargetReadyEvidence> {
+        let mut ready = Vec::new();
+        for (i, ts) in self.targets.iter_mut().enumerate() {
+            let g = 21 + i as u128;
+            campaign(ts, clock, g);
+            propose_recovering(
+                ts,
+                clock,
+                g,
+                200,
+                target_fixture::fresh_for(g)
+                    .bootstrap_command(65536)
+                    .unwrap(),
+            );
+            let import = target_fixture::from_source(
+                self.source[0].local().applications[&group(20)]
+                    .owner()
+                    .unwrap(),
+                g,
+                configuration,
+            );
+            let bytes = ts[0].local().applications[&group(g)]
+                .import_command(&import, 65536)
+                .unwrap();
+            propose_recovering(ts, clock, g, 200, bytes);
+            let s = status(ts, clock, g);
+            assert!(TargetActivationEvidence::from_status(configuration, s.clone()).is_err());
+            ready.push(
+                TargetReadyEvidence::from_status(configuration, s)
+                    .unwrap_or_else(|e| panic!("{:?}", e.0)),
+            );
+        }
+        ready
+    }
+    fn retirement_proof(
+        &mut self,
+        clock: &Instant,
+        frozen: &SourceFreezeStatus,
+    ) -> RetirementProof {
+        let configuration = ConfigurationId::new(1).unwrap();
+        let ready = self.import_targets(clock, configuration);
+        let publication = TransferPublication::new(
+            OperationId::new(200).unwrap(),
+            source_fixture::intent(),
+            vec![
+                SourceFenceEvidence::from_status(configuration, frozen.clone())
+                    .unwrap_or_else(|e| panic!("{:?}", e.0)),
+            ],
+            ready,
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        campaign(&mut self.parent, clock, 1);
+        propose_recovering(
+            &mut self.parent,
+            clock,
+            1,
+            201,
+            publication.encode(65536).unwrap(),
+        );
+        let DirectoryRead::Publication(Some(decision)) = observe(
+            &mut self.parent,
+            clock,
+            1,
+            DirectoryQuery::Publication(OperationId::new(200).unwrap()),
+        ) else {
+            panic!("publication")
+        };
+        let mut activations = Vec::new();
+        for (i, ts) in self.targets.iter_mut().enumerate() {
+            let g = 21 + i as u128;
+            let bytes = ts[0].local().applications[&group(g)]
+                .activation_command(
+                    &TargetActivation {
+                        metadata_configuration: configuration,
+                        decision: decision.clone(),
+                    },
+                    65536,
+                )
+                .unwrap();
+            campaign(ts, clock, g);
+            propose_recovering(ts, clock, g, 200, bytes);
+            activations.push(
+                TargetActivationEvidence::from_status(configuration, status(ts, clock, g))
+                    .unwrap_or_else(|e| panic!("{:?}", e.0)),
+            );
+        }
+        RetirementProof {
+            metadata_configuration: configuration,
+            decision,
+            targets: activations,
+            release: RetentionRelease {
+                source: group(20),
+                operation: OperationId::new(200).unwrap(),
+                fence_index: frozen.fence.index,
+                release: OperationId::new(900).unwrap(),
+            },
+        }
+    }
+}
+fn reclaim_retired_source(source: &mut [Node<Source>], clock: &Instant) {
+    compact(source, clock, 20);
+    let requests = source
+        .iter_mut()
+        .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
+        .collect::<Vec<_>>();
+    let mut completed = [false; 3];
+    drive(source, clock, |ns| {
+        for (i, n) in ns.iter_mut().enumerate() {
+            if let Some(event) = n.poll_reclaim() {
+                assert_eq!(event.request, requests[i]);
+                let report = event.result.unwrap();
+                assert!(report.after_bytes < report.before_bytes);
+                completed[i] = true;
+            }
+        }
+        completed.iter().all(|x| *x)
+    });
+}
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let root = std::env::temp_dir().join(format!(
@@ -48,162 +256,14 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     ));
     std::fs::create_dir_all(&root).unwrap();
     let clock = Instant::now();
-    let mut parent = open(
-        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
-        metadata,
-    );
-    let mut source = open(
-        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
-        fresh,
-    );
-    let mut targets = [
-        open(
-            configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Create),
-            &clock,
-            protocol,
-            target_fixture::fresh,
-        ),
-        open(
-            configuration(&root, 22, &[1, 2, 3], NativeOpenMode::Create),
-            &clock,
-            protocol,
-            || target_fixture::fresh_for(22),
-        ),
-    ];
-    campaign(&mut parent, &clock, 1);
-    propose_recovering(
-        &mut parent,
-        &clock,
-        1,
-        1000,
-        metadata().directory().bootstrap_command(65536).unwrap(),
-    );
-    propose_recovering(
-        &mut parent,
-        &clock,
-        1,
-        1001,
-        DirectoryCommand {
-            expected: None,
-            manifest: source_fixture::grant(),
-        }
-        .encode(32768)
-        .unwrap(),
-    );
-    propose_recovering(
-        &mut parent,
-        &clock,
-        1,
-        200,
-        source_fixture::intent().encode(32768).unwrap(),
-    );
-    campaign(&mut source, &clock, 20);
-    for (id, bytes) in [
-        (
-            100,
-            source_fixture::fresh().bootstrap_command(65536).unwrap(),
-        ),
-        (1, source_fixture::data(1, 7)),
-        (2, source_fixture::data(200, 11)),
-        (200, source_fixture::freeze()),
-    ] {
-        propose_recovering(&mut source, &clock, 20, id, bytes);
-    }
-    let RetirementRead::Freeze(Some(frozen)) =
-        observe(&mut source, &clock, 20, RetirementQuery::Freeze)
-    else {
-        panic!("source freeze")
-    };
-    let configuration = ConfigurationId::new(1).unwrap();
-    let mut ready = Vec::new();
-    for (i, ts) in targets.iter_mut().enumerate() {
-        let g = 21 + i as u128;
-        campaign(ts, &clock, g);
-        propose_recovering(
-            ts,
-            &clock,
-            g,
-            200,
-            target_fixture::fresh_for(g)
-                .bootstrap_command(65536)
-                .unwrap(),
-        );
-        let import = target_fixture::from_source(
-            source[0].local().applications[&group(20)].owner().unwrap(),
-            g,
-            configuration,
-        );
-        let bytes = ts[0].local().applications[&group(g)]
-            .import_command(&import, 65536)
-            .unwrap();
-        propose_recovering(ts, &clock, g, 200, bytes);
-        let s = status(ts, &clock, g);
-        assert!(TargetActivationEvidence::from_status(configuration, s.clone()).is_err());
-        ready.push(
-            TargetReadyEvidence::from_status(configuration, s)
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        );
-    }
-    let publication = TransferPublication::new(
-        OperationId::new(200).unwrap(),
-        source_fixture::intent(),
-        vec![
-            SourceFenceEvidence::from_status(configuration, frozen.clone())
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        ],
-        ready,
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    campaign(&mut parent, &clock, 1);
-    propose_recovering(
-        &mut parent,
-        &clock,
-        1,
-        201,
-        publication.encode(65536).unwrap(),
-    );
-    let DirectoryRead::Publication(Some(decision)) = observe(
-        &mut parent,
-        &clock,
-        1,
-        DirectoryQuery::Publication(OperationId::new(200).unwrap()),
-    ) else {
-        panic!("publication")
-    };
-    let mut activations = Vec::new();
-    for (i, ts) in targets.iter_mut().enumerate() {
-        let g = 21 + i as u128;
-        let bytes = ts[0].local().applications[&group(g)]
-            .activation_command(
-                &TargetActivation {
-                    metadata_configuration: configuration,
-                    decision: decision.clone(),
-                },
-                65536,
-            )
-            .unwrap();
-        campaign(ts, &clock, g);
-        propose_recovering(ts, &clock, g, 200, bytes);
-        activations.push(
-            TargetActivationEvidence::from_status(configuration, status(ts, &clock, g))
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        );
-    }
-    let proof = RetirementProof {
-        metadata_configuration: configuration,
-        decision,
-        targets: activations,
-        release: RetentionRelease {
-            source: group(20),
-            operation: OperationId::new(200).unwrap(),
-            fence_index: frozen.fence.index,
-            release: OperationId::new(900).unwrap(),
-        },
-    };
+    let mut rig = RetirementCluster::new(&root, &clock, protocol);
+    let frozen = rig.initialize(&clock);
+    let proof = rig.retirement_proof(&clock, &frozen);
+    let RetirementCluster {
+        parent,
+        mut source,
+        mut targets,
+    } = rig;
     let bytes = source[0].local().applications[&group(20)]
         .retirement_command(&proof, MAX_RETIREMENT_COMMAND_BYTES)
         .unwrap();
@@ -220,23 +280,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             .all(|n| n.local().applications[&group(20)].status() == Some(retired))
     });
     if checkpoint {
-        compact(&mut source, &clock, 20);
-        let requests = source
-            .iter_mut()
-            .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
-            .collect::<Vec<_>>();
-        let mut completed = [false; 3];
-        drive(&mut source, &clock, |ns| {
-            for (i, n) in ns.iter_mut().enumerate() {
-                if let Some(event) = n.poll_reclaim() {
-                    assert_eq!(event.request, requests[i]);
-                    let report = event.result.unwrap();
-                    assert!(report.after_bytes < report.before_bytes);
-                    completed[i] = true;
-                }
-            }
-            completed.iter().all(|x| *x)
-        });
+        reclaim_retired_source(&mut source, &clock);
     }
     let old_logs = close(source, &clock, 20, || {});
     for log in old_logs {

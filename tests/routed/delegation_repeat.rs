@@ -216,42 +216,9 @@ impl Moves {
     fn resume_one(&mut self, operation: u128) -> MovePhase {
         let state = self.observed(operation);
         if state.reservation.is_none() {
-            let before = state.initial.child;
-            let mut after = before.clone().into_input();
-            after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-            after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-            after.execution = if operation == 202 {
-                ExecutionMode::Single(group(23))
-            } else {
-                ExecutionMode::Partitioned(vec![
-                    RouteEntry {
-                        scope: source_fixture::range(0, 128),
-                        target: RouteTarget::Group(group(24)),
-                    },
-                    RouteEntry {
-                        scope: source_fixture::range(128, 256),
-                        target: RouteTarget::Group(group(25)),
-                    },
-                ])
-            };
-            let plan = DelegationPlan::new(
-                state.initial.parent,
-                before,
-                ResponsibilityManifest::new(after).unwrap(),
-                op(operation),
-            )
-            .unwrap();
-            campaign(&mut self.base.parent, &self.base.clock, 100);
-            let _ = propose_recovering(
-                &mut self.base.parent,
-                &self.base.clock,
-                100,
-                operation + 200,
-                plan.encode(65536).unwrap(),
-            );
-            return MovePhase::Reserve;
+            return self.reserve(operation, state.initial);
         }
-        let reservation = state.reservation.unwrap();
+        let reservation = state.reservation.as_ref().unwrap();
         let intent = reservation.child_intent(cfg()).unwrap();
         if state.intent.is_none() {
             campaign(&mut self.base.child, &self.base.clock, 1);
@@ -264,7 +231,7 @@ impl Moves {
             );
             return MovePhase::Intent;
         }
-        assert_eq!(state.intent.unwrap().intent, intent);
+        assert_eq!(state.intent.as_ref().unwrap().intent, intent);
         for (g, status) in &state.targets {
             if status.as_ref().is_none_or(|s| s.staged_index.is_none()) {
                 if !self.later.contains_key(g) {
@@ -292,69 +259,11 @@ impl Moves {
                 return MovePhase::Fence(*g);
             }
         }
-        for (g, status) in &state.targets {
-            if status.as_ref().unwrap().imported.is_none() {
-                let mut imports = Vec::new();
-                for (source, _, fence) in &state.sources {
-                    let f = fence.as_ref().unwrap();
-                    if let Some(export) = f.exports.iter().find(|e| e.target == group(*g)) {
-                        let clock = self.base.clock;
-                        let TargetRead::Freeze(_) =
-                            observe(self.nodes(*source), &clock, *source, TargetQuery::Freeze)
-                        else {
-                            panic!("source boundary")
-                        };
-                        let image = self.nodes(*source)[0].local().applications[&group(*source)]
-                            .export_target(group(*g), 65536)
-                            .unwrap();
-                        imports.push(SourceImport {
-                            fence: f.fence,
-                            configuration: cfg(),
-                            image,
-                            digest: export.digest,
-                        });
-                    }
-                }
-                let import = TargetImport::new(op(operation), intent.clone(), group(*g), imports)
-                    .unwrap_or_else(|e| panic!("{:?}", e.0));
-                let bytes = self.nodes(*g)[0].local().applications[&group(*g)]
-                    .import_command(&import, 65536)
-                    .unwrap();
-                self.commit(*g, operation, bytes);
-                return MovePhase::Import(*g);
-            }
+        if let Some(phase) = self.import_targets(operation, &state, &intent) {
+            return phase;
         }
         if state.decision.is_none() {
-            let publication = TransferPublication::new(
-                op(operation),
-                intent.clone(),
-                state
-                    .sources
-                    .iter()
-                    .map(|(_, _, f)| {
-                        SourceFenceEvidence::from_status(cfg(), f.clone().unwrap())
-                            .unwrap_or_else(|e| panic!("{:?}", e.0))
-                    })
-                    .collect(),
-                state
-                    .targets
-                    .iter()
-                    .map(|(_, s)| {
-                        TargetReadyEvidence::from_status(cfg(), s.clone().unwrap())
-                            .unwrap_or_else(|e| panic!("{:?}", e.0))
-                    })
-                    .collect(),
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            campaign(&mut self.base.child, &self.base.clock, 1);
-            let _ = propose_recovering(
-                &mut self.base.child,
-                &self.base.clock,
-                1,
-                operation + 1,
-                publication.encode(65536).unwrap(),
-            );
-            return MovePhase::ChildPublication;
+            return self.publish_child(operation, &state, &intent);
         }
         let decision = state.decision.unwrap();
         if state.parent_publication.is_none() {
@@ -393,6 +302,119 @@ impl Moves {
             }
         }
         MovePhase::Done
+    }
+    fn publish_child(
+        &mut self,
+        operation: u128,
+        state: &MoveObserved,
+        intent: &TransferIntent,
+    ) -> MovePhase {
+        let publication = TransferPublication::new(
+            op(operation),
+            intent.clone(),
+            state
+                .sources
+                .iter()
+                .map(|(_, _, f)| {
+                    SourceFenceEvidence::from_status(cfg(), f.clone().unwrap())
+                        .unwrap_or_else(|e| panic!("{:?}", e.0))
+                })
+                .collect(),
+            state
+                .targets
+                .iter()
+                .map(|(_, s)| {
+                    TargetReadyEvidence::from_status(cfg(), s.clone().unwrap())
+                        .unwrap_or_else(|e| panic!("{:?}", e.0))
+                })
+                .collect(),
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        campaign(&mut self.base.child, &self.base.clock, 1);
+        let _ = propose_recovering(
+            &mut self.base.child,
+            &self.base.clock,
+            1,
+            operation + 1,
+            publication.encode(65536).unwrap(),
+        );
+        MovePhase::ChildPublication
+    }
+    fn reserve(&mut self, operation: u128, initial: Observed) -> MovePhase {
+        let before = initial.child;
+        let mut after = before.clone().into_input();
+        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+        after.execution = if operation == 202 {
+            ExecutionMode::Single(group(23))
+        } else {
+            ExecutionMode::Partitioned(vec![
+                RouteEntry {
+                    scope: source_fixture::range(0, 128),
+                    target: RouteTarget::Group(group(24)),
+                },
+                RouteEntry {
+                    scope: source_fixture::range(128, 256),
+                    target: RouteTarget::Group(group(25)),
+                },
+            ])
+        };
+        let plan = DelegationPlan::new(
+            initial.parent,
+            before,
+            ResponsibilityManifest::new(after).unwrap(),
+            op(operation),
+        )
+        .unwrap();
+        campaign(&mut self.base.parent, &self.base.clock, 100);
+        let _ = propose_recovering(
+            &mut self.base.parent,
+            &self.base.clock,
+            100,
+            operation + 200,
+            plan.encode(65536).unwrap(),
+        );
+        MovePhase::Reserve
+    }
+    fn import_targets(
+        &mut self,
+        operation: u128,
+        state: &MoveObserved,
+        intent: &TransferIntent,
+    ) -> Option<MovePhase> {
+        for (g, status) in &state.targets {
+            if status.as_ref().unwrap().imported.is_none() {
+                let mut imports = Vec::new();
+                for (source, _, fence) in &state.sources {
+                    let f = fence.as_ref().unwrap();
+                    if let Some(export) = f.exports.iter().find(|e| e.target == group(*g)) {
+                        let clock = self.base.clock;
+                        let TargetRead::Freeze(_) =
+                            observe(self.nodes(*source), &clock, *source, TargetQuery::Freeze)
+                        else {
+                            panic!("source boundary")
+                        };
+                        let image = self.nodes(*source)[0].local().applications[&group(*source)]
+                            .export_target(group(*g), 65536)
+                            .unwrap();
+                        imports.push(SourceImport {
+                            fence: f.fence,
+                            configuration: cfg(),
+                            image,
+                            digest: export.digest,
+                        });
+                    }
+                }
+                let import = TargetImport::new(op(operation), intent.clone(), group(*g), imports)
+                    .unwrap_or_else(|e| panic!("{:?}", e.0));
+                let bytes = self.nodes(*g)[0].local().applications[&group(*g)]
+                    .import_command(&import, 65536)
+                    .unwrap();
+                self.commit(*g, operation, bytes);
+                return Some(MovePhase::Import(*g));
+            }
+        }
+        None
     }
     fn drive_base(&mut self) {
         let clock = &self.base.clock;

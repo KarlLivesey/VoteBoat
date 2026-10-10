@@ -399,8 +399,7 @@ fn retained_data(nodes: &[Node<Owner>], child: bool) {
         assert_eq!(copy.outbox().count(), 1);
     }
 }
-fn run(protocol: NativePeerProtocol, checkpoint: bool) {
-    let mut r = Rig::new(protocol, checkpoint);
+fn complete_deletion(r: &mut Rig) -> Facts {
     let (p, c) = manifests();
     r.phase(
         1,
@@ -460,6 +459,11 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         child_completion.intent.intent.tombstone().unwrap()
     );
     assert!(deleted.parent.deleted.is_some() && deleted.child.deleted.is_some());
+    deleted
+}
+fn run(protocol: NativePeerProtocol, checkpoint: bool) {
+    let mut r = Rig::new(protocol, checkpoint);
+    let deleted = complete_deletion(&mut r);
     retained_data(&r.parent_owner, false);
     retained_data(&r.child_owner, true);
     let parent_logs = creation::abandon(std::mem::take(&mut r.parent), 1);

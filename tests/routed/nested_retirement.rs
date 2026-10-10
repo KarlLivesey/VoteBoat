@@ -128,6 +128,63 @@ fn reclaim(rig: &mut Moves<Guarded>, retired: RetirementStatus, initial: &Transf
     }
     reopen(rig, g, initial);
 }
+fn serve_after_retirement(rig: &mut Moves<Guarded>, before: &State) {
+    let clock = rig.base.clock;
+    creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
+    creation::abandon(std::mem::take(&mut rig.base.parent), 1);
+    creation::abandon(std::mem::take(&mut rig.base.source), 21);
+    let mut stopped = BTreeMap::new();
+    for g in [1, 21, 31] {
+        stopped.extend(durable_files(&rig.base.root.join(g.to_string())));
+    }
+    rig.write(41, &before.child, 1, 1, 7, 7, true);
+    rig.write(42, &before.child, 81, 40, 3, 3, true);
+    rig.write(41, &before.child, 82, 1, 2, 9, false);
+    rig.write(42, &before.child, 83, 40, 4, 7, false);
+    rig.write(32, &before.sibling, 80, 80, 5, 5, true);
+    rig.write(32, &before.sibling, 84, 80, 1, 6, false);
+    for (g, manifest, key, value) in [
+        (41, &before.child, 1, 9),
+        (42, &before.child, 40, 7),
+        (32, &before.sibling, 80, 6),
+    ] {
+        assert_eq!(
+            observe_target::<Guarded>(rig.nodes(g), &clock, g, request_query(manifest, key)),
+            TargetRead::Data(value)
+        );
+        assert!(rig
+            .nodes(g)
+            .iter()
+            .all(|n| Guarded::owner(&n.local().applications[&group(g)])
+                .application()
+                .outbox()
+                .count()
+                == 2));
+    }
+    let mut after = BTreeMap::new();
+    for g in [1, 21, 31] {
+        after.extend(durable_files(&rig.base.root.join(g.to_string())));
+    }
+    assert_eq!(after, stopped);
+    let mut old = durable_files(&rig.base.root.join("20"));
+    old.extend(durable_files(&rig.base.root.join("22")));
+    assert_eq!(old, rig.base.stopped);
+}
+fn reject_bad_proofs(rig: &mut Moves<Guarded>, proof: &RetirementProof) {
+    let mut incomplete = proof.clone();
+    incomplete.targets.pop();
+    let mut wrong_release = proof.clone();
+    wrong_release.release.fence_index += 1;
+    for invalid in [&incomplete, &wrong_release] {
+        assert!(rig.nodes(31)[0].local().applications[&group(31)]
+            .retirement_command(invalid, MAX_RETIREMENT_COMMAND_BYTES)
+            .is_err());
+    }
+    assert!(rig
+        .nodes(31)
+        .iter()
+        .all(|n| n.local().applications[&group(31)].status().is_none()));
+}
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut rig = Moves::<Guarded>::new(protocol, checkpoint);
@@ -179,19 +236,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             release: source_fixture::op(901),
         },
     };
-    let mut incomplete = proof.clone();
-    incomplete.targets.pop();
-    let mut wrong_release = proof.clone();
-    wrong_release.release.fence_index += 1;
-    for invalid in [&incomplete, &wrong_release] {
-        assert!(rig.nodes(31)[0].local().applications[&group(31)]
-            .retirement_command(invalid, MAX_RETIREMENT_COMMAND_BYTES)
-            .is_err());
-    }
-    assert!(rig
-        .nodes(31)
-        .iter()
-        .all(|n| n.local().applications[&group(31)].status().is_none()));
+    reject_bad_proofs(&mut rig, &proof);
     let bytes = rig.nodes(31)[0].local().applications[&group(31)]
         .retirement_command(&proof, MAX_RETIREMENT_COMMAND_BYTES)
         .unwrap();
@@ -227,45 +272,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         reclaim(&mut rig, retired, &initial);
         recovered(&mut rig, retired, &frozen, &lineage, &bytes);
     }
-    creation::abandon(std::mem::take(&mut rig.base.targets[0]), 31);
-    creation::abandon(std::mem::take(&mut rig.base.parent), 1);
-    creation::abandon(std::mem::take(&mut rig.base.source), 21);
-    let mut stopped = BTreeMap::new();
-    for g in [1, 21, 31] {
-        stopped.extend(durable_files(&rig.base.root.join(g.to_string())));
-    }
-    rig.write(41, &before.child, 1, 1, 7, 7, true);
-    rig.write(42, &before.child, 81, 40, 3, 3, true);
-    rig.write(41, &before.child, 82, 1, 2, 9, false);
-    rig.write(42, &before.child, 83, 40, 4, 7, false);
-    rig.write(32, &before.sibling, 80, 80, 5, 5, true);
-    rig.write(32, &before.sibling, 84, 80, 1, 6, false);
-    for (g, manifest, key, value) in [
-        (41, &before.child, 1, 9),
-        (42, &before.child, 40, 7),
-        (32, &before.sibling, 80, 6),
-    ] {
-        assert_eq!(
-            observe_target::<Guarded>(rig.nodes(g), &clock, g, request_query(manifest, key)),
-            TargetRead::Data(value)
-        );
-        assert!(rig
-            .nodes(g)
-            .iter()
-            .all(|n| Guarded::owner(&n.local().applications[&group(g)])
-                .application()
-                .outbox()
-                .count()
-                == 2));
-    }
-    let mut after = BTreeMap::new();
-    for g in [1, 21, 31] {
-        after.extend(durable_files(&rig.base.root.join(g.to_string())));
-    }
-    assert_eq!(after, stopped);
-    let mut old = durable_files(&rig.base.root.join("20"));
-    old.extend(durable_files(&rig.base.root.join("22")));
-    assert_eq!(old, rig.base.stopped);
+    serve_after_retirement(&mut rig, &before);
     reopen(&mut rig, 31, &initial);
     recovered(&mut rig, retired, &frozen, &lineage, &bytes);
     rig.stop();

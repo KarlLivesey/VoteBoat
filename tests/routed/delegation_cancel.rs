@@ -71,9 +71,13 @@ fn reject_old(rig: &mut Delegated, intent: &TransferIntent) {
         DirectoryRead::Transfer(None)
     );
 }
-fn cancelled_then_transferred(protocol: NativePeerProtocol, checkpoint: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Delegated::new(protocol, checkpoint);
+fn decline_and_cancel(
+    rig: &mut Delegated,
+) -> (
+    TransferIntent,
+    DelegationDeclineStatus,
+    DelegationCancellationStatus,
+) {
     assert_eq!(rig.resume_one(), Phase::Reserve);
     let reserved = rig.observed();
     rig.restart();
@@ -89,16 +93,16 @@ fn cancelled_then_transferred(protocol: NativePeerProtocol, checkpoint: bool) {
         propose_recovering(&mut rig.child, &rig.clock, 1, 500, decline_bytes.clone()).outcome,
         DirectoryOutcome::DelegationDeclined
     );
-    let declined = decline_status(&mut rig).unwrap();
+    let declined = decline_status(rig).unwrap();
     assert_eq!(declined.operation, op(500));
     rig.parent_outage(false);
-    assert_eq!(cancellation_status(&mut rig), None);
+    assert_eq!(cancellation_status(rig), None);
     rig.restart();
-    assert_eq!(decline_status(&mut rig), Some(declined.clone()));
+    assert_eq!(decline_status(rig), Some(declined.clone()));
     assert_eq!(rig.observed(), reserved);
     campaign(&mut rig.child, &rig.clock, 1);
     assert!(propose_recovering(&mut rig.child, &rig.clock, 1, 500, decline_bytes).duplicate);
-    reject_old(&mut rig, &intent);
+    reject_old(rig, &intent);
     let cancellation = DelegationCancellation {
         reservation: reservation.operation,
         reservation_index: reservation.index,
@@ -112,75 +116,46 @@ fn cancelled_then_transferred(protocol: NativePeerProtocol, checkpoint: bool) {
         propose_recovering(&mut rig.parent, &rig.clock, 100, 401, cancel_bytes.clone()).outcome,
         DirectoryOutcome::DelegationCancelled
     );
-    let cancelled = cancellation_status(&mut rig).unwrap();
+    let cancelled = cancellation_status(rig).unwrap();
     assert_eq!(cancelled.operation, op(401));
     rig.restart();
-    assert_eq!(cancellation_status(&mut rig), Some(cancelled.clone()));
-    assert_eq!(decline_status(&mut rig), Some(declined.clone()));
+    assert_eq!(cancellation_status(rig), Some(cancelled.clone()));
+    assert_eq!(decline_status(rig), Some(declined.clone()));
     assert_eq!(rig.observed(), reserved);
     rig.check_service(&reserved);
     campaign(&mut rig.parent, &rig.clock, 100);
     assert!(propose_recovering(&mut rig.parent, &rig.clock, 100, 401, cancel_bytes).duplicate);
-    reject_old(&mut rig, &intent);
+    reject_old(rig, &intent);
 
-    // A new operation uses the unchanged compatible source grant. No old target
-    // was staged: both fresh targets bind the new actual reservation and intent.
-    rig.transfer_operation = 202;
-    rig.reservation_operation = 402;
-    for phase in [
-        Phase::Reserve,
-        Phase::Intent,
-        Phase::Stage(21),
-        Phase::Stage(22),
-        Phase::Fence,
-        Phase::Import(21),
-        Phase::Import(22),
-        Phase::ChildPublication,
-        Phase::ParentPublication,
-        Phase::Activate(21),
-        Phase::Activate(22),
-    ] {
-        eprintln!("cancellation {protocol:?} checkpoint={checkpoint} phase={phase:?}");
-        assert_eq!(rig.resume_one(), phase);
-        let original = rig.observed();
-        rig.check_service(&original);
-        if phase == Phase::Intent {
-            // Committed intent wins even before any source fence exists.
-            assert!(original.source.is_none());
-            let next = original.intent.as_ref().unwrap().intent.clone();
-            campaign(&mut rig.child, &rig.clock, 1);
-            assert_eq!(
-                propose_recovering(
-                    &mut rig.child,
-                    &rig.clock,
-                    1,
-                    502,
-                    DelegationDecline::new(next).unwrap().encode(65536).unwrap()
-                )
-                .outcome,
-                DirectoryOutcome::LifecycleBusy
-            );
-            assert_eq!(
-                observe(
-                    &mut rig.child,
-                    &rig.clock,
-                    1,
-                    DirectoryQuery::DelegationDecline(op(202))
-                ),
-                DirectoryRead::DelegationDecline(None)
-            );
-        }
-        if phase == Phase::ChildPublication {
-            rig.parent_outage(true);
-        }
-        rig.restart();
-        assert_eq!(rig.observed(), original, "reopen after {phase:?}");
-        assert_eq!(decline_status(&mut rig), Some(declined.clone()));
-        assert_eq!(cancellation_status(&mut rig), Some(cancelled.clone()));
-        rig.check_service(&original);
-    }
-    assert_eq!(rig.resume_one(), Phase::Done);
-    reject_old(&mut rig, &intent);
+    (intent, declined, cancelled)
+}
+fn reject_decline_after_intent(rig: &mut Delegated, original: &Observed) {
+    // Committed intent wins even before any source fence exists.
+    assert!(original.source.is_none());
+    let next = original.intent.as_ref().unwrap().intent.clone();
+    campaign(&mut rig.child, &rig.clock, 1);
+    assert_eq!(
+        propose_recovering(
+            &mut rig.child,
+            &rig.clock,
+            1,
+            502,
+            DelegationDecline::new(next).unwrap().encode(65536).unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::LifecycleBusy
+    );
+    assert_eq!(
+        observe(
+            &mut rig.child,
+            &rig.clock,
+            1,
+            DirectoryQuery::DelegationDecline(op(202))
+        ),
+        DirectoryRead::DelegationDecline(None)
+    );
+}
+fn write_transferred_targets(rig: &mut Delegated) {
     // Original operation IDs survive actual image import; fresh writes follow
     // the existing target-only path after cancellation and movement.
     for (i, key, operation, value) in [(0, 1, 1, 7), (1, 200, 2, 11)] {
@@ -212,6 +187,48 @@ fn cancelled_then_transferred(protocol: NativePeerProtocol, checkpoint: bool) {
         };
         assert_eq!(write.outcome, BucketOutcome::Value(value + 2));
     }
+}
+fn cancelled_then_transferred(protocol: NativePeerProtocol, checkpoint: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let mut rig = Delegated::new(protocol, checkpoint);
+    let (intent, declined, cancelled) = decline_and_cancel(&mut rig);
+
+    // A new operation uses the unchanged compatible source grant. No old target
+    // was staged: both fresh targets bind the new actual reservation and intent.
+    rig.transfer_operation = 202;
+    rig.reservation_operation = 402;
+    for phase in [
+        Phase::Reserve,
+        Phase::Intent,
+        Phase::Stage(21),
+        Phase::Stage(22),
+        Phase::Fence,
+        Phase::Import(21),
+        Phase::Import(22),
+        Phase::ChildPublication,
+        Phase::ParentPublication,
+        Phase::Activate(21),
+        Phase::Activate(22),
+    ] {
+        eprintln!("cancellation {protocol:?} checkpoint={checkpoint} phase={phase:?}");
+        assert_eq!(rig.resume_one(), phase);
+        let original = rig.observed();
+        rig.check_service(&original);
+        if phase == Phase::Intent {
+            reject_decline_after_intent(&mut rig, &original);
+        }
+        if phase == Phase::ChildPublication {
+            rig.parent_outage(true);
+        }
+        rig.restart();
+        assert_eq!(rig.observed(), original, "reopen after {phase:?}");
+        assert_eq!(decline_status(&mut rig), Some(declined.clone()));
+        assert_eq!(cancellation_status(&mut rig), Some(cancelled.clone()));
+        rig.check_service(&original);
+    }
+    assert_eq!(rig.resume_one(), Phase::Done);
+    reject_old(&mut rig, &intent);
+    write_transferred_targets(&mut rig);
     rig.restart();
     assert_eq!(rig.resume_one(), Phase::Done);
     assert_eq!(decline_status(&mut rig), Some(declined));

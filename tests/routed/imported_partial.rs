@@ -251,50 +251,7 @@ fn insertion(
             insertion::establish(nodes, config, &created),
         );
     }
-    let old = match &before.input().execution {
-        ExecutionMode::Single(g) => vec![RouteEntry {
-            scope: before.input().scope,
-            target: RouteTarget::Group(*g),
-        }],
-        ExecutionMode::Delegated(routes) => routes.clone(),
-        _ => panic!("grant"),
-    };
-    let source = if g == 21 { 20 } else { 21 };
-    let mut routes = Vec::new();
-    for r in old {
-        if r.target == RouteTarget::Group(group(source))
-            && r.scope.start() <= scope.start()
-            && r.scope.end() >= scope.end()
-        {
-            if r.scope.start() < scope.start() {
-                routes.push(RouteEntry {
-                    scope: source_fixture::range(r.scope.start(), scope.start()),
-                    target: r.target,
-                });
-            }
-            routes.push(RouteEntry {
-                scope,
-                target: RouteTarget::Child(ChildAuthority {
-                    responsibility: child.input().responsibility,
-                    group: group(1),
-                    epoch: child.input().epoch,
-                }),
-            });
-            if scope.end() < r.scope.end() {
-                routes.push(RouteEntry {
-                    scope: source_fixture::range(scope.end(), r.scope.end()),
-                    target: r.target,
-                });
-            }
-        } else {
-            routes.push(r);
-        }
-    }
-    let mut after = before.clone().into_input();
-    after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-    after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-    after.execution = ExecutionMode::Delegated(routes);
-    let after = ResponsibilityManifest::new(after).unwrap();
+    let after = insertion_manifest(&before, &child, if g == 21 { 20 } else { 21 }, scope);
     let child = InsertionChild::from_creation(child, &created).unwrap();
     if before.input().parent.is_none() {
         (
@@ -333,6 +290,166 @@ fn insertion(
         )
     }
 }
+fn insertion_manifest(
+    before: &ResponsibilityManifest,
+    child: &ResponsibilityManifest,
+    source: u128,
+    scope: BucketRange,
+) -> ResponsibilityManifest {
+    let old = match &before.input().execution {
+        ExecutionMode::Single(g) => vec![RouteEntry {
+            scope: before.input().scope,
+            target: RouteTarget::Group(*g),
+        }],
+        ExecutionMode::Delegated(routes) => routes.clone(),
+        _ => panic!("grant"),
+    };
+    let mut routes = Vec::new();
+    for r in old {
+        if r.target == RouteTarget::Group(group(source))
+            && r.scope.start() <= scope.start()
+            && r.scope.end() >= scope.end()
+        {
+            if r.scope.start() < scope.start() {
+                routes.push(RouteEntry {
+                    scope: source_fixture::range(r.scope.start(), scope.start()),
+                    target: r.target,
+                });
+            }
+            routes.push(RouteEntry {
+                scope,
+                target: RouteTarget::Child(ChildAuthority {
+                    responsibility: child.input().responsibility,
+                    group: group(1),
+                    epoch: child.input().epoch,
+                }),
+            });
+            if scope.end() < r.scope.end() {
+                routes.push(RouteEntry {
+                    scope: source_fixture::range(scope.end(), r.scope.end()),
+                    target: r.target,
+                });
+            }
+        } else {
+            routes.push(r);
+        }
+    }
+    let mut after = before.clone().into_input();
+    after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+    after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+    after.execution = ExecutionMode::Delegated(routes);
+    ResponsibilityManifest::new(after).unwrap()
+}
+fn initialize_source(run: &Run) -> Vec<Node<Source>> {
+    let mut source_nodes = run.open(20, NativeOpenMode::Create, source);
+    campaign(&mut source_nodes, &run.clock, 20);
+    propose_recovering(
+        &mut source_nodes,
+        &run.clock,
+        20,
+        100,
+        source().bootstrap_command(200000).unwrap(),
+    );
+    for (op, key, delta) in [(1, 1, 7), (2, 100, 9), (3, 200, 11), (4, 70, 5)] {
+        propose_recovering(
+            &mut source_nodes,
+            &run.clock,
+            20,
+            op,
+            data(&source_fixture::grant(), 20, key, delta),
+        );
+    }
+    source_nodes
+}
+fn prepare_owner(
+    run: &Run,
+    source_nodes: &mut Vec<Node<Source>>,
+    first: &TransferIntent,
+) -> (Vec<Node<Guard>>, ScopedExportStatus) {
+    let mut owner = run.open(21, NativeOpenMode::Recover, || guard(first));
+    run.phase(
+        &mut owner,
+        21,
+        200,
+        guard(first)
+            .owner()
+            .unwrap()
+            .bootstrap_command(200000)
+            .unwrap(),
+        || guard(first),
+    );
+    run.phase(source_nodes, 20, 200, first.encode(200000).unwrap(), source);
+    let ScopedSourceRead::Frozen(Some(frozen)) = observe(
+        source_nodes,
+        &run.clock,
+        20,
+        ScopedSourceQuery::Frozen(source_fixture::op(200)),
+    ) else {
+        panic!("fence")
+    };
+    let image = source_nodes[0].local().applications[&group(20)]
+        .export(source_fixture::op(200), 65536)
+        .unwrap();
+    let cfg = ConfigurationId::new(1).unwrap();
+    let import = TargetImport::new(
+        source_fixture::op(200),
+        first.clone(),
+        group(21),
+        vec![SourceImport {
+            fence: frozen.fence.fence,
+            configuration: cfg,
+            image,
+            digest: frozen.digest,
+        }],
+    )
+    .unwrap();
+    run.phase(
+        &mut owner,
+        21,
+        200,
+        guard(first)
+            .owner()
+            .unwrap()
+            .import_command(&import, 200000)
+            .unwrap(),
+        || guard(first),
+    );
+    assert_eq!(
+        observe(
+            &mut owner,
+            &run.clock,
+            21,
+            RetirementQuery::Owner(query(first.target_manifest(group(21)).unwrap(), 21, 1))
+        ),
+        RetirementRead::Owner(TargetRead::NotActive)
+    );
+    (owner, frozen)
+}
+fn retry_retained_child(
+    rig: &mut Rig,
+    g: u128,
+    key: u8,
+    operation: u128,
+    value: i64,
+) -> Vec<Node<Target>> {
+    let mut child = rig.children.remove(&g).unwrap();
+    let grant = child[0].local().applications[&group(g)].grant().clone();
+    assert_eq!(
+        observe(&mut child, &rig.run.clock, g, query(&grant, g, key)),
+        TargetRead::Data(value)
+    );
+    let r = propose_recovering(
+        &mut child,
+        &rig.run.clock,
+        g,
+        operation,
+        data(&grant, g, key, value),
+    );
+    assert!(
+        matches!(r.outcome,TargetOutcome::Applied(r) if r.duplicate && r.outcome==BucketOutcome::Value(value))
+    );
+    child
+}
 impl Rig {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
         let run = Run {
@@ -347,24 +464,7 @@ impl Rig {
         std::fs::create_dir_all(&run.root).unwrap();
         let mut metadata_nodes = run.open(1, NativeOpenMode::Create, metadata);
         initialize(&mut metadata_nodes, &run.clock, 1, source_fixture::grant());
-        let mut source_nodes = run.open(20, NativeOpenMode::Create, source);
-        campaign(&mut source_nodes, &run.clock, 20);
-        propose_recovering(
-            &mut source_nodes,
-            &run.clock,
-            20,
-            100,
-            source().bootstrap_command(200000).unwrap(),
-        );
-        for (op, key, delta) in [(1, 1, 7), (2, 100, 9), (3, 200, 11), (4, 70, 5)] {
-            propose_recovering(
-                &mut source_nodes,
-                &run.clock,
-                20,
-                op,
-                data(&source_fixture::grant(), 20, key, delta),
-            );
-        }
+        let mut source_nodes = initialize_source(&run);
         let mut bindings = BTreeMap::new();
         let (first, _) = insertion(
             &run,
@@ -385,69 +485,8 @@ impl Rig {
             first.encode(200000).unwrap(),
             metadata,
         );
-        let mut owner = run.open(21, NativeOpenMode::Recover, || guard(&first));
-        run.phase(
-            &mut owner,
-            21,
-            200,
-            guard(&first)
-                .owner()
-                .unwrap()
-                .bootstrap_command(200000)
-                .unwrap(),
-            || guard(&first),
-        );
-        run.phase(
-            &mut source_nodes,
-            20,
-            200,
-            first.encode(200000).unwrap(),
-            source,
-        );
-        let ScopedSourceRead::Frozen(Some(frozen)) = observe(
-            &mut source_nodes,
-            &run.clock,
-            20,
-            ScopedSourceQuery::Frozen(source_fixture::op(200)),
-        ) else {
-            panic!("fence")
-        };
-        let image = source_nodes[0].local().applications[&group(20)]
-            .export(source_fixture::op(200), 65536)
-            .unwrap();
+        let (mut owner, frozen) = prepare_owner(&run, &mut source_nodes, &first);
         let cfg = ConfigurationId::new(1).unwrap();
-        let import = TargetImport::new(
-            source_fixture::op(200),
-            first.clone(),
-            group(21),
-            vec![SourceImport {
-                fence: frozen.fence.fence,
-                configuration: cfg,
-                image,
-                digest: frozen.digest,
-            }],
-        )
-        .unwrap();
-        run.phase(
-            &mut owner,
-            21,
-            200,
-            guard(&first)
-                .owner()
-                .unwrap()
-                .import_command(&import, 200000)
-                .unwrap(),
-            || guard(&first),
-        );
-        assert_eq!(
-            observe(
-                &mut owner,
-                &run.clock,
-                21,
-                RetirementQuery::Owner(query(first.target_manifest(group(21)).unwrap(), 21, 1))
-            ),
-            RetirementRead::Owner(TargetRead::NotActive)
-        );
         let publication = TransferPublication::new(
             source_fixture::op(200),
             first.clone(),
@@ -512,6 +551,184 @@ impl Rig {
         };
         rig.owner_value(100, 9);
         rig
+    }
+    fn import_delegated_child(
+        &mut self,
+        child: &mut Vec<Node<Target>>,
+        i: &TransferIntent,
+        g: u128,
+        operation: u128,
+        cfg: ConfigurationId,
+    ) -> ScopedExportStatus {
+        let old = self.owner[0].local().applications[&group(21)]
+            .owner()
+            .unwrap();
+        let frozen = old.scoped_freeze(source_fixture::op(operation)).unwrap();
+        let image = old
+            .export_scoped(source_fixture::op(operation), 65536)
+            .unwrap();
+        let import = TargetImport::new(
+            source_fixture::op(operation),
+            i.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: frozen.fence.fence,
+                configuration: cfg,
+                image,
+                digest: frozen.digest,
+            }],
+        )
+        .unwrap();
+        let b = target(i, g, operation)
+            .import_command(&import, 200000)
+            .unwrap();
+        self.run
+            .phase(child, g, operation, b, || target(i, g, operation));
+        frozen
+    }
+    fn reserve_remaining(&mut self) -> (DelegationReservationStatus, TransferIntent) {
+        let before = self.grant();
+        let mut after = before.clone().into_input();
+        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
+        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
+        let ExecutionMode::Delegated(routes) = &mut after.execution else {
+            panic!("delegated")
+        };
+        for r in routes {
+            if r.target == RouteTarget::Group(group(21)) {
+                r.target = RouteTarget::Group(group(40));
+            }
+        }
+        let parent = manifest(
+            &mut self.metadata,
+            &self.run.clock,
+            1,
+            source_fixture::grant().input().responsibility,
+        );
+        let plan = DelegationPlan::move_remaining(
+            parent,
+            before,
+            ResponsibilityManifest::new(after).unwrap(),
+            source_fixture::op(3000),
+        )
+        .unwrap();
+        self.run.phase(
+            &mut self.metadata,
+            1,
+            6002,
+            plan.encode(200000).unwrap(),
+            metadata,
+        );
+        let DirectoryRead::DelegationReservation(Some(reservation)) = observe(
+            &mut self.metadata,
+            &self.run.clock,
+            1,
+            DirectoryQuery::DelegationReservation(source_fixture::op(6002)),
+        ) else {
+            panic!("reservation")
+        };
+        let cfg = ConfigurationId::new(1).unwrap();
+        let i = reservation.child_intent(cfg).unwrap();
+        (reservation, i)
+    }
+    fn import_remaining(
+        &mut self,
+        successor: &mut Vec<Node<Target>>,
+        i: &TransferIntent,
+        cfg: ConfigurationId,
+    ) -> SourceFreezeStatus {
+        let b = self.owner[0].local().applications[&group(21)]
+            .owner()
+            .unwrap()
+            .freeze_command(i, 65536, 200000)
+            .unwrap();
+        self.run
+            .phase(&mut self.owner, 21, 3000, b, || guard(&self.first));
+        let old = &self.owner[0].local().applications[&group(21)];
+        let frozen = old.freeze_status().unwrap().unwrap();
+        let image = old.export_target(group(40), 65536).unwrap();
+        assert_eq!(image.scope(), source_fixture::range(96, 128));
+        assert!(matches!(
+            observe(
+                &mut self.owner,
+                &self.run.clock,
+                21,
+                RetirementQuery::Owner(query(i.before(), 21, 100))
+            ),
+            RetirementRead::Owner(TargetRead::Rejected(_))
+        ));
+        let import = TargetImport::new(
+            source_fixture::op(3000),
+            i.clone(),
+            group(40),
+            vec![SourceImport {
+                fence: frozen.fence,
+                configuration: cfg,
+                digest: ContentDigest::scope_image(&image),
+                image,
+            }],
+        )
+        .unwrap();
+        self.run.phase(
+            successor,
+            40,
+            3000,
+            target(i, 40, 3000).import_command(&import, 200000).unwrap(),
+            || target(i, 40, 3000),
+        );
+        assert_eq!(
+            observe(successor, &self.run.clock, 40, query(i.after(), 40, 100)),
+            TargetRead::NotActive
+        );
+        frozen
+    }
+    fn reclaim_retired(&mut self, retired: RetirementStatus, b: Vec<u8>, lineage: &[u8]) {
+        compact(&mut self.owner, &self.run.clock, 21);
+        let requests: Vec<_> = self
+            .owner
+            .iter_mut()
+            .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
+            .collect();
+        let mut done = [false; 3];
+        drive(&mut self.owner, &self.run.clock, |nodes| {
+            for (j, n) in nodes.iter_mut().enumerate() {
+                if let Some(result) = n.poll_reclaim() {
+                    assert_eq!(result.request, requests[j]);
+                    let report = result.result.unwrap();
+                    assert!(report.after_bytes < report.before_bytes);
+                    done[j] = true;
+                }
+            }
+            done.iter().all(|x| *x)
+        });
+        let logs = creation::abandon(std::mem::take(&mut self.owner), 21);
+        for log in logs.values() {
+            assert!(log.base_index() >= retired.index);
+            assert!(log
+                .entries
+                .iter()
+                .all(|e| !matches!(e.payload, EntryPayload::Command { .. })));
+        }
+        self.owner = self
+            .run
+            .open(21, NativeOpenMode::Recover, || guard(&self.first));
+        assert_eq!(
+            observe(
+                &mut self.owner,
+                &self.run.clock,
+                21,
+                RetirementQuery::Status
+            ),
+            RetirementRead::Status(Some(retired))
+        );
+        assert_eq!(
+            propose_recovering(&mut self.owner, &self.run.clock, 21, 3000, b).outcome,
+            RetirementOutcome::Retired(retired)
+        );
+        assert_eq!(
+            self.owner[0].local().applications[&group(21)].retired_lineage(),
+            Some(lineage)
+        );
     }
     fn grant(&self) -> ResponsibilityManifest {
         self.owner[0].local().applications[&group(21)]
@@ -606,31 +823,8 @@ impl Rig {
             i.encode(200000).unwrap(),
             || guard(&self.first),
         );
-        let old = self.owner[0].local().applications[&group(21)]
-            .owner()
-            .unwrap();
-        let frozen = old.scoped_freeze(source_fixture::op(operation)).unwrap();
-        let image = old
-            .export_scoped(source_fixture::op(operation), 65536)
-            .unwrap();
         let cfg = ConfigurationId::new(1).unwrap();
-        let import = TargetImport::new(
-            source_fixture::op(operation),
-            i.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: frozen.fence.fence,
-                configuration: cfg,
-                image,
-                digest: frozen.digest,
-            }],
-        )
-        .unwrap();
-        let b = target(&i, g, operation)
-            .import_command(&import, 200000)
-            .unwrap();
-        self.run
-            .phase(&mut child, g, operation, b, || target(&i, g, operation));
+        let frozen = self.import_delegated_child(&mut child, &i, g, operation, cfg);
         self.owner_value(100, 9);
         let grant = self.grant();
         assert!(matches!(
@@ -691,48 +885,8 @@ impl Rig {
 }
 impl Rig {
     fn remaining(&mut self) -> (TransferIntent, TransferPublicationStatus) {
-        let before = self.grant();
-        let mut after = before.clone().into_input();
-        after.epoch = OwnershipEpoch::new(after.epoch.get() + 1).unwrap();
-        after.generation = RouteGeneration::new(after.generation.get() + 1).unwrap();
-        let ExecutionMode::Delegated(routes) = &mut after.execution else {
-            panic!("delegated")
-        };
-        for r in routes {
-            if r.target == RouteTarget::Group(group(21)) {
-                r.target = RouteTarget::Group(group(40));
-            }
-        }
-        let parent = manifest(
-            &mut self.metadata,
-            &self.run.clock,
-            1,
-            source_fixture::grant().input().responsibility,
-        );
-        let plan = DelegationPlan::move_remaining(
-            parent,
-            before,
-            ResponsibilityManifest::new(after).unwrap(),
-            source_fixture::op(3000),
-        )
-        .unwrap();
-        self.run.phase(
-            &mut self.metadata,
-            1,
-            6002,
-            plan.encode(200000).unwrap(),
-            metadata,
-        );
-        let DirectoryRead::DelegationReservation(Some(reservation)) = observe(
-            &mut self.metadata,
-            &self.run.clock,
-            1,
-            DirectoryQuery::DelegationReservation(source_fixture::op(6002)),
-        ) else {
-            panic!("reservation")
-        };
+        let (reservation, i) = self.reserve_remaining();
         let cfg = ConfigurationId::new(1).unwrap();
-        let i = reservation.child_intent(cfg).unwrap();
         self.run.phase(
             &mut self.metadata,
             1,
@@ -750,56 +904,7 @@ impl Rig {
             target(&i, 40, 3000).bootstrap_command(200000).unwrap(),
             || target(&i, 40, 3000),
         );
-        let b = self.owner[0].local().applications[&group(21)]
-            .owner()
-            .unwrap()
-            .freeze_command(&i, 65536, 200000)
-            .unwrap();
-        self.run
-            .phase(&mut self.owner, 21, 3000, b, || guard(&self.first));
-        let old = &self.owner[0].local().applications[&group(21)];
-        let frozen = old.freeze_status().unwrap().unwrap();
-        let image = old.export_target(group(40), 65536).unwrap();
-        assert_eq!(image.scope(), source_fixture::range(96, 128));
-        assert!(matches!(
-            observe(
-                &mut self.owner,
-                &self.run.clock,
-                21,
-                RetirementQuery::Owner(query(i.before(), 21, 100))
-            ),
-            RetirementRead::Owner(TargetRead::Rejected(_))
-        ));
-        let import = TargetImport::new(
-            source_fixture::op(3000),
-            i.clone(),
-            group(40),
-            vec![SourceImport {
-                fence: frozen.fence,
-                configuration: cfg,
-                digest: ContentDigest::scope_image(&image),
-                image,
-            }],
-        )
-        .unwrap();
-        self.run.phase(
-            &mut successor,
-            40,
-            3000,
-            target(&i, 40, 3000)
-                .import_command(&import, 200000)
-                .unwrap(),
-            || target(&i, 40, 3000),
-        );
-        assert_eq!(
-            observe(
-                &mut successor,
-                &self.run.clock,
-                40,
-                query(i.after(), 40, 100)
-            ),
-            TargetRead::NotActive
-        );
+        let frozen = self.import_remaining(&mut successor, &i, cfg);
         let p = TransferPublication::new(
             source_fixture::op(3000),
             i.clone(),
@@ -908,52 +1013,7 @@ impl Rig {
             })
             .is_err());
         if self.run.checkpoint {
-            compact(&mut self.owner, &self.run.clock, 21);
-            let requests: Vec<_> = self
-                .owner
-                .iter_mut()
-                .map(|n| n.reclaim(LogLimits::default().max_wal_bytes).unwrap())
-                .collect();
-            let mut done = [false; 3];
-            drive(&mut self.owner, &self.run.clock, |nodes| {
-                for (j, n) in nodes.iter_mut().enumerate() {
-                    if let Some(result) = n.poll_reclaim() {
-                        assert_eq!(result.request, requests[j]);
-                        let report = result.result.unwrap();
-                        assert!(report.after_bytes < report.before_bytes);
-                        done[j] = true;
-                    }
-                }
-                done.iter().all(|x| *x)
-            });
-            let logs = creation::abandon(std::mem::take(&mut self.owner), 21);
-            for log in logs.values() {
-                assert!(log.base_index() >= retired.index);
-                assert!(log
-                    .entries
-                    .iter()
-                    .all(|e| !matches!(e.payload, EntryPayload::Command { .. })));
-            }
-            self.owner = self
-                .run
-                .open(21, NativeOpenMode::Recover, || guard(&self.first));
-            assert_eq!(
-                observe(
-                    &mut self.owner,
-                    &self.run.clock,
-                    21,
-                    RetirementQuery::Status
-                ),
-                RetirementRead::Status(Some(retired))
-            );
-            assert_eq!(
-                propose_recovering(&mut self.owner, &self.run.clock, 21, 3000, b).outcome,
-                RetirementOutcome::Retired(retired)
-            );
-            assert_eq!(
-                self.owner[0].local().applications[&group(21)].retired_lineage(),
-                Some(lineage.as_slice())
-            );
+            self.reclaim_retired(retired, b, &lineage);
         }
     }
 }
@@ -993,22 +1053,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             &rig.run.root.join(g.to_string()),
         ));
     }
-    let mut child30 = rig.children.remove(&30).unwrap();
-    let grant30 = child30[0].local().applications[&group(30)].grant().clone();
-    assert_eq!(
-        observe(&mut child30, &rig.run.clock, 30, query(&grant30, 30, 1)),
-        TargetRead::Data(7)
-    );
-    let r = propose_recovering(
-        &mut child30,
-        &rig.run.clock,
-        30,
-        1,
-        data(&grant30, 30, 1, 7),
-    );
-    assert!(
-        matches!(r.outcome,TargetOutcome::Applied(r) if r.duplicate && r.outcome==BucketOutcome::Value(7))
-    );
+    let child30 = retry_retained_child(&mut rig, 30, 1, 1, 7);
     let mut successor = rig.children.remove(&40).unwrap();
     assert_eq!(
         observe(
@@ -1055,22 +1100,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             assert_eq!(stopped[&path], bytes);
         }
     }
-    let mut child31 = rig.children.remove(&31).unwrap();
-    let grant31 = child31[0].local().applications[&group(31)].grant().clone();
-    assert_eq!(
-        observe(&mut child31, &rig.run.clock, 31, query(&grant31, 31, 70)),
-        TargetRead::Data(5)
-    );
-    let retry = propose_recovering(
-        &mut child31,
-        &rig.run.clock,
-        31,
-        4,
-        data(&grant31, 31, 70, 5),
-    );
-    assert!(
-        matches!(retry.outcome, TargetOutcome::Applied(r) if r.duplicate && r.outcome == BucketOutcome::Value(5))
-    );
+    let child31 = retry_retained_child(&mut rig, 31, 70, 4, 5);
     creation::abandon(child30, 30);
     creation::abandon(child31, 31);
     creation::abandon(successor, 40);

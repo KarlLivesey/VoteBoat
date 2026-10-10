@@ -298,42 +298,7 @@ impl Split {
             }
         }
         if state.publication.is_none() {
-            let source =
-                SourceFenceEvidence::from_status(source_configuration, state.source.unwrap())
-                    .unwrap_or_else(|e| panic!("{:?}", e.0));
-            let targets = state
-                .targets
-                .into_iter()
-                .enumerate()
-                .map(|(i, t)| {
-                    let configuration = self.targets[i][0]
-                        .local()
-                        .owner
-                        .core(group(21 + i as u128))
-                        .unwrap()
-                        .state()
-                        .bootstrap
-                        .configuration;
-                    TargetReadyEvidence::from_status(configuration, t)
-                        .unwrap_or_else(|e| panic!("{:?}", e.0))
-                })
-                .collect();
-            let publication = TransferPublication::new(
-                OperationId::new(200).unwrap(),
-                source_fixture::intent(),
-                vec![source],
-                targets,
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            campaign(&mut self.parent, &self.clock, 1);
-            let _ = propose_recovering(
-                &mut self.parent,
-                &self.clock,
-                1,
-                201,
-                publication.encode(65536).unwrap(),
-            );
-            return Phase::Publish;
+            return self.publish(state, source_configuration);
         }
         for i in 0..2 {
             if state.targets[i].activated.is_none() {
@@ -358,6 +323,43 @@ impl Split {
             }
         }
         Phase::Done
+    }
+    fn publish(&mut self, state: Observed, source_configuration: ConfigurationId) -> Phase {
+        let source = SourceFenceEvidence::from_status(source_configuration, state.source.unwrap())
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let targets = state
+            .targets
+            .into_iter()
+            .enumerate()
+            .map(|(i, t)| {
+                let configuration = self.targets[i][0]
+                    .local()
+                    .owner
+                    .core(group(21 + i as u128))
+                    .unwrap()
+                    .state()
+                    .bootstrap
+                    .configuration;
+                TargetReadyEvidence::from_status(configuration, t)
+                    .unwrap_or_else(|e| panic!("{:?}", e.0))
+            })
+            .collect();
+        let publication = TransferPublication::new(
+            OperationId::new(200).unwrap(),
+            source_fixture::intent(),
+            vec![source],
+            targets,
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        campaign(&mut self.parent, &self.clock, 1);
+        let _ = propose_recovering(
+            &mut self.parent,
+            &self.clock,
+            1,
+            201,
+            publication.encode(65536).unwrap(),
+        );
+        Phase::Publish
     }
     fn close_all(&mut self) {
         if self.checkpoint {
@@ -489,32 +491,7 @@ fn data(key: u8, delta: i64) -> Vec<u8> {
     )
     .unwrap()
 }
-fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Split::new(protocol, checkpoint);
-    let expected = [
-        Phase::Intent,
-        Phase::Stage(21),
-        Phase::Stage(22),
-        Phase::Fence,
-        Phase::Import(21),
-        Phase::Import(22),
-        Phase::Publish,
-        Phase::Activate(21),
-        Phase::Activate(22),
-    ];
-    for phase in expected {
-        eprintln!("split {protocol:?} checkpoint={checkpoint} phase={phase:?}");
-        assert_eq!(rig.resume_one(), phase);
-        let before = rig.observed(); // Oracle only; not supplied to resume_one.
-        rig.serving(&before);
-        rig.restart();
-        let recovered = rig.observed();
-        assert_eq!(recovered, before, "recovered {phase:?}");
-        rig.serving(&recovered);
-    }
-    assert_eq!(rig.resume_one(), Phase::Done);
-    let original = rig.observed();
+fn write_independent_children(rig: &mut Split) {
     // Both target scopes remain usable with all ancestor/source workers stopped.
     close(std::mem::take(&mut rig.parent), &rig.clock, 1, || {
         for target in &mut rig.targets {
@@ -550,6 +527,34 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
         };
         assert_eq!(write.outcome, BucketOutcome::Value(value + 2));
     }
+}
+fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let mut rig = Split::new(protocol, checkpoint);
+    let expected = [
+        Phase::Intent,
+        Phase::Stage(21),
+        Phase::Stage(22),
+        Phase::Fence,
+        Phase::Import(21),
+        Phase::Import(22),
+        Phase::Publish,
+        Phase::Activate(21),
+        Phase::Activate(22),
+    ];
+    for phase in expected {
+        eprintln!("split {protocol:?} checkpoint={checkpoint} phase={phase:?}");
+        assert_eq!(rig.resume_one(), phase);
+        let before = rig.observed(); // Oracle only; not supplied to resume_one.
+        rig.serving(&before);
+        rig.restart();
+        let recovered = rig.observed();
+        assert_eq!(recovered, before, "recovered {phase:?}");
+        rig.serving(&recovered);
+    }
+    assert_eq!(rig.resume_one(), Phase::Done);
+    let original = rig.observed();
+    write_independent_children(&mut rig);
     // Reopen once more after child writes. No phase can be performed twice.
     rig.restart();
     assert_eq!(rig.resume_one(), Phase::Done);

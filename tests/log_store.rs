@@ -69,28 +69,7 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
         store.fetch_range(group(1), base.generation, 2, 2, 1024),
         Err(StorageError::Compacted { first_index: 3 })
     );
-    for (index, term, owner) in [(1, 1, 1), (3, 2, 1), (3, 1, 2)] {
-        let mut bad = reference;
-        bad.index = index;
-        bad.term = term;
-        bad.store = identity(owner);
-        let mutation = LogUpdate {
-            snapshot_membership: None,
-            group: group(1),
-            expected_revision: base.revision,
-            hard_state: HardState {
-                term: 2,
-                voted_for: None,
-            },
-            commit_index: 3,
-            suffix: None,
-            snapshot: Some(bad),
-        };
-        assert!(store
-            .append_batch(vec![LogMutation::Update(mutation)])
-            .is_err());
-        assert_eq!(store.state(group(1)).unwrap(), base);
-    }
+    reject_invalid_snapshots(&mut store, &base, reference);
     assert!(store
         .append_batch(vec![update(
             &base,
@@ -122,6 +101,35 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
             .unwrap(),
         vec![entry(3, 1, 3), entry(4, 2, 9)]
     );
+}
+
+fn reject_invalid_snapshots<S: LogStore>(
+    store: &mut S,
+    base: &GroupLog,
+    reference: voteboat::snapshot::SnapshotRef,
+) {
+    for (index, term, owner) in [(1, 1, 1), (3, 2, 1), (3, 1, 2)] {
+        let mut bad = reference;
+        bad.index = index;
+        bad.term = term;
+        bad.store = identity(owner);
+        let mutation = LogUpdate {
+            snapshot_membership: None,
+            group: group(1),
+            expected_revision: base.revision,
+            hard_state: HardState {
+                term: 2,
+                voted_for: None,
+            },
+            commit_index: 3,
+            suffix: None,
+            snapshot: Some(bad),
+        };
+        assert!(store
+            .append_batch(vec![LogMutation::Update(mutation)])
+            .is_err());
+        assert_eq!(&store.state(group(1)).unwrap(), base);
+    }
 }
 
 #[test]

@@ -332,28 +332,7 @@ impl Delegated {
     fn resume_one(&mut self) -> Phase {
         let state = self.observed();
         if state.reservation.is_none() {
-            campaign(&mut self.parent, &self.clock, 100);
-            phase_write(
-                self.insertion_plan.is_some(),
-                &mut self.parent,
-                &self.clock,
-                100,
-                self.reservation_operation,
-                self.insertion_plan
-                    .clone()
-                    .unwrap_or_else(|| {
-                        DelegationPlan::new(
-                            fixture::parent(),
-                            fixture::before(),
-                            fixture::after(),
-                            OperationId::new(self.transfer_operation).unwrap(),
-                        )
-                        .unwrap()
-                    })
-                    .encode(65536)
-                    .unwrap(),
-            );
-            return Phase::Reserve;
+            return self.reserve();
         }
         let reservation = state.reservation.unwrap();
         let cfg = self.parent[0]
@@ -378,43 +357,8 @@ impl Delegated {
             return Phase::Intent;
         }
         assert_eq!(state.intent.unwrap().intent, intent);
-        for i in 0..2 {
-            if state.targets[i]
-                .as_ref()
-                .is_none_or(|t| t.staged_index.is_none())
-            {
-                let g = 21 + i as u128;
-                if self.targets[i].is_empty() {
-                    self.targets[i] = open(
-                        configuration(
-                            &self.root,
-                            g,
-                            &[1, 2, 3],
-                            if self.insertion_plan.is_some() {
-                                NativeOpenMode::Recover
-                            } else {
-                                NativeOpenMode::Create
-                            },
-                        ),
-                        &self.clock,
-                        self.protocol,
-                        || fixture::fresh_target_for(g, &intent, self.transfer_operation),
-                    );
-                }
-                let bytes = self.targets[i][0].local().applications[&group(g)]
-                    .bootstrap_command(65536)
-                    .unwrap();
-                campaign(&mut self.targets[i], &self.clock, g);
-                phase_write(
-                    self.insertion_plan.is_some(),
-                    &mut self.targets[i],
-                    &self.clock,
-                    g,
-                    self.transfer_operation,
-                    bytes,
-                );
-                return Phase::Stage(g);
-            }
+        if let Some(phase) = self.stage_targets(&state.targets, &intent) {
+            return phase;
         }
         if state.source.is_none() {
             campaign(&mut self.source, &self.clock, 20);
@@ -437,80 +381,11 @@ impl Delegated {
             .state()
             .bootstrap
             .configuration;
-        for i in 0..2 {
-            if state.targets[i].as_ref().unwrap().imported.is_none() {
-                let g = 21 + i as u128;
-                let digest = frozen
-                    .exports
-                    .iter()
-                    .find(|e| e.target == group(g))
-                    .unwrap()
-                    .digest;
-                let import = TargetImport::new(
-                    OperationId::new(self.transfer_operation).unwrap(),
-                    intent.clone(),
-                    group(g),
-                    vec![SourceImport {
-                        fence: frozen.fence,
-                        configuration: source_cfg,
-                        image: self.source[0].local().applications[&group(20)]
-                            .export_target(group(g), 65536)
-                            .unwrap(),
-                        digest,
-                    }],
-                )
-                .unwrap_or_else(|e| panic!("{:?}", e.0));
-                let bytes = self.targets[i][0].local().applications[&group(g)]
-                    .import_command(&import, 65536)
-                    .unwrap();
-                campaign(&mut self.targets[i], &self.clock, g);
-                phase_write(
-                    self.insertion_plan.is_some(),
-                    &mut self.targets[i],
-                    &self.clock,
-                    g,
-                    self.transfer_operation,
-                    bytes,
-                );
-                return Phase::Import(g);
-            }
+        if let Some(phase) = self.import_targets(&state.targets, &intent, &frozen, source_cfg) {
+            return phase;
         }
         if state.decision.is_none() {
-            let ready = state
-                .targets
-                .into_iter()
-                .enumerate()
-                .map(|(i, t)| {
-                    let cfg = self.targets[i][0]
-                        .local()
-                        .owner
-                        .core(group(21 + i as u128))
-                        .unwrap()
-                        .state()
-                        .bootstrap
-                        .configuration;
-                    TargetReadyEvidence::from_status(cfg, t.unwrap())
-                        .unwrap_or_else(|e| panic!("{:?}", e.0))
-                })
-                .collect();
-            let publication = TransferPublication::new(
-                OperationId::new(self.transfer_operation).unwrap(),
-                intent,
-                vec![SourceFenceEvidence::from_status(source_cfg, frozen)
-                    .unwrap_or_else(|e| panic!("{:?}", e.0))],
-                ready,
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            campaign(&mut self.child, &self.clock, 1);
-            phase_write(
-                self.insertion_plan.is_some(),
-                &mut self.child,
-                &self.clock,
-                1,
-                self.transfer_operation + 1,
-                publication.encode(65536).unwrap(),
-            );
-            return Phase::ChildPublication;
+            return self.publish_child(state.targets, intent, frozen, source_cfg);
         }
         let decision = state.decision.unwrap();
         let child_cfg = self.child[0]
@@ -544,8 +419,16 @@ impl Delegated {
             state.parent_publication.unwrap().completion.decision,
             decision
         );
-        for i in 0..2 {
-            if state.targets[i].as_ref().unwrap().activated.is_none() {
+        self.activate_targets(&state.targets, decision, child_cfg)
+    }
+    fn activate_targets(
+        &mut self,
+        targets: &[Option<TargetStatus>; 2],
+        decision: TransferPublicationStatus,
+        child_cfg: ConfigurationId,
+    ) -> Phase {
+        for (i, target) in targets.iter().enumerate() {
+            if target.as_ref().unwrap().activated.is_none() {
                 let g = 21 + i as u128;
                 let bytes = self.targets[i][0].local().applications[&group(g)]
                     .activation_command(
@@ -569,6 +452,161 @@ impl Delegated {
             }
         }
         Phase::Done
+    }
+    fn reserve(&mut self) -> Phase {
+        campaign(&mut self.parent, &self.clock, 100);
+        phase_write(
+            self.insertion_plan.is_some(),
+            &mut self.parent,
+            &self.clock,
+            100,
+            self.reservation_operation,
+            self.insertion_plan
+                .clone()
+                .unwrap_or_else(|| {
+                    DelegationPlan::new(
+                        fixture::parent(),
+                        fixture::before(),
+                        fixture::after(),
+                        OperationId::new(self.transfer_operation).unwrap(),
+                    )
+                    .unwrap()
+                })
+                .encode(65536)
+                .unwrap(),
+        );
+        Phase::Reserve
+    }
+    fn stage_targets(
+        &mut self,
+        targets: &[Option<TargetStatus>; 2],
+        intent: &TransferIntent,
+    ) -> Option<Phase> {
+        for (i, target) in targets.iter().enumerate() {
+            if target.as_ref().is_none_or(|t| t.staged_index.is_none()) {
+                let g = 21 + i as u128;
+                if self.targets[i].is_empty() {
+                    self.targets[i] = open(
+                        configuration(
+                            &self.root,
+                            g,
+                            &[1, 2, 3],
+                            if self.insertion_plan.is_some() {
+                                NativeOpenMode::Recover
+                            } else {
+                                NativeOpenMode::Create
+                            },
+                        ),
+                        &self.clock,
+                        self.protocol,
+                        || fixture::fresh_target_for(g, intent, self.transfer_operation),
+                    );
+                }
+                let bytes = self.targets[i][0].local().applications[&group(g)]
+                    .bootstrap_command(65536)
+                    .unwrap();
+                campaign(&mut self.targets[i], &self.clock, g);
+                phase_write(
+                    self.insertion_plan.is_some(),
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    self.transfer_operation,
+                    bytes,
+                );
+                return Some(Phase::Stage(g));
+            }
+        }
+        None
+    }
+    fn import_targets(
+        &mut self,
+        targets: &[Option<TargetStatus>; 2],
+        intent: &TransferIntent,
+        frozen: &SourceFreezeStatus,
+        source_cfg: ConfigurationId,
+    ) -> Option<Phase> {
+        for (i, target) in targets.iter().enumerate() {
+            if target.as_ref().unwrap().imported.is_none() {
+                let g = 21 + i as u128;
+                let digest = frozen
+                    .exports
+                    .iter()
+                    .find(|e| e.target == group(g))
+                    .unwrap()
+                    .digest;
+                let import = TargetImport::new(
+                    OperationId::new(self.transfer_operation).unwrap(),
+                    intent.clone(),
+                    group(g),
+                    vec![SourceImport {
+                        fence: frozen.fence,
+                        configuration: source_cfg,
+                        image: self.source[0].local().applications[&group(20)]
+                            .export_target(group(g), 65536)
+                            .unwrap(),
+                        digest,
+                    }],
+                )
+                .unwrap_or_else(|e| panic!("{:?}", e.0));
+                let bytes = self.targets[i][0].local().applications[&group(g)]
+                    .import_command(&import, 65536)
+                    .unwrap();
+                campaign(&mut self.targets[i], &self.clock, g);
+                phase_write(
+                    self.insertion_plan.is_some(),
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    self.transfer_operation,
+                    bytes,
+                );
+                return Some(Phase::Import(g));
+            }
+        }
+        None
+    }
+    fn publish_child(
+        &mut self,
+        targets: [Option<TargetStatus>; 2],
+        intent: TransferIntent,
+        frozen: SourceFreezeStatus,
+        source_cfg: ConfigurationId,
+    ) -> Phase {
+        let ready = targets
+            .into_iter()
+            .enumerate()
+            .map(|(i, t)| {
+                let cfg = self.targets[i][0]
+                    .local()
+                    .owner
+                    .core(group(21 + i as u128))
+                    .unwrap()
+                    .state()
+                    .bootstrap
+                    .configuration;
+                TargetReadyEvidence::from_status(cfg, t.unwrap())
+                    .unwrap_or_else(|e| panic!("{:?}", e.0))
+            })
+            .collect();
+        let publication = TransferPublication::new(
+            OperationId::new(self.transfer_operation).unwrap(),
+            intent,
+            vec![SourceFenceEvidence::from_status(source_cfg, frozen)
+                .unwrap_or_else(|e| panic!("{:?}", e.0))],
+            ready,
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        campaign(&mut self.child, &self.clock, 1);
+        phase_write(
+            self.insertion_plan.is_some(),
+            &mut self.child,
+            &self.clock,
+            1,
+            self.transfer_operation + 1,
+            publication.encode(65536).unwrap(),
+        );
+        Phase::ChildPublication
     }
     fn check_service(&mut self, state: &Observed) {
         assert_eq!(state.root, fixture::grandparent());

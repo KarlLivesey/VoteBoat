@@ -266,41 +266,16 @@ impl Repeated {
             }
         }
         if state.target.imported.is_none() {
-            let sources = state
-                .fences
-                .iter()
-                .enumerate()
-                .map(|(i, status)| {
-                    let status = status.as_ref().unwrap();
-                    let g = 21 + i as u128;
-                    let configuration = self.split.targets[i][0]
-                        .local()
-                        .owner
-                        .core(group(g))
-                        .unwrap()
-                        .state()
-                        .bootstrap
-                        .configuration;
-                    let image = self.split.targets[i][0].local().applications[&group(g)]
-                        .export_target(group(23), 65536)
-                        .unwrap();
-                    SourceImport {
-                        fence: status.fence,
-                        configuration,
-                        image,
-                        digest: status.exports[0].digest,
-                    }
-                })
-                .collect();
-            let import = TargetImport::new(id, intent, group(23), sources)
-                .unwrap_or_else(|e| panic!("{:?}", e.0));
-            let bytes = self.merged[0].local().applications[&group(23)]
-                .import_command(&import, 65536)
-                .unwrap();
-            campaign(&mut self.merged, &self.split.clock, 23);
-            let _ = propose_recovering(&mut self.merged, &self.split.clock, 23, 300, bytes);
-            return LaterPhase::Import;
+            return self.import_frozen_sources(&state, id, intent);
         }
+        self.publish(state, id, intent)
+    }
+    fn publish(
+        &mut self,
+        state: LaterObserved,
+        id: OperationId,
+        intent: TransferIntent,
+    ) -> LaterPhase {
         let sources = state
             .fences
             .into_iter()
@@ -339,6 +314,47 @@ impl Repeated {
             publication.encode(65536).unwrap(),
         );
         LaterPhase::Publish
+    }
+    fn import_frozen_sources(
+        &mut self,
+        state: &LaterObserved,
+        id: OperationId,
+        intent: TransferIntent,
+    ) -> LaterPhase {
+        let sources = state
+            .fences
+            .iter()
+            .enumerate()
+            .map(|(i, status)| {
+                let status = status.as_ref().unwrap();
+                let g = 21 + i as u128;
+                let configuration = self.split.targets[i][0]
+                    .local()
+                    .owner
+                    .core(group(g))
+                    .unwrap()
+                    .state()
+                    .bootstrap
+                    .configuration;
+                let image = self.split.targets[i][0].local().applications[&group(g)]
+                    .export_target(group(23), 65536)
+                    .unwrap();
+                SourceImport {
+                    fence: status.fence,
+                    configuration,
+                    image,
+                    digest: status.exports[0].digest,
+                }
+            })
+            .collect();
+        let import = TargetImport::new(id, intent, group(23), sources)
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let bytes = self.merged[0].local().applications[&group(23)]
+            .import_command(&import, 65536)
+            .unwrap();
+        campaign(&mut self.merged, &self.split.clock, 23);
+        let _ = propose_recovering(&mut self.merged, &self.split.clock, 23, 300, bytes);
+        LaterPhase::Import
     }
     fn close_merged(&mut self) {
         if self.split.checkpoint {

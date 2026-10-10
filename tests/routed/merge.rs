@@ -291,56 +291,59 @@ impl Merge {
             return Phase::Import;
         }
         if state.publication.is_none() {
-            let sources = state
-                .sources
-                .into_iter()
-                .enumerate()
-                .map(|(i, source)| {
-                    let SourceObservation::Known(Some(status)) = source else {
-                        panic!("source fence")
-                    };
-                    let configuration = self.sources[i][0]
-                        .local()
-                        .owner
-                        .core(group(21 + i as u128))
-                        .unwrap()
-                        .state()
-                        .bootstrap
-                        .configuration;
-                    SourceFenceEvidence::from_status(configuration, status)
-                        .unwrap_or_else(|e| panic!("{:?}", e.0))
-                })
-                .collect();
-            let target = TargetReadyEvidence::from_status(
-                self.target[0]
+            return self.publish(state);
+        }
+        unreachable!("a retained publication activates before querying source availability")
+    }
+    fn publish(&mut self, state: Observed) -> Phase {
+        let sources = state
+            .sources
+            .into_iter()
+            .enumerate()
+            .map(|(i, source)| {
+                let SourceObservation::Known(Some(status)) = source else {
+                    panic!("source fence")
+                };
+                let configuration = self.sources[i][0]
                     .local()
                     .owner
-                    .core(group(23))
+                    .core(group(21 + i as u128))
                     .unwrap()
                     .state()
                     .bootstrap
-                    .configuration,
-                state.target,
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            let publication = TransferPublication::new(
-                OperationId::new(200).unwrap(),
-                fixture::intent(),
-                sources,
-                vec![target],
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            campaign(&mut self.parent, &self.clock, 1);
-            let _ = propose_recovering(
-                &mut self.parent,
-                &self.clock,
-                1,
-                201,
-                publication.encode(65536).unwrap(),
-            );
-            return Phase::Publish;
-        }
-        unreachable!("a retained publication activates before querying source availability")
+                    .configuration;
+                SourceFenceEvidence::from_status(configuration, status)
+                    .unwrap_or_else(|e| panic!("{:?}", e.0))
+            })
+            .collect();
+        let target = TargetReadyEvidence::from_status(
+            self.target[0]
+                .local()
+                .owner
+                .core(group(23))
+                .unwrap()
+                .state()
+                .bootstrap
+                .configuration,
+            state.target,
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let publication = TransferPublication::new(
+            OperationId::new(200).unwrap(),
+            fixture::intent(),
+            sources,
+            vec![target],
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        campaign(&mut self.parent, &self.clock, 1);
+        let _ = propose_recovering(
+            &mut self.parent,
+            &self.clock,
+            1,
+            201,
+            publication.encode(65536).unwrap(),
+        );
+        Phase::Publish
     }
     fn close_all(&mut self) {
         if self.checkpoint {
@@ -509,98 +512,42 @@ impl Merge {
         self.serving(&recovered);
     }
 }
-fn interrupted(protocol: NativePeerProtocol, checkpoint: bool, collision: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let mut rig = Merge::new(protocol, checkpoint, collision);
-    let phases = [
-        Phase::Intent,
-        Phase::Stage,
-        Phase::Fence(21),
-        Phase::Fence(22),
-        Phase::Import,
-        Phase::Publish,
-        Phase::Activate,
-    ];
-    for phase in phases {
-        eprintln!(
-            "merge {protocol:?} checkpoint={checkpoint} collision={collision} phase={phase:?}"
-        );
-        if collision && phase == Phase::Import {
-            let before = rig.observed();
-            let bytes = rig.import_command(&before);
-            campaign(&mut rig.target, &rig.clock, 23);
-            let checkpoint = rig.target[0].local().applications[&group(23)]
-                .checkpoint(200000)
-                .unwrap();
-            let rejected = rig.target[0]
-                .propose(ClientRequest {
-                    group: group(23),
-                    operation: OperationId::new(200).unwrap(),
-                    bytes,
-                })
-                .unwrap_err();
-            assert!(matches!(rejected.reason, ClientError::Application(_)));
-            assert_eq!(
-                rig.target[0].local().applications[&group(23)]
-                    .checkpoint(200000)
-                    .unwrap(),
-                checkpoint
-            );
-            assert!(
-                before.target.imported.is_none()
-                    && before.target.activated.is_none()
-                    && before.publication.is_none()
-            );
-            rig.restart();
-            let recovered = rig.observed();
-            assert_eq!(recovered, before);
-            rig.serving(&recovered);
-            assert!(TargetReadyEvidence::from_status(
-                ConfigurationId::new(1).unwrap(),
-                recovered.target
-            )
-            .is_err());
-            rig.close_all();
-            std::fs::remove_dir_all(rig.root).unwrap();
-            return;
-        }
-        let original_sources = if phase == Phase::Activate {
-            let previous = rig.observed();
-            for i in 0..2 {
-                close(
-                    std::mem::take(&mut rig.sources[i]),
-                    &rig.clock,
-                    21 + i as u128,
-                    || {
-                        drive(&mut rig.parent, &rig.clock, |_| true);
-                        drive(&mut rig.target, &rig.clock, |_| true);
-                    },
-                );
-            }
-            Some(previous.sources)
-        } else {
-            None
-        };
-        assert_eq!(rig.resume_one(), phase);
-        let mut before = rig.observed();
-        rig.serving(&before);
-        rig.restart();
-        let recovered = rig.observed();
-        if let Some(sources) = original_sources {
-            assert!(before
-                .sources
-                .iter()
-                .all(|source| *source == SourceObservation::Unavailable));
-            before.sources = sources;
-        }
-        assert_eq!(recovered, before, "recovered {phase:?}");
-        rig.serving(&recovered);
-        if phase == Phase::Fence(21) {
-            rig.pause_right(&recovered);
-        }
-    }
-    assert_eq!(rig.resume_one(), Phase::Done);
-    let original = rig.observed();
+fn reject_colliding_import(rig: &mut Merge) {
+    let before = rig.observed();
+    let bytes = rig.import_command(&before);
+    campaign(&mut rig.target, &rig.clock, 23);
+    let checkpoint = rig.target[0].local().applications[&group(23)]
+        .checkpoint(200000)
+        .unwrap();
+    let rejected = rig.target[0]
+        .propose(ClientRequest {
+            group: group(23),
+            operation: OperationId::new(200).unwrap(),
+            bytes,
+        })
+        .unwrap_err();
+    assert!(matches!(rejected.reason, ClientError::Application(_)));
+    assert_eq!(
+        rig.target[0].local().applications[&group(23)]
+            .checkpoint(200000)
+            .unwrap(),
+        checkpoint
+    );
+    assert!(
+        before.target.imported.is_none()
+            && before.target.activated.is_none()
+            && before.publication.is_none()
+    );
+    rig.restart();
+    let recovered = rig.observed();
+    assert_eq!(recovered, before);
+    rig.serving(&recovered);
+    assert!(
+        TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), recovered.target)
+            .is_err()
+    );
+}
+fn write_merged_service(rig: &mut Merge) {
     close(std::mem::take(&mut rig.parent), &rig.clock, 1, || {
         for source in &mut rig.sources {
             drive(source, &rig.clock, |_| true);
@@ -647,9 +594,8 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool, collision: bool) 
         };
         assert_eq!(r.outcome, BucketOutcome::Value(value));
     }
-    rig.restart();
-    assert_eq!(rig.resume_one(), Phase::Done);
-    assert_eq!(rig.observed(), original);
+}
+fn verify_merged_recovery(rig: &mut Merge) {
     for (key, value) in [(1, 9), (200, 16)] {
         assert_eq!(
             observe(
@@ -703,6 +649,71 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool, collision: bool) 
             SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
         );
     }
+}
+fn interrupted(protocol: NativePeerProtocol, checkpoint: bool, collision: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let mut rig = Merge::new(protocol, checkpoint, collision);
+    let phases = [
+        Phase::Intent,
+        Phase::Stage,
+        Phase::Fence(21),
+        Phase::Fence(22),
+        Phase::Import,
+        Phase::Publish,
+        Phase::Activate,
+    ];
+    for phase in phases {
+        eprintln!(
+            "merge {protocol:?} checkpoint={checkpoint} collision={collision} phase={phase:?}"
+        );
+        if collision && phase == Phase::Import {
+            reject_colliding_import(&mut rig);
+            rig.close_all();
+            std::fs::remove_dir_all(rig.root).unwrap();
+            return;
+        }
+        let original_sources = if phase == Phase::Activate {
+            let previous = rig.observed();
+            for i in 0..2 {
+                close(
+                    std::mem::take(&mut rig.sources[i]),
+                    &rig.clock,
+                    21 + i as u128,
+                    || {
+                        drive(&mut rig.parent, &rig.clock, |_| true);
+                        drive(&mut rig.target, &rig.clock, |_| true);
+                    },
+                );
+            }
+            Some(previous.sources)
+        } else {
+            None
+        };
+        assert_eq!(rig.resume_one(), phase);
+        let mut before = rig.observed();
+        rig.serving(&before);
+        rig.restart();
+        let recovered = rig.observed();
+        if let Some(sources) = original_sources {
+            assert!(before
+                .sources
+                .iter()
+                .all(|source| *source == SourceObservation::Unavailable));
+            before.sources = sources;
+        }
+        assert_eq!(recovered, before, "recovered {phase:?}");
+        rig.serving(&recovered);
+        if phase == Phase::Fence(21) {
+            rig.pause_right(&recovered);
+        }
+    }
+    assert_eq!(rig.resume_one(), Phase::Done);
+    let original = rig.observed();
+    write_merged_service(&mut rig);
+    rig.restart();
+    assert_eq!(rig.resume_one(), Phase::Done);
+    assert_eq!(rig.observed(), original);
+    verify_merged_recovery(&mut rig);
     rig.close_all();
     std::fs::remove_dir_all(rig.root).unwrap();
 }

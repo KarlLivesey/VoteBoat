@@ -67,41 +67,8 @@ impl Cross {
                 NativeOpenMode::Recover,
             )
         });
-        let creations = std::array::from_fn(|i| {
-            campaign(&mut rig.child, &rig.clock, 1);
-            let c = GroupCreationIntent {
-                authority: group(1),
-                parent: fixture::before().input().responsibility,
-                expected: fixture::before().input().generation,
-                responsibility: fixture::id(21 + i as u128),
-                bootstrap: configurations[i][0].bootstrap.clone(),
-                application: fixture::before().input().application,
-                mode: GroupCreationMode::Staging,
-            };
-            assert_eq!(
-                propose_recovering(
-                    &mut rig.child,
-                    &rig.clock,
-                    1,
-                    1002 + i as u128,
-                    c.encode(100000).unwrap()
-                )
-                .outcome,
-                DirectoryOutcome::CreationReserved
-            );
-            let _ = manifest(
-                &mut rig.child,
-                &rig.clock,
-                1,
-                fixture::before().input().responsibility,
-            );
-            let core = rig.child[0].local().owner.core(group(1)).unwrap();
-            rig.child[0].local().applications[&group(1)]
-                .directory()
-                .group_creation_at(core.state().commit_index, group(21 + i as u128))
-                .unwrap()
-                .unwrap()
-        });
+        let creations =
+            std::array::from_fn(|i| Self::reserve_creation(&mut rig, &configurations[i], i));
         for c in &configurations[0][..2] {
             establish(&rig.child, c, &creations[0]);
         }
@@ -161,6 +128,53 @@ impl Cross {
                 .unwrap(),
             );
         }
+        rig.insertion_plan = Some(Self::insertion_plan(children, rig.transfer_operation));
+        Self {
+            rig,
+            creations,
+            bindings,
+        }
+    }
+    fn reserve_creation(
+        rig: &mut Delegated,
+        configurations: &[NativeStartup],
+        i: usize,
+    ) -> GroupCreationStatus {
+        campaign(&mut rig.child, &rig.clock, 1);
+        let c = GroupCreationIntent {
+            authority: group(1),
+            parent: fixture::before().input().responsibility,
+            expected: fixture::before().input().generation,
+            responsibility: fixture::id(21 + i as u128),
+            bootstrap: configurations[0].bootstrap.clone(),
+            application: fixture::before().input().application,
+            mode: GroupCreationMode::Staging,
+        };
+        assert_eq!(
+            propose_recovering(
+                &mut rig.child,
+                &rig.clock,
+                1,
+                1002 + i as u128,
+                c.encode(100000).unwrap()
+            )
+            .outcome,
+            DirectoryOutcome::CreationReserved
+        );
+        let _ = manifest(
+            &mut rig.child,
+            &rig.clock,
+            1,
+            fixture::before().input().responsibility,
+        );
+        let core = rig.child[0].local().owner.core(group(1)).unwrap();
+        rig.child[0].local().applications[&group(1)]
+            .directory()
+            .group_creation_at(core.state().commit_index, group(21 + i as u128))
+            .unwrap()
+            .unwrap()
+    }
+    fn insertion_plan(children: Vec<InsertionChild>, transfer_operation: u128) -> DelegationPlan {
         let mut after = fixture::before().into_input();
         after.epoch = OwnershipEpoch::new(2).unwrap();
         after.generation = RouteGeneration::new(2).unwrap();
@@ -177,20 +191,170 @@ impl Cross {
                 })
                 .collect(),
         );
-        rig.insertion_plan = Some(
-            DelegationPlan::cross_authority_insertion(
-                fixture::parent(),
-                fixture::before(),
-                ResponsibilityManifest::new(after).unwrap(),
-                children,
-                OperationId::new(rig.transfer_operation).unwrap(),
-            )
-            .unwrap(),
-        );
-        Self {
-            rig,
-            creations,
-            bindings,
+
+        DelegationPlan::cross_authority_insertion(
+            fixture::parent(),
+            fixture::before(),
+            ResponsibilityManifest::new(after).unwrap(),
+            children,
+            OperationId::new(transfer_operation).unwrap(),
+        )
+        .unwrap()
+    }
+    fn retry_metadata(
+        &mut self,
+        phase: Phase,
+        state: &Observed,
+        intent: &TransferIntent,
+        operation: u128,
+    ) {
+        let (g, id, bytes) = match phase {
+            Phase::Reserve => (
+                100,
+                self.rig.reservation_operation,
+                state
+                    .reservation
+                    .as_ref()
+                    .unwrap()
+                    .plan
+                    .encode(65536)
+                    .unwrap(),
+            ),
+            Phase::Intent => (1, operation, intent.encode(65536).unwrap()),
+            Phase::ChildPublication => (
+                1,
+                operation + 1,
+                state
+                    .decision
+                    .as_ref()
+                    .unwrap()
+                    .publication
+                    .encode(65536)
+                    .unwrap(),
+            ),
+            Phase::ParentPublication => (
+                100,
+                self.rig.reservation_operation + 1,
+                state
+                    .parent_publication
+                    .as_ref()
+                    .unwrap()
+                    .completion
+                    .encode(MAX_DELEGATION_COMPLETION_BYTES)
+                    .unwrap(),
+            ),
+            _ => unreachable!(),
+        };
+        let nodes = if g == 100 {
+            &mut self.rig.parent
+        } else {
+            &mut self.rig.child
+        };
+        campaign(nodes, &self.rig.clock, g);
+        assert!(propose_recovering(nodes, &self.rig.clock, g, id, bytes).duplicate);
+    }
+    fn serve_targets(
+        &mut self,
+        intent: &TransferIntent,
+        decision: &TransferPublicationStatus,
+        child_cfg: ConfigurationId,
+    ) {
+        let checkpoint = self.rig.checkpoint;
+        let protocol = self.rig.protocol;
+        for (i, g, key, operation, value) in [(0, 21, 1, 1, 7), (1, 22, 200, 2, 11)] {
+            let m = intent.target_manifest(group(g)).unwrap();
+            let h = hint(m, key);
+            assert_eq!(
+                observe(
+                    &mut self.rig.targets[i],
+                    &self.rig.clock,
+                    g,
+                    TargetQuery::Data(RoutedQuery {
+                        hint: h,
+                        key: vec![key],
+                        query: vec![key]
+                    })
+                ),
+                TargetRead::NotActive
+            );
+            let bytes = self.rig.targets[i][0].local().applications[&group(g)]
+                .activation_command(
+                    &TargetActivation {
+                        metadata_configuration: child_cfg,
+                        decision: decision.clone(),
+                    },
+                    65536,
+                )
+                .unwrap();
+            campaign(&mut self.rig.targets[i], &self.rig.clock, g);
+            phase_write(
+                true,
+                &mut self.rig.targets[i],
+                &self.rig.clock,
+                g,
+                self.rig.transfer_operation,
+                bytes.clone(),
+            );
+            let TargetRead::Status(activated) = observe(
+                &mut self.rig.targets[i],
+                &self.rig.clock,
+                g,
+                TargetQuery::Status,
+            ) else {
+                panic!("activated status");
+            };
+            if checkpoint {
+                compact(&mut self.rig.targets[i], &self.rig.clock, g);
+            }
+            creation::abandon(std::mem::take(&mut self.rig.targets[i]), g);
+            self.rig.targets[i] = open(
+                configuration(&self.rig.root, g, &[1, 2, 3], NativeOpenMode::Recover),
+                &self.rig.clock,
+                protocol,
+                || fixture::fresh_target_for(g, intent, self.rig.transfer_operation),
+            );
+            campaign(&mut self.rig.targets[i], &self.rig.clock, g);
+            assert!(
+                matches!(propose_recovering(&mut self.rig.targets[i],&self.rig.clock,g,
+            self.rig.transfer_operation,bytes).outcome,TargetOutcome::Activated(v) if Some(v)==activated.activated)
+            );
+            let write = |delta| {
+                encode_routed(
+                    h,
+                    &[key],
+                    &encode_add(&[key], delta, b"effect", 1024).unwrap(),
+                    4096,
+                )
+                .unwrap()
+            };
+            assert!(
+                matches!(propose_recovering(&mut self.rig.targets[i],&self.rig.clock,g,operation,write(value)).outcome,
+            TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
+            );
+            assert_eq!(
+                self.rig.targets[i][0].local().applications[&group(g)]
+                    .application()
+                    .outbox()
+                    .count(),
+                1
+            );
+            assert!(
+                matches!(propose_recovering(&mut self.rig.targets[i],&self.rig.clock,g,100+operation,write(2)).outcome,
+            TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
+            );
+            assert_eq!(
+                observe(
+                    &mut self.rig.targets[i],
+                    &self.rig.clock,
+                    g,
+                    TargetQuery::Data(RoutedQuery {
+                        hint: h,
+                        key: vec![key],
+                        query: vec![key]
+                    })
+                ),
+                TargetRead::Data(value + 2)
+            );
         }
     }
     fn observed(&mut self) -> (Observed, [Option<ResponsibilityManifest>; 2]) {
@@ -293,50 +457,7 @@ impl Cross {
             .unwrap();
         match phase {
             Phase::Reserve | Phase::Intent | Phase::ChildPublication | Phase::ParentPublication => {
-                let (g, id, bytes) = match phase {
-                    Phase::Reserve => (
-                        100,
-                        self.rig.reservation_operation,
-                        state
-                            .reservation
-                            .as_ref()
-                            .unwrap()
-                            .plan
-                            .encode(65536)
-                            .unwrap(),
-                    ),
-                    Phase::Intent => (1, operation, intent.encode(65536).unwrap()),
-                    Phase::ChildPublication => (
-                        1,
-                        operation + 1,
-                        state
-                            .decision
-                            .as_ref()
-                            .unwrap()
-                            .publication
-                            .encode(65536)
-                            .unwrap(),
-                    ),
-                    Phase::ParentPublication => (
-                        100,
-                        self.rig.reservation_operation + 1,
-                        state
-                            .parent_publication
-                            .as_ref()
-                            .unwrap()
-                            .completion
-                            .encode(MAX_DELEGATION_COMPLETION_BYTES)
-                            .unwrap(),
-                    ),
-                    _ => unreachable!(),
-                };
-                let nodes = if g == 100 {
-                    &mut self.rig.parent
-                } else {
-                    &mut self.rig.child
-                };
-                campaign(nodes, &self.rig.clock, g);
-                assert!(propose_recovering(nodes, &self.rig.clock, g, id, bytes).duplicate);
+                self.retry_metadata(phase, state, &intent, operation);
             }
             Phase::Stage(g) | Phase::Import(g) => {
                 let i = (g - 21) as usize;
@@ -501,101 +622,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         .into_iter()
         .map(|g| (g, durable_files(&cross.rig.root.join(g.to_string()))))
         .collect::<Vec<_>>();
-    for (i, g, key, operation, value) in [(0, 21, 1, 1, 7), (1, 22, 200, 2, 11)] {
-        let m = intent.target_manifest(group(g)).unwrap();
-        let h = hint(m, key);
-        assert_eq!(
-            observe(
-                &mut cross.rig.targets[i],
-                &cross.rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: h,
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::NotActive
-        );
-        let bytes = cross.rig.targets[i][0].local().applications[&group(g)]
-            .activation_command(
-                &TargetActivation {
-                    metadata_configuration: child_cfg,
-                    decision: decision.clone(),
-                },
-                65536,
-            )
-            .unwrap();
-        campaign(&mut cross.rig.targets[i], &cross.rig.clock, g);
-        phase_write(
-            true,
-            &mut cross.rig.targets[i],
-            &cross.rig.clock,
-            g,
-            cross.rig.transfer_operation,
-            bytes.clone(),
-        );
-        let TargetRead::Status(activated) = observe(
-            &mut cross.rig.targets[i],
-            &cross.rig.clock,
-            g,
-            TargetQuery::Status,
-        ) else {
-            panic!("activated status");
-        };
-        if checkpoint {
-            compact(&mut cross.rig.targets[i], &cross.rig.clock, g);
-        }
-        creation::abandon(std::mem::take(&mut cross.rig.targets[i]), g);
-        cross.rig.targets[i] = open(
-            configuration(&cross.rig.root, g, &[1, 2, 3], NativeOpenMode::Recover),
-            &cross.rig.clock,
-            protocol,
-            || fixture::fresh_target_for(g, &intent, cross.rig.transfer_operation),
-        );
-        campaign(&mut cross.rig.targets[i], &cross.rig.clock, g);
-        assert!(
-            matches!(propose_recovering(&mut cross.rig.targets[i],&cross.rig.clock,g,
-            cross.rig.transfer_operation,bytes).outcome,TargetOutcome::Activated(v) if Some(v)==activated.activated)
-        );
-        let write = |delta| {
-            encode_routed(
-                h,
-                &[key],
-                &encode_add(&[key], delta, b"effect", 1024).unwrap(),
-                4096,
-            )
-            .unwrap()
-        };
-        assert!(
-            matches!(propose_recovering(&mut cross.rig.targets[i],&cross.rig.clock,g,operation,write(value)).outcome,
-            TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
-        );
-        assert_eq!(
-            cross.rig.targets[i][0].local().applications[&group(g)]
-                .application()
-                .outbox()
-                .count(),
-            1
-        );
-        assert!(
-            matches!(propose_recovering(&mut cross.rig.targets[i],&cross.rig.clock,g,100+operation,write(2)).outcome,
-            TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
-        );
-        assert_eq!(
-            observe(
-                &mut cross.rig.targets[i],
-                &cross.rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: h,
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::Data(value + 2)
-        );
-    }
+    cross.serve_targets(&intent, &decision, child_cfg);
     for (g, files) in &stopped {
         assert_eq!(&durable_files(&cross.rig.root.join(g.to_string())), files);
     }

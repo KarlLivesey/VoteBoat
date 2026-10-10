@@ -168,29 +168,7 @@ fn vote_conformance<S: LogStore>(mut store: S) {
     assert_eq!(origin.configuration, ConfigurationId::new(1).unwrap());
     assert_eq!(origin.candidate_store, message.sender.identity);
     assert_eq!(core.membership().id(), ConfigurationId::new(1).unwrap());
-    // Correlation scope cannot manufacture another vote or replace its origin.
-    let mut retry = vote_request(10, 1);
-    retry.context.sequence = 2;
-    let ack = reply(core.step(Event::Receive(retry.clone())).unwrap());
-    assert_eq!(ack.context, retry.context);
-    assert_eq!(ack.configuration, retry.configuration);
-    assert!(matches!(ack.rpc, Rpc::Voted { granted: true }));
-    assert_eq!(core.state().ballot_origin, Some(origin));
-    let mut other = vote_request(11, 1);
-    other.from = node(3);
-    other.sender = HostLogStore::new(3).binding();
-    other.context.origin = other.sender;
-    assert!(matches!(
-        reply(core.step(Event::Receive(other.clone())).unwrap()).rpc,
-        Rpc::Voted { granted: false }
-    ));
-    other.sender.identity = identity(99);
-    other.context.origin = other.sender;
-    assert_eq!(
-        core.step(Event::Receive(other)),
-        Err(RaftError::WrongIdentity)
-    );
-    assert_eq!(core.state().ballot_origin, Some(origin));
+    check_vote_correlation(&mut core, origin);
     // A newer request scope/term cannot hide a stale candidate log. Observing
     // that term is still durable before the negative reply escapes.
     let effects = core.step(Event::Receive(request(12, 2))).unwrap();
@@ -216,6 +194,32 @@ fn vote_conformance<S: LogStore>(mut store: S) {
     assert_eq!(core.state().ballot_origin, None);
     assert_eq!(core.membership().id(), ConfigurationId::new(1).unwrap());
 }
+fn check_vote_correlation(core: &mut Raft, origin: BallotOrigin) {
+    // Correlation scope cannot manufacture another vote or replace its origin.
+    let mut retry = vote_request(10, 1);
+    retry.context.sequence = 2;
+    let ack = reply(core.step(Event::Receive(retry.clone())).unwrap());
+    assert_eq!(ack.context, retry.context);
+    assert_eq!(ack.configuration, retry.configuration);
+    assert!(matches!(ack.rpc, Rpc::Voted { granted: true }));
+    assert_eq!(core.state().ballot_origin, Some(origin));
+    let mut other = vote_request(11, 1);
+    other.from = node(3);
+    other.sender = HostLogStore::new(3).binding();
+    other.context.origin = other.sender;
+    assert!(matches!(
+        reply(core.step(Event::Receive(other.clone())).unwrap()).rpc,
+        Rpc::Voted { granted: false }
+    ));
+    other.sender.identity = identity(99);
+    other.context.origin = other.sender;
+    assert_eq!(
+        core.step(Event::Receive(other)),
+        Err(RaftError::WrongIdentity)
+    );
+    assert_eq!(core.state().ballot_origin, Some(origin));
+}
+
 #[test]
 fn host_vote_scope_preserves_durable_local_origin_and_single_vote() {
     vote_conformance(HostLogStore::new(2));

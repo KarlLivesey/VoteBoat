@@ -171,7 +171,9 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    completion requires strict all-target all-feature/core-only Clippy with no
    warnings. No suppressed baseline or increased thresholds. Production Clippy now passes in all-feature and core-only profiles after the
    directory, routed/log, native, consensus, runtime and transfer refactors.
-   Test/example violations remain explicit work; all-target Clippy still fails.
+   Examples now pass in all-feature/TLS profiles. Integration-test violations
+   remain explicit work; all-target Clippy still fails. Keep both strict checks
+   at zero after cleanup, and fix any new diagnostics in the same change.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -13957,3 +13959,73 @@ executable and examples have no diagnostics in that run. Next within mini item1:
 split shared retirement/recovery fixtures, storage/vote conformance phases and
 the reported nested merge retirement history; retain all assertions and failure
 boundaries. No thresholds or lint levels changed.
+
+### Shared storage and retirement test cleanup — schema plan
+
+Preserve test cases, assertions, exact durability boundaries and all three
+retirement publication fault modes. Use a private prepared-snapshot record for
+expected retirement status, frozen lineage, snapshot bytes and metadata. Keep
+native store ownership and drop/reopen order visible in the history; separate
+snapshot preparation/publication and final reclamation recovery checks. Separate
+compacted-log invalid-update checks and vote-correlation checks from their setup.
+For the reported nested merge history, separate continued child/sibling service
+and outbox checks after old owners stop, preserving file comparisons and reopen.
+These helpers make recovery phases independently readable without changing
+production contracts. Acceptance: affected host/native conformance tests,
+retirement histories and all four TCP/QUIC nested-merge cases; strict Clippy on
+the affected targets, with unrelated failures still reported. Continues mini
+item1 and supports storage/consensus and split/merge validation milestones.
+
+### Routed lifecycle test cleanup — schema plan
+
+Keep each split/merge resumption decision based on the same recovered quorum
+observations. Extract publication/import construction into named methods that
+consume those observations only on the selected branch. Split collision refusal,
+independent target writes, and post-restart source fencing checks into explicit
+phases, preserving their order and every assertion. For native retirement, group
+the existing cluster handles in a private fixture and separate bootstrap,
+activation-proof preparation and reclamation. Retain exact process shutdown,
+file comparison, retry and checkpoint behavior. Acceptance remains the same
+TCP/QUIC WAL/checkpoint histories and strict routed-target lint; no public API or
+protocol change. This continues the zero-diagnostic priority and supports the
+split/merge macro milestone.
+
+Extend the routed cleanup to cross-authority insertion and retained ownership:
+separate reserved creation, binding reconstruction, publication retry, and
+successor service checks. Keep durable observations as inputs, preserve partial
+creation and no-ancestor-write assertions, and leave restart/cleanup order
+explicit. No new production prerequisites or provider changes are needed.
+
+Extend the same phase separation to imported partial owners, deletion and
+reparenting. Preserve source export at its original applied boundary, distinct
+publication/activation observations, retained child retries and proof validation.
+A generic retained-child retry helper must receive the original group, key,
+operation and value explicitly. Keep the same final shutdown/file verification.
+
+## Storage and routed test lint cleanup — implemented, regression execution ongoing
+
+Separated shared retirement snapshot preparation, interrupted publication and
+post-reclamation recovery; compacted-log refusal and vote-correlation checks;
+routed split/merge publication, import, activation and independent service
+phases; delegation cancellation/retry; cross-authority creation; retained and
+imported partial owner setup/recovery; and deletion/reparenting. Private helpers
+retain explicit operation IDs, observed state, store ownership and cleanup.
+No production code, thresholds or lint allowances changed. The two retained
+child histories share the same parameterized read/retry assertions.
+
+The strict complete all-feature --keep-going scan exits nonzero with191
+distinct remaining diagnostics (31 in routed); core-only exits nonzero with94.
+No diagnostics remain in the files changed by this batch. The earlier completed
+all-feature scan had227 diagnostics. These are failed whole-repository checks,
+not a clean lint result. The user requires zero and keeping it at zero; AGENTS.md
+now records the exact local commands, and CI uses --keep-going for complete
+feedback. Local work continues while CI runs.
+
+Local storage/vote/retirement tests pass23 cases (9+7+7); formatting and whitespace
+checks pass. The routed regression binary builds. Native regression execution is
+still ongoing: the first QUIC nested-merge retirement WAL case has passed, while
+the remaining targeted and broader routed cases have not completed. Do not
+interpret pending execution as a pass. The broader run started before the final
+small fixture refactors; re-run their affected filters against the final build.
+Continue mini item1 with remaining routed setup/recovery histories and other
+integration targets; the next two feature deliverables remain unchanged.
