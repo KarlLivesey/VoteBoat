@@ -271,10 +271,17 @@ fn lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable() {
         .contains("cancellation_scope=local_gate"));
     wait_status(&c, source, "resuming=false");
     // Gate cancellation is separate from the already replicated handoff.
-    assert!(c
-        .ok(source, &["cancel-leadership", "19701"])
-        .contains("phase=Cancelled"));
-    assert!(c.ok(source, &["add", "19703", "2"]).contains("Value(9)"));
+    assert!(leader_request(&mut c, &["cancel-leadership", "19701"]).contains("phase=Cancelled"));
+    let (_, cancelled) = leadership::status(&mut c, "19701", "phase=Cancelled");
+    assert!(
+        cancelled.contains(&format!("source={source} ")),
+        "{cancelled}"
+    );
+    assert!(
+        cancelled.contains(&format!("target={target} ")),
+        "{cancelled}"
+    );
+    assert!(authenticated_write(&c, &["add", "19703", "2"]).contains("Value(9)"));
     kill(&mut c, source);
     c.start(source, "recover");
     wait_status(&c, source, "phase=Cancelled");

@@ -2,6 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+#[path = "leadership/cancellation.rs"]
+mod cancellation;
+
 fn cluster(quic: bool) -> Cluster {
     let mut c = Cluster::new();
     c.quic = quic;

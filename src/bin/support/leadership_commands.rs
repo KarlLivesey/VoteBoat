@@ -196,7 +196,15 @@ impl Driver {
                 index: record.index,
             },
         ) {
-            Ok(phase) => c.phase = phase,
+            Ok(phase) => {
+                eprintln!(
+                    "leadership cancel admitted group={:?} operation={} intent_index={}",
+                    self.group,
+                    record.intent.request.operation.get(),
+                    record.index
+                );
+                c.phase = phase;
+            }
             Err(e) => c.reply(format!("ERR {e}")),
         }
     }

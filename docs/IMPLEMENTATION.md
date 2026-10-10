@@ -88,14 +88,84 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Current202a completes the selected old-checkpoint/member recovery cases below.
-Next199f addresses the recorded service command/QUIC failures: it depends on
+Completed202a covers the selected old-checkpoint/member recovery cases below.
+Completed199f corrects the recorded cancellation acceptance assumption and adds
+admitted-cancel/source-loss recovery over TCP and QUIC. Current199g addresses
+the remaining recorded service command/QUIC failures: it depends on
 the retained exact platform logs and must reproduce the relevant local failure
 or distinguish an unresolved platform-only failure before changing behavior.
-This advances the usable Linux/macOS service milestone. Following202b selects
+This advances the usable Linux/macOS service milestone. Next202b selects
 the next combined lifecycle/revocation schedule from the acceptance ledger;
 it depends on existing original-ID lifecycle and credential contracts and must
 preserve authoritative ownership plus retry state across the selected restart.
+Following201d extends the unreviewed provider obligations; it depends on the
+existing inventory and shared conformance harness, and must connect each selected
+obligation to actual host/native assertions. This advances replaceable Rust
+embedding without treating a metadata count as provider certification.
+
+### Slice199f schema plan — interrupted leadership cancellation
+
+The recorded Linux failure is an immediate-success assertion for cancellation
+on the original leader: the command instead reports an explicit leadership
+change. A fresh isolated execution passes, so this is not evidence of a
+reproduced storage or consensus defect. The existing contract allows an unknown
+result after admission. Correct that acceptance assumption and add an actual
+interrupted cancellation history before claiming this case is covered.
+
+Data/API shape: reuse the exact operation ID, original leadership intent and
+existing status/receipt fields. Extend the test's existing leader-request helper
+only for the documented cancellation replies (not-leader and leadership-change
+uncertainty); arbitrary errors still fail. A cancellation-admission diagnostic
+records group, operation and original intent index so the process test can cut
+after admission rather than relying on sleep. It carries no authority.
+
+Transitions/ownership: committed Pending intent -> admitted cancellation without
+quorum -> loss of source process and unobserved reply -> recovered original intent
+(Pending or Cancelled if the retained suffix commits when quorum returns) -> exact
+cancellation retry -> quorum-read Cancelled. A lost connection releases
+observation only; it cannot imply rollback or successful cancellation. Preserve
+the local drain gate's independent cancellation semantics. No protocol, storage
+format, timeout or retry behavior in the production client changes.
+
+Acceptance: TCP/WAL and QUIC/checkpoint histories retain original intent identity,
+index and term, reach durable cancellation after restart, replay old data exactly
+once and accept a new write. The existing lost-drain test observes cancellation
+through the current leader and quorum status instead of demanding an immediate
+reply from its original source. Run affected leadership/drain tests and all four
+strict lint profiles. Broader macOS failures and platform acceptance remain open.
+
+### Slice199f implemented — original cancellation across source loss
+
+The retained6f26bc1 Linux failure is an immediate-success assumption in the
+lost-drain test: cancellation returned the documented UNKNOWN LeadershipChanged.
+An unchanged isolated rerun passes. The fixture now selects the current leader,
+retries only exact documented leadership-change/non-leader outcomes with the same
+operation ID, and verifies a quorum-backed Cancelled record with the original
+source and target. Its subsequent write also retains its original identity.
+This does not establish a reproduced consensus defect or alter CLI retry policy.
+
+Two new executable histories remove the handoff target, commit the original
+Pending intent, remove the other voter and issue cancellation without a quorum.
+An admission diagnostic makes the process cut explicit. After source loss and
+restart, the record must retain every original field, including index and term;
+only Pending or Cancelled is legal. The exact cancellation completes, survives
+another all-process restart and is idempotent; the original data retry stays7
+and a fresh write reaches10. The QUIC history checkpoints through the observed
+committed prefix both before the cut and after cancellation; an old snapshot's
+existence alone cannot satisfy that check. Only the admission diagnostic is a
+production change; wire formats, consensus, client deadlines and storage are
+unchanged.
+
+`validation/baseline/slice199f/` records the unchanged isolated pass, two initial
+new histories, a full all-feature counter target (124 passed), and focused final
+leadership/drain runs after strengthening the checkpoint-prefix assertion.
+The final focused results are11 all-feature leadership tests, one lost-drain
+test and8 default-feature leadership tests, all passing.
+The full run includes the previously failing Linux drain and all eight named
+historical macOS test functions, executed locally on Linux. This is not macOS
+evidence. Formatting and all four strict Clippy profiles pass. Full P0–P7 stays
+active; current199g retains the other platform failures, next202b is combined
+lifecycle/revocation recovery, and following201d is provider conformance.
 
 Completed refinement201b advances the P0/C03 replacement-provider milestone:
 exercise snapshot publication and retention through the same host/native cases.

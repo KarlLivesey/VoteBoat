@@ -1,6 +1,12 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Cancellation recovery evidence: [slice199f](baseline/slice199f/README.md), with
+TCP/WAL and QUIC/checkpoint admitted-cancel/source-loss histories and124 passing
+local all-feature service tests. Final focused checks strengthen the checkpoint
+prefix assertion. Original intent identity, fresh quorum status, restart and
+data deduplication remain checked. This corrects a fixture acceptance assumption;
+only an admission diagnostic changes production code. macOS acceptance is open.
 Older-checkpoint recovery evidence: [slice202](baseline/slice202/README.md), with
 eleven host/native-file member states, rejected bad pins and832 native-WAL
 failure schedules. Selected membership suites pass74 all-feature and30 core-only

@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice199f corrects the lost-drain fixture's immediate cancellation assumption
+and adds TCP/WAL and QUIC/checkpoint admitted-cancel/source-loss histories.
+Original intent fields and data retries survive recovery; cancellation is
+confirmed by a fresh quorum read and survives another restart. The complete
+local all-feature counter target passes124 tests, with focused final runs after
+a stronger checkpoint-prefix assertion. Only an admission diagnostic changes
+production code. This is Linux evidence; macOS and separate-host acceptance,
+broader faults and P7 remain open.
+
 Slice202a adds old-checkpoint member recovery: eleven host/native-file states
 cover promotion/finalization, rollback, demotion and accepted/committed removal.
 Newer uninstalled publications cannot replace the authoritative old WAL pin;

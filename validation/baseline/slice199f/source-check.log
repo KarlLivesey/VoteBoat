@@ -1,0 +1,9 @@
+src/bin/support/leadership_commands.rs: OK
+tests/counter_service.rs: OK
+tests/counter_service/drain.rs: OK
+tests/counter_service/leadership.rs: OK
+tests/counter_service/leadership/cancellation.rs: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice199f/README.md: OK
