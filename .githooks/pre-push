@@ -5,5 +5,6 @@ set -eu
 cd "$(git rev-parse --show-toplevel)"
 printf '%s\n' 'Checking formatting and strict Clippy before push...'
 cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings

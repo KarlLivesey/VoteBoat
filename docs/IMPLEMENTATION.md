@@ -88,7 +88,7 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-The zero-diagnostic baseline and pre-push enforcement are complete. Keep both
+The zero-diagnostic baseline and pre-push enforcement are complete. Keep all three
 strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
@@ -106,9 +106,87 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: placement replacement/removal plans180 | Close the learner-only C18 planning gap; advances P4/P5 composition and selective assignment. | Validated recursive policies, existing planner/authorizer, learner admission and joint/final records. | Host/native plans preserve tree structure, reject stale/unprepared/unauthorized targets and replay with correct joint/final timing; all54 service tests pass, including planner-produced TCP/QUIC demotion histories. No automatic activation. |
 | Completed: publication-step attribution181 | Identify the observed native storage cost before another optimization; advances P7. | Optional native timings, original reference workload and unchanged publication boundaries. | Native interruption/error/recovery tests pass; complete256-operation reference and instrumented runs pass raw/recovery checks. File and directory synchronization dominate publication means. Reference p99 remains above250ms; no improvement claimed. |
 | Completed: reject unproven write-overlap experiment183 | Evaluate ordinary leader replication during local synchronization; advances P7 evidence. | Original workload, unchanged local/quorum durability and bounded ownership tests. | Candidate passed affected safety suites but failed one run and showed no performance benefit; patch and raw results retained, original production path restored. |
-| Current: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
-| Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
-| Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+| Retained: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
+| Completed: authenticated remote manifest lookup184 | Let cold Rust clients resolve remotely hosted directory paths; advances P5/C17 and usable embedding. | Existing ManifestDiscovery/NativeManifestLookup, authenticated sessions, bounded manifest codec and selected source authority. | Native TCP/QUIC and short-I/O host runs fetch only requested path segments, reject stale/wrong authority replies, retain cache during source loss and preserve owner-side fencing. |
+| Current: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+| Next: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+| Following: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice184 verified result
+
+The Rust remote manifest component now implements the existing ManifestDiscovery
+contract over provisioned authenticated TCP/TLS or QUIC. Seven downstream host
+tests cover partial I/O, malformed requests/replies, oversized/truncated frames,
+exact sequence/authority, generation floors, bounded cache admission, TTL,
+cancellation and explicit reconnect. Six native automatic-lookup histories pass,
+including the two new remote histories. The new histories fetch exactly the
+three requested route levels, cancel during an original accepted directory read,
+drain the selected wait and remaining Node read credit, serve duplicate-safe
+child writes/reads with metadata offline, refuse a stale ownership hint and
+recover unchanged parent logs. Existing original-read and endpoint-discovery
+regression suites also pass. See docs/REMOTE_MANIFESTS.md for ownership and wire
+contracts and validation/baseline/slice184 for exact commands/results.
+
+Initial native assertions incorrectly expected two route levels and assumed
+selected-wait cancellation immediately released the underlying Node request.
+Inspection showed root/service/child traversal and retained original read credit;
+the tests now check those existing contracts and explicitly drain before shutdown.
+No production read ownership rule was weakened to make those assertions pass.
+Test helpers separate connection setup, original-read drain and owner refusal so
+each independently checks the slice's acceptance obligations within lint limits.
+
+An extra default-feature Clippy run exposed an existing benchmark reference to
+the optional QUIC variant. A feature-gated protocol match fixes the TCP-only
+build while retaining the QUIC refusal requirement. Formatting and strict Clippy
+now run for default, all-feature and core-only profiles in both the enabled push
+hook and background CI. No lint allowance, threshold or feature was weakened.
+
+This closes the explicit Rust remote-fetch component gap in P5/C17, not P5 or the
+full baseline. No executable discovery commands, trust bootstrap or signed proof
+were added. MacOS/current separate-host evidence, broader combined fault gates,
+placement orchestration and original P7 performance budgets remain open. The next
+mini deliverable is the combined membership/lifecycle gap audit; it chooses
+missing schedules from the baseline ledger before writing more helpers. Then
+follow remaining deployment integration and renewed full-scope evidence review.
+
+### Slice184 schema plan — authenticated remote manifest hints
+
+Move the explicit P5 remote-manifest gap ahead of further P7 tuning. Slice183
+provided no basis for another default write-path change; useful remote routing
+can advance independently. P7 remains required, with its failed evidence intact.
+The current deliverable is the Rust discovery component; next are combined
+P4/P6 failure gates and executable/deployment integration. No baseline scope is
+removed and no ancestor commit enters the ordinary child write path.
+
+Use a dedicated authenticated SecureSession and one configured authority group.
+The server owns a selected ManifestDiscovery view, normally NativeManifestLookup
+backed by the original Node read path. Host polling drives that source. Send only
+its checked manifest and bounded remaining lifetime; never encode/reconstruct a
+ReadBarrier. The receiver implements the same public ManifestDiscovery seam and
+validates the provisioned source identity, exact request/sequence/authority,
+minimum epoch/generation, canonical existing manifest codec and bounded length.
+A native cache preserves generation/conflict floors; cached data remains a hint,
+never evidence authorizing membership or bypassing a server's ownership checks.
+
+One request and one bounded input/output frame per connection. Freeze accepted
+request context until response/timeout; cancellation suppresses publication but
+retains the slot until it drains or the connection is abandoned. Time and source
+bindings cannot regress. Failed sessions require explicit replacement with a
+later local session generation for the same provisioned source. Preserve cache
+floors and unrelated unexpired entries across connection failure. Source close
+cancels the selected discovery view without dropping its underlying accepted
+Node read; return original source/session objects for draining and recovery.
+
+Acceptance covers short/partial I/O, malformed/oversized frames, stale request
+contexts, wrong source/group, minimum floors, invalidation, cancellation/timeout,
+cache during source outage and explicit reconnect. Exercise TCP/TLS and QUIC
+against actual quorum-backed Node manifest reads, then prove the resolved route
+still passes the existing owner/fencing checks. Maintain both strict Clippy
+profiles and record limits separately from implemented evidence.
+
+Follow-up compile check: also validate the ordinary default-feature build;
+optional-QUIC-only references must remain feature-gated. Include this profile in
+the existing local/push/CI lint checks.
 
 ### Slice183 experimental schema plan — rejected after measurement
 

@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/remote_manifest.rs (target/debug/deps/remote_manifest-c5ef35e5410f4f64)
+
+running 7 tests
+test wire::lifetime_is_bounded_and_counted_from_request_admission ... ok
+test short_io_lookup_refresh_cancel_and_cache_during_outage ... ok
+test wire::malformed_or_wrong_authority_request_closes_selected_source ... ok
+test wrong_source_authority_stale_generation_and_reconnect_are_checked ... ok
+test wire::zero_io_budget_defers_work_and_cache_capacity_preserves_existing_entries ... ok
+test wire::oversized_lengths_are_rejected_from_header_and_truncation_times_out ... ok
+test wire::malformed_headers_scope_sequence_and_manifest_never_enter_cache ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.97s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-ee7bfa6d5518db76)
+
+running 3 tests
+test downstream_original_read_source_contract_compiles_without_native ... ok
+test native::construction_and_recovery_preserve_original_owned_source_and_ticket ... ok
+test native::deadline_retains_accepted_source_work_until_actual_terminal_result ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/remote_manifest.rs (target/debug/deps/remote_manifest-6825181454072487)
+
+running 7 tests
+test wire::malformed_or_wrong_authority_request_closes_selected_source ... ok
+test wire::lifetime_is_bounded_and_counted_from_request_admission ... ok
+test wrong_source_authority_stale_generation_and_reconnect_are_checked ... ok
+test short_io_lookup_refresh_cancel_and_cache_during_outage ... ok
+test wire::zero_io_budget_defers_work_and_cache_capacity_preserves_existing_entries ... ok
+test wire::oversized_lengths_are_rejected_from_header_and_truncation_times_out ... ok
+test wire::malformed_headers_scope_sequence_and_manifest_never_enter_cache ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

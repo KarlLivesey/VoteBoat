@@ -274,3 +274,10 @@ source timeout. A separate real TCP/TLS test fetches an endpoint and uses it in
 `DiscoveryConnector` to authenticate the pinned target despite stale caller
 input. External manifest-fetch protocols, executable wiring, live QUIC migration,
 macOS and separate-host validation remain outside this slice.
+
+## Remote manifest provider (slice184)
+
+[Remote manifest discovery](REMOTE_MANIFESTS.md) implements `ManifestDiscovery`
+for a provisioned authenticated source. It composes with the original quorum-read
+lookup driver and the existing route resolver; it does not mint local read
+barriers or activate ownership.

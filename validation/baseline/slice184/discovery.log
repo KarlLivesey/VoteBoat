@@ -1,0 +1,42 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-139020413b735c3b)
+
+running 3 tests
+test downstream_original_read_source_contract_compiles_without_native ... ok
+test native::construction_and_recovery_preserve_original_owned_source_and_ticket ... ok
+test native::deadline_retains_accepted_source_work_until_actual_terminal_result ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-508811d8035e7ce4)
+
+running 14 tests
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test tcp_tls_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/remote_manifest.rs (target/debug/deps/remote_manifest-f346c67be6364a1a)
+
+running 7 tests
+test wire::malformed_or_wrong_authority_request_closes_selected_source ... ok
+test wire::lifetime_is_bounded_and_counted_from_request_admission ... ok
+test short_io_lookup_refresh_cancel_and_cache_during_outage ... ok
+test wrong_source_authority_stale_generation_and_reconnect_are_checked ... ok
+test wire::zero_io_budget_defers_work_and_cache_capacity_preserves_existing_entries ... ok
+test wire::oversized_lengths_are_rejected_from_header_and_truncation_times_out ... ok
+test wire::malformed_headers_scope_sequence_and_manifest_never_enter_cache ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -34,7 +34,9 @@ Keep formatting and Clippy clean after every change. Run
 Zero diagnostics is the acceptance condition; a clean subset is not a clean
 repository. Fix the causes rather than weakening lint levels or thresholds.
 
-The tracked `.githooks/pre-push` runs formatting and both strict Clippy profiles.
+The tracked `.githooks/pre-push` runs formatting and strict Clippy for default, all-feature and no-default-feature builds.
 Keep it enabled with `git config --local core.hooksPath .githooks`; do not bypass
-it to push code with failing checks. The no-default-features command is
+it to push code with failing checks. The default-feature command is
+`cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings`.
+The no-default-features command is
 `cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings`.

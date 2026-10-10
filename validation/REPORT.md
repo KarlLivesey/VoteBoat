@@ -5424,3 +5424,16 @@ restored. Candidate code, focused safety/ownership tests, failures, raw samples,
 binary hashes and scope remain in [slice183](performance/slice183/README.md).
 Both the removed experimental tree and restored default receive separate local
 formatting/strict-Clippy verification. Full P0–P7 and platform evidence remain open.
+
+## Slice184 — authenticated remote manifest discovery
+
+Seven new host tests and two native TCP/TLS/QUIC histories validate the bounded
+remote ManifestDiscovery provider, original directory-read ownership, three-level
+routing and offline child service with owner rejection. The complete selected
+regression commands pass 32 all-feature cases; default and native-without-TLS
+configurations also pass their focused cases. A pre-existing optional-QUIC enum
+reference exposed by the default build was feature-gated, and the default strict
+Clippy profile was added to the enabled push hook and CI. All three Clippy
+profiles and formatting are clean. Exact commands, scope and logs are in
+[slice184](baseline/slice184/README.md). No executable discovery integration,
+new macOS/separate-host result or complete P0–P7 certificate is claimed.

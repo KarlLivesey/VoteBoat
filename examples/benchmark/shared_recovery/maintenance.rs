@@ -215,8 +215,13 @@ fn maintenance_while_held(
                 >= index
             {
                 let count = checkpoint_reclaims.get_or_insert(observations.completions[n]);
-                let refusal_observed = h.protocol != NativePeerProtocol::Quic
-                    || totals.snapshot_send_refusals.iter().sum::<usize>() > 0;
+                let refusal_observed = match h.protocol {
+                    NativePeerProtocol::TcpTls => true,
+                    #[cfg(feature = "quic")]
+                    NativePeerProtocol::Quic => {
+                        totals.snapshot_send_refusals.iter().sum::<usize>() > 0
+                    }
+                };
                 if observations.completions[n] > *count && refusal_observed {
                     println!("held_recovery=1 foreground_index={index} checkpointed=true post_checkpoint_reclaim=true");
                     return;
