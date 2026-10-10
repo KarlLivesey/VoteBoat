@@ -134,9 +134,71 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
 | Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
 | Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
-| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Extend group-bound membership/leadership execution, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Data commands are implemented; multi-group administration and drain remain planned work. |
+| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Group-bound membership commands are implemented in197b4b2b1, with validation recorded below. Next extend group-bound leadership execution, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Complete multi-group drain remains planned work. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4b2b1 schema plan — group-bound membership execution
+
+Extend the existing membership executor to carry an explicit GroupIdentity.
+Its current group1 binding and global completion drain prevent safe multi-group
+use. A small owner-side administration set is needed to route each completion
+by its exact ticket's group and retain each group's independent readiness,
+request and reply state. Keep the existing single-group plan file and behavior.
+Add a bounded group-plan manifest selecting original per-group files; validate
+sorted unique scopes against the complete startup group set before resources
+open. Bound manifest size, plan count, aggregate loaded bytes and retained
+configuration records. This selects existing native placement authorization;
+it is not a new consensus protocol or live configuration-file reload.
+
+Add group-prefixed configure and configuration-status commands. Pending command
+ownership includes group plus operation ID, and configuration execution rechecks
+the same live authenticated connection, scope and original record. Route replies
+and disconnect cancellation only to the exact group; consume late cancelled
+completions before allowing that group's next request. Different groups may use
+the same operation ID. The shared Node continues to enforce durable committed
+joint/final records, live readiness and original incarnation/store checks.
+
+Acceptance: actual TCP/WAL and QUIC/checkpoint services configure independent
+groups with repeated operation IDs, reject wrong-scope/unauthorized requests,
+preserve an unrelated group, reopen committed joint state and finish the original
+operation. Test disconnected waits, manifest bounds/unknown groups and existing
+single-group administration regressions. This is197b4b2b's membership portion,
+advancing P4/P2. Group-bound leadership and complete drain orchestration follow;
+assignment listing198 and platform/operator recovery199 remain in the full plan.
+
+### Slice197b4b2b1 implementation and validation
+
+Implemented exact-group administration in the counter executable. The bounded
+`--group-admin-plans` manifest selects existing provisioned plans for a subset
+of the original startup groups; unsupported scopes fail before node resources
+open. Each administrator retains its own pending request/readiness state. One
+owner routes configuration completions by full ticket, and network replies and
+disconnect cancellation use the exact group plus operation ID. Execution-time
+authorization rechecks the live connection's permission for that same group.
+The single-group automatic/provisioned/client-target paths continue through
+the same owner. No consensus, storage format, public provider or dependency is
+added or replaced.
+
+The full counter service suite passes105 tests, alongside nine command unit
+tests. Four focused tests cover TCP/WAL and QUIC/checkpoint group membership,
+independent repeated operation IDs, reader and wrong-group/incarnation admin
+refusals, missing-plan refusal, disconnected observation, finalization after
+restart, and preservation of unrelated data/deduplication. Native file inspection
+checks committed joint records before recovery: TCP retains their WAL entries;
+QUIC has compacted them into joint checkpoint bases. Malformed, duplicate,
+unknown and oversized manifests fail without creating a node store; distinct
+tests exercise the256-plan and1 MiB aggregate input ceilings.
+
+Strict Clippy initially rejected dispatch complexity26 against the unchanged
+limit25. Request parsing/leader validation now belongs to the administration
+owner; no lint suppression or threshold change was made. All four feature
+profiles, formatting, warnings-denied API documentation and105-contract
+inventory metadata pass. See
+[the recorded commands and logs](../validation/baseline/slice197b4b2b1/README.md).
+These are finite local Linux histories. Group-bound leadership, complete
+multi-group operator drain, assignment listing and macOS/operator recovery
+remain active work; P0–P7 is not complete.
 
 ### Slice197b4b2a schema plan — executable group selection and authenticated data
 

@@ -16,7 +16,6 @@
 use super::setup::{application, checked, group, Failure, Service, MAX_NODE};
 use std::{
     collections::BTreeMap,
-    io::Read,
     path::Path,
     time::{Duration, Instant},
 };
@@ -45,6 +44,7 @@ pub enum RecordSubmission {
     Reply(String),
 }
 pub struct Administration {
+    group: GroupIdentity,
     plan: Option<NativeAdministrationPlan>,
     dynamic: Option<DynamicPolicy>,
     target: Option<ConfigurationRecord>,
@@ -55,7 +55,7 @@ pub struct Administration {
     stopped: bool,
     remote: bool,
     requested: Option<OperationId>,
-    reply: Option<String>,
+    reply: Option<(OperationId, String)>,
 }
 pub(super) fn node(text: &str) -> Result<NodeId, Failure> {
     let number: u64 = text.parse()?;
@@ -185,15 +185,21 @@ impl Administration {
         mode: Mode,
         maintenance: bool,
     ) -> Result<Self, Failure> {
-        let remote = mode != Mode::Automatic;
-        let mut data = Vec::new();
-        std::fs::File::open(path)?
-            .take(65537)
-            .read_to_end(&mut data)?;
+        let data = super::service_setup::material(path, 65536)?;
+        Self::from_data(group(), &data, stores, mode, maintenance)
+    }
+    pub(super) fn from_data(
+        group: GroupIdentity,
+        data: &[u8],
+        stores: &BTreeMap<NodeId, StoreIdentity>,
+        mode: Mode,
+        maintenance: bool,
+    ) -> Result<Self, Failure> {
         if data.len() > 65536 {
             return Err("administration file exceeds 64 KiB".into());
         }
-        let mut lines = std::str::from_utf8(&data)?.lines();
+        let remote = mode != Mode::Automatic;
+        let mut lines = std::str::from_utf8(data)?.lines();
         if lines.next() != Some("voteboat-counter-admin-v1") {
             return Err("expected voteboat-counter-admin-v1 header".into());
         }
@@ -235,7 +241,7 @@ impl Administration {
         }
         // Vec growth can otherwise exceed the backend's retained-capacity ceiling.
         records.shrink_to_fit();
-        let placement = NativePlacementAuthorizer::new(group(), replicas, requirements)
+        let placement = NativePlacementAuthorizer::new(group, replicas, requirements)
             .map_err(|(e, _)| format!("{e:?}"))?;
         use voteboat::application::StateMachine;
         let requirements =
@@ -253,13 +259,14 @@ impl Administration {
         } else {
             (
                 Some(
-                    NativeAdministrationPlan::new(group(), placement, requirements, records)
+                    NativeAdministrationPlan::new(group, placement, requirements, records)
                         .map_err(|e| format!("{:?}", e.reason))?,
                 ),
                 None,
             )
         };
         Ok(Self {
+            group,
             plan,
             dynamic,
             target: None,
@@ -272,6 +279,15 @@ impl Administration {
             requested: None,
             reply: None,
         })
+    }
+    pub fn group(&self) -> GroupIdentity {
+        self.group
+    }
+    pub(super) fn retained_bytes(&self) -> usize {
+        self.intents()
+            .iter()
+            .map(ConfigurationRecord::retained_bytes)
+            .sum()
     }
     fn requirements(&self) -> ReadinessRequirements {
         match (&self.plan, &self.dynamic) {
@@ -293,7 +309,7 @@ impl Administration {
         proposal: &ConfigurationProposal,
     ) -> Result<(), ConfigurationProposalError> {
         if let Some(policy) = &self.dynamic {
-            if scope != group()
+            if scope != self.group
                 || self.target.as_ref() != Some(&proposal.record)
                 || proposal.requirements != policy.requirements
             {
@@ -337,7 +353,11 @@ impl Administration {
         if record.retained_bytes() > MAX_ADMINISTRATION_BYTES {
             return Err("record retained budget".into());
         }
-        let core = service.local().owner.core(group()).ok_or("missing group")?;
+        let core = service
+            .local()
+            .owner
+            .core(self.group)
+            .ok_or("missing group")?;
         let state = core.state();
         let status = core
             .configuration_status(record.operation)
@@ -396,15 +416,15 @@ impl Administration {
         self.next = Instant::now();
         Ok(())
     }
-    pub fn take_reply(&mut self) -> Option<String> {
-        if self.remote
-            && self.stopped
-            && self.pending.is_none()
-            && self.requested.take().is_some()
-            && self.reply.is_none()
-        {
-            self.target = None;
-            self.reply = Some("ERR administration blocked; inspect server log".into());
+    pub fn take_reply(&mut self) -> Option<(OperationId, String)> {
+        if self.remote && self.stopped && self.pending.is_none() && self.reply.is_none() {
+            if let Some(operation) = self.requested.take() {
+                self.target = None;
+                self.reply = Some((
+                    operation,
+                    "ERR administration blocked; inspect server log".into(),
+                ));
+            }
         }
         self.reply.take()
     }
@@ -432,25 +452,26 @@ impl Administration {
         self.proofs.clear();
         self.stopped = true;
         if self.waiting.take().is_some() {
-            checked(service.cancel_learner_readiness(group()))?;
+            checked(service.cancel_learner_readiness(self.group))?;
         }
         Ok(())
     }
-    fn consume_results(&mut self, service: &mut Service) -> Result<(), Failure> {
-        while let Some(result) = service.poll_configuration() {
-            if self.pending != Some(result.ticket) {
-                return Err("unrecognized administration ticket".into());
-            }
-            self.pending = None;
-            self.proofs.clear();
-            eprintln!(
-                "administration operation={} outcome={:?}",
-                result.ticket.operation().get(),
-                result.outcome
-            );
-            if self.remote {
-                if self.requested == Some(result.ticket.operation()) {
-                    self.reply = Some(match &result.outcome {
+    pub(super) fn complete(&mut self, result: ConfigurationCompletion) -> Result<(), Failure> {
+        if self.pending != Some(result.ticket) {
+            return Err("unrecognized administration ticket".into());
+        }
+        self.pending = None;
+        self.proofs.clear();
+        eprintln!(
+            "administration operation={} outcome={:?}",
+            result.ticket.operation().get(),
+            result.outcome
+        );
+        if self.remote {
+            if self.requested == Some(result.ticket.operation()) {
+                self.reply = Some((
+                    result.ticket.operation(),
+                    match &result.outcome {
                         ConfigurationOutcome::Committed(position) => format!(
                             "OK operation={} committed_index={} term={}",
                             result.ticket.operation().get(),
@@ -466,26 +487,26 @@ impl Administration {
                         ConfigurationOutcome::Unknown(reason) => {
                             format!("UNKNOWN {reason:?}; retry the same configuration operation ID and record")
                         }
-                    });
-                    self.requested = None;
-                }
-                self.target = None;
-                self.stopped = true;
-                continue;
+                    },
+                ));
+                self.requested = None;
             }
-            if let ConfigurationOutcome::NotProposed(error) = result.outcome {
-                // Scope/readiness can change between enqueue and execution. Recheck
-                // exact original intent; do not alter its ID or target on retry.
-                let retry = matches!(
-                    error,
-                    RaftError::NotLeader | RaftError::ReadNotReady | RaftError::Busy
-                ) || matches!(&error, RaftError::Configuration(reason) if matches!(reason.as_ref(),
+            self.target = None;
+            self.stopped = true;
+            return Ok(());
+        }
+        if let ConfigurationOutcome::NotProposed(error) = result.outcome {
+            // Scope/readiness can change between enqueue and execution. Recheck
+            // exact original intent; do not alter its ID or target on retry.
+            let retry = matches!(
+                error,
+                RaftError::NotLeader | RaftError::ReadNotReady | RaftError::Busy
+            ) || matches!(&error, RaftError::Configuration(reason) if matches!(reason.as_ref(),
                     ConfigurationProposalError::AuthenticationRequired
                     | ConfigurationProposalError::Membership(MembershipError::StaleConfiguration | MembershipError::JointNotCommitted)
                     | ConfigurationProposalError::Readiness(ReadinessError::Stale | ReadinessError::WrongBinding | ReadinessError::NotCaughtUp)));
-                if !retry {
-                    self.stopped = true;
-                }
+            if !retry {
+                self.stopped = true;
             }
         }
         Ok(())
@@ -497,7 +518,7 @@ impl Administration {
         let core = service
             .local()
             .owner
-            .core(group())
+            .core(self.group)
             .ok_or("missing administration group")?;
         if core.role() != Role::Leader || !core.local_voter() {
             self.proofs.clear();
@@ -516,7 +537,8 @@ impl Administration {
             .iter()
             .filter(|r| !self.remote || self.requested == Some(r.operation))
         {
-            match checked(service.configuration_status(group(), intent.operation))?.resume_action()
+            match checked(service.configuration_status(self.group, intent.operation))?
+                .resume_action()
             {
                 ConfigurationResumeAction::Completed => continue,
                 ConfigurationResumeAction::WaitForCommit => return Ok(None),
@@ -538,9 +560,12 @@ impl Administration {
         let Some(record) = selected else {
             self.stopped = true;
             if let Some(operation) = self.requested.take() {
-                self.reply = Some(format!(
-                    "OK evidence=local_durable operation={} action=completed",
-                    operation.get()
+                self.reply = Some((
+                    operation,
+                    format!(
+                        "OK evidence=local_durable operation={} action=completed",
+                        operation.get()
+                    ),
                 ));
             }
             eprintln!("administration historical operations completed; inspect configuration-status for local evidence");
@@ -560,7 +585,7 @@ impl Administration {
             readiness: Vec::new(),
             requirements: self.requirements(),
         };
-        if let Err(error) = self.authorize(group(), core.membership(), &proposal) {
+        if let Err(error) = self.authorize(self.group, core.membership(), &proposal) {
             self.stopped = true;
             eprintln!("administration blocked: {error:?}");
             return Ok(None);
@@ -585,7 +610,7 @@ impl Administration {
         let core = service
             .local()
             .owner
-            .core(group())
+            .core(self.group)
             .ok_or("missing administration group")?;
         let peers = service.peers().ok_or("missing administration peers")?;
         self.proofs.retain(|id, proof| {
@@ -617,13 +642,13 @@ impl Administration {
         if let Some(id) = required.iter().find(|id| !self.proofs.contains_key(id)) {
             if let Some((waiting, since)) = self.waiting {
                 if (waiting != *id || since.elapsed() >= Duration::from_secs(2))
-                    && service.cancel_learner_readiness(group()).is_ok()
+                    && service.cancel_learner_readiness(self.group).is_ok()
                 {
                     self.waiting = None;
                 }
             } else {
                 let admitted = service
-                    .request_learner_readiness(group(), *id, self.requirements())
+                    .request_learner_readiness(self.group, *id, self.requirements())
                     .is_ok();
                 if self.remote {
                     eprintln!("administration operation={} preparing_learner={} readiness_admitted={admitted}",
@@ -639,7 +664,6 @@ impl Administration {
         Ok(true)
     }
     pub fn tick(&mut self, service: &mut Service, shutting_down: bool) -> Result<(), Failure> {
-        self.consume_results(service)?;
         if shutting_down || self.stopped || self.pending.is_some() || Instant::now() < self.next {
             return Ok(());
         }
@@ -652,7 +676,7 @@ impl Administration {
         }
         proposal.readiness = required.iter().map(|id| self.proofs[id].clone()).collect();
         match service.configure(ConfigurationRequest {
-            group: group(),
+            group: self.group,
             proposal,
         }) {
             Ok(ticket) => self.pending = Some(ticket),

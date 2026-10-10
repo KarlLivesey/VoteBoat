@@ -3,7 +3,7 @@
 use super::*;
 
 const GROUPS: &str = "voteboat-counter-groups-v1\ngroup 1 1 1 m:3 v:1 v:2 v:3\ngroup 7 3 9 m:3 v:1 v:2 v:3\ngroup 8 2 11 w:3 1 v:1 1 v:2 1 v:3\n";
-fn setup(quic: bool) -> Cluster {
+pub(super) fn setup(quic: bool) -> Cluster {
     let mut c = Cluster::new();
     c.quic = quic;
     let groups = c.root.join("groups.txt");
@@ -15,7 +15,7 @@ fn setup(quic: bool) -> Cluster {
     c.command_principal = Some(3);
     c
 }
-fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
+pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
     let end = Instant::now() + Duration::from_secs(20);
     loop {
         for id in 1..=3 {

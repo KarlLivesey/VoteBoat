@@ -15,6 +15,8 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/administration_set.rs"]
+mod administration_set;
 #[path = "support/command_client.rs"]
 mod command_client;
 #[path = "support/command_discovery.rs"]
@@ -97,12 +99,14 @@ Membership drain: source uses --membership-drain FILE and all peers use --remote
 voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.\n\
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
-Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.";
+Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
+Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
+Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
     Read(ReadInvocationTicket),
-    Configure(OperationId),
+    Configure(GroupIdentity, OperationId),
     CancelLeadership(voteboat::maintenance::LeadershipRecord),
     Drain(u64, OperationId),
 }
@@ -173,7 +177,7 @@ fn command(
     service: &mut Service,
     observer: &Diagnostics,
     command: &str,
-    administration: &mut Option<administration::Administration>,
+    administration: &mut Option<administration_set::Administrations>,
     quit: &mut bool,
     credentials: &mut credential_reload::Commands<'_>,
     discovery: &Option<command_discovery::Source>,
@@ -191,25 +195,18 @@ fn command(
         ["explain-quorum", voters, offset, count] => quorum_diagnostics::explain(service, voters, offset, count)?,
         ["configuration-status", operation] => administration::status(service, group, operation)?,
         ["configure-record", record @ ..] => {
-            if service.local().owner.core(group).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
-                return Err("NOT_LEADER".into());
-            }
+            group_command::require_leader(service, group)?;
             let submission = administration.as_mut().ok_or("client-supplied targets disabled")?
-                .request_record(&record.join(" "), service)?;
+                .get_mut(group)?.request_record(&record.join(" "), service)?;
             match submission {
-                administration::RecordSubmission::Pending(operation) => return Ok(Phase::Pending(Pending::Configure(operation))),
+                administration::RecordSubmission::Pending(operation) => return Ok(Phase::Pending(Pending::Configure(group, operation))),
                 administration::RecordSubmission::Reply(reply) => reply,
             }
         }
         ["configure", operation] => {
-            let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
-                .ok_or("invalid operation ID")?;
-            if service.local().owner.core(group).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
-                return Err("NOT_LEADER".into());
-            }
-            administration.as_mut().ok_or("remote administration disabled")?
-                .request(operation)?;
-            return Ok(Phase::Pending(Pending::Configure(operation)));
+            let operation = administration.as_mut().ok_or("remote administration disabled")?
+                .request(service, group, operation)?;
+            return Ok(Phase::Pending(Pending::Configure(group, operation)));
         }
         ["status"] => {
             let core = service.local().owner.core(group).ok_or("missing group")?;
@@ -314,7 +311,7 @@ fn outputs(
 struct PreparedService {
     service: Service,
     credentials: credential_reload::Credentials,
-    administration: Option<administration::Administration>,
+    administration: Option<administration_set::Administrations>,
     listener: TcpListener,
     peer_address: std::net::SocketAddr,
     discovery: Option<command_discovery::Source>,
@@ -357,16 +354,24 @@ fn prepare_service(
             store: config.startup.store,
         },
     )?;
-    let administration = plan_path
-        .map(|path| {
-            administration::Administration::load(
-                path,
-                &config.provisioned_stores,
-                admin_mode,
-                options.leadership_maintenance,
-            )
-        })
-        .transpose()?;
+    let administration = if let Some(path) = &options.group_admin_plans {
+        Some(administration_set::Administrations::load(
+            path,
+            &config.provisioned_stores,
+        )?)
+    } else {
+        plan_path
+            .map(|path| {
+                administration::Administration::load(
+                    path,
+                    &config.provisioned_stores,
+                    admin_mode,
+                    options.leadership_maintenance,
+                )
+                .map(administration_set::Administrations::single)
+            })
+            .transpose()?
+    };
     let drain_plan = options
         .membership_drain
         .as_deref()
@@ -376,7 +381,8 @@ fn prepare_service(
                 &config.provisioned_stores,
                 administration
                     .as_ref()
-                    .ok_or("missing membership administration")?,
+                    .ok_or("missing membership administration")?
+                    .get(group())?,
             )
         })
         .transpose()?;
@@ -388,6 +394,12 @@ fn prepare_service(
     }
     let peer_address = config.startup.listen;
     let prepared = group_setup::prepare(config, options.groups.as_deref())?;
+    if administration
+        .as_ref()
+        .is_some_and(|a| a.groups().any(|g| !prepared.contains(g)))
+    {
+        return Err("administration group absent from startup manifest".into());
+    }
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
     let mut service = prepared.open(
@@ -575,17 +587,17 @@ fn advance_shutdown(
 }
 fn advance_administration(
     service: &mut Service,
-    administration: &mut Option<administration::Administration>,
+    administration: &mut Option<administration_set::Administrations>,
     connection: &mut Option<Connection>,
     quit: bool,
 ) -> Result<(), Failure> {
     if let Some(admin) = administration.as_mut() {
         admin.tick(service, quit)?;
-        if let Some(reply) = admin.take_reply() {
-            if let Some(c) = connection
-                .as_mut()
-                .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
-            {
+        while let Some((group, operation, reply)) = admin.take_reply() {
+            if let Some(c) = connection.as_mut().filter(|c| {
+                matches!(c.phase,
+                Phase::Pending(Pending::Configure(g, op)) if g == group && op == operation)
+            }) {
                 c.reply(reply);
             }
         }
@@ -791,7 +803,7 @@ impl Connection {
 }
 fn finish_connection(
     service: &mut Service,
-    administration: &mut Option<administration::Administration>,
+    administration: &mut Option<administration_set::Administrations>,
     connection: &Option<Connection>,
     remove_reason: &str,
     observer: &mut Diagnostics,
@@ -816,9 +828,11 @@ fn finish_connection(
                 checked(service.cancel_read(t))?;
             }
             Pending::CancelLeadership(_) | Pending::Drain(_, _) => (),
-            Pending::Configure(_) => {
+            Pending::Configure(group, _) => {
                 if let Some(admin) = administration.as_mut() {
-                    admin.cancel_remote(service, remove_reason)?;
+                    admin
+                        .get_mut(group)?
+                        .cancel_remote(service, remove_reason)?;
                 }
             }
         }
@@ -839,9 +853,15 @@ struct StartupOptions {
     node_drain: bool,
     membership_drain: Option<std::path::PathBuf>,
     groups: Option<std::path::PathBuf>,
+    group_admin_plans: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
     fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
+        if self.group_admin_plans.is_some()
+            && (self.groups.is_none() || self.service_access.is_none())
+        {
+            return Err("--group-admin-plans requires --groups and --service-access".into());
+        }
         if self.groups.is_some()
             && (self.service_access.is_none()
                 || self.admin_plan.is_some()
@@ -849,7 +869,7 @@ impl StartupOptions {
                 || self.node_drain
                 || self.discovery_peers.is_some())
         {
-            return Err("--groups requires --service-access; multi-group administration, drain and discovery profiles are not yet supported".into());
+            return Err("--groups requires --service-access; multi-group administration uses --group-admin-plans; leadership, drain and discovery profiles are not yet supported".into());
         }
         if self.leadership_maintenance
             && (self.service_access.is_none()
@@ -931,6 +951,7 @@ fn is_startup_option(flag: &str) -> bool {
             | "--node-drain"
             | "--membership-drain"
             | "--groups"
+            | "--group-admin-plans"
     )
 }
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
@@ -948,6 +969,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut node_drain = None;
     let mut membership_drain = None;
     let mut groups = None;
+    let mut group_admin_plans = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !is_startup_option(flag) {
@@ -955,6 +977,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         }
         let value = args.pop().unwrap();
         match args.pop().unwrap().as_str() {
+            "--group-admin-plans" if group_admin_plans.is_none() && args[0] == "serve" => {
+                group_admin_plans = Some(std::path::PathBuf::from(value));
+            }
             "--groups" if groups.is_none() && args[0] == "serve" => {
                 groups = Some(std::path::PathBuf::from(value));
             }
@@ -1025,13 +1050,14 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         node_drain: node_drain.unwrap_or(false),
         membership_drain,
         groups,
+        group_admin_plans,
     })
 }
 
 fn poll_service(
     service: &mut Service,
     observer: &mut Diagnostics,
-    administration: Option<&administration::Administration>,
+    administration: Option<&administration_set::Administrations>,
     connection: &Option<Connection>,
     access: Option<&service_access::ActiveAccess>,
     time: MonoTime,
@@ -1043,11 +1069,13 @@ fn poll_service(
                 time,
                 NodePollBudget::default(),
                 |core, proposal| {
+                    let scope = core.state().bootstrap.group;
+                    let admin = admin.get(scope).map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
                     if admin.remote() {
                         let live = connection.as_ref().filter(|c| Instant::now() < c.deadline && matches!(c.phase,
-                            Phase::Pending(Pending::Configure(operation)) if operation == proposal.record.operation))
+                            Phase::Pending(Pending::Configure(group, operation)) if group == scope && operation == proposal.record.operation))
                             .ok_or(voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
-                        live.stream.authorize(access, group(), "configure", time)
+                        live.stream.authorize(access, scope, "configure", time)
                             .map_err(|_| voteboat::raft::ConfigurationProposalError::AuthenticationRequired)?;
                     }
                     admin

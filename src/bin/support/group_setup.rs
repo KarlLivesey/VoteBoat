@@ -95,6 +95,12 @@ fn bootstrap(line: &str, stores: &BTreeMap<NodeId, StoreIdentity>) -> Result<Boo
     })
 }
 impl Prepared {
+    pub fn contains(&self, group: GroupIdentity) -> bool {
+        match self {
+            Self::Single(config) => config.startup.bootstrap.group == group,
+            Self::Multi(_, applications) => applications.contains_key(&group),
+        }
+    }
     pub fn open(
         self,
         protocol: NativePeerProtocol,

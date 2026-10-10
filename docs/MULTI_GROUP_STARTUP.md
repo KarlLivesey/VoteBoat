@@ -93,8 +93,42 @@ across explicit leader rejections. An interrupted write remains unknown: retry
 the same complete command. Different groups may reuse an operation ID.
 
 Unprefixed existing commands retain their original group1 scope. Node controls
-such as `quit` do not accept a group prefix. Multi-group membership,
-leadership/drain execution and endpoint-discovery profiles are not yet connected
-to this executable mode; incompatible options are rejected before startup.
+such as `quit` do not accept a group prefix. Multi-group leadership/drain
+execution and endpoint-discovery profiles are not yet connected to this
+executable mode; incompatible options are rejected before startup.
 WAL maintenance and automatic checkpoints operate through the existing shared
 Node. Single-group invocations remain available without `--groups`.
+
+## Group membership administration
+
+Add `--group-admin-plans FILE` to select trusted plans for individual groups:
+
+```text
+voteboat-counter-group-admin-v1
+group 7 3 seven.plan
+group 8 2 eight.plan
+```
+
+Each file uses the existing `voteboat-counter-admin-v1` grammar described in
+[counter administration](COUNTER_SERVICE.md). Paths are relative to the manifest
+directory. Rows must be sorted, unique, and match exact groups/incarnations in
+the original startup manifest. The manifest and each plan are limited to64 KiB;
+there are at most256 plans,1 MiB of combined input, and4 MiB of retained
+configuration records. Invalid input is rejected before opening node resources.
+
+Plans authorize specific original operations; loading a plan does not execute
+it. An authenticated administrator must address the selected group's leader:
+
+```sh
+voteboat-counter client 40000 1 group 7 3 configure 7001 --service-tls ./tls --principal 3
+voteboat-counter client 40000 1 group 7 3 configuration-status 7001 --service-tls ./tls --principal 3
+```
+
+An invocation advances one configuration record. After a committed joint change,
+repeat the same operation to finalize; after interruption inspect status and
+retry the same original plan and operation. Recovery requires the original group
+file and the same trusted plans. Separate groups may reuse operation IDs without
+sharing pending requests, completion replies or durable configuration history.
+Groups without a selected plan remain readable but cannot be configured through
+this interface. Permissions are checked against the exact group/incarnation both
+when admitting a command and when executing its configuration proposal.

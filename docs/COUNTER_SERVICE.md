@@ -641,6 +641,11 @@ service mutation endpoints and remote lifecycle release remain work.
 
 ## Trusted startup administration plan
 
+For shared multi-group nodes, use the explicitly group-bound
+[administration manifest](MULTI_GROUP_STARTUP.md#group-membership-administration)
+and `group ID INC configure OP` commands. The single-group plan below retains
+its existing startup behavior.
+
 Generate learner/replacement/voter plans with the [placement CLI](PLACEMENT.md),
 or provide the explicit records below.
 

@@ -39,8 +39,11 @@ pub fn parse(input: &str) -> Result<Command<'_>, String> {
             .and_then(GroupIncarnation::new)
             .ok_or("invalid group incarnation")?,
     };
-    if !matches!(word(text)?.0, "status" | "read" | "add" | "checkpoint") {
-        return Err("group prefix supports status, read, add or checkpoint".into());
+    if !matches!(
+        word(text)?.0,
+        "status" | "read" | "add" | "checkpoint" | "configure" | "configuration-status"
+    ) {
+        return Err("unsupported group command".into());
     }
     Ok(Command {
         group,
@@ -54,6 +57,17 @@ pub fn resolve<'a>(service: &Service, text: &'a str) -> Result<Command<'a>, Stri
         return Err("unknown group or incarnation".into());
     }
     Ok(selected)
+}
+pub fn require_leader(service: &Service, group: GroupIdentity) -> Result<(), String> {
+    if service
+        .local()
+        .owner
+        .core(group)
+        .is_none_or(|core| core.role() != voteboat::raft::Role::Leader)
+    {
+        return Err("NOT_LEADER".into());
+    }
+    Ok(())
 }
 pub fn payload(words: &[String]) -> &[String] {
     if words.first().is_some_and(|w| w == "group") {

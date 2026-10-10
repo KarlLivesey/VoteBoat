@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 4 tests
+test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 101 filtered out; finished in 3.77s
+

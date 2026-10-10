@@ -1,0 +1,14 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: the function has a cognitive complexity of (26/25)
+   --> src/bin/counter_service.rs:174:4
+    |
+174 | fn command(
+    |    ^^^^^^^
+    |
+    = help: you could split it up into multiple smaller functions
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cognitive_complexity
+    = note: requested on the command line with `-D clippy::cognitive-complexity`
+
+error: could not compile `voteboat` (bin "voteboat-counter") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 1 previous error
