@@ -1,4 +1,13 @@
-# Baseline acceptance map — review192, operator evidence updated205
+# Baseline acceptance map — review192, operator evidence updated206
+
+Slice206 corrects transfer setup's immediate-success assumption after a reported
+leadership change, retaining original initialization/grant IDs. New TCP/WAL and
+QUIC/checkpoint histories pass lost accepted initialization waits, all-role
+restart, original bootstrap replay with existing data and complete split/retry
+checks. All14 concurrent transfer tests pass after the fixture's shared
+reservation/spawn gate addresses the repeated startup bind failures observed
+locally; both failed runs are retained. These are acceptance changes,
+not a new production retry protocol or a current-platform completion claim.
 
 Slice205 adds bounded original-ID retries for source status and assignment-page
 observations. Lost replies and pre-command authentication deadlines consume the

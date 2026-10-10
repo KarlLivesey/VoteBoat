@@ -140,10 +140,7 @@ fn ownership(rig: &Cluster, phase: usize) {
     }
 }
 fn retire(rig: &Cluster, source: &str, release: &str) -> Output {
-    rig.client(0, 3, "client")
-        .args(["retire", source, release])
-        .output()
-        .unwrap()
+    run(rig.client(0, 3, "client").args(["retire", source, release]))
 }
 fn retired(rig: &Cluster, source: &str, release: &str) -> String {
     let out = retire(rig, source, release);
@@ -206,10 +203,10 @@ fn finish(mut rig: Cluster) {
     fs::remove_dir_all(root).unwrap();
 }
 fn initialize_merge(rig: &Cluster) {
-    rig.ok(1, &["initialize"]);
-    rig.ok(1, &["grant"]);
+    initialization::command(rig, 1, "initialize");
+    initialization::command(rig, 1, "grant");
     for (g, key, id, value) in [(20, "1", "1", "7"), (21, "200", "2", "11")] {
-        rig.ok(g, &["initialize"]);
+        initialization::command(rig, g, "initialize");
         rig.ok(g, &["add", id, key, value]);
     }
     assert!(!rig.request(0, 3, 20, &["read", "200"]).status.success());

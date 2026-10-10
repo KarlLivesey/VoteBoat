@@ -8,11 +8,16 @@ use std::{
     net::{TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command, Output, Stdio},
-    sync::atomic::{AtomicU16, Ordering},
+    sync::{
+        atomic::{AtomicU16, Ordering},
+        Mutex, MutexGuard,
+    },
     time::{Duration, Instant},
 };
 #[path = "transfer_service/cuts.rs"]
 mod cuts;
+#[path = "transfer_service/initialization.rs"]
+mod initialization;
 #[path = "transfer_service/interrupt.rs"]
 mod interrupt;
 #[path = "transfer_service/merge.rs"]
@@ -23,6 +28,22 @@ mod profiles;
 mod retirement;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
 static NEXT: AtomicU16 = AtomicU16::new(14000);
+// A concurrent fork can briefly inherit another fixture's reserved listeners.
+// Coordinate reservations and process creation, never child execution/waiting.
+static RESERVATION_SPAWN: Mutex<()> = Mutex::new(());
+fn fixture_gate() -> MutexGuard<'static, ()> {
+    RESERVATION_SPAWN
+        .lock()
+        .unwrap_or_else(|error| error.into_inner())
+}
+fn spawn(command: &mut Command) -> Child {
+    let _gate = fixture_gate();
+    command.spawn().unwrap()
+}
+fn run(command: &mut Command) -> Output {
+    let child = spawn(command.stdout(Stdio::piped()).stderr(Stdio::piped()));
+    child.wait_with_output().unwrap()
+}
 const GROUPS: [u128; 4] = [1, 20, 21, 22];
 struct Cluster {
     root: PathBuf,
@@ -38,6 +59,7 @@ impl Cluster {
         Self::with_profile(quic, retirement, false)
     }
     fn with_profile(quic: bool, retirement: bool, merge: bool) -> Self {
+        let reservation = fixture_gate();
         let (base, held, udp) = loop {
             let base = NEXT.fetch_add(1024, Ordering::Relaxed);
             let mut held = Vec::new();
@@ -86,6 +108,8 @@ impl Cluster {
         if retirement && !merge {
             plan.arg("--retirement");
         }
+        // This offline child finishes under the reservation gate, so no reserved
+        // listener can outlive the parent reservation through an unrelated fork.
         let plan = plan.output().unwrap();
         assert!(
             plan.status.success(),
@@ -115,6 +139,7 @@ impl Cluster {
         }
         drop(held);
         drop(udp);
+        drop(reservation);
         let mut rig = Self {
             root,
             base,
@@ -129,20 +154,20 @@ impl Cluster {
     }
     fn start_one(&mut self, g: u128, slot: usize, node: u16, mode: &str) {
         let log = fs::File::create(self.root.join(format!("{g}-{node}.log"))).unwrap();
-        let child = Command::new(BIN)
-            .args(["serve", mode])
-            .arg(self.root.join(format!("{g}/{node}")))
-            .arg(node.to_string())
-            .arg((self.base + slot as u16 * 128).to_string())
-            .arg(self.tls())
-            .arg(self.root.join("profile"))
-            .arg(g.to_string())
-            .arg(self.root.join("access"))
-            .arg(if self.quic { "quic" } else { "tcp" })
-            .stdout(log.try_clone().unwrap())
-            .stderr(log)
-            .spawn()
-            .unwrap();
+        let child = spawn(
+            Command::new(BIN)
+                .args(["serve", mode])
+                .arg(self.root.join(format!("{g}/{node}")))
+                .arg(node.to_string())
+                .arg((self.base + slot as u16 * 128).to_string())
+                .arg(self.tls())
+                .arg(self.root.join("profile"))
+                .arg(g.to_string())
+                .arg(self.root.join("access"))
+                .arg(if self.quic { "quic" } else { "tcp" })
+                .stdout(log.try_clone().unwrap())
+                .stderr(log),
+        );
         self.children.push((g, node, child));
     }
     fn start(&mut self, mode: &str) {
@@ -184,11 +209,10 @@ impl Cluster {
         command
     }
     fn request(&self, select: u16, principal: u64, g: u128, words: &[&str]) -> Output {
-        self.client(select, principal, "command")
+        run(self
+            .client(select, principal, "command")
             .arg(g.to_string())
-            .args(words)
-            .output()
-            .unwrap()
+            .args(words))
     }
     fn ok(&self, g: u128, words: &[&str]) -> String {
         let out = self.request(0, 3, g, words);
@@ -201,7 +225,7 @@ impl Cluster {
         String::from_utf8(out.stdout).unwrap()
     }
     fn operate(&self, verb: &str) -> String {
-        let out = self.client(0, 3, "client").arg(verb).output().unwrap();
+        let out = run(self.client(0, 3, "client").arg(verb));
         assert!(
             out.status.success(),
             "{verb}: {} {}",
@@ -271,9 +295,9 @@ fn history(quic: bool) {
     finish(rig);
 }
 fn initialize(rig: &Cluster) {
-    rig.ok(1, &["initialize"]);
-    rig.ok(1, &["grant"]);
-    rig.ok(20, &["initialize"]);
+    initialization::command(rig, 1, "initialize");
+    initialization::command(rig, 1, "grant");
+    initialization::command(rig, 20, "initialize");
     rig.ok(20, &["add", "1", "1", "7"]);
     rig.ok(20, &["add", "2", "200", "11"]);
 }

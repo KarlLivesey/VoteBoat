@@ -31,14 +31,12 @@ fn invalid_profiles_fail_before_opening_replica_files() {
         let profile = root.join("profile");
         fs::write(&profile, text).unwrap();
         let replica = root.join("must-not-exist");
-        let out = Command::new(BIN)
+        let out = run(Command::new(BIN)
             .args(["serve", "create"])
             .arg(&replica)
             .args(["1", "14000", "absent-tls"])
             .arg(&profile)
-            .args(["1", "absent-access", "tcp"])
-            .output()
-            .unwrap();
+            .args(["1", "absent-access", "tcp"]));
         assert!(!out.status.success());
         assert!(
             String::from_utf8_lossy(&out.stderr).contains(expected),

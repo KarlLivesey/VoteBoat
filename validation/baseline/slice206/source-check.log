@@ -1,0 +1,7 @@
+tests/transfer_service.rs: OK
+tests/transfer_service/initialization.rs: OK
+tests/transfer_service/cuts_support.rs: OK
+tests/transfer_service/merge.rs: OK
+tests/transfer_service/retirement.rs: OK
+tests/transfer_service/interrupt.rs: OK
+tests/transfer_service/profiles.rs: OK

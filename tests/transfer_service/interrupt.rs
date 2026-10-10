@@ -21,13 +21,12 @@ pub(super) fn read(rig: &mut Cluster) {
     }
     let log_path = rig.root.join(format!("1-{leader}.log"));
     let before = fs::read_to_string(&log_path).unwrap().len();
-    let mut pending = rig
-        .client(leader, 3, "client")
-        .arg("status")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut pending = spawn(
+        rig.client(leader, 3, "client")
+            .arg("status")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped()),
+    );
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
         let log = fs::read_to_string(&log_path).unwrap();

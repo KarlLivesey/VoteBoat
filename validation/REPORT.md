@@ -5653,3 +5653,23 @@ macOS passes115 counter tests and fails seven before directory/transfer. The
 source-request timeout does not identify its command; these selected regressions
 do not establish a fix for every macOS failure or a current platform pass.
 See [slice205](baseline/slice205/README.md) for commands, scope and source hashes.
+
+## Slice206 — initialization receipt-loss acceptance
+
+The older Ubuntu transfer failure was an explicit unknown initialization result
+after leadership changed. Production behavior remains correct and unchanged;
+the setup fixture now repeats only that exact outcome using the same command
+and profile, with four attempts maximum. Two fixture tests cover bounds and
+unrelated-error refusal. Two new real TCP/WAL and QUIC/checkpoint histories pass
+accepted bootstrap/grant wait loss, absent quorum, all-process restart, original
+operation replay without resetting7/11 data and complete split/client retry.
+
+The initial parallel run records nine passes/five failures: two missing initial
+leader preconditions and three listener bind failures. After adding that
+precondition, another run records ten passes/four bind failures. Both logs remain.
+A short reservation/spawn gate applies the Counter harness's existing pattern
+to prevent unrelated children briefly inheriting reserved listeners. It does
+not serialize service execution or process waits. The final concurrent transfer
+suite passes all14 tests in69.51s. Formatting and all four strict Clippy profiles
+pass. See [slice206](baseline/slice206/README.md); no macOS/full baseline
+acceptance or production behavior change is claimed.

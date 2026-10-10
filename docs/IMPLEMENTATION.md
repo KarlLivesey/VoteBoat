@@ -138,12 +138,87 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Current199c–e: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d/e are recorded below; platform acceptance remains open. CI stays background feedback. |
+| Completed206: initialization receipt-loss acceptance | Exercise original bootstrap/grant replay and correct transfer setup's unknown-outcome assumption; advances P1/P6 acceptance. | Fixed profile IDs, existing application deduplication, native interruption helpers and coordinated fixture resource ownership. | All14 concurrent transfer tests pass, including two new TCP/QUIC lost-initialization/restart/checkpoint histories and two bounded retry/refusal checks. Preserve earlier failed runs; production unknown outcomes remain explicit. |
 | Completed205: bounded source observation recovery | Repeat only original-ID status/assignment reads after unavailable or interrupted exchange; advances usable maintenance/P2/P4. |204 attempt budgets, authenticated command exchange and existing source response validation. | Seven new tests exercise withheld replies, unchanged offsets, stalled authentication, request/deadline exhaustion and terminal rejection; the nine native single-/multi-group histories pass. Source mutations retain explicit unknown outcomes. |
 | Completed204: bounded configuration reply recovery | Keep an uncertain configuration attempt inside the original single-/multi-group drain budget; advances usable maintenance/P4. | Original immutable drain plans, journal observation, idempotent configuration commands and shared authenticated exchange. | An authenticated withheld-reply regression fails before and passes after; exhausted requests cannot reach shutdown; rejection/identity checks, actual TCP/QUIC replacement and single-/multi-group recovery histories pass. Broader platform acceptance199 remains open. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice206 implemented evidence and next review
+
+Production transfer commands intentionally preserve unknown mutation outcomes.
+The test setup now retries only the exact `UNKNOWN Unknown(LeadershipChanged)`
+result, using the same profile-bound metadata/source initialize or grant command,
+at most four times. Two finite fixture tests verify retry bounds, success only
+after an applied receipt and immediate refusal of unrelated failures. Low-level
+command behavior, wire formats and core consensus are unchanged.
+
+New TCP/WAL and QUIC/checkpoint histories each lose accepted metadata bootstrap,
+grant and source bootstrap waits with quorum absent, restart every role process,
+resume original operations and repeat them after data is written. Both pass:
+the unchanged profile and original7/11 values survive replay/checkpoint, and a
+complete split preserves original client retries on independently serving
+children. The interruption helper now waits for a fresh group's first election
+before intentionally removing quorum; it does not infer durability from role.
+
+Two initial parallel runs are retained: nine passes/five failures (three bind
+failures plus the missing fresh-election precondition), then ten passes/four
+bind failures after correcting that precondition. The transfer harness now uses
+the Counter harness's established reservation/spawn exclusion pattern. Parent
+listener reservations cannot be inherited by an unrelated child during fork;
+all process waits and service operation remain outside the gate. The offline
+profile-generation child alone completes while its own reservation is held.
+All14 tests pass in the final concurrent full transfer suite (69.51s), including
+all existing split, merge and retirement histories. Formatting and all four
+strict Clippy profiles pass. Failed and successful concurrent-suite results and
+source hashes are retained in validation/baseline/slice206. This is finite local
+evidence, not general proof of race freedom or macOS acceptance.
+
+The macro plan remains unchanged: this strengthens initialization/recovery
+acceptance, without adding an automatically retrying production mutation API.
+Current platform acceptance, general fault coverage and P7 remain open. Next201
+continues provider obligations and following202 combined membership/checkpoints.
+
+### Slice206 schema plan — initialization receipt-loss acceptance
+
+Previous turn made progress: cf9b7b2 adds bounded original source observations.
+The completed446c807 Ubuntu run reaches transfer tests and fails when metadata
+initialization returns `UNKNOWN Unknown(LeadershipChanged)`. Inspection confirms
+the low-level client intentionally reports unknown mutation outcomes; callers
+must retain original identities. The setup fixture incorrectly requires every
+initialization/grant attempt to succeed immediately. Production retry/consensus
+semantics should not be broadened merely to hide this legitimate outcome.
+
+This slice advances P1/P6 operator acceptance with a bounded initialization
+fixture: repeat only the exact metadata/source initialize or grant command on
+the unchanged profile after the exact leadership-change response, at most four
+attempts. Every attempt must eventually return an actual successful receipt;
+other errors remain terminal. Profile bindings supply stable bootstrap/grant
+operation IDs and deterministic payloads, already deduplicated by the apps.
+
+Factor the existing native accepted-command interruption helper only enough to
+stop before its lifecycle-specific follow-up. It will then also test initial
+bootstrap admission with quorum absent, lost wait, all-process restart, original
+initialization replay and repeated bootstrap after data writes. Data must remain
+7/11, then transfer to the correct children with original retry history intact.
+No new production API, automatic broad mutation retry or format is needed.
+The acceptance checks are TCP/WAL and QUIC/checkpoint histories, a finite retry
+classifier regression, existing transfer histories and all strict lint profiles.
+Next201 remains provider obligations; following202 remains combined membership/
+checkpoint cuts. The full goal and current platform gate remain open.
+
+Slice206 failed-check review: the first parallel run records nine passes/five
+failures: two new tests assumed a leader existed immediately after service
+startup, and three existing tests failed to bind listeners. Add a bounded leader
+precondition before removing quorum. The second run again shows listener binds
+failing in concurrent fixture setup. Transfer fixtures hold reserved listening
+sockets while other threads spawn children; unlike the Counter harness, they
+lack its short held-resource/process-creation gate. Use that established pattern
+for reservation and spawn only, leaving child execution/waits concurrent. This
+removes a plausible inherited-descriptor window; repeated bind failures are not
+treated as fixed until the same concurrent suite passes. Preserve both runs.
 
 ### Slice205 implemented evidence and next review
 

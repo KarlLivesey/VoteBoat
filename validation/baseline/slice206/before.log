@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 2 tests
+
+thread 'initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal' (187) panicked at tests/transfer_service/initialization.rs:54:5:
+assertion `left == right` failed
+  left: 1
+ right: 4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt' (188) panicked at tests/transfer_service/initialization.rs:43:5:
+Err("UNKNOWN Unknown(LeadershipChanged)\n original operation remains unknown")
+test initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal ... FAILED
+test initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt ... FAILED
+
+failures:
+
+failures:
+    initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal
+    initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test transfer_service`

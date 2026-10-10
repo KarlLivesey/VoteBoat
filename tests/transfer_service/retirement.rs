@@ -42,10 +42,7 @@ fn encoded(proof: &RetirementProof) -> String {
         .collect()
 }
 fn retire(rig: &Cluster, release: &str) -> Output {
-    rig.client(0, 3, "client")
-        .args(["retire", "20", release])
-        .output()
-        .unwrap()
+    run(rig.client(0, 3, "client").args(["retire", "20", release]))
 }
 fn require_success(out: Output) -> String {
     assert!(
@@ -92,13 +89,12 @@ fn lost_wait(rig: &mut Cluster, encoded: &str) {
     }
     let log = rig.root.join(format!("20-{leader}.log"));
     let offset = fs::read_to_string(&log).unwrap().len();
-    let mut waiting = rig
-        .client(leader, 3, "command")
-        .args(["20", "retire-group", encoded])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .unwrap();
+    let mut waiting = spawn(
+        rig.client(leader, 3, "command")
+            .args(["20", "retire-group", encoded])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null()),
+    );
     let deadline = Instant::now() + Duration::from_secs(5);
     while !fs::read_to_string(&log).unwrap()[offset..].contains("transfer_proposal accepted") {
         assert!(
@@ -159,20 +155,20 @@ fn rejected_binding(rig: &Cluster) {
     fs::write(marker, contents).unwrap();
 }
 fn binding_refusal(rig: &Cluster) {
-    let mut child = Command::new(BIN)
-        .args(["serve", "recover"])
-        .arg(rig.root.join("20/1"))
-        .arg("1")
-        .arg((rig.base + 128).to_string())
-        .arg(rig.tls())
-        .arg(rig.root.join("profile"))
-        .arg("20")
-        .arg(rig.root.join("access"))
-        .arg(if rig.quic { "quic" } else { "tcp" })
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut child = spawn(
+        Command::new(BIN)
+            .args(["serve", "recover"])
+            .arg(rig.root.join("20/1"))
+            .arg("1")
+            .arg((rig.base + 128).to_string())
+            .arg(rig.tls())
+            .arg(rig.root.join("profile"))
+            .arg("20")
+            .arg(rig.root.join("access"))
+            .arg(if rig.quic { "quic" } else { "tcp" })
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped()),
+    );
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
         if child.try_wait().unwrap().is_some() {

@@ -62,6 +62,11 @@ generates the simple two-target profile. Its groups/responsibility use incarnati
 epoch/generation1→2 and adapter/scheme1. Metadata initialization/grant use1000/1001;
 source initialization uses100. Conflicting IDs or mappings are rejected.
 
+Initialization and grant commands can return `UNKNOWN` after leadership changes.
+Repeat the identical command with the original profile and wait for an applied
+receipt before proceeding. The profile retains the operation IDs; an unknown
+reply is not permission to create a new bootstrap identity or reset existing data.
+
 Custom profiles use this bounded format, with canonical `TransferIntent::encode`
 bytes. Every referenced group must appear exactly once:
 

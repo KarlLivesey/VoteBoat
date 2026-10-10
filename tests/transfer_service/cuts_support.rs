@@ -64,9 +64,25 @@ pub(super) fn lost_proposal(rig: &mut Cluster, g: u128, verb: &str, before: &str
     lost_command(rig, g, &words, before);
 }
 pub(in super::super) fn lost_command(rig: &mut Cluster, g: u128, words: &[String], before: &str) {
-    let leader = (1..=3)
-        .find(|n| status(rig, g, *n).contains("role=Leader"))
-        .unwrap();
+    interrupt_command(rig, g, words);
+    let next = rig.operate("status");
+    if next.starts_with(&format!("OK next={before}")) {
+        rig.operate("step");
+    }
+    eprintln!("lost {} reply recovered next={next}", words[1]);
+}
+pub(in super::super) fn interrupt_command(rig: &mut Cluster, g: u128, words: &[String]) {
+    let deadline = Instant::now() + Duration::from_secs(15);
+    let leader = loop {
+        if let Some(leader) = (1..=3).find(|n| status(rig, g, *n).contains("role=Leader")) {
+            break leader;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "group {g} did not elect before interruption"
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    };
     for n in (1..=3).filter(|n| *n != leader) {
         let at = rig
             .children
@@ -81,13 +97,7 @@ pub(in super::super) fn lost_command(rig: &mut Cluster, g: u128, words: &[String
     let offset = fs::read_to_string(&log).unwrap().len();
     let mut command = rig.client(leader, 3, "command");
     command.arg(g.to_string()).args(words);
-    let mut client = WaitingClient(
-        command
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .unwrap(),
-    );
+    let mut client = WaitingClient(spawn(command.stdout(Stdio::piped()).stderr(Stdio::piped())));
     let deadline = Instant::now() + Duration::from_secs(5);
     loop {
         let text = fs::read_to_string(&log).unwrap();
@@ -97,19 +107,18 @@ pub(in super::super) fn lost_command(rig: &mut Cluster, g: u128, words: &[String
         assert!(
             client.0.try_wait().unwrap().is_none(),
             "client ended before accepted {}",
-            words[1]
+            words.join(" ")
         );
-        assert!(Instant::now() < deadline, "{} not admitted", words[1]);
+        assert!(
+            Instant::now() < deadline,
+            "{} not admitted",
+            words.join(" ")
+        );
         std::thread::sleep(Duration::from_millis(1));
     }
     drop(client);
     rig.crash();
     rig.start("recover");
-    let next = rig.operate("status");
-    if next.starts_with(&format!("OK next={before}")) {
-        rig.operate("step");
-    }
-    eprintln!("lost {} reply recovered next={next}", words[1]);
 }
 fn unhex(hex: &str) -> Vec<u8> {
     assert_eq!(hex.len() % 2, 0);
