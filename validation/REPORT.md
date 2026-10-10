@@ -6,7 +6,9 @@ retry exposes stale-leader caller assumptions. Existing bounded original-ID/cont
 recovery retains uncertainty evidence, exact values/retries and intentional unread
 fault cuts. Final creation10/0 passes on Linux/Mac, formatting/four strict profiles
 zero and652 final inputs match. No production/timer/quota change. Linux additional
-delete4/0 and created-source4/0 pass; Mac checks remain pending and the unchanged
+delete4/0 and created-source4/0 pass; additional Mac deletion2/2 fails explicit
+duplicate/fence equality, with terminal-outcome diagnosis pending. Mac created-source
+checks remain live and the unchanged
 original251 full run remains independent. This is selected namespace acceptance.
 
 Original parent-independent service retry/store ownership:

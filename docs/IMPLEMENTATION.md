@@ -25705,3 +25705,28 @@ not an isolated pass replacing a different-source failure. Next255 functional
 release-gap audit and following256 separate-host service acceptance retain their
 purposes/dependencies/checks above. Macro review keeps the existing usable service
 and embedding ahead of P7 tuning/security; no new helper prerequisite is added.
+
+254c-remaining actual Mac deletion result:2/2, Linux4/0. TCP/WAL fails child
+intent operation210's explicit duplicate at deletion344; QUIC/checkpoint fails
+parent fence200 equality against the captured original at348. Original bodies
+are now preserved in namespace evidence; this is not a completed lifecycle slice.
+Created-source4 is still running on the unchanged source; original251 remains
+independent. No broad Mac/current full-suite pass is claimed.
+
+Next diagnosis schema within current254c: data remains original ClientRequest
+(group/operation/bytes), ClientCompletion::outcome and per-voter committed/applied
+positions plus application facts. phase_write currently holds one terminal
+envelope unconsumed and compares applications against a current commit prefix,
+without distinguishing Applied from Unknown. Capture that exact terminal kind
+and original operation's durability/application witness before owner abort.
+Accepted Unknown must not be treated as a committed phase; an actual Applied
+with missing recovered state instead requires storage/recovery investigation.
+Caller owns the retained completion/request credit until explicit abort/drain;
+keep original unread-result cuts, IDs/bytes, duplicate and full-fence assertions,
+checkpoint/WAL recovery and frozen metadata files. Diagnose first, then sketch
+the smallest correction from the observed class; no broad helper rewrite,
+lease/timing change or weakened duplicate assertion from this inference.
+Acceptance remains original named TCP/QUIC deletion/created-source histories and
+affected shared helper histories on both platforms, source-linked failure and
+final evidence, fmt/four strict profiles zero. Current254c still advances P5/P6;
+next255 audit and following256 separate-host service remain linked above.

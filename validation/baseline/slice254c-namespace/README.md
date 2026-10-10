@@ -32,3 +32,13 @@ original logs; publication normalizes workspace paths, trailing whitespace and t
 final.patch is zero-context relative to ee38796. Failed Drop is not a worker-join
 certificate; failed roots remain. Mac uses the isolated repo252 source/build,
 stable1.98.0 arm64 and scoped4096 descriptors. Linux stable1.98.1.
+
+Additional Mac deletion run now finishes2/2 (passed/failed): TCP/WAL's
+child-intent retry is not duplicate; QUIC/checkpoint's parent fence replay does
+not equal the original captured fence. Linux's same four cases remain4/0.
+This does not change the accepted creation10/0 result. phase_write retains
+a terminal envelope and waits for applied >= current commit, but checks only
+its ticket, not Applied versus Unknown. That is a diagnosis candidate; neither
+a lost-commit/storage defect nor its absence is established without the actual
+terminal outcome and operation-prefix witness. No assertion is relaxed. Mac
+created-source4 remains pending; preserved original251 still has its own scope.

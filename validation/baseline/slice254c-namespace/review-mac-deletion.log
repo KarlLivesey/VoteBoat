@@ -1,0 +1,79 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal has been running for over 60 seconds
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal has been running for over 60 seconds
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... FAILED
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... FAILED
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+
+failures:
+
+---- native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal stdout ----
+
+thread 'native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal' (17475813) panicked at tests/routed/deletion.rs:344:17:
+assertion failed: propose_recovering(&mut self.child, &self.clock, g, op, b).duplicate
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:150:5
+   3: <routed::native::delegation::deletion::Rig>::phase
+             at ./tests/routed/deletion.rs:344:17
+   4: routed::native::delegation::deletion::complete_deletion
+             at ./tests/routed/deletion.rs:409:7
+   5: routed::native::delegation::deletion::run
+             at ./tests/routed/deletion.rs:466:19
+   6: routed::native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal
+             at ./tests/routed/deletion.rs:567:5
+   7: routed::native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal::{closure#0}
+             at ./tests/routed/deletion.rs:566:60
+   8: <routed::native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+   9: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+---- native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint stdout ----
+
+thread 'native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint' (17475810) panicked at tests/routed/deletion.rs:348:17:
+assertion failed: matches!(propose_recovering(&mut
+    self.parent_owner,&self.clock,g,op,b).outcome,RoutedOutcome::Fenced(f) if
+    Some(f)==original.parent_fence)
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:150:5
+   3: <routed::native::delegation::deletion::Rig>::phase
+             at ./tests/routed/deletion.rs:348:17
+   4: routed::native::delegation::deletion::complete_deletion
+             at ./tests/routed/deletion.rs:433:7
+   5: routed::native::delegation::deletion::run
+             at ./tests/routed/deletion.rs:466:19
+   6: routed::native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint
+             at ./tests/routed/deletion.rs:581:5
+   7: routed::native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint::{closure#0}
+             at ./tests/routed/deletion.rs:580:68
+   8: <routed::native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+   9: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint
+    native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 172 filtered out; finished in 206.61s
+
+error: test failed, to rerun pass `--test routed`
