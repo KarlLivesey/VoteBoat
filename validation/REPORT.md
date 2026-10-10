@@ -5241,3 +5241,28 @@ validation pass. Inventory shape/path checking is not protocol conformance.
 No automatic executable reload, remote secret distribution, durable rotation
 journal, macOS/separate-host execution or complete C09/C21/P0–P7 claim follows.
 Accepted external progress cannot be undone by credential replacement.
+
+## Slice174 — durable live command-credential reload
+
+Linux:50/50 service tests pass, including both new unread-reload/revocation/restart
+histories. An additional31 credential/security and3 executable unit tests pass.
+Core-only checks pass9 and native-only journal checks pass4. Formatting, both
+all-target strict Clippy profiles, warnings-denied docs and94-record inventory
+checks pass. `validation/baseline/slice174` contains commands, failed/final logs
+and source hashes; no filtered-out target is counted as tested.
+
+Public fixed-record journal host injection checks exact retry, owner/sequence/
+generation rejection, pre/post replacement uncertainty, byte corruption and
+partial staging. Controlled preparation checks single-flight admission, join
+and fencing. Service histories verify current generation after unobserved
+replies, revoked writer permissions, intact application retries, invalid-file
+refusal and restart rollback/same-generation digest refusal.
+
+An old administration test assumed a discovered leader stayed stable until reply;
+its fix retries only the documented uncertainty with the identical operation.
+A later overlapping test invocation encountered AddrInUse; its actual recovery
+log is retained and the final full service run executed alone. No production
+consensus rules or lint limits were weakened. Credential preparation is local,
+not a replicated membership change or full audit history. Physical power loss,
+macOS/separate-host validation, peer key orchestration and remaining P0–P7 gates
+are not established by this slice.

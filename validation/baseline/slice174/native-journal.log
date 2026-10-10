@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.13s
+     Running tests/credential_journal.rs (target/debug/deps/credential_journal-6a54ca3ea302695d)
+
+running 4 tests
+test latest_retry_is_idempotent_and_stale_or_cross_owner_records_are_refused ... ok
+test uncertain_completion_fences_until_reopen_with_old_or_new_record ... ok
+test every_byte_corruption_of_committed_record_fails_closed ... ok
+test native_file_recovery_ignores_partial_staging_and_validates_published_record ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

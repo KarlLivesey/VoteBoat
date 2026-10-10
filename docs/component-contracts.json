@@ -829,7 +829,15 @@
         "tests/credential_refresh/keys.rs",
         "tests/quic_connect/credential_refresh.rs"
       ],
-      "scope": "Contract version1. Bounded explicit prepared-material replacement rejects same/lower generations and returns original rejected or previous material; no implicit I/O, session list or runtime. GuardedSession requires authenticated Ready immutable binding, checks fixed-generation validity around I/O and returns construction inputs on refusal. Revocation suppresses success and clears a read buffer if discovered after provider progress, never rolls back external bytes or committed work. Native set close/drop revokes only its own leases; guard close affects only one connection, extraction revokes first. Host injection checks call suppression, during-I/O invalidation and cleanup ownership. Real TCP/TLS/QUIC old-session revocation and fresh stable-identity authorization, actual TLS certificate/key and pin replacement, and native transport exact failed-batch ownership. Host must capture lease before authentication, validate bundle consistency and own bounded sessions/restart configuration. No executable reload, durable rotation journal, external issuer, secret distribution or membership authority."
+      "scope": "Contract version1. Bounded explicit prepared-material replacement rejects same/lower generations and returns original rejected or previous material; no implicit I/O, session list or runtime. GuardedSession requires authenticated Ready immutable binding, checks fixed-generation validity around I/O and returns construction inputs on refusal. Revocation suppresses success and clears a read buffer if discovered after provider progress, never rolls back external bytes or committed work. Native set close/drop revokes only its own leases; guard close affects only one connection, extraction revokes first. Host injection checks call suppression, during-I/O invalidation and cleanup ownership. Real TCP/TLS/QUIC old-session revocation and fresh stable-identity authorization, actual TLS certificate/key and pin replacement, and native transport exact failed-batch ownership. Host must capture lease before authentication, validate bundle consistency and own bounded sessions/restart configuration. Executable command-channel publication composes this with CredentialJournal. No external issuer, secret distribution or membership authority."
+    },
+    {
+      "design_id": "C09/C21",
+      "public_contract": "CredentialJournal / CredentialRecordIo",
+      "operations": ["owner", "latest", "publish", "read", "replace"],
+      "native": "NativeCredentialJournal<I> over host-supplied atomic record I/O; FileCredentialRecord uses stage, file sync, rename and directory sync. The executable owns one preparation worker and publishes through NativeCredentialSet.",
+      "conformance": ["tests/credential_journal.rs", "tests/counter_service/credential_reload.rs", "src/bin/support/credential_reload_tests.rs"],
+      "scope": "Version1 local fixed128-byte checksummed latest preparation record binds stable node/store identity, request sequence, expected/replacement generations and exact loaded material digest. Exact latest retries are idempotent; changed/superseded sequences and older expected generations reject. Uncertain writes fence until reopen. Caller provides exclusive writer lifetime and runs blocking I/O outside Node polling. Executable reload uses fixed trusted paths, bounded complete material validation, single-flight worker ownership, durable preparation before publication, guarded old-session revocation and status after lost replies. Failed preparation retains old credentials; uncertain publication stops service. Shutdown/error exits join accepted workers. Reopen refuses rollback and same-generation digest mismatch; higher trusted startup configuration remains allowed. Command-channel TLS/policy only: no automatic peer credential rotation, secret distribution, full audit history or cluster-wide atomic update. Finite corruption/partial-stage and before/after replacement tests are not physical power-loss proof."
     },
     {
       "design_id": "C09",
@@ -2313,7 +2321,7 @@
     "client-disk-and-connection-admission-policy",
     "automatic-remote-authority-discovery-and-live-endpoint-refresh",
     "observability-latency-and-budgeted-events",
-    "live-credential-rotation-and-durable-authorization-audit",
+    "cluster-peer-credential-rotation-and-general-durable-authorization-audit",
     "compression",
     "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",

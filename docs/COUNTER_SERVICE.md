@@ -654,6 +654,11 @@ online enrollment, arbitrary partial joint/final delivery, dropped readiness
 reply recovery, divergent retained-only learner repair or unavailable witness
 liveness. The broader fault-release gates and public mutation-ingress gate remain.
 
+Authenticated command credentials can be reloaded through `reload-access REQUEST
+EXPECTED NEXT`; `credential-status REQUEST` resolves an unread reply. See the
+[reload contract](CREDENTIAL_REFRESH.md#executable-command-channel-reload) for
+staging, generation, restart and per-node scope.
+
 ## Authenticated submission of provisioned configuration intents
 
 Slice115 adds an opt-in command path alongside automatic startup plans:

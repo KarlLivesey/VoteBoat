@@ -15,6 +15,8 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/credential_reload.rs"]
+mod credential_reload;
 #[path = "support/diagnostics.rs"]
 mod diagnostics;
 #[path = "support/local_client.rs"]
@@ -53,7 +55,8 @@ recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named o
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
-Use the same operation ID and delta when retrying an unknown write.";
+Use the same operation ID and delta when retrying an unknown write.\n\
+Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
@@ -109,9 +112,11 @@ fn command(
     command: &str,
     administration: &mut Option<administration::Administration>,
     quit: &mut bool,
+    credentials: &mut credential_reload::Commands<'_>,
 ) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
+        ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
         ["maintenance"] => maintenance_status(service),
         ["events", session, after, count] => observer.events(session, after, count)?,
         ["metrics"] => {
@@ -248,7 +253,14 @@ fn outputs(service: &mut Service, connection: &mut Option<Connection>) -> Result
     }
     Ok(())
 }
-fn serve(
+struct PreparedService {
+    service: Service,
+    credentials: credential_reload::Credentials,
+    administration: Option<administration::Administration>,
+    listener: TcpListener,
+    peer_address: std::net::SocketAddr,
+}
+fn prepare_service(
     mode: &str,
     root: &Path,
     id: u64,
@@ -256,7 +268,7 @@ fn serve(
     tls: &Path,
     input: setup::PeerInput<'_>,
     options: &StartupOptions,
-) -> Result<(), Failure> {
+) -> Result<PreparedService, Failure> {
     let protocol = options.protocol;
     let plan_path = options.admin_plan.as_deref();
     let access_path = options.service_access.as_deref();
@@ -270,10 +282,17 @@ fn serve(
         plan_path.is_some(),
     )?;
     let config = setup::configuration(root, id, base, tls, create, input)?;
-    let access = access_path
-        .map(|path| service_access::Access::load(path, tls, config.startup.tls.clone()))
-        .transpose()?;
-    let mut administration = plan_path
+    let credentials = credential_reload::Credentials::load(
+        root,
+        access_path,
+        tls,
+        id,
+        voteboat::secure::PeerIdentity {
+            node: config.startup.node,
+            store: config.startup.store,
+        },
+    )?;
+    let administration = plan_path
         .map(|path| {
             administration::Administration::load(path, &config.provisioned_stores, admin_mode)
         })
@@ -283,6 +302,32 @@ fn serve(
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     options.configure_maintenance(&mut service)?;
+    Ok(PreparedService {
+        service,
+        credentials,
+        administration,
+        listener,
+        peer_address,
+    })
+}
+fn serve(
+    mode: &str,
+    root: &Path,
+    id: u64,
+    base: u16,
+    tls: &Path,
+    input: setup::PeerInput<'_>,
+    options: &StartupOptions,
+) -> Result<(), Failure> {
+    let prepared = prepare_service(mode, root, id, base, tls, input, options)?;
+    let mut service = prepared.service;
+    // Declare after service: error exits join the credential worker before
+    // releasing the service's exclusive data-directory ownership.
+    let mut credentials = prepared.credentials;
+    let mut administration = prepared.administration;
+    let listener = prepared.listener;
+    let peer_address = prepared.peer_address;
+    let protocol = options.protocol;
     let owner = service.local().owner.identity();
     let mut observer = Diagnostics::new(owner).map_err(|e| format!("diagnostic setup: {e:?}"))?;
     let command_local = service_access::server_local(id, owner.store.session);
@@ -297,18 +342,36 @@ fn serve(
     let mut shutdown_started = None;
     loop {
         let time = now(start);
+        if credentials.poll() {
+            eprintln!("credential reload has uncertain durable state; stopping");
+            quit = true;
+        }
         // Observe command closure/deadline and cancel its exact pending work
         // before this iteration can authorize queued membership execution.
         if !quit && connection.is_none() {
-            connection = accept_connection(&listener, access.is_some(), &mut command_generation)?;
+            connection = accept_connection(
+                &listener,
+                credentials.access.is_some(),
+                &mut command_generation,
+            )?;
         }
+        let (access, mut commands) = credentials.split();
         let remove_reason = connection.as_mut().and_then(|c| {
             c.poll(
-                access.as_ref(),
+                access,
                 command_local,
                 SecureSessionGeneration::new(command_generation).unwrap(),
                 time,
-                |s| command(&mut service, &observer, s, &mut administration, &mut quit),
+                |s| {
+                    command(
+                        &mut service,
+                        &observer,
+                        s,
+                        &mut administration,
+                        &mut quit,
+                        &mut commands,
+                    )
+                },
             )
         });
 
@@ -327,7 +390,7 @@ fn serve(
             &mut observer,
             administration.as_ref(),
             &connection,
-            access.as_ref(),
+            credentials.access.as_ref(),
             time,
             owner,
         )?;
@@ -355,6 +418,7 @@ fn serve(
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
+    credentials.finish()?;
     observer.close();
     setup::join(service)?;
     println!("stopped node={id} workers_joined=true");
@@ -423,7 +487,7 @@ fn main() -> Result<(), Failure> {
 impl Connection {
     fn poll(
         &mut self,
-        access: Option<&service_access::Access>,
+        access: Option<&service_access::ActiveAccess>,
         local: voteboat::secure::LocalIdentity,
         generation: SecureSessionGeneration,
         time: MonoTime,
@@ -634,7 +698,7 @@ fn poll_service(
     observer: &mut Diagnostics,
     administration: Option<&administration::Administration>,
     connection: &Option<Connection>,
-    access: Option<&service_access::Access>,
+    access: Option<&service_access::ActiveAccess>,
     time: MonoTime,
     owner: RuntimeOwner,
 ) -> Result<(), Failure> {

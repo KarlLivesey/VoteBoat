@@ -96,9 +96,49 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: recorded cancellation/publication race schedules171 | Exercise competing creation decisions under owner loss; advances P0/P5/P6 validation. | Schema16 cancellation, native owner/file recovery and slice170 service fixes. | Sixteen recorded TCP/QUIC schedules preserve the winning decision, reject the loser, retain retry identity and keep canceled targets non-serving; broader lifecycle faults remain open. |
 | Completed: bounded remote endpoint refresh172 | Fetch endpoint hints over authenticated TCP/TLS or QUIC; advances P5/C17. | Existing discovery/session contracts and owner-independent child routing. | Bounded single-flight refresh/retry, exact cancellation, stale refusal, explicit reconnect and cached-peer availability during source failure. External manifest fetching and executable integration remain open. |
 | Completed: credential generation and session revocation173 | Revoke old authenticated connections when prepared credentials change; advances C09/C21 and Rust embedding. | Existing SecureSession/ServiceAuthorizer contracts and chapter09/17 audit. | Host/native ownership and callback checks, selected TCP/QUIC reauthentication, TLS key/pin replacement and exact failed native transport batches. Executable publication remains open. |
-| Current: staged executable credential publication | Make credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Validate complete material before generation publication, reject stale generations, revoke old pending channels without revoking unrelated work, preserve admitted-operation recovery and restart configuration. |
-| Next: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Direct evidence for selected gaps, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
-| Following: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
+| Completed: staged executable credential publication174 | Make command-credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Complete bundle validation, durable local preparation, monotonic publication, old-channel revocation, exact latest retry/status, malformed-file refusal and restart digest/generation checks. Peer rotation and full audit history remain open. |
+| Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Direct evidence for selected gaps, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
+| Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
+| Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+
+### Slice174 schema plan — live executable credential reload
+
+Purpose: expose the generation guard as usable service behavior. The fixed
+startup access/TLS paths remain trusted host configuration; remote input chooses
+only a local request sequence and expected/replacement generations. Add
+administrator-only reload submission plus read-only reload status.
+
+Shape/ownership: one off-thread preparation at a time, bounded input files and
+one prepared Access bundle. Capture the original request and stable local store
+identity. Hash the exact loaded access, TLS and pin bytes. Persist a fixed-size,
+checksummed latest reload record through a public CredentialJournal contract
+before publishing NativeCredentialSet. Keep a monotonic local request sequence;
+exact latest retries are idempotent and superseded sequences are refused.
+
+Transitions: queued -> load/validate -> durable prepared record -> publish new
+credentials -> old channels revoked. An immediate queue reply is admission only;
+status reports durable preparation/current activation after reply loss. Failed
+preparation leaves old credentials intact. Uncertain journal writes fence command
+credentials and require recovery. Shutdown retains/joins accepted preparation;
+connection loss cannot undo a durable reload. Startup compares the loaded bundle
+to the last committed generation/digest; stale or changed same-generation files
+fail closed. This is local administrative audit, not a Raft membership change.
+Higher explicit trusted startup generations remain allowed; the durable record
+is a floor and an exact digest obligation at the recorded generation.
+
+Checks: journal owner/checksum/sequence validation and old/new recovery cuts;
+bounded worker admission and join; native TCP/QUIC service reload without restart,
+revoked writer, surviving reads/data retries, malformed/stale reload refusal and
+reopen validation. Polling must perform no file reads/writes. Preserve both
+strict Clippy configurations. Full key distribution and general durable audit
+remain separate; this record covers this one explicit reload operation.
+
+Regression schema note: the full service run exposed a configuration test helper
+that assumed its discovered leader remained leader until reply. Preserve the
+original operation ID and expected outcome; retry only the exact documented
+LeadershipChanged uncertainty for expected-success mutations. Deterministic
+refusals and other errors remain failures. This changes test-driving behavior,
+not production retries, configuration admission or the acceptance condition.
 
 ### Slice173 schema plan — credential generation and session revocation
 
@@ -16081,3 +16121,46 @@ no old session receives a fresh lease. Native file preparation/publication and
 executable integration are the next linked deliverable. Key distribution,
 durable rotation audit/recovery, broader fault/platform validation and remaining
 P0–P7 requirements are not declared complete.
+
+### Slice174 progress — durable live command-credential reload
+
+Revalidated the in-progress worktree after the explanatory Clippy turn. Added
+explicit authenticated `reload-access REQUEST EXPECTED NEXT` and
+`credential-status REQUEST` commands. One worker loads bounded fixed-path
+access/TLS/pin material and validates it before persisting a fixed128-byte record
+through the public CredentialJournal/CredentialRecordIo seams. Only that durable
+preparation permits publication into NativeCredentialSet. Old command channels
+retain their original leases and are revoked; group membership and peer sessions
+do not change.
+
+Latest exact retries are idempotent. Status resolves an unread reply; queued
+admission is not durable success. Validation failure retains old credentials;
+uncertain writes fence command access and stop the service. Startup refuses
+rollback and changed same-generation material; explicit higher trusted startup
+generations remain allowed. Both normal and error cleanup join accepted workers
+before releasing the service's directory ownership. Startup and command handling
+were split to retain the existing size/complexity limits, without lint exceptions.
+
+Linux evidence in validation/baseline/slice174: all50 service tests pass in42.38s,
+31 credential/security tests pass, and all3 executable unit tests pass. Nine
+core-only checks and four native-only journal checks pass. The two new process
+histories cover TCP/QUIC peer transports with TLS command channels, deliberately
+unread reload replies, writer revocation, preserved reads/deduplication, invalid
+material, stale requests and restart generation/digest refusal. Controlled
+worker checks cover single-flight ownership, held preparation, join and fencing.
+Journal tests cover host injection, corruption and selected replacement cuts.
+
+The first broad service run exposed an old test helper rejecting an exact
+LeadershipChanged response; it now retries only the same configuration operation
+when success is expected. Another run encountered an actual AddrInUse while a
+separate service invocation shared the port pool. Its log is retained, and the
+final full invocation ran alone. Diagnostics now print the current recovery log.
+Formatting, both strict Clippy profiles, warning-denied docs and94-record
+inventory validation pass. Logs and source hashes distinguish failed and final
+checks; metadata validation is not protocol proof.
+
+Macro review: this advances operational C09/C21 without changing the P0–P7
+definition. The linked mini plan moves to remaining baseline/deployment evidence,
+then measured performance and combined lifecycle fault gates. Automatic peer key
+rotation, external issuers/distribution, full audit history, physical power-loss,
+macOS/separate-host evidence and wider baseline requirements remain open.

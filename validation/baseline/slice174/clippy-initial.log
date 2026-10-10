@@ -1,0 +1,43 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: the function has a cognitive complexity of (29/25)
+   --> src/bin/counter_service.rs:109:4
+    |
+109 | fn command(
+    |    ^^^^^^^
+    |
+    = help: you could split it up into multiple smaller functions
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cognitive_complexity
+    = note: requested on the command line with `-D clippy::cognitive-complexity`
+
+error: this function has too many lines (111/100)
+   --> src/bin/counter_service.rs:109:1
+    |
+109 | / fn command(
+110 | |     service: &mut Service,
+111 | |     observer: &Diagnostics,
+112 | |     command: &str,
+...   |
+116 | |     credential_generation: Option<voteboat::authorization::CredentialGeneration>,
+117 | | ) -> Result<Phase, String> {
+    | |__________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+    = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: this function has too many lines (134/100)
+   --> src/bin/counter_service.rs:269:1
+    |
+269 | / fn serve(
+270 | |     mode: &str,
+271 | |     root: &Path,
+272 | |     id: u64,
+...   |
+276 | |     options: &StartupOptions,
+277 | | ) -> Result<(), Failure> {
+    | |________________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter") due to 3 previous errors

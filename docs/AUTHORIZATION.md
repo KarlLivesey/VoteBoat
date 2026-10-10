@@ -42,14 +42,15 @@ voteboat-service-access-v1 1
 Header value is the credential generation. Each grant is
 `PRINCIPAL ROLE GROUP INCARNATION`. Principal numbers are 1..4096. Groups and
 incarnations are nonzero. The demo serves group 1/incarnation 1. Invalid grants
-fail before listener/store creation. Policies take effect at restart; increment
-the generation when replacing credentials or permissions.
+fail before listener/store creation. Increment the generation when replacing
+credentials or permissions. Apply at restart or use the explicit authenticated
+[live command-channel reload](CREDENTIAL_REFRESH.md#executable-command-channel-reload).
 
 | Role | Commands |
 | --- | --- |
-| reader | status, metrics, configuration-status, read |
+| reader | status, metrics, configuration-status, credential-status, read |
 | writer | reader commands plus add |
-| admin | writer commands plus checkpoint and quit |
+| admin | writer commands plus checkpoint, reload-access and quit |
 
 Startup `--admin-plan` remains an operator input with separate committed
 configuration checks. Slice115 adds --remote-admin-plan with administrator-only
@@ -108,4 +109,4 @@ The same group/session gate is rechecked at execution against one immutable full
 target and operator-provisioned placement. See [client target semantics](COUNTER_SERVICE.md#client-supplied-configuration-targets)
 for bounded parsing, exact retry comparison and compacted-history refusal.
 
-Slice173 adds [credential generations and session guards](CREDENTIAL_REFRESH.md) for Rust hosts. Prepared policy/TLS replacement can revoke existing guarded sessions without changing voter membership. The executable still loads its access file at startup; automatic live reload and durable rotation audit remain open.
+Slices173–174 add [credential generations, session guards and explicit live reload](CREDENTIAL_REFRESH.md) for Rust hosts and the executable. Prepared command-policy/TLS replacement revokes existing guarded sessions without changing voter membership. The executable records local preparation before publication; automatic peer rotation, external secret distribution and general durable audit remain open.

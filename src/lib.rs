@@ -21,6 +21,7 @@ pub mod buffer;
 pub mod child_slots;
 pub mod connect;
 pub mod contracts;
+pub mod credential_reload;
 pub mod delegation;
 pub mod deletion;
 pub mod dial;

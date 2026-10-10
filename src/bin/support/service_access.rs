@@ -23,7 +23,11 @@ use std::{
 use voteboat::{
     authorization::*,
     identity::*,
-    native::{authorization::*, tls::*},
+    native::{
+        authorization::*,
+        credentials::{CredentialLease, NativeCredentialSet},
+        tls::*,
+    },
     runtime::MonoTime,
     secure::*,
 };
@@ -61,10 +65,15 @@ pub struct Access {
     pub policy: NativeServiceAccess,
     tls: NativeTlsConfig,
     peers: BTreeMap<PrincipalId, TlsPeer>,
+    pub digest: [u8; 32],
 }
+pub type ActiveAccess = NativeCredentialSet<Access>;
 impl Access {
-    pub fn load(path: &Path, directory: &Path, tls: NativeTlsConfig) -> Result<Self, Failure> {
+    pub fn load(path: &Path, directory: &Path, id: u64) -> Result<Self, Failure> {
         let bytes = material(path, 4096)?;
+        let mut hash = ring::digest::Context::new(&ring::digest::SHA256);
+        hash_part(&mut hash, &bytes);
+        let tls = load_tls(directory, id, &mut hash)?;
         let text = std::str::from_utf8(&bytes)?;
         let mut lines = text.lines();
         let header = lines
@@ -107,6 +116,7 @@ impl Access {
             let identity = transport_identity(number, true);
             if let std::collections::btree_map::Entry::Vacant(entry) = peers.entry(principal) {
                 let certificate = material(&directory.join(format!("node{number}.der")), 65536)?;
+                hash_part(&mut hash, &certificate);
                 pin_bytes = pin_bytes
                     .checked_add(certificate.capacity())
                     .filter(|n| *n <= 1024 * 1024)
@@ -130,8 +140,30 @@ impl Access {
             policy,
             tls: checked(tls.with_wire_version(1))?,
             peers,
+            digest: hash.finish().as_ref().try_into().unwrap(),
         })
     }
+}
+fn hash_part(hash: &mut ring::digest::Context, bytes: &[u8]) {
+    hash.update(&(bytes.len() as u64).to_be_bytes());
+    hash.update(bytes);
+}
+fn load_tls(
+    directory: &Path,
+    id: u64,
+    hash: &mut ring::digest::Context,
+) -> Result<NativeTlsConfig, Failure> {
+    let root = material(&directory.join("ca.der"), 65536)?;
+    let cert = material(&directory.join(format!("node{id}.der")), 65536)?;
+    let key = material(&directory.join(format!("node{id}-key.der")), 65536)?;
+    for b in [&root, &cert, &key] {
+        hash_part(hash, b);
+    }
+    checked(NativeTlsConfig::new(TlsCredentials {
+        roots: vec![root],
+        certificate_chain: vec![cert],
+        private_key: key,
+    }))
 }
 pub struct ClientAccess {
     tls: NativeTlsConfig,
@@ -192,7 +224,8 @@ pub enum Channel {
         len: usize,
     },
     Tls {
-        session: Box<NativeTlsSession<TcpStream>>,
+        session: Option<Box<dyn SecureSession>>,
+        lease: Option<CredentialLease>,
         context: Option<CredentialContext>,
         generation: CredentialGeneration,
     },
@@ -226,14 +259,15 @@ impl Channel {
             now,
         ))?;
         Ok(Self::Tls {
-            session: Box::new(session),
+            session: Some(Box::new(session)),
+            lease: None,
             context: None,
             generation: CredentialGeneration::new(1).unwrap(),
         })
     }
     pub fn poll(
         &mut self,
-        access: Option<&Access>,
+        access: Option<&ActiveAccess>,
         local: LocalIdentity,
         generation: SecureSessionGeneration,
         now: MonoTime,
@@ -253,7 +287,9 @@ impl Channel {
                                 std::str::from_utf8(&bytes[..*len - 1])?.parse::<u64>()?;
                             let principal =
                                 PrincipalId::new(principal).ok_or("invalid principal selector")?;
-                            let access = access.ok_or("missing access policy")?;
+                            let active = access.ok_or("missing access policy")?;
+                            let access = active.material().ok_or("revoked access policy")?;
+                            let lease = active.lease().map_err(|e| format!("{e:?}"))?;
                             let peer = access
                                 .peers
                                 .get(&principal)
@@ -269,7 +305,8 @@ impl Channel {
                                 now,
                             ))?;
                             *self = Self::Tls {
-                                session: Box::new(session),
+                                session: Some(Box::new(session)),
+                                lease: Some(lease),
                                 context: None,
                                 generation: access.policy.generation(),
                             };
@@ -288,9 +325,18 @@ impl Channel {
                 session,
                 context,
                 generation,
+                lease,
             } => {
-                checked(session.poll(now, SessionPollBudget::default()))?;
-                match session.state() {
+                if let Some(lease) = lease.as_ref() {
+                    checked(lease.validate())?;
+                }
+                checked(
+                    session
+                        .as_mut()
+                        .ok_or("missing TLS session")?
+                        .poll(now, SessionPollBudget::default()),
+                )?;
+                match session.as_ref().unwrap().state() {
                     SessionState::Handshaking => return Ok(false),
                     SessionState::Closing | SessionState::Closed | SessionState::Failed => {
                         return Err("closed service channel".into())
@@ -298,6 +344,11 @@ impl Channel {
                     SessionState::Ready => (),
                 }
                 if context.is_none() {
+                    if let Some(validity) = lease.take() {
+                        let guarded = GuardedSession::new(session.take().unwrap(), validity)
+                            .map_err(|(e, _, _)| format!("{e:?}"))?;
+                        *session = Some(Box::new(guarded));
+                    }
                     *context = Some(CredentialContext {
                         generation: *generation,
                         authenticated_at: now,
@@ -311,15 +362,20 @@ impl Channel {
         match self {
             Self::Plain(_) => Ok(true),
             Self::Tls { session, .. } => {
-                checked(session.poll(now, SessionPollBudget::default()))?;
-                Ok(session.state() == SessionState::Ready)
+                checked(
+                    session
+                        .as_mut()
+                        .ok_or("missing TLS session")?
+                        .poll(now, SessionPollBudget::default()),
+                )?;
+                Ok(session.as_ref().unwrap().state() == SessionState::Ready)
             }
             Self::Selecting { .. } => Err("invalid client channel".into()),
         }
     }
     pub fn authorize(
         &self,
-        access: Option<&Access>,
+        access: Option<&ActiveAccess>,
         scope: GroupIdentity,
         text: &str,
         now: MonoTime,
@@ -327,15 +383,21 @@ impl Channel {
         let Some(access) = access else {
             return Ok(());
         };
+        let access = access.material().ok_or("AUTHORIZATION")?;
         let action = match text.split_whitespace().next() {
-            Some("status" | "metrics" | "events" | "maintenance" | "configuration-status") => {
-                ServiceAction::Inspect
-            }
+            Some(
+                "status"
+                | "metrics"
+                | "events"
+                | "maintenance"
+                | "configuration-status"
+                | "credential-status",
+            ) => ServiceAction::Inspect,
             Some("read") => ServiceAction::Read,
             Some("add") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,
             Some("quit") => ServiceAction::Shutdown,
-            Some("configure" | "configure-record") => ServiceAction::Configure,
+            Some("configure" | "configure-record" | "reload-access") => ServiceAction::Configure,
             _ => return Err("unknown authorized command".into()),
         };
         let Self::Tls {
@@ -349,7 +411,7 @@ impl Channel {
         authorize_session(
             &access.policy,
             &access.policy,
-            &**session,
+            &**session.as_ref().ok_or("AUTHORIZATION")?,
             *context,
             scope,
             action,
@@ -361,7 +423,7 @@ impl Channel {
     pub fn is_flushed(&self) -> bool {
         match self {
             Self::Plain(_) => true,
-            Self::Tls { session, .. } => session.is_flushed(),
+            Self::Tls { session, .. } => session.as_ref().is_some_and(|s| s.is_flushed()),
             Self::Selecting { .. } => false,
         }
     }
@@ -376,7 +438,11 @@ impl Read for Channel {
     fn read(&mut self, bytes: &mut [u8]) -> io::Result<usize> {
         match self {
             Self::Plain(stream) => stream.read(bytes),
-            Self::Tls { session, .. } => session.read_plaintext(bytes).map_err(session_error),
+            Self::Tls { session, .. } => session
+                .as_mut()
+                .ok_or_else(|| io::Error::from(io::ErrorKind::NotConnected))?
+                .read_plaintext(bytes)
+                .map_err(session_error),
             Self::Selecting { .. } => Err(io::ErrorKind::WouldBlock.into()),
         }
     }
@@ -385,7 +451,11 @@ impl Write for Channel {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
         match self {
             Self::Plain(stream) => stream.write(bytes),
-            Self::Tls { session, .. } => session.write_plaintext(bytes).map_err(session_error),
+            Self::Tls { session, .. } => session
+                .as_mut()
+                .ok_or_else(|| io::Error::from(io::ErrorKind::NotConnected))?
+                .write_plaintext(bytes)
+                .map_err(session_error),
             Self::Selecting { .. } => Err(io::ErrorKind::WouldBlock.into()),
         }
     }

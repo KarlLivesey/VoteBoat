@@ -1,4 +1,4 @@
-# Baseline acceptance map — review159, updated173
+# Baseline acceptance map — review159, updated174
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
@@ -78,7 +78,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C06 transport | PeerTransport/Factory, PeerDriver/Roster/Connector; native TCP/TLS and QUIC | General receive/connection admission/fairness and separate-host evidence. Local send completion is never remote durability. |
 | C07 wire | WireCodec/NativeWireCodec, bounded negotiated formats | Fuzzing/compatibility expansion; no gRPC/Protobuf implementation. |
 | C08 persistent codec | LogCodec/VoteLogCodec/SnapshotCodec and native codecs | Persistent format migration remains explicit, separate from trait compatibility. |
-| C09 secure session | SecureSession and native rustls/QUIC | Slice173 adds common validity guards, explicit native generation replacement, actual TLS key/pin replacement and selected TCP/QUIC session revocation/reauthentication. Executable integration, rotation recovery and broader failure coverage remain. |
+| C09 secure session | SecureSession and native rustls/QUIC | Slices173–174 add validity guards, prepared replacement and durable executable command-channel reload. Selected key/pin, TCP/QUIC revocation, lost-reply and restart checks exist. Peer credential orchestration, broader failure and platform coverage remain. |
 | C10 scheduler | ReadyScheduler, FairScheduler, Shard/TimedShard/EffectOwner/Node | Wider multi-lane deployment/resource isolation. |
 | C11 timers | TimerService/DeadlineQueue, generation-scoped expiration | Broader queue/lateness attribution. |
 | C12 clock | Clock/MonotonicClock and explicit core MonoTime | No hidden core wall clock; maintain host injection. |
@@ -90,7 +90,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking | General voter replacement/removal, measured sample collection/reservations and global rebalancing. Recommendations never change membership alone. |
 | C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Per-group tracing, latency/queue/critical-path attribution and external exporter integration remain. |
 | C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Selected new-store interruption/recovery161 is exercised; broader ingress, revocation and combined failures remain. Native configuration endpoints exist and must not be listed wholly missing. |
-| C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess | Slice173 adds prepared policy replacement and scoped revocation for Rust hosts. Executable live reload, external issuer, durable audit and broader revocation schedules remain. Unflagged loopback mode is explicitly trusted. |
+| C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, peer rotation and broader revocation schedules remain. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Preserve this distinction. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
 | C24 transactions | One-group ordered application commands | Cross-group transactions are unsupported P8, not a hidden baseline coordinator. |

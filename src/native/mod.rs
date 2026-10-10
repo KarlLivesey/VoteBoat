@@ -19,6 +19,7 @@ pub mod authorization;
 pub mod buffer;
 #[cfg(feature = "tls")]
 pub mod connect;
+pub mod credential_journal;
 pub mod credentials;
 pub mod dial;
 pub mod discovery;

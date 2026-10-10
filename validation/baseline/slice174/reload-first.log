@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.39s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 3.15s
+
+     Running tests/credential_journal.rs (target/debug/deps/credential_journal-dcf637a55ede73c8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+

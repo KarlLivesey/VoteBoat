@@ -1,0 +1,35 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.13s
+     Running tests/authorization.rs (target/debug/deps/authorization-6812bfe02b407c6c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 3.20s
+
+     Running tests/credential_journal.rs (target/debug/deps/credential_journal-dcf637a55ede73c8)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests/credential_refresh.rs (target/debug/deps/credential_refresh-b7556b095d48a24e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests/secure.rs (target/debug/deps/secure-ab0ba1d9936906f0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s
+

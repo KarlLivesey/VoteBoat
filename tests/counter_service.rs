@@ -33,6 +33,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/credential_reload.rs"]
+mod credential_reload;
 #[path = "counter_service/events.rs"]
 mod events;
 #[path = "counter_service/history.rs"]
@@ -292,8 +294,7 @@ impl Cluster {
                     assert!(
                         child.try_wait().unwrap().is_none(),
                         "node {id} exited: {}",
-                        fs::read_to_string(self.root.join(format!("{id}-create.log")))
-                            .unwrap_or_default()
+                        self.service_log(id)
                     );
                     let output = self.request(id, &["status"]);
                     if output.status.success()
@@ -2050,7 +2051,12 @@ fn remote_plan_command(cluster: &mut Cluster, operation: &str, success: bool) ->
         let leader = cluster.leader();
         let output = cluster.request(leader, &["configure", operation]);
         let text = String::from_utf8(output.stdout).unwrap();
-        if text != "ERR NOT_LEADER\n" {
+        // A leader can change after discovery or during an admitted mutation.
+        // Retry only this documented uncertainty with the identical operation;
+        // an expected deterministic refusal must never be retried as success.
+        let leadership_changed = success
+            && text == "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n";
+        if text != "ERR NOT_LEADER\n" && !leadership_changed {
             assert_eq!(
                 output.status.success(),
                 success,

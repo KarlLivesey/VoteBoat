@@ -1,0 +1,35 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.84s
+     Running tests/authorization.rs (target/debug/deps/authorization-9599e9d40a95999d)
+
+running 2 tests
+test downstream_credentials_and_policy_pass_same_checked_scope_gate_without_native ... ok
+test simulator_unready_and_changed_host_sessions_never_pass_authorization ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/credential_journal.rs (target/debug/deps/credential_journal-1db03ba5997c4d88)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/credential_refresh.rs (target/debug/deps/credential_refresh-9f0c586ebdaf1c90)
+
+running 5 tests
+test host::extracting_parts_always_revokes_before_returning_raw_session ... ok
+test host::downstream_validity_blocks_io_and_one_channel_close_preserves_others ... ok
+test host::failed_construction_returns_unchanged_session_and_validity ... ok
+test host::simulator_or_unready_session_is_returned_before_guarding ... ok
+test host::invalidation_during_provider_io_suppresses_success_and_scrubs_read_output ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/secure.rs (target/debug/deps/secure-e9cb5966606815e2)
+
+running 2 tests
+test production_rejects_simulation_even_with_ready_identity ... ok
+test session_limits_and_poll_budgets_are_checked_without_native_provider ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 3 tests
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
