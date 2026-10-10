@@ -122,6 +122,9 @@ pub fn lookup(args: &[String]) -> Result<(), Failure> {
         minimum_epoch: None,
         minimum_generation: None,
     };
+    if node == "auto" {
+        return lookup_auto(base, tls, principal, query, rest);
+    }
     let mut parts = vec![base.clone(), node.clone(), tls.clone(), principal.clone()];
     parts.extend_from_slice(rest);
     let mut client = connection(&parts, "manifest-session\n")?;
@@ -149,8 +152,7 @@ pub fn lookup(args: &[String]) -> Result<(), Failure> {
         }
         match remote.lookup(query, timestamp()) {
             Ok(value) => {
-                let m = value.manifest.input();
-                println!("OK responsibility={} incarnation={} authority={} authority_incarnation={} generation={} epoch={} execution={:?}",m.responsibility.id.get(),m.responsibility.incarnation.get(),m.authority.id.get(),m.authority.incarnation.get(),m.generation.get(),m.epoch.get(),m.execution);
+                print_manifest(&value.manifest);
                 remote.close();
                 return Ok(());
             }
@@ -163,6 +165,46 @@ pub fn lookup(args: &[String]) -> Result<(), Failure> {
         {
             c.result.map_err(|e| format!("manifest response: {e:?}"))?;
         }
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+fn print_manifest(manifest: &ResponsibilityManifest) {
+    let m = manifest.input();
+    println!("OK responsibility={} incarnation={} authority={} authority_incarnation={} generation={} epoch={} execution={:?}",m.responsibility.id.get(),m.responsibility.incarnation.get(),m.authority.id.get(),m.authority.incarnation.get(),m.generation.get(),m.epoch.get(),m.execution);
+}
+fn lookup_auto(
+    base: &str,
+    tls: &str,
+    principal: &str,
+    query: ManifestLookup,
+    options: &[String],
+) -> Result<(), Failure> {
+    let (base, _) = super::ids(base, "1")?;
+    let path = match options {
+        [] => None,
+        [flag, path] if flag == "--command-peers" => Some(Path::new(path)),
+        _ => return Err("expected optional --command-peers FILE".into()),
+    };
+    let targets = command_endpoints::targets(base, None, path)?;
+    let access = ClientAccess::load(Path::new(tls), principal.parse()?, &targets)?;
+    let authorities = super::authority_endpoints::Authorities {
+        groups: std::collections::BTreeMap::from([(query.locator.authority, targets.clone())]),
+        pins: targets,
+    };
+    let mut discovery = super::route_discovery::Discovery::new(authorities, access, Instant::now());
+    loop {
+        match discovery.lookup(query, discovery.now()) {
+            Ok(value) => {
+                print_manifest(&value.manifest);
+                discovery.close();
+                return Ok(());
+            }
+            Err(ManifestDiscoveryError::Unavailable) => (),
+            Err(error) => return Err(format!("manifest lookup: {error:?}").into()),
+        }
+        discovery
+            .poll()
+            .map_err(|error| format!("manifest lookup failed: {error}"))?;
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

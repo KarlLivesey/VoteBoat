@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.10s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 2 tests
+old_source=3 replacement=1 pinned_status=exit status: 1 stdout="" stderr="Error: \"manifest lookup deadline expired\"\n"
+old_source=3 replacement=1 pinned_status=exit status: 1 stdout="" stderr="Error: \"manifest lookup deadline expired\"\n"
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp ... ok
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 11.68s
+

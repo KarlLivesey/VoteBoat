@@ -71,12 +71,13 @@ Only administrators can initialize/publish. The server proposes the original
 plan bytes under their original operation IDs; replies contain actual Directory
 outcomes and duplicate status. A disconnected write has an unknown outcome:
 retry the same plan operation on the current leader. Non-leaders refuse proposals.
-No automatic leader routing is implemented here yet.
+Writes select an explicit node; retry their original operation on the current leader.
 
-Fetch a manifest through a fresh quorum-backed read on the authority leader:
+Fetch a manifest through a fresh quorum-backed read, selecting an eligible
+authority endpoint automatically:
 
 ```sh
-target/debug/voteboat-directory lookup 43000 1 /your/client-tls 1 42 1 10 1
+target/debug/voteboat-directory lookup 43000 auto /your/client-tls 1 42 1 10 1
 ```
 
 The last four numbers are authority group/incarnation and responsibility
@@ -85,6 +86,13 @@ scope may query. An unpublished responsibility returns Missing. Loss of quorum
 cannot be replaced by local state or liveness. `lookup` prints the selected
 manifest's identity, generation, epoch and execution mode; it is one lookup,
 not permission to serve data. For recursive traversal, use `route` below.
+
+`auto` uses the configured command endpoints (the default three nodes or
+`--command-peers FILE`) and the existing bounded route discovery client. Every
+attempt keeps the same authority and query within one ten-second deadline;
+status only selects an attempt, and success requires a validated fresh manifest.
+Replace `auto` with a numeric node to pin that source. A pinned follower refuses
+the read even if another endpoint can serve it.
 
 Clients can append `--command-peers FILE` for explicit non-default command
 addresses and independently pinned TLS names. The complete connection, command

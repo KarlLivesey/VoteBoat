@@ -29,6 +29,8 @@ use voteboat::{
     directory::DirectoryCommand, identity::*, placement::PlacementRequirements, routing::*,
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-directory");
+#[path = "directory_service/lookup_auto.rs"]
+mod lookup_auto;
 #[path = "directory_service/peer_credentials.rs"]
 mod peer_credentials;
 // Keep fixture listeners below Linux's ephemeral client-port range. A client

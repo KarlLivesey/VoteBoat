@@ -1,5 +1,19 @@
 # Validation report — slice 35
 
+Bounded directory read source selection: [slice220](baseline/slice220/README.md).
+Opt-in `lookup auto` reuses route Discovery with a fixed original query, provisioned
+endpoints and unchanged10s deadline; numeric sources remain pinned. TCP/QUIC
+forced sampled-source loss preserves explicit follower refusal and exact default/
+mapped auto output. No live authority returns no hint. Final all-feature directory22,
+default17 and existing discovery deadline2 checks pass. Initial new fixture
+setup fails21/1 before its loss cut; the focused setup correction and all original
+failures are retained. The earlier unlabelled219 timeout cause remains unproven.
+Formatting/four strict Clippy profiles have zero diagnostics;21 metadata cases
+and108 inventory paths pass. Terminal219 CI passes Ubuntu166/19/21, while macOS
+counter164/2 fails on assignment UNKNOWN interruption and drain setup Busy;
+later macOS targets do not run. These CI results predate220. Full P0–P7/platform/
+P7 acceptance remains open; broad security stays with the user's Daybreak run.
+
 Framed progress correction: [slice219](baseline/slice219/README.md). Native
 transport spends only unused original session budget after plaintext progress.
 Actual production-limit three-group QUIC frames at selected6ms cadence deliver

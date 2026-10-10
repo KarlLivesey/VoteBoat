@@ -3,6 +3,8 @@
 use super::*;
 #[path = "../support/credential_commands.rs"]
 mod commands;
+#[path = "peer_credentials/diagnostics.rs"]
+mod diagnostics;
 fn select(c: &Cluster, generation: u64, directory: &std::path::Path) {
     fs::write(
         c.root.join("peer-credentials"),
@@ -29,13 +31,14 @@ fn wait(c: &Cluster, node: usize, verb: &str, generation: u64, state: &str) {
         std::thread::park_timeout(Duration::from_millis(5));
     }
 }
-fn lookup(c: &mut Cluster) -> Vec<u8> {
-    let leader = c.leader();
-    let out = c.lookup(leader).fixture_output().unwrap();
+fn lookup(c: &Cluster, phase: &str) -> Vec<u8> {
+    let out = lookup_auto::command(c).fixture_output().unwrap();
     assert!(
         out.status.success(),
-        "{}",
-        String::from_utf8_lossy(&out.stderr)
+        "phase={phase} source=auto stdout={:?} stderr={:?}\n{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr),
+        diagnostics::snapshot(c, phase)
     );
     out.stdout
 }
@@ -141,7 +144,7 @@ fn history(quic: bool) {
     c.peer_credentials = true;
     select(&c, 1, &c.tls());
     initialize(&mut c);
-    let before = lookup(&mut c);
+    let before = lookup(&c, "before_peer_reload");
     rotate(&mut c);
     assert!(initialization::command(&mut c, &["initialize"])
         .1
@@ -149,13 +152,13 @@ fn history(quic: bool) {
     assert!(initialization::command(&mut c, &["publish", "101"])
         .1
         .contains("duplicate=true"));
-    assert_eq!(lookup(&mut c), before);
+    assert_eq!(lookup(&c, "after_peer_reload"), before);
     if quic {
         let leader = c.leader();
         checkpoint(&c, leader);
     }
     restart(&mut c);
-    assert_eq!(lookup(&mut c), before);
+    assert_eq!(lookup(&c, "after_peer_reopen"), before);
     for node in 1..=3 {
         wait(&c, node, "peer-credential-status", 2, "recorded");
     }
@@ -165,7 +168,7 @@ fn history(quic: bool) {
         c.start(node, "recover");
         wait(&c, node, "credential-status", 2, "recorded");
     }
-    assert_eq!(lookup(&mut c), before);
+    assert_eq!(lookup(&c, "after_access_reopen"), before);
     c.stop();
 }
 #[test]

@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 2 tests
+old_source=3 replacement=1 pinned_status=exit status: 1 stdout="" stderr="Error: \"manifest lookup deadline expired\"\n"
+
+thread 'lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic' (2648110) panicked at tests/directory_service/lookup_auto.rs:42:5:
+stdout="" stderr="Error: ParseIntError { kind: InvalidDigit }\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic ... FAILED
+old_source=3 replacement=1 pinned_status=exit status: 1 stdout="" stderr="Error: \"manifest lookup deadline expired\"\n"
+
+thread 'lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp' (2648111) panicked at tests/directory_service/lookup_auto.rs:42:5:
+stdout="" stderr="Error: ParseIntError { kind: InvalidDigit }\n"
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp ... FAILED
+
+failures:
+
+failures:
+    lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic
+    lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 19 filtered out; finished in 11.40s
+
+error: test failed, to rerun pass `--test directory_service`

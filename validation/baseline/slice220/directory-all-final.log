@@ -1,0 +1,30 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 22 tests
+test initialization::setup_retries_exact_leadership_loss_and_requires_original_applied_receipt ... ok
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+test initialization::setup_is_bounded_and_rejects_unrelated_errors_or_changed_receipts ... ok
+test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... ok
+test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_tcp ... ok
+test routes::recursive_route_missing_leaf_is_not_a_partial_success ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_quic ... ok
+test routes::recursive_route_quic_and_known_child_without_ancestors ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... ok
+test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_quic ... ok
+test lookup_auto::automatic_lookup_never_returns_a_hint_without_a_live_authority ... ok
+test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp ... ok
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic ... ok
+test routes::recursive_route_enforces_root_observation_floors ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.93s
+

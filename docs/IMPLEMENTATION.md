@@ -474,25 +474,42 @@ TCP membership drain has no matching durable local record at its expected Active
 observation. These results do not contain219's production change. Raw logs,
 observations and terminal state remain in slice219, separate from local evidence.
 
-Current: verify the corrected219 progress path on supported platforms and locate
-the retained directory lookup failure's earliest transition. Depend on the actual
-matching-source operator run, original endpoint/query/phase identities and
-bounded read-only diagnostics if needed. Completion requires original write/read/
-retry/leader-loss/cold-restart/clean-stop histories under their existing budgets;
-retain failures and fix a demonstrated cause rather than repeating unchanged
-sweeps or accepting unknown success. This advances usable-service/P2/P5 acceptance;
-CI remains background feedback, and separate-host evidence stays distinct.
+Implemented220 adds opt-in single-authority `lookup auto` through the existing
+bounded route Discovery. Forced old-source loss retains explicit follower refusal
+and exact original manifests through default/mapped TCP/QUIC command endpoints.
+No live authority returns no hint. The peer-reload fixture now uses this reader,
+with four failure-only phase labels and bounded status/log capture. All22
+all-feature directory histories and17 default histories pass; two reused discovery
+deadline checks pass. The first new full sweep fails21/1 on its initial explicit
+sampled-leader read, before the loss cut; correcting only that setup assumption
+produces the final passing sweep. Initial module-path and unimplemented-auto
+failures remain retained. This does not retroactively prove219's unlabelled
+timeout cause. Formatting/four strict lint profiles stay at zero;21 ledger
+metadata cases and108 inventory paths pass. No public contract is added.
 
-Next: address the demonstrated administrative caller/preparation gaps that remain
-after matching-source platform feedback. Depend on original19770/21101/drain
-plans, exact local/quorum observations and the existing P4 continuation contracts.
-Reproduce the specific lost-leadership or absent-record transition before selecting
-a caller or production fix. Completion requires unchanged original operation and
-payload, positive durable/quorum evidence, refusal of changed identities and
-actual TCP/QUIC recovery checks under the original command budgets. This advances
-the online-membership/usable-service milestone without expanding security review.
+Terminal matching219 run38053081242 passes Ubuntu166 counter/19 directory/21
+transfer. macOS passes164 counter histories and fails2: assignment original retry
+has UNKNOWN deadline/interruption, and drain journal-failure setup receives exact
+not_proposed=Busy. Later macOS targets do not run. Raw logs/state are retained220;
+these platform results contain219's transport change, not220's new CLI behavior.
 
-Following: repeat the original P7 committed/applied latency profile with the
+Macro review220 advances the usable-service/P5 read-recovery path without a new
+retry engine or consensus change. The selected Linux directory path is usable;
+matching macOS/separate-host acceptance, broader faults/provider obligations and
+the original P7 performance gate remain open. Broad security remains with the
+user's Daybreak run; full P0–P7 stays active.
+
+Current: reproduce the two remaining matching219 macOS counter transitions.
+Purpose: finish usable-service/platform recovery rather than broaden security.
+Depend on exact original assignment IDs/delta, drain setup operation and retained
+UNKNOWN/interruption or not_proposed=Busy evidence. Sketch the caller's known
+non-admission versus unknown-outcome transitions before editing. Completion
+requires original-ID positive durable/quorum recovery, changed-payload refusal,
+actual TCP/QUIC histories within existing budgets and fresh platform evidence.
+Keep older19770/21101 failures explicit until their matching histories pass.
+This advances usable-service/P4 acceptance; CI remains background feedback.
+
+Next: repeat the original P7 committed/applied latency profile with the
 corrected transport after its functional checks, while platform feedback runs.
 Depend on the recorded benchmark workload, durability, offered load and hardware
 details; keep the fixed250ms serial TCP p99 gate unchanged. Completion requires
@@ -500,6 +517,62 @@ reproducible committed/applied results and a cause-specific correction if the
 original gate still fails, plus contract/recovery checks for any changed path.
 This advances measured tuning; broader fault/provider and deployment obligations
 remain explicit in the full P0–P7 acceptance ledger.
+
+Following: review the next uncovered replacement-provider operation set through
+shared downstream/native checks. Purpose: make the promised mix-and-match Rust
+interfaces assessable, not add another prerequisite to using the service.
+Depend on the existing108-entry inventory and8 partial reviews/57 operations;
+choose a bounded contract with a concrete ownership/failure obligation. Completion
+requires actual shared checks, refusal/cleanup evidence and explicit remaining
+limitations, not only a valid metadata reference. This advances P0 composition;
+no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice220 schema plan — directory source selection and retained failure phase
+
+Purpose/dependency: locate219's unresolved TCP lookup deadline without broad
+replays. The fixture's four reads sample role=Leader and pin that endpoint;
+status is a hint, not a guarantee of later fresh-read eligibility. Add bounded
+failure-only phase/source/status/log capture before fixture teardown. Force the
+sampled leader to lose authority, keep the original query fixed, and verify the
+explicit old-source lookup cannot return a hint. This advances usable-service/P5
+read recovery; do not infer the original failure's cause from source inspection.
+
+Data/API candidate: if the forced case confirms this caller limitation, add
+`lookup BASE auto ... [--command-peers FILE]` using the already implemented bounded
+route Discovery for one fixed authority/query. Preserve explicit-node behavior
+and exact manifest output. Build its provisioned endpoint set through the existing
+command map/default three nodes, not remote redirects; use existing typed
+authentication and quorum-backed remote observations. This reuses a tested public
+discovery contract instead of creating another retry engine or changing Raft.
+
+Transitions/ownership: sample -> stale/follower source -> explicit lookup refusal;
+auto source probes/refreshes retain one query, the same authority/responsibility
+and one existing10s absolute deadline/128-connection ceiling. Status only selects
+an eligible attempt; only a validated remote hint returns success. Replacement
+closes the old read view and leaves accepted Node read ownership to the existing
+drain path. No write retry, timeout increase or parent commit is introduced.
+Diagnostic subprocesses share one3s deadline including fixture-gate acquisition;
+expiry kills/joins them. Capture at most three read-only statuses and4KiB per
+node log; these are sequential postfailure observations, not atomic state.
+
+Acceptance: retain the forced explicit-source failure with original query and
+leadership transition evidence before any production edit. Verify auto output
+equals the original exact manifest over TCP/QUIC, with missing authority/source
+or exhausted deadline never treated as success. Keep original peer-reload,
+checkpoint/reopen and access histories/operation IDs unchanged, adding phase
+labels and using auto for their read source choice only after its forced-case
+check. Record which evidence proves a feature and which still leaves219's sampled
+failure unresolved. Run affected CLI/discovery/directory checks and formatting/
+four strict Clippy profiles at zero; current matching-source CI stays background.
+Broad security, P8 and Windows remain deferred; the full P0–P7 scope stays active.
+
+Focused fixture correction220: the first complete local run passes21/22, but
+the new QUIC history fails its initial explicit sampled-leader lookup before
+forcing loss. Establish the baseline through the same bounded auto read instead;
+the later explicit old-follower lookup must still refuse, and both post-loss
+default/mapped auto results must equal that original manifest. No retry/deadline
+change is made. This removes an unproved setup assumption, not a Raft guarantee;
+retain the first sweep and the original219 failure independently.
 
 ### Slice219 schema plan — framed QUIC progress within one owner budget
 

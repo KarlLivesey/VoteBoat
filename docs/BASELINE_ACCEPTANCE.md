@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice220 adds opt-in bounded single-authority executable lookup through the
+existing route Discovery. Original query/output, provisioned endpoints and10s
+deadline remain; numeric-source behavior stays pinned. Selected TCP/QUIC source
+loss and explicit maps preserve exact manifests; no live authority returns no
+hint. Final directory22 all-feature/17 default and discovery deadline2 checks
+pass. Earlier unlabelled219 timeout causality remains open. Terminal219 CI passes
+Ubuntu166/19/21 but fails macOS counter164/2 before later targets; raw UNKNOWN
+assignment interruption and drain setup Busy remain for focused caller checks.
+No new public seam, security expansion or whole-roadmap acceptance is claimed.
+
 Slice219 fixes plaintext-to-session owner-cycle deferral within the unchanged
 I/O budget. Actual default-limit separate-group QUIC frames deliver3 but complete
 only2/3 by48ms in the original selected6ms/50ms profile; the same profile now

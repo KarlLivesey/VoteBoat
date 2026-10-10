@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0583]: file not found for module `diagnostics`
+ --> tests/directory_service/peer_credentials.rs:6:1
+  |
+6 | mod diagnostics;
+  | ^^^^^^^^^^^^^^^^
+  |
+  = help: to create the module `diagnostics`, create file "tests/directory_service/diagnostics.rs" or "tests/directory_service/diagnostics/mod.rs"
+  = note: if there is a `mod diagnostics` elsewhere in the crate already, import it with `use crate::...` instead
+
+warning: value assigned to `auto` is never read
+  --> tests/directory_service/lookup_auto.rs:27:20
+   |
+27 |     let mut auto = c.lookup(1);
+   |                    ^^^^^^^^^^^ this value is reassigned later and never used
+28 |     // Build the actual CLI mode, preserving the exact original manifest query.
+29 |     auto = Command::new(BIN);
+   |     ---- `auto` is overwritten here before the previous value is read
+   |
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+For more information about this error, try `rustc --explain E0583`.
+warning: `voteboat` (test "directory_service") generated 1 warning
+error: could not compile `voteboat` (test "directory_service") due to 1 previous error; 1 warning emitted
