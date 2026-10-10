@@ -27,7 +27,8 @@ Same-generation identical live hints are idempotent. Same-generation changed
 address or expiry conflicts. Lower generations reject. Expiry/invalidation retain
 a floor slot; reusing the invalidated generation cannot silently revive it, and
 invalidation of an older generation cannot remove a newer publication. There is
-no implicit eviction; capacity includes floors. A host must size the provider for
+no implicit eviction; capacity includes floors. These strict rules apply to the
+public `publish` API. A host must size the provider for
 its provisioned identities or explicitly construct a new provider. Closing rejects
 further publication/resolution. The cache creates no sockets, threads or files.
 
@@ -203,8 +204,13 @@ request for that peer shares the slot; a different uncached peer receives
 one `RefreshCompletion` with the original request's session binding, sequence,
 peer, start and deadline. Cache hits require no source call. One fixed negative
 result slot and retry delay bound retries. The existing cache bounds entries,
-including invalidated generation floors. Renewing an expired or invalidated
-advertisement requires a newer generation, even when its address is unchanged.
+including invalidated generation floors. A fresh authenticated response can renew
+an expired or locally invalidated lease at the same generation only when the exact
+peer and endpoint are unchanged. An address change still requires a newer
+generation; a lower generation still rejects. Only this checked response path
+can revalidate a same-generation lease: ordinary cache publication remains strict.
+Local invalidation records a failed address attempt, not credential revocation.
+The connector's authentication and membership checks remain independent.
 
 `NativeDiscoveryResponder<S, R: PeerDiscovery>` uses the same authenticated
 session contract and accepts an independently supplied native or host provider.
@@ -275,6 +281,16 @@ source timeout. A separate real TCP/TLS test fetches an endpoint and uses it in
 `DiscoveryConnector` to authenticate the pinned target despite stale caller
 input. External manifest-fetch protocols, executable wiring, live QUIC migration,
 macOS and separate-host validation remain outside this slice.
+
+Slice209a adds shared short-I/O host, TCP/TLS and QUIC histories using a source
+that retains its generation/address and returns a fresh bounded TTL for every
+request, as the executable source does. Repeated expiry and local invalidation
+renew successfully. Same-generation address conflicts, lower generations and
+cancelled renewals cannot publish; exact next-request sequencing rejects a
+replayed positive response. Explicit source-session replacement retains the
+generation floor and permits fresh unchanged-endpoint renewal. TTL still starts
+at local request submission. These checks cover persistent client instances,
+not persistent cache files or automatic progress inside a type-erased Node.
 
 ## Remote manifest provider (slice184)
 

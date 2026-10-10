@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.09s
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-a63a353355012f6c)
+
+running 1 test
+
+thread 'short_io_authenticated_endpoint_leases_renew_without_changing_generation' (394) panicked at tests/remote_discovery/renewal.rs:96:29:
+called `Result::unwrap()` on an `Err` value: Discovery(ConflictingGeneration)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test short_io_authenticated_endpoint_leases_renew_without_changing_generation ... FAILED
+
+failures:
+
+failures:
+    short_io_authenticated_endpoint_leases_renew_without_changing_generation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test remote_discovery`

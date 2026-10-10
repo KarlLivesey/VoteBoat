@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/discovery.rs (target/debug/deps/discovery-d744bfdcbb0ef202)
+
+running 3 tests
+test checked_discovery_refuses_wrong_identity_expiry_and_duplicate_completions ... ok
+test construction_returns_live_parts_and_shared_host_views_close_independently ... ok
+test downstream_discovery_substitutes_only_address_and_preserves_rejection_and_attempt_ownership ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

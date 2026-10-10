@@ -121,7 +121,9 @@ histories with three receive frames, actual refusal, sixteen foreground writes
 and reads, all-eight-group forced snapshot recovery, full restart and original
 operation retries. These advance P2/P7 isolation without a general latency claim.
 
-Current209 integrates persistent discovery refresh against the existing
+Completed209a fixes authenticated unchanged-endpoint lease renewal in persistent
+client instances, with host/TCP/QUIC expiry, invalidation, cancellation and stale
+response checks. Current209 continues integrating persistent discovery refresh against the existing
 authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; dependencies are existing discovery, exact
 peer pins and the fair reactor. Completion requires refreshed hints, stale
@@ -139,6 +141,56 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209a implemented — authenticated endpoint lease renewal
+
+The new short-I/O history first reproduces `ConflictingGeneration` on the first
+expired lease. A private native-cache revalidation path now accepts a fresh lease
+at the same generation only for the unchanged exact peer/endpoint. The public
+cache publication API remains strict, including rejected-input ownership.
+The remote client enters revalidation only after checking its current request
+and authenticated session; local request submission still anchors expiry.
+No new public seam, generation, wire/storage format or background worker is added.
+
+Shared host, real TCP/TLS and QUIC histories exercise repeated expiry and local
+invalidation at capacity1, changed endpoint with a newer generation, conflicting
+and stale responses, cancelled renewal and successful retry. Additional host
+checks reject a captured previous positive response during renewal and renew
+through an explicitly replaced source session while retaining generation floors.
+Local publication still rejects same-generation expiry changes and revival.
+All54 affected all-feature tests pass;41 default-feature,20 native-only and3
+core-only tests pass in sequential runs. Formatting and all four strict Clippy
+profiles pass with zero diagnostics. Inventory106 and all13 provider metadata
+checks pass. Raw reproduction and validation are in validation/baseline/slice209a.
+Full209 automatic progress/reconnect and restart/parent-offline composition are
+not closed by this cache-boundary fix. The full P0–P7 objective remains active.
+
+### Slice209a schema plan — authenticated endpoint lease renewal
+
+The long-lived remote endpoint client currently republishes fresh replies through
+the strict local cache API. That API compares expiry as part of an identical
+generation, so the executable source's unchanged generation/address with a fresh
+30-second lease conflicts after expiry. Fix this boundary before wiring more
+refresh scheduling: scheduling alone would repeatedly hit the same rejection.
+
+Keep public `NativePeerDiscovery::publish` strict. Add an internal authenticated
+revalidation path that permits a fresh lease for the same exact peer, generation
+and endpoint, including after local expiry or dial-failure invalidation. Lower
+generations and same-generation endpoint changes still reject. Only the remote
+client calls this path after validating its current session, original request
+sequence/peer, deadline and uncancelled response. Expiry stays relative to local
+request submission, so delayed or replayed replies cannot extend it. Capacity,
+floor retention, explicit polling and source/session ownership remain unchanged.
+No disk format, consensus, wire format or public provider contract changes.
+
+Acceptance: reproduce same-generation expiry renewal failure first; run shared
+short-I/O host, TCP/TLS and QUIC histories through repeated expiry/invalidation,
+higher-generation address replacement, stale/conflicting responses and cancelled
+renewal. Preserve strict local-publication tests and existing delayed/replayed
+reply, source replacement, close and capacity tests. This advances209/P5; it
+does not close automatic long-lived refresh integration or restart/parent-offline
+composition. The next two deliverables remain provider obligations and current
+platform/operator acceptance as described above.
 
 ### Slice208b2 implemented — native receive pressure with forced recovery
 

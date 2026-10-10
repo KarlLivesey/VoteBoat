@@ -1,0 +1,34 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.41s
+     Running tests/discovery.rs (target/debug/deps/discovery-15505c772c273da6)
+
+running 5 tests
+test checked_discovery_refuses_wrong_identity_expiry_and_duplicate_completions ... ok
+test construction_returns_live_parts_and_shared_host_views_close_independently ... ok
+test local_publication_cannot_extend_or_revive_an_unchanged_generation ... ok
+test downstream_discovery_substitutes_only_address_and_preserves_rejection_and_attempt_ownership ... ok
+test native_cache_retains_generation_floors_and_bounds_even_after_expiry_and_close ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-a63a353355012f6c)
+
+running 15 tests
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test host::replayed_positive_cannot_renew_an_invalidated_lease ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test short_io_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -15,6 +15,8 @@
 #![cfg(feature = "native")]
 #[path = "remote_discovery/host.rs"]
 mod host;
+#[path = "remote_discovery/renewal.rs"]
+mod renewal;
 #[path = "remote_discovery/scenario.rs"]
 mod scenario;
 mod support;
@@ -52,4 +54,17 @@ fn short_io_remote_refresh_keeps_unrelated_cached_peer_available() {
 fn tcp_tls_remote_refresh_keeps_unrelated_cached_peer_available() {
     let (a, b) = support::tls::pair(local(1), local(2), 1);
     scenario::refresh(a, b, MonoTime(0));
+}
+
+#[test]
+fn short_io_authenticated_endpoint_leases_renew_without_changing_generation() {
+    let (a, b) = host::pair();
+    renewal::exercise(a, b, MonoTime(0));
+}
+
+#[cfg(feature = "tls")]
+#[test]
+fn tcp_tls_authenticated_endpoint_leases_renew_without_changing_generation() {
+    let (a, b) = support::tls::pair(local(1), local(2), 1);
+    renewal::exercise(a, b, MonoTime(0));
 }

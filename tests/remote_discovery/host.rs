@@ -421,8 +421,20 @@ fn reconnect_retains_floors_and_rejects_old_session_generations() {
     .ok()
     .unwrap();
     client.resolve(peer(3), deadline).unwrap_err();
-    let (done, _) = scenario::drive(&mut client, &mut replacement, deadline);
+    let (done, now) = scenario::drive(&mut client, &mut replacement, deadline);
     assert_eq!(done.result, Err(DiscoveryError::StaleGeneration.into()));
+    let later = MonoTime(now.0 + RemoteDiscoveryConfig::default().retry_ms);
+    replacement.source_mut().hint = Some(PeerEndpointHint {
+        expires_at: MonoTime(later.0 + 50_000),
+        ..known
+    });
+    client.resolve(peer(3), later).unwrap_err();
+    let (done, received) = scenario::drive(&mut client, &mut replacement, later);
+    let renewed = done.result.unwrap();
+    assert_eq!(renewed.generation, known.generation);
+    assert_eq!(renewed.endpoint, known.endpoint);
+    assert!(renewed.expires_at > known.expires_at);
+    assert_eq!(client.resolve(peer(3), received), Ok(renewed));
 }
 #[test]
 fn ipv6_scope_and_flow_round_trip_without_address_substitution() {
@@ -526,4 +538,61 @@ fn responder_rejects_replayed_request_before_calling_source_again() {
     let error = (0..30).find_map(|_| server.poll(MonoTime(0), SessionPollBudget::default()).err());
     assert_eq!(error, Some(RemoteDiscoveryError::Protocol));
     assert_eq!(server.source_mut().calls, 1);
+}
+
+#[test]
+fn replayed_positive_cannot_renew_an_invalidated_lease() {
+    let (a, b) = pair();
+    let replies = a.input.clone();
+    let config = RemoteDiscoveryConfig::default();
+    let mut client = NativeRemotePeerDiscovery::new(a, peer(2), config, MonoTime(0))
+        .ok()
+        .unwrap();
+    let mut server = NativeDiscoveryResponder::new(
+        b,
+        peer(1),
+        HostHints {
+            hint: Some(hint(3, 1, 50_000)),
+            calls: 0,
+            closed: false,
+        },
+        config,
+        MonoTime(0),
+    )
+    .ok()
+    .unwrap();
+    client.resolve(peer(3), MonoTime(0)).unwrap_err();
+    buffer_reply(&mut client, &mut server, MonoTime(0));
+    let replay = replies.borrow().clone();
+    assert_eq!(replay.len(), 96);
+    let (done, now) = scenario::drive(&mut client, &mut server, MonoTime(0));
+    assert!(client.invalidate(peer(3), done.result.unwrap().generation));
+    client.resolve(peer(3), now).unwrap_err();
+    assert_eq!(client.pending().unwrap().sequence, 2);
+    buffer_reply(&mut client, &mut server, now);
+    assert_eq!(replies.borrow().len(), 96);
+    *replies.borrow_mut() = replay;
+    let (done, now) = scenario::drive(&mut client, &mut server, now);
+    assert_eq!(done.result, Err(RemoteDiscoveryError::Protocol));
+    assert!(client.source_failed());
+    assert_eq!(
+        client.resolve(peer(3), now),
+        Err(DiscoveryError::Unavailable)
+    );
+}
+
+fn buffer_reply(
+    client: &mut NativeRemotePeerDiscovery<HostSession>,
+    server: &mut NativeDiscoveryResponder<HostSession, HostHints>,
+    now: MonoTime,
+) {
+    for _ in 0..20 {
+        assert!(client
+            .poll(now, SessionPollBudget::default())
+            .unwrap()
+            .is_none());
+    }
+    for _ in 0..50 {
+        server.poll(now, SessionPollBudget::default()).unwrap();
+    }
 }

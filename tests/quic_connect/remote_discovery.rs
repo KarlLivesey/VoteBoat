@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 use super::*;
 use voteboat::{discovery::*, native::remote_discovery::*};
+#[path = "../remote_discovery/renewal.rs"]
+mod renewal;
 #[path = "../remote_discovery/scenario.rs"]
 mod scenario;
 fn peer(n: u64) -> PeerIdentity {
@@ -37,4 +39,13 @@ fn quic_remote_refresh_keeps_unrelated_cached_peer_available() {
     let a = sessions.remove(&(1, 2)).unwrap();
     let b = sessions.remove(&(2, 1)).unwrap();
     scenario::refresh(a, b, MonoTime(now));
+}
+
+#[test]
+fn quic_authenticated_endpoint_leases_renew_without_changing_generation() {
+    let mut connectors = connectors();
+    let (mut sessions, now) = establish(&mut connectors, 0, 1);
+    let a = sessions.remove(&(1, 2)).unwrap();
+    let b = sessions.remove(&(2, 1)).unwrap();
+    renewal::exercise(a, b, MonoTime(now));
 }

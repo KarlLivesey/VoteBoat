@@ -304,6 +304,33 @@ fn native_cache_retains_generation_floors_and_bounds_even_after_expiry_and_close
 }
 
 #[test]
+#[cfg(feature = "native")]
+fn local_publication_cannot_extend_or_revive_an_unchanged_generation() {
+    use voteboat::native::discovery::NativePeerDiscovery;
+    let mut cache = NativePeerDiscovery::new(1, MonoTime(0)).unwrap();
+    let original = hint(2, 1);
+    cache.publish(original, MonoTime(0)).unwrap();
+    let renewed = PeerEndpointHint {
+        expires_at: MonoTime(original.expires_at.0 + 100),
+        ..original
+    };
+    assert_eq!(
+        cache.publish(renewed, MonoTime(1)),
+        Err((DiscoveryError::ConflictingGeneration, renewed))
+    );
+    assert_eq!(cache.resolve(peer(2), MonoTime(1)), Ok(original));
+    assert!(cache.invalidate(peer(2), original.generation));
+    assert_eq!(
+        cache.publish(original, MonoTime(1)),
+        Err((DiscoveryError::StaleGeneration, original))
+    );
+    assert_eq!(
+        cache.resolve(peer(2), MonoTime(1)),
+        Err(DiscoveryError::Missing)
+    );
+}
+
+#[test]
 fn construction_returns_live_parts_and_shared_host_views_close_independently() {
     let control = Rc::new(RefCell::new(Control {
         pending: Some(request(1)),

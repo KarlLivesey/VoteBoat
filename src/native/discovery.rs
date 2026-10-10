@@ -50,6 +50,23 @@ impl NativePeerDiscovery {
         hint: PeerEndpointHint,
         now: MonoTime,
     ) -> Result<(), (DiscoveryError, PeerEndpointHint)> {
+        self.publish_hint(hint, now, false)
+    }
+    /// Only a fresh, authenticated request/response may renew an unchanged endpoint.
+    /// Local publication still cannot revive an invalidated generation or alter TTL.
+    pub(super) fn revalidate(
+        &mut self,
+        hint: PeerEndpointHint,
+        now: MonoTime,
+    ) -> Result<(), (DiscoveryError, PeerEndpointHint)> {
+        self.publish_hint(hint, now, true)
+    }
+    fn publish_hint(
+        &mut self,
+        hint: PeerEndpointHint,
+        now: MonoTime,
+        renewal: bool,
+    ) -> Result<(), (DiscoveryError, PeerEndpointHint)> {
         let check = (|| {
             if self.closed {
                 return Err(DiscoveryError::Closed);
@@ -63,10 +80,12 @@ impl NativePeerDiscovery {
                     return Err(DiscoveryError::StaleGeneration);
                 }
                 if hint.generation == entry.floor.generation {
-                    if hint != entry.floor {
+                    if hint.endpoint != entry.floor.endpoint
+                        || (!renewal && hint.expires_at != entry.floor.expires_at)
+                    {
                         return Err(DiscoveryError::ConflictingGeneration);
                     }
-                    if !entry.live {
+                    if !renewal && !entry.live {
                         return Err(DiscoveryError::StaleGeneration);
                     }
                 }

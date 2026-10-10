@@ -205,7 +205,7 @@ impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
             expires_at,
         };
         self.cache
-            .publish(hint, now)
+            .revalidate(hint, now)
             .map_err(|(e, _)| RemoteDiscoveryError::Discovery(e))?;
         Ok(hint)
     }

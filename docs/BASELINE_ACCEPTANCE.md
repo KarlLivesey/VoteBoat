@@ -1,5 +1,12 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209a fixes renewal of unchanged authenticated endpoint leases in long-lived
+client instances. Shared host/TCP/TLS/QUIC histories cover expiry, invalidation,
+stale/conflicting responses and cancellation; host checks also cover positive
+response replay and source-session replacement. Ordinary cache publication stays
+strict. Automatic long-lived discovery progress and restart/parent-outage
+integration remain209; this change does not make cache floors durable.
+
 Slice208b2 adds native TCP/QUIC eight-group receive-pressure histories:
 actual admission refusal under a three-frame cap,16 applied foreground writes,
 16 quorum reads, concurrent one-job snapshot recovery, full close/reopen and
