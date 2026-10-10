@@ -345,3 +345,13 @@ A fresh current-source audit also confirms that public authenticated membership
 commands already exist; both client-supplied target TCP/QUIC histories passed in
 3.51s. Current summaries now distinguish this implemented ingress from remaining
 revocation, older-checkpoint and remote new-voter acceptance work.
+
+Slice157 adds public joint-command recovery when the serving leader is demoted
+to learner. Both TCP and QUIC cover an unread committed result followed by either
+an abrupt WAL recovery or a drained joint checkpoint. Survivors elect, retain
+the exact joint operation, reject conflicting reuse and require an explicitly
+authorized final record. The recovered former leader catches up as a learner;
+full restart preserves the two-voter configuration, data and retries. The full
+counter_service suite passed35/35 in19.94s on Linux. This is selected P4/P1
+evidence, not completion of broader revocation, older-checkpoint, new-voter or
+platform/fault requirements.

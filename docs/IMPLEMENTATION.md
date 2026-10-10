@@ -13,7 +13,7 @@ record claims that unimplemented phases already work.
 | P1 | Native durable three-node Raft, application retries, recovery, snapshots and reads | Static-config replication, reads, snapshot catch-up and asynchronous checkpoint/compaction implemented through native workers, owned node facade and real TCP/TLS histories; broader fault coverage remains |
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
-| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; authenticated provisioned-intent and client-target ingress plus generic enforced application envelopes are implemented; broader revocation, older-checkpoint and remote new-voter schedules remain |
+| P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules and public joint-command leader-loss recovery157 are exercised; authenticated provisioned-intent and client-target ingress plus generic enforced application envelopes are implemented; broader revocation, older-checkpoint and remote new-voter schedules remain |
 | P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1, retained-owner adoption156c2a and full/partial imported-owner adoption/retirement156c2b implemented; foreign directory/cache locator updates156c2c implemented; owner locator adoption156c2d and selected repeated moves156c3 implemented; selected original full-owner TCP/QUIC composition156c4 implemented; selected retained/imported native metadata continuity156c5 implemented; selected later retained native handoff156c6a implemented; selected later ordinary/partial imported movement and retirement156c6b implemented; broader lifecycle/fault coverage remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; selected later imported movement/retirement after metadata migration156c6b implemented; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: remaining public administration acceptance | Audit the existing authenticated provisioned-intent and client-target commands, then close a specific remaining failure schedule; advances online membership. | Existing authorization, durable operation status/resumption and native P4 histories115–121. | Keep the implemented public ingress; distinguish tested rejection/retry/restart behavior from missing revocation, older-checkpoint and remote new-voter schedules, then verify the selected gap. |
-| Next: retained QUIC follower catch-up failure | Restore the measured paused-follower recovery path; advances broader validation and tuning. | Existing failing P7 workload and transport/checkpoint evidence. | Use the existing per-group failure diagnostics and a declared delivery schedule to distinguish buffered log repair from required snapshot installation; preserve the original benchmark gate and durability semantics. |
-| Following: full baseline acceptance review | Reconcile P0–P7 requirements with the new lifecycle and administration evidence; advances all macro milestones. | Chapter12/17, the component contracts and current executed evidence. | Identify the next missing required behavior and its direct check; keep optional research separate and do not infer completion from test counts. |
+| Current: retained QUIC follower catch-up failure | Restore the measured paused-follower recovery path; advances broader validation and tuning. | Existing failing P7 workload and transport/checkpoint evidence. | Use the existing per-group failure diagnostics and a declared delivery schedule to distinguish buffered log repair from required snapshot installation; preserve the original benchmark gate and durability semantics. |
+| Next: full baseline acceptance review | Reconcile P0–P7 requirements with the new lifecycle and administration evidence; advances all macro milestones. | Chapter12/17, the component contracts and current executed evidence. | Identify the next missing required behavior and its direct check; keep optional research separate and do not infer completion from test counts. |
+| Following: native discovery after metadata movement | Connect automatic manifest lookup to moved metadata authorities; advances recursive routing and embedding. | Existing ManifestReadSource, bounded native lookup and metadata serving read/provenance contracts; confirm scope in the baseline review. | Read/refresh through the same public discovery contract before and after a metadata move, reject fenced or inactive authorities, and verify bounded cancellation/restart behavior. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -193,7 +193,7 @@ check. Detailed cleanup and hook validation appear at the end of this record.
    The selected later retained/imported handoff and retirement compositions now
    pass; repeated family moves and broader failure combinations remain.
    Data writes retain their direct owner path.
-2. **Remaining public administration acceptance (current; P4).** The existing
+2. **Remaining public administration acceptance (selected157 implemented; P4).** The existing
    authenticated provisioned-intent and client-target commands already expose
    bounded public ingress. Audit their native115–121 evidence and select an
    unverified revocation, older-checkpoint or remote new-voter schedule. Reuse
@@ -14683,3 +14683,73 @@ learner and weighted same-electorate joint/final records, checkpoint/restart,
 compacted-history refusal, a fresh post-restart record and application retry.
 They do not newly verify arbitrary revocation, remote new-voter failures or older
 mismatching checkpoints. Those concrete gaps determine the next P4 deliverable.
+
+### 157 public joint retirement across leader loss — schema plan
+
+Previous goal turn was progress:156c6b was tested and pushed as5a1fc00. The public
+command path already exists. Its selected unread-commit process-loss test covers
+a learners record, while native Node histories cover other joint recovery cases.
+The missing composition selected here is a public joint command that removes its
+serving leader, loses that reply and is finalized by surviving voters.
+
+Data/API: use the existing authenticated `configure-record`, operation status,
+Counter and native process fixture. Start three voters with a committed value42.
+Build one exact joint record whose next two voters are the serving leader's two
+peers. Wait for that record's durable commitment without reading its client
+reply. Keep the original operation ID and joint/final configuration IDs. One
+profile kills the leader with its WAL; another checkpoints and drains that
+leader before closing it. Its two peers form both the old and new quorums.
+
+Transitions/ownership: committed joint -> leader loss -> survivor election ->
+demoted leader reopen -> explicit final using the original operation -> final
+catch-up. The former leader remains an assigned learner so its final record can
+be replicated; removing the voter does not imply erasing that replica. Remote
+mode must not manufacture the final command after restart.
+Require exact joint retry/status, refusal of conflicting reuse, the final receipt,
+original application retry/value and subsequent writes. Inspect recovered files
+at the declared boundaries; WAL and checkpoint cases must prove their different
+storage preconditions. Reuse bounded process/session cleanup and existing
+certificate pins. No new provider, protocol, schema or consensus exception.
+
+Completion: TCP/QUIC histories, unchanged earlier public-administration tests,
+formatting and both complete strict Clippy profiles with zero diagnostics. This
+advances P4/P1; it does not close older-checkpoint, arbitrary revocation/new-voter
+fault schedules, platform validation or the full roadmap. Next remains the
+retained QUIC selected-group catch-up investigation; following remains the full
+baseline evidence review.
+
+### 157 implemented — public joint-command loss and voter demotion
+
+Two new executable tests cover four TCP/QUIC histories. A client submits a joint
+record that demotes its serving leader to learner, waits for server-observed
+commitment without reading the reply, then loses that leader. The two surviving
+voters elect under the joint policy. They report that finalization still needs
+authorization, return the exact original joint receipt, reject conflicting
+operation reuse and commit the explicitly submitted matching final record.
+
+The WAL branch kills the process and verifies an uncompacted joint entry. The
+checkpoint branch drains the selected checkpoint and process, then verifies the
+joint state at the durable snapshot boundary. Reopening the old leader from
+either state preserves the original configuration history and catches up the
+final record. It remains an assigned learner; this tests removal from voting,
+not deletion of the replica. After full restart it cannot win an election.
+Original data retries preserve42; a fresh write reaches43. All three recovered
+files retain that data and exactly the two surviving voters plus the learner.
+Explicit startup and committed-prefix waits avoid assuming process launch or
+a leader receipt already implies follower catch-up. No consensus, provider,
+production API, persistent format or authentication rules changed.
+
+Validation on Linux: first TCP test passed both storage branches in4.93s. After
+adding explicit readiness/catch-up waits, the entire counter_service suite passed
+35/35 tests in19.94s, including both new tests and the existing public targets,
+permissions, close/deadline, enrollment, membership and retry histories. Formatting
+and both complete strict Clippy profiles passed with zero diagnostics. No lint
+allowance or threshold change.
+
+Macro review: closes this selected P4/P1 joint-command recovery gap. Older
+mismatching checkpoints, arbitrary revocation/new-voter schedules and broader
+platform/fault coverage remain open. The next mini-plan returns to the retained
+P7 QUIC experiment with its original group-specific gate; a host-poll pause does
+not itself guarantee snapshot necessity. The baseline review then reconciles
+remaining required behavior, including the original-Directory-only native
+automatic lookup adapter identified in current source. Full P0–P7 stays active.

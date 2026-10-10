@@ -12,6 +12,12 @@ The sections below record staged implementation. Earlier statements that public
 mutation ingress was pending are historical; slices115–121 added the current
 authenticated commands and selected fault/recovery coverage.
 
+Selected executable tests also cover losing an unread joint-command result when
+that command demotes the serving leader. The surviving voters elect and finish
+the same operation through an explicitly authorized final command; WAL and joint
+checkpoint recovery preserve the former leader as a learner, data and retries.
+This is bounded TCP/QUIC coverage, not a general revocation or fault proof.
+
 Readiness rounds are volatile, exact-context checks. Owner-admitted
 `cancel_learner_readiness` clears the pending round and cached result; an old
 reply cannot satisfy a new round. It does not revoke durable membership or fence
