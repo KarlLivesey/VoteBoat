@@ -238,6 +238,66 @@ impl Maintenance {
         let Some(config) = self.config else {
             return Ok(());
         };
+        self.complete_active(replicas, now, config)?;
+        // At most one periodic opportunity per reactor turn; never queue missed work.
+        let intended = self.next as u128 * config.period;
+        if intended >= self.horizon || now < intended {
+            return Ok(());
+        }
+        let wave = self.next;
+        self.next += 1;
+        let mut group = group_id((wave - 1) % self.groups + 1);
+        let paused = self.actual_pause.is_some() && self.actual_resume.is_none();
+        if paused && self.forced.is_none() {
+            if let Some(g) = (1..=self.groups).map(group_id).find(|g| {
+                leader(replicas, *g).is_ok_and(|i| {
+                    replicas[i].local().applications[g].applied_index() > self.pause_prefix[g]
+                })
+            }) {
+                group = g;
+            } else {
+                self.skip(wave, group, intended, now, "awaiting_new_prefix")?;
+                return Ok(());
+            }
+        }
+        if self.active.is_some() {
+            self.skip(wave, group, intended, now, "busy")?;
+            return Ok(());
+        }
+        if now >= self.horizon {
+            self.skip(wave, group, intended, now, "late")?;
+            return Ok(());
+        }
+        let i = leader(replicas, group)?;
+        let local = replicas[i].local();
+        let core = local.owner.core(group).unwrap();
+        let previous = core.state().base_index();
+        let requested = local.applications[&group].applied_index();
+        if requested <= previous {
+            self.skip(wave, group, intended, now, "no_new_applied_prefix")?;
+            return Ok(());
+        }
+        let (binding, term) = (core.storage_binding(), core.state().hard_state.term);
+        let mut row = Row::new(wave, "checkpoint", group, i, intended, now);
+        row.previous = previous;
+        row.requested = requested;
+        checked(replicas[i].control(group, NodeControl::Checkpoint))?;
+        let index = self.push(row)?;
+        self.active = Some(Active::Checkpoint(Checkpoint {
+            row: index,
+            leader: i,
+            group,
+            binding,
+            term,
+        }));
+        Ok(())
+    }
+    fn complete_active<L: LogStore + Send + 'static>(
+        &mut self,
+        replicas: &mut [Replica<L>],
+        now: u128,
+        config: Config,
+    ) -> Result<(), Failure> {
         if let Some(active) = self.active.take() {
             match active {
                 Active::Checkpoint(p) => {
@@ -322,57 +382,6 @@ impl Maintenance {
                 }
             }
         }
-        // At most one periodic opportunity per reactor turn; never queue missed work.
-        let intended = self.next as u128 * config.period;
-        if intended >= self.horizon || now < intended {
-            return Ok(());
-        }
-        let wave = self.next;
-        self.next += 1;
-        let mut group = group_id((wave - 1) % self.groups + 1);
-        let paused = self.actual_pause.is_some() && self.actual_resume.is_none();
-        if paused && self.forced.is_none() {
-            if let Some(g) = (1..=self.groups).map(group_id).find(|g| {
-                leader(replicas, *g).is_ok_and(|i| {
-                    replicas[i].local().applications[g].applied_index() > self.pause_prefix[g]
-                })
-            }) {
-                group = g;
-            } else {
-                self.skip(wave, group, intended, now, "awaiting_new_prefix")?;
-                return Ok(());
-            }
-        }
-        if self.active.is_some() {
-            self.skip(wave, group, intended, now, "busy")?;
-            return Ok(());
-        }
-        if now >= self.horizon {
-            self.skip(wave, group, intended, now, "late")?;
-            return Ok(());
-        }
-        let i = leader(replicas, group)?;
-        let local = replicas[i].local();
-        let core = local.owner.core(group).unwrap();
-        let previous = core.state().base_index();
-        let requested = local.applications[&group].applied_index();
-        if requested <= previous {
-            self.skip(wave, group, intended, now, "no_new_applied_prefix")?;
-            return Ok(());
-        }
-        let (binding, term) = (core.storage_binding(), core.state().hard_state.term);
-        let mut row = Row::new(wave, "checkpoint", group, i, intended, now);
-        row.previous = previous;
-        row.requested = requested;
-        checked(replicas[i].control(group, NodeControl::Checkpoint))?;
-        let index = self.push(row)?;
-        self.active = Some(Active::Checkpoint(Checkpoint {
-            row: index,
-            leader: i,
-            group,
-            binding,
-            term,
-        }));
         Ok(())
     }
     fn skip(

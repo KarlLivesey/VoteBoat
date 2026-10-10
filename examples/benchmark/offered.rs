@@ -334,28 +334,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let mut storage = Vec::new();
     let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
     // Any error after construction still attempts explicit worker shutdown/join.
-    let preparation = (|| {
-        campaign(&mut replicas, clock, groups)?;
-        eprintln!("phase=warmup protocol={protocol:?} mode=offered");
-        let warmup = workload(
-            &mut replicas,
-            clock,
-            Workload {
-                first: 1,
-                count: WARMUP,
-                window,
-                groups,
-                diagnostic: Some((root, "warmup")),
-            },
-        )?;
-        let last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
-        verify(&mut replicas, clock, WARMUP, groups, &last)?;
-        let placement = (1..=groups)
-            .map(|g| leader(&replicas, group_id(g)).map(|i| format!("{g}:{}", i + 1)))
-            .collect::<Result<Vec<_>, _>>()?
-            .join(",");
-        Ok::<_, Failure>((warmup, placement))
-    })();
+    let preparation = prepare_offered(&mut replicas, clock, &config);
     let (warmup, placement) = match preparation {
         Ok(w) => w,
         Err(error) => {
@@ -368,13 +347,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         }
     };
     let mut ledger = Ledger::new(count, rate, window, groups);
-    let mut maintenance = Maintenance::new(maintenance_config, ledger.horizon(), groups);
-    if maintenance_config.is_some() {
-        std::fs::write(
-            root.join("maintenance-config.txt"),
-            maintenance.summary(&PollTotals::default()),
-        )?;
-    }
+    let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
     let mut totals = PollTotals::default();
     observe::capture(&mut storage, "before_measurement", &traces);
     eprintln!("phase=offering operations={count} rate={rate} groups={groups} leaders={placement}");
@@ -404,36 +377,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     let (expected, last) = match history {
         Ok(h) => h,
         Err(error) => {
-            let mut cancellation_errors = Vec::new();
-            for ((replica, _), (ticket, _)) in &ledger.pending {
-                // Cancellation ends observation only; it never proves non-commit.
-                if let Err(e) = replicas[*replica].cancel_client(*ticket) {
-                    cancellation_errors.push(format!("{e:?}"));
-                }
-            }
-            for n in &mut replicas {
-                while let Some(output) = n.poll_client() {
-                    if let Err(e) = n.complete_client(output) {
-                        cancellation_errors.push(format!("{:?}", e.reason));
-                    }
-                }
-            }
-            let mut reclaimed = Vec::new();
-            let reclaim_cleanup = until(&mut replicas, clock, |ns| {
-                for n in ns.iter_mut() {
-                    while let Some(e) = n.poll_reclaim() {
-                        reclaimed.push(format!("{e:?}"));
-                    }
-                }
-                Ok(ns.iter().all(|n| n.replica_usage().reclaims == 0))
-            })
-            .map(|_| ());
-            let cleanup = close(replicas, clock);
-            std::fs::write(
-                root.join("failure.txt"),
-                format!("measurement={error}; cancellation_errors={cancellation_errors:?}; reclaim_cleanup={reclaim_cleanup:?}; reclaim_events={reclaimed:?}; cleanup={cleanup:?}\n"),
-            )?;
-            return Err(error);
+            return failed_measurement(replicas, clock, root, error, &ledger);
         }
     };
     let compacted_bases = maintenance.bases(&replicas);
@@ -444,102 +388,39 @@ pub(super) fn run<L: LogStore + Send + 'static>(
     eprintln!("phase=recovery-verification mode=offered");
     let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
     let recovered_bases = maintenance.bases(&replicas);
-    let recovered = (|| {
-        maintenance.verify_recovery(&replicas, &compacted_bases)?;
-        campaign(&mut replicas, clock, groups)?;
-        verify_expected(&mut replicas, clock, &expected, &last)?;
-        let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
-        let last_success = ledger.rows.iter().rev().find(|r| r.status == "applied");
-        let (operation, value) =
-            last_success
-                .map(|r| (r.operation, r.value))
-                .unwrap_or_else(|| {
-                    let s = warmup
-                        .samples
-                        .iter()
-                        .find(|s| s.operation == WARMUP as u128)
-                        .unwrap();
-                    (WARMUP, s.value)
-                });
-        let retries = retry(&mut replicas, clock, 1, first.value, groups)?
-            + retry(&mut replicas, clock, operation, value, groups)?;
-        let retry_index = boundaries(replicas.iter().flat_map(|n| {
-            n.local()
-                .applications
-                .iter()
-                .map(|(g, a)| (*g, a.applied_index()))
-        }));
-        verify_expected(&mut replicas, clock, &expected, &retry_index)?;
-        Ok::<_, Failure>(retries)
-    })();
+    let recovered = verify_offered_recovery(
+        &mut replicas,
+        clock,
+        groups,
+        &maintenance,
+        RecoveryCheck {
+            warmup: &warmup,
+            ledger: &ledger,
+            expected: &expected,
+            compacted_bases: &compacted_bases,
+            last: &last,
+        },
+    );
     let joined = close(replicas, clock);
     let retries = checked_stage(root, "recovery", recovered, joined)?;
     if maintenance_config.is_some() {
-        let mut bases = exclusive(&root.join("bases.csv"))?;
-        writeln!(bases, "stage,replica,group,base_index")?;
-        for (stage, values) in [
-            ("before_close", &compacted_bases),
-            ("after_recover", &recovered_bases),
-        ] {
-            for ((replica, group), base) in values {
-                writeln!(bases, "{stage},{},{},{base}", replica + 1, group.id.get())?;
-            }
-        }
-        bases.sync_all()?;
+        write_bases(root, &compacted_bases, &recovered_bases)?;
     }
     observe::capture(&mut storage, "after_recover_join", &recovered_traces);
     observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
-    let horizon = ledger.horizon();
-    let applied = ledger.count_status("applied");
-    let during = ledger
-        .rows
-        .iter()
-        .filter(|r| r.status == "applied" && r.completed < horizon)
-        .count();
-    let admitted = ledger.rows.iter().filter(|r| r.sequence > 0).count();
-    let backlog = ledger
-        .rows
-        .iter()
-        .filter(|r| r.sequence > 0 && r.dispatched < horizon && r.completed >= horizon)
-        .count();
-    let mut end_to_end = ledger
-        .rows
-        .iter()
-        .filter(|r| r.status == "applied")
-        .map(|r| r.completed - r.intended)
-        .collect::<Vec<_>>();
-    let mut service = ledger
-        .rows
-        .iter()
-        .filter(|r| r.status == "applied")
-        .map(|r| r.completed - r.dispatched)
-        .collect::<Vec<_>>();
-    let p99 = percentile(&mut end_to_end, 99);
-    let service_p99 = percentile(&mut service, 99);
-    let recovered_value: i64 = expected.values().sum();
-    let admitted_during = ledger
-        .rows
-        .iter()
-        .filter(|r| r.sequence > 0 && r.dispatched < horizon)
-        .count();
-    let late_decisions = ledger
-        .rows
-        .iter()
-        .filter(|r| r.dispatched >= horizon)
-        .count();
-    let mut dispatch_lag = ledger
-        .rows
-        .iter()
-        .map(|r| r.dispatched - r.intended)
-        .collect::<Vec<_>>();
-    let dispatch_p99 = percentile(&mut dispatch_lag, 99);
-    let maintenance_summary = maintenance.summary(&totals);
-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
-    let mut file = exclusive(&root.join("summary.txt"))?;
-    file.write_all(summary.as_bytes())?;
-    file.sync_all()?;
-    print!("{summary}");
-    Ok(())
+    report_offered(
+        &config,
+        rate,
+        CompletedRun {
+            placement: &placement,
+            ledger: &ledger,
+            totals: &totals,
+            maintenance: &maintenance,
+            elapsed,
+            expected: &expected,
+            retries,
+        },
+    )
 }
 
 fn checked_stage<T>(
@@ -749,4 +630,239 @@ mod tests {
         assert!(diagnostic.contains("cleanup failed"));
         std::fs::remove_dir_all(root).unwrap();
     }
+}
+
+fn failed_measurement<L: LogStore + Send + 'static>(
+    mut replicas: Vec<Replica<L>>,
+    clock: &Instant,
+    root: &Path,
+    error: Failure,
+    ledger: &Ledger,
+) -> Result<(), Failure> {
+    let mut cancellation_errors = Vec::new();
+    for ((replica, _), (ticket, _)) in &ledger.pending {
+        // Cancellation ends observation only; it never proves non-commit.
+        if let Err(e) = replicas[*replica].cancel_client(*ticket) {
+            cancellation_errors.push(format!("{e:?}"));
+        }
+    }
+    for n in &mut replicas {
+        while let Some(output) = n.poll_client() {
+            if let Err(e) = n.complete_client(output) {
+                cancellation_errors.push(format!("{:?}", e.reason));
+            }
+        }
+    }
+    let mut reclaimed = Vec::new();
+    let reclaim_cleanup = until(&mut replicas, clock, |ns| {
+        for n in ns.iter_mut() {
+            while let Some(e) = n.poll_reclaim() {
+                reclaimed.push(format!("{e:?}"));
+            }
+        }
+        Ok(ns.iter().all(|n| n.replica_usage().reclaims == 0))
+    })
+    .map(|_| ());
+    let cleanup = close(replicas, clock);
+    std::fs::write(
+                root.join("failure.txt"),
+                format!("measurement={error}; cancellation_errors={cancellation_errors:?}; reclaim_cleanup={reclaim_cleanup:?}; reclaim_events={reclaimed:?}; cleanup={cleanup:?}\n"),
+            )?;
+    Err(error)
+}
+
+struct CompletedRun<'a> {
+    placement: &'a str,
+    ledger: &'a Ledger,
+    totals: &'a PollTotals,
+    maintenance: &'a Maintenance,
+    elapsed: Duration,
+    expected: &'a BTreeMap<GroupIdentity, i64>,
+    retries: usize,
+}
+fn report_offered(
+    config: &RunConfig<'_>,
+    rate: usize,
+    run: CompletedRun<'_>,
+) -> Result<(), Failure> {
+    let RunConfig {
+        root,
+        protocol,
+        count,
+        window,
+        groups,
+        ..
+    } = *config;
+    let CompletedRun {
+        placement,
+        ledger,
+        totals,
+        maintenance,
+        elapsed,
+        expected,
+        retries,
+    } = run;
+    let horizon = ledger.horizon();
+    let applied = ledger.count_status("applied");
+    let during = ledger
+        .rows
+        .iter()
+        .filter(|r| r.status == "applied" && r.completed < horizon)
+        .count();
+    let admitted = ledger.rows.iter().filter(|r| r.sequence > 0).count();
+    let backlog = ledger
+        .rows
+        .iter()
+        .filter(|r| r.sequence > 0 && r.dispatched < horizon && r.completed >= horizon)
+        .count();
+    let mut end_to_end = ledger
+        .rows
+        .iter()
+        .filter(|r| r.status == "applied")
+        .map(|r| r.completed - r.intended)
+        .collect::<Vec<_>>();
+    let mut service = ledger
+        .rows
+        .iter()
+        .filter(|r| r.status == "applied")
+        .map(|r| r.completed - r.dispatched)
+        .collect::<Vec<_>>();
+    let p99 = percentile(&mut end_to_end, 99);
+    let service_p99 = percentile(&mut service, 99);
+    let recovered_value: i64 = expected.values().sum();
+    let admitted_during = ledger
+        .rows
+        .iter()
+        .filter(|r| r.sequence > 0 && r.dispatched < horizon)
+        .count();
+    let late_decisions = ledger
+        .rows
+        .iter()
+        .filter(|r| r.dispatched >= horizon)
+        .count();
+    let mut dispatch_lag = ledger
+        .rows
+        .iter()
+        .map(|r| r.dispatched - r.intended)
+        .collect::<Vec<_>>();
+    let dispatch_p99 = percentile(&mut dispatch_lag, 99);
+    let maintenance_summary = maintenance.summary(totals);
+    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+    let mut file = exclusive(&root.join("summary.txt"))?;
+    file.write_all(summary.as_bytes())?;
+    file.sync_all()?;
+    print!("{summary}");
+    Ok(())
+}
+
+fn prepare_offered<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    config: &RunConfig<'_>,
+) -> Result<(Measurement, String), Failure> {
+    let RunConfig {
+        root,
+        protocol,
+        window,
+        groups,
+        ..
+    } = *config;
+    campaign(replicas, clock, groups)?;
+    eprintln!("phase=warmup protocol={protocol:?} mode=offered");
+    let warmup = workload(
+        replicas,
+        clock,
+        Workload {
+            first: 1,
+            count: WARMUP,
+            window,
+            groups,
+            diagnostic: Some((root, "warmup")),
+        },
+    )?;
+    let last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
+    verify(replicas, clock, WARMUP, groups, &last)?;
+    let placement = (1..=groups)
+        .map(|g| leader(replicas, group_id(g)).map(|i| format!("{g}:{}", i + 1)))
+        .collect::<Result<Vec<_>, _>>()?
+        .join(",");
+    Ok::<_, Failure>((warmup, placement))
+}
+
+struct RecoveryCheck<'a> {
+    warmup: &'a Measurement,
+    ledger: &'a Ledger,
+    expected: &'a BTreeMap<GroupIdentity, i64>,
+    compacted_bases: &'a BTreeMap<(usize, GroupIdentity), u64>,
+    last: &'a BTreeMap<GroupIdentity, u64>,
+}
+fn verify_offered_recovery<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    groups: usize,
+    maintenance: &Maintenance,
+    history: RecoveryCheck<'_>,
+) -> Result<usize, Failure> {
+    let RecoveryCheck {
+        warmup,
+        ledger,
+        expected,
+        compacted_bases,
+        last,
+    } = history;
+    maintenance.verify_recovery(replicas, compacted_bases)?;
+    campaign(replicas, clock, groups)?;
+    verify_expected(replicas, clock, expected, last)?;
+    let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
+    let last_success = ledger.rows.iter().rev().find(|r| r.status == "applied");
+    let (operation, value) = last_success
+        .map(|r| (r.operation, r.value))
+        .unwrap_or_else(|| {
+            let s = warmup
+                .samples
+                .iter()
+                .find(|s| s.operation == WARMUP as u128)
+                .unwrap();
+            (WARMUP, s.value)
+        });
+    let retries = retry(replicas, clock, 1, first.value, groups)?
+        + retry(replicas, clock, operation, value, groups)?;
+    let retry_index = boundaries(replicas.iter().flat_map(|n| {
+        n.local()
+            .applications
+            .iter()
+            .map(|(g, a)| (*g, a.applied_index()))
+    }));
+    verify_expected(replicas, clock, expected, &retry_index)?;
+    Ok::<_, Failure>(retries)
+}
+
+fn write_bases(
+    root: &Path,
+    compacted_bases: &BTreeMap<(usize, GroupIdentity), u64>,
+    recovered_bases: &BTreeMap<(usize, GroupIdentity), u64>,
+) -> Result<(), Failure> {
+    let mut bases = exclusive(&root.join("bases.csv"))?;
+    writeln!(bases, "stage,replica,group,base_index")?;
+    for (stage, values) in [
+        ("before_close", compacted_bases),
+        ("after_recover", recovered_bases),
+    ] {
+        for ((replica, group), base) in values {
+            writeln!(bases, "{stage},{},{},{base}", replica + 1, group.id.get())?;
+        }
+    }
+    bases.sync_all()?;
+    Ok(())
+}
+
+fn prepare_maintenance(config: &RunConfig<'_>, horizon: u128) -> Result<Maintenance, Failure> {
+    let maintenance = Maintenance::new(config.maintenance, horizon, config.groups);
+    if config.maintenance.is_some() {
+        std::fs::write(
+            config.root.join("maintenance-config.txt"),
+            maintenance.summary(&PollTotals::default()),
+        )?;
+    }
+    Ok(maintenance)
 }

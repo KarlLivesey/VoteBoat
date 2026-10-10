@@ -79,36 +79,8 @@ fn main() -> Result<(), Failure> {
     let operation = OperationId::new(operation.parse()?).ok_or("nonzero operation ID required")?;
     let delta: i64 = delta.parse()?;
     let tls = Path::new(tls);
-    let node_id = NodeId::new(1).unwrap();
-    let store = StoreIdentity {
-        id: StoreId::new(1).unwrap(),
-        incarnation: StoreIncarnation::new(1).unwrap(),
-    };
-    let group = GroupIdentity {
-        id: GroupId::new(1).unwrap(),
-        incarnation: GroupIncarnation::new(1).unwrap(),
-    };
-    let config = NativeStartup {
-        directory: root.into(),
-        mode,
-        node: node_id,
-        store,
-        bootstrap: Bootstrap {
-            group,
-            configuration: ConfigurationId::new(1).unwrap(),
-            policy: check(Policy::new(Tree::Voter(node_id), Limits::default()))?,
-            voter_stores: [(node_id, store)].into(),
-        },
-        listen: "127.0.0.1:0".parse()?,
-        peers: BTreeMap::new(),
-        entropy_seed: 17,
-        limits: NodeLimits::default(),
-        tls: check(NativeTlsConfig::new(TlsCredentials {
-            roots: vec![material(&tls.join("ca.der"))?],
-            certificate_chain: vec![material(&tls.join("node1.der"))?],
-            private_key: material(&tls.join("node1-key.der"))?,
-        }))?,
-    };
+    let config = startup(root, tls, mode)?;
+    let group = config.bootstrap.group;
     let mut node = match config.open(
         check(Counter::new(10000))?,
         Arc::new(ThreadWake::current()),
@@ -172,6 +144,46 @@ fn main() -> Result<(), Failure> {
         }
         Ok(true)
     })?;
+    close(node, group, start)
+}
+
+fn startup(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<NativeStartup, Failure> {
+    let node_id = NodeId::new(1).unwrap();
+    let store = StoreIdentity {
+        id: StoreId::new(1).unwrap(),
+        incarnation: StoreIncarnation::new(1).unwrap(),
+    };
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    Ok(NativeStartup {
+        directory: root.into(),
+        mode,
+        node: node_id,
+        store,
+        bootstrap: Bootstrap {
+            group,
+            configuration: ConfigurationId::new(1).unwrap(),
+            policy: check(Policy::new(Tree::Voter(node_id), Limits::default()))?,
+            voter_stores: [(node_id, store)].into(),
+        },
+        listen: "127.0.0.1:0".parse()?,
+        peers: BTreeMap::new(),
+        entropy_seed: 17,
+        limits: NodeLimits::default(),
+        tls: check(NativeTlsConfig::new(TlsCredentials {
+            roots: vec![material(&tls.join("ca.der"))?],
+            certificate_chain: vec![material(&tls.join("node1.der"))?],
+            private_key: material(&tls.join("node1-key.der"))?,
+        }))?,
+    })
+}
+fn close(
+    mut node: NativeNode<Counter>,
+    group: GroupIdentity,
+    start: Instant,
+) -> Result<(), Failure> {
     check(node.control(group, NodeControl::Checkpoint))?;
     node.begin_shutdown();
     drive(&mut node, start, |n| Ok(n.is_drained()))?;

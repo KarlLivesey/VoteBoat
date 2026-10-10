@@ -13926,3 +13926,34 @@ library, its inline tests or the executable. Thresholds and deny levels are
 unchanged. Next within mini item1: clean the example setup/workload functions,
 then bounded groups of shared integration fixtures and their test histories;
 rerun the affected targets. The wider goal remains active.
+
+### Example lint cleanup — schema plan
+
+Preserve example CLI/output, on-disk formats, benchmark timing boundaries and
+success/failure gates. Separate setup/recovery and worker cleanup from example
+workloads; split benchmark construction, offered-load admission, maintenance
+completion and reporting by their existing ownership phases. Keep accepted
+work and failed-run artifacts intact; do not reinterpret invalid measurements
+as success. Verify create/recover/retry for embedding and the synchronous demo,
+WAL replay, and small TCP/QUIC single/shared benchmark runs plus example tests.
+No performance claim is inferred from these smoke checks. This continues mini
+item1, serving the Rust embedding and measured-validation macro milestones.
+
+## Example lint cleanup — implemented evidence
+
+Separated example startup/recovery, benchmark worker construction, receipt
+collection, maintenance completion and reporting into named ownership phases.
+Kept existing CLI/output, workload timing boundaries and failed-run cleanup.
+Strict example Clippy passes with all features and with TLS-only features;
+all16 example tests pass. Formatting and whitespace checks pass. Fresh-directory
+embedding and synchronous replicated-counter create/recover/retry checks reach
+7,7,10; the WAL benchmark replay check passes. Small TCP and QUIC startup,
+shared-group and offered-load/maintenance runs all pass their recovery, duplicate
+retry and worker-join gates. These debug smoke runs make no performance claim.
+
+The complete strict all-target/all-feature --keep-going run still fails with227
+distinct diagnostics, all in integration tests. Library, inline library tests,
+executable and examples have no diagnostics in that run. Next within mini item1:
+split shared retirement/recovery fixtures, storage/vote conformance phases and
+the reported nested merge retirement history; retain all assertions and failure
+boundaries. No thresholds or lint levels changed.

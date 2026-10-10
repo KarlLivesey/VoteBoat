@@ -156,86 +156,7 @@ fn main() -> Result<(), Failure> {
         Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => (),
         Err(e) => return Err(e.into()),
     }
-    let group = GroupIdentity {
-        id: GroupId::new(1).unwrap(),
-        incarnation: GroupIncarnation::new(1).unwrap(),
-    };
-    let stores: BTreeMap<_, _> = (1..=3)
-        .map(|n| {
-            (
-                NodeId::new(n).unwrap(),
-                StoreIdentity {
-                    id: StoreId::new(n as u128).unwrap(),
-                    incarnation: StoreIncarnation::new(1).unwrap(),
-                },
-            )
-        })
-        .collect();
-    let policy = Policy::new(
-        Tree::Majority(stores.keys().map(|n| Tree::Voter(*n)).collect()),
-        Limits::default(),
-    )
-    .map_err(|e| format!("{e:?}"))?;
-    let bootstrap = Bootstrap {
-        group,
-        configuration: ConfigurationId::new(1).unwrap(),
-        policy,
-        voter_stores: stores.clone(),
-    };
-    let mut demo = Demo {
-        replicas: BTreeMap::new(),
-        messages: VecDeque::new(),
-    };
-    for (node, identity) in stores {
-        let directory = root.join(node.get().to_string());
-        let limits = LogLimits::default();
-        let store = if directory.join("MANIFEST").exists() {
-            NativeLogStore::recover(FileLogIo::open(&directory)?, identity, limits)?
-        } else {
-            let mut s = NativeLogStore::create(FileLogIo::create(&directory)?, identity, limits)?;
-            let tickets = s.append_batch(vec![LogMutation::Create(bootstrap.clone())])?;
-            s.barrier(&tickets)?;
-            s
-        };
-        let state = store.state(group)?;
-        if state.bootstrap != bootstrap {
-            return Err("demo configuration differs from recovered configuration".into());
-        }
-        let mut application = Counter::new(10000).map_err(|e| format!("{e:?}"))?;
-        let checkpoint_directory = directory.join("checkpoints");
-        let checkpoint_identity = SnapshotIdentity {
-            store: identity,
-            group,
-        };
-        let mut snapshots = if checkpoint_directory.join("MANIFEST").exists() {
-            NativeSnapshotStore::recover(
-                FileSnapshotIo::open(&checkpoint_directory)?,
-                checkpoint_identity,
-                SnapshotLimits::default(),
-            )?
-        } else {
-            NativeSnapshotStore::create(
-                FileSnapshotIo::create(&checkpoint_directory)?,
-                checkpoint_identity,
-                SnapshotLimits::default(),
-            )?
-        };
-        let (core, restored) =
-            recover_replica(node, group, &store, &mut snapshots, &mut application)
-                .map_err(|e| format!("{e:?}"))?;
-        demo.replicas.insert(
-            node,
-            Replica {
-                core,
-                store,
-                application,
-                receipts: Vec::new(),
-                read_value: None,
-                snapshots,
-                restored_checkpoint: restored.checkpoint_index,
-            },
-        );
-    }
+    let mut demo = open_demo(&root)?;
     let leader = NodeId::new(1).unwrap();
     demo.act(leader, Event::Campaign)?;
     demo.pump()?;
@@ -303,4 +224,94 @@ fn main() -> Result<(), Failure> {
     }
     demo.pump()?;
     Ok(())
+}
+
+fn open_replica(
+    root: &std::path::Path,
+    node: NodeId,
+    identity: StoreIdentity,
+    bootstrap: &Bootstrap,
+) -> Result<Replica, Failure> {
+    let group = bootstrap.group;
+    let directory = root.join(node.get().to_string());
+    let limits = LogLimits::default();
+    let store = if directory.join("MANIFEST").exists() {
+        NativeLogStore::recover(FileLogIo::open(&directory)?, identity, limits)?
+    } else {
+        let mut s = NativeLogStore::create(FileLogIo::create(&directory)?, identity, limits)?;
+        let tickets = s.append_batch(vec![LogMutation::Create(bootstrap.clone())])?;
+        s.barrier(&tickets)?;
+        s
+    };
+    let state = store.state(group)?;
+    if state.bootstrap != *bootstrap {
+        return Err("demo configuration differs from recovered configuration".into());
+    }
+    let mut application = Counter::new(10000).map_err(|e| format!("{e:?}"))?;
+    let checkpoint_directory = directory.join("checkpoints");
+    let checkpoint_identity = SnapshotIdentity {
+        store: identity,
+        group,
+    };
+    let mut snapshots = if checkpoint_directory.join("MANIFEST").exists() {
+        NativeSnapshotStore::recover(
+            FileSnapshotIo::open(&checkpoint_directory)?,
+            checkpoint_identity,
+            SnapshotLimits::default(),
+        )?
+    } else {
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(&checkpoint_directory)?,
+            checkpoint_identity,
+            SnapshotLimits::default(),
+        )?
+    };
+    let (core, restored) = recover_replica(node, group, &store, &mut snapshots, &mut application)
+        .map_err(|e| format!("{e:?}"))?;
+    Ok(Replica {
+        core,
+        store,
+        application,
+        receipts: Vec::new(),
+        read_value: None,
+        snapshots,
+        restored_checkpoint: restored.checkpoint_index,
+    })
+}
+fn open_demo(root: &std::path::Path) -> Result<Demo, Failure> {
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let stores: BTreeMap<_, _> = (1..=3)
+        .map(|n| {
+            (
+                NodeId::new(n).unwrap(),
+                StoreIdentity {
+                    id: StoreId::new(n as u128).unwrap(),
+                    incarnation: StoreIncarnation::new(1).unwrap(),
+                },
+            )
+        })
+        .collect();
+    let policy = Policy::new(
+        Tree::Majority(stores.keys().map(|n| Tree::Voter(*n)).collect()),
+        Limits::default(),
+    )
+    .map_err(|e| format!("{e:?}"))?;
+    let bootstrap = Bootstrap {
+        group,
+        configuration: ConfigurationId::new(1).unwrap(),
+        policy,
+        voter_stores: stores.clone(),
+    };
+    let mut demo = Demo {
+        replicas: BTreeMap::new(),
+        messages: VecDeque::new(),
+    };
+    for (node, identity) in stores {
+        demo.replicas
+            .insert(node, open_replica(root, node, identity, &bootstrap)?);
+    }
+    Ok(demo)
 }

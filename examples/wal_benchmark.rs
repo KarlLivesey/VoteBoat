@@ -143,6 +143,57 @@ fn main() -> Result<(), Failure> {
     };
     let tickets = checked(store.append_batch(vec![LogMutation::Create(bootstrap)]))?;
     checked(store.barrier(&tickets))?;
+    let (samples, elapsed) = measure_batches(&mut store, &timings, batches, entries)?;
+    let expected = checked(store.state(group()))?;
+    drop(store);
+    let count = (batches + WARMUP) * entries;
+    verify_recovery(root, expected, count)?;
+    let mut csv = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(root.join("samples.csv"))?;
+    writeln!(csv,"batch,entries,append_ns,barrier_ns,total_ns,file_append_ns,wal_sync_ns,manifest_publish_ns,wal_bytes")?;
+    for s in &samples {
+        if s.io.appends != 1 || s.io.syncs != 1 || s.io.publications != 1 {
+            return Err("primitive count mismatch".into());
+        }
+        writeln!(
+            csv,
+            "{},{},{},{},{},{},{},{},{}",
+            s.batch,
+            s.entries,
+            s.append_ns,
+            s.barrier_ns,
+            s.total_ns,
+            s.io.append_ns,
+            s.io.sync_ns,
+            s.io.publish_ns,
+            s.io.bytes
+        )?;
+    }
+    csv.sync_all()?;
+    let sum = |f: fn(&Sample) -> u128| samples.iter().map(f).sum::<u128>() as f64 / 1e6;
+    let mut barriers = samples.iter().map(|s| s.barrier_ns).collect::<Vec<_>>();
+    barriers.sort_unstable();
+    let p99 = barriers[(batches * 99).div_ceil(100) - 1] as f64 / 1e6;
+    let bytes = samples.iter().map(|s| s.io.bytes).sum::<usize>();
+    let summary=format!("scope=local_wal groups=1 warmup_batches={WARMUP} batches={batches} entries_per_batch={entries} measured_records={} elapsed_s={:.6} durable_records_s={:.3} barrier_p99_ms={p99:.3} total_append_ms={:.3} file_append_ms={:.3} wal_sync_ms={:.3} manifest_publish_ms={:.3} total_barrier_ms={:.3} wal_bytes={bytes} recovered_records={count} replay_retry_verified=true\n",batches*entries,elapsed.as_secs_f64(),(batches*entries) as f64/elapsed.as_secs_f64(),sum(|s|s.append_ns),sum(|s|s.io.append_ns),sum(|s|s.io.sync_ns),sum(|s|s.io.publish_ns),sum(|s|s.barrier_ns));
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(root.join("summary.txt"))?;
+    file.write_all(summary.as_bytes())?;
+    file.sync_all()?;
+    print!("{summary}");
+    Ok(())
+}
+
+fn measure_batches(
+    store: &mut NativeLogStore<ObservedIo>,
+    timings: &Rc<RefCell<Timings>>,
+    batches: usize,
+    entries: usize,
+) -> Result<(Vec<Sample>, std::time::Duration), Failure> {
     let mut samples = Vec::with_capacity(batches);
     let mut measured_start = None;
     for batch in 0..batches + WARMUP {
@@ -199,8 +250,10 @@ fn main() -> Result<(), Failure> {
         }
     }
     let elapsed = measured_start.unwrap().elapsed();
-    let expected = checked(store.state(group()))?;
-    drop(store);
+    Ok((samples, elapsed))
+}
+
+fn verify_recovery(root: &Path, expected: GroupLog, count: usize) -> Result<(), Failure> {
     let recovered = checked(NativeLogStore::recover(
         FileLogIo::open(root.join("store"))?,
         identity(),
@@ -210,7 +263,6 @@ fn main() -> Result<(), Failure> {
     if actual != expected {
         return Err("recovered WAL differs from acknowledged state".into());
     }
-    let count = (batches + WARMUP) * entries;
     let mut app = checked(Counter::new(count))?;
     let receipts = checked(app.apply_batch(&actual.entries))?;
     if checked(app.read_applied(actual.commit_index))? != count as i64 || receipts.len() != count {
@@ -234,42 +286,5 @@ fn main() -> Result<(), Failure> {
         return Err("retry changed value".into());
     }
     drop(recovered);
-    let mut csv = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(root.join("samples.csv"))?;
-    writeln!(csv,"batch,entries,append_ns,barrier_ns,total_ns,file_append_ns,wal_sync_ns,manifest_publish_ns,wal_bytes")?;
-    for s in &samples {
-        if s.io.appends != 1 || s.io.syncs != 1 || s.io.publications != 1 {
-            return Err("primitive count mismatch".into());
-        }
-        writeln!(
-            csv,
-            "{},{},{},{},{},{},{},{},{}",
-            s.batch,
-            s.entries,
-            s.append_ns,
-            s.barrier_ns,
-            s.total_ns,
-            s.io.append_ns,
-            s.io.sync_ns,
-            s.io.publish_ns,
-            s.io.bytes
-        )?;
-    }
-    csv.sync_all()?;
-    let sum = |f: fn(&Sample) -> u128| samples.iter().map(f).sum::<u128>() as f64 / 1e6;
-    let mut barriers = samples.iter().map(|s| s.barrier_ns).collect::<Vec<_>>();
-    barriers.sort_unstable();
-    let p99 = barriers[(batches * 99).div_ceil(100) - 1] as f64 / 1e6;
-    let bytes = samples.iter().map(|s| s.io.bytes).sum::<usize>();
-    let summary=format!("scope=local_wal groups=1 warmup_batches={WARMUP} batches={batches} entries_per_batch={entries} measured_records={} elapsed_s={:.6} durable_records_s={:.3} barrier_p99_ms={p99:.3} total_append_ms={:.3} file_append_ms={:.3} wal_sync_ms={:.3} manifest_publish_ms={:.3} total_barrier_ms={:.3} wal_bytes={bytes} recovered_records={count} replay_retry_verified=true\n",batches*entries,elapsed.as_secs_f64(),(batches*entries) as f64/elapsed.as_secs_f64(),sum(|s|s.append_ns),sum(|s|s.io.append_ns),sum(|s|s.io.sync_ns),sum(|s|s.io.publish_ns),sum(|s|s.barrier_ns));
-    let mut file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(root.join("summary.txt"))?;
-    file.write_all(summary.as_bytes())?;
-    file.sync_all()?;
-    print!("{summary}");
     Ok(())
 }

@@ -70,84 +70,305 @@ pub(super) fn open(
     let mut replicas = Vec::new();
     let mut traces = Vec::new();
     for n in 1..=3 {
+        let setup = ClusterSetup {
+            root,
+            mode,
+            protocol,
+            capacity,
+            clock,
+            bootstraps: &bootstraps,
+            addresses: &addresses,
+        };
+        let (replica, trace) = setup.open_replica(n)?;
+        replicas.push(replica);
+        traces.push(trace);
+    }
+    Ok((replicas, traces))
+}
+
+fn open_log(
+    directory: &Path,
+    n: u64,
+    create: bool,
+    bootstraps: &[Bootstrap],
+    trace: &Trace,
+) -> Result<SharedLog, Failure> {
+    let log = if create {
+        let mut log = ObservedLog {
+            inner: checked(NativeLogStore::create(
+                ObservedIo {
+                    inner: FileLogIo::create(directory)?,
+                    trace: trace.clone(),
+                },
+                store(n),
+                LogLimits::default(),
+            ))?,
+            trace: trace.clone(),
+        };
+        let tickets = checked(
+            log.append_batch(
+                bootstraps
+                    .iter()
+                    .cloned()
+                    .map(LogMutation::Create)
+                    .collect(),
+            ),
+        )?;
+        checked(log.barrier(&tickets))?;
+        log
+    } else {
+        ObservedLog {
+            inner: NativeLogStore::recover(
+                ObservedIo {
+                    inner: FileLogIo::open(directory)?,
+                    trace: trace.clone(),
+                },
+                store(n),
+                LogLimits::default(),
+            )?,
+            trace: trace.clone(),
+        }
+    };
+    Ok(log)
+}
+struct RecoveredGroups {
+    cores: Vec<voteboat::raft::Raft>,
+    applications: BTreeMap<GroupIdentity, Counter>,
+    snapshots: BTreeMap<GroupIdentity, NativeSnapshotStore<FileSnapshotIo>>,
+}
+fn recover_groups(
+    directory: &Path,
+    n: u64,
+    create: bool,
+    bootstraps: &[Bootstrap],
+    capacity: usize,
+    log: &SharedLog,
+) -> Result<RecoveredGroups, Failure> {
+    let mut cores = Vec::new();
+    let mut applications = BTreeMap::new();
+    let mut snapshots = BTreeMap::new();
+    for bootstrap in bootstraps {
+        if log.state(bootstrap.group)?.bootstrap != *bootstrap {
+            return Err("recovered bootstrap differs from selected cluster".into());
+        }
+        let path = directory.join(format!("snapshot-{}", bootstrap.group.id.get()));
+        let identity = SnapshotIdentity {
+            store: store(n),
+            group: bootstrap.group,
+        };
+        let mut snap = if create {
+            NativeSnapshotStore::create(
+                FileSnapshotIo::create(path)?,
+                identity,
+                SnapshotLimits::default(),
+            )?
+        } else {
+            NativeSnapshotStore::recover(
+                FileSnapshotIo::open(path)?,
+                identity,
+                SnapshotLimits::default(),
+            )?
+        };
+        let mut app = checked(Counter::new(capacity))?;
+        cores.push(
+            checked(recover_replica(
+                node(n),
+                bootstrap.group,
+                log,
+                &mut snap,
+                &mut app,
+            ))?
+            .0,
+        );
+        applications.insert(bootstrap.group, app);
+        snapshots.insert(bootstrap.group, snap);
+    }
+    Ok(RecoveredGroups {
+        cores,
+        applications,
+        snapshots,
+    })
+}
+fn timed_shard(
+    cores: Vec<voteboat::raft::Raft>,
+    owner_id: RuntimeOwner,
+    n: u64,
+    groups: usize,
+    clock: &Instant,
+) -> Result<
+    (
+        MonoTime,
+        TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+    ),
+    Failure,
+> {
+    let mut shard = checked(Shard::new(
+        owner_id,
+        ShardLimits {
+            max_groups: groups,
+            ..ShardLimits::default()
+        },
+        checked(FairScheduler::new(groups))?,
+    ))?;
+    for core in cores {
+        checked(shard.register(core))?;
+    }
+    let now = MonoTime(clock.elapsed().as_millis() as u64);
+    let timed = checked(TimedShard::new(
+        shard,
+        checked(DeadlineQueue::new(owner_id, groups))?,
+        JitterEntropy::new(n + 17),
+        TimerConfig {
+            heartbeat_ms: 50,
+            election_min_ms: 10000,
+            election_spread_ms: 10000,
+            expirations_per_poll: 32,
+        },
+        now,
+    ))?;
+    Ok((now, timed))
+}
+struct Routers {
+    ingress: IngressRouter,
+    results: ApplicationRouter<CounterReceipt>,
+    clients: ClientRouter<CounterReceipt>,
+    reads: ReadRequests<(), i64>,
+}
+fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<Routers, Failure> {
+    let ingress = checked(IngressRouter::new(
+        IngressBinding {
+            owner: owner_id,
+            local,
+            generation: IngressGeneration::new(1).unwrap(),
+        },
+        IngressLimits::default(),
+    ))?;
+    let results = checked(ApplicationRouter::new(
+        ApplicationRouterBinding {
+            owner: owner_id,
+            generation: ApplicationRouterGeneration::new(1).unwrap(),
+        },
+        ApplicationRouterLimits::default(),
+    ))?;
+    let clients = checked(ClientRouter::new(
+        ClientRouterBinding {
+            owner: owner_id,
+            generation: ClientRouterGeneration::new(1).unwrap(),
+        },
+        ClientRouterLimits::default(),
+    ))?;
+    let reads = checked(ReadRequests::new(
+        ReadInvocationBinding {
+            owner: owner_id,
+            generation: ReadInvocationGeneration::new(1).unwrap(),
+        },
+        ReadInvocationLimits::default(),
+        checked(ReadRouter::new(
+            ReadRouterBinding {
+                owner: owner_id,
+                generation: ReadRouterGeneration::new(1).unwrap(),
+            },
+            ReadRouterLimits::default(),
+        ))?,
+    ))?;
+    Ok(Routers {
+        ingress,
+        results,
+        clients,
+        reads,
+    })
+}
+fn connector(
+    n: u64,
+    local: LocalIdentity,
+    remote: &BTreeMap<NodeId, StoreIdentity>,
+    addresses: &BTreeMap<u64, std::net::SocketAddr>,
+    protocol: NativePeerProtocol,
+    wake: Arc<dyn WorkerWake>,
+    now: MonoTime,
+) -> Result<NativeServiceConnector, Failure> {
+    let pins = remote
+        .iter()
+        .map(|(p, s)| {
+            (
+                *p,
+                TlsPeer {
+                    identity: PeerIdentity {
+                        node: *p,
+                        store: *s,
+                    },
+                    certificate: cert(p.get()).to_vec(),
+                    server_name: format!("node{}.voteboat.test", p.get()),
+                },
+            )
+        })
+        .collect::<BTreeMap<_, _>>();
+    let config = NativeConnectConfig {
+        local,
+        limits: ConnectLimits::default(),
+        session: SessionLimits::default(),
+    };
+    let connector = match protocol {
+        NativePeerProtocol::TcpTls => {
+            let dialer = checked(NativeTcpDialer::spawn(
+                local,
+                remote.clone(),
+                DialLimits::default(),
+                wake,
+            ))?;
+            NativeServiceConnector::Tcp(Box::new(checked(NativePeerConnector::new(
+                config,
+                tls(n),
+                pins,
+                dialer,
+                Some(TcpListener::bind(addresses[&n])?),
+                now,
+            ))?))
+        }
+        #[cfg(feature = "quic")]
+        NativePeerProtocol::Quic => NativeServiceConnector::Quic(Box::new(checked(
+            voteboat::native::quic_connect::NativeQuicConnector::new(
+                config,
+                tls(n),
+                pins.into_iter()
+                    .map(|(p, pin)| (p, (addresses[&p.get()], pin)))
+                    .collect(),
+                UdpSocket::bind(addresses[&n])?,
+                now,
+            ),
+        )?)),
+    };
+    Ok(connector)
+}
+struct ClusterSetup<'a> {
+    root: &'a Path,
+    mode: NativeOpenMode,
+    protocol: NativePeerProtocol,
+    capacity: usize,
+    clock: &'a Instant,
+    bootstraps: &'a [Bootstrap],
+    addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
+}
+impl ClusterSetup<'_> {
+    fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
+        let Self {
+            root,
+            mode,
+            protocol,
+            capacity,
+            clock,
+            bootstraps,
+            addresses,
+        } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
         let trace = Trace::default();
-        let log = if create {
-            let mut log = ObservedLog {
-                inner: checked(NativeLogStore::create(
-                    ObservedIo {
-                        inner: FileLogIo::create(&directory)?,
-                        trace: trace.clone(),
-                    },
-                    store(n),
-                    LogLimits::default(),
-                ))?,
-                trace: trace.clone(),
-            };
-            let tickets = checked(
-                log.append_batch(
-                    bootstraps
-                        .iter()
-                        .cloned()
-                        .map(LogMutation::Create)
-                        .collect(),
-                ),
-            )?;
-            checked(log.barrier(&tickets))?;
-            log
-        } else {
-            ObservedLog {
-                inner: NativeLogStore::recover(
-                    ObservedIo {
-                        inner: FileLogIo::open(&directory)?,
-                        trace: trace.clone(),
-                    },
-                    store(n),
-                    LogLimits::default(),
-                )?,
-                trace: trace.clone(),
-            }
-        };
-        let mut cores = Vec::new();
-        let mut applications = BTreeMap::new();
-        let mut snapshots = BTreeMap::new();
-        for bootstrap in &bootstraps {
-            if log.state(bootstrap.group)?.bootstrap != *bootstrap {
-                return Err("recovered bootstrap differs from selected cluster".into());
-            }
-            let path = directory.join(format!("snapshot-{}", bootstrap.group.id.get()));
-            let identity = SnapshotIdentity {
-                store: store(n),
-                group: bootstrap.group,
-            };
-            let mut snap = if create {
-                NativeSnapshotStore::create(
-                    FileSnapshotIo::create(path)?,
-                    identity,
-                    SnapshotLimits::default(),
-                )?
-            } else {
-                NativeSnapshotStore::recover(
-                    FileSnapshotIo::open(path)?,
-                    identity,
-                    SnapshotLimits::default(),
-                )?
-            };
-            let mut app = checked(Counter::new(capacity))?;
-            cores.push(
-                checked(recover_replica(
-                    node(n),
-                    bootstrap.group,
-                    &log,
-                    &mut snap,
-                    &mut app,
-                ))?
-                .0,
-            );
-            applications.insert(bootstrap.group, app);
-            snapshots.insert(bootstrap.group, snap);
-        }
+        let log = open_log(&directory, n, create, bootstraps, &trace)?;
+        let RecoveredGroups {
+            cores,
+            applications,
+            snapshots,
+        } = recover_groups(&directory, n, create, bootstraps, capacity, &log)?;
         let owner_id = RuntimeOwner {
             store: log.binding(),
             lane: ExecutionLaneId::new(1).unwrap(),
@@ -171,168 +392,25 @@ pub(super) fn open(
         ))?
         .peers()
         .collect::<BTreeMap<_, _>>();
-        let mut shard = checked(Shard::new(
-            owner_id,
-            ShardLimits {
-                max_groups: groups,
-                ..ShardLimits::default()
-            },
-            checked(FairScheduler::new(groups))?,
-        ))?;
-        for core in cores {
-            checked(shard.register(core))?;
-        }
-        let now = MonoTime(clock.elapsed().as_millis() as u64);
-        let timed = checked(TimedShard::new(
-            shard,
-            checked(DeadlineQueue::new(owner_id, groups))?,
-            JitterEntropy::new(n + 17),
-            TimerConfig {
-                heartbeat_ms: 50,
-                election_min_ms: 10000,
-                election_spread_ms: 10000,
-                expirations_per_poll: 32,
-            },
-            now,
-        ))?;
-        let outbound = checked(NativeOutbound::new(
-            OutboundBinding {
-                node: node(n),
-                store: owner_id.store,
-                generation: OutboundGeneration::new(1).unwrap(),
-            },
-            OutboundLimits::default(),
-        ))?;
-        let roster = checked(PeerRoster::new(
-            PeerRosterConfig {
-                local,
-                outbound: outbound.binding(),
-                first_generation: SecureSessionGeneration::new(first).ok_or("session exhausted")?,
-                last_generation: SecureSessionGeneration::new(last).ok_or("session exhausted")?,
-                wire_version: 1,
-                limits: PeerRosterLimits::default(),
-                transport_limits: TransportLimits::default(),
-            },
-            remote.clone(),
-            now,
-        ))?;
-        let ingress = checked(IngressRouter::new(
-            IngressBinding {
-                owner: owner_id,
-                local,
-                generation: IngressGeneration::new(1).unwrap(),
-            },
-            IngressLimits::default(),
-        ))?;
-        let results = checked(ApplicationRouter::new(
-            ApplicationRouterBinding {
-                owner: owner_id,
-                generation: ApplicationRouterGeneration::new(1).unwrap(),
-            },
-            ApplicationRouterLimits::default(),
-        ))?;
-        let clients = checked(ClientRouter::new(
-            ClientRouterBinding {
-                owner: owner_id,
-                generation: ClientRouterGeneration::new(1).unwrap(),
-            },
-            ClientRouterLimits::default(),
-        ))?;
-        let reads = checked(ReadRequests::new(
-            ReadInvocationBinding {
-                owner: owner_id,
-                generation: ReadInvocationGeneration::new(1).unwrap(),
-            },
-            ReadInvocationLimits::default(),
-            checked(ReadRouter::new(
-                ReadRouterBinding {
-                    owner: owner_id,
-                    generation: ReadRouterGeneration::new(1).unwrap(),
-                },
-                ReadRouterLimits::default(),
-            ))?,
-        ))?;
+        let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock)?;
+        let (outbound, roster) = peer_io(local, first, last, &remote, now)?;
+        let Routers {
+            ingress,
+            results,
+            clients,
+            reads,
+        } = application_routers(owner_id, local)?;
         let factory = checked(NativeTransportFactory::new(
             checked(NativeWireCodec::new(Default::default()))?,
             Default::default(),
         ))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
-        let persistence = checked(NativeLogWorker::spawn(
-            log,
-            StorageWorkerGeneration::new(1).unwrap(),
-            WorkerLimits::default(),
-            wake.clone(),
-        ))?;
-        let owner = checked(EffectOwner::new(
-            timed,
-            persistence.binding(),
-            EffectOwnerLimits::default(),
-        ))?;
-        let worker = checked(NativeSnapshotWorker::spawn(
-            snapshots,
-            SnapshotWorkerBinding {
-                store: owner_id.store,
-                generation: SnapshotWorkerGeneration::new(1).unwrap(),
-            },
-            SnapshotWorkLimits::default(),
-            wake.clone(),
-        ))?;
-        let router = checked(SnapshotRouter::new(
-            owner.identity(),
-            worker.binding(),
-            SnapshotRouterLimits::default(),
-        ))?;
-        let pins = remote
-            .iter()
-            .map(|(p, s)| {
-                (
-                    *p,
-                    TlsPeer {
-                        identity: PeerIdentity {
-                            node: *p,
-                            store: *s,
-                        },
-                        certificate: cert(p.get()).to_vec(),
-                        server_name: format!("node{}.voteboat.test", p.get()),
-                    },
-                )
-            })
-            .collect::<BTreeMap<_, _>>();
-        let config = NativeConnectConfig {
-            local,
-            limits: ConnectLimits::default(),
-            session: SessionLimits::default(),
-        };
-        let connector = match protocol {
-            NativePeerProtocol::TcpTls => {
-                let dialer = checked(NativeTcpDialer::spawn(
-                    local,
-                    remote.clone(),
-                    DialLimits::default(),
-                    wake,
-                ))?;
-                NativeServiceConnector::Tcp(Box::new(checked(NativePeerConnector::new(
-                    config,
-                    tls(n),
-                    pins,
-                    dialer,
-                    Some(TcpListener::bind(addresses[&n])?),
-                    now,
-                ))?))
-            }
-            #[cfg(feature = "quic")]
-            NativePeerProtocol::Quic => NativeServiceConnector::Quic(Box::new(checked(
-                voteboat::native::quic_connect::NativeQuicConnector::new(
-                    config,
-                    tls(n),
-                    pins.into_iter()
-                        .map(|(p, pin)| (p, (addresses[&p.get()], pin)))
-                        .collect(),
-                    UdpSocket::bind(addresses[&n])?,
-                    now,
-                ),
-            )?)),
-        };
+        let Workers {
+            owner,
+            persistence,
+            snapshots: snapshot_workers,
+        } = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
+        let connector = connector(n, local, &remote, addresses, protocol, wake, now)?;
         let parts = NodeParts {
             local: NodeLocalParts {
                 owner,
@@ -342,7 +420,7 @@ pub(super) fn open(
                 clients,
                 reads,
                 outbound,
-                snapshots: Some(NodeSnapshots { router, worker }),
+                snapshots: Some(snapshot_workers),
             },
             peers: Some(PeerParts {
                 admission_routes: None,
@@ -365,13 +443,86 @@ pub(super) fn open(
                     .collect(),
             }),
         };
-        // Failed runs are invalid and retain their directory; only successful
-        // runs advertise workers_joined after the explicit close/reopen gates.
-        replicas.push(
-            Node::from_parts(parts, NodeLimits::default(), now)
-                .map_err(|e| format!("node assembly failed: {:?}", e.reason))?,
-        );
-        traces.push(trace);
+        // Failed construction retains its directory; successful runs join workers explicitly.
+        let replica = Node::from_parts(parts, NodeLimits::default(), now)
+            .map_err(|e| format!("node assembly failed: {:?}", e.reason))?;
+        Ok((replica, trace))
     }
-    Ok((replicas, traces))
 }
+
+struct Workers {
+    owner: EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>,
+    persistence: NativeLogWorker<SharedLog>,
+    snapshots: NodeSnapshots<NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>>,
+}
+fn spawn_workers(
+    log: SharedLog,
+    timed: TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+    snapshots: BTreeMap<GroupIdentity, NativeSnapshotStore<FileSnapshotIo>>,
+    owner_id: RuntimeOwner,
+    wake: Arc<dyn WorkerWake>,
+) -> Result<Workers, Failure> {
+    let persistence = checked(NativeLogWorker::spawn(
+        log,
+        StorageWorkerGeneration::new(1).unwrap(),
+        WorkerLimits::default(),
+        wake.clone(),
+    ))?;
+    let owner = checked(EffectOwner::new(
+        timed,
+        persistence.binding(),
+        EffectOwnerLimits::default(),
+    ))?;
+    let worker = checked(NativeSnapshotWorker::spawn(
+        snapshots,
+        SnapshotWorkerBinding {
+            store: owner_id.store,
+            generation: SnapshotWorkerGeneration::new(1).unwrap(),
+        },
+        SnapshotWorkLimits::default(),
+        wake.clone(),
+    ))?;
+    let router = checked(SnapshotRouter::new(
+        owner.identity(),
+        worker.binding(),
+        SnapshotRouterLimits::default(),
+    ))?;
+    Ok(Workers {
+        owner,
+        persistence,
+        snapshots: NodeSnapshots { router, worker },
+    })
+}
+
+fn peer_io(
+    local: LocalIdentity,
+    first: u64,
+    last: u64,
+    remote: &BTreeMap<NodeId, StoreIdentity>,
+    now: MonoTime,
+) -> Result<(NativeOutbound, BenchmarkRoster), Failure> {
+    let outbound = checked(NativeOutbound::new(
+        OutboundBinding {
+            node: local.node,
+            store: local.store,
+            generation: OutboundGeneration::new(1).unwrap(),
+        },
+        OutboundLimits::default(),
+    ))?;
+    let roster = checked(PeerRoster::new(
+        PeerRosterConfig {
+            local,
+            outbound: outbound.binding(),
+            first_generation: SecureSessionGeneration::new(first).ok_or("session exhausted")?,
+            last_generation: SecureSessionGeneration::new(last).ok_or("session exhausted")?,
+            wire_version: 1,
+            limits: PeerRosterLimits::default(),
+            transport_limits: TransportLimits::default(),
+        },
+        remote.clone(),
+        now,
+    ))?;
+    Ok((outbound, roster))
+}
+
+type BenchmarkRoster = PeerRoster<NativePeerTransport<Box<dyn SecureSession>, NativeWireCodec>>;

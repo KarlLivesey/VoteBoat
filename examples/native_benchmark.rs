@@ -408,48 +408,14 @@ fn workload<L: LogStore + Send + 'static>(
             *group_pending.entry(group).or_default() += 1;
             max_inflight = max_inflight.max(pending.len());
         }
-        for (replica, n) in ns.iter_mut().enumerate() {
-            while let Some(output) = n.poll_client() {
-                let completed = start.elapsed().as_nanos();
-                let ticket = output.ticket();
-                let (original, submitted) = pending
-                    .remove(&(replica, ticket.sequence))
-                    .ok_or("untracked receipt")?;
-                if ticket != original {
-                    return Err("ticket identity mismatch".into());
-                }
-                *group_pending
-                    .get_mut(&ticket.group)
-                    .ok_or("untracked group")? -= 1;
-                let receipt = match checked(n.complete_client(output).map_err(|e| e.reason))? {
-                    ClientOutcome::Applied { receipt, .. } => receipt,
-                    other => {
-                        return Err(format!(
-                            "operation {}: non-applied outcome invalidates measurement: {other:?}",
-                            ticket.operation.get()
-                        )
-                        .into())
-                    }
-                };
-                let CounterOutcome::Value(value) = receipt.outcome else {
-                    return Err("non-value receipt".into());
-                };
-                if receipt.operation != ticket.operation || receipt.duplicate {
-                    return Err("invalid useful-write receipt".into());
-                }
-                if value != ((receipt.operation.get() - 1) / groups as u128 + 1) as i64 {
-                    return Err("receipt disagrees with round-robin group history".into());
-                }
-                samples.push(Sample {
-                    group: ticket.group,
-                    operation: receipt.operation.get(),
-                    submitted_ns: submitted,
-                    completed_ns: completed,
-                    index: receipt.index,
-                    value,
-                });
-            }
-        }
+        collect_workload_receipts(
+            ns,
+            start,
+            groups,
+            &mut pending,
+            &mut group_pending,
+            &mut samples,
+        )?;
         Ok(samples.len() == count)
     });
     if let Err(error) = result {
@@ -805,22 +771,7 @@ fn run<L: LogStore + Send + 'static>(
     };
     let warmup_last = boundaries(warmup.samples.iter().map(|s| (s.group, s.index)));
     verify(&mut replicas, clock, WARMUP, groups, &warmup_last)?;
-    let placement = (1..=groups)
-        .map(|g| {
-            let group = group_id(g);
-            Ok(format!(
-                "{g}:{}",
-                replicas[leader(&replicas, group)?]
-                    .local()
-                    .owner
-                    .core(group)
-                    .unwrap()
-                    .local_node()
-                    .get()
-            ))
-        })
-        .collect::<Result<Vec<_>, Failure>>()?
-        .join(",");
+    let placement = leader_placement(&replicas, groups)?;
     eprintln!("phase=measurement operations={count} groups={groups} leaders={placement}");
     observe::capture(&mut storage, "before_measurement", &traces);
     let measured = match workload(
@@ -856,8 +807,95 @@ fn run<L: LogStore + Send + 'static>(
     observe::capture(&mut storage, "after_create_join", &traces);
     eprintln!("phase=recovery-verification");
     let (mut replicas, recovered_traces) = open_cluster(NativeOpenMode::Recover)?;
-    campaign(&mut replicas, clock, groups)?;
-    verify(&mut replicas, clock, capacity, groups, &last)?;
+    let recovery_retries = verify_recovered_workload(
+        &mut replicas,
+        clock,
+        groups,
+        &last,
+        &warmup,
+        &measured,
+        capacity,
+    )?;
+    close(replicas, clock)?;
+    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
+    if shared {
+        observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
+    } else if !traces.is_empty() {
+        observe::write_csv(&mut exclusive(&root.join("journal.csv"))?, &storage)?;
+    }
+    report_run(
+        &config,
+        &placement,
+        &measured,
+        recovery_retries,
+        !traces.is_empty(),
+    )
+}
+
+fn collect_workload_receipts<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    start: Instant,
+    groups: usize,
+    pending: &mut BTreeMap<(usize, u64), (ClientTicket, u128)>,
+    group_pending: &mut BTreeMap<GroupIdentity, usize>,
+    samples: &mut Vec<Sample>,
+) -> Result<(), Failure> {
+    for (replica, n) in replicas.iter_mut().enumerate() {
+        while let Some(output) = n.poll_client() {
+            let completed = start.elapsed().as_nanos();
+            let ticket = output.ticket();
+            let (original, submitted) = pending
+                .remove(&(replica, ticket.sequence))
+                .ok_or("untracked receipt")?;
+            if ticket != original {
+                return Err("ticket identity mismatch".into());
+            }
+            *group_pending
+                .get_mut(&ticket.group)
+                .ok_or("untracked group")? -= 1;
+            let receipt = match checked(n.complete_client(output).map_err(|e| e.reason))? {
+                ClientOutcome::Applied { receipt, .. } => receipt,
+                other => {
+                    return Err(format!(
+                        "operation {}: non-applied outcome invalidates measurement: {other:?}",
+                        ticket.operation.get()
+                    )
+                    .into())
+                }
+            };
+            let CounterOutcome::Value(value) = receipt.outcome else {
+                return Err("non-value receipt".into());
+            };
+            if receipt.operation != ticket.operation || receipt.duplicate {
+                return Err("invalid useful-write receipt".into());
+            }
+            if value != ((receipt.operation.get() - 1) / groups as u128 + 1) as i64 {
+                return Err("receipt disagrees with round-robin group history".into());
+            }
+            samples.push(Sample {
+                group: ticket.group,
+                operation: receipt.operation.get(),
+                submitted_ns: submitted,
+                completed_ns: completed,
+                index: receipt.index,
+                value,
+            });
+        }
+    }
+    Ok(())
+}
+
+fn verify_recovered_workload<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    groups: usize,
+    last: &BTreeMap<GroupIdentity, u64>,
+    warmup: &Measurement,
+    measured: &Measurement,
+    capacity: usize,
+) -> Result<usize, Failure> {
+    campaign(replicas, clock, groups)?;
+    verify(replicas, clock, capacity, groups, last)?;
     let first_value = warmup
         .samples
         .iter()
@@ -870,22 +908,35 @@ fn run<L: LogStore + Send + 'static>(
         .find(|s| s.operation == capacity as u128)
         .unwrap()
         .value;
-    let recovery_retries = retry(&mut replicas, clock, 1, first_value, groups)?
-        + retry(&mut replicas, clock, capacity, last_value, groups)?;
+    let recovery_retries = retry(replicas, clock, 1, first_value, groups)?
+        + retry(replicas, clock, capacity, last_value, groups)?;
     let retry_index = boundaries(replicas.iter().flat_map(|n| {
         n.local()
             .applications
             .iter()
             .map(|(g, a)| (*g, a.applied_index()))
     }));
-    verify(&mut replicas, clock, capacity, groups, &retry_index)?;
-    close(replicas, clock)?;
-    observe::capture(&mut storage, "after_recover_join", &recovered_traces);
-    if shared {
-        observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
-    } else if !traces.is_empty() {
-        observe::write_csv(&mut exclusive(&root.join("journal.csv"))?, &storage)?;
-    }
+    verify(replicas, clock, capacity, groups, &retry_index)?;
+    Ok(recovery_retries)
+}
+
+fn report_run(
+    config: &RunConfig<'_>,
+    placement: &str,
+    measured: &Measurement,
+    recovery_retries: usize,
+    journal: bool,
+) -> Result<(), Failure> {
+    let RunConfig {
+        root,
+        protocol,
+        count,
+        window,
+        groups,
+        shared,
+        ..
+    } = *config;
+    let capacity = count + WARMUP;
     let mut latency = measured
         .samples
         .iter()
@@ -894,7 +945,7 @@ fn run<L: LogStore + Send + 'static>(
     latency.sort_unstable();
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
     let election_ms = if shared { 10000 } else { 1000 };
-    let diagnostic = if !shared && !traces.is_empty() {
+    let diagnostic = if !shared && journal {
         " journal_timings=true"
     } else {
         ""
@@ -906,4 +957,26 @@ fn run<L: LogStore + Send + 'static>(
     output.sync_all()?;
     print!("{summary}");
     Ok(())
+}
+
+fn leader_placement<L: LogStore + Send + 'static>(
+    replicas: &[Replica<L>],
+    groups: usize,
+) -> Result<String, Failure> {
+    Ok((1..=groups)
+        .map(|g| {
+            let group = group_id(g);
+            Ok(format!(
+                "{g}:{}",
+                replicas[leader(replicas, group)?]
+                    .local()
+                    .owner
+                    .core(group)
+                    .unwrap()
+                    .local_node()
+                    .get()
+            ))
+        })
+        .collect::<Result<Vec<_>, Failure>>()?
+        .join(","))
 }
