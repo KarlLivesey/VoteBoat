@@ -94,7 +94,8 @@ owner and TCP/QUIC service regressions are recorded in validation/REPORT.md.
 
 This is peer-address discovery, not complete C17. Remote manifest fetching was
 added184, command endpoint integration188 and a metadata authority executable189.
-Live endpoint changes without restart and broader refresh scheduling remain open. Slice172 below adds a bounded external endpoint protocol. Real selected discovery connections include
+Slice209e adds versioned live command-endpoint updates; native startup integration
+and broader refresh composition remain open. Slice172 below adds a bounded external endpoint protocol. Real selected discovery connections include
 TCP/TLS and QUIC. No macOS/separate-host, arbitrary-fault or performance claim follows.
 
 ## Explicit QUIC dial refresh
@@ -260,7 +261,8 @@ finish both request kinds before parts can be recovered. An already determined
 local outcome stays retained if the underlying connector poll fails. Source
 timeouts, malformed replies or unavailable endpoints remain resolver outcomes,
 so a source outage cannot fence unrelated connected peers or live cached hints.
-The host owns source-session provisioning/replacement and readiness wakes.
+The host owns initial source-session provisioning and readiness wakes. The
+reconnecting wrapper below can own subsequent source-session replacement.
 After selecting driven mode, it must not independently consume resolver progress.
 
 Slice209b checks downstream host budgets, exact request/terminal ownership,
@@ -337,6 +339,40 @@ replayed positive response. Explicit source-session replacement retains the
 generation floor and permits fresh unchanged-endpoint renewal. TTL still starts
 at local request submission. These checks cover persistent client instances,
 not persistent cache files or automatic progress inside a type-erased Node.
+
+### Reconnecting source inside an owning Node
+
+Wrap a provisioned `NativeRemotePeerDiscovery` in
+`ReconnectingPeerDiscovery::new(remote, source_connector, reconnect, now)`, then
+pass that resolver to `DiscoveryConnector::new_driven(data_connector, resolver,
+now)`. Select the resulting connector in the existing `PeerParts` assembly.
+The source connector is dedicated to the configured discovery peer; the data
+connector independently authenticates every peer selected by a hint. Initial
+source authentication remains explicit host work.
+
+`SourceReconnectConfig` supplies a numeric source endpoint, bounded retry delay
+and a reserved inclusive connection-generation range. Reserve generations above
+the initial source session, without reusing them in the same local store session.
+Exhaustion stops reconnecting. Construction returns both original owners on
+refusal. Polling the Node drives source repair through the existing bounded
+discovery visits; no independent client-side poller is required or permitted.
+
+After source failure, the wrapper releases the failed session before dialing so
+QUIC can release its per-peer socket lease. It retains cached hints and generation
+floors, verifies the replacement's peer, local store session, wire version and
+connection generation, and preserves accepted request ownership through close.
+Restart reconstructs the wrapper and its volatile cache from host input; it does
+not persist floors or derive membership from discovery. Shutdown drains Node
+work before reclaiming the resolver and joining its dedicated native dial worker.
+
+Slice209c exercises host, TCP/TLS and QUIC source reconnection and refusal cases.
+Slice209f composes the reconnecting resolver with an owning three-node TCP/TLS
+service: the original source closes, a healthy data peer sustains a committed
+write, and Node polling repairs the source and missing data connection. Original
+operation receipts survive this repair and a full file reopen. A second history
+drains pending discovery with the source offline. These selected histories do
+not establish combined multi-authority migration, native startup provisioning,
+or macOS/separate-host acceptance.
 
 ## Remote manifest provider (slice184)
 

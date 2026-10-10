@@ -127,7 +127,9 @@ including native Node reconnect/reopen and QUIC connection evidence. Completed20
 adds connector-driven source-session reconnection with host/TCP/QUIC checks.
 Completed209d covers cold child WAL/checkpoint recovery with metadata offline.
 Completed209e adds versioned counter command-endpoint updates with explicit
-volatile/restart semantics. Current209 continues native peer-source provisioning and combined long-lived
+volatile/restart semantics. Completed209f composes source-session repair with
+the owning TCP/TLS Node, healthy-quorum writes and original receipt recovery.
+Current209 continues native peer-source provisioning and combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -146,6 +148,55 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209f implemented — owning Node source repair
+
+The existing native discovery Node fixture now uses ReconnectingPeerDiscovery
+with a dedicated native source connector. Each source has a separately owned
+acceptor and a bounded generation range. A new history closes the original
+authenticated source, expires its hints and disconnects one data peer. While
+source acceptance is paused, the unaffected peer sustains an acknowledged
+committed write. Resuming source polling accepts a later authenticated session;
+only Node::poll drives the client and establishes a later data-peer binding.
+The original receipt for operation1 remains7 when current state is10, and full
+file reopen retains both original operations before a new write reaches15.
+
+The previous Node history still covers lease renewal, data reconnect, offline
+cached operation and draining a pending discovery request. Shutdown now also
+drains the dedicated source connector/acceptor and joins their native workers.
+This is test composition over existing APIs; no production behavior, persistent
+format, timer threshold or contract bound changed. The first compile diagnostic
+was a missing SecureSession trait import in the new fixture, now corrected.
+
+Both owning-Node histories pass under all features and the default TCP build;
+the42 surrounding remote-discovery/QUIC connector tests pass. Formatting and
+all four strict Clippy profiles pass with zero diagnostics. Raw results and
+the original diagnostic are retained in validation/baseline/slice209f.
+Macro review: selected Node/source integration is covered. Native startup
+provisioning and combined endpoint/recursive multi-authority movement remain
+within209; provider obligations and reproduced platform failures remain the
+next two deliverables. This TCP/TLS Node history does not claim equivalent
+whole-Node QUIC or macOS/separate-host evidence, and full P0–P7 remains active.
+
+### Slice209f schema plan — owning Node repairs its discovery source
+
+Compose the existing ReconnectingPeerDiscovery with the real owning native
+Node fixture. Each node owns its data connector and a separate pinned discovery
+connector. The fixture owns the corresponding source acceptor and responder;
+all advertised peer identities and data endpoints remain explicit. Source
+connection generations use a reserved bounded range above the initial session.
+
+Close and drop the original responder, force data-peer reconnection after hint
+expiry, and drive source acceptance externally while only Node::poll advances
+the client's discovery/reconnect state. Preserve the same Node, cache and
+application objects through the outage. Assert a later authenticated source
+session, renewed peer binding, original operation receipts and new writes.
+Close while source repair is pending; Node drain must consume owned work, then
+every data/source dial worker and storage worker must join. Existing full-store
+reopen checks remain in the same fixture. This advances209/P0/P5 integration;
+native startup provisioning and recursive movement remain separate. No new
+production API, persistence format or automatic authority is needed for this
+composition check.
 
 ### Slice209e implemented — versioned counter endpoint updates
 

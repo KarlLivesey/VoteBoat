@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209f composes the existing source reconnect wrapper with an owning native
+TCP/TLS Node. The original source closes, one data peer disconnects, an unaffected
+peer sustains a committed write, and Node polling repairs source and data sessions.
+Original receipt values and operation deduplication survive repair and file
+reopen; shutdown drains both dedicated connectors and joins workers. Both Node
+histories and42 surrounding protocol tests pass. Native startup provisioning,
+combined multi-authority movement, whole-Node QUIC and platform acceptance remain
+open; existing standalone QUIC source/connector evidence keeps its narrower scope.
+
 Slice209e adds explicit-generation counter command-endpoint sources and
 authenticated address compare-and-set updates. The bounded shared snapshot
 preserves fixed identities/TLS names, refuses invalid/stale/conflicting updates,

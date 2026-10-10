@@ -20,9 +20,13 @@ use voteboat::{
     native::{connect::NativePeerConnector, remote_discovery::*},
     secure::{PeerIdentity, SessionPollBudget},
 };
-type Remote = NativeRemotePeerDiscovery<Session>;
+#[path = "driven_discovery/source.rs"]
+mod source;
+use source::SourceServer;
+type Remote = ReconnectingPeerDiscovery<NativePeerConnector>;
 type Boat = NativeNode<Counter, DiscoveryConnector<NativePeerConnector, Remote>>;
 type Responder = NativeDiscoveryResponder<Session, Source>;
+#[derive(Clone)]
 struct Source {
     hints: BTreeMap<NodeId, PeerEndpointHint>,
     calls: Rc<Cell<usize>>,
@@ -49,7 +53,7 @@ impl PeerDiscovery for Source {
 struct Cluster {
     now: MonoTime,
     nodes: Vec<Boat>,
-    sources: Vec<Responder>,
+    sources: Vec<SourceServer>,
     calls: Vec<Rc<Cell<usize>>>,
 }
 impl Cluster {
@@ -106,37 +110,17 @@ impl Cluster {
         };
         for (i, (n, p)) in fixtures.into_iter().zip(networks).enumerate() {
             let source = identities[(i + 1) % identities.len()];
-            let (client, server) = support::tls::pair(identities[i], source, 1);
             let calls = Rc::new(Cell::new(0));
-            cluster.sources.push(
-                NativeDiscoveryResponder::new(
-                    server,
-                    PeerIdentity {
-                        node: identities[i].node,
-                        store: identities[i].store.identity,
-                    },
-                    Source {
-                        hints: hints.clone(),
-                        calls: calls.clone(),
-                    },
-                    RemoteDiscoveryConfig::default(),
-                    MonoTime(0),
-                )
-                .ok()
-                .unwrap(),
-            );
-            cluster.calls.push(calls);
-            let remote = NativeRemotePeerDiscovery::new(
-                client,
-                PeerIdentity {
-                    node: source.node,
-                    store: source.store.identity,
+            let (remote, server) = SourceServer::new(
+                identities[i],
+                source,
+                Source {
+                    hints: hints.clone(),
+                    calls: calls.clone(),
                 },
-                RemoteDiscoveryConfig::default(),
-                MonoTime(0),
-            )
-            .ok()
-            .unwrap();
+            );
+            cluster.sources.push(server);
+            cluster.calls.push(calls);
             cluster.nodes.push(discovered_node(n, p, remote));
         }
         cluster
@@ -146,7 +130,7 @@ impl Cluster {
         let now = self.now;
         if source_online {
             for source in &mut self.sources {
-                source.poll(now, SessionPollBudget::default()).unwrap();
+                source.poll(now);
             }
         }
         for n in &mut self.nodes {
@@ -193,7 +177,13 @@ impl Cluster {
             std::thread::park_timeout(Duration::from_millis(1));
         }
     }
-    fn write(&mut self, operation: u128, delta: i64, expected: i64, source_online: bool) {
+    fn write(
+        &mut self,
+        operation: u128,
+        delta: i64,
+        expected: i64,
+        source_online: bool,
+    ) -> CounterReceipt {
         let ticket = self.nodes[0]
             .propose(ClientRequest {
                 group: group(1),
@@ -201,36 +191,39 @@ impl Cluster {
                 bytes: delta.to_le_bytes().to_vec(),
             })
             .unwrap();
-        let mut completed = false;
+        let mut completed = None;
         self.until(source_online, |c| {
             if let Some(reply) = c.nodes[0].poll_client() {
                 assert_eq!(reply.ticket(), ticket);
                 let outcome = c.nodes[0].complete_client(reply).unwrap();
-                assert!(
-                    matches!(outcome, ClientOutcome::Applied { .. }),
-                    "operation {operation}: {outcome:?}"
-                );
-                completed = true;
+                let ClientOutcome::Applied { receipt, .. } = outcome else {
+                    panic!("operation {operation}: {outcome:?}");
+                };
+                assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+                completed = Some(receipt);
             }
-            completed
+            completed.is_some()
                 && c.nodes.iter().all(|n| {
                     let app = &n.local().applications[&group(1)];
                     app.read_applied(app.applied_index()) == Ok(expected)
                 })
         });
+        completed.unwrap()
     }
     fn close(mut self) {
         for n in &mut self.nodes {
             n.begin_shutdown();
         }
         self.until(false, |c| c.nodes.iter().all(|n| n.is_drained()));
-        for source in &mut self.sources {
-            source.close();
+        for source in self.sources {
+            source.finish(self.now);
         }
         for n in self.nodes {
             let mut p = n.into_parts().unwrap_or_else(|_| panic!("not drained"));
             let (connector, remote) = p.peers.take().unwrap().connector.into_parts().ok().unwrap();
-            drop(remote.into_session().ok().unwrap());
+            let (remote, source_connector) = remote.into_parts().ok().unwrap();
+            drop(remote.into_optional_session().ok().unwrap());
+            source::finish_connector(source_connector);
             let mut dialer = connector.into_dialer().ok().unwrap();
             let deadline = Instant::now() + Duration::from_secs(5);
             while !dialer.try_finish().unwrap() {
@@ -370,4 +363,87 @@ fn discovered_node(
         MonoTime(0),
     )
     .unwrap_or_else(|r| panic!("{:?}", r.reason))
+}
+
+#[test]
+fn owning_node_repairs_closed_discovery_source_without_stopping_healthy_quorum() {
+    let root =
+        std::env::temp_dir().join(format!("voteboat-reconnecting-node-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    let mut cluster = Cluster::open(&root, false);
+    cluster.nodes[0]
+        .control(group(1), NodeControl::Campaign)
+        .unwrap();
+    cluster.until(true, |c| {
+        c.nodes[0].local().owner.core(group(1)).unwrap().role() == Role::Leader
+    });
+    cluster.write(1, 7, 7, true);
+    let old = cluster.nodes[0]
+        .peers()
+        .unwrap()
+        .roster()
+        .binding(node(2))
+        .unwrap();
+    let calls = cluster.calls[0].get();
+    cluster.sources[0].disconnect();
+    cluster.now = MonoTime(cluster.now.0 + 100);
+    cluster.nodes[0].disconnect(node(2), cluster.now).unwrap();
+    cluster.nodes[1].disconnect(node(1), cluster.now).unwrap();
+    cluster.until(false, |c| {
+        c.nodes[0].peers().unwrap().connector_usage().requests > 0
+    });
+    assert_eq!(cluster.calls[0].get(), calls);
+    // The unaffected peer sustains a real committed write while source repair waits.
+    let ticket = cluster.nodes[0]
+        .propose(ClientRequest {
+            group: group(1),
+            operation: OperationId::new(2).unwrap(),
+            bytes: 3_i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    let mut applied = false;
+    cluster.until(false, |c| {
+        if let Some(reply) = c.nodes[0].poll_client() {
+            assert_eq!(reply.ticket(), ticket);
+            assert!(matches!(
+                c.nodes[0].complete_client(reply).unwrap(),
+                ClientOutcome::Applied { .. }
+            ));
+            applied = true;
+        }
+        applied
+            && [0, 2].into_iter().all(|i| {
+                let app = &c.nodes[i].local().applications[&group(1)];
+                app.read_applied(app.applied_index()) == Ok(10)
+            })
+    });
+    cluster.until(true, |c| {
+        c.sources[0].accepted_generation() > 1
+            && c.calls[0].get() > calls
+            && c.nodes[0]
+                .peers()
+                .unwrap()
+                .roster()
+                .binding(node(2))
+                .is_some_and(|binding| binding.generation > old.generation)
+    });
+    cluster.write(2, 3, 10, true);
+    let receipt = cluster.write(1, 7, 10, true);
+    assert!(receipt.duplicate);
+    assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+    cluster.close();
+    let mut recovered = Cluster::open(&root, true);
+    recovered.nodes[0]
+        .control(group(1), NodeControl::Campaign)
+        .unwrap();
+    recovered.until(true, |c| {
+        c.nodes[0].local().owner.core(group(1)).unwrap().role() == Role::Leader
+    });
+    let receipt = recovered.write(1, 7, 10, true);
+    assert!(receipt.duplicate);
+    assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+    recovered.write(2, 3, 10, true);
+    recovered.write(3, 5, 15, true);
+    recovered.close();
+    std::fs::remove_dir_all(root).unwrap();
 }

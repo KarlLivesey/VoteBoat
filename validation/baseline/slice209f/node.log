@@ -1,0 +1,20 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0599]: no method named `close` found for struct `voteboat::native::tls::NativeTlsSession<I>` in the current scope
+   --> tests/native/driven_discovery/source.rs:128:29
+    |
+128 |                     session.close();
+    |                             ^^^^^ method not found in `voteboat::native::tls::NativeTlsSession<TcpStream>`
+    |
+   ::: src/secure.rs:185:8
+    |
+185 |     fn close(&mut self);
+    |        ----- the method is available for `voteboat::native::tls::NativeTlsSession<TcpStream>` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `SecureSession` which provides `close` is implemented but not in scope; perhaps you want to import it
+    |
+ 15 + use voteboat::secure::SecureSession;
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "effect_owner") due to 1 previous error

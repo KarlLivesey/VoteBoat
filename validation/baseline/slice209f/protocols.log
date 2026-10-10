@@ -1,0 +1,55 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-95ac16d5a239c80e)
+
+running 15 tests
+test credential_refresh::native::native_replace_is_monotonic_returns_material_and_close_is_scoped ... ok
+test failed_construction_returns_socket_without_starting_protocol_work ... ok
+test cancellation_and_expiry_keep_exact_terminal_slots_and_reject_stale_or_wrong_requests ... ok
+test discovered::discovered_quic_dial_validates_endpoint_and_cannot_replace_peer_pin ... ok
+test discovered::downstream_hint_provider_selects_actual_authenticated_quic_endpoint ... ok
+test credential_refresh::native::native_transport_returns_exact_accepted_batch_as_failed_after_revocation ... ok
+test discovered::refreshed_quic_hint_selects_new_address_and_retained_peer_lease_bounds_reconnect ... ok
+test one_socket_per_node_establishes_multiple_peers_and_close_preserves_transferred_sessions ... ok
+test remote_discovery::quic_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test remote_discovery::driven::quic_connector_poll_drives_remote_lookup_and_authenticates_target ... ok
+test remote_discovery::quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup ... ok
+test retired_leases_release_socket_routes_for_fresh_generations ... ok
+test credential_refresh::quic_rotation_revokes_old_io_and_reconnect_preserves_identity ... ok
+test shared_quic_connector_preserves_selected_versions_and_rejects_mismatches ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-ef7c79810918c6ff)
+
+running 27 tests
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::reconnect::constructor_rejection_preserves_pending_owners_and_monotonic_time ... ok
+test host::reconnect::close_drains_accepted_ticket_without_publishing_late_success ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::reconnect::invalid_time_and_zero_budget_do_not_submit_or_change_pending_work ... ok
+test host::reconnect::deadline_and_poll_error_retain_original_ticket_until_actual_receipt ... ok
+test host::reconnect::constructor_returns_original_owners_for_invalid_configuration_and_binding ... ok
+test host::reconnect::malformed_rejection_is_not_retried ... ok
+test host::reconnect::retry_consumes_only_reserved_generations_and_stops_at_exhaustion ... ok
+test host::reconnect::wrong_completion_ticket_or_session_binding_fences_the_source ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::replayed_positive_cannot_renew_an_invalidated_lease ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test short_io_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test host::reconnect::owning_discovery_connector_reconnects_source_without_manual_resolver_polling ... ok
+test tcp_tls_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test tcp_tls_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test tcp_reconnect::tcp_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
