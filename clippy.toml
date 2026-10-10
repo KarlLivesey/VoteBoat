@@ -1,5 +1,5 @@
-# Keep complexity thresholds explicit. Standard Clippy lints are required by CI;
-# function length and cognitive complexity are also reported as a separate audit.
+# Keep maintainability thresholds explicit. Local and CI Clippy checks enforce
+# these limits; Cargo.toml denies function length and cognitive complexity.
 cognitive-complexity-threshold = 25
 too-many-lines-threshold = 100
 too-many-arguments-threshold = 7

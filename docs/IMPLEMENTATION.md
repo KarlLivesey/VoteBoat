@@ -169,9 +169,8 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    on the existing parser, ownership, recovery and provider contracts. Check
    unchanged formats/refusal/atomicity using each affected subsystem's tests;
    completion requires strict all-target all-feature/core-only Clippy with no
-   warnings. No suppressed baseline or increased thresholds. The first directory
-   cleanup removes its seven diagnostics; other production and fixture findings
-   remain explicit work. This priority does not redefine a red lint job as green.
+   warnings. No suppressed baseline or increased thresholds. Directory, routed/log and native cleanups have reduced production findings
+   from48 to25. Remaining core functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -13659,3 +13658,66 @@ is unchanged round-trip/malformed/version/budget tests, startup failure cleanup,
 and fewer strict diagnostics without new allowances. This continues the current
 maintainability deliverable supporting all macro milestones, before returning to
 the documented native metadata composition and public ingress deliverables.
+
+### Wire codec cleanup — schema plan
+
+Keep Message, all RPC tags (0–17), negotiated versions (1–7), and frame bytes
+unchanged. Private validation functions separate learner repair, readiness,
+authority and snapshot invariants. Encoder helpers separate snapshot/readiness
+payloads from RPC dispatch. A private decoded envelope carries the already-checked
+group/configuration/peer/session/context to decoder helpers; it is ephemeral and
+owns no buffers. Keep early traversal bounds, cursor order, allocation charging,
+semantic validation and trailing-byte rejection in their original order. Decode
+still publishes no message before all checks pass. Existing round-trip, hostile
+valid-checksum, truncation, version-gate and budget-symmetry cases are acceptance
+checks, followed by native transport/startup checks and strict lint. These helpers
+are needed for the current maintainability milestone, not new protocol features.
+
+### Startup cleanup — schema plan
+
+Separate recovered storage/core, runtime peer setup, and application routers into
+private owned records. Recovery still validates the original bootstrap, restores
+the selected application and chooses the same explicit receive modes. Runtime
+setup retains the session-derived generation interval, exact provisioned peers,
+timers and bounded queues. Storage workers stay under Cleanup immediately after
+spawn; final assembly still restores the application and every worker/connector
+on rejection. Preserve initialization order and the existing returned errors.
+Startup, enrollment/member startup, timer and late-constructor failure histories
+are acceptance checks; no new configuration or public provider contract.
+
+## Wire and startup lint cleanup — implemented evidence
+
+Separated RPC family validation, encoding and decoding. A private MessageEnvelope
+carries the checked header into decoding; public Message/Rpc types, tags,
+negotiated versions and persistent formats are unchanged. Snapshot/readiness and
+append helpers retain their existing field order, version checks and allocation
+budgets. Encoder preflight bounds still precede semantic traversal. The initial
+extraction hit an earlier guarded match arm; compilation detected the wrong
+selection, and the encoder was restored from HEAD and re-extracted only within
+its payload-dispatch match before validation.
+
+Startup now has private owned storage and runtime preparation records, separate
+application router construction and selected codec construction. Worker spawn,
+Cleanup registration, final assembly and recovery of rejected owned parts retain
+their original order. Connection direction is shared by active and provisioned
+routes. Also corrected the stale clippy.toml comment that described an audit;
+limits remain enforced by the existing Cargo deny-level lints.
+
+Final local checks (cargo +stable --locked --offline):150 all-feature tests pass
+across configuration_capacity, member_recovery, native_member_startup,
+replication_scope, startup, transport and wire. This includes the actual version
+5/6/7 repair codecs, hostile frames, checkpoint recovery, refusal and late worker
+cleanup. The native-only selection passes86 tests across the five applicable
+non-TLS targets. Formatting, whitespace and the88-contract inventory pass.
+Strict all-target/all-feature Clippy still fails:25 production plus9 inline-test
+diagnostics, with further integration fixture cleanup not yet fully enumerated.
+The wire and startup production findings are removed; no lint was suppressed or
+threshold increased. This is not a full-suite or clean-lint claim.
+
+Next bounded cleanup: split consensus event handling, append processing,
+snapshot installation and effect persistence by their existing state-transition
+responsibilities. Preserve validation order, cloned candidate publication,
+current-term/configuration checks and exact durability-ticket release. Check
+consensus/replication/membership/repair and fault/recovery suites after each
+coherent change. This remains mini item1 under all macro milestones; remaining
+native owner-family composition and public administration are still items2/3.

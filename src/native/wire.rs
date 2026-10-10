@@ -126,37 +126,7 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
             previous_index,
             previous_term,
             entries,
-        } => {
-            if version < 5
-                || m.context.origin != m.sender
-                || entries.is_empty()
-                || !matches!(&joint.payload, EntryPayload::Configuration(record)
-                    if matches!(&record.change, ConfigurationChange::Joint { id, .. } if *id == m.configuration))
-            {
-                return Err(WireError::InvalidMessage("learner repair scope/version"));
-            }
-            boundary(*previous_index, *previous_term, m.term)?;
-            if joint.index == 0 || joint.term == 0 || joint.term > m.term {
-                return Err(WireError::InvalidMessage("learner repair joint"));
-            }
-            let mut index = *previous_index;
-            let mut term = *previous_term;
-            for entry in entries {
-                index = index.checked_add(1).ok_or(WireError::TooLarge)?;
-                if entry.index != index
-                    || entry.index > joint.index
-                    || entry.term == 0
-                    || entry.term < term
-                    || entry.term > m.term
-                    || (matches!(entry.payload, EntryPayload::Configuration(_))
-                        && entry != joint.as_ref())
-                    || (entry.index == joint.index && entry != joint.as_ref())
-                {
-                    return Err(WireError::InvalidMessage("learner repair range"));
-                }
-                term = entry.term;
-            }
-        }
+        } => validate_learner_repair(m, version, joint, previous_index, previous_term, entries)?,
         Rpc::LearnerRepaired {
             matching_index,
             matching_term,
@@ -168,28 +138,7 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
             boundary(*matching_index, *matching_term, m.term)?;
         }
         Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
-            let query = matches!(m.rpc, Rpc::LearnerReadinessRequest(_));
-            if version < 4
-                || r.group != m.group
-                || r.configuration != m.configuration
-                || r.context != m.context
-                || r.term != m.term
-                || r.leader != if query { m.from } else { m.to }
-                || r.learner.node != if query { m.to } else { m.from }
-                || (query && r.context.origin != m.sender)
-                || (!query
-                    && (r.learner.store != m.sender.identity || r.session != m.sender.session))
-                || r.index == 0
-                || r.index_term == 0
-                || r.requirements.application_schema == 0
-                || r.requirements.command_bytes == 0
-                || r.requirements.snapshot_bytes == 0
-            {
-                return Err(WireError::InvalidMessage(
-                    "readiness scope/version/capabilities",
-                ));
-            }
-            boundary(r.index, r.index_term, r.term)?;
+            validate_readiness(m, version, r)?
         }
         Rpc::AuthorityRequest {
             candidate,
@@ -199,33 +148,7 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
             candidate,
             configuration,
             ..
-        } => {
-            if version < 3
-                || candidate.node == m.from
-                || candidate.node == m.to
-                || *configuration <= m.configuration
-            {
-                return Err(WireError::InvalidMessage("authority scope/version"));
-            }
-            let request = matches!(m.rpc, Rpc::AuthorityRequest { .. });
-            if request && m.context.origin != m.sender {
-                return Err(WireError::InvalidMessage("authority context"));
-            }
-            if let Rpc::AuthorityReply {
-                committed_index,
-                committed_term,
-                granted,
-                ..
-            } = &m.rpc
-            {
-                if (*granted && (*committed_index == 0 || *committed_term == 0))
-                    || (!*granted && (*committed_index != 0 || *committed_term != 0))
-                {
-                    return Err(WireError::InvalidMessage("authority boundary"));
-                }
-                boundary(*committed_index, *committed_term, m.term)?;
-            }
-        }
+        } => validate_authority(m, version, candidate, configuration)?,
         Rpc::Vote {
             last_index,
             last_term,
@@ -256,38 +179,7 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         Rpc::Snapshot { snapshot }
         | Rpc::LearnerRepairSnapshot { snapshot }
         | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
-            if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) && version < 7 {
-                return Err(WireError::UnsupportedVersion(version));
-            }
-            if matches!(
-                m.rpc,
-                Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
-            ) && (version < 6
-                || snapshot.metadata.membership.is_none()
-                || m.context.origin != m.sender)
-            {
-                return Err(WireError::InvalidMessage("snapshot repair version/context"));
-            }
-            let meta = &snapshot.metadata;
-            if meta.bootstrap.group != m.group
-                || (version == 1 && meta.bootstrap.configuration != m.configuration)
-                || meta.validate().is_err()
-                || meta.index == 0
-                || meta.index == u64::MAX
-                || meta.term == 0
-                || meta.term > m.term
-                || meta.application_schema == 0
-                || snapshot.application.is_empty()
-                || !meta
-                    .bootstrap
-                    .voter_stores
-                    .keys()
-                    .eq(meta.bootstrap.policy.voters().iter())
-            {
-                return Err(WireError::InvalidMessage(
-                    "snapshot scope/boundary/membership",
-                ));
-            }
+            validate_snapshot(m, version, snapshot)?
         }
         Rpc::SnapshotAck { index } if *index == 0 => {
             return Err(WireError::InvalidMessage("snapshot ack boundary"))
@@ -300,6 +192,142 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         }
         _ => (),
     }
+    Ok(())
+}
+fn validate_learner_repair(
+    m: &Message,
+    version: u16,
+    joint: &LogEntry,
+    previous_index: &u64,
+    previous_term: &u64,
+    entries: &[LogEntry],
+) -> Result<(), WireError> {
+    if version < 5
+        || m.context.origin != m.sender
+        || entries.is_empty()
+        || !matches!(&joint.payload, EntryPayload::Configuration(record)
+                    if matches!(&record.change, ConfigurationChange::Joint { id, .. } if *id == m.configuration))
+    {
+        return Err(WireError::InvalidMessage("learner repair scope/version"));
+    }
+    boundary(*previous_index, *previous_term, m.term)?;
+    if joint.index == 0 || joint.term == 0 || joint.term > m.term {
+        return Err(WireError::InvalidMessage("learner repair joint"));
+    }
+    let mut index = *previous_index;
+    let mut term = *previous_term;
+    for entry in entries {
+        index = index.checked_add(1).ok_or(WireError::TooLarge)?;
+        if entry.index != index
+            || entry.index > joint.index
+            || entry.term == 0
+            || entry.term < term
+            || entry.term > m.term
+            || (matches!(entry.payload, EntryPayload::Configuration(_)) && entry != joint)
+            || (entry.index == joint.index && entry != joint)
+        {
+            return Err(WireError::InvalidMessage("learner repair range"));
+        }
+        term = entry.term;
+    }
+
+    Ok(())
+}
+fn validate_readiness(
+    m: &Message,
+    version: u16,
+    r: &LearnerReadinessRequest,
+) -> Result<(), WireError> {
+    let query = matches!(m.rpc, Rpc::LearnerReadinessRequest(_));
+    if version < 4
+        || r.group != m.group
+        || r.configuration != m.configuration
+        || r.context != m.context
+        || r.term != m.term
+        || r.leader != if query { m.from } else { m.to }
+        || r.learner.node != if query { m.to } else { m.from }
+        || (query && r.context.origin != m.sender)
+        || (!query && (r.learner.store != m.sender.identity || r.session != m.sender.session))
+        || r.index == 0
+        || r.index_term == 0
+        || r.requirements.application_schema == 0
+        || r.requirements.command_bytes == 0
+        || r.requirements.snapshot_bytes == 0
+    {
+        return Err(WireError::InvalidMessage(
+            "readiness scope/version/capabilities",
+        ));
+    }
+    boundary(r.index, r.index_term, r.term)?;
+
+    Ok(())
+}
+fn validate_authority(
+    m: &Message,
+    version: u16,
+    candidate: &crate::secure::PeerIdentity,
+    configuration: &ConfigurationId,
+) -> Result<(), WireError> {
+    if version < 3
+        || candidate.node == m.from
+        || candidate.node == m.to
+        || *configuration <= m.configuration
+    {
+        return Err(WireError::InvalidMessage("authority scope/version"));
+    }
+    let request = matches!(m.rpc, Rpc::AuthorityRequest { .. });
+    if request && m.context.origin != m.sender {
+        return Err(WireError::InvalidMessage("authority context"));
+    }
+    if let Rpc::AuthorityReply {
+        committed_index,
+        committed_term,
+        granted,
+        ..
+    } = &m.rpc
+    {
+        if (*granted && (*committed_index == 0 || *committed_term == 0))
+            || (!*granted && (*committed_index != 0 || *committed_term != 0))
+        {
+            return Err(WireError::InvalidMessage("authority boundary"));
+        }
+        boundary(*committed_index, *committed_term, m.term)?;
+    }
+
+    Ok(())
+}
+fn validate_snapshot(m: &Message, version: u16, snapshot: &Snapshot) -> Result<(), WireError> {
+    if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) && version < 7 {
+        return Err(WireError::UnsupportedVersion(version));
+    }
+    if matches!(
+        m.rpc,
+        Rpc::LearnerRepairSnapshot { .. } | Rpc::CommittedLearnerRepairSnapshot { .. }
+    ) && (version < 6 || snapshot.metadata.membership.is_none() || m.context.origin != m.sender)
+    {
+        return Err(WireError::InvalidMessage("snapshot repair version/context"));
+    }
+    let meta = &snapshot.metadata;
+    if meta.bootstrap.group != m.group
+        || (version == 1 && meta.bootstrap.configuration != m.configuration)
+        || meta.validate().is_err()
+        || meta.index == 0
+        || meta.index == u64::MAX
+        || meta.term == 0
+        || meta.term > m.term
+        || meta.application_schema == 0
+        || snapshot.application.is_empty()
+        || !meta
+            .bootstrap
+            .voter_stores
+            .keys()
+            .eq(meta.bootstrap.policy.voters().iter())
+    {
+        return Err(WireError::InvalidMessage(
+            "snapshot scope/boundary/membership",
+        ));
+    }
+
     Ok(())
 }
 struct Encoder<'a> {
@@ -540,6 +568,9 @@ impl<'a> Encoder<'a> {
         self.u64(m.term)?;
         self.binding(m.context.origin)?;
         self.u64(m.context.sequence)?;
+        self.rpc(m)
+    }
+    fn rpc(&mut self, m: &Message) -> Result<(), WireError> {
         match &m.rpc {
             Rpc::LearnerRepair {
                 joint,
@@ -570,28 +601,7 @@ impl<'a> Encoder<'a> {
                 self.u64(*matching_term)
             }
             Rpc::LearnerReadinessRequest(r) | Rpc::LearnerReadinessReply { request: r, .. } => {
-                self.budget.charge(size_of::<LearnerReadinessRequest>())?;
-                self.u8(if matches!(m.rpc, Rpc::LearnerReadinessRequest(_)) {
-                    12
-                } else {
-                    13
-                })?;
-                self.peer(r.learner)?;
-                self.u64(r.session.get())?;
-                self.u64(r.index)?;
-                self.u64(r.index_term)?;
-                self.u64(r.requirements.application_schema)?;
-                self.u64(
-                    u64::try_from(r.requirements.command_bytes).map_err(|_| WireError::TooLarge)?,
-                )?;
-                self.u64(
-                    u64::try_from(r.requirements.snapshot_bytes)
-                        .map_err(|_| WireError::TooLarge)?,
-                )?;
-                if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
-                    self.u8(u8::from(*ready))?;
-                }
-                Ok(())
+                self.readiness_rpc(m, r)
             }
             Rpc::Vote {
                 last_index,
@@ -610,21 +620,7 @@ impl<'a> Encoder<'a> {
                 previous_term,
                 entries,
                 leader_commit,
-            } => {
-                if entries.len() > self.limits.max_entries_per_message {
-                    return Err(WireError::TooLarge);
-                }
-                self.budget.array::<LogEntry>(entries.len())?;
-                self.u8(2)?;
-                self.u64(*previous_index)?;
-                self.u64(*previous_term)?;
-                self.u64(*leader_commit)?;
-                self.u32(entries.len() as u32)?;
-                for entry in entries {
-                    self.entry(entry)?;
-                }
-                Ok(())
-            }
+            } => self.append_rpc(*previous_index, *previous_term, entries, *leader_commit),
             Rpc::Appended {
                 success,
                 matching_index,
@@ -637,57 +633,7 @@ impl<'a> Encoder<'a> {
             Rpc::ReadAck => self.u8(5),
             Rpc::Snapshot { snapshot }
             | Rpc::LearnerRepairSnapshot { snapshot }
-            | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
-                if snapshot.application.len() > self.limits.max_snapshot_bytes {
-                    return Err(WireError::TooLarge);
-                }
-                self.budget.charge(size_of::<Snapshot>())?;
-                self.budget.charge(snapshot.application.len())?;
-                let meta = &snapshot.metadata;
-                if meta.membership.is_some() && self.version < 2 {
-                    return Err(WireError::InvalidMessage(
-                        "membership requires wire format 2",
-                    ));
-                }
-                let explicit_base =
-                    meta.membership.is_some() || meta.bootstrap.configuration != m.configuration;
-                self.u8(
-                    if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) {
-                        17
-                    } else if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
-                        16
-                    } else if explicit_base {
-                        9
-                    } else {
-                        6
-                    },
-                )?;
-                if explicit_base {
-                    self.u64(meta.bootstrap.configuration.get())?;
-                }
-                self.u64(meta.index)?;
-                self.u64(meta.term)?;
-                self.u64(meta.application_schema)?;
-                self.tree(meta.bootstrap.policy.tree(), 0, &mut 0, &mut 0)?;
-                self.budget
-                    .charge(meta.bootstrap.policy.voters().len() * 128)?;
-                self.budget
-                    .charge(meta.bootstrap.voter_stores.len() * 128)?;
-                self.u32(meta.bootstrap.voter_stores.len() as u32)?;
-                for (node, store) in &meta.bootstrap.voter_stores {
-                    self.u64(node.get())?;
-                    self.u128(store.id.get())?;
-                    self.u64(store.incarnation.get())?;
-                }
-                if explicit_base {
-                    self.u8(u8::from(meta.membership.is_some()))?;
-                    if let Some(membership) = &meta.membership {
-                        self.membership(membership)?;
-                    }
-                }
-                self.u32(snapshot.application.len() as u32)?;
-                self.put(&snapshot.application)
-            }
+            | Rpc::CommittedLearnerRepairSnapshot { snapshot } => self.snapshot_rpc(m, snapshot),
             Rpc::SnapshotAck { index } => {
                 self.u8(7)?;
                 self.u64(*index)
@@ -721,6 +667,97 @@ impl<'a> Encoder<'a> {
             }
         }
     }
+    fn append_rpc(
+        &mut self,
+        previous_index: u64,
+        previous_term: u64,
+        entries: &[LogEntry],
+        leader_commit: u64,
+    ) -> Result<(), WireError> {
+        if entries.len() > self.limits.max_entries_per_message {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.array::<LogEntry>(entries.len())?;
+        self.u8(2)?;
+        self.u64(previous_index)?;
+        self.u64(previous_term)?;
+        self.u64(leader_commit)?;
+        self.u32(entries.len() as u32)?;
+        for entry in entries {
+            self.entry(entry)?;
+        }
+        Ok(())
+    }
+    fn readiness_rpc(&mut self, m: &Message, r: &LearnerReadinessRequest) -> Result<(), WireError> {
+        self.budget.charge(size_of::<LearnerReadinessRequest>())?;
+        self.u8(if matches!(m.rpc, Rpc::LearnerReadinessRequest(_)) {
+            12
+        } else {
+            13
+        })?;
+        self.peer(r.learner)?;
+        self.u64(r.session.get())?;
+        self.u64(r.index)?;
+        self.u64(r.index_term)?;
+        self.u64(r.requirements.application_schema)?;
+        self.u64(u64::try_from(r.requirements.command_bytes).map_err(|_| WireError::TooLarge)?)?;
+        self.u64(u64::try_from(r.requirements.snapshot_bytes).map_err(|_| WireError::TooLarge)?)?;
+        if let Rpc::LearnerReadinessReply { ready, .. } = &m.rpc {
+            self.u8(u8::from(*ready))?;
+        }
+        Ok(())
+    }
+    fn snapshot_rpc(&mut self, m: &Message, snapshot: &Snapshot) -> Result<(), WireError> {
+        if snapshot.application.len() > self.limits.max_snapshot_bytes {
+            return Err(WireError::TooLarge);
+        }
+        self.budget.charge(size_of::<Snapshot>())?;
+        self.budget.charge(snapshot.application.len())?;
+        let meta = &snapshot.metadata;
+        if meta.membership.is_some() && self.version < 2 {
+            return Err(WireError::InvalidMessage(
+                "membership requires wire format 2",
+            ));
+        }
+        let explicit_base =
+            meta.membership.is_some() || meta.bootstrap.configuration != m.configuration;
+        self.u8(
+            if matches!(m.rpc, Rpc::CommittedLearnerRepairSnapshot { .. }) {
+                17
+            } else if matches!(m.rpc, Rpc::LearnerRepairSnapshot { .. }) {
+                16
+            } else if explicit_base {
+                9
+            } else {
+                6
+            },
+        )?;
+        if explicit_base {
+            self.u64(meta.bootstrap.configuration.get())?;
+        }
+        self.u64(meta.index)?;
+        self.u64(meta.term)?;
+        self.u64(meta.application_schema)?;
+        self.tree(meta.bootstrap.policy.tree(), 0, &mut 0, &mut 0)?;
+        self.budget
+            .charge(meta.bootstrap.policy.voters().len() * 128)?;
+        self.budget
+            .charge(meta.bootstrap.voter_stores.len() * 128)?;
+        self.u32(meta.bootstrap.voter_stores.len() as u32)?;
+        for (node, store) in &meta.bootstrap.voter_stores {
+            self.u64(node.get())?;
+            self.u128(store.id.get())?;
+            self.u64(store.incarnation.get())?;
+        }
+        if explicit_base {
+            self.u8(u8::from(meta.membership.is_some()))?;
+            if let Some(membership) = &meta.membership {
+                self.membership(membership)?;
+            }
+        }
+        self.u32(snapshot.application.len() as u32)?;
+        self.put(&snapshot.application)
+    }
     fn batch(&mut self, scope: WireScope, messages: &[Message]) -> Result<(), WireError> {
         if messages.is_empty() || messages.len() > self.limits.max_messages {
             return Err(WireError::TooLarge);
@@ -741,6 +778,16 @@ impl<'a> Encoder<'a> {
         }
         self.u32(0)
     }
+}
+#[derive(Clone, Copy)]
+struct MessageEnvelope {
+    group: GroupIdentity,
+    configuration: ConfigurationId,
+    from: NodeId,
+    sender: StoreBinding,
+    to: NodeId,
+    term: u64,
+    context: RequestContext,
 }
 struct Decoder<'a> {
     bytes: &'a [u8],
@@ -1038,7 +1085,40 @@ impl<'a> Decoder<'a> {
             origin: self.binding()?,
             sequence: self.u64()?,
         };
-        let rpc = match self.u8()? {
+        let envelope = MessageEnvelope {
+            group,
+            configuration,
+            from,
+            sender,
+            to,
+            term,
+            context,
+        };
+        let rpc = self.rpc(&envelope, limits, budget, version)?;
+        let message = Message {
+            group: envelope.group,
+            configuration: envelope.configuration,
+            from: envelope.from,
+            sender: envelope.sender,
+            to: envelope.to,
+            term: envelope.term,
+            context: envelope.context,
+            rpc,
+        };
+        validate_message(&message, version)?;
+        if self.remaining() != 0 {
+            return Err(WireError::Corrupt("trailing message bytes"));
+        }
+        Ok(message)
+    }
+    fn rpc(
+        &mut self,
+        envelope: &MessageEnvelope,
+        limits: WireLimits,
+        budget: &mut Budget,
+        version: u16,
+    ) -> Result<Rpc, WireError> {
+        Ok(match self.u8()? {
             14 if version >= 5 => {
                 budget.charge(size_of::<LogEntry>())?;
                 let joint = Box::new(self.entry(limits, budget, version)?);
@@ -1099,118 +1179,14 @@ impl<'a> Decoder<'a> {
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
             kind @ (6 | 9 | 16 | 17) => {
-                if (kind == 9 && version < 2)
-                    || (kind == 16 && version < 6)
-                    || (kind == 17 && version < 7)
-                {
-                    return Err(WireError::InvalidMessage("RPC kind"));
-                }
-                let bootstrap_configuration = if kind != 6 {
-                    self.configuration_id()?
-                } else {
-                    configuration
-                };
-                let index = self.u64()?;
-                let term = self.u64()?;
-                let application_schema = self.u64()?;
-                budget.charge(size_of::<Snapshot>())?;
-                let mut voters = 0;
-                let tree = self.tree(limits, budget, 0, &mut 0, &mut voters)?;
-                budget.charge(voters * 128)?;
-                let policy = Policy::new(tree, limits.policy)
-                    .map_err(|_| WireError::InvalidMessage("invalid quorum policy"))?;
-                let count = self.u32()? as usize;
-                if count != policy.voters().len() {
-                    return Err(WireError::InvalidMessage("voter store count"));
-                }
-                if count > self.remaining() / 32 {
-                    return Err(WireError::Truncated);
-                }
-                budget.charge(count * 128)?;
-                let mut voter_stores = BTreeMap::new();
-                for _ in 0..count {
-                    let node =
-                        NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero voter"))?;
-                    let id = StoreId::new(self.u128()?)
-                        .ok_or(WireError::InvalidMessage("zero voter store"))?;
-                    let incarnation = StoreIncarnation::new(self.u64()?)
-                        .ok_or(WireError::InvalidMessage("zero voter store incarnation"))?;
-                    if voter_stores
-                        .insert(node, StoreIdentity { id, incarnation })
-                        .is_some()
-                    {
-                        return Err(WireError::InvalidMessage("duplicate voter store"));
-                    }
-                }
-                let membership = if kind != 6 && bool_value(self.u8()?)? {
-                    Some(Box::new(self.membership(index, limits, budget)?))
-                } else {
-                    None
-                };
-                let len = self.u32()? as usize;
-                if len > limits.max_snapshot_bytes {
-                    return Err(WireError::TooLarge);
-                }
-                let bytes = self.take(len)?;
-                budget.charge(len)?;
-                let snapshot = Box::new(Snapshot {
-                    metadata: SnapshotMetadata {
-                        membership,
-                        bootstrap: Bootstrap {
-                            group,
-                            configuration: bootstrap_configuration,
-                            policy,
-                            voter_stores,
-                        },
-                        index,
-                        term,
-                        application_schema,
-                    },
-                    application: bytes.to_vec(),
-                });
-                if kind == 17 {
-                    Rpc::CommittedLearnerRepairSnapshot { snapshot }
-                } else if kind == 16 {
-                    Rpc::LearnerRepairSnapshot { snapshot }
-                } else {
-                    Rpc::Snapshot { snapshot }
-                }
+                self.snapshot_rpc(kind, envelope, limits, budget, version)?
             }
             7 => Rpc::SnapshotAck { index: self.u64()? },
             8 => Rpc::Compacted {
                 index: self.u64()?,
                 term: self.u64()?,
             },
-            kind @ (12 | 13) if version >= 4 => {
-                budget.charge(size_of::<LearnerReadinessRequest>())?;
-                let request = LearnerReadinessRequest {
-                    group,
-                    configuration,
-                    leader: if kind == 12 { from } else { to },
-                    context,
-                    term,
-                    learner: self.peer()?,
-                    session: StoreSession::new(self.u64()?)
-                        .ok_or(WireError::InvalidMessage("zero readiness session"))?,
-                    index: self.u64()?,
-                    index_term: self.u64()?,
-                    requirements: ReadinessRequirements {
-                        application_schema: self.u64()?,
-                        command_bytes: usize::try_from(self.u64()?)
-                            .map_err(|_| WireError::TooLarge)?,
-                        snapshot_bytes: usize::try_from(self.u64()?)
-                            .map_err(|_| WireError::TooLarge)?,
-                    },
-                };
-                if kind == 12 {
-                    Rpc::LearnerReadinessRequest(Box::new(request))
-                } else {
-                    Rpc::LearnerReadinessReply {
-                        request: Box::new(request),
-                        ready: bool_value(self.u8()?)?,
-                    }
-                }
-            }
+            kind @ (12 | 13) if version >= 4 => self.readiness_rpc(kind, envelope, budget)?,
             10 if version >= 3 => Rpc::AuthorityRequest {
                 candidate: self.peer()?,
                 configuration: self.configuration_id()?,
@@ -1223,22 +1199,136 @@ impl<'a> Decoder<'a> {
                 granted: bool_value(self.u8()?)?,
             },
             _ => return Err(WireError::InvalidMessage("RPC kind")),
+        })
+    }
+    fn snapshot_rpc(
+        &mut self,
+        kind: u8,
+        envelope: &MessageEnvelope,
+        limits: WireLimits,
+        budget: &mut Budget,
+        version: u16,
+    ) -> Result<Rpc, WireError> {
+        let MessageEnvelope {
+            group,
+            configuration,
+            ..
+        } = *envelope;
+        if (kind == 9 && version < 2) || (kind == 16 && version < 6) || (kind == 17 && version < 7)
+        {
+            return Err(WireError::InvalidMessage("RPC kind"));
+        }
+        let bootstrap_configuration = if kind != 6 {
+            self.configuration_id()?
+        } else {
+            configuration
         };
-        let message = Message {
+        let index = self.u64()?;
+        let term = self.u64()?;
+        let application_schema = self.u64()?;
+        budget.charge(size_of::<Snapshot>())?;
+        let mut voters = 0;
+        let tree = self.tree(limits, budget, 0, &mut 0, &mut voters)?;
+        budget.charge(voters * 128)?;
+        let policy = Policy::new(tree, limits.policy)
+            .map_err(|_| WireError::InvalidMessage("invalid quorum policy"))?;
+        let count = self.u32()? as usize;
+        if count != policy.voters().len() {
+            return Err(WireError::InvalidMessage("voter store count"));
+        }
+        if count > self.remaining() / 32 {
+            return Err(WireError::Truncated);
+        }
+        budget.charge(count * 128)?;
+        let mut voter_stores = BTreeMap::new();
+        for _ in 0..count {
+            let node = NodeId::new(self.u64()?).ok_or(WireError::InvalidMessage("zero voter"))?;
+            let id =
+                StoreId::new(self.u128()?).ok_or(WireError::InvalidMessage("zero voter store"))?;
+            let incarnation = StoreIncarnation::new(self.u64()?)
+                .ok_or(WireError::InvalidMessage("zero voter store incarnation"))?;
+            if voter_stores
+                .insert(node, StoreIdentity { id, incarnation })
+                .is_some()
+            {
+                return Err(WireError::InvalidMessage("duplicate voter store"));
+            }
+        }
+        let membership = if kind != 6 && bool_value(self.u8()?)? {
+            Some(Box::new(self.membership(index, limits, budget)?))
+        } else {
+            None
+        };
+        let len = self.u32()? as usize;
+        if len > limits.max_snapshot_bytes {
+            return Err(WireError::TooLarge);
+        }
+        let bytes = self.take(len)?;
+        budget.charge(len)?;
+        let snapshot = Box::new(Snapshot {
+            metadata: SnapshotMetadata {
+                membership,
+                bootstrap: Bootstrap {
+                    group,
+                    configuration: bootstrap_configuration,
+                    policy,
+                    voter_stores,
+                },
+                index,
+                term,
+                application_schema,
+            },
+            application: bytes.to_vec(),
+        });
+        Ok(if kind == 17 {
+            Rpc::CommittedLearnerRepairSnapshot { snapshot }
+        } else if kind == 16 {
+            Rpc::LearnerRepairSnapshot { snapshot }
+        } else {
+            Rpc::Snapshot { snapshot }
+        })
+    }
+    fn readiness_rpc(
+        &mut self,
+        kind: u8,
+        envelope: &MessageEnvelope,
+        budget: &mut Budget,
+    ) -> Result<Rpc, WireError> {
+        let MessageEnvelope {
             group,
             configuration,
             from,
-            sender,
             to,
             term,
             context,
-            rpc,
+            ..
+        } = *envelope;
+        budget.charge(size_of::<LearnerReadinessRequest>())?;
+        let request = LearnerReadinessRequest {
+            group,
+            configuration,
+            leader: if kind == 12 { from } else { to },
+            context,
+            term,
+            learner: self.peer()?,
+            session: StoreSession::new(self.u64()?)
+                .ok_or(WireError::InvalidMessage("zero readiness session"))?,
+            index: self.u64()?,
+            index_term: self.u64()?,
+            requirements: ReadinessRequirements {
+                application_schema: self.u64()?,
+                command_bytes: usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?,
+                snapshot_bytes: usize::try_from(self.u64()?).map_err(|_| WireError::TooLarge)?,
+            },
         };
-        validate_message(&message, version)?;
-        if self.remaining() != 0 {
-            return Err(WireError::Corrupt("trailing message bytes"));
-        }
-        Ok(message)
+        Ok(if kind == 12 {
+            Rpc::LearnerReadinessRequest(Box::new(request))
+        } else {
+            Rpc::LearnerReadinessReply {
+                request: Box::new(request),
+                ready: bool_value(self.u8()?)?,
+            }
+        })
     }
 }
 impl WireCodec for NativeWireCodec {

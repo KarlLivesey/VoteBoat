@@ -686,26 +686,17 @@ impl NativeStartup {
         })
     }
 }
-fn build<A, C: StartupConnector>(
-    config: NativeStartup,
-    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
-    application: &mut Option<A>,
-    cleanup: &mut Cleanup,
-    wake: Arc<dyn WorkerWake>,
-    now: MonoTime,
-    connector: impl FnOnce(
-        &NativeStartup,
-        &BTreeMap<NodeId, StoreIdentity>,
-        LocalIdentity,
-        Arc<dyn WorkerWake>,
-        &mut Cleanup,
-    ) -> Result<C, NativeStartupError>,
-) -> Result<NativeNode<A, C>, NativeStartupError>
-where
-    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
-    A::Receipt: ApplicationReceipt,
-{
-    let (authorization, timers, timings) = options;
+struct StartupStorage {
+    store: NativeLogStore<FileLogIo>,
+    snapshots: NativeSnapshotStore<FileSnapshotIo>,
+    core: crate::raft::Raft,
+}
+fn recover_storage<A: CheckpointStateMachine>(
+    config: &NativeStartup,
+    authorization: &StartupAuthorization,
+    timings: Option<JournalTimings>,
+    app: &mut A,
+) -> Result<StartupStorage, NativeStartupError> {
     let create = config.mode == NativeOpenMode::Create;
     let io = if create {
         FileLogIo::create(&config.directory)?
@@ -755,7 +746,6 @@ where
             SnapshotLimits::default(),
         )?
     };
-    let app = application.as_mut().unwrap();
     let recover = if matches!(authorization, StartupAuthorization::Member(_)) {
         recover_member_replica
     } else {
@@ -783,8 +773,31 @@ where
     } else {
         core
     };
+    Ok(StartupStorage {
+        store,
+        snapshots,
+        core,
+    })
+}
+struct StartupRuntime<S: SecureSession> {
+    owner_id: RuntimeOwner,
+    local: LocalIdentity,
+    remote: BTreeMap<NodeId, StoreIdentity>,
+    timed: TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+    outbound: NativeOutbound,
+    roster: PeerRoster<NativePeerTransport<S, NativeWireCodec>>,
+    ingress: IngressRouter,
+}
+fn prepare_runtime<S: SecureSession>(
+    config: &NativeStartup,
+    authorization: &StartupAuthorization,
+    core: crate::raft::Raft,
+    binding: StoreBinding,
+    timers: TimerConfig,
+    now: MonoTime,
+) -> Result<StartupRuntime<S>, NativeStartupError> {
     let owner_id = RuntimeOwner {
-        store: store.binding(),
+        store: binding,
         lane: ExecutionLaneId::new(1).unwrap(),
         generation: RuntimeGeneration::new(1).unwrap(),
     };
@@ -809,7 +822,7 @@ where
     ))?
     .peers()
     .collect::<BTreeMap<_, _>>();
-    let stores = authorization.stores(&config);
+    let stores = authorization.stores(config);
     if remote
         .iter()
         .any(|(node, store)| stores.get(node) != Some(store))
@@ -866,6 +879,24 @@ where
         },
         IngressLimits::default(),
     ))?;
+    Ok(StartupRuntime {
+        owner_id,
+        local,
+        remote,
+        timed,
+        outbound,
+        roster,
+        ingress,
+    })
+}
+struct ApplicationRoutes<R, Q, V> {
+    results: ApplicationRouter<R>,
+    clients: ClientRouter<R>,
+    reads: ReadRequests<Q, V>,
+}
+fn application_routes<R: ApplicationReceipt, Q, V>(
+    owner_id: RuntimeOwner,
+) -> Result<ApplicationRoutes<R, Q, V>, NativeStartupError> {
     let results = checked(ApplicationRouter::new(
         ApplicationRouterBinding {
             owner: owner_id,
@@ -894,7 +925,16 @@ where
             ReadRouterLimits::default(),
         ))?,
     ))?;
-    let codec = match config.tls.wire_version() {
+    Ok(ApplicationRoutes {
+        results,
+        clients,
+        reads,
+    })
+}
+fn transport_factory(
+    version: u16,
+) -> Result<NativeTransportFactory<NativeWireCodec>, NativeStartupError> {
+    let codec = match version {
         1 => NativeWireCodec::new(Default::default()),
         2 => NativeWireCodec::with_membership(Default::default()),
         3 => NativeWireCodec::with_authority(Default::default()),
@@ -908,6 +948,53 @@ where
         checked(codec)?,
         Default::default(),
     ))?;
+    Ok(factory)
+}
+fn build<A, C: StartupConnector>(
+    config: NativeStartup,
+    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
+    application: &mut Option<A>,
+    cleanup: &mut Cleanup,
+    wake: Arc<dyn WorkerWake>,
+    now: MonoTime,
+    connector: impl FnOnce(
+        &NativeStartup,
+        &BTreeMap<NodeId, StoreIdentity>,
+        LocalIdentity,
+        Arc<dyn WorkerWake>,
+        &mut Cleanup,
+    ) -> Result<C, NativeStartupError>,
+) -> Result<NativeNode<A, C>, NativeStartupError>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let (authorization, timers, timings) = options;
+    let StartupStorage {
+        store,
+        snapshots,
+        core,
+    } = recover_storage(
+        &config,
+        &authorization,
+        timings,
+        application.as_mut().unwrap(),
+    )?;
+    let StartupRuntime {
+        owner_id,
+        local,
+        remote,
+        timed,
+        outbound,
+        roster,
+        ingress,
+    } = prepare_runtime::<C::Session>(&config, &authorization, core, store.binding(), timers, now)?;
+    let ApplicationRoutes {
+        results,
+        clients,
+        reads,
+    } = application_routes(owner_id)?;
+    let factory = transport_factory(config.tls.wire_version())?;
     cleanup.log = Some(checked(NativeLogWorker::spawn(
         store,
         StorageWorkerGeneration::new(1).unwrap(),
@@ -933,6 +1020,7 @@ where
         cleanup.snapshots.as_ref().unwrap().binding(),
         SnapshotRouterLimits::default(),
     ))?;
+    let stores = authorization.stores(&config);
     let connector = connector(&config, stores, local, wake.clone(), cleanup)?;
     let built = NativeNode::<A, C>::from_parts(
         NativeNodeParts {
@@ -950,43 +1038,14 @@ where
                 }),
             },
             peers: Some(PeerParts {
-                admission_routes: matches!(authorization, StartupAuthorization::Member(_)).then(
-                    || {
-                        stores
-                            .iter()
-                            .filter(|(node, _)| **node != config.node)
-                            .map(|(node, store)| {
-                                (
-                                    *node,
-                                    PeerRoute {
-                                        store: *store,
-                                        direction: if config.node < *node {
-                                            ConnectDirection::Dial(config.peers[node].address)
-                                        } else {
-                                            ConnectDirection::Accept
-                                        },
-                                    },
-                                )
-                            })
-                            .collect()
-                    },
-                ),
+                admission_routes: admission_routes(&authorization, &config),
                 connector,
                 roster,
                 factory,
                 ingress,
                 routes: remote
                     .keys()
-                    .map(|n| {
-                        (
-                            *n,
-                            if config.node < *n {
-                                ConnectDirection::Dial(config.peers[n].address)
-                            } else {
-                                ConnectDirection::Accept
-                            },
-                        )
-                    })
+                    .map(|n| (*n, connection_direction(&config, *n)))
                     .collect(),
             }),
         },
@@ -1005,4 +1064,33 @@ where
             Err(error("node assembly", r.reason))
         }
     }
+}
+
+fn connection_direction(config: &NativeStartup, node: NodeId) -> ConnectDirection<SocketAddr> {
+    if config.node < node {
+        ConnectDirection::Dial(config.peers[&node].address)
+    } else {
+        ConnectDirection::Accept
+    }
+}
+fn admission_routes(
+    authorization: &StartupAuthorization,
+    config: &NativeStartup,
+) -> Option<BTreeMap<NodeId, PeerRoute<SocketAddr>>> {
+    matches!(authorization, StartupAuthorization::Member(_)).then(|| {
+        authorization
+            .stores(config)
+            .iter()
+            .filter(|(node, _)| **node != config.node)
+            .map(|(node, store)| {
+                (
+                    *node,
+                    PeerRoute {
+                        store: *store,
+                        direction: connection_direction(config, *node),
+                    },
+                )
+            })
+            .collect()
+    })
 }
