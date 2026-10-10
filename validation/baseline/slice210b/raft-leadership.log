@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
+     Running tests/raft.rs (target/debug/deps/raft-012fe3879bfff57d)
+
+running 11 tests
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 30 filtered out; finished in 0.00s
+

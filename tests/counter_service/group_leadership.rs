@@ -5,6 +5,9 @@ use super::*;
 #[path = "group_leadership/historical.rs"]
 mod historical;
 
+#[path = "group_leadership/busy.rs"]
+mod busy;
+
 const OP: &str = "40001";
 const NEXT: &str = "40002";
 pub(super) fn command(c: &mut Cluster, scope: (&str, &str), words: &[&str]) -> String {
@@ -23,7 +26,9 @@ pub(super) fn command(c: &mut Cluster, scope: (&str, &str), words: &[&str]) -> S
                 | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"
                 | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n"
                 | "ERR Unavailable(LeadershipChanged)\n"
-                | "ERR NotRead(ReadNotReady)\n"),
+                | "ERR NotRead(ReadNotReady)\n"
+                | "ERR not_proposed=Busy\n"
+                | "UNKNOWN authenticated read failed; retry the same administrative operation ID and record\n"),
             "{args:?}: {text:?} {}; {}",
             String::from_utf8_lossy(&output.stderr), c.service_log(leader)
         );

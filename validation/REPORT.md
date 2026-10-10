@@ -5816,3 +5816,25 @@ in the evidence directory. No production behavior, retry policy, deadline or
 lint threshold changed. The newly completed priorcd54071 CI job passes Ubuntu
 and fails6 macOS counter tests; it is retained to select further platform work,
 not acceptance of this correction. See [slice210a](baseline/slice210a/README.md).
+
+## Slice210b — original handoff replay and reproduced QUIC liveness failure
+
+Both new TCP/QUIC histories fail before the fixture accepts explicit Busy
+non-admission. Corrected focused histories pass7, full local counter/maintenance
+runs pass156/6, deterministic core handoff checks pass11 and default TCP checks
+pass4. The exact original Pending and Cancelled records and counter receipts
+survive cold recovery; QUIC checkpoint installation is verified. The fixture
+also recognizes the specific observed administrative read interruption for the
+same command. Production behavior and deadlines remain unchanged.
+
+An additional focused run under the CI temporary-directory setup fails two
+QUIC histories (5 pass). Original requests still cannot settle within the
+unchanged deadline. Their service logs and copied-journal inspection remain:
+source term6 versus survivor terms51–74, with original Pending records and data
+intact. This establishes a local liveness failure to investigate, not its exact
+cause or a platform fix. Three-node last-status diagnostics and CI text-log
+retention are added to obtain stronger evidence. The default-group snapshot
+path mistake in the first inspection is retained alongside corrected output.
+Formatting and all four strict Clippy profiles pass with zero diagnostics.
+The prior36526bc macOS job has7 counter failures; Ubuntu passes. Full-goal and
+platform acceptance remain open. See [slice210b](baseline/slice210b/README.md).

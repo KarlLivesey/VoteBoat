@@ -24,6 +24,7 @@ jobs:
     env:
       CARGO_TERM_COLOR: never
       RUST_BACKTRACE: 1
+      TMPDIR: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Rust toolchain
@@ -41,6 +42,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: operator-recovery-${{ matrix.os }}-${{ github.sha }}
-          path: operator-recovery.log
+          path: |
+            operator-recovery.log
+            ${{ runner.temp }}/voteboat-service-*/*.log
           if-no-files-found: ignore
           retention-days: 14

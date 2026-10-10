@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 4 tests
+test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 104 filtered out; finished in 7.40s
+

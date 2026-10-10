@@ -20,12 +20,19 @@ pub(super) fn setup(quic: bool) -> Cluster {
 }
 pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
     let end = Instant::now() + Duration::from_secs(20);
+    let mut observations: [Option<String>; 3] = std::array::from_fn(|_| None);
     loop {
         for id in 1..=3 {
             if c.children[id - 1].is_none() {
                 continue;
             }
             let output = c.request(id, &["group", group, incarnation, "status"]);
+            observations[id - 1] = Some(format!(
+                "status={} stdout={:?} stderr={:?}",
+                output.status,
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            ));
             if output.status.success()
                 && String::from_utf8_lossy(&output.stdout).contains("role=Leader")
             {
@@ -42,7 +49,14 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
                 c.service_log(id)
             );
         }
-        assert!(Instant::now() < end, "group {group}: {}", c.service_log(1));
+        assert!(
+            Instant::now() < end,
+            "group {group}:{incarnation} root={:?} last_status={observations:?}\nnode1={}\nnode2={}\nnode3={}",
+            c.root,
+            c.service_log(1),
+            c.service_log(2),
+            c.service_log(3)
+        );
         std::thread::sleep(Duration::from_millis(10));
     }
 }

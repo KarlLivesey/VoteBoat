@@ -1,5 +1,23 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210b adds exact original handoff replay after actual non-admission. Native
+TCP/QUIC histories reproduce the fixture's old Busy refusal, then preserve the
+quorum-observed original Pending record until cancellation, reject a changed
+target store and recover the exact Cancelled record and data receipts. QUIC
+checks an installed checkpoint. The fixture also permits the exact observed
+administrative read interruption for the same bound command. Counter156,
+maintenance6 and core handoff11 tests pass locally. Group leader deadlines now
+retain the three last status responses and all service logs; CI preserves only
+counter text logs alongside the operator summary. This changes diagnostics and
+test acceptance, not production retry or consensus behavior. The completed
+prior36526bc operator run passes Ubuntu and has7 macOS counter failures. Its
+logs remain explicit evidence of unresolved platform acceptance.
+An additional local focused run under the CI temp setup fails2 QUIC histories
+(5 pass). Copied journal recovery preserves original records/data but finds
+divergent survivor terms. This is retained liveness failure evidence, not a
+diagnosed transport cause or a complete operator correction. Deadlines stay
+unchanged; peer/session recovery is the next operator investigation.
+
 Slice210a corrects one multi-group operator acceptance assumption: an initial
 observed success after uncertain original attempts can be a retained duplicate.
 Real authenticated unread writes in all three groups reproduce the old failure

@@ -75,14 +75,14 @@ fn history(quic: bool) {
     c.stop();
 }
 
-fn checkpoint(c: &mut Cluster) -> (usize, u64) {
+pub(super) fn checkpoint(c: &mut Cluster) -> (usize, u64) {
     let leader = groups::leader(c, "7", "3");
     let through = field(&c.ok(leader, &["group", "7", "3", "status"]), "committed=");
     c.ok(leader, &["group", "7", "3", "checkpoint"]);
     (leader, through)
 }
 
-fn verify_checkpoint(c: &Cluster, node: usize, through: u64) {
+pub(super) fn verify_checkpoint(c: &Cluster, node: usize, through: u64) {
     use voteboat::{
         application::Counter,
         identity::*,

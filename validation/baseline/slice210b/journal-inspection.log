@@ -1,0 +1,41 @@
+   Compiling voteboat-failure-inspect v0.0.0 (/tmp/voteboat210b-inspect)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running `/tmp/voteboat210b-inspect/target/debug/voteboat-failure-inspect /tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423149694-2 /tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423120669-0`
+root=/tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423149694-2
+node=1 group=1:1 term=6 last=2 commit=2 base=0
+applied=2 data=Ok(0) record=None
+node=1 group=7:3 term=6 last=4 commit=4 base=0
+applied=4 data=Ok(5) record=Some(LeadershipRecord { intent: LeadershipIntent { request: LeadershipTransferRequest { operation: OperationId(40001), target: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, configuration: ConfigurationId(9) }, source: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } } }, index: 3, term: 1, phase: Pending })
+node=1 group=8:2 term=5 last=3 commit=3 base=0
+applied=3 data=Ok(8) record=None
+node=2 group=1:1 term=1 last=1 commit=1 base=0
+applied=1 data=Ok(0) record=None
+node=2 group=7:3 term=1 last=2 commit=2 base=0
+applied=2 data=Ok(5) record=None
+node=2 group=8:2 term=1 last=2 commit=2 base=0
+applied=2 data=Ok(8) record=None
+node=3 group=1:1 term=74 last=2 commit=2 base=0
+applied=2 data=Ok(0) record=None
+node=3 group=7:3 term=71 last=4 commit=4 base=0
+applied=4 data=Ok(5) record=Some(LeadershipRecord { intent: LeadershipIntent { request: LeadershipTransferRequest { operation: OperationId(40001), target: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, configuration: ConfigurationId(9) }, source: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } } }, index: 3, term: 1, phase: Pending })
+node=3 group=8:2 term=74 last=3 commit=3 base=0
+applied=3 data=Ok(8) record=None
+root=/tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423120669-0
+node=1 group=1:1 term=6 last=2 commit=2 base=0
+applied=2 data=Ok(0) record=None
+node=1 group=7:3 term=6 last=4 commit=4 base=0
+applied=4 data=Ok(5) record=Some(LeadershipRecord { intent: LeadershipIntent { request: LeadershipTransferRequest { operation: OperationId(40001), target: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, configuration: ConfigurationId(9) }, source: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } } }, index: 3, term: 1, phase: Pending })
+node=1 group=8:2 term=6 last=3 commit=3 base=0
+applied=3 data=Ok(8) record=None
+node=2 group=1:1 term=1 last=1 commit=1 base=0
+applied=1 data=Ok(0) record=None
+node=2 group=7:3 term=1 last=2 commit=2 base=0
+applied=2 data=Ok(5) record=None
+node=2 group=8:2 term=1 last=2 commit=2 base=0
+applied=2 data=Ok(8) record=None
+node=3 group=1:1 term=53 last=2 commit=2 base=0
+applied=2 data=Ok(0) record=None
+node=3 group=7:3 term=51 last=4 commit=4 base=0
+applied=4 data=Ok(5) record=Some(LeadershipRecord { intent: LeadershipIntent { request: LeadershipTransferRequest { operation: OperationId(40001), target: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, configuration: ConfigurationId(9) }, source: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } } }, index: 3, term: 1, phase: Pending })
+node=3 group=8:2 term=53 last=3 commit=3 base=0
+applied=3 data=Ok(8) record=None

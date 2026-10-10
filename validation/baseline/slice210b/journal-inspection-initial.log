@@ -1,0 +1,19 @@
+     Locking 20 packages to latest compatible versions
+   Compiling shlex v2.0.1
+   Compiling libc v0.2.190
+   Compiling find-msvc-tools v0.1.14
+   Compiling cfg-if v1.0.5
+   Compiling untrusted v0.9.0
+   Compiling cc v1.6.0
+   Compiling ring v0.17.14
+   Compiling getrandom v0.2.17
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+   Compiling voteboat-failure-inspect v0.0.0 (/tmp/voteboat210b-inspect)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.29s
+     Running `/tmp/voteboat210b-inspect/target/debug/voteboat-failure-inspect /tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423149694-2 /tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423120669-0`
+root=/tmp/voteboat210b-inspect/voteboat-service-4078411-1791626664423149694-2
+node=1 group=1:1 term=6 last=2 commit=2 base=0
+
+thread 'main' (2) panicked at src/main.rs:14:144:
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

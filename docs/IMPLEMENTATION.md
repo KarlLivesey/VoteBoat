@@ -155,6 +155,19 @@ old failure over TCP and QUIC. Exact retained receipts, changed-payload refusal
 and cold recovery pass locally; the QUIC history checks installed checkpoint
 boundaries. The full local all-feature counter suite passes154 tests. Fresh
 macOS confirmation remains pending; this does not close other operator failures.
+Implemented210b corrects exact non-admission/observed administrative interruption
+replay in the group handoff fixture. Both native transports reproduce the old
+Busy failure; original Pending/Cancelled records and data receipts survive cold
+recovery, with installed QUIC checkpoints. The full local counter156,
+maintenance6 and core handoff11 checks pass. Bounded per-node last-status output
+and retained CI service logs support diagnosis of remaining leader deadlines.
+No production behavior or timeout changes; matching macOS confirmation is open.
+An additional CI-directory focused run fails two QUIC histories within the
+unchanged original-command deadline. Copied-journal inspection preserves the
+original Pending records/data but finds source term6 versus survivor terms51–74.
+This reproduces a local liveness failure; it selects peer/session recovery for
+the next operator investigation, without establishing its exact cause. Keep
+this failed evidence alongside the successful full suite and zero lint results.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -176,6 +189,60 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210b schema plan — exact handoff replay after non-admission
+
+The current macOS historical-handoff fixture rejects the explicit
+not_proposed=Busy response. The core refuses proposals while a volatile handoff
+is active; that response is not admission, historical completion or permission
+to alter the original intent. The production bound drain runner already
+reobserves this exact response. The test fixture will add only this exact
+non-admission response to its bounded original-command retry set. Its existing
+15-second deadline and all production behavior remain unchanged.
+
+Reproduce using real TCP/QUIC services: commit a handoff to an unavailable exact
+voter, observe its Pending record with a quorum read, then replay the identical
+Begin while the volatile attempt blocks proposals. Require an actual Busy
+refusal before calling the old helper. After the local attempt expires, repeat
+the exact command; require the original source, target, configuration, index,
+term and Pending phase, without replacing the operation. Cancel durably, refuse
+a conflicting target for that operation and verify the original Cancelled record
+and data receipts after cold recovery. QUIC also verifies actual checkpoint
+installation using the existing historical fixture's native recovery helper.
+Independent group8 retains data and no handoff record. Cluster owns process
+cleanup and the original command channel; no new production seam is needed.
+
+The deliverable advances operator/platform acceptance of the networked service.
+Broader QUIC liveness/readiness failures stay open. The next two deliverables
+remain the linked combined membership/lifecycle recovery and malformed codecs;
+matching macOS results are required before claiming platform acceptance.
+
+The first focused run after adding Busy replay passes six histories and fails
+the new QUIC history on UNKNOWN authenticated read failed with the explicit
+same administrative operation/record instruction. The service log identifies
+deadline cancellation of that original wait after local attempt expiry; the
+earlier quorum-observed Pending record remains the test's durable premise. Add
+only this exact observed administrative interruption to the fixture's original
+command replay set, retaining the deadline and exact record comparisons. A
+transport wait failure never establishes completion or a new administrative ID.
+
+The newly completed prior36526bc macOS run records seven counter failures,
+including leader/read deadlines that cannot be diagnosed from one startup line.
+For the same operator milestone, retain a bounded last-status observation for
+each of the three nodes in the existing group-leader fixture and print all
+three service logs and the fixture root on deadline failure. These are diagnostic
+samples, never quorum or leadership authority; do not add requests or change
+the failure deadline. CI will use its existing runner temporary directory and
+preserve only counter service text logs alongside the normal operator result.
+No data stores or credentials are uploaded. This evidence is needed to select
+the next focused liveness fix without masking failures or guessing at timeouts.
+The additional run under the selected temporary directory reproduces two QUIC
+original-command deadline failures. Inspect copies of stopped native journals,
+preserving the originals. Recovery finds the original Pending records/data on
+both survivors but diverging persisted terms (source6, survivor51–74). This
+selects communication/session recovery for the next slice; no transport cause
+or complete operator/platform fix is claimed. Keep the failing regression and
+deadline intact rather than repeatedly rerunning until it passes.
 
 ### Slice210a schema plan — multi-group original receipt observations
 
