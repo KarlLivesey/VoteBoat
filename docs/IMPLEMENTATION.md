@@ -1170,7 +1170,7 @@ exact original ticket release and next bounded admission, historical records/dat
 child cleanup and zero strict diagnostics. Current242 cannot certify this separate
 case. Broader transport progress remains explicit if the original write still fails.
 
-Current247: establish the actual serving/admission precondition for original
+Implemented247: establish the actual serving/admission precondition for original
 configuration loss histories. Purpose: advance functional Mac membership/operator
 acceptance. Depend on24521101/17920 failures, role sampling versus Raft's current-
 term commitment/readiness contract, exact accepted preparation/ticket ownership,
@@ -1182,7 +1182,71 @@ durable under lost quorum, retained conflict/status/retry identity and recovery,
 exact ticket release/next admission, Mac/Linux checks and zero strict diagnostics.
 Keep unknown outcomes unknown and do not widen caller deadlines or weaken gates.
 
-Next248: resolve actual bounded drain-runner observation progress. Purpose: complete
+247 implemented evidence: source-bound [logs/patches](../validation/baseline/slice247/README.md)
+retain original Mac isolated2/0 and full191/5. The broad run reproduces both21101
+missing configuration_queued cuts with selected term2/committed2/preparing. The
+two-file test gate completes an authenticated linearizable read of42 on the exact
+selected endpoint before removing its other voters; it leaves production and
+original records/post-loss deadlines/durable-status/conflict/recovery checks intact.
+Final Mac all194/2 passes both21101 and17920 cases. Remaining QUIC interrupted-runner
+request exhaustion and TCP shared-group cold-start AddrInUse are independent
+failures, not certified by this gate. Linux all197/default138 and current-term/
+cancelable-read contract1 pass; formatting/four strict profiles are zero. The
+initial Linux default137/1 port-rebind failure remains recorded; a Linux-only
+parent-handle spawn guard makes that ownership/rebind check pass in both full suites.
+Do not infer a complete kernel-cause attribution from AddrInUse alone.
+Mac default137/0 and formatting/four strict profiles pass after its all-feature
+suite finishes. All646 tracked source/fixture/build hashes verify before that
+sequence. The later Linux-only guarded test remains excluded on Mac, with its
+separate delta/final manifest verification recorded. No duplicate execution is
+started on an observation timeout; original concurrency and failed stores remain.
+
+Macro review247 advances the selected P4/P1 original accepted-configuration loss
+histories. It does not certify the whole feature/platform milestone. The new Mac
+restart listener failure is separate evidence for249's functional gap review;
+248 retains the original bounded runner deliverable. No additional provider,
+configuration protocol or broad prerequisite is introduced. P0–P7 remains active.
+
+247 schema before editing: the loss histories own a recovered three-process
+cluster, select an endpoint from a volatile role hint, then kill its other voters.
+The service's `Administration::next_proposal` separately requires a committed
+entry in that leader's current term. The retained245 Mac failures show term2,
+committed2, durable_last3 and no accepted configuration; the selected leader's
+new no-op has not committed. This is consistent with cutting quorum before that
+precondition. The isolated original TCP/QUIC histories both pass on the Mac;
+the original broad schedule is being rerun and its outcome remains evidence,
+not a reason to replace concurrency with isolation.
+
+Proposed data/API shape: a loss-fixture-only `serving_leader` returns an endpoint
+only after an actual successful authenticated linearizable read of value42 from
+that same endpoint. Reuse the existing10-second request-settlement deadline and
+exact read refusal classifier; do not globally change role discovery or any
+production contract. Transition recovered -> role candidate -> completed read ->
+quorum cut -> original configuration admission/unknown -> local durable status ->
+restored quorum/cold recovery. A completed read owns/releases its own ticket;
+its failure cannot establish authority. Terminal replies or deadline expiry
+fail the fixture; cluster RAII closes children and retains failed stores. The
+cut still leaves a possible subsequent election race, which must remain a real
+failure rather than being hidden. No new durable token, watermark, generation,
+configuration ID, operation ID, persistence or quorum behavior is introduced.
+Acceptance retains21101/17920 original records, local accepted-versus-committed
+distinction, conflict refusal, unchanged retries, data/dedup and worker cleanup.
+Check full Mac/Linux counter suites and zero formatting/four strict profiles.
+
+247b schema after focused Linux failure: all-feature197 passes; default137/1
+fails only the Linux late-port reservation test on immediate TCP rebind after
+dropping its placeholders. It keeps the no-reuse PORT_BLOCKS reservation but
+does not hold the existing STORE_SPAWN gate, which protects native parent handles
+from brief inheritance during concurrent child creation. Add that existing gate
+around this small ownership/rebind check; acquire it before PORT_BLOCKS, whose
+other owners release before spawning. No child wait or consensus progress occurs
+under either guard. This prevents this test's fork/release overlap; the observed
+AddrInUse alone does not identify an external process or prove kernel cause.
+Keep the failed log, port-range/no-dual-bind/rebind assertions and actual suite
+concurrency. Validate the Linux-only case in the full default/all suites and
+formatting/four strict profiles; Mac does not compile this target_os=linux test.
+
+Current248: resolve actual bounded drain-runner observation progress. Purpose: complete
 the original public membership/drain workflow over source loss. Depend on245 runner
 request-exhaustion evidence, original19701 identity, per-command request ownership
 and existing fixed absolute-deadline/request budgets. Select an actual state/
@@ -1191,13 +1255,21 @@ purpose. Completion requires original sequence/operation recovery, terminal owne
 request cleanup, exact final membership/data checks on Mac/Linux and zero lints.
 No performance/security detour or silent budget increase.
 
-Following249: close one required operator integration gap and reconcile functional
+Next249: close one required operator integration gap and reconcile functional
 requirements/platform evidence. Purpose: make the baseline feature boundary explicit.
 Depend on247/248 and chapter12/acceptance map. Select an actual missing capability
 before adding helpers. Completion requires public executable/Rust usage with
 original-operation recovery/cleanup and source-bound evidence or an explicit
 remaining item for every required baseline feature and supported Mac/Linux workflow.
 Selected suites cannot certify full coverage; full P0–P7 remains active.
+
+Following250: implement a confirmed missing functional exit from249's audit.
+Purpose: advance the baseline feature milestone rather than add speculative
+helpers. Depend on the original chapter12/17 requirements, public contracts and
+the concrete gap selected by249. State its schema and completion checks before
+editing; require usable Rust/executable behavior, recovery/cleanup and relevant
+Mac/Linux checks with zero diagnostics. A gap not yet inspected is planned work,
+not an absent implementation claim. Keep performance/security gates separate.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,

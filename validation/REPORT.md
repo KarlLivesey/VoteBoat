@@ -1,5 +1,18 @@
 # Validation report
 
+Configuration-loss serving precondition: [slice247](baseline/slice247/README.md).
+An actual read of42 on the exact selected endpoint qualifies the fixture before
+it deliberately kills quorum. Production/readiness/quorum/durability and original
+21101/17920 status/conflict/retry/recovery assertions remain unchanged. Original
+isolated Mac2/0 differs from broad191/5, which reproduces both preparing-only loss
+failures. Changed Mac all194/2 passes those and17920; remaining failures are QUIC
+interrupted-runner request exhaustion and TCP shared-group restart AddrInUse.
+Mac default137/0 and formatting/four strict profiles pass. Linux final197/138 and
+strict profiles pass after the Linux-only port test uses the existing parent-handle
+spawn guard; its first default137/1 rebind failure stays recorded. All646 Mac build
+inputs verify; no narrowed concurrency or timing/quorum change. Full acceptance
+remains open; bounded runner progress and functional/operator reconciliation next.
+
 Native host-clock shutdown and declared assembly conformance: [slice246](baseline/slice246/README.md).
 An owner beyond10000ms exposes the old cleanup clock moving backwards. Caller
 epoch retention fixes that actual regression without changing Node validation or

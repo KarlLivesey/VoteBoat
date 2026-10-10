@@ -1,0 +1,33 @@
+Source: published5a48e812b41adc2b53913ed7fb1076acc9a6bd40 plus source.patch.
+The task-owned Mac checkout retains9c952aa plus the recorded246 startup patches;
+build-source.sha256 checks all646 tracked source/fixture/build inputs against
+the published Linux tree plus this focused two-file change. No production change.
+
+Before Mac, original full concurrency and unchanged source:
+cargo +stable test --locked --offline --all-features --test counter_service configuration_pending -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service
+Retain isolated passes separately from broad failure evidence. Do not edit the
+Mac checkout while that suite owns target/debug executable processes.
+
+Final Linux and Mac, each host's feature configurations sequential:
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service
+.githooks/pre-push
+The hook checks formatting and strict default/all/no-default/native-only Clippy.
+On Mac prepend installed cargo to PATH; use the original task-owned test roots.
+No installs, soft-limit changes, concurrency changes or machine settings.
+
+Linux actual current-term/read ticket contract:
+cargo +stable test --locked --offline --all-features --test raft read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable
+
+Metadata checks remain limited to inventory and documented conformance scope:
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+After the Mac sequence is terminal, apply linux-only.patch (this module is
+target_os=linux), verify published-build-source.sha256 (all646 inputs), and run
+.githooks/pre-push again. No executable suite is repeated for a Mac-excluded test
+guard. The final strict profiles still exit0 and published source is exact.
+
+Full P0–P7 stays active. Do not use counter passes as full roadmap acceptance,
+security review, performance validation, or a guarantee of every election race.

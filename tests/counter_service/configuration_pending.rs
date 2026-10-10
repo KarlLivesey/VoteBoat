@@ -33,6 +33,28 @@ pub(super) fn setup(quic: bool) -> Cluster {
     c
 }
 
+// A sampled leader role does not establish current-term commitment. Complete
+// a real quorum read on this exact endpoint before deliberately removing voters.
+pub(super) fn serving_leader(c: &mut Cluster) -> usize {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let leader = c.leader();
+        let output = c.request(leader, &["read"]);
+        let text = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            assert_eq!(text, "OK value=42\n");
+            return leader;
+        }
+        assert!(
+            retryable_leader_response(&["read"], &text),
+            "pre-cut read node={leader}: {text} {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(Instant::now() < deadline, "pre-cut read did not settle");
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+}
+
 fn observe_pending(c: &Cluster, leader: usize) -> String {
     let pending = c.ok(leader, &["configuration-status", OP]);
     assert!(pending.contains("evidence=local_durable"), "{pending}");
@@ -52,7 +74,7 @@ fn observe_pending(c: &Cluster, leader: usize) -> String {
 
 fn history(quic: bool) {
     let mut c = setup(quic);
-    let leader = c.leader();
+    let leader = serving_leader(&mut c);
     for node in (1..=3).filter(|node| *node != leader) {
         drain::kill(&mut c, node);
     }

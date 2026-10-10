@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (<mac-task>/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-4a7126c9b497a5c5)
+
+running 2 tests
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... ok
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 194 filtered out; finished in 12.44s

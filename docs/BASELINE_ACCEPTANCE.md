@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Configuration-loss serving precondition: [slice247](../validation/baseline/slice247/README.md).
+Actual exact-endpoint read authority precedes deliberate quorum loss, preserving
+original records and post-loss recovery checks. Linux all197/default138 and Mac
+default137 pass; final Mac all194/2 retains QUIC interrupted-runner request
+exhaustion and TCP shared-group restart AddrInUse. Formatting/four strict profiles
+are zero on both hosts. Original Mac broad191/5 and Linux default137/1 are retained,
+not replaced by isolated passes. All646 Mac build inputs verify; full P0–P7 stays
+active, with remaining platform/operator/provider/functional exits still explicit.
+
 Native host-clock shutdown and declared assembly conformance: [slice246](../validation/baseline/slice246/README.md).
 An owner beyond10000ms exposes the old cleanup clock moving backwards. Caller
 epoch retention fixes that actual regression without changing Node validation or

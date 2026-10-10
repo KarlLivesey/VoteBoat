@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/raft.rs (target/debug/deps/raft-012fe3879bfff57d)
+
+running 1 test
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 40 filtered out; finished in 0.00s

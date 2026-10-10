@@ -1,0 +1,5 @@
+counter-default=101
+strict=0
+counter-default-final=0
+counter-all-final=0
+strict-final=0

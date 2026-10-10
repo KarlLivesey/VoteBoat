@@ -1,0 +1,14 @@
+diff --git a/tests/counter_service/startup_ports.rs b/tests/counter_service/startup_ports.rs
+index c46c818..35ee9b5 100644
+--- a/tests/counter_service/startup_ports.rs
++++ b/tests/counter_service/startup_ports.rs
+@@ -5,6 +5,9 @@ use super::*;
+
+ #[test]
+ fn late_listener_reservations_avoid_kernel_client_ports() {
++    // Prevent a concurrent child spawn from inheriting these parent handles
++    // across the exact release/rebind check; child execution stays parallel.
++    let _spawn = fixture_gate();
+     // The recorded failure was allocation180, peer33426, during cold recovery.
+     // Model used blocks locally, retaining actual global reservations separately.
+     let mut global = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());

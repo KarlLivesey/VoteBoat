@@ -1,0 +1,69 @@
+diff --git a/tests/counter_service/configuration_pending.rs b/tests/counter_service/configuration_pending.rs
+index 59d4d38..77ecb3c 100644
+--- a/tests/counter_service/configuration_pending.rs
++++ b/tests/counter_service/configuration_pending.rs
+@@ -33,6 +33,28 @@ pub(super) fn setup(quic: bool) -> Cluster {
+     c
+ }
+
++// A sampled leader role does not establish current-term commitment. Complete
++// a real quorum read on this exact endpoint before deliberately removing voters.
++pub(super) fn serving_leader(c: &mut Cluster) -> usize {
++    let deadline = Instant::now() + Duration::from_secs(10);
++    loop {
++        let leader = c.leader();
++        let output = c.request(leader, &["read"]);
++        let text = String::from_utf8(output.stdout).unwrap();
++        if output.status.success() {
++            assert_eq!(text, "OK value=42\n");
++            return leader;
++        }
++        assert!(
++            retryable_leader_response(&["read"], &text),
++            "pre-cut read node={leader}: {text} {}",
++            String::from_utf8_lossy(&output.stderr)
++        );
++        assert!(Instant::now() < deadline, "pre-cut read did not settle");
++        std::thread::park_timeout(Duration::from_millis(10));
++    }
++}
++
+ fn observe_pending(c: &Cluster, leader: usize) -> String {
+     let pending = c.ok(leader, &["configuration-status", OP]);
+     assert!(pending.contains("evidence=local_durable"), "{pending}");
+@@ -52,7 +74,7 @@ fn observe_pending(c: &Cluster, leader: usize) -> String {
+
+ fn history(quic: bool) {
+     let mut c = setup(quic);
+-    let leader = c.leader();
++    let leader = serving_leader(&mut c);
+     for node in (1..=3).filter(|node| *node != leader) {
+         drain::kill(&mut c, node);
+     }
+diff --git a/tests/counter_service/preparing_command.rs b/tests/counter_service/preparing_command.rs
+index 7dccbc1..c6606b6 100644
+--- a/tests/counter_service/preparing_command.rs
++++ b/tests/counter_service/preparing_command.rs
+@@ -179,7 +179,7 @@ fn history(quic: bool) {
+ #[test]
+ fn unknown_configuration_reply_keeps_original_durable_record_without_rerouting() {
+     let mut c = configuration_pending::setup(false);
+-    let leader = c.leader();
++    let leader = configuration_pending::serving_leader(&mut c);
+     for id in (1..=3).filter(|id| *id != leader) {
+         drain::kill(&mut c, id);
+     }
+diff --git a/tests/counter_service/startup_ports.rs b/tests/counter_service/startup_ports.rs
+index c46c818..35ee9b5 100644
+--- a/tests/counter_service/startup_ports.rs
++++ b/tests/counter_service/startup_ports.rs
+@@ -5,6 +5,9 @@ use super::*;
+
+ #[test]
+ fn late_listener_reservations_avoid_kernel_client_ports() {
++    // Prevent a concurrent child spawn from inheriting these parent handles
++    // across the exact release/rebind check; child execution stays parallel.
++    let _spawn = fixture_gate();
+     // The recorded failure was allocation180, peer33426, during cold recovery.
+     // Model used blocks locally, retaining actual global reservations separately.
+     let mut global = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());

@@ -179,7 +179,7 @@ fn history(quic: bool) {
 #[test]
 fn unknown_configuration_reply_keeps_original_durable_record_without_rerouting() {
     let mut c = configuration_pending::setup(false);
-    let leader = c.leader();
+    let leader = configuration_pending::serving_leader(&mut c);
     for id in (1..=3).filter(|id| *id != leader) {
         drain::kill(&mut c, id);
     }

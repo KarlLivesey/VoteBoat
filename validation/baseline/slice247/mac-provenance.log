@@ -1,0 +1,20 @@
+9c952aa1db234ecc00d0bb145b177756551bcac2
+arm64
+ProductName:		macOS
+ProductVersion:		27.0
+BuildVersion:		26A428
+cargo 1.98.0 (797e8a9bc 2026-08-05)
+rustc 1.98.0 (88d9e12ae 2026-08-18)
+ tests/counter_service/configuration_pending.rs | 24 +++++++++++++++++++++++-
+ tests/counter_service/preparing_command.rs     |  2 +-
+ tests/startup.rs                               | 12 ++++++++----
+ tests/startup/maintenance.rs                   | 24 ++++++++++++++++++------
+ tests/startup/maintenance/binding.rs           |  2 +-
+ tests/startup/maintenance/drain.rs             |  2 +-
+ tests/startup/maintenance/membership_drain.rs  |  2 +-
+ tests/startup/multi.rs                         | 12 ++++--------
+ tests/startup/peer_rotation.rs                 |  4 ++--
+ 9 files changed, 59 insertions(+), 25 deletions(-)
+test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
