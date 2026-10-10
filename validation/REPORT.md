@@ -1,5 +1,25 @@
 # Validation report — slice 35
 
+QUIC FIN progress: [slice216](baseline/slice216/README.md). Same-read zero-length
+FIN observation removes an avoidable stream-credit owner cycle while preserving
+exact plaintext limits, one stream and acknowledged flush. The original coarse
+profile fails before and passes after; an ACK-frequency candidate does not fix it
+and is removed. All12 session/15 shared-connector checks pass. The first full
+counter run has161/1, exposing a checkpoint setup accepting an older image.
+Exact original completion-floor preparation passes2 TCP/QUIC histories; the final
+full counter run is still161/1 on a different explicit unknown initial drain
+admission. Preserve that failure for original-identity continuation; no full
+counter/macOS acceptance claim. Previous a25e5f7 and f1c18d4 Ubuntu operators pass
+162/19/21, while macOS fails152/10 and150/12 before later targets execute. Raw
+failures/candidate and terminal platform logs remain; full P0–P7 stays active.
+Directory19/transfer21 pass in matching sequential execution. Earlier concurrent
+target execution fails18/1 and20/1 in QUIC peer rotation; retain those pressure
+observations and do not claim their exact cause is known. Counter161/1 remains
+failed, so there is no complete local operator acceptance result.
+The default TCP exact-floor check passes1. Formatting/four strict Clippy profiles
+have zero diagnostics; inventory108 paths and18 partial-ledger metadata checks
+pass. No compiler warning or failed runtime result is hidden or reclassified.
+
 Timer contract review: [slice215](baseline/slice215/README.md). The shared
 downstream host/native checks cover exact-token ownership, capacity/refusal,
 replacement/cancellation, deadline budgets/lateness and recreated-owner rejection.

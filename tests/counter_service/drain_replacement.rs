@@ -103,6 +103,33 @@ fn verify_maintenance_checkpoint(c: &Cluster, original: &GroupLog) {
         LeadershipPhase::Completed { .. }
     ));
 }
+fn checkpoint_after(c: &Cluster, id: usize, minimum: u64) {
+    let end = Instant::now() + Duration::from_secs(10);
+    loop {
+        let text = c.ok(id, &["status"]);
+        if field(&text, "committed=") >= minimum {
+            break;
+        }
+        assert!(Instant::now() < end, "handoff prefix on {id}: {text}");
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+    c.ok(id, &["checkpoint"]);
+    loop {
+        let text = c.ok(id, &["maintenance"]);
+        if field(&text, "checkpoint_base=") >= minimum {
+            return;
+        }
+        assert!(Instant::now() < end, "handoff checkpoint on {id}: {text}");
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+}
+fn field(text: &str, prefix: &str) -> u64 {
+    text.split_whitespace()
+        .find_map(|word| word.strip_prefix(prefix))
+        .unwrap()
+        .parse()
+        .unwrap()
+}
 fn prepare(quic: bool) -> Cluster {
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/four-node-tls");
     let mut c = drain::cluster_with_tls(quic, Some(tls));
@@ -142,6 +169,9 @@ fn prepare(quic: bool) -> Cluster {
         c.start(id, "recover-member");
     }
     configure(&mut c, "19770");
+    // An older image is real setup state, not proof a later checkpoint finished.
+    c.ok(1, &["checkpoint"]);
+    drain::wait_manual_checkpoint(&c, 1);
     let leader = c.leader();
     let target = leader % 3 + 1;
     c.ok(
@@ -155,10 +185,19 @@ fn prepare(quic: bool) -> Cluster {
             "1",
         ],
     );
-    leadership::status(&mut c, "19769", "phase=Completed");
+    let (_, completed) = leadership::status(&mut c, "19769", "phase=Completed");
+    let minimum = completed
+        .split_once("phase=Completed { index: ")
+        .unwrap()
+        .1
+        .split(',')
+        .next()
+        .unwrap()
+        .parse::<u64>()
+        .unwrap();
+    assert!(minimum > 0);
     for id in 1..=3 {
-        c.ok(id, &["checkpoint"]);
-        drain::wait_manual_checkpoint(&c, id);
+        checkpoint_after(&c, id, minimum);
     }
     c.stop();
     enroll(&mut c);

@@ -128,6 +128,20 @@ confirmation remains open. The newly completed priorcd54071 operator run passes
 Ubuntu but has6 macOS counter failures; the exact result/log is retained in
 validation/baseline/slice210a and is not acceptance of this change.
 
+Slice216 releases an already-known QUIC FIN/stream credit in the same plaintext
+read without changing single-stream limits or acknowledged flush. The original
+coarse-poll profile fails before and passes after; all12 session and15 shared
+connector checks pass. Two actual replacement-drain histories now require the
+checkpoint's exact handoff completion floor under the original wait deadline.
+Both full local counter runs have161/1 failures: the first on stale checkpoint
+setup, the final on a different explicit unknown initial drain admission. Keep
+that original-identity continuation open; no whole-counter/platform pass claim.
+Previous a25e5f7/f1c18d4 Ubuntu operators pass162/19/21; macOS fails152/10 and150/12.
+These selected P2/runtime improvements do not close macOS or P7 latency gates.
+Directory19/transfer21 pass in the CI sequential profile. Their concurrent18/1
+and20/1 deadline/leadership-uncertainty failures remain recorded for isolation
+work; no whole-operator acceptance is inferred from the sequential successes.
+
 Slice215 adds selected TimerService operation review: shared host/native
 capacity-three histories, eight seeds of128 actions, exact-token cancellation,
 generation recreation and poll-budget/monotonic-time assertions. A wrong host

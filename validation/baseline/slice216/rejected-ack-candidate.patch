@@ -1,0 +1,20 @@
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+index d19077a..a80bf0e 100644
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -73,8 +73,15 @@ pub struct NativeQuicSession {
+     peer_closed: bool,
+ }
+ fn bounded_transport(limits: SessionLimits) -> Result<Arc<TransportConfig>, SessionError> {
++    // This channel serializes chunks until their FIN is acknowledged. Waiting
++    // for a second eliciting packet can stall the next chunk/control frame.
++    // Keep exact acknowledged flush semantics and existing I/O budgets; request
++    // immediate ACKs where the peer supports QUIC ACK_FREQUENCY.
++    let mut acknowledgements = AckFrequencyConfig::default();
++    acknowledgements.ack_eliciting_threshold(0u32.into());
+     let mut transport = TransportConfig::default();
+     transport
++        .ack_frequency_config(Some(acknowledgements))
+         .max_concurrent_bidi_streams(0u32.into())
+         .max_idle_timeout(Some(
+             Duration::from_secs(5)

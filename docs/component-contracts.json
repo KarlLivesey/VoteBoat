@@ -934,7 +934,8 @@
       "native": "NativeTlsConfig with with_wire_version/wire_version selection; NativeTlsSession<I: Read + Write> (tls feature); NativeQuicSession / QuicSessionOptions with client, server, local_addr and next_deadline (optional quic feature); Box<S> forwarding",
       "conformance": [
         "tests/secure.rs",
-        "tests/quic.rs"
+        "tests/quic.rs",
+        "tests/quic/chunk_progress.rs"
       ],
       "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1\u20134 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport."
     },

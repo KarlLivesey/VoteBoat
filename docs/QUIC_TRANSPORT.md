@@ -59,6 +59,13 @@ one incoming stream at a time. Reading a FIN ends that chunk, not the logical
 byte channel. The application and frame codec see ordinary partial reads/writes.
 This deliberately conservative flow-control scheme has not been benchmarked.
 
+After returning a chunk's last bytes, the reader checks for an already-known
+FIN without consuming more plaintext. It releases that stream's credit in the
+same read; partial or unavailable data keeps the current stream. This avoids an
+extra caller cycle before the next chunk can start. The outgoing ACK/flush gate
+and single-stream limit remain. Selected coarse-poll checks exercise this path;
+they do not guarantee host responsiveness or a network latency bound.
+
 Each poll bounds socket calls and bytes. The fixed UDP payload/initial MTU is
 1200 bytes, with MTU discovery and segmentation offload disabled. One pending
 encrypted datagram survives socket backpressure without being overwritten by

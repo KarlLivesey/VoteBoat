@@ -398,9 +398,25 @@ impl NativeQuicSession {
             let mut recv = c.recv_stream(stream);
             let mut chunks = recv.read(true).map_err(|_| SessionError::Truncated)?;
             let result = chunks.next(bytes.len());
+            // Observe a known FIN after the last bytes in this same read.
+            // A zero-byte probe cannot consume more plaintext; if data remains,
+            // the empty chunk leaves its offset unchanged. Waiting until a
+            // later read unnecessarily withholds the single-stream ID credit.
+            let finished = if matches!(result, Ok(Some(_))) {
+                match chunks.next(0) {
+                    Ok(None) => true,
+                    Ok(Some(_)) | Err(ReadError::Blocked) => false,
+                    _ => return Err(SessionError::Truncated),
+                }
+            } else {
+                false
+            };
             let _ = chunks.finalize(); // The next poll sends flow-control updates.
             match result {
                 Ok(Some(chunk)) => {
+                    if finished {
+                        self.receiving = None;
+                    }
                     bytes[..chunk.bytes.len()].copy_from_slice(&chunk.bytes);
                     return Ok(chunk.bytes.len());
                 }

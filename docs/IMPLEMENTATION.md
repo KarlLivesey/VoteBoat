@@ -329,10 +329,67 @@ profiles pass with zero diagnostics; the pre-push hook remains enabled.
 Broader security work stays with the user's Daybreak run. Macro milestones and
 supported-platform completion criteria are unchanged; full P0–P7 remains active.
 
-Current: diagnose macOS remaining group liveness/preparation failures using
-actual run38047957086/33afe94 (counter147 pass/11 fail; Ubuntu157/1). Earlier
-38047529334/629db60 Ubuntu passes all targets, but macOS finishes145/13. Later
-targets on failing counter jobs were not run. Depend on retained logs, new
+Implemented216 corrects native QUIC's delayed stream-credit release: when a read
+returns the last bytes, a zero-length ordered probe observes an already-known FIN
+before finalize. It consumes no extra plaintext or socket calls and retains the
+single-stream, bounded buffering, exact authenticated binding and ACK/flush rules.
+The coarse6ms three-chunk/50ms profile fails before correction with all48 bytes
+received but final output unflushed, then passes identically afterward. The1ms
+twelve-chunk profile already passes before correction. An immediate-ACK candidate
+does not fix the coarse profile and is removed; its patch/results remain.
+All12 QUIC session and15 shared-connector tests pass, including partial bytes,
+loss/retransmission, close and original credits. No Raft/QUIC timeout or ACK
+configuration change is installed; no general latency or macOS completion claim.
+
+The first full local counter run has161 passes/1 failure: replacement-drain import
+finds an older checkpoint without the required Completed handoff. The fixture
+previously accepted any positive checkpoint base after a leader's quorum read.
+It now captures that exact original completion index, waits for local committed
+prefixes and requires each requested image to cover it under the unchanged10s
+checkpoint deadline. Imported Completed/retry/profile checks remain. The selected
+old-checkpoint setup run passes2 rather than reproducing the full-run failure;
+final exact-floor TCP/QUIC checks pass2. Do not describe that selected old run as
+a deterministic failing regression. The final full counter run still has161/1:
+the replacement check and affected group histories pass, but drain_retirement's
+setup stops on explicit UNKNOWN initial drain admission/no matching local record,
+instructing a repeat of the same sequence/operation. Preserve that failure and
+advance original-identity continuation next; do not rerun unchanged for a pass.
+
+Directory/transfer checks were launched concurrently (same all-feature binaries,
+separate fixtures), rather than the operator job's sequential target order. They
+finish18/1 and20/1, both in QUIC peer-rotation histories on lookup/command deadlines.
+Retain those pressure failures as real observations; do not attribute them to
+the FIN correction or dismiss them as proven host-load effects. Run each target
+once in the actual CI sequential order after both handles are terminal. This is
+an explicit change of validation conditions to match the operator profile,
+not an unchanged repeat or reconstruction of the failed packet history. Any
+remaining failure stays open, and sequential passes would not close pressure/
+resource-isolation acceptance.
+
+The matching sequential profile passes directory19 and transfer21, including
+their actual peer-rotation, directory lookup, split/merge phase cuts and original
+receipt/retirement recovery paths. The final accurately named two QUIC progress
+assertions also pass unchanged. The concurrent18/1 and20/1 observations and
+full-counter161/1 uncertainty remain open; these scoped passes are not a complete
+operator or macOS acceptance result.
+The final default TCP exact-floor history also passes1. It runs after all
+all-feature executable targets finish, preserving the feature-build isolation
+rule. The scoped QUIC correction does not affect the TCP production path.
+Formatting and all four strict Clippy profiles pass with zero diagnostics.
+Inventory108 paths and all18 provider-ledger metadata checks pass; no new seam
+or additional provider certification is claimed. The pre-push hook stays enabled.
+
+Both previous platform runs are terminal: a25e5f7 Ubuntu162/19/21 succeeds and
+macOS counter152/10 fails; f1c18d4 Ubuntu162/19/21 succeeds and macOS counter150/12
+fails. Later macOS targets were not executed. Full logs are retained in slice216;
+these preceding-source outcomes do not validate this current change. Macro review:
+P2 byte-channel progress and usable-service checkpoint preparation advance;
+original drain continuation, matching macOS and full P0–P7 acceptance stay open.
+
+Current: recover the explicitly unknown original retirement-setup drain without
+changing source/sequence/operation, and diagnose macOS remaining group liveness/
+preparation failures using the actual a25e5f7/f1c18d4 runs above. Later targets on
+failing counter jobs were not run. Depend on retained logs, new
 failure-only queue/binding/timing observations and shared-group session/owner
 contracts. Identify the earliest failed
 transition, add bounded diagnostic evidence if necessary and reproduce a focused
@@ -359,6 +416,83 @@ requires terminal observed outcomes under the original deadlines and recorded
 identities, not an enlarged timeout or omitted failing history. This advances
 the usable service macro milestone; separate-host provisioning and broader faults
 remain explicit rather than silently counted as complete.
+
+### Slice216 schema plan — QUIC acknowledged-chunk progress
+
+The completed diagnostic macOS job114203803025 at a25e5f7 has152 passing counter
+checks and10 failures; later operator targets did not run. In the stopped-source
+group-drain-runner case both remaining peers are bound with15–20 outbound batches
+and Candidate terms70/72. Their observed poll maxima are below7ms. Other three-
+node failures retain bound peers and33–50 batches. These observations select the
+QUIC progress path for investigation but do not establish the failed run's cause.
+
+The native byte channel allows one unacknowledged FIN chunk and waits for its
+Finished event before another write; the pinned protocol defaults acknowledge
+every other eliciting packet or after25ms. A serialized small-frame workload
+can therefore accumulate delayed acknowledgements despite active owner polling.
+First reproduce that accumulation with12 exact16-byte chunks under controlled
+1ms virtual polls and the existing150ms minimum election interval as a finite
+test horizon. That corrected profile passes at46ms and alone provides no basis
+for a change. A second fixed profile sends three chunks in the default50ms
+heartbeat interval, with6ms owner polls: all48 bytes arrive but the final original
+chunk remains unacknowledged at48ms. The6ms cadence is a selected coarse-owner
+schedule, not an assertion that CI measured inter-poll intervals. Preserve both
+outcomes. These are not network/wall-clock latency guarantees or P7 benchmarks.
+
+Candidate API/data shape: retain the single-stream/chunk, byte/handshake budgets,
+tokens, binding and exact flush semantics. If the reproduction fails, request
+immediate acknowledgements through the pinned QUIC ACK_FREQUENCY configuration
+for both native endpoints (ack-eliciting threshold0, unchanged negotiated delay).
+Negotiation stays inside QUIC; no VoteBoat frame,
+credential, provider seam or Raft timer changes. Extra ACK traffic remains under
+the existing poll I/O/byte budgets. No ACK is Raft durability or quorum evidence.
+
+Transitions/ownership: each accepted write still owns its unacknowledged chunk;
+is_flushed remains false until the existing completion event. Peer loss, close,
+revoke, retransmission and backpressure retain their current behavior. No second
+stream, unbounded in-flight queue or early credit release is introduced. Legacy
+peers retain their negotiated behavior; do not claim this removes every stall.
+
+Acceptance: preserve the old failing finite schedule, verify unchanged exact
+bytes/flush and bounded polls afterward, run the existing QUIC partial-byte,
+packet-loss, close and framed credit checks, then affected multi-group service
+histories and four strict lint profiles. Matching platform feedback is required
+before closing macOS acceptance. This advances usable P2 transport progress and
+leaves broad security work to Daybreak; the full P0–P7 goal stays active.
+
+Cause review before adopting a change: requesting immediate ACKs does not fix
+the same6ms profile; it still receives all bytes but remains unflushed at48ms.
+Remove that candidate and retain its exact patch/output. The pinned stream reader
+only releases stream-ID credit when next() observes FIN. Native read_chunk returns
+the final data immediately, deferring that FIN observation until another caller
+read/poll. With one permitted stream this introduces an avoidable owner cycle.
+
+Revised candidate shape: after returning data, probe next(0) on the same ordered
+reader before finalize. The pinned implementation returns an empty, non-consuming
+chunk when more data exists, Blocked for unavailable data/FIN, or None for an
+already-known FIN. Only that terminal None releases receiving/stream credit.
+No extra plaintext, socket I/O, buffering, stream or early flush is introduced.
+Partial and packet-loss checks must verify no byte loss or false termination.
+The default QUIC ACK configuration and all Raft timers remain unchanged. Passing
+the same coarse schedule would identify this local progress cause, not prove the
+macOS job's complete cause or its operational acceptance.
+
+The complete local counter run then has161 passes and one replacement-drain
+fixture failure: the imported source1 checkpoint does not contain Completed
+handoff19769. The fixture waits for Completed on a quorum-read leader, requests
+per-node checkpoints and considers any checkpoint_base>0 sufficient. That neither
+requires source1 to commit the completion nor requires its image to include it.
+Do not weaken the imported Completed assertion or rerun unchanged for a pass.
+
+Companion fixture schema: deliberately retain a prior source1 checkpoint before
+the handoff. Capture the original Completed record's positive index from the
+quorum reply; wait for each local committed prefix to cover it before requesting
+the new checkpoint. Then require checkpoint_base at least that exact floor under
+the existing10s checkpoint wait, before shutdown/offline enrollment. The old
+checkpoint alone cannot satisfy setup. Only test setup changes; original intent,
+source/import profile, receipt/reopen assertions and production checkpoint rules
+remain. Preserve the initial failed full run and test this specific correction
+before repeating the full suite.
 
 ### Slice215 schema plan — replaceable timer ownership and budgets
 

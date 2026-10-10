@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 160 filtered out; finished in 14.66s
+

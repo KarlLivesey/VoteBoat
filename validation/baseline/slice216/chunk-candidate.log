@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.92s
+     Running tests/quic.rs (target/debug/deps/quic-08ec27dd5beb7107)
+
+running 2 tests
+cadence=6 horizon=50 elapsed=48 admitted=48 received=48 flushed=false
+
+thread 'chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls' (1557498) panicked at tests/quic/chunk_progress.rs:62:5:
+original chunk still unacknowledged
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... FAILED
+cadence=1 horizon=150 elapsed=45 admitted=192 received=192 flushed=true
+test chunk_progress::serialized_small_chunks_do_not_accumulate_ack_delay_across_election_interval ... ok
+
+failures:
+
+failures:
+    chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test quic`

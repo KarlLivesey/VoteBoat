@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.08s
+     Running tests/quic.rs (target/debug/deps/quic-08ec27dd5beb7107)
+
+running 2 tests
+cadence=6 horizon=50 elapsed=48 admitted=48 received=48 flushed=true
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... ok
+cadence=1 horizon=150 elapsed=35 admitted=192 received=192 flushed=true
+test chunk_progress::serialized_small_chunks_do_not_accumulate_ack_delay_across_election_interval ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+

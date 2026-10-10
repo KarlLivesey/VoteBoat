@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![cfg(feature = "quic")]
+#[path = "quic/chunk_progress.rs"]
+mod chunk_progress;
 mod support;
 use std::net::UdpSocket;
 use support::*;
