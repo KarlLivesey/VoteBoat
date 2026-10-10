@@ -26,6 +26,7 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 mod readiness;
+mod receive;
 pub use readiness::*;
 mod configuration;
 pub use authority::ReplicationAuthorizationStatus;
@@ -396,6 +397,51 @@ impl Raft {
         mode: RecoveryMode,
     ) -> Result<Self, RaftError> {
         let limits = limits.validate()?;
+        let membership = Self::validate_recovery(node, binding, &state, limits, mode)?;
+        Ok(Self {
+            node,
+            binding,
+            limits,
+            durable: state,
+            membership,
+            role: Role::Follower,
+            votes: BTreeSet::new(),
+            vote_context: None,
+            progress: BTreeMap::new(),
+            next_index: BTreeMap::new(),
+            requests: BTreeMap::new(),
+            repair_requests: BTreeMap::new(),
+            batched_joint_repair: false,
+            snapshot_joint_repair: false,
+            committed_snapshot_repair: false,
+            configuration_replication: false,
+            request_sequence: 0,
+            last_batch: 0,
+            pending: None,
+            read: None,
+            ready_read: None,
+            last_read_request: 0,
+            fenced: false,
+            staged_snapshot: None,
+            staged_snapshot_repair: false,
+            application_install: None,
+            checkpoint_requested: None,
+            checkpoint_reconcile: None,
+            election_reset: 0,
+            authority_request: None,
+            replication_permit: None,
+            learner_readiness: None,
+            ready_learner: None,
+            readiness_check: None,
+        })
+    }
+    fn validate_recovery(
+        node: NodeId,
+        binding: StoreBinding,
+        state: &GroupLog,
+        limits: LogLimits,
+        mode: RecoveryMode,
+    ) -> Result<Membership, RaftError> {
         if (mode == RecoveryMode::StaticVoter
             && state.bootstrap.voter_stores.get(&node) != Some(&binding.identity))
             || state
@@ -448,6 +494,16 @@ impl Raft {
             previous_term = e.term;
         }
         let membership = state.membership().map_err(|_| RaftError::InvalidRecovery)?;
+        Self::validate_recovery_assignment(node, binding, state, mode, &membership)?;
+        Ok(membership)
+    }
+    fn validate_recovery_assignment(
+        node: NodeId,
+        binding: StoreBinding,
+        state: &GroupLog,
+        mode: RecoveryMode,
+        membership: &Membership,
+    ) -> Result<(), RaftError> {
         if mode == RecoveryMode::Member {
             let committed = state
                 .membership_at(state.commit_index)
@@ -467,7 +523,7 @@ impl Raft {
                     && m.stable().policy() == &state.bootstrap.policy
                     && m.stable().voter_stores() == &state.bootstrap.voter_stores
             };
-            if !assignment_only(&membership)
+            if !assignment_only(membership)
                 || !assignment_only(&committed)
                 || membership.stable().learners().get(&node) != Some(&binding.identity)
                 || committed.stable().learners().get(&node) != Some(&binding.identity)
@@ -485,43 +541,9 @@ impl Raft {
                 return Err(RaftError::InvalidRecovery);
             }
         }
-        Ok(Self {
-            node,
-            binding,
-            limits,
-            durable: state,
-            membership,
-            role: Role::Follower,
-            votes: BTreeSet::new(),
-            vote_context: None,
-            progress: BTreeMap::new(),
-            next_index: BTreeMap::new(),
-            requests: BTreeMap::new(),
-            repair_requests: BTreeMap::new(),
-            batched_joint_repair: false,
-            snapshot_joint_repair: false,
-            committed_snapshot_repair: false,
-            configuration_replication: false,
-            request_sequence: 0,
-            last_batch: 0,
-            pending: None,
-            read: None,
-            ready_read: None,
-            last_read_request: 0,
-            fenced: false,
-            staged_snapshot: None,
-            staged_snapshot_repair: false,
-            application_install: None,
-            checkpoint_requested: None,
-            checkpoint_reconcile: None,
-            election_reset: 0,
-            authority_request: None,
-            replication_permit: None,
-            learner_readiness: None,
-            ready_learner: None,
-            readiness_check: None,
-        })
+        Ok(())
     }
+
     pub fn role(&self) -> Role {
         self.role
     }
@@ -840,24 +862,7 @@ impl Raft {
                 learner,
                 session,
                 requirements,
-            } => {
-                let request = self
-                    .begin_learner_readiness(learner, session, requirements)
-                    .map_err(|e| match e {
-                        ReadinessError::Consensus(e) => e,
-                        _ => RaftError::InvalidMessage,
-                    })?;
-                Ok(vec![Effect::Send(Message {
-                    group: request.group,
-                    configuration: request.configuration,
-                    from: self.node,
-                    sender: self.binding,
-                    to: learner.node,
-                    term: request.term,
-                    context: request.context,
-                    rpc: Rpc::LearnerReadinessRequest(Box::new(request)),
-                })])
-            }
+            } => self.request_learner_readiness(learner, session, requirements),
             Event::CancelLearnerReadiness => {
                 self.cancel_learner_readiness();
                 Ok(Vec::new())
@@ -880,34 +885,7 @@ impl Raft {
                 self.checkpoint_requested = Some(context);
                 Ok(vec![Effect::CheckpointRequired { context }])
             }
-            Event::Campaign => {
-                if !self.local_voter() {
-                    return Err(RaftError::NotVoter);
-                }
-                self.reset_election()?;
-                self.clear_reads();
-                self.role = Role::Candidate;
-                self.votes.clear();
-                self.requests.clear();
-                self.repair_requests.clear();
-                self.vote_context = None;
-                let term = self
-                    .durable
-                    .hard_state
-                    .term
-                    .checked_add(1)
-                    .ok_or(RaftError::Exhausted)?;
-                self.persist(
-                    HardState {
-                        term,
-                        voted_for: Some(self.node),
-                    },
-                    self.durable.commit_index,
-                    None,
-                    After::Campaign,
-                    None,
-                )
-            }
+            Event::Campaign => self.campaign(),
             Event::Heartbeat => {
                 if self.role == Role::Leader {
                     let mut effects = self.broadcast()?;
@@ -917,34 +895,7 @@ impl Raft {
                     Ok(Vec::new())
                 }
             }
-            Event::Propose { operation, bytes } => {
-                if self.role != Role::Leader || !self.local_voter() {
-                    return Err(RaftError::NotLeader);
-                }
-                if bytes.len() > self.limits.max_command_bytes {
-                    return Err(StorageError::Rejected("command byte budget").into());
-                }
-                let index = self
-                    .durable
-                    .last_index()
-                    .checked_add(1)
-                    .ok_or(RaftError::Exhausted)?;
-                let entry = LogEntry {
-                    index,
-                    term: self.durable.hard_state.term,
-                    payload: EntryPayload::Command { operation, bytes },
-                };
-                self.persist(
-                    self.durable.hard_state,
-                    self.durable.commit_index,
-                    Some(Suffix {
-                        from: index,
-                        entries: vec![entry],
-                    }),
-                    After::LeaderAppend,
-                    None,
-                )
-            }
+            Event::Propose { operation, bytes } => self.propose(operation, bytes),
             Event::Receive(message) => self.receive(message),
             Event::Read { request } => self.begin_read(request),
             Event::CancelRead { request } => {
@@ -961,6 +912,89 @@ impl Raft {
                 }
             }
         }
+    }
+    fn campaign(&mut self) -> Result<Vec<Effect>, RaftError> {
+        if !self.local_voter() {
+            return Err(RaftError::NotVoter);
+        }
+        self.reset_election()?;
+        self.clear_reads();
+        self.role = Role::Candidate;
+        self.votes.clear();
+        self.requests.clear();
+        self.repair_requests.clear();
+        self.vote_context = None;
+        let term = self
+            .durable
+            .hard_state
+            .term
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        self.persist(
+            HardState {
+                term,
+                voted_for: Some(self.node),
+            },
+            self.durable.commit_index,
+            None,
+            After::Campaign,
+            None,
+        )
+    }
+    fn propose(
+        &mut self,
+        operation: OperationId,
+        bytes: Vec<u8>,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if self.role != Role::Leader || !self.local_voter() {
+            return Err(RaftError::NotLeader);
+        }
+        if bytes.len() > self.limits.max_command_bytes {
+            return Err(StorageError::Rejected("command byte budget").into());
+        }
+        let index = self
+            .durable
+            .last_index()
+            .checked_add(1)
+            .ok_or(RaftError::Exhausted)?;
+        let entry = LogEntry {
+            index,
+            term: self.durable.hard_state.term,
+            payload: EntryPayload::Command { operation, bytes },
+        };
+        self.persist(
+            self.durable.hard_state,
+            self.durable.commit_index,
+            Some(Suffix {
+                from: index,
+                entries: vec![entry],
+            }),
+            After::LeaderAppend,
+            None,
+        )
+    }
+    fn request_learner_readiness(
+        &mut self,
+        learner: PeerIdentity,
+        session: StoreSession,
+        requirements: ReadinessRequirements,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let request = self
+            .begin_learner_readiness(learner, session, requirements)
+            .map_err(|e| match e {
+                ReadinessError::Consensus(e) => e,
+                _ => RaftError::InvalidMessage,
+            })?;
+        Ok(vec![Effect::Send(Message {
+            group: request.group,
+            configuration: request.configuration,
+            from: self.node,
+            sender: self.binding,
+            to: learner.node,
+            term: request.term,
+            context: request.context,
+            rpc: Rpc::LearnerReadinessRequest(Box::new(request)),
+        })])
     }
 
     /// Async/batched workers must correlate the full submitted effect as well
@@ -1056,7 +1090,27 @@ impl Raft {
             ));
         }
         effects.extend(retirement);
-        match p.after {
+        self.after_durable(p.after, p.reply, &mut effects)?;
+        if effects.iter().any(|e| {
+            matches!(
+                e,
+                Effect::Send(Message {
+                    rpc: Rpc::Voted { granted: true },
+                    ..
+                })
+            )
+        }) {
+            self.reset_election()?;
+        }
+        Ok(effects)
+    }
+    fn after_durable(
+        &mut self,
+        after: After,
+        reply: Option<Message>,
+        effects: &mut Vec<Effect>,
+    ) -> Result<(), RaftError> {
+        match after {
             After::Campaign => {
                 self.votes.insert(self.node);
                 if self.membership().is_satisfied(&self.votes) {
@@ -1082,7 +1136,7 @@ impl Raft {
                 }
             }
             After::Reply => {
-                if let Some(mut reply) = p.reply {
+                if let Some(mut reply) = reply {
                     reply.term = self.durable.hard_state.term;
                     effects.push(Effect::Send(reply));
                 }
@@ -1103,7 +1157,7 @@ impl Raft {
             }
             After::SnapshotInstall(reference) => {
                 self.application_install =
-                    Some((reference, p.reply.ok_or(RaftError::WrongCompletion)?));
+                    Some((reference, reply.ok_or(RaftError::WrongCompletion)?));
                 effects.push(Effect::SnapshotInstalled(reference));
             }
             After::CheckpointCompact(reference) => {
@@ -1113,18 +1167,7 @@ impl Raft {
                 effects.push(Effect::CheckpointCompacted(reference));
             }
         }
-        if effects.iter().any(|e| {
-            matches!(
-                e,
-                Effect::Send(Message {
-                    rpc: Rpc::Voted { granted: true },
-                    ..
-                })
-            )
-        }) {
-            self.reset_election()?;
-        }
-        Ok(effects)
+        Ok(())
     }
 
     fn persist(
@@ -1578,478 +1621,6 @@ impl Raft {
         }
         Ok(effects)
     }
-    fn receive_inner(&mut self, m: Message) -> Result<Vec<Effect>, RaftError> {
-        if matches!(
-            m.rpc,
-            Rpc::LearnerReadinessRequest(_) | Rpc::LearnerReadinessReply { .. }
-        ) {
-            return self.receive_readiness(m);
-        }
-        if matches!(
-            m.rpc,
-            Rpc::AuthorityRequest { .. } | Rpc::AuthorityReply { .. }
-        ) {
-            return self.receive_authority(m);
-        }
-        if let Some(index) = self.retirement_commit(&m) {
-            let reply = self.reply(
-                &m,
-                Rpc::Appended {
-                    success: true,
-                    matching_index: index,
-                },
-            );
-            return if index > self.durable.commit_index {
-                self.persist(
-                    self.durable.hard_state,
-                    index,
-                    None,
-                    After::Reply,
-                    Some(reply),
-                )
-            } else {
-                Ok(vec![Effect::Send(reply)])
-            };
-        }
-        // Replication and vote requests from an exact locally authorized voter
-        // may bridge differing accepted heads. Replication proves only its
-        // checked matching prefix. A vote uses the local electorate and freshness;
-        // the request scope is echoed, never installed as membership. Read
-        // authority and every response require the local current scope, and
-        // response handlers also match their admitted request.
-        let replication_request = matches!(&m.rpc, Rpc::Append { .. } | Rpc::Snapshot { .. });
-        let election_request = matches!(&m.rpc, Rpc::Vote { .. });
-        let permitted = self.permitted_replication(&m);
-        if m.to != self.node
-            || m.from == self.node
-            || m.group != self.durable.bootstrap.group
-            || (!replication_request
-                && !election_request
-                && m.configuration != self.membership().id())
-            || (!permitted && self.membership().replica_store(m.from) != Some(m.sender.identity))
-        {
-            return Err(RaftError::WrongIdentity);
-        }
-        // Learners return replication evidence but never vote, lead, or
-        // establish read authority. Replication replies remain non-voting.
-        if !permitted
-            && !self.membership().is_voter(m.from)
-            && !matches!(
-                m.rpc,
-                Rpc::Appended { .. } | Rpc::SnapshotAck { .. } | Rpc::Compacted { .. }
-            )
-        {
-            return Err(RaftError::WrongIdentity);
-        }
-        if m.term == 0 || m.context.sequence == 0 {
-            return Err(RaftError::InvalidMessage);
-        }
-        let request = matches!(
-            &m.rpc,
-            Rpc::Vote { .. } | Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
-        );
-        if request && m.context.origin != m.sender {
-            return Err(RaftError::WrongIdentity);
-        }
-        if !request && m.context.origin != self.binding {
-            return Err(RaftError::WrongIdentity);
-        }
-        if matches!(m.rpc, Rpc::ReadProbe) && !self.local_voter() {
-            return Err(RaftError::WrongIdentity);
-        }
-        let old = self.durable.hard_state;
-        let hard = if m.term > old.term {
-            HardState {
-                term: m.term,
-                voted_for: None,
-            }
-        } else {
-            old
-        };
-        if m.term > old.term {
-            self.clear_reads();
-            self.role = Role::Follower;
-            self.vote_context = None;
-            self.requests.clear();
-            self.repair_requests.clear();
-        }
-        match &m.rpc {
-            Rpc::LearnerRepair { .. }
-            | Rpc::LearnerRepaired { .. }
-            | Rpc::LearnerRepairSnapshot { .. }
-            | Rpc::CommittedLearnerRepairSnapshot { .. } => unreachable!(),
-            Rpc::AuthorityRequest { .. }
-            | Rpc::AuthorityReply { .. }
-            | Rpc::LearnerReadinessRequest(_)
-            | Rpc::LearnerReadinessReply { .. } => unreachable!(),
-            Rpc::Vote {
-                last_index,
-                last_term,
-            } => {
-                if *last_term > m.term || ((*last_index == 0) != (*last_term == 0)) {
-                    return Err(RaftError::InvalidMessage);
-                }
-                let granted = self.local_voter()
-                    && self.membership().is_voter(m.from)
-                    && m.term == hard.term
-                    && (hard.voted_for.is_none()
-                        || (hard.voted_for == Some(m.from)
-                            && self.durable.ballot_origin.is_some_and(|origin| {
-                                origin.candidate_store == m.sender.identity
-                            })))
-                    && (*last_term, *last_index)
-                        >= (self.durable.last_term(), self.durable.last_index());
-                let next = HardState {
-                    voted_for: if granted {
-                        Some(m.from)
-                    } else {
-                        hard.voted_for
-                    },
-                    ..hard
-                };
-                let mut reply = self.reply(&m, Rpc::Voted { granted });
-                reply.term = next.term;
-                if next != old {
-                    self.persist(
-                        next,
-                        self.durable.commit_index,
-                        None,
-                        After::Reply,
-                        Some(reply),
-                    )
-                } else {
-                    Ok(vec![Effect::Send(reply)])
-                }
-            }
-            Rpc::Voted { granted } => {
-                if hard != old {
-                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
-                }
-                if self.role != Role::Candidate
-                    || m.term != old.term
-                    || self.vote_context != Some(m.context)
-                {
-                    return Ok(Vec::new());
-                }
-                if *granted {
-                    self.votes.insert(m.from);
-                }
-                if self.membership().is_satisfied(&self.votes) {
-                    self.become_leader()
-                } else {
-                    Ok(Vec::new())
-                }
-            }
-            Rpc::Append {
-                previous_index,
-                previous_term,
-                entries,
-                leader_commit,
-            } => {
-                if *previous_term > m.term
-                    || ((*previous_index == 0) != (*previous_term == 0))
-                    || entries.len() > 64
-                    || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
-                        > self.limits.max_batch_bytes
-                {
-                    return Err(RaftError::InvalidMessage);
-                }
-                if m.term < old.term {
-                    return Ok(vec![Effect::Send(self.reply(
-                        &m,
-                        Rpc::Appended {
-                            success: false,
-                            matching_index: self.durable.last_index(),
-                        },
-                    ))]);
-                }
-                self.role = Role::Follower;
-                self.clear_reads();
-                self.vote_context = None;
-                self.requests.clear();
-                self.repair_requests.clear();
-                let mut previous = *previous_term;
-                for (i, e) in entries.iter().enumerate() {
-                    if let EntryPayload::Configuration(record) = &e.payload {
-                        let activated = match &record.change {
-                            crate::membership::ConfigurationChange::Learners(next) => next.id(),
-                            crate::membership::ConfigurationChange::Joint { id, .. }
-                            | crate::membership::ConfigurationChange::Final { id } => *id,
-                        };
-                        if activated > m.configuration {
-                            return Err(RaftError::InvalidMessage);
-                        }
-                    }
-                    if previous_index.checked_add(i as u64 + 1) != Some(e.index)
-                        || e.term == 0
-                        || e.term < previous
-                        || e.term > m.term
-                        || e.payload_bytes() > self.limits.max_command_bytes
-                    {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                    previous = e.term;
-                }
-                if self.durable.term_at(*previous_index) != Some(*previous_term) {
-                    let mut reply = self.reply(
-                        &m,
-                        if *previous_index < self.durable.base_index() {
-                            Rpc::Compacted {
-                                index: self.durable.base_index(),
-                                term: self.durable.base_term(),
-                            }
-                        } else {
-                            Rpc::Appended {
-                                success: false,
-                                matching_index: self.durable.last_index(),
-                            }
-                        },
-                    );
-                    reply.term = hard.term;
-                    return if hard != old {
-                        self.persist(
-                            hard,
-                            self.durable.commit_index,
-                            None,
-                            After::Reply,
-                            Some(reply),
-                        )
-                    } else {
-                        Ok(vec![Effect::Send(reply)])
-                    };
-                }
-                let mut suffix = None;
-                for (offset, entry) in entries.iter().enumerate() {
-                    match self.durable.entry_at(entry.index) {
-                        Some(old_entry) if old_entry.term == entry.term => {
-                            if old_entry != entry {
-                                return Err(RaftError::InvalidMessage);
-                            }
-                        }
-                        _ => {
-                            suffix = Some(Suffix {
-                                from: entry.index,
-                                entries: entries[offset..].to_vec(),
-                            });
-                            break;
-                        }
-                    }
-                }
-                let matching = entries.last().map_or(*previous_index, |e| e.index);
-                let commit = self
-                    .durable
-                    .commit_index
-                    .max((*leader_commit).min(matching));
-                let mut reply = self.reply(
-                    &m,
-                    Rpc::Appended {
-                        success: true,
-                        matching_index: matching,
-                    },
-                );
-                reply.term = hard.term;
-                if hard != old || suffix.is_some() || commit != self.durable.commit_index {
-                    self.persist(hard, commit, suffix, After::Reply, Some(reply))
-                } else {
-                    Ok(vec![Effect::Send(reply)])
-                }
-            }
-            Rpc::Appended {
-                success,
-                matching_index,
-            } => {
-                if hard != old {
-                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
-                }
-                if self.role != Role::Leader || m.term != old.term {
-                    return Ok(Vec::new());
-                }
-                let Some(sent) = self.requests.get(&m.from).copied() else {
-                    return Ok(Vec::new());
-                };
-                if sent.context != m.context || sent.configuration != m.configuration {
-                    return Ok(Vec::new());
-                }
-                if sent.snapshot.is_some() {
-                    return Ok(Vec::new());
-                }
-                self.requests.remove(&m.from);
-                if *success {
-                    if *matching_index != sent.end {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                    let prefix = self.progress[&m.from].max(*matching_index);
-                    self.progress.insert(m.from, prefix);
-                    self.next_index.insert(m.from, prefix + 1);
-                    let mut effects = self.maybe_commit()?;
-                    if self.pending.is_none() && prefix < self.durable.last_index() {
-                        effects.push(self.append_for(m.from)?);
-                    }
-                    Ok(effects)
-                } else {
-                    let next = self.next_index[&m.from]
-                        .saturating_sub(1)
-                        .min(matching_index.saturating_add(1))
-                        .max(1);
-                    self.next_index.insert(m.from, next);
-                    Ok(vec![self.append_for(m.from)?])
-                }
-            }
-            Rpc::ReadProbe => {
-                if m.term < old.term {
-                    // The higher-term response makes the requester step down;
-                    // its term cannot satisfy the request's read quorum.
-                    return Ok(vec![Effect::Send(self.reply(&m, Rpc::ReadAck))]);
-                }
-                self.role = Role::Follower;
-                self.clear_reads();
-                self.vote_context = None;
-                self.requests.clear();
-                self.repair_requests.clear();
-                let mut reply = self.reply(&m, Rpc::ReadAck);
-                reply.term = hard.term;
-                if hard != old {
-                    self.persist(
-                        hard,
-                        self.durable.commit_index,
-                        None,
-                        After::Reply,
-                        Some(reply),
-                    )
-                } else {
-                    Ok(vec![Effect::Send(reply)])
-                }
-            }
-            Rpc::ReadAck => {
-                if hard != old {
-                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
-                }
-                if self.role != Role::Leader || m.term != old.term {
-                    return Ok(Vec::new());
-                }
-                if let Some(read) = &mut self.read {
-                    if read.barrier.context == m.context {
-                        read.acknowledgements.insert(m.from);
-                    }
-                }
-                Ok(self.maybe_read_ready())
-            }
-            Rpc::Snapshot { snapshot } => {
-                let meta = &snapshot.metadata;
-                if snapshot.application.is_empty()
-                    || snapshot.application.len() > self.limits.max_snapshot_bytes
-                    || meta.bootstrap != self.durable.bootstrap
-                    || meta.validate().is_err()
-                    || meta.configuration() > m.configuration
-                    || meta.term > m.term
-                {
-                    return Err(RaftError::InvalidMessage);
-                }
-                if m.term < old.term {
-                    return Ok(vec![Effect::Send(
-                        self.reply(&m, Rpc::SnapshotAck { index: 0 }),
-                    )]);
-                }
-                self.role = Role::Follower;
-                self.clear_reads();
-                self.vote_context = None;
-                self.requests.clear();
-                self.repair_requests.clear();
-                if meta.index <= self.durable.commit_index {
-                    if self
-                        .durable
-                        .term_at(meta.index)
-                        .is_some_and(|t| t != meta.term)
-                    {
-                        return Err(RaftError::InvalidMessage);
-                    }
-                    let mut reply = self.reply(&m, Rpc::SnapshotAck { index: meta.index });
-                    reply.term = hard.term;
-                    return if hard != old {
-                        self.persist(
-                            hard,
-                            self.durable.commit_index,
-                            None,
-                            After::Reply,
-                            Some(reply),
-                        )
-                    } else {
-                        Ok(vec![Effect::Send(reply)])
-                    };
-                }
-                self.staged_snapshot = Some(m.clone());
-                self.staged_snapshot_repair = false;
-                Ok(vec![Effect::StageSnapshot(m)])
-            }
-            Rpc::SnapshotAck { index } => {
-                if hard != old {
-                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
-                }
-                if self.role != Role::Leader || m.term != old.term {
-                    return Ok(Vec::new());
-                }
-                let Some(sent) = self.requests.get(&m.from).copied() else {
-                    return Ok(Vec::new());
-                };
-                if sent.context != m.context
-                    || sent.configuration != m.configuration
-                    || sent.snapshot.is_none()
-                {
-                    return Ok(Vec::new());
-                }
-                if *index != sent.end {
-                    return Err(RaftError::InvalidMessage);
-                }
-                self.requests.remove(&m.from);
-                let prefix = self.progress[&m.from].max(*index);
-                self.progress.insert(m.from, prefix);
-                self.next_index.insert(m.from, prefix + 1);
-                let mut effects = self.maybe_commit()?;
-                if self.pending.is_none() {
-                    effects.push(self.append_for(m.from)?);
-                }
-                Ok(effects)
-            }
-            Rpc::Compacted { index, term } => {
-                if hard != old {
-                    return self.persist(hard, self.durable.commit_index, None, After::Reply, None);
-                }
-                if self.role != Role::Leader || m.term != old.term {
-                    return Ok(Vec::new());
-                }
-                let Some(sent) = self.requests.get(&m.from) else {
-                    return Ok(Vec::new());
-                };
-                if sent.context != m.context
-                    || sent.configuration != m.configuration
-                    || sent.snapshot.is_some()
-                {
-                    return Ok(Vec::new());
-                }
-                if *index == 0
-                    || *term == 0
-                    || *index > self.durable.last_index()
-                    || self.durable.term_at(*index).is_some_and(|t| t != *term)
-                {
-                    return Err(RaftError::InvalidMessage);
-                }
-                self.requests.remove(&m.from);
-                if *index < self.durable.base_index() {
-                    self.next_index.insert(m.from, self.durable.base_index());
-                } else {
-                    self.progress
-                        .insert(m.from, self.progress[&m.from].max(*index));
-                    self.next_index.insert(m.from, index + 1);
-                }
-                let mut effects = self.maybe_commit()?;
-                if self.pending.is_none() {
-                    effects.push(self.append_for(m.from)?);
-                }
-                Ok(effects)
-            }
-        }
-    }
-
     pub(crate) fn begin_compact(
         &mut self,
         reference: SnapshotRef,

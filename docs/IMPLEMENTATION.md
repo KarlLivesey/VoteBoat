@@ -170,7 +170,7 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    unchanged formats/refusal/atomicity using each affected subsystem's tests;
    completion requires strict all-target all-feature/core-only Clippy with no
    warnings. No suppressed baseline or increased thresholds. Directory, routed/log and native cleanups have reduced production findings
-   from48 to25. Remaining core functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
+   from48 to18. Remaining runtime/transfer functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -13721,3 +13721,57 @@ current-term/configuration checks and exact durability-ticket release. Check
 consensus/replication/membership/repair and fault/recovery suites after each
 coherent change. This remains mini item1 under all macro milestones; remaining
 native owner-family composition and public administration are still items2/3.
+
+### Consensus lint cleanup — schema plan
+
+Retain the public Raft/Event/Message/effect and storage schemas. Separate recovery
+validation from initialization; election/proposal initiation from event dispatch;
+and post-durability effect selection from completion admission. Separate receive
+scope validation and typed RPC transitions, preserving the current higher-term
+volatile reset before payload validation. Append validation, matching-prefix
+checks and candidate suffix selection keep their existing order. Snapshot staging
+retains ownership of the original Message. No send, vote, commit or application
+notification may escape before its existing exact durability dependency.
+
+Witness request/reply and learner repair request/reply handling become private
+separate transitions. Historical repair context, partial progress, committed
+prefix/fork refusal, generation and voter/store checks remain unchanged. No new
+fallback or provider contract. Acceptance: consensus, ballots, membership,
+replication scope, learners, snapshot, repair and runtime integration histories,
+followed by strict Clippy; no allowances or raised thresholds.
+
+## Consensus lint cleanup — implemented evidence
+
+Recovery now separates invariant/membership-assignment validation from volatile
+initialization. Event dispatch separates campaign, proposal and readiness
+initiation; completion publishes the durable candidate before selecting its
+post-durability effects. Ordinary peer handling lives in a private receive module
+with separate vote, append, read, snapshot and response transitions. Peer/context
+validation and higher-term volatile resets retain their original order. Append
+range checks still precede prefix matching and atomic suffix persistence; staged
+snapshots retain their owned Message. Witness requests/replies and learner repair
+requests/replies now have separate private paths, including the historical
+higher-term reply check and bounded learner-entry validation.
+
+No public API, protocol tag, persistence format, quorum rule, durability token or
+admission threshold changed. The extracted helpers use existing typed inputs and
+owned messages; they do not create new queues, runtimes or authority paths.
+
+Final local validation (cargo +stable --locked --offline):161 all-feature tests
+pass across nine consensus/ballot/membership/learner/snapshot targets;257 further
+tests pass across seven runtime/effect-owner/worker/peer/native-membership/QUIC
+integration targets. All64 library unit tests pass, including partial joint/final,
+reused-store ballot and snapshot dependency histories. Core-only runs pass71
+integration tests plus51 library unit tests. Formatting, whitespace and the
+88-contract inventory pass. The final strict all-target/all-feature Clippy still
+fails with18 production and9 inline-test diagnostics; other integration fixture
+findings are not fully enumerated until the library compiles cleanly. This slice
+removes all seven production consensus diagnostics without suppressions.
+
+Next mini-step under current item1: separate runtime construction/admission,
+provider completion and result publication using the existing owned tickets and
+credits; preserve accepted-work cleanup on every failure. Then finish the
+remaining scope/transfer production findings and test fixtures. Acceptance is
+unchanged runtime admission/ownership/fault tests and strict all-target lint.
+The next capability items remain native authority-move owner-family coverage
+(P5/P6) and public administration ingress (P4), as recorded in the linked plan.

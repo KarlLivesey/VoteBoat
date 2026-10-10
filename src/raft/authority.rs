@@ -166,95 +166,117 @@ impl Raft {
             Rpc::AuthorityRequest {
                 candidate,
                 configuration,
-            } => {
-                if message.context.origin != message.sender
-                    || candidate.node == message.from
-                    || candidate.node == self.node
-                    || configuration <= message.configuration
-                {
-                    return Err(RaftError::WrongIdentity);
-                }
-                let base = self
-                    .authority_base(message.configuration)
-                    .ok_or(RaftError::WrongIdentity)?;
-                if base.replica_store(message.from) != Some(message.sender.identity)
-                    || base.voter_store(self.node) != Some(self.binding.identity)
-                {
-                    return Err(RaftError::WrongIdentity);
-                }
-                let committed = self
-                    .durable
-                    .membership_at(self.durable.commit_index)
-                    .map_err(|_| RaftError::InvalidRecovery)?;
-                let granted = committed.voter_store(candidate.node) == Some(candidate.store)
-                    && (configuration == committed.id()
-                        || committed
-                            .joint()
-                            .is_some_and(|joint| configuration == joint.next.id()))
-                    && self.durable.commit_index > 0;
-                let mut reply = self.reply(
-                    &message,
-                    Rpc::AuthorityReply {
-                        candidate,
-                        configuration,
-                        committed_index: if granted {
-                            self.durable.commit_index
-                        } else {
-                            0
-                        },
-                        committed_term: if granted {
-                            self.durable
-                                .term_at(self.durable.commit_index)
-                                .ok_or(RaftError::InvalidRecovery)?
-                        } else {
-                            0
-                        },
-                        granted,
-                    },
-                );
-                reply.term = reply.term.max(1);
-                Ok(vec![Effect::Send(reply)])
-            }
+            } => self.receive_authority_request(&message, candidate, configuration),
             Rpc::AuthorityReply {
                 candidate,
                 configuration,
                 committed_index,
                 committed_term,
                 granted,
-            } => {
-                let pending = self
-                    .authority_request
-                    .as_ref()
-                    .ok_or(RaftError::WrongIdentity)?;
-                if pending.base != self.membership().id()
-                    || message.configuration != pending.base
-                    || pending.witness.node != message.from
-                    || pending.witness.store != message.sender.identity
-                    || self.membership().voter_store(message.from) != Some(message.sender.identity)
-                    || pending.context != message.context
-                    || message.context.origin != self.binding
-                    || pending.candidate != candidate
-                    || pending.configuration != configuration
-                {
-                    return Err(RaftError::WrongIdentity);
-                }
-                if (granted
-                    && (committed_index <= self.membership().last_configuration_index()
-                        || committed_term == 0
-                        || committed_term > message.term))
-                    || (!granted && (committed_index != 0 || committed_term != 0))
-                {
-                    return Err(RaftError::InvalidMessage);
-                }
-                self.replication_permit = granted.then_some(ReplicationPermit {
-                    candidate,
-                    configuration,
-                    base: pending.base,
-                });
-                self.authority_request = None;
-                Ok(Vec::new())
-            }
+            } => self.receive_authority_reply(
+                &message,
+                candidate,
+                configuration,
+                committed_index,
+                committed_term,
+                granted,
+            ),
             _ => unreachable!(),
         }
+    }
+    fn receive_authority_request(
+        &mut self,
+        message: &Message,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if message.context.origin != message.sender
+            || candidate.node == message.from
+            || candidate.node == self.node
+            || configuration <= message.configuration
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        let base = self
+            .authority_base(message.configuration)
+            .ok_or(RaftError::WrongIdentity)?;
+        if base.replica_store(message.from) != Some(message.sender.identity)
+            || base.voter_store(self.node) != Some(self.binding.identity)
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        let committed = self
+            .durable
+            .membership_at(self.durable.commit_index)
+            .map_err(|_| RaftError::InvalidRecovery)?;
+        let granted = committed.voter_store(candidate.node) == Some(candidate.store)
+            && (configuration == committed.id()
+                || committed
+                    .joint()
+                    .is_some_and(|joint| configuration == joint.next.id()))
+            && self.durable.commit_index > 0;
+        let mut reply = self.reply(
+            message,
+            Rpc::AuthorityReply {
+                candidate,
+                configuration,
+                committed_index: if granted {
+                    self.durable.commit_index
+                } else {
+                    0
+                },
+                committed_term: if granted {
+                    self.durable
+                        .term_at(self.durable.commit_index)
+                        .ok_or(RaftError::InvalidRecovery)?
+                } else {
+                    0
+                },
+                granted,
+            },
+        );
+        reply.term = reply.term.max(1);
+        Ok(vec![Effect::Send(reply)])
+    }
+    fn receive_authority_reply(
+        &mut self,
+        message: &Message,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+        committed_index: u64,
+        committed_term: u64,
+        granted: bool,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let pending = self
+            .authority_request
+            .as_ref()
+            .ok_or(RaftError::WrongIdentity)?;
+        if pending.base != self.membership().id()
+            || message.configuration != pending.base
+            || pending.witness.node != message.from
+            || pending.witness.store != message.sender.identity
+            || self.membership().voter_store(message.from) != Some(message.sender.identity)
+            || pending.context != message.context
+            || message.context.origin != self.binding
+            || pending.candidate != candidate
+            || pending.configuration != configuration
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        if (granted
+            && (committed_index <= self.membership().last_configuration_index()
+                || committed_term == 0
+                || committed_term > message.term))
+            || (!granted && (committed_index != 0 || committed_term != 0))
+        {
+            return Err(RaftError::InvalidMessage);
+        }
+        self.replication_permit = granted.then_some(ReplicationPermit {
+            candidate,
+            configuration,
+            base: pending.base,
+        });
+        self.authority_request = None;
+        Ok(Vec::new())
     }
 }

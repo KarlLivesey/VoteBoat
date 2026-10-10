@@ -187,188 +187,18 @@ impl Raft {
             matching_term,
         } = message.rpc
         {
-            let checkpoint = self
-                .repair_requests
-                .get(&message.from)
-                .filter(|sent| sent.snapshot.is_some() && sent.snapshot == self.durable.snapshot)
-                .and_then(|sent| {
-                    self.snapshot_repair_scope(message.from).filter(|scope| {
-                        scope.configuration == sent.configuration
-                            && scope.peer_store == message.sender.identity
-                    })
-                });
-            let historical = self
-                .repair_requests
-                .get(&message.from)
-                .filter(|sent| sent.snapshot.is_none())
-                .map(|sent| self.repair_joint(message.from, Some(sent.configuration)))
-                .transpose()?
-                .flatten();
-            if message.to != self.node
-                || message.from == self.node
-                || message.group != self.durable.bootstrap.group
-                || message.context.origin != self.binding
-                || (self.membership().stable().learners().get(&message.from)
-                    != Some(&message.sender.identity)
-                    && historical.as_ref().map(|(_, _, store)| *store)
-                        != Some(message.sender.identity)
-                    && checkpoint.is_none())
-            {
-                return Err(RaftError::WrongIdentity);
-            }
-            if message.term > self.durable.hard_state.term {
-                if message.configuration != self.membership().id() {
-                    // A historical reply cannot pass the ordinary current-head
-                    // response gate. Observe only its exact admitted context,
-                    // without importing its old configuration or prefix claim.
-                    if !self.repair_requests.get(&message.from).is_some_and(|sent| {
-                        sent.context == message.context
-                            && sent.configuration == message.configuration
-                    }) {
-                        return Ok(Vec::new());
-                    }
-                    self.clear_reads();
-                    self.role = Role::Follower;
-                    self.vote_context = None;
-                    self.requests.clear();
-                    self.repair_requests.clear();
-                    return self.persist(
-                        HardState {
-                            term: message.term,
-                            voted_for: None,
-                        },
-                        self.durable.commit_index,
-                        None,
-                        After::Reply,
-                        None,
-                    );
-                }
-                message.rpc = Rpc::Appended {
-                    success: false,
-                    matching_index,
-                };
-                return self.receive_inner(message);
-            }
-            if self.role != Role::Candidate || message.term != self.durable.hard_state.term {
-                return Ok(Vec::new());
-            }
-            let Some(sent) = self.repair_requests.get(&message.from).copied() else {
-                return Ok(Vec::new());
-            };
-            if sent.context != message.context || sent.configuration != message.configuration {
-                return Ok(Vec::new());
-            }
-            let joint_index = if sent.snapshot.is_some() {
-                checkpoint.ok_or(RaftError::InvalidMessage)?.voting_index
-            } else {
-                historical.ok_or(RaftError::InvalidMessage)?.0.index
-            };
-            if (success && matching_index != sent.end)
-                || matching_index >= joint_index && !success
-                || self.durable.term_at(matching_index) != Some(matching_term)
-            {
-                return Err(RaftError::InvalidMessage);
-            }
-            self.repair_requests.remove(&message.from);
-            if success && matching_index >= joint_index {
-                let Some(context) = self.vote_context else {
-                    return Ok(Vec::new());
-                };
-                return Ok(vec![Effect::Send(self.message(
-                    message.from,
-                    context,
-                    Rpc::Vote {
-                        last_index: self.durable.last_index(),
-                        last_term: self.durable.last_term(),
-                    },
-                ))]);
-            }
-            if matching_index < sent.start {
-                return Ok(Vec::new());
-            }
-            return self.repair_batch(message.from, matching_index + 1, sent.configuration);
+            return self.receive_learner_repaired(message, success, matching_index, matching_term);
         }
+        self.validate_learner_repair_request(&message)?;
         let Rpc::LearnerRepair {
-            joint,
             previous_index,
             previous_term,
             entries,
+            ..
         } = &message.rpc
         else {
             unreachable!()
         };
-        let EntryPayload::Configuration(record) = &joint.payload else {
-            return Err(RaftError::InvalidMessage);
-        };
-        let ConfigurationChange::Joint { id, next } = &record.change else {
-            return Err(RaftError::InvalidMessage);
-        };
-        let committed = self
-            .durable
-            .membership_at(self.durable.commit_index)
-            .map_err(|_| RaftError::InvalidMessage)?;
-        if message.to != self.node
-            || message.from == self.node
-            || message.group != self.durable.bootstrap.group
-            || message.context.origin != message.sender
-            || message.context.sequence == 0
-            || message.term == 0
-            || message.term < self.durable.hard_state.term
-            || committed != self.membership
-            || committed.joint().is_some()
-            || committed.stable().learners().get(&self.node) != Some(&self.binding.identity)
-            || committed.voter_store(message.from) != Some(message.sender.identity)
-            || next.voter_stores().get(&self.node) != Some(&self.binding.identity)
-            || message.configuration != *id
-            || joint.term == 0
-            || joint.term > message.term
-            || joint.payload_bytes() > self.limits.max_command_bytes
-            || self
-                .membership()
-                .validate_next(joint.index, record, self.durable.commit_index)
-                .is_err()
-            || entries.is_empty()
-            || entries.len() > 64
-            || (*previous_index == 0) != (*previous_term == 0)
-            || *previous_term > message.term
-        {
-            return Err(RaftError::InvalidMessage);
-        }
-        let mut bytes = 256usize
-            .saturating_add(joint.retained_payload_bytes())
-            .saturating_add(37);
-        let mut term = *previous_term;
-        for (offset, entry) in entries.iter().enumerate() {
-            if previous_index.checked_add(offset as u64 + 1) != Some(entry.index)
-                || entry.index > joint.index
-                || entry.term == 0
-                || entry.term < term
-                || entry.term > message.term
-                || entry.payload_bytes() > self.limits.max_command_bytes
-                || (matches!(entry.payload, EntryPayload::Configuration(_))
-                    && entry != joint.as_ref())
-                || (entry.index == joint.index && entry != joint.as_ref())
-                // Only an exact committed stable learner reaches this path.
-                // A different-term uncommitted command suffix may be replaced
-                // through ordinary atomic suffix persistence. Committed entries
-                // and same-term payload forks remain immutable/rejected.
-                || self.durable.entry_at(entry.index).is_some_and(|local| {
-                    local != entry
-                        && (entry.index <= self.durable.commit_index || local.term == entry.term)
-                })
-            {
-                return Err(RaftError::InvalidMessage);
-            }
-            term = entry.term;
-            bytes = entry
-                .retained_payload_bytes()
-                .checked_add(37)
-                .and_then(|n| bytes.checked_add(n))
-                .ok_or(RaftError::InvalidMessage)?;
-            if bytes > self.limits.max_batch_bytes {
-                return Err(RaftError::InvalidMessage);
-            }
-        }
         let mut previous_index = *previous_index;
         let mut previous_term = *previous_term;
         let mut entries = entries.clone();
@@ -419,5 +249,219 @@ impl Raft {
         }
         self.reset_election()?;
         Ok(effects)
+    }
+    fn receive_learner_repaired(
+        &mut self,
+        message: Message,
+        success: bool,
+        matching_index: u64,
+        matching_term: u64,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let checkpoint = self
+            .repair_requests
+            .get(&message.from)
+            .filter(|sent| sent.snapshot.is_some() && sent.snapshot == self.durable.snapshot)
+            .and_then(|sent| {
+                self.snapshot_repair_scope(message.from).filter(|scope| {
+                    scope.configuration == sent.configuration
+                        && scope.peer_store == message.sender.identity
+                })
+            });
+        let historical = self
+            .repair_requests
+            .get(&message.from)
+            .filter(|sent| sent.snapshot.is_none())
+            .map(|sent| self.repair_joint(message.from, Some(sent.configuration)))
+            .transpose()?
+            .flatten();
+        if message.to != self.node
+            || message.from == self.node
+            || message.group != self.durable.bootstrap.group
+            || message.context.origin != self.binding
+            || (self.membership().stable().learners().get(&message.from)
+                != Some(&message.sender.identity)
+                && historical.as_ref().map(|(_, _, store)| *store) != Some(message.sender.identity)
+                && checkpoint.is_none())
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        if message.term > self.durable.hard_state.term {
+            return self.receive_higher_repair_term(message, matching_index);
+        }
+        if self.role != Role::Candidate || message.term != self.durable.hard_state.term {
+            return Ok(Vec::new());
+        }
+        let Some(sent) = self.repair_requests.get(&message.from).copied() else {
+            return Ok(Vec::new());
+        };
+        if sent.context != message.context || sent.configuration != message.configuration {
+            return Ok(Vec::new());
+        }
+        let joint_index = if sent.snapshot.is_some() {
+            checkpoint.ok_or(RaftError::InvalidMessage)?.voting_index
+        } else {
+            historical.ok_or(RaftError::InvalidMessage)?.0.index
+        };
+        if (success && matching_index != sent.end)
+            || matching_index >= joint_index && !success
+            || self.durable.term_at(matching_index) != Some(matching_term)
+        {
+            return Err(RaftError::InvalidMessage);
+        }
+        self.repair_requests.remove(&message.from);
+        if success && matching_index >= joint_index {
+            let Some(context) = self.vote_context else {
+                return Ok(Vec::new());
+            };
+            return Ok(vec![Effect::Send(self.message(
+                message.from,
+                context,
+                Rpc::Vote {
+                    last_index: self.durable.last_index(),
+                    last_term: self.durable.last_term(),
+                },
+            ))]);
+        }
+        if matching_index < sent.start {
+            return Ok(Vec::new());
+        }
+        self.repair_batch(message.from, matching_index + 1, sent.configuration)
+    }
+    fn receive_higher_repair_term(
+        &mut self,
+        mut message: Message,
+        matching_index: u64,
+    ) -> Result<Vec<Effect>, RaftError> {
+        if message.configuration != self.membership().id() {
+            // A historical reply cannot pass the ordinary current-head
+            // response gate. Observe only its exact admitted context,
+            // without importing its old configuration or prefix claim.
+            if !self.repair_requests.get(&message.from).is_some_and(|sent| {
+                sent.context == message.context && sent.configuration == message.configuration
+            }) {
+                return Ok(Vec::new());
+            }
+            self.clear_reads();
+            self.role = Role::Follower;
+            self.vote_context = None;
+            self.requests.clear();
+            self.repair_requests.clear();
+            return self.persist(
+                HardState {
+                    term: message.term,
+                    voted_for: None,
+                },
+                self.durable.commit_index,
+                None,
+                After::Reply,
+                None,
+            );
+        }
+        message.rpc = Rpc::Appended {
+            success: false,
+            matching_index,
+        };
+        self.receive_inner(message)
+    }
+    fn validate_learner_repair_request(&self, message: &Message) -> Result<(), RaftError> {
+        let Rpc::LearnerRepair {
+            joint,
+            previous_index,
+            previous_term,
+            entries,
+        } = &message.rpc
+        else {
+            unreachable!()
+        };
+        let EntryPayload::Configuration(record) = &joint.payload else {
+            return Err(RaftError::InvalidMessage);
+        };
+        let ConfigurationChange::Joint { id, next } = &record.change else {
+            return Err(RaftError::InvalidMessage);
+        };
+        let committed = self
+            .durable
+            .membership_at(self.durable.commit_index)
+            .map_err(|_| RaftError::InvalidMessage)?;
+        if message.to != self.node
+            || message.from == self.node
+            || message.group != self.durable.bootstrap.group
+            || message.context.origin != message.sender
+            || message.context.sequence == 0
+            || message.term == 0
+            || message.term < self.durable.hard_state.term
+            || committed != self.membership
+            || committed.joint().is_some()
+            || committed.stable().learners().get(&self.node) != Some(&self.binding.identity)
+            || committed.voter_store(message.from) != Some(message.sender.identity)
+            || next.voter_stores().get(&self.node) != Some(&self.binding.identity)
+            || message.configuration != *id
+            || joint.term == 0
+            || joint.term > message.term
+            || joint.payload_bytes() > self.limits.max_command_bytes
+            || self
+                .membership()
+                .validate_next(joint.index, record, self.durable.commit_index)
+                .is_err()
+            || entries.is_empty()
+            || entries.len() > 64
+            || (*previous_index == 0) != (*previous_term == 0)
+            || *previous_term > message.term
+        {
+            return Err(RaftError::InvalidMessage);
+        }
+        self.validate_learner_repair_entries(
+            message.term,
+            joint,
+            *previous_index,
+            *previous_term,
+            entries,
+        )?;
+        Ok(())
+    }
+    fn validate_learner_repair_entries(
+        &self,
+        message_term: u64,
+        joint: &LogEntry,
+        previous_index: u64,
+        previous_term: u64,
+        entries: &[LogEntry],
+    ) -> Result<(), RaftError> {
+        let mut bytes = 256usize
+            .saturating_add(joint.retained_payload_bytes())
+            .saturating_add(37);
+        let mut term = previous_term;
+        for (offset, entry) in entries.iter().enumerate() {
+            if previous_index.checked_add(offset as u64 + 1) != Some(entry.index)
+                || entry.index > joint.index
+                || entry.term == 0
+                || entry.term < term
+                || entry.term > message_term
+                || entry.payload_bytes() > self.limits.max_command_bytes
+                || (matches!(entry.payload, EntryPayload::Configuration(_))
+                    && entry != joint)
+                || (entry.index == joint.index && entry != joint)
+                // Only an exact committed stable learner reaches this path.
+                // A different-term uncommitted command suffix may be replaced
+                // through ordinary atomic suffix persistence. Committed entries
+                // and same-term payload forks remain immutable/rejected.
+                || self.durable.entry_at(entry.index).is_some_and(|local| {
+                    local != entry
+                        && (entry.index <= self.durable.commit_index || local.term == entry.term)
+                })
+            {
+                return Err(RaftError::InvalidMessage);
+            }
+            term = entry.term;
+            bytes = entry
+                .retained_payload_bytes()
+                .checked_add(37)
+                .and_then(|n| bytes.checked_add(n))
+                .ok_or(RaftError::InvalidMessage)?;
+            if bytes > self.limits.max_batch_bytes {
+                return Err(RaftError::InvalidMessage);
+            }
+        }
+        Ok(())
     }
 }
