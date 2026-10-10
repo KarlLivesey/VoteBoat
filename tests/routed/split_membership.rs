@@ -16,7 +16,8 @@ use super::*;
 use voteboat::{
     identity::FailureDomainId,
     membership::{
-        Configuration, ConfigurationChange, ConfigurationRecord, ConfigurationResumeAction,
+        Configuration, ConfigurationChange, ConfigurationProgress, ConfigurationRecord,
+        ConfigurationResumeAction,
     },
     native::{
         administration::NativeAdministrationPlan, placement::NativePlacementAuthorizer,
@@ -28,6 +29,16 @@ use voteboat::{
     worker::PersistenceWorker,
 };
 type SourceNode = Node<source_fixture::Source>;
+#[derive(Clone, Copy, Eq, PartialEq)]
+enum FinalCut {
+    AfterActivation,
+    BeforeImport,
+}
+#[derive(Clone, Copy)]
+enum RecoveryCheckpoint {
+    Current,
+    Retained,
+}
 fn cid(id: u64) -> ConfigurationId {
     ConfigurationId::new(id).unwrap()
 }
@@ -234,8 +245,12 @@ fn abort_source(mut node: SourceNode, clock: &Instant, expected: Option<Configur
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn recover_source(rig: &mut Split, expected: Option<ConfigurationTicket>) {
-    if rig.checkpoint {
+fn recover_source(
+    rig: &mut Split,
+    expected: Option<ConfigurationTicket>,
+    checkpoint: RecoveryCheckpoint,
+) {
+    if rig.checkpoint && matches!(checkpoint, RecoveryCheckpoint::Current) {
         compact(&mut rig.source, &rig.clock, 20);
     }
     for node in std::mem::take(&mut rig.source) {
@@ -251,12 +266,12 @@ fn recover_source(rig: &mut Split, expected: Option<ConfigurationTicket>) {
     rig.source.swap(0, eligible);
     campaign(&mut rig.source, &rig.clock, 20);
 }
-fn check_imported_children(rig: &mut Split) {
+fn check_imported_children(rig: &mut Split, configuration: ConfigurationId) {
     let state = rig.observed();
     for target in &state.targets {
         let imported = target.imported.as_ref().unwrap();
         assert_eq!(imported.sources.len(), 1);
-        assert_eq!(imported.sources[0].configuration, cid(2));
+        assert_eq!(imported.sources[0].configuration, configuration);
         assert_eq!(
             imported.sources[0].fence,
             state.source.as_ref().unwrap().fence
@@ -320,7 +335,84 @@ fn assert_final_source(rig: &Split, fence: OwnershipFence) {
         assert_eq!(n.local().applications[&group(20)].fence(), Some(fence));
     }
 }
-fn history(protocol: NativePeerProtocol, checkpoint: bool) {
+fn finalize_source(
+    rig: &mut Split,
+    original: ConfigurationTicket,
+) -> voteboat::runtime::ProposalPosition {
+    campaign(&mut rig.source, &rig.clock, 20);
+    let ConfigurationResumption::Submitted(ticket) = rig.source[0]
+        .resume_configuration(
+            group(20),
+            original.operation(),
+            source_fixture::fresh().readiness_requirements(),
+        )
+        .unwrap()
+    else {
+        panic!("original final configuration not submitted");
+    };
+    assert_eq!(ticket.operation(), original.operation());
+    member_drive(&mut rig.source, &rig.clock, |nodes| {
+        committed(nodes, cid(3))
+    });
+    let receipt = rig.source[0].poll_configuration().unwrap();
+    assert_eq!(receipt.ticket, ticket);
+    let ConfigurationOutcome::Committed(position) = receipt.outcome else {
+        panic!("original final configuration not committed");
+    };
+    position
+}
+fn finalize_before_import(rig: &mut Split, original: ConfigurationTicket, frozen: &Observed) {
+    let bases: BTreeMap<_, _> = rig
+        .source
+        .iter()
+        .map(|n| {
+            let core = n.local().owner.core(group(20)).unwrap();
+            (core.local_node(), core.state().base_index())
+        })
+        .collect();
+    let images = [21, 22].map(|g| {
+        rig.source[0].local().applications[&group(20)]
+            .export_target(group(g), 65536)
+            .unwrap()
+    });
+    let final_position = finalize_source(rig, original);
+    recover_source(rig, None, RecoveryCheckpoint::Retained);
+    assert!(committed(&rig.source, cid(3)));
+    for n in &rig.source {
+        let core = n.local().owner.core(group(20)).unwrap();
+        let base = core.state().base_index();
+        assert_eq!(base, bases[&core.local_node()]);
+        assert_eq!(
+            core.state().membership_at(base).unwrap().id(),
+            cid(if rig.checkpoint { 2 } else { 1 })
+        );
+        assert!(base < core.state().commit_index);
+        assert_eq!(core.membership().id(), cid(3));
+        let status = n
+            .configuration_status(group(20), original.operation())
+            .unwrap();
+        let expected = ConfigurationProgress::Final {
+            configuration: cid(3),
+            index: final_position.index,
+            term: final_position.term,
+        };
+        assert_eq!(status.accepted, expected);
+        assert_eq!(status.committed, expected);
+        assert_eq!(status.resume_action(), ConfigurationResumeAction::Completed);
+    }
+    assert_final_source(rig, frozen.source.as_ref().unwrap().fence);
+    assert_eq!(rig.observed(), *frozen);
+    for (g, image) in [21, 22].into_iter().zip(images) {
+        assert_eq!(
+            rig.source[0].local().applications[&group(20)]
+                .export_target(group(g), 65536)
+                .unwrap(),
+            image
+        );
+    }
+    rig.serving(frozen);
+}
+fn history(protocol: NativePeerProtocol, checkpoint: bool, final_cut: FinalCut) {
     let _guard = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut rig = Split::new(protocol, checkpoint);
     for phase in [Phase::Intent, Phase::Stage(21), Phase::Stage(22)] {
@@ -342,7 +434,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             .unwrap()
     });
     eprintln!("joint_split protocol={protocol:?} checkpoint={checkpoint} phase=fenced");
-    recover_source(&mut rig, Some(old_ticket));
+    recover_source(&mut rig, Some(old_ticket), RecoveryCheckpoint::Current);
     eprintln!("joint_split protocol={protocol:?} checkpoint={checkpoint} phase=joint_recovered");
     assert!(committed(&rig.source, cid(2)));
     assert_eq!(
@@ -368,6 +460,9 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         status.resume_action(),
         ConfigurationResumeAction::Finalize(record(true))
     );
+    if final_cut == FinalCut::BeforeImport {
+        finalize_before_import(&mut rig, old_ticket, &frozen);
+    }
     for phase in [
         Phase::Import(21),
         Phase::Import(22),
@@ -379,27 +474,21 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         let state = rig.observed();
         rig.serving(&state);
     }
-    check_imported_children(&mut rig);
+    // Import provenance comes from the fresh quorum observation, while the
+    // immutable source fence/export boundary remains the original Joint cut.
+    check_imported_children(
+        &mut rig,
+        cid(if final_cut == FinalCut::BeforeImport {
+            3
+        } else {
+            2
+        }),
+    );
     eprintln!("joint_split protocol={protocol:?} checkpoint={checkpoint} phase=targets_active");
-    campaign(&mut rig.source, &rig.clock, 20);
-    assert!(matches!(
-        rig.source[0]
-            .resume_configuration(
-                group(20),
-                old_ticket.operation(),
-                source_fixture::fresh().readiness_requirements()
-            )
-            .unwrap(),
-        ConfigurationResumption::Submitted(_)
-    ));
-    member_drive(&mut rig.source, &rig.clock, |nodes| {
-        committed(nodes, cid(3))
-    });
-    assert!(matches!(
-        rig.source[0].poll_configuration().unwrap().outcome,
-        ConfigurationOutcome::Committed(_)
-    ));
-    recover_source(&mut rig, None);
+    if final_cut == FinalCut::AfterActivation {
+        finalize_source(&mut rig, old_ticket);
+        recover_source(&mut rig, None, RecoveryCheckpoint::Current);
+    }
     eprintln!("joint_split protocol={protocol:?} checkpoint={checkpoint} phase=final_recovered");
     assert!(committed(&rig.source, cid(3)));
     assert_final_source(&rig, frozen.source.as_ref().unwrap().fence);
@@ -414,19 +503,38 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
 }
 #[test]
 fn tcp_split_fence_survives_joint_membership_and_unread_source_abort() {
-    history(NativePeerProtocol::TcpTls, false);
+    history(NativePeerProtocol::TcpTls, false, FinalCut::AfterActivation);
 }
 #[test]
 fn tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort() {
-    history(NativePeerProtocol::TcpTls, true);
+    history(NativePeerProtocol::TcpTls, true, FinalCut::AfterActivation);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_split_fence_survives_joint_membership_and_unread_source_abort() {
-    history(NativePeerProtocol::Quic, false);
+    history(NativePeerProtocol::Quic, false, FinalCut::AfterActivation);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_split_fence_survives_joint_checkpoint_and_unread_source_abort() {
-    history(NativePeerProtocol::Quic, true);
+    history(NativePeerProtocol::Quic, true, FinalCut::AfterActivation);
+}
+
+#[test]
+fn tcp_split_import_preserves_joint_fence_after_final_wal_recovery() {
+    history(NativePeerProtocol::TcpTls, false, FinalCut::BeforeImport);
+}
+#[test]
+fn tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint() {
+    history(NativePeerProtocol::TcpTls, true, FinalCut::BeforeImport);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_split_import_preserves_joint_fence_after_final_wal_recovery() {
+    history(NativePeerProtocol::Quic, false, FinalCut::BeforeImport);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint() {
+    history(NativePeerProtocol::Quic, true, FinalCut::BeforeImport);
 }

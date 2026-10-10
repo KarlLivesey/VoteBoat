@@ -1,5 +1,21 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice211 adds four source Final-before-import histories to the four existing
+after-activation TCP/QUIC WAL/checkpoint cases; all8 pass. Retained Joint bases
+plus later Final WAL reconstruct exact original receipt index/term and current
+membership without changing the frozen source/export boundary. Fresh imports
+record configuration3 rather than the original fixture's configuration2; exact
+fence/digest/serving/child receipt/outbox cold-recovery checks remain. This advances
+selected older-checkpoint/combined membership-lifecycle evidence without claiming
+arbitrary new-voter, revocation or physical-power-loss acceptance.
+
+Slice210h corrects original drain preparation after the current a3822c4 Ubuntu
+run fails two retirement histories before their fault cut on LeadershipChanged.
+The helper retains the fixed target and original operation, validates positive
+fields and refuses unrelated errors. All30 selected drain histories pass with
+formatting/all-four strict lints clean. Matching macOS/platform evidence remains
+open; neither production uncertainty handling nor deadlines change.
+
 Slice210g preserves the actual escaped non-OK drain source observation instead
 of incorrectly calling it a changed identity. The authenticated regression fails
 before correction and checks original commands, consumed budget, unchanged

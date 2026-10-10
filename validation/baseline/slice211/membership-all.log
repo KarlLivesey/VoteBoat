@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.01s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 8 tests
+test native::split::membership::quic_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort has been running for over 60 seconds
+test native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery has been running for over 60 seconds
+test native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint has been running for over 60 seconds
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort has been running for over 60 seconds
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort has been running for over 60 seconds
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery has been running for over 60 seconds
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint has been running for over 60 seconds
+test native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... ok
+test native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... ok
+test native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery ... ok
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery ... ok
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 163 filtered out; finished in 137.49s
+

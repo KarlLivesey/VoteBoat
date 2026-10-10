@@ -86,6 +86,13 @@ deferred research. Online membership and split/merge do not block use of the
 static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
+Macro review211: selected source Final-before-import recovery now composes the
+membership and split milestones over actual TCP/QUIC and WAL/retained Joint
+checkpoints. It preserves immutable fence/export data while fresh import evidence
+uses the current committed configuration. Broader new-voter/revocation, phase-
+internal storage faults, macOS deployment and P7 performance gates remain open;
+this completes the selected mini-plan history, not either whole milestone.
+
 ### Mini plan: current deliverable and next two
 
 Completed202a covers the selected old-checkpoint/member recovery cases below.
@@ -216,6 +223,25 @@ is retained separately from the preceding143/13 run; supported-platform
 acceptance remains open. Next within the current operator deliverable, use
 the preserved source refusal and exact administrative uncertainty to select a
 cause-specific correction; the linked combined lifecycle and codec work remain.
+Implemented210h corrects the two completed a3822c4 Ubuntu failures during
+retirement setup: a sampled leader returns the exact LeadershipChanged unknown
+before the retirement cut. Preparation retains the same target and operation,
+allows only exact known caller-retry outcomes and checks positive record fields.
+All30 native drain histories pass; the complete affected counter sweep is recorded
+separately with158 passes. Production CLI semantics and timers remain unchanged.
+The sequential default TCP drain selection passes22. The current a3822c4 macOS
+job has subsequently finished143 pass/15 fail; its group leadership stalls and
+command interruptions remain unresolved, with raw terminal logs retained210h.
+Implemented211 adds four Final-before-import TCP/QUIC WAL/retained-checkpoint
+histories alongside the four existing after-activation cases; all8 pass. Every
+recovered source retains its old base and reconstructs exact Final receipt
+index/term, accepted/committed operation status and removed-voter learner state.
+Immutable fence/exports survive; imported fresh-read configuration is exactly3
+(the older after-activation import remains2). Per-phase serving refusal and
+independent child retry/outbox/cold-recovery checks pass. A reused configuration2
+fixture assumption and an incorrect public receipt type namespace failed first;
+both raw failures are retained. The sequential default TCP selection passes4.
+No production protocol or format changes.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -223,20 +249,101 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
-Next: select an uncovered combined membership/lifecycle recovery schedule
-from the acceptance ledger, using the existing native phase/restart fixtures and
-independent original-receipt observations. Check source fencing, exact accepted
-configuration and one writable owner through the selected cut, then repeat
-original operations after cold recovery. This advances P4/P6 and depends on the
-existing journals, snapshot lineage and source/target services; it does not
-require global automatic orchestration.
+Next: broaden malformed transfer-observation decoding evidence using its existing
+public128KiB wire codec and actual completed-read observation fixtures. Generate
+reproducible malformed lengths/counts, truncations and inconsistent identity/
+prefix combinations; require typed refusal, bounded allocation and unchanged
+operator state. This advances P0/P1 defensive recovery and P6 resumable operators,
+depending on existing observation/operation contracts rather than a replacement
+serialization system. Valid native observations must still round-trip.
 
-Following: broaden malformed-input and bounded decoding evidence using the
-existing wire/snapshot/log codec contracts. Use reproducible generated inputs,
-explicit byte/count limits and unchanged rejected-state assertions. This
-advances P0/P1 defensive recovery and depends on existing native/host codecs,
-not a replacement serialization system. Select an uncovered codec family from
-the acceptance ledger after the preceding fault schedule is verified.
+Following: select the next unreviewed replaceable provider contract from the
+108-entry inventory and document its actual ownership/budget/recovery obligations.
+Run the same independently modeled traces against a downstream host replacement
+and the native provider, including failed admission/terminal cleanup. Completion
+requires cause-detecting assertions and scoped ledger evidence, not merely a
+green metadata check. This advances P0 composition and depends on existing public
+seams/shared conformance patterns;102 entries currently remain unreviewed.
+
+### Slice210h schema plan — prepare the original drain source under role changes
+
+The completed a3822c4 Ubuntu counter run passes156/fails2. Both failures are
+retirement histories inside membership_drain::prepare: its sampled leader's
+move-leader19750 response is Unknown(LeadershipChanged). They occur before the
+retirement cut, not in drain admission or its new diagnostic. Source and target
+identities were fixed before restart; keep that original target and operation.
+
+Replace the single assumed-success setup request with one bounded setup phase.
+Within the existing15s preparation deadline, resample current leadership. If
+the required source already leads, preserve the existing setup success condition
+without inventing a self-target handoff. Otherwise submit exactly operation19750,
+configuration1 and the same required target node/store/incarnation. A successful
+record must report those exact identities. Only exact NOT_LEADER and the observed
+LeadershipChanged uncertainty permit a caller retry; unrelated errors stay
+terminal. Existing administration preserves an already retained record's source
+when reconstructing an exact retry. This is fixture-owned intent recovery;
+the CLI and production uncertainty policy do not change.
+
+Ownership/failure: Cluster owns channels/processes. No new journal or proof;
+keep the original saved source and downstream membership/drain/retirement plan.
+The preparation helper is needed by the selected milestone because without it
+role churn aborts the retirement histories before their actual fault assertions.
+Acceptance is actual native retirement TCP/QUIC recovery plus affected shared
+preparation histories, exact record validation and zero formatting/four strict
+lint profiles. Current macOS and unrelated failures remain open. Combined211
+membership/split evidence and the following bounded codec deliverable retain
+their full scope; this setup correction does not replace either.
+
+### Slice211 schema plan — Final suffix over a retained joint split checkpoint
+
+The existing185 source-membership/split histories finalize membership after
+target activation. Add the complementary native cut: finalize after the source
+is durably fenced but before either target imports, then abort/reopen source
+workers while keeping the older Joint checkpoint and replaying the later Final
+WAL suffix. WAL-only variants retain the original uncheckpointed history.
+This advances the linked combined P4/P6 milestone while the current operator CI
+run continues under its existing live handle.
+
+Data/API shape: reuse Split, NativeMemberStartup, original operation500 and
+Joint2/Final3 records, source freeze and exported images, and the public split
+operator. Add an explicit test-only Final cut and checkpoint recovery selection;
+the shared finalization helper ensures both cuts use identical original-operation
+resumption and authorization. No production provider/state machine is replaced.
+After Joint and fence, existing recovery proves the unread original Joint receipt.
+For the new cut, record each node's installed base, append/commit Final, verify
+the exact new receipt, abort/drain/join and reopen without installing another
+source checkpoint. Check unchanged base, Joint membership at that boundary and
+Final committed/accepted membership from the replayed suffix; node1 stays learner.
+
+Ownership/failure: original frozen source keeps its exact fence, export bytes,
+operation receipts and outbox lineage. Both target scopes stay non-serving until
+valid import/publication/activation. Every phase independently exercises source
+write refusal and target non-serving/writable state. Child imports must keep the
+original Joint-cut fence and byte-identical exports, with configuration3 from
+their actual fresh quorum observation after current source membership is Final3.
+After ancestor/source shutdown, child writes and original retries must work;
+cold child reopen preserves exact values, duplicate receipts and outbox counts.
+Abort uses the existing exact-ticket cancellation/drain/worker-join path before
+opening authoritative files. Tests serialize their native fixture ownership.
+
+Acceptance: four new TCP/QUIC × WAL/retained-checkpoint histories, four existing
+after-activation histories, relevant split regressions, default TCP coverage and
+zero formatting/all-four strict Clippy diagnostics. This is selected process-
+abort/checkpoint recovery, not power-loss or arbitrary new-voter/revocation proof.
+The macro plan still leaves broader faults and platform acceptance open. Next
+within the linked plan are bounded malformed codecs; the current operator
+deliverable continues independently using actual source-refusal evidence.
+
+First-run correction: all four new histories reach recovered Final3 membership,
+unchanged frozen state/exports and target activation, then fail a reused helper
+hard-coded to import configuration2. The initial schema incorrectly treated
+that field as the configuration at the original fence. SourceFreezeStatus has
+no configuration field; SourceFenceEvidence::from_status and TransferObservation
+bind the completed read barrier's configuration. Before import this is3; the
+existing after-activation case imports under2. Check those exact contexts and
+keep the original fence/digests, rather than accepting arbitrary configuration.
+Also compare original Final receipt index/term against every recovered source's
+accepted/committed operation status. No production semantics are changed.
 
 ### Slice210g schema plan — preserve the actual drain admission refusal
 

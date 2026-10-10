@@ -1,0 +1,72 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.78s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 8 tests
+test native::split::membership::quic_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... FAILED
+test native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery has been running for over 60 seconds
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort has been running for over 60 seconds
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort has been running for over 60 seconds
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery has been running for over 60 seconds
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint has been running for over 60 seconds
+test native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery ... FAILED
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery ... FAILED
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... FAILED
+
+failures:
+
+---- native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint stdout ----
+joint_split protocol=Quic checkpoint=true phase=joint
+joint_split protocol=Quic checkpoint=true phase=fenced
+joint_split protocol=Quic checkpoint=true phase=joint_recovered
+
+thread 'native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint' (568844) panicked at tests/routed/split_membership.rs:273:9:
+assertion `left == right` failed
+  left: ConfigurationId(3)
+ right: ConfigurationId(2)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery stdout ----
+joint_split protocol=Quic checkpoint=false phase=joint
+joint_split protocol=Quic checkpoint=false phase=fenced
+joint_split protocol=Quic checkpoint=false phase=joint_recovered
+
+thread 'native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery' (568843) panicked at tests/routed/split_membership.rs:273:9:
+assertion `left == right` failed
+  left: ConfigurationId(3)
+ right: ConfigurationId(2)
+
+---- native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery stdout ----
+joint_split protocol=TcpTls checkpoint=false phase=joint
+joint_split protocol=TcpTls checkpoint=false phase=fenced
+joint_split protocol=TcpTls checkpoint=false phase=joint_recovered
+
+thread 'native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery' (568847) panicked at tests/routed/split_membership.rs:273:9:
+assertion `left == right` failed
+  left: ConfigurationId(3)
+ right: ConfigurationId(2)
+
+---- native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint stdout ----
+joint_split protocol=TcpTls checkpoint=true phase=joint
+joint_split protocol=TcpTls checkpoint=true phase=fenced
+joint_split protocol=TcpTls checkpoint=true phase=joint_recovered
+
+thread 'native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint' (568848) panicked at tests/routed/split_membership.rs:273:9:
+assertion `left == right` failed
+  left: ConfigurationId(3)
+ right: ConfigurationId(2)
+
+
+failures:
+    native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery
+    native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint
+    native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery
+    native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint
+
+test result: FAILED. 4 passed; 4 failed; 0 ignored; 0 measured; 163 filtered out; finished in 89.29s
+
+error: test failed, to rerun pass `--test routed`

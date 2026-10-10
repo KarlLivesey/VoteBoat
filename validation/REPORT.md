@@ -1,5 +1,25 @@
 # Validation report — slice 35
 
+Combined membership/split recovery: [slice211](baseline/slice211/README.md).
+All8 native TCP/QUIC WAL/checkpoint histories pass, including four new source
+Final-before-import cuts over a retained Joint checkpoint plus later Final WAL.
+Recovered original receipt index/term, accepted/committed membership, old base,
+immutable fences/exports and no-dual-owner phase checks are independent assertions.
+Child retries, values and outbox survive cold reopen with ancestors closed.
+The initial reused import-configuration assertion and receipt-type compile error
+are retained; corrected imports use exactly the fresh quorum-read configuration.
+All4 default TCP cases also pass. This selected process-abort evidence does not
+close broader P4/P6 faults.
+
+Original drain preparation: [slice210h](baseline/slice210h/README.md). The current
+a3822c4 Ubuntu run has156 passes/2 failures during retirement setup on exact
+LeadershipChanged uncertainty. Fixture-owned preparation retains its original
+target/operation and validates positive record fields. All30 affected native drain
+histories and the full158 counter target pass locally; default TCP drain22 passes.
+Formatting/four strict lint profiles remain clean. The current macOS job completes
+143 pass/15 fail, with recorded group liveness/command interruptions still open.
+Matching platform acceptance remains open; production CLI semantics are unchanged.
+
 Drain admission diagnostics: [slice210g](baseline/slice210g/README.md). An
 authenticated original-admission script fails on the old generic identity
 message. The corrected failure preserves the actual escaped source refusal,

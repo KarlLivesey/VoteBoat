@@ -1,0 +1,907 @@
+﻿2026-10-10T10:45:45.5555860Z Current runner version: '2.337.0'
+2026-10-10T10:45:45.5570130Z ##[group]Runner Image Provisioner
+2026-10-10T10:45:45.5570640Z Hosted Compute Agent
+2026-10-10T10:45:45.5571010Z Version: 20260828.587
+2026-10-10T10:45:45.5571410Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-10-10T10:45:45.5571880Z Build Date: 2026-08-28T16:44:25Z
+2026-10-10T10:45:45.5572310Z Worker ID: {5e4b5b8a-5526-48e6-bc1e-a3ab6a05335f}
+2026-10-10T10:45:45.5572760Z Azure Region: westus
+2026-10-10T10:45:45.5573120Z ##[endgroup]
+2026-10-10T10:45:45.5574000Z ##[group]Operating System
+2026-10-10T10:45:45.5574380Z macOS
+2026-10-10T10:45:45.5574700Z 26.6.2
+2026-10-10T10:45:45.5575010Z 25G83
+2026-10-10T10:45:45.5575340Z ##[endgroup]
+2026-10-10T10:45:45.5575680Z ##[group]Runner Image
+2026-10-10T10:45:45.5576060Z Image: macos-26-arm64
+2026-10-10T10:45:45.5576410Z Version: 20260907.0351.1
+2026-10-10T10:45:45.5577200Z Included Software: https://github.com/actions/runner-images/blob/macos-26-arm64/20260907.0351/images/macos/macos-26-arm64-Readme.md
+2026-10-10T10:45:45.5578210Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-26-arm64%2F20260907.0351
+2026-10-10T10:45:45.5578850Z ##[endgroup]
+2026-10-10T10:45:45.5579590Z ##[group]GITHUB_TOKEN Permissions
+2026-10-10T10:45:45.5580660Z Contents: read
+2026-10-10T10:45:45.5581010Z Metadata: read
+2026-10-10T10:45:45.5581360Z ##[endgroup]
+2026-10-10T10:45:45.5582760Z Secret source: Actions
+2026-10-10T10:45:45.5583310Z Cache mode: write
+2026-10-10T10:45:45.5583740Z Prepare workflow directory
+2026-10-10T10:45:45.5837760Z Prepare all required actions
+2026-10-10T10:45:45.5871470Z Getting action download info
+2026-10-10T10:45:45.9691110Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-10T10:45:46.3140270Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-10T10:45:46.4903310Z Complete job name: Operators on macos-latest
+2026-10-10T10:45:46.5340660Z ##[group]Run actions/checkout@v4
+2026-10-10T10:45:46.5341350Z with:
+2026-10-10T10:45:46.5341700Z   repository: KarlLivesey/VoteBoat
+2026-10-10T10:45:46.5344320Z   token: ***
+2026-10-10T10:45:46.5344680Z   ssh-strict: true
+2026-10-10T10:45:46.5345000Z   ssh-user: git
+2026-10-10T10:45:46.5345330Z   persist-credentials: true
+2026-10-10T10:45:46.5345690Z   clean: true
+2026-10-10T10:45:46.5346050Z   sparse-checkout-cone-mode: true
+2026-10-10T10:45:46.5346430Z   fetch-depth: 1
+2026-10-10T10:45:46.5346760Z   fetch-tags: false
+2026-10-10T10:45:46.5347090Z   show-progress: true
+2026-10-10T10:45:46.5347420Z   lfs: false
+2026-10-10T10:45:46.5347720Z   submodules: false
+2026-10-10T10:45:46.5348060Z   set-safe-directory: true
+2026-10-10T10:45:46.5348430Z   allow-unsafe-pr-checkout: false
+2026-10-10T10:45:46.5349180Z env:
+2026-10-10T10:45:46.5349560Z   CARGO_TERM_COLOR: never
+2026-10-10T10:45:46.5349920Z   RUST_BACKTRACE: 1
+2026-10-10T10:45:46.5350240Z ##[endgroup]
+2026-10-10T10:45:47.0584320Z Syncing repository: KarlLivesey/VoteBoat
+2026-10-10T10:45:47.0586140Z ##[group]Getting Git version info
+2026-10-10T10:45:47.0586760Z Working directory is '/Users/runner/work/VoteBoat/VoteBoat'
+2026-10-10T10:45:47.0587590Z [command]/opt/homebrew/bin/git version
+2026-10-10T10:45:47.0942700Z git version 2.55.0
+2026-10-10T10:45:47.0961670Z ##[endgroup]
+2026-10-10T10:45:47.0994330Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/d70ea038-d608-4927-b970-0ba6748f5af8/.gitconfig'
+2026-10-10T10:45:47.1008860Z Temporarily overriding HOME='/Users/runner/work/_temp/d70ea038-d608-4927-b970-0ba6748f5af8' before making global git config changes
+2026-10-10T10:45:47.1010220Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T10:45:47.1011380Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/VoteBoat/VoteBoat
+2026-10-10T10:45:47.1215630Z Deleting the contents of '/Users/runner/work/VoteBoat/VoteBoat'
+2026-10-10T10:45:47.1225390Z ##[group]Initializing the repository
+2026-10-10T10:45:47.1233650Z [command]/opt/homebrew/bin/git init /Users/runner/work/VoteBoat/VoteBoat
+2026-10-10T10:45:47.1550680Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-10T10:45:47.1551660Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-10T10:45:47.1552560Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-10T10:45:47.1553160Z hint: call:
+2026-10-10T10:45:47.1553530Z hint:
+2026-10-10T10:45:47.1554020Z hint: 	git config --global init.defaultBranch <name>
+2026-10-10T10:45:47.1554510Z hint:
+2026-10-10T10:45:47.1554950Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-10T10:45:47.1555620Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-10T10:45:47.1556250Z hint:
+2026-10-10T10:45:47.1556580Z hint: 	git branch -m <name>
+2026-10-10T10:45:47.1556940Z hint:
+2026-10-10T10:45:47.1557440Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-10T10:45:47.1558250Z Initialized empty Git repository in /Users/runner/work/VoteBoat/VoteBoat/.git/
+2026-10-10T10:45:47.1559900Z [command]/opt/homebrew/bin/git remote add origin https://github.com/KarlLivesey/VoteBoat
+2026-10-10T10:45:47.1689730Z ##[endgroup]
+2026-10-10T10:45:47.1690420Z ##[group]Disabling automatic garbage collection
+2026-10-10T10:45:47.1692240Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-10-10T10:45:47.1818500Z ##[endgroup]
+2026-10-10T10:45:47.1819100Z ##[group]Setting up auth
+2026-10-10T10:45:47.1823440Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T10:45:47.1958270Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T10:45:47.3566470Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T10:45:47.3629260Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T10:45:47.4360580Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T10:45:47.4460810Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T10:45:47.5846240Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-10T10:45:47.6086030Z ##[endgroup]
+2026-10-10T10:45:47.6091690Z ##[group]Fetching the repository
+2026-10-10T10:45:47.6099050Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a3822c4e832b420c8f6e4cef34e1a0689fff4e2d:refs/remotes/origin/main
+2026-10-10T10:45:48.7735510Z From https://github.com/KarlLivesey/VoteBoat
+2026-10-10T10:45:48.7798990Z  * [new ref]         a3822c4e832b420c8f6e4cef34e1a0689fff4e2d -> origin/main
+2026-10-10T10:45:48.8075190Z ##[endgroup]
+2026-10-10T10:45:48.8185240Z ##[group]Determining the checkout info
+2026-10-10T10:45:48.8289450Z ##[endgroup]
+2026-10-10T10:45:48.8391880Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-10-10T10:45:48.8610390Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-10T10:45:48.8654290Z ##[group]Checking out the ref
+2026-10-10T10:45:48.8658870Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-10T10:45:49.1484160Z Switched to a new branch 'main'
+2026-10-10T10:45:49.1487670Z branch 'main' set up to track 'origin/main'.
+2026-10-10T10:45:49.1493240Z ##[endgroup]
+2026-10-10T10:45:49.1597340Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-10-10T10:45:49.1665110Z a3822c4e832b420c8f6e4cef34e1a0689fff4e2d
+2026-10-10T10:45:49.1894470Z ##[group]Run rustup toolchain install 1.98.1 --profile minimal
+2026-10-10T10:45:49.1894970Z [36;1mrustup toolchain install 1.98.1 --profile minimal[0m
+2026-10-10T10:45:49.1935670Z shell: /bin/bash -e {0}
+2026-10-10T10:45:49.1935960Z env:
+2026-10-10T10:45:49.1936180Z   CARGO_TERM_COLOR: never
+2026-10-10T10:45:49.1936410Z   RUST_BACKTRACE: 1
+2026-10-10T10:45:49.1936600Z ##[endgroup]
+2026-10-10T10:45:49.2648250Z info: syncing channel updates for 1.98.1-aarch64-apple-darwin
+2026-10-10T10:45:49.3663950Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T10:45:49.3671460Z info: downloading 3 components
+2026-10-10T10:45:55.3316010Z 
+2026-10-10T10:45:55.4040180Z info: self-update is disabled for this build of rustup
+2026-10-10T10:45:55.4043660Z info: any updates to rustup will need to be fetched with your system package manager
+2026-10-10T10:45:55.4044220Z   1.98.1-aarch64-apple-darwin installed - rustc 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T10:45:55.4045360Z 
+2026-10-10T10:45:55.4243140Z ##[group]Run cargo fetch --locked
+2026-10-10T10:45:55.4243530Z [36;1mcargo fetch --locked[0m
+2026-10-10T10:45:55.4292190Z shell: /bin/bash -e {0}
+2026-10-10T10:45:55.4292450Z env:
+2026-10-10T10:45:55.4292640Z   CARGO_TERM_COLOR: never
+2026-10-10T10:45:55.4293000Z   RUST_BACKTRACE: 1
+2026-10-10T10:45:55.4293190Z ##[endgroup]
+2026-10-10T10:45:55.5318370Z info: syncing channel updates for 1.98.1-aarch64-apple-darwin
+2026-10-10T10:45:55.5972860Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T10:45:55.6048220Z info: downloading component clippy
+2026-10-10T10:45:56.3452560Z     Updating crates.io index
+2026-10-10T10:45:56.5135100Z  Downloading crates ...
+2026-10-10T10:45:56.5911900Z   Downloaded subtle v2.6.1
+2026-10-10T10:45:56.6554310Z   Downloaded untrusted v0.9.0
+2026-10-10T10:45:56.6669110Z   Downloaded cfg-if v1.0.5
+2026-10-10T10:45:56.6770450Z   Downloaded slab v0.4.12
+2026-10-10T10:45:56.6871730Z   Downloaded futures-task v0.3.34
+2026-10-10T10:45:56.6973220Z   Downloaded futures-core v0.3.34
+2026-10-10T10:45:56.7075290Z   Downloaded windows-targets v0.52.6
+2026-10-10T10:45:56.7176910Z   Downloaded rustls-webpki v0.103.15
+2026-10-10T10:45:56.7227740Z   Downloaded wasm-bindgen-shared v0.2.129
+2026-10-10T10:45:56.7229140Z   Downloaded wasm-bindgen-macro v0.2.129
+2026-10-10T10:45:56.7230690Z   Downloaded quote v1.0.47
+2026-10-10T10:45:56.7231060Z   Downloaded web-time v1.1.0
+2026-10-10T10:45:56.7231510Z   Downloaded pin-project-lite v0.2.17
+2026-10-10T10:45:56.7232000Z   Downloaded rustversion v1.0.23
+2026-10-10T10:45:56.7232350Z   Downloaded once_cell v1.21.4
+2026-10-10T10:45:56.7232690Z   Downloaded shlex v2.0.1
+2026-10-10T10:45:56.7233260Z   Downloaded thiserror v2.0.21
+2026-10-10T10:45:56.7359770Z   Downloaded zeroize v1.9.1
+2026-10-10T10:45:56.7381870Z   Downloaded rustls-pki-types v1.15.1
+2026-10-10T10:45:56.7429200Z   Downloaded proc-macro2 v1.0.107
+2026-10-10T10:45:56.7478240Z   Downloaded getrandom v0.2.17
+2026-10-10T10:45:56.7532560Z   Downloaded find-msvc-tools v0.1.14
+2026-10-10T10:45:56.7559630Z   Downloaded thiserror-impl v2.0.21
+2026-10-10T10:45:56.7589050Z   Downloaded rustc-hash v2.1.3
+2026-10-10T10:45:56.7615820Z   Downloaded rand_pcg v0.10.2
+2026-10-10T10:45:56.7640000Z   Downloaded lru-slab v0.1.3
+2026-10-10T10:45:56.7653120Z   Downloaded unicode-ident v1.0.26
+2026-10-10T10:45:56.7697440Z   Downloaded wasi v0.11.1+wasi-snapshot-preview1
+2026-10-10T10:45:56.7724470Z   Downloaded cpufeatures v0.3.1
+2026-10-10T10:45:56.7748700Z   Downloaded wasm-bindgen v0.2.129
+2026-10-10T10:45:56.7800330Z   Downloaded tracing-core v0.1.36
+2026-10-10T10:45:56.7842980Z   Downloaded tinyvec v1.13.3
+2026-10-10T10:45:56.7906220Z   Downloaded rand_core v0.10.1
+2026-10-10T10:45:56.7932770Z   Downloaded chacha20 v0.10.2
+2026-10-10T10:45:56.7972490Z   Downloaded bumpalo v3.20.3
+2026-10-10T10:45:56.8008680Z   Downloaded cc v1.6.0
+2026-10-10T10:45:56.8062140Z   Downloaded getrandom v0.4.3
+2026-10-10T10:45:56.8126670Z   Downloaded r-efi v6.0.0
+2026-10-10T10:45:56.8219750Z   Downloaded js-sys v0.3.106
+2026-10-10T10:45:56.8265020Z   Downloaded rand v0.10.3
+2026-10-10T10:45:56.8327040Z   Downloaded bytes v1.12.1
+2026-10-10T10:45:56.8398670Z   Downloaded wasm-bindgen-macro-support v0.2.129
+2026-10-10T10:45:56.8431430Z   Downloaded futures-util v0.3.34
+2026-10-10T10:45:56.8681020Z   Downloaded rustls v0.23.45
+2026-10-10T10:45:56.8911430Z   Downloaded quinn-proto v0.11.19
+2026-10-10T10:45:56.9020020Z   Downloaded syn v3.0.6
+2026-10-10T10:45:56.9205680Z   Downloaded windows_x86_64_gnullvm v0.52.6
+2026-10-10T10:45:56.9281420Z   Downloaded windows_aarch64_gnullvm v0.52.6
+2026-10-10T10:45:56.9373130Z   Downloaded tracing v0.1.44
+2026-10-10T10:45:56.9612400Z   Downloaded windows_i686_gnullvm v0.52.6
+2026-10-10T10:45:56.9691290Z   Downloaded windows_x86_64_gnu v0.52.6
+2026-10-10T10:45:56.9868640Z   Downloaded windows_aarch64_msvc v0.52.6
+2026-10-10T10:45:56.9987600Z   Downloaded windows_x86_64_msvc v0.52.6
+2026-10-10T10:45:57.0110090Z   Downloaded libc v0.2.190
+2026-10-10T10:45:57.0901400Z   Downloaded windows_i686_gnu v0.52.6
+2026-10-10T10:45:57.1098220Z   Downloaded windows_i686_msvc v0.52.6
+2026-10-10T10:45:57.1217620Z   Downloaded ring v0.17.14
+2026-10-10T10:45:57.1893460Z   Downloaded windows-sys v0.52.0
+2026-10-10T10:45:57.2860230Z ##[group]Run set -o pipefail
+2026-10-10T10:45:57.2860510Z [36;1mset -o pipefail[0m
+2026-10-10T10:45:57.2860740Z [36;1mcargo test --locked --offline --all-features \[0m
+2026-10-10T10:45:57.2861200Z [36;1m  --test counter_service --test directory_service --test transfer_service \[0m
+2026-10-10T10:45:57.2861560Z [36;1m  2>&1 | tee operator-recovery.log[0m
+2026-10-10T10:45:57.2895210Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-10T10:45:57.2895530Z env:
+2026-10-10T10:45:57.2895750Z   CARGO_TERM_COLOR: never
+2026-10-10T10:45:57.2896060Z   RUST_BACKTRACE: 1
+2026-10-10T10:45:57.2896250Z   TMPDIR: /Users/runner/work/_temp
+2026-10-10T10:45:57.2896460Z ##[endgroup]
+2026-10-10T10:45:57.4330930Z    Compiling libc v0.2.190
+2026-10-10T10:45:57.4332490Z    Compiling find-msvc-tools v0.1.14
+2026-10-10T10:45:57.4332900Z    Compiling cfg-if v1.0.5
+2026-10-10T10:45:57.5151610Z    Compiling shlex v2.0.1
+2026-10-10T10:45:57.7208860Z    Compiling cc v1.6.0
+2026-10-10T10:45:57.7917640Z    Compiling proc-macro2 v1.0.107
+2026-10-10T10:45:59.0650430Z    Compiling ring v0.17.14
+2026-10-10T10:46:03.0447440Z    Compiling unicode-ident v1.0.26
+2026-10-10T10:46:03.5216920Z    Compiling quote v1.0.47
+2026-10-10T10:46:05.3096980Z    Compiling rand_core v0.10.1
+2026-10-10T10:46:05.5581470Z    Compiling getrandom v0.2.17
+2026-10-10T10:46:05.8293980Z    Compiling zeroize v1.9.1
+2026-10-10T10:46:06.0127000Z    Compiling once_cell v1.21.4
+2026-10-10T10:46:06.1408980Z    Compiling getrandom v0.4.3
+2026-10-10T10:46:06.3117290Z    Compiling untrusted v0.9.0
+2026-10-10T10:46:06.4352080Z    Compiling rustls-pki-types v1.15.1
+2026-10-10T10:46:06.4664670Z    Compiling syn v3.0.6
+2026-10-10T10:46:07.0965540Z    Compiling rustls v0.23.45
+2026-10-10T10:46:07.3541160Z    Compiling thiserror v2.0.21
+2026-10-10T10:46:08.2832290Z    Compiling tracing-core v0.1.36
+2026-10-10T10:46:08.9501080Z    Compiling thiserror-impl v2.0.21
+2026-10-10T10:46:09.0381430Z    Compiling chacha20 v0.10.2
+2026-10-10T10:46:09.4060680Z    Compiling pin-project-lite v0.2.17
+2026-10-10T10:46:09.6853600Z    Compiling subtle v2.6.1
+2026-10-10T10:46:09.8606620Z    Compiling tracing v0.1.44
+2026-10-10T10:46:10.2314310Z    Compiling rand v0.10.3
+2026-10-10T10:46:10.5606600Z    Compiling rand_pcg v0.10.2
+2026-10-10T10:46:10.6486350Z    Compiling lru-slab v0.1.3
+2026-10-10T10:46:10.7088720Z    Compiling bytes v1.12.1
+2026-10-10T10:46:11.1073190Z    Compiling tinyvec v1.13.3
+2026-10-10T10:46:11.4005850Z    Compiling rustc-hash v2.1.3
+2026-10-10T10:46:11.4203160Z    Compiling slab v0.4.12
+2026-10-10T10:46:13.5940630Z    Compiling rustls-webpki v0.103.15
+2026-10-10T10:46:16.3069910Z    Compiling quinn-proto v0.11.19
+2026-10-10T10:46:19.0248960Z    Compiling voteboat v0.1.0 (/Users/runner/work/VoteBoat/VoteBoat)
+2026-10-10T10:46:54.7877210Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 57.44s
+2026-10-10T10:46:54.7970500Z      Running tests/counter_service.rs (target/debug/deps/counter_service-e6ec83c06bc1cc6b)
+2026-10-10T10:46:54.8137720Z 
+2026-10-10T10:46:54.8138260Z running 158 tests
+2026-10-10T10:46:55.0448630Z test assignments::single_group_inventory_does_not_require_a_leader ... ok
+2026-10-10T10:46:58.0896270Z test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+2026-10-10T10:46:59.4493500Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+2026-10-10T10:46:59.6354600Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+2026-10-10T10:46:59.6824120Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+2026-10-10T10:46:59.8943630Z test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+2026-10-10T10:47:01.5429150Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+2026-10-10T10:47:07.8217950Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+2026-10-10T10:47:12.9148380Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+2026-10-10T10:47:15.0176280Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+2026-10-10T10:47:17.9529210Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+2026-10-10T10:47:19.0737050Z test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+2026-10-10T10:47:19.8123220Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+2026-10-10T10:47:20.3547710Z test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+2026-10-10T10:47:20.9672500Z test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+2026-10-10T10:47:23.2163370Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_quic ... ok
+2026-10-10T10:47:23.2431580Z test command_discovery::peer_source::invalid_peer_source_refuses_before_opening_store ... ok
+2026-10-10T10:47:23.5907840Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_tcp ... ok
+2026-10-10T10:47:24.4922910Z test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... FAILED
+2026-10-10T10:47:24.4969730Z test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+2026-10-10T10:47:24.5079230Z test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+2026-10-10T10:47:24.5610910Z test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+2026-10-10T10:47:24.5735720Z test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+2026-10-10T10:47:28.4787710Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_quic ... ok
+2026-10-10T10:47:29.0688240Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+2026-10-10T10:47:29.1604710Z test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+2026-10-10T10:47:31.4114520Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+2026-10-10T10:47:32.5403060Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+2026-10-10T10:47:37.1554930Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+2026-10-10T10:47:40.3621250Z test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... ok
+2026-10-10T10:47:40.6336230Z test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... ok
+2026-10-10T10:47:41.2980040Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+2026-10-10T10:47:42.2584830Z test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... FAILED
+2026-10-10T10:47:42.9808660Z test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+2026-10-10T10:47:43.1939050Z test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+2026-10-10T10:47:44.0330830Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+2026-10-10T10:47:44.1727130Z test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+2026-10-10T10:47:45.1620630Z test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+2026-10-10T10:47:47.1659250Z test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+2026-10-10T10:47:50.9909590Z test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+2026-10-10T10:47:59.1928300Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+2026-10-10T10:48:01.7016230Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... FAILED
+2026-10-10T10:48:03.5265280Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+2026-10-10T10:48:05.4366740Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+2026-10-10T10:48:07.4088720Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+2026-10-10T10:48:09.7175180Z test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+2026-10-10T10:48:09.9316610Z test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+2026-10-10T10:48:10.1403330Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+2026-10-10T10:48:10.4023900Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+2026-10-10T10:48:12.7143400Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+2026-10-10T10:48:13.0378130Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+2026-10-10T10:48:16.1638770Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+2026-10-10T10:48:18.0314550Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+2026-10-10T10:48:23.3124900Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+2026-10-10T10:48:28.0867430Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+2026-10-10T10:48:28.3263630Z test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+2026-10-10T10:48:28.3559390Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+2026-10-10T10:48:28.5772930Z test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+2026-10-10T10:48:31.5427850Z test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+2026-10-10T10:48:31.9979330Z test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+2026-10-10T10:48:38.2880260Z test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+2026-10-10T10:48:38.4154660Z test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+2026-10-10T10:48:39.0440730Z test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+2026-10-10T10:48:47.1799640Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... FAILED
+2026-10-10T10:48:53.0411450Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+2026-10-10T10:48:56.5189420Z test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+2026-10-10T10:49:02.2071680Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... FAILED
+2026-10-10T10:49:11.8258520Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+2026-10-10T10:49:24.9800090Z test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... FAILED
+2026-10-10T10:49:29.0889830Z test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic ... FAILED
+2026-10-10T10:49:34.0439390Z test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... ok
+2026-10-10T10:49:41.8482660Z test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+2026-10-10T10:49:45.5346250Z test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+2026-10-10T10:49:56.5340340Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic has been running for over 60 seconds
+2026-10-10T10:50:04.0211800Z test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... FAILED
+2026-10-10T10:50:08.6574110Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+2026-10-10T10:50:29.7602490Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... FAILED
+2026-10-10T10:50:37.3464270Z test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+2026-10-10T10:50:37.4096670Z test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+2026-10-10T10:50:37.4342140Z test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+2026-10-10T10:51:02.0014640Z test groups::authenticated_group_commands_quic_recover_independent_histories ... FAILED
+2026-10-10T10:51:03.4822180Z test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic ... FAILED
+2026-10-10T10:51:03.8513990Z test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+2026-10-10T10:51:09.4087560Z test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp ... ok
+2026-10-10T10:51:14.1626970Z test history::quic_faulted_client_histories_are_linearizable ... ok
+2026-10-10T10:51:14.1818800Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+2026-10-10T10:51:14.2819230Z test invalid_administration_is_rejected_before_store_open ... ok
+2026-10-10T10:51:14.3769170Z test invalid_deployment_is_rejected_before_store_creation ... ok
+2026-10-10T10:51:14.3884710Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+2026-10-10T10:51:18.0699730Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+2026-10-10T10:51:20.2145980Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... FAILED
+2026-10-10T10:51:28.9596010Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+2026-10-10T10:51:29.2138920Z test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+2026-10-10T10:51:33.6996460Z test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+2026-10-10T10:51:34.9237560Z test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+2026-10-10T10:51:37.7334670Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+2026-10-10T10:51:39.1289750Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_quic ... ok
+2026-10-10T10:51:39.5330050Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_tcp ... ok
+2026-10-10T10:51:40.8500180Z test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+2026-10-10T10:51:41.0372360Z test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+2026-10-10T10:51:43.2972370Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+2026-10-10T10:51:43.6414990Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+2026-10-10T10:51:43.9547280Z test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+2026-10-10T10:51:43.9739730Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+2026-10-10T10:51:44.0038820Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+2026-10-10T10:51:45.5370270Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+2026-10-10T10:51:45.7217360Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+2026-10-10T10:51:48.9748990Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+2026-10-10T10:51:50.6901570Z test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... FAILED
+2026-10-10T10:51:50.9955450Z test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+2026-10-10T10:51:51.0193100Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+2026-10-10T10:51:52.7899030Z test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+2026-10-10T10:51:53.1625540Z test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+2026-10-10T10:51:56.7887510Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+2026-10-10T10:51:59.0844320Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+2026-10-10T10:52:03.4804810Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+2026-10-10T10:52:16.5600720Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+2026-10-10T10:52:20.0051300Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+2026-10-10T10:52:22.0565130Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+2026-10-10T10:52:22.5409660Z test peer_credentials::peer_administration_uses_actual_local_scopes_without_requiring_group_one ... ok
+2026-10-10T10:52:29.1888750Z test peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+2026-10-10T10:52:39.1318770Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+2026-10-10T10:52:45.7844410Z test peer_credentials::quic_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+2026-10-10T10:52:50.7880090Z test peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+2026-10-10T10:52:58.5157640Z test peer_credentials::tcp_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+2026-10-10T10:52:58.9815320Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+2026-10-10T10:53:02.1843990Z test peer_credentials::tcp_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+2026-10-10T10:53:04.2114190Z test peer_discovery::discovered_member_recovery_and_peer_rotation_quic ... ok
+2026-10-10T10:53:06.7896130Z test peer_discovery::discovered_member_recovery_and_peer_rotation_tcp ... ok
+2026-10-10T10:53:16.0955260Z test peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions ... FAILED
+2026-10-10T10:53:17.3648980Z test peer_discovery::discovered_shared_groups_and_peer_rotation_quic ... FAILED
+2026-10-10T10:53:17.5451490Z test peer_discovery::discovered_shared_groups_and_peer_rotation_tcp ... ok
+2026-10-10T10:53:17.6709300Z test peer_discovery::malformed_peer_discovery_client_refuses_before_store_creation ... ok
+2026-10-10T10:53:17.9095740Z test peer_discovery::unavailable_peer_source_does_not_block_commands_or_shutdown ... ok
+2026-10-10T10:53:17.9353520Z test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+2026-10-10T10:53:20.6763430Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_tcp ... ok
+2026-10-10T10:53:25.3989810Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_quic ... ok
+2026-10-10T10:53:25.4252890Z test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+2026-10-10T10:53:25.4618780Z test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+2026-10-10T10:53:27.1749730Z test placement::generated_placement_executes_and_recovers_quic ... ok
+2026-10-10T10:53:27.9550930Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+2026-10-10T10:53:28.8442450Z test placement::generated_placement_executes_and_recovers_tcp ... ok
+2026-10-10T10:53:28.9622380Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+2026-10-10T10:53:30.1160780Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+2026-10-10T10:53:32.4294860Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+2026-10-10T10:53:32.5119030Z test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+2026-10-10T10:53:32.6589510Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_quic ... ok
+2026-10-10T10:53:32.6667470Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+2026-10-10T10:53:34.1610680Z test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+2026-10-10T10:53:38.7076160Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+2026-10-10T10:53:39.8576380Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+2026-10-10T10:53:42.5298340Z test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+2026-10-10T10:53:42.6251340Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+2026-10-10T10:53:43.8596470Z test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+2026-10-10T10:53:44.2805850Z test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+2026-10-10T10:53:48.1636770Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+2026-10-10T10:53:50.3140350Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+2026-10-10T10:53:50.3329180Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+2026-10-10T10:53:54.0723590Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+2026-10-10T10:53:54.0725110Z 
+2026-10-10T10:53:54.0725860Z failures:
+2026-10-10T10:53:54.0726140Z 
+2026-10-10T10:53:54.0727420Z ---- assignments::assignment_pages_quic_bind_permissions_membership_and_reopen stdout ----
+2026-10-10T10:53:54.0728980Z 
+2026-10-10T10:53:54.0730370Z thread 'assignments::assignment_pages_quic_bind_permissions_membership_and_reopen' (58978) panicked at tests/counter_service/groups.rs:52:9:
+2026-10-10T10:53:54.0735290Z group 7:3 root="/Users/runner/work/_temp/voteboat-service-21272-1791629214815306000-1" last_status=[Some("status=exit status: 0 stdout=\"OK role=Candidate term=125 committed=5\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Candidate term=125 committed=5\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Candidate term=125 committed=2\\n\" stderr=\"\"")]
+2026-10-10T10:53:54.0742180Z node1=ready node=1 peer=127.0.0.1:10129 transport=Quic command=127.0.0.1:10229
+2026-10-10T10:53:54.0745670Z administration operation=7001 outcome=Unknown(LeadershipChanged)
+2026-10-10T10:53:54.0747410Z administration operation=7001 outcome=Unknown(LeadershipChanged)
+2026-10-10T10:53:54.0748410Z 
+2026-10-10T10:53:54.0749000Z node2=ready node=2 peer=127.0.0.1:10130 transport=Quic command=127.0.0.1:10230
+2026-10-10T10:53:54.0750180Z 
+2026-10-10T10:53:54.0750920Z node3=ready node=3 peer=127.0.0.1:10131 transport=Quic command=127.0.0.1:10231
+2026-10-10T10:53:54.0751970Z 
+2026-10-10T10:53:54.0752410Z stack backtrace:
+2026-10-10T10:53:54.0753100Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.0755620Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.0758110Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.0759220Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.0761010Z    2: counter_service::groups::leader
+2026-10-10T10:53:54.0761880Z              at ./tests/counter_service/groups.rs:52:9
+2026-10-10T10:53:54.0762640Z    3: counter_service::group_admin::configure
+2026-10-10T10:53:54.0763490Z              at ./tests/counter_service/group_admin.rs:79:22
+2026-10-10T10:53:54.0764230Z    4: counter_service::assignments::history
+2026-10-10T10:53:54.0765140Z              at ./tests/counter_service/assignments.rs:86:5
+2026-10-10T10:53:54.0766770Z    5: counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen
+2026-10-10T10:53:54.0768080Z              at ./tests/counter_service/assignments.rs:120:5
+2026-10-10T10:53:54.0769370Z    6: counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen::{closure#0}
+2026-10-10T10:53:54.0770730Z              at ./tests/counter_service/assignments.rs:119:66
+2026-10-10T10:53:54.0775420Z    7: <counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0777460Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0779100Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0780610Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0782110Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.0782960Z 
+2026-10-10T10:53:54.0783650Z ---- drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence stdout ----
+2026-10-10T10:53:54.0784530Z 
+2026-10-10T10:53:54.0785550Z thread 'drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence' (64145) panicked at tests/counter_service.rs:2086:9:
+2026-10-10T10:53:54.0798060Z ERR not_proposed=Busy
+2026-10-10T10:53:54.0799610Z 
+2026-10-10T10:53:54.0799880Z stack backtrace:
+2026-10-10T10:53:54.0800660Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.0801770Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.0804160Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.0805360Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.0807240Z    2: counter_service::authenticated_write
+2026-10-10T10:53:54.0808080Z              at ./tests/counter_service.rs:2086:9
+2026-10-10T10:53:54.0809260Z    3: counter_service::drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence
+2026-10-10T10:53:54.0810680Z              at ./tests/counter_service/drain.rs:355:13
+2026-10-10T10:53:54.0812330Z    4: counter_service::drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence::{closure#0}
+2026-10-10T10:53:54.0813650Z              at ./tests/counter_service/drain.rs:319:78
+2026-10-10T10:53:54.0815400Z    5: <counter_service::drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0817430Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0819040Z    6: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0820690Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0823260Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.0825470Z 
+2026-10-10T10:53:54.0826090Z ---- drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic stdout ----
+2026-10-10T10:53:54.0827010Z 
+2026-10-10T10:53:54.0831510Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic' (65014) panicked at tests/counter_service/drain_replacement.rs:256:9:
+2026-10-10T10:53:54.0834800Z missing replacement readiness: ["ready node=1 peer=127.0.0.1:17681 transport=Quic command=127.0.0.1:17781\n", "ready node=2 peer=127.0.0.1:17682 transport=Quic command=127.0.0.1:17782\n", "ready node=3 peer=127.0.0.1:17683 transport=Quic command=127.0.0.1:17783\n"]
+2026-10-10T10:53:54.0836990Z stack backtrace:
+2026-10-10T10:53:54.0837750Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.0838760Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.0844190Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.0855120Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.0903920Z    2: counter_service::drain_replacement::wait_replacement_preparation
+2026-10-10T10:53:54.0910950Z              at ./tests/counter_service/drain_replacement.rs:256:9
+2026-10-10T10:53:54.0912530Z    3: counter_service::drain_replacement::replacement_history
+2026-10-10T10:53:54.0913700Z              at ./tests/counter_service/drain_replacement.rs:196:5
+2026-10-10T10:53:54.0915800Z    4: counter_service::drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic
+2026-10-10T10:53:54.0917210Z              at ./tests/counter_service/drain_replacement.rs:270:5
+2026-10-10T10:53:54.0919590Z    5: counter_service::drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic::{closure#0}
+2026-10-10T10:53:54.0920970Z              at ./tests/counter_service/drain_replacement.rs:269:64
+2026-10-10T10:53:54.0923680Z    6: <counter_service::drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0925490Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0926220Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0928380Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0929020Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.0929340Z 
+2026-10-10T10:53:54.0929910Z ---- group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope stdout ----
+2026-10-10T10:53:54.0931670Z 
+2026-10-10T10:53:54.0932040Z thread 'group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope' (68634) panicked at tests/counter_service/group_admin.rs:68:9:
+2026-10-10T10:53:54.0935700Z group=8 node=1 expected=committed=Joint OK evidence=local_durable operation=7001 committed_prefix=4 durable_last=7 committed=NotFoundLocally accepted=Joint { configuration: ConfigurationId(12), target: ConfigurationId(13), index: 5, term: Some(38) } action=wait_for_commit
+2026-10-10T10:53:54.0938240Z 
+2026-10-10T10:53:54.0939130Z ready node=1 peer=127.0.0.1:19729 transport=Quic command=127.0.0.1:19829
+2026-10-10T10:53:54.0941270Z administration operation=7001 outcome=Committed(ProposalPosition { index: 3, term: 1 })
+2026-10-10T10:53:54.0943200Z 
+2026-10-10T10:53:54.0943390Z stack backtrace:
+2026-10-10T10:53:54.0943670Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.0944160Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.0945090Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.0946570Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.0950450Z    2: counter_service::group_admin::status
+2026-10-10T10:53:54.0952330Z              at ./tests/counter_service/group_admin.rs:68:9
+2026-10-10T10:53:54.0954300Z    3: counter_service::group_admin::joint
+2026-10-10T10:53:54.0956300Z              at ./tests/counter_service/group_admin.rs:102:9
+2026-10-10T10:53:54.0959890Z    4: counter_service::group_admin::histories
+2026-10-10T10:53:54.0961790Z              at ./tests/counter_service/group_admin.rs:153:5
+2026-10-10T10:53:54.0962270Z    5: counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope
+2026-10-10T10:53:54.0963390Z              at ./tests/counter_service/group_admin.rs:193:5
+2026-10-10T10:53:54.0965800Z    6: counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope::{closure#0}
+2026-10-10T10:53:54.0966920Z              at ./tests/counter_service/group_admin.rs:192:73
+2026-10-10T10:53:54.0967620Z    7: <counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0968800Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0971100Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0971690Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0973550Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.0973930Z 
+2026-10-10T10:53:54.0974290Z ---- group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic stdout ----
+2026-10-10T10:53:54.0974680Z 
+2026-10-10T10:53:54.0975060Z thread 'group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic' (71216) panicked at tests/counter_service/groups.rs:52:9:
+2026-10-10T10:53:54.0976640Z group 1:1 root="/Users/runner/work/_temp/voteboat-service-21272-1791629319043843000-86" last_status=[Some("status=exit status: 0 stdout=\"OK role=Candidate term=93 committed=3\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Candidate term=93 committed=2\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Follower term=92 committed=2\\n\" stderr=\"\"")]
+2026-10-10T10:53:54.0977920Z node1=ready node=1 peer=127.0.0.1:21009 transport=Quic command=127.0.0.1:21109
+2026-10-10T10:53:54.0978430Z administration operation=7001 outcome=Committed(ProposalPosition { index: 3, term: 2 })
+2026-10-10T10:53:54.0979070Z administration operation=7001 outcome=Unknown(LeadershipChanged)
+2026-10-10T10:53:54.0979330Z 
+2026-10-10T10:53:54.0979490Z node2=ready node=2 peer=127.0.0.1:21010 transport=Quic command=127.0.0.1:21110
+2026-10-10T10:53:54.0979790Z 
+2026-10-10T10:53:54.0979990Z node3=ready node=3 peer=127.0.0.1:21011 transport=Quic command=127.0.0.1:21111
+2026-10-10T10:53:54.0980290Z 
+2026-10-10T10:53:54.0980430Z stack backtrace:
+2026-10-10T10:53:54.0980660Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.0981120Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.0981570Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.0982070Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.0982900Z    2: counter_service::groups::leader
+2026-10-10T10:53:54.0983230Z              at ./tests/counter_service/groups.rs:52:9
+2026-10-10T10:53:54.0983600Z    3: counter_service::group_admin::configure
+2026-10-10T10:53:54.0983990Z              at ./tests/counter_service/group_admin.rs:79:22
+2026-10-10T10:53:54.0984350Z    4: counter_service::group_drain::setup
+2026-10-10T10:53:54.0984650Z              at ./tests/counter_service/group_drain.rs:28:5
+2026-10-10T10:53:54.0985940Z    5: counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic
+2026-10-10T10:53:54.0986880Z              at ./tests/counter_service/group_drain_runner.rs:53:17
+2026-10-10T10:53:54.0987490Z    6: counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic::{closure#0}
+2026-10-10T10:53:54.0988010Z              at ./tests/counter_service/group_drain_runner.rs:52:70
+2026-10-10T10:53:54.0988820Z    7: <counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0989610Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0990270Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.0990890Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.0992510Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.0993560Z 
+2026-10-10T10:53:54.0994330Z ---- group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready stdout ----
+2026-10-10T10:53:54.0995280Z 
+2026-10-10T10:53:54.0996640Z thread 'group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready' (70882) panicked at tests/counter_service/groups.rs:52:9:
+2026-10-10T10:53:54.0998290Z group 7:3 root="/Users/runner/work/_temp/voteboat-service-21272-1791629311542598000-82" last_status=[Some("status=exit status: 0 stdout=\"OK role=Follower term=166 committed=13\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Candidate term=166 committed=13\\n\" stderr=\"\""), Some("status=exit status: 0 stdout=\"OK role=Follower term=166 committed=13\\n\" stderr=\"\"")]
+2026-10-10T10:53:54.0999700Z node1=ready node=1 peer=127.0.0.1:20497 transport=Quic command=127.0.0.1:20597
+2026-10-10T10:53:54.1000010Z 
+2026-10-10T10:53:54.1000170Z node2=ready node=2 peer=127.0.0.1:20498 transport=Quic command=127.0.0.1:20598
+2026-10-10T10:53:54.1000460Z 
+2026-10-10T10:53:54.1000680Z node3=ready node=3 peer=127.0.0.1:20499 transport=Quic command=127.0.0.1:20599
+2026-10-10T10:53:54.1000960Z 
+2026-10-10T10:53:54.1001070Z stack backtrace:
+2026-10-10T10:53:54.1022010Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1022790Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1023220Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1023690Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1024090Z    2: counter_service::groups::leader
+2026-10-10T10:53:54.1024370Z              at ./tests/counter_service/groups.rs:52:9
+2026-10-10T10:53:54.1024840Z    3: counter_service::group_admin::configure
+2026-10-10T10:53:54.1025210Z              at ./tests/counter_service/group_admin.rs:79:22
+2026-10-10T10:53:54.1025590Z    4: counter_service::group_drain::history
+2026-10-10T10:53:54.1025910Z              at ./tests/counter_service/group_drain.rs:159:5
+2026-10-10T10:53:54.1027770Z    5: counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+2026-10-10T10:53:54.1028690Z              at ./tests/counter_service/group_drain.rs:184:5
+2026-10-10T10:53:54.1029270Z    6: counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready::{closure#0}
+2026-10-10T10:53:54.1029890Z              at ./tests/counter_service/group_drain.rs:183:83
+2026-10-10T10:53:54.1030590Z    7: <counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1031540Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1032390Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1034010Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1034620Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1034880Z 
+2026-10-10T10:53:54.1035260Z ---- group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic stdout ----
+2026-10-10T10:53:54.1035730Z 
+2026-10-10T10:53:54.1036210Z thread 'group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic' (74520) panicked at tests/counter_service/group_leadership.rs:35:9:
+2026-10-10T10:53:54.1036850Z ["group", "7", "3", "move-leader", "40001", "9", "2", "2", "1"]: ERR not_proposed=Busy
+2026-10-10T10:53:54.1037140Z 
+2026-10-10T10:53:54.1037280Z stack backtrace:
+2026-10-10T10:53:54.1037550Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1037950Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1038460Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1038840Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1040140Z    2: counter_service::group_leadership::command
+2026-10-10T10:53:54.1040500Z              at ./tests/counter_service/group_leadership.rs:35:9
+2026-10-10T10:53:54.1040910Z    3: counter_service::group_leadership::busy::history
+2026-10-10T10:53:54.1041330Z              at ./tests/counter_service/group_leadership/busy.rs:43:20
+2026-10-10T10:53:54.1041910Z    4: counter_service::group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic
+2026-10-10T10:53:54.1042940Z              at ./tests/counter_service/group_leadership/busy.rs:102:5
+2026-10-10T10:53:54.1043500Z    5: counter_service::group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic::{closure#0}
+2026-10-10T10:53:54.1044180Z              at ./tests/counter_service/group_leadership/busy.rs:101:72
+2026-10-10T10:53:54.1045040Z    6: <counter_service::group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1045890Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1046530Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1047090Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1047750Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1048040Z 
+2026-10-10T10:53:54.1048350Z ---- group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints stdout ----
+2026-10-10T10:53:54.1048740Z 
+2026-10-10T10:53:54.1049210Z thread 'group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints' (75867) panicked at tests/counter_service/group_leadership.rs:52:9:
+2026-10-10T10:53:54.1050240Z ERR NotRead(ReadNotReady)
+2026-10-10T10:53:54.1050660Z ; ready node=1 peer=127.0.0.1:21905 transport=Quic command=127.0.0.1:22005
+2026-10-10T10:53:54.1051180Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1051530Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1051860Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1052160Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1052610Z leadership local attempt expired; durable intent remains pending
+2026-10-10T10:53:54.1052950Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1053340Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1053640Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1053950Z leadership status admitted operation=40002
+2026-10-10T10:53:54.1054500Z 
+2026-10-10T10:53:54.1054590Z stack backtrace:
+2026-10-10T10:53:54.1054990Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1055510Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1055930Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1056350Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1056780Z    2: counter_service::group_leadership::status
+2026-10-10T10:53:54.1057050Z              at ./tests/counter_service/group_leadership.rs:52:9
+2026-10-10T10:53:54.1057330Z    3: counter_service::group_leadership::history
+2026-10-10T10:53:54.1057610Z              at ./tests/counter_service/group_leadership.rs:203:25
+2026-10-10T10:53:54.1058180Z    4: counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints
+2026-10-10T10:53:54.1058690Z              at ./tests/counter_service/group_leadership.rs:251:5
+2026-10-10T10:53:54.1059190Z    5: counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints::{closure#0}
+2026-10-10T10:53:54.1059690Z              at ./tests/counter_service/group_leadership.rs:250:82
+2026-10-10T10:53:54.1060900Z    6: <counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1061640Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1062920Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1063440Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1063910Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1064200Z 
+2026-10-10T10:53:54.1064540Z ---- group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic stdout ----
+2026-10-10T10:53:54.1064900Z 
+2026-10-10T10:53:54.1065290Z thread 'group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic' (78654) panicked at tests/counter_service/groups.rs:52:9:
+2026-10-10T10:53:54.1066890Z group 8:2 root="/Users/runner/work/_temp/voteboat-service-21272-1791629385534213000-97" last_status=[Some("status=exit status: 0 stdout=\"OK role=Candidate term=165 committed=8\\n\" stderr=\"\""), None, Some("status=exit status: 0 stdout=\"OK role=Candidate term=166 committed=8\\n\" stderr=\"\"")]
+2026-10-10T10:53:54.1068210Z node1=ready node=1 peer=127.0.0.1:22417 transport=Quic command=127.0.0.1:22517
+2026-10-10T10:53:54.1068600Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1068830Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1069090Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1069320Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1069540Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1069760Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1069990Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1070210Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1070430Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1070580Z 
+2026-10-10T10:53:54.1070730Z node2=ready node=2 peer=127.0.0.1:22418 transport=Quic command=127.0.0.1:22518
+2026-10-10T10:53:54.1071110Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1071550Z leadership completion unresolved: Unknown(LeadershipChanged); inspect status or resume original operation
+2026-10-10T10:53:54.1071880Z 
+2026-10-10T10:53:54.1072030Z node3=ready node=3 peer=127.0.0.1:22419 transport=Quic command=127.0.0.1:22519
+2026-10-10T10:53:54.1072360Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1072640Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1073210Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1073430Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1073650Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1073870Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1074090Z leadership status admitted operation=40001
+2026-10-10T10:53:54.1074240Z 
+2026-10-10T10:53:54.1074290Z stack backtrace:
+2026-10-10T10:53:54.1074450Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1074780Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1075570Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1075900Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1076290Z    2: counter_service::groups::leader
+2026-10-10T10:53:54.1076830Z              at ./tests/counter_service/groups.rs:52:9
+2026-10-10T10:53:54.1077560Z    3: counter_service::group_leadership::status
+2026-10-10T10:53:54.1077890Z              at ./tests/counter_service/group_leadership.rs:42:22
+2026-10-10T10:53:54.1078240Z    4: counter_service::group_leadership::historical::history
+2026-10-10T10:53:54.1079040Z              at ./tests/counter_service/group_leadership/historical.rs:54:5
+2026-10-10T10:53:54.1079560Z    5: counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic
+2026-10-10T10:53:54.1080050Z              at ./tests/counter_service/group_leadership/historical.rs:13:5
+2026-10-10T10:53:54.1080580Z    6: counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic::{closure#0}
+2026-10-10T10:53:54.1081110Z              at ./tests/counter_service/group_leadership/historical.rs:12:71
+2026-10-10T10:53:54.1081860Z    7: <counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1082700Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1083220Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1083830Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1084420Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1084680Z 
+2026-10-10T10:53:54.1085090Z ---- groups::authenticated_group_commands_quic_recover_independent_histories stdout ----
+2026-10-10T10:53:54.1085420Z 
+2026-10-10T10:53:54.1085770Z thread 'groups::authenticated_group_commands_quic_recover_independent_histories' (81478) panicked at tests/counter_service.rs:395:9:
+2026-10-10T10:53:54.1086440Z ["group", "8", "2", "read"]:  Error: "no eligible configured leader found within the routing deadline"
+2026-10-10T10:53:54.1087010Z 
+2026-10-10T10:53:54.1087080Z stack backtrace:
+2026-10-10T10:53:54.1087270Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1087660Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1088050Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1088380Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1088740Z    2: <counter_service::Cluster>::routed
+2026-10-10T10:53:54.1088960Z              at ./tests/counter_service.rs:395:9
+2026-10-10T10:53:54.1089180Z    3: counter_service::groups::data
+2026-10-10T10:53:54.1089400Z              at ./tests/counter_service/groups.rs:80:15
+2026-10-10T10:53:54.1089640Z    4: counter_service::groups::history
+2026-10-10T10:53:54.1089860Z              at ./tests/counter_service/groups.rs:170:5
+2026-10-10T10:53:54.1090240Z    5: counter_service::groups::authenticated_group_commands_quic_recover_independent_histories
+2026-10-10T10:53:54.1091230Z              at ./tests/counter_service/groups.rs:180:5
+2026-10-10T10:53:54.1091690Z    6: counter_service::groups::authenticated_group_commands_quic_recover_independent_histories::{closure#0}
+2026-10-10T10:53:54.1092120Z              at ./tests/counter_service/groups.rs:179:69
+2026-10-10T10:53:54.1092750Z    7: <counter_service::groups::authenticated_group_commands_quic_recover_independent_histories::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1093400Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1093910Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1094430Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1095000Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1095270Z 
+2026-10-10T10:53:54.1095530Z ---- groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic stdout ----
+2026-10-10T10:53:54.1095870Z 
+2026-10-10T10:53:54.1096620Z thread 'groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic' (83401) panicked at tests/counter_service.rs:2087:9:
+2026-10-10T10:53:54.1097420Z leadership failed to settle: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+2026-10-10T10:53:54.1098110Z 
+2026-10-10T10:53:54.1098190Z stack backtrace:
+2026-10-10T10:53:54.1098370Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1098700Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1099050Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1099470Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1099840Z    2: counter_service::authenticated_write
+2026-10-10T10:53:54.1100080Z              at ./tests/counter_service.rs:2087:9
+2026-10-10T10:53:54.1100310Z    3: counter_service::groups::data
+2026-10-10T10:53:54.1100530Z              at ./tests/counter_service/groups.rs:65:20
+2026-10-10T10:53:54.1100840Z    4: counter_service::groups::lost_reply::history
+2026-10-10T10:53:54.1101180Z              at ./tests/counter_service/groups/lost_reply.rs:92:5
+2026-10-10T10:53:54.1101630Z    5: counter_service::groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic
+2026-10-10T10:53:54.1102090Z              at ./tests/counter_service/groups/lost_reply.rs:121:5
+2026-10-10T10:53:54.1102580Z    6: counter_service::groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic::{closure#0}
+2026-10-10T10:53:54.1103070Z              at ./tests/counter_service/groups/lost_reply.rs:120:81
+2026-10-10T10:53:54.1103790Z    7: <counter_service::groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1104840Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1105370Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1105960Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1108040Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1108870Z 
+2026-10-10T10:53:54.1109410Z ---- group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic stdout ----
+2026-10-10T10:53:54.1110120Z 
+2026-10-10T10:53:54.1110600Z thread 'group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic' (73245) panicked at tests/counter_service/group_drain_runner.rs:24:5:
+2026-10-10T10:53:54.1112450Z  Error: "UNKNOWN drain runner budget expired; rerun the same sequence and operation"
+2026-10-10T10:53:54.1112790Z 
+2026-10-10T10:53:54.1112850Z stack backtrace:
+2026-10-10T10:53:54.1113010Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1113420Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1113800Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1114830Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1115960Z    2: counter_service::group_drain_runner::finish
+2026-10-10T10:53:54.1116700Z              at ./tests/counter_service/group_drain_runner.rs:24:5
+2026-10-10T10:53:54.1118310Z    3: counter_service::group_drain_runner::interrupted
+2026-10-10T10:53:54.1118700Z              at ./tests/counter_service/group_drain_runner.rs:128:5
+2026-10-10T10:53:54.1119190Z    4: counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+2026-10-10T10:53:54.1119740Z              at ./tests/counter_service/group_drain_runner.rs:137:5
+2026-10-10T10:53:54.1120650Z    5: counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic::{closure#0}
+2026-10-10T10:53:54.1121150Z              at ./tests/counter_service/group_drain_runner.rs:136:80
+2026-10-10T10:53:54.1122320Z    6: <counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1124520Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1126180Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1127540Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1128830Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1129530Z 
+2026-10-10T10:53:54.1130160Z ---- membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan stdout ----
+2026-10-10T10:53:54.1131000Z 
+2026-10-10T10:53:54.1131940Z thread 'membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan' (91046) panicked at tests/counter_service.rs:370:9:
+2026-10-10T10:53:54.1134630Z node 2 ["drain-node", "1", "19701"]: UNKNOWN drain handoff=Applied { position: ProposalPosition { index: 6, term: 3 }, receipt: Administration { operation: OperationId(19701), index: 6, outcome: Busy } }; retry original drain identity
+2026-10-10T10:53:54.1136990Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T10:53:54.1137750Z 
+2026-10-10T10:53:54.1138210Z service log: ready node=2 peer=127.0.0.1:27666 transport=TcpTls command=127.0.0.1:27766
+2026-10-10T10:53:54.1138920Z 
+2026-10-10T10:53:54.1139080Z stack backtrace:
+2026-10-10T10:53:54.1139520Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1140390Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1141350Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1142230Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1143180Z    2: <counter_service::Cluster>::ok
+2026-10-10T10:53:54.1143750Z              at ./tests/counter_service.rs:370:9
+2026-10-10T10:53:54.1144830Z    3: counter_service::membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan
+2026-10-10T10:53:54.1145980Z              at ./tests/counter_service/membership_drain.rs:166:7
+2026-10-10T10:53:54.1147200Z    4: counter_service::membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan::{closure#0}
+2026-10-10T10:53:54.1148510Z              at ./tests/counter_service/membership_drain.rs:164:72
+2026-10-10T10:53:54.1151490Z    5: <counter_service::membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1153380Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1154740Z    6: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1156080Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1157330Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1158040Z 
+2026-10-10T10:53:54.1158600Z ---- peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions stdout ----
+2026-10-10T10:53:54.1159380Z 
+2026-10-10T10:53:54.1160270Z thread 'peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions' (96539) panicked at tests/counter_service.rs:395:9:
+2026-10-10T10:53:54.1161910Z ["group", "7", "3", "read"]:  Error: "no eligible configured leader found within the routing deadline"
+2026-10-10T10:53:54.1163030Z 
+2026-10-10T10:53:54.1163830Z stack backtrace:
+2026-10-10T10:53:54.1164050Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1164410Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1164760Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1165250Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1165680Z    2: <counter_service::Cluster>::routed
+2026-10-10T10:53:54.1165920Z              at ./tests/counter_service.rs:395:9
+2026-10-10T10:53:54.1166220Z    3: counter_service::peer_credentials::data
+2026-10-10T10:53:54.1166510Z              at ./tests/counter_service/peer_credentials.rs:100:15
+2026-10-10T10:53:54.1166790Z    4: counter_service::peer_credentials::history
+2026-10-10T10:53:54.1168140Z              at ./tests/counter_service/peer_credentials.rs:211:5
+2026-10-10T10:53:54.1168590Z    5: counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions
+2026-10-10T10:53:54.1169010Z              at ./tests/counter_service/peer_credentials.rs:241:5
+2026-10-10T10:53:54.1169460Z    6: counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions::{closure#0}
+2026-10-10T10:53:54.1169950Z              at ./tests/counter_service/peer_credentials.rs:240:65
+2026-10-10T10:53:54.1170580Z    7: <counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1172740Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1174140Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1175510Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1176780Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1177480Z 
+2026-10-10T10:53:54.1177940Z ---- peer_discovery::discovered_shared_groups_and_peer_rotation_quic stdout ----
+2026-10-10T10:53:54.1178610Z 
+2026-10-10T10:53:54.1179390Z thread 'peer_discovery::discovered_shared_groups_and_peer_rotation_quic' (99642) panicked at tests/counter_service.rs:395:9:
+2026-10-10T10:53:54.1180900Z ["group", "8", "2", "read"]:  Error: "no eligible configured leader found within the routing deadline"
+2026-10-10T10:53:54.1181650Z 
+2026-10-10T10:53:54.1181810Z stack backtrace:
+2026-10-10T10:53:54.1182230Z    0: __rustc::rust_begin_unwind
+2026-10-10T10:53:54.1183090Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T10:53:54.1185100Z    1: core::panicking::panic_fmt
+2026-10-10T10:53:54.1185980Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+2026-10-10T10:53:54.1186930Z    2: <counter_service::Cluster>::routed
+2026-10-10T10:53:54.1187530Z              at ./tests/counter_service.rs:395:9
+2026-10-10T10:53:54.1188180Z    3: counter_service::peer_discovery::rotated_data
+2026-10-10T10:53:54.1188920Z              at ./tests/counter_service/peer_discovery.rs:120:22
+2026-10-10T10:53:54.1189670Z    4: counter_service::peer_discovery::profile_history
+2026-10-10T10:53:54.1190420Z              at ./tests/counter_service/peer_discovery.rs:165:5
+2026-10-10T10:53:54.1191750Z    5: counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic
+2026-10-10T10:53:54.1192820Z              at ./tests/counter_service/peer_discovery.rs:284:5
+2026-10-10T10:53:54.1194050Z    6: counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic::{closure#0}
+2026-10-10T10:53:54.1195340Z              at ./tests/counter_service/peer_discovery.rs:283:53
+2026-10-10T10:53:54.1209740Z    7: <counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1211480Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1212840Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+2026-10-10T10:53:54.1214190Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+2026-10-10T10:53:54.1215440Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+2026-10-10T10:53:54.1216150Z 
+2026-10-10T10:53:54.1216160Z 
+2026-10-10T10:53:54.1216320Z failures:
+2026-10-10T10:53:54.1216970Z     assignments::assignment_pages_quic_bind_permissions_membership_and_reopen
+2026-10-10T10:53:54.1218100Z     drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence
+2026-10-10T10:53:54.1218690Z     drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic
+2026-10-10T10:53:54.1219140Z     group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope
+2026-10-10T10:53:54.1219610Z     group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+2026-10-10T10:53:54.1220090Z     group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic
+2026-10-10T10:53:54.1220580Z     group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+2026-10-10T10:53:54.1221120Z     group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic
+2026-10-10T10:53:54.1221690Z     group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints
+2026-10-10T10:53:54.1222720Z     group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic
+2026-10-10T10:53:54.1224350Z     groups::authenticated_group_commands_quic_recover_independent_histories
+2026-10-10T10:53:54.1225660Z     groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic
+2026-10-10T10:53:54.1227050Z     membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan
+2026-10-10T10:53:54.1227940Z     peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions
+2026-10-10T10:53:54.1228350Z     peer_discovery::discovered_shared_groups_and_peer_rotation_quic
+2026-10-10T10:53:54.1228570Z 
+2026-10-10T10:53:54.1228790Z test result: FAILED. 143 passed; 15 failed; 0 ignored; 0 measured; 0 filtered out; finished in 419.26s
+2026-10-10T10:53:54.1229100Z 
+2026-10-10T10:53:54.1229280Z error: test failed, to rerun pass `--test counter_service`
+2026-10-10T10:53:54.1262720Z ##[error]Process completed with exit code 101.
+2026-10-10T10:53:54.1568550Z ##[group]Run actions/upload-artifact@v4
+2026-10-10T10:53:54.1568980Z with:
+2026-10-10T10:53:54.1569250Z   name: operator-recovery-macos-latest-a3822c4e832b420c8f6e4cef34e1a0689fff4e2d
+2026-10-10T10:53:54.1569700Z   path: operator-recovery.log
+/Users/runner/work/_temp/voteboat-service-*/*.log
+
+2026-10-10T10:53:54.1570020Z   if-no-files-found: ignore
+2026-10-10T10:53:54.1570220Z   retention-days: 14
+2026-10-10T10:53:54.1570410Z   compression-level: 6
+2026-10-10T10:53:54.1570600Z   overwrite: false
+2026-10-10T10:53:54.1570760Z   include-hidden-files: false
+2026-10-10T10:53:54.1570930Z env:
+2026-10-10T10:53:54.1571060Z   CARGO_TERM_COLOR: never
+2026-10-10T10:53:54.1571230Z   RUST_BACKTRACE: 1
+2026-10-10T10:53:54.1571370Z ##[endgroup]
+2026-10-10T10:53:54.7684540Z (node:46735) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-10T10:53:54.7689860Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-10T10:53:54.8883310Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-10T10:53:54.8884540Z The least common ancestor is /Users/runner/work. This will be the root directory of the artifact
+2026-10-10T10:53:54.8885090Z With the provided path, there will be 272 files uploaded
+2026-10-10T10:53:54.8887190Z Artifact name is valid!
+2026-10-10T10:53:54.8888140Z Root directory input is valid!
+2026-10-10T10:53:55.2857330Z Beginning upload of artifact content to blob storage
+2026-10-10T10:53:55.5166050Z (node:46735) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-10T10:53:55.9356550Z Uploaded bytes 93743
+2026-10-10T10:53:56.0176880Z Finished uploading artifact content to blob storage!
+2026-10-10T10:53:56.0179640Z SHA256 digest of uploaded artifact zip is 3a8e1045fa78e8bd296f1f09cb5764c60de57f19c151db38c52a9e51d6ffd0fb
+2026-10-10T10:53:56.0182980Z Finalizing artifact upload
+2026-10-10T10:53:56.2676870Z Artifact operator-recovery-macos-latest-a3822c4e832b420c8f6e4cef34e1a0689fff4e2d.zip successfully finalized. Artifact ID 11667489867
+2026-10-10T10:53:56.2679460Z Artifact operator-recovery-macos-latest-a3822c4e832b420c8f6e4cef34e1a0689fff4e2d has been successfully uploaded! Final size is 93743 bytes. Artifact ID is 11667489867
+2026-10-10T10:53:56.2694100Z Artifact download URL: https://github.com/KarlLivesey/VoteBoat/actions/runs/38046022373/artifacts/11667489867
+2026-10-10T10:53:56.3007510Z Post job cleanup.
+2026-10-10T10:53:56.4559860Z [command]/opt/homebrew/bin/git version
+2026-10-10T10:53:56.5233050Z git version 2.55.0
+2026-10-10T10:53:56.5257130Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/46a3df81-1225-41a5-8a18-aaededaa9e9b/.gitconfig'
+2026-10-10T10:53:56.5267030Z Temporarily overriding HOME='/Users/runner/work/_temp/46a3df81-1225-41a5-8a18-aaededaa9e9b' before making global git config changes
+2026-10-10T10:53:56.5268730Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T10:53:56.5271650Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/VoteBoat/VoteBoat
+2026-10-10T10:53:56.5433070Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T10:53:56.5516060Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T10:53:56.6913010Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T10:53:56.6914240Z http.https://github.com/.extraheader
+2026-10-10T10:53:56.6915460Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-10T10:53:56.6975570Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T10:53:56.8252030Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T10:53:56.8363180Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T10:53:56.9588250Z Cleaning up orphan processes
+2026-10-10T10:53:57.4422200Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.33s
+     Running tests/routed.rs (target/debug/deps/routed-3e2a837d4f0f1279)
+
+running 4 tests
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery ... ok
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 89 filtered out; finished in 30.97s
+

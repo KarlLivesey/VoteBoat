@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0425]: cannot find type `ProposalPosition` in module `voteboat::raft`
+   --> tests/routed/split_membership.rs:341:22
+    |
+341 | ) -> voteboat::raft::ProposalPosition {
+    |                      ^^^^^^^^^^^^^^^^ not found in `voteboat::raft`
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `voteboat` (test "routed") due to 1 previous error

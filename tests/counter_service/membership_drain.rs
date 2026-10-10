@@ -2,6 +2,49 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+fn prepare_source_leader(c: &mut Cluster, source: usize) {
+    let target = source.to_string();
+    let end = Instant::now() + Duration::from_secs(15);
+    loop {
+        let leader = c.leader();
+        if leader == source {
+            return;
+        }
+        let output = c.request(
+            leader,
+            &["move-leader", "19750", "1", &target, &target, "1"],
+        );
+        let text = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            for field in [
+                "operation=19750 ".to_owned(),
+                "configuration=1 ".to_owned(),
+                format!("target={source} "),
+                format!("target_store={source} "),
+                "target_incarnation=1 ".to_owned(),
+            ] {
+                assert!(text.contains(&field), "missing {field}: {text}");
+            }
+        } else {
+            assert!(
+                matches!(
+                    text.as_str(),
+                    "ERR NOT_LEADER\n"
+                        | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"
+                        | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n"
+                ),
+                "original source preparation: {text} {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        assert!(
+            Instant::now() < end,
+            "could not prepare source leader: {text}"
+        );
+        std::thread::park_timeout(Duration::from_millis(20));
+    }
+}
+
 pub(super) fn prepare(quic: bool) -> (Cluster, usize, usize) {
     let mut c = drain::cluster(quic);
     let source = c.leader();
@@ -21,25 +64,7 @@ pub(super) fn prepare(quic: bool) -> (Cluster, usize, usize) {
     c.remote_admin = true;
     c.membership_drain = Some((source, plan));
     reopen(&mut c);
-    let leader = c.leader();
-    if leader != source {
-        c.ok(
-            leader,
-            &[
-                "move-leader",
-                "19750",
-                "1",
-                &source.to_string(),
-                &source.to_string(),
-                "1",
-            ],
-        );
-    }
-    let end = Instant::now() + Duration::from_secs(15);
-    while c.leader() != source {
-        assert!(Instant::now() < end, "could not prepare source leader");
-        std::thread::sleep(Duration::from_millis(20));
-    }
+    prepare_source_leader(&mut c, source);
     (c, source, target)
 }
 fn reopen(c: &mut Cluster) {

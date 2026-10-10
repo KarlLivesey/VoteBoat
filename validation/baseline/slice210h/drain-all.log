@@ -1,0 +1,38 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 30 tests
+test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+
+test result: ok. 30 passed; 0 failed; 0 ignored; 0 measured; 128 filtered out; finished in 15.44s
+
