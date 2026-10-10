@@ -775,7 +775,15 @@ impl<Q: ReadyScheduler> Shard<Q> {
         ticket: VisitTicket,
         f: impl FnOnce(&mut Raft) -> R,
     ) -> Result<R, RuntimeError> {
-        let result = f(&mut self.live(ticket)?.core);
+        let group = self.live(ticket)?;
+        let result = f(&mut group.core);
+        if group.core.is_fenced() {
+            // Preserve the callback's failure (for example, a failed storage
+            // barrier). A fenced core cannot expand its peer set. Keep existing
+            // reservations until the caller explicitly stops/reclaims it;
+            // inspecting its connections here would mask the cause as Fenced.
+            return Ok(result);
+        }
         if let Err(error) = self
             .reserved_connection_peers()
             .and_then(|_| self.retain_connection_history(ticket.group))

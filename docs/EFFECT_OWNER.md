@@ -122,7 +122,12 @@ pending.
 
 A provider/core failure fences all groups in this owner. Accepted external
 storage can have an unknown outcome and must be drained/recovered through its
-host-owned worker. Unsent internal effects are dropped. Outstanding external
+host-owned worker. Worker delivery preserves the original storage error even
+when it fences the core: connection accounting retains its existing history
+instead of replacing that error with a generic `Runtime(Fenced)`. Healthy
+callbacks still validate the complete connection union. This does not release
+credits, certify durability or permit a fenced owner to continue.
+Unsent internal effects are dropped. Outstanding external
 leases keep their reservation until consumed by `discard_failed`; failure does
 not make their memory or progress disappear. Request metadata remains bounded
 and records unresolved accepted persistence. A failed owner is recovered under

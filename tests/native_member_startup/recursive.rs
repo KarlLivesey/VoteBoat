@@ -63,7 +63,7 @@ pub(super) fn shutdown(mut nodes: Vec<Service>, clock: &Instant) {
     }
     drive(&mut nodes, clock, |ns| ns.iter().all(|n| n.is_drained()));
     for n in nodes {
-        close(n);
+        close(n, MonoTime(clock.elapsed().as_millis() as u64));
     }
 }
 

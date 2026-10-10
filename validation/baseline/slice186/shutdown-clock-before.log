@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.33s
+     Running tests/native_member_startup.rs (target/debug/deps/native_member_startup-d3c5b3a8e31c9df3)
+
+running 1 test
+
+thread 'quic_promoted_leader_loss_requires_retained_restored_witness' (2516549) panicked at tests/native_member_startup.rs:395:60:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test quic_promoted_leader_loss_requires_retained_restored_witness ... FAILED
+
+failures:
+
+failures:
+    quic_promoted_leader_loss_requires_retained_restored_witness
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 49 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test native_member_startup`

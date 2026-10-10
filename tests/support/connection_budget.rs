@@ -72,6 +72,45 @@ fn incoming(group_id: u128, peer: u64, physical: u128) -> Event {
     })
 }
 #[test]
+fn failed_storage_keeps_its_cause_and_connection_history_until_recovery() {
+    let (mut owner, mut worker) = single(1);
+    owner
+        .set_connection_budget(budget(&owner, 1, [(node(2), identity(2))].into()))
+        .unwrap();
+    owner.admit(group(1), Event::Campaign).unwrap();
+    owner.advance(MonoTime(0), 1).unwrap();
+    let lease = owner.take_effect().unwrap().unwrap();
+    owner
+        .submit_persists(&mut worker, vec![lease], MonoTime(0))
+        .unwrap();
+    let written = worker.poll(1).pop().unwrap();
+    assert!(matches!(written, WorkerEvent::Written { .. }));
+    owner.deliver_worker(written, MonoTime(0)).unwrap();
+    worker.fail = true;
+    let failed = worker.poll(1).pop().unwrap();
+    assert!(matches!(failed, WorkerEvent::Failed { .. }));
+    assert_eq!(
+        owner.deliver_worker(failed, MonoTime(0)),
+        Err(EffectOwnerError::Worker(WorkerError::Consensus(
+            RaftError::Storage(voteboat::contracts::StorageError::Rejected(
+                "injected failure"
+            ))
+        )))
+    );
+    assert!(owner.is_failed());
+    assert!(owner.core(group(1)).unwrap().is_fenced());
+    assert_eq!(owner.core(group(1)).unwrap().state().hard_state.term, 0);
+    assert_eq!(
+        owner
+            .connection_budget()
+            .unwrap()
+            .retained_peers()
+            .collect::<Vec<_>>(),
+        vec![(node(2), identity(2))]
+    );
+    assert!(owner.take_effect().is_err());
+}
+#[test]
 fn competing_queued_changes_reserve_union_and_protocol_rejection_releases_only_queue_credits() {
     let (mut owner, _) = single(2);
     owner

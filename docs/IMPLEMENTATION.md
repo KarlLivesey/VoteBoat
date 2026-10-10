@@ -110,9 +110,67 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: authenticated remote manifest lookup184 | Let cold Rust clients resolve remotely hosted directory paths; advances P5/C17 and usable embedding. | Existing ManifestDiscovery/NativeManifestLookup, authenticated sessions, bounded manifest codec and selected source authority. | Native TCP/QUIC and short-I/O host runs fetch only requested path segments, reject stale/wrong authority replies, retain cache during source loss and preserve owner-side fencing. |
 | Completed: selected source joint/split recovery185 | Couple membership with source fencing and retry lineage; advances P4/P6. | Native member startup, original configuration results and existing split fixture. | Four TCP/QUIC × WAL/checkpoint abort/reopen histories, exact stale-ticket refusal and target retry/outbox recovery; broader schedules remain below. |
 | Retained: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
-| Current: diagnose observed macOS membership failures186 | Resolve concrete platform failures; advances P1/P4 and native deployment. | Job114126028727 at1b460ef, exact local reproductions and worker/shutdown ownership contracts. | Identify the worker fencing cause and shutdown stall without suppressing errors or widening deadlines; record local and fresh platform outcomes separately while other work continues. |
+| Completed: preserve worker errors and shutdown clocks186a | Repair locally reproduced diagnostic/time defects; advances P1/P4 and native deployment. | Original macOS failures, injected storage failure and a native history starting beyond ten seconds. | Original storage error reaches recovery with fencing/retention intact; late-clock histories and all50 member tests pass. A frozen cleanup clock exposed by that run is corrected. Original macOS outcomes remain unconfirmed. |
+| Current: cross-platform failure confirmation186b | Resolve the remaining observed platform failures; advances P1/P4. | Fresh macOS execution of the corrected error and clock paths; pending resource diagnostics identify any remaining cause. | Record actual platform outcomes, retain new failures, and repair their demonstrated causes without suppressing errors or widening deadlines. Continue the independent audit while CI runs. |
 | Next: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
 | Following: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice186a implementation and acceptance record
+
+An injected failed storage barrier reproduced the diagnostic loss: with a
+connection budget installed, worker delivery returned Worker(Runtime(Fenced))
+instead of the original storage error. Shard::with_core now preserves the
+callback result when the callback fenced the core. It retains connection history;
+the owner still fails closed, releases no dependent effects and requires explicit
+recovery. Live callbacks still check connection capacity. The regression checks
+the exact cause, unchanged durable term, retained peer history and fenced output.
+The Node test also checks that the exact storage cause reaches recovery while
+the client receives Unknown and the application remains unchanged.
+
+The native witness-outage history now starts at protocol time20s without a wall
+sleep. It first reproduced TimeWentBack in single-node cleanup, then independently
+in final cluster shutdown. Cleanup now receives the history's monotonic time;
+cluster shutdown uses the original clock. The first full membership run exposed
+a second problem: fixed-time single-node cleanup left QUIC in Draining with all
+owner/worker/output counts zero. Advancing that clock permits the transport's
+closing timer to expire. Five-second shutdown bounds are unchanged. Poll and
+timeout diagnostics now include identity, phase, retained resources and peer
+deadlines, so another platform failure retains actionable evidence.
+
+All50 native member histories pass after these corrections, including the four
+late-clock TCP/QUIC witness histories. The affected all-feature effect-owner,
+runtime and worker targets pass156/25/9 tests. Focused core-only storage-error and
+Node recovery checks pass. Failing-before and passing-after logs are retained in
+validation/baseline/slice186. Formatting and all three strict Clippy profiles
+pass with zero diagnostics; the inventory validates95 contract entries and
+their referenced paths. Actual logs are retained there. No new provider seam,
+quorum rule or durability token was introduced.
+
+These results establish local bugs and their repairs; they do not establish the
+cause of the original macOS storage failure or prove that its timeout is gone.
+The original macOS job remains the platform failure evidence until fresh results
+replace it. Platform confirmation and the independent deployment/full-scope audit
+remain planned; P7 performance and broader P4/P6 gates are unchanged.
+
+### Slice186 schema plan — preserve failure evidence and shutdown time
+
+The observed macOS worker error is not yet diagnosed: a deterministic host
+regression will first check whether connection accounting hides the storage
+failure that fenced a core. Keep the public callback/result shape unchanged.
+When a callback fences its core, preserve its result and the existing charged
+connection history; the owning worker/replica path must still fail closed and
+perform explicit recovery cleanup. Live callbacks continue to validate the
+whole connection union. No failed write may produce durable evidence or sends.
+
+The native test shutdown path must use the same monotonic clock as its history,
+including a history already beyond ten seconds. Separate the five-second wall
+deadline from protocol time; never reset protocol time or widen that deadline.
+Capture node identity, phase and outstanding owner/worker/peer resources on
+failure so a fresh macOS result identifies the actual pending obligation.
+Acceptance requires a failing-before/passing-after storage-error regression,
+late-clock shutdown coverage, affected native histories, and zero diagnostics
+in all three profiles. Linux evidence does not establish a macOS fix. This
+advances P1/P4 fault diagnosis; the wider P0–P7 requirements remain active.
 
 ### Slice185 implementation and acceptance record
 

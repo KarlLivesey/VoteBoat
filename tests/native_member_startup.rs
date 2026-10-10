@@ -34,7 +34,10 @@ use voteboat::{
 };
 use voteboat::{
     native::{administration::*, placement::*},
+    outbound::OutboundQueue,
     placement::*,
+    snapshot_worker::SnapshotWorker,
+    worker::PersistenceWorker,
 };
 
 #[path = "native_member_startup/recursive.rs"]
@@ -97,7 +100,7 @@ fn administrative_promotion(protocol: NativePeerProtocol, restart_learner: bool)
         nodes.iter().all(|n| n.is_drained())
     });
     for n in nodes {
-        close(n);
+        close(n, MonoTime(clock.elapsed().as_millis() as u64));
     }
     check_admin_files(&directory);
     std::fs::remove_dir_all(directory).unwrap();
@@ -388,12 +391,34 @@ fn cleanup(mut rejected: Box<NativeStartupRejected<Counter>>) {
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn close(mut n: NativeNode<Counter, NativeServiceConnector>) {
+fn pending_resources(n: &Service) -> String {
+    let local = n.local();
+    let core = local.owner.core(group()).unwrap();
+    format!(
+        "node={:?} phase={:?} failure={:?} term={} config={:?} commit={} owner={:?} replica={:?} persistence={:?} clients={:?} reads={:?} results_drained={} outbound={:?} peers={:?} snapshots={:?}",
+        core.local_node(), n.state(), n.failure(), core.state().hard_state.term,
+        core.membership().id(), core.state().commit_index, local.owner.usage(),
+        n.replica_usage(), local.persistence.usage(), local.clients.usage(),
+        local.reads.usage(), local.results.is_drained(), local.outbound.usage(),
+        n.peers().map(|p| (p.usage(), p.connector_usage(), p.next_deadline())),
+        local.snapshots.as_ref().map(|s| (s.router.usage(), s.worker.usage())),
+    )
+}
+
+fn close(mut n: NativeNode<Counter, NativeServiceConnector>, now: MonoTime) {
     n.begin_shutdown();
-    let deadline = Instant::now() + Duration::from_secs(5);
+    let started = Instant::now();
+    let deadline = started + Duration::from_secs(5);
     while !n.is_drained() {
-        n.poll(MonoTime(10000), NodePollBudget::default()).unwrap();
-        assert!(Instant::now() < deadline);
+        // QUIC's closing/draining timers require protocol time to advance too.
+        let tick = MonoTime(now.0 + started.elapsed().as_millis() as u64);
+        n.poll(tick, NodePollBudget::default())
+            .unwrap_or_else(|error| panic!("close: {error:?}; {}", pending_resources(&n)));
+        assert!(
+            Instant::now() < deadline,
+            "close: {}",
+            pending_resources(&n)
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
     let mut parts = n.into_parts().unwrap_or_else(|_| panic!("drained"));
@@ -521,7 +546,7 @@ fn member_histories(protocol: NativePeerProtocol) {
                 1
             );
         }
-        close(n);
+        close(n, MonoTime(0));
         std::fs::remove_dir_all(directory).unwrap();
     }
 }
@@ -568,7 +593,7 @@ fn enrollment_history(protocol: NativePeerProtocol) {
     let n = open(selected, protocol).unwrap();
     assert!(!n.local().owner.core(group()).unwrap().local_voter());
     assert_eq!(n.local().applications[&group()].read_applied(2).unwrap(), 7);
-    close(n);
+    close(n, MonoTime(0));
     std::fs::remove_dir_all(directory).unwrap();
 }
 #[test]
@@ -901,7 +926,7 @@ fn committed_retirement_releases_old_peer_requirements_without_weakening_static_
             .collect::<Vec<_>>(),
         vec![node(2)]
     );
-    close(n);
+    close(n, MonoTime(0));
     std::fs::remove_dir_all(directory).unwrap();
 }
 
@@ -1044,16 +1069,20 @@ fn promoted_leader_witness_catchup(protocol: NativePeerProtocol, compacted: bool
     while nodes.iter().any(|n| !n.is_drained()) {
         for n in &mut nodes {
             n.poll(
-                MonoTime(10000 + clock.elapsed().as_millis() as u64),
+                MonoTime(clock.elapsed().as_millis() as u64),
                 NodePollBudget::default(),
             )
             .unwrap();
         }
-        assert!(shutdown.elapsed() < Duration::from_secs(5));
+        assert!(
+            shutdown.elapsed() < Duration::from_secs(5),
+            "{:?}",
+            nodes.iter().map(pending_resources).collect::<Vec<_>>()
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
     for n in nodes {
-        close(n);
+        close(n, MonoTime(clock.elapsed().as_millis() as u64));
     }
     check_witness_catchup_files(&root, applied);
     std::fs::remove_dir_all(root).unwrap();
@@ -1079,7 +1108,9 @@ fn quic_promoted_leader_witness_installs_compacted_final_snapshot() {
 }
 
 fn promoted_leader_loss_and_witness_outage(protocol: NativePeerProtocol, compacted_witness: bool) {
-    let clock = Instant::now();
+    // Run beyond the former fixed 10-second cleanup timestamp without sleeping.
+    // Startup, recovery and shutdown must share this same monotonic time origin.
+    let clock = Instant::now() - Duration::from_secs(20);
     let root = root();
     std::fs::create_dir(&root).unwrap();
     let initial = seed_promoted_witness(&root, true, compacted_witness);
@@ -1140,12 +1171,16 @@ fn promoted_leader_loss_and_witness_outage(protocol: NativePeerProtocol, compact
     }
     let shutdown = Instant::now();
     while older.iter().any(|n| !n.is_drained()) {
-        outage_poll(&mut older, 10000 + shutdown.elapsed().as_millis() as u64);
-        assert!(shutdown.elapsed() < Duration::from_secs(5));
+        outage_poll(&mut older, clock.elapsed().as_millis() as u64);
+        assert!(
+            shutdown.elapsed() < Duration::from_secs(5),
+            "{:?}",
+            older.iter().map(pending_resources).collect::<Vec<_>>()
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
     for n in older {
-        close(n);
+        close(n, MonoTime(clock.elapsed().as_millis() as u64));
     }
     check_witness_outage_files(&root, compacted_witness, final_index);
     std::fs::remove_dir_all(root).unwrap();
@@ -1186,7 +1221,9 @@ fn admin_drive(
                         plan.authorize(core.state().bootstrap.group, core.membership(), proposal)
                     },
                 )
-                .unwrap();
+                .unwrap_or_else(|error| {
+                    panic!("administrative poll: {error:?}; {}", pending_resources(n))
+                });
             if let Some(replica) = progress.replica {
                 for step in replica.steps {
                     let transitioned = matches!(
@@ -1220,7 +1257,8 @@ fn admin_drive(
         }
         assert!(
             Instant::now() < deadline,
-            "administrative progress timed out"
+            "administrative progress timed out: {:?}",
+            nodes.iter().map(pending_resources).collect::<Vec<_>>()
         );
         std::thread::park_timeout(Duration::from_millis(1));
     }
@@ -1526,7 +1564,10 @@ fn restart_admin_learner(
     protocol: NativePeerProtocol,
 ) {
     let old_binding = proposal.readiness[0].authenticated;
-    close(nodes.remove(1));
+    close(
+        nodes.remove(1),
+        MonoTime(clock.elapsed().as_millis() as u64),
+    );
     let (mut config, _) = startup(&directory.join("2"), 2, &[1, 2, 3]);
     config.startup.tls = config.startup.tls.with_wire_version(6).unwrap();
     config.startup.listen = addresses[1];
@@ -2295,7 +2336,9 @@ fn outage_poll(nodes: &mut [Service], now: u64) -> Vec<usize> {
     let mut refusals = Vec::with_capacity(nodes.len());
     for n in nodes {
         let mut refused = 0;
-        let progress = n.poll(MonoTime(now), NodePollBudget::default()).unwrap();
+        let progress = n
+            .poll(MonoTime(now), NodePollBudget::default())
+            .unwrap_or_else(|error| panic!("outage poll: {error:?}; {}", pending_resources(n)));
         if let Some(replica) = progress.replica {
             for step in replica.steps {
                 // Old-view ingress and superseded authority replies can be
@@ -2381,17 +2424,17 @@ fn shutdown_repaired(
         || !candidate.is_drained()
         || old_voter.as_ref().is_some_and(|n| !n.is_drained())
     {
-        let now = MonoTime(10000 + start.elapsed().as_millis() as u64);
+        let now = MonoTime(start.elapsed().as_millis() as u64);
         for n in old_voter.iter_mut().chain([&mut learner, &mut candidate]) {
             n.poll(now, NodePollBudget::default()).unwrap();
         }
         assert!(shutdown.elapsed() < Duration::from_secs(5));
         std::thread::park_timeout(Duration::from_millis(1));
     }
-    close(candidate);
-    close(learner);
+    close(candidate, MonoTime(start.elapsed().as_millis() as u64));
+    close(learner, MonoTime(start.elapsed().as_millis() as u64));
     if let Some(voter) = old_voter {
-        close(voter);
+        close(voter, MonoTime(start.elapsed().as_millis() as u64));
     }
 }
 
@@ -2598,7 +2641,10 @@ fn begin_witness_outage(
         ns[0].local().owner.core(group()).unwrap().role() == Role::Leader
     });
     let acknowledged = outage_write(&mut promoted, clock, 0, 900, 7, 7);
-    close(promoted.remove(0));
+    close(
+        promoted.remove(0),
+        MonoTime(clock.elapsed().as_millis() as u64),
+    );
     let mut older = vec![open_node(1)];
     older[0].control(group(), NodeControl::Campaign).unwrap();
     outage_drive(&mut older, clock, |ns| {

@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 1 test
+
+thread 'connection_budget::failed_storage_keeps_its_cause_and_connection_history_until_recovery' (15) panicked at tests/support/connection_budget.rs:92:5:
+assertion `left == right` failed
+  left: Err(Worker(Runtime(Fenced)))
+ right: Err(Worker(Consensus(Storage(Rejected("injected failure")))))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test connection_budget::failed_storage_keeps_its_cause_and_connection_history_until_recovery ... FAILED
+
+failures:
+
+failures:
+    connection_budget::failed_storage_keeps_its_cause_and_connection_history_until_recovery
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 149 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

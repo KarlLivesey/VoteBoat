@@ -1020,9 +1020,15 @@ fn provider_failure_fences_node_and_returns_unknown_with_original_selected_resou
     p.local.persistence.fail = true;
     let mut n = boat(p);
     n.propose(request(1)).unwrap();
+    let expected = NodeError::Replica(ReplicaError::Owner(EffectOwnerError::Worker(
+        WorkerError::Consensus(RaftError::Storage(
+            voteboat::contracts::StorageError::Rejected("injected failure"),
+        )),
+    )));
     let mut failed = false;
     for _ in 0..10 {
-        if n.poll(MonoTime(0), NodePollBudget::default()).is_err() {
+        if let Err(reason) = n.poll(MonoTime(0), NodePollBudget::default()) {
+            assert_eq!(reason, expected);
             failed = true;
             break;
         }
@@ -1038,7 +1044,7 @@ fn provider_failure_fences_node_and_returns_unknown_with_original_selected_resou
     let r = n
         .into_recovery()
         .unwrap_or_else(|_| panic!("missing recovery"));
-    assert!(matches!(r.reason, NodeError::Replica(_)));
+    assert_eq!(r.reason, expected);
     assert!(r.local.persistence.closed);
     assert_eq!(r.local.applications[&group(1)].read_applied(1), Ok(0));
 }
