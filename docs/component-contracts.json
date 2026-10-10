@@ -2384,15 +2384,36 @@
         "source_read",
         "target_source_read",
         "scoped_source_read",
-        "target_read"
+        "target_read",
+        "TransferObservation::encode",
+        "TransferObservation::decode_authenticated"
       ],
-      "native": "Pure deterministic decision component used by the native three-node split recovery host; existing source/target/directory guards and Node authorization execute actions.",
+      "native": "Pure deterministic decisions used by the native three-node split recovery host and authenticated voteboat-transfer executable; existing source/target/directory guards and Node authorization execute actions.",
       "conformance": [
         "tests/transfer_operation.rs",
+        "tests/transfer_operation/wire.rs",
+        "tests/transfer_service.rs",
         "tests/routed/split.rs",
         "tests/routed/split_operator.rs"
       ],
-      "scope": "Version1 bounded immutable original intent and distinct lifecycle/publication IDs. All required observations preserve successful completed Node read barrier group/configuration/index; unknown, missing, duplicate, wrong-kind and contradictory evidence cannot authorize a phase. Next returns one intent/stage/fence/export/import/publication/activation or historical completion action. Exact inline images retain the existing 8MiB import command bound and at most512 supplied references. Host owns authenticated reads, proposal admission, refresh after every action/unknown result, I/O, reservations and shutdown. No runtime, worker, persistent counter, cryptographic certificate, new durability token or rollback. Imports must match current source configurations before publication; later configuration observations do not rewrite published provenance. Complete describes original activations, not current serving permission. Selected downstream tests cover malformed evidence; native TCP/QUIC WAL/checkpoint split histories use the same public decisions and preserve original retries. Broader merge/retained and combined membership/fault matrices remain separate validation; executable authenticated start/status/resume remains unimplemented."
+      "scope": "Version1 bounded immutable original intent and distinct lifecycle/publication IDs. All required observations preserve successful completed Node read barrier group/configuration/index; unknown, missing, duplicate, wrong-kind and contradictory evidence cannot authorize a phase. Next returns one intent/stage/fence/export/import/publication/activation or historical completion action. Exact inline images retain the existing 8MiB import command bound and at most512 supplied references. Host owns authenticated reads, proposal admission, refresh after every action/unknown result, I/O, reservations and shutdown. No runtime, worker, persistent counter, cryptographic certificate, new durability token or rollback. Imports must match current source configurations before publication; later configuration observations do not rewrite published provenance. Complete describes original activations, not current serving permission. The bounded128KiB transient observation codec requires caller-authenticated live responses matched to outstanding queries; decoding does not establish freshness or construct a local ReadBarrier. Selected downstream tests cover malformed evidence; native TCP/QUIC WAL/checkpoint split histories use the same public decisions and preserve original retries. Authenticated native whole-responsibility counter start/status/resume is implemented; broader merge/retained and combined membership/fault matrices remain separate validation."
+    },
+    {
+      "design_id": "C18/C20/C23",
+      "public_contract": "Native transfer executable over TransferOperation / Node / ServiceAuthorizer",
+      "operations": [
+        "plan",
+        "serve create|recover",
+        "client status|start|resume|step",
+        "command"
+      ],
+      "native": "voteboat-transfer composes LifecycleDirectory, TransferSource and TransferTarget through existing native startup/Node and authenticated command channels. Peer replication selects TCP/TLS or QUIC.",
+      "conformance": [
+        "tests/transfer_service.rs",
+        "tests/transfer_service/interrupt.rs",
+        "tests/transfer_service/profiles.rs"
+      ],
+      "scope": "Bounded explicit whole-responsibility native byte-counter split with one metadata group, one source and2–16 targets; each group has independent stores and leaders. All roles and operation/incarnation IDs are profile-bound. Read observations require completed quorum reads; trusted Configure principals publish lifecycle evidence through existing guards. Unknown writes are followed by fresh observations. One connection owns at most one exact read/proposal ticket; disconnect cancels it and completions continue draining. Profiles128KiB, command lines270KiB, app commands/images64KiB, fixed deadlines and existing native queue limits. Normal shutdown joins workers; owner failure uses recovery cleanup. Tests cover actual TCP/QUIC command execution, accepted-read disconnect, access rejection, first-import process loss/reopen/resume, source fencing and independent child retries with parents stopped. This is an executable assembly, not a replacement provider seam or a Byzantine certificate protocol. Recursive/merge/retained profiles, general retention, phase-internal persistence cuts, combined membership faults, macOS execution and separate-host validation remain open."
     }
   ],
   "not_yet_implemented": [

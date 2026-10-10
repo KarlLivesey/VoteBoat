@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 2 tests
+
+thread 'quic_authenticated_operator_resumes_original_split_after_process_crash' (3294021) panicked at tests/transfer_service.rs:127:17:
+server 1/1: credential_digest=[f7, 3a, 10, 9b, 1e, 1c, 26, 54, fb, 4b, 8c, 4d, 46, 37, 3a, 74, 0e, 85, 37, 07, 2f, c5, 4f, aa, a4, 1e, d3, 8d, 40, 83, 8e, 0d]
+Error: NativeStartupError { stage: "filesystem/listener", detail: "NotFound" }
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test quic_authenticated_operator_resumes_original_split_after_process_crash ... FAILED
+
+thread 'tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown' (3294022) panicked at tests/transfer_service.rs:127:17:
+server 1/1: credential_digest=[f7, 3a, 10, 9b, 1e, 1c, 26, 54, fb, 4b, 8c, 4d, 46, 37, 3a, 74, 0e, 85, 37, 07, 2f, c5, 4f, aa, a4, 1e, d3, 8d, 40, 83, 8e, 0d]
+Error: NativeStartupError { stage: "filesystem/listener", detail: "NotFound" }
+
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... FAILED
+
+failures:
+
+failures:
+    quic_authenticated_operator_resumes_original_split_after_process_crash
+    tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test transfer_service`

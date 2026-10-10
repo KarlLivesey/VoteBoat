@@ -61,3 +61,8 @@ required-features = ["native"]
 name = "voteboat-directory"
 path = "src/bin/directory_service.rs"
 required-features = ["tls"]
+
+[[bin]]
+name = "voteboat-transfer"
+path = "src/bin/transfer_service.rs"
+required-features = ["tls"]

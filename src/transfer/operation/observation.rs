@@ -5,6 +5,8 @@ use crate::{
     raft::ReadBarrier, runtime::ReadOutcome, scoped_source::ScopedSourceRead,
     transfer_publication::SourceFenceEvidence, transfer_source::SourceRead,
 };
+mod codec;
+pub use codec::MAX_TRANSFER_OBSERVATION_BYTES;
 #[derive(Clone, Debug)]
 pub(super) enum ObservationValue {
     Intent(Option<TransferIntentStatus>),

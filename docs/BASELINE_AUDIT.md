@@ -1,9 +1,23 @@
 # Baseline audits
 
-Latest implementation: [slice194a](#slice194a--public-transfer-decisions).
+Latest implementation: [slice194b](#slice194b--authenticated-native-split-commands).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice194b — authenticated native split commands
+
+The native transfer executable connects the existing guarded applications and
+public decisions to authenticated status/start/resume commands. Two real
+three-replica-per-role TCP/QUIC histories pass, including accepted-read disconnect
+cleanup, original-ID recovery after first import, rejected unauthorized commands
+and child operation with metadata/source stopped. Invalid profiles fail before
+opening stores. The bounded observation wire codec preserves completed-read
+identity/prefix metadata without claiming a portable quorum certificate.
+See [evidence](../validation/baseline/slice194b/README.md) and
+[usage](TRANSFER_SERVICE.md). This closes the bounded whole-responsibility native
+counter split command path; recursive/merge profiles, broader persistence cuts,
+maintenance operations and the full baseline/performance gates remain open.
 
 ## Slice194a — public transfer decisions
 

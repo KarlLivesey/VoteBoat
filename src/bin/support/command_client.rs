@@ -84,6 +84,18 @@ pub fn connect(
     Ok(stream)
 }
 pub fn request(stream: &mut Channel, text: &[u8], deadline: Instant, start: Instant) -> Attempt {
+    request_bounded(stream, text, deadline, start, 4096)
+}
+pub fn request_bounded(
+    stream: &mut Channel,
+    text: &[u8],
+    deadline: Instant,
+    start: Instant,
+    max_reply: usize,
+) -> Attempt {
+    if max_reply == 0 || max_reply > 1024 * 1024 {
+        return Attempt::Unavailable;
+    }
     let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
     let mut sent = 0;
     while sent < text.len() {
@@ -102,7 +114,7 @@ pub fn request(stream: &mut Channel, text: &[u8], deadline: Instant, start: Inst
             Err(_) => return Attempt::Interrupted("request write failed"),
         }
     }
-    let mut bytes = [0u8; 4096];
+    let mut bytes = vec![0u8; max_reply];
     let mut used = 0;
     loop {
         if Instant::now() >= deadline {

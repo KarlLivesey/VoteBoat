@@ -5,6 +5,8 @@ pub mod source_fixture;
 mod support;
 #[path = "transfer_target/fixtures.rs"]
 mod target_fixture;
+#[path = "transfer_operation/wire.rs"]
+mod wire;
 use source_fixture::{group, op};
 use voteboat::{
     application::*, identity::*, log::*, raft::*, runtime::*, transfer::*, transfer_publication::*,
@@ -346,6 +348,17 @@ fn only_matching_recorded_activations_finish_the_original_operation() {
     }
     v.source_configuration = 8;
     assert_eq!(v.next(), Ok(TransferAction::Complete));
+    let decoded = v
+        .reads()
+        .iter()
+        .map(|r| {
+            TransferObservation::decode_authenticated(
+                &r.encode(MAX_TRANSFER_OBSERVATION_BYTES).unwrap(),
+            )
+            .unwrap()
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(plan().next(&decoded, &[]), Ok(TransferAction::Complete));
     let complete = v.clone();
     v.targets[0].activated.as_mut().unwrap().publication_index += 1;
     assert_eq!(v.next(), Err(TransferOperationError::Inconsistent));

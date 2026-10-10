@@ -1,0 +1,11 @@
+cargo +stable test --locked --offline --no-default-features --test transfer_operation
+cargo +stable test --locked --offline --all-features --test transfer_service -- --nocapture
+cargo +stable test --locked --offline --all-features --test directory_service
+cargo +stable test --locked --offline --all-features --test counter_service authenticated_service_principals_scope_commands
+cargo +stable test --locked --offline --no-default-features --test transfer_operation --test transfer_source --test transfer_target --test transfer_publication
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --no-deps --all-features
+node validation/check-inventory.mjs

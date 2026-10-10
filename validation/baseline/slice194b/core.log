@@ -1,0 +1,56 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.50s
+     Running tests/transfer_operation.rs (target/debug/deps/transfer_operation-11004d1355ae88bd)
+
+running 8 tests
+test wire::decoded_observations_preserve_phase_decisions_and_do_not_certify_foreign_groups ... ok
+test published_provenance_is_preserved_when_current_source_configuration_changes ... ok
+test observations_reject_failed_wrong_type_wrong_group_and_out_of_prefix_values ... ok
+test export_requires_exact_image_and_duplicate_images_are_rejected ... ok
+test wire::transient_observations_roundtrip_and_reject_truncation_and_trailing_bytes ... ok
+test initial_progress_is_ordered_and_a_fence_never_substitutes_for_staging ... ok
+test only_matching_recorded_activations_finish_the_original_operation ... ok
+test missing_prerequisites_and_changed_operation_or_configurations_fail_closed ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/transfer_publication.rs (target/debug/deps/transfer_publication-38a9864c2cb9d510)
+
+running 7 tests
+test lifecycle_read_view_checks_prefix_and_accounts_all_nested_evidence ... ok
+test complete_evidence_publishes_exact_after_manifest_and_retains_original_decision ... ok
+test missing_changed_reordered_and_inconsistent_facts_refuse_before_publication ... ok
+test accepted_intent_reserves_publication_after_ordinary_operation_and_byte_exhaustion ... ok
+test maximum_256_source_merge_publication_fits_native_command_envelope ... ok
+test maximum_256_route_publication_fits_native_command_envelope ... ok
+test codec_and_checkpoint_all_truncations_are_atomic_and_status_preserves_indices ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/transfer_source.rs (target/debug/deps/transfer_source-31a9ca3771f918f4)
+
+running 7 tests
+test constructor_returns_original_application_and_provider_bound_covers_full_lifetime ... ok
+test rejects_key_mismatch_unbound_fence_and_partial_batch_without_mutation ... ok
+test same_batch_freeze_retains_exact_boundary_while_outer_prefix_advances ... ok
+test checkpoint_and_wal_replay_preserve_fence_intent_and_original_export ... ok
+test status_query_is_prefix_checked_and_charges_fixed_and_nested_capacity ... ok
+test export_budget_binding_refuses_before_fence_and_pending_data_is_checked ... ok
+test all_truncations_changed_intent_and_checkpoint_bindings_refuse_atomically ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/transfer_target.rs (target/debug/deps/transfer_target-fc0ea528c19f38fd)
+
+running 9 tests
+test expected_source_commitment_refuses_altered_image_content_or_metadata ... ok
+test target_status_reads_are_prefix_checked_and_charge_spare_source_capacity ... ok
+test stage_import_and_retries_keep_target_nonserving_and_source_lineage ... ok
+test constructor_and_binding_refuse_wrong_target_scope_limits_and_keep_provider ... ok
+test conflicting_import_content_and_ids_cannot_replace_original_data ... ok
+test multi_source_import_requires_ordered_complete_coverage_and_refuses_id_collisions ... ok
+test canonical_import_codec_and_hash_bind_content_and_return_original_inputs ... ok
+test admission_and_failed_batches_refuse_missing_stage_bad_data_and_provider_capacity ... ok
+test checkpoint_and_wal_replay_restore_original_import_status_and_content ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s

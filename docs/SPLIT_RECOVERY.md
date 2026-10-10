@@ -70,7 +70,9 @@ imports retain the existing 8 MiB command bound; at most 512 supplied image
 references are considered. The caller owns I/O, authentication, refresh,
 proposal lifetimes, resource reservations and shutdown. There is no background
 work to cancel by dropping the plan. The authenticated executable start/status/
-resume commands remain the next integration step.
+resume commands are now available for the native whole-responsibility profile;
+see [the transfer service](TRANSFER_SERVICE.md). Broader profiles remain separate
+integration and validation work.
 
 ## Selected native recovery ledger
 

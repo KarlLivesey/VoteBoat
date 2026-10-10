@@ -26,7 +26,9 @@ use voteboat::{
     directory::DirectoryCommand, identity::*, placement::PlacementRequirements, routing::*,
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-directory");
-static NEXT: AtomicU64 = AtomicU64::new(32000);
+// Keep fixture listeners below Linux's ephemeral client-port range. A client
+// can otherwise claim a later replica's port between reservation and startup.
+static NEXT: AtomicU64 = AtomicU64::new(20000);
 fn group(n: u128) -> GroupIdentity {
     GroupIdentity {
         id: GroupId::new(n).unwrap(),

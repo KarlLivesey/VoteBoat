@@ -120,9 +120,10 @@ strict profiles clean while advancing the remaining capability work.
 | Completed192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | R01–R19, operator surface and existing roadmap/catalogue ledgers reconciled;32 fresh quorum/activation/Raft tests pass. Current full-suite/platform and P7 performance remain unclosed. |
 | Completed193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
 | Completed194a: public transfer decisions | Reuse the existing recovery sequence in Rust hosts and the future command executor; advances P6 operator support. |193 preview, completed Node reads, source-fence/import/publication/activation contracts. | Six new decision tests and four native TCP/QUIC WAL/checkpoint phase histories pass; original IDs, ownership, data, retry/outbox and published configuration provenance remain checked. |
-| Current194b: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through authenticated commands with the same explicit operation identity; advances P6 operator support. |194a public decisions, actual source/target applications, current authorization and bounded service ownership. | Exercise an actual command-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the endpoint schema before implementation, retaining any unsupported profile explicitly. |
-| Next195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
-| Following196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
+| Completed194b: recoverable lifecycle administration | Make split execution/status/resumption usable through authenticated commands; advances P6 operator support. |194a decisions, existing guarded applications, TLS authorization and bounded service ownership. | Actual TCP/QUIC three-replica role services complete a split; QUIC resumes original IDs after all processes are killed following first import. Accepted-read disconnect cleanup, authorization, source refusal and independent child retries are checked. Whole-responsibility native counter profiles only. |
+| Current195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
+| Next196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
+| Following197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
 
 The192 audit changes the immediate order: chapter09 still has missing operator
 capabilities, so close a usable preview/execution path before another performance
@@ -161,6 +162,82 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice194b implemented evidence — authenticated transfer commands
+
+The native `voteboat-transfer` executable now assembles existing metadata,
+source and target applications through the same Node/startup contracts. Its
+bounded profile preserves the original intent, distinct lifecycle/publication
+IDs and group incarnations. `plan` generates a two-target native counter split;
+custom profiles support2–16 targets. `status`, `start`, `step` and `resume` use
+authenticated completed reads and the public TransferOperation decisions.
+The transient observation codec rejects truncation, trailing bytes, invalid
+identity/prefix structure and excessive sizes. It is not a portable quorum
+certificate and does not construct local read barriers from remote bytes.
+
+Each connection owns one read/proposal ticket. Disconnect cancels that exact
+ticket; the owner continues draining completions. Mutations and exports require
+Configure authorization; observations/data reads require Read. Accepted mutations
+with lost replies remain unknown and the next phase starts with fresh reads.
+Native workers join on normal shutdown; fatal owner failure transfers cleanup to
+the existing recovery owner. No persistence format or consensus protocol changes.
+
+Three executable tests pass: invalid profiles fail before opening replica files;
+a TCP split completes through authenticated commands; QUIC kills all12 role
+processes after first import, reopens the original stores and resumes. Both
+network histories interrupt an accepted read with metadata quorum unavailable,
+then check pending reads return to zero. Both reject reader mutations and a
+wrong-group principal, refuse old-source data access, and preserve original
+data/retry identity plus new writes on children after metadata/source shutdown.
+Two wire tests and the activated-status roundtrip extend the existing core
+transfer tests. All49 focused tests pass:31 core transfer tests,3 new executable
+histories,13 directory regressions and2 counter authentication histories.
+Formatting, strict Clippy in all three configurations, warning-denied rustdoc
+and the98-record inventory check pass. The first directory regression run hit
+a startup port collision; moving its fixture listener range below Linux's
+ephemeral client ports produced a passing full target. Initial and corrected
+logs are retained in validation/baseline/slice194b.
+
+Macro review: the bounded native split command path now exists. General merge,
+recursive/retained profiles, phase-internal persistence cuts, concurrent membership,
+retirement, macOS execution and separate-host deployment remain open. Current195
+extends the actual operator path's fault coverage;196/197 supply maintenance
+operations. The full P0–P7 goal and original P7 performance gate remain unchanged.
+
+### Slice194b schema plan — authenticated transfer commands
+
+The previous goal turn was progress:b0c2e2e exposed and tested the public decision
+path. The remaining command path needs actual metadata/source/target services,
+not another copied decision machine. Reuse native startup, TLS principal binding,
+Node tickets and the existing guarded applications. A bounded explicit profile
+selects one role/group and original intent/operation IDs; provisioned target
+replicas remain non-serving until the existing activation commits.
+
+Each role endpoint accepts authenticated observation, immutable export and
+profile-bound phase commands. Read replies must originate from complete_read;
+remote observation decoding checks shape/identity/prefix bounds but is never a
+cryptographic certificate. The trusted client pins each endpoint, retains the
+original profile and re-reads after every action/unknown reply. Wire observations
+carry the original completed group/configuration/index; they cannot fabricate a
+local Raft ReadBarrier. Existing source/import/publication guards remain the
+authority for commands. No log format, consensus transition or ownership rule
+changes. A source/target service also exposes guarded keyed reads/writes so the
+result is usable, rather than a transfer-only demo.
+
+One connection owns at most one pending read or proposal. Disconnect/deadline
+cancels that exact observation; accepted writes stay unknown and recover by
+original operation ID. The service drains completions even after disconnection,
+polls native owners while commands wait, and joins workers on shutdown. Wire,
+profile, image and connection buffers have explicit bounds. No implicit bootstrap
+on recovery, no timeout unfreeze and no remote arbitrary command execution.
+
+Acceptance requires three-replica role services driven through TLS: initialize,
+write, status/start/resume through the public decisions, interrupted observation,
+restart, old-source fencing and independent target retry/data checks. Reader and
+wrong-group principals must fail mutation; malformed/truncated observations must
+fail decoding. TCP and QUIC peer replication, local lint/format and targeted core
+regressions must pass. Current194b stays open until the command workflow is real;
+195 still owns broader persistence cuts and196 maintenance leadership transfer.
 
 ### Slice194a implemented evidence — public recoverable transfer decisions
 
