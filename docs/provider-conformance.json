@@ -3,6 +3,49 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "TimerService",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "host_timer_exact_tokens_and_bounded_histories"},
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "native_timer_exact_tokens_and_bounded_histories"},
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
+      ],
+      "operations": [
+        {
+          "names": ["owner", "capacity", "len"],
+          "obligation": "The volatile service owner and declared capacity remain stable; live exact group/kind deadlines determine length. Replacement consumes no additional slot, and expiration/cancellation releases its slot. is_empty derives the same live state.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"}
+          ],
+          "remaining": ["Finite capacity-three histories do not establish allocation behavior at all supported capacities or bounded execution of arbitrary host callbacks."]
+        },
+        {
+          "names": ["register", "cancel"],
+          "obligation": "Registration replaces only the exact group incarnation and kind with a fresh owner-scoped token, including at capacity. Overload leaves live work intact. Cancellation accepts only the exact live token; replaced, expired, canceled and modified tokens cannot remove another registration.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "owner_lifetime"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "scoped_cancellation"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
+          ],
+          "remaining": ["Sequence exhaustion and every store/session/lane identity mutation are not covered by these selected generation/group/kind/sequence/deadline checks; timer tokens are volatile, not durable evidence."]
+        },
+        {
+          "names": ["poll"],
+          "obligation": "Return each due exact token once within the caller budget, earliest deadlines first with unspecified tie order and exact lateness. Retain all unreturned work. Zero budget still observes monotonic time; regressed time rejects without consuming deadlines. Past registrations remain eligible.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "poll_model"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
+            {"file": "tests/runtime.rs", "symbol": "expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns"}
+          ],
+          "remaining": ["Eight seeds of 128 sequential actions per provider and selected TimedShard integration do not prove all schedules, real-host responsiveness or the cause of platform liveness failures."]
+        }
+      ]
+    },
+    {
       "public_contract": "LogStore",
       "status": "partial",
       "runners": [

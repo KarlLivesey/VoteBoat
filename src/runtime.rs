@@ -176,13 +176,22 @@ pub struct Expiration {
 pub trait TimerService {
     fn owner(&self) -> RuntimeOwner;
     fn capacity(&self) -> usize;
+    /// Replace only this exact group incarnation/kind, issuing a fresh token.
+    /// Replacement remains possible at capacity; rejected registration leaves
+    /// existing deadlines intact. A past deadline is eligible at the next poll.
     fn register(
         &mut self,
         group: GroupIdentity,
         kind: TimerKind,
         deadline: MonoTime,
     ) -> Result<TimerToken, RuntimeError>;
+    /// Remove only the exact live token. Replaced, expired, canceled or foreign
+    /// tokens are stale and must leave current deadlines intact.
     fn cancel(&mut self, token: TimerToken) -> Result<(), RuntimeError>;
+    /// Transfer at most `limit` due expirations, earliest deadlines first;
+    /// equal-deadline ordering is unspecified. Retain all unreturned deadlines.
+    /// Lateness is `now - deadline`. Even a zero budget observes the monotonic
+    /// clock; regressed time is rejected without consuming deadlines.
     fn poll(&mut self, now: MonoTime, limit: usize) -> Result<Vec<Expiration>, RuntimeError>;
     fn len(&self) -> usize;
     fn is_empty(&self) -> bool {

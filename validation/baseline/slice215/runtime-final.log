@@ -1,0 +1,39 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s
+     Running tests/runtime.rs (target/debug/deps/runtime-7749b7a87d1964a1)
+
+running 31 tests
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test failed_shared_barrier_fences_submitted_groups_without_votes_escaping ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+test native_scheduler_deadline_clock_and_entropy_conformance ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test virtual_time_leader_loss_and_recovery_use_native_timers_and_wals ... ok
+test automatic_timer_history_reopens_three_actual_native_files ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test native_timer_replication_progress_survives_multiple_heartbeat_retries ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test hundred_group_history_uses_actual_shared_files_on_three_nodes ... ok
+test hundred_groups_share_native_wals_and_recover_acknowledged_state ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+

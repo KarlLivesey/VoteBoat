@@ -1,5 +1,20 @@
 # Validation report — slice 35
 
+Timer contract review: [slice215](baseline/slice215/README.md). The shared
+downstream host/native checks cover exact-token ownership, capacity/refusal,
+replacement/cancellation, deadline budgets/lateness and recreated-owner rejection.
+Eight128-action model traces per provider pass; an intentionally wrong host
+cancellation fails the same checker. Final runtime31 all-feature and23 core-only
+checks pass, including existing TimedShard recovery/backpressure integration.
+Initial test-only identity/integer compile errors are retained. The partial
+ledger reviews7 contracts/45 operations, leaving101 contracts unreviewed;
+metadata references are not certification. The initial metadata suite fails;
+replace positional contract selection and update old counts, preserving the
+negative checks. All18 final metadata checks pass. Formatting and all four
+strict Clippy profiles pass with zero diagnostics. No production scheduling change or
+platform liveness fix is claimed; the diagnostic CI run remains live at the
+recorded observation. Security expansion is deferred to the user's Daybreak run.
+
 Bounded liveness observations: [slice214](baseline/slice214/README.md). Current
 driver/roster/outbound gauges and eight peer details extend the existing numeric
 local-volatile metrics within its4KiB buffer. Native TCP/QUIC metrics histories

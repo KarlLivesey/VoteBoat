@@ -15,6 +15,8 @@
 #[path = "runtime/campaigning.rs"]
 mod campaigning;
 mod support;
+#[path = "runtime/timer_contract.rs"]
+mod timer_contract;
 use std::{
     cell::Cell,
     collections::{BTreeMap, BTreeSet, VecDeque},

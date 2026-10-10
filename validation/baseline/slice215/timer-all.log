@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running tests/runtime.rs (target/debug/deps/runtime-7749b7a87d1964a1)
+
+running 3 tests
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s
+

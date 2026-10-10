@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.92s
+     Running tests/runtime.rs (target/debug/deps/runtime-e5b1e7cd2c353ea9)
+
+running 23 tests
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+

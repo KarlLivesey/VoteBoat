@@ -128,6 +128,14 @@ confirmation remains open. The newly completed priorcd54071 operator run passes
 Ubuntu but has6 macOS counter failures; the exact result/log is retained in
 validation/baseline/slice210a and is not acceptance of this change.
 
+Slice215 adds selected TimerService operation review: shared host/native
+capacity-three histories, eight seeds of128 actions, exact-token cancellation,
+generation recreation and poll-budget/monotonic-time assertions. A wrong host
+cancel implementation is detected. Runtime31 all-feature and23 core-only tests
+pass. The partial provider ledger now covers7 contracts/45 operations and
+leaves101 contracts unreviewed. This is P0/P2 evidence, not a platform liveness
+diagnosis, general scheduler responsiveness guarantee or provider certification.
+
 Slice201e adds shared admission-provider ownership checks:32 seeded256-action
 histories per host/native provider, independent unique-reservation accounting,
 batch/message/byte refusal, view close/drop and cross-thread final lease release.

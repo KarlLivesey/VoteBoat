@@ -1,0 +1,34 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0433]: cannot find type `Incarnation` in this scope
+  --> tests/runtime/timer_contract.rs:12:38
+   |
+12 |     mutations[1].group.incarnation = Incarnation::new(2).unwrap();
+   |                                      ^^^^^^^^^^^ use of undeclared type `Incarnation`
+
+error[E0433]: cannot find type `Incarnation` in this scope
+  --> tests/runtime/timer_contract.rs:40:32
+   |
+40 |     reincarnated.incarnation = Incarnation::new(2).unwrap();
+   |                                ^^^^^^^^^^^ use of undeclared type `Incarnation`
+
+error[E0308]: mismatched types
+   --> tests/runtime/timer_contract.rs:122:42
+    |
+122 |                     let identity = group(1 + (random >> 16) % 4);
+    |                                    ----- ^^^^^^^^^^^^^^^^^^^^^^ expected `u128`, found `u64`
+    |                                    |
+    |                                    arguments to this function are incorrect
+    |
+note: function defined here
+   --> tests/support/mod.rs:33:8
+    |
+ 33 | pub fn group(id: u128) -> GroupIdentity {
+    |        ^^^^^ --------
+help: you can convert a `u64` to a `u128`
+    |
+122 |                     let identity = group((1 + (random >> 16) % 4).into());
+    |                                          +                      ++++++++
+
+Some errors have detailed explanations: E0308, E0433.
+For more information about an error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "runtime") due to 3 previous errors

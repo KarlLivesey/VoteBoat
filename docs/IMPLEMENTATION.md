@@ -306,6 +306,29 @@ TCP metrics and max-render tests also pass. Macro review214 adds the missing
 observations needed for P2/platform diagnosis, without changing protocol,
 timeouts, access rules, durability evidence or making a liveness/performance claim.
 
+Implemented215 reviews TimerService's six declared operations through the existing
+public seam, without changing production scheduling. Shared finite assertions
+run against independent downstream HostTimers and native DeadlineQueue: exact
+tokens, incarnation/kind separation, replacement at capacity, refusal preserving
+live work, canceled/expired/replaced tokens, zero/small poll budgets, tie-order
+independence, monotonic time and past-deadline lateness. Eight seeds of128 actions
+per provider use an independent live-token model. Recreated owners may reuse a
+local sequence but reject the prior generation's token. The same checker detects
+a deliberately incorrect host cancel implementation that ignores owner identity.
+Final all-feature runtime31 and core-only runtime23 pass, including existing
+queued-expiration/backpressure, leader recovery and100-group isolation histories.
+The initial test compile used the wrong incarnation type and a mismatched group
+ID integer; raw failures remain. These are scoped P0/P2 assertions, not arbitrary
+provider certification or an explanation of platform stalls. The partial ledger
+now covers7 contracts/45 operations, with101 other contracts unreviewed.
+The initial metadata suite fails after adding this review: its old6/39 counts
+and position-based contract references need updating. Named contract selection
+preserves the original negative checks; all18 final metadata checks pass,
+including three timer omission checks. Formatting and all four strict Clippy
+profiles pass with zero diagnostics; the pre-push hook remains enabled.
+Broader security work stays with the user's Daybreak run. Macro milestones and
+supported-platform completion criteria are unchanged; full P0–P7 remains active.
+
 Current: diagnose macOS remaining group liveness/preparation failures using
 actual run38047957086/33afe94 (counter147 pass/11 fail; Ubuntu157/1). Earlier
 38047529334/629db60 Ubuntu passes all targets, but macOS finishes145/13. Later
@@ -324,7 +347,8 @@ Run the same independently modeled traces against a downstream host replacement
 and the native provider, including failed admission/terminal cleanup. Completion
 requires cause-detecting assertions and scoped ledger evidence, not merely a
 green metadata check. This advances P0 composition and depends on existing public
-seams/shared conformance patterns;102 entries currently remain unreviewed.
+seams/shared conformance patterns;101 entries currently remain unreviewed after
+the TimerService review while background platform diagnostics run.
 
 Following: complete the next supported-platform operational acceptance profile
 once the reproduced liveness defect is corrected. Depend on the actual operator
@@ -335,6 +359,37 @@ requires terminal observed outcomes under the original deadlines and recorded
 identities, not an enlarged timeout or omitted failing history. This advances
 the usable service macro milestone; separate-host provisioning and broader faults
 remain explicit rather than silently counted as complete.
+
+### Slice215 schema plan — replaceable timer ownership and budgets
+
+While the diagnostic platform run remains active, review the already-planned
+TimerService seam (P0/P2). Its six declared operations control bounded local
+deadlines; they do not certify leadership, durability or quorum availability.
+This is a finite contract check, not a diagnosis of the macOS failures.
+
+Data/API: retain the public TimerService and TimerToken shapes. Share assertions
+between the existing independent downstream HostTimers and native DeadlineQueue.
+An independent finite trace tracks live exact tokens by scanning a vector; check
+capacity/owner, per-group-kind replacement, group incarnation separation, stale
+and modified tokens, expiration lateness, zero/small poll budgets and regressed
+clock refusal. Equal-deadline ordering is not made a new provider requirement.
+
+Transitions/ownership: accepted registration replaces just the same group/kind;
+overload and stale cancellation preserve all live work. Poll transfers at most
+the requested due tokens once, and retains the others. Zero-budget polling still
+advances the monotonic observation clock. Past deadlines expire with measured
+lateness. Rearming receives a distinct token; old expired/canceled tokens cannot
+cancel it. The timer owns volatile scheduling only; restart uses a new owner
+generation, not persistence of its token sequence. A deliberately incorrect host
+cancellation implementation must fail the same assertions.
+
+Acceptance: execute shared host/native histories plus the cause-detection check;
+review all six operation obligations in the partial conformance ledger; run
+relevant TimedShard integration checks, formatting and all four strict Clippy
+profiles. No extra production scheduler/helper or timing adjustment is needed.
+Current platform diagnosis continues on the same CI run; next remains supported
+platform operational acceptance after the observed cause is corrected. Broader
+security work stays assigned to the user's Daybreak run; full P0–P7 stays active.
 
 ### Slice214 schema plan — bounded liveness failure observations
 
