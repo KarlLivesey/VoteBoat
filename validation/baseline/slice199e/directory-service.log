@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 13 tests
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... ok
+test routes::recursive_route_missing_leaf_is_not_a_partial_success ... ok
+test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... ok
+test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+test routes::recursive_route_quic_and_known_child_without_ancestors ... ok
+test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+
+thread 'directory_publication_remote_reads_and_checkpoint_recovery_quic' (1409254) panicked at tests/directory_service.rs:307:5:
+Error: "manifest lookup deadline expired"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... FAILED
+test routes::recursive_route_enforces_root_observation_floors ... ok
+
+failures:
+
+failures:
+    directory_publication_remote_reads_and_checkpoint_recovery_quic
+
+test result: FAILED. 12 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.88s
+
+error: test failed, to rerun pass `--test directory_service`

@@ -5552,3 +5552,23 @@ The completed Ubuntu job114159916794 at01d5190 passes122 counter tests but fails
 one of13 directory tests at an authentication/lookup deadline boundary. Its
 log is retained for diagnosis. Mac job114159916607 remains in progress at the
 last observation; these local fixes are not a macOS or full-baseline certificate.
+
+## Slice199e — bounded recursive-lookup authentication attempts
+
+Two real stalled-handshake regressions fail before the fix and pass after it.
+An expired authentication attempt now returns to the existing bounded endpoint
+rotation while the original ten-second lookup budget remains. Full-budget
+expiry and other authentication failures remain terminal; discovery failures
+retain recursive-lookup context. No deadline or stale-floor assertion is relaxed.
+
+The full local directory target passes12 histories, including the original
+root-floor case and bad-TLS-identity rejection, and fails one direct QUIC
+manifest lookup after checkpoint recovery. That client does not use the changed
+route-discovery path. A focused rerun passes after diagnostic-only changes;
+the intermittent failure remains open. All four strict Clippy profiles and
+formatting pass. See [commands and retained outcomes](baseline/slice199e/README.md).
+
+The completed old01d5190 macOS job114159916607 records115 counter passes and
+seven failures; its full log is retained. Several grouped caller paths changed
+later in71da217. Current run38034032131 is active on both platforms, so no current
+macOS or full-platform acceptance is inferred.

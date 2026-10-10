@@ -137,11 +137,71 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
-| Current199c–d: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d are recorded below; platform acceptance remains open. CI stays background feedback. |
+| Current199c–e: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d/e are recorded below; platform acceptance remains open. CI stays background feedback. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Next201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Retained203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. |
+
+### Slice199e implemented evidence and remaining failures
+
+Route discovery now treats only an expired authentication attempt as retryable
+within the original invocation budget. Full-budget expiry is terminal and route
+poll errors retain recursive-lookup context. Two real stalled-handshake tests
+fail before the change and pass afterward; they verify socket release, preserved
+deadline and no active source/manifest observation. An initial test compilation
+used equality on ManifestObservation, which intentionally lacks PartialEq; it
+was corrected to match only the documented error variant before regression runs.
+
+The full local directory target passes12 histories, including the original
+root-floor failure and the wrong-TLS-identity rejection, but fails one direct
+QUIC manifest read after checkpoint recovery. That direct client does not use
+the modified route-discovery path. Its exact focused rerun passes after adding
+failure diagnostics only; this is an unresolved intermittent observation, not
+a fixed or passing full target. Preserve both outcomes. All four strict Clippy
+profiles, formatting and diff checks pass. Raw evidence is in slice199e.
+
+The old01d5190 macOS operator job114159916607 is terminal:115 counter histories
+pass and seven QUIC histories fail. Three failures use grouped caller paths
+corrected in71da217, which does not yet have completed platform evidence.
+Assignment retry still has empty output; replacement preparation never reaches
+its expected log; one multi-group runner ends with no eligible read leader;
+another fails to reach the intended partial-membership cut. None is declared
+fixed from the old log. New71da217 run38034032131 has both platform jobs active.
+Next199 work uses the added diagnostics and these exact jobs to isolate the
+remaining failures. The201/202/203 obligations remain unchanged.
+
+### Slice199e schema plan — bound authority connection retries
+
+The saved Ubuntu root-floor failure ends at a per-attempt authentication timeout.
+The route discovery already owns a ten-second invocation budget, at most128
+connection attempts and 1.5-second per-attempt deadlines. `channel` currently
+treats the exact handshake-deadline result as a terminal authentication failure.
+Instead return no channel for that exact timeout while the invocation budget
+remains, allowing the existing bounded endpoint rotation. At the overall
+deadline report recursive-lookup expiry. Certificate/identity/setup failures
+remain terminal. Do not extend either deadline, accept an unauthenticated hint
+or change the stale-floor assertions.
+Keep the recursive-lookup context on failures returned from discovery polling,
+including the precise underlying connection/transport reason.
+
+The attempt owns its connected socket; timeout drops it before any channel is
+published. No new observation/source generation or lookup receipt is created.
+The existing active-source lifecycle and cache authority checks stay unchanged.
+Regression tests use a real listening socket that deliberately never answers
+the TLS handshake. Verify release after attempt expiry, unchanged invocation
+deadline and empty active/observation state; separately expire the full budget.
+The first regression must fail before the fix. Then run all directory-service
+histories, including bad TLS identities and stale root observation floors, and
+the four strict lint profiles. This advances current199/P5 platform validation;
+201 provider conformance,202 combined recovery and203 merge remain linked next.
+
+The first full local directory run passes the root-floor regression but fails
+the separate direct-manifest lookup after QUIC checkpoint recovery with a
+ten-second timeout. That client does not use route discovery, so this cannot be
+attributed to the changed retry classifier. Add the selected node and all
+service logs to this assertion and rerun the affected history once for diagnosis.
+Do not mask it with automatic retries or claim the whole directory target passed.
 
 ### Slice199d implemented evidence and remaining platform work
 

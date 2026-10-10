@@ -304,7 +304,16 @@ fn history(quic: bool) {
     assert!(c.ok(leader, &["initialize"]).contains("duplicate=true"));
     assert!(c.ok(leader, &["publish", "101"]).contains("duplicate=true"));
     let r = c.lookup(leader).fixture_output().unwrap();
-    assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
+    assert!(
+        r.status.success(),
+        "recovered lookup node={leader} status={} stdout={} stderr={} logs={:?}",
+        r.status,
+        String::from_utf8_lossy(&r.stdout),
+        String::from_utf8_lossy(&r.stderr),
+        (1..=3)
+            .map(|node| fs::read_to_string(c.root.join(format!("{node}.log"))).unwrap())
+            .collect::<Vec<_>>()
+    );
     c.stop();
     fs::write(c.root.join("plan"), plan(101)).unwrap();
     let out = c.server(1, "recover").fixture_output().unwrap();

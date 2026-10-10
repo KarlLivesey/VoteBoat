@@ -132,7 +132,9 @@ pub fn route(args: &[String]) -> Result<(), Failure> {
             Err(ManifestDiscoveryError::Unavailable) => (),
             Err(e) => return Err(format!("recursive lookup: {e:?}").into()),
         }
-        discovery.poll()?;
+        discovery
+            .poll()
+            .map_err(|error| format!("recursive lookup failed: {error}"))?;
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

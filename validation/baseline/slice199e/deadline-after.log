@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.26s
+     Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-79774abd27047b3c)
+
+running 2 tests
+test route_discovery::tests::authority_authentication_cannot_extend_the_lookup_deadline ... ok
+test route_discovery::tests::authority_authentication_timeout_preserves_remaining_lookup_budget ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.50s
+

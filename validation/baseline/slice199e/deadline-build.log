@@ -1,0 +1,39 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0369]: binary operation `==` cannot be applied to type `Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>`
+  --> src/bin/support/route_discovery/tests.rs:61:5
+   |
+61 | /     assert_eq!(
+62 | |         discovery.lookup(request, discovery.now()),
+63 | |         Err(ManifestDiscoveryError::Unavailable)
+64 | |     );
+   | |     ^
+   | |     |
+   | |_____Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>
+   |       Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>
+   |
+note: `voteboat::routing::ManifestObservation` does not implement `PartialEq`
+  --> src/routing/discovery.rs:43:1
+   |
+43 | pub struct ManifestObservation {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `voteboat::routing::ManifestObservation` is defined in another crate
+
+error[E0369]: binary operation `==` cannot be applied to type `Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>`
+  --> src/bin/support/route_discovery/tests.rs:74:5
+   |
+74 | /     assert_eq!(
+75 | |         discovery.lookup(request, discovery.now()),
+76 | |         Err(ManifestDiscoveryError::Unavailable)
+77 | |     );
+   | |     ^
+   | |     |
+   | |_____Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>
+   |       Result<voteboat::routing::ManifestObservation, voteboat::routing::ManifestDiscoveryError>
+   |
+note: `voteboat::routing::ManifestObservation` does not implement `PartialEq`
+  --> src/routing/discovery.rs:43:1
+   |
+43 | pub struct ManifestObservation {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `voteboat::routing::ManifestObservation` is defined in another crate
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `voteboat` (bin "voteboat-directory" test) due to 2 previous errors

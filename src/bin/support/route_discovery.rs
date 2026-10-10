@@ -215,6 +215,15 @@ impl Discovery {
         match command_client::connect(endpoint, deadline, Some(&self.access), self.start) {
             Ok(c) => Ok(Some(c)),
             Err(Attempt::Unavailable) => Ok(None),
+            Err(Attempt::Interrupted("authentication deadline expired")) => {
+                if Instant::now() >= self.deadline {
+                    Err("recursive lookup deadline expired during authority authentication".into())
+                } else {
+                    // No authenticated source was admitted. Drop the attempt
+                    // and let the existing bounded probe loop try another peer.
+                    Ok(None)
+                }
+            }
             Err(Attempt::Interrupted(reason)) => {
                 Err(format!("authority authentication/connection failed: {reason}").into())
             }
@@ -327,3 +336,7 @@ impl Drop for Discovery {
         self.clear_active();
     }
 }
+
+#[cfg(test)]
+#[path = "route_discovery/tests.rs"]
+mod tests;

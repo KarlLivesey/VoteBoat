@@ -130,6 +130,10 @@ connection probes and one ten-second invocation deadline. Each read attempt is
 bounded to two seconds. Explicit unavailability rotates candidates; identity,
 protocol, missing-manifest and lineage errors fail without returning a partial
 route. Cache contents are per invocation; there is no persisted fallback.
+Each connection probe has at most1.5 seconds within that same invocation budget.
+An expired authentication attempt drops its socket and permits another bounded
+probe; certificate or identity failures remain terminal. Exhausting the total
+deadline returns a recursive-lookup error with no partial route.
 
 ## Recovery and scope
 
