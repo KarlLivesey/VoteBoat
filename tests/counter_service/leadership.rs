@@ -4,6 +4,8 @@ use super::*;
 
 #[path = "leadership/cancellation.rs"]
 mod cancellation;
+#[path = "leadership/follower.rs"]
+mod follower;
 
 fn cluster(quic: bool) -> Cluster {
     let mut c = Cluster::new();
@@ -172,7 +174,8 @@ fn authenticated_cancel_deadline_and_permission_boundaries() {
     }
     c.command_principal = Some(3);
     stop_one(&mut c, target);
-    assert!(begin(&c, source, target, "96100").contains("phase=Pending"));
+    let first = begin(&c, source, target, "96100");
+    assert!(first.contains("phase=Pending"));
     let end = Instant::now() + Duration::from_secs(10);
     while !c.service_log(source).contains("local attempt expired") {
         assert!(
@@ -183,27 +186,31 @@ fn authenticated_cancel_deadline_and_permission_boundaries() {
         std::thread::sleep(Duration::from_millis(10));
     }
     assert!(authenticated_write(&c, &["add", "96101", "1"]).contains("Value(8)"));
-    assert!(c
-        .ok(source, &["resume-leadership", "96100"])
-        .contains("phase=Pending"));
-    let cancelled = c.ok(source, &["cancel-leadership", "96100"]);
+    let resumed = leader_request(&mut c, &["resume-leadership", "96100"]);
+    assert!(resumed.contains("phase=Pending"));
+    cancellation::same_intent(&first, &resumed);
+    let cancelled = leader_request(&mut c, &["cancel-leadership", "96100"]);
     assert!(cancelled.contains("phase=Cancelled"), "{cancelled}");
+    cancellation::same_intent(&first, &cancelled);
     assert_eq!(
-        c.ok(source, &["cancel-leadership", "96100"])
+        leader_request(&mut c, &["cancel-leadership", "96100"])
             .split(" evidence=")
             .next()
             .unwrap(),
         cancelled.trim()
     );
-    assert!(begin(&c, source, target, "96102").contains("phase=Pending"));
+    let current = c.leader();
+    assert!(begin(&c, current, target, "96102").contains("phase=Pending"));
     // Retrying an old terminal cancellation cannot cancel the new handoff.
     assert_eq!(
-        c.ok(source, &["cancel-leadership", "96100"])
+        leader_request(&mut c, &["cancel-leadership", "96100"])
             .split(" evidence=")
             .next()
             .unwrap(),
         cancelled.trim()
     );
+    let (_, newer) = status(&mut c, "96102", "phase=Pending");
+    check_identity(&newer, "96102", current, target);
     c.start(target, "recover");
     status(&mut c, "96102", "phase=Completed");
     let (_, status) = status(&mut c, "96100", "phase=Cancelled");

@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice224 corrects the fixture's pinned original-source resume after a real
+TCP/QUIC handoff. Current-leader selection retains every original intent field;
+historical completion, data retries/conflicts/reads and checkpoint/reopen/joins
+remain exact. Before1 pass/3 fail, corrected leadership19/full counter175/default
+leadership13 and formatting/four strict profiles pass. No production behavior or
+budget changes. Preceding223 macOS counter170/1 fails original19701 runner budget
+before later targets; Ubuntu remains live at the retained observation. The
+remaining bound needs attribution; matching platform/P7/provider/fault/deployment
+and full P0–P7 acceptance stay open. Broad security remains with Daybreak.
+
 Slice223 reproduces queued leadership cancellation across closed admission over
 actual native TCP/QUIC, then prevents counter operator scheduling while quiescing
 without discarding accepted outputs or weakening Node's Closed refusal. Original

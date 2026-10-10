@@ -1,5 +1,19 @@
 # Validation report — slice 35
 
+Original maintenance endpoint selection: [slice224](baseline/slice224/README.md).
+Both TCP/QUIC real handoffs fail at the old pinned-source resume, and the old
+response policy rejects exact follower refusal (1 pass/3 fail). The corrected
+test caller preserves original intent while selecting a current leader.
+Leadership19/full counter175/default leadership13 and formatting/four strict
+profiles pass. Historical records, exact data receipt/conflict/read and native
+checkpoint/reopen/clean joins remain required. Production behavior and budgets
+are unchanged. Preceding223 macOS counter170/1 fails only original19701 runner
+budget; later targets are unrun and Ubuntu remains live at the retained state.
+The completed macOS raw job log and initial download-format refusal are kept.
+This is selected caller/recovery evidence, not current macOS or full P0–P7/P7
+acceptance. The independent runner bound still needs attribution; broader
+security stays with Daybreak.
+
 Counter shutdown admission: [slice223](baseline/slice223/README.md). Both real
 native held-step TCP/QUIC regressions fail with Closed before the correction,
 then pass. The counter continues consuming accepted outputs while quiescing but

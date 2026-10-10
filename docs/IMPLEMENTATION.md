@@ -599,6 +599,29 @@ remaining macOS runner/source observations select the next functional item;
 P7's250ms gate, provider/fault/deployment obligations and full P0–P7 remain open.
 Broad security remains the user's Daybreak work.
 
+Implemented224: real TCP/QUIC completed-handoff histories reproduce the pinned
+original-source resume failure before the caller correction. The existing fixture
+now selects a current leader for resume/cancel, retaining every original intent
+field; a new operation uses its newly observed source. Exact follower/read-refusal
+recognition is bounded by the existing caller policy, with arbitrary/modified
+UNKNOWN or unrelated replies terminal. The old checks pass1/fail3; corrected
+leadership19, full counter175 and default TCP leadership13 pass. Historical
+Completed records survive checkpoint/reopen without restarting a handoff, data
+receipts/conflicts/fresh reads remain exact, and old cancellation cannot alter a
+new Pending intent. Formatting/four strict Clippy profiles stay zero. There is
+no production CLI, public seam, record, synchronization or deadline change.
+
+Matching223 macOS counter170/1 now fails only original19701 QUIC runner budget;
+later targets are unrun and Ubuntu remains live at the retained observation.
+The prior shutdown and follower-resume histories pass on that source, which
+contains223 but not224. Its raw API job log and download-format refusal remain
+in validation/baseline/slice224. This does not close full macOS or current224
+platform acceptance. Macro review224 closes the selected wrong-endpoint caller
+reproduction and advances usable-service/P4 original-intent recovery; isolate
+the independent runner budget next without widening it. Full P0–P7/P7, provider,
+fault/deployment and matching platform obligations remain open; security stays
+with Daybreak.
+
 Current: resolve the recorded original-runner/resume boundaries and collect
 matching shutdown platform evidence. Purpose: advance usable-service/P4 operator
 acceptance. Depend on223's held-step regression and terminal222's exact19701
@@ -608,6 +631,11 @@ common cause or successful execution from UNKNOWN/NOT_LEADER. Completion require
 exact original records/receipts through interruption/restart, actual clean joins,
 bounded cause-specific TCP/QUIC checks and matching macOS evidence. No new security
 work or timer widening; CI stays background and other work continues while it runs.
+The selected resume caller is now corrected224. The remaining runner reports
+one identical budget error for either the45s wall deadline or128 exchanges;
+attribute which bound and original phase actually stop progress before editing
+its scheduling, retry recognition or budget. A diagnostic is justified only if
+the existing observations cannot distinguish that acceptance boundary.
 
 Next: attribute the failed P7 gate to exact durability operations before selecting
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
@@ -627,6 +655,41 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice224 schema plan — current leader, original maintenance intent
+
+Purpose/dependencies: terminal222 observes original source2 as Follower in term2
+while resume-leadership96100 returns NOT_LEADER. The retained original intent
+is not the current routing endpoint. Inspect existing maintenance lookup/action
+contracts and the test-only leader_request before changing the caller. This
+advances usable-service/P4 leader-change recovery without a CLI auto-admin mode,
+security expansion or interpreting refusal as execution.
+
+Data/API: retain source/target/store/configuration/operation/index/term in the
+original durable record. Reuse the existing explicitly leader-selected fixture
+caller for resume and cancel; add only exact documented follower/read-transient
+responses for resume to its existing bounded policy. Each attempt uses unchanged
+arguments. New intents still use their newly observed source; old cancellation
+must never alter that newer intent. No production command, record or public seam
+change. Do not broaden recognition of arbitrary UNKNOWN or malformed replies.
+
+Transitions/ownership: original leader records Pending; it may become a follower
+before explicit resume/cancel. A current leader reads/reuses the original record,
+which still names the original source. For a deterministic executable regression,
+complete a real handoff so the original source is a follower; require its exact
+non-success, then resume/cancel through a current leader, checkpoint/reopen and
+compare every original intent field and data retry receipt. Completed is historical
+and cannot restart a handoff. This completed-record regression does not itself
+prove every Pending interruption schedule; retain the existing native Pending/
+deadline/cancellation histories and the terminal222 Pending failure separately.
+
+Acceptance: first fail exact follower-response policy checks against the old
+helper, then pass the corrected narrowly matched policy with unrelated/modified
+failures terminal. Actual TCP/QUIC history must verify follower refusal, exact
+original completed record, installed QUIC checkpoint, all-process reopen, original
+data receipt/conflict/fresh reads and clean worker joins. Run affected leadership
+and counter recovery tests with zero strict checks. The independent19701 runner
+budget failure remains open until its own cause is traced; do not renew its budget.
 
 ### Slice223 schema plan — queued operator cancellation across shutdown
 

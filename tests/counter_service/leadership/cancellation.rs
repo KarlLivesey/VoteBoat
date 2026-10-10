@@ -71,7 +71,7 @@ fn history(quic: bool) {
     fs::remove_dir_all(&c.root).unwrap();
 }
 
-fn checkpoint(c: &Cluster, node: usize) {
+pub(super) fn checkpoint(c: &Cluster, node: usize) {
     let committed = c.ok(node, &["status"]);
     let through = field(&committed, "committed=");
     c.ok(node, &["checkpoint"]);
@@ -97,7 +97,7 @@ fn field(text: &str, prefix: &str) -> u64 {
         .unwrap()
 }
 
-fn same_intent(first: &str, current: &str) {
+pub(super) fn same_intent(first: &str, current: &str) {
     assert_eq!(
         first.split(" phase=").next(),
         current.split(" phase=").next(),
