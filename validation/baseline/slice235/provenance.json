@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "base_revision": "f55d8fa41cf6ca6121cf51cde3dfd26c981baadf",
+  "scope": "Explicit original replacement handoff continuation in native operator fixture",
+  "production_behavior_change": false,
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101,
+      "reason": "NOT_LEADER after unread completed handoff"
+    },
+    "wrong_caller": {
+      "pass": 0,
+      "fail": 4,
+      "exit": 101,
+      "reason": "data-only auto refuses move-leader"
+    },
+    "replacement": 5,
+    "all_feature_drain": {
+      "integration": 42,
+      "unit": 24
+    },
+    "default_drain": {
+      "integration": 30,
+      "unit": 23
+    },
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "source_manifest_sha256": "af38a0ba79bd0e8781015985717b737c1e89e773345a85c7d315553646f44a56",
+  "publication": {
+    "redacted_workspace_logs": 5,
+    "private_logs": "target/slice235-unpublished-logs"
+  },
+  "limits": "Finite Linux TCP/QUIC histories; no current-source macOS/general P4/performance/security completion or new end-to-end deadline guarantee."
+}

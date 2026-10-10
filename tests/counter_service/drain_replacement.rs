@@ -3,6 +3,9 @@
 use super::*;
 use voteboat::{identity::*, log::*, native::log_store::*};
 
+#[path = "drain_replacement/setup_recovery.rs"]
+mod setup_recovery;
+
 fn stored(c: &Cluster, id: usize) -> GroupLog {
     let _gate = fixture_gate();
     NativeLogStore::recover(
@@ -130,7 +133,7 @@ fn field(text: &str, prefix: &str) -> u64 {
         .parse()
         .unwrap()
 }
-fn prepare(quic: bool) -> Cluster {
+fn prepare(quic: bool, lost_reply: bool) -> (Cluster, Option<String>) {
     let tls = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/four-node-tls");
     let mut c = drain::cluster_with_tls(quic, Some(tls));
     c.children.push(None);
@@ -174,8 +177,8 @@ fn prepare(quic: bool) -> Cluster {
     drain::wait_manual_checkpoint(&c, 1);
     let leader = c.leader();
     let target = leader % 3 + 1;
-    c.ok(
-        leader,
+    leader_request(
+        &mut c,
         &[
             "move-leader",
             "19769",
@@ -209,20 +212,12 @@ fn prepare(quic: bool) -> Cluster {
     for id in 1..=3 {
         c.start(id, "recover-member");
     }
-    let leader = c.leader();
-    if leader != 1 {
-        c.ok(leader, &["move-leader", "19750", "2", "1", "1", "1"]);
-    }
-    let until = Instant::now() + Duration::from_secs(15);
-    while c.leader() != 1 {
-        assert!(Instant::now() < until, "source did not become leader");
-        std::thread::park_timeout(Duration::from_millis(10));
-    }
-    c
+    let receipt = setup_recovery::handoff(&mut c, lost_reply);
+    (c, receipt)
 }
 
-fn replacement_history(quic: bool) {
-    let mut c = prepare(quic);
+fn replacement_history(quic: bool, lost_reply: bool) {
+    let (mut c, receipt) = prepare(quic, lost_reply);
     let log = fs::File::create(c.root.join("replacement-runner.log")).unwrap();
     let mut runner = {
         let _gate = fixture_gate();
@@ -277,6 +272,10 @@ fn replacement_history(quic: bool) {
     }
     assert!(authenticated_write(&c, &["add", "19772", "3"]).contains("duplicate=true"));
     assert!(authenticated_write(&c, &["add", "19773", "1"]).contains("Value(11)"));
+    if let Some(receipt) = receipt {
+        let (_, recovered) = leadership::status(&mut c, "19750", "phase=Completed");
+        assert_eq!(recovered, receipt);
+    }
     c.stop();
 }
 
@@ -301,10 +300,10 @@ fn wait_replacement_preparation(c: &Cluster) {
 }
 #[test]
 fn maintenance_replacement_drain_waits_for_exact_learner_tcp() {
-    replacement_history(false);
+    replacement_history(false, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn maintenance_replacement_drain_waits_for_exact_learner_quic() {
-    replacement_history(true);
+    replacement_history(true, false);
 }

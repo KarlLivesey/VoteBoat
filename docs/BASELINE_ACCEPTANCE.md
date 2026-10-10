@@ -1,5 +1,16 @@
 # Baseline acceptance map
 
+Original learner-replacement setup recovery: [slice235](../validation/baseline/slice235/README.md).
+The fixture explicitly repeats unchanged handoff words through the existing
+administration caller; CLI auto stays data-only. Actual unread19750 TCP/QUIC
+histories reproduce one-shot NOT_LEADER before and pass after, retaining exact
+Completed receipt through replacement/drain/cold recovery and data retries/joins.
+Replacement5, all-feature drain42/unit24, default30/unit23, formatting/four strict
+profiles and inventory108/conformance metadata pass. Initial wrong-helper refusal
+is retained. No production/provider/file-format change, new wall-clock guarantee
+or broad P4/platform completion. Matching234 CI is in progress at observation.
+Features and functional macOS/Linux work continue before tuning/security.
+
 Bounded recursive-route connection recovery: [slice234](../validation/baseline/slice234/README.md).
 Actual authenticated TLS status/upgrade timeouts reproduce before and recover
 after within unchanged budgets, retaining original floors and admitting sources

@@ -923,34 +923,54 @@ transfer is unrun. That generic text cannot prove the precise transport cause;
 platform feedback follows publication; broad P5/full-roadmap completion remains
 open. Performance and security remain later.
 
-Current: close original learner-replacement setup after sampled leadership loss.
-Purpose: advance online membership/P4 and Linux/macOS functional acceptance.
-Depend on source233 Linux job114255917500, original19750 LeadershipIntent and the
-existing exact-operation recovery contracts. Classify explicit non-admission,
-unknown outcome and terminal conflict before editing. Completion requires an
-actual interrupted/replayed original handoff, exact retained intent/receipt,
-learner import and replacement drain through recovery, unchanged absolute
-budgets, TCP/QUIC checks and zero strict diagnostics. Do not change the operation
-or assume that a sampled leader remains authoritative.
+Implemented235: the replacement fixture uses the existing explicit
+leader_request administration caller for unchanged19769/19750 handoff requests.
+Exact move-leader NOT_LEADER/LeadershipChanged/read interruption classification
+permits another original attempt; conflicts, Busy, unrelated uncertainty and
+invalid command shape stay terminal. CLI auto remains data-only. Existing10s
+between-attempt retry and leader/command bounds remain; no new end-to-end15s
+guarantee or production/provider/storage change is claimed.
 
-Next: reconcile matching macOS route/operator feedback and close one concrete
-functional failure. Purpose: advance P5/service and platform acceptance. Depend
-on matching published source/job identities,234 diagnostics and existing floor,
-quorum-read and operation contracts. Completion requires a cause-specific local
+Actual unread19750 TLS histories force Completed handoff and sampled-source
+Follower, reproduce old one-shot NOT_LEADER on both native transports, and pass
+after explicit original replay. Exact terminal receipt/source/target/configuration
+survive learner replacement, source shutdown and cold recovery; data retries and
+joins pass. Targeted replacement5, all-feature drain42/unit24, default30/unit23,
+formatting/four strict profiles and inventory108/conformance metadata pass. The
+initial wrong data-only helper refusal is retained with the focused correction.
+See [slice235](../validation/baseline/slice235/README.md). No performance/security
+work or broad online-membership completion claim.
+
+Macro review235 closes the selected replacement-setup dependency and advances
+P4/service functional acceptance. Matching source234 operator run38067409575,
+Ubuntu114257755705/macOS114257755869, remains in progress at observation. Source233
+macOS counter183 passes but directory21/1 fails the generic upgrade path; source233
+Linux182/1 fails setup UNKNOWN LeadershipChanged. Neither is current235 acceptance.
+Continue feature integration while source-bound feedback runs in the background.
+
+Current: reconcile matching macOS route/operator feedback and close one concrete
+functional failure. Purpose: advance P5/service and Linux/macOS acceptance. Depend
+on exact published source/job identities,234 detailed diagnostics and existing
+floor/quorum-read/operation contracts. Completion requires a cause-specific local
 regression, original floors/records/budgets and matching platform evidence when
-available. Source233 macOS counter183 passes; older preparing/Busy/conflict/socket
-failures are retained but are not assumed to persist. CI remains background.
+available. Do not assume older failures persist or wait for CI to develop features.
 
-Following: close concrete baseline operator/deployment integration gaps. Purpose:
+Next: close concrete baseline operator/deployment integration gaps. Purpose:
 advance usable service, online membership and split/merge completion. Depend on
 the existing Node/executable operations and acceptance map, not new subsystems.
-Reconcile required operations with actual public workflows first; select one
-missing end-to-end capability and record its schema before editing. Completion
-requires executable/Rust usage, original-operation restart/retry/cleanup evidence,
-relevant Linux/macOS checks and updated contracts after any interface changes.
-Do not count optional global orchestration, performance tuning or security audits
-as feature blockers. Generated membership validation follows where a concrete
-functional gap requires it; a blanket provider audit is not a release prerequisite.
+Reconcile required operations with actual public workflows; select one missing
+end-to-end capability and record its schema before editing. Completion requires
+executable/Rust usage, original-operation restart/retry/cleanup evidence, relevant
+Linux/macOS checks and aligned contracts after interface changes. Performance,
+security and optional global orchestration are separate subsequent work.
+
+Following: close one required combined membership or lifecycle recovery gap.
+Purpose: finish feature reliability within P4/P6 and the Linux/macOS milestone.
+Depend on the preceding public-workflow reconciliation and existing durable
+operation/lineage contracts. Select an explicit failure or acceptance case;
+completion requires the original intent/receipt through interruption, restart,
+retry and cleanup with relevant native transports and zero strict diagnostics.
+A blanket provider audit is not a feature prerequisite; P8/Windows stay deferred.
 
 ### Slice234 schema plan — bounded recursive-route connection recovery
 
@@ -23716,3 +23736,46 @@ run and uncertain benefit. Do not repeat the same tuning without new evidence.
 The next linked deliverables remain combined P4/P6 faults and the deployment/
 full-scope audit. The original baseline175 process remains live at observation,
 and CI stays background feedback. Full P0–P7 remains active.
+
+### Slice235 schema plan — exact replacement-setup handoff continuation
+
+Previous turn progressed:234 adds bounded route observation recovery and passes
+all/default directory histories and strict checks; f55d8fa is pushed. Matching
+operator run38067409575 runs in the background. Source233 Linux job114255917500
+fails setup19750 with exact UNKNOWN LeadershipChanged after sampling source3;
+this is an unknown result for the original intent, not a terminal rejection.
+
+Shape/contracts: reuse the existing explicit leader_request administration caller for identical
+19769/19750 handoff requests; never add retries to the generic CLI exchange or
+invent a new operation. The caller retains its10s retry deadline, existing leader-observation/command
+bounds and exact recognized non-admission/interruption responses. No scan budget
+is renewed by a failed command. Source/target,
+configuration and terminal record remain Maintenance contracts; no production
+API, file format or provider seam changes are needed for this fixture correction.
+
+Transitions/ownership: setup samples leadership, submits the fixed handoff and
+requires actual Completed quorum-read evidence before learner/drain work. A new
+forced native history delivers19750 on an unread authenticated channel, waits for
+its Completed receipt and proves the sampled source is a follower before replay.
+Closing the unread channel releases its wait. Replay uses the original words on
+the current leader and compares the terminal record; changed target remains a
+terminal conflict. Carry the exact receipt through replacement/drain, cold reopen
+and retry checks, then stop/join the owned services. No local role or uncertainty
+is treated as success. One focused test helper is needed to force this setup cut
+without changing the ordinary replacement path or introducing a production layer.
+
+Acceptance: forced TCP/QUIC setup fails the old one-shot source call, then passes
+with the existing explicit original-write caller. Exercise all replacement/drain
+histories plus exact caller classification/deadline tests, retained terminal
+intent/receipt after cold recovery, data retries and joins. Default TCP and strict
+fmt/four profiles must pass sequentially. This advances P4/service and Linux/macOS
+functional acceptance;234 matching route feedback and concrete operator/deployment
+gaps follow. No performance or security work is added.
+
+235 focused correction: the initial helper selection was wrong: CLI auto accepts
+only data reads/adds, so all four replacement checks correctly refuse move-leader
+before the intended replay. Retain that failure. Use the existing explicit
+leader_request administration caller, extend only its exact move-leader response
+classification, and keep the generic CLI unchanged. Its10s between-attempt retry
+deadline and existing bounded leader/command calls are not a new end-to-end15s
+wall-clock guarantee. Add terminal/invalid-command classifier checks.

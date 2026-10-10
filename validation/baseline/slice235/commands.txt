@@ -1,0 +1,18 @@
+New actual unread TCP/QUIC histories against old one-shot setup (0/2, exit101):
+cargo +stable test --locked --offline --all-features --test counter_service drain_replacement::setup_recovery
+
+Wrong initial data-only caller (0/4, exit101), then final explicit administration
+caller plus exact terminal classifier (5/0):
+cargo +stable test --locked --offline --all-features --test counter_service drain_replacement
+
+Related all-feature then default executable tests, sequentially (42/24;30/23):
+cargo +stable test --locked --offline --all-features --test counter_service --bin voteboat-counter drain
+cargo +stable test --locked --offline --test counter_service --bin voteboat-counter drain
+
+cargo +stable fmt --all
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+cargo +stable build --locked --offline --all-features --bins
+
+gh run view 38067409575 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url

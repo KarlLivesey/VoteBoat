@@ -1,0 +1,59 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp ... FAILED
+test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic ... FAILED
+
+failures:
+
+---- drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp stdout ----
+
+thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp' (457199) panicked at tests/counter_service.rs:379:9:
+node 3 ["move-leader", "19750", "2", "1", "1", "1"]: ERR NOT_LEADER
+ Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+service log: ready node=3 peer=127.0.0.1:10131 transport=TcpTls command=127.0.0.1:10231
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=5 committed=11\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=7 polls=700 failed_polls=0 owner_steps=45 step_errors=1 worker_events=20 snapshot_events=2 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=37 peer_received=38 ingress_blocked=0 connection_failures=4 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=3 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0 peer_4_bound=0 peer_4_batches=0 peer_4_messages=0 peer_4_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=7 rejected=0 percentile=bucket_upper_bound PollCompleted=745,sum:61012668,min:22823,max:1011989,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=6,sum:293880964,min:46831104,max:52752196,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=5 committed=11\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=837 failed_polls=0 owner_steps=28 step_errors=2 worker_events=20 snapshot_events=0 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=26 peer_received=28 ingress_blocked=0 connection_failures=4 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=3 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0 peer_4_bound=0 peer_4_batches=0 peer_4_messages=0 peer_4_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=881,sum:67079846,min:22592,max:680036,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=5,sum:241176957,min:47466556,max:48706384,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=status exit=Some(0) stdout="OK role=Follower term=5 committed=11\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=965 failed_polls=0 owner_steps=49 step_errors=1 worker_events=20 snapshot_events=2 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=44 peer_received=41 ingress_blocked=0 connection_failures=4 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=3 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_4_bound=0 peer_4_batches=0 peer_4_messages=0 peer_4_bytes=0\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=1010,sum:82721351,min:22161,max:856207,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=8,sum:390303802,min:46846312,max:53964422,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic stdout ----
+
+thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (457198) panicked at tests/counter_service.rs:379:9:
+node 3 ["move-leader", "19750", "2", "1", "1", "1"]: ERR NOT_LEADER
+ Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+service log: ready node=3 peer=127.0.0.1:10003 transport=Quic command=127.0.0.1:10103
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=5 committed=11\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=7 polls=679 failed_polls=0 owner_steps=45 step_errors=1 worker_events=20 snapshot_events=2 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=37 peer_received=38 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=1 peer_staged_batches=9 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=3 peer_connecting=1 peer_reserved_bytes=18874368 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=9 outbound_messages=9 outbound_bytes=5376 peer_details=3 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0 peer_4_bound=0 peer_4_batches=9 peer_4_messages=9 peer_4_bytes=5376\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=7 rejected=0 percentile=bucket_upper_bound PollCompleted=722,sum:79556442,min:30568,max:1403324,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=6,sum:296943181,min:46946531,max:53650583,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=5 committed=11\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=817 failed_polls=0 owner_steps=28 step_errors=2 worker_events=20 snapshot_events=0 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=26 peer_received=28 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=1 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=3 peer_connecting=1 peer_reserved_bytes=18874368 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=3 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0 peer_4_bound=0 peer_4_batches=0 peer_4_messages=0 peer_4_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=860,sum:86105785,min:30257,max:971553,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=5,sum:239964041,min:47563438,max:48713677,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=status exit=Some(0) stdout="OK role=Follower term=5 committed=11\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=941 failed_polls=0 owner_steps=49 step_errors=1 worker_events=20 snapshot_events=2 snapshot_installs=0 persistence_batches=10 applications=4 peer_sends=44 peer_received=41 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=1 peer_staged_batches=10 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=3 peer_connecting=1 peer_reserved_bytes=18874368 peer_authorized=3 peer_bound=2 peer_tracked=3 outbound_batches=10 outbound_messages=10 outbound_bytes=5952 peer_details=3 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_4_bound=0 peer_4_batches=10 peer_4_messages=10 peer_4_bytes=5952\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=986,sum:105273535,min:31960,max:1357297,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=8,sum:389313736,min:46920432,max:52791200,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+
+
+failures:
+    drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic
+    drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 183 filtered out; finished in 3.40s
+
+error: test failed, to rerun pass `--test counter_service`
