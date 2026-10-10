@@ -4895,3 +4895,21 @@ These are selected process/worker-abort histories, not physical power-loss or
 arbitrary-fault proof. Retained/imported owner-family native composition and
 other documented P0–P7 work remain. Linux/macOS GitHub CI has been activated and
 was observed running; no remote success is inferred from activation.
+
+## Maintainability enforcement and refactors — 10 October 2026
+
+Earlier strict Clippy runs covered its default group. The separate function-size
+and cognitive-complexity audit was warning-only; those passes did not establish
+compliance with the requested limits. Both lints are now deny-level in Cargo.toml,
+and the CI warning-only override has been removed. The lint job is expected to
+fail while the remaining violations are repaired.
+
+The first directory cleanup removes seven diagnostics with195 all-feature and
+158 core-only tests passing. The next routed/log/snapshot refactor removes six
+more production diagnostics. Its149 routed/lifecycle,14 routed contract,91
+storage/snapshot and four native TCP/QUIC phase-recovery checks pass; combined
+core-only coverage passes168 cases. Formatting, whitespace and inventory pass.
+Strict library Clippy still fails with35 production findings; core all-target
+Clippy fails with25 production and9 inline-test findings. Other integration
+fixture findings remain from the audit. These results are not a clean lint or
+full-roadmap completion claim.

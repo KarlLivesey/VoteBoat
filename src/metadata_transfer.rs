@@ -444,6 +444,29 @@ impl MetadataAuthoritySource {
             self.directory.active_directory()
         }
     }
+    fn read_rejected_ledger(
+        &self,
+        r: &mut Reader<'_>,
+        index: u64,
+    ) -> Result<BTreeMap<OperationId, u64>, ApplicationError> {
+        let count = r.u32()? as usize;
+        if count > self.initial.directory().limits().operations {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let mut rejected = BTreeMap::new();
+        let mut indices = std::collections::BTreeSet::new();
+        let mut previous = None;
+        for _ in 0..count {
+            let op = r.operation()?;
+            let at = r.u64()?;
+            if at == 0 || at > index || !indices.insert(at) || previous.is_some_and(|p| p >= op) {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            previous = Some(op);
+            rejected.insert(op, at);
+        }
+        Ok(rejected)
+    }
     /// Read-only access to the selected prior target's command builders and
     /// local diagnostics. Foreign observations still require quorum validation.
     /// No target is exposed after this source's committed freeze.
@@ -858,22 +881,7 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let body = r.take(n)?;
-        let count = r.u32()? as usize;
-        if count > self.initial.directory().limits().operations {
-            return Err(ApplicationError::InvalidCheckpoint);
-        }
-        let mut rejected = BTreeMap::new();
-        let mut indices = std::collections::BTreeSet::new();
-        let mut previous = None;
-        for _ in 0..count {
-            let op = r.operation()?;
-            let at = r.u64()?;
-            if at == 0 || at > index || !indices.insert(at) || previous.is_some_and(|p| p >= op) {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            previous = Some(op);
-            rejected.insert(op, at);
-        }
+        let rejected = self.read_rejected_ledger(&mut r, index)?;
         let op = r.u128()?;
         let digest: [u8; 32] = r.take(32)?.try_into().unwrap();
         let rejected_digest: [u8; 32] = r.take(32)?.try_into().unwrap();

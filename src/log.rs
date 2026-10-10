@@ -337,226 +337,263 @@ pub fn apply_batch(
             ));
         }
         match mutation {
-            LogMutation::Create(b) => {
-                if next.len() >= limits.max_groups || next.keys().any(|g| g.id == b.group.id) {
-                    return Err(StorageError::Rejected(
-                        "existing group identity or group limit",
-                    ));
-                }
-                Policy::new(b.policy.tree().clone(), PolicyLimits::default()).map_err(|_| {
-                    StorageError::Rejected("policy exceeds persisted format limits")
-                })?;
-                if b.voter_stores
-                    .keys()
-                    .copied()
-                    .collect::<std::collections::BTreeSet<_>>()
-                    != *b.policy.voters()
-                {
-                    return Err(StorageError::Rejected(
-                        "voter stores must match exact policy membership",
-                    ));
-                }
-                next.insert(
-                    group,
-                    GroupLog {
-                        snapshot_membership: None,
-                        bootstrap: b.clone(),
-                        revision: LogRevision::new(1).unwrap(),
-                        generation: LogGeneration::new(1).unwrap(),
-                        hard_state: HardState::default(),
-                        ballot_origin: None,
-                        commit_index: 0,
-                        snapshot: None,
-                        entries: Vec::new(),
-                    },
-                );
-            }
+            LogMutation::Create(b) => apply_create(&mut next, b, limits)?,
             LogMutation::Update(update) => {
                 let current = next
                     .get_mut(&group)
                     .ok_or(StorageError::Rejected("group not bootstrapped"))?;
-                if update.expected_revision != current.revision
-                    || !update.hard_state.follows(current.hard_state)
-                {
-                    return Err(StorageError::Rejected("stale revision or invalid ballot"));
-                }
-                current.validate_ballot()?;
-                // A retained promise is independent of the surviving electorate.
-                // Only a genuinely new ballot consults the predecessor accepted
-                // configuration; a suffix/snapshot cannot authorize itself.
-                let ballot_origin = if let Some(candidate) = update.hard_state.voted_for {
-                    if update.hard_state == current.hard_state {
-                        current.ballot_origin
-                    } else {
-                        let membership = current
-                            .membership()
-                            .map_err(|_| StorageError::Rejected("invalid ballot membership"))?;
-                        let candidate_store = membership
-                            .voter_store(candidate)
-                            .ok_or(StorageError::Rejected("candidate is not an accepted voter"))?;
-                        Some(BallotOrigin {
-                            configuration: membership.id(),
-                            candidate_store,
-                        })
-                    }
-                } else {
-                    None
-                };
-                if update.snapshot.is_none() && update.snapshot_membership.is_some() {
-                    return Err(StorageError::Rejected("membership base without snapshot"));
-                }
-                if let Some(reference) = update.snapshot {
-                    if update.suffix.is_some()
-                        || reference.group != group
-                        || reference.configuration
-                            != update
-                                .snapshot_membership
-                                .as_ref()
-                                .map_or(current.bootstrap.configuration, |m| m.id())
-                        || reference.index <= current.base_index()
-                        || reference.index == u64::MAX
-                        || reference.term == 0
-                        || reference.term > update.hard_state.term
-                        || reference.application_schema == 0
-                        || reference.file_bytes < 48
-                        || reference.file_bytes
-                            > limits.max_snapshot_bytes as u64 + 4 * 1024 * 1024 + 48
-                        || update.commit_index < reference.index
-                    {
-                        return Err(StorageError::Rejected("invalid snapshot boundary/scope"));
-                    }
-                    let matching = current.term_at(reference.index) == Some(reference.term);
-                    if let Some(base) = &update.snapshot_membership {
-                        base.validate_checkpoint(&current.bootstrap, reference.index)
-                            .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
-                        if base.retained_bytes() > limits.max_batch_bytes {
-                            return Err(StorageError::Rejected("snapshot membership budget"));
-                        }
-                    }
-                    if matching
-                        && current
-                            .checkpoint_membership(reference.index)
-                            .map_err(|_| StorageError::Rejected("invalid local membership"))?
-                            != update.snapshot_membership
-                    {
-                        return Err(StorageError::Rejected(
-                            "snapshot membership differs from matching prefix",
-                        ));
-                    }
-                    if !matching {
-                        let committed = current
-                            .membership_at(current.commit_index)
-                            .map_err(|_| StorageError::Rejected("invalid committed membership"))?;
-                        let incoming = crate::membership::Membership::replay_from(
-                            &current.bootstrap,
-                            update.snapshot_membership.as_deref(),
-                            reference.index,
-                            &[],
-                            reference.index,
-                        )
-                        .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
-                        if incoming.id() < committed.id()
-                            || incoming.last_configuration_index()
-                                < committed.last_configuration_index()
-                            || !incoming.operations().is_superset(committed.operations())
-                        {
-                            return Err(StorageError::Rejected(
-                                "snapshot regresses committed membership",
-                            ));
-                        }
-                    }
-                    if reference.index <= current.commit_index && !matching {
-                        return Err(StorageError::Rejected(
-                            "snapshot conflicts with committed history",
-                        ));
-                    }
-                    if matching {
-                        let removed = usize::try_from(reference.index - current.base_index())
-                            .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
-                        current.entries.drain(..removed);
-                    } else {
-                        current.entries.clear();
-                    }
-                    current.snapshot = Some(reference);
-                    current.snapshot_membership = update.snapshot_membership.clone();
-                    current.generation = current
-                        .generation
-                        .get()
-                        .checked_add(1)
-                        .and_then(LogGeneration::new)
-                        .ok_or(StorageError::Rejected("generation exhausted"))?;
-                }
-                if let Some(suffix) = &update.suffix {
-                    if suffix.from == 0
-                        || suffix.from
-                            > current
-                                .last_index()
-                                .checked_add(1)
-                                .ok_or(StorageError::Rejected("index exhausted"))?
-                        || suffix.from <= current.commit_index
-                    {
-                        return Err(StorageError::Rejected(
-                            "replacement crosses committed prefix or log gap",
-                        ));
-                    }
-                    let start = usize::try_from(suffix.from - current.base_index() - 1)
-                        .map_err(|_| StorageError::Rejected("index overflow"))?;
-                    if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
-                        return Err(StorageError::Rejected("group entry limit"));
-                    }
-                    let mut previous_term = current.term_at(suffix.from - 1).unwrap();
-                    for (offset, entry) in suffix.entries.iter().enumerate() {
-                        if entry.index != suffix.from + offset as u64
-                            || entry.term == 0
-                            || entry.term < previous_term
-                            || entry.term > update.hard_state.term
-                            || entry.payload_bytes() > limits.max_command_bytes
-                        {
-                            return Err(StorageError::Rejected("entry index/term/payload invalid"));
-                        }
-                        previous_term = entry.term;
-                    }
-                    if suffix.from <= current.last_index() {
-                        current.generation = current
-                            .generation
-                            .get()
-                            .checked_add(1)
-                            .and_then(LogGeneration::new)
-                            .ok_or(StorageError::Rejected("generation exhausted"))?;
-                    }
-                    current.entries.truncate(start);
-                    current.entries.extend(suffix.entries.iter().cloned());
-                }
-                if update.commit_index < current.commit_index
-                    || update.commit_index > current.last_index()
-                    || current.last_term() > update.hard_state.term
-                {
-                    return Err(StorageError::Rejected(
-                        "commit regression/gap or hard term behind log",
-                    ));
-                }
-                current.hard_state = update.hard_state;
-                current.ballot_origin = ballot_origin;
-                current.commit_index = update.commit_index;
-                if current.snapshot_membership.is_some()
-                    || current
-                        .entries
-                        .iter()
-                        .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
-                {
-                    current
-                        .membership()
-                        .map_err(|_| StorageError::Rejected("invalid configuration journal"))?;
-                }
-                current.revision = current
-                    .revision
-                    .get()
-                    .checked_add(1)
-                    .and_then(LogRevision::new)
-                    .ok_or(StorageError::Rejected("revision exhausted"))?;
+                apply_update(current, update, limits)?;
             }
         }
     }
     *state = next;
+    Ok(())
+}
+fn apply_create(
+    next: &mut BTreeMap<GroupIdentity, GroupLog>,
+    b: &Bootstrap,
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    if next.len() >= limits.max_groups || next.keys().any(|g| g.id == b.group.id) {
+        return Err(StorageError::Rejected(
+            "existing group identity or group limit",
+        ));
+    }
+    Policy::new(b.policy.tree().clone(), PolicyLimits::default())
+        .map_err(|_| StorageError::Rejected("policy exceeds persisted format limits"))?;
+    if b.voter_stores
+        .keys()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>()
+        != *b.policy.voters()
+    {
+        return Err(StorageError::Rejected(
+            "voter stores must match exact policy membership",
+        ));
+    }
+    next.insert(
+        b.group,
+        GroupLog {
+            snapshot_membership: None,
+            bootstrap: b.clone(),
+            revision: LogRevision::new(1).unwrap(),
+            generation: LogGeneration::new(1).unwrap(),
+            hard_state: HardState::default(),
+            ballot_origin: None,
+            commit_index: 0,
+            snapshot: None,
+            entries: Vec::new(),
+        },
+    );
+    Ok(())
+}
+fn ballot_origin(
+    current: &GroupLog,
+    update: &LogUpdate,
+) -> Result<Option<BallotOrigin>, StorageError> {
+    // A retained promise is independent of the surviving electorate.
+    // Only a genuinely new ballot consults the predecessor accepted
+    // configuration; a suffix/snapshot cannot authorize itself.
+    let ballot_origin = if let Some(candidate) = update.hard_state.voted_for {
+        if update.hard_state == current.hard_state {
+            current.ballot_origin
+        } else {
+            let membership = current
+                .membership()
+                .map_err(|_| StorageError::Rejected("invalid ballot membership"))?;
+            let candidate_store = membership
+                .voter_store(candidate)
+                .ok_or(StorageError::Rejected("candidate is not an accepted voter"))?;
+            Some(BallotOrigin {
+                configuration: membership.id(),
+                candidate_store,
+            })
+        }
+    } else {
+        None
+    };
+    Ok(ballot_origin)
+}
+fn apply_update(
+    current: &mut GroupLog,
+    update: &LogUpdate,
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    if update.expected_revision != current.revision
+        || !update.hard_state.follows(current.hard_state)
+    {
+        return Err(StorageError::Rejected("stale revision or invalid ballot"));
+    }
+    current.validate_ballot()?;
+    let ballot_origin = ballot_origin(current, update)?;
+    if update.snapshot.is_none() && update.snapshot_membership.is_some() {
+        return Err(StorageError::Rejected("membership base without snapshot"));
+    }
+    if let Some(reference) = update.snapshot {
+        apply_snapshot(current, update, reference, limits)?;
+    }
+    if let Some(suffix) = &update.suffix {
+        apply_suffix(current, suffix, update.hard_state.term, limits)?;
+    }
+    if update.commit_index < current.commit_index
+        || update.commit_index > current.last_index()
+        || current.last_term() > update.hard_state.term
+    {
+        return Err(StorageError::Rejected(
+            "commit regression/gap or hard term behind log",
+        ));
+    }
+    current.hard_state = update.hard_state;
+    current.ballot_origin = ballot_origin;
+    current.commit_index = update.commit_index;
+    if current.snapshot_membership.is_some()
+        || current
+            .entries
+            .iter()
+            .any(|e| matches!(e.payload, EntryPayload::Configuration(_)))
+    {
+        current
+            .membership()
+            .map_err(|_| StorageError::Rejected("invalid configuration journal"))?;
+    }
+    current.revision = current
+        .revision
+        .get()
+        .checked_add(1)
+        .and_then(LogRevision::new)
+        .ok_or(StorageError::Rejected("revision exhausted"))?;
+    Ok(())
+}
+fn apply_snapshot(
+    current: &mut GroupLog,
+    update: &LogUpdate,
+    reference: SnapshotRef,
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    let group = update.group;
+    if update.suffix.is_some()
+        || reference.group != group
+        || reference.configuration
+            != update
+                .snapshot_membership
+                .as_ref()
+                .map_or(current.bootstrap.configuration, |m| m.id())
+        || reference.index <= current.base_index()
+        || reference.index == u64::MAX
+        || reference.term == 0
+        || reference.term > update.hard_state.term
+        || reference.application_schema == 0
+        || reference.file_bytes < 48
+        || reference.file_bytes > limits.max_snapshot_bytes as u64 + 4 * 1024 * 1024 + 48
+        || update.commit_index < reference.index
+    {
+        return Err(StorageError::Rejected("invalid snapshot boundary/scope"));
+    }
+    let matching = current.term_at(reference.index) == Some(reference.term);
+    if let Some(base) = &update.snapshot_membership {
+        base.validate_checkpoint(&current.bootstrap, reference.index)
+            .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
+        if base.retained_bytes() > limits.max_batch_bytes {
+            return Err(StorageError::Rejected("snapshot membership budget"));
+        }
+    }
+    if matching
+        && current
+            .checkpoint_membership(reference.index)
+            .map_err(|_| StorageError::Rejected("invalid local membership"))?
+            != update.snapshot_membership
+    {
+        return Err(StorageError::Rejected(
+            "snapshot membership differs from matching prefix",
+        ));
+    }
+    if !matching {
+        let committed = current
+            .membership_at(current.commit_index)
+            .map_err(|_| StorageError::Rejected("invalid committed membership"))?;
+        let incoming = crate::membership::Membership::replay_from(
+            &current.bootstrap,
+            update.snapshot_membership.as_deref(),
+            reference.index,
+            &[],
+            reference.index,
+        )
+        .map_err(|_| StorageError::Rejected("invalid snapshot membership"))?;
+        if incoming.id() < committed.id()
+            || incoming.last_configuration_index() < committed.last_configuration_index()
+            || !incoming.operations().is_superset(committed.operations())
+        {
+            return Err(StorageError::Rejected(
+                "snapshot regresses committed membership",
+            ));
+        }
+    }
+    if reference.index <= current.commit_index && !matching {
+        return Err(StorageError::Rejected(
+            "snapshot conflicts with committed history",
+        ));
+    }
+    if matching {
+        let removed = usize::try_from(reference.index - current.base_index())
+            .map_err(|_| StorageError::Rejected("snapshot index overflow"))?;
+        current.entries.drain(..removed);
+    } else {
+        current.entries.clear();
+    }
+    current.snapshot = Some(reference);
+    current.snapshot_membership = update.snapshot_membership.clone();
+    current.generation = current
+        .generation
+        .get()
+        .checked_add(1)
+        .and_then(LogGeneration::new)
+        .ok_or(StorageError::Rejected("generation exhausted"))?;
+    Ok(())
+}
+fn apply_suffix(
+    current: &mut GroupLog,
+    suffix: &Suffix,
+    hard_term: u64,
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    if suffix.from == 0
+        || suffix.from
+            > current
+                .last_index()
+                .checked_add(1)
+                .ok_or(StorageError::Rejected("index exhausted"))?
+        || suffix.from <= current.commit_index
+    {
+        return Err(StorageError::Rejected(
+            "replacement crosses committed prefix or log gap",
+        ));
+    }
+    let start = usize::try_from(suffix.from - current.base_index() - 1)
+        .map_err(|_| StorageError::Rejected("index overflow"))?;
+    if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
+        return Err(StorageError::Rejected("group entry limit"));
+    }
+    let mut previous_term = current.term_at(suffix.from - 1).unwrap();
+    for (offset, entry) in suffix.entries.iter().enumerate() {
+        if entry.index != suffix.from + offset as u64
+            || entry.term == 0
+            || entry.term < previous_term
+            || entry.term > hard_term
+            || entry.payload_bytes() > limits.max_command_bytes
+        {
+            return Err(StorageError::Rejected("entry index/term/payload invalid"));
+        }
+        previous_term = entry.term;
+    }
+    if suffix.from <= current.last_index() {
+        current.generation = current
+            .generation
+            .get()
+            .checked_add(1)
+            .and_then(LogGeneration::new)
+            .ok_or(StorageError::Rejected("generation exhausted"))?;
+    }
+    current.entries.truncate(start);
+    current.entries.extend(suffix.entries.iter().cloned());
     Ok(())
 }

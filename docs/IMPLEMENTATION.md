@@ -13551,3 +13551,52 @@ target strict run now fails with50 distinct library/inline-test diagnostics
 inline-test). Integration fixtures are not fully enumerated by these failing
 builds; the earlier audit also reported their findings. Both complexity/length
 lints are deny-level even for plain cargo clippy. No clean lint result is claimed.
+
+The same checkpoint cleanup extracts metadata-source rejection-ledger decoding
+into a private bounded helper. It preserves count, ordering, duplicate-index and
+prefix checks before restoring any state. Existing malformed/checkpoint/native
+journal metadata tests are the acceptance checks; no encoded byte changes.
+
+Next storage validation refactor: separate group creation, ballot provenance,
+snapshot installation and suffix replacement from the deterministic batch
+validator. The public apply_batch still clones once, rejects duplicate group
+units and publishes only after every unit succeeds. Helpers mutate only that
+candidate map. Preserve exact validation ordering, committed-prefix protection,
+membership history, generation/revision increments and errors. No file I/O or
+provider changes. Check log-store, ballot, membership, snapshot and recovery
+conformance; failure/partial-batch tests must remain unchanged.
+
+Learner enrollment's snapshot publication is split from its identity/membership
+validation and log installation. The private helper keeps the exact existing
+load/reuse or begin/write/seal/publish sequence; pin verification still precedes
+the log append/barrier. There is no rollback promise or new durability token.
+Existing learner-enrollment and snapshot failure/retry tests validate this seam.
+
+## Maintainer lint cleanup — routed application and log transitions
+
+Separated routed bootstrap/full-fence/scoped-fence control from data projection
+and inner application, and separated pending replay admission from static
+admission. Checkpoint decoding now has private typed fence/semantic records and
+separate ordered-adoption decoding. All restore work stays on a candidate until
+complete validation; original formats, inner receipt checks, history budgets,
+fences and operation domains are unchanged. Metadata-source restore separately
+checks its bounded rejected-operation ledger.
+
+The deterministic log batch validator now separates create, ballot provenance,
+snapshot and suffix handling. It still validates every unit on one cloned map,
+then publishes once. Ballot origin is derived before installing any new suffix
+or snapshot. Matching-prefix, committed-membership and generation/revision rules
+retain their order. Learner snapshot publication is a private helper; its pin
+verification still precedes the log barrier and full recovery verification.
+No provider contract, public API, persistent format or durability token changed.
+
+Validation using cargo +stable --locked --offline:149 tests across nine routed/
+lifecycle targets,14 routed contract cases,91 storage/ballot/membership/snapshot
+cases, and four native TCP/TLS/QUIC WAL/checkpoint authority-move histories pass.
+The combined core-only selection passes168 tests across16 targets. Formatting,
+whitespace and the88-contract inventory check pass. The stricter lint still
+fails: production diagnostics fell from41 to35; core-only has25 production plus
+9 inline-test diagnostics. Other fixture findings remain. No warnings were
+suppressed, thresholds raised or failing lint presented as a successful check.
+The next work remains the outstanding native/runtime/consensus/transfer findings,
+followed by fixture cleanup; the macro feature roadmap is unchanged.

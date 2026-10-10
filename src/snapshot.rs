@@ -512,6 +512,40 @@ pub fn enroll_learner_snapshot<A: CheckpointStateMachine, L: LogStore, S: Snapsh
     {
         return Err(CheckpointError::InvalidBoundary);
     }
+    let reference = publish_learner_image(snapshots, incoming, limits)?;
+    if reference.store != log.binding().identity || !reference.matches(incoming) {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    snapshots.pin_for_log(reference)?;
+    if snapshots.load_pinned(reference)? != *incoming {
+        return Err(CheckpointError::InvalidBoundary);
+    }
+    let tickets = log.append_batch(vec![LogMutation::Update(LogUpdate {
+        group,
+        expected_revision: state.revision,
+        hard_state: HardState {
+            term: incoming.metadata.term,
+            voted_for: None,
+        },
+        commit_index: incoming.metadata.index,
+        suffix: None,
+        snapshot: Some(reference),
+        snapshot_membership: incoming.metadata.membership.clone(),
+    })])?;
+    let durable = log.barrier(&tickets)?;
+    if durable.tickets != tickets {
+        return Err(StorageError::StaleTicket.into());
+    }
+    // Verify the selected durable log/data together, not just the receipt.
+    let core = recover_member_replica(node, group, log, snapshots, application)?.0;
+    Ok(core)
+}
+fn publish_learner_image<S: SnapshotRetention>(
+    snapshots: &mut S,
+    incoming: &Snapshot,
+    limits: SnapshotLimits,
+) -> Result<SnapshotRef, CheckpointError> {
+    let group = incoming.metadata.bootstrap.group;
     // Reuse an exact publication after a lost receipt, rather than creating a
     // conflicting same-index image. Other publications are never overwritten.
     let reference = if let Some(published) = snapshots.load()? {
@@ -543,32 +577,7 @@ pub fn enroll_learner_snapshot<A: CheckpointStateMachine, L: LogStore, S: Snapsh
         }
         receipt.reference()
     };
-    if reference.store != log.binding().identity || !reference.matches(incoming) {
-        return Err(CheckpointError::InvalidBoundary);
-    }
-    snapshots.pin_for_log(reference)?;
-    if snapshots.load_pinned(reference)? != *incoming {
-        return Err(CheckpointError::InvalidBoundary);
-    }
-    let tickets = log.append_batch(vec![LogMutation::Update(LogUpdate {
-        group,
-        expected_revision: state.revision,
-        hard_state: HardState {
-            term: incoming.metadata.term,
-            voted_for: None,
-        },
-        commit_index: incoming.metadata.index,
-        suffix: None,
-        snapshot: Some(reference),
-        snapshot_membership: incoming.metadata.membership.clone(),
-    })])?;
-    let durable = log.barrier(&tickets)?;
-    if durable.tickets != tickets {
-        return Err(StorageError::StaleTicket.into());
-    }
-    // Verify the selected durable log/data together, not just the receipt.
-    let core = recover_member_replica(node, group, log, snapshots, application)?.0;
-    Ok(core)
+    Ok(reference)
 }
 fn recover_replica_as<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetention>(
     node: NodeId,
