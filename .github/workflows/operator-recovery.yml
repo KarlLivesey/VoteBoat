@@ -24,7 +24,6 @@ jobs:
     env:
       CARGO_TERM_COLOR: never
       RUST_BACKTRACE: 1
-      TMPDIR: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned Rust toolchain
@@ -32,6 +31,8 @@ jobs:
       - run: cargo fetch --locked
       - name: Exercise operator recovery
         shell: bash
+        env:
+          TMPDIR: ${{ runner.temp }}
         run: |
           set -o pipefail
           cargo test --locked --offline --all-features \

@@ -169,6 +169,11 @@ This reproduces a local liveness failure; it selects peer/session recovery for
 the next operator investigation, without establishing its exact cause. Keep
 this failed evidence alongside the successful full suite and zero lint results.
 Current: revisit the current Linux/macOS operator acceptance evidence.
+The210b diagnostic workflow was rejected before jobs started because runner.temp
+is unavailable in job-level env. Correct its scope to the operator step's env,
+where the runner context is supported. This preserves the exact log location,
+test command, deadlines and background CI role. Verify accepted workflow job
+creation after push; this is workflow repair, not a QUIC or platform pass.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
 supported platform job. Depend on the existing operator fixtures and logs;
