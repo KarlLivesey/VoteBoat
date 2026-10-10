@@ -32,6 +32,8 @@ use crate::{
     worker::*,
 };
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
+mod multi;
+pub use multi::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NativeOpenMode {
@@ -759,25 +761,32 @@ fn recover_storage<A: CheckpointStateMachine>(
         app,
     ))?
     .0;
-    let core = if config.tls.wire_version() >= 7 {
-        core.with_committed_snapshot_repair()
-    } else if config.tls.wire_version() >= 6 {
-        core.with_snapshot_joint_repair()
-    } else if config.tls.wire_version() >= 5 {
-        core.with_batched_joint_repair()
-    } else {
-        core
-    };
-    let core = if matches!(authorization, StartupAuthorization::Member(_)) {
-        core.with_configuration_replication()
-    } else {
-        core
-    };
+    let core = configured_core(core, config.tls.wire_version(), authorization);
     Ok(StartupStorage {
         store,
         snapshots,
         core,
     })
+}
+fn configured_core(
+    core: crate::raft::Raft,
+    version: u16,
+    authorization: &StartupAuthorization,
+) -> crate::raft::Raft {
+    let core = if version >= 7 {
+        core.with_committed_snapshot_repair()
+    } else if version >= 6 {
+        core.with_snapshot_joint_repair()
+    } else if version >= 5 {
+        core.with_batched_joint_repair()
+    } else {
+        core
+    };
+    if matches!(authorization, StartupAuthorization::Member(_)) {
+        core.with_configuration_replication()
+    } else {
+        core
+    }
 }
 struct StartupRuntime<S: SecureSession> {
     owner_id: RuntimeOwner,
@@ -791,7 +800,7 @@ struct StartupRuntime<S: SecureSession> {
 fn prepare_runtime<S: SecureSession>(
     config: &NativeStartup,
     authorization: &StartupAuthorization,
-    core: crate::raft::Raft,
+    cores: Vec<crate::raft::Raft>,
     binding: StoreBinding,
     timers: TimerConfig,
     now: MonoTime,
@@ -817,7 +826,7 @@ fn prepare_runtime<S: SecureSession>(
     };
     let remote = checked(PeerAssignments::from_cores(
         local,
-        [&core],
+        cores.iter(),
         PeerRosterLimits::default().peers,
     ))?
     .peers()
@@ -832,18 +841,21 @@ fn prepare_runtime<S: SecureSession>(
             "provision every retained/rollback peer with its exact store",
         ));
     }
+    let group_count = cores.len();
     let mut shard = checked(Shard::new(
         owner_id,
         ShardLimits {
-            max_groups: 1,
+            max_groups: group_count,
             ..ShardLimits::default()
         },
-        checked(FairScheduler::new(1))?,
+        checked(FairScheduler::new(group_count))?,
     ))?;
-    checked(shard.register(core))?;
+    for core in cores {
+        checked(shard.register(core))?;
+    }
     let timed = checked(TimedShard::new(
         shard,
-        checked(DeadlineQueue::new(owner_id, 1))?,
+        checked(DeadlineQueue::new(owner_id, group_count))?,
         JitterEntropy::new(config.entropy_seed),
         timers,
         now,
@@ -951,6 +963,12 @@ fn transport_factory(
     ))?;
     Ok(factory)
 }
+struct PreparedStartup<A> {
+    store: Option<NativeLogStore<FileLogIo>>,
+    snapshots: BTreeMap<GroupIdentity, NativeSnapshotStore<FileSnapshotIo>>,
+    cores: Vec<crate::raft::Raft>,
+    applications: BTreeMap<GroupIdentity, A>,
+}
 fn build<A, C: StartupConnector>(
     config: NativeStartup,
     options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
@@ -981,6 +999,46 @@ where
         timings,
         application.as_mut().unwrap(),
     )?;
+    let group = config.bootstrap.group;
+    let mut prepared = PreparedStartup {
+        store: Some(store),
+        snapshots: [(group, snapshots)].into(),
+        cores: vec![core],
+        applications: [(group, application.take().unwrap())].into(),
+    };
+    let result = assemble(
+        config,
+        (authorization, timers),
+        &mut prepared,
+        cleanup,
+        wake,
+        now,
+        connector,
+    );
+    *application = prepared.applications.remove(&group);
+    result
+}
+fn assemble<A, C: StartupConnector>(
+    config: NativeStartup,
+    options: (StartupAuthorization, TimerConfig),
+    prepared: &mut PreparedStartup<A>,
+    cleanup: &mut Cleanup,
+    wake: Arc<dyn WorkerWake>,
+    now: MonoTime,
+    connector: impl FnOnce(
+        &NativeStartup,
+        &BTreeMap<NodeId, StoreIdentity>,
+        LocalIdentity,
+        Arc<dyn WorkerWake>,
+        &mut Cleanup,
+    ) -> Result<C, NativeStartupError>,
+) -> Result<NativeNode<A, C>, NativeStartupError>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let (authorization, timers) = options;
+    let store = prepared.store.take().unwrap();
     let StartupRuntime {
         owner_id,
         local,
@@ -989,7 +1047,14 @@ where
         outbound,
         roster,
         ingress,
-    } = prepare_runtime::<C::Session>(&config, &authorization, core, store.binding(), timers, now)?;
+    } = prepare_runtime::<C::Session>(
+        &config,
+        &authorization,
+        std::mem::take(&mut prepared.cores),
+        store.binding(),
+        timers,
+        now,
+    )?;
     let ApplicationRoutes {
         results,
         clients,
@@ -1008,7 +1073,7 @@ where
         EffectOwnerLimits::default(),
     ))?;
     cleanup.snapshots = Some(checked(NativeSnapshotWorker::spawn(
-        [(config.bootstrap.group, snapshots)].into(),
+        std::mem::take(&mut prepared.snapshots),
         SnapshotWorkerBinding {
             store: owner_id.store,
             generation: SnapshotWorkerGeneration::new(1).unwrap(),
@@ -1028,7 +1093,7 @@ where
             local: NativeLocalParts {
                 owner,
                 persistence: cleanup.log.take().unwrap(),
-                applications: [(config.bootstrap.group, application.take().unwrap())].into(),
+                applications: std::mem::take(&mut prepared.applications),
                 results,
                 clients,
                 reads,
@@ -1056,7 +1121,7 @@ where
     match built {
         Ok(node) => Ok(node),
         Err(mut r) => {
-            *application = r.parts.local.applications.remove(&config.bootstrap.group);
+            prepared.applications = r.parts.local.applications;
             cleanup.log = Some(r.parts.local.persistence);
             cleanup.snapshots = r.parts.local.snapshots.take().map(|s| s.worker);
             if let Some(peers) = r.parts.peers.take() {

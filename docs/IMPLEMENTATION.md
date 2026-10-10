@@ -132,9 +132,79 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b2b2: executable membership-aware single-group drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Slice197b2e covers explicit final learner removal after source shutdown, accepted-but-uncommitted recovery and stale-source gating. |
 | Completed197b3: bounded multi-group Rust dispatcher | Advance independent membership evacuations fairly while retaining original identities; advances P4/P2 and chapter09. |197b2b1 immutable plan, journal, ordinary Node configuration ownership and native shared-WAL assembly. | Bounded scan/in-flight slots, stale ticket refusal, per-group errors, native TCP/QUIC mixed completed/joint/unstarted recovery and surviving writes/retries. Broader failures remain open. |
 | Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
-| Current197b4b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Expose bounded operator start/status/resume/stop across groups, preserving the original plan and refusing premature source stop. This remains planned work; the counter executable is still single-group. |
+| Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
+| Current197b4b2: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b1 production startup,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Add explicit deployment group selection and group-addressed authenticated work, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. This remains planned work; the counter executable is still single-group. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4b1 schema plan — production native multi-group startup
+
+Inspection found that the public native startup and command executable still
+construct one group; the shared multi-group assembly lives in the benchmark.
+The multi-group operator path needs an actual production Node containing the
+complete assignment set. Add a native multi-group startup wrapper around the
+existing explicit native configuration, additional original bootstraps and
+provisioned store identities. It returns the existing generic NativeNode with
+one WAL, one snapshot worker, one scheduler and one peer endpoint. Applications
+are supplied as an exact group-keyed map. Alternate providers continue through
+the existing NodeParts contracts; no benchmark observer or fixture enters core.
+
+Use at most256 groups, matching one native bootstrap batch, and validate sorted
+unique group IDs, exact store mappings, fresh applications, protocol/timer
+bounds and bootstrap byte limits before opening resources. Existing single-group
+startup keeps its directory layout and public API. Additional snapshot stores
+have explicit group/incarnation paths. Recovery requires the exact durable WAL
+group inventory and original bootstraps; omitted/changed groups refuse instead
+of disappearing from a later drain check.
+
+Reuse the existing native recovery and assembly ownership paths. Return all
+partially restored applications on failure plus the existing nonblocking cleanup
+handle; join every started worker before reopening. Recover group logs and pinned
+snapshots before polling; no new watermark, wire format or background runtime.
+Creation publishes one bounded bootstrap batch through its normal WAL barrier.
+
+Acceptance: downstream TCP/QUIC three-peer multi-group writes, checkpoint/reopen
+and original retries; shared endpoint/worker ownership; changed/omitted manifest
+refusal and late construction cleanup; all existing one-group startup tests.
+This prerequisite advances P2 and197b4b; group-addressed authenticated operator
+commands remain the next linked deliverable, followed by198 assignment listing.
+
+### Slice197b4b1 implementation evidence
+
+`NativeMultiStartup` now validates and assembles an explicit complete group set
+using the same native providers and `NativeNode` as the existing startup API.
+It accepts up to256 original bootstraps within the existing batch byte limit,
+an exact fresh application map and provisioned store identities. Creation waits
+for the bootstrap batch's WAL barrier. Recovery refuses omitted groups or
+changed original bootstraps, then restores every application through the existing
+verified checkpoint/replay path. The first snapshot path and all single-group
+entry points retain their behavior. Additional snapshots include the group and
+incarnation in their path; no automatic layout migration is supplied.
+
+The shared assembly now sizes group scheduling and deadlines to the actual
+inventory. It still has one authoritative WAL binding, one snapshot worker and
+one peer endpoint. Every failed construction returns the full application map,
+possibly partially restored, with the existing explicit worker cleanup handle.
+No new consensus effect, durability watermark, ownership authority or hidden
+runtime is introduced. Alternative providers still use public `NodeParts`.
+
+Five new downstream tests cover TCP/QUIC three-group writes, checkpoints,
+reopen/retries, omitted/changed configuration refusal, side-effect-free invalid
+inputs and late failure cleanup. A changed second bootstrap fails after the
+first application has been restored, verifying that partial replay is returned.
+Late TCP/QUIC failures verify worker joins, endpoint reuse and recovery of the
+already-created complete store. All25 startup tests,32 native benchmark tests,
+96 service tests and nine command unit tests pass. Formatting, all/default/
+no-default-feature strict Clippy, warnings-denied API documentation and the
+105-record contract inventory check pass. Actual commands, logs and source
+hashes are retained in
+[slice197b4b1 evidence](../validation/baseline/slice197b4b1/README.md).
+
+Macro review: production Rust startup now exposes the complete shared-node
+assignment set needed by the next operator slice. Multi-group executable
+commands remain planned; the counter executable is still single-group. This
+advances P2 and coordinated maintenance without closing the full P0–P7 goal,
+macOS/separate-host execution or the remaining fault/performance gates.
 
 ### Slice197b4a schema plan — mixed voter and learner source assignments
 

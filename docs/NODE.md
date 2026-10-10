@@ -19,6 +19,12 @@ remains independent of filesystem configuration and executables. Native recovery
 existing public checkpoint/WAL recovery contracts; no second authoritative log
 is introduced.
 
+`NativeMultiStartup` provides the corresponding native setup for a complete,
+explicit set of groups sharing one WAL, scheduler, snapshot worker and peer
+endpoint. See [multi-group startup](MULTI_GROUP_STARTUP.md) for construction,
+recovery and cleanup requirements. Host-supplied providers still compose through
+`NodeParts`.
+
 `NativeNode<A,C,F>` and `NativeNodeParts<A,C,F>` accept an optional selected
 transport factory. The existing connector and NativeTransportFactory defaults
 remain, so earlier one/two-parameter uses keep their behavior. Rust hosts can

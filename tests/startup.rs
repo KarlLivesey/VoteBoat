@@ -29,6 +29,8 @@ use voteboat::{
 };
 #[path = "startup/maintenance.rs"]
 mod maintenance;
+#[path = "startup/multi.rs"]
+mod multi;
 #[derive(Clone)]
 struct HostApplication(Counter);
 impl StateMachine for HostApplication {

@@ -120,6 +120,18 @@ impl<I: JournalIo> NativeLogStore<I> {
     }
 }
 impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
+    pub(crate) fn matches_startup_groups(
+        &self,
+        groups: &[GroupIdentity],
+    ) -> Result<bool, StorageError> {
+        if self.fenced {
+            return Err(StorageError::Fenced);
+        }
+        if !self.pending.is_empty() {
+            return Err(StorageError::Rejected("startup requires quiescent WAL"));
+        }
+        Ok(self.durable.keys().copied().eq(groups.iter().copied()))
+    }
     pub(crate) fn creation_state_native(
         &self,
         group: GroupIdentity,

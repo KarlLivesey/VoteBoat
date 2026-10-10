@@ -32,6 +32,21 @@
     },
     {
       "design_id": "C10/C15",
+      "public_contract": "NativeMultiStartup / NativeMultiStartupRejected<A>",
+      "operations": [
+        "validate",
+        "open",
+        "try_cleanup"
+      ],
+      "native": "Explicit complete multi-group native assembly over the same NodeParts, recovery, shared WAL and snapshot worker contracts as single-group startup; TCP/TLS or optional QUIC.",
+      "conformance": [
+        "tests/startup/multi.rs",
+        "tests/startup.rs"
+      ],
+      "scope": "At most 256 sorted original group bootstraps within one native batch byte limit; exact fresh application map and provisioned voter stores. Creation publishes one durable bootstrap batch. Recovery requires the complete durable group inventory and exact original bootstraps, then verifies snapshots and replays each application before exposure. First snapshot directory retains its existing layout; additional paths bind group and incarnation. Pure preflight precedes files and sockets. Later rejection returns every application, possibly partially restored, plus the existing nonblocking cleanup handle for workers and connections. No rollback, migration, implicit group creation, hidden executor or ownership activation. Downstream TCP/QUIC three-group checkpoint/reopen/retry and failure tests use the public API. NodeParts remains the alternate-provider composition contract; executable multi-group operator controls and macOS execution are not established by this slice."
+    },
+    {
+      "design_id": "C10/C15",
       "public_contract": "Node / NodeParts / NodeLocalParts",
       "operations": [
         "from_parts",

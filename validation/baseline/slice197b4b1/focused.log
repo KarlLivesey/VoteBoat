@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.56s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 5 tests
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 2.11s
+
