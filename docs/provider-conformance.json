@@ -27,9 +27,10 @@
           "assertions": [
             {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
             {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
-            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"}
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"},
+            {"file": "tests/member_recovery/older_checkpoint.rs", "symbol": "mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application"}
           ],
-          "remaining": ["Older mismatching membership checkpoints and wider generated corruption/recovery histories."]
+          "remaining": ["Broader checkpoint/membership combinations and generated corruption/recovery histories beyond the selected old-checkpoint cases."]
         },
         {
           "names": ["append_batch"],

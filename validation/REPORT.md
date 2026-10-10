@@ -1,6 +1,11 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Older-checkpoint recovery evidence: [slice202](baseline/slice202/README.md), with
+eleven host/native-file member states, rejected bad pins and832 native-WAL
+failure schedules. Selected membership suites pass74 all-feature and30 core-only
+tests. Explicit commit premises, file reopen and modeled power loss are reported
+separately; general lifecycle/revocation and platform acceptance remain open.
 Worker conformance evidence: [slice201c](baseline/slice201c/README.md), with195
 all-feature,173 core-only and24 native-only checks. Shared host/file worker cases
 verify close/drain, original rejected-buffer ownership and recovered queries;

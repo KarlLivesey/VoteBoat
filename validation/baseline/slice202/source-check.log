@@ -1,0 +1,13 @@
+tests/member_recovery.rs: OK
+tests/member_recovery/older_checkpoint.rs: OK
+tests/member_recovery/older_checkpoint/native.rs: OK
+tests/membership.rs: OK
+tests/support/mod.rs: OK
+tests/support/snapshot.rs: OK
+src/snapshot.rs: OK
+src/raft.rs: OK
+src/membership.rs: OK
+src/native/log_store.rs: OK
+src/native/snapshot_store.rs: OK
+docs/component-contracts.json: OK
+docs/provider-conformance.json: OK

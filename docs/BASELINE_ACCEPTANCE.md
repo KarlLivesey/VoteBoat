@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice202a adds old-checkpoint member recovery: eleven host/native-file states
+cover promotion/finalization, rollback, demotion and accepted/committed removal.
+Newer uninstalled publications cannot replace the authoritative old WAL pin;
+mismatched/missing pins refuse without changing the application. Native WAL
+model tests cover832 byte-cut/sync/publication failures at three selected later
+transitions, with exact old/new state and Counter retry checks. All74 selected
+all-feature and30 core-only membership tests pass, plus final focused feature
+runs and clean strict lint. These fixtures supply explicit commit premises;
+they are not network consensus histories or full combined-device fault coverage.
+
 Slice201c adds shared worker close/drain/query cases with host/native-file stores
 and a core-only router test for all13 altered work/visit identity fields. Current
 selected checks pass195 all-feature,173 core-only and24 native-only tests, plus

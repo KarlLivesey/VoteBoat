@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
+     Running tests/member_recovery.rs (target/debug/deps/member_recovery-f586370857dc01c4)
+
+running 3 tests
+test older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim ... FAILED
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+test older_checkpoint::native::every_torn_transition_with_old_checkpoint_recovers_whole_membership_and_retries ... ok
+
+failures:
+
+---- older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim stdout ----
+
+thread 'older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim' (211) panicked at tests/member_recovery/older_checkpoint/native.rs:23:49:
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.41s
+
+error: test failed, to rerun pass `--test member_recovery`

@@ -88,6 +88,15 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
+Current202a completes the selected old-checkpoint/member recovery cases below.
+Next199f addresses the recorded service command/QUIC failures: it depends on
+the retained exact platform logs and must reproduce the relevant local failure
+or distinguish an unresolved platform-only failure before changing behavior.
+This advances the usable Linux/macOS service milestone. Following202b selects
+the next combined lifecycle/revocation schedule from the acceptance ledger;
+it depends on existing original-ID lifecycle and credential contracts and must
+preserve authoritative ownership plus retry state across the selected restart.
+
 Completed refinement201b advances the P0/C03 replacement-provider milestone:
 exercise snapshot publication and retention through the same host/native cases.
 It depends on the existing SnapshotStore/Retention contracts and201a ledger;
@@ -156,8 +165,64 @@ strict profiles clean while advancing the remaining capability work.
 | Completed204: bounded configuration reply recovery | Keep an uncertain configuration attempt inside the original single-/multi-group drain budget; advances usable maintenance/P4. | Original immutable drain plans, journal observation, idempotent configuration commands and shared authenticated exchange. | An authenticated withheld-reply regression fails before and passes after; exhausted requests cannot reach shutdown; rejection/identity checks, actual TCP/QUIC replacement and single-/multi-group recovery histories pass. Broader platform acceptance199 remains open. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Current201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. |201a–c review30 operations across log, snapshot, retention and worker contracts, with shared cases and core-only owner checks.101 contracts remain unreviewed by this ledger; extend it without claiming metadata validation certifies implementations. |
-| Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
+| Current202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. |202a covers eleven member states over an old learner checkpoint, newer uninstalled publications, mismatched-pin refusal and selected torn transitions. Broader lifecycle/revocation combinations remain; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice202 schema plan — old learner checkpoint across member transitions
+
+Previous turn progressed with91353b4 and verified worker ownership. Existing
+membership tests cover joint checkpoints and torn snapshot switches; this slice
+adds recovery of an older learner checkpoint through the actual member API.
+No protocol or persistent format change is planned. Start from a committed
+learner assignment plus Counter operation900, checkpoint at index2, and retain
+operation901 plus subsequent promotion/demotion/removal entries in the WAL.
+The fixture's explicit commits are quorum premises, not simulated network proof.
+
+The accepted tail controls voting, while committed/accepted exact assignments
+control whether recovery is authorized. A later published/pinned snapshot is
+not the authoritative checkpoint until its WAL reference is durable. Recovery
+must restore the index2 data plus committed tail, select the original pin,
+preserve both operation IDs and configuration status, and reject removed members.
+Rollback of uncommitted joint/final entries must recover the previous predicate.
+
+Shared host/native-file stage cases cover learner, accepted/committed joint,
+accepted/committed final, rollback, demotion and removal. Native WAL model cuts
+will combine the same old checkpoint with failed transition durability, then
+recover the old or complete new state without inventing a partial membership.
+Acceptance checks use member eligibility, exact predicates/configuration IDs,
+Counter retry values and original pinned roots. Native process reopen and
+modeled power loss are recorded separately. This advances P4/P0 acceptance;
+next platform199 addresses recorded service failures, followed by the next
+remaining contract/resource-admission gap selected from the baseline ledger.
+
+### Slice202a implemented — old checkpoint with later member authority
+
+Four new tests cover an index2 learner checkpoint with a later committed Counter
+command, promotion, finalization, rollback, demotion and accepted/committed
+removal. The eleven-stage host and native-file cases preserve the original
+checkpoint while a newer snapshot is published and pinned without a WAL switch.
+Recovery uses the WAL-selected old pin, replays only committed tail entries and
+restores the current accepted quorum predicate and original configuration
+operation statuses. Accepted removal already refuses member recovery; an old
+learner assignment cannot reauthorize it. Counter operations900/901 remain
+duplicate-safe with their original7/10 results and final value10.
+
+Native files are reclaimed, closed and reopened before recovery. Five wrong/missing
+old-pin cases at each of two member stages refuse without changing a fresh
+application or falling back to the newer publication. The native WAL model tests
+832 failed writes/barriers across final commit, demotion admission and removal:
+every byte cut of the106/377/337-byte frames plus sync/publication failures.
+Each recovery matches the complete old or new GroupLog and the corresponding
+member/retry behavior. Snapshot storage in this model is a cloned host provider;
+it is not a simultaneous device-level snapshot/WAL power-loss test.
+
+All74 selected all-feature membership/member-recovery tests and30 core-only
+tests pass. Final focused runs cover4 all-feature/native-only and2 core-only new
+tests after adding exact operation-status checks. Formatting, four strict Clippy
+profiles and13 metadata checks pass. Initial module/import and missing-parent-
+directory fixture errors are retained in validation/baseline/slice202; production
+consensus and storage code did not change. This is selected P4 recovery coverage,
+not completion of all combined lifecycle, revocation or platform obligations.
 
 ### Slice201c schema plan — snapshot worker ownership and close
 

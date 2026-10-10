@@ -242,6 +242,8 @@
       ],
       "native": "Deterministic Raft with selected LogStore/SnapshotRetention/application providers",
       "conformance": [
+        "tests/member_recovery/older_checkpoint.rs",
+        "tests/member_recovery/older_checkpoint/native.rs",
         "tests/member_recovery.rs",
         "src/raft/membership_tests.rs",
         "tests/native_member_startup.rs",
@@ -279,6 +281,8 @@
       ],
       "native": "NativeLogStore",
       "conformance": [
+        "tests/member_recovery/older_checkpoint.rs",
+        "tests/member_recovery/older_checkpoint/native.rs",
         "tests/log_store.rs",
         "tests/membership.rs",
         "tests/raft.rs",
@@ -522,6 +526,8 @@
       ],
       "native": "NativeSnapshotStore",
       "conformance": [
+        "tests/member_recovery/older_checkpoint.rs",
+        "tests/member_recovery/older_checkpoint/native.rs",
         "tests/provider_conformance.rs",
         "tests/provider_conformance/snapshot.rs",
         "tests/provider_conformance/snapshot_native.rs",

@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running tests/member_recovery.rs (target/debug/deps/member_recovery-f586370857dc01c4)
+
+running 4 tests
+old-checkpoint FinalAccepted: frame_bytes=106, fault_schedules=110
+test older_checkpoint::mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application ... ok
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+test older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim ... ok
+old-checkpoint FinalCommitted: frame_bytes=377, fault_schedules=381
+old-checkpoint Demoted: frame_bytes=337, fault_schedules=341
+test older_checkpoint::native::every_torn_transition_with_old_checkpoint_recovers_whole_membership_and_retries ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.52s
+

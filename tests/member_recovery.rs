@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 //! Host-authorized dynamic recovery uses the same public core/storage seams.
 //! Imported committed assignments are fixture premises, not network certificates.
+#[path = "member_recovery/older_checkpoint.rs"]
+mod older_checkpoint;
 mod support;
 use support::*;
 use voteboat::{
