@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice225 adds failure-only local runner bound attribution while preserving its
+original UNKNOWN, exchange/time limits and readiness/stop contracts. Unit19/
+default19, actual selected TCP/QUIC runner13/default9 and formatting/four strict
+profiles pass. Terminal223 Ubuntu171/22/21 passes; macOS170/1 original19701 runner
+budget remains before later targets. Its static TCP/QUIC three-process histories
+pass leader replacement, original retries, drained checkpoint/reopen and worker
+joins; the online runner is not a static-service prerequisite. Matching225
+diagnostic and broader platform/release/deployment/provider/fault/P7 obligations
+remain open; full P0–P7 stays active and broad security stays with Daybreak.
+
 Slice224 corrects the fixture's pinned original-source resume after a real
 TCP/QUIC handoff. Current-leader selection retains every original intent field;
 historical completion, data retries/conflicts/reads and checkpoint/reopen/joins

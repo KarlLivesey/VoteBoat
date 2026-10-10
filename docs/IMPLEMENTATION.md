@@ -74,7 +74,7 @@ cause and revise this sketch before another material change.
 
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
-| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux, with selected macOS operator histories passing. Full macOS cleanup/operator acceptance and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
+| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. Actual TCP and optional QUIC static three-process histories pass on Linux and macOS at source223, including checkpoint/reopen and worker joins. Broader macOS/operator release validation and separate-host operational validation remain outstanding. Online membership runner acceptance is not a prerequisite to using the static service. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; bounded coordinated drain197 is implemented for explicit original plans; broader recovery and platform acceptance remain open. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
@@ -622,6 +622,28 @@ the independent runner budget next without widening it. Full P0–P7/P7, provide
 fault/deployment and matching platform obligations remain open; security stays
 with Daybreak.
 
+Implemented225: the existing runner budget refusal now emits failure-only local
+volatile context distinguishing exhausted exchanges and the absolute deadline,
+including original identity, target, command class, remaining count and elapsed
+time. Its returned UNKNOWN, budgets, per-exchange deadlines, proposals, retry
+policy and stop/readiness contracts remain unchanged. Existing authenticated
+unit19 checks distinguish the two bounds and assert unchanged errors/counts/
+deadlines and no stop after exhaustion; actual TCP/QUIC selected runner13 checks
+pass. Default unit19/native runner9 pass. Formatting/four strict profiles stay
+zero. There is no new provider seam, trace history or durable effect.
+
+Terminal223 Ubuntu completes171 counter/22 directory/21 transfer passes. macOS
+counter170/1 still fails original19701 runner budget before later targets; raw
+macOS evidence is in224 and terminal state/Linux log in225. Both static TCP/QUIC
+three-process histories pass on that macOS source: actual writes/reads/original
+retry, leader replacement, drained checkpoint, cold recovery and joined workers.
+Macro review225 records this selected first-service evidence without waiting for
+the online membership runner or claiming broader release/separate-host acceptance.
+The diagnostic supplies the missing failure distinction for P4; it does not fix
+the recorded failure. Source224 platform feedback is live at the retained state
+and contains no225 diagnostic. Full P0–P7/P7/provider/fault/deployment acceptance
+remain open; broad security stays with Daybreak.
+
 Current: resolve the recorded original-runner/resume boundaries and collect
 matching shutdown platform evidence. Purpose: advance usable-service/P4 operator
 acceptance. Depend on223's held-step regression and terminal222's exact19701
@@ -631,11 +653,11 @@ common cause or successful execution from UNKNOWN/NOT_LEADER. Completion require
 exact original records/receipts through interruption/restart, actual clean joins,
 bounded cause-specific TCP/QUIC checks and matching macOS evidence. No new security
 work or timer widening; CI stays background and other work continues while it runs.
-The selected resume caller is now corrected224. The remaining runner reports
-one identical budget error for either the45s wall deadline or128 exchanges;
-attribute which bound and original phase actually stop progress before editing
-its scheduling, retry recognition or budget. A diagnostic is justified only if
-the existing observations cannot distinguish that acceptance boundary.
+The selected resume caller is now corrected224. Implemented225 adds the missing
+failure-only bound/context distinction without changing the original UNKNOWN.
+Collect actual matching19701 macOS context to attribute which bound and command
+stop progress before editing scheduling or caller recognition; no budget increase.
+Keep making progress on the next independent mini item while CI runs.
 
 Next: attribute the failed P7 gate to exact durability operations before selecting
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
@@ -655,6 +677,41 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice225 schema plan — attribute the original runner budget boundary
+
+Purpose/dependencies: matching223 macOS still fails original19701 QUIC runner
+with one budget error. Runner::exchange uses that same error for either zero
+remaining exchanges or its absolute wall deadline. Existing stdout/job logs
+cannot distinguish them. A failure-only local diagnostic is the smallest needed
+prerequisite to choosing a cause-specific scheduling fix; it advances usable-
+service/P4 operator recovery, not another release milestone or security review.
+
+Data/API: retain Runner's existing owned fields,128/45s single-group and4096/120s
+multi-group limits, per-exchange deadline and returned UNKNOWN text. At the
+existing refusal boundary, read one Instant and emit fixed context: local volatile
+evidence, original source/sequence/operation, actual target node, command class,
+remaining count, elapsed milliseconds and independent request/deadline exhaustion
+flags. Both flags may be true; do not guess a unique cause. No new provider seam,
+mutable routing identity, unbounded history, observation-success claim or new
+proposal. The diagnostic never authorizes a stop or marks membership committed.
+
+Transitions/ownership: a Runner owns its unchanged eligibility budget for one
+invocation. An exhausted exchange refuses before connection and retains the
+original uncertainty result; accepted prior work still requires source-journal
+observation/restart with the same identity. Diagnostic state is volatile, never
+quorum/durability evidence. Keep unrelated transport/authentication/identity
+refusals terminal and preserve existing read-only observation cleanup paths.
+
+Acceptance: exercise existing actual authenticated fixture budget/deadline cuts
+with uncaptured stderr, inspect both exhaustion flags and original source/target/
+command context, and require unchanged returned errors, remaining counts,
+deadlines and no stop after exhaustion. Run real TCP/QUIC runner/reopen histories
+and affected counter recovery tests; retain raw output and zero strict checks.
+Then collect matching macOS failure context before changing scheduling or caller
+replay. Local successful histories do not identify the macOS failure's exact
+bound, and no timer/request-limit increase or arbitrary retry recognition follows
+from this diagnostic alone. Full P0–P7 and the original P7 gate stay active/open.
 
 ### Slice224 schema plan — current leader, original maintenance intent
 

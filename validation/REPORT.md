@@ -1,5 +1,18 @@
 # Validation report — slice 35
 
+Runner bound attribution: [slice225](baseline/slice225/README.md). The existing
+budget refusal emits local volatile identity/target/command/remaining/elapsed
+and independent exhaustion flags; original UNKNOWN and all budgets remain.
+Existing authenticated unit19/default19 and real TCP/QUIC selected runner13/
+default TCP9 pass, with unchanged error/count/deadline and no stop on exhaustion.
+Formatting/four strict profiles stay zero. This supplies missing macOS failure
+context, not a fix or new provider/durable effect. Terminal223 Ubuntu171/22/21
+passes; macOS counter170/1 original19701 runner expiry remains before later targets.
+Both retained static TCP/QUIC three-process macOS histories pass actual leader-
+loss/checkpoint/reopen/retry/join assertions, independent of online runner
+acceptance. Matching225 diagnostic, broader release/platform/deployment/provider/
+fault, original P7 and full P0–P7 obligations remain open; security stays Daybreak.
+
 Original maintenance endpoint selection: [slice224](baseline/slice224/README.md).
 Both TCP/QUIC real handoffs fail at the old pinned-source resume, and the old
 response policy rejects exact follower refusal (1 pass/3 fail). The corrected

@@ -122,7 +122,24 @@ struct Runner {
 }
 impl Runner {
     fn exchange(&mut self, target: usize, command: &str) -> Result<Attempt, Failure> {
-        if self.remaining == 0 || Instant::now() >= self.deadline {
+        let now = Instant::now();
+        let requests_exhausted = self.remaining == 0;
+        let deadline_exhausted = now >= self.deadline;
+        if requests_exhausted || deadline_exhausted {
+            // This is local refusal context, never evidence of a committed
+            // configuration or a ready source. Keep the original UNKNOWN result.
+            eprintln!(
+                "drain_runner_budget evidence=local_volatile source={} sequence={} operation={} target={} command={} requests_exhausted={} deadline_exhausted={} remaining={} elapsed_ms={}",
+                self.endpoints[self.source].node,
+                self.sequence,
+                self.operation,
+                self.endpoints[target].node,
+                command.split_whitespace().next().unwrap_or("empty"),
+                requests_exhausted,
+                deadline_exhausted,
+                self.remaining,
+                now.saturating_duration_since(self.start).as_millis(),
+            );
             return Err(
                 "UNKNOWN drain runner budget expired; rerun the same sequence and operation".into(),
             );
