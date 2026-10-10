@@ -1,0 +1,1024 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index ad451cb..20f99ee 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -385 +385,2 @@
+-        "tests/counter_service/history.rs"
++        "tests/counter_service/history.rs",
++        "tests/provider_conformance/application.rs"
+@@ -387 +388 @@
+-      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check. Slice114 adds optional enforced whole-lifetime deployment_requirements and common validation, defaulting to unavailable. Native bounded applications expose existing configured envelopes; ClientRouter checks configuration before authorization/persistence and learner readiness refuses understated lifetime capacity. Host capability assertions remain trusted. Direct low-level owners retain their documented application responsibilities; no general public mutation ingress claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
++      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check. Slice114 adds optional enforced whole-lifetime deployment_requirements and common validation, defaulting to unavailable. Native bounded applications expose existing configured envelopes; ClientRouter checks configuration before authorization/persistence and learner readiness refuses understated lifetime capacity. Host capability assertions remain trusted. Direct low-level owners retain their documented application responsibilities; no general public mutation ingress claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes. Slice252 adds a shared selected application-level conformance runner for native Counter and an independent host set application, plus source-linked operation reviews. Atomic failure and receipt allocation checks apply only to declared bounded applications. This does not certify arbitrary providers, physical application databases or distributed read authority."
+@@ -447 +448,2 @@
+-        "tests/counter_service/history.rs"
++        "tests/counter_service/history.rs",
++        "tests/provider_conformance/application.rs"
+@@ -449 +451 @@
+-      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
++      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes. Slice252 adds a shared selected application-level conformance runner for native Counter and an independent host set application, plus source-linked operation reviews. Atomic failure and receipt allocation checks apply only to declared bounded applications. This does not certify arbitrary providers, physical application databases or distributed read authority."
+@@ -634 +636,2 @@
+-        "tests/routed.rs"
++        "tests/routed.rs",
++        "tests/provider_conformance/application.rs"
+@@ -636 +639 @@
+-      "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
++      "scope": "Complete value/boundary/dedup state with exact capacity/schema validation. Host schema and state are composable. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice252 adds a shared selected application-level conformance runner for native Counter and an independent host set application, plus source-linked operation reviews. Atomic failure and receipt allocation checks apply only to declared bounded applications. This does not certify arbitrary providers, physical application databases or distributed read authority."
+@@ -652 +655,2 @@
+-        "tests/routed.rs"
++        "tests/routed.rs",
++        "tests/provider_conformance/application.rs"
+@@ -654 +658 @@
+-      "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
++      "scope": "Optional contract 1, exact ordered receipt per command, declared vector/nested capacity bounds, exact applied boundary, no blocking I/O. Host application remains trusted code; partial apply or malformed outputs fence owner-side routing for recovery. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice252 adds a shared selected application-level conformance runner for native Counter and an independent host set application, plus source-linked operation reviews. Atomic failure and receipt allocation checks apply only to declared bounded applications. This does not certify arbitrary providers, physical application databases or distributed read authority."
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 762aa14..3b2bb86 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -4,0 +5,249 @@
++    {
++      "public_contract": "StateMachine",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "validate_group"
++          ],
++          "obligation": "Selected generic Counter and independent host accept distinct hosting groups without changing state. Group validation does not grant serving or quorum authority.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "deployment"
++            }
++          ],
++          "remaining": [
++            "Ownership-bound application refusal and every startup/recovery/lifecycle combination remain separate from these generic providers."
++          ]
++        },
++        {
++          "names": [
++            "deployment_requirements",
++            "validate_deployment_requirements"
++          ],
++          "obligation": "Native Counter exposes its configured whole-lifetime envelope; exact and larger declarations validate while wrong schema or understated command/snapshot capacity refuses. An independent host without this optional capability refuses deployment validation. Validation leaves state unchanged.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "deployment"
++            }
++          ],
++          "remaining": [
++            "The independent host deliberately does not claim a membership/readiness envelope. Trusted bounds do not reserve resources; other host applications and all envelope combinations are not certified."
++          ]
++        },
++        {
++          "names": [
++            "applied_index",
++            "apply_batch"
++          ],
++          "obligation": "Ordered contiguous commands and Noop application preserve exact original command receipt identities/count/order and application-specific outcomes. Cold replay preserves original retry effects and conflicts. Selected providers additionally declare BoundedStateMachine: malformed, gap and capacity failure leaves the entire state/applied boundary unchanged.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "batch"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "invalid_batches"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "rejected_batch"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "cold_replay"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "exercise"
++            }
++          ],
++          "remaining": [
++            "Atomic failure is required here by the optional bounded capability, not every basic StateMachine. Basic partial failure requires owner fencing/recovery, exercised separately in effect_owner. Configuration/lifecycle/outbox and arbitrary downstream applications are not covered by these two scenarios."
++          ]
++        }
++      ]
++    },
++    {
++      "public_contract": "ReadableStateMachine",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "read_at"
++          ],
++          "obligation": "Read immutable applied state at current and earlier applied boundaries; refuse an unapplied boundary. Host-owned query/result types differ from the native application. Rejection and reads leave application checkpoint state unchanged.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "read"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "cold_replay"
++            }
++          ],
++          "remaining": [
++            "This is the application-level read seam, not quorum/barrier authorization or distributed linearizability. Optional read-allocation bounds and other application query types retain separate scope."
++          ]
++        }
++      ]
++    },
++    {
++      "public_contract": "CheckpointStateMachine",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "schema_version",
++            "checkpoint"
++          ],
++          "obligation": "Expose each selected application schema and bounded complete state containing the applied boundary and original retry bindings/outcomes. Reject an insufficient image budget; a mutable clone must not alias original state in the selected checkpoint workflow.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "image"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "invalid_images"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "exercise"
++            }
++          ],
++          "remaining": [
++            "The scenarios use deterministic byte encodings only for unchanged-state comparisons. The general contract does not require a shared or canonical format; OS persistence, application databases and aliasing combinations are not certified."
++          ]
++        },
++        {
++          "names": [
++            "restore_checkpoint"
++          ],
++          "obligation": "Restore into a fresh compatible application and replay original IDs/content, conflicts and a fresh operation without duplicating original effects. Reject wrong schema/boundary, every truncated image, trailing bytes and incompatible configured capacity without changing the existing application.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "restore_refusal"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "invalid_images"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "cold_replay"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "exercise"
++            }
++          ],
++          "remaining": [
++            "Selected native and independent host images exercise cold in-memory replacement, not a real external application database or physical durable publication. Snapshot/WAL recovery and lifecycle imports retain separate tests; arbitrary malformed images are not exhaustively covered."
++          ]
++        }
++      ]
++    },
++    {
++      "public_contract": "BoundedStateMachine + ApplicationReceipt",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
++        },
++        {
++          "file": "tests/provider_conformance/application.rs",
++          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "receipt_bytes_bound",
++            "nested_bytes"
++          ],
++          "obligation": "Compute the original receipt bound without changing state; measure actual receipt-vector capacity and provider-reported nested capacity against it. The independent host retains String capacity; nested limits below that capacity refuse. A false zero-bound provider is rejected by the shared checker.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "batch"
++            }
++          ],
++          "remaining": [
++            "Host nested allocation reporting remains trusted. Selected small batches do not certify all allocator capacities, command schemas or asynchronous owner/resource lifetimes. Existing effect_owner tests cover provider violations and owner fencing separately."
++          ]
++        },
++        {
++          "names": [
++            "index",
++            "operation"
++          ],
++          "obligation": "Exactly one owned receipt per Command in original order, preserving each original log index and operation identity, including cold retries. No receipt for Noop. A provider returning altered receipt indices is rejected.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "batch"
++            },
++            {
++              "file": "tests/provider_conformance/application/checks.rs",
++              "symbol": "cold_replay"
++            }
++          ],
++          "remaining": [
++            "Selected command receipts and application outcomes do not certify every receipt type, configuration/control entry, result router or lifecycle lineage."
++          ]
++        }
++      ]
++    },
+diff --git a/tests/provider_conformance.rs b/tests/provider_conformance.rs
+index a855363..022075b 100644
+--- a/tests/provider_conformance.rs
++++ b/tests/provider_conformance.rs
+@@ -4,0 +5,2 @@ mod admission_cases;
++#[path = "provider_conformance/application.rs"]
++mod application_cases;
+diff --git a/tests/provider_conformance/application.rs b/tests/provider_conformance/application.rs
+new file mode 100644
+index 0000000..f563dea
+--- /dev/null
++++ b/tests/provider_conformance/application.rs
+@@ -0,0 +1,96 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use voteboat::{application::*, identity::OperationId, log::*};
++#[path = "application/checks.rs"]
++mod checks;
++#[path = "application/host.rs"]
++mod host;
++#[path = "application/mutants.rs"]
++mod mutants;
++
++// These adapters describe selected application semantics, not a universal
++// command/result schema. A downstream provider supplies its own observations.
++trait Scenario {
++    type Receipt: ApplicationReceipt;
++    type App: StateMachine<Receipt = Self::Receipt>
++        + CheckpointStateMachine
++        + ReadableStateMachine
++        + BoundedStateMachine;
++    type Reply: std::fmt::Debug + Eq;
++    type Value: std::fmt::Debug + Eq;
++    fn fresh(capacity: usize) -> Self::App;
++    fn requirements() -> Option<voteboat::raft::ReadinessRequirements>;
++    fn command(index: u64, operation: u128, value: i64) -> LogEntry;
++    fn reply(receipt: &<Self::App as StateMachine>::Receipt) -> Self::Reply;
++    fn replies(replay: bool) -> Vec<Self::Reply>;
++    fn query() -> <Self::App as ReadableStateMachine>::Query;
++    fn value(result: <Self::App as ReadableStateMachine>::ReadResult) -> Self::Value;
++    fn expected_value(replay: bool) -> Self::Value;
++}
++struct CounterCase;
++impl Scenario for CounterCase {
++    type Receipt = CounterReceipt;
++    type App = Counter;
++    type Reply = (CounterOutcome, bool);
++    type Value = i64;
++    fn fresh(capacity: usize) -> Counter {
++        Counter::new(capacity).unwrap()
++    }
++    fn requirements() -> Option<voteboat::raft::ReadinessRequirements> {
++        Some(Self::fresh(3).readiness_requirements())
++    }
++    fn command(index: u64, operation: u128, value: i64) -> LogEntry {
++        LogEntry {
++            index,
++            term: 1,
++            payload: EntryPayload::Command {
++                operation: OperationId::new(operation).unwrap(),
++                bytes: value.to_le_bytes().to_vec(),
++            },
++        }
++    }
++    fn reply(receipt: &CounterReceipt) -> Self::Reply {
++        (receipt.outcome, receipt.duplicate)
++    }
++    fn replies(replay: bool) -> Vec<Self::Reply> {
++        if replay {
++            vec![
++                (CounterOutcome::Value(7), true),
++                (CounterOutcome::Value(18), true),
++                (CounterOutcome::OperationConflict, true),
++                (CounterOutcome::Value(23), false),
++            ]
++        } else {
++            vec![
++                (CounterOutcome::Value(7), false),
++                (CounterOutcome::Value(18), false),
++            ]
++        }
++    }
++    fn query() {}
++    fn value(result: i64) -> i64 {
++        result
++    }
++    fn expected_value(replay: bool) -> i64 {
++        if replay {
++            23
++        } else {
++            18
++        }
++    }
++}
++#[test]
++fn counter_satisfies_shared_application_read_and_checkpoint_obligations() {
++    checks::exercise::<CounterCase>();
++}
++#[test]
++fn independent_host_set_application_satisfies_same_public_obligations() {
++    checks::exercise::<host::HostCase>();
++}
++#[test]
++fn shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads() {
++    mutants::reject::<1>("receipt identity");
++    mutants::reject::<2>("failed batch changed applied boundary");
++    mutants::reject::<3>("unapplied read boundary");
++    mutants::reject::<4>("actual receipt capacity exceeds declared bound");
++}
+diff --git a/tests/provider_conformance/application/checks.rs b/tests/provider_conformance/application/checks.rs
+new file mode 100644
+index 0000000..832dd91
+--- /dev/null
++++ b/tests/provider_conformance/application/checks.rs
+@@ -0,0 +1,251 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++fn image<A: CheckpointStateMachine>(app: &A) -> Vec<u8> {
++    app.checkpoint(4096).unwrap()
++}
++fn batch<S: Scenario>(app: &mut S::App, entries: &[LogEntry], expected: Vec<S::Reply>) {
++    let before = image(app);
++    let bound = app.receipt_bytes_bound(entries).unwrap();
++    assert_eq!(
++        image(app),
++        before,
++        "receipt bound changed application state"
++    );
++    let receipts = app.apply_batch(entries).unwrap();
++    for receipt in &receipts {
++        let nested = receipt.nested_bytes(bound).unwrap();
++        if nested > 0 {
++            assert!(
++                receipt.nested_bytes(nested - 1).is_err(),
++                "nested receipt limit was ignored"
++            );
++        }
++    }
++    let retained = receipts.capacity() * std::mem::size_of::<S::Receipt>()
++        + receipts
++            .iter()
++            .map(|r| r.nested_bytes(bound).unwrap())
++            .sum::<usize>();
++    assert!(
++        retained <= bound,
++        "actual receipt capacity exceeds declared bound"
++    );
++    let identities = entries
++        .iter()
++        .filter_map(|entry| match entry.payload {
++            EntryPayload::Command { operation, .. } => Some((entry.index, operation)),
++            _ => None,
++        })
++        .collect::<Vec<_>>();
++    assert_eq!(
++        receipts
++            .iter()
++            .map(|r| (r.index(), r.operation()))
++            .collect::<Vec<_>>(),
++        identities,
++        "receipt identity/order/count differs from original commands"
++    );
++    assert_eq!(
++        receipts.iter().map(S::reply).collect::<Vec<_>>(),
++        expected,
++        "application-specific original outcomes changed"
++    );
++    assert_eq!(
++        app.applied_index(),
++        entries.last().unwrap().index,
++        "application did not advance through the contiguous batch"
++    );
++}
++fn read<S: Scenario>(app: &S::App, replay: bool) {
++    let before = image(app);
++    let applied = app.applied_index();
++    for required in [0, applied] {
++        assert_eq!(
++            S::value(app.read_at(required, S::query()).unwrap()),
++            S::expected_value(replay)
++        );
++    }
++    assert!(
++        matches!(
++            app.read_at(applied + 1, S::query()),
++            Err(ApplicationError::NotApplied)
++        ),
++        "unapplied read boundary was accepted"
++    );
++    assert_eq!(image(app), before, "read changed application state");
++}
++fn rejected_batch<S: Scenario>(app: &mut S::App, entries: &[LogEntry], error: ApplicationError) {
++    let before = image(app);
++    let applied = app.applied_index();
++    assert_eq!(app.apply_batch(entries).err(), Some(error));
++    assert_eq!(
++        app.applied_index(),
++        applied,
++        "failed batch changed applied boundary"
++    );
++    assert_eq!(image(app), before, "failed batch changed application state");
++}
++fn invalid_batches<S: Scenario>(app: &mut S::App) {
++    let malformed = LogEntry {
++        payload: EntryPayload::Command {
++            operation: OperationId::new(4).unwrap(),
++            bytes: vec![0],
++        },
++        ..S::command(5, 4, 1)
++    };
++    rejected_batch::<S>(
++        app,
++        &[S::command(4, 3, 5), malformed],
++        ApplicationError::InvalidCommand,
++    );
++    rejected_batch::<S>(app, &[S::command(5, 3, 5)], ApplicationError::IndexGap);
++    rejected_batch::<S>(
++        app,
++        &[S::command(4, 3, 5), S::command(5, 4, 6)],
++        ApplicationError::DedupCapacity,
++    );
++}
++fn restore_refusal<S: Scenario>(target: &mut S::App, schema: u64, index: u64, bytes: &[u8]) {
++    let before = image(target);
++    let applied = target.applied_index();
++    assert!(target.restore_checkpoint(schema, index, bytes).is_err());
++    assert_eq!(target.applied_index(), applied);
++    assert_eq!(
++        image(target),
++        before,
++        "failed restore changed application state"
++    );
++}
++fn invalid_images<S: Scenario>(original: &S::App, bytes: &[u8]) {
++    let mut target = S::fresh(3);
++    target.apply_batch(&[S::command(1, 9, 99)]).unwrap();
++    let schema = original.schema_version();
++    let applied = original.applied_index();
++    restore_refusal::<S>(&mut target, schema + 1, applied, bytes);
++    restore_refusal::<S>(&mut target, schema, applied + 1, bytes);
++    for end in 0..bytes.len() {
++        restore_refusal::<S>(&mut target, schema, applied, &bytes[..end]);
++    }
++    let mut trailing = bytes.to_vec();
++    trailing.push(0);
++    restore_refusal::<S>(&mut target, schema, applied, &trailing);
++    restore_refusal::<S>(&mut S::fresh(4), schema, applied, bytes);
++    assert!(original.checkpoint(bytes.len() - 1).is_err());
++}
++fn cold_replay<S: Scenario>(original: &S::App, bytes: &[u8]) {
++    let mut restored = S::fresh(3);
++    restored
++        .restore_checkpoint(original.schema_version(), original.applied_index(), bytes)
++        .unwrap();
++    assert_eq!(restored.applied_index(), original.applied_index());
++    read::<S>(&restored, false);
++    let entries = [
++        S::command(4, 1, 7),
++        S::command(5, 2, 11),
++        S::command(6, 1, 8),
++        S::command(7, 3, 5),
++    ];
++    batch::<S>(&mut restored, &entries, S::replies(true));
++    read::<S>(&restored, true);
++    rejected_batch::<S>(
++        &mut restored,
++        &[S::command(8, 4, 1)],
++        ApplicationError::DedupCapacity,
++    );
++    let receipts = restored.apply_batch(&[S::command(8, 1, 7)]).unwrap();
++    assert_eq!(receipts.len(), 1);
++    assert_eq!(
++        (receipts[0].index(), receipts[0].operation()),
++        (8, OperationId::new(1).unwrap())
++    );
++    assert_eq!(S::reply(&receipts[0]), S::replies(true).remove(0));
++    assert_eq!(restored.applied_index(), 8);
++    read::<S>(&restored, true);
++}
++fn deployment<S: Scenario>(app: &S::App) {
++    use voteboat::{
++        identity::{GroupId, GroupIdentity, GroupIncarnation},
++        raft::ReadinessRequirements,
++    };
++    let before = image(app);
++    for id in [1, 2] {
++        app.validate_group(GroupIdentity {
++            id: GroupId::new(id).unwrap(),
++            incarnation: GroupIncarnation::new(1).unwrap(),
++        })
++        .unwrap();
++    }
++    assert_eq!(app.deployment_requirements(), S::requirements());
++    if let Some(required) = S::requirements() {
++        app.validate_deployment_requirements(required).unwrap();
++        app.validate_deployment_requirements(ReadinessRequirements {
++            command_bytes: required.command_bytes + 1,
++            snapshot_bytes: required.snapshot_bytes + 1,
++            ..required
++        })
++        .unwrap();
++        for invalid in [
++            ReadinessRequirements {
++                application_schema: required.application_schema + 1,
++                ..required
++            },
++            ReadinessRequirements {
++                command_bytes: required.command_bytes - 1,
++                ..required
++            },
++            ReadinessRequirements {
++                snapshot_bytes: required.snapshot_bytes - 1,
++                ..required
++            },
++        ] {
++            assert!(app.validate_deployment_requirements(invalid).is_err());
++        }
++    } else {
++        assert_eq!(
++            app.validate_deployment_requirements(ReadinessRequirements {
++                application_schema: 1,
++                command_bytes: 8,
++                snapshot_bytes: 4096,
++            }),
++            Err(ApplicationError::InvalidCheckpoint)
++        );
++    }
++    assert_eq!(
++        image(app),
++        before,
++        "deployment validation changed application state"
++    );
++}
++pub(super) fn exercise<S: Scenario>() {
++    let mut app = S::fresh(3);
++    assert_eq!(app.applied_index(), 0);
++    deployment::<S>(&app);
++    let first = [
++        S::command(1, 1, 7),
++        LogEntry {
++            index: 2,
++            term: 1,
++            payload: EntryPayload::Noop,
++        },
++        S::command(3, 2, 11),
++    ];
++    batch::<S>(&mut app, &first, S::replies(false));
++    read::<S>(&app, false);
++    invalid_batches::<S>(&mut app);
++    let bytes = image(&app);
++    let mut independent = app.clone();
++    independent.apply_batch(&[S::command(4, 3, 5)]).unwrap();
++    assert_eq!(
++        image(&app),
++        bytes,
++        "checkpoint clone aliased mutable application state"
++    );
++    invalid_images::<S>(&app, &bytes);
++    cold_replay::<S>(&app, &bytes);
++    assert_eq!(
++        image(&app),
++        bytes,
++        "fresh restore/replay changed original application"
++    );
++}
+diff --git a/tests/provider_conformance/application/host.rs b/tests/provider_conformance/application/host.rs
+new file mode 100644
+index 0000000..b00a20e
+--- /dev/null
++++ b/tests/provider_conformance/application/host.rs
+@@ -0,0 +1,236 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::collections::BTreeMap;
++#[derive(Clone)]
++pub(super) struct HostSet {
++    capacity: usize,
++    applied: u64,
++    value: i64,
++    operations: BTreeMap<OperationId, i64>,
++}
++#[derive(Debug)]
++pub(super) struct Receipt {
++    index: u64,
++    operation: OperationId,
++    reply: String,
++    duplicate: bool,
++}
++impl HostSet {
++    fn new(capacity: usize) -> Self {
++        Self {
++            capacity,
++            applied: 0,
++            value: 0,
++            operations: BTreeMap::new(),
++        }
++    }
++    fn set(
++        &mut self,
++        operation: OperationId,
++        bytes: &[u8],
++        index: u64,
++    ) -> Result<Receipt, ApplicationError> {
++        let value = std::str::from_utf8(bytes)
++            .ok()
++            .and_then(|s| s.strip_prefix("set:"))
++            .and_then(|s| s.parse::<i64>().ok())
++            .ok_or(ApplicationError::InvalidCommand)?;
++        let duplicate = self.operations.contains_key(&operation);
++        let mut reply = String::with_capacity(32);
++        if let Some(previous) = self.operations.get(&operation) {
++            if *previous == value {
++                use std::fmt::Write;
++                write!(&mut reply, "set={previous}").unwrap();
++            } else {
++                reply.push_str("conflict");
++            }
++        } else {
++            if self.operations.len() == self.capacity {
++                return Err(ApplicationError::DedupCapacity);
++            }
++            self.operations.insert(operation, value);
++            self.value = value;
++            use std::fmt::Write;
++            write!(&mut reply, "set={value}").unwrap();
++        }
++        Ok(Receipt {
++            index,
++            operation,
++            reply,
++            duplicate,
++        })
++    }
++}
++impl ApplicationReceipt for Receipt {
++    fn index(&self) -> u64 {
++        self.index
++    }
++    fn operation(&self) -> OperationId {
++        self.operation
++    }
++    fn nested_bytes(&self, limit: usize) -> Result<usize, ApplicationError> {
++        if self.reply.capacity() > limit {
++            return Err(ApplicationError::ReceiptBudget);
++        }
++        Ok(self.reply.capacity())
++    }
++}
++impl BoundedStateMachine for HostSet {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        entries
++            .iter()
++            .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
++            .count()
++            .checked_mul(std::mem::size_of::<Receipt>() + 32)
++            .ok_or(ApplicationError::ReceiptBudget)
++    }
++}
++impl StateMachine for HostSet {
++    type Receipt = Receipt;
++    fn applied_index(&self) -> u64 {
++        self.applied
++    }
++    fn apply_batch(&mut self, entries: &[LogEntry]) -> Result<Vec<Receipt>, ApplicationError> {
++        let mut next = self.clone();
++        let commands = entries
++            .iter()
++            .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
++            .count();
++        let mut receipts = Vec::with_capacity(commands);
++        for entry in entries {
++            if entry.index != next.applied + 1 {
++                return Err(ApplicationError::IndexGap);
++            }
++            if let EntryPayload::Command { operation, bytes } = &entry.payload {
++                receipts.push(next.set(*operation, bytes, entry.index)?);
++            }
++            next.applied = entry.index;
++        }
++        *self = next;
++        Ok(receipts)
++    }
++}
++impl ReadableStateMachine for HostSet {
++    type Query = String;
++    type ReadResult = String;
++    fn read_at(&self, required_index: u64, query: String) -> Result<String, ApplicationError> {
++        if query != "value" {
++            return Err(ApplicationError::InvalidCommand);
++        }
++        if required_index > self.applied {
++            return Err(ApplicationError::NotApplied);
++        }
++        Ok(format!("value={}", self.value))
++    }
++}
++impl CheckpointStateMachine for HostSet {
++    fn schema_version(&self) -> u64 {
++        77
++    }
++    fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
++        let size = 32 + 24 * self.operations.len();
++        if size > max_bytes {
++            return Err(ApplicationError::InvalidCheckpoint);
++        }
++        let mut bytes = Vec::with_capacity(size);
++        bytes.extend(b"HOSTSET1");
++        bytes.extend(u32::try_from(self.capacity).unwrap().to_le_bytes());
++        bytes.extend(self.applied.to_le_bytes());
++        bytes.extend(self.value.to_le_bytes());
++        bytes.extend(u32::try_from(self.operations.len()).unwrap().to_le_bytes());
++        for (operation, value) in &self.operations {
++            bytes.extend(operation.get().to_le_bytes());
++            bytes.extend(value.to_le_bytes());
++        }
++        Ok(bytes)
++    }
++    fn restore_checkpoint(
++        &mut self,
++        schema: u64,
++        applied: u64,
++        bytes: &[u8],
++    ) -> Result<(), ApplicationError> {
++        if schema != 77 {
++            return Err(ApplicationError::UnsupportedSchema);
++        }
++        if bytes.len() < 32 || &bytes[..8] != b"HOSTSET1" {
++            return Err(ApplicationError::InvalidCheckpoint);
++        }
++        let capacity = u32::from_le_bytes(bytes[8..12].try_into().unwrap()) as usize;
++        let index = u64::from_le_bytes(bytes[12..20].try_into().unwrap());
++        let value = i64::from_le_bytes(bytes[20..28].try_into().unwrap());
++        let count = u32::from_le_bytes(bytes[28..32].try_into().unwrap()) as usize;
++        if capacity != self.capacity
++            || index != applied
++            || count > capacity
++            || count as u64 > applied
++            || bytes.len() != 32 + count * 24
++        {
++            return Err(ApplicationError::InvalidCheckpoint);
++        }
++        let mut operations = BTreeMap::new();
++        for record in bytes[32..].as_chunks::<24>().0 {
++            let operation = OperationId::new(u128::from_le_bytes(record[..16].try_into().unwrap()))
++                .ok_or(ApplicationError::InvalidCheckpoint)?;
++            let value = i64::from_le_bytes(record[16..].try_into().unwrap());
++            if operations.insert(operation, value).is_some() {
++                return Err(ApplicationError::InvalidCheckpoint);
++            }
++        }
++        *self = Self {
++            capacity,
++            applied,
++            value,
++            operations,
++        };
++        Ok(())
++    }
++}
++pub(super) struct HostCase;
++impl Scenario for HostCase {
++    type Receipt = Receipt;
++    type App = HostSet;
++    type Reply = (String, bool);
++    type Value = String;
++    fn fresh(capacity: usize) -> HostSet {
++        HostSet::new(capacity)
++    }
++    fn requirements() -> Option<voteboat::raft::ReadinessRequirements> {
++        None
++    }
++    fn command(index: u64, operation: u128, value: i64) -> LogEntry {
++        LogEntry {
++            payload: EntryPayload::Command {
++                operation: OperationId::new(operation).unwrap(),
++                bytes: format!("set:{value}").into_bytes(),
++            },
++            index,
++            term: 1,
++        }
++    }
++    fn reply(receipt: &Receipt) -> Self::Reply {
++        (receipt.reply.clone(), receipt.duplicate)
++    }
++    fn replies(replay: bool) -> Vec<Self::Reply> {
++        if replay {
++            vec![
++                ("set=7".to_owned(), true),
++                ("set=11".to_owned(), true),
++                ("conflict".to_owned(), true),
++                ("set=5".to_owned(), false),
++            ]
++        } else {
++            vec![("set=7".to_owned(), false), ("set=11".to_owned(), false)]
++        }
++    }
++    fn query() -> String {
++        "value".to_owned()
++    }
++    fn value(result: String) -> String {
++        result
++    }
++    fn expected_value(replay: bool) -> String {
++        format!("value={}", if replay { 5 } else { 11 })
++    }
++}
+diff --git a/tests/provider_conformance/application/mutants.rs b/tests/provider_conformance/application/mutants.rs
+new file mode 100644
+index 0000000..f31db46
+--- /dev/null
++++ b/tests/provider_conformance/application/mutants.rs
+@@ -0,0 +1,111 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++#[derive(Clone)]
++struct Broken<const MODE: u8>(Counter);
++impl<const MODE: u8> StateMachine for Broken<MODE> {
++    type Receipt = CounterReceipt;
++    fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
++        self.0.deployment_requirements()
++    }
++    fn applied_index(&self) -> u64 {
++        self.0.applied_index()
++    }
++    fn apply_batch(
++        &mut self,
++        entries: &[LogEntry],
++    ) -> Result<Vec<CounterReceipt>, ApplicationError> {
++        let result = self.0.apply_batch(entries);
++        if MODE == 2 && result.is_err() && !entries.is_empty() {
++            let _ = self.0.apply_batch(&entries[..1]);
++        }
++        result.map(|mut receipts| {
++            if MODE == 1 {
++                for receipt in &mut receipts {
++                    receipt.index += 1;
++                }
++            }
++            receipts
++        })
++    }
++}
++impl<const MODE: u8> BoundedStateMachine for Broken<MODE> {
++    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
++        if MODE == 4 {
++            Ok(0)
++        } else {
++            self.0.receipt_bytes_bound(entries)
++        }
++    }
++}
++impl<const MODE: u8> ReadableStateMachine for Broken<MODE> {
++    type Query = ();
++    type ReadResult = i64;
++    fn read_at(&self, index: u64, (): ()) -> Result<i64, ApplicationError> {
++        self.0.read_at(
++            if MODE == 3 {
++                index.min(self.applied_index())
++            } else {
++                index
++            },
++            (),
++        )
++    }
++}
++impl<const MODE: u8> CheckpointStateMachine for Broken<MODE> {
++    fn schema_version(&self) -> u64 {
++        self.0.schema_version()
++    }
++    fn checkpoint(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
++        self.0.checkpoint(max_bytes)
++    }
++    fn restore_checkpoint(
++        &mut self,
++        schema: u64,
++        index: u64,
++        bytes: &[u8],
++    ) -> Result<(), ApplicationError> {
++        self.0.restore_checkpoint(schema, index, bytes)
++    }
++}
++struct BrokenCase<const MODE: u8>;
++impl<const MODE: u8> Scenario for BrokenCase<MODE> {
++    type Receipt = CounterReceipt;
++    type App = Broken<MODE>;
++    type Reply = <CounterCase as Scenario>::Reply;
++    type Value = i64;
++    fn fresh(capacity: usize) -> Self::App {
++        Broken(CounterCase::fresh(capacity))
++    }
++    fn requirements() -> Option<voteboat::raft::ReadinessRequirements> {
++        CounterCase::requirements()
++    }
++    fn command(index: u64, operation: u128, value: i64) -> LogEntry {
++        CounterCase::command(index, operation, value)
++    }
++    fn reply(receipt: &CounterReceipt) -> Self::Reply {
++        CounterCase::reply(receipt)
++    }
++    fn replies(replay: bool) -> Vec<Self::Reply> {
++        CounterCase::replies(replay)
++    }
++    fn query() {}
++    fn value(result: i64) -> i64 {
++        result
++    }
++    fn expected_value(replay: bool) -> i64 {
++        CounterCase::expected_value(replay)
++    }
++}
++pub(super) fn reject<const MODE: u8>(expected: &str) {
++    let failure = std::panic::catch_unwind(checks::exercise::<BrokenCase<MODE>>).unwrap_err();
++    let message = failure
++        .downcast_ref::<String>()
++        .map(String::as_str)
++        .or_else(|| failure.downcast_ref::<&str>().copied())
++        .unwrap_or("non-string panic");
++    assert!(
++        message.contains(expected),
++        "unexpected checker failure: {message}"
++    );
++}
+diff --git a/validation/check-provider-conformance.test.mjs b/validation/check-provider-conformance.test.mjs
+index 991e7e5..d71ecbe 100644
+--- a/validation/check-provider-conformance.test.mjs
++++ b/validation/check-provider-conformance.test.mjs
+@@ -17,4 +17,4 @@ test('review counts only audited operations and retains unreviewed contracts', (
+-    assert.equal(report.reviewed_contracts, 9);
+-    assert.equal(report.reviewed_operations, 68);
+-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 9);
+-    for (const name of ['PeerTransport', 'TimerService', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
++    assert.equal(report.reviewed_contracts, 13);
++    assert.equal(report.reviewed_operations, 81);
++    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 13);
++    for (const name of ['StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {

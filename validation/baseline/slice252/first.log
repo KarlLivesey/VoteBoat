@@ -1,0 +1,50 @@
+   Compiling libc v0.2.190
+   Compiling shlex v2.0.1
+   Compiling cfg-if v1.0.5
+   Compiling find-msvc-tools v0.1.14
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling rand_core v0.10.1
+   Compiling once_cell v1.21.4
+   Compiling untrusted v0.9.0
+   Compiling getrandom v0.4.3
+   Compiling zeroize v1.9.1
+   Compiling thiserror v2.0.21
+   Compiling cpufeatures v0.3.1
+   Compiling rustls v0.23.45
+   Compiling subtle v2.6.1
+   Compiling pin-project-lite v0.2.17
+   Compiling slab v0.4.12
+   Compiling bytes v1.12.1
+   Compiling tinyvec v1.13.3
+   Compiling tracing-core v0.1.36
+   Compiling lru-slab v0.1.3
+   Compiling rustc-hash v2.1.3
+   Compiling cc v1.6.0
+   Compiling rustls-pki-types v1.15.1
+   Compiling chacha20 v0.10.2
+   Compiling rand_pcg v0.10.2
+   Compiling tracing v0.1.44
+   Compiling syn v3.0.6
+   Compiling getrandom v0.2.17
+   Compiling ring v0.17.14
+   Compiling rand v0.10.3
+   Compiling thiserror-impl v2.0.21
+   Compiling rustls-webpki v0.103.15
+   Compiling quinn-proto v0.11.19
+   Compiling voteboat v0.1.0 (<isolated-linux-checkout>)
+error[E0599]: no method named `map_err` found for enum `Option<T>` in the current scope
+   --> tests/provider_conformance/application/host.rs:144:18
+    |
+143 |               let operation = OperationId::new(u128::from_le_bytes(record[..16].try_into().unwrap()))
+    |  _____________________________-
+144 | |                 .map_err(|_| ApplicationError::InvalidCheckpoint)?;
+    | |_________________-^^^^^^^
+    |
+help: there is a method `map_or` with a similar name, but with different arguments
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/option.rs:1222:4
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "provider_conformance") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

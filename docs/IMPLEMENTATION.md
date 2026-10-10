@@ -1375,7 +1375,7 @@ four reproduced Mac native progress failures are the next concrete supported-
 platform dependency. P7/security/P8 remain separate. This bounded audit is not
 a feature-complete certificate or the whole active P0–P7 goal.
 
-Current250: diagnose the four native Mac progress failures at sufficient descriptors.
+Completed250: diagnosed the four native Mac progress failures at sufficient descriptors.
 Purpose: make the existing shared100-group Rust assembly reliable under its
 declared test resource conditions. Depend on249's broad361/4 and isolated1/0
 results, worker/transport/snapshot ownership contracts and original fixture
@@ -1482,7 +1482,7 @@ P0–P6 fault/provider/operator obligation or the unmet P7 fixed250ms/capacity g
 Broader supported lifecycle assembly251 and application-contract review252 are
 next; full P0–P7 stays active, features first and tuning/security later.
 
-Next251: verify the resulting baseline functional assembly across supported
+Current251: verify the resulting baseline functional assembly across supported
 Mac/Linux Rust and executable configurations. Purpose: advance P0–P6/platform
 feature acceptance, keeping P7 tuning/security gates explicit. Depend on249's
 original requirement/contract/exit audit and250's confirmed progress fix. Select relevant
@@ -1492,7 +1492,37 @@ are the original functional exits, actual source-bound platform evidence and zer
 formatting/four strict profiles. Do not infer completion from this planned sweep
 or substitute performance/security work for a missing usable feature.
 
-Following252: review the unreviewed C05/VB-000 application-provider obligations
+251 acceptance schema before execution: run the complete Cargo all-feature test
+selection, including library/bin/integration tests, configured example tests and
+doctests, on the unchanged250 implementation on Linux and the authorized Mac.
+Use no-fail-fast so later feature requirements still produce evidence after an
+earlier failure. Verify647 build/source inputs before execution; retain the Mac
+child-shell4096 descriptor condition and250's explicit fixture admission policy.
+Keep original per-test deadlines, operation IDs, fault schedules and cleanup
+assertions. No API, state transition, durable effect or helper is introduced by
+this acceptance run. Preserve failed logs/stores and identify the actual cause
+before editing; terminal handles, not observation timeouts, govern restarts.
+Feature configurations using shared target/debug executables stay sequential per
+host. Completion checks are the actual full selection results, cause-supported
+fixes for any failures, source-linked roadmap coverage and zero strict profiles;
+a passing selection still does not prove arbitrary faults or P7 latency gates.
+
+251 execution evidence in progress: both unchanged-source full all-feature runs
+are live, with647 build inputs checked before execution. Linux has completed63
+targets with1295 passing tests and zero failures, plus39 passing cases in the
+still-running171-case routed target at this observation. Mac has completed the
+counter and directory executable suites and is running effect_owner. These are
+partial observations, not terminal full-suite results. Raw logs are retained in
+target/slice251-linux/all.log and the authorized Mac's task-owned slice251/all.log.
+Keep the original handles and failed roots; do not restart an unchanged run on a
+duration notice or infer later target results from earlier selected acceptance.
+Formatting and all four strict Clippy profiles subsequently finish with zero
+diagnostics on both hosts; these checks do not launch or replace the executables
+used by the live functional histories. Inventory metadata still validates108
+contracts and nine partial provider reviews/68 operation groups. Their metadata
+success is separate from actual provider assertions and the live full-suite exits.
+
+Completed252: review the previously unreviewed C05/VB-000 application-provider obligations
 against StateMachine/ReadableStateMachine/checkpoint source and existing host,
 application, snapshot and effect-owner assertions. Purpose: make the Rust
 embedding's existing application contracts independently checkable when hosts
@@ -1502,6 +1532,107 @@ obligation; state its schema before editing. Completion checks are actual native
 host owned-command/result/replay/failure assertions, source-linked operation
 review and Mac/Linux zero strict profiles. A missing review is not an absent
 application feature; this advances P0 composition without a speculative backend.
+
+252 pre-edit contract review: application.rs already checks native retry identity,
+conflicting payloads, overflow, contiguous application, atomic invalid batches,
+capacity and checkpoint rejection/restoration. Its host receipt test injects a
+different receipt type but delegates application to Counter. effect_owner's
+host_receipts_nested_capacity_wrong_identity_and_partial_application_fail_closed
+checks the owning router's response to dishonest bounds, wrong receipts and
+partial failure. Those are existing capabilities, not missing production code.
+The concrete next dependency is a shared application-level obligation runner
+exercised by Counter and an independent downstream implementation, plus the
+source-linked C05 operation review. Before implementing, define the scenario's
+original commands/receipt observations, public checkpoint/read requirements,
+unchanged-state failure comparisons and cold replay checks. Preserve generic
+host receipts and optional bounds; do not turn Counter semantics into mandatory
+semantics for every application or duplicate the router's existing fault suite.
+
+252 schema before implementation: keep251's source/checkouts immutable while its
+full suites run; use the attached application-conformance worktree and separate
+build directory for this independent test-only deliverable. A private scenario
+adapter supplies application-specific commands, receipt/read observations and
+fresh instances to one generic public-trait checker. Counter uses delta commands;
+the independent host uses bounded set commands, owned receipts and its own
+checkpoint encoding. The checker requires exact ordered command receipts,
+contiguous application, atomic malformed/capacity rejection, immutable applied
+reads and future-boundary refusal. Restore a complete checkpoint into a fresh
+instance, replay original operation IDs/content and conflicting content, then
+apply a fresh operation; compare the scenario's original outcomes and read state.
+Reject truncated/schema/boundary/incompatible-capacity restores without changing
+the existing instance. No production seam, core authority, format or dependency
+changes. Negative test providers must make the shared checker reject wrong receipt
+identity, partial failed application and unauthorized future-boundary reads.
+Acceptance: execute native and independent-host scenarios and focused checker
+negatives on Linux/Mac, retain source-bound results, review every operation in the
+three existing basic application/read/checkpoint contracts and keep all strict
+profiles at zero. Bounds and richer router obligations retain their existing
+separate scope; this is selected application conformance, not provider certification.
+
+252 contract refinement before acceptance: failure atomicity and exact bounded
+receipts are promises of optional BoundedStateMachine, not requirements imposed
+on every basic StateMachine. Constrain this checker to that declared capability
+and make the independent host supply its own ApplicationReceipt/bounds. Check
+actual vector capacity plus nested receipt capacity against the original pure
+bound, using public receipt identity methods. Include this fourth contract's
+operation review. Basic hosts with partial failure retain the existing owning
+router's fail-closed/recovery contract; do not redefine them as conformant atomic
+providers. The initial test-only Option decoder compiler failure is preserved.
+
+252 implemented evidence: the shared scenario checker executes native Counter
+and an independent host Set state machine through public application/read/
+checkpoint/bounded-receipt traits. The host owns a different command format,
+String receipts/query/results and schema77; it does not delegate application
+behavior to Counter. Cold original-operation replay, conflicting content,
+capacity rejection, every truncated checkpoint, schema/boundary/capacity refusal,
+immutable reads and clone independence preserve actual state and identities.
+Four deliberately faulty providers fail the exact shared assertion for receipt
+identity, partial failed application, future reads and false receipt bounds.
+Counter's optional deployment envelope and the host's absent envelope validate
+without mutation; no generic membership capability is fabricated.
+
+Both Linux and Mac pass39 focused all-feature tests,24 core-only and39 native-only
+(application10 plus conformance29/14/29), sequentially per host. Formatting and
+all four strict Clippy profiles are zero;651 accepted build inputs verify on both.
+Inventory remains108 contracts; four application reviews increase the partial
+operation ledger to13 reviews/81 operations. All24 metadata-checker tests pass.
+Initial Option/GroupIdentity test-code compiler mistakes, the old metadata count
+expectation and a strict chunks_exact lint failure are retained; typed fields,
+correct Option conversion, updated exact counts and as_chunks fix their causes.
+No production API/provider/core/format/dependency change. See
+[slice252](../validation/baseline/slice252/README.md).
+
+Macro review252 advances P0/VB-000/VB-011 and Rust application replacement
+conformance. It does not establish every provider contract, a physical application
+database, distributed read authority, full platform acceptance or P7 gates.
+251's unchanged-source full runs stay live in their original checkouts; the Mac
+has reported two QUIC transport failures and routed recovery failures. These
+cannot inherit success from252's separate focused checkout. Keep the full P0–P7
+objective active, feature/functional Mac/Linux work first and tuning/security later.
+
+Next253: diagnose the two completed Mac QUIC target failures from251 before
+editing native transport or its fixture. Purpose: close concrete P1/C06 platform
+acceptance. Depend on the retained full-suite log: three16-byte chunks are fully
+received within the original6ms/50ms virtual schedule but final flush is false;
+a foreign1200-byte UDP send produces zero read bytes in the immediate first poll.
+Inspect actual session/transport follow-through and socket timing contracts,
+reproduce the original cases in a separate build and identify the cause before
+changing schedule or API. Completion checks preserve exact bytes, native UDP,
+identity refusal, original flush/ACK semantics and original per-visit budgets;
+retain the failed schedule and distinguish functional delivery from a claimed
+50ms physical latency guarantee. Require actual Mac/Linux checks and zero strict
+profiles. Do not add a production socket abstraction merely to pass the fixture.
+
+Following254: diagnose the actual Mac routed recovery failures after the current
+routed target emits its terminal assertion bodies. Purpose: advance native P5/P6
+feature acceptance, including namespace competition, parent-offline recovery and
+recursive deletion. Depend on251's retained original input/phase/operation data
+and exact caller failures; duration notices are not terminal handles. Sketch the
+state/ownership/restart paths before a focused fix; preserve original data,
+source fences, retry lineage and cleanup checks. Completion requires the original
+failed histories and relevant broad platform targets on source-matched Linux/Mac
+with zero strict profiles. Missing evidence does not become an invented feature
+or a reason to substitute security/performance work.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,

@@ -1,0 +1,38 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (<isolated-mac-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.47s
+     Running tests/application.rs (target/debug/deps/application-8a422c501d8e9527)
+
+running 10 tests
+test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+test conflicting_operation_content_never_changes_the_original_effect ... ok
+test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+test retries_return_the_original_result_without_reapplying ... ok
+test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-dc3c9e7bfe567318)
+
+running 14 tests
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s

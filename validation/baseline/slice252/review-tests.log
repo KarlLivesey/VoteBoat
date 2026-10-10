@@ -1,0 +1,53 @@
+✖ review counts only audited operations and retains unreviewed contracts (6.131409ms)
+✔ rejects unknown contract (1.508406ms)
+✔ rejects unknown operation (0.891306ms)
+✔ rejects missing operation (1.200317ms)
+✔ rejects duplicate operation (1.023053ms)
+✔ rejects missing assertion (0.908068ms)
+✔ rejects missing function (0.941781ms)
+✔ rejects missing test (0.724663ms)
+✔ rejects escaping path (1.150564ms)
+✔ rejects false completion claim (0.922374ms)
+✔ rejects missing limitation (1.020679ms)
+✔ rejects missing snapshot operation (1.351441ms)
+✔ rejects missing retention assertion (1.107843ms)
+✔ rejects missing admission operation (2.030057ms)
+✔ rejects missing admission assertion (1.624795ms)
+✔ rejects missing timer operation (0.71823ms)
+✔ rejects missing timer assertion (0.633982ms)
+✔ rejects missing timer limitation (0.576464ms)
+✔ rejects missing transport operation (0.654661ms)
+✔ rejects missing transport assertion (0.385955ms)
+✔ rejects missing transport limitation (0.363123ms)
+✔ rejects missing buffer operation (1.802029ms)
+✔ rejects missing buffer assertion (1.61701ms)
+✔ rejects missing buffer limitation (1.710807ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 23
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72.517736
+
+✖ failing tests:
+
+test at validation/check-provider-conformance.test.mjs:15:1
+✖ review counts only audited operations and retains unreviewed contracts (6.131409ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  13 !== 9
+
+      at TestContext.<anonymous> (file://<isolated-linux-checkout>/validation/check-provider-conformance.test.mjs:17:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 13,
+    expected: 9,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

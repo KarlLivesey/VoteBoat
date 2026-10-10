@@ -1,5 +1,18 @@
 # Baseline acceptance map
 
+Selected application-provider conformance:
+[slice252](../validation/baseline/slice252/README.md). The same public-trait checker
+executes native Counter and an independent host Set application with distinct
+commands, receipts, queries and checkpoints. Exact ordered receipts, atomic
+bounded failure, original cold retries, immutable reads and rejected incomplete/
+incompatible restores pass. Four defective providers trigger the intended
+assertions. Linux/Mac focused all39, core24 and native39 pass; formatting/four
+strict profiles are zero and651 build inputs verify. Four additional partial
+reviews make13 reviews/81 operations;108 contracts remain. This does not clear
+the QUIC/routed failures reported by the still-live original251 Mac full suite,
+certify arbitrary providers or satisfy P7. Native transport diagnosis253 and
+routed failure diagnosis254 are next, with the full goal intact.
+
 Native fixture admission and exact quota-refusal witness:
 [slice250](../validation/baseline/slice250/README.md). Each original three-node/
 100-group disk history retains its internal concurrency and bounds while an

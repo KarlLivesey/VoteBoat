@@ -1,0 +1,32 @@
+✔ review counts only audited operations and retains unreviewed contracts (4.800115ms)
+✔ rejects unknown contract (1.46822ms)
+✔ rejects unknown operation (0.856621ms)
+✔ rejects missing operation (1.341912ms)
+✔ rejects duplicate operation (0.939747ms)
+✔ rejects missing assertion (0.88806ms)
+✔ rejects missing function (0.979101ms)
+✔ rejects missing test (0.759648ms)
+✔ rejects escaping path (1.025518ms)
+✔ rejects false completion claim (0.90414ms)
+✔ rejects missing limitation (0.9099ms)
+✔ rejects missing snapshot operation (1.250431ms)
+✔ rejects missing retention assertion (1.126759ms)
+✔ rejects missing admission operation (1.858785ms)
+✔ rejects missing admission assertion (1.573709ms)
+✔ rejects missing timer operation (0.684336ms)
+✔ rejects missing timer assertion (0.580351ms)
+✔ rejects missing timer limitation (0.591713ms)
+✔ rejects missing transport operation (0.710085ms)
+✔ rejects missing transport assertion (0.375456ms)
+✔ rejects missing transport limitation (0.351481ms)
+✔ rejects missing buffer operation (1.789785ms)
+✔ rejects missing buffer assertion (1.560264ms)
+✔ rejects missing buffer limitation (1.747696ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.985178

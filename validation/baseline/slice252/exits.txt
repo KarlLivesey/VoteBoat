@@ -1,0 +1,4 @@
+all=0
+core=0
+native=0
+strict=101

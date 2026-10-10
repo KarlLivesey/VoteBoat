@@ -3,6 +3,255 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "StateMachine",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "validate_group"
+          ],
+          "obligation": "Selected generic Counter and independent host accept distinct hosting groups without changing state. Group validation does not grant serving or quorum authority.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "deployment"
+            }
+          ],
+          "remaining": [
+            "Ownership-bound application refusal and every startup/recovery/lifecycle combination remain separate from these generic providers."
+          ]
+        },
+        {
+          "names": [
+            "deployment_requirements",
+            "validate_deployment_requirements"
+          ],
+          "obligation": "Native Counter exposes its configured whole-lifetime envelope; exact and larger declarations validate while wrong schema or understated command/snapshot capacity refuses. An independent host without this optional capability refuses deployment validation. Validation leaves state unchanged.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "deployment"
+            }
+          ],
+          "remaining": [
+            "The independent host deliberately does not claim a membership/readiness envelope. Trusted bounds do not reserve resources; other host applications and all envelope combinations are not certified."
+          ]
+        },
+        {
+          "names": [
+            "applied_index",
+            "apply_batch"
+          ],
+          "obligation": "Ordered contiguous commands and Noop application preserve exact original command receipt identities/count/order and application-specific outcomes. Cold replay preserves original retry effects and conflicts. Selected providers additionally declare BoundedStateMachine: malformed, gap and capacity failure leaves the entire state/applied boundary unchanged.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "batch"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "invalid_batches"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "rejected_batch"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "cold_replay"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "exercise"
+            }
+          ],
+          "remaining": [
+            "Atomic failure is required here by the optional bounded capability, not every basic StateMachine. Basic partial failure requires owner fencing/recovery, exercised separately in effect_owner. Configuration/lifecycle/outbox and arbitrary downstream applications are not covered by these two scenarios."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "ReadableStateMachine",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "read_at"
+          ],
+          "obligation": "Read immutable applied state at current and earlier applied boundaries; refuse an unapplied boundary. Host-owned query/result types differ from the native application. Rejection and reads leave application checkpoint state unchanged.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "read"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "cold_replay"
+            }
+          ],
+          "remaining": [
+            "This is the application-level read seam, not quorum/barrier authorization or distributed linearizability. Optional read-allocation bounds and other application query types retain separate scope."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "CheckpointStateMachine",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "schema_version",
+            "checkpoint"
+          ],
+          "obligation": "Expose each selected application schema and bounded complete state containing the applied boundary and original retry bindings/outcomes. Reject an insufficient image budget; a mutable clone must not alias original state in the selected checkpoint workflow.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "image"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "invalid_images"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "exercise"
+            }
+          ],
+          "remaining": [
+            "The scenarios use deterministic byte encodings only for unchanged-state comparisons. The general contract does not require a shared or canonical format; OS persistence, application databases and aliasing combinations are not certified."
+          ]
+        },
+        {
+          "names": [
+            "restore_checkpoint"
+          ],
+          "obligation": "Restore into a fresh compatible application and replay original IDs/content, conflicts and a fresh operation without duplicating original effects. Reject wrong schema/boundary, every truncated image, trailing bytes and incompatible configured capacity without changing the existing application.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "restore_refusal"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "invalid_images"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "cold_replay"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "exercise"
+            }
+          ],
+          "remaining": [
+            "Selected native and independent host images exercise cold in-memory replacement, not a real external application database or physical durable publication. Snapshot/WAL recovery and lifecycle imports retain separate tests; arbitrary malformed images are not exhaustively covered."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "BoundedStateMachine + ApplicationReceipt",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "counter_satisfies_shared_application_read_and_checkpoint_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "independent_host_set_application_satisfies_same_public_obligations"
+        },
+        {
+          "file": "tests/provider_conformance/application.rs",
+          "symbol": "shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "receipt_bytes_bound",
+            "nested_bytes"
+          ],
+          "obligation": "Compute the original receipt bound without changing state; measure actual receipt-vector capacity and provider-reported nested capacity against it. The independent host retains String capacity; nested limits below that capacity refuse. A false zero-bound provider is rejected by the shared checker.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "batch"
+            }
+          ],
+          "remaining": [
+            "Host nested allocation reporting remains trusted. Selected small batches do not certify all allocator capacities, command schemas or asynchronous owner/resource lifetimes. Existing effect_owner tests cover provider violations and owner fencing separately."
+          ]
+        },
+        {
+          "names": [
+            "index",
+            "operation"
+          ],
+          "obligation": "Exactly one owned receipt per Command in original order, preserving each original log index and operation identity, including cold retries. No receipt for Noop. A provider returning altered receipt indices is rejected.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "batch"
+            },
+            {
+              "file": "tests/provider_conformance/application/checks.rs",
+              "symbol": "cold_replay"
+            }
+          ],
+          "remaining": [
+            "Selected command receipts and application outcomes do not certify every receipt type, configuration/control entry, result router or lifecycle lineage."
+          ]
+        }
+      ]
+    },
+    {
       "public_contract": "PeerTransport",
       "status": "partial",
       "runners": [

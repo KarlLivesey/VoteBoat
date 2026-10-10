@@ -1,0 +1,52 @@
+   Compiling voteboat v0.1.0 (<isolated-linux-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running tests/application.rs (target/debug/deps/application-4bd676721664247e)
+
+running 10 tests
+test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+test conflicting_operation_content_never_changes_the_original_effect ... ok
+test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+test retries_return_the_original_result_without_reapplying ... ok
+test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-70ab728b605d1ee5)
+
+running 29 tests
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::native_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test credential_native::failed_construction_returns_the_same_io_owner_without_replacement ... ok
+test credential_native::certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test credential_native::file_journal_satisfies_shared_contract_and_independent_reopen ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test credential_native::native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test credential_native::host_and_file_record_io_preserve_exact_bounded_replacement ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test snapshot_native::file_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test snapshot_native::file_snapshots_preserve_same_contract_and_both_anchors_after_reopen ... ok
+test snapshot_native::file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_use_host_snapshot_contracts ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_survive_native_file_reopen ... ok
+test native::model_log_store_satisfies_same_obligations_and_recovers_original_history ... ok
+test native::file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test admission_cases::native_admission_generated_ownership_and_refusal_history ... ok
+test buffer_cases::native_buffer_generated_owner_class_and_byte_lifetimes ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
