@@ -1,0 +1,17 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+new-voter quic=false checkpoint=false preparing
+new-voter quic=true checkpoint=false preparing
+new-voter quic=false checkpoint=false joint
+new-voter quic=true checkpoint=false joint
+new-voter quic=false checkpoint=true preparing
+new-voter quic=false checkpoint=true joint
+new-voter quic=true checkpoint=true preparing
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+new-voter quic=true checkpoint=true joint
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 35 filtered out; finished in 39.86s
+

@@ -274,3 +274,20 @@ application, storage and other errors remain failures. These are finite availabl
 quorum histories, not the complete faulted remote lifecycle. Service plan parsing
 and authorized mutation commands remain current integration work; default service
 polling stays gated.
+
+### Executable new-store recovery evidence
+
+The counter service supports authenticated provisioned or client-supplied
+configuration commands. Slice161 extends the selected public histories to an
+actually enrolled node4/store404/incarnation7. An interrupted readiness request
+does not reappear merely because the learner returns. After explicit resubmission,
+the joint transition promotes4 and replaces voter1; stopping4 at committed joint
+state prevents final commitment until its original WAL/checkpoint is recovered.
+Exact final retry, original application receipt and full-cluster reopen pass over
+TCP and QUIC. These observations are not a general fault/revocation proof.
+
+The test uses explicit client target IDs, including4, and a separate four-node
+public TLS fixture. The CLI's optional data `auto` mode currently searches only
+nodes1–3; it is not dynamic membership discovery. Administration commands also
+require an explicit target. Rust hosts retain their existing provider/Node
+composition and current-scope checks.

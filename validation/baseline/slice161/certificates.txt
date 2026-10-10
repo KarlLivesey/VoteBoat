@@ -1,0 +1,25 @@
+OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)
+subject=CN=node1.voteboat.test
+issuer=CN=VoteBoat public four-node test CA
+notBefore=Jan  1 00:00:00 2020 GMT
+notAfter=Jan  1 00:00:00 2050 GMT
+X509v3 Subject Alternative Name: 
+    DNS:node1.voteboat.test
+subject=CN=node2.voteboat.test
+issuer=CN=VoteBoat public four-node test CA
+notBefore=Jan  1 00:00:00 2020 GMT
+notAfter=Jan  1 00:00:00 2050 GMT
+X509v3 Subject Alternative Name: 
+    DNS:node2.voteboat.test
+subject=CN=node3.voteboat.test
+issuer=CN=VoteBoat public four-node test CA
+notBefore=Jan  1 00:00:00 2020 GMT
+notAfter=Jan  1 00:00:00 2050 GMT
+X509v3 Subject Alternative Name: 
+    DNS:node3.voteboat.test
+subject=CN=node4.voteboat.test
+issuer=CN=VoteBoat public four-node test CA
+notBefore=Jan  1 00:00:00 2020 GMT
+notAfter=Jan  1 00:00:00 2050 GMT
+X509v3 Subject Alternative Name: 
+    DNS:node4.voteboat.test

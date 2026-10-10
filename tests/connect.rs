@@ -595,15 +595,21 @@ mod native {
                 .unwrap();
             let mut stream = TcpStream::connect(c.listener_addr().unwrap().unwrap()).unwrap();
             stream.write_all(b"V").unwrap();
-            for _ in 0..2 {
+            let deadline = std::time::Instant::now() + Duration::from_secs(2);
+            while c.usage().anonymous != 1 {
                 assert!(step(&mut c, 0).is_empty());
+                assert!(std::time::Instant::now() < deadline, "accept stalled");
+                std::thread::park_timeout(Duration::from_millis(1));
             }
             assert_eq!(c.usage().anonymous, 1);
             assert_eq!(c.usage().handshaking, 0);
             stream.write_all(b"BCONN01").unwrap();
             stream.write_all(&2u64.to_le_bytes()).unwrap();
-            for _ in 0..3 {
+            let deadline = std::time::Instant::now() + Duration::from_secs(2);
+            while c.usage().handshaking != 1 {
                 assert!(step(&mut c, 0).is_empty());
+                assert!(std::time::Instant::now() < deadline, "preface stalled");
+                std::thread::park_timeout(Duration::from_millis(1));
             }
             assert_eq!(c.usage().anonymous, 0);
             assert_eq!(c.usage().handshaking, 1);

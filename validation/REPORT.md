@@ -4965,3 +4965,28 @@ validation passes89 entries; independent existing checker suites pass19.
 See [retained evidence](baseline/slice159-160/README.md) for commands, source
 hashes, scope and live-sweep observations. A partial log is not a passed suite.
 No new throughput, fixed-p99, macOS or full baseline success is claimed.
+
+### Slice161 — public new-voter interruption
+
+The two new tests run four TCP/QUIC × WAL/checkpoint histories and pass in39.86s.
+Actual bootstrap and executable configuration records enroll store404/incarnation7;
+interrupted readiness does not resurrect a lost request. After explicit retry,
+new voter4 restarts from committed joint WAL/checkpoint state. The final command
+is observed accepted but uncommitted while4 is absent, then completes after
+recovery through normal quorum progress. Exact final retry and original data
+receipt/value survive whole-cluster restart. There is no seeded configuration
+or production protocol change.
+
+All35 existing service tests also pass after the selected-TLS test helper change.
+Both strict Clippy profiles have zero diagnostics; formatting/diff and89-record
+inventory metadata checks pass. See [slice161 evidence](baseline/slice161/README.md)
+for commands, logs, fixture hashes and limits. These are selected process-crash
+histories, not arbitrary fault or power-loss proof. The original broad sweep and
+new macOS execution remain pending; the full P0–P7 goal is unchanged.
+
+Slice161 additionally corrects the fixed-poll-count fragmented TCP preface
+fixture exposed by macOS job114107132231 onf7886bf. Positive stage waits have a
+bounded wall deadline while virtual time remains0; timeout/cancel and queue/
+ticket/socket-close assertions are unchanged. The full connect target passes
+14/14 locally. The failed job excerpt is retained; fresh macOS validation is
+still outstanding.

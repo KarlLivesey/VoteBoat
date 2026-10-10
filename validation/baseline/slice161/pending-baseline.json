@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2026-10-10T02:17:57.177Z",
+  "status": "pending-not-terminal",
+  "session": 64351,
+  "process": 4075901,
+  "log": "/tmp/vb-baseline159-all.log",
+  "compiledBeforeSlice160": true,
+  "completedTargets": 49,
+  "passedLines": 840
+}

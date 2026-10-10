@@ -35,6 +35,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
 #[path = "counter_service/joint_retirement.rs"]
 mod joint_retirement;
+#[path = "counter_service/new_voter.rs"]
+mod new_voter;
 
 fn fixture_gate() -> std::sync::MutexGuard<'static, ()> {
     STORE_SPAWN.lock().unwrap_or_else(|e| e.into_inner())
@@ -2095,8 +2097,9 @@ fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation()
     fs::remove_dir_all(&cluster.root).unwrap();
 }
 
-// Administration has no CLI auto mode. Preserve the exact record on uncertainty.
-fn configuration_write(cluster: &mut Cluster, args: &[&str]) -> String {
+// Select a current leader; preserve exact arguments on documented uncertainty.
+// Administration has no CLI auto mode.
+fn leader_write(cluster: &mut Cluster, args: &[&str]) -> String {
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
         let leader = cluster.leader();
@@ -2149,13 +2152,8 @@ fn client_supplied_configuration_history(quic: bool) {
     let leader = cluster.leader();
     refuse_invalid_configurations(&mut cluster, leader);
     let record = "learners 16001 1 2 - m:3 v:1 v:2 v:3";
-    assert!(
-        configuration_write(&mut cluster, &["configure-record", record])
-            .contains("committed_index=")
-    );
-    assert!(
-        configuration_write(&mut cluster, &["configure-record", record]).contains("duplicate=true")
-    );
+    assert!(leader_write(&mut cluster, &["configure-record", record]).contains("committed_index="));
+    assert!(leader_write(&mut cluster, &["configure-record", record]).contains("duplicate=true"));
     let leader = cluster.leader();
     let conflict = cluster.request(
         leader,
@@ -2165,21 +2163,15 @@ fn client_supplied_configuration_history(quic: bool) {
         .unwrap()
         .contains("conflicts with retained record"));
     let joint = "joint 16003 2 3 4 - w:3 1 v:1 1 v:2 1 v:3";
-    assert!(
-        configuration_write(&mut cluster, &["configure-record", joint])
-            .contains("committed_index=")
-    );
-    assert!(
-        configuration_write(&mut cluster, &["configure-record", joint]).contains("duplicate=true")
-    );
+    assert!(leader_write(&mut cluster, &["configure-record", joint]).contains("committed_index="));
+    assert!(leader_write(&mut cluster, &["configure-record", joint]).contains("duplicate=true"));
     let final_record = "final 16003 3 4";
     assert!(
-        configuration_write(&mut cluster, &["configure-record", final_record])
+        leader_write(&mut cluster, &["configure-record", final_record])
             .contains("committed_index=")
     );
     assert!(
-        configuration_write(&mut cluster, &["configure-record", final_record])
-            .contains("duplicate=true")
+        leader_write(&mut cluster, &["configure-record", final_record]).contains("duplicate=true")
     );
     for id in 1..=3 {
         cluster.ok(id, &["checkpoint"]);
@@ -2197,7 +2189,7 @@ fn client_supplied_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configuration-status", "16001"])
         .contains("action=completed"));
-    assert!(configuration_write(
+    assert!(leader_write(
         &mut cluster,
         &[
             "configure-record",
@@ -2235,7 +2227,9 @@ impl UnobservedCommand {
     fn send(cluster: &Cluster, target: usize, command: &str) -> Self {
         use std::io::Write;
         use voteboat::{identity::*, native::tls::*, runtime::MonoTime, secure::*};
-        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let fixtures = cluster.tls.clone().unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
+        });
         let config = NativeTlsConfig::new(TlsCredentials {
             roots: vec![fs::read(fixtures.join("ca.der")).unwrap()],
             certificate_chain: vec![fs::read(fixtures.join("node3.der")).unwrap()],

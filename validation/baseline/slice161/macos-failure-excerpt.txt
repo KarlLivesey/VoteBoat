@@ -1,0 +1,13 @@
+2026-10-10T02:17:55.4053030Z ---- native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel stdout ----
+2026-10-10T02:17:55.4154300Z 
+2026-10-10T02:17:55.4255500Z thread 'native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel' (45773) panicked at tests/connect.rs:608:13:
+2026-10-10T02:17:55.4357030Z assertion `left == right` failed
+2026-10-10T02:17:55.4458040Z   left: 1
+2026-10-10T02:17:55.4559480Z  right: 0
+2026-10-10T02:17:55.4660680Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026-10-10T02:17:55.4749400Z 
+2026-10-10T02:17:55.4846480Z 
+2026-10-10T02:17:55.4899570Z failures:
+2026-10-10T02:17:55.4999830Z     native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel
+2026-10-10T02:17:55.5012920Z 
+2026-10-10T02:17:55.5015260Z test result: FAILED. 13 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
