@@ -31,6 +31,10 @@ mod diagnostics;
 mod drain_commands;
 #[path = "support/drain_runner.rs"]
 mod drain_runner;
+#[path = "support/group_command.rs"]
+mod group_command;
+#[path = "support/group_setup.rs"]
+mod group_setup;
 #[path = "support/leadership_commands.rs"]
 mod leadership_commands;
 #[path = "support/local_client.rs"]
@@ -59,7 +63,6 @@ use std::{
     path::Path,
     time::{Duration, Instant},
 };
-use voteboat::membership::ConfigurationResumeAction;
 use voteboat::observability::*;
 use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
@@ -92,7 +95,9 @@ Retained-replica drain: --node-drain enabled requires the maintenance profile.\n
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
 Membership drain: source uses --membership-drain FILE and all peers use --remote-admin-plan FILE; see docs/MAINTENANCE.md.\n\
 voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
-Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
+Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.\n\
+Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
+Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
@@ -173,7 +178,9 @@ fn command(
     credentials: &mut credential_reload::Commands<'_>,
     discovery: &Option<command_discovery::Source>,
 ) -> Result<Phase, String> {
-    let words = command.split_whitespace().collect::<Vec<_>>();
+    let selected = group_command::resolve(service, command)?;
+    let group = selected.group;
+    let words = selected.text.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
         ["discover"] => return Ok(Phase::DiscoveryAck { source: discovery.clone().ok_or("endpoint discovery disabled")?, sent: 0 }),
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
@@ -182,23 +189,9 @@ fn command(
         ["metrics"] => observer.metrics(),
         ["timings"] => observer.timings(),
         ["explain-quorum", voters, offset, count] => quorum_diagnostics::explain(service, voters, offset, count)?,
-        ["configuration-status", operation] => {
-            let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
-                .ok_or("invalid operation ID")?;
-            let status = service.configuration_status(group(), operation)
-                .map_err(|e| format!("{e:?}"))?;
-            let action = match status.resume_action() {
-                ConfigurationResumeAction::Completed => "completed",
-                ConfigurationResumeAction::WaitForCommit => "wait_for_commit",
-                ConfigurationResumeAction::Finalize(_) => "finalize_requires_authorization",
-                ConfigurationResumeAction::NotFoundLocally => "inconclusive_local_absence",
-            };
-            format!("OK evidence=local_durable operation={} committed_prefix={} durable_last={} committed={:?} accepted={:?} action={}",
-                operation.get(), status.committed_index, status.durable_last_index,
-                status.committed, status.accepted, action)
-        }
+        ["configuration-status", operation] => administration::status(service, group, operation)?,
         ["configure-record", record @ ..] => {
-            if service.local().owner.core(group()).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
+            if service.local().owner.core(group).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
                 return Err("NOT_LEADER".into());
             }
             let submission = administration.as_mut().ok_or("client-supplied targets disabled")?
@@ -211,7 +204,7 @@ fn command(
         ["configure", operation] => {
             let operation = operation.parse::<u128>().ok().and_then(OperationId::new)
                 .ok_or("invalid operation ID")?;
-            if service.local().owner.core(group()).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
+            if service.local().owner.core(group).is_none_or(|core| core.role() != voteboat::raft::Role::Leader) {
                 return Err("NOT_LEADER".into());
             }
             administration.as_mut().ok_or("remote administration disabled")?
@@ -219,7 +212,7 @@ fn command(
             return Ok(Phase::Pending(Pending::Configure(operation)));
         }
         ["status"] => {
-            let core = service.local().owner.core(group()).ok_or("missing group")?;
+            let core = service.local().owner.core(group).ok_or("missing group")?;
             format!(
                 "OK role={:?} term={} committed={}",
                 core.role(),
@@ -236,9 +229,9 @@ fn command(
             let delta = delta.parse::<i64>().map_err(|_| "invalid delta")?;
             let ticket = service
                 .propose(ClientRequest {
-                    group: group(),
+                    group,
                     operation,
-                    bytes: service.local().applications[&group()].data(delta)?,
+                    bytes: service.local().applications.get(&group).ok_or("missing group")?.data(delta)?,
                 })
                 .map_err(|r| match r.reason {
                     ClientError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
@@ -247,7 +240,7 @@ fn command(
             return Ok(Phase::Pending(Pending::Write(ticket)));
         }
         ["read"] => {
-            let ticket = service.read(group(), counter_application::Query::Data(())).map_err(|r| match r.reason {
+            let ticket = service.read(group, counter_application::Query::Data(())).map_err(|r| match r.reason {
                 ReadInvocationError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
                 other => format!("{other:?}"),
             })?;
@@ -255,7 +248,7 @@ fn command(
         }
         ["checkpoint"] => {
             service
-                .control(group(), NodeControl::Checkpoint)
+                .control(group, NodeControl::Checkpoint)
                 .map_err(|e| format!("{e:?}"))?;
             "OK checkpoint_admitted".into()
         }
@@ -393,11 +386,11 @@ fn prepare_service(
             return Err("drain plan belongs to another local owner".into());
         }
     }
+    let peer_address = config.startup.listen;
+    let prepared = group_setup::prepare(config, options.groups.as_deref())?;
     let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
-    let peer_address = config.startup.listen;
-    let mut service = setup::open(
-        config,
+    let mut service = prepared.open(
         protocol,
         mode == "recover-member",
         options.leadership_maintenance,
@@ -735,7 +728,13 @@ impl Connection {
                                     if s.trim_end_matches('\n').contains('\n') {
                                         return Err("one command per connection".into());
                                     }
-                                    self.stream.authorize(access, group(), s, time)?;
+                                    let selected = group_command::parse(s)?;
+                                    self.stream.authorize(
+                                        access,
+                                        selected.group,
+                                        selected.text,
+                                        time,
+                                    )?;
                                     command(s)
                                 });
                                 match result {
@@ -839,9 +838,19 @@ struct StartupOptions {
     leadership_maintenance: bool,
     node_drain: bool,
     membership_drain: Option<std::path::PathBuf>,
+    groups: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
     fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
+        if self.groups.is_some()
+            && (self.service_access.is_none()
+                || self.admin_plan.is_some()
+                || self.leadership_maintenance
+                || self.node_drain
+                || self.discovery_peers.is_some())
+        {
+            return Err("--groups requires --service-access; multi-group administration, drain and discovery profiles are not yet supported".into());
+        }
         if self.leadership_maintenance
             && (self.service_access.is_none()
                 || self.admin_plan.is_some()
@@ -921,6 +930,7 @@ fn is_startup_option(flag: &str) -> bool {
             | "--leadership-maintenance"
             | "--node-drain"
             | "--membership-drain"
+            | "--groups"
     )
 }
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
@@ -937,6 +947,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut leadership_maintenance = None;
     let mut node_drain = None;
     let mut membership_drain = None;
+    let mut groups = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !is_startup_option(flag) {
@@ -944,6 +955,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         }
         let value = args.pop().unwrap();
         match args.pop().unwrap().as_str() {
+            "--groups" if groups.is_none() && args[0] == "serve" => {
+                groups = Some(std::path::PathBuf::from(value));
+            }
             "--transport" if !transport_selected && args[0] == "serve" => {
                 transport_selected = true;
                 protocol = match value.as_str() {
@@ -1010,6 +1024,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         leadership_maintenance: leadership_maintenance.unwrap_or(false),
         node_drain: node_drain.unwrap_or(false),
         membership_drain,
+        groups,
     })
 }
 

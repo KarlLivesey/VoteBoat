@@ -53,5 +53,48 @@ contracts. This startup owns no hidden executor or background poll loop.
 Downstream tests in `tests/startup/multi.rs` exercise TCP and QUIC three-group
 checkpoint/reopen/retry histories, omitted and changed configuration rejection,
 preflight refusal and late construction cleanup. These are finite Linux local
-histories; executable multi-group controls and macOS execution remain separate
-work.
+histories; macOS execution remains separate work.
+
+## Counter executable
+
+Pass `--groups FILE --service-access ACCESS` to `voteboat-counter serve`. The
+group file declares the complete original local assignment set, with at most256
+groups and64 KiB of input:
+
+```text
+voteboat-counter-groups-v1
+group 1 1 1 m:3 v:1 v:2 v:3
+group 7 3 9 m:3 v:1 v:2 v:3
+group 8 2 11 w:3 1 v:1 1 v:2 1 v:3
+```
+
+Each row is `group ID INCARNATION CONFIGURATION POLICY`. Policies use the
+existing recursive `v:N`, `m:COUNT` and `w:COUNT WEIGHT CHILD ...` grammar.
+Store identities come from the existing peer/deployment configuration. All
+groups use the existing bounded counter application, with independent data and
+retry histories. The profile selects wire8; use it consistently across peers.
+Recover with the same original file, even after later configuration changes.
+Recovery also refuses an omitted `--groups` flag when the WAL contains multiple
+groups; it cannot silently open only group1.
+
+Commands select the exact group and incarnation:
+
+```sh
+voteboat-counter client 40000 auto group 7 3 add 42 5 --service-tls ./tls --principal 3
+voteboat-counter client 40000 auto group 7 3 read --service-tls ./tls --principal 3
+voteboat-counter client 40000 1 group 7 3 status --service-tls ./tls --principal 3
+voteboat-counter client 40000 1 group 7 3 checkpoint --service-tls ./tls --principal 3
+```
+
+The access file must grant that principal the requested permission for group7,
+incarnation3; a grant for group1 does not authorize group7. Automatic routing
+supports reads and adds, preserving the exact group, operation and payload
+across explicit leader rejections. An interrupted write remains unknown: retry
+the same complete command. Different groups may reuse an operation ID.
+
+Unprefixed existing commands retain their original group1 scope. Node controls
+such as `quit` do not accept a group prefix. Multi-group membership,
+leadership/drain execution and endpoint-discovery profiles are not yet connected
+to this executable mode; incompatible options are rejected before startup.
+WAL maintenance and automatic checkpoints operate through the existing shared
+Node. Single-group invocations remain available without `--groups`.

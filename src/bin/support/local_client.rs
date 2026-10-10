@@ -39,6 +39,7 @@ pub(super) fn exchange(
     request(&mut stream, text, deadline, start)
 }
 fn retryable_reply(command: &[String], response: &str) -> bool {
+    let command = super::group_command::payload(command);
     response == NOT_LEADER
         || command == ["read"]
             && matches!(
@@ -58,6 +59,7 @@ fn terminal(response: String) -> Result<(), Failure> {
     }
 }
 fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
+    let command = super::group_command::payload(command);
     if command.first().is_some_and(|c| c == "add") {
         println!("UNKNOWN {reason}; retry the same operation ID and delta");
     } else if command
@@ -161,7 +163,7 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
     }
     let command = command.as_slice();
     if id.is_none() {
-        match command {
+        match super::group_command::payload(command) {
             [cmd] if cmd == "read" => (),
             [cmd, operation, delta]
                 if cmd == "add"
@@ -177,6 +179,7 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
         return Err("command too long".into());
     }
     let text = format!("{}\n", command.join(" "));
+    super::group_command::parse(&text)?;
     let start = Instant::now();
     let deadline = start + Duration::from_secs(10);
     if let Some(source) = source {

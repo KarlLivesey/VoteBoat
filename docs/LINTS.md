@@ -1,19 +1,24 @@
 # Rust checks
 
 The enabled pre-push hook and background CI check formatting, then strict Clippy
-for three configurations: default (native TCP/TLS), all features (including QUIC),
-and no default features (core only). Each uses all targets and denies warnings.
+for four configurations: default (native TCP/TLS), all features (including QUIC),
+no default features (core only), and native without TLS. These cover all distinct
+feature sets in the current dependency graph. Each uses all targets and denies
+warnings.
 
 ```sh
 cargo +stable fmt --all -- --check
 cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
 ```
 
 These compile different conditional paths. Slice184's default check caught an
 unguarded QUIC enum reference that both other profiles missed. Tests are run
-separately; the push hook runs the four checks above. Unsafe code is forbidden.
+separately; the push hook runs formatting and all four lint builds above. The
+native-only build caught a TLS-only startup helper compiled without its caller;
+that helper now has the same feature gate as its caller. Unsafe code is forbidden.
 CI is background feedback, with no required branch check blocking implementation.
 
 `clippy.toml` pins the usual limits: 7 arguments, type complexity 250, cognitive

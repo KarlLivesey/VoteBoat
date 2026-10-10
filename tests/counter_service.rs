@@ -49,6 +49,8 @@ mod drain_retirement;
 mod drain_runner;
 #[path = "counter_service/events.rs"]
 mod events;
+#[path = "counter_service/groups.rs"]
+mod groups;
 #[path = "counter_service/history.rs"]
 mod history;
 #[path = "support/history.rs"]
@@ -109,6 +111,7 @@ struct Cluster {
     leadership_maintenance: bool,
     node_drain: bool,
     membership_drain: Option<(usize, PathBuf)>,
+    groups: Option<PathBuf>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -179,6 +182,7 @@ impl Cluster {
             leadership_maintenance: false,
             node_drain: false,
             membership_drain: None,
+            groups: None,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -208,6 +212,9 @@ impl Cluster {
             .arg(tls);
         if let Some(path) = &self.endpoints {
             command.arg(path);
+        }
+        if let Some(path) = &self.groups {
+            command.arg("--groups").arg(path);
         }
         if let Some(path) = &self.deployment {
             command.arg("--deployment").arg(path);

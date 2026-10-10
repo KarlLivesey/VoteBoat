@@ -8,3 +8,4 @@ cargo +stable fmt --all -- --check
 cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings

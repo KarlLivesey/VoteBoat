@@ -722,6 +722,12 @@ fn recover_storage<A: CheckpointStateMachine>(
     } else {
         NativeLogStore::recover(io, config.store, LogLimits::default())?
     };
+    if !store.matches_startup_groups(&[config.bootstrap.group])? {
+        return Err(error(
+            "recovery",
+            "durable group inventory differs from selected startup",
+        ));
+    }
     let state = store.state(config.bootstrap.group)?;
     if state.bootstrap != config.bootstrap {
         return Err(error(

@@ -184,7 +184,7 @@ impl Tree {
     fn success(&self, authority: &str, responsibility: &str) {
         let out = self
             .command(authority, responsibility, "10", &[])
-            .output()
+            .fixture_output()
             .unwrap();
         assert!(
             out.status.success(),
@@ -195,7 +195,10 @@ impl Tree {
         assert!(text.contains("responsibility=30 incarnation=1 execution_group=100 execution_incarnation=1 scope=0..128 bucket=10 epoch=1 generation=1 hint_only=true"),"{text}");
     }
     fn refused(&self, options: &[&str], reason: &str) {
-        let out = self.command("42", "10", "10", options).output().unwrap();
+        let out = self
+            .command("42", "10", "10", options)
+            .fixture_output()
+            .unwrap();
         refused(out, reason);
     }
     fn stop(&mut self) {
@@ -222,7 +225,7 @@ fn history(quic: bool) {
     t.success("42", "10");
     t.refused(&["--max-hops", "2"], "HopLimit");
     refused(
-        t.command("42", "10", "200", &[]).output().unwrap(),
+        t.command("42", "10", "200", &[]).fixture_output().unwrap(),
         "WrongAuthority",
     );
     t.root.stop();
@@ -312,7 +315,7 @@ fn recursive_route_interrupted_leaf_never_returns_a_hint() {
         .command("42", "10", "10", &[])
         .stdout(fs::File::create(&output).unwrap())
         .stderr(fs::File::create(&error).unwrap())
-        .spawn()
+        .fixture_spawn()
         .unwrap();
     let accepted = Instant::now() + Duration::from_secs(8);
     loop {
@@ -370,7 +373,7 @@ fn recursive_route_rejects_invalid_maps_and_options_before_connections() {
             .arg("route")
             .args(["/missing-tls", "1", "42", "1", "10", "1", "10"])
             .arg(&map)
-            .output()
+            .fixture_output()
             .unwrap();
         refused(out, reason);
     }
@@ -387,7 +390,7 @@ fn recursive_route_rejects_invalid_maps_and_options_before_connections() {
             .args(["/missing-tls", "1", "42", "1", "10", "1", "10"])
             .arg(&map)
             .args(args)
-            .output()
+            .fixture_output()
             .unwrap();
         assert!(!out.status.success());
         assert!(!String::from_utf8_lossy(&out.stderr).contains("No such file"));
@@ -398,7 +401,10 @@ fn recursive_route_rejects_invalid_maps_and_options_before_connections() {
 fn recursive_route_enforces_root_observation_floors() {
     let mut t = Tree::new(false, |_| {});
     for flag in ["--min-epoch", "--min-generation"] {
-        let out = t.command("42", "10", "10", &[flag, "2"]).output().unwrap();
+        let out = t
+            .command("42", "10", "10", &[flag, "2"])
+            .fixture_output()
+            .unwrap();
         let error = String::from_utf8_lossy(&out.stderr);
         assert!(
             error.contains("deadline expired") || error.contains("connection budget exhausted"),

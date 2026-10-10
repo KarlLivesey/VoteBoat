@@ -5,7 +5,9 @@
 over mutually authenticated TCP/TLS or optional QUIC, elect leaders using native
 timers, and keep separate durable
 WALs and snapshots. The quickstart creates static three-voter membership and one
-counter group. Explicit member recovery can reopen compatible dynamic histories
+counter group. An explicit [group manifest](MULTI_GROUP_STARTUP.md#counter-executable)
+opens multiple groups in the same process and WAL with group-scoped authenticated
+data commands. Explicit member recovery can reopen compatible dynamic histories
 prepared through the Rust administration APIs. Peer addresses are configurable;
 the command endpoint defaults to 127.0.0.1. Its default mode is trusted
 plaintext; `--service-access FILE` requires authenticated, scoped

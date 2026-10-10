@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.64s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 1 test
+test groups::authenticated_group_commands_tcp_recover_independent_histories ... FAILED
+
+failures:
+
+---- groups::authenticated_group_commands_tcp_recover_independent_histories stdout ----
+
+thread 'groups::authenticated_group_commands_tcp_recover_independent_histories' (508362) panicked at tests/counter_service/groups.rs:98:9:
+unexpected startup: ready node=1 peer=127.0.0.1:10001 transport=TcpTls command=127.0.0.1:10101
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    groups::authenticated_group_commands_tcp_recover_independent_histories
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 100 filtered out; finished in 1.92s
+
+error: test failed, to rerun pass `--test counter_service`

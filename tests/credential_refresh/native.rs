@@ -13,13 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
-use voteboat::{
-    authorization::*,
-    native::{
-        authorization::{NativeServiceAccess, ServiceAccess},
-        credentials::*,
-    },
-};
+#[cfg(feature = "tls")]
+use voteboat::native::authorization::{NativeServiceAccess, ServiceAccess};
+use voteboat::{authorization::*, native::credentials::*};
 pub(super) fn generation(n: u64) -> CredentialGeneration {
     CredentialGeneration::new(n).unwrap()
 }
@@ -55,6 +51,7 @@ fn native_replace_is_monotonic_returns_material_and_close_is_scoped() {
     drop(unrelated);
     assert_eq!(independent.validate(), Err(SessionError::Revoked));
 }
+#[cfg(feature = "tls")]
 fn policy(g: u64, permissions: ServicePermissions) -> NativeServiceAccess {
     NativeServiceAccess::new(
         generation(g),
@@ -71,6 +68,7 @@ fn policy(g: u64, permissions: ServicePermissions) -> NativeServiceAccess {
     )
     .unwrap()
 }
+#[cfg(feature = "tls")]
 pub(super) fn exercise<S: SecureSession, T: SecureSession>(
     a: S,
     b: T,
@@ -126,6 +124,7 @@ pub(super) fn exercise<S: SecureSession, T: SecureSession>(
     credentials
 }
 
+#[cfg(feature = "tls")]
 pub(super) fn resume<S: SecureSession, T: SecureSession>(
     a: S,
     b: T,

@@ -1,0 +1,15 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: method `matches_startup_groups` is never used
+   --> src/native/log_store.rs:123:19
+    |
+122 | impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
+    | ---------------------------------------------------- method in this implementation
+123 |     pub(crate) fn matches_startup_groups(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: could not compile `voteboat` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 1 previous error

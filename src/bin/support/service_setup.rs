@@ -46,7 +46,7 @@ fn store_id(id: u64) -> StoreIdentity {
 fn node(id: u64) -> NodeId {
     NodeId::new(id).unwrap()
 }
-fn material(path: &Path, limit: u64) -> Result<Vec<u8>, Failure> {
+pub(super) fn material(path: &Path, limit: u64) -> Result<Vec<u8>, Failure> {
     use std::io::Read;
     let mut bytes = Vec::new();
     std::fs::File::open(path)?

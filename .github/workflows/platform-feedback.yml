@@ -26,6 +26,7 @@ jobs:
       - run: cargo clippy --locked --offline --keep-going --all-targets -- -D warnings
       - run: cargo clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
       - run: cargo clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+      - run: cargo clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
   test:
     name: Rust on ${{ matrix.os }}
     strategy:

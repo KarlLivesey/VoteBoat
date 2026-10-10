@@ -120,6 +120,7 @@ impl<I: JournalIo> NativeLogStore<I> {
     }
 }
 impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
+    #[cfg(feature = "tls")]
     pub(crate) fn matches_startup_groups(
         &self,
         groups: &[GroupIdentity],

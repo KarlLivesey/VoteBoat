@@ -1,0 +1,18 @@
+# From repository root; native process histories require local TCP/UDP sockets.
+cargo +stable test --locked --offline --all-features --test counter_service groups::
+cargo +stable test --locked --offline --all-features --test counter_service groups::authenticated_group_commands_tcp_recover_independent_histories
+cargo +stable test --locked --offline --all-features --test startup --test counter_service groups::
+cargo +stable test --locked --offline --all-features --test startup --test counter_service --bin voteboat-counter
+cargo +stable test --locked --offline --all-features --test directory_service --test transfer_service
+cargo +stable test --locked --offline --all-features --test directory_service --test transfer_service --test credential_refresh
+cargo +stable test --locked --offline --all-features --test directory_service recursive_route_enforces_root_observation_floors
+cargo +stable test --locked --offline --all-features --test directory_service recursive_route_missing_leaf_is_not_a_partial_success
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+git diff --check
+# The enabled pre-push hook repeats formatting and all four strict lint builds.

@@ -1,7 +1,7 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
-Latest focused implementation evidence: [slice197b4b1 native multi-group startup](baseline/slice197b4b1/README.md).
+Latest focused implementation evidence: [slice197b4b2a executable group commands](baseline/slice197b4b2a/README.md).
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete

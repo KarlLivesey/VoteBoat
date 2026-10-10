@@ -19,7 +19,10 @@ use std::{
     net::{TcpListener, UdpSocket},
     path::PathBuf,
     process::{Child, Command, Output, Stdio},
-    sync::atomic::{AtomicU64, Ordering},
+    sync::{
+        atomic::{AtomicU64, Ordering},
+        Mutex,
+    },
     time::{Duration, Instant},
 };
 use voteboat::{
@@ -29,6 +32,24 @@ const BIN: &str = env!("CARGO_BIN_EXE_voteboat-directory");
 // Keep fixture listeners below Linux's ephemeral client-port range. A client
 // can otherwise claim a later replica's port between reservation and startup.
 static NEXT: AtomicU64 = AtomicU64::new(20000);
+// Serialize only descriptor release and fork/exec, never child execution.
+static SPAWNS: Mutex<()> = Mutex::new(());
+trait FixtureCommand {
+    fn fixture_spawn(&mut self) -> std::io::Result<Child>;
+    fn fixture_output(&mut self) -> std::io::Result<Output>;
+}
+impl FixtureCommand for Command {
+    fn fixture_spawn(&mut self) -> std::io::Result<Child> {
+        let _spawn = SPAWNS.lock().unwrap_or_else(|e| e.into_inner());
+        self.spawn()
+    }
+    fn fixture_output(&mut self) -> std::io::Result<Output> {
+        self.stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
+        self.fixture_spawn()?.wait_with_output()
+    }
+}
 fn group(n: u128) -> GroupIdentity {
     GroupIdentity {
         id: GroupId::new(n).unwrap(),
@@ -108,7 +129,7 @@ impl Cluster {
         fs::create_dir(&root).unwrap();
         let generated = Command::new(BIN)
             .args(["plan", "42", "1", "10", "1", "100", "1"])
-            .output()
+            .fixture_output()
             .unwrap();
         assert!(generated.status.success());
         assert_eq!(String::from_utf8_lossy(&generated.stdout), plan(100));
@@ -145,6 +166,7 @@ impl Cluster {
         c
     }
     fn start(&mut self, id: usize, mode: &str) {
+        let _spawn = SPAWNS.lock().unwrap_or_else(|e| e.into_inner());
         self.held.clear();
         self.udp.clear();
         let log = fs::File::create(self.root.join(format!("{id}.log"))).unwrap();
@@ -165,7 +187,7 @@ impl Cluster {
         c
     }
     fn request(&self, id: usize, principal: u64, args: &[&str]) -> Output {
-        self.client(id, principal, args).output().unwrap()
+        self.client(id, principal, args).fixture_output().unwrap()
     }
     fn ok(&self, id: usize, args: &[&str]) -> String {
         let r = self.request(id, 3, args);
@@ -252,7 +274,7 @@ fn initialize(c: &mut Cluster) -> usize {
     assert!(!denied.status.success());
     assert!(String::from_utf8_lossy(&denied.stdout).contains("AUTHORIZATION"));
     assert!(c.ok(leader, &["initialize"]).contains("Initialized"));
-    let missing = c.lookup(leader).output().unwrap();
+    let missing = c.lookup(leader).fixture_output().unwrap();
     assert!(!missing.status.success());
     assert!(
         String::from_utf8_lossy(&missing.stderr).contains("Missing"),
@@ -265,7 +287,7 @@ fn initialize(c: &mut Cluster) -> usize {
 fn history(quic: bool) {
     let mut c = Cluster::new(quic);
     let leader = initialize(&mut c);
-    let r = c.lookup(leader).output().unwrap();
+    let r = c.lookup(leader).fixture_output().unwrap();
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     assert!(String::from_utf8_lossy(&r.stdout).contains("authority=42"));
     c.ok(leader, &["checkpoint"]);
@@ -281,11 +303,11 @@ fn history(quic: bool) {
     let leader = c.leader();
     assert!(c.ok(leader, &["initialize"]).contains("duplicate=true"));
     assert!(c.ok(leader, &["publish", "101"]).contains("duplicate=true"));
-    let r = c.lookup(leader).output().unwrap();
+    let r = c.lookup(leader).fixture_output().unwrap();
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     c.stop();
     fs::write(c.root.join("plan"), plan(101)).unwrap();
-    let out = c.server(1, "recover").output().unwrap();
+    let out = c.server(1, "recover").fixture_output().unwrap();
     assert!(!out.status.success(), "changed durable plan accepted");
     let error = String::from_utf8_lossy(&out.stderr);
     assert!(
@@ -318,7 +340,7 @@ fn disconnected_manifest_read_retains_and_drains_node_ownership() {
         .lookup(leader)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .spawn()
+        .fixture_spawn()
         .unwrap();
     let deadline = Instant::now() + Duration::from_secs(3);
     loop {
@@ -342,7 +364,7 @@ fn disconnected_manifest_read_retains_and_drains_node_ownership() {
         }
     }
     let leader = c.leader();
-    assert!(c.lookup(leader).output().unwrap().status.success());
+    assert!(c.lookup(leader).fixture_output().unwrap().status.success());
     c.stop();
 }
 #[test]
@@ -356,7 +378,7 @@ fn invalid_metadata_plan_is_rejected_before_storage_or_tls() {
         ("x".repeat(128 * 1024 + 1), "exceeds128KiB"),
     ] {
         fs::write(c.root.join("plan"), text).unwrap();
-        let out = c.server(1, "create").output().unwrap();
+        let out = c.server(1, "create").fixture_output().unwrap();
         assert!(!out.status.success());
         assert!(String::from_utf8_lossy(&out.stderr).contains(reason));
         assert!(!c.root.join("1").exists());

@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.45s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+test groups::authenticated_group_commands_quic_recover_independent_histories ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 96 filtered out; finished in 3.50s
+

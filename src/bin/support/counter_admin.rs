@@ -668,3 +668,23 @@ impl Administration {
         Ok(())
     }
 }
+
+pub fn status(service: &Service, group: GroupIdentity, operation: &str) -> Result<String, String> {
+    let operation = operation
+        .parse::<u128>()
+        .ok()
+        .and_then(OperationId::new)
+        .ok_or("invalid operation ID")?;
+    let status = service
+        .configuration_status(group, operation)
+        .map_err(|e| format!("{e:?}"))?;
+    let action = match status.resume_action() {
+        ConfigurationResumeAction::Completed => "completed",
+        ConfigurationResumeAction::WaitForCommit => "wait_for_commit",
+        ConfigurationResumeAction::Finalize(_) => "finalize_requires_authorization",
+        ConfigurationResumeAction::NotFoundLocally => "inconclusive_local_absence",
+    };
+    Ok(format!("OK evidence=local_durable operation={} committed_prefix={} durable_last={} committed={:?} accepted={:?} action={}",
+                operation.get(), status.committed_index, status.durable_last_index,
+                status.committed, status.accepted, action))
+}

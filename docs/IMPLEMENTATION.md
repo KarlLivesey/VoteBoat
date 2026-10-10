@@ -133,9 +133,99 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b3: bounded multi-group Rust dispatcher | Advance independent membership evacuations fairly while retaining original identities; advances P4/P2 and chapter09. |197b2b1 immutable plan, journal, ordinary Node configuration ownership and native shared-WAL assembly. | Bounded scan/in-flight slots, stale ticket refusal, per-group errors, native TCP/QUIC mixed completed/joint/unstarted recovery and surviving writes/retries. Broader failures remain open. |
 | Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
 | Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
-| Current197b4b2: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b1 production startup,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Add explicit deployment group selection and group-addressed authenticated work, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. This remains planned work; the counter executable is still single-group. |
+| Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
+| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Extend group-bound membership/leadership execution, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Data commands are implemented; multi-group administration and drain remain planned work. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4b2a schema plan — executable group selection and authenticated data
+
+The counter executable currently authorizes and executes every command against
+its fixed group. Connecting multi-group startup without changing both would
+leave remote requests scoped incorrectly. This deliverable makes the shared
+node usable from actual processes: a bounded `--groups FILE` lists sorted
+original group/incarnation/configuration identities and recursive voter policies,
+resolved against the existing provisioned stores. Pure validation precedes files
+and sockets. Reuse NativeMultiStartup, its exact recovery inventory and the
+existing counter application; keep single-group invocations unchanged.
+
+`group ID INC COMMAND` selects a group for status/read/add/checkpoint. Parse once
+for authorization, and use the same checked identity for execution. Retain exact
+group-bound tickets and command bytes through automatic routing; only explicit
+non-acceptance permits a write retry. Unprefixed existing node controls retain
+their existing scope. Prefixes cannot turn a group permission into a node-wide
+shutdown, configuration or diagnostic permission. Initially refuse combinations
+with the still-single-group membership/leadership/drain executor rather than
+silently applying that executor to one arbitrary group.
+
+Acceptance: actual three-process TCP/QUIC groups serve different data using the
+same operation IDs without collision; group-scoped authorization rejects wrong
+incarnations, missing groups and write permissions; checkpoint/reopen preserves
+all group histories and retries; omitted/changed manifests fail recovery and
+malformed/profile-incompatible inputs fail before resource creation. Preserve
+single-group and client retry regressions, formatting and all strict lint builds.
+This is the first executable part of197b4b2/P2. Next, group-bound maintenance and
+membership controls connect the existing coordinator for complete drain197;
+assignment listing198 and platform recovery199 remain linked afterward.
+
+Recovery review adds an explicit missing-profile check: the older single-group
+startup must also verify its complete one-group WAL inventory. Otherwise omitting
+`--groups` could reopen only the first group of a shared store. Reuse the native
+inventory comparison with no marker file or storage format change; exercise the
+omitted flag before applying the fix and rerun the native startup regressions.
+
+Additional validation found two directory-harness address-in-use failures during
+concurrent startup. Coordinate process spawning with closing reserved listeners,
+as the counter fixture already does, so fork/exec cannot temporarily inherit a
+listener another fixture is about to bind. Only this descriptor handoff is
+serialized; process execution and tests remain concurrent. Rerun the directory
+suite and retain its original failures. Native-only strict Clippy also checks
+the fourth supported feature set: gate TLS-only helpers with their callers and
+add that configuration to the existing push/CI checks without lint allowances.
+
+### Slice197b4b2a implementation evidence
+
+The counter executable now accepts a bounded `--groups` file of original group
+identities, configurations and recursive voter policies. It validates the entire
+set and fresh application map before opening the command listener, then uses
+NativeMultiStartup's shared WAL, snapshots and endpoint. Group-prefixed
+status/read/add/checkpoint commands authorize the same checked group and
+incarnation used for execution. Original request bytes survive leader redirects;
+uncertainty still stops automatic write routing. Existing unprefixed commands
+retain their original scope. Unsupported combinations with the single-group
+membership, leadership/drain and discovery executors fail explicitly.
+
+Five new service tests cover TCP/QUIC three-group independent counters with the
+same operation ID, exact-scope permissions, wrong incarnation and missing-group
+refusal, checkpoint/reopen, leader loss and malformed/bounded input. Routing
+tests check exact request retention and no third-peer submission after unknown
+results or a disconnected second peer. Recovery refuses omitted/changed group
+declarations and an omitted `--groups` flag. The omitted-flag test demonstrably
+started a partial one-group service before the fix; both startup paths now check
+the complete durable inventory without another persistent marker or format.
+
+Final primary validation passes101 service tests, nine command unit tests and
+all25 native startup tests. The additional run passes13 directory-service,
+five transfer-service and nine credential-refresh tests, including the
+previously failing directory histories and both TCP/WAL and QUIC/checkpoint
+split phase cuts. The recorded strict native-only check exposed a
+TLS-only startup helper and TLS-only test helpers compiled without callers;
+their feature gates now match their uses. The hook and background CI add this
+fourth supported configuration, retaining formatting and the other three
+strict all-target builds. No lint level or threshold is relaxed.
+
+The extra directory/transfer regression exposed two directory harness
+address-in-use failures. The fixture now coordinates listener release with
+process fork/exec, including clients, as the counter fixture already does;
+child execution and tests remain concurrent. Original failed output is retained
+alongside final results in
+[slice197b4b2a evidence](../validation/baseline/slice197b4b2a/README.md).
+
+Macro review: executable shared-group data service is now implemented, advancing
+P2 and197's actual service composition. Group-bound membership/leadership and
+the complete drain coordinator remain next under197b4b2b; assignment listing198,
+macOS/separate-host evidence and the remaining P0–P7 fault/performance gates are
+still open. This slice does not add a new consensus protocol or migration path.
 
 ### Slice197b4b1 schema plan — production native multi-group startup
 
