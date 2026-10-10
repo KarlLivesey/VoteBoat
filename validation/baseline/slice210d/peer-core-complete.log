@@ -1,0 +1,52 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.09s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 31 tests
+test peer_driver::closing_network_resolves_queued_outbound_on_poll_without_closing_host_queue ... ok
+test peer_driver::closing_connecting_driver_waits_for_actual_provider_receipts_before_reclaim ... ok
+test peer_driver::binding_time_and_budget_errors_do_not_poll_provider_or_fence_owner ... ok
+test peer_driver::construction_returns_selected_parts_on_route_or_budget_failure_without_closing_host_resources ... ok
+test peer_driver::closed::close_between_poll_and_submit_retains_ticket_and_reconnects_only_that_peer ... ok
+test peer_driver::close_resolves_staged_work_but_waits_for_accepted_send_and_preserves_other_instance ... ok
+test peer_driver::disconnected::failed_peer_releases_saturated_output_without_waiting_for_reconnect ... ok
+test peer_driver::disconnected::authenticated_reconnect_starts_a_fresh_disconnected_output_interval ... FAILED
+test peer_driver::bounded_staging_covers_whole_outbound_queue_so_one_stalled_peer_cannot_pin_other_peer_admission ... ok
+test peer_driver::explicit_disconnect_cancels_exact_attempt_and_other_peer_can_attach ... ok
+test peer_driver::closed::invalid_binding_at_submit_still_fences_the_driver ... ok
+test peer_driver::invalid_factory_transport_is_aborted_and_fences_before_any_raft_or_send_progress ... ok
+test peer_driver::expired_attempt_retains_provider_slot_and_late_session_cannot_attach_or_spend_replacement_generation ... ok
+test peer_driver::failed_local_owner_can_drain_network_and_cancel_held_ingress_without_core_access ... ok
+test peer_driver::discovery_misses_back_off_without_fencing_but_invalid_scope_is_terminal ... ok
+test peer_driver::membership_removal_discards_held_input_and_completes_accepted_and_staged_output ... ok
+test peer_driver::mis_scoped_connector_receipt_fences_and_closes_returned_session_for_recovery ... ok
+test peer_driver::membership_removal_cancels_attempts_but_waits_for_obsolete_provider_receipts ... ok
+test peer_driver::local_configuration_admission_uses_retained_pins_and_prevents_queued_route_withdrawal ... ok
+test peer_driver::prospective_routes_check_credentials_and_capacity_without_changing_roster_or_clock ... ok
+test peer_driver::owned_route_plan_checks_pins_retains_queued_dependencies_and_rejects_stale_budget_restore ... ok
+test peer_driver::rejected_queue_completion_returns_original_payload_and_holds_credit_for_recovery ... ok
+test peer_driver::planned_retirement_waits_for_only_that_peers_original_outbound_credits ... ok
+test peer_driver::wrong_outbound_terminal_ticket_fences_instead_of_publishing_unscoped_local_completion ... ok
+test peer_driver::receive_fairness::held_recovery_receive_preserves_control_reserve_and_outbound_completion ... ok
+test peer_driver::oversized_outbound_poll_is_quarantined_whole_with_credits_until_explicit_recovery ... ok
+test peer_driver::mis_scoped_transport_completion_keeps_exact_queue_payload_until_explicit_recovery ... ok
+test peer_driver::public_host_reactor_attaches_and_keeps_blocked_peer_credits_while_other_peer_and_ingress_progress ... ok
+test peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers ... ok
+test peer_driver::retained_plan_connects_only_after_valid_witness_reply_and_preserves_live_bindings ... ok
+test peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers ... ok
+
+failures:
+
+---- peer_driver::disconnected::authenticated_reconnect_starts_a_fresh_disconnected_output_interval stdout ----
+
+thread 'peer_driver::disconnected::authenticated_reconnect_starts_a_fresh_disconnected_output_interval' (324) panicked at tests/support/peer_driver.rs:594:9:
+not drained
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    peer_driver::disconnected::authenticated_reconnect_starts_a_fresh_disconnected_output_interval
+
+test result: FAILED. 30 passed; 1 failed; 0 ignored; 0 measured; 140 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

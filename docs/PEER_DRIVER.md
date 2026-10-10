@@ -55,7 +55,17 @@ ceiling. Thus rejected batches from a stalled peer cannot fill a smaller staging
 queue and prevent extraction of other peer/control work. Payloads retain the
 outbound queue's original node/peer/class count and capacity-byte charges until
 exact local completion. The driver does not create a second payload budget or
-release credits on submit, timeout or disconnection.
+release credits on submit or disconnection alone. After an observed connection
+failure, unsent batches may wait for a quick reconnect for
+`PeerDriverLimits::disconnected_send_retry_ms` (default500ms, maximum60s).
+Repeated failed attempts preserve the first failure time; authenticated attachment
+resets it. At expiry, bounded send visits return each original batch through the
+outbound queue's exact `Failed` completion, releasing its credits. Transport-owned
+work retains its existing terminal path. Initial connection staging before any
+observed failure and backpressure on usable sessions remain unchanged.
+`next_deadline` includes this interval for staged work belonging to unavailable
+peers. Local failure neither advances a replica prefix nor grants read authority;
+Raft's normal message retries and generation checks govern recovery.
 
 Budgets bound connection scans, connector I/O/receipts, transport visits/I/O,
 send extraction/retries and ingress dispatch. Returned diagnostic/completion

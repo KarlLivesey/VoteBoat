@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0609]: no field `node` on type `voteboat::runtime::RuntimeOwner`
+    --> src/bin/counter_service.rs:1314:19
+     |
+1314 |             owner.node.get(),
+     |                   ^^^^ unknown field
+     |
+     = note: available fields are: `store`, `lane`, `generation`
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `voteboat` (bin "voteboat-counter") due to 1 previous error

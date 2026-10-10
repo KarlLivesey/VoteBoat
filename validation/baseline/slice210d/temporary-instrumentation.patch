@@ -1,0 +1,22 @@
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+index d19077a..b304a8c 100644
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -318,6 +318,7 @@ impl NativeQuicSession {
+                     self.authenticated = true;
+                 }
+                 Event::ConnectionLost { reason } => {
++                    eprintln!("QUIC-DIAG lost local={} peer={} generation={} now={} reason={reason:?}", self.options.local.node.get(), self.options.peer.identity.node.get(), self.options.generation.get(), self.now.0);
+                     if matches!(&reason, ConnectionError::ApplicationClosed(close) if close.error_code == VarInt::from_u32(0))
+                         && self.authenticated
+                         && self.binding.is_some()
+@@ -574,6 +575,9 @@ impl NativeQuicSession {
+         if now < self.now {
+             return Err(SessionError::TimeWentBack);
+         }
++        if now.0 / 1000 != self.now.0 / 1000 {
++            eprintln!("QUIC-DIAG state local={} peer={} generation={} now={} state={:?} sending={:?} receiving={:?} stats={:?}", self.options.local.node.get(), self.options.peer.identity.node.get(), self.options.generation.get(), now.0, self.state, self.sending, self.receiving, self.connection.as_ref().map(|(_, c)| c.stats()));
++        }
+         self.now = now;
+         if self.state == SessionState::Closed {
+             return Ok(SessionProgress::default());

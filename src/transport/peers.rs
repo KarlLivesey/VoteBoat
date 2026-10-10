@@ -119,6 +119,7 @@ struct Peer<P> {
     authorized: bool,
     next: MonoTime,
     failures: u32,
+    failure_since: Option<MonoTime>,
     attempt: Option<Attempt>,
     transport: Option<P>,
     binding: Option<SessionBinding>,
@@ -206,6 +207,7 @@ impl<P: PeerTransport> PeerRoster<P> {
                             authorized: true,
                             next: now,
                             failures: 0,
+                            failure_since: None,
                             attempt: None,
                             transport: None,
                             binding: None,
@@ -243,6 +245,19 @@ impl<P: PeerTransport> PeerRoster<P> {
             None
         } else {
             p.binding
+        }
+    }
+    pub(crate) fn disconnected_send_deadline(
+        &self,
+        peer: NodeId,
+        retry_ms: u64,
+    ) -> Option<MonoTime> {
+        let p = self.peers.get(&peer)?;
+        if p.authorized && (p.transport.is_none() || p.retiring) {
+            p.failure_since
+                .map(|since| MonoTime(since.0.saturating_add(retry_ms)))
+        } else {
+            None
         }
     }
     pub fn is_fenced(&self) -> bool {
@@ -321,6 +336,7 @@ impl<P: PeerTransport> PeerRoster<P> {
                 if !peer.authorized {
                     peer.next = now;
                     peer.failures = 0;
+                    peer.failure_since = None;
                 }
                 peer.authorized = true;
                 continue;
@@ -338,6 +354,7 @@ impl<P: PeerTransport> PeerRoster<P> {
                 authorized: true,
                 next: now,
                 failures: 0,
+                failure_since: None,
                 attempt: None,
                 transport: None,
                 binding: None,
@@ -591,6 +608,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         Ok(tickets)
     }
     fn backoff(p: &mut Peer<P>, now: MonoTime, limits: PeerRosterLimits) {
+        p.failure_since.get_or_insert(now);
         let delay = limits
             .retry_min_ms
             .saturating_mul(1u64 << p.failures.min(63))
@@ -676,6 +694,7 @@ impl<P: PeerTransport> PeerRoster<P> {
         let p = self.peers.get_mut(&ticket.peer.node).unwrap();
         p.attempt = None;
         p.binding = Some(binding);
+        p.failure_since = None;
         p.session = Some(binding.peer.store.session);
         p.transport = Some(transport);
         p.retiring = false;

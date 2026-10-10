@@ -43,12 +43,17 @@ pub struct PeerRoutesRejected<E> {
 pub struct PeerDriverLimits {
     pub staged_batches: usize,
     pub metadata_bytes: usize,
+    /// Retain unsent output after an observed disconnect/connect failure for
+    /// this bounded interval. Expiry returns local Failed, never remote evidence.
+    /// Initial connection staging and usable-session backpressure are unaffected.
+    pub disconnected_send_retry_ms: u64,
 }
 impl Default for PeerDriverLimits {
     fn default() -> Self {
         Self {
             staged_batches: 4096,
             metadata_bytes: 1024 * 1024,
+            disconnected_send_retry_ms: 500,
         }
     }
 }
@@ -222,6 +227,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                     )
                 });
             if limits.staged_batches < outbound.limits().node.max.batches
+                || limits.disconnected_send_retry_ms > 60_000
                 || limits.staged_batches > 65536
                 || limits.metadata_bytes > 64 * 1024 * 1024
                 || metadata.is_none_or(|n| n > limits.metadata_bytes)
@@ -350,6 +356,16 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             self.parts
                 .roster
                 .next_deadline_filtered(|peer| !self.attempts.iter().any(|t| t.peer.node == peer)),
+            self.staged
+                .iter()
+                .filter_map(|batch| {
+                    self.parts.roster.disconnected_send_deadline(
+                        batch.ticket.peer,
+                        self.limits.disconnected_send_retry_ms,
+                    )
+                })
+                .min()
+                .map(|deadline| deadline.max(self.now)),
         ]
         .into_iter()
         .flatten()
@@ -1028,7 +1044,17 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         }
         for _ in 0..self.staged.len().min(limit) {
             let batch = self.staged.pop_front().unwrap();
-            if self.closed || self.parts.roster.peer_identity(batch.ticket.peer).is_none() {
+            if self.closed
+                || self.parts.roster.peer_identity(batch.ticket.peer).is_none()
+                || self
+                    .parts
+                    .roster
+                    .disconnected_send_deadline(
+                        batch.ticket.peer,
+                        self.limits.disconnected_send_retry_ms,
+                    )
+                    .is_some_and(|deadline| self.now >= deadline)
+            {
                 let ticket = batch.ticket;
                 match outbound.complete(batch, LocalSendResult::Failed) {
                     Ok(done) => {

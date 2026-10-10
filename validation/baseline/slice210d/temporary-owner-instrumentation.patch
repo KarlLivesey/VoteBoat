@@ -1,0 +1,74 @@
+diff --git a/src/bin/counter_service.rs b/src/bin/counter_service.rs
+index f568709..18db603 100644
+--- a/src/bin/counter_service.rs
++++ b/src/bin/counter_service.rs
+@@ -1305,6 +1305,21 @@ fn poll_service(
+         service.state(),
+         &result,
+     ));
++    if time.0 >= observer.traced_at + 1000 {
++        use voteboat::outbound::OutboundQueue;
++        observer.traced_at = time.0;
++        let local = service.local();
++        eprintln!(
++            "OWNER-DIAG node={} now={} owner={:?} replica={:?} outbound={:?} peer2={:?} peer3={:?}",
++            owner.store.identity.id.get(),
++            time.0,
++            local.owner.usage(),
++            service.replica_usage(),
++            local.outbound.usage(),
++            local.outbound.peer_usage(NodeId::new(2).unwrap()),
++            local.outbound.peer_usage(NodeId::new(3).unwrap())
++        );
++    }
+     checked(result)?;
+     Ok(())
+ }
+diff --git a/src/bin/support/diagnostics.rs b/src/bin/support/diagnostics.rs
+index 70f99f8..541ed80 100644
+--- a/src/bin/support/diagnostics.rs
++++ b/src/bin/support/diagnostics.rs
+@@ -20,6 +20,7 @@ use voteboat::{
+ };
+ 
+ pub struct Diagnostics {
++    pub traced_at: u64,
+     counters: NativeCounterObserver,
+     events: NativeEventObserver,
+     reporter: EventReporter,
+@@ -33,6 +34,7 @@ impl Diagnostics {
+             generation: EventGeneration::new(1).unwrap(),
+         };
+         Ok(Self {
++            traced_at: 0,
+             counters: NativeCounterObserver::new(owner),
+             events: NativeEventObserver::new(binding, EventLimits::default())?,
+             reporter: EventReporter::new(binding),
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+index d19077a..d351be2 100644
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -318,6 +318,13 @@ impl NativeQuicSession {
+                     self.authenticated = true;
+                 }
+                 Event::ConnectionLost { reason } => {
++                    eprintln!(
++                        "QUIC-DIAG lost local={} peer={} generation={} now={} reason={reason:?}",
++                        self.options.local.node.get(),
++                        self.options.peer.identity.node.get(),
++                        self.options.generation.get(),
++                        self.now.0
++                    );
+                     if matches!(&reason, ConnectionError::ApplicationClosed(close) if close.error_code == VarInt::from_u32(0))
+                         && self.authenticated
+                         && self.binding.is_some()
+@@ -574,6 +581,9 @@ impl NativeQuicSession {
+         if now < self.now {
+             return Err(SessionError::TimeWentBack);
+         }
++        if now.0 / 1000 != self.now.0 / 1000 {
++            eprintln!("QUIC-DIAG state local={} peer={} generation={} now={} state={:?} sending={:?} receiving={:?} stats={:?}", self.options.local.node.get(), self.options.peer.identity.node.get(), self.options.generation.get(), now.0, self.state, self.sending, self.receiving, self.connection.as_ref().map(|(_, c)| c.stats()));
++        }
+         self.now = now;
+         if self.state == SessionState::Closed {
+             return Ok(SessionProgress::default());

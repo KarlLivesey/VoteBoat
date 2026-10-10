@@ -413,6 +413,8 @@ impl PeerTransportFactory<Session> for Factory {
 type Driver = PeerDriver<Connector, Factory>;
 #[path = "peer_driver_closed.rs"]
 mod closed;
+#[path = "peer_driver_disconnected.rs"]
+mod disconnected;
 #[path = "peer_receive_fairness.rs"]
 mod receive_fairness;
 struct Fixture {

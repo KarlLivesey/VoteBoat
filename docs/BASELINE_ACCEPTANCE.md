@@ -1,5 +1,17 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210d identifies the reproduced QUIC survivor stall as disconnected-output
+retention: a healthy authenticated connection keeps receiving, but256 queued
+batches to the offline voter pin rejected Send effects in all three local groups.
+PeerDriver now bounds that retention with an explicit caller-clock interval and
+exact Failed completions, preserving initial staging, quick reconnect, active
+backpressure and transport-owned terminal lifetimes. Temporary instrumentation
+and failed histories are retained as evidence; instrumentation is removed from
+production. The downstream regression fails before correction. Native handoff7,
+counter156/maintenance6, runtime228 and default TCP handoff4 pass locally.
+Supported-platform acceptance remains open: the accepted prior8cc6852 run has
+Ubuntu154 pass/2 fail and macOS141 pass/15 fail. Those runs predate this fix.
+
 Slice210b adds exact original handoff replay after actual non-admission. Native
 TCP/QUIC histories reproduce the fixture's old Busy refusal, then preserve the
 quorum-observed original Pending record until cancellation, reject a changed

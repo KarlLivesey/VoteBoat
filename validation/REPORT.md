@@ -1,5 +1,14 @@
 # Validation report — slice 35
 
+Disconnected-output liveness: [slice210d](baseline/slice210d/README.md). Instrumented
+native failures retain healthy QUIC protocol progress but expose256 unsent
+batches for the offline peer and three pinned Send leases. The cause-specific
+downstream host regression fails before the lifetime correction. Native
+handoff7, full counter156/maintenance6, runtime228 and default handoff4 pass
+afterward. Matching macOS/Linux CI remains pending; prior8cc6852 fails both
+platform operator selections. Local send failure grants no durable/quorum
+evidence. This closes selected local stall evidence, not P0–P7 acceptance.
+
 Shared admission obligations: [slice201e](baseline/slice201e/README.md). Host and
 native providers pass the same32 seeded ownership histories and explicit
 cross-thread final-release checks. A deliberately faulty early-release provider

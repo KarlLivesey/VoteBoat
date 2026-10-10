@@ -168,12 +168,24 @@ original Pending records/data but finds source term6 versus survivor terms51–7
 This reproduces a local liveness failure; it selects peer/session recovery for
 the next operator investigation, without establishing its exact cause. Keep
 this failed evidence alongside the successful full suite and zero lint results.
+Implemented210d diagnoses the reproduced survivor stall using temporary QUIC
+and owner instrumentation: the healthy channel stays Ready while256 batches for
+the offline voter pin three rejected Send leases. The peer reactor now retains
+disconnected output for an explicit bounded interval (default500ms) and returns
+expired original tickets through exact local Failed completions. Quick reconnect,
+initial staging and live-channel backpressure retain their contracts; repeated
+failed attempts do not extend the interval. Temporary instrumentation is removed.
+The cause-specific host regression fails before correction; native handoff7,
+counter156/maintenance6, runtime228 and default handoff4 pass afterward. Matching
+platform feedback remains open. The accepted prior8cc6852 CI run fails Ubuntu
+counter2 and macOS counter15; these pre-fix results are retained explicitly.
+Completed210c repairs the210b workflow rejection by moving runner.temp to the
+supported operator-step env scope. The exact log location, commands and deadlines
+remain; both platform jobs start and complete at8cc6852. This proves workflow
+activation, not successful platform acceptance. Implemented210d retains zero
+formatting/Clippy diagnostics in all four required profiles after the final host
+reset/cleanup regression. The pre-push hook remains enabled.
 Current: revisit the current Linux/macOS operator acceptance evidence.
-The210b diagnostic workflow was rejected before jobs started because runner.temp
-is unavailable in job-level env. Correct its scope to the operator step's env,
-where the runner context is supported. This preserves the exact log location,
-test command, deadlines and background CI role. Verify accepted workflow job
-creation after push; this is workflow repair, not a QUIC or platform pass.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
 supported platform job. Depend on the existing operator fixtures and logs;
@@ -194,6 +206,63 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210d schema plan — diagnose QUIC survivor liveness
+
+Purpose: distinguish a healthy-peer session/stream stall from administrative
+command waiting after one voter disappears. This advances usable Linux/macOS
+service acceptance; it is required by the reproduced210b failure, not a new
+feature prerequisite. The next two deliverables remain combined membership/
+lifecycle recovery and bounded malformed codecs as described above.
+
+Use temporary local instrumentation of the existing QUIC session owner: record
+exact local/remote node, session generation, monotonic time, stream IDs, protocol
+counters and connection-loss reason. Preserve polling, deadlines, admission,
+identity checks and all state transitions. The instrumentation is experimental
+and will be removed before committing production code; retain its exact patch
+and test output for reproducibility. Each live session owns its existing socket
+lease; failed sessions still release through the current transport path.
+
+Run the seven bounded real-process group-handoff histories with the same CI-temp
+layout and unchanged commands. Inspect failed survivor streams/reconnects before
+selecting a production fix and cause-specific regression. A passing experiment
+does not erase the previous failure. Acceptance for this diagnostic step is
+concrete protocol evidence that narrows the next action, followed by restored
+production source and clean formatting/strict lint. A transport correction will
+need its own revised schema and failing-before/passing-after regression.
+
+The first instrumented run reproduces both failures (5 pass/2 fail): survivor
+QUIC sessions remain Ready and receive increasing protocol/application traffic,
+but the source stops sending application streams. A single owner-instrumented
+history passes; applying those counters to the original seven-history workload
+reproduces one failure (6 pass/1 fail). The failed source holds256 outbound
+batches for the offline peer and three rejected Send leases, pinning all three
+local groups while its healthy QUIC session remains Ready. This narrows the
+cause to retained disconnected-peer output, not QUIC authentication or packet
+loss on the surviving connection. Temporary instrumentation is now removed.
+
+Revised production schema: add an internal roster query for an authorized peer
+with an observed connection failure and no usable session. Existing host tests
+require an original ticket to survive quick reconnection. Retain disconnected
+output for an explicit PeerDriverLimits interval (default500ms), starting at the
+first observed failure. Repeated failed attempts do not extend it; authenticated
+attachment resets it. Include this deadline in next_deadline while staged work
+exists. Preserve initial
+connection staging until a failure is actually observed and active-channel
+backpressure. After that interval, when the unavailable peer's batch reaches PeerDriver,
+complete its original outbound ticket as Failed instead of retaining it across
+indefinite reconnect attempts. Transport-owned batches still finish through
+the existing exact completion path; failure never counts as remote/durable
+acknowledgement. No persistent schema, quorum or generation change. A later
+authenticated connection and fresh Raft retries use existing generation checks.
+
+Acceptance: a downstream host regression saturates a peer, induces an observed
+disconnect, requires exact failed completions/credit release and fresh healthy
+peer progress while reconnect is stalled, then verifies new-generation sends
+after reconnect. It must fail before the correction. Re-run native TCP/QUIC
+handoff recovery under the original deadlines, relevant peer/runtime histories,
+full counter selection and formatting/all strict Clippy profiles. Passing these
+checks closes this selected stall; other platform/fault gates remain open.
 
 ### Slice210b schema plan — exact handoff replay after non-admission
 

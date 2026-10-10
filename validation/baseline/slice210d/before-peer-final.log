@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.29s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 1 test
+
+thread 'peer_driver::disconnected::failed_peer_releases_saturated_output_without_waiting_for_reconnect' (297) panicked at tests/support/peer_driver_disconnected.rs:35:5:
+assertion `left == right` failed
+  left: None
+ right: Some(MonoTime(501))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test peer_driver::disconnected::failed_peer_releases_saturated_output_without_waiting_for_reconnect ... FAILED
+
+failures:
+
+failures:
+    peer_driver::disconnected::failed_peer_releases_saturated_output_without_waiting_for_reconnect
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 169 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`
