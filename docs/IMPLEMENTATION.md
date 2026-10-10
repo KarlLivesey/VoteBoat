@@ -74,7 +74,7 @@ cause and revise this sketch before another material change.
 
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
-| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
+| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux, with selected macOS operator histories passing. Full macOS cleanup/operator acceptance and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; bounded coordinated drain197 is implemented for explicit original plans; broader recovery and platform acceptance remain open. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
@@ -534,24 +534,58 @@ deadlines. Production functional checks are sufficient to run the original P7
 measurement while platform feedback remains background. Broader provider/fault,
 deployment/platform and full P0–P7 acceptance stay open; security stays with Daybreak.
 
-Current: repeat the original P7 committed/applied latency profile with the
-corrected transport after its functional checks, while platform feedback runs.
-Depend on the recorded benchmark workload, durability, offered load and hardware
-details; keep the fixed250ms serial TCP p99 gate unchanged. Completion requires
-reproducible committed/applied results and a cause-specific correction if the
-original gate still fails, plus contract/recovery checks for any changed path.
-This advances measured tuning; broader fault/provider and deployment obligations
-remain explicit in the full P0–P7 acceptance ledger.
+Measured222: the unchanged disk serial TCP reference completes256 useful receipts,
+all-replica value320 recovery, original retries and worker joins. Raw checks pass;
+the provenance-bound fixed gate fails at471.057ms p99 versus250ms,7.890 ops/s.
+The existing journal diagnostic also completes recovery/joins, with872.815ms p99
+and4.945 ops/s; it is instrumented and cannot replace the reference. Per-replica
+recorded measurement deltas have511/512 log synchronizations and manifest
+publications. Log sync consumes11.42–12.18s, manifest file sync10.27–11.55s and
+directory sync10.25–12.00s per replica; open/write/rename are much shorter.
+Parallel/live-boundary durations do not prove an operation's critical path.
+Host poll maxima are0.855ms reference/0.542ms diagnostic. This selects durability
+publication for investigation without adopting a candidate or relaxing semantics.
+Both runs use the original8-byte/64-warmup/256/window1 workload and timers on the
+shared Btrfs/NVMe host; no new tests/builds overlap measurement. Toolchain, raw
+files, source/binary/context hashes, host activity and gate failure are retained.
+The initial serial-checker child-spawn EPERM is distinct from the actual failed
+gate; the permission-enabled unchanged checker runs its required raw validator.
+Formatting/four strict Clippy configurations pass with zero diagnostics.
 
-Next: isolate the retained220 platform failures by their earliest exact boundary.
-Purpose: finish usable-service/P4/platform recovery. Depend on original21101/
-17012 configuration records,19701 drain sequence and node1's actual Closed exit,
-plus retained logs and fresh221 platform results. Sketch known non-admission,
-unknown work and owned shutdown before selecting a correction; these different
-outcomes cannot share an unchecked retry rule. Completion requires exact original
-receipts/state, refusal of changed records, bounded cleanup and relevant native
-TCP/QUIC recovery plus matching platform evidence. Do not widen timers or make
-CI a prerequisite for the independent measurement/provider deliverables.
+Matching221 run38054779549 macOS counter170 passes/1 fails before later targets:
+membership_drain_recovery_refuses_changed_or_omitted_original_plan fails in
+Cluster::stop after restored-plan cancellation/resuming=false. Node2 acknowledges
+quit but exits1 with Closed instead of the required clean join. This identifies
+shutdown, not initial startup, as the observed boundary; root cause is not yet
+proved. Selected original write/assignment/configuration/runner histories pass
+on this source. Terminal matching Ubuntu passes171/22/21. Preceding220
+Ubuntu completes166/22/21 successfully; its macOS162/4 failures stay separate.
+
+Macro review222 closes the planned original reference measurement, not the failed
+P7 latency criterion. Aggregate durability timings identify a focused next
+investigation; no optimization is adopted from them. Matching macOS evidence
+narrows immediate usable-service/P4 work to a clean-shutdown failure. Keep that
+functional milestone first, while broader faults/provider/deployment and P0–P7
+acceptance remain open. Broad security stays with Daybreak.
+
+Current: reproduce the matching221 Closed exit at the exact shutdown boundary.
+Purpose: complete usable-service/P4 clean-stop behavior. Depend on original19701
+membership-drain recovery/cancellation, resuming=false, explicit quit and original
+owned Node/worker/admin completion contracts. Trace shutdown ownership before
+editing; do not suppress Closed globally or reinterpret exit1 as success.
+Completion requires actual bounded quiesce/drain/join, no new proposals after
+shutdown starts, preserved original records/receipts and TCP/QUIC evidence plus
+matching macOS confirmation. CI stays background; no timer widening.
+
+Next: attribute the failed P7 gate to exact durability operations before selecting
+a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
+250ms serial TCP gate. Depend on222's raw reference/diagnostic, one authoritative
+log-store binding and existing JournalIo/native publication contracts; reread the
+design's required storage/consensus chapters before any redesign. Completion
+requires original-operation attribution and a bounded cause-specific candidate
+with meaningful crash/ownership checks, followed by the unchanged reference gate.
+Aggregate file-call durations alone cannot justify fewer durability barriers or
+optimistic voter evidence. No speculative rewrite or replacement workload.
 
 Following: review the next uncovered replacement-provider operation set through
 shared downstream/native checks. Purpose: make the promised mix-and-match Rust
@@ -561,6 +595,51 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice222 schema plan — unchanged serial TCP performance gate
+
+Purpose/dependencies: execute the current P7 mini item on the corrected transport,
+after221's functional checks. Inspect the original checker/workload rather than
+replace its failing250ms p99 gate with offered load, batching or tmpfs evidence.
+This advances measured tuning and leaves platform CI in the background.
+
+Data/API: build the existing release native_benchmark; use a fresh workspace
+disk directory, TCP/TLS native startup, three logical replicas, one group,
+64 warmup plus256 measured8-byte writes and window1. Keep heartbeat50ms,
+election1000ms+1000ms, one authoritative WAL/worker and unchanged File::sync_all,
+manifest rename and directory synchronization. Record exact source/binary hashes,
+hardware/filesystem/mount provenance and pre-run host activity. No new runtime,
+provider seam, benchmark mode, instrumentation or production edit for this run.
+
+Transitions/ownership: create -> campaign -> warmup/fresh reads -> measured
+original receipts -> checkpoint/full close/join -> recover -> original retries
+and reads -> final close/join -> summary publication. The example's existing
+failure path retains partial samples and joins selected workers; partial data is
+not a completed measurement. Preserve the fresh run directory and its outputs.
+Do not overlap new builds/native suites with measurement. Shared desktop/device
+activity and one physical host remain explicit; no CPU isolation is claimed.
+
+Acceptance: validate raw receipt/index/value/window/latency arithmetic, actual
+recovery/retry/join flags, and provenance-bound summary/sample hashes with the
+unchanged serial checker. Record both process and gate outcomes. If the fixed
+gate fails, preserve it and select a cause-specific diagnostic using existing
+journal/publication timing instead of timer/durability relaxation or speculative
+rewrites. A diagnostic cannot replace the uninstrumented reference. Separate
+finite profile acceptance from sustainable capacity, wider P7 and whole-platform
+acceptance; broad security/P8/Windows remain deferred and full P0–P7 stays active.
+
+Measured222 reference: the original uninstrumented run completes256 measured
+receipts, recovers320, verifies original retries and joins workers. Raw arithmetic
+passes; the fixed gate reports471.057ms p99 versus250ms, so it remains unmet.
+The initial checker invocation hits sandbox child-spawn EPERM, retained separately;
+the unchanged child-validating checker runs with the required permission and
+reports the actual failed gate. Do not conflate that sandbox refusal with latency.
+Next diagnostic: run the existing --journal-timings mode on another fresh disk
+directory with identical workload/timers/durability, after the reference process
+is terminal. Validate raw receipts plus per-replica log-sync/publication and the
+open/write/file-sync/rename/directory-sync counters. These overlapping file-call
+durations can select a cause-specific investigation, not prove one operation's
+critical path or replace the uninstrumented gate. No candidate protocol change.
 
 ### Slice221 schema plan — original write continuation at two caller boundaries
 

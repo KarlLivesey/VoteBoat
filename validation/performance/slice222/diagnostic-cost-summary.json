@@ -1,0 +1,44 @@
+{
+  "scope": "Derived from validated recorded measurement counter deltas; live boundaries may cut calls, durations overlap across replicas, not per-operation critical path.",
+  "rows": [
+    {
+      "replica": "1",
+      "log_sync_calls": 512,
+      "log_sync_ms": 12181.719413,
+      "manifest_calls": 512,
+      "manifest_ms": 20796.203903,
+      "log_sync_mean_ms": 23.792420728515626,
+      "open_ms": 9.835383,
+      "write_ms": 3.402161,
+      "file_sync_ms": 10272.686898,
+      "rename_ms": 259.667224,
+      "directory_sync_ms": 10249.355793
+    },
+    {
+      "replica": "2",
+      "log_sync_calls": 511,
+      "log_sync_ms": 11423.214397,
+      "manifest_calls": 511,
+      "manifest_ms": 23853.678376,
+      "log_sync_mean_ms": 22.354627,
+      "open_ms": 9.234342,
+      "write_ms": 3.219789,
+      "file_sync_ms": 11553.929901,
+      "rename_ms": 283.198121,
+      "directory_sync_ms": 12002.826295
+    },
+    {
+      "replica": "3",
+      "log_sync_calls": 511,
+      "log_sync_ms": 12093.718105,
+      "manifest_calls": 511,
+      "manifest_ms": 23540.218402,
+      "log_sync_mean_ms": 23.666767328767126,
+      "open_ms": 8.854435,
+      "write_ms": 3.140536,
+      "file_sync_ms": 11225.569288,
+      "rename_ms": 298.020496,
+      "directory_sync_ms": 12003.414533
+    }
+  ]
+}

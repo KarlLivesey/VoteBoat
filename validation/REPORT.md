@@ -1,5 +1,20 @@
 # Validation report — slice 35
 
+Original P7 measurement: [slice222](performance/slice222/README.md). The unmodified
+disk TCP/startup3-replica/1-group/256-after64/window1 reference completes recovery320,
+original retries and worker joins. Raw receipts and provenance checks pass; the
+unchanged250ms gate fails at471.057ms p99,7.890 ops/s. The instrumented diagnostic
+also completes, with872.815ms p99, and passes journal/publication checks. Its
+overlapping recorded per-replica log/file/directory-sync time selects durability
+publication for further attribution, not a safe optimization or critical-path
+proof. Hardware/activity/toolchain/source/binary and raw failures remain retained.
+Initial checker child-spawn EPERM is separate; permission-enabled validation runs
+the unchanged checker. Formatting/four strict profiles stay zero. Matching221
+macOS counter170/1 fails specifically in clean stop after membership-drain recovery/
+cancellation, with node2 Closed exit1. Later macOS targets are unrun; matching
+Ubuntu171/22/21 passes. Preceding220 Ubuntu166/22/21 passes. Full P7,
+platform/fault/deployment and P0–P7 acceptance remain open; security stays with Daybreak.
+
 Original write caller recovery: [slice221](baseline/slice221/README.md). The old
 narrow policy passes1 scripted case/fails3 on the recorded Busy/deadline boundaries.
 The shared test-only continuation passes5 cases, retaining original arguments,

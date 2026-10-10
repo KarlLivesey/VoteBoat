@@ -1,0 +1,518 @@
+﻿2026-10-10T13:02:02.6887885Z Current runner version: '2.337.0'
+2026-10-10T13:02:02.6912738Z ##[group]Runner Image Provisioner
+2026-10-10T13:02:02.6913698Z Hosted Compute Agent
+2026-10-10T13:02:02.6914359Z Version: 20261002.596
+2026-10-10T13:02:02.6915098Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-10T13:02:02.6915876Z Build Date: 2026-10-02T22:28:27Z
+2026-10-10T13:02:02.6916890Z Worker ID: {92d1d03b-e1a8-4f9c-bd89-b353eea9f7f5}
+2026-10-10T13:02:02.6917689Z Region: northcentralus
+2026-10-10T13:02:02.6918338Z Cloud: Azure
+2026-10-10T13:02:02.6918884Z ##[endgroup]
+2026-10-10T13:02:02.6920448Z ##[group]Operating System
+2026-10-10T13:02:02.6921099Z Ubuntu
+2026-10-10T13:02:02.6921699Z 24.04.5
+2026-10-10T13:02:02.6922295Z LTS
+2026-10-10T13:02:02.6922870Z ##[endgroup]
+2026-10-10T13:02:02.6923636Z ##[group]Runner Image
+2026-10-10T13:02:02.6924254Z Image: ubuntu-24.04
+2026-10-10T13:02:02.6924890Z Version: 20261004.327.1
+2026-10-10T13:02:02.6926411Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-10T13:02:02.6928377Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-10T13:02:02.6929418Z ##[endgroup]
+2026-10-10T13:02:02.6930622Z ##[group]GITHUB_TOKEN Permissions
+2026-10-10T13:02:02.6932862Z Contents: read
+2026-10-10T13:02:02.6933542Z Metadata: read
+2026-10-10T13:02:02.6934173Z ##[endgroup]
+2026-10-10T13:02:02.6936584Z Secret source: Actions
+2026-10-10T13:02:02.6937769Z Cache mode: write
+2026-10-10T13:02:02.6938687Z Prepare workflow directory
+2026-10-10T13:02:02.7346611Z Prepare all required actions
+2026-10-10T13:02:02.7403653Z Getting action download info
+2026-10-10T13:02:02.9933337Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-10T13:02:03.0873978Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-10T13:02:03.2994557Z Complete job name: Operators on ubuntu-latest
+2026-10-10T13:02:03.3751519Z ##[group]Run actions/checkout@v4
+2026-10-10T13:02:03.3752341Z with:
+2026-10-10T13:02:03.3752804Z   repository: KarlLivesey/VoteBoat
+2026-10-10T13:02:03.3757039Z   token: ***
+2026-10-10T13:02:03.3757497Z   ssh-strict: true
+2026-10-10T13:02:03.3757945Z   ssh-user: git
+2026-10-10T13:02:03.3758394Z   persist-credentials: true
+2026-10-10T13:02:03.3758879Z   clean: true
+2026-10-10T13:02:03.3759317Z   sparse-checkout-cone-mode: true
+2026-10-10T13:02:03.3759831Z   fetch-depth: 1
+2026-10-10T13:02:03.3760271Z   fetch-tags: false
+2026-10-10T13:02:03.3760710Z   show-progress: true
+2026-10-10T13:02:03.3761153Z   lfs: false
+2026-10-10T13:02:03.3761565Z   submodules: false
+2026-10-10T13:02:03.3762013Z   set-safe-directory: true
+2026-10-10T13:02:03.3762512Z   allow-unsafe-pr-checkout: false
+2026-10-10T13:02:03.3763275Z env:
+2026-10-10T13:02:03.3763692Z   CARGO_TERM_COLOR: never
+2026-10-10T13:02:03.3764163Z   RUST_BACKTRACE: 1
+2026-10-10T13:02:03.3764593Z ##[endgroup]
+2026-10-10T13:02:03.4788862Z Syncing repository: KarlLivesey/VoteBoat
+2026-10-10T13:02:03.4791342Z ##[group]Getting Git version info
+2026-10-10T13:02:03.4792411Z Working directory is '/home/runner/work/VoteBoat/VoteBoat'
+2026-10-10T13:02:03.4793504Z [command]/usr/bin/git version
+2026-10-10T13:02:03.4876282Z git version 2.55.0
+2026-10-10T13:02:03.4896281Z ##[endgroup]
+2026-10-10T13:02:03.4917667Z Temporarily overriding HOME='/home/runner/work/_temp/aa843857-54b6-4d74-afde-9c7ead816a41' before making global git config changes
+2026-10-10T13:02:03.4922473Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T13:02:03.4924612Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VoteBoat/VoteBoat
+2026-10-10T13:02:03.4971917Z Deleting the contents of '/home/runner/work/VoteBoat/VoteBoat'
+2026-10-10T13:02:03.4977040Z ##[group]Initializing the repository
+2026-10-10T13:02:03.4980830Z [command]/usr/bin/git init /home/runner/work/VoteBoat/VoteBoat
+2026-10-10T13:02:03.5079449Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-10T13:02:03.5081287Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-10T13:02:03.5082266Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-10T13:02:03.5082995Z hint: call:
+2026-10-10T13:02:03.5083409Z hint:
+2026-10-10T13:02:03.5083937Z hint: 	git config --global init.defaultBranch <name>
+2026-10-10T13:02:03.5084584Z hint:
+2026-10-10T13:02:03.5085178Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-10T13:02:03.5086356Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-10T13:02:03.5087468Z hint:
+2026-10-10T13:02:03.5087930Z hint: 	git branch -m <name>
+2026-10-10T13:02:03.5088414Z hint:
+2026-10-10T13:02:03.5089038Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-10T13:02:03.5094972Z Initialized empty Git repository in /home/runner/work/VoteBoat/VoteBoat/.git/
+2026-10-10T13:02:03.5104636Z [command]/usr/bin/git remote add origin https://github.com/KarlLivesey/VoteBoat
+2026-10-10T13:02:03.5150193Z ##[endgroup]
+2026-10-10T13:02:03.5151417Z ##[group]Disabling automatic garbage collection
+2026-10-10T13:02:03.5155601Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-10T13:02:03.5202707Z ##[endgroup]
+2026-10-10T13:02:03.5204009Z ##[group]Setting up auth
+2026-10-10T13:02:03.5205237Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T13:02:03.5243580Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T13:02:03.5596135Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T13:02:03.5641321Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T13:02:03.5895445Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T13:02:03.5934637Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T13:02:03.6174851Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-10T13:02:03.6218065Z ##[endgroup]
+2026-10-10T13:02:03.6219307Z ##[group]Fetching the repository
+2026-10-10T13:02:03.6228643Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +f1688c4ea972543082f75719a09b937570776634:refs/remotes/origin/main
+2026-10-10T13:02:04.6457840Z From https://github.com/KarlLivesey/VoteBoat
+2026-10-10T13:02:04.6459675Z  * [new ref]         f1688c4ea972543082f75719a09b937570776634 -> origin/main
+2026-10-10T13:02:04.6463608Z ##[endgroup]
+2026-10-10T13:02:04.6465391Z ##[group]Determining the checkout info
+2026-10-10T13:02:04.6467355Z ##[endgroup]
+2026-10-10T13:02:04.6487228Z [command]/usr/bin/git sparse-checkout disable
+2026-10-10T13:02:04.6528353Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-10T13:02:04.6565715Z ##[group]Checking out the ref
+2026-10-10T13:02:04.6571137Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-10T13:02:04.8320008Z Switched to a new branch 'main'
+2026-10-10T13:02:04.8322127Z branch 'main' set up to track 'origin/main'.
+2026-10-10T13:02:04.8333555Z ##[endgroup]
+2026-10-10T13:02:04.8383231Z [command]/usr/bin/git log -1 --format=%H
+2026-10-10T13:02:04.8413315Z f1688c4ea972543082f75719a09b937570776634
+2026-10-10T13:02:04.8676570Z ##[group]Run rustup toolchain install 1.98.1 --profile minimal
+2026-10-10T13:02:04.8678560Z [36;1mrustup toolchain install 1.98.1 --profile minimal[0m
+2026-10-10T13:02:04.8922604Z shell: /usr/bin/bash -e {0}
+2026-10-10T13:02:04.8923816Z env:
+2026-10-10T13:02:04.8925039Z   CARGO_TERM_COLOR: never
+2026-10-10T13:02:04.8926330Z   RUST_BACKTRACE: 1
+2026-10-10T13:02:04.8927350Z ##[endgroup]
+2026-10-10T13:02:04.9429078Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+2026-10-10T13:02:05.0480323Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T13:02:05.0482324Z info: downloading 3 components
+2026-10-10T13:02:12.7636604Z 
+2026-10-10T13:02:12.7710392Z   1.98.1-x86_64-unknown-linux-gnu installed - rustc 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T13:02:12.7711064Z 
+2026-10-10T13:02:12.7802005Z ##[group]Run cargo fetch --locked
+2026-10-10T13:02:12.7802381Z [36;1mcargo fetch --locked[0m
+2026-10-10T13:02:12.7875233Z shell: /usr/bin/bash -e {0}
+2026-10-10T13:02:12.7875566Z env:
+2026-10-10T13:02:12.7875824Z   CARGO_TERM_COLOR: never
+2026-10-10T13:02:12.7876306Z   RUST_BACKTRACE: 1
+2026-10-10T13:02:12.7876576Z ##[endgroup]
+2026-10-10T13:02:12.8494959Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+2026-10-10T13:02:12.9368313Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+2026-10-10T13:02:12.9488436Z info: downloading 2 components
+2026-10-10T13:02:13.6288078Z     Updating crates.io index
+2026-10-10T13:02:13.7510653Z  Downloading crates ...
+2026-10-10T13:02:13.7914231Z   Downloaded web-time v1.1.0
+2026-10-10T13:02:13.7934621Z   Downloaded untrusted v0.9.0
+2026-10-10T13:02:13.7952283Z   Downloaded rustls-pki-types v1.15.1
+2026-10-10T13:02:13.7980068Z   Downloaded subtle v2.6.1
+2026-10-10T13:02:13.7992599Z   Downloaded zeroize v1.9.1
+2026-10-10T13:02:13.8009912Z   Downloaded rustls-webpki v0.103.15
+2026-10-10T13:02:13.8042096Z   Downloaded rustc-hash v2.1.3
+2026-10-10T13:02:13.8056289Z   Downloaded chacha20 v0.10.2
+2026-10-10T13:02:13.8082289Z   Downloaded futures-task v0.3.34
+2026-10-10T13:02:13.8097047Z   Downloaded thiserror-impl v2.0.21
+2026-10-10T13:02:13.8113772Z   Downloaded getrandom v0.4.3
+2026-10-10T13:02:13.8226889Z   Downloaded quote v1.0.47
+2026-10-10T13:02:13.8229167Z   Downloaded rand_pcg v0.10.2
+2026-10-10T13:02:13.8230573Z   Downloaded lru-slab v0.1.3
+2026-10-10T13:02:13.8232514Z   Downloaded cfg-if v1.0.5
+2026-10-10T13:02:13.8250212Z   Downloaded cpufeatures v0.3.1
+2026-10-10T13:02:13.8265448Z   Downloaded wasm-bindgen-macro v0.2.129
+2026-10-10T13:02:13.8275314Z   Downloaded futures-core v0.3.34
+2026-10-10T13:02:13.8290561Z   Downloaded r-efi v6.0.0
+2026-10-10T13:02:13.8345407Z   Downloaded rustls v0.23.45
+2026-10-10T13:02:13.8471210Z   Downloaded wasm-bindgen-shared v0.2.129
+2026-10-10T13:02:13.8482706Z   Downloaded rustversion v1.0.23
+2026-10-10T13:02:13.8512464Z   Downloaded slab v0.4.12
+2026-10-10T13:02:13.8525841Z   Downloaded pin-project-lite v0.2.17
+2026-10-10T13:02:13.8588640Z   Downloaded windows-targets v0.52.6
+2026-10-10T13:02:13.8597636Z   Downloaded wasi v0.11.1+wasi-snapshot-preview1
+2026-10-10T13:02:13.8614706Z   Downloaded shlex v2.0.1
+2026-10-10T13:02:13.8628431Z   Downloaded find-msvc-tools v0.1.14
+2026-10-10T13:02:13.8645256Z   Downloaded thiserror v2.0.21
+2026-10-10T13:02:13.8714069Z   Downloaded rand_core v0.10.1
+2026-10-10T13:02:13.8731152Z   Downloaded getrandom v0.2.17
+2026-10-10T13:02:13.8762747Z   Downloaded tinyvec v1.13.3
+2026-10-10T13:02:13.8799466Z   Downloaded unicode-ident v1.0.26
+2026-10-10T13:02:13.8828945Z   Downloaded once_cell v1.21.4
+2026-10-10T13:02:13.8855183Z   Downloaded proc-macro2 v1.0.107
+2026-10-10T13:02:13.8886500Z   Downloaded tracing-core v0.1.36
+2026-10-10T13:02:13.8914488Z   Downloaded rand v0.10.3
+2026-10-10T13:02:13.8954948Z   Downloaded bytes v1.12.1
+2026-10-10T13:02:13.8992171Z   Downloaded wasm-bindgen v0.2.129
+2026-10-10T13:02:13.9020929Z   Downloaded cc v1.6.0
+2026-10-10T13:02:13.9057369Z   Downloaded bumpalo v3.20.3
+2026-10-10T13:02:13.9084926Z   Downloaded js-sys v0.3.106
+2026-10-10T13:02:13.9118131Z   Downloaded wasm-bindgen-macro-support v0.2.129
+2026-10-10T13:02:13.9143960Z   Downloaded futures-util v0.3.34
+2026-10-10T13:02:13.9286259Z   Downloaded quinn-proto v0.11.19
+2026-10-10T13:02:13.9359264Z   Downloaded syn v3.0.6
+2026-10-10T13:02:13.9471075Z   Downloaded windows_x86_64_gnullvm v0.52.6
+2026-10-10T13:02:13.9552375Z   Downloaded windows_aarch64_gnullvm v0.52.6
+2026-10-10T13:02:13.9633741Z   Downloaded tracing v0.1.44
+2026-10-10T13:02:13.9800554Z   Downloaded windows_i686_gnullvm v0.52.6
+2026-10-10T13:02:13.9887074Z   Downloaded windows_x86_64_gnu v0.52.6
+2026-10-10T13:02:14.0079092Z   Downloaded windows_x86_64_msvc v0.52.6
+2026-10-10T13:02:14.0201867Z   Downloaded windows_i686_gnu v0.52.6
+2026-10-10T13:02:14.0402349Z   Downloaded windows_i686_msvc v0.52.6
+2026-10-10T13:02:14.0534472Z   Downloaded windows_aarch64_msvc v0.52.6
+2026-10-10T13:02:14.0666696Z   Downloaded libc v0.2.190
+2026-10-10T13:02:14.1185249Z   Downloaded ring v0.17.14
+2026-10-10T13:02:14.1631408Z   Downloaded windows-sys v0.52.0
+2026-10-10T13:02:14.2537147Z ##[group]Run set -o pipefail
+2026-10-10T13:02:14.2537478Z [36;1mset -o pipefail[0m
+2026-10-10T13:02:14.2537782Z [36;1mcargo test --locked --offline --all-features \[0m
+2026-10-10T13:02:14.2538271Z [36;1m  --test counter_service --test directory_service --test transfer_service \[0m
+2026-10-10T13:02:14.2538712Z [36;1m  2>&1 | tee operator-recovery.log[0m
+2026-10-10T13:02:14.2609172Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-10T13:02:14.2609522Z env:
+2026-10-10T13:02:14.2609729Z   CARGO_TERM_COLOR: never
+2026-10-10T13:02:14.2609968Z   RUST_BACKTRACE: 1
+2026-10-10T13:02:14.2610199Z   TMPDIR: /home/runner/work/_temp
+2026-10-10T13:02:14.2610456Z ##[endgroup]
+2026-10-10T13:02:14.3614821Z    Compiling libc v0.2.190
+2026-10-10T13:02:14.3615310Z    Compiling shlex v2.0.1
+2026-10-10T13:02:14.3616597Z    Compiling cfg-if v1.0.5
+2026-10-10T13:02:14.3617190Z    Compiling find-msvc-tools v0.1.14
+2026-10-10T13:02:14.3962750Z    Compiling proc-macro2 v1.0.107
+2026-10-10T13:02:14.4698712Z    Compiling quote v1.0.47
+2026-10-10T13:02:14.5518730Z    Compiling cc v1.6.0
+2026-10-10T13:02:14.6462358Z    Compiling unicode-ident v1.0.26
+2026-10-10T13:02:14.7334806Z    Compiling rand_core v0.10.1
+2026-10-10T13:02:14.8447178Z    Compiling untrusted v0.9.0
+2026-10-10T13:02:14.8913802Z    Compiling zeroize v1.9.1
+2026-10-10T13:02:15.0108837Z    Compiling getrandom v0.4.3
+2026-10-10T13:02:15.3206825Z    Compiling once_cell v1.21.4
+2026-10-10T13:02:15.3541035Z    Compiling syn v3.0.6
+2026-10-10T13:02:15.4588628Z    Compiling rustls-pki-types v1.15.1
+2026-10-10T13:02:15.7308299Z    Compiling getrandom v0.2.17
+2026-10-10T13:02:15.8494015Z    Compiling rustls v0.23.45
+2026-10-10T13:02:15.8908631Z    Compiling thiserror v2.0.21
+2026-10-10T13:02:15.9347202Z    Compiling cpufeatures v0.3.1
+2026-10-10T13:02:15.9617177Z    Compiling chacha20 v0.10.2
+2026-10-10T13:02:16.1452460Z    Compiling ring v0.17.14
+2026-10-10T13:02:16.1618300Z    Compiling tracing-core v0.1.36
+2026-10-10T13:02:16.2797930Z    Compiling pin-project-lite v0.2.17
+2026-10-10T13:02:16.3137132Z    Compiling subtle v2.6.1
+2026-10-10T13:02:16.3947319Z    Compiling rand v0.10.3
+2026-10-10T13:02:16.7139823Z    Compiling tracing v0.1.44
+2026-10-10T13:02:16.8827229Z    Compiling rand_pcg v0.10.2
+2026-10-10T13:02:16.9687183Z    Compiling tinyvec v1.13.3
+2026-10-10T13:02:17.0064362Z    Compiling bytes v1.12.1
+2026-10-10T13:02:17.2647183Z    Compiling lru-slab v0.1.3
+2026-10-10T13:02:17.3357415Z    Compiling slab v0.4.12
+2026-10-10T13:02:17.4397975Z    Compiling rustc-hash v2.1.3
+2026-10-10T13:02:17.5593918Z    Compiling thiserror-impl v2.0.21
+2026-10-10T13:02:20.0567415Z    Compiling rustls-webpki v0.103.15
+2026-10-10T13:02:22.3661917Z    Compiling quinn-proto v0.11.19
+2026-10-10T13:02:24.1917502Z    Compiling voteboat v0.1.0 (/home/runner/work/VoteBoat/VoteBoat)
+2026-10-10T13:02:53.9425892Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 39.64s
+2026-10-10T13:02:53.9475158Z      Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+2026-10-10T13:02:53.9492880Z 
+2026-10-10T13:02:53.9493289Z running 166 tests
+2026-10-10T13:02:53.9978395Z test assignments::single_group_inventory_does_not_require_a_leader ... ok
+2026-10-10T13:02:55.8169203Z test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+2026-10-10T13:02:55.8816673Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+2026-10-10T13:02:55.8902765Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+2026-10-10T13:02:55.9454171Z test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+2026-10-10T13:02:56.8835651Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+2026-10-10T13:02:56.9985017Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+2026-10-10T13:03:01.7930387Z test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... ok
+2026-10-10T13:03:03.1301917Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+2026-10-10T13:03:03.1498568Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+2026-10-10T13:03:03.7415275Z test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+2026-10-10T13:03:04.2107650Z test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+2026-10-10T13:03:04.8102810Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+2026-10-10T13:03:04.9269102Z test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+2026-10-10T13:03:06.1519061Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+2026-10-10T13:03:06.1604469Z test command_discovery::peer_source::invalid_peer_source_refuses_before_opening_store ... ok
+2026-10-10T13:03:06.5359196Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_quic ... ok
+2026-10-10T13:03:06.5705217Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_tcp ... ok
+2026-10-10T13:03:06.5745221Z test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+2026-10-10T13:03:06.5817795Z test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+2026-10-10T13:03:06.5906938Z test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+2026-10-10T13:03:06.5956731Z test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+2026-10-10T13:03:07.0883759Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+2026-10-10T13:03:09.6076613Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+2026-10-10T13:03:09.6398845Z test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+2026-10-10T13:03:09.6972832Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_quic ... ok
+2026-10-10T13:03:10.0486977Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+2026-10-10T13:03:13.5130110Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+2026-10-10T13:03:13.6365458Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+2026-10-10T13:03:15.2420610Z test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+2026-10-10T13:03:16.5238055Z test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+2026-10-10T13:03:16.9332647Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+2026-10-10T13:03:17.7763968Z test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+2026-10-10T13:03:17.9099351Z test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... ok
+2026-10-10T13:03:18.1053440Z test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... ok
+2026-10-10T13:03:18.6139755Z test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+2026-10-10T13:03:18.7330554Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+2026-10-10T13:03:19.4649293Z test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+2026-10-10T13:03:20.0173299Z test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+2026-10-10T13:03:20.1144257Z test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+2026-10-10T13:03:29.0134885Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+2026-10-10T13:03:29.3864367Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+2026-10-10T13:03:29.7994422Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+2026-10-10T13:03:29.8400854Z test drain_runner::confirmation::caller_bounds_unknown_invocations_and_preserves_terminal_refusals ... ok
+2026-10-10T13:03:29.8402797Z test drain_runner::confirmation::caller_refuses_wrong_duplicate_and_unconfirmed_success_fields ... ok
+2026-10-10T13:03:29.8507872Z test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... ok
+2026-10-10T13:03:31.1301925Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+2026-10-10T13:03:31.3611866Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+2026-10-10T13:03:33.2858466Z test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+2026-10-10T13:03:33.4201517Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+2026-10-10T13:03:33.5576788Z test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+2026-10-10T13:03:33.9906202Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+2026-10-10T13:03:35.4378434Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+2026-10-10T13:03:35.6167310Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+2026-10-10T13:03:36.8516817Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+2026-10-10T13:03:37.7118933Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+2026-10-10T13:03:37.7123035Z test failure_diagnostics::failure_diagnostics_preserve_scope_and_never_reissue_the_failed_write ... ok
+2026-10-10T13:03:37.7637965Z test failure_diagnostics::failure_diagnostics_stop_at_fixture_gate_deadline_without_spawning ... ok
+2026-10-10T13:03:37.7649531Z test failure_diagnostics::failure_diagnostics_stop_at_shared_deadline_and_bound_node_count ... ok
+2026-10-10T13:03:37.8167179Z test failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller ... ok
+2026-10-10T13:03:38.2087117Z test drain_runner::killed_quic_runner_and_source_resume_original_durable_plan ... ok
+2026-10-10T13:03:41.2520948Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+2026-10-10T13:03:41.3719754Z test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+2026-10-10T13:03:41.4117560Z test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+2026-10-10T13:03:41.6774014Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+2026-10-10T13:03:41.9932258Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... ok
+2026-10-10T13:03:43.5917851Z test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+2026-10-10T13:03:43.7597254Z test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+2026-10-10T13:03:43.8640163Z test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+2026-10-10T13:03:43.9733369Z test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+2026-10-10T13:03:46.9995397Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+2026-10-10T13:03:47.4574216Z test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... ok
+2026-10-10T13:03:47.9170229Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+2026-10-10T13:03:48.1099331Z test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+2026-10-10T13:03:50.1623847Z test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+2026-10-10T13:03:50.8347570Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+2026-10-10T13:03:52.8973975Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+2026-10-10T13:03:57.5917851Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... ok
+2026-10-10T13:03:57.9889904Z test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic ... ok
+2026-10-10T13:03:58.2816994Z test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... ok
+2026-10-10T13:04:00.2027121Z test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+2026-10-10T13:04:02.2739659Z test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... ok
+2026-10-10T13:04:03.0006220Z test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+2026-10-10T13:04:03.1342687Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+2026-10-10T13:04:03.1495660Z test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+2026-10-10T13:04:03.1611307Z test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+2026-10-10T13:04:05.0123628Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... ok
+2026-10-10T13:04:07.8743826Z test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+2026-10-10T13:04:07.9527653Z test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+2026-10-10T13:04:09.5413080Z test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic ... ok
+2026-10-10T13:04:09.9741139Z test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp ... ok
+2026-10-10T13:04:09.9796813Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+2026-10-10T13:04:10.0337699Z test invalid_administration_is_rejected_before_store_open ... ok
+2026-10-10T13:04:10.0822508Z test invalid_deployment_is_rejected_before_store_creation ... ok
+2026-10-10T13:04:10.0854197Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+2026-10-10T13:04:11.9267597Z test history::quic_faulted_client_histories_are_linearizable ... ok
+2026-10-10T13:04:12.0137574Z test groups::authenticated_group_commands_quic_recover_independent_histories ... ok
+2026-10-10T13:04:12.8023511Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+2026-10-10T13:04:15.8442300Z test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+2026-10-10T13:04:18.5307159Z test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+2026-10-10T13:04:19.2395955Z test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+2026-10-10T13:04:19.5942049Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+2026-10-10T13:04:22.4181933Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_quic ... ok
+2026-10-10T13:04:22.4269767Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_tcp ... ok
+2026-10-10T13:04:23.0668238Z test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+2026-10-10T13:04:23.6639422Z test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+2026-10-10T13:04:23.7285636Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+2026-10-10T13:04:24.3835680Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+2026-10-10T13:04:24.5287762Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+2026-10-10T13:04:24.5363819Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+2026-10-10T13:04:24.5458487Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+2026-10-10T13:04:24.8599286Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+2026-10-10T13:04:25.1241850Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+2026-10-10T13:04:25.7744127Z test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+2026-10-10T13:04:26.3199331Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+2026-10-10T13:04:27.5210377Z test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+2026-10-10T13:04:27.5349011Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+2026-10-10T13:04:27.8253534Z test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+2026-10-10T13:04:28.7834781Z test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+2026-10-10T13:04:29.5599666Z test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+2026-10-10T13:04:30.0818624Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+2026-10-10T13:04:30.3421770Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+2026-10-10T13:04:37.3156256Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+2026-10-10T13:04:38.4282039Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+2026-10-10T13:04:39.2608771Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+2026-10-10T13:04:39.6091653Z test peer_credentials::peer_administration_uses_actual_local_scopes_without_requiring_group_one ... ok
+2026-10-10T13:04:44.1823340Z test peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+2026-10-10T13:04:46.2368183Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+2026-10-10T13:04:50.1570409Z test peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+2026-10-10T13:04:50.2104842Z test peer_credentials::quic_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+2026-10-10T13:04:53.1752164Z test peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+2026-10-10T13:04:54.4612198Z test peer_credentials::tcp_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+2026-10-10T13:04:55.7393502Z test peer_credentials::tcp_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+2026-10-10T13:04:58.3716228Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+2026-10-10T13:04:58.7201967Z test peer_discovery::discovered_member_recovery_and_peer_rotation_tcp ... ok
+2026-10-10T13:04:58.7656683Z test peer_discovery::discovered_member_recovery_and_peer_rotation_quic ... ok
+2026-10-10T13:05:03.3683131Z test peer_discovery::discovered_shared_groups_and_peer_rotation_tcp ... ok
+2026-10-10T13:05:05.0828973Z test peer_discovery::discovered_shared_groups_and_peer_rotation_quic ... ok
+2026-10-10T13:05:05.1135464Z test peer_discovery::malformed_peer_discovery_client_refuses_before_store_creation ... ok
+2026-10-10T13:05:05.2519950Z test peer_discovery::unavailable_peer_source_does_not_block_commands_or_shutdown ... ok
+2026-10-10T13:05:05.2584855Z test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+2026-10-10T13:05:05.6567147Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_tcp ... ok
+2026-10-10T13:05:06.5148641Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_quic ... ok
+2026-10-10T13:05:06.5311656Z test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+2026-10-10T13:05:06.5559548Z test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+2026-10-10T13:05:09.0170256Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+2026-10-10T13:05:09.2159138Z test placement::generated_placement_executes_and_recovers_tcp ... ok
+2026-10-10T13:05:09.5923034Z test placement::generated_placement_executes_and_recovers_quic ... ok
+2026-10-10T13:05:09.7789378Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+2026-10-10T13:05:09.9729438Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+2026-10-10T13:05:10.7962939Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+2026-10-10T13:05:10.8137359Z test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+2026-10-10T13:05:12.4832943Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_quic ... ok
+2026-10-10T13:05:12.4860532Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+2026-10-10T13:05:12.6143355Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+2026-10-10T13:05:13.9828740Z test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+2026-10-10T13:05:16.9648224Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+2026-10-10T13:05:17.0616280Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+2026-10-10T13:05:17.9942640Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+2026-10-10T13:05:18.1115310Z test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+2026-10-10T13:05:18.9250201Z test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+2026-10-10T13:05:20.2460477Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+2026-10-10T13:05:20.7253674Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+2026-10-10T13:05:20.8168168Z test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+2026-10-10T13:05:21.7697789Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+2026-10-10T13:05:28.1547411Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+2026-10-10T13:05:28.1547958Z 
+2026-10-10T13:05:28.1548372Z test result: ok. 166 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 154.21s
+2026-10-10T13:05:28.1548943Z 
+2026-10-10T13:05:28.1553719Z      Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+2026-10-10T13:05:28.1568194Z 
+2026-10-10T13:05:28.1568412Z running 22 tests
+2026-10-10T13:05:29.8153684Z test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+2026-10-10T13:05:30.5408970Z test directory_publication_remote_reads_and_checkpoint_recovery_quic ... ok
+2026-10-10T13:05:30.5822257Z test initialization::setup_is_bounded_and_rejects_unrelated_errors_or_changed_receipts ... ok
+2026-10-10T13:05:30.5862202Z test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+2026-10-10T13:05:30.5941646Z test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+2026-10-10T13:05:30.6016875Z test initialization::setup_retries_exact_leadership_loss_and_requires_original_applied_receipt ... ok
+2026-10-10T13:05:31.5116236Z test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_quic ... ok
+2026-10-10T13:05:32.8562947Z test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_tcp ... ok
+2026-10-10T13:05:39.0937444Z test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_quic ... ok
+2026-10-10T13:05:40.6009307Z test lookup_auto::automatic_lookup_never_returns_a_hint_without_a_live_authority ... ok
+2026-10-10T13:05:42.7844409Z test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic ... ok
+2026-10-10T13:05:43.5929700Z test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+2026-10-10T13:05:43.8225480Z test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp ... ok
+2026-10-10T13:05:45.9846353Z test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... ok
+2026-10-10T13:05:46.0611784Z test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+2026-10-10T13:05:47.4609851Z test routes::recursive_route_missing_leaf_is_not_a_partial_success ... ok
+2026-10-10T13:05:48.8851529Z test routes::recursive_route_quic_and_known_child_without_ancestors ... ok
+2026-10-10T13:05:49.2359284Z test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+2026-10-10T13:05:52.9828468Z test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... ok
+2026-10-10T13:05:53.9838177Z test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+2026-10-10T13:06:01.2991713Z test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+2026-10-10T13:06:03.5957129Z test routes::recursive_route_enforces_root_observation_floors ... ok
+2026-10-10T13:06:03.5957638Z 
+2026-10-10T13:06:03.5960352Z test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.44s
+2026-10-10T13:06:03.5960914Z 
+2026-10-10T13:06:03.5961328Z      Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+2026-10-10T13:06:03.5974516Z 
+2026-10-10T13:06:03.5974791Z running 21 tests
+2026-10-10T13:06:03.6538656Z test initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal ... ok
+2026-10-10T13:06:03.6713362Z test initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt ... ok
+2026-10-10T13:06:27.9558858Z test initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts ... ok
+2026-10-10T13:06:39.4438604Z test initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data ... ok
+2026-10-10T13:07:03.5979449Z test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+2026-10-10T13:07:03.6186913Z test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+2026-10-10T13:07:09.4177763Z test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+2026-10-10T13:07:27.9590943Z test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement has been running for over 60 seconds
+2026-10-10T13:07:35.7885892Z test merge::tcp_operator_collects_both_images_before_importing_a_merge ... ok
+2026-10-10T13:07:39.4400390Z test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement has been running for over 60 seconds
+2026-10-10T13:07:48.3512245Z test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... ok
+2026-10-10T13:08:11.9556460Z test peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic ... ok
+2026-10-10T13:08:12.0416512Z test profiles::invalid_profiles_fail_before_opening_replica_files ... ok
+2026-10-10T13:08:14.2960126Z test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+2026-10-10T13:08:18.0177514Z test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+2026-10-10T13:08:38.0096480Z test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... ok
+2026-10-10T13:08:38.0640209Z test retirement_retry::retirement_confirmation_bounds_attempts_and_preserves_terminal_failures ... ok
+2026-10-10T13:08:38.0798973Z test retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss ... ok
+2026-10-10T13:08:38.1024008Z test retirement_retry::retirement_confirmation_requires_original_quorum_status_and_stable_record ... ok
+2026-10-10T13:08:43.3524224Z test retirement::tcp_retirement_recovers_unread_proposal_and_original_release_from_wal ... ok
+2026-10-10T13:08:45.0816639Z test quic_authenticated_operator_resumes_original_split_after_process_crash ... ok
+2026-10-10T13:08:48.9752082Z test retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint ... ok
+2026-10-10T13:09:05.8482273Z test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+2026-10-10T13:09:16.1552125Z test revocation::interrupted_split_resumes_under_replacement_administrator_tcp ... ok
+2026-10-10T13:09:16.9526873Z test revocation::interrupted_split_resumes_under_replacement_administrator_quic ... ok
+2026-10-10T13:09:16.9527392Z 
+2026-10-10T13:09:16.9527691Z test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 193.36s
+2026-10-10T13:09:16.9528069Z 
+2026-10-10T13:09:16.9658588Z ##[group]Run actions/upload-artifact@v4
+2026-10-10T13:09:16.9658905Z with:
+2026-10-10T13:09:16.9659278Z   name: operator-recovery-ubuntu-latest-f1688c4ea972543082f75719a09b937570776634
+2026-10-10T13:09:16.9659848Z   path: operator-recovery.log
+/home/runner/work/_temp/voteboat-service-*/*.log
+
+2026-10-10T13:09:16.9660253Z   if-no-files-found: ignore
+2026-10-10T13:09:16.9660492Z   retention-days: 14
+2026-10-10T13:09:16.9660718Z   compression-level: 6
+2026-10-10T13:09:16.9660939Z   overwrite: false
+2026-10-10T13:09:16.9661158Z   include-hidden-files: false
+2026-10-10T13:09:16.9661398Z env:
+2026-10-10T13:09:16.9661592Z   CARGO_TERM_COLOR: never
+2026-10-10T13:09:16.9661834Z   RUST_BACKTRACE: 1
+2026-10-10T13:09:16.9662039Z ##[endgroup]
+2026-10-10T13:09:17.1378841Z (node:26648) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-10T13:09:17.1379671Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-10T13:09:17.2103987Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-10T13:09:17.2105479Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact
+2026-10-10T13:09:17.2106565Z With the provided path, there will be 288 files uploaded
+2026-10-10T13:09:17.2107322Z Artifact name is valid!
+2026-10-10T13:09:17.2107700Z Root directory input is valid!
+2026-10-10T13:09:17.4560092Z Beginning upload of artifact content to blob storage
+2026-10-10T13:09:17.6919911Z (node:26648) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-10T13:09:17.8819189Z Uploaded bytes 97285
+2026-10-10T13:09:17.9214006Z Finished uploading artifact content to blob storage!
+2026-10-10T13:09:17.9214923Z SHA256 digest of uploaded artifact zip is b4cbbc7c173be7dfa46c3a35facc18e2f8ebdd331ff3137ee8c641efda1f8926
+2026-10-10T13:09:17.9217453Z Finalizing artifact upload
+2026-10-10T13:09:18.1383512Z Artifact operator-recovery-ubuntu-latest-f1688c4ea972543082f75719a09b937570776634.zip successfully finalized. Artifact ID 11670404144
+2026-10-10T13:09:18.1385271Z Artifact operator-recovery-ubuntu-latest-f1688c4ea972543082f75719a09b937570776634 has been successfully uploaded! Final size is 97285 bytes. Artifact ID is 11670404144
+2026-10-10T13:09:18.1397196Z Artifact download URL: https://github.com/KarlLivesey/VoteBoat/actions/runs/38054167141/artifacts/11670404144
+2026-10-10T13:09:18.1665628Z Post job cleanup.
+2026-10-10T13:09:18.2562455Z [command]/usr/bin/git version
+2026-10-10T13:09:18.2612249Z git version 2.55.0
+2026-10-10T13:09:18.2655320Z Temporarily overriding HOME='/home/runner/work/_temp/74e263ea-377f-41d9-a7d2-8f5b69a792d5' before making global git config changes
+2026-10-10T13:09:18.2656826Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T13:09:18.2662256Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VoteBoat/VoteBoat
+2026-10-10T13:09:18.2714232Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T13:09:18.2755588Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T13:09:18.3039013Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T13:09:18.3071174Z http.https://github.com/.extraheader
+2026-10-10T13:09:18.3085771Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-10T13:09:18.3129803Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T13:09:18.3418159Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T13:09:18.3470409Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T13:09:18.3942670Z Cleaning up orphan processes
+2026-10-10T13:09:18.4275041Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

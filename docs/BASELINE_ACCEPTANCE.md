@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice222 executes the unchanged original serial disk TCP gate. All256 raw useful
+receipts, recovery320, original retries and worker joins pass, but471.057ms p99
+exceeds250ms. Existing journal diagnostics retain synchronization costs without
+changing durability or accepting an instrumented run as the reference. No
+optimization or whole-P7 completion. Matching221 macOS counter170/1 fails at
+Cluster::stop with Closed exit1 after cancelled membership-drain recovery; later
+macOS targets are unrun. Matching Ubuntu171/22/21 and preceding220 Ubuntu166/22/21
+pass. Raw evidence and strict
+zero diagnostics remain retained; clean shutdown is the next functional boundary.
+
 Slice221 checks explicit original-write continuation at selected Busy/deadline
 caller boundaries, without changing production automatic routing or uncertainty.
 Five scripted checks pass after the old narrow policy fails3; full native

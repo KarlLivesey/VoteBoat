@@ -1,0 +1,4 @@
+phase=warmup protocol=TcpTls window=1
+phase=measurement operations=256 groups=1 leaders=1:1
+phase=recovery-verification
+protocol=TcpTls replicas=3 groups=1 assembly=startup leader_placement=1:1 wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=1000 election_spread_ms=1000 payload_bytes=8 warmup=64 operations=256 window=1 max_inflight=1 elapsed_s=32.444868 applied_ops_s=7.890 p50_us=101688.215 p95_us=233454.785 p99_us=471056.732 max_us=517002.456 recovered_value=320 recovery_retries=0 retry_verified=true workers_joined=true poll_rounds=197128 host_poll_ms=2923.484 max_host_poll_ms=0.855 persistence_batches=1534 worker_events=3068 application_deliveries=766

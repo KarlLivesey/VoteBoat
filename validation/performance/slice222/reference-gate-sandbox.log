@@ -1,0 +1,38 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: ifError got unwanted exception: spawnSync /home/karllivesey/.nvm/versions/node/v24.21.0/bin/node EPERM
+    at main (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-serial-gate.mjs:75:12)
+    at Object.spawnSync (node:internal/child_process:1160:20)
+    at spawnSync (node:child_process:928:24)
+    at main (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-serial-gate.mjs:74:17)
+    at file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-serial-gate.mjs:97:90
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: Error: spawnSync /home/karllivesey/.nvm/versions/node/v24.21.0/bin/node EPERM
+      at Object.spawnSync (node:internal/child_process:1160:20)
+      at spawnSync (node:child_process:928:24)
+      at main (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-serial-gate.mjs:74:17)
+      at file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-serial-gate.mjs:97:90
+      at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+      at async node:internal/modules/esm/loader:647:26
+      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+    errno: -1,
+    code: 'EPERM',
+    syscall: 'spawnSync /home/karllivesey/.nvm/versions/node/v24.21.0/bin/node',
+    path: '/home/karllivesey/.nvm/versions/node/v24.21.0/bin/node',
+    spawnargs: [
+      '/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-native-benchmark.mjs',
+      '/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice222/reference'
+    ]
+  },
+  expected: null,
+  operator: 'ifError',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

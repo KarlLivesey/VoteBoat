@@ -1,0 +1,39 @@
+Sat Oct 10 13:14:07 UTC 2026
+Linux 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64
+TARGET SOURCE                 FSTYPE OPTIONS
+/home  /dev/nvme0n1p2[/@home] btrfs  rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home
+NAME        TYPE   SIZE MODEL                       ROTA
+sda         disk 931.5G CT1000P3PSSD8                  0
+├─sda1      part   260M                                0
+├─sda2      part    16M                                0
+├─sda3      part    54G                                0
+└─sda4      part   787M                                0
+sdb         disk     0B MassStorageClass               0
+sdc         disk     0B MassStorageClass               0
+zram0       disk  60.5G                                0
+nvme0n1     disk   1.8T Sabrent SB-ROCKET-NVMe4-2TB    0
+├─nvme0n1p1 part     4G                                0
+└─nvme0n1p2 part   1.8T                                0
+nvme1n1     disk   1.8T Sabrent SB-ROCKET-NVMe4-2TB    0
+└─nvme1n1p1 part   1.8T                                0
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  16
+On-line CPU(s) list:                     0-15
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD Ryzen 7 9800X3D 8-Core Processor
+CPU family:                              26
+Model:                                   68
+Thread(s) per core:                      2
+Core(s) per socket:                      8
+Socket(s):                               1
+Stepping:                                0
+Microcode version:                       0xb404038
+Frequency boost:                         enabled
+CPU(s) scaling MHz:                      93%
+               total        used        free      shared  buff/cache   available
+Mem:            60Gi        19Gi        13Gi       197Mi        27Gi        40Gi
+Swap:           60Gi        11Gi        48Gi
+6.83 6.85 7.47 6/3840 2989506
