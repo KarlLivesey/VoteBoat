@@ -33,6 +33,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/command_endpoints.rs"]
+mod command_endpoints;
 #[path = "counter_service/credential_reload.rs"]
 mod credential_reload;
 #[path = "counter_service/events.rs"]
@@ -78,6 +80,8 @@ struct Cluster {
     targets_admin: bool,
     command_access: Option<PathBuf>,
     command_principal: Option<u64>,
+    command_peers: Option<PathBuf>,
+    remote_commands: bool,
     tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
@@ -108,7 +112,7 @@ impl Cluster {
                     if blocks.contains(&base) {
                         return None;
                     }
-                    [1, 2, 3, 4, 11, 12, 13, 101, 102, 103, 104]
+                    [1, 2, 3, 4, 11, 12, 13, 101, 102, 103, 104, 111, 112, 113]
                         .into_iter()
                         .map(|offset| {
                             TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset))
@@ -141,6 +145,8 @@ impl Cluster {
             targets_admin: false,
             command_access: None,
             command_principal: None,
+            command_peers: None,
+            remote_commands: false,
             tls: None,
             listeners,
             udp_sockets,
@@ -203,6 +209,11 @@ impl Cluster {
         if let Some(path) = &self.command_access {
             command.arg("--service-access").arg(path);
         }
+        if self.remote_commands {
+            command
+                .arg("--command-listen")
+                .arg(format!("0.0.0.0:{}", self.base + 110 + id as u16));
+        }
         let _gate = fixture_gate();
         self.children[id - 1] = Some(
             command
@@ -244,6 +255,9 @@ impl Cluster {
         command
             .args(["client", &self.base.to_string(), target])
             .args(args);
+        if let Some(path) = &self.command_peers {
+            command.arg("--command-peers").arg(path);
+        }
         if let Some(principal) = self.command_principal {
             command
                 .arg("--service-tls")

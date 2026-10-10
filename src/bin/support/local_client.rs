@@ -12,15 +12,17 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Bounded local routing. Writes require explicit non-acceptance; retried reads
+//! Bounded configured routing. Writes require explicit non-acceptance; retried reads
 //! always request a new quorum barrier.
 use super::{
+    command_endpoints::{self, Endpoint},
     service_access::{Channel, ClientAccess},
     setup::Failure,
 };
 use std::{
     io::{Read, Write},
-    net::{Ipv4Addr, TcpStream},
+    net::TcpStream,
+    path::PathBuf,
     time::{Duration, Instant},
 };
 use voteboat::runtime::MonoTime;
@@ -31,8 +33,7 @@ enum Attempt {
     Reply(String),
 }
 fn exchange(
-    base: u16,
-    id: u64,
+    target: &Endpoint,
     text: &[u8],
     deadline: Instant,
     auth: Option<&ClientAccess>,
@@ -41,13 +42,11 @@ fn exchange(
     let Some(remaining) = deadline.checked_duration_since(Instant::now()) else {
         return Attempt::Unavailable;
     };
-    let mut stream = match TcpStream::connect_timeout(
-        &(Ipv4Addr::LOCALHOST, base + 100 + id as u16).into(),
-        remaining.min(Duration::from_secs(2)),
-    ) {
-        Ok(stream) => stream,
-        Err(_) => return Attempt::Unavailable,
-    };
+    let mut stream =
+        match TcpStream::connect_timeout(&target.address, remaining.min(Duration::from_secs(2))) {
+            Ok(stream) => stream,
+            Err(_) => return Attempt::Unavailable,
+        };
     if stream.set_nonblocking(true).is_err() {
         return Attempt::Interrupted("could not configure connected socket");
     }
@@ -70,7 +69,7 @@ fn exchange(
     }
     let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
     let mut stream = if let Some(auth) = auth {
-        match Channel::client(stream, auth, id, timestamp()) {
+        match Channel::client(stream, auth, target.node, timestamp()) {
             Ok(stream) => stream,
             Err(_) => return Attempt::Interrupted("authentication setup failed"),
         }
@@ -169,13 +168,18 @@ fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
     }
     Err("request interrupted after connection; automatic routing stopped".into())
 }
-pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> {
-    let mut command = input.to_vec();
+struct Options {
+    tls_directory: Option<PathBuf>,
+    principal: Option<u64>,
+    command_peers: Option<PathBuf>,
+}
+fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
     let mut tls_directory = None;
     let mut principal = None;
+    let mut command_peers = None;
     while command.len() >= 2 {
         let flag = command[command.len() - 2].as_str();
-        if !matches!(flag, "--service-tls" | "--principal") {
+        if !matches!(flag, "--service-tls" | "--principal" | "--command-peers") {
             break;
         }
         let value = command.pop().unwrap();
@@ -184,11 +188,26 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
                 tls_directory = Some(std::path::PathBuf::from(value))
             }
             "--principal" if principal.is_none() => principal = Some(value.parse::<u64>()?),
+            "--command-peers" if command_peers.is_none() => {
+                command_peers = Some(PathBuf::from(value))
+            }
             _ => return Err("duplicate service client option".into()),
         }
     }
-    let targets = id.map_or_else(|| vec![1, 2, 3], |id| vec![id]);
-    let auth = match (tls_directory.as_deref(), principal) {
+    if command_peers.is_some() && (tls_directory.is_none() || principal.is_none()) {
+        return Err("--command-peers requires --service-tls and --principal".into());
+    }
+    Ok(Options {
+        tls_directory,
+        principal,
+        command_peers,
+    })
+}
+pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> {
+    let mut command = input.to_vec();
+    let options = options(&mut command)?;
+    let targets = command_endpoints::targets(base, id, options.command_peers.as_deref())?;
+    let auth = match (options.tls_directory.as_deref(), options.principal) {
         (None, None) => None,
         (Some(directory), Some(principal)) => {
             Some(ClientAccess::load(directory, principal, &targets)?)
@@ -215,8 +234,8 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
     let text = format!("{}\n", command.join(" "));
     let start = Instant::now();
     let deadline = start + Duration::from_secs(10);
-    if let Some(id) = id {
-        return match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
+    if id.is_some() {
+        return match exchange(&targets[0], text.as_bytes(), deadline, auth.as_ref(), start) {
             Attempt::Unavailable => Err("node unavailable before connection".into()),
             Attempt::Interrupted(reason) => interrupted(command, reason),
             Attempt::Reply(response) => terminal(response),
@@ -224,11 +243,13 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
     }
     // Each attempt owns one socket and the same bounded original command. No leader cache.
     for _ in 0..100 {
-        for id in 1..=3 {
+        for target in &targets {
             if Instant::now() >= deadline {
-                return Err("no eligible local leader found within the routing deadline".into());
+                return Err(
+                    "no eligible configured leader found within the routing deadline".into(),
+                );
             }
-            match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
+            match exchange(target, text.as_bytes(), deadline, auth.as_ref(), start) {
                 Attempt::Unavailable => (),
                 Attempt::Reply(response) if retryable_reply(command, &response) => {}
                 Attempt::Reply(response) => return terminal(response),
@@ -238,5 +259,5 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
         let remaining = deadline.saturating_duration_since(Instant::now());
         std::thread::park_timeout(remaining.min(Duration::from_millis(50)));
     }
-    Err("no eligible local leader found within the routing attempt limit".into())
+    Err("no eligible configured leader found within the routing attempt limit".into())
 }

@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 6 tests
+test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 54 filtered out; finished in 6.88s

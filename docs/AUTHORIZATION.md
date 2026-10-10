@@ -26,8 +26,11 @@ executing untrusted requests.
 
 ## Executable mode
 
-The counter's command endpoint remains loopback TCP, including when Raft peers
+The counter's command endpoint defaults to loopback TCP, including when Raft peers
 use QUIC. Without `--service-access`, it retains its trusted plaintext demo mode.
+An explicit `--command-listen ADDRESS` requires `--service-access` before any
+resources open. Remote CLI routes use `--command-peers FILE` together with
+`--service-tls` and `--principal`; see [remote command endpoints](COUNTER_SERVICE.md#remote-command-endpoints).
 Append `--service-access /path/access.txt` to **every** serve/recover invocation to
 require mutually authenticated native rustls sessions for commands. The file is
 trusted startup configuration, limited to 4 KiB and 64 grants:

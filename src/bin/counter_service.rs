@@ -15,6 +15,8 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/command_endpoints.rs"]
+mod command_endpoints;
 #[path = "support/credential_reload.rs"]
 mod credential_reload;
 #[path = "support/diagnostics.rs"]
@@ -31,7 +33,7 @@ use diagnostics::Diagnostics;
 use setup::{checked, group, Failure, Service};
 use std::{
     io::{Read, Write},
-    net::{Ipv4Addr, TcpListener},
+    net::{SocketAddr, TcpListener},
     path::Path,
     time::{Duration, Instant},
 };
@@ -41,7 +43,7 @@ use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -49,7 +51,7 @@ voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
 voteboat-counter client BASE_PORT NODE explain-quorum NODES_CSV_OR_DASH OFFSET COUNT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
-Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
+Commands default to trusted loopback controls. --command-listen requires --service-access. Peer traffic uses mutual TLS.\n\
 recover-member explicitly verifies existing membership journals and selects wire format 7 on all peers.\n\
 enroll is an offline trusted handoff; stop source and destination before use and preserve files on failure.\n\
 QUIC requires a build with --features quic; TCP is the default.\n\
@@ -57,6 +59,7 @@ PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
+Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
@@ -283,6 +286,8 @@ fn prepare_service(
     let plan_path = options.admin_plan.as_deref();
     let access_path = options.service_access.as_deref();
     let admin_mode = options.remote_admin;
+    let command_address =
+        command_endpoints::listener(options.command_listen, access_path.is_some(), base, id)?;
     let remote = admin_mode != administration::Mode::Automatic;
     let create = checked_service_mode(
         mode,
@@ -307,7 +312,7 @@ fn prepare_service(
             administration::Administration::load(path, &config.provisioned_stores, admin_mode)
         })
         .transpose()?;
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, base + 100 + id as u16))?;
+    let listener = TcpListener::bind(command_address)?;
     listener.set_nonblocking(true)?;
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
@@ -344,8 +349,8 @@ fn serve(
     let mut command_generation = 0u64;
     let start = Instant::now();
     println!(
-        "ready node={id} peer={peer_address} transport={protocol:?} command=127.0.0.1:{}",
-        base + 100 + id as u16
+        "ready node={id} peer={peer_address} transport={protocol:?} command={}",
+        listener.local_addr()?
     );
     let mut connection: Option<Connection> = None;
     let mut quit = false;
@@ -600,6 +605,7 @@ struct StartupOptions {
     deployment: Option<std::path::PathBuf>,
     admin_plan: Option<std::path::PathBuf>,
     service_access: Option<std::path::PathBuf>,
+    command_listen: Option<SocketAddr>,
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
@@ -636,6 +642,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut deployment = None;
     let mut admin_plan = None;
     let mut service_access = None;
+    let mut command_listen = None;
     let mut remote_admin = administration::Mode::Automatic;
     let mut wal_reclaim_ms = None;
     let mut checkpoint_entries = None;
@@ -649,6 +656,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--remote-admin-plan"
                 | "--remote-admin-policy"
                 | "--service-access"
+                | "--command-listen"
                 | "--wal-reclaim-ms"
                 | "--checkpoint-entries"
         ) {
@@ -685,6 +693,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
                 service_access = Some(std::path::PathBuf::from(value));
             }
+            "--command-listen" if command_listen.is_none() && args[0] == "serve" => {
+                command_listen = Some(value.parse()?);
+            }
             "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
                 let interval: u64 = value.parse()?;
                 if interval == 0 {
@@ -707,6 +718,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         deployment,
         admin_plan,
         service_access,
+        command_listen,
         remote_admin,
         wal_reclaim_ms,
         checkpoint_entries,

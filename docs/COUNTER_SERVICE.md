@@ -7,9 +7,10 @@ timers, and keep separate durable
 WALs and snapshots. The quickstart creates static three-voter membership and one
 counter group. Explicit member recovery can reopen compatible dynamic histories
 prepared through the Rust administration APIs. Peer addresses are configurable;
-the command endpoint always binds to 127.0.0.1. Its default mode is trusted
-plaintext; optional `--service-access FILE` requires authenticated, scoped
+the command endpoint defaults to 127.0.0.1. Its default mode is trusted
+plaintext; `--service-access FILE` requires authenticated, scoped
 commands. See [principal permissions and client flags](AUTHORIZATION.md).
+An explicit [remote command endpoint](#remote-command-endpoints) requires that authentication.
 
 ## Start three processes
 
@@ -92,10 +93,59 @@ local entry selects the peer listener; other entries select authenticated routin
 hints. Server names must match the supplied certificates. The smaller node ID
 dials the larger, preventing duplicate connection direction choices. Recovery
 can use new addresses/names with the same authorized bootstrap/store identities;
-addresses cannot change membership or grant voting authority. Run client commands
-locally on the relevant host; the command port is not a remote service API.
+addresses cannot change membership or grant voting authority. By default, run client
+commands locally; configure the authenticated command endpoints below for remote use.
 Actual acceptance tests use explicitly configured non-default loopback endpoints.
 Separate-host deployment has not been exercised here.
+
+## Remote command endpoints
+
+Use an explicit listener with the same authenticated command API:
+
+```sh
+target/debug/voteboat-counter serve create /your/data/node1 1 43000 /your/tls peers.txt --service-access access.txt --command-listen 10.0.0.11:43101
+```
+
+`--command-listen` requires `--service-access`, including when binding loopback.
+IPv4/IPv6 wildcard listeners are supported; zero ports and multicast addresses
+are rejected before files or sockets open. Omit the option to retain the
+default loopback listener. The ready message reports the selected address.
+
+Create a separate command endpoint file; these are service routes, not Raft peer
+assignments or membership authority:
+
+```text
+voteboat-command-peers-v1
+1 10.0.0.11:43101 node1.voteboat.test
+2 10.0.0.12:43102 node2.voteboat.test
+3 10.0.0.13:43103 node3.voteboat.test
+```
+
+```sh
+target/debug/voteboat-counter client 43000 auto add 1 7 --command-peers commands.txt --service-tls /your/client-tls --principal 2
+target/debug/voteboat-counter client 43000 1 status --command-peers commands.txt --service-tls /your/client-tls --principal 1
+```
+
+The client requires both authentication flags with `--command-peers`. It uses
+the file's numeric addresses instead of deriving ports from BASE_PORT; the base
+argument retains its normal validation. Node IDs are 1..4096. The file allows
+1..64 entries and at most16KiB, with unique node IDs and addresses, nonzero ports,
+non-unspecified/non-multicast addresses and valid TLS names. IPv6 uses brackets.
+Blank/comment lines, extra fields and missing explicit targets are errors.
+Each listed target pins `nodeN.der`; the principal uses its own `nodeP.der` and
+`nodeP-key.der`. The selected name must match the pinned server certificate.
+The retained server certificate/name budget is1MiB.
+
+Auto mode scans the supplied nodes in numeric order, with the existing ten-second
+deadline and exact non-acceptance retry rules. A connected TLS failure or unknown
+write stops routing. Addresses confer no permissions or leadership. The file is
+reloaded for each CLI invocation; there is no automatic discovery or live server
+listener replacement. Commands remain TCP/TLS even when Raft peers use QUIC.
+
+Executable TCP/QUIC cluster tests use wildcard listeners and non-default loopback
+ports, verify access denial and TLS-name rejection, then preserve same-ID retries
+across leader loss, checkpoint and restart. Separate-machine and macOS execution
+remain distinct validation requirements.
 
 ## Recover an existing member journal
 
@@ -180,10 +230,11 @@ remain an error. Static create/recover refuse this option; the original bootstra
 is preserved even when its retired nodes are absent from current provisioning.
 Other groups/bootstrap configurations use explicit Rust assembly.
 
-The local command port remains BASE+100+NODE; reject any base/node combination
+The default local command port remains BASE+100+NODE; reject any base/node combination
 that exceeds 65535. Explicit `client BASE NODE ...` supports these node IDs.
-`auto` still searches only demo nodes 1..3 and is not general membership routing;
-address a later leader explicitly. Runtime configuration mutation remains gated.
+Without a command endpoint file, `auto` searches demo nodes1..3. With
+`--command-peers`, it searches that explicit list, including later member IDs;
+the list itself cannot change membership. Runtime configuration mutation remains gated.
 
 TCP/TLS and QUIC executable histories enroll node 4 at store 404/incarnation 7,
 verify its imported counter/retry state, reject changed identity, observe its new
@@ -258,13 +309,14 @@ Unknown, incomplete/invalid replies, connected I/O failures, or other errors. It
 never automatically resends an uncertain write to another node. A lost write
 reply prints Unknown; retry manually using the same operation ID and delta.
 
-Automatic mode scans the three local command ports with one active socket, at
+Automatic mode scans three local command ports by default, or the configured
+command endpoint list, with one active socket, at
 most 100 rounds, a ten-second absolute observation deadline and bounded reply
 storage. Partial reply progress cannot reset that deadline. Each successful read
 still obtains a fresh quorum barrier. Automatic mode accepts only add/read;
 status, checkpoint and quit require an explicit node ID. Explicit IDs remain
-available for writes/reads too. Routing is limited to the local quickstart; it
-does not discover or forward to command endpoints on other hosts.
+available for writes/reads too. Remote addresses require the explicit authenticated
+configuration above; automatic endpoint or manifest discovery remains separate.
 
 `status` shows local role, term and commit index; it is a diagnostic, not a
 linearizable application read. `checkpoint` reports admission, not durable
@@ -354,8 +406,8 @@ and [application results](APPLICATION_RESULTS.md) for embedding contracts.
 
 ## Bounds and current limits
 
-The command endpoint is a trusted local-user interface without client TLS or
-application authentication. It accepts one active connection, one command of at
+The default command endpoint is a trusted local-user interface. Authenticated
+local or remote mode enforces the selected principal policy. It accepts one active connection, one command of at
 most 256 bytes per connection, a five-second observation deadline and bounded
 responses. Parsing, partial I/O and response backpressure do not block Raft polling.
 A timed-out pending request cancels its wait; exact tickets prevent a late output
@@ -364,7 +416,7 @@ their own existing bounded credits and control reserves.
 
 Peer addresses and TLS names are configurable. Rust startup is generic over the
 application, while the CLI still selects a fixed three-voter counter bootstrap.
-Remote client routing, a generic multi-group configuration loader, richer
+Automatic discovery, a generic multi-group configuration loader, richer
 application protocols and operational packaging remain work. Counter deduplication and WAL capacity are
 bounded; manual checkpoints do not automatically reclaim physical WAL bytes.
 Online membership, recursive responsibilities and split/merge remain unfinished.

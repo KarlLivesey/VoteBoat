@@ -112,8 +112,65 @@ strict profiles clean while advancing the remaining capability work.
 | Retained: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
 | Completed: preserve worker errors and shutdown clocks186a | Repair locally reproduced diagnostic/time defects; advances P1/P4 and native deployment. | Original macOS failures, injected storage failure and a native history starting beyond ten seconds. | Original storage error reaches recovery with fencing/retention intact; late-clock histories and all50 member tests pass. A frozen cleanup clock exposed by that run is corrected. Original macOS outcomes remain unconfirmed. |
 | Current: cross-platform failure confirmation186b | Resolve the remaining observed platform failures; advances P1/P4. | Fresh macOS execution of the corrected error and clock paths; pending resource diagnostics identify any remaining cause. | Record actual platform outcomes, retain new failures, and repair their demonstrated causes without suppressing errors or widening deadlines. Continue the independent audit while CI runs. |
-| Next: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+| Completed: authenticated remote command endpoints187 | Make the existing durable service usable from explicitly configured remote clients; advances P1/P5 deployment. | Existing command TLS/access policy, bounded CLI routing and provisioned certificate pins. | TCP/QUIC executable clusters use selected listeners, enforce permissions/TLS names and retain retries/recovery; six new tests and the full60-test service suite pass. Separate-machine validation remains open. |
+| Current independent deliverable: remaining discovery/deployment audit188 | Close explicit P0–P7 integration gaps while keeping the usable service; advances deployment/composition. | Remote command endpoints and the actual manifest/endpoint discovery APIs. | Verify a usable executable path for authority discovery and placement orchestration; retain every unsupported operation and require actual owner-side fencing. |
+| Next: selected discovery/deployment integration | Implement the concrete missing executable composition identified by188; advances P5 and usable embedding. | Audit-selected public source/lookup/placement contracts, deployment identities and bounded credentials. | A real executable/host path performs the selected operation with authorization, failure cleanup, restart and owner-side checks; do not substitute static hints for dynamic authority. |
 | Following: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice187 implementation and acceptance record
+
+The counter service now accepts `--command-listen ADDRESS` only alongside
+`--service-access`; validation occurs before configuration files, listeners or
+stores open. Default loopback behavior is preserved. Remote clients select a
+versioned `--command-peers FILE` containing exact node/address/TLS-name targets.
+The CLI requires mutual TLS credentials, checks the full declaration and
+certificate/name budget before connecting, and routes only within the selected
+list. Original operation bytes, one active connection, the absolute deadline
+and exact non-acceptance/Unknown retry semantics are unchanged. Endpoint files
+are static per invocation and confer no membership, leadership or authority.
+
+Six new executable checks cover TCP/QUIC peer clusters with wildcard command
+listeners and non-default client ports, reader denial, TLS-name mismatch,
+checkpoint/leader-loss/restart with exact retry values, unauthenticated listener
+refusal, malformed/oversized/duplicate declarations, missing targets, aggregate
+pin capacity and interrupted TLS without trying another target. The full60-test
+service suite passes, including existing default routing, credential reload,
+new-voter membership, joint retirement and automatic maintenance histories.
+All three strict Clippy profiles and formatting pass; inventory metadata passes.
+Logs and exact commands are retained in validation/baseline/slice187.
+
+The initial TLS-interruption test reused a plaintext line reader which could
+consume ClientHello bytes after the selector; it now reads exactly the selector
+before closing. No production protocol workaround was introduced. This slice
+adds no new public provider seam or dependency and changes no consensus/storage
+format. Actual separate-machine and macOS validation remain unproven. Executable
+manifest/endpoint discovery, placement orchestration, broader combined faults
+and the original P7 performance gates remain open under the full P0–P7 goal.
+
+### Slice187 schema plan — authenticated remote command endpoints
+
+The deployment audit confirms that peer routes support different hosts, while
+the executable command listener/client are hard-coded to loopback. Close that
+usable-service gap with optional explicit command endpoints, using the existing
+TLS/principal contracts. No new remote authority, voter identity or codec is
+introduced. `--command-listen ADDRESS` requires `--service-access` before any
+listener/store opens. The default trusted loopback mode remains available.
+
+`--command-peers FILE` selects a versioned, bounded list of node IDs, numeric
+addresses and TLS names (64 entries/16KiB), separately from Raft membership.
+Reject duplicates, invalid addresses/names and missing explicit targets before
+connecting. Require authenticated client credentials for this option and bound
+retained certificate material. Auto routing visits only the supplied targets;
+it keeps the existing exact non-acceptance retry rule and stops on an ambiguous
+write. A new invocation reloads the explicit list; it is not automatic discovery.
+
+The host retains one command connection, its original request/deadline and
+existing result ownership. Disconnect remains cancellation/Unknown rather than
+rollback. Shutdown drains the same Node/providers. Tests must use actual
+executable clusters, non-default command ports, both peer transports, access
+denial, same-ID retries, leader loss and file recovery; negative construction
+and TLS failure checks must establish that no plaintext fallback or mutation
+occurs. Loopback integration cannot prove separate-machine deployment or macOS.
 
 ### Slice186a implementation and acceptance record
 

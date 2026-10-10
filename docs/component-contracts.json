@@ -1876,9 +1876,10 @@
       "native": "NativeServiceAccess: bounded immutable shared principal and group-scope access plan; optional counter-service mutual-TLS command gate",
       "conformance": [
         "tests/authorization.rs",
-        "tests/counter_service.rs"
+        "tests/counter_service.rs",
+        "tests/counter_service/command_endpoints.rs"
       ],
-      "scope": "Exact authenticated Ready SecureSession binding, captured credential generation/time, expiry and concrete group/action checks before admission; recheck channel after policy. Host-local principal snapshots are not bearer tokens. Native one-to-one stable peer/principal mapping, bounded grants, rejection ownership, scoped close and explicit replacement generation. Command mode uses existing rustls pins/hello and separate service identities, retains bounded partial I/O/deadline/reply flush and original operation retries; restart reloads policy. No voting/configuration/ownership authority, live rotation, external issuer, durable audit or arbitrary callback sandbox. Legacy unflagged endpoint remains trusted plaintext loopback."
+      "scope": "Exact authenticated Ready SecureSession binding, captured credential generation/time, expiry and concrete group/action checks before admission; recheck channel after policy. Host-local principal snapshots are not bearer tokens. Native one-to-one stable peer/principal mapping, bounded grants, rejection ownership, scoped close and explicit replacement generation. Command mode uses existing rustls pins/hello and separate service identities, retains bounded partial I/O/deadline/reply flush and original operation retries; restart reloads policy. No voting/configuration/ownership authority, live rotation, external issuer, durable audit or arbitrary callback sandbox. Legacy unflagged endpoint remains trusted plaintext loopback. Slice187 adds an explicit authenticated command listener and bounded versioned CLI endpoint list with node/address/TLS-name validation, retained pin budget and the original no-automatic-retry rule after unknown writes. Actual executable TCP/QUIC histories cover non-default command endpoints, TLS-name refusal, permission checks, leader loss, checkpoints and restart; separate-host and macOS confirmation remain outstanding. Static command routes are not executable manifest discovery."
     },
     {
       "design_id": "C17",

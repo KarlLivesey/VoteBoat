@@ -13,7 +13,10 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded command-channel assembly over the existing public TLS/auth contracts.
-use super::setup::{checked, Failure};
+use super::{
+    command_endpoints::{Endpoint, MAX_TARGETS},
+    setup::{checked, Failure},
+};
 use std::{
     collections::BTreeMap,
     io::{self, Read, Write},
@@ -172,10 +175,10 @@ pub struct ClientAccess {
     pub principal: PrincipalId,
 }
 impl ClientAccess {
-    pub fn load(directory: &Path, principal: u64, targets: &[u64]) -> Result<Self, Failure> {
+    pub fn load(directory: &Path, principal: u64, targets: &[Endpoint]) -> Result<Self, Failure> {
         if !(1..=super::setup::MAX_NODE).contains(&principal)
             || targets.is_empty()
-            || targets.len() > 3
+            || targets.len() > MAX_TARGETS
         {
             return Err("invalid service client selection".into());
         }
@@ -195,15 +198,23 @@ impl ClientAccess {
                 session: StoreSession::new(1).unwrap(),
             },
         };
+        let mut pin_bytes = 0usize;
         let peers = targets
             .iter()
-            .map(|&number| {
+            .map(|endpoint| {
+                let number = endpoint.node;
+                let certificate = material(&directory.join(format!("node{number}.der")), 65536)?;
+                pin_bytes = pin_bytes
+                    .checked_add(certificate.capacity())
+                    .and_then(|n| n.checked_add(endpoint.server_name.len()))
+                    .filter(|n| *n <= 1024 * 1024)
+                    .ok_or("service client pin budget")?;
                 Ok((
                     number,
                     TlsPeer {
                         identity: transport_identity(number, false),
-                        certificate: material(&directory.join(format!("node{number}.der")), 65536)?,
-                        server_name: format!("node{number}.voteboat.test"),
+                        certificate,
+                        server_name: endpoint.server_name.clone(),
                     },
                 ))
             })
