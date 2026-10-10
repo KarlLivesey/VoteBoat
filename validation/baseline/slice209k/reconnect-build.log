@@ -1,0 +1,3 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.31s
+  Executable tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)

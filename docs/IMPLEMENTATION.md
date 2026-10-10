@@ -139,25 +139,100 @@ Completed209j connects counter startup to that source through the public driven
 connector. Static/member/shared-group TCP/QUIC histories cover stale configured
 dials, source outage, peer-key replacement, WAL/checkpoint reopen and original
 receipts. Source trust and cache restart policy remain explicit host inputs.
-Current209 continues combined long-lived
-endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
-bounded cache. Its purpose is usable reconnect after discovery changes;
-dependencies are existing discovery, exact peer pins and the fair reactor.
-Completion requires refreshed hints, stale generation refusal and parent-offline
-child continuity across restart. This
-advances P5 discovery without granting ownership from a cached endpoint.
-Next, extend the next unreviewed public-provider obligations selected from the
+Completed209k composes two real metadata moves, offline ancestors, source-session
+repair and a data-peer endpoint change. Four TCP/QUIC WAL/checkpoint histories
+preserve original receipts/outbox, reject stale hints after source reconnection,
+and recover data again without altering stopped metadata. This closes the
+selected209 combined history; broader discovery faults and durable cache policy
+remain explicit limitations.
+Current: extend the next unreviewed public-provider obligations selected from the
 contract ledger. Reuse host/native implementations and their injected failures;
 completion requires executable shared assertions for ownership, rejection and
 shutdown, not just metadata entries. This advances composable Rust embedding
 under P0/P2 without making a particular external backend a prerequisite.
-Following that, revisit the current Linux/macOS operator acceptance evidence.
+Next: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
 supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+Following: select an uncovered combined membership/lifecycle recovery schedule
+from the acceptance ledger, using the existing native phase/restart fixtures and
+independent original-receipt observations. Check source fencing, exact accepted
+configuration and one writable owner through the selected cut, then repeat
+original operations after cold recovery. This advances P4/P6 and depends on the
+existing journals, snapshot lineage and source/target services; it does not
+require global automatic orchestration.
+
+### Slice209k schema plan — endpoint refresh after recursive metadata movement
+
+Reuse the real metadata1 ->9 ->11 movement, parent-locator refresh and data-owner
+adoption contracts. Once both moves commit, stop all metadata groups and record
+their bytes. Reopen the data replicas through prepared native startup plus the
+existing driven DiscoveryConnector. The test-owned authenticated endpoint source
+contains only exact provisioned identities, addresses, lease generations and
+bounded completion counters; it grants no metadata or write authority.
+
+Verify cached routing from the adopted grant while metadata remains offline.
+After successful discovery, stop the highest-numbered replica and reopen its
+same files at a new listen address. Lower replicas retain their source sessions
+and cache floors. Advertise a lower generation first: it must be rejected and
+must not authenticate a replacement data connection. Then advertise a greater
+generation and require fresh connections plus original receipts and new writes.
+Incoming QUIC routes remain valid because the unchanged lower replicas still
+originate connections; only the stopped peer's listening address moves.
+
+Use existing worker drain/join on orderly shutdown; aborted owner observations
+remain discarded by the existing recovery fixture. Exercise WAL and verified
+checkpoint variants over TCP/TLS and QUIC, inspect retained operation/outbox and
+grant state after another cold reopen, and compare all stopped metadata bytes.
+This advances209/P5 long-lived discovery and the P6 composition evidence, without
+introducing another transfer engine or claiming durable client cache floors.
+
+The first QUIC runs fail in the test-owned discovery source. A temporary
+connection-loss diagnostic identifies `TimedOut`, rather than a data-frame
+decoding failure: the fixture retained an idle source without composing its
+existing reconnect owner. Remove the diagnostic and use ReconnectingPeerDiscovery
+with a bounded test connector returning real authenticated TCP/QUIC sessions.
+Keep the same remote cache across connections. Explicitly close the source
+sessions during peer movement so repair is deterministic on both transports;
+assert later source generations, refusal of the stale endpoint and later data
+connections. This adds fixture composition, not another production retry path.
+
+### Slice209k implemented — recursive metadata outage and endpoint repair
+
+Four new native histories compose the existing metadata movement, discovery
+and reconnect contracts. Authorities move1 ->9 ->11; the actual parent locator
+and child owner adopt those results. All four metadata groups then remain
+closed while the data replicas recover, including verified checkpoint variants.
+The same child files reopen at a changed peer endpoint. Both surviving replicas
+lose their source sessions, accept later authenticated source generations, reject
+endpoint generation1 below their cached floor2, and reconnect only after
+generation3 is published. A test-owned bounded connector supplies real TCP/TLS
+or QUIC sessions; retry/backoff/cache ownership remains in production
+ReconnectingPeerDiscovery and DiscoveryConnector.
+
+Original receipts retain values7/10, fresh work reaches15, and another cold
+recovery retains all three receipts and exactly three outbox entries. Stopped
+metadata files remain byte-identical. The four combined tests and43 neighboring
+discovery/QUIC-connector tests pass. The broader22-test metadata-movement
+selection also passes, including automatic lookup, retained/imported owners,
+later handoff and retirement. Both new TCP cases also pass with default features
+after the all-feature processes finish. Formatting and all four strict Clippy
+profiles pass with zero diagnostics. Inventory metadata remains108 contracts;
+the13 provider-ledger metadata tests pass without adding a reviewed obligation
+family. Commands, initial failures and final evidence are retained in
+validation/baseline/slice209k.
+
+The first QUIC fixture assumed an idle source would stay live; captured transport
+diagnostics show timeout. Composing the existing source reconnect owner and
+explicitly closing source sessions fixes that assumption without changing
+production timeouts, trust, persisted formats or stale-generation checks.
+Macro review: selected long-lived recursive discovery integration is now
+covered; reusable provider obligations, platform/operator acceptance and broader
+P4/P6/P7 faults remain in the linked plan. Durable cache floors, executable
+separate-host discovery and full P0–P7 completion are not established.
 
 ### Slice209j schema plan — executable consumes authenticated peer discovery
 

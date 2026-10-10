@@ -15,7 +15,7 @@
 use super::*;
 use voteboat::native::lookup_discovery::*;
 #[path = "remote_manifest.rs"]
-mod remote_manifest;
+pub(in crate::native) mod remote_manifest;
 fn now(clock: &Instant) -> MonoTime {
     MonoTime(clock.elapsed().as_millis() as u64)
 }

@@ -914,3 +914,6 @@ mod families;
 
 #[path = "metadata_lookup.rs"]
 mod automatic_metadata;
+
+#[path = "metadata_endpoint_discovery.rs"]
+mod endpoint_discovery;

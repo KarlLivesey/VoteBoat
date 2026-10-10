@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.72s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint' (3623475) panicked at tests/routed/metadata_endpoint_source.rs:153:43:
+called `Result::unwrap()` on an `Err` value: Session(Truncated)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... FAILED
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal' (3623476) panicked at tests/routed/metadata_endpoint_source.rs:153:43:
+called `Result::unwrap()` on an `Err` value: Session(Truncated)
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... FAILED
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+
+failures:
+
+failures:
+    native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint
+    native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 163 filtered out; finished in 33.93s
+
+error: test failed, to rerun pass `--test routed`

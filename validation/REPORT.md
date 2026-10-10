@@ -1,5 +1,14 @@
 # Validation report — slice 35
 
+Recursive endpoint repair: [slice209k](baseline/slice209k/README.md). Four native
+TCP/QUIC WAL/checkpoint histories pass after two metadata moves with every
+metadata group offline. Explicit source disconnection, later authenticated
+source generations, stale-hint refusal and changed data-peer addresses preserve
+original receipts/outbox through cold recovery. An initial QUIC fixture failure
+was traced to an idle source without a reconnect owner; the test now composes
+the existing reconnect contract instead of increasing timeouts. This is selected
+Linux integration evidence, not full platform or P0–P7 completion.
+
 Native receive-pressure acceptance: [slice208b2](baseline/slice208b2/README.md).
 TCP/QUIC histories record actual refusal under three-frame ingress limits while
 performing16 foreground writes and16 quorum reads, then finish8 snapshot

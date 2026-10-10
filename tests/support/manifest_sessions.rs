@@ -20,9 +20,18 @@ pub fn pair(
     right: LocalIdentity,
     clock: &Instant,
 ) -> (Box<dyn SecureSession>, Box<dyn SecureSession>) {
+    pair_generation(protocol, left, right, clock, 1)
+}
+pub fn pair_generation(
+    protocol: NativePeerProtocol,
+    left: LocalIdentity,
+    right: LocalIdentity,
+    clock: &Instant,
+    generation: u64,
+) -> (Box<dyn SecureSession>, Box<dyn SecureSession>) {
     let (mut a, mut b): (Box<dyn SecureSession>, Box<dyn SecureSession>) = match protocol {
         NativePeerProtocol::TcpTls => {
-            let (a, b) = super::tls::pair(left, right, 1);
+            let (a, b) = super::tls::pair(left, right, generation);
             (Box::new(a), Box::new(b))
         }
         #[cfg(feature = "quic")]
@@ -36,7 +45,7 @@ pub fn pair(
                 local,
                 peer: super::tls::peer(peer),
                 remote,
-                generation: voteboat::identity::SecureSessionGeneration::new(1).unwrap(),
+                generation: voteboat::identity::SecureSessionGeneration::new(generation).unwrap(),
                 limits: SessionLimits::default(),
             };
             let now = MonoTime(clock.elapsed().as_millis() as u64);

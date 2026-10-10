@@ -17,7 +17,7 @@ use super::*;
 mod restart;
 use voteboat::{native::remote_manifest::*, secure::*};
 #[path = "../support/manifest_sessions.rs"]
-mod sessions;
+pub(in crate::native) mod sessions;
 // The session helper shares this test's existing TLS fixtures.
 mod tls {
     pub use crate::support::tls::*;

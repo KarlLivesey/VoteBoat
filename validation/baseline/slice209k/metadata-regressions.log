@@ -1,0 +1,46 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 22 tests
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 145 filtered out; finished in 240.38s
+

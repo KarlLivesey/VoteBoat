@@ -1,0 +1,60 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: mismatched types
+   --> tests/routed/metadata_endpoint_source.rs:176:33
+    |
+176 |     let discovery = view.driver(parts.local.owner.identity(), env.protocol, env.clock);
+    |                          ------ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `LocalIdentity`, found `RuntimeOwner`
+    |                          |
+    |                          arguments to this method are incorrect
+    |
+note: method defined here
+   --> tests/routed/metadata_endpoint_source.rs:51:12
+    |
+ 51 |     pub fn driver(
+    |            ^^^^^^
+ 52 |         &self,
+ 53 |         local: LocalIdentity,
+    |         --------------------
+
+error[E0609]: no field `node` on type `RuntimeOwner`
+   --> tests/routed/metadata_endpoint_source.rs:184:49
+    |
+184 |         if *node > parts.local.owner.identity().node {
+    |                                                 ^^^^ unknown field
+    |
+    = note: available fields are: `store`, `lane`, `generation`
+
+error[E0599]: no method named `clone` found for struct `voteboat::native::startup::NativeStartup` in the current scope
+  --> tests/routed/metadata_endpoint_discovery.rs:70:41
+   |
+70 |     owners.push(source::open(configs[2].clone(), view, env));
+   |                                         ^^^^^ method not found in `voteboat::native::startup::NativeStartup`
+
+error[E0277]: the trait bound `voteboat::native::startup::NativeStartup: Clone` is not satisfied
+   --> tests/routed/metadata_endpoint_discovery.rs:108:10
+    |
+108 |         .cloned()
+    |          ^^^^^^ the trait `Clone` is not implemented for `voteboat::native::startup::NativeStartup`
+    |
+note: required by a bound in `cloned`
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/iter/traits/iterator.rs:3559:4
+
+error[E0599]: `Cloned<std::slice::Iter<'_, voteboat::native::startup::NativeStartup>>` is not an iterator
+   --> tests/routed/metadata_endpoint_discovery.rs:109:10
+    |
+106 |       let mut owners = configs
+    |  ______________________-
+107 | |         .iter()
+108 | |         .cloned()
+109 | |         .map(|c| source::open(c, &view, &env))
+    | |         -^^^ `Cloned<std::slice::Iter<'_, voteboat::native::startup::NativeStartup>>` is not an iterator
+    | |_________|
+    |
+    |
+    = note: the following trait bounds were not satisfied:
+            `Cloned<std::slice::Iter<'_, voteboat::native::startup::NativeStartup>>: Iterator`
+            which is required by `&mut Cloned<std::slice::Iter<'_, voteboat::native::startup::NativeStartup>>: Iterator`
+
+Some errors have detailed explanations: E0277, E0308, E0599, E0609.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (test "routed") due to 5 previous errors

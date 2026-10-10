@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209k adds the selected combined discovery/recursive-recovery history. After
+two actual metadata moves and owner/parent locator adoption, all metadata stays
+offline. TCP/QUIC WAL/checkpoint cases recover the child, drop its endpoint-source
+sessions, change a data peer's address, refuse lower-generation hints after
+source reconnection, and restore data connections using newer hints. Original
+receipts, values and outbox entries survive another cold restart; stopped
+metadata files remain unchanged. A test-owned source connector returns real
+authenticated sessions through the public reconnect contract. This is not
+separate-host executable discovery deployment or durable cache-floor policy;
+broader provider/platform/performance obligations remain open.
+
 Slice209j connects counter startup to an explicit authenticated peer source over
 the public driven discovery contract. Native static/member/shared-group
 preparation retains durable credential checks; the wrapper forwards live peer

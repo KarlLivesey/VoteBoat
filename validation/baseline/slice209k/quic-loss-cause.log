@@ -1,0 +1,25 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.11s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+slice209k QUIC loss: ApplicationClosed(ApplicationClose { error_code: 0, reason: b"" }) local=LocalIdentity { node: NodeId(2), store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) } } now=MonoTime(4611)
+slice209k QUIC loss: ApplicationClosed(ApplicationClose { error_code: 0, reason: b"" }) local=LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(4) } } now=MonoTime(4831)
+slice209k QUIC loss: ApplicationClosed(ApplicationClose { error_code: 0, reason: b"" }) local=LocalIdentity { node: NodeId(2), store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(4) } } now=MonoTime(4831)
+slice209k QUIC loss: TimedOut local=LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(4) } } now=MonoTime(10136)
+slice209k QUIC loss: TimedOut local=LocalIdentity { node: NodeId(2), store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(4) } } now=MonoTime(10137)
+slice209k QUIC loss: TimedOut local=LocalIdentity { node: NodeId(3), store: StoreBinding { identity: StoreIdentity { id: StoreId(300), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } } now=MonoTime(10538)
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint' (3649459) panicked at tests/routed/metadata_endpoint_source.rs:150:17:
+source server Session(Truncated) at MonoTime(10538); client failed=false pending=Some(RefreshRequest { binding: SessionBinding { local: LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(4) } }, peer: LocalIdentity { node: NodeId(3), store: StoreBinding { identity: StoreIdentity { id: StoreId(300), incarnation: StoreIncarnation(1) }, session: StoreSession(1) } }, generation: SecureSessionGeneration(1), wire_version: 1 }, sequence: 3, peer: PeerIdentity { node: NodeId(3), store: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) } }, started_at: MonoTime(10537), deadline: MonoTime(20537) })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... FAILED
+
+failures:
+
+failures:
+    native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 166 filtered out; finished in 10.54s
+
+error: test failed, to rerun pass `--test routed`
