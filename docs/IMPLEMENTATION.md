@@ -138,11 +138,68 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Current199c–e: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d/e are recorded below; platform acceptance remains open. CI stays background feedback. |
+| Completed205: bounded source observation recovery | Repeat only original-ID status/assignment reads after unavailable or interrupted exchange; advances usable maintenance/P2/P4. |204 attempt budgets, authenticated command exchange and existing source response validation. | Seven new tests exercise withheld replies, unchanged offsets, stalled authentication, request/deadline exhaustion and terminal rejection; the nine native single-/multi-group histories pass. Source mutations retain explicit unknown outcomes. |
 | Completed204: bounded configuration reply recovery | Keep an uncertain configuration attempt inside the original single-/multi-group drain budget; advances usable maintenance/P4. | Original immutable drain plans, journal observation, idempotent configuration commands and shared authenticated exchange. | An authenticated withheld-reply regression fails before and passes after; exhausted requests cannot reach shutdown; rejection/identity checks, actual TCP/QUIC replacement and single-/multi-group recovery histories pass. Broader platform acceptance199 remains open. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice205 implemented evidence and next review
+
+The source-status withheld-reply test fails before changing retry semantics,
+with the recorded `UNKNOWN source request: reply deadline expired` outcome.
+Source status and assignment-page reads now share a method that constructs
+only their original sequence/operation/offset, drops each failed exchange and
+retries within the existing deadline and request count. Explicit replies still
+pass through the existing validators. Source mutations and group handoff waits
+keep their existing unknown/error behavior; this is not a catch-all retry rule.
+
+All18 selected runner tests pass, including seven new observation tests. Actual
+TLS exchanges verify lost status and page replies, stalled authentication,
+exhausted request count and an absolute deadline ending during authentication.
+Unauthorized, wrong-identity and incomplete replies are rejected after one
+completed response. The nine actual single-/multi-group TCP/QUIC runner histories
+and both TCP/QUIC replacement-drain histories also pass (29 selected tests total).
+Formatting and all four strict Clippy profiles pass with zero
+diagnostics. Results and source bindings are in validation/baseline/slice205.
+
+The completed older446c807 operator run is now recorded in full: Ubuntu passes
+122 counter and13 directory tests but fails one of10 transfer tests on an
+unknown initialization outcome; macOS passes115 counter tests and fails seven,
+preventing its later targets. The macOS source timeout does not identify which
+source command failed, so this read-path fix is not claimed as complete diagnosis
+of that run. Current platform acceptance remains open. The macro plan and
+next201/following202 contracts/recovery work stay active; retain the transfer
+initialization failure for focused diagnosis rather than relabeling Ubuntu green.
+
+### Slice205 schema plan — bounded source observations
+
+Previous turn made progress: verified/pushed6f26bc1 fixes configuration reply
+ambiguity. Revalidated clean source. The completed446c807 operator run now
+records another source-request timeout in macOS multi-group recovery; the old
+error does not identify whether the interrupted command was read or mutation.
+This slice addresses the read path, without claiming to diagnose that entire
+failure. Source mutations keep their existing explicit unknown outcomes.
+
+Data/API shape: a private source-observation method constructs only original-ID
+`drain-status` or `drain-group OFFSET` commands. Single-group status, multi-group
+status and assignment-page reads use it. Repeat only unavailable connections,
+recognized deadline/closure outcomes and pre-command authentication deadlines;
+invalid authentication, corrupt/oversized replies and explicit server errors
+remain terminal. Each completed response still passes the existing identity,
+phase, digest and assignment checks before affecting progress or stop.
+
+Each retry owns/drops one channel, consumes the original shared request/time
+budget and backs off within that deadline. No new durable state, cached success,
+wire format or provider is needed. The small shared observation method is
+necessary to give all three existing read sites the same bounded behavior.
+Acceptance: actual authenticated lost-status and lost-page replies, stalled
+authentication, exhausted request budget, refusal classification and the native
+TCP/QUIC runner recovery histories. Macro link: usable maintenance and P4/P2
+operator recovery. Next201 remains operation-by-operation provider conformance;
+following202 remains combined membership/checkpoint schedules. Full platform
+acceptance and unrelated failures stay open.
 
 ### Slice204 implemented evidence and next review
 

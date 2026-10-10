@@ -12,6 +12,9 @@ use std::time::{Duration, Instant};
 #[path = "drain_runner/multi.rs"]
 mod multi;
 #[cfg(test)]
+#[path = "drain_runner/observation_tests.rs"]
+mod observation_tests;
+#[cfg(test)]
 #[path = "drain_runner/recovery_tests.rs"]
 mod recovery_tests;
 
@@ -66,6 +69,16 @@ fn configuration_reply(reply: &str, operation: u128) -> Result<ConfigurationRepl
         return Ok(ConfigurationReply::ObserveSource);
     }
     Err(format!("{reply}preserve original drain and configuration identities").into())
+}
+fn repeat_observation(reason: &str) -> bool {
+    matches!(
+        reason,
+        "authentication deadline expired"
+            | "request deadline expired"
+            | "reply deadline expired"
+            | "connection closed during request"
+            | "connection closed without a complete reply"
+    )
 }
 fn field<'a>(text: &'a str, name: &str) -> Result<&'a str, Failure> {
     let prefix = format!("{name}=");
@@ -143,11 +156,30 @@ impl Runner {
             .into()),
         }
     }
+    fn source_observation(&mut self, offset: Option<usize>) -> Result<String, Failure> {
+        let command = match offset {
+            Some(offset) => format!("drain-group {} {} {offset}", self.sequence, self.operation),
+            None => format!("drain-status {} {}", self.sequence, self.operation),
+        };
+        loop {
+            match self.exchange(self.source, &command)? {
+                Attempt::Reply(reply) => return Ok(reply),
+                Attempt::Unavailable => (),
+                Attempt::Interrupted(reason) if repeat_observation(reason) => (),
+                Attempt::Interrupted(reason) => {
+                    return Err(format!("UNKNOWN source observation {command}: {reason}; preserve original drain identity").into());
+                }
+            }
+            // Only reads reach this loop. Drop each failed channel and repeat
+            // the same source/identity/offset within the original shared budget.
+            std::thread::park_timeout(
+                Duration::from_millis(25)
+                    .min(self.deadline.saturating_duration_since(Instant::now())),
+            );
+        }
+    }
     fn status(&mut self) -> Result<Progress, Failure> {
-        let text = self.source(&format!(
-            "drain-status {} {}",
-            self.sequence, self.operation
-        ))?;
+        let text = self.source_observation(None)?;
         progress(&text, self.sequence, self.operation)
     }
     fn resolve_admission(&mut self) -> Result<Progress, Failure> {

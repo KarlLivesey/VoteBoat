@@ -7,10 +7,7 @@ use rows::{Assignment, Progress, Row};
 
 impl Runner {
     fn multi_status(&mut self) -> Result<Progress, Failure> {
-        let text = self.source(&format!(
-            "drain-status {} {}",
-            self.sequence, self.operation
-        ))?;
+        let text = self.source_observation(None)?;
         Progress::parse(&text, self.sequence, self.operation)
     }
     fn multi_begin(&mut self) -> Result<Progress, Failure> {
@@ -32,10 +29,7 @@ impl Runner {
         }
     }
     fn multi_row(&mut self, offset: usize, count: usize) -> Result<Row, Failure> {
-        let text = self.source(&format!(
-            "drain-group {} {} {offset}",
-            self.sequence, self.operation
-        ))?;
+        let text = self.source_observation(Some(offset))?;
         Row::parse(&text, self.sequence, self.operation, offset, count)
     }
     fn assignments(&mut self, count: usize) -> Result<Vec<Assignment>, Failure> {

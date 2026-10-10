@@ -46,7 +46,7 @@ fn invalid_configuration_transport_is_not_hidden_by_retry() {
     }
 }
 
-fn accept(listener: &TcpListener, stop: &mpsc::Receiver<()>) -> Option<Channel> {
+pub(super) fn accept(listener: &TcpListener, stop: &mpsc::Receiver<()>) -> Option<Channel> {
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         if stop.try_recv().is_ok() {
@@ -74,7 +74,7 @@ fn poll(channel: &mut Channel, access: &ActiveAccess, start: Instant) -> bool {
         )
         .unwrap()
 }
-fn request(channel: &mut Channel, access: &ActiveAccess, start: Instant) -> String {
+pub(super) fn request(channel: &mut Channel, access: &ActiveAccess, start: Instant) -> String {
     let deadline = Instant::now() + Duration::from_secs(10);
     let mut command = Vec::new();
     loop {
@@ -98,7 +98,7 @@ fn request(channel: &mut Channel, access: &ActiveAccess, start: Instant) -> Stri
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn respond(channel: &mut Channel, access: &ActiveAccess, start: Instant, text: &str) {
+pub(super) fn respond(channel: &mut Channel, access: &ActiveAccess, start: Instant, text: &str) {
     channel.write_all(text.as_bytes()).unwrap();
     let deadline = Instant::now() + Duration::from_secs(10);
     while !channel.is_flushed() {
@@ -143,7 +143,7 @@ fn script(listener: TcpListener, access: ActiveAccess, stop: mpsc::Receiver<()>)
     commands
 }
 
-fn history(request_limit: Option<usize>) {
+pub(super) fn fixture() -> (Runner, TcpListener, ActiveAccess, std::path::PathBuf) {
     let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
     listener.set_nonblocking(true).unwrap();
     let root = std::env::temp_dir().join(format!(
@@ -175,6 +175,11 @@ fn history(request_limit: Option<usize>) {
     runner.auth = ClientAccess::load(&tls, 3, std::slice::from_ref(&endpoint)).unwrap();
     runner.endpoints = vec![endpoint];
     runner.source = 0;
+    (runner, listener, active, root)
+}
+
+fn history(request_limit: Option<usize>) {
+    let (mut runner, listener, active, root) = fixture();
     if let Some(limit) = request_limit {
         runner.remaining = limit;
     }

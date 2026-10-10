@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 1 test
+
+thread 'drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation' (1700995) panicked at src/bin/support/drain_runner/observation_tests.rs:45:27:
+called `Result::unwrap()` on an `Err` value: "UNKNOWN source request: reply deadline expired; preserve original drain identity"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation ... FAILED
+
+failures:
+
+failures:
+    drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 23 filtered out; finished in 5.00s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

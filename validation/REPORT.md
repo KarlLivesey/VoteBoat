@@ -5634,3 +5634,22 @@ TLS-readiness polling and sandbox socket-permission issues were fixed before
 capturing the pre-change behavioral failure. Evidence and commands are retained
 in [slice204](baseline/slice204/README.md). No macOS or full-suite pass is claimed;
 other timeout paths, provider conformance and the full P0–P7 goal remain open.
+
+## Slice205 — bounded original source observations
+
+The new authenticated source-status fixture fails before the behavioral change
+with the recorded reply-deadline outcome. After the change, status and assignment
+pages repeat only the same source, sequence, operation and offset. All18 selected
+runner tests pass, including seven new tests for lost replies, pre-command TLS
+stall, unchanged page identity, in-flight absolute deadline, request exhaustion
+and terminal malformed/unauthorized replies. The nine native TCP/QUIC runner
+histories and both replacement-drain histories pass (29 selected tests total).
+Formatting and all four strict Clippy profiles pass. Mutation
+timeouts are not turned into success or blindly retried by this read-only path.
+
+The completed prior446c807 operator log is retained: Ubuntu passes122 counter
+and13 directory tests, then fails transfer initialization (nine pass/one fail).
+macOS passes115 counter tests and fails seven before directory/transfer. The
+source-request timeout does not identify its command; these selected regressions
+do not establish a fix for every macOS failure or a current platform pass.
+See [slice205](baseline/slice205/README.md) for commands, scope and source hashes.

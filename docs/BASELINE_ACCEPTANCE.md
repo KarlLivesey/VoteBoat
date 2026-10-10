@@ -1,4 +1,12 @@
-# Baseline acceptance map — review192, operator evidence updated204
+# Baseline acceptance map — review192, operator evidence updated205
+
+Slice205 adds bounded original-ID retries for source status and assignment-page
+observations. Lost replies and pre-command authentication deadlines consume the
+existing budget; mutations remain separate, and successful replies still require
+identity/phase/plan validation. Eighteen selected runner tests and nine native
+single-/multi-group histories pass locally. The completed older446c807 run has
+seven macOS counter failures and one Ubuntu transfer-initialization failure;
+neither platform is declared accepted from that run or these selected checks.
 
 Slice204 reproduces and fixes the foreground drain's configuration reply-timeout
 exit. Single- and multi-group configuration attempts now reobserve the original
