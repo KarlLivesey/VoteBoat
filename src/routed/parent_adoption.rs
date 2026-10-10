@@ -78,6 +78,17 @@ impl ParentAdoptionCommand {
             Self::decode(bytes, cross)
         }
     }
+    pub fn decode_scoped_metadata(
+        bytes: &[u8],
+        slots: bool,
+        metadata: bool,
+    ) -> Result<Self, ApplicationError> {
+        if metadata && bytes.starts_with(b"VBMAAD01") {
+            OwnerMetadataAdoption::decode(bytes).map(Self::Metadata)
+        } else {
+            Self::decode_scoped(bytes, slots)
+        }
+    }
     pub fn encode(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         match self {
             Self::Local(a) => a.encode(max),

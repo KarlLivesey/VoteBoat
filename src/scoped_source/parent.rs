@@ -16,11 +16,13 @@
 use super::*;
 use crate::routed::parent_adoption::ParentAdoptionCommand;
 pub const PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 4;
+pub const METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 6;
 pub(super) fn parent_command(bytes: &[u8]) -> bool {
     bytes.starts_with(b"VBRPAD01")
         || bytes.starts_with(b"VBXPAD01")
         || bytes.starts_with(b"VBSLAD01")
         || bytes.starts_with(b"VBSXAD01")
+        || bytes.starts_with(b"VBMAAD01")
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -29,11 +31,51 @@ where
     P: PartitionPolicy + Clone,
 {
     pub(super) fn parent_command_bound(&self) -> usize {
-        if self.parent_slots {
+        if self.metadata_adoption {
+            MAX_METADATA_ADOPTION_BYTES
+        } else if self.parent_slots {
             MAX_PARENT_SLOT_ADOPTION_BYTES
         } else {
             MAX_CROSS_PARENT_ADOPTION_BYTES
         }
+    }
+    /// Select before bootstrap, after retained grants. Uses the existing ordered
+    /// grant ledger, with an explicit budget for complete metadata observations.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_authority_adoption(
+        self,
+        maximum: usize,
+    ) -> Result<Self, (ApplicationError, Self)> {
+        if maximum == 0
+            || maximum > MAX_PARENT_ADOPTIONS
+            || self
+                .readiness_requirements()
+                .snapshot_bytes
+                .checked_add(
+                    2 + self.routed.scoped_fence_limit()
+                        + maximum * (61 + MAX_METADATA_ADOPTION_BYTES),
+                )
+                .is_none_or(|n| n > MAX_SCOPED_SOURCE_CHECKPOINT_BYTES)
+        {
+            return Err((ApplicationError::InvalidCommand, self));
+        }
+        let mut next = self.with_parent_adoption(maximum)?;
+        next.parent_slots = true;
+        next.metadata_adoption = true;
+        Ok(next)
+    }
+    /// Original owner receipt plus source/destination metadata index provenance.
+    pub fn metadata_adoption(&self, op: OperationId) -> Option<MetadataGrantStatus> {
+        self.adoptions.iter().find_map(|change| match change {
+            GrantChange::Parent {
+                status,
+                command: ParentAdoptionCommand::Metadata(command),
+            } if status.operation == op => Some(MetadataGrantStatus {
+                owner: *status,
+                activation: command.activation(),
+            }),
+            _ => None,
+        })
     }
     /// Select schema5 before bootstrap, after retained grants. The same bounded
     /// parent ledger accepts both moved-owner and parent child-slot observations.
@@ -143,7 +185,11 @@ where
         index: u64,
         bytes: &[u8],
     ) -> Result<ParentGrantStatus, ApplicationError> {
-        let command = ParentAdoptionCommand::decode_scoped(bytes, self.parent_slots)?;
+        let command = ParentAdoptionCommand::decode_scoped_metadata(
+            bytes,
+            self.parent_slots,
+            self.metadata_adoption,
+        )?;
         let change = self.checked_parent(op, index, command)?;
         let GrantChange::Parent { status, .. } = change else {
             unreachable!()

@@ -4732,3 +4732,25 @@ These are selected modelled journal and embedding cases, not TCP/QUIC deployment
 or power-loss proof. Retained/imported families, foreign locators and repeated
 metadata moves remain, together with the full goal's other open requirements.
 Formatting, whitespace and the86-contract inventory/path check pass.
+
+## Slice156c2a — retained-owner metadata adoption
+
+All-feature metadata_transfer23, reparent_guards18, reparenting14 and
+retained_insertion33 pass (88 cases). Three new retained metadata cases cover
+actual source fence/import/publication/activation, earlier immutable exports,
+retained -> metadata -> retained grant replay, later transfer through the new
+authority and original source/target data retries. Profile capacity rejection,
+old-profile refusal, pending control/data admission, stale/conflicting adoption,
+partial batches, checkpoint truncations and post-fence retry behavior are checked.
+Native ModelIo cuts every adoption-frame byte and synchronization/publication
+boundaries, recovering only old or complete grants and preserving exports/outbox.
+
+Initial test calls used a private status helper and a nonexistent query variant;
+they were corrected to existing public quorum-read APIs. No production API was
+weakened for the fixtures. This is embedding and modelled native-journal evidence,
+not physical power loss, native TCP/QUIC relocation or macOS validation.
+
+The matching core-only targets pass67 cases (18/14/11/24). The three new
+all-feature cases were rerun after adding an explicit imported-value and duplicate
+retry check on the second target. All-target/all-feature Clippy with warnings
+denied, formatting, whitespace and the86-contract inventory/path check pass.

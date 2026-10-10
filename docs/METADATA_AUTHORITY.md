@@ -91,9 +91,16 @@ parent changes. `MetadataAdoption` queries return the original owner receipt and
 activation together, keeping the source and destination index domains explicit.
 The same profile composes with `TransferSource` for later data splits.
 
+For a retained owner, select `ScopedTransferSource::with_retained_grants`, then
+`with_metadata_authority_adoption` before bootstrap. Schema6 uses the same ordered
+grant ledger for retained, parent/slot and metadata changes, reserving bounded
+space for complete observations. Its `MetadataAdoption` read includes original
+activation provenance. Earlier scoped exports stay immutable; later retained
+transfers can proceed through the new metadata authority after adoption.
+
 The native cache's opt-in `with_metadata_authority_moves` accepts only the exact
 metadata/reference/generation transformation through `ManifestCache`. Verify
 the move before supplying these hints. Partial parent/child refresh fails route
-resolution; cache contents do not authorize writes. Retained/imported owners,
+resolution; cache contents do not authorize writes. Imported owners,
 foreign parent/child locators, a second metadata move and TCP/QUIC service
 composition remain work.

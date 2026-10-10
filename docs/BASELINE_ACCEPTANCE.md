@@ -266,3 +266,9 @@ refresh. Six new cases cover real activation, mixed parent/metadata history,
 retry/outbox preservation, a later data split, partial cache refresh, old-profile
 refusal and every-byte native adoption-journal cuts. Retained/imported owners,
 foreign locators, repeated metadata moves and native socket composition remain.
+
+Slice156c2a adds selected retained-owner metadata adoption: actual prior scoped
+handoff, metadata relocation, another retained handoff under the new authority,
+original export/retry preservation, checked mixed-history recovery and modeled
+native journal cuts. Imported-owner metadata lineage, foreign locators, repeat
+movement and native socket composition remain open; this does not complete P5/P6.

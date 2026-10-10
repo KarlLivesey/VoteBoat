@@ -36,7 +36,7 @@ pub use crate::routed::parent_slots::{
 };
 pub use adoption::{RetainedGrantAdoption, MAX_RETAINED_ADOPTION_BYTES};
 use parent::parent_command;
-pub use parent::PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA;
+pub use parent::{METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA, PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA};
 pub const SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 1;
 pub const BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 2;
 pub const RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 3;
@@ -55,13 +55,16 @@ pub enum ScopedSourceQuery<Q> {
     Frozen(OperationId),
     Grant(OperationId),
     ParentAdoption(OperationId),
+    MetadataAdoption(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[allow(clippy::large_enum_variant)] // Fixed observation is charged by read_result_bound.
 pub enum ScopedSourceRead<R> {
     Data(RoutedRead<R>),
     Frozen(Option<ScopedExportStatus>),
     Grant(Option<RetainedGrantStatus>),
     ParentAdoption(Option<ParentGrantStatus>),
+    MetadataAdoption(Option<MetadataGrantStatus>),
 }
 #[derive(Clone)]
 struct FrozenExport {
@@ -85,6 +88,7 @@ pub struct ScopedTransferSource<A, P> {
     adoptions: Vec<GrantChange>,
     parent_limit: usize,
     parent_slots: bool,
+    metadata_adoption: bool,
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -143,6 +147,7 @@ where
             adoptions: Vec::new(),
             parent_limit: 0,
             parent_slots: false,
+            metadata_adoption: false,
         })
     }
     /// Bind each scoped freeze to its exact retained-insertion intent before bootstrap.
@@ -379,7 +384,9 @@ where
         }
         let mut bytes =
             Vec::with_capacity(if self.parent_limit == 0 { 20 } else { 22 } + inner.len());
-        bytes.extend(if self.parent_slots {
+        bytes.extend(if self.metadata_adoption {
+            b"VBSCOWN6"
+        } else if self.parent_slots {
             b"VBSCOWN5"
         } else if self.parent_limit != 0 {
             b"VBSCOWN4"
@@ -413,6 +420,7 @@ where
                 || bytes.starts_with(b"VBSCOWN3")
                 || bytes.starts_with(b"VBSCOWN4")
                 || bytes.starts_with(b"VBSCOWN5")
+                || bytes.starts_with(b"VBSCOWN6")
             {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
@@ -564,7 +572,9 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.parent_slots {
+            application_schema: if self.metadata_adoption {
+                METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
+            } else if self.parent_slots {
                 PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
             } else if self.parent_limit != 0 {
                 PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
@@ -576,7 +586,9 @@ where
                 SCOPED_TRANSFER_SOURCE_SCHEMA
             },
             command_bytes: (inner.command_bytes + if self.parent_limit == 0 { 20 } else { 22 })
-                .max(if self.parent_slots {
+                .max(if self.metadata_adoption {
+                    MAX_RETAINED_ADOPTION_BYTES.max(MAX_METADATA_ADOPTION_BYTES)
+                } else if self.parent_slots {
                     MAX_RETAINED_ADOPTION_BYTES.max(MAX_PARENT_SLOT_ADOPTION_BYTES)
                 } else if self.parent_limit != 0 {
                     MAX_RETAINED_ADOPTION_BYTES.max(MAX_CROSS_PARENT_ADOPTION_BYTES)
@@ -898,7 +910,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.parent_slots {
+        out.extend(if self.metadata_adoption {
+            b"VBSCCHK6"
+        } else if self.parent_slots {
             b"VBSCCHK5"
         } else if self.parent_limit != 0 {
             b"VBSCCHK4"
@@ -976,7 +990,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.parent_slots {
+                != if self.metadata_adoption {
+                    b"VBSCCHK6"
+                } else if self.parent_slots {
                     b"VBSCCHK5"
                 } else if self.parent_limit != 0 {
                     b"VBSCCHK4"
@@ -1128,9 +1144,10 @@ where
                         next.checked_parent(
                             operation,
                             index,
-                            crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped(
+                            crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped_metadata(
                                 command_bytes,
                                 next.parent_slots,
+                                next.metadata_adoption,
                             )?,
                         )?
                     } else {
@@ -1220,6 +1237,14 @@ where
                 }
                 Ok(ScopedSourceRead::ParentAdoption(self.parent_adoption(op)))
             }
+            ScopedSourceQuery::MetadataAdoption(op) => {
+                if !self.metadata_adoption {
+                    return Err(ApplicationError::UnsupportedSchema);
+                }
+                Ok(ScopedSourceRead::MetadataAdoption(
+                    self.metadata_adoption(op),
+                ))
+            }
             ScopedSourceQuery::Grant(op) => {
                 if self.retained_grants {
                     Ok(ScopedSourceRead::Grant(
@@ -1247,7 +1272,8 @@ where
             ScopedSourceQuery::Data(q) => self.routed.query_bytes(q, limit),
             ScopedSourceQuery::Frozen(_)
             | ScopedSourceQuery::Grant(_)
-            | ScopedSourceQuery::ParentAdoption(_) => Ok(0),
+            | ScopedSourceQuery::ParentAdoption(_)
+            | ScopedSourceQuery::MetadataAdoption(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
@@ -1259,7 +1285,8 @@ where
                 .ok_or(ApplicationError::ReceiptBudget)?,
             ScopedSourceQuery::Frozen(_)
             | ScopedSourceQuery::Grant(_)
-            | ScopedSourceQuery::ParentAdoption(_) => 0,
+            | ScopedSourceQuery::ParentAdoption(_)
+            | ScopedSourceQuery::MetadataAdoption(_) => 0,
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -1274,7 +1301,8 @@ where
             ScopedSourceRead::Data(r) => self.routed.read_result_bytes(r, limit),
             ScopedSourceRead::Frozen(_)
             | ScopedSourceRead::Grant(_)
-            | ScopedSourceRead::ParentAdoption(_) => Ok(0),
+            | ScopedSourceRead::ParentAdoption(_)
+            | ScopedSourceRead::MetadataAdoption(_) => Ok(0),
         }
     }
 }

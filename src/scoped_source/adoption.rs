@@ -121,7 +121,10 @@ impl GrantChange {
     pub fn command(&self) -> Result<Vec<u8>, ApplicationError> {
         match self {
             Self::Retained(a) => a.command.encode(MAX_RETAINED_ADOPTION_BYTES),
-            Self::Parent { command, .. } => command.encode(MAX_PARENT_SLOT_ADOPTION_BYTES),
+            Self::Parent { command, .. } => command.encode(match command {
+                ParentAdoptionCommand::Metadata(_) => MAX_METADATA_ADOPTION_BYTES,
+                _ => MAX_PARENT_SLOT_ADOPTION_BYTES,
+            }),
         }
     }
     pub fn digest(&self) -> Result<ContentDigest, ApplicationError> {
