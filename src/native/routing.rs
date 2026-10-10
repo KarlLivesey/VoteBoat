@@ -43,6 +43,7 @@ pub struct NativeManifestCache {
     local_reparenting: bool,
     cross_reparenting: bool,
     metadata_moves: bool,
+    metadata_locators: bool,
 }
 impl NativeManifestCache {
     pub fn new(limits: ManifestCacheLimits) -> Result<Self, RoutingError> {
@@ -54,6 +55,7 @@ impl NativeManifestCache {
             local_reparenting: false,
             cross_reparenting: false,
             metadata_moves: false,
+            metadata_locators: false,
         })
     }
     /// Opt into trusted same-authority reparenting views before admitting hints.
@@ -83,6 +85,15 @@ impl NativeManifestCache {
         self.metadata_moves = true;
         Ok(self)
     }
+    /// Accept authenticated foreign locator refreshes, selected before hints.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_locator_updates(mut self) -> Result<Self, (RoutingError, Self)> {
+        if !self.entries.is_empty() || self.metadata_locators {
+            return Err((RoutingError::InvalidLimits, self));
+        }
+        self.metadata_locators = true;
+        Ok(self)
+    }
     fn admission(&self, manifest: &ResponsibilityManifest) -> Result<usize, RoutingError> {
         let next = manifest.input();
         let mut old_bytes = 0;
@@ -98,9 +109,12 @@ impl NativeManifestCache {
                     Err(RoutingError::GenerationConflict)
                 };
             }
+            let metadata_locator =
+                self.metadata_locators && manifest.refreshes_metadata_locators(old);
             let metadata_move = self.metadata_moves && manifest.moves_metadata_from(old);
             if (next.parent != prior.parent
                 && !metadata_move
+                && !metadata_locator
                 && !(self.local_reparenting && manifest.reparents_within_authority(old))
                 && !(self.cross_reparenting && manifest.reparents_preserving_owner(old)))
                 || (next.authority != prior.authority && !metadata_move)
@@ -117,6 +131,7 @@ impl NativeManifestCache {
                 && next.execution != prior.execution
                 && !manifest.refreshes_child_epochs(old)
                 && !metadata_move
+                && !metadata_locator
                 && !manifest.retires_child_slots(old)
                 && !(self.local_reparenting && manifest.fills_vacant_child_slots(old))
             {

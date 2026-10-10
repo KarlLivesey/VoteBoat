@@ -1256,7 +1256,8 @@
         "ResponsibilityManifest::fills_vacant_child_slots",
         "ResponsibilityManifest::reparents_within_authority",
         "ResponsibilityManifest::reparents_preserving_owner",
-        "ResponsibilityManifest::moves_metadata_from"
+        "ResponsibilityManifest::moves_metadata_from",
+        "ResponsibilityManifest::refreshes_metadata_locators"
       ],
       "native": "NativeBytePartition: stable unsigned single-byte bucket scheme 1/version 1; native and host caches pass the same checked core resolver.",
       "conformance": [
@@ -1280,7 +1281,8 @@
         "usage",
         "NativeManifestCache::with_local_reparenting",
         "NativeManifestCache::with_cross_authority_reparenting",
-        "NativeManifestCache::with_metadata_authority_moves"
+        "NativeManifestCache::with_metadata_authority_moves",
+        "NativeManifestCache::with_metadata_locator_updates"
       ],
       "native": "NativeManifestCache: explicit caller-owned BTreeMap hints, bounded count and retained value/route capacity, atomic owned admission/replacement and generation-scoped invalidation.",
       "conformance": [
@@ -1368,7 +1370,9 @@
         "ReparentPublicationEvidence::from_status",
         "ReleaseCommittedReparent::encode",
         "ReleaseCommittedReparent::decode",
-        "with_remaining_transfer (pristine schema14)"
+        "with_remaining_transfer (pristine schema14)",
+        "with_metadata_locator_updates (pristine schema15)",
+        "metadata_locator_at"
       ],
       "native": "Deterministic native directory application using the existing public application/log/snapshot contracts. No new provider owner or mandatory ancestor write path.",
       "conformance": [
@@ -2094,6 +2098,31 @@
         "tests/reparent_guards.rs"
       ],
       "scope": "Slice156c1 carries the complete metadata move plan, selected responsibility and original activation/publication/import observations. Checked plan digest, authority domains and phase indices bind the exact current grant to the updated metadata references/generation. Hosts authenticate foreign quorum/configuration and opaque digest evidence; encoding is not a certificate. Selection occurs before bootstrap and reserves bounded command/checkpoint capacity; oversized complete plans refuse without truncation. Data ownership/epochs, application state, original bootstrap and retry/outbox history remain intact. MetadataGrantStatus and routed/source quorum reads retain both local owner receipt and original activation domains. Exact retries survive later fences; mixed parent/metadata adoption chains restore atomically. Default and earlier profiles refuse the new command. Tests include actual activation, full-owner adoption with exhausted data history, later split/import/activation through the migrated directory, strict native cache refresh, malformed/capacity/partial-batch rejection and every-byte ModelIo journal cuts. Retained/imported owner families, foreign locators, repeated metadata moves and TCP/QUIC authority-move composition remain open."
+    },
+    {
+      "design_id": "C05/C15/C16/C17",
+      "public_contract": "MetadataLocatorUpdate / MetadataLocatorStatus",
+      "operations": [
+        "new",
+        "before",
+        "after",
+        "plan",
+        "activation",
+        "encode",
+        "decode",
+        "Directory::with_metadata_locator_updates",
+        "Directory::metadata_locator_at",
+        "DirectoryQuery::MetadataLocator",
+        "DirectoryRead::MetadataLocator",
+        "ResponsibilityManifest::refreshes_metadata_locators",
+        "NativeManifestCache::with_metadata_locator_updates"
+      ],
+      "native": "Deterministic schema15 directory transition and original quorum-read status on the existing application, journal, checkpoint and cache seams; no additional runtime, worker or store.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/locators.rs"
+      ],
+      "scope": "Slice156c2c binds the exact foreign manifest and complete bounded move plan to host-authenticated original activation observations. All matching parent/child metadata locators change atomically with generation +1; concrete data ownership, epochs, application and selectors are preserved. Source/destination incarnations, reciprocal scope/epoch/identity links, stale views, active lifecycle reservations and partial/corrupt input are checked. The pre-bootstrap schema15 profile retains exact original outcomes and reconstructs all changes from the original command history; old profiles refuse the new command and checkpoint. Successful updates use a bounded existing control reserve with an explicit lifetime count, preserving unfinished publication reservations and ordinary-history limits. Fixed status carries original local operation/index and activation domains plus the complete command digest. Full plans exceeding the control command ceiling are rejected, never truncated. The separate pristine cache option requires a complete single-source/destination reference transformation and leaves data authorization to owners. Actual source/import/publication/activation with foreign parent/child references and a bridge with both boundary roles, cache refresh orders, replay/provenance/capacity/partial-state refusals and native modeled every-byte/sync/publication journal cuts are tested. Data-owner adoption of locator updates, repeated metadata exports and TCP/QUIC authority-move composition remain work."
     }
   ],
   "not_yet_implemented": [

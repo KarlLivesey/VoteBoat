@@ -339,6 +339,7 @@ pub struct TransferIntentStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
+    MetadataLocator(OperationId),
     Reparent(OperationId),
     ReparentGuard(OperationId),
     ReparentDecision(OperationId),
@@ -359,6 +360,7 @@ pub enum DirectoryQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
+    MetadataLocator(Option<crate::metadata_transfer::MetadataLocatorStatus>),
     Reparent(Option<crate::reparenting::ReparentStatus>),
     ReparentGuard(Option<crate::reparent_guard::ReparentGuardStatus>),
     ReparentDecision(Option<crate::reparent_commit::ReparentDecisionStatus>),
@@ -447,6 +449,10 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::MetadataLocator(operation) => self
+                .0
+                .metadata_locator_at(required, operation)
+                .map(DirectoryRead::MetadataLocator),
             DirectoryQuery::ReparentDecision(operation) => self
                 .0
                 .reparent_decision_at(required, operation)
@@ -520,6 +526,10 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
+                DirectoryQuery::MetadataLocator(op) => {
+                    self.0.metadata_locator_at(self.applied_index(), *op)?;
+                    0
+                }
                 DirectoryQuery::ReparentDecision(op) => self
                     .0
                     .reparent_decision_at(self.applied_index(), *op)?
@@ -621,6 +631,7 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::MetadataLocator(_) => 0,
             DirectoryRead::ReparentDecision(s) => s.as_ref().map_or(0, |s| {
                 s.retained_bytes() - size_of::<crate::reparent_commit::ReparentDecisionStatus>()
             }),

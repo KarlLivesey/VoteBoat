@@ -1,8 +1,9 @@
 # Moving metadata authority
 
 Source fencing, import, publication and destination activation are implemented
-for Rust embedding. Live-owner/locator refresh, repeated moves and native socket
-composition remain; an imported image alone does not authorize a new metadata group.
+for Rust embedding, including original/retained/imported owner metadata adoption
+and foreign directory/cache locator refresh. Owner adoption of foreign locator
+updates, repeated moves and native socket composition remain; an imported image alone does not authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction
@@ -109,6 +110,27 @@ after a later handoff, then retains it without the retired application payload.
 The native cache's opt-in `with_metadata_authority_moves` accepts only the exact
 metadata/reference/generation transformation through `ManifestCache`. Verify
 the move before supplying these hints. Partial parent/child refresh fails route
-resolution; cache contents do not authorize writes. Foreign parent/child
-locators, a second metadata move and TCP/QUIC service
-composition remain work.
+resolution; cache contents do not authorize writes.
+
+For a foreign parent or child authority, select
+`Directory::with_metadata_locator_updates` before bootstrap (schema15). Build a
+`MetadataLocatorUpdate` from its exact current manifest, the complete move plan
+and authenticated original activation. Propose its encoding to that authority.
+It checks reciprocal responsibility/scope/epoch links, updates all matching
+parent/child references with generation +1, and preserves data ownership. A
+stale manifest or an open lifecycle/guard refuses the update. Each authority
+commits independently; no cross-authority atomic transaction is implied.
+
+The original operation/index, command digest and activation are available through
+`DirectoryQuery::MetadataLocator`. Obtain them through the original authority's
+quorum. Successful updates share the bounded control pool, with a lifetime count
+no larger than the configured ordinary operation count. Complete commands above
+`MAX_METADATA_LOCATOR_BYTES` are refused; no plan is truncated. Checkpoints replay
+original commands and exact retries return the original outcome.
+
+Select the cache's separate `with_metadata_locator_updates` option before admitting
+hints. It accepts only the complete same-authority reference transformation for
+one foreign source/destination pair. Partial authority refresh still refuses
+incompatible routes. This is a hint check, not data-owner grant adoption.
+Owner adoption of foreign locator results, a second metadata export and native
+TCP/QUIC authority-move composition remain work.

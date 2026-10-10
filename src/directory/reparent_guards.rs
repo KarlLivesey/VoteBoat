@@ -246,7 +246,8 @@ impl Directory {
         let r = next.execute(index, operation, bytes)?;
         if !matches!(
             r.outcome,
-            DirectoryOutcome::Initialized
+            DirectoryOutcome::MetadataLocatorUpdated(_)
+                | DirectoryOutcome::Initialized
                 | DirectoryOutcome::CreationReserved
                 | DirectoryOutcome::NamespacePublished(_)
                 | DirectoryOutcome::Published(_)

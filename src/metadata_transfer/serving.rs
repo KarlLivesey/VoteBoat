@@ -407,7 +407,8 @@ impl MetadataServingTarget {
 fn query_operation(q: DirectoryQuery) -> Option<OperationId> {
     Some(match q {
         DirectoryQuery::Manifest(_) => return None,
-        DirectoryQuery::Reparent(op)
+        DirectoryQuery::MetadataLocator(op)
+        | DirectoryQuery::Reparent(op)
         | DirectoryQuery::ReparentGuard(op)
         | DirectoryQuery::ReparentDecision(op)
         | DirectoryQuery::ReparentPublication(op)

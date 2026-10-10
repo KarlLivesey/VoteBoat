@@ -498,3 +498,6 @@ mod activation;
 
 #[path = "metadata_transfer/adoption.rs"]
 mod adoption;
+
+#[path = "metadata_transfer/locators.rs"]
+mod locators;

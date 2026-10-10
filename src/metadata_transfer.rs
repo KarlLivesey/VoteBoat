@@ -16,6 +16,7 @@
 //!
 //! Select before bootstrap. Exports preserve the original authority/index
 //! domain; an image is not permission to activate another metadata group.
+mod locators;
 mod publication;
 mod serving;
 mod target;
@@ -28,6 +29,7 @@ use crate::{
     routing::{codec::*, *},
     transfer::{ContentDigest, DirectoryQuery, DirectoryRead, LifecycleDirectory},
 };
+pub use locators::*;
 pub use publication::*;
 pub use serving::*;
 use std::{collections::BTreeMap, mem::size_of};

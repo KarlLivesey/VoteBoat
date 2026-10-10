@@ -4787,3 +4787,27 @@ Core-only imported_parent adds3 passing cases (88 total across all seven targets
 Both all-feature and core-only all-target Clippy pass with warnings denied. Final
 metadata tests pass8 cases after the fixture cleanup; formatting, whitespace and
 the86-contract inventory/path check pass. README remains unchanged.
+
+## Slice156c2c — foreign metadata locator refresh, 10 October 2026
+
+Seven new downstream tests cover actual metadata move phases, foreign parent and
+child locators, a bridge manifest with both roles, bounded reserved admission,
+original outcomes, profile/provenance/truncation/pending/batch refusals and cache
+refresh order. The bridge test requires all references to one moved authority to
+change together. Oversized complete plans refuse without projection. Native
+ModelIo cuts every update-frame byte and sync/publication boundary for both
+foreign authorities; each recovery has only the old or complete manifest and
+resumes the original operation/status. Open creation keeps its completion reserve.
+
+Executed locally:
+- All-feature tests: directory31, group_creation4, metadata_transfer30,
+  reparent_guards18, reparenting14, retained_insertion38, routing13:148 pass.
+- Core-only same targets:27/3/23/14/11/28/9:115 pass.
+- All-feature and core-only all-target Clippy, warnings denied: pass.
+- cargo +stable fmt --all -- --check; git diff --check; node
+  validation/check-inventory.mjs: pass (87 contract records/paths).
+
+Commands used --locked --offline and the stable toolchain. No native socket,
+physical power-loss or macOS result is claimed. Data-owner locator adoption,
+repeated metadata exports, native move composition and remaining P0–P7 requirements
+remain open. The full goal is active.

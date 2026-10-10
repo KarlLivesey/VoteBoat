@@ -18,7 +18,6 @@ use crate::metadata_transfer::{
     MetadataActivationStatus, MetadataMovePlan, MAX_METADATA_PLAN_BYTES,
     METADATA_ACTIVATION_STATUS_BYTES,
 };
-use crate::transfer::ContentDigest;
 
 pub const METADATA_ADOPTING_ROUTED_SCHEMA: u64 = 5;
 pub const MAX_METADATA_ADOPTION_BYTES: usize = MAX_ROUTED_COMMAND_BYTES;
@@ -50,17 +49,12 @@ impl OwnerMetadataAdoption {
         Ok(value)
     }
     fn validate(&self) -> Result<(), ApplicationError> {
-        self.activation.encode()?;
-        let source = self.activation.publication.imported.source;
-        if source.source != self.plan.source()
-            || source.target != self.plan.target()
-            || source.plan_digest
-                != ContentDigest::sha256(&self.plan.encode(MAX_METADATA_PLAN_BYTES)?)
-            || !self
-                .plan
-                .manifests()
-                .iter()
-                .any(|m| m.input().responsibility == self.responsibility)
+        crate::metadata_transfer::validate_move_observation(&self.plan, self.activation)?;
+        if !self
+            .plan
+            .manifests()
+            .iter()
+            .any(|m| m.input().responsibility == self.responsibility)
         {
             return Err(ApplicationError::InvalidCommand);
         }

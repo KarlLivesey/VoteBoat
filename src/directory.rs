@@ -20,6 +20,8 @@
 //! from the existing Raft/WAL/application/checkpoint contracts. Schema2 creation
 //! reserves fresh identities but cannot bootstrap groups or activate ownership.
 mod child_slots;
+mod metadata_locators;
+use crate::metadata_transfer::MetadataLocatorUpdate;
 mod reparent_commit;
 mod reparent_guards;
 use crate::reparent_commit::*;
@@ -43,6 +45,7 @@ use std::{
     mem::size_of,
 };
 
+pub const METADATA_LOCATOR_DIRECTORY_SCHEMA: u64 = 15;
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const REMAINING_TRANSFER_DIRECTORY_SCHEMA: u64 = 14;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
@@ -260,6 +263,7 @@ impl DirectoryCommand {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryOutcome {
+    MetadataLocatorUpdated(RouteGeneration),
     Initialized,
     CreationReserved,
     CreationConflict,
@@ -293,6 +297,7 @@ pub enum DirectoryOutcome {
 }
 #[allow(clippy::large_enum_variant)] // Bounded cold parsing; no extra heap indirection.
 enum Request {
+    MetadataLocator(MetadataLocatorUpdate),
     Bootstrap,
     RetireChildSlot(RetireChildSlot),
     Reparent(ReparentPlan),
@@ -358,6 +363,8 @@ pub struct Directory {
     local_reparenting: bool,
     reparent_guards: bool,
     cross_reparenting: bool,
+    metadata_locators: bool,
+    metadata_locator_controls: BTreeSet<OperationId>,
     reparent_decisions: BTreeMap<OperationId, OperationId>,
     reparent_publications: BTreeMap<OperationId, OperationId>,
     reparent_completions: BTreeMap<OperationId, OperationId>,
@@ -414,6 +421,8 @@ impl Directory {
             local_reparenting: false,
             reparent_guards: false,
             cross_reparenting: false,
+            metadata_locators: false,
+            metadata_locator_controls: BTreeSet::new(),
             reparent_decisions: BTreeMap::new(),
             reparent_publications: BTreeMap::new(),
             reparent_completions: BTreeMap::new(),
@@ -538,6 +547,13 @@ impl Directory {
         next.remaining_transfer = true;
         Ok(next)
     }
+    /// Select schema15 before bootstrap for completed foreign metadata moves.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_locator_updates(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_remaining_transfer()?;
+        next.metadata_locators = true;
+        Ok(next)
+    }
     fn control_command_limit(&self) -> usize {
         if self.namespace_deletion {
             MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
@@ -635,7 +651,8 @@ impl Directory {
                 - self.delegation_cancellations.len()
                 - self.namespace_publications.len()
                 - self.deletion_publications.len()
-                - self.reparent_controls.len())
+                - self.reparent_controls.len()
+                - self.metadata_locator_controls.len())
     }
     /// Extra bounded control pool; successful publications never use ordinary history.
     pub fn control_history_capacity(&self) -> usize {
@@ -674,7 +691,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.remaining_transfer {
+        bytes.extend(if self.metadata_locators {
+            b"VBDINI15"
+        } else if self.remaining_transfer {
             b"VBDINI14"
         } else if self.cross_reparenting {
             b"VBDINI13"
@@ -734,6 +753,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINI12")
             || bytes.starts_with(b"VBDINI13")
             || bytes.starts_with(b"VBDINI14")
+            || bytes.starts_with(b"VBDINI15")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -743,7 +763,9 @@ impl Directory {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if self.cross_reparenting && bytes.starts_with(b"VBXRCM01") {
+            if self.metadata_locators && bytes.starts_with(b"VBMLUP01") {
+                MetadataLocatorUpdate::decode(bytes).map(Request::MetadataLocator)
+            } else if self.cross_reparenting && bytes.starts_with(b"VBXRCM01") {
                 CommitReparent::decode(bytes).map(Request::CommitReparent)
             } else if self.cross_reparenting && bytes.starts_with(b"VBXRPU01") {
                 PublishReparent::decode(bytes).map(Request::PublishReparent)
@@ -866,7 +888,13 @@ impl Directory {
                 }),
             snapshot_bytes: 58
                 + self.plan.encoded_len()
-                + if self.reparent_guards { 112 } else { 56 } * self.limits.operations
+                + if self.metadata_locators {
+                    140
+                } else if self.reparent_guards {
+                    112
+                } else {
+                    56
+                } * self.limits.operations
                 + self.limits.history_bytes
                 + self.control_history_capacity(),
         }
@@ -1489,7 +1517,9 @@ impl Directory {
                 true,
             )
         } else {
-            let control = matches!(&command,Request::DeletionCompletion(c) if self.deletion_permitted(operation,c))
+            let locator_control = matches!(&command, Request::MetadataLocator(u) if self.locator_permitted(u, bytes.len()));
+            let control = locator_control
+                || matches!(&command,Request::DeletionCompletion(c) if self.deletion_permitted(operation,c))
                 || matches!(&command,Request::Publication(p) if self.publication_permitted(p))
                 || matches!(&command,Request::Namespace(p) if self.namespace_permitted(p))
                 || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
@@ -1509,8 +1539,16 @@ impl Directory {
             {
                 return Err(ApplicationError::DedupCapacity);
             }
+            // An otherwise valid locator with exhausted control reserve must
+            // not mutate state via the ordinary-history path.
+            if matches!(&command, Request::MetadataLocator(u) if matches!(self.locator_outcome(u), DirectoryOutcome::MetadataLocatorUpdated(_)))
+                && !locator_control
+            {
+                return Err(ApplicationError::DedupCapacity);
+            }
             let guarded_before = (!self.guarded_manifests.is_empty()).then(|| self.clone());
             let mut outcome = match command {
+                Request::MetadataLocator(u) => self.update_metadata_locators(u),
                 Request::ReparentGuard(p) => self.prepare_reparent(operation, p),
                 Request::CommitReparent(c) => self.commit_reparent(index, operation, c),
                 Request::PublishReparent(c) => self.publish_reparent(operation, c),
@@ -1557,6 +1595,9 @@ impl Directory {
                 )
             {
                 self.reparent_controls.insert(operation);
+            }
+            if locator_control {
+                self.metadata_locator_controls.insert(operation);
             }
             self.history.insert(
                 operation,
@@ -1743,7 +1784,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.remaining_transfer {
+        if self.metadata_locators {
+            METADATA_LOCATOR_DIRECTORY_SCHEMA
+        } else if self.remaining_transfer {
             REMAINING_TRANSFER_DIRECTORY_SCHEMA
         } else if self.cross_reparenting {
             CROSS_REPARENT_DIRECTORY_SCHEMA
@@ -1785,7 +1828,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.remaining_transfer {
+        bytes.extend(if self.metadata_locators {
+            b"VBDIR015"
+        } else if self.remaining_transfer {
             b"VBDIR014"
         } else if self.cross_reparenting {
             b"VBDIR013"
@@ -1849,7 +1894,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.remaining_transfer {
+                != if self.metadata_locators {
+                    b"VBDIR015"
+                } else if self.remaining_transfer {
                     b"VBDIR014"
                 } else if self.cross_reparenting {
                     b"VBDIR013"
@@ -1893,7 +1940,14 @@ impl CheckpointStateMachine for Directory {
                 }
             }
             let count = reader.u32()? as usize;
-            if count > if self.reparent_guards { 4 } else { 2 } * self.limits.operations
+            if count
+                > if self.metadata_locators {
+                    5
+                } else if self.reparent_guards {
+                    4
+                } else {
+                    2
+                } * self.limits.operations
                 || count as u64 > applied
             {
                 return Err(ApplicationError::InvalidCheckpoint);
@@ -1912,6 +1966,7 @@ impl CheckpointStateMachine for Directory {
             next.local_reparenting = self.local_reparenting;
             next.reparent_guards = self.reparent_guards;
             next.cross_reparenting = self.cross_reparenting;
+            next.metadata_locators = self.metadata_locators;
             let mut previous = 0;
             for _ in 0..count {
                 let index = reader.u64()?;

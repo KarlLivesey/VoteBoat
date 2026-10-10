@@ -278,3 +278,11 @@ Actual moved-authority split and retained/remaining handoffs preserve original
 activation, retry/outbox and earlier exports. Exact ordered retirement replay,
 negative history tests and modeled native adoption/retirement cuts pass. Foreign
 locators, repeat authority moves and native socket composition remain open.
+
+Slice156c2c adds schema15 foreign directory locator updates and a separate native
+cache opt-in. Complete original move observations authorize an exact foreign
+manifest reference/generation transformation. Seven new cases exercise actual
+move phases, both boundary roles, combined parent/child updates, bounded reserve,
+old-profile/refusal/replay checks and modeled native journal interruptions.
+Data-owner adoption of those locator results, repeated moves and native TCP/QUIC
+composition remain; this does not complete the metadata-movement requirement.

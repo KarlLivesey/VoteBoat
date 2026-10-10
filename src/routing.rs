@@ -381,6 +381,78 @@ impl ResponsibilityManifest {
         }
         a == &expected
     }
+    /// Exact foreign locator refresh for one metadata source/destination pair.
+    /// Hosts authenticate the move; this is only a structural cache check.
+    pub fn refreshes_metadata_locators(&self, previous: &Self) -> bool {
+        let (next, old) = (self.input(), previous.input());
+        if old.state != ResponsibilityState::Active
+            || old.generation.get().checked_add(1) != Some(next.generation.get())
+        {
+            return false;
+        }
+        let mut pair = None;
+        let mut change = |from: GroupIdentity, to: GroupIdentity| {
+            if from.id == to.id || from.id == old.authority.id || to.id == old.authority.id {
+                return false;
+            }
+            match pair {
+                Some(p) => p == (from, to),
+                None => {
+                    pair = Some((from, to));
+                    true
+                }
+            }
+        };
+        let mut expected = old.clone();
+        expected.generation = next.generation;
+        if let (Some(a), Some(b)) = (old.parent, next.parent) {
+            if a.group != b.group {
+                if !change(a.group, b.group) {
+                    return false;
+                }
+                expected.parent.as_mut().unwrap().group = b.group;
+            }
+        }
+        if let (ExecutionMode::Delegated(a), ExecutionMode::Delegated(b)) =
+            (&mut expected.execution, &next.execution)
+        {
+            if a.len() != b.len() {
+                return false;
+            }
+            for (a, b) in a.iter_mut().zip(b) {
+                if let (RouteTarget::Child(from), RouteTarget::Child(to)) =
+                    (&mut a.target, b.target)
+                {
+                    if from.group != to.group {
+                        if !change(from.group, to.group) {
+                            return false;
+                        }
+                        from.group = to.group;
+                    }
+                }
+            }
+        }
+        let Some((from, to)) = pair else {
+            return false;
+        };
+        // Every reference to this source in the manifest must follow the move,
+        // including references whose omission would leave a mixed local view.
+        if let Some(parent) = &mut expected.parent {
+            if parent.group == from {
+                parent.group = to;
+            }
+        }
+        if let ExecutionMode::Delegated(routes) = &mut expected.execution {
+            for route in routes {
+                if let RouteTarget::Child(child) = &mut route.target {
+                    if child.group == from {
+                        child.group = to;
+                    }
+                }
+            }
+        }
+        next == &expected
+    }
     /// Charges value bytes and all retained route capacity. Collection/allocator
     /// bookkeeping is separately bounded by the fixed entry ceiling.
     pub fn retained_bytes(&self) -> usize {
