@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Terminal full Linux suite: [slice251](../validation/baseline/slice251/linux/README.md).
+Source-preserved ba67c8c finishes1826 passes, zero failures/ignored; routed171 and
+later targets complete. Original647 inputs verify before/after and formatting/
+four strict profiles are zero. Production is identical through17ba335, but later
+changed tests/conformance have only their own focused evidence. Mac full251 stays
+live with reported failures; explicit lookup-source handoff254b and remaining
+routing diagnosis254c are active. This finite Linux result is not full platform/
+provider certification or P7 acceptance.
+
 Controlled native QUIC fixture input: [slice253](../validation/baseline/slice253/README.md).
 Linux/Mac native QUIC15/15 pass; formatting/four strict profiles are zero and651
 build inputs verify. Non-consuming socket observations establish physical arrival

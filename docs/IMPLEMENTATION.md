@@ -1742,6 +1742,251 @@ failed histories and relevant broad platform targets on source-matched Linux/Mac
 with zero strict profiles. Missing evidence does not become an invented feature
 or a reason to substitute security/performance work.
 
+254 diagnostic schema before isolated reproduction: terminal251 assertion bodies
+remain pending. Collect an unchanged selected parent-offline checkpoint history
+in the separate source-verified checkout while251 continues, rather than waiting
+to learn whether its exact assertion reproduces independently. Data/API, native
+TCP, original operation IDs/receipts, two checkpoint reopens, offline parent-file
+comparison and ordinary owned cleanup remain unchanged. The fixture lease starts
+the original clock only after admission. Record the full assertion and retained
+failed root if it fails; an isolated pass cannot clear the original broad failure.
+Depend on final253651 input hashes (routed production/tests unchanged) and existing
+Mac child-shell4096 condition. Completion: terminal same-input isolated Mac/Linux
+results, no edits until a concrete assertion identifies the responsible contract.
+This advances P5/P6 platform diagnosis, without a new helper or timer relaxation.
+
+254 focused correction schema after reproduced assertion: Linux/Mac parent-offline
+checkpoint history passes unchanged (1 each), which does not clear251's failure.
+Linux automatic QUIC service passes, but Mac fails twice at LeadershipChanged;
+the second backtrace identifies initialized_directory's initial bootstrap at141.
+Recover only that shared metadata preparation and its seed publications through
+existing propose_recovering (four attempts, only exact LeadershipChanged retry,
+original group/operation/bytes, ordinary core authority checks). Assert original
+bootstrap operation/Initialized outcome and each original publication operation/
+generation. This is before deliberate routing/restart fault cuts; raw proposal
+helpers and fault injections remain single-observation. Existing Directory history
+retains original semantic outcomes through receipt loss. No provider/API/format,
+production timer, budget or safety change. Completion: same failed Mac history,
+relevant automatic lookup/remote-manifest family on both hosts, source matching
+and zero formatting/four strict profiles. Keep original full failures open until
+their actual bodies agree; retain failed roots and preflight manifest-path error.
+
+254 candidate evidence: Linux affected lookup family10/0; Mac9/1. Original QUIC
+service failure now passes, but TCP service stalls at resolve_auto's original15s
+bound. Zero formatting/four strict profiles on both; do not publish this as a
+clean family or enlarge its deadline. Diagnostic refinement: on timeout only,
+report the pending lookup and existing read binding, role/term/commit and pending
+read count for the original source/peers; track caller identifies the actual
+service/recovery phase. No extra successful-path poll, campaign, read or clock
+change. Collect this cause-specific failure in the isolated TCP service before
+selecting any correction; preserve Mac9/1 and original failed roots.
+
+254 authority preparation schema after the diagnostic failure: the first service
+resolve (caller548) has no pending read, source store1 is Follower term3/commit8,
+store2 is Leader at the same committed boundary, all pending counts zero. Native
+ManifestLookup owns a fixed local read source; it does not promise peer leader
+selection. The fixture checkpoint can outlive the earlier ready-leader sample.
+Re-establish the existing ready-authority precondition after metadata preparation
+and, for the service, after checkpointing immediately before moving the source
+into that fixed driver. Reuse campaign's existing core-checked commitment/applied
+boundary and current winning-leader selection. No campaign is added to discovery,
+ordinary child writes or production. Source read bindings still belong to the
+actually moved node; restart uses fresh verified bindings. Original deadlines,
+cache invalidation/read tickets, cold retries, parent-offline behavior and failed
+results remain. Acceptance: affected10 on both hosts plus all strict profiles;
+this is a fixture serving precondition, not automatic native leader discovery.
+
+254 authority candidate is unaccepted: Linux affected10/0; Mac8/2 at80.62s.
+Both TCP and QUIC service fail at the first resolve after preparation (caller552):
+source store1 is Follower with no pending reads; store2/3 is the current leader.
+An earlier ready-authority sample is insufficient. Do not repeat that preparation
+or claim source selection/driver failover is implemented. All four strict profiles
+and formatting remain zero on both; final experimental651 inputs verify on Mac.
+The candidate/diagnostic patch and raw results remain under target/slice254; it is
+uncommitted in the attached worktree, not published. Original primary/full251
+source remains unchanged, and17ba335 is the published accepted QUIC slice.
+Next within254: inspect fixed-source binding/cancellation/negative-cache ownership
+and specify actual authority recovery through the existing public contracts before
+editing. A production leader-discovery change requires its own explicit scope and
+acceptance; do not introduce it silently to satisfy this fixed-source fixture.
+No additional generic helpers, unchanged retry loop or larger deadline is justified.
+
+254 fixed-source recovery schema before editing: the inspected public driver binds
+one owned ManifestReadSource and refuses binding replacement; its Unavailable is
+not peer leader selection. Preparing another ready sample does not guarantee
+later authority. Remove the rejected extra preparation campaigns. For positive
+fixture lookup only, after actual Unavailable, no accepted pending invocation,
+zero native read requests and a Follower source, enqueue the existing Campaign
+control on that same node. Candidate/Leader or any accepted read gets no campaign.
+Use existing poll order and original absolute15s resolution deadline; no nested
+blocking drive, extra poll, cached authority/read or changed binding. Each retry
+is the original manifest request via a fresh native ticket. This keeps authority
+validation in core and changes only the host fixture's explicit availability
+control, not production discovery or automatic child write behavior.
+
+Add a bounded forced-loss setup to the service fixture: one other voter campaigns
+and the fixed source must actually become Follower under a higher term with a
+ready leader before resolution starts. Source ownership/binding stays unchanged;
+normal real TCP/QUIC route reads, invalidation, child parent-offline operation,
+WAL/checkpoint reopen and original cold retries still run. This helper is needed
+to make the diagnosed authority loss deterministic rather than depend on IO timing.
+Run this original unsupported-source recovery path before correction to retain
+its exact timeout, then require new TCP/QUIC cases and affected family on Mac/Linux
+with original budgets and zero four strict profiles. Existing failed source and
+8/2 result stay preserved; no larger deadline or production leader-discovery seam.
+
+254 forced regression before correction fails0/1 on Linux at the original15s
+lookup bound: actual source Follower term2/commit8, store2 Leader and no pending
+reads. Forced transfer setup completed; the timeout is the intended original
+fixed-source lookup path, not the setup helper. Save its651 source hashes/modified
+source alongside the exact panic, then apply the idle-follower recovery above.
+
+254 recovery candidate: Linux12/0, Mac11/1; both forced TCP/QUIC authority-loss
+cases pass on Mac. Remaining TCP first resolve shows Candidate term206/commit7,
+other peers Follower and no pending reads. The fixture queues Campaign repeatedly
+while the core still reports Follower during asynchronous hard-state publication;
+role alone does not witness completion of an already accepted control. Refine
+ownership before retry: latch one accepted Campaign per resolve invocation, do
+not enqueue another while durability/election finishes. Core timers handle native
+retry/transition; no new timer, extra polls or nested deadline. Keep the absolute
+15s bound, exact source binding and real read authority checks. Save this failed
+source/result before the focused latch correction; require the whole affected
+family and forced loss histories on both hosts, with all strict profiles zero.
+
+254 latched candidate: Linux12/0, Mac11/1. Original TCP/QUIC service and forced TCP
+loss now pass; the remaining forced QUIC history fails earlier in metadata seed
+operation10003 at immediate admission Consensus(NotLeader). It has not reached
+its forced-loss step. Existing propose_recovering handles asynchronous NotProposed
+and Unknown leadership changes, but propose_attempt unwraps this exact synchronous
+admission refusal. Add a real three-node regression: another voter establishes
+ready authority while node0 is Follower; verify direct admission returns the full
+original group/op/bytes with exact NotLeader, then recover the same bootstrap ID/
+content, check duplicate original outcome and join/close. Run before correction.
+Normalize only that known admission refusal into the private fixture's existing
+leadership-recovery result; other refusals stay fatal and raw single-attempt helpers
+still fail. No public ClientOutcome is manufactured or changed. The original
+four-attempt recovery and per-drive bounds stay intact; no new generic retry policy.
+
+254 exact admission regression fails0/1 before correction on Linux: the direct
+Node refusal verifies original request return, then bounded recovery panics on
+that same NotLeader at operation4242. Capture its input hashes. First successful
+observation may be a duplicate if a later accepted attempt loses its receipt;
+assert original Initialized outcome and subsequent explicit duplicate, rather
+than assume no legitimate receipt loss during recovery. Retain the rejection's
+unchanged group/op/bytes and verify no application initialized from that refusal.
+
+254 admission candidate: Linux13/0, Mac11/2. Both forced source-loss cases and
+original TCP service pass. New admission regression times out in preparation
+because it assumes nominated node1 wins despite timer-driven competition. Use
+existing campaign's observed ready winner, then select a different actual node
+for the exact NotLeader refusal; direct public rejection remains mandatory.
+Original QUIC service now reports generic read invocation rejected at native373,
+which omitted its typed reason. Add caller/typed-reason diagnostic only to that
+existing private read attempt before selecting recovery; do not assume overload
+or leadership from the generic text. Keep all old failed results/source hashes.
+
+254 diagnostic family passes13/0 on Mac after observed-winner regression setup;
+the earlier generic read refusal does not reproduce and its exact reason remains
+unclassified. Independently, inspected public ReadRequests rejects nonleaders
+before admission with Consensus(NotLeader), and the private read recovery helper
+unwraps all synchronous refusals while handling the same asynchronous class.
+Extend the real admission regression to verify original group/query return on
+that exact refusal, zero accepted read slots, then original manifest through a
+fresh quorum read and unchanged application manifests. Run before read correction.
+Normalize only known synchronous NotLeader to the private recovery helper's None;
+other typed reasons remain fatal/visible. Positive cached-child/reopen queries
+may use existing bounded read_recovering with identical group/query. Raw read and
+intentional stale-hint probes retain their original single-attempt behavior.
+No public result/read authority/cache semantics, source ownership or deadline
+changes. This verifies the known class rather than inventing the unknown old cause.
+
+254 read regression initially fails before exercising refusal: bootstrap marks
+Directory initialized but does not publish its planned manifests. The fixture
+incorrectly unwrapped live manifest1. Correct its expected live state to None and
+require a real quorum-backed absent result, preserving zero pending request slots
+and unchanged absence on every replica. This also distinguishes an applied absent
+answer from the private outer None denoting no read result. No production change.
+
+254 corrected read regression fails0/1 before correction with the exact typed
+Consensus(NotLeader), after original group/query return and zero accepted slots
+are verified. This is the intended missing before-admission path. Save its651
+inputs and both changed test files; apply only the known synchronous class and
+existing positive-query bounded recovery described above. No attribution of the
+older untyped failure to this exact cause is claimed.
+
+254 read-corrected family: Linux13/0, Mac12/1. The remaining original TCP service
+returns exact LeadershipChanged through a raw positive proposal helper. Complete
+that selected caller contract: positive child bootstrap/cached writes/reopen writes
+use bounded original-ID/payload recovery; raw fault probes are unchanged.
+Receipt-loss retries can legitimately make the first observed receipt a duplicate.
+Preserve the stronger assertion by recording the private attempt class: immediate/
+asynchronous NotLeader refusal is distinct from an accepted Unknown outcome.
+An observed-recovery wrapper returns receipt plus whether an actual accepted
+LeadershipChanged uncertainty occurred. Existing recovering callers take only the
+receipt. First duplicate is permitted only with that uncertainty witness; explicit
+next and cold retries must still be duplicates, exact7/10 values and quorum reads
+remain. This private witness is needed to check original receipt semantics without
+falsely demanding a fresh receipt after actual receipt loss. No public result type,
+application history, policy, timer, quota or IO change. An edit-script duplicate
+variable stopped before execution; correct its name without any Rust tree change.
+
+254 positive candidate remains unaccepted: Linux13/0, Mac11/2. Original QUIC
+service again loses its fixed source after the one latched campaign: source store1
+Follower term4/commit9, store2 Leader and no pending read. The TCP WAL-offline
+history separately returns Unknown(LeadershipChanged) through its own raw positive
+proposal. All formatting/four strict profiles are zero on both;651 positive inputs
+verify. Full failed target bodies and hashes are retained under target/slice254,
+including controlled pre-correction write/read admission and forced-loss failures.
+No254 code is committed/pushed;17ba335 remains the accepted published source.
+Do not repeat election preparation or the same controller change without new
+contract evidence. The before/after admission gaps and accepted uncertainty
+classification are proven separately; they do not certify this failing family.
+
+251 terminal Linux evidence: the original source-preserved all-feature full
+suite finishes all=0 with1826 passes, zero failures/ignored and90 successful result
+summaries (including zero-test/doc summaries). Routed171 and all later targets
+finish. Original647 build inputs verify both before execution and at terminal;
+source remains ba67c8c. Formatting/four strict profiles are zero on that source.
+Production src/Cargo.toml/Cargo.lock are identical through published17ba335;
+later test/conformance changes do not inherit a full current-source certificate.
+See [Linux251](../validation/baseline/slice251/linux/README.md) for exact command,
+source hashes, raw terminal output and installed stable1.98.1 environment.
+The original Mac full suite remains live with independently reported failures.
+No source/build executable was replaced in either original run; only Linux is
+terminal. Keep Mac's original checkout intact until it also finishes.
+
+Macro review251 advances finite P0–P6 Linux functional evidence, including existing
+membership, recursive responsibility and lifecycle histories. It closes this
+specific full Linux run, not every provider/fault obligation, current-source full
+acceptance on both platforms or P7 gates. Current254b addresses explicit owned
+lookup source handoff; next254c retains the remaining original routing failures,
+then255 selects the smallest original required functional exit. Full goal active.
+
+Current254b schema direction — explicit owned lookup-source handoff (P5/P0 Rust
+embedding): the public driver fixes its original binding and cache observations
+are instance-local monotonically allocated IDs. Availability recovery should use
+an actual ready source; it must not alias/drop an accepted invocation or reuse an
+old observation handle for new data. Inspect source/cache/native and host contracts
+before editing. Design an explicit same-provider replacement returning the intact
+old source, refusing while driver or either source has unresolved reads, refusing
+backwards time/invalid bindings and retaining old state plus replacement on failure.
+New binding resets source-specific read sequence/cache while preserving escaped
+observation-ID uniqueness/floors; no cached leader grants read authority. Every new
+answer still needs an actual bound quorum-read outcome. Keep original cache limits,
+lifetimes and deadline configuration. Add shared host/native refusal, stale-handle,
+ownership-return and source-loss checks before adopting any production seam.
+Replace the rejected campaign workaround only after that contract is concrete.
+This is the next functional dependency identified by the failed schedule, not a
+new consensus, storage or automatic leader-election protocol.
+
+Next254c: finish the original namespace/deletion/remaining offline routing failure
+ledger. Purpose: P5/P6 functional Mac/Linux acceptance. Depend on terminal251 bodies
+or isolated same-input reproductions, plus254b's explicit source lifecycle where
+relevant. Keep exact operations, phase cuts, fences, retry lineage and shutdown;
+write the next schema from actual typed failures. Completion: original named
+failed histories and affected targets on both hosts with zero strict profiles.
+No passing local-source subset substitutes for these original obligations.
+
 Following255: finish the functional release-gap decision from the original
 R01–R19/P0–P6 acceptance ledger after254 identifies its actual dependency. Purpose:
 advance the smallest remaining usable Linux/Mac capability rather than add generic
