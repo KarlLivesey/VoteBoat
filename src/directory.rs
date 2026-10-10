@@ -29,6 +29,7 @@ mod reparenting;
 use crate::reparent_guard::*;
 use crate::reparenting::*;
 pub mod creation;
+mod creation_cancellation;
 use crate::child_slots::*;
 mod deletion;
 mod namespace;
@@ -40,12 +41,14 @@ use crate::transfer::{InsertionChild, TransferIntent, TransferIntentStatus};
 use crate::transfer_publication::*;
 use crate::{application::*, identity::*, log::*, routing::*};
 pub use creation::*;
+pub use creation_cancellation::*;
 use std::{
     collections::{BTreeMap, BTreeSet},
     mem::size_of,
 };
 
 pub const METADATA_LOCATOR_DIRECTORY_SCHEMA: u64 = 15;
+pub const CREATION_CANCELLATION_DIRECTORY_SCHEMA: u64 = 16;
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
 pub const REMAINING_TRANSFER_DIRECTORY_SCHEMA: u64 = 14;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
@@ -266,6 +269,7 @@ pub enum DirectoryOutcome {
     MetadataLocatorUpdated(RouteGeneration),
     Initialized,
     CreationReserved,
+    CreationCancelled,
     CreationConflict,
     NamespacePublished(RouteGeneration),
     Published(RouteGeneration),
@@ -311,6 +315,7 @@ enum Request {
     Deletion(DeletionIntent),
     DeletionCompletion(DeletionCompletion),
     Create(GroupCreationIntent),
+    CancelCreation(CancelGroupCreation),
     Namespace(NamespacePublication),
     Publish(DirectoryCommand),
     Transfer(TransferIntent),
@@ -351,6 +356,8 @@ pub struct Directory {
     applied: u64,
     initialized: bool,
     group_creation: bool,
+    creation_cancellation: bool,
+    creation_cancellations: BTreeMap<OperationId, OperationId>,
     namespace_creation: bool,
     namespace_transfers: bool,
     responsibility_insertion: bool,
@@ -409,6 +416,8 @@ impl Directory {
             applied: 0,
             initialized: false,
             group_creation: false,
+            creation_cancellation: false,
+            creation_cancellations: BTreeMap::new(),
             namespace_creation: false,
             namespace_transfers: false,
             responsibility_insertion: false,
@@ -554,6 +563,13 @@ impl Directory {
         next.metadata_locators = true;
         Ok(next)
     }
+    /// Select schema16 before bootstrap; cancel only unpublished, unclaimed creations.
+    #[allow(clippy::result_large_err)]
+    pub fn with_creation_cancellation(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_metadata_locator_updates()?;
+        next.creation_cancellation = true;
+        Ok(next)
+    }
     fn control_command_limit(&self) -> usize {
         if self.namespace_deletion {
             MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
@@ -650,6 +666,7 @@ impl Directory {
                 - self.delegation_publications.len()
                 - self.delegation_cancellations.len()
                 - self.namespace_publications.len()
+                - self.creation_cancellations.len()
                 - self.deletion_publications.len()
                 - self.reparent_controls.len()
                 - self.metadata_locator_controls.len())
@@ -667,6 +684,7 @@ impl Directory {
             + if self.namespace_creation {
                 (self.creations.len()
                     - self.namespace_publications.len()
+                    - self.creation_cancellations.len()
                     - self.insertion_creations.len())
                     * MAX_NAMESPACE_PUBLICATION_BYTES
             } else {
@@ -691,7 +709,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.metadata_locators {
+        bytes.extend(if self.creation_cancellation {
+            b"VBDINI16"
+        } else if self.metadata_locators {
             b"VBDINI15"
         } else if self.remaining_transfer {
             b"VBDINI14"
@@ -736,7 +756,9 @@ impl Directory {
         self.initialized
     }
     fn checkpoint_magic(&self) -> &'static [u8; 8] {
-        if self.metadata_locators {
+        if self.creation_cancellation {
+            b"VBDIR016"
+        } else if self.metadata_locators {
             b"VBDIR015"
         } else if self.remaining_transfer {
             b"VBDIR014"
@@ -790,6 +812,7 @@ impl Directory {
                 | b"VBDINI13"
                 | b"VBDINI14"
                 | b"VBDINI15"
+                | b"VBDINI16"
         ) {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -806,6 +829,9 @@ impl Directory {
     }
     fn decode_request(&self, bytes: &[u8]) -> Result<Request, ApplicationError> {
         match bytes.get(..8).unwrap_or_default() {
+            b"VBGCAN01" if self.creation_cancellation => {
+                CancelGroupCreation::decode(bytes).map(Request::CancelCreation)
+            }
             b"VBMLUP01" if self.metadata_locators => {
                 MetadataLocatorUpdate::decode(bytes).map(Request::MetadataLocator)
             }
@@ -1091,9 +1117,11 @@ impl Directory {
         })
     }
     fn transfer_target_busy(&self, group: GroupIdentity) -> bool {
-        self.retired_slot_children
-            .values()
-            .any(|g| g.id == group.id)
+        self.creation_cancelled(group)
+            || self
+                .retired_slot_children
+                .values()
+                .any(|g| g.id == group.id)
             || self.transfer_targets.contains(&group)
             || self
                 .plan
@@ -1573,6 +1601,7 @@ impl Directory {
     }
     fn control_permitted(&self, operation: OperationId, command: &Request, locator: bool) -> bool {
         match command {
+            Request::CancelCreation(c) => self.creation_cancellation_permitted(*c),
             Request::MetadataLocator(_) => locator,
             Request::DeletionCompletion(c) => self.deletion_permitted(operation, c),
             Request::Publication(p) => self.publication_permitted(p),
@@ -1598,6 +1627,7 @@ impl Directory {
         command: Request,
     ) -> DirectoryOutcome {
         match command {
+            Request::CancelCreation(c) => self.cancel_creation(operation, c),
             Request::MetadataLocator(u) => self.update_metadata_locators(u),
             Request::ReparentGuard(p) => self.prepare_reparent(operation, p),
             Request::CommitReparent(c) => self.commit_reparent(index, operation, c),
@@ -1872,7 +1902,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.metadata_locators {
+        if self.creation_cancellation {
+            CREATION_CANCELLATION_DIRECTORY_SCHEMA
+        } else if self.metadata_locators {
             METADATA_LOCATOR_DIRECTORY_SCHEMA
         } else if self.remaining_transfer {
             REMAINING_TRANSFER_DIRECTORY_SCHEMA
@@ -1981,6 +2013,7 @@ impl CheckpointStateMachine for Directory {
             }
             let mut next = Self::new(self.plan.clone(), self.limits).map_err(|(e, _)| e)?;
             next.group_creation = self.group_creation;
+            next.creation_cancellation = self.creation_cancellation;
             next.namespace_creation = self.namespace_creation;
             next.namespace_transfers = self.namespace_transfers;
             next.responsibility_insertion = self.responsibility_insertion;

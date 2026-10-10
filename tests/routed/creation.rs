@@ -109,6 +109,15 @@ fn quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage() {
 fn tcp_namespace_partial_publication_activation_unread_receipts_owner_abort() {
     namespace_service::run(NativePeerProtocol::TcpTls, true);
 }
+#[test]
+fn tcp_namespace_cancellation_unread_receipt_and_late_readiness() {
+    namespace_service::run_cancellation(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_namespace_cancellation_unread_receipt_and_late_readiness() {
+    namespace_service::run_cancellation(NativePeerProtocol::Quic);
+}
 #[cfg(feature = "quic")]
 #[test]
 fn quic_namespace_partial_publication_activation_unread_receipts_owner_abort() {

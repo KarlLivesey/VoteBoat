@@ -1,0 +1,44 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+     Running tests/insertion.rs (target/debug/deps/insertion-0a965ff15c41e813)
+
+running 12 tests
+test cancellation::insertion_and_cancellation_are_exclusive_in_both_orders ... ok
+test cross_authority::cross_authority_pre_intent_refusal_cancels_parent_but_accepted_intent_is_forward_only ... ok
+test insertion_codec_and_reservation_references_are_checked_before_locking ... ok
+test nested::nested_insertion_checks_remaining_hops_before_reserving_parent ... ok
+test cross_authority::cross_authority_insert_fence_import_publish_refresh_activate_and_retry_survive_checkpoints ... ok
+test cross_authority::cross_authority_codecs_and_local_creation_admission_preserve_legacy_schema ... ok
+test nested::nested_mapping_codec_parent_authorization_and_legacy_replay_fail_closed ... ok
+test nested::continuity::inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_retries ... ok
+test fenced_parent_imports_into_exact_children_and_publication_recovers_atomically ... ok
+test insertion_intent_native_torn_frames_recover_exact_reservations_and_lock ... ok
+test cross_authority::cross_authority_native_intent_torn_frames_recover_local_creations_and_lock ... ok
+test nested::nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lifecycle ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.14s
+
+     Running tests/namespace_creation.rs (target/debug/deps/namespace_creation-19c3ea0a5e010f68)
+
+running 17 tests
+test cancellation::cancellation_binding_codec_and_schema_refuse_before_mutation ... ok
+test cancellation::cancellation_uses_reserved_capacity_and_releases_parent_deletion_lock ... ok
+test cancellation::published_and_activated_namespace_rejects_cancellation_after_recovery ... ok
+test cancellation::cancelled_ready_target_cannot_publish_or_serve_and_original_receipt_recovers ... ok
+test source::created_source_freeze_export_actual_targets_and_publication_preserve_lineage ... ok
+test namespace_codecs_and_bindings_reject_wrong_modes_parents_and_ready_facts ... ok
+test transfer::created_namespace_requires_publication_and_exact_current_authority ... ok
+test source::created_source_never_serves_or_freezes_before_activation_and_rejects_bypasses ... ok
+test transfer::created_namespace_transfer_lock_publication_and_repeated_movement_recover ... ok
+test creation_deployment_envelope_covers_large_valid_recursive_policy_and_store_map ... ok
+test publication_reserved_control_completes_full_directory_and_recovers_exact_status ... ok
+test transfer::schema4_selection_preserves_schema3_refusals_and_rejects_cross_schema_history ... ok
+test target_never_serves_before_exact_activation_and_preserves_retries_on_restore ... ok
+cancel frame cuts: 213 old, 2 cancelled; all exact retries remain cancelled
+test cancellation::faults::every_cancel_frame_cut_and_barrier_fault_preserves_old_or_cancelled_then_exact_retry ... ok
+test every_torn_native_activation_frame_recovers_nonserving_or_exact_activation ... ok
+test source::source_guard_checkpoint_provenance_bounds_and_owner_selection_fail_closed ... ok
+test source::every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+

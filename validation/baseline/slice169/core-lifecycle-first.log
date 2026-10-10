@@ -1,0 +1,77 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.47s
+     Running tests/directory.rs (target/debug/deps/directory-d343254daebb4242)
+
+running 31 tests
+test directory_plan_checks_local_ancestry_grants_and_returns_original_inputs ... ok
+test independently_authored_child_directory_uses_verified_external_bootstrap_grant ... ok
+test directory_publishes_committed_order_retries_original_outcomes_and_rejects_transfers ... ok
+test creation::creation_mode_is_bound_before_apply_and_cross_schema_recovery_fails_closed ... ok
+test checkpoint_rejects_bad_history_order_identity_and_lengths_without_partial_restore ... ok
+test creation::creation_parent_authority_generation_and_known_routes_refuse ... ok
+test creation::creation_admission_reserves_original_history_capacity ... ok
+test application_batch_failure_is_atomic_and_pending_admission_reserves_history ... ok
+test committed_initialization_binds_the_full_plan_before_any_publication ... ok
+test creation::creation_does_not_bypass_parent_transfer_reservation ... ok
+test maximum_partition_map_roundtrips_and_pending_byte_reservation_covers_conflicts ... ok
+test plan_refuses_multiple_parents_and_foreign_aliases_of_local_responsibilities ... ok
+test transfer::checked_split_and_merge_shape_bind_epochs_identity_and_distinct_groups ... ok
+test transfer::directory_records_intent_without_publishing_ownership_and_locks_changes ... ok
+test creation::creation_reserves_only_new_identity_and_never_publishes_ownership ... ok
+test read_receipts_charge_inline_and_nested_capacity_without_double_counting ... ok
+test transfer::lifecycle_read_view_preserves_original_api_and_counts_nested_result_capacity ... ok
+test plan_depth_and_lifetime_limits_reject_before_retaining_work ... ok
+test transfer::target_group_reservations_cover_other_assignments_and_overlapping_intents ... ok
+test transfer::unknown_or_stale_intents_reject_and_retries_keep_original_failure ... ok
+test creation::creation_codec_bounds_policy_counts_bindings_and_every_truncation ... ok
+test directory_command_codec_is_bounded_canonical_and_rejects_every_truncation ... ok
+test native::native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen ... ok
+test native::native_transfer_intent_survives_lost_observation_snapshot_catchup_and_reopen ... ok
+test large_plan_declares_initialization_envelope_and_restores_its_complete_binding ... ok
+test transfer::intent_command_and_checkpoint_truncations_are_atomic_and_preserve_locks ... ok
+test native::native_three_replica_directory_commits_replays_compacts_and_installs_retry_state ... ok
+test creation::creation_checkpoint_replays_reservations_and_atomic_batch_rejects_partial_progress ... ok
+test transfer::pending_intents_are_bounded_and_constructor_rejection_preserves_route_buffer ... ok
+test checkpoint_reconstructs_publications_rejections_and_retry_history_atomically ... ok
+test creation::creation_native_wal_every_torn_frame_and_barrier_failure_recovers_old_or_complete_intent ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/group_creation.rs (target/debug/deps/group_creation-41cd0b0cd5dd5b93)
+
+running 4 tests
+test host_authority_assignment_and_application_are_checked_before_mutation ... ok
+test existing_unbound_or_conflicting_creation_never_resets_a_group ... ok
+test immutable_binding_precedes_bootstrap_and_uncertain_publication_resumes_exactly ... ok
+test native_bootstrap_every_torn_frame_and_sync_publication_fault_resumes_after_reopen ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/insertion.rs (target/debug/deps/insertion-0a965ff15c41e813)
+
+running 12 tests
+
+thread 'cancellation::insertion_and_cancellation_are_exclusive_in_both_orders' (767) panicked at tests/insertion/cancellation.rs:45:91:
+called `Result::unwrap()` on an `Err` value: (InvalidRange, ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(10), incarnation: ResponsibilityIncarnation(1) }, parent: None, authority: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, application: ApplicationAdapter { id: ApplicationAdapterId(1), version: 1 }, scheme: PartitionScheme { id: RoutingSchemeId(1), version: 1 }, scope: BucketRange { start: 0, end: 256 }, epoch: OwnershipEpoch(1), generation: RouteGeneration(1), placement: PlacementRequirements { minimum_voting_domains: 1, survive_any_single_domain_loss: false }, state: Active, execution: Single(GroupIdentity { id: GroupId(20), incarnation: GroupIncarnation(1) }) }), ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(10), incarnation: ResponsibilityIncarnation(1) }, parent: None, authority: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, application: ApplicationAdapter { id: ApplicationAdapterId(1), version: 1 }, scheme: PartitionScheme { id: RoutingSchemeId(1), version: 1 }, scope: BucketRange { start: 0, end: 256 }, epoch: OwnershipEpoch(2), generation: RouteGeneration(2), placement: PlacementRequirements { minimum_voting_domains: 1, survive_any_single_domain_loss: false }, state: Active, execution: Single(GroupIdentity { id: GroupId(21), incarnation: GroupIncarnation(1) }) }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cancellation::insertion_and_cancellation_are_exclusive_in_both_orders ... FAILED
+test cross_authority::cross_authority_pre_intent_refusal_cancels_parent_but_accepted_intent_is_forward_only ... ok
+test nested::nested_insertion_checks_remaining_hops_before_reserving_parent ... ok
+test insertion_codec_and_reservation_references_are_checked_before_locking ... ok
+test cross_authority::cross_authority_insert_fence_import_publish_refresh_activate_and_retry_survive_checkpoints ... ok
+test cross_authority::cross_authority_codecs_and_local_creation_admission_preserve_legacy_schema ... ok
+test nested::nested_mapping_codec_parent_authorization_and_legacy_replay_fail_closed ... ok
+test nested::continuity::inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_retries ... ok
+test fenced_parent_imports_into_exact_children_and_publication_recovers_atomically ... ok
+test insertion_intent_native_torn_frames_recover_exact_reservations_and_lock ... ok
+test cross_authority::cross_authority_native_intent_torn_frames_recover_local_creations_and_lock ... ok
+test nested::nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lifecycle ... ok
+
+failures:
+
+failures:
+    cancellation::insertion_and_cancellation_are_exclusive_in_both_orders
+
+test result: FAILED. 11 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.23s
+
+error: test failed, to rerun pass `--test insertion`

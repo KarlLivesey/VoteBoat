@@ -339,6 +339,7 @@ pub struct TransferIntentStatus {
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DirectoryQuery {
+    CreationCancellation(OperationId),
     MetadataLocator(OperationId),
     Reparent(OperationId),
     ReparentGuard(OperationId),
@@ -360,6 +361,7 @@ pub enum DirectoryQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed inline layout is charged in the result bound.
 pub enum DirectoryRead {
+    CreationCancellation(Option<crate::directory::GroupCreationCancellationStatus>),
     MetadataLocator(Option<crate::metadata_transfer::MetadataLocatorStatus>),
     Reparent(Option<crate::reparenting::ReparentStatus>),
     ReparentGuard(Option<crate::reparent_guard::ReparentGuardStatus>),
@@ -392,6 +394,28 @@ impl LifecycleDirectory {
     }
     pub fn into_directory(self) -> Directory {
         self.0
+    }
+    fn validate_inline_query(&self, query: &DirectoryQuery) -> Result<(), ApplicationError> {
+        let at = self.applied_index();
+        match *query {
+            DirectoryQuery::CreationCancellation(op) => {
+                self.0.group_creation_cancellation_at(at, op)?;
+            }
+            DirectoryQuery::MetadataLocator(op) => {
+                self.0.metadata_locator_at(at, op)?;
+            }
+            DirectoryQuery::ReparentPublication(op) => {
+                self.0.reparent_publication_at(at, op)?;
+            }
+            DirectoryQuery::ReparentCompletion(op) => {
+                self.0.reparent_completion_at(at, op)?;
+            }
+            DirectoryQuery::ReparentCancellation(op) => {
+                self.0.reparent_cancellation_at(at, op)?;
+            }
+            _ => return Err(ApplicationError::InvalidCommand),
+        }
+        Ok(())
     }
 }
 impl StateMachine for LifecycleDirectory {
@@ -449,6 +473,10 @@ impl ReadableStateMachine for LifecycleDirectory {
         query: DirectoryQuery,
     ) -> Result<DirectoryRead, ApplicationError> {
         match query {
+            DirectoryQuery::CreationCancellation(operation) => self
+                .0
+                .group_creation_cancellation_at(required, operation)
+                .map(DirectoryRead::CreationCancellation),
             DirectoryQuery::MetadataLocator(operation) => self
                 .0
                 .metadata_locator_at(required, operation)
@@ -526,8 +554,12 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
     fn read_result_bound(&self, query: &DirectoryQuery) -> Result<usize, ApplicationError> {
         Ok(size_of::<DirectoryRead>()
             + match query {
-                DirectoryQuery::MetadataLocator(op) => {
-                    self.0.metadata_locator_at(self.applied_index(), *op)?;
+                DirectoryQuery::CreationCancellation(_)
+                | DirectoryQuery::MetadataLocator(_)
+                | DirectoryQuery::ReparentPublication(_)
+                | DirectoryQuery::ReparentCompletion(_)
+                | DirectoryQuery::ReparentCancellation(_) => {
+                    self.validate_inline_query(query)?;
                     0
                 }
                 DirectoryQuery::ReparentDecision(op) => self
@@ -537,14 +569,6 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
                         s.retained_bytes()
                             - size_of::<crate::reparent_commit::ReparentDecisionStatus>()
                     }),
-                DirectoryQuery::ReparentPublication(op) => {
-                    self.0.reparent_publication_at(self.applied_index(), *op)?;
-                    0
-                }
-                DirectoryQuery::ReparentCompletion(op) => {
-                    self.0.reparent_completion_at(self.applied_index(), *op)?;
-                    0
-                }
                 DirectoryQuery::ReparentGuard(op) => self
                     .0
                     .reparent_guard_at(self.applied_index(), *op)?
@@ -552,10 +576,6 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
                         s.plan.retained_bytes()
                             - size_of::<crate::reparent_guard::CrossReparentPlan>()
                     }),
-                DirectoryQuery::ReparentCancellation(op) => {
-                    self.0.reparent_cancellation_at(self.applied_index(), *op)?;
-                    0
-                }
                 DirectoryQuery::Reparent(op) => self
                     .0
                     .reparent_status_at(self.applied_index(), *op)?
@@ -631,6 +651,7 @@ impl BoundedReadableStateMachine for LifecycleDirectory {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
+            DirectoryRead::CreationCancellation(_) => 0,
             DirectoryRead::MetadataLocator(_) => 0,
             DirectoryRead::ReparentDecision(s) => s.as_ref().map_or(0, |s| {
                 s.retained_bytes() - size_of::<crate::reparent_commit::ReparentDecisionStatus>()

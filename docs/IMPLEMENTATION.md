@@ -94,9 +94,40 @@ strict profiles clean while advancing the remaining capability work.
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
 | Completed: bounded operational event reporting168 | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded aggregate event retention, cursor-gap reporting, failing-sink isolation and TCP/QUIC service export/restart checks; detailed evidence below. |
-| Current: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
-| Next: recorded lifecycle fault schedules | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, completed cancellation semantics and deterministic fault fixtures. | Recorded bounded crash/restart cuts preserve exact operation identities, prevent dual active owners and retain reproducible failed schedules; keep unexplored combinations explicit. |
-| Following: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
+| Current: recorded lifecycle fault schedules and service regressions | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, schema16 cancellation semantics, deterministic fault fixtures and prior-commit CI failures. | Resolve the recorded transient read/write/configuration and shutdown failures without weakening assertions; recorded crash/restart cuts preserve exact IDs and prevent dual active owners; keep unexplored combinations explicit. |
+| Next: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
+| Following: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, discovery refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
+
+### Slice169 schema plan — unresolved creation cancellation
+
+Purpose: resolve a pending creation without leaving its parent's lifecycle locked.
+This advances P5/P6; recorded lifecycle schedules and remote discovery refresh
+remain the next two deliverables above. This is an opt-in schema16 extension;
+schemas1–15 retain their historical replay behavior. No new provider or worker.
+
+Data/API: a fixed56-byte cancellation command binds the original creation
+operation, index and group identity. The existing metadata log records the
+cancel operation and original outcome; a bounded map points from creation to
+that retained record. Query through the existing lifecycle read contract.
+State: reserved -> canceled, exclusively before namespace publication or any
+recorded transfer targeting that group. Retain the original reservation forever
+within the existing bounded history: group/responsibility IDs cannot be reused.
+Canceled reservations stop authorizing bootstrap/publication/insertion and stop
+holding pending-parent locks. They do not revoke a published or active owner.
+
+Ownership/failure: use the publication's existing reserved control credit for
+the mutually exclusive cancellation. Commit/apply through the normal metadata
+Raft durability dependency before any success escapes. Lost replies resolve by
+original status/retry; checkpoint replay reconstructs the tombstone. Provisioned
+files are retained, not deleted. A previously obtained bootstrap fact can still
+produce a non-serving staged group; no unpublished namespace can activate.
+This operation does not revoke direct embedded-group service authority.
+
+Acceptance: exact binding/codec bounds, retry/conflict, publication-vs-cancel
+and transfer-vs-cancel ordering, exhausted ordinary capacity, pending admission,
+checkpoint/profile refusal, parent lock release, and late readiness unable to
+publish/activate. Exercise native WAL frame cuts/barrier/receipt loss before
+claiming crash evidence; keep native service and platform limits explicit.
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -15684,3 +15715,53 @@ This closes bounded aggregate event history/export, not per-group tracing,
 latency attribution or an external metrics backend. Full P0–P7 remains active.
 The linked mini plan now advances unresolved creation cancellation, recorded
 lifecycle fault schedules and bounded remote discovery refresh.
+
+### Slice169 — unresolved creation cancellation
+
+Schema16 adds `CancelGroupCreation` and an original-index cancellation query on
+the existing metadata application/log. The fixed56-byte command must match an
+unpublished creation not yet claimed by a transfer. Cancellation and publication
+share the original reserved control capacity; competing pending decisions cannot
+both spend it. Original group/responsibility identities remain tombstoned, including
+attempts to recycle the group ID with a new incarnation through a plain transfer.
+Canceled creations disappear from live creation lookup and no longer lock their
+parent's deletion, reparenting or slot changes. Original creation retries retain
+their historical outcome; cancellation status supplies the current resolution.
+
+Bootstrap verification and later namespace/insertion publication refuse canceled
+assignments. A ready or late-provisioned target remains non-serving without a
+committed publication; published/active owners and claimed transfer targets cannot
+be canceled. No provider, second log, thread, file deletion, source unfreeze or
+direct embedded-group revocation is introduced. All new state reconstructs from
+retained commands in WAL/checkpoints; schemas1–15 keep their original behavior.
+
+Validation covers exact bindings and bounded codecs, truncated/atomic checkpoint
+restore, competing pending publication/cancellation, exhausted ordinary history,
+parent-lock release, both transfer/cancel orders, identity reuse and active-owner
+refusal. Native WAL modeling covers215 cancellation cuts:213 recover the prior
+reservation,2 recover cancellation, and every exact retry preserves cancellation.
+Selected TCP/TLS and QUIC histories leave readiness and cancellation tickets
+unread, recover a lagging metadata replica, compact/reopen cancellation and refuse
+late publication and target data admission. These are selected local Linux histories,
+not physical-power-loss, general schedule enumeration or macOS evidence.
+
+The initial reuse fixture tried an unsupported single-to-single transfer and was
+corrected to the existing partitioned transfer contract. The first native QUIC
+history attempted a quorum read using cached leadership after pausing target
+polling for metadata recovery; the fixture now establishes fresh target leadership.
+No production election or read guarantee was weakened. Raw failures and completed
+checks are retained in `validation/baseline/slice169`.
+
+Final validation:189 selected lifecycle regressions,55 core-only creation and
+directory tests,7 final cancellation tests and all12 native creation/created-source
+histories pass. The final native cancellation pair passes again on the final
+source revision. Formatting, both strict Clippy profiles, warnings-denied docs
+and92-record inventory metadata checks pass. Base-commit CI separately reports
+service failures on Linux and macOS; its lint job passes. Those failures remain
+explicit next-slice work, with raw output retained alongside local evidence.
+
+Macro review: this closes the pre-publication creation-reservation cleanup gap in
+P5/P6. The full P0–P7 goal remains open; recorded lifecycle schedules, bounded remote
+discovery refresh, broader membership/platform/fault evidence remain in the linked
+mini/macro plan. Cancellation does not reclaim provisioned storage or replace the
+forward-only transfer protocol.

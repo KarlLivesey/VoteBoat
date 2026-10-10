@@ -14,6 +14,9 @@
 // rights and limitations under the RPL.
 use super::*;
 type Namespace = CreatedNamespace<Counter, HostPolicy>;
+#[path = "namespace_cancellation.rs"]
+mod cancellation;
+pub(super) use cancellation::run as run_cancellation;
 struct Service {
     root: std::path::PathBuf,
     clock: Instant,
@@ -53,9 +56,10 @@ fn reserve(
     parents: &mut [Node<Directory>],
     clock: &Instant,
     intent: &GroupCreationIntent,
+    make: fn() -> Directory,
 ) -> (NamespacePlan, ResponsibilityManifest) {
     campaign(parents, clock, 1);
-    let boot = namespace_directory()
+    let boot = make()
         .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
         .unwrap();
     assert_eq!(
@@ -142,10 +146,14 @@ fn establish(
 }
 impl Service {
     fn new(protocol: NativePeerProtocol, interrupted: bool) -> Self {
+        Self::new_in(protocol, interrupted, namespace_directory)
+    }
+    fn new_in(protocol: NativePeerProtocol, interrupted: bool, make: fn() -> Directory) -> Self {
         let clock = Instant::now();
         let root = std::env::temp_dir().join(format!(
-            "voteboat-namespace-service-{}-{protocol:?}-{interrupted}",
-            std::process::id()
+            "voteboat-namespace-service-{}-{protocol:?}-{interrupted}-{}",
+            std::process::id(),
+            make().schema_version()
         ));
         std::fs::create_dir_all(&root).unwrap();
         let targets = configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Recover);
@@ -162,9 +170,9 @@ impl Service {
             configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
             &clock,
             protocol,
-            namespace_directory,
+            make,
         );
-        let (plan, parent_manifest) = reserve(&mut parents, &clock, &intent);
+        let (plan, parent_manifest) = reserve(&mut parents, &clock, &intent, make);
         establish(&root, &parents, &targets, &intent, &plan);
         let nodes = open(targets, &clock, protocol, || fresh(&plan));
         Self {

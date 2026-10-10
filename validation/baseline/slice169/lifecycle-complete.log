@@ -1,0 +1,246 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.86s
+     Running tests/deletion.rs (target/debug/deps/deletion-00aa7c0d996538ea)
+
+running 12 tests
+test fence_read_view_does_not_promote_a_scoped_fence_to_whole_owner_evidence ... ok
+test deletion_and_parent_delegation_serialize_and_failed_batches_keep_original_state ... ok
+test deletion_locks_original_manifest_and_rejects_unresolved_creation ... ok
+test fixed_owner_fence_read_preserves_original_schema_and_data_guards ... ok
+test leaf_deletion_preserves_fence_tombstone_and_original_retries ... ok
+test partitioned_deletion_fences_every_distinct_owner_and_refuses_wrong_coverage ... ok
+test reserved_completion_survives_exhausted_ordinary_capacity_and_pending_duplicates ... ok
+test recursive_foreign_authority_binds_original_child_observation ... ok
+test recursive_same_authority_requires_actual_local_child_tombstone ... ok
+test three_authority_deletion_propagates_only_original_published_tombstones ... ok
+test deletion_codecs_checkpoints_and_profiles_refuse_partial_or_changed_history ... ok
+test deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/directory.rs (target/debug/deps/directory-d343254daebb4242)
+
+running 31 tests
+test creation::creation_admission_reserves_original_history_capacity ... ok
+test checkpoint_rejects_bad_history_order_identity_and_lengths_without_partial_restore ... ok
+test application_batch_failure_is_atomic_and_pending_admission_reserves_history ... ok
+test committed_initialization_binds_the_full_plan_before_any_publication ... ok
+test independently_authored_child_directory_uses_verified_external_bootstrap_grant ... ok
+test creation::creation_mode_is_bound_before_apply_and_cross_schema_recovery_fails_closed ... ok
+test creation::creation_does_not_bypass_parent_transfer_reservation ... ok
+test plan_refuses_multiple_parents_and_foreign_aliases_of_local_responsibilities ... ok
+test read_receipts_charge_inline_and_nested_capacity_without_double_counting ... ok
+test creation::creation_parent_authority_generation_and_known_routes_refuse ... ok
+test transfer::checked_split_and_merge_shape_bind_epochs_identity_and_distinct_groups ... ok
+test creation::creation_reserves_only_new_identity_and_never_publishes_ownership ... ok
+test directory_plan_checks_local_ancestry_grants_and_returns_original_inputs ... ok
+test plan_depth_and_lifetime_limits_reject_before_retaining_work ... ok
+test directory_publishes_committed_order_retries_original_outcomes_and_rejects_transfers ... ok
+test transfer::unknown_or_stale_intents_reject_and_retries_keep_original_failure ... ok
+test transfer::target_group_reservations_cover_other_assignments_and_overlapping_intents ... ok
+test maximum_partition_map_roundtrips_and_pending_byte_reservation_covers_conflicts ... ok
+test transfer::lifecycle_read_view_preserves_original_api_and_counts_nested_result_capacity ... ok
+test transfer::directory_records_intent_without_publishing_ownership_and_locks_changes ... ok
+test directory_command_codec_is_bounded_canonical_and_rejects_every_truncation ... ok
+test creation::creation_codec_bounds_policy_counts_bindings_and_every_truncation ... ok
+test native::native_transfer_intent_survives_lost_observation_snapshot_catchup_and_reopen ... ok
+test native::native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen ... ok
+test large_plan_declares_initialization_envelope_and_restores_its_complete_binding ... ok
+test transfer::intent_command_and_checkpoint_truncations_are_atomic_and_preserve_locks ... ok
+test native::native_three_replica_directory_commits_replays_compacts_and_installs_retry_state ... ok
+test creation::creation_checkpoint_replays_reservations_and_atomic_batch_rejects_partial_progress ... ok
+test transfer::pending_intents_are_bounded_and_constructor_rejection_preserves_route_buffer ... ok
+test checkpoint_reconstructs_publications_rejections_and_retry_history_atomically ... ok
+test creation::creation_native_wal_every_torn_frame_and_barrier_failure_recovers_old_or_complete_intent ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/group_creation.rs (target/debug/deps/group_creation-41cd0b0cd5dd5b93)
+
+running 4 tests
+test host_authority_assignment_and_application_are_checked_before_mutation ... ok
+test existing_unbound_or_conflicting_creation_never_resets_a_group ... ok
+test immutable_binding_precedes_bootstrap_and_uncertain_publication_resumes_exactly ... ok
+test native_bootstrap_every_torn_frame_and_sync_publication_fault_resumes_after_reopen ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/insertion.rs (target/debug/deps/insertion-0a965ff15c41e813)
+
+running 12 tests
+test cancellation::insertion_and_cancellation_are_exclusive_in_both_orders ... ok
+test cross_authority::cross_authority_pre_intent_refusal_cancels_parent_but_accepted_intent_is_forward_only ... ok
+test insertion_codec_and_reservation_references_are_checked_before_locking ... ok
+test cross_authority::cross_authority_insert_fence_import_publish_refresh_activate_and_retry_survive_checkpoints ... ok
+test nested::nested_insertion_checks_remaining_hops_before_reserving_parent ... ok
+test cross_authority::cross_authority_codecs_and_local_creation_admission_preserve_legacy_schema ... ok
+test nested::nested_mapping_codec_parent_authorization_and_legacy_replay_fail_closed ... ok
+test nested::continuity::inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_retries ... ok
+test fenced_parent_imports_into_exact_children_and_publication_recovers_atomically ... ok
+test insertion_intent_native_torn_frames_recover_exact_reservations_and_lock ... ok
+test cross_authority::cross_authority_native_intent_torn_frames_recover_local_creations_and_lock ... ok
+test nested::nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lifecycle ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.10s
+
+     Running tests/metadata_transfer.rs (target/debug/deps/metadata_transfer-33936ce56a3a6a84)
+
+running 42 tests
+test adoption::native_cache_accepts_only_checked_metadata_shape_and_refuses_partial_paths ... ok
+test activation::publication_activation_and_new_writes_preserve_original_history_and_indices ... ok
+test activation::creation_read_bound_survives_larger_future_records_within_the_directory_capacity ... ok
+test activation::inherited_creation_reservations_survive_and_new_namespace_publication_works ... ok
+test adoption::adopted_full_source_performs_later_data_split_without_old_metadata ... ok
+test adoption::full_owner_adopts_activated_metadata_with_original_data_and_control_retries ... ok
+test adoption::ordered_local_parent_metadata_and_later_parent_changes_recover_together ... ok
+test locators::locator_updates_wait_for_open_creation_without_spending_its_completion_reserve ... ok
+test metadata_wrappers_retain_receipts_within_declared_capacity ... ok
+test locators::native_cache_requires_complete_foreign_boundary_refreshes ... ok
+test activation::activation_bindings_early_attempts_and_partial_batches_refuse_atomically ... ok
+test locators::one_foreign_manifest_refreshes_both_boundaries_atomically ... ok
+test pending_changes_stale_plans_and_open_lifecycles_cannot_freeze ... ok
+test plans_validate_closure_and_preserve_data_ownership ... ok
+test rejected_control_ids_survive_recovery_and_do_not_exhaust_the_success_reserve ... ok
+test locators::foreign_parent_and_child_commit_reserved_updates_with_original_status_and_replay ... ok
+test repeated::nested_construction_is_bounded_before_ownership_transfer ... ok
+test owner_locators::retained_owner_keeps_exports_and_adopts_a_later_retained_transfer ... ok
+test owner_locators::original_owner_adopts_real_locator_then_splits_without_changing_data_lineage ... ok
+test repeated::another_move_preserves_three_origins_and_rejects_old_control_ids ... ok
+test source_fence_exports_exact_old_authority_and_keeps_original_history ... ok
+test source_selection_bootstrap_and_failed_batches_preserve_atomicity ... ok
+test owner_locators::locator_observation_profiles_pending_and_checkpoint_corruption_refuse_atomically ... ok
+test target::metadata_import_preserves_source_indices_and_never_serves_as_active_authority ... ok
+test target::rehashed_rejection_records_and_command_shaped_fence_boundaries_refuse ... ok
+test target::target_construction_pending_order_and_changed_imports_refuse ... ok
+test locators::locator_provenance_bounds_stale_views_and_atomic_profiles_are_checked ... ok
+test repeated::repeated_profiles_refuse_wrong_bindings_stale_views_and_partial_restore ... ok
+test locators::complete_oversized_move_is_refused_instead_of_truncating_its_plan ... ok
+test repeated::repeated_move_preserves_all_authority_domains_creations_and_retries ... ok
+test checkpoints_bind_profile_fence_digest_and_original_bootstrap ... ok
+test target::target_import_and_checkpoint_bind_all_provenance_and_recover_local_phase_indices ... ok
+test activation::checkpoints_refuse_truncation_profile_changes_and_replay_history_collisions ... ok
+test interrupted_native_metadata_fence_recovers_old_or_complete_image ... ok
+test adoption::adoption_provenance_profiles_capacity_and_atomic_recovery_are_checked ... ok
+test target::interrupted_native_metadata_import_recovers_only_stage_or_complete_history ... ok
+test adoption::native_metadata_owner_adoption_cuts_preserve_data_and_resume_exact_control ... ok
+test activation::native_publication_and_activation_cuts_preserve_single_authority ... ok
+test locators::native_locator_journal_cuts_recover_old_or_complete_foreign_manifest ... ok
+test repeated::repeated_move_native_journal_cuts_keep_fence_publication_activation_and_retries ... ok
+test owner_locators::native_locator_adoption_cuts_preserve_all_owner_families_and_exact_retries ... ok
+test owner_locators::imported_full_and_partial_locators_preserve_import_and_retire_exact_later_merge ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.62s
+
+     Running tests/namespace_creation.rs (target/debug/deps/namespace_creation-19c3ea0a5e010f68)
+
+running 18 tests
+test cancellation::cancellation_binding_codec_and_schema_refuse_before_mutation ... ok
+test cancellation::cancellation_uses_reserved_capacity_and_releases_parent_deletion_lock ... ok
+test cancellation::cancelled_ready_target_cannot_publish_or_serve_and_original_receipt_recovers ... ok
+test cancellation::published_and_activated_namespace_rejects_cancellation_after_recovery ... ok
+test transfer::created_namespace_requires_publication_and_exact_current_authority ... ok
+test namespace_codecs_and_bindings_reject_wrong_modes_parents_and_ready_facts ... ok
+test source::created_source_never_serves_or_freezes_before_activation_and_rejects_bypasses ... ok
+test transfer::created_namespace_transfer_lock_publication_and_repeated_movement_recover ... ok
+test source::created_source_freeze_export_actual_targets_and_publication_preserve_lineage ... ok
+test creation_deployment_envelope_covers_large_valid_recursive_policy_and_store_map ... ok
+test publication_reserved_control_completes_full_directory_and_recovers_exact_status ... ok
+test cancellation::competing_control_admission_and_failed_batches_preserve_the_original_reservation ... ok
+test transfer::schema4_selection_preserves_schema3_refusals_and_rejects_cross_schema_history ... ok
+test target_never_serves_before_exact_activation_and_preserves_retries_on_restore ... ok
+cancel frame cuts: 213 old, 2 cancelled; all exact retries remain cancelled
+test cancellation::faults::every_cancel_frame_cut_and_barrier_fault_preserves_old_or_cancelled_then_exact_retry ... ok
+test every_torn_native_activation_frame_recovers_nonserving_or_exact_activation ... ok
+test source::source_guard_checkpoint_provenance_bounds_and_owner_selection_fail_closed ... ok
+test source::every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.36s
+
+     Running tests/reparent_guards.rs (target/debug/deps/reparent_guards-2ec2383994fb521b)
+
+running 18 tests
+test cancelled_before_prepare_blocks_delayed_acquisition_and_reserves_completion ... ok
+test creation_reservations_and_local_reparent_cannot_bypass_guards ... ok
+test guarded_manifests_block_metadata_and_lifecycle_but_disjoint_metadata_and_data_continue ... ok
+test reciprocal_moves_share_guarded_ancestry_and_pending_cancellation_releases_only_its_move ... ok
+test committed::cancellation_and_commit_are_mutually_exclusive_and_success_releases_allow_next_move ... ok
+test committed::owner::native_cache_cross_move_refresh_is_explicit_atomic_and_rejects_partial_routes ... ok
+test committed::either_participant_publication_order_recovers_and_preserves_one_physical_owner ... ok
+test three_authority_preparation_cancellation_and_original_results_survive_restart ... ok
+test committed::missing_stale_or_changed_facts_and_early_release_are_rejected_without_publishing ... ok
+test committed::commit_publish_finish_and_release_move_real_routes_with_full_ordinary_history ... ok
+test committed::owner::cross_authority_adopted_source_restarts_and_splits_under_new_parent ... ok
+test complete_ancestry_subtree_and_post_move_depth_are_required_and_codecs_are_strict ... ok
+test profile_checkpoint_and_batch_failures_leave_no_partial_guards ... ok
+test committed::owner::completed_cross_move_adoption_keeps_data_retry_status_and_exact_profile_recovery ... ok
+test committed::codecs_old_profiles_and_checkpoint_replay_preserve_completed_decisions ... ok
+test native_guard_and_cancel_frames_recover_original_locks_or_complete_cancellation ... ok
+test committed::owner::native_cross_adoption_and_later_freeze_cuts_keep_exact_original_lineage ... ok
+test committed::native_decision_publication_completion_and_release_cuts_keep_exact_phase_state ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.30s
+
+     Running tests/reparenting.rs (target/debug/deps/reparenting-0f95bc973b15be93)
+
+running 14 tests
+test native_cache_rebinds_parent_and_both_routes_without_moving_data_ownership ... ok
+test nested_child_moves_without_changing_descendants_or_their_data ... ok
+test cycles_and_foreign_ancestry_or_subtrees_refuse_without_partial_updates ... ok
+test one_commit_moves_live_child_and_preserves_values_retries_and_parent_service ... ok
+test owner_adoption::adoption_respects_boundaries_profiles_pending_capacity_and_semantic_operations ... ok
+test lifecycle_reservations_capacity_and_batch_failure_cannot_half_move_a_child ... ok
+test owner_adoption::original_owner_adopts_multiple_parent_bindings_and_keeps_original_control_retries ... ok
+test destination_depth_is_checked_against_the_whole_moved_subtree ... ok
+test owner_adoption::adopted_original_source_restarts_splits_and_preserves_both_target_retries ... ok
+test shape_and_live_destination_refuse_before_ownership_can_change ... ok
+test original_profiles_refuse_reparenting_and_checkpoint_restore_is_atomic ... ok
+test owner_adoption::adoption_control_reserve_and_checkpoint_chain_refuse_partial_or_conflicting_state ... ok
+test journal_cuts_never_publish_only_one_parent_or_lose_the_original_result ... ok
+test owner_adoption::native_adoption_and_subsequent_freeze_cuts_replay_only_complete_owner_states ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s
+
+     Running tests/retained_insertion.rs (target/debug/deps/retained_insertion-6f5bc0232709ebef)
+
+running 38 tests
+test imported_partial::full_imported_data_history_keeps_partial_control_capacity ... ok
+test imported_partial::partial_history_interleaves_parent_and_slot_changes_without_losing_import_lineage ... ok
+test imported_partial::activated_import_delegates_twice_keeps_retries_and_recovers_mixed_history ... ok
+test metadata::imported::imported_full_and_partial_metadata_lineages_retire_after_later_handoff ... ok
+test metadata::imported::imported_profiles_adopt_metadata_without_changing_initial_activation ... ok
+test bound_source_intent_ids_profiles_and_checkpoint_links_fail_closed ... ok
+test foreign_nested_retained_child_refreshes_parent_then_activates_independently ... ok
+test imported_partial::remaining::partial_imports_move_all_remaining_data_without_changing_earlier_children ... ok
+test metadata::retained_owner_metadata_move_keeps_exports_and_supports_later_retained_transfer ... ok
+test metadata::metadata_adoption_profiles_pending_work_and_checkpoint_failures_are_atomic ... ok
+test parent_moves::local_parent_adoption_has_independent_capacity_and_preserves_original_status ... ok
+test imported_partial::remaining::retirement::retired_partial_owner_survives_native_publication_interruption_and_reclaims_old_log ... ok
+test metadata::imported::imported_metadata_profiles_refuse_stale_partial_and_cross_profile_state ... ok
+test parent_moves::completed_cross_parent_move_preserves_scoped_exports_and_next_retained_handoff ... ok
+test parent_slots::cross_parent_slots_preserve_exports_and_both_parents_transfer_again ... ok
+test parent_slots::local_slot_commands_are_checked_for_both_parent_roles ... ok
+test parent_slots::slot_capacity_and_pending_roundtrip_use_the_same_ordered_ledger ... ok
+test adoption_profiles_corrupt_ledgers_and_wrong_original_evidence_refuse_atomically ... ok
+test imported_partial::remaining::retirement::retirement_rejects_rehashed_history_discontinuities_and_mismatched_final_grants ... ok
+test retained_intent_requires_actual_creation_and_preserves_remaining_routes ... ok
+test metadata::imported::imported_retirement_requires_the_exact_ordered_metadata_history ... ok
+test retained_nested_decline_cancels_only_before_child_intent_acceptance ... ok
+test root_retained_child_moves_real_data_without_full_source_fence ... ok
+test second_retained_child_keeps_old_child_exports_and_serves_latest_grant ... ok
+test bound_source_frame_cuts_recover_intent_fence_and_image_together ... ok
+test retained_intent_native_frame_cuts_recover_original_creation_and_exact_lock ... ok
+test imported_partial::partial_target_rejects_unactivated_conflicting_pending_and_corrupt_histories ... ok
+test parent_moves::parent_profile_replay_operation_reserve_and_malformed_mixed_history_are_atomic ... ok
+test imported_partial::remaining::retirement::partial_owner_retires_after_remaining_handoff_and_preserves_its_authority_history ... ok
+test parent_slots::slot_provenance_pending_profiles_and_checkpoint_corruption_fail_closed ... ok
+test adoption_frame_cuts_recover_original_grant_or_exact_new_epoch_with_exports ... ok
+test metadata::retained_metadata_adoption_native_cuts_keep_original_exports_and_resume ... ok
+test parent_slots::slot_journal_cuts_recover_original_or_complete_grant_and_immutable_export ... ok
+test imported_partial::remaining::interrupted_remaining_freeze_preserves_only_a_complete_owner_boundary ... ok
+test parent_moves::mixed_retained_and_parent_journal_cuts_preserve_exports_and_later_full_fence ... ok
+test imported_partial::partial_freeze_and_grant_frames_recover_exact_images_and_retained_service ... ok
+test imported_partial::remaining::remaining_moves_reject_changed_children_reused_groups_and_legacy_profiles ... ok
+test metadata::imported::imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.26s
+

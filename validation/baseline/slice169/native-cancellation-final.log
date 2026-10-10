@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 2 tests
+test native::creation::tcp_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::quic_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 1.63s
+

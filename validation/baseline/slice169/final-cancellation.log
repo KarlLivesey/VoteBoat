@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.46s
+     Running tests/insertion.rs (target/debug/deps/insertion-0a965ff15c41e813)
+
+running 1 test
+test cancellation::insertion_and_cancellation_are_exclusive_in_both_orders ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests/namespace_creation.rs (target/debug/deps/namespace_creation-19c3ea0a5e010f68)
+
+running 6 tests
+test cancellation::cancellation_uses_reserved_capacity_and_releases_parent_deletion_lock ... ok
+test cancellation::published_and_activated_namespace_rejects_cancellation_after_recovery ... ok
+test cancellation::cancellation_binding_codec_and_schema_refuse_before_mutation ... ok
+test cancellation::cancelled_ready_target_cannot_publish_or_serve_and_original_receipt_recovers ... ok
+test cancellation::competing_control_admission_and_failed_batches_preserve_the_original_reservation ... ok
+cancel frame cuts: 213 old, 2 cancelled; all exact retries remain cancelled
+test cancellation::faults::every_cancel_frame_cut_and_barrier_fault_preserves_old_or_cancelled_then_exact_retry ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.05s
+

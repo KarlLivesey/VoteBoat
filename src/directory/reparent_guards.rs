@@ -249,6 +249,7 @@ impl Directory {
             DirectoryOutcome::MetadataLocatorUpdated(_)
                 | DirectoryOutcome::Initialized
                 | DirectoryOutcome::CreationReserved
+                | DirectoryOutcome::CreationCancelled
                 | DirectoryOutcome::NamespacePublished(_)
                 | DirectoryOutcome::Published(_)
                 | DirectoryOutcome::TransferIntentRecorded

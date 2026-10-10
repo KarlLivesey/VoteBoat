@@ -1,5 +1,41 @@
 # Metadata-authorized group creation
 
+## Cancel an unresolved reservation
+
+Select `Directory::with_creation_cancellation()` before bootstrap on every
+metadata replica. This selects schema16 (`VBDINI16` / `VBDIR016`), including the
+existing schema15 capabilities. Older profiles retain their original formats
+and outcomes; there is no live upgrade.
+
+`CancelGroupCreation::from_status` binds the original creation operation, index
+and group in a fixed56-byte command. Authorize it as an administrative operation
+and propose it to the original metadata authority. It succeeds only before
+namespace publication and before a recorded transfer has claimed the group.
+Once either transition wins, cancellation refuses, even if activation or its
+receipt has not yet been observed. Timeout is never evidence of cancellation.
+
+The successful decision uses the creation's reserved publication credit, so
+ordinary history exhaustion cannot strand it. Original group and responsibility
+IDs remain reserved permanently within bounded retained history. Exact operation
+retries preserve the decision; altered or competing operations cannot undo it.
+`group_creation_cancellation_at` and
+`DirectoryQuery::CreationCancellation(original_creation_operation)` resolve a
+lost receipt. These are local applied observations unless used through an
+authenticated quorum-read path. Their required index is a minimum applied prefix,
+not a request to read historical state before a later cancellation.
+
+Canceled reservations no longer hold pending-parent lifecycle locks and no
+longer appear in `group_creation_at`. Local bootstrap verification, namespace
+publication and later insertion refuse them. A previously obtained assignment
+or an in-flight readiness result may still produce a staged, non-serving target;
+the canceled metadata authority cannot publish it, so it cannot acquire namespace
+activation authority. Provisioned WAL, snapshot and binding files are retained.
+This is not file reclamation, owner revocation, rollback of a fenced transfer,
+or revocation of a directly embedded group's independent service authority.
+
+Conformance and selected native recovery evidence are in
+`validation/baseline/slice169/README.md`.
+
 Creation is opt-in through `Directory::with_group_creation()` before bootstrap or
 application. It selects application schema2, initialization `VBDINIT2` and
 checkpoint `VBDIR002`. Default Directory remains schema1 with its existing formats

@@ -5127,3 +5127,31 @@ Strict Clippy in both configurations, formatting, warnings-denied docs and
 retains commands, raw unsuccessful service runs and the bounded fixture fixes.
 This is not per-group tracing, latency attribution, durable event storage or a
 new macOS claim. The broader baseline and lifecycle acceptance work remain open.
+
+### Slice169 — unresolved creation cancellation
+
+Opt-in metadata schema16 records exact creation cancellation using the existing
+reserved publication credit and retained operation history. Canceled identities
+cannot be reused, late namespace/insertion publication refuses, and parent
+lifecycle locks can proceed. Published owners and claimed transfer targets
+cannot be canceled. No file reclamation or direct embedded-service revocation
+is implied.
+
+The selected lifecycle regression run passes189 tests, and core-only creation/
+directory/insertion runs pass55. Seven final cancellation checks include215
+native WAL interruption cuts; each recovers an old reservation or complete
+cancellation and retries to the original cancellation. Both new native TCP/TLS
+and QUIC histories pass unread readiness/cancellation, lagging metadata recovery,
+checkpoint/reopen and non-serving target checks. Formatting, both strict Clippy
+profiles, warnings-denied docs and92-record inventory metadata validation pass.
+All12 selected native creation/created-source regression histories pass in200.81s.
+[Slice169 evidence](baseline/slice169/README.md) records commands, raw failures
+and the distinction between modeled persistence loss and real process recovery.
+
+The base commit's completed CI run38018887145 passed formatting/both Clippy
+profiles but failed selected service tests on both platforms. Linux reported
+LeadershipChanged during write/configuration histories; macOS reported
+ReadNotReady and a nonzero shutdown exit. Those are retained follow-up failures,
+not evidence of completed platform validation. The linked plan now includes
+these service regressions alongside recorded lifecycle schedules. Full P0–P7
+and macOS acceptance remain unproven.

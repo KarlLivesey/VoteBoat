@@ -301,7 +301,13 @@ impl Directory {
             return DirectoryOutcome::CreationConflict;
         }
         if self.namespace_creation
-            && self.reserved_publication_bytes() + MAX_NAMESPACE_PUBLICATION_BYTES
+            && self.reserved_publication_bytes()
+                + MAX_NAMESPACE_PUBLICATION_BYTES
+                + if self.creation_cancellation {
+                    self.control_bytes
+                } else {
+                    0
+                }
                 > self.control_history_capacity()
         {
             return DirectoryOutcome::TransferControlBusy;
@@ -311,6 +317,8 @@ impl Directory {
     }
     /// Applied local status only. Establish authenticated metadata quorum read
     /// authority separately; this constructible value is not a remote certificate.
+    /// Canceled reservations return `None`; `required` is a minimum applied
+    /// prefix, not a historical snapshot selector before a later cancellation.
     pub fn group_creation_at(
         &self,
         required: u64,
@@ -321,6 +329,9 @@ impl Directory {
         }
         if required > self.applied {
             return Err(ApplicationError::NotApplied);
+        }
+        if self.creation_cancelled(group) {
+            return Ok(None);
         }
         let Some((operation, h)) = self
             .creations

@@ -12,6 +12,8 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[path = "insertion/cancellation.rs"]
+mod cancellation;
 #[path = "transfer_source/fixtures.rs"]
 mod fixture;
 mod support;
