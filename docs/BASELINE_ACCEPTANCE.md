@@ -128,6 +128,16 @@ confirmation remains open. The newly completed priorcd54071 operator run passes
 Ubuntu but has6 macOS counter failures; the exact result/log is retained in
 validation/baseline/slice210a and is not acceptance of this change.
 
+Slice217 adds bounded original caller continuation after the exact initial-drain
+unknown/no-record response, preserving production terminal refusal and source
+identity. The scripted previous single-attempt caller fails;3 final caller checks
+and19 production runner checks pass. Actual TCP/QUIC runner/source-loss histories
+retain exact journal/profile bytes and original data/retries;13 selected native
+runner checks and2 retirement histories pass. All166 all-feature counter tests
+pass; default selected checks pass9. Preceding cf7bf90 Ubuntu162/19/21 succeeds,
+but macOS148/14 fails before later targets. No current-platform/P0–P7 closure or
+broader peer-progress/latency guarantee is claimed.
+
 Slice216 releases an already-known QUIC FIN/stream credit in the same plaintext
 read without changing single-stream limits or acknowledged flush. The original
 coarse-poll profile fails before and passes after; all12 session and15 shared

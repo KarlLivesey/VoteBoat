@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test drain_runner::confirmation::caller_refuses_wrong_duplicate_and_unconfirmed_success_fields ... ok
+test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... ok
+test drain_runner::confirmation::caller_bounds_unknown_invocations_and_preserves_terminal_refusals ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 163 filtered out; finished in 0.04s
+

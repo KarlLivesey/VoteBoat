@@ -386,9 +386,37 @@ these preceding-source outcomes do not validate this current change. Macro revie
 P2 byte-channel progress and usable-service checkpoint preparation advance;
 original drain continuation, matching macOS and full P0–P7 acceptance stay open.
 
-Current: recover the explicitly unknown original retirement-setup drain without
-changing source/sequence/operation, and diagnose macOS remaining group liveness/
-preparation failures using the actual a25e5f7/f1c18d4 runs above. Later targets on
+Implemented217 corrects the retirement/runner caller's single-success assumption
+without changing production refusal behavior. One bound Command is reused at
+most four times only for the exact retained explicit no-local-record unknown
+and empty stdout. Wrong/duplicate success identities, missing readiness/accepted
+stop evidence and all other failures remain terminal. The original single-
+attempt caller fails the scripted absent-then-confirmed trace; final three caller
+checks pass and the classifier matches the actual retained native CLI error.
+The before-check also has two unused-code warnings before wiring the caller;
+both disappear when it is used, with no suppression.
+
+Actual TCP/QUIC runner/source-loss histories now compare the original journal
+and plan bytes before loss, after reopen and after checked stop/data recovery.
+The new QUIC case uses the same accepted-drain boundary as the existing TCP
+history. All13 selected native runner/caller/group-runner checks and both actual
+learner-retirement histories pass. All19 production runner checks still pass,
+including exact terminal refusal and original budget/identity enforcement.
+The full final all-feature counter target passes166; no unknown result is counted
+as commitment or successful retirement. This advances selected P4 caller/source
+recovery and the usable-service milestone, not all P4/P0–P7 closure.
+Final default selected TCP/caller/group checks pass9 after all all-feature
+executables finish. Formatting and all four strict Clippy profiles have zero
+diagnostics through the enabled pre-push hook. No lint level or threshold changes.
+
+The preceding-source cf7bf90 operator run38050412675 is terminal: Ubuntu passes
+counter162/directory19/transfer21, while macOS counter148/14 fails before later
+targets run. Raw logs and terminal state remain in slice217. The FIN correction
+has finite local progress evidence but does not establish macOS acceptance or
+explain every queued-group stall; current caller changes inherit no platform pass.
+
+Current: diagnose macOS remaining group liveness/preparation failures using
+the actual cf7bf90 run above and its queued-peer/timing observations. Later targets on
 failing counter jobs were not run. Depend on retained logs, new
 failure-only queue/binding/timing observations and shared-group session/owner
 contracts. Identify the earliest failed
@@ -398,8 +426,12 @@ checks locally plus the supported platform run, rather than increasing timeouts
 or accepting all unknown outcomes. This advances the usable service and P2/P4
 platform recovery; CI continues in the background.
 
-Next: select the next unreviewed replaceable provider contract from the
-108-entry inventory and document its actual ownership/budget/recovery obligations.
+Next: review the unreviewed PeerTransport contract from the108-entry inventory,
+including original send-ticket ownership, ordered decoded batches, flush progress
+and finite poll/queue budgets. Relate an independently controlled shared-group
+control trace to the native single-frame progress path before changing batching
+or adding a helper; this is needed for the P2 queued-group liveness milestone.
+Document actual ownership/budget/recovery obligations.
 Run the same independently modeled traces against a downstream host replacement
 and the native provider, including failed admission/terminal cleanup. Completion
 requires cause-detecting assertions and scoped ledger evidence, not merely a
@@ -416,6 +448,45 @@ requires terminal observed outcomes under the original deadlines and recorded
 identities, not an enlarged timeout or omitted failing history. This advances
 the usable service macro milestone; separate-host provisioning and broader faults
 remain explicit rather than silently counted as complete.
+
+### Slice217 schema plan — original caller continuation after absent drain record
+
+The retained final216 run stops retirement setup on the exact CLI error UNKNOWN
+initial drain admission/no matching durable local drain, instructing the caller
+to rerun the same sequence/operation. Existing production observation tests require
+that invocation to stop after the source refusal; preserve that contract. Do not
+automatically reroute an unknown write, treat absence as a rollback or expand the
+source refusal into a committed receipt.
+
+Data/API: add a test-only caller confirmation helper because this P4 retirement
+history currently assumes the first runner invocation succeeds. Construct one
+Command bound to the same source, sequence1, operation19701, endpoints and
+administrator. Reuse it at most four times, only for empty stdout plus the exact
+observed error with the unchanged original-identity retry instruction. Any other
+failure is terminal. Confirm success fields for the original sequence/operation,
+shutdown_requested, retained replica and source-ready/stop-accepted evidence;
+wrong or duplicate success fields cannot satisfy setup. The helper creates no
+new runtime/provider seam and changes no production runner or request budget.
+
+Transitions/ownership: the CLI keeps its existing per-invocation request/time
+budget and stops on explicit refusal. The caller may make at most four complete
+original invocations; this is a caller retry limit, not a new global wall-clock
+guarantee. Unknown attempts do not prove drain admission or permit retirement.
+Only confirmed original readiness/stop followed by the existing joined-source
+check allows the later retirement fault cut. Preserve the prepared profile and
+all original configuration/data/retry identities across these attempts.
+
+Acceptance: first retain the failing single-attempt caller against a scripted
+explicit absence followed by success. Check bounded exhaustion, terminal other
+failures, wrong/duplicate confirmation and unchanged identity. Then exercise
+actual retirement TCP/QUIC recovery and add QUIC coverage of the existing
+accepted-drain runner/source-loss/reopen history. Verify original operation data
+and journal continuation, plus formatting/four strict lint profiles. Matching
+platform evidence stays separate; no unobserved case is accepted as success.
+This advances the usable service and P4 recovery milestone. Current platform
+run38050412675 remains live; next remains public provider review while it runs,
+then actual supported-platform operational acceptance. Daybreak handles broad
+security review and full P0–P7 stays active.
 
 ### Slice216 schema plan — QUIC acknowledged-chunk progress
 

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+#[path = "drain_runner/confirmation.rs"]
+mod confirmation;
+pub(super) use confirmation::confirmed;
 
 pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Command {
     let mut command = Command::new(BIN);
@@ -24,14 +27,7 @@ pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u6
     command
 }
 fn finish(c: &mut Cluster, source: usize) {
-    let output = run(&mut command(c, source, "19701", 3));
-    assert!(
-        output.status.success(),
-        "{} {}",
-        String::from_utf8_lossy(&output.stdout),
-        String::from_utf8_lossy(&output.stderr)
-    );
-    assert!(String::from_utf8_lossy(&output.stdout).contains("shutdown_requested=true"));
+    confirmed(c, source, 19701);
     drain::joined(c, source);
     assert!(authenticated_write(c, &["add", "19760", "3"]).contains("Value(10)"));
     assert!(authenticated_write(c, &["add", "19700", "7"]).contains("duplicate=true"));
@@ -60,7 +56,18 @@ fn authenticated_runner_drives_membership_and_stops_source_quic() {
 }
 #[test]
 fn killed_runner_and_source_resume_original_durable_plan() {
-    let (mut c, source, target) = membership_drain::prepare(false);
+    interrupted(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn killed_quic_runner_and_source_resume_original_durable_plan() {
+    interrupted(true);
+}
+fn interrupted(quic: bool) {
+    let (mut c, source, target) = membership_drain::prepare(quic);
+    let profile = c.membership_drain.as_ref().unwrap().1.clone();
+    let prepared = fs::read(&profile).unwrap();
+    let journal = c.root.join(source.to_string()).join("drain.record");
     drain::kill(&mut c, target);
     let log = fs::File::create(c.root.join("runner-first.log")).unwrap();
     let mut runner = {
@@ -72,13 +79,18 @@ fn killed_runner_and_source_resume_original_durable_plan() {
             .unwrap()
     };
     drain::wait_status(&c, source, "phase=Active");
+    let original = fs::read(&journal).unwrap();
     runner.kill().unwrap();
     runner.wait().unwrap();
     drain::kill(&mut c, source);
     c.start(target, "recover-member");
     c.start(source, "recover-member");
     drain::wait_status(&c, source, "phase=Active");
+    assert_eq!(fs::read(&journal).unwrap(), original);
+    assert_eq!(fs::read(&profile).unwrap(), prepared);
     finish(&mut c, source);
+    assert_eq!(fs::read(&journal).unwrap(), original);
+    assert_eq!(fs::read(&profile).unwrap(), prepared);
 }
 #[test]
 fn runner_rejects_unauthorized_and_wrong_identity_without_drain() {

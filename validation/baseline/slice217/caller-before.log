@@ -1,0 +1,39 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: unused import: `confirmation::confirmed`
+ --> tests/counter_service/drain_runner.rs:6:16
+  |
+6 | pub(super) use confirmation::confirmed;
+  |                ^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `confirmed` is never used
+  --> tests/counter_service/drain_runner/confirmation.rs:50:15
+   |
+50 | pub(crate) fn confirmed(c: &Cluster, source: usize, operation: u128) -> String {
+   |               ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voteboat` (test "counter_service") generated 2 warnings (run `cargo fix --test "counter_service" -p voteboat` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.69s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 1 test
+test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... FAILED
+
+failures:
+
+---- drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record stdout ----
+
+thread 'drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record' (324) panicked at tests/counter_service/drain_runner/confirmation.rs:82:23:
+called `Result::unwrap()` on an `Err` value: "drain 1/19701 remains unknown after bounded attempts"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 164 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test counter_service`

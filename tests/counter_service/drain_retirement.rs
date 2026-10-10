@@ -96,12 +96,7 @@ fn history(quic: bool) {
     // The retirement expects configuration3, not the original voter set.
     assert!(!c.request(source, &["configure", RETIRE]).status.success());
     status(&c, source, "inconclusive_local_absence");
-    let output = run(&mut drain_runner::command(&c, source, "19701", 3));
-    assert!(
-        output.status.success(),
-        "{}",
-        String::from_utf8_lossy(&output.stderr)
-    );
+    drain_runner::confirmed(&c, source, 19701);
     drain::joined(&mut c, source);
     let survivors = (1..=3).filter(|id| *id != source).collect::<Vec<_>>();
     let leader = c.leader();

@@ -1,5 +1,23 @@
 # Validation report — slice 35
 
+Original drain caller continuation: [slice217](baseline/slice217/README.md).
+The previous single-attempt caller fails the scripted explicit absence followed
+by confirmed original success. The final caller repeats one bound invocation at
+most four times only for the exact recorded unknown error and empty stdout;
+three budget/refusal/identity checks pass. The unchanged production runner's
+19 checks still enforce its terminal refusal and original budgets. Actual
+TCP/QUIC accepted-drain caller/source loss preserves journal/profile bytes and
+original data/retries; all13 selected runner/group-runner checks and2 learner
+retirement histories pass. The complete final all-feature counter target passes
+166; default selected checks pass9. Two unused-code warnings in the initial
+unwired test are retained and resolved by use, without suppression.
+Formatting and all four strict Clippy profiles pass with zero diagnostics through
+the enabled hook; no production runner behavior or lint threshold is changed.
+Preceding cf7bf90 CI completes: Ubuntu162/19/21 passes, macOS counter148/14 fails
+and later targets do not run. This does not close macOS or full P0–P7 acceptance;
+PeerTransport progress/ownership is the next linked review, with Daybreak
+responsible for broad security work.
+
 QUIC FIN progress: [slice216](baseline/slice216/README.md). Same-read zero-length
 FIN observation removes an avoidable stream-credit owner cycle while preserving
 exact plaintext limits, one stream and acknowledged flush. The original coarse

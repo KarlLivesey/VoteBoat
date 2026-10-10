@@ -282,6 +282,11 @@ whether its bound operation needs progress and whether stopping is safe; an
 interrupted connection or any other unknown result still ends the runner with
 the original identities preserved for an explicit rerun.
 
+If initial admission is unknown and source status reports no matching durable
+local record, the runner stops. Absence does not prove rollback or authorize a
+new identity. Preserve the plan and repeat the same source, sequence and operation;
+only confirmed readiness and accepted shutdown permit subsequent retirement.
+
 Success says `shutdown_requested=true`: the source accepted shutdown after its
 local readiness check. It does not certify that remote worker joining finished
 or that every remote voter is currently available. The source remains a learner
