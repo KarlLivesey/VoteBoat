@@ -15,78 +15,16 @@
 //! Bounded configured routing. Writes require explicit non-acceptance; retried reads
 //! always request a new quorum barrier.
 use super::{
+    command_client::{connect, request, Attempt},
     command_endpoints::{self, Endpoint},
-    service_access::{Channel, ClientAccess},
+    service_access::ClientAccess,
     setup::Failure,
 };
 use std::{
-    io::{Read, Write},
-    net::TcpStream,
     path::PathBuf,
     time::{Duration, Instant},
 };
-use voteboat::runtime::MonoTime;
 const NOT_LEADER: &str = "ERR NOT_LEADER\n";
-enum Attempt {
-    Unavailable,
-    Interrupted(&'static str),
-    Reply(String),
-}
-fn connect(
-    target: &Endpoint,
-    deadline: Instant,
-    auth: Option<&ClientAccess>,
-    start: Instant,
-) -> Result<Channel, Attempt> {
-    let Some(remaining) = deadline.checked_duration_since(Instant::now()) else {
-        return Err(Attempt::Unavailable);
-    };
-    let mut stream =
-        match TcpStream::connect_timeout(&target.address, remaining.min(Duration::from_secs(2))) {
-            Ok(stream) => stream,
-            Err(_) => return Err(Attempt::Unavailable),
-        };
-    if stream.set_nonblocking(true).is_err() {
-        return Err(Attempt::Interrupted("could not configure connected socket"));
-    }
-    if let Some(auth) = auth {
-        let selector = format!("{}\n", auth.principal.get());
-        let mut selected = 0;
-        while selected < selector.len() {
-            if Instant::now() >= deadline {
-                return Err(Attempt::Interrupted("authentication deadline expired"));
-            }
-            match stream.write(&selector.as_bytes()[selected..]) {
-                Ok(0) => return Err(Attempt::Interrupted("closed authentication selector")),
-                Ok(n) => selected += n,
-                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    std::thread::park_timeout(Duration::from_millis(1))
-                }
-                Err(_) => return Err(Attempt::Interrupted("authentication selector failed")),
-            }
-        }
-    }
-    let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
-    let mut stream = if let Some(auth) = auth {
-        match Channel::client(stream, auth, target.node, timestamp()) {
-            Ok(stream) => stream,
-            Err(_) => return Err(Attempt::Interrupted("authentication setup failed")),
-        }
-    } else {
-        Channel::Plain(stream)
-    };
-    loop {
-        if Instant::now() >= deadline {
-            return Err(Attempt::Interrupted("authentication deadline expired"));
-        }
-        match stream.poll_client(timestamp()) {
-            Ok(true) => break,
-            Ok(false) => std::thread::park_timeout(Duration::from_millis(1)),
-            Err(_) => return Err(Attempt::Interrupted("authentication failed")),
-        }
-    }
-    Ok(stream)
-}
 fn exchange(
     target: &Endpoint,
     text: &[u8],
@@ -99,58 +37,6 @@ fn exchange(
         Err(e) => return e,
     };
     request(&mut stream, text, deadline, start)
-}
-fn request(stream: &mut Channel, text: &[u8], deadline: Instant, start: Instant) -> Attempt {
-    let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
-    let mut sent = 0;
-    while sent < text.len() {
-        if Instant::now() >= deadline {
-            return Attempt::Interrupted("request deadline expired");
-        }
-        if stream.poll_client(timestamp()).is_err() {
-            return Attempt::Interrupted("authenticated write failed");
-        }
-        match stream.write(&text[sent..]) {
-            Ok(0) => return Attempt::Interrupted("connection closed during request"),
-            Ok(n) => sent += n,
-            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                std::thread::park_timeout(Duration::from_millis(1))
-            }
-            Err(_) => return Attempt::Interrupted("request write failed"),
-        }
-    }
-    let mut bytes = [0u8; 4096];
-    let mut used = 0;
-    loop {
-        if Instant::now() >= deadline {
-            return Attempt::Interrupted("reply deadline expired");
-        }
-        if stream.poll_client(timestamp()).is_err() {
-            return Attempt::Interrupted("authenticated read failed");
-        }
-        match stream.read(&mut bytes[used..]) {
-            Ok(0) => return Attempt::Interrupted("connection closed without a complete reply"),
-            Ok(n) => {
-                used += n;
-                if let Some(end) = bytes[..used].iter().position(|b| *b == b'\n') {
-                    if end + 1 != used {
-                        return Attempt::Interrupted("multiple reply lines");
-                    }
-                    return match std::str::from_utf8(&bytes[..used]) {
-                        Ok(text) => Attempt::Reply(text.to_owned()),
-                        Err(_) => Attempt::Interrupted("invalid reply encoding"),
-                    };
-                }
-                if used == bytes.len() {
-                    return Attempt::Interrupted("reply exceeds limit");
-                }
-            }
-            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                std::thread::park_timeout(Duration::from_millis(1))
-            }
-            Err(_) => return Attempt::Interrupted("reply read failed"),
-        }
-    }
 }
 fn retryable_reply(command: &[String], response: &str) -> bool {
     response == NOT_LEADER

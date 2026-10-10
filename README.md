@@ -11,6 +11,7 @@ cargo run --locked --example replicated_counter -- /tmp/voteboat-counter 1 7
 ```
 
 - [Networked service quickstart](docs/COUNTER_SERVICE.md)
+- [Metadata authority service](docs/DIRECTORY_SERVICE.md)
 - [TCP and QUIC](docs/QUIC_TRANSPORT.md)
 - [Rust embedding and node API](docs/NODE.md)
 - [Roadmap and implementation status](docs/IMPLEMENTATION.md)

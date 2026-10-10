@@ -76,7 +76,7 @@ cause and revise this sketch before another material change.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. |
-| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup; recursive executable routing and placement orchestration remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
 
@@ -114,10 +114,99 @@ strict profiles clean while advancing the remaining capability work.
 | Current: cross-platform failure confirmation186b | Resolve the remaining observed platform failures; advances P1/P4. | Fresh macOS execution of the corrected error and clock paths; pending resource diagnostics identify any remaining cause. | Record actual platform outcomes, retain new failures, and repair their demonstrated causes without suppressing errors or widening deadlines. Continue the independent audit while CI runs. |
 | Completed: authenticated remote command endpoints187 | Make the existing durable service usable from explicitly configured remote clients; advances P1/P5 deployment. | Existing command TLS/access policy, bounded CLI routing and provisioned certificate pins. | TCP/QUIC executable clusters use selected listeners, enforce permissions/TLS names and retain retries/recovery; six new tests and the full60-test service suite pass. Separate-machine validation remains open. |
 | Completed188: executable endpoint discovery | Resolve current command addresses through the public authenticated protocol; advances P1/P5 deployment. | Independent command pins, bounded startup endpoint view and NativeRemotePeerDiscovery/Responder. | Full64-test service run plus all5 discovery tests pass; stale addresses, source identity, permissions, scope, startup refusal and checkpoint/retry recovery are exercised. Manifest authority remains separate. |
-| Current189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
-| Next190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
-| Following191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
-| Parallel: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+| Completed189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
+| Current190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
+| Next191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
+| Following192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice189 implementation and acceptance record
+
+Added voteboat-directory: a separate native metadata authority executable using
+the existing Directory application, static three-voter startup and authenticated
+command channels. The bounded plan file selects exact initial grants and
+operation IDs. A plan generator produces a reviewed single-owner starting shape.
+Neither loading nor generating a plan publishes it. Admin initialize and publish
+commands submit exact original records to Node; actual Directory receipts and
+duplicate status are returned. Status remains local evidence. The lookup CLI
+uses the existing remote manifest protocol and real quorum-backed source reads.
+
+Native configuration/open/join and authenticated command exchange were extracted
+from counter helpers for reuse; the counter retains its own admission, routing
+and unknown-outcome rules. No public contract, storage/wire format, dependency,
+consensus path or worker topology was changed. The metadata listener admits one
+bounded command/session. It transfers the same guarded TLS session into the
+responder. Closing a remote view retains NativeManifestLookup, its Node and
+original read credits until both levels drain. The acceptance test waits for a
+new accepted-read diagnostic before killing the client during quorum loss, then
+requires zero retained reads before recovering quorum and querying again.
+
+The first native test run correctly refused the full Directory readiness bound,
+which reserves lifecycle-control records beyond this executable's admitted
+initial-plan commands. Startup now verifies every selected command, total unique
+history and the exact schema1 checkpoint bound against native limits. It does
+not advertise the larger lifecycle/readiness profile or expose those commands.
+The deterministic Directory implementation and conservative public readiness
+contract remain unchanged. All mutations are still replicated and durable.
+
+Actual validation: all4 metadata executable tests pass in1.51s. They compare the
+CLI-generated plan with independently encoded canonical commands, require
+unpublished manifests to be absent, deny a writer's initialization, publish/read
+through TCP and QUIC peer clusters, wait for actual checkpoint advancement,
+recover duplicate operations and reject changed plans specifically through
+application/checkpoint validation. Invalid and oversized plans fail before store
+creation. All65 counter-service tests pass in43.86s after the shared-helper
+extraction. Formatting, all-target strict Clippy default/all-feature/core-only,
+and the95-entry inventory check pass. Raw failure/passing logs and final source
+hashes are in validation/baseline/slice189.
+
+Macro review: P1/P5 deployment now has a usable metadata service. The current
+mini plan advances to190 recursive executable lookup with explicit authority
+endpoint mapping, then191 placement execution and192 acceptance review. It does
+not close full P5/P7, lifecycle administration, broader faults or platform gates.
+At the last external observation,4221875 CI38024748949 was pending; the older
+38022391223 Linux job and local baseline175 remained live, while its previously
+recorded macOS failure predates186. None is current-source platform success.
+The full P0–P7 goal remains active.
+
+### Slice189 schema plan — executable metadata authority
+
+Use a separate voteboat-directory binary with the existing Directory state
+machine, native startup and authenticated command transport. Share native
+configuration/open/join and command exchange helpers with the counter; these
+extractions prevent divergent credential, cleanup and unknown-outcome paths.
+No consensus/storage protocol or persistent format changes.
+
+A bounded trusted plan names authority group/incarnation, one bootstrap operation
+and up to64 distinct initial publication operations carrying canonical
+DirectoryCommand bytes. Validate exact authority, initial generations, unique
+identities/operations and native payload/snapshot limits before opening resources.
+The plan grants do not populate live manifests. Explicit admin initialize/publish
+commands submit exact plan bytes with original operation IDs through Node.
+Receipts report only actual application outcomes; retries reuse the same bytes.
+
+One authenticated command session can upgrade to the existing remote manifest
+protocol. NativeManifestLookup owns the real Node while serving; the same host
+loop polls Node, lookup and responder. On disconnect/deadline, close the selected
+view, drain its accepted lookup and underlying Node read credits, and only then
+return Node to command mode. No command request loses ownership when a client
+vanishes. Status is local; remote manifest observations require fresh quorum reads.
+
+Acceptance: native three-process TCP/QUIC initialization and publication,
+unauthorized mutation denial, quorum-backed remote reads, absent-before-publish,
+checkpoint/restart and original operation retry, and disconnect with accepted read
+before another command. Test failed construction and changed plans fail closed.
+Keep formatting, all three strict Clippy profiles and existing counter behavior.
+
+Capacity refinement after the first native run: Directory's full readiness
+contract reserves lifecycle-control history beyond this executable's whitelist.
+Do not claim or configure membership/readiness for that larger profile. Validate
+every admitted initial command plus the exact schema1 checkpoint ceiling instead:
+58 + plan bytes +28 per unique operation + retained original command bytes;
+control history remains zero because no control command is admitted. Keep the
+full Directory application and its conservative public readiness contract
+unchanged. A later lifecycle-capable executable needs compatible larger native
+envelopes. Reject an initial plan that exceeds command, history or checkpoint
+limits before opening resources. This refines admission, not durability.
 
 ### Slice188 implementation and acceptance record
 

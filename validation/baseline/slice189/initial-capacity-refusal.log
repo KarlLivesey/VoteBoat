@@ -1,0 +1,33 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.81s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-6c276ad50426b6a0)
+
+running 4 tests
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+
+thread 'directory_publication_remote_reads_and_checkpoint_recovery_tcp' (2721165) panicked at tests/directory_service.rs:184:21:
+Error: "directory plan exceeds native transport limits"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'directory_publication_remote_reads_and_checkpoint_recovery_quic' (2721164) panicked at tests/directory_service.rs:184:21:
+Error: "directory plan exceeds native transport limits"
+
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... FAILED
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... FAILED
+
+thread 'disconnected_manifest_read_retains_and_drains_node_ownership' (2721166) panicked at tests/directory_service.rs:184:21:
+Error: "directory plan exceeds native transport limits"
+
+test disconnected_manifest_read_retains_and_drains_node_ownership ... FAILED
+
+failures:
+
+failures:
+    directory_publication_remote_reads_and_checkpoint_recovery_quic
+    directory_publication_remote_reads_and_checkpoint_recovery_tcp
+    disconnected_manifest_read_retains_and_drains_node_ownership
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test directory_service`

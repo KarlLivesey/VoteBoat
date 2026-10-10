@@ -91,9 +91,9 @@ preserves transferred session ownership. `tests/support/peer_driver.rs` checks
 transient misses use backoff and wrong scope remains terminal. Full connector,
 owner and TCP/QUIC service regressions are recorded in validation/REPORT.md.
 
-This is peer-address discovery, not complete C17. External remote manifest fetching,
-dynamic executable endpoint refresh and broader refresh scheduling remain
-outstanding. Slice172 below adds a bounded external endpoint protocol. Real selected discovery connections include
+This is peer-address discovery, not complete C17. Remote manifest fetching was
+added184, command endpoint integration188 and a metadata authority executable189.
+Live endpoint changes without restart and broader refresh scheduling remain open. Slice172 below adds a bounded external endpoint protocol. Real selected discovery connections include
 TCP/TLS and QUIC. No macOS/separate-host, arbitrary-fault or performance claim follows.
 
 ## Explicit QUIC dial refresh
@@ -159,8 +159,9 @@ and QUIC, refresh expired unchanged metadata, reject a higher requested epoch an
 suppress a real late positive read after host cancellation. Public host conformance
 checks retained deadline/close work, bounded retry, construction refusal and exact
 recovery handoff. This adds embedded automatic Directory-read orchestration.
-An external remote lookup protocol and executable endpoint refresh remain work;
-existing cached child routes retain their parent-independent behavior.
+Remote lookup is provided by184 and the metadata authority executable189;
+endpoint integration is provided by188. Existing cached child routes retain
+their parent-independent behavior. Recursive executable routing remains open.
 
 ## Composition with routed applications
 

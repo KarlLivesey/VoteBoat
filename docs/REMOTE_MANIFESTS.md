@@ -13,6 +13,10 @@ driver, the responder and the remote client. A host replacement source has the
 same responsibility to supply authorized observations. No worker, socket,
 runtime or implicit polling loop is created by these components.
 
+The [metadata authority executable](DIRECTORY_SERVICE.md) now composes this
+protocol with a real replicated Directory, explicit initial publication and
+quorum-backed lookup. Recursive multi-authority CLI routing remains separate.
+
 ## Request and cache ownership
 
 A cache miss queues one request and returns `Unavailable`. The exact pending

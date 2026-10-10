@@ -407,11 +407,13 @@ impl Channel {
                 | "credential-status"
                 | "discover",
             ) => ServiceAction::Inspect,
-            Some("read") => ServiceAction::Read,
+            Some("read" | "manifest-session") => ServiceAction::Read,
             Some("add") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,
             Some("quit") => ServiceAction::Shutdown,
-            Some("configure" | "configure-record" | "reload-access") => ServiceAction::Configure,
+            Some("configure" | "configure-record" | "reload-access" | "initialize" | "publish") => {
+                ServiceAction::Configure
+            }
             _ => return Err("unknown authorized command".into()),
         };
         let Self::Tls {

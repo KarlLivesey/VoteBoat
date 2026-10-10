@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-6c276ad50426b6a0)
+
+running 4 tests
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.51s

@@ -56,3 +56,8 @@ test = true
 [[example]]
 name = "wal_benchmark"
 required-features = ["native"]
+
+[[bin]]
+name = "voteboat-directory"
+path = "src/bin/directory_service.rs"
+required-features = ["tls"]

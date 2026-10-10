@@ -15,6 +15,8 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/command_client.rs"]
+mod command_client;
 #[path = "support/command_discovery.rs"]
 mod command_discovery;
 #[path = "support/command_endpoints.rs"]
@@ -29,6 +31,8 @@ mod local_client;
 mod quorum_diagnostics;
 #[path = "support/service_access.rs"]
 mod service_access;
+#[path = "support/service_setup.rs"]
+mod service_setup;
 #[path = "support/counter_setup.rs"]
 mod setup;
 use diagnostics::Diagnostics;
