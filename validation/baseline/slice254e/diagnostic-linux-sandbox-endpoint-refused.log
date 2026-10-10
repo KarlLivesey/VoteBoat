@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.12s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+
+thread 'native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal' (1472) panicked at tests/routed/native.rs:70:18:
+available TCP/UDP endpoint
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal ... FAILED
+
+failures:
+
+failures:
+    native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 176 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test routed`

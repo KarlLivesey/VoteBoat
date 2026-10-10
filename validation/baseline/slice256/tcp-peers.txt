@@ -1,0 +1,3 @@
+1 192.168.223.133:47201 node1.voteboat.test
+2 192.168.223.133:47202 node2.voteboat.test
+3 192.168.192.76:47203 node3.voteboat.test

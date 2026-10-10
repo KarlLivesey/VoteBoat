@@ -25856,3 +25856,68 @@ Broader65 shared-family checks remain live on both fixed sources, so254d's
 broad completion check remains pending. Next254e readiness-timeout diagnosis,
 following255 audit and later256 cross-host service retain their recorded scope.
 Full P0–P7 stays active, features first.
+
+254e diagnostic schema: retain the existing unread request and its one client
+credit. Observe its terminal envelope without completing or cancelling it; log
+the test name, ticket/outcome and actual source/replica term, role, original
+operation index, commit/applied prefixes and semantic predicate. Keep the
+original predicate and 15-second wait, so an observed Unknown cannot turn this
+diagnostic into a passing retry. Drop only the borrowed observation at the
+existing failure/return; preserve failed stores. Start with the exact failing
+QUIC/WAL history, on a separate Mac build; leave the running 254d and original
+251 sources untouched. Acceptance for this diagnostic is source-linked outcome
+evidence and zero formatting/strict lint, followed by a cause-specific fix.
+Review insertion callers of the shared unread fixture before changing it.
+
+256 independent static-service schema: use the existing counter executable,
+two explicit fresh Linux stores and one explicit fresh Mac store per protocol.
+Provision one immutable three-peer address file; keep command endpoints local
+to each host and issue Mac commands through the authorized SSH connection.
+Own all child/SSH processes, temporary stores, selected ports and logs; retain
+failed stores. Use original write IDs/payloads through duplicate retry, abrupt
+leader loss, recover and full cold reopen. Require quorum reads of the expected
+value and successful explicit quit/process exits on completion. Probe the chosen
+ports before startup, never reuse another deployment's live stores, and do not
+alter host settings. This check independently advances the usable P1/P2
+Linux/macOS service milestone while 254d/254e recovery evidence runs; it does
+not certify recursive lifecycle or change their planned acceptance.
+
+254e observation completes: exact QUIC/WAL split history1/0 on Linux18.75s and
+Mac294.05s. All traced terminal envelopes are Applied. Original semantic cuts,
+IDs/bytes, 15-second per-drive bounds, retained credit and cleanup remain;
+653 inputs verify on both, fmt/all-feature strict Clippy zero. The initial
+node-field compile error and sandbox endpoint refusal are retained separately.
+The observation-only fixture patch is removed after capture. The original
+Mac3/1 readiness timeout remains unexplained; do not install a guessed retry
+change from this isolated pass. Evidence: [254e](../validation/baseline/slice254e/README.md).
+
+256 selected service acceptance completes independently: two Linux replicas
+and one Mac pass identical TCP/TLS and QUIC histories. Removing one Linux voter
+forces a Linux/Mac quorum; observed leader loss, same-ID receipts, all-replica
+cold reopen, fresh write/read17 and owned cleanup pass. Sixteen incarnations
+exit: four intentional losses, twelve graceful; all six successful stores are
+removed only after process exits. Production inputs match91576fa, observation-
+only build653 inputs verify and binary digests are retained. Initial port
+preflight collision starts no process; bounded free-port selection is recorded.
+Evidence: [256](../validation/baseline/slice256/README.md). No performance result.
+Macro review advances the usable static Linux/macOS P1/P2 service milestone;
+recursive compatibility and provider coverage keep their own evidence gates.
+
+Linked mini plan: current254d broad recovery qualification advances P5/P6.
+Purpose: finish the affected65-family checks and use actual terminal bodies
+to identify remaining caller/runtime faults. Depend on preserved91576fa Linux/
+Mac builds; Mac currently reports cross-authority failures while live. Completion:
+source-linked terminal summaries, cause-specific negatives/corrections if needed,
+affected histories on both hosts and fmt/four strict profiles zero. Preserve
+the original251 full run and the unexplained254e readiness failure separately.
+Next255 functional release-gap audit advances P0–P6: distinguish source-backed
+missing behavior from wider fault/provider evidence; depend on the existing
+R01–R19/operator map and these scoped results, retaining pending states.
+Completion: concrete remaining functional exits with API/state/ownership/restart
+checks, without importing P7 tuning/security or Windows/P8 into feature scope.
+Following257 implements the smallest actual remaining functional correction
+identified by that audit/terminal failure evidence. Depend on a demonstrated
+cause and preserved contracts; completion requires a failing-before/passing-after
+check, unchanged safety/bounds/ID contracts and relevant Linux/Mac checks plus
+strict zero. Separate-host256 is now selected completed evidence, not another
+prerequisite. Full P0–P7 remains active; performance/security follow features.

@@ -1,0 +1,11 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0609]: no field `node` on type `voteboat::log::Bootstrap`
+   --> tests/routed/creation_source.rs:176:37
+    |
+176 |                         s.bootstrap.node,
+    |                                     ^^^^ unknown field
+    |
+    = note: available fields are: `group`, `configuration`, `policy`, `voter_stores`
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `voteboat` (test "routed") due to 1 previous error

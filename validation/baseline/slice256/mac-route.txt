@@ -1,0 +1,6 @@
+   route to: 192.168.223.133
+destination: 192.168.223.133
+  interface: en0
+      flags: <UP,HOST,DONE,LLINFO,WASCLONED,IFSCOPE,IFREF>
+ recvpipe  sendpipe  ssthresh  rtt,msec    rttvar  hopcount      mtu     expire
+       0         0  22245959         5         4         0      1500      1190

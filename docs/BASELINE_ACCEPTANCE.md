@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Selected separate-host static service: [slice256](../validation/baseline/slice256/README.md).
+Two Linux replicas and one Mac pass TCP/TLS and QUIC writes/quorum reads,
+required Linux/Mac quorum, leader loss, original retries, complete cold reopen
+and graceful process cleanup. This closes that selected P1/P2 host-composition
+check; recursive Mac failures, full platform/provider coverage and P7 remain.
+Production matches91576fa, with source-linked temporary test observation only.
+The exact namespace diagnostic passes both in isolation without explaining its
+earlier Mac failure; broad254d recovery results remain independent and pending.
+
 Terminal full Linux suite: [slice251](../validation/baseline/slice251/linux/README.md).
 Source-preserved ba67c8c finishes1826 passes, zero failures/ignored; routed171 and
 later targets complete. Original647 inputs verify before/after and formatting/

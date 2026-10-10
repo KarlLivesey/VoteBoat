@@ -1,5 +1,22 @@
 # Validation report
 
+Separate-host static service: [256](baseline/slice256/README.md). Two Linux
+replicas and one Mac pass TCP/TLS and QUIC original writes/quorum reads, a
+required Linux/Mac quorum, observed leader loss, same-ID duplicate retries,
+checkpoint admission/full cold reopen and a final write. All16 incarnations
+exit (four deliberate losses/twelve graceful), Mac PID absence is checked and
+six owned successful stores are removed. Production matches91576fa; 653 build
+inputs and binary digests bind the observation-only254e test source. This is
+selected separate-host compatibility, not performance or recursive acceptance.
+
+Namespace timeout observation: [254e](baseline/slice254e/README.md). Exact
+QUIC/WAL history passes in isolation1/0 on Linux and Mac with retained Applied
+outcomes; formatting/all-feature strict checks are zero. The original3/1 Mac
+family's readiness failure remains unexplained. The temporary observer is
+removed after capture; this run is not a fix or retrospective failure diagnosis.
+Current254d broad Mac family is still live with reported cross-authority failures;
+exact terminal bodies and the independent Linux family remain pending.
+
 Applied unread-phase qualification: [254d](baseline/slice254d/README.md). Mac
 traces expose leadership-unknown operations above the committed/applied prefix.
 Controlled actual native negatives fail0/1 on both; bounded original-ID/content

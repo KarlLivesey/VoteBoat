@@ -1,0 +1,2 @@
+ready node=3 peer=192.168.192.76:47203 transport=TcpTls command=127.0.0.1:47303
+stopped node=3 workers_joined=true

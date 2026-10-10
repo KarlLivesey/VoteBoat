@@ -1,0 +1,89 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.47s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+created source Quic checkpoint=false phase=Ready
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 20/1002
+Applied ProposalPosition { index: 4, term: 3 } receipt OperationId(1002)/4
+node NodeId(1) Leader term 3 op Some(4) commit 4 applied 4 done true
+node NodeId(2) Follower term 3 op Some(4) commit 3 applied 3 done false
+node NodeId(3) Follower term 3 op Some(4) commit 3 applied 3 done false
+created source Quic checkpoint=false phase=NamespacePublish
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 1/1003
+Applied ProposalPosition { index: 21, term: 20 } receipt OperationId(1003)/21
+node NodeId(1) Leader term 20 op Some(21) commit 21 applied 21 done true
+node NodeId(2) Follower term 20 op Some(21) commit 20 applied 20 done false
+node NodeId(3) Follower term 20 op Some(21) commit 20 applied 20 done false
+created source Quic checkpoint=false phase=NamespaceActivate
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 20/1003
+Applied ProposalPosition { index: 27, term: 28 } receipt OperationId(1003)/27
+node NodeId(1) Leader term 28 op Some(27) commit 27 applied 27 done true
+node NodeId(2) Follower term 28 op Some(27) commit 26 applied 26 done false
+node NodeId(3) Follower term 28 op Some(27) commit 26 applied 26 done false
+created source Quic checkpoint=false phase=Data(1)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 20/1
+Applied ProposalPosition { index: 40, term: 41 } receipt OperationId(1)/40
+node NodeId(2) Leader term 41 op Some(40) commit 40 applied 40 done true
+node NodeId(3) Follower term 41 op Some(40) commit 39 applied 39 done false
+node NodeId(1) Follower term 41 op Some(40) commit 39 applied 39 done false
+created source Quic checkpoint=false phase=Data(2)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 20/2
+Applied ProposalPosition { index: 53, term: 53 } receipt OperationId(2)/53
+node NodeId(1) Leader term 53 op Some(53) commit 53 applied 53 done true
+node NodeId(2) Follower term 53 op Some(53) commit 52 applied 52 done false
+node NodeId(3) Follower term 53 op Some(53) commit 52 applied 52 done false
+created source Quic checkpoint=false phase=Intent
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 1/200
+Applied ProposalPosition { index: 72, term: 72 } receipt OperationId(200)/72
+node NodeId(1) Leader term 72 op Some(72) commit 72 applied 72 done true
+node NodeId(2) Follower term 72 op Some(72) commit 71 applied 71 done false
+node NodeId(3) Follower term 72 op Some(72) commit 71 applied 71 done false
+created source Quic checkpoint=false phase=Stage(21)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 21/200
+Applied ProposalPosition { index: 39, term: 48 } receipt OperationId(200)/39
+node NodeId(1) Leader term 48 op Some(39) commit 39 applied 39 done true
+node NodeId(2) Follower term 48 op Some(39) commit 38 applied 38 done false
+node NodeId(3) Follower term 48 op Some(39) commit 38 applied 38 done false
+created source Quic checkpoint=false phase=Stage(22)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 22/200
+Applied ProposalPosition { index: 45, term: 54 } receipt OperationId(200)/45
+node NodeId(1) Leader term 54 op Some(45) commit 45 applied 45 done true
+node NodeId(2) Follower term 54 op Some(45) commit 44 applied 44 done false
+node NodeId(3) Follower term 54 op Some(45) commit 44 applied 44 done false
+created source Quic checkpoint=false phase=Fence
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 20/200
+Applied ProposalPosition { index: 96, term: 94 } receipt OperationId(200)/96
+node NodeId(1) Leader term 94 op Some(96) commit 96 applied 96 done true
+node NodeId(2) Follower term 94 op Some(96) commit 95 applied 95 done false
+node NodeId(3) Follower term 94 op Some(96) commit 95 applied 95 done false
+created source Quic checkpoint=false phase=Import(21)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 21/200
+Applied ProposalPosition { index: 60, term: 67 } receipt OperationId(200)/60
+node NodeId(1) Leader term 67 op Some(39) commit 60 applied 60 done true
+node NodeId(2) Follower term 67 op Some(39) commit 59 applied 59 done false
+node NodeId(3) Follower term 67 op Some(39) commit 59 applied 59 done false
+created source Quic checkpoint=false phase=Import(22)
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 22/200
+Applied ProposalPosition { index: 66, term: 73 } receipt OperationId(200)/66
+node NodeId(1) Leader term 73 op Some(45) commit 66 applied 66 done true
+node NodeId(2) Follower term 73 op Some(45) commit 65 applied 65 done false
+node NodeId(3) Follower term 73 op Some(45) commit 65 applied 65 done false
+created source Quic checkpoint=false phase=Publish
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 1/201
+Applied ProposalPosition { index: 147, term: 145 } receipt OperationId(201)/147
+node NodeId(1) Leader term 145 op Some(147) commit 147 applied 147 done true
+node NodeId(2) Follower term 145 op Some(147) commit 146 applied 146 done false
+node NodeId(3) Follower term 145 op Some(147) commit 146 applied 146 done false
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 21/200
+Applied ProposalPosition { index: 81, term: 86 } receipt OperationId(200)/81
+node NodeId(1) Leader term 86 op Some(39) commit 81 applied 81 done true
+node NodeId(2) Follower term 86 op Some(39) commit 80 applied 80 done false
+node NodeId(3) Follower term 86 op Some(39) commit 80 applied 80 done false
+unread diagnostic native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal 22/200
+Applied ProposalPosition { index: 82, term: 87 } receipt OperationId(200)/82
+node NodeId(1) Leader term 87 op Some(45) commit 82 applied 82 done true
+node NodeId(2) Follower term 87 op Some(45) commit 81 applied 81 done false
+node NodeId(3) Follower term 87 op Some(45) commit 81 applied 81 done false
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 176 filtered out; finished in 18.75s

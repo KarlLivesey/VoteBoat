@@ -1,0 +1,2 @@
+2026-10-10T23:20:03.515Z {"protocol":"tcp","phase":"start"}
+2026-10-10T23:20:03.540Z {"failure":"Error: listen EADDRINUSE: address already in use 192.168.223.133:45002\n    at Server.setupListenHandle [as _listen2] (node:net:2328:16)\n    at listenInCluster (node:net:2437:12)\n    at node:net:2666:7\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)"}

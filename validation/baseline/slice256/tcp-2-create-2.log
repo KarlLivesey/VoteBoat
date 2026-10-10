@@ -1,0 +1,1 @@
+ready node=2 peer=192.168.223.133:47202 transport=TcpTls command=127.0.0.1:47302

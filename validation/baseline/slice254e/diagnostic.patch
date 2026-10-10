@@ -1,0 +1,44 @@
+diff --git a/tests/routed/creation_source.rs b/tests/routed/creation_source.rs
+index 9f4476d..4672bd3 100644
+--- a/tests/routed/creation_source.rs
++++ b/tests/routed/creation_source.rs
+@@ -146,0 +147 @@ pub(super) fn unread<A>(
++    let mut terminal = None;
+@@ -147,0 +149,37 @@ pub(super) fn unread<A>(
++        if terminal.is_none() {
++            terminal = ns[0].poll_client();
++            if let Some(c) = terminal.as_ref() {
++                assert_eq!(c.ticket(), ticket);
++                let test = std::thread::current();
++                eprintln!("unread diagnostic {} {g}/{operation}", test.name().unwrap());
++                match c.outcome() {
++                    ClientOutcome::Applied { position, receipt } => eprintln!(
++                        "Applied {position:?} receipt {:?}/{:?}",
++                        receipt.operation(),
++                        receipt.index()
++                    ),
++                    ClientOutcome::NotProposed(e) => eprintln!("NotProposed {e:?}"),
++                    ClientOutcome::Unknown(e) => eprintln!("Unknown {e:?}"),
++                }
++                for n in ns.iter() {
++                    let core = n.local().owner.core(group(g)).unwrap();
++                    let s = core.state();
++                    let index = s.entries.iter().find_map(|e| match e.payload {
++                        EntryPayload::Command { operation: id, .. } if id == ticket.operation => {
++                            Some(e.index)
++                        }
++                        _ => None,
++                    });
++                    let app = &n.local().applications[&group(g)];
++                    eprintln!(
++                        "node {:?} {:?} term {:?} op {index:?} commit {:?} applied {:?} done {}",
++                        core.local_node(),
++                        core.role(),
++                        s.hard_state.term,
++                        s.commit_index,
++                        app.applied_index(),
++                        done(app)
++                    );
++                }
++            }
++        }
