@@ -314,6 +314,158 @@ impl TransferIntent {
         }
         Self::retained_candidate(before, after, child)
     }
+    fn validate_retained_candidate(
+        before: &ResponsibilityManifest,
+        after: &ResponsibilityManifest,
+        child: &InsertionChild,
+    ) -> Result<(), ApplicationError> {
+        let b = before.input();
+        let a = after.input();
+        let c = child.manifest.input();
+        let ExecutionMode::Single(target) = c.execution else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        let ExecutionMode::Delegated(_) = &a.execution else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        if b.responsibility != a.responsibility
+            || b.parent != a.parent
+            || b.authority != a.authority
+            || b.application != a.application
+            || b.scheme != a.scheme
+            || b.scope != a.scope
+            || b.placement != a.placement
+            || b.state != ResponsibilityState::Active
+            || a.state != ResponsibilityState::Active
+            || b.epoch.get().checked_add(1) != Some(a.epoch.get())
+            || b.generation.get().checked_add(1) != Some(a.generation.get())
+            || c.parent
+                != Some(ParentAuthority {
+                    responsibility: b.responsibility,
+                    group: b.authority,
+                })
+            || c.authority != b.authority
+            || c.application != b.application
+            || c.scheme != b.scheme
+            || c.epoch.get() != 1
+            || c.generation.get() != 1
+            || c.state != ResponsibilityState::Active
+            || c.scope.start() < b.scope.start()
+            || c.scope.end() > b.scope.end()
+            || c.responsibility.id == b.responsibility.id
+            || b.parent.is_some_and(|p| {
+                p.responsibility.id == c.responsibility.id || p.group.id == target.id
+            })
+            || target.id == b.authority.id
+            || child.creation_index == 0
+            || child.creation_index == u64::MAX
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let source = Self::retained_source_group(before, child)?;
+        if source.id == target.id
+            || source.id == b.authority.id
+            || b.parent.is_some_and(|p| p.group.id == source.id)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Self::validate_retained_routes(before, after, child, source)
+    }
+    fn retained_source_group(
+        before: &ResponsibilityManifest,
+        child: &InsertionChild,
+    ) -> Result<GroupIdentity, ApplicationError> {
+        let b = before.input();
+        let c = child.manifest.input();
+        Ok(match &b.execution {
+            ExecutionMode::Single(g) => *g,
+            ExecutionMode::Delegated(v) => {
+                let r = v
+                    .iter()
+                    .find(|r| r.scope.start() <= c.scope.start() && r.scope.end() >= c.scope.end())
+                    .ok_or(ApplicationError::InvalidCommand)?;
+                let RouteTarget::Group(g) = r.target else {
+                    return Err(ApplicationError::InvalidCommand);
+                };
+                if v.iter().any(|r| {
+                        matches!(r.target, RouteTarget::Group(other) if other != g)
+                            || matches!(r.target, RouteTarget::Child(old) if old.responsibility.id == c.responsibility.id)
+                    }) {
+                        return Err(ApplicationError::InvalidCommand);
+                    }
+                g
+            }
+            _ => return Err(ApplicationError::InvalidCommand),
+        })
+    }
+    fn validate_retained_routes(
+        before: &ResponsibilityManifest,
+        after: &ResponsibilityManifest,
+        child: &InsertionChild,
+        source: GroupIdentity,
+    ) -> Result<(), ApplicationError> {
+        let b = before.input();
+        let c = child.manifest.input();
+        let ExecutionMode::Delegated(routes) = &after.input().execution else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        let old_target = |bucket| match &b.execution {
+            ExecutionMode::Single(g) => RouteTarget::Group(*g),
+            ExecutionMode::Delegated(v) => {
+                v.iter()
+                    .find(|r| r.scope.contains(bucket))
+                    .expect("covered before")
+                    .target
+            }
+            _ => unreachable!(),
+        };
+        let fresh = RouteTarget::Child(ChildAuthority {
+            responsibility: c.responsibility,
+            group: c.authority,
+            epoch: c.epoch,
+        });
+        if !routes
+            .iter()
+            .any(|r| r.scope == c.scope && r.target == fresh)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        if let ExecutionMode::Delegated(old) = &b.execution {
+            if old
+                .iter()
+                .filter(|r| matches!(r.target, RouteTarget::Child(_)))
+                .any(|r| !routes.contains(r))
+            {
+                return Err(ApplicationError::InvalidCommand);
+            }
+        }
+        let mut retained = false;
+        for bucket in b.scope.start()..b.scope.end() {
+            let old = old_target(bucket);
+            let expected = if c.scope.contains(bucket) {
+                if old != RouteTarget::Group(source) {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                fresh
+            } else {
+                retained |= old == RouteTarget::Group(source);
+                old
+            };
+            if routes
+                .iter()
+                .find(|r| r.scope.contains(bucket))
+                .expect("covered after")
+                .target
+                != expected
+            {
+                return Err(ApplicationError::InvalidCommand);
+            }
+        }
+        if !retained {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(())
+    }
     #[allow(clippy::result_large_err)]
     pub(crate) fn retained_candidate(
         before: ResponsibilityManifest,
@@ -328,136 +480,7 @@ impl TransferIntent {
             InsertionChild,
         ),
     > {
-        let validate = || -> Result<(), ApplicationError> {
-            let b = before.input();
-            let a = after.input();
-            let c = child.manifest.input();
-            let ExecutionMode::Single(target) = c.execution else {
-                return Err(ApplicationError::InvalidCommand);
-            };
-            let ExecutionMode::Delegated(routes) = &a.execution else {
-                return Err(ApplicationError::InvalidCommand);
-            };
-            if b.responsibility != a.responsibility
-                || b.parent != a.parent
-                || b.authority != a.authority
-                || b.application != a.application
-                || b.scheme != a.scheme
-                || b.scope != a.scope
-                || b.placement != a.placement
-                || b.state != ResponsibilityState::Active
-                || a.state != ResponsibilityState::Active
-                || b.epoch.get().checked_add(1) != Some(a.epoch.get())
-                || b.generation.get().checked_add(1) != Some(a.generation.get())
-                || c.parent
-                    != Some(ParentAuthority {
-                        responsibility: b.responsibility,
-                        group: b.authority,
-                    })
-                || c.authority != b.authority
-                || c.application != b.application
-                || c.scheme != b.scheme
-                || c.epoch.get() != 1
-                || c.generation.get() != 1
-                || c.state != ResponsibilityState::Active
-                || c.scope.start() < b.scope.start()
-                || c.scope.end() > b.scope.end()
-                || c.responsibility.id == b.responsibility.id
-                || b.parent.is_some_and(|p| {
-                    p.responsibility.id == c.responsibility.id || p.group.id == target.id
-                })
-                || target.id == b.authority.id
-                || child.creation_index == 0
-                || child.creation_index == u64::MAX
-            {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            let source = match &b.execution {
-                ExecutionMode::Single(g) => *g,
-                ExecutionMode::Delegated(v) => {
-                    let r = v
-                        .iter()
-                        .find(|r| {
-                            r.scope.start() <= c.scope.start() && r.scope.end() >= c.scope.end()
-                        })
-                        .ok_or(ApplicationError::InvalidCommand)?;
-                    let RouteTarget::Group(g) = r.target else {
-                        return Err(ApplicationError::InvalidCommand);
-                    };
-                    if v.iter().any(|r| {
-                        matches!(r.target, RouteTarget::Group(other) if other != g)
-                            || matches!(r.target, RouteTarget::Child(old) if old.responsibility.id == c.responsibility.id)
-                    }) {
-                        return Err(ApplicationError::InvalidCommand);
-                    }
-                    g
-                }
-                _ => return Err(ApplicationError::InvalidCommand),
-            };
-            if source.id == target.id
-                || source.id == b.authority.id
-                || b.parent.is_some_and(|p| p.group.id == source.id)
-            {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            let old_target = |bucket| match &b.execution {
-                ExecutionMode::Single(g) => RouteTarget::Group(*g),
-                ExecutionMode::Delegated(v) => {
-                    v.iter()
-                        .find(|r| r.scope.contains(bucket))
-                        .expect("covered before")
-                        .target
-                }
-                _ => unreachable!(),
-            };
-            let fresh = RouteTarget::Child(ChildAuthority {
-                responsibility: c.responsibility,
-                group: c.authority,
-                epoch: c.epoch,
-            });
-            if !routes
-                .iter()
-                .any(|r| r.scope == c.scope && r.target == fresh)
-            {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            if let ExecutionMode::Delegated(old) = &b.execution {
-                if old
-                    .iter()
-                    .filter(|r| matches!(r.target, RouteTarget::Child(_)))
-                    .any(|r| !routes.contains(r))
-                {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-            }
-            let mut retained = false;
-            for bucket in b.scope.start()..b.scope.end() {
-                let old = old_target(bucket);
-                let expected = if c.scope.contains(bucket) {
-                    if old != RouteTarget::Group(source) {
-                        return Err(ApplicationError::InvalidCommand);
-                    }
-                    fresh
-                } else {
-                    retained |= old == RouteTarget::Group(source);
-                    old
-                };
-                if routes
-                    .iter()
-                    .find(|r| r.scope.contains(bucket))
-                    .expect("covered after")
-                    .target
-                    != expected
-                {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-            }
-            if !retained {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            Ok(())
-        };
-        if let Err(e) = validate() {
+        if let Err(e) = Self::validate_retained_candidate(&before, &after, &child) {
             return Err((e, before, after, child));
         }
         Ok(Self {

@@ -844,6 +844,376 @@ where
                 + self.partial_reserve(),
         }
     }
+    fn apply_freeze(
+        &mut self,
+        entry: &LogEntry,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<(TargetOutcome<A::Receipt>, bool), ApplicationError> {
+        let mut provider_advanced = false;
+        let outcome = {
+            let (intent, export_bytes) = self.freeze_request(bytes)?;
+            if !intent.permits_operation(*operation) {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            if *operation == self.operation
+                || self.inner.contains_operation(*operation)
+                || self.partial_operation(*operation)
+            {
+                TargetOutcome::OperationConflict
+            } else {
+                if entry.index == u64::MAX {
+                    return Err(ApplicationError::IndexGap);
+                }
+                let fence = OwnershipFence {
+                    group: self.group,
+                    responsibility: intent.before().input().responsibility,
+                    epoch: intent.before().input().epoch,
+                    operation: *operation,
+                    index: entry.index,
+                };
+                let mut projected = entry.clone();
+                projected.payload = EntryPayload::Noop;
+                if !self.inner.apply_batch(&[projected])?.is_empty()
+                    || self.inner.applied_index() != entry.index
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                self.inner
+                    .checkpoint(self.limits.application_checkpoint_bytes)?;
+                self.frozen = Some(FreezeRecord {
+                    bytes: bytes.to_vec(),
+                    intent,
+                    export_bytes,
+                    fence,
+                });
+                self.freeze_status()?; // Validate actual exports before publishing the fence.
+                provider_advanced = true;
+                TargetOutcome::Frozen(fence)
+            }
+        };
+        Ok((outcome, provider_advanced))
+    }
+    fn apply_import(
+        &mut self,
+        entry: &LogEntry,
+        operation: &OperationId,
+        bytes: &[u8],
+        import: TargetImport,
+    ) -> Result<(TargetOutcome<A::Receipt>, bool), ApplicationError> {
+        let mut provider_advanced = false;
+        let outcome = if *operation != self.operation {
+            TargetOutcome::OperationConflict
+        } else if let Some(record) = &self.imported {
+            if record.bytes == *bytes {
+                TargetOutcome::Imported {
+                    index: record.index,
+                    digest: record.status.digest,
+                }
+            } else {
+                TargetOutcome::OperationConflict
+            }
+        } else {
+            if self.staged.is_none() {
+                return Err(ApplicationError::NotApplied);
+            }
+            let images = import
+                .sources()
+                .iter()
+                .map(|s| s.image.clone())
+                .collect::<Vec<_>>();
+            self.inner.import_scopes(&images, entry.index)?;
+            if self.inner.applied_index() != entry.index
+                || self.inner.contains_operation(self.operation)
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            // Validate recoverable provider envelope before accepting readiness.
+            self.inner
+                .checkpoint(self.limits.application_checkpoint_bytes)?;
+            let status = Self::status_for(entry.index, bytes, &import);
+            let outcome = TargetOutcome::Imported {
+                index: entry.index,
+                digest: status.digest,
+            };
+            self.imported = Some(ImportRecord {
+                index: entry.index,
+                bytes: bytes.to_vec(),
+                status,
+            });
+            provider_advanced = true;
+            outcome
+        };
+        Ok((outcome, provider_advanced))
+    }
+    fn apply_activation(
+        &mut self,
+        entry: &LogEntry,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<TargetOutcome<A::Receipt>, ApplicationError> {
+        Ok(if *operation != self.operation {
+            TargetOutcome::OperationConflict
+        } else if let Some(record) = &self.activated {
+            if record.bytes == *bytes {
+                TargetOutcome::Activated(record.status)
+            } else {
+                TargetOutcome::OperationConflict
+            }
+        } else {
+            let activation = self.activation(bytes)?;
+            self.check_activation(&activation)?;
+            let status = Self::activation_status(entry.index, bytes, &activation);
+            self.activated = Some(ActivationRecord {
+                bytes: bytes.to_vec(),
+                status,
+            });
+            TargetOutcome::Activated(status)
+        })
+    }
+    fn apply_data(
+        &mut self,
+        entry: &LogEntry,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<(TargetOutcome<A::Receipt>, bool), ApplicationError> {
+        let mut provider_advanced = false;
+        let outcome = {
+            let Command::Data { hint, key, payload } =
+                decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)?
+            else {
+                return Err(ApplicationError::InvalidCommand);
+            };
+            if let Err(error) = self.check_active_context(&hint, key) {
+                TargetOutcome::Rejected(error)
+            } else {
+                let projected = LogEntry {
+                    index: entry.index,
+                    term: entry.term,
+                    payload: EntryPayload::Command {
+                        operation: *operation,
+                        bytes: payload.to_vec(),
+                    },
+                };
+                let mut result = self.inner.apply_batch(&[projected])?.into_iter();
+                let receipt = result.next().ok_or(ApplicationError::InvalidCommand)?;
+                if result.next().is_some()
+                    || receipt.index() != entry.index
+                    || receipt.operation() != *operation
+                    || self.inner.applied_index() != entry.index
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                self.inner
+                    .checkpoint(self.limits.application_checkpoint_bytes)?;
+                provider_advanced = true;
+                TargetOutcome::Applied(receipt)
+            }
+        };
+        Ok((outcome, provider_advanced))
+    }
+    fn apply_command(
+        &mut self,
+        entry: &LogEntry,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<(TargetOutcome<A::Receipt>, bool), ApplicationError> {
+        let mut provider_advanced = false;
+        let import = self.request(bytes)?;
+        let outcome = if self.partial.is_some() && partial::control(bytes) {
+            let (outcome, advanced) = self.apply_partial(entry, None, false)?;
+            provider_advanced = advanced;
+            outcome
+        } else if parent::is_parent(bytes) {
+            self.apply_parent(*operation, entry.index, bytes)?
+        } else if self.parent_adoption(*operation).is_some() || self.partial_operation(*operation) {
+            TargetOutcome::OperationConflict
+        } else if let Some(record) = &self.frozen {
+            if *operation == record.fence.operation && *bytes == record.bytes {
+                TargetOutcome::Frozen(record.fence)
+            } else {
+                TargetOutcome::Rejected(RoutingError::Fenced)
+            }
+        } else if bytes.starts_with(b"VBTFRZ01") {
+            let (outcome, advanced) = self.apply_freeze(entry, operation, bytes)?;
+            provider_advanced = advanced;
+            outcome
+        } else if bytes == self.binding {
+            if *operation != self.operation {
+                TargetOutcome::OperationConflict
+            } else {
+                TargetOutcome::Staged {
+                    index: *self.staged.get_or_insert(entry.index),
+                }
+            }
+        } else if let Some(import) = import {
+            let (outcome, advanced) = self.apply_import(entry, operation, bytes, import)?;
+            provider_advanced = advanced;
+            outcome
+        } else if bytes.starts_with(b"VBTACT01") {
+            self.apply_activation(entry, operation, bytes)?
+        } else if *operation == self.operation {
+            TargetOutcome::OperationConflict
+        } else if self.activated.is_none() {
+            TargetOutcome::NotActive
+        } else {
+            let (outcome, advanced) = self.apply_data(entry, operation, bytes)?;
+            provider_advanced = advanced;
+            outcome
+        };
+        Ok((outcome, provider_advanced))
+    }
+    fn validate_checkpoint_schema(
+        &self,
+        schema: u64,
+        bytes: &[u8],
+    ) -> Result<(), ApplicationError> {
+        let insertion = self.intent.insertion_children().is_some();
+        let parent = self.parent_limit != 0;
+        let partial = self.partial.is_some();
+        let remaining = self.intent.is_remaining_transfer();
+        if ((insertion || parent || partial || remaining) && schema != self.schema_version())
+            || (!insertion
+                && !parent
+                && !partial
+                && !remaining
+                && schema != TRANSFER_TARGET_SCHEMA
+                && schema != 1)
+        {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        if bytes.len() > self.readiness_requirements().snapshot_bytes {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(())
+    }
+    fn checkpoint_formats(
+        &self,
+        schema: u64,
+        r: &mut Reader<'_>,
+    ) -> Result<(bool, bool), ApplicationError> {
+        let partial = self.partial.is_some();
+        let parent = self.parent_limit != 0;
+        let insertion = self.intent.insertion_children().is_some();
+        let recursive = insertion && self.intent.delegation().is_some();
+        let remaining = self.intent.is_remaining_transfer();
+        let tag = r.take(8)?;
+        let tag = if self.metadata_adoption {
+            if tag
+                != if self.metadata_locator_adoption {
+                    if partial {
+                        b"VBTRGT12"
+                    } else {
+                        b"VBTRGT11"
+                    }
+                } else if partial {
+                    b"VBTRGT10"
+                } else {
+                    b"VBTRGT09"
+                }
+            {
+                return Err(ApplicationError::UnsupportedSchema);
+            }
+            if partial {
+                &b"VBTRGT07"[..]
+            } else {
+                &b"VBTRGT06"[..]
+            }
+        } else {
+            tag
+        };
+        let frozen_format = tag == b"VBTRGT03"
+            || tag == b"VBTRGT04"
+            || tag == b"VBTRGT05"
+            || tag == b"VBTRGT06"
+            || tag == b"VBTRGT07"
+            || tag == b"VBTRGT08";
+        if (partial && tag != b"VBTRGT07")
+            || (!partial && tag == b"VBTRGT07")
+            || (!partial && parent && tag != b"VBTRGT06")
+            || (!partial && !parent && tag == b"VBTRGT06")
+            || (!partial && !parent && remaining && tag != b"VBTRGT08")
+            || (!remaining && tag == b"VBTRGT08")
+            || (!partial
+                && !parent
+                && !remaining
+                && ((recursive && tag != b"VBTRGT05")
+                    || (!recursive && tag == b"VBTRGT05")
+                    || (insertion && !recursive && tag != b"VBTRGT04")
+                    || (!insertion && tag == b"VBTRGT04")))
+            || (schema >= TRANSFER_TARGET_SCHEMA) != frozen_format
+        {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
+        let activated_format = frozen_format || tag == b"VBTRGT02";
+        if !activated_format && tag != b"VBTRGT01" {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok((activated_format, frozen_format))
+    }
+    fn checkpoint_import(
+        &self,
+        r: &mut Reader<'_>,
+        applied: u64,
+    ) -> Result<(u64, u64, Option<ImportRecord>), ApplicationError> {
+        let staged = r.u64()?;
+        let index = r.u64()?;
+        let len = r.u32()? as usize;
+        let import_bytes = r.take(len)?;
+        if staged > applied
+            || index > applied
+            || (index == 0) != (len == 0)
+            || index != 0 && (staged == 0 || index <= staged)
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let imported = if len == 0 {
+            None
+        } else {
+            let import = self.load(import_bytes)?;
+            Some(ImportRecord {
+                index,
+                bytes: import_bytes.to_vec(),
+                status: Self::status_for(index, import_bytes, &import),
+            })
+        };
+        Ok((staged, index, imported))
+    }
+    fn restored_freeze(
+        &self,
+        freeze_bytes: &[u8],
+        freeze_operation: u128,
+        freeze_index: u64,
+    ) -> Result<Option<FreezeRecord>, ApplicationError> {
+        Ok(if freeze_bytes.is_empty() {
+            None
+        } else {
+            let (intent, export_bytes) = self.freeze_request(freeze_bytes)?;
+            let operation =
+                OperationId::new(freeze_operation).ok_or(ApplicationError::InvalidCheckpoint)?;
+            if operation == self.operation
+                || self.parent_adoption(operation).is_some()
+                || self.partial_operation(operation)
+                || self.inner.contains_operation(operation)
+                || !intent.permits_operation(operation)
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            let fence = OwnershipFence {
+                group: self.group,
+                responsibility: intent.before().input().responsibility,
+                epoch: intent.before().input().epoch,
+                operation,
+                index: freeze_index,
+            };
+            Some(FreezeRecord {
+                bytes: freeze_bytes.to_vec(),
+                intent,
+                export_bytes,
+                fence,
+            })
+        })
+    }
 }
 impl<A, P> StateMachine for TransferTarget<A, P>
 where
@@ -881,169 +1251,8 @@ where
             }
             let mut provider_advanced = false;
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
-                let import = next.request(bytes)?;
-                let outcome = if next.partial.is_some() && partial::control(bytes) {
-                    let (outcome, advanced) = next.apply_partial(entry, None, false)?;
-                    provider_advanced = advanced;
-                    outcome
-                } else if parent::is_parent(bytes) {
-                    next.apply_parent(*operation, entry.index, bytes)?
-                } else if next.parent_adoption(*operation).is_some()
-                    || next.partial_operation(*operation)
-                {
-                    TargetOutcome::OperationConflict
-                } else if let Some(record) = &next.frozen {
-                    if *operation == record.fence.operation && *bytes == record.bytes {
-                        TargetOutcome::Frozen(record.fence)
-                    } else {
-                        TargetOutcome::Rejected(RoutingError::Fenced)
-                    }
-                } else if bytes.starts_with(b"VBTFRZ01") {
-                    let (intent, export_bytes) = next.freeze_request(bytes)?;
-                    if !intent.permits_operation(*operation) {
-                        return Err(ApplicationError::InvalidCommand);
-                    }
-                    if *operation == next.operation
-                        || next.inner.contains_operation(*operation)
-                        || next.partial_operation(*operation)
-                    {
-                        TargetOutcome::OperationConflict
-                    } else {
-                        if entry.index == u64::MAX {
-                            return Err(ApplicationError::IndexGap);
-                        }
-                        let fence = OwnershipFence {
-                            group: next.group,
-                            responsibility: intent.before().input().responsibility,
-                            epoch: intent.before().input().epoch,
-                            operation: *operation,
-                            index: entry.index,
-                        };
-                        let mut projected = entry.clone();
-                        projected.payload = EntryPayload::Noop;
-                        if !next.inner.apply_batch(&[projected])?.is_empty()
-                            || next.inner.applied_index() != entry.index
-                        {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        next.inner
-                            .checkpoint(next.limits.application_checkpoint_bytes)?;
-                        next.frozen = Some(FreezeRecord {
-                            bytes: bytes.clone(),
-                            intent,
-                            export_bytes,
-                            fence,
-                        });
-                        next.freeze_status()?; // Validate actual exports before publishing the fence.
-                        provider_advanced = true;
-                        TargetOutcome::Frozen(fence)
-                    }
-                } else if bytes == &next.binding {
-                    if *operation != next.operation {
-                        TargetOutcome::OperationConflict
-                    } else {
-                        TargetOutcome::Staged {
-                            index: *next.staged.get_or_insert(entry.index),
-                        }
-                    }
-                } else if let Some(import) = import {
-                    if *operation != next.operation {
-                        TargetOutcome::OperationConflict
-                    } else if let Some(record) = &next.imported {
-                        if record.bytes == *bytes {
-                            TargetOutcome::Imported {
-                                index: record.index,
-                                digest: record.status.digest,
-                            }
-                        } else {
-                            TargetOutcome::OperationConflict
-                        }
-                    } else {
-                        if next.staged.is_none() {
-                            return Err(ApplicationError::NotApplied);
-                        }
-                        let images = import
-                            .sources()
-                            .iter()
-                            .map(|s| s.image.clone())
-                            .collect::<Vec<_>>();
-                        next.inner.import_scopes(&images, entry.index)?;
-                        if next.inner.applied_index() != entry.index
-                            || next.inner.contains_operation(next.operation)
-                        {
-                            return Err(ApplicationError::InvalidCheckpoint);
-                        }
-                        // Validate recoverable provider envelope before accepting readiness.
-                        next.inner
-                            .checkpoint(next.limits.application_checkpoint_bytes)?;
-                        let status = Self::status_for(entry.index, bytes, &import);
-                        let outcome = TargetOutcome::Imported {
-                            index: entry.index,
-                            digest: status.digest,
-                        };
-                        next.imported = Some(ImportRecord {
-                            index: entry.index,
-                            bytes: bytes.clone(),
-                            status,
-                        });
-                        provider_advanced = true;
-                        outcome
-                    }
-                } else if bytes.starts_with(b"VBTACT01") {
-                    if *operation != next.operation {
-                        TargetOutcome::OperationConflict
-                    } else if let Some(record) = &next.activated {
-                        if record.bytes == *bytes {
-                            TargetOutcome::Activated(record.status)
-                        } else {
-                            TargetOutcome::OperationConflict
-                        }
-                    } else {
-                        let activation = next.activation(bytes)?;
-                        next.check_activation(&activation)?;
-                        let status = Self::activation_status(entry.index, bytes, &activation);
-                        next.activated = Some(ActivationRecord {
-                            bytes: bytes.clone(),
-                            status,
-                        });
-                        TargetOutcome::Activated(status)
-                    }
-                } else if *operation == next.operation {
-                    TargetOutcome::OperationConflict
-                } else if next.activated.is_none() {
-                    TargetOutcome::NotActive
-                } else {
-                    let Command::Data { hint, key, payload } =
-                        decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)?
-                    else {
-                        return Err(ApplicationError::InvalidCommand);
-                    };
-                    if let Err(error) = next.check_active_context(&hint, key) {
-                        TargetOutcome::Rejected(error)
-                    } else {
-                        let projected = LogEntry {
-                            index: entry.index,
-                            term: entry.term,
-                            payload: EntryPayload::Command {
-                                operation: *operation,
-                                bytes: payload.to_vec(),
-                            },
-                        };
-                        let mut result = next.inner.apply_batch(&[projected])?.into_iter();
-                        let receipt = result.next().ok_or(ApplicationError::InvalidCommand)?;
-                        if result.next().is_some()
-                            || receipt.index() != entry.index
-                            || receipt.operation() != *operation
-                            || next.inner.applied_index() != entry.index
-                        {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        next.inner
-                            .checkpoint(next.limits.application_checkpoint_bytes)?;
-                        provider_advanced = true;
-                        TargetOutcome::Applied(receipt)
-                    }
-                };
+                let (outcome, advanced) = next.apply_command(entry, operation, bytes)?;
+                provider_advanced = advanced;
                 receipts.push(TargetReceipt {
                     index: entry.index,
                     operation: *operation,
@@ -1336,102 +1545,18 @@ where
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        let insertion = self.intent.insertion_children().is_some();
-        let recursive = insertion && self.intent.delegation().is_some();
-        let parent = self.parent_limit != 0;
+        self.validate_checkpoint_schema(schema, bytes)?;
         let partial = self.partial.is_some();
-        let remaining = self.intent.is_remaining_transfer();
-        if ((insertion || parent || partial || remaining) && schema != self.schema_version())
-            || (!insertion
-                && !parent
-                && !partial
-                && !remaining
-                && schema != TRANSFER_TARGET_SCHEMA
-                && schema != 1)
-        {
-            return Err(ApplicationError::UnsupportedSchema);
-        }
-        if bytes.len() > self.readiness_requirements().snapshot_bytes {
-            return Err(ApplicationError::InvalidCheckpoint);
-        }
         let mut r = Reader::new(bytes);
-        let tag = r.take(8)?;
-        let tag = if self.metadata_adoption {
-            if tag
-                != if self.metadata_locator_adoption {
-                    if partial {
-                        b"VBTRGT12"
-                    } else {
-                        b"VBTRGT11"
-                    }
-                } else if partial {
-                    b"VBTRGT10"
-                } else {
-                    b"VBTRGT09"
-                }
-            {
-                return Err(ApplicationError::UnsupportedSchema);
-            }
-            if partial {
-                &b"VBTRGT07"[..]
-            } else {
-                &b"VBTRGT06"[..]
-            }
-        } else {
-            tag
-        };
-        let frozen_format = tag == b"VBTRGT03"
-            || tag == b"VBTRGT04"
-            || tag == b"VBTRGT05"
-            || tag == b"VBTRGT06"
-            || tag == b"VBTRGT07"
-            || tag == b"VBTRGT08";
-        if (partial && tag != b"VBTRGT07")
-            || (!partial && tag == b"VBTRGT07")
-            || (!partial && parent && tag != b"VBTRGT06")
-            || (!partial && !parent && tag == b"VBTRGT06")
-            || (!partial && !parent && remaining && tag != b"VBTRGT08")
-            || (!remaining && tag == b"VBTRGT08")
-            || (!partial
-                && !parent
-                && !remaining
-                && ((recursive && tag != b"VBTRGT05")
-                    || (!recursive && tag == b"VBTRGT05")
-                    || (insertion && !recursive && tag != b"VBTRGT04")
-                    || (!insertion && tag == b"VBTRGT04")))
-            || (schema >= TRANSFER_TARGET_SCHEMA) != frozen_format
-        {
-            return Err(ApplicationError::UnsupportedSchema);
-        }
-        let activated_format = frozen_format || tag == b"VBTRGT02";
-        if (!activated_format && tag != b"VBTRGT01") || r.u64()? != applied {
+        let (activated_format, frozen_format) = self.checkpoint_formats(schema, &mut r)?;
+        if r.u64()? != applied {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let len = r.u32()? as usize;
         if r.take(len)? != self.binding {
             return Err(ApplicationError::InvalidCheckpoint);
         }
-        let staged = r.u64()?;
-        let index = r.u64()?;
-        let len = r.u32()? as usize;
-        let import_bytes = r.take(len)?;
-        if staged > applied
-            || index > applied
-            || (index == 0) != (len == 0)
-            || index != 0 && (staged == 0 || index <= staged)
-        {
-            return Err(ApplicationError::InvalidCheckpoint);
-        }
-        let imported = if len == 0 {
-            None
-        } else {
-            let import = self.load(import_bytes)?;
-            Some(ImportRecord {
-                index,
-                bytes: import_bytes.to_vec(),
-                status: Self::status_for(index, import_bytes, &import),
-            })
-        };
+        let (staged, index, imported) = self.checkpoint_import(&mut r, applied)?;
         let (activation_index, activation_bytes) = if activated_format {
             let index = r.u64()?;
             let len = r.u32()? as usize;
@@ -1499,34 +1624,7 @@ where
         if !r.done() {
             return Err(ApplicationError::InvalidCheckpoint);
         }
-        next.frozen = if freeze_bytes.is_empty() {
-            None
-        } else {
-            let (intent, export_bytes) = next.freeze_request(freeze_bytes)?;
-            let operation =
-                OperationId::new(freeze_operation).ok_or(ApplicationError::InvalidCheckpoint)?;
-            if operation == next.operation
-                || next.parent_adoption(operation).is_some()
-                || next.partial_operation(operation)
-                || next.inner.contains_operation(operation)
-                || !intent.permits_operation(operation)
-            {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            let fence = OwnershipFence {
-                group: next.group,
-                responsibility: intent.before().input().responsibility,
-                epoch: intent.before().input().epoch,
-                operation,
-                index: freeze_index,
-            };
-            Some(FreezeRecord {
-                bytes: freeze_bytes.to_vec(),
-                intent,
-                export_bytes,
-                fence,
-            })
-        };
+        next.frozen = next.restored_freeze(freeze_bytes, freeze_operation, freeze_index)?;
         next.applied = applied;
         next.freeze_status()?;
         *self = next;

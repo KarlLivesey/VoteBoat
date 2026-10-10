@@ -207,6 +207,164 @@ where
             })
         })
     }
+    fn check_partial_export(
+        &self,
+        op: &OperationId,
+        bytes: &[u8],
+    ) -> Result<(TransferIntent, usize), ApplicationError> {
+        let p = self
+            .partial
+            .as_ref()
+            .ok_or(ApplicationError::UnsupportedSchema)?;
+        let intent = TransferIntent::decode(bytes)?;
+        let sources = intent.sources();
+        if intent.before() != self.grant()
+            || !intent.is_retained_insertion()
+            || !intent.permits_operation(*op)
+            || sources.len() != 1
+            || sources[0].target != RouteTarget::Group(self.group)
+            || self.partial_pending()
+            || intent.insertion_children().is_none_or(|c| {
+                c.iter().any(|c| {
+                    c.creation == self.operation
+                        || self.inner.contains_operation(c.creation)
+                        || self.partial_operation(c.creation)
+                })
+            })
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        if p.events.iter().filter(|e| e.image.is_some()).count() >= p.maximum {
+            return Err(ApplicationError::ReceiptBudget);
+        }
+        let scope = sources[0].scope;
+        if p.events.iter().any(|e| {
+            e.image
+                .as_ref()
+                .is_some_and(|i| i.scope().start() < scope.end() && scope.start() < i.scope().end())
+        }) {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let bound = self.inner.export_scope_bound(scope)?;
+        let used =
+            p.events
+                .iter()
+                .filter_map(|e| e.image.as_ref())
+                .try_fold(0usize, |used, i| {
+                    used.checked_add(self.inner.export_scope_bound(i.scope())?)
+                        .ok_or(ApplicationError::ReceiptBudget)
+                })?;
+        if bound == 0 || bound > p.export_bytes.saturating_sub(used) {
+            return Err(ApplicationError::ReceiptBudget);
+        }
+        Ok((intent, bound))
+    }
+    fn apply_partial_freeze(
+        &mut self,
+        entry: &LogEntry,
+        op: &OperationId,
+        bytes: &[u8],
+        restored: Option<ScopeImage>,
+        replay: bool,
+    ) -> Result<(Outcome, Option<ScopeImage>, bool), ApplicationError> {
+        let (intent, bound) = self.check_partial_export(op, bytes)?;
+        let scope = intent.sources()[0].scope;
+        let mut advanced = false;
+        let image = if replay {
+            restored.ok_or(ApplicationError::InvalidCheckpoint)?
+        } else {
+            let receipts = self.inner.apply_batch(&[LogEntry {
+                index: entry.index,
+                term: entry.term,
+                payload: EntryPayload::Noop,
+            }])?;
+            if !receipts.is_empty() || self.inner.applied_index() != entry.index {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            self.inner
+                .checkpoint(self.limits.application_checkpoint_bytes)?;
+            advanced = true;
+            self.inner.export_scope(scope, bound)?
+        };
+        if image.schema() != self.inner.schema_version()
+            || image.scheme() != self.inner.scheme()
+            || image.scope() != scope
+            || image.source_applied() != entry.index
+            || image.payload_capacity() > bound
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let status = ScopedExportStatus {
+            fence: ScopedOwnershipFence {
+                fence: OwnershipFence {
+                    group: self.group,
+                    responsibility: self.grant().input().responsibility,
+                    epoch: self.grant().input().epoch,
+                    operation: *op,
+                    index: entry.index,
+                },
+                scope,
+            },
+            digest: ContentDigest::scope_image(&image),
+            schema: image.schema(),
+            payload_bytes: image.bytes().len(),
+            intent_digest: Some(ContentDigest::sha256(bytes)),
+        };
+        Ok((Outcome::Frozen(status), Some(image), advanced))
+    }
+    fn apply_partial_grant(
+        &mut self,
+        entry: &LogEntry,
+        op: &OperationId,
+        bytes: &[u8],
+        restored: Option<ScopeImage>,
+    ) -> Result<Outcome, ApplicationError> {
+        let p = self
+            .partial
+            .as_ref()
+            .ok_or(ApplicationError::UnsupportedSchema)?;
+        if restored.is_some() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let command = RetainedGrantAdoption::decode(bytes)?;
+        let publication = &command.decision.publication;
+        let intent = publication.intent();
+        let e = p
+            .events
+            .iter()
+            .find(|e| e.operation == publication.operation())
+            .ok_or(ApplicationError::NotApplied)?;
+        let Outcome::Frozen(status) = e.outcome else {
+            return Err(ApplicationError::InvalidCommand);
+        };
+        let source = publication
+            .sources()
+            .iter()
+            .find(|s| s.fence.group == self.group)
+            .ok_or(ApplicationError::InvalidCommand)?;
+        let expected =
+            SourceFenceEvidence::from_scoped_status(source.configuration, status, intent)
+                .map_err(|e| e.0)?;
+        if intent.before() != self.grant()
+            || e.bytes != intent.encode(MAX_TRANSFER_INTENT_BYTES)?
+            || status.fence.fence.index >= entry.index
+            || *source != expected
+            || p.events.iter().any(
+                |e| matches!(e.outcome, Outcome::Grant(s) if s.transfer == publication.operation()),
+            )
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        let status = RetainedGrantStatus {
+            operation: *op,
+            index: entry.index,
+            transfer: publication.operation(),
+            epoch: intent.after().input().epoch,
+            generation: intent.after().input().generation,
+        };
+        self.active_grant = intent.after().clone();
+        Ok(Outcome::Grant(status))
+    }
     pub(super) fn apply_partial<R>(
         &mut self,
         entry: &LogEntry,
@@ -248,128 +406,12 @@ where
         }
         let mut advanced = false;
         let (outcome, image) = if bytes.starts_with(b"VBTINT06") {
-            let intent = TransferIntent::decode(bytes)?;
-            let sources = intent.sources();
-            if intent.before() != self.grant()
-                || !intent.is_retained_insertion()
-                || !intent.permits_operation(*op)
-                || sources.len() != 1
-                || sources[0].target != RouteTarget::Group(self.group)
-                || self.partial_pending()
-                || intent.insertion_children().is_none_or(|c| {
-                    c.iter().any(|c| {
-                        c.creation == self.operation
-                            || self.inner.contains_operation(c.creation)
-                            || self.partial_operation(c.creation)
-                    })
-                })
-            {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            if p.events.iter().filter(|e| e.image.is_some()).count() >= p.maximum {
-                return Err(ApplicationError::ReceiptBudget);
-            }
-            let scope = sources[0].scope;
-            if p.events.iter().any(|e| {
-                e.image.as_ref().is_some_and(|i| {
-                    i.scope().start() < scope.end() && scope.start() < i.scope().end()
-                })
-            }) {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            let bound = self.inner.export_scope_bound(scope)?;
-            let used =
-                p.events
-                    .iter()
-                    .filter_map(|e| e.image.as_ref())
-                    .try_fold(0usize, |used, i| {
-                        used.checked_add(self.inner.export_scope_bound(i.scope())?)
-                            .ok_or(ApplicationError::ReceiptBudget)
-                    })?;
-            if bound == 0 || bound > p.export_bytes.saturating_sub(used) {
-                return Err(ApplicationError::ReceiptBudget);
-            }
-            let image = if replay {
-                restored.ok_or(ApplicationError::InvalidCheckpoint)?
-            } else {
-                let receipts = self.inner.apply_batch(&[LogEntry {
-                    index: entry.index,
-                    term: entry.term,
-                    payload: EntryPayload::Noop,
-                }])?;
-                if !receipts.is_empty() || self.inner.applied_index() != entry.index {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                self.inner
-                    .checkpoint(self.limits.application_checkpoint_bytes)?;
-                advanced = true;
-                self.inner.export_scope(scope, bound)?
-            };
-            if image.schema() != self.inner.schema_version()
-                || image.scheme() != self.inner.scheme()
-                || image.scope() != scope
-                || image.source_applied() != entry.index
-                || image.payload_capacity() > bound
-            {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            let status = ScopedExportStatus {
-                fence: ScopedOwnershipFence {
-                    fence: OwnershipFence {
-                        group: self.group,
-                        responsibility: self.grant().input().responsibility,
-                        epoch: self.grant().input().epoch,
-                        operation: *op,
-                        index: entry.index,
-                    },
-                    scope,
-                },
-                digest: ContentDigest::scope_image(&image),
-                schema: image.schema(),
-                payload_bytes: image.bytes().len(),
-                intent_digest: Some(ContentDigest::sha256(bytes)),
-            };
-            (Outcome::Frozen(status), Some(image))
+            let (outcome, image, provider_advanced) =
+                self.apply_partial_freeze(entry, op, bytes, restored, replay)?;
+            advanced = provider_advanced;
+            (outcome, image)
         } else if bytes.starts_with(b"VBSADP01") {
-            if restored.is_some() {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            let command = RetainedGrantAdoption::decode(bytes)?;
-            let publication = &command.decision.publication;
-            let intent = publication.intent();
-            let e = p
-                .events
-                .iter()
-                .find(|e| e.operation == publication.operation())
-                .ok_or(ApplicationError::NotApplied)?;
-            let Outcome::Frozen(status) = e.outcome else {
-                return Err(ApplicationError::InvalidCommand);
-            };
-            let source = publication
-                .sources()
-                .iter()
-                .find(|s| s.fence.group == self.group)
-                .ok_or(ApplicationError::InvalidCommand)?;
-            let expected =
-                SourceFenceEvidence::from_scoped_status(source.configuration, status, intent)
-                    .map_err(|e| e.0)?;
-            if intent.before() != self.grant()
-                || e.bytes != intent.encode(MAX_TRANSFER_INTENT_BYTES)?
-                || status.fence.fence.index >= entry.index
-                || *source != expected
-                || p.events.iter().any(|e| matches!(e.outcome, Outcome::Grant(s) if s.transfer == publication.operation()))
-            {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            let status = RetainedGrantStatus {
-                operation: *op,
-                index: entry.index,
-                transfer: publication.operation(),
-                epoch: intent.after().input().epoch,
-                generation: intent.after().input().generation,
-            };
-            self.active_grant = intent.after().clone();
-            (Outcome::Grant(status), None)
+            (self.apply_partial_grant(entry, op, bytes, restored)?, None)
         } else {
             if restored.is_some() || self.partial_pending() {
                 return Err(ApplicationError::InvalidCommand);
@@ -560,6 +602,38 @@ where
     /// Reconstruct only authority history. No application payload or provider
     /// operation is needed after retirement. Foreign observations retain the
     /// same authenticated-host obligation as their original ordered adoption.
+    fn retired_transfer(
+        &self,
+        command: &[u8],
+        grant: &ResponsibilityManifest,
+        previous: u64,
+        index: u64,
+        used: &mut std::collections::BTreeSet<OperationId>,
+    ) -> Result<ResponsibilityManifest, ApplicationError> {
+        let adoption = RetainedGrantAdoption::decode(command)?;
+        let pubn = &adoption.decision.publication;
+        let intent = pubn.intent();
+        let [source] = pubn.sources() else {
+            return Err(ApplicationError::InvalidCheckpoint);
+        };
+        if intent.before() != grant
+            || source.fence.group != self.group
+            || source.fence.index <= previous
+            || source.fence.index >= index
+            || !used.insert(source.fence.operation)
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        for child in intent
+            .insertion_children()
+            .ok_or(ApplicationError::InvalidCheckpoint)?
+        {
+            if !used.insert(child.creation) {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+        }
+        Ok(intent.after().clone())
+    }
     pub(super) fn partial_retirement_grant(
         &self,
         bytes: &[u8],
@@ -630,29 +704,7 @@ where
                 if transfers > p.maximum {
                     return Err(ApplicationError::InvalidCheckpoint);
                 }
-                let adoption = RetainedGrantAdoption::decode(command)?;
-                let pubn = &adoption.decision.publication;
-                let intent = pubn.intent();
-                let [source] = pubn.sources() else {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                };
-                if intent.before() != &grant
-                    || source.fence.group != self.group
-                    || source.fence.index <= previous
-                    || source.fence.index >= index
-                    || !used.insert(source.fence.operation)
-                {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                for child in intent
-                    .insertion_children()
-                    .ok_or(ApplicationError::InvalidCheckpoint)?
-                {
-                    if !used.insert(child.creation) {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                }
-                grant = intent.after().clone();
+                grant = self.retired_transfer(command, &grant, previous, index, &mut used)?;
             } else {
                 parents += 1;
                 if parents > self.parent_limit {

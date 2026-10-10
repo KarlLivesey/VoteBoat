@@ -169,8 +169,9 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    on the existing parser, ownership, recovery and provider contracts. Check
    unchanged formats/refusal/atomicity using each affected subsystem's tests;
    completion requires strict all-target all-feature/core-only Clippy with no
-   warnings. No suppressed baseline or increased thresholds. Directory, routed/log and native cleanups have reduced production findings
-   from48 to8. Remaining scope/transfer functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
+   warnings. No suppressed baseline or increased thresholds. Production Clippy now passes in all-feature and core-only profiles after the
+   directory, routed/log, native, consensus, runtime and transfer refactors.
+   Test/example violations remain explicit work; all-target Clippy still fails.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -13819,3 +13820,47 @@ application and checkpoint restoration responsibilities. Preserve exact schema
 bytes, validation order, candidate publication, retained lineage and no-dual-owner
 checks; then clean inline and integration fixtures. Capability items2/3 remain
 native owner-family composition (P5/P6) and public administration ingress (P4).
+
+### Scope and transfer lint cleanup — schema plan
+
+Keep the public source/target traits, command/checkpoint tags and ownership
+lineage unchanged. Separate command projection, control-command application,
+export capture and receipt adjustment. Apply each batch to the same cloned
+candidate and publish only after every check succeeds. Split checkpoint parsing
+into header, image/event and adoption phases; retain ordered replay, exact byte
+validation and all-or-nothing restoration. Separate retained-insertion identity
+checks from route coverage checks. Helpers are private and exist to isolate these
+validation/state-transition responsibilities, not to add a provider or workflow.
+
+Acceptance: scope, transfer, insertion, retained/imported-parent and metadata
+histories, including malformed checkpoints, replay and no-dual-owner checks;
+strict production/all-target Clippy and formatting. This continues mini item1
+(P0–P7 maintainability); native composition and administration remain items2/3.
+
+## Scope and transfer lint cleanup — implemented evidence
+
+Scoped sources separate bounded projection, control commands, immutable export
+capture and receipt adjustment. Checkpoint restoration reconstructs the candidate
+through header, ordered image and grant-adoption phases before publishing it.
+Retained insertion separates identity/source selection from complete route
+coverage. Transfer targets separate freeze, import, activation and data commands;
+partial exports retain their original reservation and replay checks. Checkpoint
+formats, imported state and frozen state are validated separately in the same
+order. No public contract, schema tag, encoded byte layout, activation rule or
+resource limit changed. Batch/restore publication is still all-or-nothing.
+
+Local checks (cargo +stable --locked --offline):281 all-feature tests and231
+core-only tests pass across the library and16 scope/transfer/insertion/retained
+owner/metadata/retirement/reparenting/directory targets. Strict production-library
+Clippy passes in both feature profiles with -D warnings. Formatting, whitespace
+and the88-contract inventory pass. All eight remaining production size findings
+are removed without suppression or raised thresholds. The initial all-target
+run reports39 distinct test/example diagnostics and still fails; test target
+failures may hide additional findings. Production lint success is not whole-repo
+lint success.
+
+Next under mini item1: split oversized membership-test histories into named
+setup/delivery/assertion phases, then do the same for remaining integration
+fixtures and the embedding example. Preserve each history and assertion, and
+rerun those exact targets plus strict all-target/core checks. Native owner-family
+composition and public administration remain the next capability items.

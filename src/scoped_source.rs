@@ -424,104 +424,7 @@ where
             if bytes.len() > MAX_ROUTED_COMMAND_BYTES {
                 return Err(ApplicationError::InvalidCommand);
             }
-            let replacement = if bytes.starts_with(b"VBSCOWN1")
-                || bytes.starts_with(b"VBSCOWN2")
-                || bytes.starts_with(b"VBSCOWN3")
-                || bytes.starts_with(b"VBSCOWN4")
-                || bytes.starts_with(b"VBSCOWN5")
-                || bytes.starts_with(b"VBSCOWN6")
-                || bytes.starts_with(b"VBSCOWN7")
-            {
-                if bytes != &self.bootstrap_command(bytes.len())? {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                self.routed.bootstrap_command(bytes.len())?
-            } else if self.bound_intents && bytes.starts_with(b"VBTINT06") {
-                let intent = TransferIntent::decode(bytes)?;
-                if bytes != &intent.encode(bytes.len())? {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                if self
-                    .images
-                    .get(operation)
-                    .is_some_and(|e| e.intent.as_ref() != Some(&intent))
-                {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                let scope = self.checked_intent(*operation, &intent)?;
-                if !self.images.contains_key(operation) {
-                    self.export_capacity(scope)?;
-                }
-                encode_scope_fence(self.routed.grant().input().epoch, scope)
-            } else {
-                match decode(bytes, self.routed.limits().payload_bytes)? {
-                    Command::Data { hint, key, payload } => {
-                        if self.adoption_operation(*operation) {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        if self.bound_intents
-                            && self.images.iter().any(|(id, e)| {
-                                *id == *operation
-                                    || e.intent.as_ref().is_some_and(|i| {
-                                        i.insertion_children().is_some_and(|children| {
-                                            children.iter().any(|c| c.creation == *operation)
-                                        })
-                                    })
-                            })
-                        {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        if self.routed.application().command_key(payload)? != key {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        if self.retained_grants {
-                            self.check_context(&hint, key)
-                                .map_err(|_| ApplicationError::InvalidCommand)?;
-                            encode_routed(
-                                self.routed
-                                    .original_hint(hint)
-                                    .map_err(|_| ApplicationError::InvalidCommand)?,
-                                key,
-                                payload,
-                                MAX_ROUTED_COMMAND_BYTES,
-                            )?
-                        } else {
-                            bytes.clone()
-                        }
-                    }
-                    Command::ScopeFence(_, scope) => {
-                        if self.bound_intents {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        if !self.images.contains_key(operation) {
-                            if self.routed.application().contains_operation(*operation) {
-                                return Err(ApplicationError::InvalidCommand);
-                            }
-                            self.export_capacity(scope)?;
-                        }
-                        bytes.clone()
-                    }
-                    Command::Fence(epoch) => {
-                        if self.routed.application().contains_operation(*operation)
-                            || (self.bound_intents && self.reserved_creation(*operation))
-                            || self.adoption_operation(*operation)
-                        {
-                            return Err(ApplicationError::InvalidCommand);
-                        }
-                        if self.retained_grants {
-                            if epoch != self.grant().input().epoch {
-                                return Err(ApplicationError::InvalidCommand);
-                            }
-                            encode_fence(self.routed.grant().input().epoch)
-                        } else {
-                            bytes.clone()
-                        }
-                    }
-                    Command::Bootstrap(_) | Command::ParentAdopt(_) => {
-                        return Err(ApplicationError::InvalidCommand)
-                    }
-                }
-            };
+            let replacement = self.projected_command(operation, bytes)?;
             if let EntryPayload::Command { bytes, .. } = &mut projected.payload {
                 *bytes = replacement;
             }
@@ -633,6 +536,482 @@ where
                 },
         }
     }
+    fn projected_command(
+        &self,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<Vec<u8>, ApplicationError> {
+        Ok(
+            if bytes.starts_with(b"VBSCOWN1")
+                || bytes.starts_with(b"VBSCOWN2")
+                || bytes.starts_with(b"VBSCOWN3")
+                || bytes.starts_with(b"VBSCOWN4")
+                || bytes.starts_with(b"VBSCOWN5")
+                || bytes.starts_with(b"VBSCOWN6")
+                || bytes.starts_with(b"VBSCOWN7")
+            {
+                if bytes != self.bootstrap_command(bytes.len())? {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                self.routed.bootstrap_command(bytes.len())?
+            } else if self.bound_intents && bytes.starts_with(b"VBTINT06") {
+                let intent = TransferIntent::decode(bytes)?;
+                if bytes != intent.encode(bytes.len())? {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self
+                    .images
+                    .get(operation)
+                    .is_some_and(|e| e.intent.as_ref() != Some(&intent))
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                let scope = self.checked_intent(*operation, &intent)?;
+                if !self.images.contains_key(operation) {
+                    self.export_capacity(scope)?;
+                }
+                encode_scope_fence(self.routed.grant().input().epoch, scope)
+            } else {
+                self.project_decoded(operation, bytes)?
+            },
+        )
+    }
+    fn project_decoded(
+        &self,
+        operation: &OperationId,
+        bytes: &[u8],
+    ) -> Result<Vec<u8>, ApplicationError> {
+        Ok(match decode(bytes, self.routed.limits().payload_bytes)? {
+            Command::Data { hint, key, payload } => {
+                if self.adoption_operation(*operation) {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self.bound_intents
+                    && self.images.iter().any(|(id, e)| {
+                        *id == *operation
+                            || e.intent.as_ref().is_some_and(|i| {
+                                i.insertion_children().is_some_and(|children| {
+                                    children.iter().any(|c| c.creation == *operation)
+                                })
+                            })
+                    })
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self.routed.application().command_key(payload)? != key {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self.retained_grants {
+                    self.check_context(&hint, key)
+                        .map_err(|_| ApplicationError::InvalidCommand)?;
+                    encode_routed(
+                        self.routed
+                            .original_hint(hint)
+                            .map_err(|_| ApplicationError::InvalidCommand)?,
+                        key,
+                        payload,
+                        MAX_ROUTED_COMMAND_BYTES,
+                    )?
+                } else {
+                    bytes.to_vec()
+                }
+            }
+            Command::ScopeFence(_, scope) => {
+                if self.bound_intents {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if !self.images.contains_key(operation) {
+                    if self.routed.application().contains_operation(*operation) {
+                        return Err(ApplicationError::InvalidCommand);
+                    }
+                    self.export_capacity(scope)?;
+                }
+                bytes.to_vec()
+            }
+            Command::Fence(epoch) => {
+                if self.routed.application().contains_operation(*operation)
+                    || (self.bound_intents && self.reserved_creation(*operation))
+                    || self.adoption_operation(*operation)
+                {
+                    return Err(ApplicationError::InvalidCommand);
+                }
+                if self.retained_grants {
+                    if epoch != self.grant().input().epoch {
+                        return Err(ApplicationError::InvalidCommand);
+                    }
+                    encode_fence(self.routed.grant().input().epoch)
+                } else {
+                    bytes.to_vec()
+                }
+            }
+            Command::Bootstrap(_) | Command::ParentAdopt(_) => {
+                return Err(ApplicationError::InvalidCommand)
+            }
+        })
+    }
+    fn apply_control(
+        &mut self,
+        entry: &LogEntry,
+    ) -> Result<Option<RoutedReceipt<A::Receipt>>, ApplicationError> {
+        if let EntryPayload::Command { operation, bytes } = &entry.payload {
+            if parent_command(bytes) {
+                let status = self.apply_parent(*operation, entry.index, bytes)?;
+                self.routed.apply_batch(&[LogEntry {
+                    index: entry.index,
+                    term: entry.term,
+                    payload: EntryPayload::Noop,
+                }])?;
+                return Ok(Some(RoutedReceipt {
+                    index: entry.index,
+                    operation: *operation,
+                    outcome: RoutedOutcome::ParentAdopted(status),
+                }));
+            }
+            if bytes.starts_with(b"VBSADP01") {
+                let command = RetainedGrantAdoption::decode(bytes)?;
+                let original = self.checked_adoption(*operation, &command)?;
+                let noop = LogEntry {
+                    index: entry.index,
+                    term: entry.term,
+                    payload: EntryPayload::Noop,
+                };
+                self.routed.apply_batch(&[noop])?;
+                let status = original.unwrap_or(RetainedGrantStatus {
+                    operation: *operation,
+                    index: entry.index,
+                    transfer: command.decision.publication.operation(),
+                    epoch: command.decision.publication.intent().after().input().epoch,
+                    generation: command
+                        .decision
+                        .publication
+                        .intent()
+                        .after()
+                        .input()
+                        .generation,
+                });
+                if original.is_none() {
+                    self.active_grant = command.decision.publication.intent().after().clone();
+                    self.adoptions
+                        .try_reserve_exact(1)
+                        .map_err(|_| ApplicationError::ReceiptBudget)?;
+                    self.adoptions
+                        .push(GrantChange::Retained(Adoption::new(status, command)?));
+                }
+                return Ok(Some(RoutedReceipt {
+                    index: entry.index,
+                    operation: *operation,
+                    outcome: RoutedOutcome::GrantAdopted(status),
+                }));
+            }
+            if self.retained_grants {
+                if let Ok(Command::Data { hint, key, .. }) =
+                    decode(bytes, self.routed.limits().payload_bytes)
+                {
+                    if let Err(error) = self.check_context(&hint, key) {
+                        self.routed.apply_batch(&[LogEntry {
+                            index: entry.index,
+                            term: entry.term,
+                            payload: EntryPayload::Noop,
+                        }])?;
+                        return Ok(Some(RoutedReceipt {
+                            index: entry.index,
+                            operation: *operation,
+                            outcome: RoutedOutcome::Rejected(error),
+                        }));
+                    }
+                }
+            }
+        }
+        Ok(None)
+    }
+    fn capture_exports(
+        &mut self,
+        entry: &LogEntry,
+        applied: &[RoutedReceipt<A::Receipt>],
+    ) -> Result<(), ApplicationError> {
+        for r in applied {
+            if let RoutedOutcome::ScopeFenced(fence) = r.outcome {
+                if !self.images.contains_key(&fence.fence.operation) {
+                    let bound = self.export_capacity(fence.scope)?;
+                    let image = self.routed.application().export_scope(fence.scope, bound)?;
+                    self.checked_image(&image, fence)?;
+                    if image.payload_capacity() > self.remaining_export_bytes() {
+                        return Err(ApplicationError::ReceiptBudget);
+                    }
+                    self.images.insert(
+                        fence.fence.operation,
+                        FrozenExport {
+                            digest: ContentDigest::scope_image(&image),
+                            image,
+                            reservation: bound,
+                            intent: if self.bound_intents {
+                                let EntryPayload::Command { bytes, .. } = &entry.payload else {
+                                    return Err(ApplicationError::InvalidCommand);
+                                };
+                                Some(TransferIntent::decode(bytes)?)
+                            } else {
+                                None
+                            },
+                            intent_digest: if self.bound_intents {
+                                let EntryPayload::Command { bytes, .. } = &entry.payload else {
+                                    return Err(ApplicationError::InvalidCommand);
+                                };
+                                Some(ContentDigest::sha256(bytes))
+                            } else {
+                                None
+                            },
+                        },
+                    );
+                }
+            }
+        }
+        Ok(())
+    }
+    fn adjust_fences(&self, applied: &mut [RoutedReceipt<A::Receipt>]) {
+        if self.retained_grants {
+            for r in applied {
+                match &mut r.outcome {
+                    RoutedOutcome::ScopeFenced(f) => {
+                        if let Some(i) = self
+                            .images
+                            .get(&f.fence.operation)
+                            .and_then(|e| e.intent.as_ref())
+                        {
+                            f.fence.epoch = i.before().input().epoch;
+                        }
+                    }
+                    RoutedOutcome::Fenced(f) => f.epoch = self.grant_at(f.index).input().epoch,
+                    _ => {}
+                }
+            }
+        }
+    }
+    fn read_export(
+        &self,
+        r: &mut Reader<'_>,
+        op: OperationId,
+        reservation: usize,
+        retained: usize,
+    ) -> Result<FrozenExport, ApplicationError> {
+        let digest = ContentDigest(
+            r.take(32)?
+                .try_into()
+                .map_err(|_| ApplicationError::InvalidCheckpoint)?,
+        );
+        let schema = r.u64()?;
+        let scheme = PartitionScheme {
+            id: RoutingSchemeId::new(r.u128()?).ok_or(ApplicationError::InvalidCheckpoint)?,
+            version: r.u32()?,
+        };
+        let scope = r.range()?;
+        let index = r.u64()?;
+        let len = r.u32()? as usize;
+        if reservation == 0
+            || reservation > self.export_bytes - retained
+            || len == 0
+            || len > reservation
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let image = ScopeImage::new(schema, scheme, scope, index, r.take(len)?.to_vec())
+            .map_err(|e| e.0)?;
+        let fence = *self
+            .routed
+            .scoped_fences()
+            .iter()
+            .find(|s| s.fence.operation == op)
+            .ok_or(ApplicationError::InvalidCheckpoint)?;
+        self.checked_image(&image, fence)?;
+        if reservation != self.routed.application().export_scope_bound(fence.scope)?
+            || image.payload_capacity() > reservation
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        if digest != ContentDigest::scope_image(&image) {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let intent = if self.bound_intents {
+            let original_digest = ContentDigest(
+                r.take(32)?
+                    .try_into()
+                    .map_err(|_| ApplicationError::InvalidCheckpoint)?,
+            );
+            let len = r.u32()? as usize;
+            let intent = TransferIntent::decode(r.take(len)?)?;
+            if self.checked_intent_for(op, &intent, intent.before())? != fence.scope {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            if original_digest != ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?)
+            {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            Some(intent)
+        } else {
+            None
+        };
+        let intent_digest = intent
+            .as_ref()
+            .map(|i| {
+                i.encode(MAX_TRANSFER_INTENT_BYTES)
+                    .map(|b| ContentDigest::sha256(&b))
+            })
+            .transpose()?;
+        Ok(FrozenExport {
+            digest,
+            image,
+            reservation,
+            intent,
+            intent_digest,
+        })
+    }
+    fn restore_images(&mut self, r: &mut Reader<'_>) -> Result<(), ApplicationError> {
+        let count = usize::from(r.u16()?);
+        if count != self.routed.scoped_fences().len() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        self.images.clear();
+        let mut previous = 0;
+        let mut retained = 0usize;
+        for _ in 0..count {
+            let reservation =
+                usize::try_from(r.u64()?).map_err(|_| ApplicationError::InvalidCheckpoint)?;
+            let op = r.operation()?;
+            if op.get() <= previous {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            previous = op.get();
+            let export = self.read_export(r, op, reservation, retained)?;
+            retained = retained
+                .checked_add(reservation)
+                .filter(|n| *n <= self.export_bytes)
+                .ok_or(ApplicationError::InvalidCheckpoint)?;
+            self.images.insert(op, export);
+        }
+        Ok(())
+    }
+    fn restore_adoptions(
+        &mut self,
+        r: &mut Reader<'_>,
+        applied: u64,
+    ) -> Result<(), ApplicationError> {
+        if self.retained_grants {
+            let count = usize::from(r.u16()?);
+            if count > self.routed.scoped_fence_limit() + self.parent_limit {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            let mut last = 0;
+            for _ in 0..count {
+                let parent = self.parent_limit != 0 && r.boolean()?;
+                let digest = ContentDigest(
+                    r.take(32)?
+                        .try_into()
+                        .map_err(|_| ApplicationError::InvalidCheckpoint)?,
+                );
+                let operation = r.operation()?;
+                let index = r.u64()?;
+                let len = r.u32()? as usize;
+                let command_bytes = r.take(len)?;
+                if index == 0
+                    || index <= last
+                    || index > applied
+                    || self.routed.has_semantic_index(index)
+                    || self.adoption_operation(operation)
+                {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                let change = if parent {
+                    self.checked_parent(
+                            operation,
+                            index,
+                            crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped_metadata(
+                                command_bytes,
+                                self.parent_slots,
+                                self.metadata_adoption, self.metadata_locator_adoption
+                            )?,
+                        )?
+                } else {
+                    let command = RetainedGrantAdoption::decode(command_bytes)?;
+                    if self
+                        .checked_adoption_at(operation, &command, index)?
+                        .is_some()
+                    {
+                        return Err(ApplicationError::InvalidCheckpoint);
+                    }
+                    let intent = command.decision.publication.intent();
+                    let status = RetainedGrantStatus {
+                        operation,
+                        index,
+                        transfer: command.decision.publication.operation(),
+                        epoch: intent.after().input().epoch,
+                        generation: intent.after().input().generation,
+                    };
+                    GrantChange::Retained(Adoption::new(status, command)?)
+                };
+                if change.digest()? != digest {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+                self.active_grant = change.after();
+                self.adoptions
+                    .try_reserve_exact(1)
+                    .map_err(|_| ApplicationError::ReceiptBudget)?;
+                self.adoptions.push(change);
+                last = index;
+            }
+            for (operation, e) in &self.images {
+                let intent = e
+                    .intent
+                    .as_ref()
+                    .ok_or(ApplicationError::InvalidCheckpoint)?;
+                if intent.before() != &self.grant_at(e.image.source_applied())
+                    || self
+                        .checked_intent_for(*operation, intent, intent.before())
+                        .is_err()
+                {
+                    return Err(ApplicationError::InvalidCheckpoint);
+                }
+            }
+        }
+        Ok(())
+    }
+    fn restored_checkpoint(&self, applied: u64, bytes: &[u8]) -> Result<Self, ApplicationError> {
+        let mut r = Reader::new(bytes);
+        if r.take(8)?
+            != if self.metadata_locator_adoption {
+                b"VBSCCHK7"
+            } else if self.metadata_adoption {
+                b"VBSCCHK6"
+            } else if self.parent_slots {
+                b"VBSCCHK5"
+            } else if self.parent_limit != 0 {
+                b"VBSCCHK4"
+            } else if self.retained_grants {
+                b"VBSCCHK3"
+            } else if self.bound_intents {
+                b"VBSCCHK2"
+            } else {
+                b"VBSCCHK1"
+            }
+            || r.u64()? != applied
+            || r.u64()? != self.export_bytes as u64
+        {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        let len = r.u32()? as usize;
+        let mut next = self.clone();
+        next.active_grant = next.routed.grant().clone();
+        next.adoptions.clear();
+        next.routed
+            .restore_checkpoint(SCOPED_ROUTED_APPLICATION_SCHEMA, applied, r.take(len)?)?;
+        if self.parent_limit != 0 && usize::from(r.u16()?) != self.parent_limit {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        next.restore_images(&mut r)?;
+        next.restore_adoptions(&mut r, applied)?;
+        if !r.done() {
+            return Err(ApplicationError::InvalidCheckpoint);
+        }
+        Ok(next)
+    }
 }
 impl<A, P> StateMachine for ScopedTransferSource<A, P>
 where
@@ -662,133 +1041,14 @@ where
                 .count(),
         );
         for entry in entries {
-            if let EntryPayload::Command { operation, bytes } = &entry.payload {
-                if parent_command(bytes) {
-                    let status = next.apply_parent(*operation, entry.index, bytes)?;
-                    next.routed.apply_batch(&[LogEntry {
-                        index: entry.index,
-                        term: entry.term,
-                        payload: EntryPayload::Noop,
-                    }])?;
-                    receipts.push(RoutedReceipt {
-                        index: entry.index,
-                        operation: *operation,
-                        outcome: RoutedOutcome::ParentAdopted(status),
-                    });
-                    continue;
-                }
-                if bytes.starts_with(b"VBSADP01") {
-                    let command = RetainedGrantAdoption::decode(bytes)?;
-                    let original = next.checked_adoption(*operation, &command)?;
-                    let noop = LogEntry {
-                        index: entry.index,
-                        term: entry.term,
-                        payload: EntryPayload::Noop,
-                    };
-                    next.routed.apply_batch(&[noop])?;
-                    let status = original.unwrap_or(RetainedGrantStatus {
-                        operation: *operation,
-                        index: entry.index,
-                        transfer: command.decision.publication.operation(),
-                        epoch: command.decision.publication.intent().after().input().epoch,
-                        generation: command
-                            .decision
-                            .publication
-                            .intent()
-                            .after()
-                            .input()
-                            .generation,
-                    });
-                    if original.is_none() {
-                        next.active_grant = command.decision.publication.intent().after().clone();
-                        next.adoptions
-                            .try_reserve_exact(1)
-                            .map_err(|_| ApplicationError::ReceiptBudget)?;
-                        next.adoptions
-                            .push(GrantChange::Retained(Adoption::new(status, command)?));
-                    }
-                    receipts.push(RoutedReceipt {
-                        index: entry.index,
-                        operation: *operation,
-                        outcome: RoutedOutcome::GrantAdopted(status),
-                    });
-                    continue;
-                }
-                if next.retained_grants {
-                    if let Ok(Command::Data { hint, key, .. }) =
-                        decode(bytes, next.routed.limits().payload_bytes)
-                    {
-                        if let Err(error) = next.check_context(&hint, key) {
-                            next.routed.apply_batch(&[LogEntry {
-                                index: entry.index,
-                                term: entry.term,
-                                payload: EntryPayload::Noop,
-                            }])?;
-                            receipts.push(RoutedReceipt {
-                                index: entry.index,
-                                operation: *operation,
-                                outcome: RoutedOutcome::Rejected(error),
-                            });
-                            continue;
-                        }
-                    }
-                }
+            if let Some(receipt) = next.apply_control(entry)? {
+                receipts.push(receipt);
+                continue;
             }
             let projected = next.projected(entry)?;
             let mut applied = next.routed.apply_batch(std::slice::from_ref(&projected))?;
-            for r in &applied {
-                if let RoutedOutcome::ScopeFenced(fence) = r.outcome {
-                    if !next.images.contains_key(&fence.fence.operation) {
-                        let bound = next.export_capacity(fence.scope)?;
-                        let image = next.routed.application().export_scope(fence.scope, bound)?;
-                        next.checked_image(&image, fence)?;
-                        if image.payload_capacity() > next.remaining_export_bytes() {
-                            return Err(ApplicationError::ReceiptBudget);
-                        }
-                        next.images.insert(
-                            fence.fence.operation,
-                            FrozenExport {
-                                digest: ContentDigest::scope_image(&image),
-                                image,
-                                reservation: bound,
-                                intent: if next.bound_intents {
-                                    let EntryPayload::Command { bytes, .. } = &entry.payload else {
-                                        return Err(ApplicationError::InvalidCommand);
-                                    };
-                                    Some(TransferIntent::decode(bytes)?)
-                                } else {
-                                    None
-                                },
-                                intent_digest: if next.bound_intents {
-                                    let EntryPayload::Command { bytes, .. } = &entry.payload else {
-                                        return Err(ApplicationError::InvalidCommand);
-                                    };
-                                    Some(ContentDigest::sha256(bytes))
-                                } else {
-                                    None
-                                },
-                            },
-                        );
-                    }
-                }
-            }
-            if next.retained_grants {
-                for r in &mut applied {
-                    match &mut r.outcome {
-                        RoutedOutcome::ScopeFenced(f) => {
-                            if let Some(i) = next
-                                .images
-                                .get(&f.fence.operation)
-                                .and_then(|e| e.intent.as_ref())
-                            {
-                                f.fence.epoch = i.before().input().epoch;
-                            }
-                        }
-                        RoutedOutcome::Fenced(f) => f.epoch = next.grant_at(f.index).input().epoch,
-                        _ => {}
-                    }
-                }
-            }
+            next.capture_exports(entry, &applied)?;
+            next.adjust_fences(&mut applied);
             receipts.extend(applied);
         }
         *self = next;
@@ -1001,219 +1261,9 @@ where
         if bytes.len() > self.readiness_requirements().snapshot_bytes {
             return Err(ApplicationError::InvalidCheckpoint);
         }
-        let restore = || -> Result<Self, ApplicationError> {
-            let mut r = Reader::new(bytes);
-            if r.take(8)?
-                != if self.metadata_locator_adoption {
-                    b"VBSCCHK7"
-                } else if self.metadata_adoption {
-                    b"VBSCCHK6"
-                } else if self.parent_slots {
-                    b"VBSCCHK5"
-                } else if self.parent_limit != 0 {
-                    b"VBSCCHK4"
-                } else if self.retained_grants {
-                    b"VBSCCHK3"
-                } else if self.bound_intents {
-                    b"VBSCCHK2"
-                } else {
-                    b"VBSCCHK1"
-                }
-                || r.u64()? != applied
-                || r.u64()? != self.export_bytes as u64
-            {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            let len = r.u32()? as usize;
-            let mut next = self.clone();
-            next.active_grant = next.routed.grant().clone();
-            next.adoptions.clear();
-            next.routed.restore_checkpoint(
-                SCOPED_ROUTED_APPLICATION_SCHEMA,
-                applied,
-                r.take(len)?,
-            )?;
-            if self.parent_limit != 0 && usize::from(r.u16()?) != self.parent_limit {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            let count = usize::from(r.u16()?);
-            if count != next.routed.scoped_fences().len() {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            next.images.clear();
-            let mut previous = 0;
-            let mut retained = 0usize;
-            for _ in 0..count {
-                let reservation =
-                    usize::try_from(r.u64()?).map_err(|_| ApplicationError::InvalidCheckpoint)?;
-                let op = r.operation()?;
-                if op.get() <= previous {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                previous = op.get();
-                let digest = ContentDigest(
-                    r.take(32)?
-                        .try_into()
-                        .map_err(|_| ApplicationError::InvalidCheckpoint)?,
-                );
-                let schema = r.u64()?;
-                let scheme = PartitionScheme {
-                    id: RoutingSchemeId::new(r.u128()?)
-                        .ok_or(ApplicationError::InvalidCheckpoint)?,
-                    version: r.u32()?,
-                };
-                let scope = r.range()?;
-                let index = r.u64()?;
-                let len = r.u32()? as usize;
-                if reservation == 0
-                    || reservation > next.export_bytes - retained
-                    || len == 0
-                    || len > reservation
-                {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                let image = ScopeImage::new(schema, scheme, scope, index, r.take(len)?.to_vec())
-                    .map_err(|e| e.0)?;
-                let fence = *next
-                    .routed
-                    .scoped_fences()
-                    .iter()
-                    .find(|s| s.fence.operation == op)
-                    .ok_or(ApplicationError::InvalidCheckpoint)?;
-                next.checked_image(&image, fence)?;
-                if reservation != next.routed.application().export_scope_bound(fence.scope)?
-                    || image.payload_capacity() > reservation
-                {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                if digest != ContentDigest::scope_image(&image) {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                let intent = if next.bound_intents {
-                    let original_digest = ContentDigest(
-                        r.take(32)?
-                            .try_into()
-                            .map_err(|_| ApplicationError::InvalidCheckpoint)?,
-                    );
-                    let len = r.u32()? as usize;
-                    let intent = TransferIntent::decode(r.take(len)?)?;
-                    if next.checked_intent_for(op, &intent, intent.before())? != fence.scope {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                    if original_digest
-                        != ContentDigest::sha256(&intent.encode(MAX_TRANSFER_INTENT_BYTES)?)
-                    {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                    Some(intent)
-                } else {
-                    None
-                };
-                let intent_digest = intent
-                    .as_ref()
-                    .map(|i| {
-                        i.encode(MAX_TRANSFER_INTENT_BYTES)
-                            .map(|b| ContentDigest::sha256(&b))
-                    })
-                    .transpose()?;
-                retained = retained
-                    .checked_add(reservation)
-                    .filter(|n| *n <= next.export_bytes)
-                    .ok_or(ApplicationError::InvalidCheckpoint)?;
-                next.images.insert(
-                    op,
-                    FrozenExport {
-                        digest,
-                        image,
-                        reservation,
-                        intent,
-                        intent_digest,
-                    },
-                );
-            }
-            if next.retained_grants {
-                let count = usize::from(r.u16()?);
-                if count > next.routed.scoped_fence_limit() + next.parent_limit {
-                    return Err(ApplicationError::InvalidCheckpoint);
-                }
-                let mut last = 0;
-                for _ in 0..count {
-                    let parent = self.parent_limit != 0 && r.boolean()?;
-                    let digest = ContentDigest(
-                        r.take(32)?
-                            .try_into()
-                            .map_err(|_| ApplicationError::InvalidCheckpoint)?,
-                    );
-                    let operation = r.operation()?;
-                    let index = r.u64()?;
-                    let len = r.u32()? as usize;
-                    let command_bytes = r.take(len)?;
-                    if index == 0
-                        || index <= last
-                        || index > applied
-                        || next.routed.has_semantic_index(index)
-                        || next.adoption_operation(operation)
-                    {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                    let change = if parent {
-                        next.checked_parent(
-                            operation,
-                            index,
-                            crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped_metadata(
-                                command_bytes,
-                                next.parent_slots,
-                                next.metadata_adoption, next.metadata_locator_adoption
-                            )?,
-                        )?
-                    } else {
-                        let command = RetainedGrantAdoption::decode(command_bytes)?;
-                        if next
-                            .checked_adoption_at(operation, &command, index)?
-                            .is_some()
-                        {
-                            return Err(ApplicationError::InvalidCheckpoint);
-                        }
-                        let intent = command.decision.publication.intent();
-                        let status = RetainedGrantStatus {
-                            operation,
-                            index,
-                            transfer: command.decision.publication.operation(),
-                            epoch: intent.after().input().epoch,
-                            generation: intent.after().input().generation,
-                        };
-                        GrantChange::Retained(Adoption::new(status, command)?)
-                    };
-                    if change.digest()? != digest {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                    next.active_grant = change.after();
-                    next.adoptions
-                        .try_reserve_exact(1)
-                        .map_err(|_| ApplicationError::ReceiptBudget)?;
-                    next.adoptions.push(change);
-                    last = index;
-                }
-                for (operation, e) in &next.images {
-                    let intent = e
-                        .intent
-                        .as_ref()
-                        .ok_or(ApplicationError::InvalidCheckpoint)?;
-                    if intent.before() != &next.grant_at(e.image.source_applied())
-                        || next
-                            .checked_intent_for(*operation, intent, intent.before())
-                            .is_err()
-                    {
-                        return Err(ApplicationError::InvalidCheckpoint);
-                    }
-                }
-            }
-            if !r.done() {
-                return Err(ApplicationError::InvalidCheckpoint);
-            }
-            Ok(next)
-        };
-        *self = restore().map_err(|_| ApplicationError::InvalidCheckpoint)?;
+        *self = self
+            .restored_checkpoint(applied, bytes)
+            .map_err(|_| ApplicationError::InvalidCheckpoint)?;
         Ok(())
     }
 }
