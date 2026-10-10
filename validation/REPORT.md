@@ -5345,3 +5345,20 @@ These are diagnostic views of supplied node IDs. They do not establish network
 liveness, authenticated/durable acknowledgements, or permission to commit. The
 quorum predicate and consensus protocol are unchanged. No current full-suite,
 macOS, separate-host or performance-gate success follows from the historical run.
+
+
+## Slice178 — static local lanes
+
+All28 native benchmark tests pass on Linux; the final six focused lane tests
+also pass after the last fanout adjustment. The independent lane validator passes
+seven cases and checks retained TCP/QUIC samples, disjoint assignment, global
+window/rate/latency arithmetic and native storage counters. Formatting and both
+strict Clippy profiles pass with zero diagnostics. Evidence, source hashes and
+scope are in baseline/slice178 and performance/slice178.
+
+Three release runs pass actual file reopen, historical retries and worker joins.
+They are finite, busy-host composition checks, not sustainable capacity or a
+fixed-p99 improvement. One/two-lane TCP p99 is706.891026/1075.042194ms; two-lane
+QUIC p99 is1058.867266ms. The original serial250ms gate remains open. Ubuntu CI
+for432a6e9 failed three service authority-race histories; raw output is retained
+and no fix is inferred. macOS and baseline175 remain pending at capture.

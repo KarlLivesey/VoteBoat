@@ -1,0 +1,74 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: called `unwrap` on `saved` after checking its variant with `is_some`
+   --> examples/benchmark/shared_recovery.rs:136:20
+    |
+135 |         if images_returned && saved.is_some() {
+    |                               --------------- the check is happening here
+136 |             return saved.unwrap();
+    |                    ^^^^^^^^^^^^^^
+    |
+    = help: try using `match`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: items after a test module
+   --> examples/benchmark/offered.rs:446:1
+    |
+446 |   mod tests {
+    |   ^^^^^^^^^
+...
+635 | / fn failed_measurement<L: LogStore + Send + 'static>(
+636 | |     mut replicas: Vec<Replica<L>>,
+637 | |     clock: &Instant,
+638 | |     root: &Path,
+639 | |     error: Failure,
+640 | |     ledger: &Ledger,
+641 | | ) -> Result<(), Failure> {
+    | |________________________^
+...
+674 |   struct CompletedRun<'a> {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^
+...
+683 | / fn report_offered(
+684 | |     config: &RunConfig<'_>,
+685 | |     rate: usize,
+686 | |     run: CompletedRun<'_>,
+687 | | ) -> Result<(), Failure> {
+    | |________________________^
+...
+758 | / fn prepare_offered<L: LogStore + Send + 'static>(
+759 | |     replicas: &mut [Replica<L>],
+760 | |     clock: &Instant,
+761 | |     config: &RunConfig<'_>,
+762 | | ) -> Result<(Measurement, String), Failure> {
+    | |___________________________________________^
+...
+792 |   struct RecoveryCheck<'a> {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+799 | / fn verify_offered_recovery<L: LogStore + Send + 'static>(
+800 | |     replicas: &mut [Replica<L>],
+801 | |     clock: &Instant,
+802 | |     groups: usize,
+803 | |     maintenance: &Maintenance,
+804 | |     history: RecoveryCheck<'_>,
+805 | | ) -> Result<usize, Failure> {
+    | |___________________________^
+...
+840 | / fn write_bases(
+841 | |     root: &Path,
+842 | |     compacted_bases: &BTreeMap<(usize, GroupIdentity), u64>,
+843 | |     recovered_bases: &BTreeMap<(usize, GroupIdentity), u64>,
+844 | | ) -> Result<(), Failure> {
+    | |________________________^
+...
+859 |   fn prepare_maintenance(config: &RunConfig<'_>, horizon: u128) -> Result<Maintenance, Failure> {
+    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#items_after_test_module
+    = note: `-D clippy::items-after-test-module` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::items_after_test_module)]`
+    = help: move the items to before the test module was defined
+
+error: could not compile `voteboat` (example "native_benchmark" test) due to 2 previous errors

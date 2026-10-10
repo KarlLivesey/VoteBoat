@@ -125,6 +125,54 @@ batching/lane improvements remain required P7 work. No consensus protocol, defau
 changed. The native startup API now exposes the existing TimerConfig capability
 so embeddings can declare timing appropriate to their deployment.
 
+## Static local lanes
+
+The same public Node/native assembly can partition 1–32 groups across 1–4
+independent local lanes. Use a fresh run directory:
+
+```sh
+./target/release/examples/native_benchmark --lanes target/benchmark-runs/lanes-one tcp 64 8 4 1
+./target/release/examples/native_benchmark --lanes target/benchmark-runs/lanes-two tcp 64 8 4 2
+node validation/check-native-benchmark.mjs --storage target/benchmark-runs/lanes-two
+```
+
+Arguments after the directory/protocol are total operations, total window, total
+groups and lanes. Operations, groups and window must each be at least the lane
+count. The planner partitions all three totals and the total64-operation warm-up;
+it does not multiply offered work or concurrency. Each lane owns contiguous,
+disjoint concrete group IDs and three distinct store identities/directories.
+Operation IDs are local to their concrete group. Changing the lane assignment
+is not a supported file migration.
+
+One host thread drives each lane's three loopback replica owners. Each replica
+lane has one shared native WAL/worker, snapshot worker and peer endpoint, plus
+one dial worker for TCP. Groups within a lane share those resources. Thus two
+lanes mean two owner threads, six WAL workers, six snapshot workers and six peer
+endpoints; TCP adds six dial workers. This is a single-machine experiment with
+three logical replica hosts, not independent machines or failure domains.
+
+Every lane completes warm-up and quorum-read verification before the shared
+measurement start. Dispatch/completion timestamps use that common origin;
+latency begins immediately before each proposal, while elapsed throughput also
+includes any delay in waking a lane after the start. No lane starts post-run
+verification, output-file writes or recovery until all measured workloads finish.
+A lane awaiting a phase boundary continues polling its owners. The reported sum
+of lane maximum concurrency is an upper bound, not an observed simultaneous peak.
+
+Each lane verifies all replica values and quorum reads, drains and joins workers,
+reopens its actual files, checks historical retry receipts and verifies unchanged
+values before final joins. The coordinator joins every host thread. A failed
+lane invalidates the whole run, with retained files and a failure record instead
+of a success summary. Selected pre-start and partial-replica failures are tested;
+this is not exhaustive OS worker-creation failure coverage.
+
+Raw output includes the checked static plan, per-lane samples/storage traces and
+aggregate samples/summary. The independent checker validates assignment, total
+counts, per-group history, per-lane/global windows, timing arithmetic and native
+storage counters. A successful finite run proves those checks, not sustainable
+capacity. Shared physical storage can limit every lane; controlled comparisons,
+maintenance/load tests and the original fixed-p99 gate remain required.
+
 ## WAL barrier and host progress attribution
 
 The local WAL harness times the unchanged FileLogIo through the public JournalIo

@@ -1,0 +1,3 @@
+storage measured deltas: append_calls=144 units=145 commands=95 mean_units=1.007 append_ms=2.292 barriers=143 mean_appends_per_barrier=1.007 mean_units_per_barrier=1.007 barrier_ms=9289.501 sync_ms=3298.915 publish_ms=5989.107 histogram=1:143|2:1
+storage measured deltas: append_calls=143 units=145 commands=95 mean_units=1.014 append_ms=2.117 barriers=142 mean_appends_per_barrier=1.007 mean_units_per_barrier=1.014 barrier_ms=9490.066 sync_ms=3586.640 publish_ms=5952.910 histogram=1:141|2:2
+{"directory":"target/benchmark-runs/slice178/tcp-two","lanes":2,"groups":4,"count":64,"elapsed_ns":4119009379,"p99_ns":1075042194,"partitions":[[1,1,2],[2,3,2]]}

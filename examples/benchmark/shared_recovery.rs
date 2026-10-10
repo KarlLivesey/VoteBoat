@@ -77,6 +77,7 @@ impl Harness {
             clock: &self.clock,
             bootstraps: &self.bootstraps,
             addresses: &self.addresses,
+            lane: 1,
         }
         .open_replica_with_recovery(n, self.recovery)
         .unwrap()
@@ -131,8 +132,10 @@ fn abort_follower(mut replica: Replica<SharedLog>) -> BTreeMap<GroupIdentity, u6
             snapshots.worker.poll(64);
             images_returned = snapshots.worker.try_reclaim().unwrap().is_some();
         }
-        if images_returned && saved.is_some() {
-            return saved.unwrap();
+        if images_returned {
+            if let Some(saved) = saved.take() {
+                return saved;
+            }
         }
         assert!(
             Instant::now() < deadline,

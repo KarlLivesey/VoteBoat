@@ -1,0 +1,13 @@
+✔ validation/check-journal-timings.test.mjs (40.692737ms)
+✔ validation/check-lanes.test.mjs (40.887753ms)
+✔ validation/check-maintenance.test.mjs (44.649707ms)
+✔ validation/check-offered.test.mjs (39.179592ms)
+✔ validation/check-serial-gate.test.mjs (40.283458ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.985609

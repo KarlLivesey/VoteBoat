@@ -86,12 +86,12 @@ pub(super) fn retain<L: LogStore + Send + 'static>(
     state.sync_all()?;
     Ok(())
 }
-pub(super) fn cleanup<L: LogStore + Send + 'static>(
+pub(super) fn cleanup<L: LogStore + Send + 'static, T>(
     replicas: Vec<Replica<L>>,
     clock: &Instant,
     root: &Path,
     original: Failure,
-) -> Result<(), Failure> {
+) -> Result<T, Failure> {
     let cleanup = close(replicas, clock);
     let text = match &cleanup {
         Ok(()) => "workers_joined=true".into(),
@@ -146,7 +146,7 @@ mod tests {
             original.contains("DedupCapacity"),
             "unexpected failure: {original}"
         );
-        let cleanup = cleanup(replicas, &clock, &root, error);
+        let cleanup: Result<(), Failure> = cleanup(replicas, &clock, &root, error);
         assert_eq!(cleanup.unwrap_err().to_string(), original);
         let samples = std::fs::read_to_string(root.join("measurement-partial.csv")).unwrap();
         assert_eq!(samples.lines().count(), 2, "one receipt plus header");

@@ -442,196 +442,6 @@ fn checked_stage<T>(
     work.and_then(|value| cleanup.map(|()| value))
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    fn ticket(l: &Ledger, row: usize, sequence: u64) -> ClientTicket {
-        ClientTicket {
-            binding: ClientRouterBinding {
-                owner: RuntimeOwner {
-                    store: StoreBinding {
-                        identity: store(1),
-                        session: StoreSession::new(1).unwrap(),
-                    },
-                    lane: ExecutionLaneId::new(1).unwrap(),
-                    generation: RuntimeGeneration::new(1).unwrap(),
-                },
-                generation: ClientRouterGeneration::new(1).unwrap(),
-            },
-            sequence,
-            group: l.rows[row].group,
-            operation: OperationId::new(l.rows[row].operation as u128).unwrap(),
-        }
-    }
-    fn applied(ticket: ClientTicket, index: u64, value: i64) -> ClientOutcome<CounterReceipt> {
-        ClientOutcome::Applied {
-            position: ProposalPosition { index, term: 1 },
-            receipt: CounterReceipt {
-                operation: ticket.operation,
-                index,
-                outcome: CounterOutcome::Value(value),
-                duplicate: false,
-            },
-        }
-    }
-    fn warmup() -> Measurement {
-        Measurement {
-            elapsed: Duration::ZERO,
-            max_inflight: 0,
-            polls: PollTotals::default(),
-            samples: (1..=2)
-                .map(|g| Sample {
-                    group: group_id(g),
-                    operation: 62 + g as u128,
-                    submitted_ns: 0,
-                    completed_ns: 1,
-                    index: 33,
-                    value: 32,
-                })
-                .collect(),
-        }
-    }
-    #[test]
-    fn missed_schedule_does_not_shift_intended_start_or_drop_due_ids() {
-        assert!(validate(1, 0).is_err());
-        assert!(validate(301, 1).is_err());
-        assert!(validate(300, 1).is_ok());
-        let mut l = Ledger::new(3, 3, 1, 1);
-        assert_eq!(l.horizon(), 1_000_000_000);
-        assert!(l.due(0));
-        l.begin(0);
-        assert!(!l.due(333_333_332));
-        assert!(l.due(1_000_000_000));
-        let second = l.begin(1_000_000_000);
-        assert_eq!(l.rows[second].intended, 333_333_333);
-        assert!(l.due(1_000_000_000));
-        let third = l.begin(1_000_000_001);
-        assert_eq!(l.rows[third].intended, 666_666_666);
-        assert!(!l.due(u128::MAX));
-    }
-    #[test]
-    fn windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot() {
-        let mut l = Ledger::new(4, 4, 3, 2);
-        let a = l.begin(0);
-        let ta = ticket(&l, a, 1);
-        l.admit(a, 0, ta).unwrap();
-        let b = l.begin(250_000_000);
-        let tb = ticket(&l, b, 1);
-        l.admit(b, 1, tb).unwrap();
-        let c = l.begin(500_000_000);
-        let tc = ticket(&l, c, 2);
-        l.admit(c, 0, tc).unwrap();
-        assert!(l.full(group_id(1)));
-        assert!(l.full(group_id(2)));
-        let d = l.begin(750_000_000);
-        l.rows[d].status = "window_refused";
-        assert_eq!(l.max_pending, 3);
-        let mut stale = ta;
-        stale.binding.generation = ClientRouterGeneration::new(2).unwrap();
-        assert!(l
-            .finish(
-                0,
-                stale,
-                ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
-                800_000_000
-            )
-            .is_err());
-        assert_eq!(l.pending.len(), 3);
-        assert!(l
-            .finish(
-                2,
-                ta,
-                ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
-                800_000_000
-            )
-            .is_err());
-        l.finish(
-            0,
-            ta,
-            ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
-            800_000_000,
-        )
-        .unwrap();
-        assert_eq!(l.pending.len(), 2);
-        assert_eq!(l.count_status("unknown"), 1);
-        assert!(!l.full(group_id(1)));
-        assert!(!l.full(group_id(2)));
-        assert!(l.history(&warmup()).is_err());
-    }
-    #[test]
-    fn group_window_can_refuse_before_global_window_is_full() {
-        let mut l = Ledger::new(3, 3, 4, 2);
-        let a = l.begin(0);
-        let ta = ticket(&l, a, 1);
-        l.admit(a, 0, ta).unwrap();
-        let b = l.begin(1);
-        l.rows[b].status = "no_leader";
-        let c = l.begin(2);
-        let tc = ticket(&l, c, 2);
-        l.admit(c, 0, tc).unwrap();
-        assert!(l.full(group_id(1)));
-        assert!(!l.full(group_id(2)));
-        assert_eq!(l.pending.len(), 2);
-    }
-    #[test]
-    fn refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts() {
-        let mut l = Ledger::new(4, 4, 4, 2);
-        let a = l.begin(0);
-        let ta = ticket(&l, a, 1);
-        l.admit(a, 0, ta).unwrap();
-        let b = l.begin(1);
-        l.rows[b].status = "window_refused";
-        let c = l.begin(2);
-        let tc = ticket(&l, c, 2);
-        l.admit(c, 0, tc).unwrap();
-        let d = l.begin(3);
-        l.rows[d].status = "admission_refused";
-        // Arrival order differs from log order; history is checked by group/index.
-        l.finish(0, tc, applied(tc, 35, 34), 5).unwrap();
-        l.finish(0, ta, applied(ta, 34, 33), 6).unwrap();
-        let (values, last) = l.history(&warmup()).unwrap();
-        assert_eq!(values[&group_id(1)], 34);
-        assert_eq!(values[&group_id(2)], 32);
-        assert_eq!(last[&group_id(1)], 35);
-        assert_eq!(last[&group_id(2)], 33);
-        l.rows[c].value = 35;
-        assert!(l.history(&warmup()).is_err());
-    }
-    #[test]
-    fn no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known() {
-        let mut l = Ledger::new(2, 2, 1, 2);
-        let a = l.begin(0);
-        let ta = ticket(&l, a, 1);
-        l.admit(a, 0, ta).unwrap();
-        l.finish(
-            0,
-            ta,
-            ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader),
-            1,
-        )
-        .unwrap();
-        let b = l.begin(2);
-        l.rows[b].status = "no_leader";
-        let (values, _) = l.history(&warmup()).unwrap();
-        assert_eq!(values.values().sum::<i64>(), 64);
-        assert_eq!(percentile(&mut [], 99), "NA");
-        assert_eq!(percentile(&mut [1000, 5000, 3000], 99), "5.000");
-    }
-    #[test]
-    fn stage_failure_retains_both_work_and_cleanup_errors() {
-        let root =
-            std::env::temp_dir().join(format!("voteboat-offered-stage-{}", std::process::id()));
-        std::fs::create_dir(&root).unwrap();
-        let work: Result<(), Failure> = Err("work failed".into());
-        let cleanup: Result<(), Failure> = Err("cleanup failed".into());
-        assert!(checked_stage(&root, "test", work, cleanup).is_err());
-        let diagnostic = std::fs::read_to_string(root.join("failure.txt")).unwrap();
-        assert!(diagnostic.contains("work failed"));
-        assert!(diagnostic.contains("cleanup failed"));
-        std::fs::remove_dir_all(root).unwrap();
-    }
-}
-
 fn failed_measurement<L: LogStore + Send + 'static>(
     mut replicas: Vec<Replica<L>>,
     clock: &Instant,
@@ -865,4 +675,194 @@ fn prepare_maintenance(config: &RunConfig<'_>, horizon: u128) -> Result<Maintena
         )?;
     }
     Ok(maintenance)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn ticket(l: &Ledger, row: usize, sequence: u64) -> ClientTicket {
+        ClientTicket {
+            binding: ClientRouterBinding {
+                owner: RuntimeOwner {
+                    store: StoreBinding {
+                        identity: store(1),
+                        session: StoreSession::new(1).unwrap(),
+                    },
+                    lane: ExecutionLaneId::new(1).unwrap(),
+                    generation: RuntimeGeneration::new(1).unwrap(),
+                },
+                generation: ClientRouterGeneration::new(1).unwrap(),
+            },
+            sequence,
+            group: l.rows[row].group,
+            operation: OperationId::new(l.rows[row].operation as u128).unwrap(),
+        }
+    }
+    fn applied(ticket: ClientTicket, index: u64, value: i64) -> ClientOutcome<CounterReceipt> {
+        ClientOutcome::Applied {
+            position: ProposalPosition { index, term: 1 },
+            receipt: CounterReceipt {
+                operation: ticket.operation,
+                index,
+                outcome: CounterOutcome::Value(value),
+                duplicate: false,
+            },
+        }
+    }
+    fn warmup() -> Measurement {
+        Measurement {
+            elapsed: Duration::ZERO,
+            max_inflight: 0,
+            polls: PollTotals::default(),
+            samples: (1..=2)
+                .map(|g| Sample {
+                    group: group_id(g),
+                    operation: 62 + g as u128,
+                    submitted_ns: 0,
+                    completed_ns: 1,
+                    index: 33,
+                    value: 32,
+                })
+                .collect(),
+        }
+    }
+    #[test]
+    fn missed_schedule_does_not_shift_intended_start_or_drop_due_ids() {
+        assert!(validate(1, 0).is_err());
+        assert!(validate(301, 1).is_err());
+        assert!(validate(300, 1).is_ok());
+        let mut l = Ledger::new(3, 3, 1, 1);
+        assert_eq!(l.horizon(), 1_000_000_000);
+        assert!(l.due(0));
+        l.begin(0);
+        assert!(!l.due(333_333_332));
+        assert!(l.due(1_000_000_000));
+        let second = l.begin(1_000_000_000);
+        assert_eq!(l.rows[second].intended, 333_333_333);
+        assert!(l.due(1_000_000_000));
+        let third = l.begin(1_000_000_001);
+        assert_eq!(l.rows[third].intended, 666_666_666);
+        assert!(!l.due(u128::MAX));
+    }
+    #[test]
+    fn windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot() {
+        let mut l = Ledger::new(4, 4, 3, 2);
+        let a = l.begin(0);
+        let ta = ticket(&l, a, 1);
+        l.admit(a, 0, ta).unwrap();
+        let b = l.begin(250_000_000);
+        let tb = ticket(&l, b, 1);
+        l.admit(b, 1, tb).unwrap();
+        let c = l.begin(500_000_000);
+        let tc = ticket(&l, c, 2);
+        l.admit(c, 0, tc).unwrap();
+        assert!(l.full(group_id(1)));
+        assert!(l.full(group_id(2)));
+        let d = l.begin(750_000_000);
+        l.rows[d].status = "window_refused";
+        assert_eq!(l.max_pending, 3);
+        let mut stale = ta;
+        stale.binding.generation = ClientRouterGeneration::new(2).unwrap();
+        assert!(l
+            .finish(
+                0,
+                stale,
+                ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
+                800_000_000
+            )
+            .is_err());
+        assert_eq!(l.pending.len(), 3);
+        assert!(l
+            .finish(
+                2,
+                ta,
+                ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
+                800_000_000
+            )
+            .is_err());
+        l.finish(
+            0,
+            ta,
+            ClientOutcome::Unknown(ClientUnknown::LeadershipChanged),
+            800_000_000,
+        )
+        .unwrap();
+        assert_eq!(l.pending.len(), 2);
+        assert_eq!(l.count_status("unknown"), 1);
+        assert!(!l.full(group_id(1)));
+        assert!(!l.full(group_id(2)));
+        assert!(l.history(&warmup()).is_err());
+    }
+    #[test]
+    fn group_window_can_refuse_before_global_window_is_full() {
+        let mut l = Ledger::new(3, 3, 4, 2);
+        let a = l.begin(0);
+        let ta = ticket(&l, a, 1);
+        l.admit(a, 0, ta).unwrap();
+        let b = l.begin(1);
+        l.rows[b].status = "no_leader";
+        let c = l.begin(2);
+        let tc = ticket(&l, c, 2);
+        l.admit(c, 0, tc).unwrap();
+        assert!(l.full(group_id(1)));
+        assert!(!l.full(group_id(2)));
+        assert_eq!(l.pending.len(), 2);
+    }
+    #[test]
+    fn refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts() {
+        let mut l = Ledger::new(4, 4, 4, 2);
+        let a = l.begin(0);
+        let ta = ticket(&l, a, 1);
+        l.admit(a, 0, ta).unwrap();
+        let b = l.begin(1);
+        l.rows[b].status = "window_refused";
+        let c = l.begin(2);
+        let tc = ticket(&l, c, 2);
+        l.admit(c, 0, tc).unwrap();
+        let d = l.begin(3);
+        l.rows[d].status = "admission_refused";
+        // Arrival order differs from log order; history is checked by group/index.
+        l.finish(0, tc, applied(tc, 35, 34), 5).unwrap();
+        l.finish(0, ta, applied(ta, 34, 33), 6).unwrap();
+        let (values, last) = l.history(&warmup()).unwrap();
+        assert_eq!(values[&group_id(1)], 34);
+        assert_eq!(values[&group_id(2)], 32);
+        assert_eq!(last[&group_id(1)], 35);
+        assert_eq!(last[&group_id(2)], 33);
+        l.rows[c].value = 35;
+        assert!(l.history(&warmup()).is_err());
+    }
+    #[test]
+    fn no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known() {
+        let mut l = Ledger::new(2, 2, 1, 2);
+        let a = l.begin(0);
+        let ta = ticket(&l, a, 1);
+        l.admit(a, 0, ta).unwrap();
+        l.finish(
+            0,
+            ta,
+            ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader),
+            1,
+        )
+        .unwrap();
+        let b = l.begin(2);
+        l.rows[b].status = "no_leader";
+        let (values, _) = l.history(&warmup()).unwrap();
+        assert_eq!(values.values().sum::<i64>(), 64);
+        assert_eq!(percentile(&mut [], 99), "NA");
+        assert_eq!(percentile(&mut [1000, 5000, 3000], 99), "5.000");
+    }
+    #[test]
+    fn stage_failure_retains_both_work_and_cleanup_errors() {
+        let root =
+            std::env::temp_dir().join(format!("voteboat-offered-stage-{}", std::process::id()));
+        std::fs::create_dir(&root).unwrap();
+        let work: Result<(), Failure> = Err("work failed".into());
+        let cleanup: Result<(), Failure> = Err("cleanup failed".into());
+        assert!(checked_stage(&root, "test", work, cleanup).is_err());
+        let diagnostic = std::fs::read_to_string(root.join("failure.txt")).unwrap();
+        assert!(diagnostic.contains("work failed"));
+        assert!(diagnostic.contains("cleanup failed"));
+        std::fs::remove_dir_all(root).unwrap();
+    }
 }

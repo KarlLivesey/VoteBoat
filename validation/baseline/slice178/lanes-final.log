@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.75s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 6 tests
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+test lanes::tests::quic_two_lanes_share_groups_and_recover ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 22 filtered out; finished in 0.73s
+

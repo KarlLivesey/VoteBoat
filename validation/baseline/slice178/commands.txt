@@ -1,0 +1,35 @@
+Base: 432a6e966b7315989e06ab6e975792c5ec5f2bd2, plus source-sha256.txt.
+
+cargo +stable test --locked --offline --all-features --example native_benchmark
+  28 passed (includes existing recovery/maintenance and six lane tests).
+cargo +stable test --locked --offline --all-features --example native_benchmark lanes::
+  Final six lane tests passed after command-fanout refinement.
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+node --test validation/check-lanes.test.mjs
+node --test validation/check-lanes.test.mjs validation/check-offered.test.mjs validation/check-maintenance.test.mjs validation/check-journal-timings.test.mjs validation/check-serial-gate.test.mjs
+node validation/check-native-benchmark.mjs validation/performance/slice138/tcp-reference
+  Historical raw sample arithmetic check; not a new benchmark run.
+Release commands and raw results: ../../performance/slice178/README.md.
+
+Initial test compile used nonexistent HardState.commit_index; corrected to GroupLog.commit_index.
+A failure fixture precreated an empty directory, which FileLogIo validly accepts.
+Changed fixture to a file occupying the replica directory; cleanup test then passes.
+No lint threshold, timeout or production correctness contract was relaxed.
+
+Background full suite: session42300, cargo1526695/routed1580417 confirmed live.
+Snapshot baseline175-progress.log follows the original deleted output descriptor;
+not a complete passing result and not compiled from current178 source.
+CI432a6e9: lint pass, Ubuntu failure, macOS pending at captured status.
+Ubuntu failures in ci-ubuntu.log remain open for the next slice, not fixed here.
+
+Enabled test=true for native_benchmark so ordinary cargo test/CI and all-target
+Clippy include this target. Initial expanded Clippy found unnecessary_unwrap
+and items_after_test_module in existing example tests. Corrected both without
+suppression; final Clippy logs cover the expanded target set.
+Final full benchmark suite rerun: example-final.log.
+Release runs preceded these test-only changes; their selected source hashes
+are retained in release-source-sha256.txt. Production benchmark behavior is unchanged.

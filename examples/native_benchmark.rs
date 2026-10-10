@@ -36,6 +36,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "benchmark/lanes.rs"]
+mod lanes;
 #[path = "benchmark/shared.rs"]
 mod shared;
 type Failure = Box<dyn std::error::Error>;
@@ -370,6 +372,15 @@ fn workload<L: LogStore + Send + 'static>(
     clock: &Instant,
     spec: Workload<'_>,
 ) -> Result<Measurement, Failure> {
+    workload_in_partition(replicas, clock, spec, 0, Instant::now())
+}
+fn workload_in_partition<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    spec: Workload<'_>,
+    offset: usize,
+    start: Instant,
+) -> Result<Measurement, Failure> {
     let Workload {
         first,
         count,
@@ -377,7 +388,6 @@ fn workload<L: LogStore + Send + 'static>(
         groups,
         diagnostic,
     } = spec;
-    let start = Instant::now();
     let mut sent = 0;
     let mut pending = BTreeMap::new();
     let mut group_pending = BTreeMap::<GroupIdentity, usize>::new();
@@ -388,7 +398,7 @@ fn workload<L: LogStore + Send + 'static>(
         while sent < count && pending.len() < window {
             let operation = (first + sent) as u128;
             let submitted = start.elapsed().as_nanos();
-            let group = operation_group(first + sent, groups);
+            let group = group_id(offset + (first + sent - 1) % groups + 1);
             if group_pending.get(&group).copied().unwrap_or(0) >= window.div_ceil(groups) {
                 break;
             }
@@ -526,7 +536,21 @@ fn retry_once<L: LogStore + Send + 'static>(
     expected: i64,
     groups: usize,
 ) -> Result<bool, Failure> {
-    let group = operation_group(operation, groups);
+    retry_group_once(
+        replicas,
+        clock,
+        operation,
+        expected,
+        operation_group(operation, groups),
+    )
+}
+fn retry_group_once<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    operation: usize,
+    expected: i64,
+    group: GroupIdentity,
+) -> Result<bool, Failure> {
     let replica = leader(replicas, group)?;
     let ticket = replicas[replica]
         .propose(ClientRequest {
@@ -626,6 +650,9 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+    if args.first().is_some_and(|arg| arg == "--lanes") {
+        return lanes::run(&args[1..]);
+    }
     let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
     if journal_timings {
         args.pop();

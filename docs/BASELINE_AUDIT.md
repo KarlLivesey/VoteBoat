@@ -1,8 +1,27 @@
 # Baseline audits
 
-Latest implementation follow-up: [slice177](#slice177--quorum-explanations-and-verified-historical-baseline).
+Latest implementation follow-up: [slice178](#slice178--static-local-lanes-and-current-platform-failures).
 Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
 Earlier reviews below retain their original revision and scope.
+
+## Slice178 — static local lanes and current platform failures
+
+The public Node assembly now has an executable static multi-lane benchmark:
+1–4 host owner threads, disjoint group/store identities and independent bounded
+native resources per replica lane. Six focused tests, the28-test benchmark suite
+and three release file-recovery/retry runs exercise it. The total client window
+and warm-up are partitioned. Raw result checks reject overlapping groups, lost
+operations, excess concurrency and incorrect rates/latency. This does not add
+automatic live placement, independent machines or a performance improvement.
+Its unit-test target is now enabled in ordinary Cargo test/CI and all-target
+Clippy; the two existing test-only diagnostics it exposed were corrected.
+The busy-host release runs exceed the original250ms p99 budget.
+
+The432a6e9 Ubuntu job has three concrete service failures: a configuration command
+sent after leadership changed, a read with LeadershipChanged, and a read with
+ReadNotReady. They remain the next corrective boundary. macOS and baseline175
+are pending at capture. Historical baseline159 success remains scoped to its
+original compiled source. No complete P0–P7 or current-platform claim is made.
 
 ## Slice177 — quorum explanations and verified historical baseline
 

@@ -15,7 +15,7 @@
 //! Benchmark assembly: one WAL, snapshot worker and peer endpoint per replica.
 use super::observe::{ObservedIo, ObservedLog, Trace};
 use super::*;
-type SharedLog = ObservedLog<NativeLogStore<ObservedIo<FileLogIo>>>;
+pub(super) type SharedLog = ObservedLog<NativeLogStore<ObservedIo<FileLogIo>>>;
 use voteboat::{
     connect::*,
     dial::*,
@@ -39,6 +39,46 @@ pub(super) fn open(
     clock: &Instant,
     groups: usize,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+    open_partition(
+        root,
+        mode,
+        protocol,
+        capacity,
+        clock,
+        Partition {
+            offset: 0,
+            groups,
+            lane: 1,
+        },
+    )
+}
+
+#[derive(Clone, Copy)]
+pub(super) struct Partition {
+    pub offset: usize,
+    pub groups: usize,
+    pub lane: u64,
+}
+
+pub(super) fn open_partition(
+    root: &Path,
+    mode: NativeOpenMode,
+    protocol: NativePeerProtocol,
+    capacity: usize,
+    clock: &Instant,
+    partition: Partition,
+) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
+    if partition.groups == 0
+        || partition.groups > 32
+        || partition.lane == 0
+        || partition.lane > 4
+        || partition
+            .offset
+            .checked_add(partition.groups)
+            .is_none_or(|end| end > 32)
+    {
+        return Err("invalid lane partition".into());
+    }
     // Hold every endpoint reservation until all addresses have been selected.
     let reservations = (0..3)
         .map(|_| {
@@ -58,12 +98,14 @@ pub(super) fn open(
         Tree::Majority((1..=3).map(|n| Tree::Voter(node(n))).collect()),
         Limits::default(),
     ))?;
-    let bootstraps = (1..=groups)
+    let bootstraps = (partition.offset + 1..=partition.offset + partition.groups)
         .map(|g| Bootstrap {
             group: group_id(g),
             configuration: ConfigurationId::new(1).unwrap(),
             policy: policy.clone(),
-            voter_stores: (1..=3).map(|n| (node(n), store(n))).collect(),
+            voter_stores: (1..=3)
+                .map(|n| (node(n), store((partition.lane - 1) * 3 + n)))
+                .collect(),
         })
         .collect::<Vec<_>>();
     drop(reservations);
@@ -78,8 +120,12 @@ pub(super) fn open(
             clock,
             bootstraps: &bootstraps,
             addresses: &addresses,
+            lane: partition.lane,
         };
-        let (replica, trace) = setup.open_replica(n)?;
+        let (replica, trace) = match setup.open_replica(n) {
+            Ok(opened) => opened,
+            Err(error) => return failure::cleanup(replicas, clock, root, error),
+        };
         replicas.push(replica);
         traces.push(trace);
     }
@@ -88,7 +134,7 @@ pub(super) fn open(
 
 fn open_log(
     directory: &Path,
-    n: u64,
+    identity: StoreIdentity,
     create: bool,
     bootstraps: &[Bootstrap],
     trace: &Trace,
@@ -100,7 +146,7 @@ fn open_log(
                     inner: FileLogIo::create(directory)?,
                     trace: trace.clone(),
                 },
-                store(n),
+                identity,
                 LogLimits::default(),
             ))?,
             trace: trace.clone(),
@@ -123,7 +169,7 @@ fn open_log(
                     inner: FileLogIo::open(directory)?,
                     trace: trace.clone(),
                 },
-                store(n),
+                identity,
                 LogLimits::default(),
             )?,
             trace: trace.clone(),
@@ -153,7 +199,7 @@ fn recover_groups(
         }
         let path = directory.join(format!("snapshot-{}", bootstrap.group.id.get()));
         let identity = SnapshotIdentity {
-            store: store(n),
+            store: log.binding().identity,
             group: bootstrap.group,
         };
         let mut snap = if create {
@@ -348,6 +394,7 @@ struct ClusterSetup<'a> {
     clock: &'a Instant,
     bootstraps: &'a [Bootstrap],
     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
+    lane: u64,
 }
 impl ClusterSetup<'_> {
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
@@ -366,11 +413,13 @@ impl ClusterSetup<'_> {
             clock,
             bootstraps,
             addresses,
+            lane,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
         let trace = Trace::default();
-        let log = open_log(&directory, n, create, bootstraps, &trace)?;
+        let identity = bootstraps.first().ok_or("empty lane")?.voter_stores[&node(n)];
+        let log = open_log(&directory, identity, create, bootstraps, &trace)?;
         let RecoveredGroups {
             cores,
             applications,
@@ -378,7 +427,7 @@ impl ClusterSetup<'_> {
         } = recover_groups(&directory, n, create, bootstraps, capacity, &log)?;
         let owner_id = RuntimeOwner {
             store: log.binding(),
-            lane: ExecutionLaneId::new(1).unwrap(),
+            lane: ExecutionLaneId::new(lane).ok_or("invalid lane identity")?,
             generation: RuntimeGeneration::new(1).unwrap(),
         };
         let first = owner_id

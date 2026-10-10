@@ -1,0 +1,3 @@
+storage measured deltas: append_calls=144 units=146 commands=96 mean_units=1.014 append_ms=2.688 barriers=144 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.014 barrier_ms=12004.184 sync_ms=4482.709 publish_ms=7519.262 histogram=1:142|2:2
+storage measured deltas: append_calls=144 units=146 commands=96 mean_units=1.014 append_ms=2.837 barriers=143 mean_appends_per_barrier=1.007 mean_units_per_barrier=1.014 barrier_ms=11902.572 sync_ms=3921.188 publish_ms=7979.151 histogram=1:142|2:2
+{"directory":"target/benchmark-runs/slice178/quic-two","lanes":2,"groups":4,"count":64,"elapsed_ns":5109380515,"p99_ns":1058867266,"partitions":[[1,1,2],[2,3,2]]}

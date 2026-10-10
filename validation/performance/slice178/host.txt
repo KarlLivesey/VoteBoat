@@ -1,0 +1,13 @@
+Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux
+/home/karllivesey/Documents/ChatGPT/VoteBoat /dev/nvme0n1p2[/@home/karllivesey/Documents/ChatGPT/VoteBoat] btrfs rw,nosuid,nodev,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home
+               total        used        free      shared  buff/cache   available
+Mem:     64957030400 18010075136 24371212288   211386368 22918541312 46946955264
+Swap:    64956133376 10505719808 54450413568
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+rustc 1.98.1 (48a229cea 2026-09-01)
+binary: rustc
+commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985
+commit-date: 2026-09-01
+host: x86_64-unknown-linux-gnu
+release: 1.98.1
+LLVM version: 22.1.8

@@ -100,9 +100,39 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: peer closure recovery175 | Keep a healthy service running when a peer closes between poll and send admission; advances P1/C06 and platform validation. | Existing transport rejection ownership, roster backoff and connection generations. | Reproduced failure, exact-ticket retry after reconnect, unrelated-peer progress, invalid-binding refusal and all50 service histories. macOS execution of this revision and the earlier checkpoint timeout remain separate open checks. |
 | Completed: bounded duration diagnostics176 | Distinguish service poll cost and connection waiting; advances P7/C19. | Existing RuntimeOwner, host clocks and post-call observer contract. | Host/native ownership, clock, overflow and bucket checks; TCP/QUIC interrupted/completed connections, authenticated export and reset on restart. All52 service histories pass. No benchmark improvement inferred. |
 | Completed: quorum explanations177 | Explain unsatisfied recursive branches without conflating hypothetical IDs with live acknowledgements; advances P3/P4 operator support. | Validated Policy/JointPolicy and accepted membership inspection. | All512 nine-voter sets, weighted/joint branch evidence and bounded authorized TCP/QUIC pages; historical baseline159 exit0 recorded with its pre160 scope. |
-| Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
+| Parallel: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
+| Completed: static local lane composition178 | Exercise real independent local owners/stores using the public Node assembly; advances P2/P7. | Shared native benchmark, bounded static assignments, common phase boundaries. | Six lane tests and all28 benchmark tests; TCP/QUIC file reopen/retry checks; independent raw/window/storage checks. Finite release runs are not a sustainable improvement claim. |
+| Current: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Reproduce or inject the observed leadership/readiness changes, preserve identical write/configuration requests, reject unrelated errors and pass the affected local service histories. |
 | Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+
+### Slice178 schema plan — real bounded local lane composition
+
+P7 explicitly requires multiple local lanes. The current benchmark owns one
+shared lane per replica and cannot test independent lane resources. Extend that
+same public Node/from_parts assembly with a bounded static partition: disjoint
+concrete group IDs, distinct store identities/directories and explicit execution
+lane IDs. One host thread drives each lane's three loopback replica owners; each
+replica lane shares its own WAL, snapshot worker and endpoint across its groups.
+This is a local composition harness, not automatic live placement or migration.
+
+Each worker has a bounded one-command start/abort channel. All workers finish
+warm-up before one shared measurement start. Partition the total window and
+operation count rather than silently multiplying load by lane count. Retain each
+lane's samples and storage attribution; publish aggregate success only after all
+lanes verify every replica, quorum reads, close/join, reopen and exact retries.
+On preparation failure abort prepared peers and join every started host thread;
+never delete retained stores or substitute a successful partial run. Groups keep
+one ordered log and one authoritative local store; no core protocol, persistent
+format, durability token or dynamic generation is added.
+
+Acceptance: checked configuration bounds and disjoint assignments, TCP and QUIC
+multi-group/two-lane creation/recovery, retained diagnostics on one lane's startup
+failure, and zero formatting/Clippy diagnostics. Report actual thread/store counts
+and timing boundaries. No sustainable throughput or original fixed-p99 claim is
+inferred from these finite correctness checks. Next: controlled original P7
+measurements; then audit-selected combined membership/lifecycle failures, while
+the existing full baseline and platform jobs continue independently.
 
 ### Slice177 schema plan — quorum explanations and recovered validation output
 
@@ -16371,3 +16401,41 @@ The full scope is unchanged: baseline175 and platform jobs are not declared
 complete; P7's fixed-p99/sustainable improvement and wider P0–P7 acceptance remain.
 The linked plan continues with actual baseline/platform outcomes, then measured
 performance and combined membership/lifecycle fault gates.
+
+
+## Slice178 — bounded static local execution lanes
+
+The native benchmark now composes 1–4 lane owners on independent host threads,
+with disjoint group IDs, distinct store identities and separate native WAL,
+snapshot and endpoint resources per replica lane. Multiple groups still share
+each lane's resources. Total64 warm-up operations, measured operations and window
+are partitioned, not multiplied. Bounded start/verification handshakes preserve a
+common measurement boundary; every successful lane verifies quorum reads,
+closes/joins, reopens actual files and verifies historical retries. Failed lanes
+invalidate the aggregate, and selected prepared/partial-replica failures join
+previously started owners. The benchmark test target is now enabled for ordinary Cargo test/CI and
+all-target Clippy runs; two newly exposed test-only lints were corrected.
+No production core/protocol, persistent format or provider seam changed; all composition uses existing public contracts.
+
+Actual Linux checks: all28 native-benchmark tests passed; the final six lane
+checks passed after the last command-fanout refinement. Both strict Clippy
+profiles and formatting have zero diagnostics. The independent lane checker has
+seven positive/negative cases; existing checker scripts and a historical serial
+sample remain valid after storage-check extraction. Documentation and inventory
+checks are retained. See validation/baseline/slice178 and
+validation/performance/slice178 for exact commands, hashes and raw results.
+
+Three finite release runs use64 measured operations, four groups, window8 and
+one TCP lane / two TCP lanes / two QUIC lanes. All pass replicated value, file
+reopen, retry and worker-join checks. They ran while the older full suite remained
+active on the same host; they are not controlled capacity measurements. TCP p99
+was706.891026ms for one lane and1075.042194ms for two. QUIC two-lane p99 was
+1058.867266ms. No original250ms serial gate, sustainable throughput gain or
+independent-host scalability is claimed. Live assignment/migration is not added.
+
+The432a6e9 Ubuntu CI job failed three service histories on NOT_LEADER,
+Unavailable(LeadershipChanged) and NotRead(ReadNotReady). The raw log is retained;
+these failures are not declared fixed by the lane work. The next slice addresses
+those exact authority races with unchanged operation identities. At capture,
+macOS and the original baseline175 process still run. Their pending output is
+not final validation. The full P0–P7 scope remains active.
