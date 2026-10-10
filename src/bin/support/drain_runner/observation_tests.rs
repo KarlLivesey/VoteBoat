@@ -4,6 +4,44 @@ use super::{recovery_tests::*, *};
 use std::sync::mpsc;
 
 #[test]
+fn uncertain_admission_preserves_actual_source_refusal_without_advancing() {
+    let (mut runner, listener, active, root) = fixture();
+    let remaining = runner.remaining;
+    let deadline = runner.deadline;
+    let (stop, stopped) = mpsc::channel();
+    let refusal =
+        "ERR no matching durable local drain; retry original drain-node if outcome was unknown\n";
+    let server = std::thread::spawn(move || {
+        let start = Instant::now();
+        let mut commands = Vec::new();
+        for (expected, reply) in [
+            ("drain-node 1 2\n", "UNKNOWN original drain outcome\n"),
+            ("drain-status 1 2\n", refusal),
+        ] {
+            let mut channel = accept(&listener, &stopped).unwrap();
+            let command = request(&mut channel, &active, start);
+            assert_eq!(command, expected);
+            commands.push(command);
+            respond(&mut channel, &active, start, reply);
+        }
+        assert!(
+            accept(&listener, &stopped).is_none(),
+            "unexpected request after refusal"
+        );
+        commands
+    });
+    let error = runner.execute().unwrap_err().to_string();
+    let _ = stop.send(());
+    let commands = server.join().unwrap();
+    std::fs::remove_dir_all(root).unwrap();
+    assert_eq!(commands, ["drain-node 1 2\n", "drain-status 1 2\n"]);
+    assert_eq!(runner.remaining, remaining - 2);
+    assert_eq!(runner.deadline, deadline);
+    assert!(error.contains(&format!("{refusal:?}")), "{error}");
+    assert!(!error.contains("different drain identity"), "{error}");
+}
+
+#[test]
 fn observation_retry_refuses_authentication_failure_and_invalid_transport_data() {
     for reason in [
         "authentication deadline expired",

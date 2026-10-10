@@ -1,0 +1,14 @@
+docs/BASELINE_ACCEPTANCE.md: OK
+docs/IMPLEMENTATION.md: OK
+src/bin/support/drain_runner.rs: OK
+src/bin/support/drain_runner/observation_tests.rs: OK
+tests/counter_service.rs: OK
+validation/REPORT.md: OK
+validation/baseline/slice210g/README.md: OK
+validation/baseline/slice210g/before.log: OK
+validation/baseline/slice210g/checks.log: OK
+validation/baseline/slice210g/ci-current-macos.log: OK
+validation/baseline/slice210g/ci-current.json: OK
+validation/baseline/slice210g/runner-all.log: OK
+validation/baseline/slice210g/runner-default.log: OK
+validation/baseline/slice210g/runner-service.log: OK

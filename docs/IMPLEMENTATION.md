@@ -205,6 +205,17 @@ Ubuntu run has156 passes/2 failures: an exact authenticated configuration read
 interruption and unresolved original drain admission. Neither is a successful
 operation. The source response behind the latter needs cause-specific evidence;
 do not infer a changed identity from the runner's generic parser error.
+Implemented210g reproduces that generic parser diagnostic over an authenticated
+channel, then preserves escaped non-OK source replies without permitting further
+resume/configuration/stop requests. All19 selected runner tests and9 native
+single/shared-group runner histories pass; formatting/four strict lints stay
+clean. This exposes refusal evidence, not a correction of the unknown CI cause.
+The matching56245bb macOS run has now completed147 pass/11 fail, with ten QUIC
+histories and one TCP configuration authenticated-read interruption. Its raw log
+is retained separately from the preceding143/13 run; supported-platform
+acceptance remains open. Next within the current operator deliverable, use
+the preserved source refusal and exact administrative uncertainty to select a
+cause-specific correction; the linked combined lifecycle and codec work remain.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -226,6 +237,35 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210g schema plan — preserve the actual drain admission refusal
+
+Current56245bb Ubuntu reports UNKNOWN initial drain admission: source replied
+with a different drain identity. identity() uses that message for every non-OK
+source reply, hiding whether the source refused authorization, lacked a durable
+local record or returned another error. This prevents a cause-specific fix.
+Improve that existing failure path before changing retry/admission behavior.
+
+Keep Runner's source, sequence, operation, request budget and absolute deadline.
+A complete non-OK observation still fails admission and cannot permit resume,
+configuration or shutdown; return its escaped original text in the error.
+Foreign successful identities retain their existing mismatch refusal. No new
+effect, state, provider interface, durable evidence or automatic write retry.
+The diagnostic is caller-visible failure text, bounded by the existing reply
+limit; escaped rendering preserves a single diagnostic line.
+
+Add an authenticated native-channel script: original drain-node is uncertain,
+then the exact bound drain-status returns the production no-matching-durable
+record refusal. Require that exact refusal in the returned diagnostic, only two
+original-identity requests, unchanged deadline, consumed budget and no later
+resume/configuration/stop request. The old implementation must fail this check.
+Also check non-OK and foreign/malformed successful identities remain terminal.
+Run the selected runner/command tests and zero formatting/four strict lints.
+This diagnostic is necessary for the current usable operator acceptance
+milestone; it does not fix or establish the cause of the actual CI drain failure.
+Use this evidence to select the admission correction within the current
+deliverable. The next two deliverables remain combined P4/P6 recovery and bounded
+malformed codecs, linked to P0/P1 acceptance.
 
 ### Slice210f schema plan — original receipts after sampled authority loss
 

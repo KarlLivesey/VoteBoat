@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210g preserves the actual escaped non-OK drain source observation instead
+of incorrectly calling it a changed identity. The authenticated regression fails
+before correction and checks original commands, consumed budget, unchanged
+deadline and no further actions. All19 selected runner tests and9 native
+single/shared-group runner histories pass with strict checks clean. No retry,
+admission, quorum or durability behavior changes. The terminal56245bb macOS run
+has147 passes/11 failures, including ten QUIC histories and one TCP configuration
+interruption; Ubuntu156/2 remains explicit. Diagnostic evidence selects further
+operator investigation without closing platform or combined-fault acceptance.
+
 Slice210f corrects the TCP quorum-loss fixture's sampled-authority assumption.
 Forced acknowledged-leader loss fails its old direct observation; existing
 bounded caller retries preserve original operations and exact duplicate receipts

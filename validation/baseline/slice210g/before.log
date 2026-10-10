@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.62s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 1 test
+test drain_runner::observation_tests::uncertain_admission_preserves_actual_source_refusal_without_advancing ... FAILED
+
+failures:
+
+---- drain_runner::observation_tests::uncertain_admission_preserves_actual_source_refusal_without_advancing stdout ----
+
+thread 'drain_runner::observation_tests::uncertain_admission_preserves_actual_source_refusal_without_advancing' (505043) panicked at src/bin/support/drain_runner/observation_tests.rs:36:5:
+UNKNOWN initial drain admission: source replied with a different drain identity; rerun the same sequence and operation
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    drain_runner::observation_tests::uncertain_admission_preserves_actual_source_refusal_without_advancing
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

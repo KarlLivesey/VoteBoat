@@ -1,5 +1,14 @@
 # Validation report — slice 35
 
+Drain admission diagnostics: [slice210g](baseline/slice210g/README.md). An
+authenticated original-admission script fails on the old generic identity
+message. The corrected failure preserves the actual escaped source refusal,
+consumes only its original two requests and cannot authorize further actions.
+All19 selected runner tests and9 native single/shared-group runner histories
+pass; formatting/four strict lint profiles remain clean. The current56245bb
+macOS job completes147 pass/11 fail; this diagnostic is not a fix for its ten
+QUIC histories or TCP configuration interruption. Operator acceptance is open.
+
 Sampled-authority recovery: [slice210f](baseline/slice210f/README.md). Forced
 acknowledged-leader loss fails the old TCP fixture observation path. Existing
 caller-owned retries retain exact original write receipts, cold recovery and

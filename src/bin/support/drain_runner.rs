@@ -84,8 +84,10 @@ fn field<'a>(text: &'a str, name: &str) -> Result<&'a str, Failure> {
     Ok(value)
 }
 fn identity(text: &str, sequence: u64, operation: u128) -> Result<(), Failure> {
-    if !text.starts_with("OK ")
-        || field(text, "sequence")?.parse::<u64>()? != sequence
+    if !text.starts_with("OK ") {
+        return Err(format!("source drain observation unsuccessful: {text:?}").into());
+    }
+    if field(text, "sequence")?.parse::<u64>()? != sequence
         || field(text, "operation")?.parse::<u128>()? != operation
     {
         return Err("source replied with a different drain identity".into());
