@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 
 // A bounded peer that either answers one command or waits for the caller to
 // close. None also models a stalled TLS handshake after its principal selector.
-fn peer(
+pub(super) fn peer(
     listener: TcpListener,
     reply: Option<&'static [u8]>,
 ) -> std::thread::JoinHandle<Option<Vec<u8>>> {
@@ -23,6 +23,8 @@ fn peer(
             }
             std::thread::park_timeout(Duration::from_millis(1));
         };
+        // Own one accepted connection; further callers must not enter a backlog.
+        drop(listener);
         stream.set_nonblocking(false).unwrap();
         stream
             .set_read_timeout(Some(Duration::from_secs(12)))

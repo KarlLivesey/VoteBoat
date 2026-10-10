@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+error[E0521]: borrowed data escapes outside of closure
+  --> tests/counter_service/write_recovery/authentication.rs:35:13
+   |
+30 |     let mut calls = Vec::new();
+   |         --------- `calls` declared here, outside of the closure body
+...
+34 |         |words| {
+   |          ----- `words` is a reference that is only valid in the closure body
+35 |             calls.push(words.to_vec());
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ `words` escapes the closure body here
+   |
+   = note: requirement occurs because of a mutable reference to `Vec<Vec<&str>>`
+   = note: mutable references are invariant over their type parameter
+   = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance
+
+For more information about this error, try `rustc --explain E0521`.
+error: could not compile `voteboat` (test "counter_service") due to 1 previous error

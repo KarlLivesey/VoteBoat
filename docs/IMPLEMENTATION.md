@@ -1107,7 +1107,7 @@ Later macOS targets are unrun. These are earlier source-bound outcomes, not241
 platform acceptance. Broader provider, lifecycle/fault and P0–P7 exits remain;
 feature/Linux/macOS functional work precedes tuning/security.
 
-Current242: recover the original write through authentication-phase timeout.
+Implemented242: recover the original write through authentication-phase timeout.
 Purpose: advance usable Linux/macOS service acceptance. Depend on preceding239
 macOS original group7/inc3/op42/delta5 failure, write_recovery::repeatable, command
 phase/error contracts and the existing unchanged-argument absolute-deadline loop.
@@ -1118,7 +1118,16 @@ receipt/data recovery and owned connection cleanup, exact refusal classification
 bounded deadline checks and zero formatting/four strict profiles. Do not infer
 consensus liveness from a successful retry classifier or widen timing budgets.
 
-Next243: close status-wait admission/cleanup assumptions. Purpose: advance functional
+Current243: verify the published source directly on the user's local Mac. Purpose:
+advance functional macOS service and embedding acceptance without waiting on CI.
+Depend on authorized SSH access, an isolated Git checkout and installed Rust1.98;
+the supplied arm64 Mac runs macOS27.0 and has locked dependencies available.
+Completion requires exact revision/toolchain records, native TCP/QUIC original-write
+and full counter operator checks, relevant Rust tests and strict formatting/lints.
+Keep failures and diagnose their demonstrated cause; never substitute Linux passes
+for Mac evidence. Do not change an existing checkout or global machine settings.
+
+Next244: close status-wait admission/cleanup assumptions. Purpose: advance functional
 Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
 source237 read-release observations and public read/cancellation ticket ownership.
 Select and reproduce one actual failure before adding helpers. Completion requires
@@ -1133,6 +1142,78 @@ actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+Implemented242 evidence: the exact authentication deadline/interrupted pair is
+repeatable in the original-write caller. Invalid credentials, malformed replies,
+wrong stderr and other failures remain terminal. Both actual stalled command
+connections fail the old classifier; after the focused owned-observation compile
+fix, TCP/QUIC recover the same group7/inc3/op42/delta5 duplicate receipt, distinct
+group1/7/8 values, fresh scoped write and cold WAL/checked-prefix checkpoint state.
+The fake listener closes on accept and its connection owner joins before the
+healthy manifest is restored and retry starts. No production/provider/core/API/
+format or deadline change. Focused8/read5/full all-feature counter197 and sequential
+default counter138 pass on Linux. Formatting/four strict profiles are zero;
+inventory108/conformance metadata unchanged. See
+[slice242](../validation/baseline/slice242/README.md).
+
+Macro review242: this closes one demonstrated original-write caller assumption,
+not general consensus liveness or all platform acceptance. Preceding240 CI ends
+Linux counter185/6 and macOS189/1; later targets are unrun. The Mac original write
+again reports authentication deadline, with volatile candidate observations;
+those do not establish its entire cause. Linux retains drain uncertainty, one
+planned configure uncertainty (covered separately by241), missing configuration
+queue observation, absent preparation after wrong identity, ordinary write
+leadership uncertainty and placement completion failure. Keep these source-bound
+failures separate from current local197/138 passes. The user has now supplied
+direct Mac access: exact-source native validation becomes the next deliverable,
+followed by status-wait recovery and a required integration gap. Feature completion
+and functional macOS/Linux remain first; full P0–P7, broader provider/lifecycle
+coverage and later tuning/security remain open.
+
+### Slice242 schema plan — original write recovery after authentication timeout
+
+Previous goal turn progressed:241 is committed/pushed16f01e2, native original-plan
+configuration recovery and full all-feature194/default136 counter tests pass with
+four strict profiles zero. Current worktree is clean. Preceding239 macOS retains
+original group7/inc3 add42 delta5 UNKNOWN authentication deadline expired. The
+existing write_recovery caller permits exact leadership/read/reply uncertainty,
+but excludes that authentication-phase reply. command_client::connect returns
+Interrupted before local_client::exchange can invoke request; application command
+bytes are gated on completed authentication. Never infer a positive write receipt
+from this phase/error observation. Production CLI auto continues to stop on unknown.
+
+Shape/state: add only the exact authentication-timeout stdout and existing
+interrupted-after-connection stderr pair to the caller's repeatable set. Reuse the
+existing unchanged-argument retry loop and budget; no prefix/error catch-all.
+Invalid credentials, authorization/conflict, changed/error-shaped responses and
+unknown other authentication failures stay terminal. Caller deadlines prevent
+starting further invocations; an ongoing CLI invocation retains its own existing
+bound, so do not claim a new strict end-to-end deadline. No production/core/provider/
+wire/storage/API semantics change or widened timeout.
+
+Ownership/native history: reuse the bounded stalled peer, closing its listening
+socket immediately after accept so no second invocation can enter a fake backlog.
+Keep all three actual Raft voters healthy; node1 commands use an alternate configured
+port while its data peer stays unchanged. Seed the same operation42 independently
+in groups1/7/8 with values3/5/9. Inject a TLS stall only into the first command route
+for node1. The generic original-write callback observes the exact actual timeout,
+joins the fake owner, restores the original endpoint manifest synchronously before
+returning uncertainty, then repeats the unchanged group7/inc3/op42/delta5. This
+controlled transient fault does not alter data quorum policy or operation fields.
+Reuse the existing checked-prefix multi-group checkpoint/stop helper for QUIC;
+all client/child/thread owners close/join. Cold WAL/checkpoint and fresh scoped
+write must preserve distinct group data/deduplication. Fixture visibility changes
+are solely for reusing those existing owned fault/checkpoint contracts.
+
+Acceptance: actual TCP/QUIC histories must fail the old caller on that precise
+response and pass after; require original duplicate receipt, unchanged callback
+words and group isolation, fresh operation, cold retry/value recovery and joins.
+Add exact refusal and authentication-deadline budget assertions. Run focused caller/
+native tests, full all-feature/default counter targets sequentially and formatting/
+four strict profiles, inventory/conformance metadata. Keep source240/241 CI bound
+to its own commit and continue without waiting. This advances usable Linux/macOS
+service recovery; status-wait cleanup and actual integration gaps follow. Broader
+consensus/transport liveness, performance/security and full P0–P7 remain separate.
 
 ### Slice241 schema plan — retain planned configuration through sampled role loss
 

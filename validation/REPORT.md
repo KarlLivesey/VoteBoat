@@ -1,5 +1,20 @@
 # Validation report
 
+Original write authentication-timeout recovery: [slice242](baseline/slice242/README.md).
+The caller accepts only the exact native deadline/interrupted pair, preserving
+scope, operation ID, delta and existing budget; other authentication and malformed
+failures stop. Actual TCP/QUIC stall histories fail2 before and pass after, retaining
+duplicate5, isolated group1/7/8 data, fresh write and cold WAL/checkpoint recovery.
+Focused8/read5/all-feature counter197 and sequential default counter138 pass on
+Linux. Formatting/four strict profiles are zero; inventory108/conformance metadata
+unchanged. Initial borrowed-observation compilation is retained. No production/
+provider/core/API/format/deadline change. Preceding240 CI ends Linux185/6 and
+macOS189/1, with later targets unrun; exact causes remain source-bound. These do
+not certify current Mac. Direct user Mac access and Rust1.98 are verified; native
+exact-source checks follow. Status-wait cleanup and required integration remain;
+feature/functional Linux/macOS work stays ahead of tuning/security and the full
+P0–P7 goal remains active.
+
 Original planned configuration recovery: [slice241](baseline/slice241/README.md).
 The replacement caller preserves its plan/operation across exact known authority
 or uncertainty replies and explicitly requests the original trusted Final only

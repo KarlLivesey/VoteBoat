@@ -5,6 +5,8 @@ use super::*;
 const LEADERSHIP: &str = "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n";
 const READ_FAILED: &str =
     "UNKNOWN authenticated read failed; retry the same operation ID and delta\n";
+const AUTHENTICATION_DEADLINE: &str =
+    "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n";
 const DEADLINE: &str = "UNKNOWN reply deadline expired; retry the same operation ID and delta\n";
 const BUSY: &str = "ERR not_proposed=Busy\n";
 const INTERRUPTED: &str =
@@ -12,11 +14,13 @@ const INTERRUPTED: &str =
 const UNSUCCESSFUL: &str =
     "Error: \"request unsuccessful; preserve the operation ID and payload when retrying a write\"";
 type FailedAttempt = (String, String);
+#[path = "write_recovery/authentication.rs"]
+mod authentication;
 
 fn repeatable(text: &str, error: &str) -> bool {
     match text {
         LEADERSHIP | BUSY => error.trim_end() == UNSUCCESSFUL,
-        READ_FAILED | DEADLINE => error.trim_end() == INTERRUPTED,
+        READ_FAILED | DEADLINE | AUTHENTICATION_DEADLINE => error.trim_end() == INTERRUPTED,
         _ => false,
     }
 }
@@ -106,6 +110,11 @@ mod tests {
     }
 
     #[test]
+    fn authentication_timeout_repeats_only_the_original_scoped_write() {
+        sequence(AUTHENTICATION_DEADLINE, INTERRUPTED);
+    }
+
+    #[test]
     fn unrelated_or_modified_failures_remain_terminal() {
         let start = Instant::now();
         for (text, error) in [
@@ -118,6 +127,10 @@ mod tests {
             ),
             (BUSY, INTERRUPTED),
             (DEADLINE, UNSUCCESSFUL),
+            (AUTHENTICATION_DEADLINE, UNSUCCESSFUL),
+            (AUTHENTICATION_DEADLINE, "Error: invalid credentials"),
+            ("UNKNOWN authentication failed; retry the same operation ID and delta\n", INTERRUPTED),
+            ("UNKNOWN authentication deadline expired; retry the same operation ID and delta\nextra\n", INTERRUPTED),
             (LEADERSHIP, "Error: invalid credentials"),
             (READ_FAILED, "Error: invalid credentials"),
             ("OK partial\n", INTERRUPTED),
@@ -143,21 +156,23 @@ mod tests {
     #[test]
     fn caller_deadline_never_renews_or_becomes_a_success() {
         let start = Instant::now();
-        let now = Cell::new(start);
-        let mut calls = 0;
-        let result = retry(
-            ORIGINAL,
-            start + Duration::from_millis(30),
-            |args| {
-                assert_eq!(args, ORIGINAL);
-                calls += 1;
-                Err((DEADLINE.into(), INTERRUPTED.into()))
-            },
-            || now.get(),
-            || now.set(now.get() + Duration::from_millis(10)),
-        );
-        assert!(result.unwrap_err().contains("caller deadline expired"));
-        assert_eq!(calls, 3);
+        for reason in [DEADLINE, AUTHENTICATION_DEADLINE] {
+            let now = Cell::new(start);
+            let mut calls = 0;
+            let result = retry(
+                ORIGINAL,
+                start + Duration::from_millis(30),
+                |args| {
+                    assert_eq!(args, ORIGINAL);
+                    calls += 1;
+                    Err((reason.into(), INTERRUPTED.into()))
+                },
+                || now.get(),
+                || now.set(now.get() + Duration::from_millis(10)),
+            );
+            assert!(result.unwrap_err().contains("caller deadline expired"));
+            assert_eq!(calls, 3);
+        }
         let expired = retry(
             ORIGINAL,
             start,

@@ -1,0 +1,8 @@
+2026-10-10T17:44:03.0829740Z ---- assignments::assignment_pages_quic_bind_permissions_membership_and_reopen stdout ----
+2026-10-10T17:44:03.0831730Z
+2026-10-10T17:44:03.0833420Z thread 'assignments::assignment_pages_quic_bind_permissions_membership_and_reopen' (33570) panicked at tests/counter_service/write_recovery.rs:40:29:
+2026-10-10T17:44:03.0836140Z original write ["group", "7", "3", "add", "42", "5"]: "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n" Error: "request interrupted after connection; automatic routing stopped"
+2026-10-10T17:44:03.0838110Z
+2026-10-10T17:44:03.0838590Z diagnostics nodes=3 omitted=0 evidence=local_volatile
+2026-10-10T17:44:03.0839810Z node=1 command=group 7 3 status exit=Some(0) stdout="OK role=Candidate term=48 committed=5\n" stderr=""
+2026-10-10T17:44:03.0991660Z test result: FAILED. 189 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 319.62s

@@ -1,0 +1,43 @@
+2026-10-10T17:41:45.3863434Z ---- drain::retained_drain_handoff_stop_recover_and_cancel_quic stdout ----
+2026-10-10T17:41:45.3863686Z
+2026-10-10T17:41:45.3863970Z thread 'drain::retained_drain_handoff_stop_recover_and_cancel_quic' (6226) panicked at tests/counter_service.rs:386:9:
+2026-10-10T17:41:45.3864648Z node 3 ["drain-node", "1", "19701", "1", "1", "1", "1"]: UNKNOWN drain handoff=Unknown(LeadershipChanged); retry original drain identity
+2026-10-10T17:41:45.3865230Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:41:45.3865545Z
+2026-10-10T17:41:45.3865809Z service log: ready node=3 peer=127.0.0.1:8323 transport=Quic command=127.0.0.1:8423
+2026-10-10T17:41:45.3898764Z ---- drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp stdout ----
+2026-10-10T17:41:45.3899053Z
+2026-10-10T17:41:45.3899586Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp' (6407) panicked at tests/counter_service.rs:386:9:
+2026-10-10T17:41:45.3900284Z node 2 ["configure", "19770"]: UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+2026-10-10T17:41:45.3900787Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:41:45.3901050Z
+2026-10-10T17:41:45.3901222Z service log: ready node=2 peer=127.0.0.1:8834 transport=TcpTls command=127.0.0.1:8934
+2026-10-10T17:41:45.3931530Z ---- configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic stdout ----
+2026-10-10T17:41:45.3931831Z
+2026-10-10T17:41:45.3932165Z thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic' (5710) panicked at tests/counter_service.rs:2621:9:
+2026-10-10T17:41:45.3933070Z missing phase=configuration_queued; logs at "<ci-workspace>/voteboat-service-4464-1791653915151266036-48/3-recover-member.log": ready node=3 peer=127.0.0.1:7171 transport=Quic command=127.0.0.1:7271
+2026-10-10T17:41:45.3934068Z command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(21101)) reason=deadline
+2026-10-10T17:41:45.3934684Z administration observation_cancelled operation=21101 phase=preparing reason=deadline
+2026-10-10T17:41:45.3934963Z
+2026-10-10T17:41:45.3948899Z ---- drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain stdout ----
+2026-10-10T17:41:45.3949164Z
+2026-10-10T17:41:45.3949751Z thread 'drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain' (7627) panicked at tests/counter_service/membership_drain.rs:16:9:
+2026-10-10T17:41:45.3950389Z missing operation=19750 : OK phase=Absent evidence=quorum_read
+2026-10-10T17:41:45.3950588Z
+2026-10-10T17:41:45.3950654Z stack backtrace:
+2026-10-10T17:41:45.3950831Z    0: __rustc::rust_begin_unwind
+2026-10-10T17:41:45.3973653Z ---- three_service_processes_retry_replace_leader_and_recover_native_files stdout ----
+2026-10-10T17:41:45.3973912Z
+2026-10-10T17:41:45.3974201Z thread 'three_service_processes_retry_replace_leader_and_recover_native_files' (21983) panicked at tests/counter_service.rs:417:9:
+2026-10-10T17:41:45.3974715Z ["add", "2", "3"]: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+2026-10-10T17:41:45.3975140Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:41:45.3975400Z
+2026-10-10T17:41:45.3975512Z diagnostics nodes=3 omitted=0 evidence=local_volatile
+2026-10-10T17:41:45.4001877Z ---- placement::generated_placement_executes_and_recovers_quic stdout ----
+2026-10-10T17:41:45.4002100Z
+2026-10-10T17:41:45.4002368Z thread 'placement::generated_placement_executes_and_recovers_quic' (18143) panicked at tests/counter_service.rs:1340:9:
+2026-10-10T17:41:45.4002951Z operation 1002 did not complete; logs at "<ci-workspace>/voteboat-service-4464-1791654067167496367-186"
+2026-10-10T17:41:45.4003319Z stack backtrace:
+2026-10-10T17:41:45.4003494Z    0: __rustc::rust_begin_unwind
+2026-10-10T17:41:45.4003816Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+2026-10-10T17:41:45.4012518Z test result: FAILED. 185 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 210.15s

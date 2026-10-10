@@ -208,7 +208,7 @@ fn profile_history(quic: bool, multi: bool) {
     fs::remove_dir_all(&source.root).unwrap();
 }
 
-fn checkpoint_stop(c: &mut Cluster) {
+pub(super) fn checkpoint_stop(c: &mut Cluster) {
     use voteboat::{identity::*, log::*, native::log_store::*};
     let selected = if c.groups.is_some() {
         vec![(1, 1), (7, 3), (8, 2)]

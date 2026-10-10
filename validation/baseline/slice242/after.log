@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 8 tests
+test write_recovery::tests::authentication_timeout_repeats_only_the_original_scoped_write ... ok
+test write_recovery::tests::existing_leadership_and_read_interruptions_retain_original_identity ... ok
+test write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success ... ok
+test write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt ... ok
+test write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt ... ok
+test write_recovery::tests::unrelated_or_modified_failures_remain_terminal ... ok
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp ... ok
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 189 filtered out; finished in 14.58s

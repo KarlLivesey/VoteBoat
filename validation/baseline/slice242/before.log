@@ -1,0 +1,53 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.90s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp ... FAILED
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint ... FAILED
+
+failures:
+
+---- write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp stdout ----
+
+thread 'write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp' (783812) panicked at tests/counter_service/write_recovery/authentication.rs:63:35:
+original write ["group", "7", "3", "add", "42", "5"]: "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n" Error: "request interrupted after connection; automatic routing stopped"
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=group 7 3 status exit=Some(0) stdout="OK role=Leader term=1 committed=2\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=9749 failed_polls=0 owner_steps=1121 step_errors=0 worker_events=30 snapshot_events=0 snapshot_installs=0 persistence_batches=15 applications=6 peer_sends=899 peer_received=899 ingress_blocked=0 connection_failures=2 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=9792,sum:878787341,min:28073,max:631117,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=12,sum:589111497,min:46792284,max:55045594,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=group 7 3 status exit=Some(0) stdout="OK role=Follower term=1 committed=2\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=9891 failed_polls=0 owner_steps=1136 step_errors=0 worker_events=30 snapshot_events=0 snapshot_installs=0 persistence_batches=15 applications=6 peer_sends=911 peer_received=911 ingress_blocked=0 connection_failures=1 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=9936,sum:881588854,min:27412,max:676562,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:438290136,min:46881009,max:53531376,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=group 7 3 status exit=Some(0) stdout="OK role=Follower term=1 committed=2\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=10010 failed_polls=0 owner_steps=1149 step_errors=0 worker_events=30 snapshot_events=0 snapshot_installs=0 persistence_batches=15 applications=6 peer_sends=922 peer_received=922 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=10053,sum:905849395,min:27912,max:638351,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=6,sum:298570081,min:47076556,max:55202469,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint stdout ----
+
+thread 'write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint' (783811) panicked at tests/counter_service/write_recovery/authentication.rs:63:35:
+original write ["group", "7", "3", "add", "42", "5"]: "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n" Error: "request interrupted after connection; automatic routing stopped"
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=group 7 3 status exit=Some(0) stdout="OK role=Leader term=1 committed=2\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=9763 failed_polls=0 owner_steps=2027 step_errors=0 worker_events=54 snapshot_events=0 snapshot_installs=0 persistence_batches=27 applications=9 peer_sends=1368 peer_received=1368 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=1 outbound_messages=1 outbound_bytes=512 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=1 peer_2_messages=1 peer_2_bytes=512 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=9806,sum:1204001399,min:31079,max:2029437,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=15,sum:772329699,min:47232892,max:58956599,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=group 7 3 status exit=Some(0) stdout="OK role=Follower term=1 committed=2\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=10065 failed_polls=0 owner_steps=743 step_errors=0 worker_events=50 snapshot_events=0 snapshot_installs=0 persistence_batches=25 applications=9 peer_sends=728 peer_received=728 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=1 outbound_messages=1 outbound_bytes=512 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=1 peer_1_messages=1 peer_1_bytes=512 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=10108,sum:1038730833,min:28163,max:1152277,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=8,sum:388077000,min:47266535,max:50395920,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=group 7 3 status exit=Some(0) stdout="OK role=Follower term=1 committed=2\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=1 polls=10205 failed_polls=0 owner_steps=738 step_errors=0 worker_events=44 snapshot_events=0 snapshot_installs=0 persistence_batches=22 applications=7 peer_sends=729 peer_received=729 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=1 rejected=0 percentile=bucket_upper_bound PollCompleted=10248,sum:1038059070,min:28725,max:1145404,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=7,sum:338489149,min:46630279,max:50040051,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+
+
+failures:
+    write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint
+    write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 194 filtered out; finished in 11.88s
+
+error: test failed, to rerun pass `--test counter_service`

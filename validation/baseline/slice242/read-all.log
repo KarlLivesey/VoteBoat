@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 5 tests
+test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+test read_failover::automatic_authenticated_read_escapes_stalled_handshake_quic ... ok
+test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 192 filtered out; finished in 10.01s

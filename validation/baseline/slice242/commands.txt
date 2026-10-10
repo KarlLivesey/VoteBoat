@@ -1,0 +1,29 @@
+Before classifier change, after the focused owned-observation compile correction:
+cargo +stable test --locked --offline --all-features --test counter_service write_recovery::authentication
+before.log:0 pass/2 fail,exit101,exact authentication deadline/interrupted pair.
+compile-failed.log retains E0521 borrowed callback observations escaping; owned
+String observations replace them before native checks.
+
+Final sequential Linux checks:
+cargo +stable test --locked --offline --all-features --test counter_service write_recovery
+cargo +stable test --locked --offline --all-features --test counter_service read_failover
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service
+cargo +stable fmt --all -- --check
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Retained preceding240 observations, not current source acceptance:
+gh run view 38072310155 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114272594539/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114272594843/logs
+
+Direct Mac preparation only (isolated temporary clone, no Mac test claim here):
+ssh -o BatchMode=yes -o ConnectTimeout=5 karllivesey@192.168.192.76
+uname -m
+sw_vers
+~/.cargo/bin/cargo +stable --version
+~/.cargo/bin/rustc +stable --version
+git clone https://github.com/KarlLivesey/VoteBoat.git <isolated-temp>/repo
+~/.cargo/bin/cargo +stable fetch --locked
