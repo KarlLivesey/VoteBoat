@@ -1,5 +1,20 @@
 # Validation report — slice 35
 
+Counter shutdown admission: [slice223](baseline/slice223/README.md). Both real
+native held-step TCP/QUIC regressions fail with Closed before the correction,
+then pass. The counter continues consuming accepted outputs while quiescing but
+does not schedule new operator controls. Public Node admission stays Closed;
+queued cancellation clears in its original term, native workers join and local
+endpoints release. Counter unit40, full integration171, final strengthened2,
+default unit39 and membership-drain4 pass. Formatting/four strict profiles stay
+zero; initial unused import and strengthened fixture-size failures are retained.
+No synchronization, timeout, durable record or public-provider seam change.
+Preceding222 CI completes Ubuntu171/22/21 and macOS counter169/2 before later
+targets. Original19701 runner budget and96100 follower-resume refusal remain
+open; this is pre-correction source evidence. Matching macOS/platform, provider/
+fault/deployment, original P7 and full P0–P7 acceptance stay open. Broad security
+remains the user's Daybreak work.
+
 Original P7 measurement: [slice222](performance/slice222/README.md). The unmodified
 disk TCP/startup3-replica/1-group/256-after64/window1 reference completes recovery320,
 original retries and worker joins. Raw receipts and provenance checks pass; the

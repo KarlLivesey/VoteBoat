@@ -53,6 +53,9 @@ mod leadership_commands;
 mod leadership_set;
 #[path = "support/local_client.rs"]
 mod local_client;
+#[cfg(test)]
+#[path = "support/operator_shutdown.rs"]
+mod operator_shutdown;
 #[path = "support/peer_credentials.rs"]
 mod peer_credentials;
 #[path = "support/peer_discovery.rs"]
@@ -656,6 +659,12 @@ fn advance_leadership(
     quit: bool,
 ) -> Result<(), Failure> {
     outputs(service, connection, leadership, drain)?;
+    // Consume accepted results while draining, but do not admit new operator
+    // controls after the node has closed admission. Publication workers remain
+    // owned by finish_service until their real completion is checked and joined.
+    if service.state() != NodeState::Running {
+        return Ok(());
+    }
     if let Some(drain) = drain {
         drain.tick(service, leadership, connection)?;
     }

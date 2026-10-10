@@ -1,0 +1,42 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: unused import: `native::startup::*`
+ --> src/bin/support/operator_shutdown.rs:9:16
+  |
+9 | use voteboat::{native::startup::*, raft::*, secure::PeerIdentity};
+  |                ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voteboat` (bin "voteboat-counter" test) generated 1 warning (run `cargo fix --bin "voteboat-counter" -p voteboat --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.64s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 2 tests
+test operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_tcp ... FAILED
+test operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_quic ... FAILED
+
+failures:
+
+---- operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_tcp stdout ----
+
+thread 'operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_tcp' (3251423) panicked at src/bin/support/operator_shutdown.rs:214:5:
+assertion `left == right` failed
+  left: Err("Closed")
+ right: Ok(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_quic stdout ----
+
+thread 'operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_quic' (3251422) panicked at src/bin/support/operator_shutdown.rs:214:5:
+assertion `left == right` failed
+  left: Err("Closed")
+ right: Ok(())
+
+
+failures:
+    operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_quic
+    operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.14s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

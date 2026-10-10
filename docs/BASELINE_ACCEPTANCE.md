@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice223 reproduces queued leadership cancellation across closed admission over
+actual native TCP/QUIC, then prevents counter operator scheduling while quiescing
+without discarding accepted outputs or weakening Node's Closed refusal. Original
+cancellation clears in the same term; workers join and endpoints release.
+Counter unit40/integration171, final strengthened2, default unit39/drain4 and
+formatting/four strict profiles pass. This closes the selected local reproduction,
+not whole-platform acceptance. Preceding222 Ubuntu171/22/21 passes; macOS169/2
+fails original runner budget/follower resume before later targets run. Matching
+macOS and broader platform/fault/provider/P7 obligations remain open. Security
+review remains with Daybreak.
+
 Slice222 executes the unchanged original serial disk TCP gate. All256 raw useful
 receipts, recovery320, original retries and worker joins pass, but471.057ms p99
 exceeds250ms. Existing journal diagnostics retain synchronization costs without

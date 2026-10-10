@@ -568,14 +568,46 @@ narrows immediate usable-service/P4 work to a clean-shutdown failure. Keep that
 functional milestone first, while broader faults/provider/deployment and P0–P7
 acceptance remain open. Broad security stays with Daybreak.
 
-Current: reproduce the matching221 Closed exit at the exact shutdown boundary.
-Purpose: complete usable-service/P4 clean-stop behavior. Depend on original19701
-membership-drain recovery/cancellation, resuming=false, explicit quit and original
-owned Node/worker/admin completion contracts. Trace shutdown ownership before
-editing; do not suppress Closed globally or reinterpret exit1 as success.
-Completion requires actual bounded quiesce/drain/join, no new proposals after
-shutdown starts, preserved original records/receipts and TCP/QUIC evidence plus
-matching macOS confirmation. CI stays background; no timer widening.
+Implemented223: real native TCP/QUIC held-owner-step tests reproduce Closed after
+quit queues cancellation but before the owner executes it. The executable now
+consumes accepted outputs while quiescing and schedules operator/drain controls
+only while Running. Original Node admission still returns Closed; the original
+queued cancellation clears in the same term, and native workers join/endpoints
+release. Both regressions pass after failing before; counter unit40 and full
+all-feature counter171 pass. Final strengthened regressions2 and default unit39
+also pass. No global error suppression, admission exception, durable record,
+provider seam, timeout or synchronization change. This closes the selected local
+shutdown reproduction, not matching macOS acceptance or every Closed exit.
+Default TCP membership-drain selection4 passes. Formatting and all four strict
+all-target Clippy configurations have zero diagnostics through the enabled hook.
+The stronger regression initially exceeds the function-size lint; naming its
+existing source owner removes repeated field chains without a suppression.
+Actual commands, failures, source hashes and validation scope are retained in
+validation/baseline/slice223.
+
+Preceding222 run38055650899 completes Ubuntu171/22/21 successfully and macOS
+counter169/2 before later targets run. The original19701 QUIC drain runner expires
+its budget; leadership96100 resume uses the original source after it becomes a
+follower and returns explicit NOT_LEADER. The prior221 shutdown history passes
+on this unchanged production source in this run, which does not prove223's fix.
+Keep both failures and source identity separate from current local results.
+
+Macro review223 advances usable-service/P4 clean stop with a bounded admission
+correction and a reproducible native failure. Accepted publication workers still
+join under the retained directory owner and propagate actual I/O errors. The
+remaining macOS runner/source observations select the next functional item;
+P7's250ms gate, provider/fault/deployment obligations and full P0–P7 remain open.
+Broad security remains the user's Daybreak work.
+
+Current: resolve the recorded original-runner/resume boundaries and collect
+matching shutdown platform evidence. Purpose: advance usable-service/P4 operator
+acceptance. Depend on223's held-step regression and terminal222's exact19701
+runner deadline/96100 follower refusal, original durable intent, source identity
+and fixed budgets. Trace each failed boundary before editing; do not infer one
+common cause or successful execution from UNKNOWN/NOT_LEADER. Completion requires
+exact original records/receipts through interruption/restart, actual clean joins,
+bounded cause-specific TCP/QUIC checks and matching macOS evidence. No new security
+work or timer widening; CI stays background and other work continues while it runs.
 
 Next: attribute the failed P7 gate to exact durability operations before selecting
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
@@ -595,6 +627,43 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice223 schema plan — queued operator cancellation across shutdown
+
+Purpose/dependencies: matching221 identifies quit-accepted exit1/Closed in the
+membership-drain cancellation history. Node closes control admission immediately
+at begin_shutdown, but counter advance_leadership continues cancel/driver work
+afterward. A leadership cancellation is queued owner work; its transfer can stay
+visible while an owner step is delayed. Reproduce that boundary using the real
+NativeNode/service/driver composition before changing policy. This advances
+usable-service/P4 clean stop, not performance tuning or expanded security.
+
+Data/API: retain the existing advance_leadership helper, original transfer request
+and NodeState. Always consume original client/read outputs. Admit operator/drain
+progress only while the Node is Running; after quiescence, poll the Node's
+accepted work and finish/join selected publication workers under existing owner
+lifetime. No new public seam, cancellation identity, durable intent mutation,
+Node admission exception, ignored error or timeout increase.
+
+Transitions/ownership: Running with active transfer -> quit queues its exact
+cancellation -> begin_shutdown closes admission before owner executes it ->
+Quiescing still exposes the old transfer -> queued cancellation executes during
+normal drain -> selected workers join. New operator controls after admission
+closure must remain Closed. Existing drain publication finish retains actual I/O
+failure and the directory owner until join; do not discard an accepted result or
+turn Closed into a generic success. Administration already stops new scheduling
+on quit and consumes original configuration completions.
+
+Acceptance: a native TCP/QUIC binary-unit fixture holds the transfer target and
+the source owner step, exercises the actual helper twice around begin_shutdown,
+and retains the old Closed failure. Require control admission to remain Closed,
+original queued cancellation to remove the volatile transfer, full native drain/
+join and released endpoints. Then run original executable membership-drain,
+leadership and counter recovery checks with original durable records/receipts,
+including pending/cancelled/checkpoint/reopen histories and final zero strict
+checks. Fresh macOS evidence is required; source inspection alone cannot prove
+every failure with the same string has this cause. P7's250ms gate stays unmet,
+and full P0–P7 remains active.
 
 ### Slice222 schema plan — unchanged serial TCP performance gate
 
