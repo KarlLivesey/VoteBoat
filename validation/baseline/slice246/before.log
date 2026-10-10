@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.04s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 1 test
+test shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources ... FAILED
+
+failures:
+
+---- shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources stdout ----
+
+thread 'shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources' (1014625) panicked at tests/startup.rs:916:14:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 47 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test startup`

@@ -1,0 +1,8 @@
+tests/startup.rs: OK
+tests/startup/maintenance.rs: OK
+tests/startup/maintenance/binding.rs: OK
+tests/startup/maintenance/drain.rs: OK
+tests/startup/maintenance/membership_drain.rs: OK
+tests/startup/multi.rs: OK
+tests/startup/peer_rotation.rs: OK
+tests/startup/shutdown_clock.rs: OK

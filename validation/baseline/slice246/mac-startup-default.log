@@ -1,0 +1,69 @@
+   Compiling voteboat v0.1.0 (<mac-task>/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.62s
+     Running tests/startup.rs (target/debug/deps/startup-20e50da6eeb44f4f)
+
+running 34 tests
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application ... ok
+test discovery::prepared_member_rejects_create_before_creating_files ... ok
+test discovery::prepared_shared_groups_reject_missing_application_before_creating_files ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test discovery::abandoned_prepared_startup_closes_workers_and_releases_listener ... ok
+test discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts ... ok
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... FAILED
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... FAILED
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp ... FAILED
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources ... ok
+test timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection ... ok
+test timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application ... ok
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::tcp_prepared_member_recovers_with_host_discovery ... ok
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+
+failures:
+
+---- maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp stdout ----
+
+thread 'maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp' (16563879) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal stdout ----
+
+thread 'maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal' (16563880) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+
+---- maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp stdout ----
+
+thread 'maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp' (16563878) panicked at tests/startup/maintenance/binding.rs:33:5:
+assertion failed: matches!(h.submit(0, OperationId::new(23902).unwrap(),
+    Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()),
+    ClientOutcome::Applied { .. })
+
+
+failures:
+    maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp
+    maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp
+    maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal
+
+test result: FAILED. 31 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 17.31s
+
+error: test failed, to rerun pass `--test startup`

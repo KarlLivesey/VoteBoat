@@ -1,0 +1,20 @@
+Base9c952aa, test-only source correction. Before retains old fixed10000ms helper semantics with caller clock ignored:
+cargo +stable test --locked --offline --all-features --test startup shutdown_clock
+0/1,TimeWentBack,exit101. Initial nested-caller compile errors retained.
+
+Clock-only Linux and exact-source Mac, sequential profiles:
+cargo +stable test --locked --offline --all-features --test startup
+cargo +stable test --locked --offline --test startup
+.githooks/pre-push
+
+Then inspect terminal failures before selecting the declared native assembly profile.
+Verify clock-only hashes, apply exact profile-delta.patch, verify all8 final hashes.
+Final Linux/Mac use the same commands above, retaining original default libtest
+concurrency and unchanged10-second caller/cleanup gates. Final48/34 and four strict
+profiles pass on both. Mac arm64/macOS27.0/Rust1.98.0; CI pins1.98.1.
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Configurations that spawn target/debug executables run sequentially per host.
+Do not replace a live command after observation timeout; both source-bound Mac
+commands were terminal before subsequent changes. Pre-push stays enabled.

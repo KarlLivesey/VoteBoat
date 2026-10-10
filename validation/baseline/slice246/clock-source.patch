@@ -1,0 +1,223 @@
+diff --git a/tests/startup.rs b/tests/startup.rs
+index aad55db..19d36a1 100644
+--- a/tests/startup.rs
++++ b/tests/startup.rs
+@@ -35,6 +35,8 @@ mod maintenance;
+ mod multi;
+ #[path = "startup/peer_rotation.rs"]
+ mod peer_rotation;
++#[path = "startup/shutdown_clock.rs"]
++mod shutdown_clock;
+ #[path = "startup/timing_profile.rs"]
+ mod timing_profile;
+ #[derive(Clone)]
+@@ -592,7 +594,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
+     );
+     reconcile_wire_nodes(&mut nodes, &stores, &addresses, clock);
+     write_wire_nodes(&mut nodes, clock);
+-    drain_wire_nodes(nodes);
++    drain_wire_nodes(nodes, clock);
+     let nodes = open(NativeOpenMode::Recover);
+     for node in &nodes {
+         assert_eq!(node.peers().unwrap().roster().wire_version(), version);
+@@ -602,7 +604,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
+             Ok(9)
+         );
+     }
+-    drain_wire_nodes(nodes);
++    drain_wire_nodes(nodes, Instant::now());
+     std::fs::remove_dir_all(directory).unwrap();
+ }
+ #[test]
+@@ -896,6 +898,7 @@ fn reconcile_wire_nodes(
+
+ fn drain_wire_nodes<A>(
+     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
++    host_clock: Instant,
+ ) where
+     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+     A::Receipt: ApplicationReceipt,
+@@ -907,7 +910,7 @@ fn drain_wire_nodes<A>(
+     loop {
+         for node in &mut nodes {
+             node.poll(
+-                MonoTime(10000 + clock.elapsed().as_millis() as u64),
++                MonoTime(host_clock.elapsed().as_millis() as u64),
+                 NodePollBudget::default(),
+             )
+             .unwrap();
+diff --git a/tests/startup/maintenance.rs b/tests/startup/maintenance.rs
+index 4795728..b0e0e1a 100644
+--- a/tests/startup/maintenance.rs
++++ b/tests/startup/maintenance.rs
+@@ -58,7 +58,7 @@ impl History {
+         h.open(NativeOpenMode::Create, version);
+         if member {
+             // Membership recovery cannot invent a new voter from empty files.
+-            drain_wire_nodes(std::mem::take(&mut h.nodes));
++            drain_wire_nodes(std::mem::take(&mut h.nodes), h.clock);
+             h.open(NativeOpenMode::Recover, version);
+         }
+         h
+@@ -276,11 +276,11 @@ impl History {
+                 (0..3).all(|id| h.core(id).state().base_index() >= index)
+             });
+         }
+-        drain_wire_nodes(std::mem::take(&mut self.nodes));
++        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
+         self.open(NativeOpenMode::Recover, 8);
+     }
+     fn close(mut self) {
+-        drain_wire_nodes(std::mem::take(&mut self.nodes));
++        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
+         std::fs::remove_dir_all(&self.directory).unwrap();
+     }
+ }
+diff --git a/tests/startup/maintenance/binding.rs b/tests/startup/maintenance/binding.rs
+index 6f33760..30ccab2 100644
+--- a/tests/startup/maintenance/binding.rs
++++ b/tests/startup/maintenance/binding.rs
+@@ -81,7 +81,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
+             ..
+         }
+     ));
+-    drain_wire_nodes(std::mem::take(&mut h.nodes));
++    drain_wire_nodes(std::mem::take(&mut h.nodes), h.clock);
+ }
+
+ fn rejects_unassigned_source(h: &mut History, intent: LeadershipIntent) {
+diff --git a/tests/startup/maintenance/drain.rs b/tests/startup/maintenance/drain.rs
+index 382fafd..cd90fb0 100644
+--- a/tests/startup/maintenance/drain.rs
++++ b/tests/startup/maintenance/drain.rs
+@@ -64,7 +64,7 @@ fn drain(protocol: NativePeerProtocol) {
+     );
+     // Shutdown still owns all accepted effects; readiness itself never stops workers.
+     let source = h.nodes.remove(0);
+-    drain_wire_nodes(vec![source]);
++    drain_wire_nodes(vec![source], h.clock);
+     assert!(matches!(
+         h.submit(0, rejected.request.operation, rejected.request.bytes),
+         ClientOutcome::Applied { .. }
+diff --git a/tests/startup/maintenance/membership_drain.rs b/tests/startup/maintenance/membership_drain.rs
+index 92dfe3f..d030703 100644
+--- a/tests/startup/maintenance/membership_drain.rs
++++ b/tests/startup/maintenance/membership_drain.rs
+@@ -229,7 +229,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
+     );
+     h.elect(1);
+     let source = h.nodes.remove(0);
+-    drain_wire_nodes(vec![source]);
++    drain_wire_nodes(vec![source], h.clock);
+     assert!(matches!(
+         h.submit(
+             0,
+diff --git a/tests/startup/multi.rs b/tests/startup/multi.rs
+index 803db3b..8e1b0e3 100644
+--- a/tests/startup/multi.rs
++++ b/tests/startup/multi.rs
+@@ -200,7 +200,7 @@ impl History {
+         });
+     }
+     fn close(&mut self) {
+-        drain_wire_nodes(std::mem::take(&mut self.nodes));
++        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
+     }
+     fn rejected_recovery(&self, changed: bool) {
+         let mut config = selected(&self.root, &self.addresses, 1, NativeOpenMode::Recover);
+@@ -359,7 +359,7 @@ fn failed_cleanup(protocol: NativePeerProtocol) {
+             MonoTime(0),
+         )
+         .unwrap();
+-    drain_wire_nodes(vec![node]);
++    drain_wire_nodes(vec![node], Instant::now());
+     drop((tcp, udp));
+     std::fs::remove_dir_all(root).unwrap();
+ }
+diff --git a/tests/startup/peer_rotation.rs b/tests/startup/peer_rotation.rs
+index fd77edf..793ade9 100644
+--- a/tests/startup/peer_rotation.rs
++++ b/tests/startup/peer_rotation.rs
+@@ -167,7 +167,7 @@ fn static_and_member_startup_install_the_recorded_generation() {
+     );
+     let token = node.local().owner.deadline(group()).unwrap();
+     assert!((1500..3000).contains(&token.deadline.0));
+-    drain_wire_nodes(vec![node]);
++    drain_wire_nodes(vec![node], Instant::now());
+     let mut recovered = config(root.clone(), NativeOpenMode::Recover);
+     recovered.tls = recovered.tls.with_wire_version(7).unwrap();
+     let record = record(&recovered, &recovered.bootstrap.voter_stores, 2);
+@@ -194,7 +194,7 @@ fn static_and_member_startup_install_the_recorded_generation() {
+     );
+     let token = node.local().owner.deadline(group()).unwrap();
+     assert!((1500..3000).contains(&token.deadline.0));
+-    drain_wire_nodes(vec![node]);
++    drain_wire_nodes(vec![node], Instant::now());
+     std::fs::remove_dir_all(root).unwrap();
+ }
+
+diff --git a/tests/startup/shutdown_clock.rs b/tests/startup/shutdown_clock.rs
+new file mode 100644
+index 0000000..ade40f1
+--- /dev/null
++++ b/tests/startup/shutdown_clock.rs
+@@ -0,0 +1,59 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::native::connect::NativePeerProtocol;
++
++#[test]
++fn native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources() {
++    let protocols = [
++        NativePeerProtocol::TcpTls,
++        #[cfg(feature = "quic")]
++        NativePeerProtocol::Quic,
++    ];
++    for protocol in protocols {
++        let directory = root();
++        let (tcp, udp) = (0..32)
++            .find_map(|_| {
++                let tcp = std::net::TcpListener::bind("127.0.0.1:0").ok()?;
++                let udp = std::net::UdpSocket::bind(tcp.local_addr().ok()?).ok()?;
++                Some((tcp, udp))
++            })
++            .unwrap();
++        let address = tcp.local_addr().unwrap();
++        drop((tcp, udp));
++        let clock = Instant::now().checked_sub(Duration::from_secs(20)).unwrap();
++        let mut selected = config(directory.clone(), NativeOpenMode::Create);
++        selected.listen = address;
++        let mut node = selected
++            .open_with_protocol_and_timers(
++                protocol,
++                NativeTimingProfile::Throughput.timers(),
++                app(),
++                Arc::new(ThreadWake::current()),
++                MonoTime(20000),
++            )
++            .unwrap();
++        let now = MonoTime(clock.elapsed().as_millis() as u64);
++        assert!(now.0 >= 20000);
++        node.poll(now, NodePollBudget::default()).unwrap();
++        let session = node.local().owner.identity().store.session;
++        drain_wire_nodes(vec![node], clock);
++        let tcp = std::net::TcpListener::bind(address).unwrap();
++        let udp = std::net::UdpSocket::bind(address).unwrap();
++        drop((tcp, udp));
++        let mut selected = config(directory.clone(), NativeOpenMode::Recover);
++        selected.listen = address;
++        let recovered = selected
++            .open_with_protocol_and_timers(
++                protocol,
++                NativeTimingProfile::Throughput.timers(),
++                app(),
++                Arc::new(ThreadWake::current()),
++                MonoTime(0),
++            )
++            .unwrap();
++        assert!(recovered.local().owner.identity().store.session > session);
++        drain_wire_nodes(vec![recovered], Instant::now());
++        std::fs::remove_dir_all(directory).unwrap();
++    }
++}

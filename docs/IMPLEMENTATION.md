@@ -1156,7 +1156,7 @@ diagnostics. Explicit election settings must not be confused with widened client
 deadlines or reduced synchronization. Keep remaining failures; full acceptance
 must be supported by the actual selected assembly.
 
-Current246: repair demonstrated native host-clock/cleanup assumptions, then close
+Implemented246: repair demonstrated native host-clock/cleanup assumptions, then inspect
 status-wait admission/cleanup assumptions. Purpose: advance functional
 Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
 source237 read-release observations and public read/cancellation ticket ownership.
@@ -1170,20 +1170,34 @@ exact original ticket release and next bounded admission, historical records/dat
 child cleanup and zero strict diagnostics. Current242 cannot certify this separate
 case. Broader transport progress remains explicit if the original write still fails.
 
-Next247: close one required operator/deployment integration gap. Purpose:
-complete usable service, membership and split/merge feature integration. Depend
-on chapter09/public-workflow reconciliation and the acceptance map; select an
-actual missing end-to-end capability before adding helpers. Completion requires
-public executable/Rust usage, original-operation recovery/cleanup evidence and
-Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
-security, optional global orchestration, P8 and Windows stay separate.
+Current247: establish the actual serving/admission precondition for original
+configuration loss histories. Purpose: advance functional Mac membership/operator
+acceptance. Depend on24521101/17920 failures, role sampling versus Raft's current-
+term commitment/readiness contract, exact accepted preparation/ticket ownership,
+and original-operation/cold-recovery checks. The role hint alone must not certify
+a serving leader before cutting quorum. Reproduce that boundary with actual native
+processes and inspect cause before adding helpers or changing behavior. Completion
+requires a legitimate pre-cut authority/readiness gate, original record locally
+durable under lost quorum, retained conflict/status/retry identity and recovery,
+exact ticket release/next admission, Mac/Linux checks and zero strict diagnostics.
+Keep unknown outcomes unknown and do not widen caller deadlines or weaken gates.
 
-Following248: complete the functional requirement/platform reconciliation. Purpose:
-make the feature-completion boundary explicit across public service and embedding
-workflows. Depend on246/247 and chapter12/acceptance map. Completion requires
-source-bound evidence or an explicit remaining item for each required baseline
-feature and supported Mac/Linux workflow; selected suites cannot certify full
-coverage. No performance/security detour or automatic full-goal completion.
+Next248: resolve actual bounded drain-runner observation progress. Purpose: complete
+the original public membership/drain workflow over source loss. Depend on245 runner
+request-exhaustion evidence, original19701 identity, per-command request ownership
+and existing fixed absolute-deadline/request budgets. Select an actual state/
+observation defect before changing the loop; avoid polling unchanged state without
+purpose. Completion requires original sequence/operation recovery, terminal owned
+request cleanup, exact final membership/data checks on Mac/Linux and zero lints.
+No performance/security detour or silent budget increase.
+
+Following249: close one required operator integration gap and reconcile functional
+requirements/platform evidence. Purpose: make the baseline feature boundary explicit.
+Depend on247/248 and chapter12/acceptance map. Select an actual missing capability
+before adding helpers. Completion requires public executable/Rust usage with
+original-operation recovery/cleanup and source-bound evidence or an explicit
+remaining item for every required baseline feature and supported Mac/Linux workflow.
+Selected suites cannot certify full coverage; full P0–P7 remains active.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,
@@ -1237,6 +1251,84 @@ or optional integration work. Keep selected embedding/static service passes and
 the broad failures distinct. The next deliverables are244 election progress,
 245 status-wait cleanup and one required operator gap. Full P0–P7 remains active;
 features/macOS/Linux functional acceptance remain first, tuning/security later.
+
+### Slice246 schema plan — retain the host epoch through native shutdown
+
+Previous turn is progress: source9c952aa is committed/pushed with timing-profile/
+original Draining routing evidence. Worktree is clean. Mac native startup has13
+remaining failures, including TimeWentBack at the shared drain_wire_nodes helper.
+The helper invents10000ms plus a new elapsed clock even when a caller has already
+polled beyond10000ms. Node correctly refuses backward time before changing state.
+
+Shape/ownership: require the existing caller-owned Instant epoch as a helper
+argument; each fixture passes the same epoch used for its running node polls.
+Unpolled fresh/recovered owners use a fresh epoch consistent with their initial
+MonoTime0. The shutdown deadline gets a separate new Instant and remains10seconds.
+No new production getter, clock/provider seam, timeout increase, authority/token
+or persistent/wire change is needed. Host ownership and monotonic validation remain
+unchanged. Preserve accepted persistence/snapshot/peer work until drained; join
+workers/dialers and release resources only after terminal drain. Recovery creates
+a new owner/epoch only after the old owner has completely stopped.
+
+Acceptance: add an actual native startup initialized beyond10000ms with a matching
+host epoch. The old helper must fail TimeWentBack; the new helper must drain/join
+without backward time and permit the same directory/listener to reopen. Update
+all existing helper callers with their actual clock instead of a guessed offset.
+Run full startup profiles on Linux/Mac at original concurrency, keep other unknown/
+election-assumption failures, and require formatting/four strict profiles zero.
+Then inspect actual remaining election and configuration/status/runner failures
+before another change. This advances usable Rust embedding/native lifecycle, not
+whole-platform or full P0–P7 completion; features first, tuning/security later.
+
+246b schema amendment from terminal Mac checks: clock-only startup finishes40/8
+versus source24534/13; the new elapsed-epoch case passes and TimeWentBack disappears.
+Linux all48/default34 and four strict profiles pass. Remaining Mac histories retain
+leader/candidate expectations, maintenance uncertainty and requested-voter election
+waits. Inspect original errors before selecting a narrower assembly change.
+
+The actual disk-backed wire/maintenance fixtures still use low-level50/150–300ms
+defaults, while shared groups select50/500–1000ms. Unlike deterministic host tests,
+these assemblies exercise synchronized native files and real TCP/QUIC. Select the
+already-public declared throughput profile explicitly in these three assembly
+paths, matching the service/Rust embedding recipe, rather than pretend these
+fixtures use that supported recipe. Keep low-level defaults and custom-timer
+contract tests unchanged. No core/provider, caller/cleanup budget, persistence,
+quorum or assertion weakening. Failure remains failure. Exact same operations,
+requested voters, configuration histories, data/dedup checks and restart paths
+must pass at original Mac/Linux concurrency under the declared selection. The
+profile is construction-time liveness configuration, not a latency guarantee or
+attribution of every old failure. Keep clock-only and selected-profile evidence
+separate; this advances functional native Rust composition while remaining
+configuration/status/runner gaps and full P0–P7 stay active.
+
+Implemented246 evidence: native shutdown now receives the caller's running host
+epoch instead of inventing10000ms plus a fresh elapsed clock. Cleanup still uses
+its separate10-second deadline. All nested callers pass their actual epoch; fresh
+unpolled/recovered owners use a domain consistent with their initial MonoTime0.
+The actual native20-second regression fails old fixed-epoch semantics with
+TimeWentBack, then drains/joins, rebinds the exact address and recovers the same
+directory under a newer session. Initial nested-caller compilation is retained.
+No production/core/provider/public API, stored/wire, quorum/sync or deadline change.
+
+Clock-only Linux all48/default34 and four strict profiles pass. Mac all40/8 and
+default31/3 retain maintenance/election assumptions while the new regression passes
+and TimeWentBack is absent. Actual native wire/maintenance/shared-group assemblies
+then explicitly select the already-public durable throughput profile. Low-level
+default/custom-timer tests, operations, requested voters, data/dedup/recovery and
+assertions remain intact. Final Linux and Mac all48/default34 pass at original
+concurrency; formatting/four strict profiles are zero on both. All8 final source
+hashes bind the isolated Mac9c952aa base plus exact retained patches. Inventory108
+and conformance metadata9 partial reviews/68 operations remain finite metadata
+evidence. See [slice246](../validation/baseline/slice246/README.md).
+
+Macro review246: selected native Rust startup/member/maintenance/shared-group/wire
+and shutdown composition now pass on both supported hosts under the declared
+durable assembly. These single finite runs are not statistical attribution,
+performance guarantees or general protocol proof. Production service code is
+unchanged; Mac245 counter191/5/default135/2 remain separate. Next247 checks the
+actual configuration serving/admission boundary before quorum loss, then248 checks
+bounded runner observation progress and249 required integration/reconciliation.
+Full P0–P7 stays active; features/macOS/Linux first, tuning/security later.
 
 ### Slice245 schema plan — explicit native service election profiles
 

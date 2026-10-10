@@ -1,0 +1,60 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests/startup/maintenance/binding.rs:84:5
+    |
+ 84 |     drain_wire_nodes(std::mem::take(&mut h.nodes));
+    |     ^^^^^^^^^^^^^^^^------------------------------ argument #2 of type `std::time::Instant` is missing
+    |
+note: function defined here
+   --> tests/startup.rs:899:4
+    |
+899 | fn drain_wire_nodes<A>(
+    |    ^^^^^^^^^^^^^^^^
+900 |     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+901 |     _host_clock: Instant,
+    |     --------------------
+help: provide the argument
+    |
+ 84 |     drain_wire_nodes(std::mem::take(&mut h.nodes), /* std::time::Instant */);
+    |                                                  ++++++++++++++++++++++++++
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests/startup/maintenance/drain.rs:67:5
+    |
+ 67 |     drain_wire_nodes(vec![source]);
+    |     ^^^^^^^^^^^^^^^^-------------- argument #2 of type `std::time::Instant` is missing
+    |
+note: function defined here
+   --> tests/startup.rs:899:4
+    |
+899 | fn drain_wire_nodes<A>(
+    |    ^^^^^^^^^^^^^^^^
+900 |     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+901 |     _host_clock: Instant,
+    |     --------------------
+help: provide the argument
+    |
+ 67 |     drain_wire_nodes(vec![source], /* std::time::Instant */);
+    |                                  ++++++++++++++++++++++++++
+
+error[E0061]: this function takes 2 arguments but 1 argument was supplied
+   --> tests/startup/maintenance/membership_drain.rs:232:5
+    |
+232 |     drain_wire_nodes(vec![source]);
+    |     ^^^^^^^^^^^^^^^^-------------- argument #2 of type `std::time::Instant` is missing
+    |
+note: function defined here
+   --> tests/startup.rs:899:4
+    |
+899 | fn drain_wire_nodes<A>(
+    |    ^^^^^^^^^^^^^^^^
+900 |     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+901 |     _host_clock: Instant,
+    |     --------------------
+help: provide the argument
+    |
+232 |     drain_wire_nodes(vec![source], /* std::time::Instant */);
+    |                                  ++++++++++++++++++++++++++
+
+For more information about this error, try `rustc --explain E0061`.
+error: could not compile `voteboat` (test "startup") due to 3 previous errors

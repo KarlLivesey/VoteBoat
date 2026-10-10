@@ -1,0 +1,66 @@
+diff --git a/tests/startup.rs b/tests/startup.rs
+index 19d36a1..45d1b5a 100644
+--- a/tests/startup.rs
++++ b/tests/startup.rs
+@@ -557,8 +557,9 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
+         (1..=3)
+             .map(|n| {
+                 make_config(n, mode)
+-                    .open_with_protocol(
++                    .open_with_protocol_and_timers(
+                         protocol,
++                        NativeTimingProfile::Throughput.timers(),
+                         app(),
+                         Arc::new(ThreadWake::current()),
+                         MonoTime(0),
+diff --git a/tests/startup/maintenance.rs b/tests/startup/maintenance.rs
+index b0e0e1a..8975a11 100644
+--- a/tests/startup/maintenance.rs
++++ b/tests/startup/maintenance.rs
+@@ -82,11 +82,23 @@ impl History {
+                         startup: c,
+                         provisioned_stores: self.bootstrap.voter_stores.clone(),
+                     }
+-                    .open_with_protocol(self.protocol, app, wake, MonoTime(0))
++                    .open_with_protocol_and_timers(
++                        self.protocol,
++                        NativeTimingProfile::Throughput.timers(),
++                        app,
++                        wake,
++                        MonoTime(0),
++                    )
+                     .unwrap()
+                 } else {
+-                    c.open_with_protocol(self.protocol, app, wake, MonoTime(0))
+-                        .unwrap()
++                    c.open_with_protocol_and_timers(
++                        self.protocol,
++                        NativeTimingProfile::Throughput.timers(),
++                        app,
++                        wake,
++                        MonoTime(0),
++                    )
++                    .unwrap()
+                 }
+             })
+             .collect();
+diff --git a/tests/startup/multi.rs b/tests/startup/multi.rs
+index 8e1b0e3..8e2b597 100644
+--- a/tests/startup/multi.rs
++++ b/tests/startup/multi.rs
+@@ -50,13 +50,9 @@ fn selected(
+     }
+ }
+ fn timers() -> TimerConfig {
+-    TimerConfig {
+-        heartbeat_ms: 50,
+-        election_min_ms: 500,
+-        election_spread_ms: 500,
+-        expirations_per_poll: 32,
+-    }
++    NativeTimingProfile::Throughput.timers()
+ }
++
+ struct History {
+     root: PathBuf,
+     addresses: Vec<std::net::SocketAddr>,

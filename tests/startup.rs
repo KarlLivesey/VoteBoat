@@ -35,6 +35,8 @@ mod maintenance;
 mod multi;
 #[path = "startup/peer_rotation.rs"]
 mod peer_rotation;
+#[path = "startup/shutdown_clock.rs"]
+mod shutdown_clock;
 #[path = "startup/timing_profile.rs"]
 mod timing_profile;
 #[derive(Clone)]
@@ -555,8 +557,9 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
         (1..=3)
             .map(|n| {
                 make_config(n, mode)
-                    .open_with_protocol(
+                    .open_with_protocol_and_timers(
                         protocol,
+                        NativeTimingProfile::Throughput.timers(),
                         app(),
                         Arc::new(ThreadWake::current()),
                         MonoTime(0),
@@ -592,7 +595,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
     );
     reconcile_wire_nodes(&mut nodes, &stores, &addresses, clock);
     write_wire_nodes(&mut nodes, clock);
-    drain_wire_nodes(nodes);
+    drain_wire_nodes(nodes, clock);
     let nodes = open(NativeOpenMode::Recover);
     for node in &nodes {
         assert_eq!(node.peers().unwrap().roster().wire_version(), version);
@@ -602,7 +605,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
             Ok(9)
         );
     }
-    drain_wire_nodes(nodes);
+    drain_wire_nodes(nodes, Instant::now());
     std::fs::remove_dir_all(directory).unwrap();
 }
 #[test]
@@ -896,6 +899,7 @@ fn reconcile_wire_nodes(
 
 fn drain_wire_nodes<A>(
     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+    host_clock: Instant,
 ) where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
@@ -907,7 +911,7 @@ fn drain_wire_nodes<A>(
     loop {
         for node in &mut nodes {
             node.poll(
-                MonoTime(10000 + clock.elapsed().as_millis() as u64),
+                MonoTime(host_clock.elapsed().as_millis() as u64),
                 NodePollBudget::default(),
             )
             .unwrap();

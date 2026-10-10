@@ -50,13 +50,9 @@ fn selected(
     }
 }
 fn timers() -> TimerConfig {
-    TimerConfig {
-        heartbeat_ms: 50,
-        election_min_ms: 500,
-        election_spread_ms: 500,
-        expirations_per_poll: 32,
-    }
+    NativeTimingProfile::Throughput.timers()
 }
+
 struct History {
     root: PathBuf,
     addresses: Vec<std::net::SocketAddr>,
@@ -200,7 +196,7 @@ impl History {
         });
     }
     fn close(&mut self) {
-        drain_wire_nodes(std::mem::take(&mut self.nodes));
+        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
     }
     fn rejected_recovery(&self, changed: bool) {
         let mut config = selected(&self.root, &self.addresses, 1, NativeOpenMode::Recover);
@@ -359,7 +355,7 @@ fn failed_cleanup(protocol: NativePeerProtocol) {
             MonoTime(0),
         )
         .unwrap();
-    drain_wire_nodes(vec![node]);
+    drain_wire_nodes(vec![node], Instant::now());
     drop((tcp, udp));
     std::fs::remove_dir_all(root).unwrap();
 }

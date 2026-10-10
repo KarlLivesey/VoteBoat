@@ -1,5 +1,16 @@
 # Baseline acceptance map
 
+Native host-clock shutdown and declared assembly conformance: [slice246](../validation/baseline/slice246/README.md).
+An owner beyond10000ms exposes the old cleanup clock moving backwards. Caller
+epoch retention fixes that actual regression without changing Node validation or
+the10-second cleanup budget. Clock-only Mac40/8 and31/3 retain other assumptions;
+explicit durable throughput selection in real native fixtures then passes all48/
+default34 startup tests on both Mac/Linux at original concurrency. Final formatting/
+four strict profiles are zero. All8 source hashes bind Mac evidence; no production/
+core/provider/format/quorum change or weakened assertion. Earlier counter191/5 and
+default135/2 remain separate; next is serving/configuration admission and runner
+progress. Full P0–P7 stays active; features first, tuning/security later.
+
 Native election profiles and drained-follower routing: [slice245](../validation/baseline/slice245/README.md).
 Construction-time throughput/edge/legacy profiles reach static/member/multi/
 discovery/rotation services; Rust host injection/defaults remain explicit. Exact

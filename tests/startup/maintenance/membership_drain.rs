@@ -229,7 +229,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     );
     h.elect(1);
     let source = h.nodes.remove(0);
-    drain_wire_nodes(vec![source]);
+    drain_wire_nodes(vec![source], h.clock);
     assert!(matches!(
         h.submit(
             0,

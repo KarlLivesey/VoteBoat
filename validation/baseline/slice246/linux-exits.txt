@@ -1,0 +1,4 @@
+startup-default 0
+strict 0
+profile-startup-default 0
+profile-strict 0

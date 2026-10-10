@@ -58,7 +58,7 @@ impl History {
         h.open(NativeOpenMode::Create, version);
         if member {
             // Membership recovery cannot invent a new voter from empty files.
-            drain_wire_nodes(std::mem::take(&mut h.nodes));
+            drain_wire_nodes(std::mem::take(&mut h.nodes), h.clock);
             h.open(NativeOpenMode::Recover, version);
         }
         h
@@ -82,11 +82,23 @@ impl History {
                         startup: c,
                         provisioned_stores: self.bootstrap.voter_stores.clone(),
                     }
-                    .open_with_protocol(self.protocol, app, wake, MonoTime(0))
+                    .open_with_protocol_and_timers(
+                        self.protocol,
+                        NativeTimingProfile::Throughput.timers(),
+                        app,
+                        wake,
+                        MonoTime(0),
+                    )
                     .unwrap()
                 } else {
-                    c.open_with_protocol(self.protocol, app, wake, MonoTime(0))
-                        .unwrap()
+                    c.open_with_protocol_and_timers(
+                        self.protocol,
+                        NativeTimingProfile::Throughput.timers(),
+                        app,
+                        wake,
+                        MonoTime(0),
+                    )
+                    .unwrap()
                 }
             })
             .collect();
@@ -276,11 +288,11 @@ impl History {
                 (0..3).all(|id| h.core(id).state().base_index() >= index)
             });
         }
-        drain_wire_nodes(std::mem::take(&mut self.nodes));
+        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
         self.open(NativeOpenMode::Recover, 8);
     }
     fn close(mut self) {
-        drain_wire_nodes(std::mem::take(&mut self.nodes));
+        drain_wire_nodes(std::mem::take(&mut self.nodes), self.clock);
         std::fs::remove_dir_all(&self.directory).unwrap();
     }
 }

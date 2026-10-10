@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "base_revision": "9c952aa1db234ecc00d0bb145b177756551bcac2",
+  "scope": "Native host epoch shutdown and explicit durable-node test assembly conformance",
+  "production_behavior_change": false,
+  "new_public_seam": false,
+  "core_or_persistent_format_change": false,
+  "low_level_defaults_changed": false,
+  "caller_or_cleanup_deadlines_changed": false,
+  "quorum_or_sync_weakened": false,
+  "source_manifest_sha256": "36af9a882a1010c6934e13b85b3e67b16821845ea81efd81b4d247d97e32c8ff",
+  "applied_patch_sha256": {
+    "clock": "59319f6673beeedc924ab181118dd8e7196bc7fa051a2ef0c957a8184b299e0e",
+    "profile_delta": "72b7badeee86357fabd7106777bba0dbaea98a21361ce34f3cd5af8ed090b614"
+  },
+  "published_patch_sha256": "031b03d4afe6a071daaec0d82dbe6b73dd0762c4f59d44088a65d25db8d4df99",
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 1,
+      "exit": 101,
+      "condition": "Old fixed10000ms helper retained while new host-clock argument is ignored; actual native owner at20000ms fails TimeWentBack. Initial nested-caller compile failures retained separately."
+    },
+    "linux": {
+      "clock_only": {
+        "all": {
+          "pass": 48,
+          "fail": 0
+        },
+        "default": {
+          "pass": 34,
+          "fail": 0
+        },
+        "strict": "zero diagnostics"
+      },
+      "declared_profile": {
+        "all": {
+          "pass": 48,
+          "fail": 0
+        },
+        "default": {
+          "pass": 34,
+          "fail": 0
+        },
+        "strict": "zero diagnostics"
+      }
+    },
+    "mac": {
+      "clock_only": {
+        "all": {
+          "pass": 40,
+          "fail": 8
+        },
+        "default": {
+          "pass": 31,
+          "fail": 3
+        },
+        "strict": "zero diagnostics",
+        "interpretation": "Elapsed-epoch regression passes; no TimeWentBack; maintenance/election/read assumptions remain"
+      },
+      "declared_profile": {
+        "all": {
+          "pass": 48,
+          "fail": 0
+        },
+        "default": {
+          "pass": 34,
+          "fail": 0
+        },
+        "strict": "zero diagnostics",
+        "exit": 0
+      },
+      "source_hashes": "all8 pass",
+      "environment": "arm64/macOS27.0/installed stable Rust1.98.0; CI pins1.98.1; original default libtest concurrency12; host settings unchanged"
+    },
+    "inventory": 108,
+    "conformance": "9 partial reviews/68 operations; finite metadata evidence",
+    "feature_configurations": "sequential per independent host"
+  },
+  "publication": {
+    "normalization": "Workspace/task paths replaced, trailing whitespace/final blanks removed; patch context whitespace normalized; raw applied digests recorded separately",
+    "original_local_logs": "target/slice246-raw-local",
+    "original_mac_logs": "target/slice246-macos-final",
+    "failed_mac_stores": "retained owned task roots"
+  },
+  "limits": "All native startup tests pass under the explicitly declared durable assembly on both hosts. No statistical performance, general liveness, full platform/P0-P7 or security proof. Mac245 counter191/5 and default135/2 remain separate and unchanged by this test-only correction."
+}

@@ -167,7 +167,7 @@ fn static_and_member_startup_install_the_recorded_generation() {
     );
     let token = node.local().owner.deadline(group()).unwrap();
     assert!((1500..3000).contains(&token.deadline.0));
-    drain_wire_nodes(vec![node]);
+    drain_wire_nodes(vec![node], Instant::now());
     let mut recovered = config(root.clone(), NativeOpenMode::Recover);
     recovered.tls = recovered.tls.with_wire_version(7).unwrap();
     let record = record(&recovered, &recovered.bootstrap.voter_stores, 2);
@@ -194,7 +194,7 @@ fn static_and_member_startup_install_the_recorded_generation() {
     );
     let token = node.local().owner.deadline(group()).unwrap();
     assert!((1500..3000).contains(&token.deadline.0));
-    drain_wire_nodes(vec![node]);
+    drain_wire_nodes(vec![node], Instant::now());
     std::fs::remove_dir_all(root).unwrap();
 }
 

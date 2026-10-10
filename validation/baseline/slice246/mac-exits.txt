@@ -1,0 +1,6 @@
+startup-all 101
+startup-default 101
+strict 0
+profile-startup-all 0
+profile-startup-default 0
+profile-strict 0

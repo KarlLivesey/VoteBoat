@@ -81,7 +81,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
             ..
         }
     ));
-    drain_wire_nodes(std::mem::take(&mut h.nodes));
+    drain_wire_nodes(std::mem::take(&mut h.nodes), h.clock);
 }
 
 fn rejects_unassigned_source(h: &mut History, intent: LeadershipIntent) {
