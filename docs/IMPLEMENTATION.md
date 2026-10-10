@@ -88,10 +88,16 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Current priority is sensible feature completion: finish a complete usable path,
-check the failures it introduces, and advance to the next capability. Reparenting154
-and activated partial sources155 have selected embedding/native evidence.
-Metadata authority movement156 is current. Broader validation remains explicit.
+Current priority is restoring and maintaining zero repository-wide lint diagnostics.
+
+| Deliverable | Purpose and macro link | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current: strict lint cleanup | Keep all implemented milestones maintainable; separate oversized test histories into explicit phases without changing behavior. | Existing fixtures, fault schedules and assertions. | Formatting plus all-target Clippy with all features and no default features both report zero; affected tests pass. |
+| Next: enforced local pre-push checks | Preserve that baseline during normal development across all milestones. | Both strict profiles clean. | Tracked hook runs formatting and both profiles, blocks a failing check, and is installed for this checkout. |
+| Then: resume metadata authority movement156 | Advance recursive responsibilities and split/merge while preserving the usable static service. | Clean baseline and existing154/155 contracts. | Bounded schema plan, real data/retry/restart evidence and strict local checks for each slice. |
+
+The earlier capability sketches below remain design context, not evidence of
+completion. No additional feature prerequisites are introduced by this cleanup.
 
 #### 154d3 schema sketch (planned, before implementation)
 
@@ -14321,3 +14327,71 @@ cases pass. The created-group and namespace files are counted with their former
 creation.rs parent. Formatting and whitespace checks pass. Continue the current
 mini item with the106 remaining all-feature diagnostics and58 core diagnostics;
 install/verify the hook only when both full commands reach zero.
+
+### Membership/readiness fixture cleanup — schema plan
+
+Separate joint/final status observation from rollback/retry, and isolate snapshot
+membership invariants from the compaction history that exercises them. In
+readiness checks, separate malformed requests and capability cases from the
+successful exchange, while retaining the same learner/session, durable prefix,
+pending write and stale proof checks. No protocol behavior changes. Acceptance:
+full membership/learner suites and both strict scans; current mini item1.
+
+### Worker fixture cleanup — schema plan
+
+Separate live-transport polling, simulated-frame polling and bounded delivery
+from the convergence loop. Keep the same visit limits, duplicate schedule,
+rejected-message ownership and end-to-end deadline. Extract the deliberately
+held group history and native worker construction; preserve the surviving
+quorum, reopened binding and all100-group value checks. Acceptance: worker
+suite plus both strict scans and assertion inventory; current mini item1.
+
+### Member-recovery fixture cleanup — schema plan
+
+Separate receiver construction from witness authorization, divergent suffix
+fault injection and committed-checkpoint installation. Keep the same bootstrap,
+store session and initial commit, and return the complete owned fixture so the
+caller retains all original crash/reopen and stale-authority checks. Acceptance:
+member-recovery suite, assertion inventory and strict scans; current mini item1.
+
+### Snapshot-worker history cleanup — schema plan
+
+Make the native snapshot test state explicit (owner, WAL worker, snapshot
+worker, router, application and original binding). Separate initial storage,
+receipt-loss boundaries and final file recovery. Keep every phase number,
+original pin check, concurrent-group progress check, Written-before-Durable
+assertion and duplicate application retry. Helpers must not consume or release
+resources earlier than the existing test. Acceptance: snapshot-worker suite,
+assertion inventory and both strict profiles; current mini item1.
+
+### Created-namespace fixture cleanup — schema plan
+
+Separate initialization/publication from actual target imports and activation
+retries, and checkpoint corruption from fixed-profile rejection. Keep the
+created source's original lineage, freeze index and exported images. Native
+fault tests retain every byte cut and the same replayed retry; only prefix
+seeding and retry assertions gain names. The separate roomy transfer history
+continues checking locks and a subsequent merge. Acceptance: namespace-creation
+suite, assertion inventory and strict scans; current mini item1.
+
+### Insertion test phase cleanup — schema plan
+
+Separate imports, publication atomicity/reserved-capacity checks, activation
+service, and later child movement. Cross-authority cases retain independent
+parent/source state and inactive targets until the original completion.
+Nested cases keep their original lineage, hop-budget checks and retirement
+proofs. Fault schedules and checkpoint assertions remain in place. Acceptance:
+insertion suite, assertion inventory and both strict profiles; current mini item1.
+
+### Membership, storage recovery and insertion cleanup — implemented evidence
+
+Strict all-target scans now report63 diagnostics with all features and31 with
+no default features, down from106/58. Production library, binary and examples
+remain clean. All remaining diagnostics concern test function length or
+cognitive complexity; no lint levels, thresholds or allowances changed.
+
+Local all-feature tests passed: membership32, learners24, worker9,
+member-recovery38, snapshot-worker14, namespace-creation12 and insertion11.
+All assertions in these changed files were retained. Formatting and whitespace
+checks passed. This is partial cleanup evidence, not a clean-repository claim.
+The requested pre-push hook is still pending both strict profiles reaching zero.

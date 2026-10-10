@@ -651,25 +651,7 @@ fn readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_
             })
             .unwrap();
         let query = sent(&effects, 4);
-        let before = learner.state().clone();
-        let mut future = query.clone();
-        future.term += 10;
-        if let Rpc::LearnerReadinessRequest(r) = &mut future.rpc {
-            r.term = future.term;
-        }
-        assert!(learner.step(Event::Receive(future)).unwrap().is_empty());
-        assert_eq!(learner.state(), &before);
-        assert!(!learner.has_pending_dependency());
-        let mut ahead = query.clone();
-        if let Rpc::LearnerReadinessRequest(r) = &mut ahead.rpc {
-            r.index += 1;
-        }
-        let denied = sent(&learner.step(Event::Receive(ahead)).unwrap(), 1);
-        assert!(matches!(
-            denied.rpc,
-            Rpc::LearnerReadinessReply { ready: false, .. }
-        ));
-        assert!(!learner.has_pending_dependency());
+        let before = reject_invalid_readiness_queries(&mut learner, &query);
         let effects = learner.step(Event::Receive(query.clone())).unwrap();
         let [effect @ Effect::VerifyLearnerReadiness(_)] = effects.as_slice() else {
             panic!()
@@ -828,11 +810,8 @@ mod native_exchange {
             .into(),
         }
     }
-    fn channels(
-        a: LocalIdentity,
-        b: LocalIdentity,
-        quic: bool,
-    ) -> (Channel, Channel, NativeOutbound, NativeOutbound) {
+    type SessionPair = (Box<dyn SecureSession>, Box<dyn SecureSession>);
+    fn readiness_sessions(a: LocalIdentity, b: LocalIdentity, quic: bool) -> SessionPair {
         let ca = support::tls::configuration(1).with_wire_version(4).unwrap();
         let cb = support::tls::configuration(2).with_wire_version(4).unwrap();
         let generation = SecureSessionGeneration::new(1).unwrap();
@@ -840,7 +819,7 @@ mod native_exchange {
             write_buffer_bytes: 256,
             ..SessionLimits::default()
         };
-        let (mut sa, mut sb): (Box<dyn SecureSession>, Box<dyn SecureSession>) = if quic {
+        let (sa, sb): SessionPair = if quic {
             #[cfg(feature = "quic")]
             {
                 use voteboat::native::quic::*;
@@ -916,6 +895,14 @@ mod native_exchange {
                 ),
             )
         };
+        (sa, sb)
+    }
+    fn channels(
+        a: LocalIdentity,
+        b: LocalIdentity,
+        quic: bool,
+    ) -> (Channel, Channel, NativeOutbound, NativeOutbound) {
+        let (mut sa, mut sb) = readiness_sessions(a, b, quic);
         let clock = Instant::now();
         while sa.state() != SessionState::Ready || sb.state() != SessionState::Ready {
             let now = MonoTime(clock.elapsed().as_millis() as u64);
@@ -993,86 +980,117 @@ mod native_exchange {
         assert!(queue.is_drained());
         received.messages.into_iter().next().unwrap()
     }
-    fn run(quic: bool) {
-        let mut log = HostLogStore::new(4);
-        let (mut leader, mut learner, mut app, mut leader_log) = readiness_cluster(&mut log);
-        let mut snapshots = super::snapshots();
-        let receipt = checkpoint_application(&learner, &app, &mut snapshots).unwrap();
-        compact_replica(
-            &mut learner,
-            &mut log,
-            &mut snapshots,
-            &app,
-            receipt.reference(),
-        )
-        .unwrap();
-        let identity = readiness_visit(&learner).owner;
-        let worker_binding = SnapshotWorkerBinding {
-            store: log.binding(),
-            generation: SnapshotWorkerGeneration::new(54).unwrap(),
-        };
-        let mut worker = NativeSnapshotWorker::spawn(
-            [(group(1), snapshots)].into(),
-            worker_binding,
-            SnapshotWorkLimits::default(),
-            Arc::new(ThreadWake::current()),
-        )
-        .unwrap();
-        let mut shard = Shard::new(
-            identity,
-            ShardLimits {
-                max_groups: 2,
-                ..Default::default()
-            },
-            FairScheduler::new(2).unwrap(),
-        )
-        .unwrap();
-        shard.register(learner).unwrap();
-        let mut other_log = HostLogStore::new(4);
-        append(&mut other_log, vec![LogMutation::Create(bootstrap(2, 4))]);
-        shard
-            .register(
-                Raft::recover(
-                    node(4),
-                    other_log.binding(),
-                    other_log.state(group(2)).unwrap(),
-                    other_log.limits(),
-                )
-                .unwrap(),
+    type ReadinessOwner = EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>;
+    struct ReadinessRun {
+        log: HostLogStore,
+        leader: Raft,
+        app: Counter,
+        leader_log: HostLogStore,
+        worker: NativeSnapshotWorker<support::snapshot::HostSnapshots>,
+        router: SnapshotRouter,
+        owner: ReadinessOwner,
+        a: Channel,
+        b: Channel,
+        qa: NativeOutbound,
+        qb: NativeOutbound,
+        timeline: Instant,
+    }
+    impl ReadinessRun {
+        fn new(quic: bool) -> Self {
+            let mut log = HostLogStore::new(4);
+            let (leader, mut learner, app, leader_log) = readiness_cluster(&mut log);
+            let mut snapshots = super::snapshots();
+            let receipt = checkpoint_application(&learner, &app, &mut snapshots).unwrap();
+            compact_replica(
+                &mut learner,
+                &mut log,
+                &mut snapshots,
+                &app,
+                receipt.reference(),
             )
             .unwrap();
-        let runtime = TimedShard::new(
-            shard,
-            DeadlineQueue::new(identity, 2).unwrap(),
-            JitterEntropy::new(54),
-            TimerConfig::default(),
-            MonoTime(0),
-        )
-        .unwrap();
-        let mut owner = EffectOwner::new(
-            runtime,
-            WorkerBinding {
+            let identity = readiness_visit(&learner).owner;
+            let worker_binding = SnapshotWorkerBinding {
                 store: log.binding(),
-                generation: StorageWorkerGeneration::new(1).unwrap(),
-            },
-            EffectOwnerLimits::default(),
-        )
-        .unwrap();
-        let mut router =
-            SnapshotRouter::new(identity, worker_binding, SnapshotRouterLimits::default()).unwrap();
-        let (mut a, mut b, mut qa, mut qb) = channels(
-            LocalIdentity {
-                node: node(1),
-                store: leader.storage_binding(),
-            },
-            LocalIdentity {
-                node: node(4),
-                store: log.binding(),
-            },
-            quic,
-        );
-        let timeline = Instant::now();
-        for (capable, closing) in [(false, false), (true, false), (true, true)] {
+                generation: SnapshotWorkerGeneration::new(54).unwrap(),
+            };
+            let worker = NativeSnapshotWorker::spawn(
+                [(group(1), snapshots)].into(),
+                worker_binding,
+                SnapshotWorkLimits::default(),
+                Arc::new(ThreadWake::current()),
+            )
+            .unwrap();
+            let mut shard = Shard::new(
+                identity,
+                ShardLimits {
+                    max_groups: 2,
+                    ..Default::default()
+                },
+                FairScheduler::new(2).unwrap(),
+            )
+            .unwrap();
+            shard.register(learner).unwrap();
+            let mut other_log = HostLogStore::new(4);
+            append(&mut other_log, vec![LogMutation::Create(bootstrap(2, 4))]);
+            shard
+                .register(
+                    Raft::recover(
+                        node(4),
+                        other_log.binding(),
+                        other_log.state(group(2)).unwrap(),
+                        other_log.limits(),
+                    )
+                    .unwrap(),
+                )
+                .unwrap();
+            let runtime = TimedShard::new(
+                shard,
+                DeadlineQueue::new(identity, 2).unwrap(),
+                JitterEntropy::new(54),
+                TimerConfig::default(),
+                MonoTime(0),
+            )
+            .unwrap();
+            let owner = EffectOwner::new(
+                runtime,
+                WorkerBinding {
+                    store: log.binding(),
+                    generation: StorageWorkerGeneration::new(1).unwrap(),
+                },
+                EffectOwnerLimits::default(),
+            )
+            .unwrap();
+            let router =
+                SnapshotRouter::new(identity, worker_binding, SnapshotRouterLimits::default())
+                    .unwrap();
+            let (a, b, qa, qb) = channels(
+                LocalIdentity {
+                    node: node(1),
+                    store: leader.storage_binding(),
+                },
+                LocalIdentity {
+                    node: node(4),
+                    store: log.binding(),
+                },
+                quic,
+            );
+            Self {
+                log,
+                leader,
+                app,
+                leader_log,
+                worker,
+                router,
+                owner,
+                a,
+                b,
+                qa,
+                qb,
+                timeline: Instant::now(),
+            }
+        }
+        fn round(&mut self, capable: bool, closing: bool) {
             let requirements = if capable {
                 readiness_requirements()
             } else {
@@ -1082,30 +1100,42 @@ mod native_exchange {
                 }
             };
             let query = sent(
-                &leader
+                &self
+                    .leader
                     .step(Event::CheckLearnerReadiness {
                         learner: learner_peer(),
-                        session: log.binding().session,
+                        session: self.log.binding().session,
                         requirements,
                     })
                     .unwrap(),
                 4,
             );
-            let query = transfer(&mut a, &mut b, &mut qa, query, &timeline);
-            owner.admit(group(1), Event::Receive(query)).unwrap();
-            assert!(owner.advance(MonoTime(0), 1).unwrap()[0].error.is_none());
-            let lease = owner.take_effect().unwrap().unwrap();
+            let query = transfer(
+                &mut self.a,
+                &mut self.b,
+                &mut self.qa,
+                query,
+                &self.timeline,
+            );
+            self.owner.admit(group(1), Event::Receive(query)).unwrap();
+            assert!(self.owner.advance(MonoTime(0), 1).unwrap()[0]
+                .error
+                .is_none());
+            let lease = self.owner.take_effect().unwrap().unwrap();
             assert!(matches!(lease.effect, Effect::VerifyLearnerReadiness(_)));
             let visit = lease.ticket.visit;
-            let ticket = router.submit(&mut owner, &mut worker, lease, &app).unwrap();
-            assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+            let ticket = self
+                .router
+                .submit(&mut self.owner, &mut self.worker, lease, &self.app)
+                .unwrap();
+            assert!(self.owner.core(group(1)).unwrap().has_pending_dependency());
             // Polling is deliberately withheld. Provider completion cannot release
             // the original visit or its credits, and another group still runs.
-            assert_eq!(worker.usage().requests, 1);
+            assert_eq!(self.worker.usage().requests, 1);
             assert_eq!(
-                router.deliver(
-                    &mut owner,
-                    &mut app,
+                self.router.deliver(
+                    &mut self.owner,
+                    &mut self.app,
                     SnapshotWorkEvent {
                         request: SnapshotWorkTicket {
                             sequence: ticket.sequence + 1,
@@ -1118,75 +1148,94 @@ mod native_exchange {
                 ),
                 Err(SnapshotRouteError::StaleCompletion)
             );
-            assert!(!owner.is_failed());
+            assert!(!self.owner.is_failed());
             if closing {
-                owner.close_admission().unwrap();
-                worker.close();
-                assert!(!owner.is_drained());
-                assert!(!worker.is_drained());
+                self.owner.close_admission().unwrap();
+                self.worker.close();
+                assert!(!self.owner.is_drained());
+                assert!(!self.worker.is_drained());
             } else {
-                owner
+                self.owner
                     .admit(group(2), Event::CancelReplicationAuthorization)
                     .unwrap();
-                let steps = owner.advance(MonoTime(0), 1).unwrap();
+                let steps = self.owner.advance(MonoTime(0), 1).unwrap();
                 assert_eq!(steps.len(), 1);
                 assert!(steps[0].error.is_none());
             }
-            assert_eq!(worker.usage().requests, 1);
-            let clock = Instant::now();
-            let event = loop {
-                if let Some(event) = worker.poll(1).pop() {
-                    break event;
-                }
-                assert!(clock.elapsed() < Duration::from_secs(5));
-                std::thread::park_timeout(Duration::from_millis(1));
-            };
+            assert_eq!(self.worker.usage().requests, 1);
+            let event = self.wait_snapshot();
             assert_eq!(event.request, ticket);
-            router
-                .deliver(&mut owner, &mut app, event, MonoTime(0))
+            self.router
+                .deliver(&mut self.owner, &mut self.app, event, MonoTime(0))
                 .unwrap();
-            assert_eq!(router.usage().requests, 0);
-            assert!(!owner.core(group(1)).unwrap().has_pending_dependency());
-            let lease = owner.take_effect().unwrap().unwrap();
+            assert_eq!(self.router.usage().requests, 0);
+            assert!(!self.owner.core(group(1)).unwrap().has_pending_dependency());
+            let lease = self.owner.take_effect().unwrap().unwrap();
             let Effect::Send(reply) = lease.effect else {
                 panic!()
             };
-            owner.release_transferred_send(lease.ticket).unwrap();
-            let reply = transfer(&mut b, &mut a, &mut qb, reply, &timeline);
+            self.owner.release_transferred_send(lease.ticket).unwrap();
+            let reply = transfer(
+                &mut self.b,
+                &mut self.a,
+                &mut self.qb,
+                reply,
+                &self.timeline,
+            );
             assert!(
                 matches!(reply.rpc, Rpc::LearnerReadinessReply { ready, .. } if ready == capable)
             );
-            leader.step(Event::Receive(reply)).unwrap();
-            assert_eq!(leader.ready_learner().is_some(), capable);
-            assert_eq!(worker.usage(), SnapshotWorkUsage::default());
+            self.leader.step(Event::Receive(reply)).unwrap();
+            assert_eq!(self.leader.ready_learner().is_some(), capable);
+            assert_eq!(self.worker.usage(), SnapshotWorkUsage::default());
         }
-        leader
-            .check_learner_readiness(leader.ready_learner().unwrap(), log.binding())
-            .unwrap();
-        let proof = PromotionReadiness {
-            ready: leader.ready_learner().unwrap().clone(),
-            authenticated: a.binding().peer.store,
-        };
-        // Network-derived evidence now feeds the same local journal admission.
-        // Configuration delivery to other nodes remains independently gated.
-        let effects = leader
-            .step(Event::Configure(Box::new(proposal(
-                &[1, 2, 4],
-                vec![proof],
-            ))))
-            .unwrap();
-        assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
-        assert!(leader.ready_learner().is_none());
-        persist(&mut leader, &mut leader_log, effects);
-        assert!(leader.membership().joint().is_some());
-        assert_eq!(owner.usage().active_visits, 0);
-        assert!(owner.is_drained());
-        worker.close();
-        let clock = Instant::now();
-        while worker.try_reclaim().unwrap().is_none() {
-            assert!(clock.elapsed() < Duration::from_secs(5));
-            std::thread::park_timeout(Duration::from_millis(1));
+        fn wait_snapshot(&mut self) -> SnapshotWorkEvent {
+            let clock = Instant::now();
+            loop {
+                if let Some(event) = self.worker.poll(1).pop() {
+                    return event;
+                }
+                assert!(clock.elapsed() < Duration::from_secs(5));
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
         }
+        fn finish(mut self) {
+            self.leader
+                .check_learner_readiness(self.leader.ready_learner().unwrap(), self.log.binding())
+                .unwrap();
+            let proof = PromotionReadiness {
+                ready: self.leader.ready_learner().unwrap().clone(),
+                authenticated: self.a.binding().peer.store,
+            };
+            // Network-derived evidence now feeds the same local journal admission.
+            // Configuration delivery to other nodes remains independently gated.
+            let effects = self
+                .leader
+                .step(Event::Configure(Box::new(proposal(
+                    &[1, 2, 4],
+                    vec![proof],
+                ))))
+                .unwrap();
+            assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+            assert!(self.leader.ready_learner().is_none());
+            persist(&mut self.leader, &mut self.leader_log, effects);
+            assert!(self.leader.membership().joint().is_some());
+            assert_eq!(self.owner.usage().active_visits, 0);
+            assert!(self.owner.is_drained());
+            self.worker.close();
+            let clock = Instant::now();
+            while self.worker.try_reclaim().unwrap().is_none() {
+                assert!(clock.elapsed() < Duration::from_secs(5));
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+        }
+    }
+    fn run(quic: bool) {
+        let mut run = ReadinessRun::new(quic);
+        for (capable, closing) in [(false, false), (true, false), (true, true)] {
+            run.round(capable, closing);
+        }
+        run.finish();
     }
     #[test]
     fn tcp_readiness_checks_compacted_learner_through_worker_and_original_owner() {
@@ -1239,27 +1288,7 @@ fn readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix() {
         leader.storage_binding(),
     )
     .unwrap();
-    for changed in [
-        LearnerReadinessRequest {
-            index: request.index + 1,
-            ..request
-        },
-        LearnerReadinessRequest {
-            term: request.term + 1,
-            ..request
-        },
-        LearnerReadinessRequest {
-            configuration: cid(99),
-            ..request
-        },
-        LearnerReadinessRequest {
-            requirements: ReadinessRequirements {
-                application_schema: 99,
-                ..request.requirements
-            },
-            ..request
-        },
-    ] {
+    for changed in changed_readiness_requests(request) {
         assert_eq!(
             leader.accept_learner_readiness(
                 LearnerReadinessReceipt {
@@ -1333,20 +1362,7 @@ fn readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes()
             readiness_requirements(),
         )
         .unwrap();
-    for requirements in [
-        ReadinessRequirements {
-            application_schema: 99,
-            ..request.requirements
-        },
-        ReadinessRequirements {
-            command_bytes: usize::MAX,
-            ..request.requirements
-        },
-        ReadinessRequirements {
-            snapshot_bytes: usize::MAX,
-            ..request.requirements
-        },
-    ] {
+    for requirements in changed_readiness_requirements(request.requirements) {
         assert_eq!(
             verify_learner_readiness(
                 &learner,
@@ -1547,22 +1563,7 @@ fn native_readiness_reopens_compacted_files_and_requires_fresh_peer_session() {
     use voteboat::native::{log_store::*, snapshot_store::*};
     let root = std::env::temp_dir().join(format!("voteboat-readiness52-{}", std::process::id()));
     std::fs::create_dir(&root).unwrap();
-    let mut log = NativeLogStore::create(
-        FileLogIo::create(root.join("log")).unwrap(),
-        identity(4),
-        LogLimits::default(),
-    )
-    .unwrap();
-    let si = SnapshotIdentity {
-        store: identity(4),
-        group: group(1),
-    };
-    let mut snapshots = NativeSnapshotStore::create(
-        FileSnapshotIo::create(root.join("snapshot")).unwrap(),
-        si,
-        SnapshotLimits::default(),
-    )
-    .unwrap();
+    let (mut log, mut snapshots, si) = readiness_file_stores(&root);
     let (mut leader, mut learner, app, _leader_log) = readiness_cluster(&mut log);
     let old_binding = log.binding();
     let request = leader
@@ -1683,42 +1684,7 @@ fn readiness_expires_when_commit_advances_or_leader_changes_term() {
             readiness_requirements(),
         )
         .unwrap();
-    let effects = leader
-        .step(Event::Propose {
-            operation: OperationId::new(99).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
-        })
-        .unwrap();
-    assert_eq!(
-        leader.check_learner_readiness(&ready, log.binding()),
-        Err(ReadinessError::Consensus(RaftError::Busy))
-    );
-    let effects = persist(&mut leader, &mut leader_log, effects);
-    let append_two = sent(&effects, 2);
-    // Complete the heartbeat already in flight before acknowledging the new
-    // command; a reply cannot exceed the original request's matching end.
-    let effects = leader
-        .step(Event::Receive(response(
-            &append_two,
-            2,
-            Rpc::Appended {
-                success: true,
-                matching_index: 2,
-            },
-        )))
-        .unwrap();
-    let append_two = sent(&effects, 2);
-    let effects = leader
-        .step(Event::Receive(response(
-            &append_two,
-            2,
-            Rpc::Appended {
-                success: true,
-                matching_index: 3,
-            },
-        )))
-        .unwrap();
-    persist(&mut leader, &mut leader_log, effects);
+    advance_readiness_commit(&mut leader, &mut leader_log, &ready, log.binding());
     assert_eq!(
         leader.check_learner_readiness(&ready, log.binding()),
         Err(ReadinessError::Stale)
@@ -2040,59 +2006,12 @@ fn native_configuration_proposals_reopen_committed_joint_and_final_journal() {
 #[cfg(feature = "native")]
 #[test]
 fn queued_promotion_rechecks_live_bindings_and_defaults_to_rejection() {
-    use voteboat::{native::runtime::*, runtime::*, worker::*};
+    use voteboat::runtime::*;
     let mut log = HostLogStore::new(4);
     let (mut leader, learner, app, _leader_log) = readiness_cluster(&mut log);
     let proof = ready_proof(&mut leader, &learner, &log, &app);
     let proposed = proposal(&[1, 2, 4], vec![proof.clone()]);
-    let identity = RuntimeOwner {
-        store: leader.storage_binding(),
-        lane: ExecutionLaneId::new(1).unwrap(),
-        generation: RuntimeGeneration::new(1).unwrap(),
-    };
-    let mut shard = Shard::new(
-        identity,
-        ShardLimits {
-            max_groups: 1,
-            max_event_bytes: 32 * 1024,
-            ..ShardLimits::default()
-        },
-        FairScheduler::new(1).unwrap(),
-    )
-    .unwrap();
-    shard.register(leader).unwrap();
-    let timed = TimedShard::new(
-        shard,
-        DeadlineQueue::new(identity, 1).unwrap(),
-        JitterEntropy::new(53),
-        TimerConfig::default(),
-        MonoTime(0),
-    )
-    .unwrap();
-    let mut owner = EffectOwner::new(
-        timed,
-        WorkerBinding {
-            store: identity.store,
-            generation: StorageWorkerGeneration::new(1).unwrap(),
-        },
-        EffectOwnerLimits::default(),
-    )
-    .unwrap();
-    owner
-        .set_connection_budget(
-            ConnectionBudget::new(
-                voteboat::secure::LocalIdentity {
-                    node: node(1),
-                    store: identity.store,
-                },
-                4,
-                (2..=5)
-                    .map(|n| (node(n), support::identity(n as u128)))
-                    .collect(),
-            )
-            .unwrap(),
-        )
-        .unwrap();
+    let mut owner = queued_promotion_owner(leader);
     let before = owner.core(group(1)).unwrap().state().clone();
     let mut oversized = proposed.clone();
     oversized.readiness.reserve_exact(50000);
@@ -2311,4 +2230,204 @@ fn readiness_refuses_a_current_checkpoint_that_understates_configured_lifetime_c
         Err(ReadinessError::Capability)
     );
     assert!(leader.ready_learner().is_none());
+}
+
+fn reject_invalid_readiness_queries(learner: &mut Raft, query: &Message) -> GroupLog {
+    let before = learner.state().clone();
+    let mut future = query.clone();
+    future.term += 10;
+    if let Rpc::LearnerReadinessRequest(r) = &mut future.rpc {
+        r.term = future.term;
+    }
+    assert!(learner.step(Event::Receive(future)).unwrap().is_empty());
+    assert_eq!(learner.state(), &before);
+    assert!(!learner.has_pending_dependency());
+    let mut ahead = query.clone();
+    if let Rpc::LearnerReadinessRequest(r) = &mut ahead.rpc {
+        r.index += 1;
+    }
+    let denied = sent(&learner.step(Event::Receive(ahead)).unwrap(), 1);
+    assert!(matches!(
+        denied.rpc,
+        Rpc::LearnerReadinessReply { ready: false, .. }
+    ));
+    assert!(!learner.has_pending_dependency());
+    before
+}
+
+fn changed_readiness_requests(request: LearnerReadinessRequest) -> [LearnerReadinessRequest; 4] {
+    [
+        LearnerReadinessRequest {
+            index: request.index + 1,
+            ..request
+        },
+        LearnerReadinessRequest {
+            term: request.term + 1,
+            ..request
+        },
+        LearnerReadinessRequest {
+            configuration: cid(99),
+            ..request
+        },
+        LearnerReadinessRequest {
+            requirements: ReadinessRequirements {
+                application_schema: 99,
+                ..request.requirements
+            },
+            ..request
+        },
+    ]
+}
+
+fn changed_readiness_requirements(
+    requirements: ReadinessRequirements,
+) -> [ReadinessRequirements; 3] {
+    [
+        ReadinessRequirements {
+            application_schema: 99,
+            ..requirements
+        },
+        ReadinessRequirements {
+            command_bytes: usize::MAX,
+            ..requirements
+        },
+        ReadinessRequirements {
+            snapshot_bytes: usize::MAX,
+            ..requirements
+        },
+    ]
+}
+
+fn advance_readiness_commit(
+    leader: &mut Raft,
+    leader_log: &mut HostLogStore,
+    ready: &ReadyLearner,
+    binding: StoreBinding,
+) {
+    let effects = leader
+        .step(Event::Propose {
+            operation: OperationId::new(99).unwrap(),
+            bytes: 7i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    assert_eq!(
+        leader.check_learner_readiness(ready, binding),
+        Err(ReadinessError::Consensus(RaftError::Busy))
+    );
+    let effects = persist(leader, leader_log, effects);
+    let append_two = sent(&effects, 2);
+    // Complete the heartbeat already in flight before acknowledging the new
+    // command; a reply cannot exceed the original request's matching end.
+    let effects = leader
+        .step(Event::Receive(response(
+            &append_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 2,
+            },
+        )))
+        .unwrap();
+    let append_two = sent(&effects, 2);
+    let effects = leader
+        .step(Event::Receive(response(
+            &append_two,
+            2,
+            Rpc::Appended {
+                success: true,
+                matching_index: 3,
+            },
+        )))
+        .unwrap();
+    persist(leader, leader_log, effects);
+}
+
+#[cfg(feature = "native")]
+fn queued_promotion_owner(
+    leader: Raft,
+) -> voteboat::runtime::EffectOwner<
+    voteboat::native::runtime::FairScheduler,
+    voteboat::native::runtime::DeadlineQueue,
+    voteboat::native::runtime::JitterEntropy,
+> {
+    use voteboat::{native::runtime::*, runtime::*, worker::*};
+    let identity = RuntimeOwner {
+        store: leader.storage_binding(),
+        lane: ExecutionLaneId::new(1).unwrap(),
+        generation: RuntimeGeneration::new(1).unwrap(),
+    };
+    let mut shard = Shard::new(
+        identity,
+        ShardLimits {
+            max_groups: 1,
+            max_event_bytes: 32 * 1024,
+            ..ShardLimits::default()
+        },
+        FairScheduler::new(1).unwrap(),
+    )
+    .unwrap();
+    shard.register(leader).unwrap();
+    let timed = TimedShard::new(
+        shard,
+        DeadlineQueue::new(identity, 1).unwrap(),
+        JitterEntropy::new(53),
+        TimerConfig::default(),
+        MonoTime(0),
+    )
+    .unwrap();
+    let mut owner = EffectOwner::new(
+        timed,
+        WorkerBinding {
+            store: identity.store,
+            generation: StorageWorkerGeneration::new(1).unwrap(),
+        },
+        EffectOwnerLimits::default(),
+    )
+    .unwrap();
+    owner
+        .set_connection_budget(
+            ConnectionBudget::new(
+                voteboat::secure::LocalIdentity {
+                    node: node(1),
+                    store: identity.store,
+                },
+                4,
+                (2..=5)
+                    .map(|n| (node(n), support::identity(n as u128)))
+                    .collect(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+    owner
+}
+
+#[cfg(feature = "native")]
+fn readiness_file_stores(
+    root: &std::path::Path,
+) -> (
+    voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::FileLogIo>,
+    voteboat::native::snapshot_store::NativeSnapshotStore<
+        voteboat::native::snapshot_store::FileSnapshotIo,
+    >,
+    SnapshotIdentity,
+) {
+    use voteboat::native::{log_store::*, snapshot_store::*};
+    let log = NativeLogStore::create(
+        FileLogIo::create(root.join("log")).unwrap(),
+        identity(4),
+        LogLimits::default(),
+    )
+    .unwrap();
+    let si = SnapshotIdentity {
+        store: identity(4),
+        group: group(1),
+    };
+    let snapshots = NativeSnapshotStore::create(
+        FileSnapshotIo::create(root.join("snapshot")).unwrap(),
+        si,
+        SnapshotLimits::default(),
+    )
+    .unwrap();
+    (log, snapshots, si)
 }

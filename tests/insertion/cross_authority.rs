@@ -264,56 +264,7 @@ fn cross_authority_insert_fence_import_publish_refresh_activate_and_retry_surviv
         DirectoryOutcome::TransferIntentRecorded
     );
     d = recover(&d);
-    let mut s = Source::new(
-        RoutedApplication::new(
-            group(20),
-            before(),
-            BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
-            Policy,
-            RoutedLimits {
-                operations: 32,
-                semantic_bytes: 8192,
-                payload_bytes: 1024,
-                inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.error)),
-        65536,
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let source_template = s.clone();
-    let boot = s.bootstrap_command(100000).unwrap();
-    commit(&mut s, 100, boot);
-    commit(&mut s, 1, nested::data_for(&before(), 20, 1, 7));
-    commit(&mut s, 2, nested::data_for(&before(), 20, 200, 11));
-    commit(
-        &mut s,
-        300,
-        Source::freeze_command(&intent, 100000).unwrap(),
-    );
-    let SourceRead::Freeze(Some(status)) =
-        s.read_at(s.applied_index(), SourceQuery::Freeze).unwrap()
-    else {
-        panic!("fence");
-    };
-    let cp = s.checkpoint(100000).unwrap();
-    let mut reopened = source_template;
-    reopened
-        .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
-        .unwrap();
-    s = reopened;
-    assert_eq!(
-        s.read_at(
-            s.applied_index(),
-            SourceQuery::Data(RoutedQuery {
-                hint: nested::source_hint(&before(), 20, 1),
-                key: vec![1],
-                query: vec![1]
-            })
-        )
-        .unwrap(),
-        SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
-    );
+    let (s, status) = frozen_cross_authority_source(&intent);
     let (mut targets, decision) = nested::handoff(&mut d, &intent, 300, status, |g| {
         s.export_target(g, 65536).unwrap()
     });
@@ -379,46 +330,13 @@ fn cross_authority_insert_fence_import_publish_refresh_activate_and_retry_surviv
         DirectoryOutcome::DelegationPublished(RouteGeneration::new(2).unwrap())
     );
     nested::activate(&mut targets, 300, decision);
-    for (i, g, key, value, operation) in [(0, 21, 1, 7, 1), (1, 22, 200, 11, 2)] {
-        let m = intent.target_manifest(group(g)).unwrap();
-        let cp = targets[i].checkpoint(100000).unwrap();
-        let mut t = super::nested::target_for(&intent, g, 300);
-        t.restore_checkpoint(targets[i].schema_version(), targets[i].applied_index(), &cp)
-            .unwrap();
-        assert!(matches!(
-            commit(&mut t, operation, nested::data_for(m, g, key, value)).outcome,
-            TargetOutcome::Applied(BucketReceipt {
-                duplicate: true,
-                ..
-            })
-        ));
-        assert_eq!(t.application().outbox().count(), 1);
-        assert!(matches!(
-            commit(&mut t, 3, nested::data_for(m, g, key, 1)).outcome,
-            TargetOutcome::Applied(BucketReceipt {
-                duplicate: false,
-                ..
-            })
-        ));
-        assert_eq!(
-            t.read_at(
-                t.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint: nested::source_hint(m, g, key),
-                    key: vec![key],
-                    query: vec![key]
-                })
-            )
-            .unwrap(),
-            TargetRead::Data(value + 1)
-        );
-    }
+    exercise_cross_authority_targets(&targets, &intent);
 }
 
 #[cfg(feature = "native")]
 #[test]
 fn cross_authority_native_intent_torn_frames_recover_local_creations_and_lock() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (mut p, d, plan) = setup();
     let (_, intent) = reserve(&mut p, &plan);
@@ -443,28 +361,7 @@ fn cross_authority_native_intent_torn_frames_recover_local_creations_and_lock() 
         prefix.push(entry(index, g, status.intent.encode(100000).unwrap()));
     }
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(1, 3))],
-        );
-        let state = log.state(group(1)).unwrap();
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                4,
-                Some(Suffix {
-                    from: 1,
-                    entries: prefix.clone(),
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_cross_authority_intent(&prefix);
     let (_, log) = seed();
     let state = log.state(group(1)).unwrap();
     let mutation = support::update(
@@ -590,4 +487,123 @@ fn cross_authority_pre_intent_refusal_cancels_parent_but_accepted_intent_is_forw
         .outcome,
         DirectoryOutcome::LifecycleBusy
     );
+}
+
+fn frozen_cross_authority_source(intent: &TransferIntent) -> (Source, SourceFreezeStatus) {
+    let mut s = Source::new(
+        RoutedApplication::new(
+            group(20),
+            before(),
+            BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap(),
+            Policy,
+            RoutedLimits {
+                operations: 32,
+                semantic_bytes: 8192,
+                payload_bytes: 1024,
+                inner_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.error)),
+        65536,
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    let source_template = s.clone();
+    let boot = s.bootstrap_command(100000).unwrap();
+    commit(&mut s, 100, boot);
+    commit(&mut s, 1, nested::data_for(&before(), 20, 1, 7));
+    commit(&mut s, 2, nested::data_for(&before(), 20, 200, 11));
+    commit(&mut s, 300, Source::freeze_command(intent, 100000).unwrap());
+    let SourceRead::Freeze(Some(status)) =
+        s.read_at(s.applied_index(), SourceQuery::Freeze).unwrap()
+    else {
+        panic!("fence");
+    };
+    let cp = s.checkpoint(100000).unwrap();
+    let mut reopened = source_template;
+    reopened
+        .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
+        .unwrap();
+    s = reopened;
+    assert_eq!(
+        s.read_at(
+            s.applied_index(),
+            SourceQuery::Data(RoutedQuery {
+                hint: nested::source_hint(&before(), 20, 1),
+                key: vec![1],
+                query: vec![1]
+            })
+        )
+        .unwrap(),
+        SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+    (s, status)
+}
+
+fn exercise_cross_authority_targets(targets: &[Target], intent: &TransferIntent) {
+    for (i, g, key, value, operation) in [(0, 21, 1, 7, 1), (1, 22, 200, 11, 2)] {
+        let m = intent.target_manifest(group(g)).unwrap();
+        let cp = targets[i].checkpoint(100000).unwrap();
+        let mut t = super::nested::target_for(intent, g, 300);
+        t.restore_checkpoint(targets[i].schema_version(), targets[i].applied_index(), &cp)
+            .unwrap();
+        assert!(matches!(
+            commit(&mut t, operation, nested::data_for(m, g, key, value)).outcome,
+            TargetOutcome::Applied(BucketReceipt {
+                duplicate: true,
+                ..
+            })
+        ));
+        assert_eq!(t.application().outbox().count(), 1);
+        assert!(matches!(
+            commit(&mut t, 3, nested::data_for(m, g, key, 1)).outcome,
+            TargetOutcome::Applied(BucketReceipt {
+                duplicate: false,
+                ..
+            })
+        ));
+        assert_eq!(
+            t.read_at(
+                t.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint: nested::source_hint(m, g, key),
+                    key: vec![key],
+                    query: vec![key]
+                })
+            )
+            .unwrap(),
+            TargetRead::Data(value + 1)
+        );
+    }
+}
+
+#[cfg(feature = "native")]
+fn seed_cross_authority_intent(
+    prefix: &[voteboat::log::LogEntry],
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let limits = LogLimits::default();
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(1, 3))],
+    );
+    let state = log.state(group(1)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            4,
+            Some(Suffix {
+                from: 1,
+                entries: prefix.to_vec(),
+            }),
+        )],
+    );
+    (io, log)
 }

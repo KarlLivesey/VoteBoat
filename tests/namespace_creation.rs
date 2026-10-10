@@ -358,24 +358,7 @@ fn target_never_serves_before_exact_activation_and_preserves_retries_on_restore(
     );
     let index = reopened.applied_index();
     let image = reopened.checkpoint(1000000).unwrap();
-    let binding_len = u32::from_le_bytes(image[16..20].try_into().unwrap()) as usize;
-    let ready_offset = 20 + binding_len;
-    let mut corrupt_ready = image.clone();
-    corrupt_ready[ready_offset..ready_offset + 8].copy_from_slice(&3u64.to_le_bytes());
-    assert!(target(&p)
-        .restore_checkpoint(1, index, &corrupt_ready)
-        .is_err());
-    let mut corrupt_activation = image.clone();
-    corrupt_activation[ready_offset + 9..ready_offset + 17].copy_from_slice(&2u64.to_le_bytes());
-    assert!(target(&p)
-        .restore_checkpoint(1, index, &corrupt_activation)
-        .is_err());
-    let mut colliding_operation = image.clone();
-    colliding_operation[ready_offset + 17..ready_offset + 33]
-        .copy_from_slice(&10u128.to_le_bytes());
-    assert!(target(&p)
-        .restore_checkpoint(1, index, &colliding_operation)
-        .is_err());
+    reject_corrupt_activation(&p, index, &image);
     let mut recovered = target(&p);
     recovered.restore_checkpoint(1, index, &image).unwrap();
     assert_eq!(
@@ -433,29 +416,7 @@ fn every_torn_native_activation_frame_recovers_nonserving_or_exact_activation() 
         .unwrap()
         .unwrap();
     let activation = ready_app.activation_command(&status, 2000).unwrap();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log =
-            NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
-        append(
-            &mut log,
-            vec![LogMutation::Create(p.creation.intent.bootstrap.clone())],
-        );
-        let state = log.state(group(100)).unwrap();
-        append(
-            &mut log,
-            vec![update(
-                &state,
-                1,
-                1,
-                Some(Suffix {
-                    from: 1,
-                    entries: vec![entry(1, 3, init.clone())],
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_activation_log(&p, &init);
     let (_, log) = seed();
     let state = log.state(group(100)).unwrap();
     let mutation = update(
@@ -556,4 +517,56 @@ fn creation_deployment_envelope_covers_large_valid_recursive_policy_and_store_ma
     let encoded = intent.encode(MAX_GROUP_CREATION_BYTES).unwrap();
     assert!(encoded.len() > MAX_DIRECTORY_CONTROL_BYTES);
     assert!(directory(16).readiness_requirements().command_bytes >= encoded.len());
+}
+
+fn reject_corrupt_activation(p: &NamespacePlan, index: u64, image: &[u8]) {
+    let binding_len = u32::from_le_bytes(image[16..20].try_into().unwrap()) as usize;
+    let ready_offset = 20 + binding_len;
+    let mut corrupt_ready = image.to_vec();
+    corrupt_ready[ready_offset..ready_offset + 8].copy_from_slice(&3u64.to_le_bytes());
+    assert!(target(p)
+        .restore_checkpoint(1, index, &corrupt_ready)
+        .is_err());
+    let mut corrupt_activation = image.to_vec();
+    corrupt_activation[ready_offset + 9..ready_offset + 17].copy_from_slice(&2u64.to_le_bytes());
+    assert!(target(p)
+        .restore_checkpoint(1, index, &corrupt_activation)
+        .is_err());
+    let mut colliding_operation = image.to_vec();
+    colliding_operation[ready_offset + 17..ready_offset + 33]
+        .copy_from_slice(&10u128.to_le_bytes());
+    assert!(target(p)
+        .restore_checkpoint(1, index, &colliding_operation)
+        .is_err());
+}
+
+#[cfg(feature = "native")]
+fn seed_activation_log(
+    p: &NamespacePlan,
+    init: &[u8],
+) -> (
+    ModelIo,
+    voteboat::native::log_store::NativeLogStore<ModelIo>,
+) {
+    use voteboat::native::log_store::*;
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
+    append(
+        &mut log,
+        vec![LogMutation::Create(p.creation.intent.bootstrap.clone())],
+    );
+    let state = log.state(group(100)).unwrap();
+    append(
+        &mut log,
+        vec![update(
+            &state,
+            1,
+            1,
+            Some(Suffix {
+                from: 1,
+                entries: vec![entry(1, 3, init.to_vec())],
+            }),
+        )],
+    );
+    (io, log)
 }

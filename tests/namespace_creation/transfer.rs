@@ -252,66 +252,7 @@ fn created_namespace_transfer_lock_publication_and_repeated_movement_recover() {
         p.manifest
     );
 
-    // A separate adequately sized history checks the lock and subsequent merge.
-    let (mut d, p) = published(16);
-    let intent = split(&p.manifest);
-    let bytes = intent.encode(MAX_TRANSFER_INTENT_BYTES).unwrap();
-    commit(&mut d, 10, bytes.clone());
-    let mut d = restore(&d, 16);
-    assert_eq!(
-        commit(&mut d, 12, bytes).outcome,
-        DirectoryOutcome::LifecycleBusy
-    );
-    assert_eq!(
-        commit(
-            &mut d,
-            13,
-            DirectoryCommand {
-                expected: Some(RouteGeneration::new(1).unwrap()),
-                manifest: intent.after().clone(),
-            }
-            .encode(MAX_DIRECTORY_COMMAND_BYTES)
-            .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::LifecycleBusy
-    );
-    commit(
-        &mut d,
-        11,
-        evidence(&intent, OperationId::new(10).unwrap())
-            .encode(MAX_TRANSFER_PUBLICATION_BYTES)
-            .unwrap(),
-    );
-    let mut d = restore(&d, 16);
-    let mut after = intent.after().clone().into_input();
-    after.epoch = OwnershipEpoch::new(3).unwrap();
-    after.generation = RouteGeneration::new(3).unwrap();
-    after.execution = ExecutionMode::Single(group(103));
-    let merge = TransferIntent::new(
-        intent.after().clone(),
-        ResponsibilityManifest::new(after).unwrap(),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(&mut d, 20, merge.encode(MAX_TRANSFER_INTENT_BYTES).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
-    let mut d = restore(&d, 16);
-    assert_eq!(
-        commit(
-            &mut d,
-            21,
-            evidence(&merge, OperationId::new(20).unwrap())
-                .encode(MAX_TRANSFER_PUBLICATION_BYTES)
-                .unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferPublished(RouteGeneration::new(3).unwrap())
-    );
-    let d = restore(&d, 16);
-    assert_eq!(d.manifest(identity_of(50)), Some(merge.after()));
-    assert_eq!(d.manifest(identity_of(1)), Some(&manifest(1, 20)));
+    check_later_namespace_merge();
 }
 
 #[test]
@@ -398,4 +339,67 @@ fn schema4_selection_preserves_schema3_refusals_and_rejects_cross_schema_history
         destination.reserved_publication_bytes(),
         MAX_TRANSFER_PUBLICATION_BYTES
     );
+}
+
+fn check_later_namespace_merge() {
+    // A separate adequately sized history checks the lock and subsequent merge.
+    let (mut d, p) = published(16);
+    let intent = split(&p.manifest);
+    let bytes = intent.encode(MAX_TRANSFER_INTENT_BYTES).unwrap();
+    commit(&mut d, 10, bytes.clone());
+    let mut d = restore(&d, 16);
+    assert_eq!(
+        commit(&mut d, 12, bytes).outcome,
+        DirectoryOutcome::LifecycleBusy
+    );
+    assert_eq!(
+        commit(
+            &mut d,
+            13,
+            DirectoryCommand {
+                expected: Some(RouteGeneration::new(1).unwrap()),
+                manifest: intent.after().clone(),
+            }
+            .encode(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::LifecycleBusy
+    );
+    commit(
+        &mut d,
+        11,
+        evidence(&intent, OperationId::new(10).unwrap())
+            .encode(MAX_TRANSFER_PUBLICATION_BYTES)
+            .unwrap(),
+    );
+    let mut d = restore(&d, 16);
+    let mut after = intent.after().clone().into_input();
+    after.epoch = OwnershipEpoch::new(3).unwrap();
+    after.generation = RouteGeneration::new(3).unwrap();
+    after.execution = ExecutionMode::Single(group(103));
+    let merge = TransferIntent::new(
+        intent.after().clone(),
+        ResponsibilityManifest::new(after).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(&mut d, 20, merge.encode(MAX_TRANSFER_INTENT_BYTES).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+    let mut d = restore(&d, 16);
+    assert_eq!(
+        commit(
+            &mut d,
+            21,
+            evidence(&merge, OperationId::new(20).unwrap())
+                .encode(MAX_TRANSFER_PUBLICATION_BYTES)
+                .unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferPublished(RouteGeneration::new(3).unwrap())
+    );
+    let d = restore(&d, 16);
+    assert_eq!(d.manifest(identity_of(50)), Some(merge.after()));
+    assert_eq!(d.manifest(identity_of(1)), Some(&manifest(1, 20)));
 }

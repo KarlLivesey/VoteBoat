@@ -871,24 +871,7 @@ fn witnessed_replication_with<S: LogStore>(
         witness_log.limits(),
     )
     .unwrap();
-    let mut receiver_log = HostLogStore::new(3);
-    append(
-        &mut receiver_log,
-        vec![LogMutation::Create(bootstrap(1, 3))],
-    );
-    record(
-        &mut receiver_log,
-        2,
-        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
-        1,
-    );
-    let mut receiver = Raft::recover_member(
-        node(3),
-        receiver_log.binding(),
-        receiver_log.state(group(1)).unwrap(),
-        receiver_log.limits(),
-    )
-    .unwrap();
+    let (receiver_log, mut receiver) = witnessed_receiver();
     let before = receiver.state().clone();
     let reset = receiver.election_reset_sequence();
     let query = receiver
@@ -929,28 +912,7 @@ fn witnessed_replication_with<S: LogStore>(
             && base == cid(2) && configuration == cid(3)));
     assert_eq!(receiver.state(), &before);
     assert_eq!(receiver.election_reset_sequence(), reset);
-    let sender = StoreBinding {
-        identity: identity(4),
-        session: StoreSession::new(1).unwrap(),
-    };
-    let probe = Message {
-        group: group(1),
-        configuration: cid(3),
-        from: node(4),
-        sender,
-        to: node(3),
-        term: 1,
-        context: RequestContext {
-            origin: sender,
-            sequence: 10,
-        },
-        rpc: Rpc::Append {
-            previous_index: 2,
-            previous_term: 1,
-            entries: vec![],
-            leader_commit: 2,
-        },
-    };
+    let probe = unauthorized_append_probe();
     let result = receiver.step(Event::Receive(probe.clone())).unwrap();
     assert!(matches!(
         result.as_slice(),
@@ -1728,46 +1690,7 @@ mod joint_repair {
             ] {
                 let (_, mut sender, first) = batched_source();
                 assert!(first.term >= 2);
-                let io = ModelIo::default();
-                let mut log =
-                    NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
-                let _initial = destination(&mut log);
-                let state = log.state(group(1)).unwrap();
-                let abandoned = (2..=200)
-                    .map(|index| LogEntry {
-                        index,
-                        term: 2,
-                        payload: EntryPayload::Command {
-                            operation: OperationId::new(6000 + u128::from(index)).unwrap(),
-                            bytes: 99i64.to_le_bytes().to_vec(),
-                        },
-                    })
-                    .collect::<Vec<_>>();
-                append(
-                    &mut log,
-                    vec![LogMutation::Update(LogUpdate {
-                        group: group(1),
-                        expected_revision: state.revision,
-                        hard_state: voteboat::contracts::HardState {
-                            term: 2,
-                            voted_for: None,
-                        },
-                        commit_index: 1,
-                        suffix: Some(Suffix {
-                            from: 2,
-                            entries: abandoned.clone(),
-                        }),
-                        snapshot: None,
-                        snapshot_membership: None,
-                    })],
-                );
-                let mut receiver = Raft::recover_member(
-                    node(4),
-                    log.binding(),
-                    log.state(group(1)).unwrap(),
-                    log.limits(),
-                )
-                .unwrap();
+                let (io, mut log, mut receiver) = divergent_receiver();
                 let before = receiver.state().clone();
                 io.0.borrow_mut().fault = fault;
                 assert!(install(&mut log, &mut receiver, roundtrip(&codec, &first)).is_err());
@@ -2061,6 +1984,72 @@ mod joint_repair {
         }
     }
 
+    fn divergent_receiver() -> (ModelIo, NativeLogStore<ModelIo>, Raft) {
+        let io = ModelIo::default();
+        let mut log =
+            NativeLogStore::create(io.clone(), identity(4), LogLimits::default()).unwrap();
+        let _initial = destination(&mut log);
+        let state = log.state(group(1)).unwrap();
+        let abandoned = (2..=200)
+            .map(|index| LogEntry {
+                index,
+                term: 2,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(6000 + u128::from(index)).unwrap(),
+                    bytes: 99i64.to_le_bytes().to_vec(),
+                },
+            })
+            .collect::<Vec<_>>();
+        append(
+            &mut log,
+            vec![LogMutation::Update(LogUpdate {
+                group: group(1),
+                expected_revision: state.revision,
+                hard_state: voteboat::contracts::HardState {
+                    term: 2,
+                    voted_for: None,
+                },
+                commit_index: 1,
+                suffix: Some(Suffix {
+                    from: 2,
+                    entries: abandoned.clone(),
+                }),
+                snapshot: None,
+                snapshot_membership: None,
+            })],
+        );
+        let receiver = Raft::recover_member(
+            node(4),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        (io, log, receiver)
+    }
+
+    fn checkpoint_receiver() -> (
+        HostLogStore,
+        Raft,
+        support::snapshot::HostSnapshots,
+        Counter,
+    ) {
+        let mut destination_log = HostLogStore::new(4);
+        let receiver = destination(&mut destination_log).with_committed_snapshot_repair();
+        let mut destination_images = support::snapshot::HostSnapshots::new();
+        destination_images.identity.store = identity(4);
+        destination_images.binding = destination_log.binding();
+        let mut destination_app = Counter::new(100).unwrap();
+        destination_app
+            .apply_batch(receiver.replay_committed())
+            .unwrap();
+        (
+            destination_log,
+            receiver,
+            destination_images,
+            destination_app,
+        )
+    }
     #[test]
     fn accepted_final_repairs_from_only_its_committed_joint_checkpoint() {
         let mut log = HostLogStore::new(2);
@@ -2115,15 +2104,8 @@ mod joint_repair {
         };
         assert_eq!(snapshot.metadata.index, 2);
         assert_eq!(snapshot.metadata.configuration(), cid(3));
-        let mut destination_log = HostLogStore::new(4);
-        let mut receiver = destination(&mut destination_log).with_committed_snapshot_repair();
-        let mut destination_images = support::snapshot::HostSnapshots::new();
-        destination_images.identity.store = identity(4);
-        destination_images.binding = destination_log.binding();
-        let mut destination_app = Counter::new(100).unwrap();
-        destination_app
-            .apply_batch(receiver.replay_committed())
-            .unwrap();
+        let (mut destination_log, mut receiver, mut destination_images, mut destination_app) =
+            checkpoint_receiver();
         let effects = receiver.step(Event::Receive(request)).unwrap();
         let [Effect::StageSnapshot(stage)] = effects.as_slice() else {
             panic!("stage")
@@ -2587,5 +2569,52 @@ mod joint_repair {
         let before = receiver.state().clone();
         assert!(receiver.step(Event::Receive(request)).is_err());
         assert_eq!(receiver.state(), &before);
+    }
+}
+
+fn witnessed_receiver() -> (HostLogStore, Raft) {
+    let mut receiver_log = HostLogStore::new(3);
+    append(
+        &mut receiver_log,
+        vec![LogMutation::Create(bootstrap(1, 3))],
+    );
+    record(
+        &mut receiver_log,
+        2,
+        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
+        1,
+    );
+    let receiver = Raft::recover_member(
+        node(3),
+        receiver_log.binding(),
+        receiver_log.state(group(1)).unwrap(),
+        receiver_log.limits(),
+    )
+    .unwrap();
+    (receiver_log, receiver)
+}
+
+fn unauthorized_append_probe() -> Message {
+    let sender = StoreBinding {
+        identity: identity(4),
+        session: StoreSession::new(1).unwrap(),
+    };
+    Message {
+        group: group(1),
+        configuration: cid(3),
+        from: node(4),
+        sender,
+        to: node(3),
+        term: 1,
+        context: RequestContext {
+            origin: sender,
+            sequence: 10,
+        },
+        rpc: Rpc::Append {
+            previous_index: 2,
+            previous_term: 1,
+            entries: vec![],
+            leader_commit: 2,
+        },
     }
 }

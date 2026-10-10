@@ -527,114 +527,12 @@ fn worker_pump<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>], isolated: Opti
         for node in nodes.iter_mut() {
             progress |= node.progress();
             if !node.transports.is_empty() {
-                if node.staged_sends.is_empty() {
-                    node.staged_sends.extend(node.outbound.poll(32));
-                }
-                for _ in 0..node.staged_sends.len().min(32) {
-                    let batch = node.staged_sends.pop_front().unwrap();
-                    let transport = node.transports.get_mut(&batch.ticket.peer).unwrap();
-                    match transport.submit(batch) {
-                        Ok(()) => {
-                            node.sent_frames += 1;
-                            progress = true;
-                        }
-                        Err(rejected) if rejected.reason == TransportError::Overloaded => {
-                            node.staged_sends.push_back(*rejected.batch)
-                        }
-                        Err(e) => panic!("transport rejected a valid outbound batch: {e:?}"),
-                    }
-                }
-                assert!(node.staged_sends.len() <= 32);
-                for transport in node.transports.values_mut() {
-                    let p = transport
-                        .poll(MonoTime(0), TransportPollBudget::default())
-                        .unwrap();
-                    progress |= p.read_bytes > 0
-                        || p.written_bytes > 0
-                        || p.session.read_bytes > 0
-                        || p.session.written_bytes > 0
-                        || p.sent
-                        || p.received;
-                    if let Some(done) = transport.take_send() {
-                        assert_eq!(done.connection, transport.binding());
-                        node.outbound.complete(done.batch, done.result).unwrap();
-                        progress = true;
-                    }
-                    // Reserve a complete codec-sized batch in the bounded test
-                    // network before transferring receive ownership.
-                    if network.len() <= 8192 - 128 {
-                        if let Some(received) = transport.take_received() {
-                            assert_eq!(received.connection, transport.binding());
-                            assert!(received.messages.len() <= 128);
-                            network.extend(received.messages);
-                            node.received_frames += 1;
-                            progress = true;
-                        }
-                    }
-                }
+                progress |= poll_live_transport(node, &mut network);
                 continue;
             }
-            for mut batch in node.outbound.poll(32) {
-                assert!(network.len() + batch.messages.len() <= 8192);
-                if let Some(codec) = &node.wire {
-                    let binding = node.outbound.binding();
-                    let scope = WireScope {
-                        from: binding.node,
-                        sender: binding.store,
-                        to: batch.ticket.peer,
-                    };
-                    let encoded = codec.encode_batch(scope, &batch.messages).unwrap();
-                    assert_eq!(
-                        codec.frame_length(&encoded[..codec.header_bytes()]),
-                        Ok(encoded.len())
-                    );
-                    // The simulator supplies the trusted scope. This exercises
-                    // frame handling, not authentication of a real connection.
-                    network.extend(codec.decode_batch(scope, &encoded).unwrap());
-                } else {
-                    network.extend(batch.messages.drain(..));
-                }
-                // A local send can complete before remote delivery (or loss).
-                // Only actual received Raft messages can acknowledge a prefix.
-                node.outbound
-                    .complete(batch, LocalSendResult::Sent)
-                    .unwrap();
-                progress = true;
-            }
+            progress |= poll_simulated_transport(node, &mut network);
         }
-        // Bound each network visit and redeliver some packets. Rejected ingress
-        // stays owned by this bounded driver rather than disappearing.
-        for _ in 0..32 {
-            let Some(message) = network.pop_front() else {
-                break;
-            };
-            if isolated.is_some_and(|n| message.from == n || message.to == n) {
-                progress = true;
-                continue;
-            }
-            sequence += 1;
-            let duplicate = (sequence % 17 == 0).then(|| message.clone());
-            let target = message.to.get() as usize - 1;
-            match nodes[target]
-                .shard
-                .admit(message.group, Event::Receive(message))
-            {
-                Ok(()) => {
-                    progress = true;
-                    if let Some(message) = duplicate {
-                        assert!(network.len() < 8192);
-                        network.push_back(message);
-                    }
-                }
-                Err(rejected) if rejected.reason == RuntimeError::Overloaded => {
-                    let Event::Receive(message) = *rejected.event else {
-                        panic!()
-                    };
-                    network.push_back(message);
-                }
-                Err(e) => panic!("unexpected network rejection: {e:?}"),
-            }
-        }
+        progress |= deliver_worker_network(nodes, &mut network, &mut sequence, isolated);
         if !progress {
             if network.is_empty()
                 && nodes.iter().map(|n| n.sent_frames).sum::<usize>()
@@ -672,40 +570,7 @@ fn worker_cluster_history<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
             assert_eq!(node.shard.core(group(g)).unwrap().state().commit_index, 1);
         }
     }
-    nodes[0].hold = true;
-    for g in 1..=100 {
-        nodes[0].shard.admit(group(g), propose(1, 7)).unwrap();
-    }
-    worker_pump(nodes, None);
-    assert!(nodes[0].held.is_some());
-    assert_eq!(nodes[0].apps[&group(1)].read_applied(1), Ok(0));
-    for node in nodes.iter() {
-        for g in 2..=100 {
-            assert_eq!(node.apps[&group(g)].read_applied(2), Ok(7));
-        }
-    }
-    let mut admitted = 0;
-    while nodes[0].shard.admit(group(1), propose(1, 7)).is_ok() {
-        admitted += 1;
-        assert!(admitted < 6);
-    }
-    assert!(admitted > 0);
-    nodes[0].shard.admit(group(1), Event::Heartbeat).unwrap();
-    nodes[0]
-        .shard
-        .admit(
-            group(100),
-            Event::Read {
-                request: ReadRequestId::new(1).unwrap(),
-            },
-        )
-        .unwrap();
-    worker_pump(nodes, None);
-    assert_eq!(nodes[0].reads, [7]);
-    nodes[0].hold = false;
-    let event = nodes[0].held.take().unwrap();
-    nodes[0].deliver(event);
-    worker_pump(nodes, None);
+    hold_one_worker_group(nodes);
     for g in 1..=100 {
         nodes[0].shard.admit(group(g), propose(1, 7)).unwrap();
     }
@@ -925,6 +790,44 @@ mod native {
             }
         }
     }
+    fn native_worker_node(
+        id: u64,
+        path: &std::path::Path,
+        recover: bool,
+        wake: &Arc<ThreadWake>,
+    ) -> WorkerNode<NativeLogWorker<NativeLogStore<FileLogIo>>> {
+        let store = if recover {
+            NativeLogStore::recover(
+                FileLogIo::open(path).unwrap(),
+                identity(id as u128),
+                LogLimits::default(),
+            )
+            .unwrap()
+        } else {
+            NativeLogStore::create(
+                FileLogIo::create(path).unwrap(),
+                identity(id as u128),
+                LogLimits::default(),
+            )
+            .unwrap()
+        };
+        WorkerNode::new(
+            id,
+            store,
+            !recover,
+            |store| {
+                NativeLogWorker::spawn(
+                    store,
+                    StorageWorkerGeneration::new(1).unwrap(),
+                    WorkerLimits::default(),
+                    wake.clone(),
+                )
+                .unwrap()
+            },
+            |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
+        )
+        .with_wire(NativeWireCodec::new(voteboat::wire::WireLimits::default()).unwrap())
+    }
     #[test]
     fn three_native_wal_workers_replicate_and_recover_acknowledged_operations() {
         let root =
@@ -933,30 +836,7 @@ mod native {
         std::fs::create_dir_all(&root).unwrap();
         let wake = Arc::new(ThreadWake::current());
         let mut nodes = (1..=3)
-            .map(|id| {
-                let store = NativeLogStore::create(
-                    FileLogIo::create(root.join(id.to_string())).unwrap(),
-                    identity(id as u128),
-                    LogLimits::default(),
-                )
-                .unwrap();
-                WorkerNode::new(
-                    id,
-                    store,
-                    true,
-                    |store| {
-                        NativeLogWorker::spawn(
-                            store,
-                            StorageWorkerGeneration::new(1).unwrap(),
-                            WorkerLimits::default(),
-                            wake.clone(),
-                        )
-                        .unwrap()
-                    },
-                    |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
-                )
-                .with_wire(NativeWireCodec::new(voteboat::wire::WireLimits::default()).unwrap())
-            })
+            .map(|id| native_worker_node(id, &root.join(id.to_string()), false, &wake))
             .collect::<Vec<_>>();
         let old_bindings = nodes
             .iter()
@@ -972,29 +852,9 @@ mod native {
         drop(nodes);
         let mut nodes = (1..=3)
             .map(|id| {
-                let store = NativeLogStore::recover(
-                    FileLogIo::open(root.join(id.to_string())).unwrap(),
-                    identity(id as u128),
-                    LogLimits::default(),
-                )
-                .unwrap();
-                assert_ne!(store.binding(), old_bindings[id as usize - 1]);
-                WorkerNode::new(
-                    id,
-                    store,
-                    false,
-                    |store| {
-                        NativeLogWorker::spawn(
-                            store,
-                            StorageWorkerGeneration::new(1).unwrap(),
-                            WorkerLimits::default(),
-                            wake.clone(),
-                        )
-                        .unwrap()
-                    },
-                    |binding| Box::new(NativeOutbound::new(binding, outbound_limits()).unwrap()),
-                )
-                .with_wire(NativeWireCodec::new(voteboat::wire::WireLimits::default()).unwrap())
+                let node = native_worker_node(id, &root.join(id.to_string()), true, &wake);
+                assert_ne!(node.worker.binding().store, old_bindings[id as usize - 1]);
+                node
             })
             .collect::<Vec<_>>();
         // The explicitly stopped follower missed operation 4; both surviving
@@ -1438,4 +1298,172 @@ mod native {
             assert_eq!(returned.is_err(), panic);
         }
     }
+}
+
+fn poll_live_transport<W: PersistenceWorker>(
+    node: &mut WorkerNode<W>,
+    network: &mut VecDeque<Message>,
+) -> bool {
+    let mut progress = false;
+    if node.staged_sends.is_empty() {
+        node.staged_sends.extend(node.outbound.poll(32));
+    }
+    for _ in 0..node.staged_sends.len().min(32) {
+        let batch = node.staged_sends.pop_front().unwrap();
+        let transport = node.transports.get_mut(&batch.ticket.peer).unwrap();
+        match transport.submit(batch) {
+            Ok(()) => {
+                node.sent_frames += 1;
+                progress = true;
+            }
+            Err(rejected) if rejected.reason == TransportError::Overloaded => {
+                node.staged_sends.push_back(*rejected.batch)
+            }
+            Err(e) => panic!("transport rejected a valid outbound batch: {e:?}"),
+        }
+    }
+    assert!(node.staged_sends.len() <= 32);
+    for transport in node.transports.values_mut() {
+        let p = transport
+            .poll(MonoTime(0), TransportPollBudget::default())
+            .unwrap();
+        progress |= p.read_bytes > 0
+            || p.written_bytes > 0
+            || p.session.read_bytes > 0
+            || p.session.written_bytes > 0
+            || p.sent
+            || p.received;
+        if let Some(done) = transport.take_send() {
+            assert_eq!(done.connection, transport.binding());
+            node.outbound.complete(done.batch, done.result).unwrap();
+            progress = true;
+        }
+        // Reserve a complete codec-sized batch in the bounded test
+        // network before transferring receive ownership.
+        if network.len() <= 8192 - 128 {
+            if let Some(received) = transport.take_received() {
+                assert_eq!(received.connection, transport.binding());
+                assert!(received.messages.len() <= 128);
+                network.extend(received.messages);
+                node.received_frames += 1;
+                progress = true;
+            }
+        }
+    }
+    progress
+}
+
+fn poll_simulated_transport<W: PersistenceWorker>(
+    node: &mut WorkerNode<W>,
+    network: &mut VecDeque<Message>,
+) -> bool {
+    let mut progress = false;
+    for mut batch in node.outbound.poll(32) {
+        assert!(network.len() + batch.messages.len() <= 8192);
+        if let Some(codec) = &node.wire {
+            let binding = node.outbound.binding();
+            let scope = WireScope {
+                from: binding.node,
+                sender: binding.store,
+                to: batch.ticket.peer,
+            };
+            let encoded = codec.encode_batch(scope, &batch.messages).unwrap();
+            assert_eq!(
+                codec.frame_length(&encoded[..codec.header_bytes()]),
+                Ok(encoded.len())
+            );
+            // The simulator supplies the trusted scope. This exercises
+            // frame handling, not authentication of a real connection.
+            network.extend(codec.decode_batch(scope, &encoded).unwrap());
+        } else {
+            network.extend(batch.messages.drain(..));
+        }
+        // A local send can complete before remote delivery (or loss).
+        // Only actual received Raft messages can acknowledge a prefix.
+        node.outbound
+            .complete(batch, LocalSendResult::Sent)
+            .unwrap();
+        progress = true;
+    }
+    progress
+}
+
+fn deliver_worker_network<W: PersistenceWorker>(
+    nodes: &mut [WorkerNode<W>],
+    network: &mut VecDeque<Message>,
+    sequence: &mut u64,
+    isolated: Option<NodeId>,
+) -> bool {
+    let mut progress = false;
+    // Bound each network visit and redeliver some packets. Rejected ingress
+    // stays owned by this bounded driver rather than disappearing.
+    for _ in 0..32 {
+        let Some(message) = network.pop_front() else {
+            break;
+        };
+        if isolated.is_some_and(|n| message.from == n || message.to == n) {
+            progress = true;
+            continue;
+        }
+        *sequence += 1;
+        let duplicate = (*sequence).is_multiple_of(17).then(|| message.clone());
+        let target = message.to.get() as usize - 1;
+        match nodes[target]
+            .shard
+            .admit(message.group, Event::Receive(message))
+        {
+            Ok(()) => {
+                progress = true;
+                if let Some(message) = duplicate {
+                    assert!(network.len() < 8192);
+                    network.push_back(message);
+                }
+            }
+            Err(rejected) if rejected.reason == RuntimeError::Overloaded => {
+                let Event::Receive(message) = *rejected.event else {
+                    panic!()
+                };
+                network.push_back(message);
+            }
+            Err(e) => panic!("unexpected network rejection: {e:?}"),
+        }
+    }
+    progress
+}
+
+fn hold_one_worker_group<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
+    nodes[0].hold = true;
+    for g in 1..=100 {
+        nodes[0].shard.admit(group(g), propose(1, 7)).unwrap();
+    }
+    worker_pump(nodes, None);
+    assert!(nodes[0].held.is_some());
+    assert_eq!(nodes[0].apps[&group(1)].read_applied(1), Ok(0));
+    for node in nodes.iter() {
+        for g in 2..=100 {
+            assert_eq!(node.apps[&group(g)].read_applied(2), Ok(7));
+        }
+    }
+    let mut admitted = 0;
+    while nodes[0].shard.admit(group(1), propose(1, 7)).is_ok() {
+        admitted += 1;
+        assert!(admitted < 6);
+    }
+    assert!(admitted > 0);
+    nodes[0].shard.admit(group(1), Event::Heartbeat).unwrap();
+    nodes[0]
+        .shard
+        .admit(
+            group(100),
+            Event::Read {
+                request: ReadRequestId::new(1).unwrap(),
+            },
+        )
+        .unwrap();
+    worker_pump(nodes, None);
+    assert_eq!(nodes[0].reads, [7]);
+    nodes[0].hold = false;
+    let event = nodes[0].held.take().unwrap();
+    nodes[0].deliver(event);
+    worker_pump(nodes, None);
 }

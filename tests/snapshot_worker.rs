@@ -696,8 +696,13 @@ mod native {
         assert!(worker.is_drained());
         reclaim(&mut worker);
     }
-    #[test]
-    fn asynchronous_pinned_load_supplies_exact_leader_snapshot_request() {
+
+    fn pinned_load_fixture() -> (
+        HostLogStore,
+        Raft,
+        Counter,
+        support::snapshot::HostSnapshots,
+    ) {
         let mut log = HostLogStore::new(1);
         append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
         let command = LogEntry {
@@ -741,6 +746,11 @@ mod native {
             receipt.reference(),
         )
         .unwrap();
+        (log, core, app, snapshots)
+    }
+    #[test]
+    fn asynchronous_pinned_load_supplies_exact_leader_snapshot_request() {
+        let (mut log, mut core, mut app, snapshots) = pinned_load_fixture();
         let sb = SnapshotWorkerBinding {
             store: log.binding(),
             ..binding()
@@ -819,9 +829,21 @@ mod native {
         assert_eq!(**snapshot, image(1));
         reclaim(&mut worker);
     }
-    #[test]
-    fn local_checkpoint_receipt_loss_recovers_exact_wal_anchor_and_tail() {
-        for phase in 0..5 {
+    type FileSnapshots = NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>;
+    type FileWal = NativeLogWorker<NativeLogStore<FileLogIo>>;
+    struct CheckpointRun {
+        root: std::path::PathBuf,
+        commands: Vec<LogEntry>,
+        old: SnapshotRef,
+        wb: WorkerBinding,
+        owner: Owner,
+        router: SnapshotRouter,
+        sw: FileSnapshots,
+        wal: FileWal,
+        app: Counter,
+    }
+    impl CheckpointRun {
+        fn new(phase: usize) -> Self {
             let root = std::env::temp_dir().join(format!(
                 "voteboat-local-checkpoint-{}-{phase}",
                 std::process::id()
@@ -840,18 +862,7 @@ mod native {
                     LogMutation::Create(bootstrap(2, 3)),
                 ],
             );
-            let commands = [7i64, 3]
-                .into_iter()
-                .enumerate()
-                .map(|(i, delta)| LogEntry {
-                    index: i as u64 + 1,
-                    term: 1,
-                    payload: EntryPayload::Command {
-                        operation: OperationId::new(i as u128 + 1).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
-                    },
-                })
-                .collect::<Vec<_>>();
+            let commands = checkpoint_commands();
             let mutation = update(
                 &log.state(group(1)).unwrap(),
                 1,
@@ -900,114 +911,145 @@ mod native {
                 log.limits(),
             )
             .unwrap();
-            let mut owner = owner_with(&log, vec![core, other], wb);
-            let mut router =
+            let owner = owner_with(&log, vec![core, other], wb);
+            let router =
                 SnapshotRouter::new(owner.identity(), sb, SnapshotRouterLimits::default()).unwrap();
-            let mut sw = NativeSnapshotWorker::spawn(
+            let sw = NativeSnapshotWorker::spawn(
                 [(group(1), snapshots)].into(),
                 sb,
                 SnapshotWorkLimits::default(),
                 Arc::new(ThreadWake::current()),
             )
             .unwrap();
-            let mut wal = NativeLogWorker::spawn(
+            let wal = NativeLogWorker::spawn(
                 log,
                 wb.generation,
                 WorkerLimits::default(),
                 Arc::new(ThreadWake::current()),
             )
             .unwrap();
-            owner.admit(group(1), Event::Checkpoint).unwrap();
-            owner.advance(MonoTime(0), 1).unwrap();
-            let lease = owner.take_effect().unwrap().unwrap();
+            Self {
+                root,
+                commands,
+                old,
+                wb,
+                owner,
+                router,
+                sw,
+                wal,
+                app,
+            }
+        }
+        fn run(&mut self, phase: usize) {
+            self.owner.admit(group(1), Event::Checkpoint).unwrap();
+            self.owner.advance(MonoTime(0), 1).unwrap();
+            let lease = self.owner.take_effect().unwrap().unwrap();
             assert!(matches!(lease.effect, Effect::CheckpointRequired { .. }));
-            router.submit(&mut owner, &mut sw, lease, &app).unwrap();
-            let event = wait(&mut sw);
-            assert_eq!(owner.core(group(1)).unwrap().state().snapshot, Some(old));
-            assert!(owner.core(group(1)).unwrap().has_pending_dependency());
+            self.router
+                .submit(&mut self.owner, &mut self.sw, lease, &self.app)
+                .unwrap();
+            let event = wait(&mut self.sw);
+            assert_eq!(
+                self.owner.core(group(1)).unwrap().state().snapshot,
+                Some(self.old)
+            );
+            assert!(self.owner.core(group(1)).unwrap().has_pending_dependency());
             if phase == 0 {
                 // Delay delivery of this snapshot receipt while the same owner
                 // and WAL worker complete another group's durable election.
-                owner.admit(group(2), Event::Campaign).unwrap();
-                owner.advance(MonoTime(0), 1).unwrap();
-                let persist = owner.take_effect().unwrap().unwrap();
+                self.owner.admit(group(2), Event::Campaign).unwrap();
+                self.owner.advance(MonoTime(0), 1).unwrap();
+                let persist = self.owner.take_effect().unwrap().unwrap();
                 assert_eq!(persist.ticket.visit.group, group(2));
-                owner
-                    .submit_persists(&mut wal, vec![persist], MonoTime(0))
+                self.owner
+                    .submit_persists(&mut self.wal, vec![persist], MonoTime(0))
                     .unwrap();
                 let until = Instant::now() + Duration::from_secs(10);
-                while owner.core(group(2)).unwrap().has_pending_dependency() {
-                    for event in wal.poll(1) {
-                        owner.deliver_worker(event, MonoTime(0)).unwrap();
+                while self.owner.core(group(2)).unwrap().has_pending_dependency() {
+                    for event in self.wal.poll(1) {
+                        self.owner.deliver_worker(event, MonoTime(0)).unwrap();
                     }
                     assert!(Instant::now() < until);
                     std::thread::park_timeout(Duration::from_millis(1));
                 }
-                while let Some(lease) = owner.take_effect().unwrap() {
+                while let Some(lease) = self.owner.take_effect().unwrap() {
                     assert_eq!(lease.ticket.visit.group, group(2));
                     assert!(matches!(lease.effect, Effect::Send(_)));
-                    owner.release(lease, 0, MonoTime(0)).unwrap();
+                    self.owner.release(lease, 0, MonoTime(0)).unwrap();
                 }
-                assert_eq!(owner.core(group(2)).unwrap().state().hard_state.term, 1);
-                assert!(owner.core(group(1)).unwrap().has_pending_dependency());
-                assert_eq!(router.usage().requests, 1);
+                assert_eq!(
+                    self.owner.core(group(2)).unwrap().state().hard_state.term,
+                    1
+                );
+                assert!(self.owner.core(group(1)).unwrap().has_pending_dependency());
+                assert_eq!(self.router.usage().requests, 1);
             }
             if phase > 0 {
-                router
-                    .deliver(&mut owner, &mut app, event, MonoTime(0))
+                self.advance(phase, event);
+            }
+        }
+        fn advance(&mut self, phase: usize, event: SnapshotWorkEvent) {
+            self.router
+                .deliver(&mut self.owner, &mut self.app, event, MonoTime(0))
+                .unwrap();
+            let persist = self.owner.take_effect().unwrap().unwrap();
+            assert!(matches!(persist.effect, Effect::Persist(_)));
+            assert_eq!(
+                self.owner.core(group(1)).unwrap().state().snapshot,
+                Some(self.old)
+            );
+            if phase > 1 {
+                self.owner
+                    .submit_persists(&mut self.wal, vec![persist], MonoTime(0))
                     .unwrap();
-                let persist = owner.take_effect().unwrap().unwrap();
-                assert!(matches!(persist.effect, Effect::Persist(_)));
-                assert_eq!(owner.core(group(1)).unwrap().state().snapshot, Some(old));
-                if phase > 1 {
-                    owner
-                        .submit_persists(&mut wal, vec![persist], MonoTime(0))
-                        .unwrap();
-                    let until = Instant::now() + Duration::from_secs(10);
-                    let mut durable = false;
-                    while !durable {
-                        for event in wal.poll(1) {
-                            let written = matches!(event, WorkerEvent::Written { .. });
-                            durable |= matches!(event, WorkerEvent::Durable { .. });
-                            owner.deliver_worker(event, MonoTime(0)).unwrap();
-                            if written {
-                                assert_eq!(
-                                    owner.core(group(1)).unwrap().state().snapshot,
-                                    Some(old)
-                                );
-                                assert!(owner.take_effect().unwrap().is_none());
-                            }
+                let until = Instant::now() + Duration::from_secs(10);
+                let mut durable = false;
+                while !durable {
+                    for event in self.wal.poll(1) {
+                        let written = matches!(event, WorkerEvent::Written { .. });
+                        durable |= matches!(event, WorkerEvent::Durable { .. });
+                        self.owner.deliver_worker(event, MonoTime(0)).unwrap();
+                        if written {
+                            assert_eq!(
+                                self.owner.core(group(1)).unwrap().state().snapshot,
+                                Some(self.old)
+                            );
+                            assert!(self.owner.take_effect().unwrap().is_none());
                         }
-                        assert!(Instant::now() < until);
-                        std::thread::park_timeout(Duration::from_millis(1));
                     }
-                    let compacted = owner.take_effect().unwrap().unwrap();
-                    assert!(matches!(compacted.effect, Effect::CheckpointCompacted(_)));
-                    assert!(owner.core(group(1)).unwrap().has_pending_dependency());
-                    if phase > 2 {
-                        router.submit(&mut owner, &mut sw, compacted, &app).unwrap();
-                        let event = wait(&mut sw);
-                        if phase > 3 {
-                            router
-                                .deliver(&mut owner, &mut app, event, MonoTime(0))
-                                .unwrap();
-                            assert!(owner.is_drained());
-                        }
+                    assert!(Instant::now() < until);
+                    std::thread::park_timeout(Duration::from_millis(1));
+                }
+                let compacted = self.owner.take_effect().unwrap().unwrap();
+                assert!(matches!(compacted.effect, Effect::CheckpointCompacted(_)));
+                assert!(self.owner.core(group(1)).unwrap().has_pending_dependency());
+                if phase > 2 {
+                    self.router
+                        .submit(&mut self.owner, &mut self.sw, compacted, &self.app)
+                        .unwrap();
+                    let event = wait(&mut self.sw);
+                    if phase > 3 {
+                        self.router
+                            .deliver(&mut self.owner, &mut self.app, event, MonoTime(0))
+                            .unwrap();
+                        assert!(self.owner.is_drained());
                     }
                 }
             }
+        }
+        fn recover(mut self, phase: usize) {
             // Abandon observation at each boundary; accepted work is drained,
             // then actual files are reopened with fresh recovered sessions.
-            drop(router);
-            drop(owner);
-            let mut stores = reclaim(&mut sw);
+            drop(self.router);
+            drop(self.owner);
+            let mut stores = reclaim(&mut self.sw);
             let snapshots = stores.get_mut(&group(1)).unwrap();
-            assert_eq!(snapshots.load_pinned(old).is_ok(), phase < 3);
+            assert_eq!(snapshots.load_pinned(self.old).is_ok(), phase < 3);
             drop(stores);
-            wal.close();
+            self.wal.close();
             let until = Instant::now() + Duration::from_secs(10);
             loop {
-                if let Some(log) = wal.try_reclaim().unwrap() {
+                if let Some(log) = self.wal.try_reclaim().unwrap() {
                     drop(log);
                     break;
                 }
@@ -1015,14 +1057,14 @@ mod native {
                 std::thread::park_timeout(Duration::from_millis(1));
             }
             let log = NativeLogStore::recover(
-                FileLogIo::open(root.join("wal")).unwrap(),
+                FileLogIo::open(self.root.join("wal")).unwrap(),
                 identity(2),
                 LogLimits::default(),
             )
             .unwrap();
-            assert_ne!(log.binding(), wb.store);
+            assert_ne!(log.binding(), self.wb.store);
             let mut snapshots = NativeSnapshotStore::recover(
-                FileSnapshotIo::open(root.join("snap")).unwrap(),
+                FileSnapshotIo::open(self.root.join("snap")).unwrap(),
                 SnapshotIdentity {
                     store: identity(2),
                     group: group(1),
@@ -1039,19 +1081,48 @@ mod native {
             assert_eq!(app.read_applied(2), Ok(10));
             let retry = LogEntry {
                 index: 3,
-                ..commands[0].clone()
+                ..self.commands[0].clone()
             };
             let receipts = app.apply_batch(&[retry]).unwrap();
             assert!(receipts[0].duplicate);
             assert_eq!(app.read_applied(3), Ok(10));
             drop(snapshots);
             drop(log);
-            std::fs::remove_dir_all(root).unwrap();
+            std::fs::remove_dir_all(self.root).unwrap();
         }
     }
     #[test]
-    fn real_files_install_through_effect_owner_snapshot_worker_and_wal_worker() {
-        for phase in 0..3 {
+    fn local_checkpoint_receipt_loss_recovers_exact_wal_anchor_and_tail() {
+        for phase in 0..5 {
+            let mut history = CheckpointRun::new(phase);
+            history.run(phase);
+            history.recover(phase);
+        }
+    }
+    fn checkpoint_commands() -> Vec<LogEntry> {
+        [7i64, 3]
+            .into_iter()
+            .enumerate()
+            .map(|(i, delta)| LogEntry {
+                index: i as u64 + 1,
+                term: 1,
+                payload: EntryPayload::Command {
+                    operation: OperationId::new(i as u128 + 1).unwrap(),
+                    bytes: delta.to_le_bytes().to_vec(),
+                },
+            })
+            .collect::<Vec<_>>()
+    }
+    struct InstallRun {
+        root: std::path::PathBuf,
+        sb: SnapshotWorkerBinding,
+        owner: Owner,
+        sw: FileSnapshots,
+        wal: FileWal,
+        app: Counter,
+    }
+    impl InstallRun {
+        fn new(phase: usize) -> Self {
             let root = std::env::temp_dir().join(format!(
                 "voteboat-async-snapshot-{}-{phase}",
                 std::process::id()
@@ -1084,7 +1155,7 @@ mod native {
                 store: log.binding(),
                 ..binding()
             };
-            let mut sw = NativeSnapshotWorker::spawn(
+            let sw = NativeSnapshotWorker::spawn(
                 [(group(1), snap)].into(),
                 sb,
                 SnapshotWorkLimits::default(),
@@ -1095,136 +1166,155 @@ mod native {
                 store: log.binding(),
                 generation: StorageWorkerGeneration::new(1).unwrap(),
             };
-            let mut owner = owner(&log, core, wb);
-            let mut wal = NativeLogWorker::spawn(
+            let owner = owner(&log, core, wb);
+            let wal = NativeLogWorker::spawn(
                 log,
                 wb.generation,
                 WorkerLimits::default(),
                 Arc::new(ThreadWake::current()),
             )
             .unwrap();
-            let mut app = Counter::new(20).unwrap();
-            owner
+            let app = Counter::new(20).unwrap();
+            Self {
+                root,
+                sb,
+                owner,
+                sw,
+                wal,
+                app,
+            }
+        }
+        fn run(&mut self, phase: usize) {
+            self.owner
                 .admit(group(1), Event::Receive(message(image(1))))
                 .unwrap();
-            owner.advance(MonoTime(0), 1).unwrap();
-            let lease = owner.take_effect().unwrap().unwrap();
+            self.owner.advance(MonoTime(0), 1).unwrap();
+            let lease = self.owner.take_effect().unwrap().unwrap();
             assert!(matches!(lease.effect, Effect::StageSnapshot(_)));
             let work = prepare_snapshot_work(
-                owner.core(group(1)).unwrap(),
-                &app,
+                self.owner.core(group(1)).unwrap(),
+                &self.app,
                 lease.ticket.visit,
                 &lease.effect,
-                sb,
+                self.sb,
             )
             .unwrap();
-            let request = sw.submit(work).unwrap();
-            assert!(owner.take_effect().unwrap().is_none());
-            let event = wait(&mut sw);
+            let request = self.sw.submit(work).unwrap();
+            assert!(self.owner.take_effect().unwrap().is_none());
+            let event = wait(&mut self.sw);
             let v = lease.ticket.visit;
-            owner
+            self.owner
                 .complete_effect_with(lease, 0, MonoTime(0), |core, effect| {
-                    let effects = complete_snapshot_work(core, &mut app, effect, request, v, event)
-                        .map_err(|e| {
-                            RaftError::Storage(StorageError::Uncertain(format!("{e:?}")))
-                        })?;
+                    let effects =
+                        complete_snapshot_work(core, &mut self.app, effect, request, v, event)
+                            .map_err(|e| {
+                                RaftError::Storage(StorageError::Uncertain(format!("{e:?}")))
+                            })?;
                     Ok((effects, ()))
                 })
                 .unwrap();
             // Published and pinned snapshot alone releases only a WAL update.
-            assert_eq!(owner.core(group(1)).unwrap().state().commit_index, 0);
-            assert_eq!(app.applied_index(), 0);
-            let persist = owner.take_effect().unwrap().unwrap();
+            assert_eq!(self.owner.core(group(1)).unwrap().state().commit_index, 0);
+            assert_eq!(self.app.applied_index(), 0);
+            let persist = self.owner.take_effect().unwrap().unwrap();
             assert!(matches!(persist.effect, Effect::Persist(_)));
             if phase != 0 {
-                owner
-                    .submit_persists(&mut wal, vec![persist], MonoTime(0))
-                    .unwrap();
-                let until = Instant::now() + Duration::from_secs(10);
-                let mut written = false;
-                let mut durable = false;
-                while !durable {
-                    for event in wal.poll(1) {
-                        let is_written = matches!(event, WorkerEvent::Written { .. });
-                        durable |= matches!(event, WorkerEvent::Durable { .. });
-                        owner.deliver_worker(event, MonoTime(0)).unwrap();
-                        if is_written {
-                            written = true;
-                            assert!(owner.take_effect().unwrap().is_none());
-                            assert_eq!(owner.core(group(1)).unwrap().state().commit_index, 0);
-                        }
-                    }
-                    assert!(Instant::now() < until);
-                    std::thread::park_timeout(Duration::from_millis(1));
-                }
-                assert!(written);
-                let installed = owner.take_effect().unwrap().unwrap();
-                assert!(matches!(installed.effect, Effect::SnapshotInstalled(_)));
-                assert_eq!(app.applied_index(), 0);
-                // Lost application completion: durable log+pin are sufficient for
-                // recovery; no SnapshotAck has escaped from this live owner.
-                if phase == 2 {
-                    owner
-                        .extend_reservation(
-                            installed.ticket,
-                            snapshot_load_reservation(limits()).unwrap(),
-                        )
-                        .unwrap();
-                    let work = prepare_snapshot_work(
-                        owner.core(group(1)).unwrap(),
-                        &app,
-                        installed.ticket.visit,
-                        &installed.effect,
-                        sb,
-                    )
-                    .unwrap();
-                    let request = sw.submit(work).unwrap();
-                    let event = wait(&mut sw);
-                    let v = installed.ticket.visit;
-                    owner
-                        .complete_effect_with(installed, 0, MonoTime(0), |core, effect| {
-                            let effects =
-                                complete_snapshot_work(core, &mut app, effect, request, v, event)
-                                    .map_err(|e| {
-                                    RaftError::Storage(StorageError::Uncertain(format!("{e:?}")))
-                                })?;
-                            Ok((effects, ()))
-                        })
-                        .unwrap();
-                    assert_eq!(app.read_applied(1), Ok(7));
-                    let ack = owner.take_effect().unwrap().unwrap();
-                    assert!(matches!(
-                        &ack.effect,
-                        Effect::Send(Message {
-                            rpc: Rpc::SnapshotAck { index: 1 },
-                            ..
-                        })
-                    ));
-                    owner
-                        .release(ack, app.applied_index(), MonoTime(0))
-                        .unwrap();
-                    assert!(owner.is_drained());
-                }
+                self.install(phase, persist);
             }
-            drop(owner);
-            let stores = reclaim(&mut sw);
+        }
+        fn install(&mut self, phase: usize, persist: EffectLease) {
+            self.owner
+                .submit_persists(&mut self.wal, vec![persist], MonoTime(0))
+                .unwrap();
+            let until = Instant::now() + Duration::from_secs(10);
+            let mut written = false;
+            let mut durable = false;
+            while !durable {
+                for event in self.wal.poll(1) {
+                    let is_written = matches!(event, WorkerEvent::Written { .. });
+                    durable |= matches!(event, WorkerEvent::Durable { .. });
+                    self.owner.deliver_worker(event, MonoTime(0)).unwrap();
+                    if is_written {
+                        written = true;
+                        assert!(self.owner.take_effect().unwrap().is_none());
+                        assert_eq!(self.owner.core(group(1)).unwrap().state().commit_index, 0);
+                    }
+                }
+                assert!(Instant::now() < until);
+                std::thread::park_timeout(Duration::from_millis(1));
+            }
+            assert!(written);
+            let installed = self.owner.take_effect().unwrap().unwrap();
+            assert!(matches!(installed.effect, Effect::SnapshotInstalled(_)));
+            assert_eq!(self.app.applied_index(), 0);
+            // Lost application completion: durable log+pin are sufficient for
+            // recovery; no SnapshotAck has escaped from this live owner.
+            if phase == 2 {
+                self.finish_install(installed);
+            }
+        }
+        fn finish_install(&mut self, installed: EffectLease) {
+            self.owner
+                .extend_reservation(
+                    installed.ticket,
+                    snapshot_load_reservation(limits()).unwrap(),
+                )
+                .unwrap();
+            let work = prepare_snapshot_work(
+                self.owner.core(group(1)).unwrap(),
+                &self.app,
+                installed.ticket.visit,
+                &installed.effect,
+                self.sb,
+            )
+            .unwrap();
+            let request = self.sw.submit(work).unwrap();
+            let event = wait(&mut self.sw);
+            let v = installed.ticket.visit;
+            self.owner
+                .complete_effect_with(installed, 0, MonoTime(0), |core, effect| {
+                    let effects =
+                        complete_snapshot_work(core, &mut self.app, effect, request, v, event)
+                            .map_err(|e| {
+                                RaftError::Storage(StorageError::Uncertain(format!("{e:?}")))
+                            })?;
+                    Ok((effects, ()))
+                })
+                .unwrap();
+            assert_eq!(self.app.read_applied(1), Ok(7));
+            let ack = self.owner.take_effect().unwrap().unwrap();
+            assert!(matches!(
+                &ack.effect,
+                Effect::Send(Message {
+                    rpc: Rpc::SnapshotAck { index: 1 },
+                    ..
+                })
+            ));
+            self.owner
+                .release(ack, self.app.applied_index(), MonoTime(0))
+                .unwrap();
+            assert!(self.owner.is_drained());
+        }
+        fn recover(mut self, phase: usize) {
+            drop(self.owner);
+            let stores = reclaim(&mut self.sw);
             drop(stores);
-            wal.close();
+            self.wal.close();
             let log = loop {
-                if let Some(log) = wal.try_reclaim().unwrap() {
+                if let Some(log) = self.wal.try_reclaim().unwrap() {
                     break log;
                 }
                 std::thread::park_timeout(Duration::from_millis(1));
             };
             drop(log);
             let log = NativeLogStore::recover(
-                FileLogIo::open(root.join("wal")).unwrap(),
+                FileLogIo::open(self.root.join("wal")).unwrap(),
                 identity(2),
                 LogLimits::default(),
             )
             .unwrap();
             let mut snapshots = NativeSnapshotStore::recover(
-                FileSnapshotIo::open(root.join("snap")).unwrap(),
+                FileSnapshotIo::open(self.root.join("snap")).unwrap(),
                 SnapshotIdentity {
                     store: identity(2),
                     group: group(1),
@@ -1256,7 +1346,15 @@ mod native {
             }
             drop(snapshots);
             drop(log);
-            std::fs::remove_dir_all(root).unwrap();
+            std::fs::remove_dir_all(self.root).unwrap();
+        }
+    }
+    #[test]
+    fn real_files_install_through_effect_owner_snapshot_worker_and_wal_worker() {
+        for phase in 0..3 {
+            let mut history = InstallRun::new(phase);
+            history.run(phase);
+            history.recover(phase);
         }
     }
 }

@@ -250,114 +250,13 @@ fn created_source_freeze_export_actual_targets_and_publication_preserve_lineage(
     );
     let original_status = s.status();
     let mut s = recover(&s, &p);
-    let q = SourceNamespaceQuery::Data(SourceQuery::Freeze);
-    let result = s.read_at(s.applied_index(), q.clone()).unwrap();
-    let nested = s.read_result_bytes(&result, usize::MAX).unwrap();
-    assert_eq!(
-        s.read_result_bound(&q).unwrap(),
-        std::mem::size_of_val(&result) + nested
-    );
-    assert!(s.read_result_bytes(&result, nested - 1).is_err());
-    let SourceNamespaceRead::Data(SourceRead::Freeze(Some(status))) = result else {
-        panic!("frozen status")
-    };
+    let status = read_created_fence(&s);
     let source_evidence =
         SourceFenceEvidence::from_status(ConfigurationId::new(1).unwrap(), status.clone())
             .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let mut targets = Vec::new();
-    let mut ready = Vec::new();
-    for (g, key, expected, range) in [
-        (101, 4, 7, BucketRange::new(0, 128).unwrap()),
-        (102, 200, 11, BucketRange::new(128, 256).unwrap()),
-    ] {
-        let image = s.owner().export_target(group(g), 65536).unwrap();
-        assert_eq!(image.source_applied(), fence.index);
-        let mut target = NewTarget::new(
-            group(g),
-            OperationId::new(10).unwrap(),
-            transfer.clone(),
-            BucketCounter::new(range, Policy, bucket_limits()).unwrap_or_else(|_| panic!("app")),
-            Policy,
-            TargetLimits {
-                import_bytes: 65536,
-                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-        let bootstrap = target.bootstrap_command(100000).unwrap();
-        commit(&mut target, 10, bootstrap);
-        let import = TargetImport::new(
-            OperationId::new(10).unwrap(),
-            transfer.clone(),
-            group(g),
-            vec![SourceImport {
-                fence,
-                configuration: ConfigurationId::new(1).unwrap(),
-                digest: ContentDigest::scope_image(&image),
-                image,
-            }],
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-        let b = target.import_command(&import, 100000).unwrap();
-        commit(&mut target, 10, b);
-        assert!(target.status().activated.is_none());
-        assert_eq!(
-            target
-                .read_at(
-                    target.applied_index(),
-                    TargetQuery::Data(RoutedQuery {
-                        hint: hint(transfer.after(), g, key, range),
-                        key: vec![key],
-                        query: vec![key],
-                    })
-                )
-                .unwrap(),
-            TargetRead::NotActive
-        );
-        ready.push(
-            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        );
-        targets.push((target, g, key, expected, range));
-    }
-    let publication = TransferPublication::new(
-        OperationId::new(10).unwrap(),
-        transfer.clone(),
-        vec![source_evidence],
-        ready,
-    )
-    .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert_eq!(
-        commit(
-            &mut d,
-            11,
-            publication.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap()
-        )
-        .outcome,
-        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
-    );
-    let decision = d
-        .transfer_publication_at(d.applied_index(), OperationId::new(10).unwrap())
-        .unwrap()
-        .unwrap();
-    for (mut target, g, key, expected, range) in targets {
-        let activation = TargetActivation {
-            metadata_configuration: ConfigurationId::new(1).unwrap(),
-            decision: decision.clone(),
-        };
-        let b = target.activation_command(&activation, 100000).unwrap();
-        commit(&mut target, 10, b);
-        let op = if key == 4 { 20 } else { 21 };
-        let r = commit(
-            &mut target,
-            op,
-            data(transfer.after(), g, key, range, expected),
-        );
-        assert!(
-            matches!(r.outcome,TargetOutcome::Applied(BucketReceipt {duplicate:true,outcome:BucketOutcome::Value(v),..}) if v==expected)
-        );
-        assert_eq!(target.application().outbox().count(), 1);
-    }
+    let (targets, ready) = import_created_targets(&s, &transfer, fence);
+    let decision = publish_created_targets(&mut d, &transfer, source_evidence, ready);
+    activate_created_targets(targets, &transfer, &decision);
     let image = s.owner().export_target(group(101), 65536).unwrap();
     let init = s.initialization_command(100000).unwrap();
     let activation = d
@@ -470,37 +369,7 @@ fn source_guard_checkpoint_provenance_bounds_and_owner_selection_fail_closed() {
     assert_eq!(fresh.checkpoint(100000).unwrap(), image);
     assert!(Source::from_source(p.clone(), fresh.owner().clone()).is_err());
 
-    let mut fixed = CreatedNamespace::new(
-        p.clone(),
-        BucketCounter::new(p.manifest.input().scope, Policy, bucket_limits())
-            .unwrap_or_else(|_| panic!("app")),
-        Policy,
-        s.routed().limits(),
-    )
-    .unwrap_or_else(|_| panic!("fixed"));
-    assert_eq!(fixed.schema_version(), 1);
-    assert_ne!(
-        fixed.initialization_command(100000).unwrap(),
-        source(&p, 65536).initialization_command(100000).unwrap()
-    );
-    assert_eq!(
-        fixed.restore_checkpoint(2, s.applied_index(), &image),
-        Err(ApplicationError::UnsupportedSchema)
-    );
-    assert!(fixed
-        .restore_checkpoint(1, s.applied_index(), &image)
-        .is_err());
-    let fixed_boot = fixed.initialization_command(100000).unwrap();
-    commit(&mut fixed, 3, fixed_boot);
-    let fixed_image = fixed.checkpoint(100000).unwrap();
-    let mut source_fresh = source(&p, 65536);
-    assert_eq!(
-        source_fresh.restore_checkpoint(1, fixed.applied_index(), &fixed_image),
-        Err(ApplicationError::UnsupportedSchema)
-    );
-    assert!(source_fresh
-        .restore_checkpoint(2, fixed.applied_index(), &fixed_image)
-        .is_err());
+    reject_fixed_source_profile(&s, &p, &image);
     let mut tiny = source(&p, 1);
     let b = tiny.initialization_command(100000).unwrap();
     commit(&mut tiny, 3, b);
@@ -532,33 +401,7 @@ fn every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export
     let activate = active.activation_command(&pubn, 100000).unwrap();
     let write = data(&p.manifest, 100, 4, p.manifest.input().scope, 7);
     let freeze = Owner::freeze_command(&intent(&p), 100000).unwrap();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log =
-            NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
-        append(
-            &mut log,
-            vec![LogMutation::Create(p.creation.intent.bootstrap.clone())],
-        );
-        let state = log.state(group(100)).unwrap();
-        append(
-            &mut log,
-            vec![update(
-                &state,
-                1,
-                3,
-                Some(Suffix {
-                    from: 1,
-                    entries: vec![
-                        entry(1, 3, init.clone()),
-                        entry(2, 4, activate.clone()),
-                        entry(3, 20, write.clone()),
-                    ],
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_created_fence_log(&p, &init, &activate, &write);
     let (_, log) = seed();
     let mutation = update(
         &log.state(group(100)).unwrap(),
@@ -619,44 +462,257 @@ fn every_torn_created_source_fence_frame_recovers_serving_or_fenced_exact_export
             }
             _ => panic!("old or complete fence only"),
         }
-        let state = log.state(group(100)).unwrap();
-        let index = state.last_index() + 1;
-        append(
-            &mut log,
-            vec![update(
-                &state,
-                1,
-                index,
-                Some(Suffix {
-                    from: index,
-                    entries: vec![entry(index, 10, freeze.clone())],
-                }),
-            )],
-        );
-        let core = Raft::recover(
-            node(1),
-            log.binding(),
-            log.state(group(100)).unwrap(),
-            log.limits(),
-        )
-        .unwrap();
-        let mut retried = source(&p, 65536);
-        retried.apply_batch(core.replay_committed()).unwrap();
-        let fence = retried.owner().fence().unwrap();
-        assert_eq!(fence.index, 4);
-        let image = retried.owner().export_target(group(101), 65536).unwrap();
-        assert_eq!(image.source_applied(), 4);
-        assert_eq!(
-            recover(&retried, &p)
-                .owner()
-                .export_target(group(101), 65536)
-                .unwrap(),
-            image
-        );
-        assert_eq!(
-            retried.read_at(index, query(&p, 4)).unwrap(),
-            SourceNamespaceRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
-        );
+        retry_created_fence(&mut log, &p, &freeze);
     }
     assert!(old && complete);
+}
+
+type ImportedTarget = (NewTarget, u128, u8, i64, BucketRange);
+fn import_created_targets(
+    s: &Source,
+    transfer: &TransferIntent,
+    fence: OwnershipFence,
+) -> (Vec<ImportedTarget>, Vec<TargetReadyEvidence>) {
+    let mut targets = Vec::new();
+    let mut ready = Vec::new();
+    for (g, key, expected, range) in [
+        (101, 4, 7, BucketRange::new(0, 128).unwrap()),
+        (102, 200, 11, BucketRange::new(128, 256).unwrap()),
+    ] {
+        let image = s.owner().export_target(group(g), 65536).unwrap();
+        assert_eq!(image.source_applied(), fence.index);
+        let mut target = NewTarget::new(
+            group(g),
+            OperationId::new(10).unwrap(),
+            transfer.clone(),
+            BucketCounter::new(range, Policy, bucket_limits()).unwrap_or_else(|_| panic!("app")),
+            Policy,
+            TargetLimits {
+                import_bytes: 65536,
+                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let bootstrap = target.bootstrap_command(100000).unwrap();
+        commit(&mut target, 10, bootstrap);
+        let import = TargetImport::new(
+            OperationId::new(10).unwrap(),
+            transfer.clone(),
+            group(g),
+            vec![SourceImport {
+                fence,
+                configuration: ConfigurationId::new(1).unwrap(),
+                digest: ContentDigest::scope_image(&image),
+                image,
+            }],
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let b = target.import_command(&import, 100000).unwrap();
+        commit(&mut target, 10, b);
+        assert!(target.status().activated.is_none());
+        assert_eq!(
+            target
+                .read_at(
+                    target.applied_index(),
+                    TargetQuery::Data(RoutedQuery {
+                        hint: hint(transfer.after(), g, key, range),
+                        key: vec![key],
+                        query: vec![key],
+                    })
+                )
+                .unwrap(),
+            TargetRead::NotActive
+        );
+        ready.push(
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), target.status())
+                .unwrap_or_else(|e| panic!("{:?}", e.0)),
+        );
+        targets.push((target, g, key, expected, range));
+    }
+    (targets, ready)
+}
+
+fn activate_created_targets(
+    targets: Vec<ImportedTarget>,
+    transfer: &TransferIntent,
+    decision: &TransferPublicationStatus,
+) {
+    for (mut target, g, key, expected, range) in targets {
+        let activation = TargetActivation {
+            metadata_configuration: ConfigurationId::new(1).unwrap(),
+            decision: decision.clone(),
+        };
+        let b = target.activation_command(&activation, 100000).unwrap();
+        commit(&mut target, 10, b);
+        let op = if key == 4 { 20 } else { 21 };
+        let r = commit(
+            &mut target,
+            op,
+            data(transfer.after(), g, key, range, expected),
+        );
+        assert!(
+            matches!(r.outcome,TargetOutcome::Applied(BucketReceipt {duplicate:true,outcome:BucketOutcome::Value(v),..}) if v==expected)
+        );
+        assert_eq!(target.application().outbox().count(), 1);
+    }
+}
+
+fn reject_fixed_source_profile(s: &Source, p: &NamespacePlan, image: &[u8]) {
+    let mut fixed = CreatedNamespace::new(
+        p.clone(),
+        BucketCounter::new(p.manifest.input().scope, Policy, bucket_limits())
+            .unwrap_or_else(|_| panic!("app")),
+        Policy,
+        s.routed().limits(),
+    )
+    .unwrap_or_else(|_| panic!("fixed"));
+    assert_eq!(fixed.schema_version(), 1);
+    assert_ne!(
+        fixed.initialization_command(100000).unwrap(),
+        source(p, 65536).initialization_command(100000).unwrap()
+    );
+    assert_eq!(
+        fixed.restore_checkpoint(2, s.applied_index(), image),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert!(fixed
+        .restore_checkpoint(1, s.applied_index(), image)
+        .is_err());
+    let fixed_boot = fixed.initialization_command(100000).unwrap();
+    commit(&mut fixed, 3, fixed_boot);
+    let fixed_image = fixed.checkpoint(100000).unwrap();
+    let mut source_fresh = source(p, 65536);
+    assert_eq!(
+        source_fresh.restore_checkpoint(1, fixed.applied_index(), &fixed_image),
+        Err(ApplicationError::UnsupportedSchema)
+    );
+    assert!(source_fresh
+        .restore_checkpoint(2, fixed.applied_index(), &fixed_image)
+        .is_err());
+}
+
+#[cfg(feature = "native")]
+fn seed_created_fence_log(
+    p: &NamespacePlan,
+    init: &[u8],
+    activate: &[u8],
+    write: &[u8],
+) -> (
+    ModelIo,
+    voteboat::native::log_store::NativeLogStore<ModelIo>,
+) {
+    use voteboat::native::log_store::*;
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
+    append(
+        &mut log,
+        vec![LogMutation::Create(p.creation.intent.bootstrap.clone())],
+    );
+    let state = log.state(group(100)).unwrap();
+    append(
+        &mut log,
+        vec![update(
+            &state,
+            1,
+            3,
+            Some(Suffix {
+                from: 1,
+                entries: vec![
+                    entry(1, 3, init.to_vec()),
+                    entry(2, 4, activate.to_vec()),
+                    entry(3, 20, write.to_vec()),
+                ],
+            }),
+        )],
+    );
+    (io, log)
+}
+
+#[cfg(feature = "native")]
+fn retry_created_fence(
+    log: &mut voteboat::native::log_store::NativeLogStore<ModelIo>,
+    p: &NamespacePlan,
+    freeze: &[u8],
+) {
+    use voteboat::raft::Raft;
+    let state = log.state(group(100)).unwrap();
+    let index = state.last_index() + 1;
+    append(
+        log,
+        vec![update(
+            &state,
+            1,
+            index,
+            Some(Suffix {
+                from: index,
+                entries: vec![entry(index, 10, freeze.to_vec())],
+            }),
+        )],
+    );
+    let core = Raft::recover(
+        node(1),
+        log.binding(),
+        log.state(group(100)).unwrap(),
+        log.limits(),
+    )
+    .unwrap();
+    let mut retried = source(p, 65536);
+    retried.apply_batch(core.replay_committed()).unwrap();
+    let fence = retried.owner().fence().unwrap();
+    assert_eq!(fence.index, 4);
+    let image = retried.owner().export_target(group(101), 65536).unwrap();
+    assert_eq!(image.source_applied(), 4);
+    assert_eq!(
+        recover(&retried, p)
+            .owner()
+            .export_target(group(101), 65536)
+            .unwrap(),
+        image
+    );
+    assert_eq!(
+        retried.read_at(index, query(p, 4)).unwrap(),
+        SourceNamespaceRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
+    );
+}
+
+fn read_created_fence(s: &Source) -> SourceFreezeStatus {
+    let q = SourceNamespaceQuery::Data(SourceQuery::Freeze);
+    let result = s.read_at(s.applied_index(), q.clone()).unwrap();
+    let nested = s.read_result_bytes(&result, usize::MAX).unwrap();
+    assert_eq!(
+        s.read_result_bound(&q).unwrap(),
+        std::mem::size_of_val(&result) + nested
+    );
+    assert!(s.read_result_bytes(&result, nested - 1).is_err());
+    let SourceNamespaceRead::Data(SourceRead::Freeze(Some(status))) = result else {
+        panic!("frozen status")
+    };
+    status
+}
+
+fn publish_created_targets(
+    d: &mut Directory,
+    transfer: &TransferIntent,
+    source_evidence: SourceFenceEvidence,
+    ready: Vec<TargetReadyEvidence>,
+) -> TransferPublicationStatus {
+    let publication = TransferPublication::new(
+        OperationId::new(10).unwrap(),
+        transfer.clone(),
+        vec![source_evidence],
+        ready,
+    )
+    .unwrap_or_else(|e| panic!("{:?}", e.0));
+    assert_eq!(
+        commit(
+            d,
+            11,
+            publication.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap()
+        )
+        .outcome,
+        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
+    );
+    d.transfer_publication_at(d.applied_index(), OperationId::new(10).unwrap())
+        .unwrap()
+        .unwrap()
 }

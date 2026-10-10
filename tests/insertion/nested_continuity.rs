@@ -459,21 +459,7 @@ fn inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_ret
             .unwrap()
             .clone();
     let before = s.nested.target_manifest(group(31)).unwrap().clone();
-    let (reservation, split) = reserve(
-        &mut s.d,
-        &before,
-        ExecutionMode::Partitioned(vec![
-            RouteEntry {
-                scope: range(0, 32),
-                target: RouteTarget::Group(group(41)),
-            },
-            RouteEntry {
-                scope: range(32, 64),
-                target: RouteTarget::Group(group(42)),
-            },
-        ]),
-        501,
-    );
+    let (reservation, split) = reserve_nested_split(&mut s, &before);
     let original = s.grandchildren[0].status();
     movement(&mut s.grandchildren[..1], &split, 501);
     assert_eq!(s.grandchildren[0].status(), original);
@@ -510,17 +496,7 @@ fn inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_ret
         );
     }
     retire(&mut s.grandchildren[0], nested_proof);
-    let retired = s.grandchildren[0].live.checkpoint(500000).unwrap();
-    let mut wrong_owner = s.grandchildren[1].fresh.clone();
-    let pristine = wrong_owner.checkpoint(500000).unwrap();
-    assert!(wrong_owner
-        .restore_checkpoint(
-            RETIREMENT_GUARD_SCHEMA,
-            s.grandchildren[0].live.applied_index(),
-            &retired
-        )
-        .is_err());
-    assert_eq!(wrong_owner.checkpoint(500000).unwrap(), pristine);
+    reject_sibling_snapshot(&s.grandchildren[0], &s.grandchildren[1]);
     write(&mut divided[0], split.after(), 1, 1, 7, 7, true);
     write(&mut divided[1], split.after(), 81, 40, 3, 3, true);
     write(&mut divided[0], split.after(), 82, 1, 2, 9, false);
@@ -571,34 +547,78 @@ fn inserted_grandchild_split_merge_retirement_preserves_original_lineage_and_ret
         Some(merge.after())
     );
     #[cfg(feature = "native")]
-    {
-        let mut cache = voteboat::native::routing::NativeManifestCache::new(ManifestCacheLimits {
-            manifests: 4,
-            bytes: 65536,
-        })
-        .unwrap();
-        for id in [
-            s.root.before().input().responsibility,
-            s.nested.before().input().responsibility,
-            before.input().responsibility,
-            sibling.input().responsibility,
-        ] {
-            cache
-                .admit(recovered.manifest(id).unwrap().clone())
-                .unwrap();
-        }
-        for (manifest, key) in [(merge.after(), 1), (merge.after(), 40), (sibling, 80)] {
-            assert_eq!(
-                resolve(
-                    &cache,
-                    &Policy,
-                    s.root.before().input().responsibility,
-                    &[key],
-                    4
-                )
-                .unwrap(),
-                route(manifest, key)
-            );
-        }
+    verify_nested_final_cache(&recovered, &s, &before, sibling, &merge);
+}
+
+fn reject_sibling_snapshot(retired_owner: &Owner, sibling: &Owner) {
+    let retired = retired_owner.live.checkpoint(500000).unwrap();
+    let mut wrong_owner = sibling.fresh.clone();
+    let pristine = wrong_owner.checkpoint(500000).unwrap();
+    assert!(wrong_owner
+        .restore_checkpoint(
+            RETIREMENT_GUARD_SCHEMA,
+            retired_owner.live.applied_index(),
+            &retired
+        )
+        .is_err());
+    assert_eq!(wrong_owner.checkpoint(500000).unwrap(), pristine);
+}
+
+#[cfg(feature = "native")]
+fn verify_nested_final_cache(
+    recovered: &Directory,
+    s: &Scene,
+    before: &ResponsibilityManifest,
+    sibling: &ResponsibilityManifest,
+    merge: &TransferIntent,
+) {
+    let mut cache = voteboat::native::routing::NativeManifestCache::new(ManifestCacheLimits {
+        manifests: 4,
+        bytes: 65536,
+    })
+    .unwrap();
+    for id in [
+        s.root.before().input().responsibility,
+        s.nested.before().input().responsibility,
+        before.input().responsibility,
+        sibling.input().responsibility,
+    ] {
+        cache
+            .admit(recovered.manifest(id).unwrap().clone())
+            .unwrap();
     }
+    for (manifest, key) in [(merge.after(), 1), (merge.after(), 40), (sibling, 80)] {
+        assert_eq!(
+            resolve(
+                &cache,
+                &Policy,
+                s.root.before().input().responsibility,
+                &[key],
+                4
+            )
+            .unwrap(),
+            route(manifest, key)
+        );
+    }
+}
+
+fn reserve_nested_split(
+    s: &mut Scene,
+    before: &ResponsibilityManifest,
+) -> (DelegationReservationStatus, TransferIntent) {
+    reserve(
+        &mut s.d,
+        before,
+        ExecutionMode::Partitioned(vec![
+            RouteEntry {
+                scope: range(0, 32),
+                target: RouteTarget::Group(group(41)),
+            },
+            RouteEntry {
+                scope: range(32, 64),
+                target: RouteTarget::Group(group(42)),
+            },
+        ]),
+        501,
+    )
 }

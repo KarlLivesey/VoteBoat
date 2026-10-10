@@ -308,52 +308,7 @@ fn nested_mapping_codec_parent_authorization_and_legacy_replay_fail_closed() {
         commit(&mut d, 300, fake.encode(100000).unwrap()).outcome,
         DirectoryOutcome::TransferEvidenceMismatch
     );
-    // A refusal is bound to the original ID forever; a fresh branch retains the valid intent.
-    let mut branch = d.clone();
-    let decline = DelegationDecline::new(intent.clone()).unwrap();
-    assert_eq!(
-        commit(&mut branch, 401, decline.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::DelegationDeclined
-    );
-    let decline = branch
-        .delegation_decline_at(branch.applied_index(), op(300))
-        .unwrap()
-        .unwrap();
-    let cancel = DelegationCancellation {
-        reservation: op(400),
-        reservation_index: status.index,
-        parent_configuration: configuration(),
-        child_configuration: configuration(),
-        decline,
-    };
-    assert_eq!(
-        commit(&mut branch, 402, cancel.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::DelegationCancelled
-    );
-    let cp = branch.checkpoint(200000).unwrap();
-    let mut restored = directory();
-    restored
-        .restore_checkpoint(6, branch.applied_index(), &cp)
-        .unwrap();
-    assert_eq!(
-        restored.manifest(root.before().input().responsibility),
-        Some(root.after())
-    );
-    // Exact new schema selection; earlier modes neither parse nor replay the new kind.
-    let (mut legacy, _) = setup();
-    let cp = legacy.checkpoint(200000).unwrap();
-    let before = legacy.applied_index();
-    assert!(legacy
-        .apply_batch(&[entry(before + 1, 400, plan.encode(100000).unwrap())])
-        .is_err());
-    assert_eq!(legacy.checkpoint(200000).unwrap(), cp);
-    assert!(legacy
-        .restore_checkpoint(
-            6,
-            branch.applied_index(),
-            &branch.checkpoint(200000).unwrap()
-        )
-        .is_err());
+    check_nested_decline_and_legacy(&d, &intent, &status, &root, &plan);
 }
 #[test]
 fn nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lifecycle() {
@@ -415,22 +370,7 @@ fn nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lif
             .unwrap(),
         TargetRead::Rejected(RoutingError::Fenced)
     );
-    for (i, g, key) in [(0, 31, 1), (1, 32, 80)] {
-        let hint = source_hint(intent.target_manifest(group(g)).unwrap(), g, key);
-        assert_eq!(
-            targets[i]
-                .read_at(
-                    targets[i].applied_index(),
-                    TargetQuery::Data(RoutedQuery {
-                        hint,
-                        key: vec![key],
-                        query: vec![key]
-                    })
-                )
-                .unwrap(),
-            TargetRead::NotActive
-        );
-    }
+    verify_nested_inactive(&targets, &intent);
     let completion = DelegationCompletion {
         reservation: op(400),
         reservation_index: reservation.index,
@@ -447,139 +387,16 @@ fn nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lif
         restored.manifest(before.input().responsibility),
         Some(intent.after())
     );
-    let mut exhausted = restored.clone();
-    let mut id = 1000;
-    while exhausted.remaining_operations() > 0 {
-        commit(
-            &mut exhausted,
-            id,
-            DirectoryCommand {
-                expected: None,
-                manifest: grant(),
-            }
-            .encode(100000)
-            .unwrap(),
-        );
-        id += 1;
-    }
-    assert!(matches!(
-        commit(&mut exhausted, 403, completion.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::DelegationPublished(_)
-    ));
-    let before_cp = restored.checkpoint(200000).unwrap();
-    assert_eq!(
-        restored.apply_batch(&[
-            entry(
-                restored.applied_index() + 1,
-                403,
-                completion.encode(100000).unwrap()
-            ),
-            noop(restored.applied_index() + 3)
-        ]),
-        Err(ApplicationError::IndexGap)
-    );
-    assert_eq!(restored.checkpoint(200000).unwrap(), before_cp);
+    check_nested_publication(&mut restored, &completion);
     assert_eq!(
         commit(&mut restored, 403, completion.encode(100000).unwrap()).outcome,
         DirectoryOutcome::DelegationPublished(RouteGeneration::new(3).unwrap())
     );
     #[cfg(feature = "native")]
-    {
-        let mut cache = voteboat::native::routing::NativeManifestCache::new(ManifestCacheLimits {
-            manifests: 5,
-            bytes: 65536,
-        })
-        .unwrap();
-        cache
-            .admit(
-                restored
-                    .manifest(root.before().input().responsibility)
-                    .unwrap()
-                    .clone(),
-            )
-            .unwrap();
-        cache.admit(intent.after().clone()).unwrap();
-        cache
-            .admit(root.insertion_children().unwrap()[1].manifest.clone())
-            .unwrap();
-        for c in intent.insertion_children().unwrap() {
-            cache.admit(c.manifest.clone()).unwrap();
-        }
-        for (g, key) in [(31, 1), (32, 80)] {
-            assert_eq!(
-                resolve(
-                    &cache,
-                    &Policy,
-                    root.before().input().responsibility,
-                    &[key],
-                    4
-                )
-                .unwrap(),
-                source_hint(intent.target_manifest(group(g)).unwrap(), g, key)
-            );
-        }
-    }
+    verify_nested_cache(&restored, &root, &intent);
     activate(&mut targets, 300, decision);
-    for (i, g, key, old_op, value) in [(0, 31, 1, 1, 7), (1, 32, 80, 80, 5)] {
-        let m = intent.target_manifest(group(g)).unwrap();
-        let r = commit(&mut targets[i], old_op, data_for(m, g, key, value));
-        assert!(
-            matches!(r.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
-        );
-        assert!(matches!(
-            commit(&mut targets[i], 4, data_for(m, g, key, 2)).outcome,
-            TargetOutcome::Applied(_)
-        ));
-        assert_eq!(targets[i].application().value(&[key]), Ok(value + 2));
-        assert_eq!(targets[i].application().outbox().count(), 2);
-        let cp = targets[i].checkpoint(100000).unwrap();
-        let mut fresh = target_for(&intent, g, 300);
-        fresh
-            .restore_checkpoint(4, targets[i].applied_index(), &cp)
-            .unwrap();
-        assert!(fresh
-            .restore_checkpoint(3, targets[i].applied_index(), &cp)
-            .is_err());
-    }
-    let child = intent.target_manifest(group(31)).unwrap().clone();
-    let mut after = child.clone().into_input();
-    after.epoch = OwnershipEpoch::new(2).unwrap();
-    after.generation = RouteGeneration::new(2).unwrap();
-    after.execution = ExecutionMode::Partitioned(vec![
-        RouteEntry {
-            scope: range(0, 32),
-            target: RouteTarget::Group(group(41)),
-        },
-        RouteEntry {
-            scope: range(32, 64),
-            target: RouteTarget::Group(group(42)),
-        },
-    ]);
-    let later = DelegationPlan::new(
-        intent.after().clone(),
-        child.clone(),
-        ResponsibilityManifest::new(after).unwrap(),
-        op(501),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(&mut restored, 500, later.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::DelegationReserved
-    );
-    let next = restored
-        .delegation_reservation_at(restored.applied_index(), op(500))
-        .unwrap()
-        .unwrap()
-        .child_intent(configuration())
-        .unwrap();
-    assert_eq!(
-        commit(&mut restored, 501, next.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
-    let bytes = targets[0].freeze_command(&next, 65536, 100000).unwrap();
-    assert!(
-        matches!(commit(&mut targets[0],501,bytes).outcome,TargetOutcome::Frozen(f) if f.responsibility==child.input().responsibility)
-    );
+    exercise_nested_targets(&mut targets, &intent);
+    later_nested_child_transfer(&mut restored, &mut targets, &intent);
     let stable = restored.checkpoint(200000).unwrap();
     for end in 0..stable.len() {
         let mut fresh = directory();
@@ -594,36 +411,7 @@ fn nested_insert_handoff_preserves_lineage_parent_refresh_and_dynamic_parent_lif
 #[test]
 fn nested_insertion_checks_remaining_hops_before_reserving_parent() {
     for depth in [MAX_ROUTE_HOPS - 1, MAX_ROUTE_HOPS] {
-        let mut manifests = Vec::new();
-        for i in 0..depth {
-            let mut m = grant().into_input();
-            m.responsibility.id = ResponsibilityId::new(1000 + i as u128).unwrap();
-            m.parent = if i == 0 {
-                None
-            } else {
-                Some(ParentAuthority {
-                    responsibility: ResponsibilityIdentity {
-                        id: ResponsibilityId::new(999 + i as u128).unwrap(),
-                        incarnation: ResponsibilityIncarnation::new(1).unwrap(),
-                    },
-                    group: group(1),
-                })
-            };
-            if i + 1 < depth {
-                m.execution = ExecutionMode::Delegated(vec![RouteEntry {
-                    scope: m.scope,
-                    target: RouteTarget::Child(ChildAuthority {
-                        responsibility: ResponsibilityIdentity {
-                            id: ResponsibilityId::new(1001 + i as u128).unwrap(),
-                            incarnation: ResponsibilityIncarnation::new(1).unwrap(),
-                        },
-                        group: group(1),
-                        epoch: m.epoch,
-                    }),
-                }]);
-            }
-            manifests.push(ResponsibilityManifest::new(m).unwrap());
-        }
+        let manifests = nested_chain(depth);
         let mut d = Directory::new(
             DirectoryPlan::new(group(1), manifests.clone()).unwrap(),
             DirectoryLimits {
@@ -710,3 +498,253 @@ fn nested_insertion_checks_remaining_hops_before_reserving_parent() {
 
 #[path = "nested_continuity.rs"]
 mod continuity;
+
+fn check_nested_decline_and_legacy(
+    d: &Directory,
+    intent: &TransferIntent,
+    status: &DelegationReservationStatus,
+    root: &TransferIntent,
+    plan: &DelegationPlan,
+) {
+    // A refusal is bound to the original ID forever; a fresh branch retains the valid intent.
+    let mut branch = d.clone();
+    let decline = DelegationDecline::new(intent.clone()).unwrap();
+    assert_eq!(
+        commit(&mut branch, 401, decline.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::DelegationDeclined
+    );
+    let decline = branch
+        .delegation_decline_at(branch.applied_index(), op(300))
+        .unwrap()
+        .unwrap();
+    let cancel = DelegationCancellation {
+        reservation: op(400),
+        reservation_index: status.index,
+        parent_configuration: configuration(),
+        child_configuration: configuration(),
+        decline,
+    };
+    assert_eq!(
+        commit(&mut branch, 402, cancel.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::DelegationCancelled
+    );
+    let cp = branch.checkpoint(200000).unwrap();
+    let mut restored = directory();
+    restored
+        .restore_checkpoint(6, branch.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(
+        restored.manifest(root.before().input().responsibility),
+        Some(root.after())
+    );
+    // Exact new schema selection; earlier modes neither parse nor replay the new kind.
+    let (mut legacy, _) = setup();
+    let cp = legacy.checkpoint(200000).unwrap();
+    let before = legacy.applied_index();
+    assert!(legacy
+        .apply_batch(&[entry(before + 1, 400, plan.encode(100000).unwrap())])
+        .is_err());
+    assert_eq!(legacy.checkpoint(200000).unwrap(), cp);
+    assert!(legacy
+        .restore_checkpoint(
+            6,
+            branch.applied_index(),
+            &branch.checkpoint(200000).unwrap()
+        )
+        .is_err());
+}
+
+fn check_nested_publication(restored: &mut Directory, completion: &DelegationCompletion) {
+    let mut exhausted = restored.clone();
+    let mut id = 1000;
+    while exhausted.remaining_operations() > 0 {
+        commit(
+            &mut exhausted,
+            id,
+            DirectoryCommand {
+                expected: None,
+                manifest: grant(),
+            }
+            .encode(100000)
+            .unwrap(),
+        );
+        id += 1;
+    }
+    assert!(matches!(
+        commit(&mut exhausted, 403, completion.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::DelegationPublished(_)
+    ));
+    let before_cp = restored.checkpoint(200000).unwrap();
+    assert_eq!(
+        restored.apply_batch(&[
+            entry(
+                restored.applied_index() + 1,
+                403,
+                completion.encode(100000).unwrap()
+            ),
+            noop(restored.applied_index() + 3)
+        ]),
+        Err(ApplicationError::IndexGap)
+    );
+    assert_eq!(restored.checkpoint(200000).unwrap(), before_cp);
+}
+
+#[cfg(feature = "native")]
+fn verify_nested_cache(restored: &Directory, root: &TransferIntent, intent: &TransferIntent) {
+    let mut cache = voteboat::native::routing::NativeManifestCache::new(ManifestCacheLimits {
+        manifests: 5,
+        bytes: 65536,
+    })
+    .unwrap();
+    cache
+        .admit(
+            restored
+                .manifest(root.before().input().responsibility)
+                .unwrap()
+                .clone(),
+        )
+        .unwrap();
+    cache.admit(intent.after().clone()).unwrap();
+    cache
+        .admit(root.insertion_children().unwrap()[1].manifest.clone())
+        .unwrap();
+    for c in intent.insertion_children().unwrap() {
+        cache.admit(c.manifest.clone()).unwrap();
+    }
+    for (g, key) in [(31, 1), (32, 80)] {
+        assert_eq!(
+            resolve(
+                &cache,
+                &Policy,
+                root.before().input().responsibility,
+                &[key],
+                4
+            )
+            .unwrap(),
+            source_hint(intent.target_manifest(group(g)).unwrap(), g, key)
+        );
+    }
+}
+
+fn exercise_nested_targets(targets: &mut [Target], intent: &TransferIntent) {
+    for (i, g, key, old_op, value) in [(0, 31, 1, 1, 7), (1, 32, 80, 80, 5)] {
+        let m = intent.target_manifest(group(g)).unwrap();
+        let r = commit(&mut targets[i], old_op, data_for(m, g, key, value));
+        assert!(
+            matches!(r.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
+        );
+        assert!(matches!(
+            commit(&mut targets[i], 4, data_for(m, g, key, 2)).outcome,
+            TargetOutcome::Applied(_)
+        ));
+        assert_eq!(targets[i].application().value(&[key]), Ok(value + 2));
+        assert_eq!(targets[i].application().outbox().count(), 2);
+        let cp = targets[i].checkpoint(100000).unwrap();
+        let mut fresh = target_for(intent, g, 300);
+        fresh
+            .restore_checkpoint(4, targets[i].applied_index(), &cp)
+            .unwrap();
+        assert!(fresh
+            .restore_checkpoint(3, targets[i].applied_index(), &cp)
+            .is_err());
+    }
+}
+
+fn later_nested_child_transfer(
+    restored: &mut Directory,
+    targets: &mut [Target],
+    intent: &TransferIntent,
+) {
+    let child = intent.target_manifest(group(31)).unwrap().clone();
+    let mut after = child.clone().into_input();
+    after.epoch = OwnershipEpoch::new(2).unwrap();
+    after.generation = RouteGeneration::new(2).unwrap();
+    after.execution = ExecutionMode::Partitioned(vec![
+        RouteEntry {
+            scope: range(0, 32),
+            target: RouteTarget::Group(group(41)),
+        },
+        RouteEntry {
+            scope: range(32, 64),
+            target: RouteTarget::Group(group(42)),
+        },
+    ]);
+    let later = DelegationPlan::new(
+        intent.after().clone(),
+        child.clone(),
+        ResponsibilityManifest::new(after).unwrap(),
+        op(501),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(restored, 500, later.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::DelegationReserved
+    );
+    let next = restored
+        .delegation_reservation_at(restored.applied_index(), op(500))
+        .unwrap()
+        .unwrap()
+        .child_intent(configuration())
+        .unwrap();
+    assert_eq!(
+        commit(restored, 501, next.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+    let bytes = targets[0].freeze_command(&next, 65536, 100000).unwrap();
+    assert!(
+        matches!(commit(&mut targets[0],501,bytes).outcome,TargetOutcome::Frozen(f) if f.responsibility==child.input().responsibility)
+    );
+}
+
+fn nested_chain(depth: usize) -> Vec<ResponsibilityManifest> {
+    let mut manifests = Vec::new();
+    for i in 0..depth {
+        let mut m = grant().into_input();
+        m.responsibility.id = ResponsibilityId::new(1000 + i as u128).unwrap();
+        m.parent = if i == 0 {
+            None
+        } else {
+            Some(ParentAuthority {
+                responsibility: ResponsibilityIdentity {
+                    id: ResponsibilityId::new(999 + i as u128).unwrap(),
+                    incarnation: ResponsibilityIncarnation::new(1).unwrap(),
+                },
+                group: group(1),
+            })
+        };
+        if i + 1 < depth {
+            m.execution = ExecutionMode::Delegated(vec![RouteEntry {
+                scope: m.scope,
+                target: RouteTarget::Child(ChildAuthority {
+                    responsibility: ResponsibilityIdentity {
+                        id: ResponsibilityId::new(1001 + i as u128).unwrap(),
+                        incarnation: ResponsibilityIncarnation::new(1).unwrap(),
+                    },
+                    group: group(1),
+                    epoch: m.epoch,
+                }),
+            }]);
+        }
+        manifests.push(ResponsibilityManifest::new(m).unwrap());
+    }
+    manifests
+}
+
+fn verify_nested_inactive(targets: &[Target], intent: &TransferIntent) {
+    for (i, g, key) in [(0, 31, 1), (1, 32, 80)] {
+        let hint = source_hint(intent.target_manifest(group(g)).unwrap(), g, key);
+        assert_eq!(
+            targets[i]
+                .read_at(
+                    targets[i].applied_index(),
+                    TargetQuery::Data(RoutedQuery {
+                        hint,
+                        key: vec![key],
+                        query: vec![key]
+                    })
+                )
+                .unwrap(),
+            TargetRead::NotActive
+        );
+    }
+}

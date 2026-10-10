@@ -235,37 +235,7 @@ fn fenced_parent_imports_into_exact_children_and_publication_recovers_atomically
     let evidence =
         SourceFenceEvidence::from_status(ConfigurationId::new(1).unwrap(), status.clone())
             .unwrap_or_else(|e| panic!("{:?}", e.0));
-    let mut targets = Vec::new();
-    let mut facts = Vec::new();
-    for g in [21, 22] {
-        let mut t = target(&intent, g);
-        let boot = t.bootstrap_command(100000).unwrap();
-        commit(&mut t, 200, boot);
-        let import = TargetImport::new(
-            op(200),
-            intent.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: source.fence().unwrap(),
-                configuration: ConfigurationId::new(1).unwrap(),
-                image: source.export_target(group(g), 65536).unwrap(),
-                digest: status
-                    .exports
-                    .iter()
-                    .find(|e| e.target == group(g))
-                    .unwrap()
-                    .digest,
-            }],
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-        let bytes = t.import_command(&import, 100000).unwrap();
-        commit(&mut t, 200, bytes);
-        facts.push(
-            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status())
-                .unwrap_or_else(|e| panic!("{:?}", e.0)),
-        );
-        targets.push(t);
-    }
+    let (mut targets, facts) = import_inserted_targets(&source, &intent, &status);
     let mut wrong = facts.clone();
     wrong[0].configuration = ConfigurationId::new(2).unwrap();
     assert!(
@@ -273,59 +243,7 @@ fn fenced_parent_imports_into_exact_children_and_publication_recovers_atomically
     );
     let publication = TransferPublication::new(op(200), intent.clone(), vec![evidence], facts)
         .unwrap_or_else(|e| panic!("{:?}", e.0));
-    assert!(d
-        .manifest(
-            intent.insertion_children().unwrap()[0]
-                .manifest
-                .input()
-                .responsibility
-        )
-        .is_none());
-    let old = d.checkpoint(200000).unwrap();
-    let mut atomic = d.clone();
-    assert_eq!(
-        atomic.apply_batch(&[
-            entry(
-                d.applied_index() + 1,
-                201,
-                publication.encode(100000).unwrap()
-            ),
-            noop(d.applied_index() + 3)
-        ]),
-        Err(ApplicationError::IndexGap)
-    );
-    assert_eq!(atomic.checkpoint(200000).unwrap(), old);
-    let mut exhausted = d.clone();
-    let mut fill = 1000;
-    while exhausted.remaining_operations() > 0 {
-        assert_eq!(
-            commit(
-                &mut exhausted,
-                fill,
-                DirectoryCommand {
-                    expected: None,
-                    manifest: grant()
-                }
-                .encode(100000)
-                .unwrap()
-            )
-            .outcome,
-            DirectoryOutcome::LifecycleBusy
-        );
-        fill += 1;
-    }
-    assert!(exhausted
-        .validate_proposal(
-            op(201),
-            &publication.encode(100000).unwrap(),
-            std::iter::empty()
-        )
-        .is_ok());
-    assert_eq!(
-        commit(&mut exhausted, 201, publication.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
-    );
-    assert_eq!(exhausted.reserved_publication_bytes(), 0);
+    verify_insertion_publication_reservation(&d, &intent, &publication);
     assert_eq!(
         commit(&mut d, 201, publication.encode(100000).unwrap()).outcome,
         DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
@@ -359,115 +277,8 @@ fn fenced_parent_imports_into_exact_children_and_publication_recovers_atomically
         .transfer_publication_at(restored.applied_index(), op(200))
         .unwrap()
         .unwrap();
-    for (i, t) in targets.iter_mut().enumerate() {
-        let activation = TargetActivation {
-            metadata_configuration: ConfigurationId::new(1).unwrap(),
-            decision: decision.clone(),
-        };
-        let bytes = t.activation_command(&activation, 100000).unwrap();
-        assert!(matches!(
-            commit(t, 200, bytes).outcome,
-            TargetOutcome::Activated(_)
-        ));
-        assert_eq!(
-            commit(t, 90, data(if i == 0 { 1 } else { 200 }, 1)).outcome,
-            TargetOutcome::Rejected(RoutingError::WrongIdentity)
-        );
-        let child = &intent.insertion_children().unwrap()[i].manifest;
-        let key = if i == 0 { 1 } else { 200 };
-        let mut h = hint(key);
-        h.responsibility = child.input().responsibility;
-        h.group = group(21 + i as u128);
-        h.scope = child.input().scope;
-        assert_eq!(
-            t.read_at(
-                t.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint: h,
-                    key: vec![key],
-                    query: vec![key]
-                })
-            )
-            .unwrap(),
-            TargetRead::Data(if i == 0 { 7 } else { 11 })
-        );
-        let retry = encode_routed(
-            h,
-            &[key],
-            &encode_add(&[key], if i == 0 { 7 } else { 11 }, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        assert!(matches!(
-            commit(t, if i == 0 { 1 } else { 2 }, retry).outcome,
-            TargetOutcome::Applied(_)
-        ));
-        assert_eq!(
-            t.application().value(&[key]),
-            Ok(if i == 0 { 7 } else { 11 })
-        );
-        assert_eq!(t.application().outbox().count(), 1);
-        let cmd = encode_routed(
-            h,
-            &[key],
-            &encode_add(&[key], 1, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        assert!(matches!(
-            commit(t, 3, cmd).outcome,
-            TargetOutcome::Applied(_)
-        ));
-        let cp = t.checkpoint(100000).unwrap();
-        let mut fresh = target(&intent, 21 + i as u128);
-        fresh.restore_checkpoint(3, t.applied_index(), &cp).unwrap();
-        assert!(fresh.restore_checkpoint(2, t.applied_index(), &cp).is_err());
-    }
-    let child = intent.insertion_children().unwrap()[0].manifest.clone();
-    let mut next = child.clone().into_input();
-    next.epoch = OwnershipEpoch::new(2).unwrap();
-    next.generation = RouteGeneration::new(2).unwrap();
-    next.execution = ExecutionMode::Partitioned(vec![
-        RouteEntry {
-            scope: range(0, 64),
-            target: RouteTarget::Group(group(31)),
-        },
-        RouteEntry {
-            scope: range(64, 128),
-            target: RouteTarget::Group(group(32)),
-        },
-    ]);
-    let plan = voteboat::delegation::DelegationPlan::new(
-        intent.after().clone(),
-        child.clone(),
-        ResponsibilityManifest::new(next).unwrap(),
-        op(300),
-    )
-    .unwrap();
-    assert_eq!(
-        commit(&mut restored, 301, plan.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::DelegationReserved
-    );
-    let next = restored
-        .delegation_reservation_at(restored.applied_index(), op(301))
-        .unwrap()
-        .unwrap()
-        .child_intent(ConfigurationId::new(1).unwrap())
-        .unwrap();
-    assert_eq!(
-        commit(&mut restored, 300, next.encode(100000).unwrap()).outcome,
-        DirectoryOutcome::TransferIntentRecorded
-    );
-    let bytes = targets[0].freeze_command(&next, 65536, 100000).unwrap();
-    let TargetOutcome::Frozen(fence) = commit(&mut targets[0], 300, bytes).outcome else {
-        panic!("later child freeze")
-    };
-    assert_eq!(fence.responsibility, child.input().responsibility);
-    let cp = targets[0].checkpoint(100000).unwrap();
-    let mut reopened = target(&intent, 21);
-    reopened
-        .restore_checkpoint(3, targets[0].applied_index(), &cp)
-        .unwrap();
+    exercise_inserted_targets(&mut targets, &intent, &decision);
+    later_inserted_child_transfer(&mut restored, &mut targets, &intent);
     assert!(matches!(
         commit(&mut source, 4, data(1, 1)).outcome,
         RoutedOutcome::Rejected(RoutingError::Fenced)
@@ -583,3 +394,225 @@ fn insertion_intent_native_torn_frames_recover_exact_reservations_and_lock() {
 mod cross_authority;
 #[path = "insertion/nested.rs"]
 mod nested;
+
+fn import_inserted_targets(
+    source: &Source,
+    intent: &TransferIntent,
+    status: &SourceFreezeStatus,
+) -> (Vec<Target>, Vec<TargetReadyEvidence>) {
+    let mut targets = Vec::new();
+    let mut facts = Vec::new();
+    for g in [21, 22] {
+        let mut t = target(intent, g);
+        let boot = t.bootstrap_command(100000).unwrap();
+        commit(&mut t, 200, boot);
+        let import = TargetImport::new(
+            op(200),
+            intent.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: source.fence().unwrap(),
+                configuration: ConfigurationId::new(1).unwrap(),
+                image: source.export_target(group(g), 65536).unwrap(),
+                digest: status
+                    .exports
+                    .iter()
+                    .find(|e| e.target == group(g))
+                    .unwrap()
+                    .digest,
+            }],
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let bytes = t.import_command(&import, 100000).unwrap();
+        commit(&mut t, 200, bytes);
+        facts.push(
+            TargetReadyEvidence::from_status(ConfigurationId::new(1).unwrap(), t.status())
+                .unwrap_or_else(|e| panic!("{:?}", e.0)),
+        );
+        targets.push(t);
+    }
+    (targets, facts)
+}
+
+fn verify_insertion_publication_reservation(
+    d: &Directory,
+    intent: &TransferIntent,
+    publication: &TransferPublication,
+) {
+    assert!(d
+        .manifest(
+            intent.insertion_children().unwrap()[0]
+                .manifest
+                .input()
+                .responsibility
+        )
+        .is_none());
+    let old = d.checkpoint(200000).unwrap();
+    let mut atomic = d.clone();
+    assert_eq!(
+        atomic.apply_batch(&[
+            entry(
+                d.applied_index() + 1,
+                201,
+                publication.encode(100000).unwrap()
+            ),
+            noop(d.applied_index() + 3)
+        ]),
+        Err(ApplicationError::IndexGap)
+    );
+    assert_eq!(atomic.checkpoint(200000).unwrap(), old);
+    let mut exhausted = d.clone();
+    let mut fill = 1000;
+    while exhausted.remaining_operations() > 0 {
+        assert_eq!(
+            commit(
+                &mut exhausted,
+                fill,
+                DirectoryCommand {
+                    expected: None,
+                    manifest: grant()
+                }
+                .encode(100000)
+                .unwrap()
+            )
+            .outcome,
+            DirectoryOutcome::LifecycleBusy
+        );
+        fill += 1;
+    }
+    assert!(exhausted
+        .validate_proposal(
+            op(201),
+            &publication.encode(100000).unwrap(),
+            std::iter::empty()
+        )
+        .is_ok());
+    assert_eq!(
+        commit(&mut exhausted, 201, publication.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferPublished(RouteGeneration::new(2).unwrap())
+    );
+    assert_eq!(exhausted.reserved_publication_bytes(), 0);
+}
+
+fn exercise_inserted_targets(
+    targets: &mut [Target],
+    intent: &TransferIntent,
+    decision: &TransferPublicationStatus,
+) {
+    for (i, t) in targets.iter_mut().enumerate() {
+        let activation = TargetActivation {
+            metadata_configuration: ConfigurationId::new(1).unwrap(),
+            decision: decision.clone(),
+        };
+        let bytes = t.activation_command(&activation, 100000).unwrap();
+        assert!(matches!(
+            commit(t, 200, bytes).outcome,
+            TargetOutcome::Activated(_)
+        ));
+        assert_eq!(
+            commit(t, 90, data(if i == 0 { 1 } else { 200 }, 1)).outcome,
+            TargetOutcome::Rejected(RoutingError::WrongIdentity)
+        );
+        let child = &intent.insertion_children().unwrap()[i].manifest;
+        let key = if i == 0 { 1 } else { 200 };
+        let mut h = hint(key);
+        h.responsibility = child.input().responsibility;
+        h.group = group(21 + i as u128);
+        h.scope = child.input().scope;
+        assert_eq!(
+            t.read_at(
+                t.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint: h,
+                    key: vec![key],
+                    query: vec![key]
+                })
+            )
+            .unwrap(),
+            TargetRead::Data(if i == 0 { 7 } else { 11 })
+        );
+        let retry = encode_routed(
+            h,
+            &[key],
+            &encode_add(&[key], if i == 0 { 7 } else { 11 }, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        assert!(matches!(
+            commit(t, if i == 0 { 1 } else { 2 }, retry).outcome,
+            TargetOutcome::Applied(_)
+        ));
+        assert_eq!(
+            t.application().value(&[key]),
+            Ok(if i == 0 { 7 } else { 11 })
+        );
+        assert_eq!(t.application().outbox().count(), 1);
+        let cmd = encode_routed(
+            h,
+            &[key],
+            &encode_add(&[key], 1, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        assert!(matches!(
+            commit(t, 3, cmd).outcome,
+            TargetOutcome::Applied(_)
+        ));
+        let cp = t.checkpoint(100000).unwrap();
+        let mut fresh = target(intent, 21 + i as u128);
+        fresh.restore_checkpoint(3, t.applied_index(), &cp).unwrap();
+        assert!(fresh.restore_checkpoint(2, t.applied_index(), &cp).is_err());
+    }
+}
+
+fn later_inserted_child_transfer(
+    restored: &mut Directory,
+    targets: &mut [Target],
+    intent: &TransferIntent,
+) {
+    let child = intent.insertion_children().unwrap()[0].manifest.clone();
+    let mut next = child.clone().into_input();
+    next.epoch = OwnershipEpoch::new(2).unwrap();
+    next.generation = RouteGeneration::new(2).unwrap();
+    next.execution = ExecutionMode::Partitioned(vec![
+        RouteEntry {
+            scope: range(0, 64),
+            target: RouteTarget::Group(group(31)),
+        },
+        RouteEntry {
+            scope: range(64, 128),
+            target: RouteTarget::Group(group(32)),
+        },
+    ]);
+    let plan = voteboat::delegation::DelegationPlan::new(
+        intent.after().clone(),
+        child.clone(),
+        ResponsibilityManifest::new(next).unwrap(),
+        op(300),
+    )
+    .unwrap();
+    assert_eq!(
+        commit(restored, 301, plan.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::DelegationReserved
+    );
+    let next = restored
+        .delegation_reservation_at(restored.applied_index(), op(301))
+        .unwrap()
+        .unwrap()
+        .child_intent(ConfigurationId::new(1).unwrap())
+        .unwrap();
+    assert_eq!(
+        commit(restored, 300, next.encode(100000).unwrap()).outcome,
+        DirectoryOutcome::TransferIntentRecorded
+    );
+    let bytes = targets[0].freeze_command(&next, 65536, 100000).unwrap();
+    let TargetOutcome::Frozen(fence) = commit(&mut targets[0], 300, bytes).outcome else {
+        panic!("later child freeze")
+    };
+    assert_eq!(fence.responsibility, child.input().responsibility);
+    let cp = targets[0].checkpoint(100000).unwrap();
+    let mut reopened = target(intent, 21);
+    reopened
+        .restore_checkpoint(3, targets[0].applied_index(), &cp)
+        .unwrap();
+}
