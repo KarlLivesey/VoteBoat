@@ -43,6 +43,7 @@ impl Profile {
         let retirement = match *version {
             "voteboat-transfer-profile-v1" => false,
             "voteboat-transfer-profile-v2-retirement" => true,
+            "voteboat-transfer-profile-v3-merge-retirement" => true,
             _ => return Err("invalid transfer profile".into()),
         };
         let first = lines
@@ -57,20 +58,28 @@ impl Profile {
             hex,
             MAX_TRANSFER_INTENT_BYTES,
         )?))?;
-        if !matches!(intent.before().input().execution, ExecutionMode::Single(_))
-            || !matches!(
-                intent.after().input().execution,
+        let merge = *version == "voteboat-transfer-profile-v3-merge-retirement";
+        let compatible = if merge {
+            matches!(
+                intent.before().input().execution,
                 ExecutionMode::Partitioned(_)
-            )
-        {
-            return Err("native service profile requires a whole-responsibility split".into());
+            ) && matches!(intent.after().input().execution, ExecutionMode::Single(_))
+        } else {
+            matches!(intent.before().input().execution, ExecutionMode::Single(_))
+                && matches!(
+                    intent.after().input().execution,
+                    ExecutionMode::Partitioned(_)
+                )
+        };
+        if !compatible {
+            return Err("transfer profile version does not match split/merge shape".into());
         }
         let operation = TransferOperation::new(intent, op(operation)?, op(publication)?)
             .map_err(|e| format!("transfer plan: {:?}", e.0))?;
         let mut groups = BTreeMap::new();
         for line in lines {
             if groups.len() >= 18 {
-                return Err("at most16 split targets".into());
+                return Err("at most18 transfer groups".into());
             }
             let words = line.split_whitespace().collect::<Vec<_>>();
             let [role, group, incarnation, bootstrap, grant] = words.as_slice() else {
@@ -168,16 +177,17 @@ impl Profile {
             .ok_or_else(|| "unknown profile group".into())
     }
 }
-pub fn plan(args: &[String]) -> Result<String, Failure> {
+pub fn plan(args: &[String], merge: bool) -> Result<String, Failure> {
     use voteboat::placement::PlacementRequirements;
     let [authority, source, left, right, responsibility, split, lifecycle, publication, rest @ ..] =
         args
     else {
         return Err(super::HELP.into());
     };
-    let version = match rest {
-        [] => "voteboat-transfer-profile-v1",
-        [flag] if flag == "--retirement" => "voteboat-transfer-profile-v2-retirement",
+    let version = match (merge, rest) {
+        (true, []) => "voteboat-transfer-profile-v3-merge-retirement",
+        (false, []) => "voteboat-transfer-profile-v1",
+        (false, [flag]) if flag == "--retirement" => "voteboat-transfer-profile-v2-retirement",
         _ => return Err("expected optional --retirement".into()),
     };
     let group = |s: &str| -> Result<GroupIdentity, Failure> {
@@ -191,6 +201,18 @@ pub fn plan(args: &[String]) -> Result<String, Failure> {
     let left = group(left)?;
     let right = group(right)?;
     let split = split.parse::<u16>()?;
+    let routes = |a, b| -> Result<ExecutionMode, Failure> {
+        Ok(ExecutionMode::Partitioned(vec![
+            RouteEntry {
+                scope: checked(BucketRange::new(0, split))?,
+                target: RouteTarget::Group(a),
+            },
+            RouteEntry {
+                scope: checked(BucketRange::new(split, 256))?,
+                target: RouteTarget::Group(b),
+            },
+        ]))
+    };
     let before = checked(ResponsibilityManifest::new(ManifestInput {
         responsibility: ResponsibilityIdentity {
             id: ResponsibilityId::new(responsibility.parse()?).ok_or("invalid responsibility")?,
@@ -214,24 +236,39 @@ pub fn plan(args: &[String]) -> Result<String, Failure> {
             survive_any_single_domain_loss: false,
         },
         state: ResponsibilityState::Active,
-        execution: ExecutionMode::Single(source),
+        execution: if merge {
+            routes(source, left)?
+        } else {
+            ExecutionMode::Single(source)
+        },
     }))?;
     let mut after = before.clone().into_input();
     after.epoch = OwnershipEpoch::new(2).unwrap();
     after.generation = RouteGeneration::new(2).unwrap();
-    after.execution = ExecutionMode::Partitioned(vec![
-        RouteEntry {
-            scope: checked(BucketRange::new(0, split))?,
-            target: RouteTarget::Group(left),
-        },
-        RouteEntry {
-            scope: checked(BucketRange::new(split, 256))?,
-            target: RouteTarget::Group(right),
-        },
-    ]);
+    after.execution = if merge {
+        ExecutionMode::Single(right)
+    } else {
+        routes(left, right)?
+    };
     let intent = TransferIntent::new(before, checked(ResponsibilityManifest::new(after))?)
-        .map_err(|e| format!("invalid split: {:?}", e.0))?;
-    let text=format!("{version} {lifecycle} {publication}\nintent {}\nmetadata {} 1 1000 1001\nsource {} 1 100 0\ntarget {} 1 {lifecycle} 0\ntarget {} 1 {lifecycle} 0\n",wire::hex(&checked(intent.encode(MAX_TRANSFER_INTENT_BYTES))?),authority.id.get(),source.id.get(),left.id.get(),right.id.get());
+        .map_err(|e| format!("invalid transfer: {:?}", e.0))?;
+    let mut text = format!(
+        "{version} {lifecycle} {publication}\nintent {}\nmetadata {} 1 1000 1001\n",
+        wire::hex(&checked(intent.encode(MAX_TRANSFER_INTENT_BYTES))?),
+        authority.id.get()
+    );
+    for route in intent.sources() {
+        text.push_str(&format!(
+            "source {} 1 100 0\n",
+            route_group(&route).id.get()
+        ));
+    }
+    for route in intent.targets() {
+        text.push_str(&format!(
+            "target {} 1 {lifecycle} 0\n",
+            route_group(&route).id.get()
+        ));
+    }
     Profile::parse(&text)?;
     Ok(text)
 }
@@ -243,4 +280,62 @@ fn route_group(route: &RouteEntry) -> GroupIdentity {
         unreachable!()
     };
     g
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn arguments() -> Vec<String> {
+        ["1", "20", "21", "22", "10", "128", "200", "201"]
+            .map(str::to_owned)
+            .to_vec()
+    }
+
+    #[test]
+    fn merge_profile_rejects_mislabeled_missing_and_conflicting_bindings() {
+        let text = plan(&arguments(), true).unwrap();
+        let profile = Profile::parse(&text).unwrap();
+        assert!(profile.retirement);
+        assert_eq!(profile.operation.intent().sources().len(), 2);
+        assert_eq!(profile.operation.intent().targets().len(), 1);
+        for bad in [
+            text.replace(
+                "voteboat-transfer-profile-v3-merge-retirement",
+                "voteboat-transfer-profile-v1",
+            ),
+            text.replace(
+                "voteboat-transfer-profile-v3-merge-retirement",
+                "voteboat-transfer-profile-v2-retirement",
+            ),
+            text.replace("source 21 1 100 0\n", ""),
+            text.replace("source 21 1 100 0", "target 21 1 200 0"),
+            text.replace("source 21 1 100 0", "source 21 1 200 0"),
+            text.replace("target 22 1 200 0", "target 22 2 200 0"),
+        ] {
+            assert!(Profile::parse(&bad).is_err(), "accepted {bad}");
+        }
+    }
+
+    #[test]
+    fn merge_plan_rejects_overlapping_identities_and_invalid_boundaries() {
+        for (at, value) in [
+            (2, "20"),
+            (3, "20"),
+            (5, "0"),
+            (5, "256"),
+            (5, "257"),
+            (7, "200"),
+        ] {
+            let mut args = arguments();
+            args[at] = value.to_owned();
+            assert!(plan(&args, true).is_err(), "accepted {args:?}");
+        }
+        let split = plan(&arguments(), false).unwrap();
+        assert!(Profile::parse(&split.replace(
+            "voteboat-transfer-profile-v1",
+            "voteboat-transfer-profile-v3-merge-retirement"
+        ))
+        .is_err());
+    }
 }

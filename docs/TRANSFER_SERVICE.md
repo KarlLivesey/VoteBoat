@@ -1,14 +1,16 @@
-# Native split commands
+# Native split and merge commands
 
 `voteboat-transfer` runs a provisioned metadata, source or target replica and
 provides authenticated `status`, `start` and `resume` commands. It uses the public
 `TransferOperation` decisions and existing durable source/import/publication/
 activation guards. Different groups may have different leaders.
 
-The initial profile supports one native byte-bucket counter source and 2–16
-targets, with a fixed three-voter default or explicit deployment file. It is an
-executable whole-responsibility split; the Rust contracts support broader
-compositions separately. Each source/target retains up to32 data operations.
+The split profile supports one native byte-bucket counter source and 2–16
+targets. The merge profile combines partitioned sources into one target, with
+at most18 total metadata/source/target groups. Both use a fixed three-voter
+default or explicit deployment file. Each source/target retains up to32 data
+operations. The target's combined import must fit its existing32KiB limit;
+the command envelope remains64KiB. Broader Rust compositions are separate.
 Metadata/source/target roles have separate directories and log owners.
 
 ## Local example
@@ -130,6 +132,43 @@ Retirement releases live application payloads. It does not delete the replica,
 erase backups, remove membership, or bypass snapshot/WAL retention. External
 retention promises must actually be released by the operator. General retention
 policy and physical cleanup remain separate work.
+
+## Merging two source groups
+
+Use fresh stores and `plan-merge` to generate the explicit v3 profile:
+
+```sh
+$V plan-merge 1 20 21 22 10 128 200 201 > "$D/profile"
+```
+
+This assigns0..128 to source20,128..256 to source21 and the merged0..256
+range to target22. Provision the four groups as in the split example, then
+initialize metadata and **both** sources:
+
+```sh
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 1 initialize
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 1 grant
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 20 initialize
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 21 initialize
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 20 add 1 7 10
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 21 add 2 200 11
+$V client "$D/profile" "$D/endpoints" "$TLS" 3 start
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 22 read 7
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 22 read 200
+```
+
+The client fences every source, collects and validates every required image,
+and submits one combined import. Publication and activation use the original
+durable contracts. A missing source can pause the merge; fenced sources stay
+fenced. `status`, `step` and `resume` retain the original profile and IDs.
+
+The v3 profile enables retirement from creation and binds each source's exact
+profile. After activation and release of external retention promises, retire
+sources independently with `client ... retire 20 700` and
+`client ... retire 21 701`. Retiring one source does not retire the other.
+This is not an upgrade of existing v1/v2 stores or automatic conversion of
+an existing split deployment. Imported retry histories must be compatible;
+conflicting records or an oversized combined image are refused by the target.
 
 ## Contracts and limits
 

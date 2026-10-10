@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 #[path = "cuts_support.rs"]
-mod support;
+pub(super) mod support;
 
 fn ownership(rig: &Cluster, phase: usize) {
     if phase < 4 {

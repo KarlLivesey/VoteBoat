@@ -1,0 +1,10 @@
+src/bin/transfer_service.rs: OK
+src/bin/support/transfer_app.rs: OK
+src/bin/support/transfer_client.rs: OK
+src/bin/support/transfer_profile.rs: OK
+tests/transfer_service.rs: OK
+tests/transfer_service/merge.rs: OK
+tests/transfer_service/cuts.rs: OK
+tests/transfer_service/cuts_support.rs: OK
+Cargo.toml: OK
+Cargo.lock: OK

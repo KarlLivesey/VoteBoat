@@ -141,7 +141,90 @@ strict profiles clean while advancing the remaining capability work.
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Next201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
-| Retained203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. |
+| Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice203 implemented evidence and macro review
+
+The executable accepts explicit v3 merge/retirement profiles and generates them
+with plan-merge. Each source uses its assigned range for application state and
+command hints. The client collects all required immutable source images under
+count/byte bounds before constructing the existing combined import. No public
+consensus, persistence or ownership contract changes.
+
+Three new executable histories pass: TCP/WAL and QUIC/checkpoint each reopen all
+role processes at all eight merge boundaries, interrupt accepted import and
+activation waits, preserve both original data/retry histories, reject old-source
+and inactive-target writes, and retire sources independently. They reopen the
+retirement records and prove target reads/new writes after metadata and both
+sources stop. A separate TCP start-to-complete history exercises the ordinary
+client's multiple-image collection. All10 executable transfer regressions pass
+in304.60s, as do two profile validation tests and33 existing
+operation/source/publication/target tests. Raw failures, corrected outcomes,
+full executable regression results and four-profile lint checks are recorded in
+validation/baseline/slice203.
+
+The prior71da217 platform run is now terminal: Ubuntu passes122 counter,13
+directory and7 transfer histories; macOS passes116 counter histories and fails
+six QUIC histories before reaching directory/transfer. These results apply only
+to that revision. Assignment retries, group commands/leadership, multi-group
+drain/runner and trusted startup recovery remain platform diagnosis work; no
+deadline or assertion is weakened to close them.
+
+The split/merge milestone advances to an executable compatible merge, while
+broader recursive operator profiles, combined failure schedules and retention
+policy remain open.199 remains current parallel platform work,201 is next for
+provider conformance, and202 follows for combined membership/checkpoint recovery.
+The full P0–P7 objective and original P7 gates remain unchanged.
+
+### Slice203 schema plan — executable compatible merge
+
+Rechecked the clean worktree and the existing source/target contracts: merge is
+implemented in the library, but executable profiles reject it, source construction assumes full
+scope, and the client collects only one export. Closing these three integration
+gaps advances the split/merge macro milestone directly; no new ownership engine
+or prerequisite is needed.201 and202 remain the next two deliverables;199 remains
+parallel validation work with unresolved failures retained.
+
+Add an explicit fresh `voteboat-transfer-profile-v3-merge-retirement` profile,
+generated by `plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE
+PUBLICATION`. Existing v1/v2 split profiles retain their accepted shapes. The new
+profile binds two partitioned sources to one single-group successor. Construct
+each source application over its own checked route range, retaining the common
+manifest. Both sources use the existing immutable retirement-profile binding.
+
+The client reuses TransferOperation decisions and gathers requested immutable
+exports until the bounded complete import is available. Check image count and
+aggregate bytes; each export is validated by the existing decision contract.
+Images belong to one client invocation, never become completion evidence, and
+are dropped on failure. Restart re-reads committed observations and fetches the
+same fenced images with original IDs. Transitions remain intent -> stage -> both
+source fences -> combined non-serving import -> publication -> activation ->
+independent source retirement. Missing data or unknown results never unfreeze
+sources, publish incomplete imports or activate a target.
+
+Acceptance: actual TCP/WAL and QUIC/checkpoint merge histories, pre-activation
+target refusal, source fencing, both imported retry histories, independent source
+retirement and operation resumption through lost import/activation waits.
+Invalid/mislabeled profiles fail before storage opening. Existing split and
+retirement tests remain valid, and formatting/all four strict lint profiles stay
+at zero. These checks do not close arbitrary power-loss, combined membership,
+platform or general retention acceptance.
+
+First203 native checks reject the initial write with InvalidCommand: the source
+application has its correct local range, but executable RouteHint still carries
+the full responsibility range. Existing routing::check_owner requires the exact
+selected route range. Correct source hints through the same checked local-scope
+selection; retain refusal for keys belonging to the other source. Initial build
+checks also exposed a missing constant import and a test-helper visibility error;
+these are corrected without changing library contracts. Preserve the first
+three failed merge histories as pre-fix evidence.
+
+The corrected source path reaches import/publication/activation and retirement.
+The initial retirement assertion compared a first mutation-plus-status response
+with a later status-only response. Compare the durable retirement fields instead,
+excluding the quorum read prefix which can legitimately advance. This changes
+test observation only, without weakening the original retirement identity/index
+or source fencing checks.
 
 ### Slice199e implemented evidence and remaining failures
 

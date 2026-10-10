@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running unittests src/bin/transfer_service.rs (target/debug/deps/voteboat_transfer-a17822a37a58e1c3)
+
+running 2 tests
+test profile::tests::merge_plan_rejects_overlapping_identities_and_invalid_boundaries ... ok
+test profile::tests::merge_profile_rejects_mislabeled_missing_and_conflicting_bindings ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+

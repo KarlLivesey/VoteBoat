@@ -53,7 +53,7 @@ pub fn metadata(p: &Profile) -> Result<LifecycleDirectory, Failure> {
 }
 pub fn source(p: &Profile, b: Binding) -> Result<Source, Failure> {
     let inner = checked(BucketCounter::new(
-        p.operation.intent().before().input().scope,
+        source_scope(p, b.group)?,
         NativeBytePartition,
         limits(),
     ))?;
@@ -92,6 +92,15 @@ pub fn target(p: &Profile, b: Binding) -> Result<Target, Failure> {
     )
     .map_err(|e| format!("target construction: {:?}", e.0).into())
 }
+fn source_scope(p: &Profile, group: GroupIdentity) -> Result<BucketRange, Failure> {
+    p.operation
+        .intent()
+        .sources()
+        .into_iter()
+        .find(|r| r.target == RouteTarget::Group(group))
+        .map(|r| r.scope)
+        .ok_or_else(|| "missing source scope".into())
+}
 fn target_scope(p: &Profile, group: GroupIdentity) -> Result<BucketRange, Failure> {
     p.operation
         .intent()
@@ -124,7 +133,7 @@ fn hint(p: &Profile, b: Binding, key: u8) -> Result<RouteHint, Failure> {
         application: m.application,
         scheme: m.scheme,
         scope: if b.role == profile::Role::Source {
-            m.scope
+            source_scope(p, b.group)?
         } else {
             target_scope(p, b.group)?
         },

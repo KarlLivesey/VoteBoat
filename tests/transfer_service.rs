@@ -15,6 +15,8 @@ use std::{
 mod cuts;
 #[path = "transfer_service/interrupt.rs"]
 mod interrupt;
+#[path = "transfer_service/merge.rs"]
+mod merge;
 #[path = "transfer_service/profiles.rs"]
 mod profiles;
 #[path = "transfer_service/retirement.rs"]
@@ -33,6 +35,9 @@ impl Cluster {
         Self::with_retirement(quic, false)
     }
     fn with_retirement(quic: bool, retirement: bool) -> Self {
+        Self::with_profile(quic, retirement, false)
+    }
+    fn with_profile(quic: bool, retirement: bool, merge: bool) -> Self {
         let (base, held, udp) = loop {
             let base = NEXT.fetch_add(1024, Ordering::Relaxed);
             let mut held = Vec::new();
@@ -67,8 +72,18 @@ impl Cluster {
             fs::create_dir_all(root.join(group.to_string())).unwrap();
         }
         let mut plan = Command::new(BIN);
-        plan.args(["plan", "1", "20", "21", "22", "10", "128", "200", "201"]);
-        if retirement {
+        plan.args([
+            if merge { "plan-merge" } else { "plan" },
+            "1",
+            "20",
+            "21",
+            "22",
+            "10",
+            "128",
+            "200",
+            "201",
+        ]);
+        if retirement && !merge {
             plan.arg("--retirement");
         }
         let plan = plan.output().unwrap();

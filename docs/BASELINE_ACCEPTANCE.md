@@ -1,4 +1,4 @@
-# Baseline acceptance map — review192, updated193
+# Baseline acceptance map — review192, operator evidence updated203
 
 Current review starts at 639c1fb (slice191). The roadmap and catalogue below
 retain historical test scopes, with corrections from source inspection and
@@ -59,7 +59,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | --- | --- | --- |
 | R01 crash-fault consensus | Raft, scoped persistence completions, WAL/recovery; raft, log_store, snapshot and Counter histories. | Selected histories pass; broader combined faults and current platform sweep remain. |
 | R02 recursive responsibility | ResponsibilityManifest, durable delegation and recursive resolve; nested native routed histories; executable lookup190. | General recursive lifecycle fault composition remains; no protocol-specific two-level ceiling. |
-| R03 multiple ordered lanes under one responsibility | Partitioned manifests and independent groups, source/target split and compatible merge; routed histories. | Operator lifecycle workflow and broader recovery coverage remain. No cross-lane total order is claimed. |
+| R03 multiple ordered lanes under one responsibility | Partitioned manifests and independent groups, source/target split and compatible merge; routed histories and executable native split/merge profiles. | Broader recursive operator profiles and recovery coverage remain. No cross-lane total order is claimed. |
 | R04 hierarchical quorums | Policy/JointPolicy, all four election/read/commit sites inspected192; fresh quorum/raft/activation tests pass. | Finite intersection/activation evidence does not establish a distributed protocol proof or all schedules. |
 | R05 selective participation | Explicit assigned local groups, public groups/groups_after iteration, selected manifest paths and cached routing; native parent-offline histories, remote lookup190. | Slice198 adds bounded authenticated local assignment pages with configuration/session-bound cursors; broader deployment/failure coverage remains. |
 | R06 shared WAL throughput | Shared native log worker/barriers and batching; shared_barrier/runtime tests. | Shared mechanism exists; sustainable throughput improvement and original latency gate remain unmet. |
@@ -95,7 +95,7 @@ not a complete operator workflow.
 | add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
 | change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
 | split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
-| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts;194a public TransferOperation and194b authenticated native split commands join the existing stages. | Broader recursive/retained/merge executable profiles and phase-internal fault coverage. Native whole-responsibility counter split is exercised over TCP/QUIC. |
+| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts;194a public TransferOperation and194b authenticated native split commands join the existing stages.203 adds the compatible merge executable profile. | Broader recursive/retained profiles and phase-internal fault coverage. Native whole-responsibility counter split and compatible merge are exercised over TCP/QUIC. |
 | resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194b authenticated split resumption. Slice195 checks every native split phase over TCP/WAL and QUIC/checkpoints plus admitted fence/publication reply loss. | Broader lifecycle profiles, phase-internal power loss and combined membership cuts; membership resumption already exists. |
 | retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
 
@@ -123,6 +123,15 @@ Previews must not reserve resources, fence sources or act as durability evidence
 Peer credential rotation, full persisted admin audit, complete core metrics and
 rolling-format negotiation/migration evidence also remain open chapter09 work.
 Separate-machine execution and current macOS success have not been established.
+
+Slice203 adds explicit fresh-v3 merge/retirement profiles and a bounded client
+that collects all required source images. Three executable histories cover the
+ordinary two-source merge and TCP/WAL plus QUIC/checkpoint restart at all eight
+boundaries, lost accepted import/activation waits, original retries and independent
+source retirement. Broader recursive profiles, arbitrary persistence cuts and
+combined membership failures remain open. The earlier71da217 platform run passes
+all142 Ubuntu operator tests but fails six of122 macOS counter histories; no
+later revision inherits a platform pass from that result.
 
 ## Roadmap exits
 

@@ -165,24 +165,38 @@ impl Client {
             .collect()
     }
     fn next(&self, reads: &[TransferObservation]) -> Result<TransferAction, Failure> {
-        let action = checked(self.profile.operation.next(reads, &[]))?;
-        let TransferAction::Export(export) = action else {
-            return Ok(action);
-        };
-        let reply = self.ask(
-            export.source,
-            &format!("transfer-export {}", export.target.id.get()),
-            true,
-        )?;
-        let image = wire::read_image(reply.strip_prefix("OK image ").ok_or("missing image")?)?;
-        checked(self.profile.operation.next(
-            reads,
-            &[TransferImage {
-                source: export.source,
-                target: export.target,
-                image: &image,
-            }],
-        ))
+        let mut images = Vec::new();
+        let mut bytes = 0usize;
+        loop {
+            let borrowed = images
+                .iter()
+                .map(|(source, target, image)| TransferImage {
+                    source: *source,
+                    target: *target,
+                    image,
+                })
+                .collect::<Vec<_>>();
+            let action = checked(self.profile.operation.next(reads, &borrowed))?;
+            let TransferAction::Export(export) = action else {
+                return Ok(action);
+            };
+            if images.len() >= MAX_OPERATION_IMAGES {
+                return Err("transfer image count budget exceeded".into());
+            }
+            let reply = self.ask(
+                export.source,
+                &format!("transfer-export {}", export.target.id.get()),
+                true,
+            )?;
+            let image = wire::read_image(reply.strip_prefix("OK image ").ok_or("missing image")?)?;
+            bytes = bytes
+                .checked_add(image.payload_capacity())
+                .ok_or("image size overflow")?;
+            if bytes > wire::APP_BYTES {
+                return Err("transfer image byte budget exceeded".into());
+            }
+            images.push((export.source, export.target, image));
+        }
     }
     fn execute(&self, action: &TransferAction) -> Result<String, Failure> {
         let authority = self.profile.operation.intent().before().input().authority;

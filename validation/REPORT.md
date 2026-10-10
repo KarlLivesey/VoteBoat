@@ -5572,3 +5572,24 @@ The completed old01d5190 macOS job114159916607 records115 counter passes and
 seven failures; its full log is retained. Several grouped caller paths changed
 later in71da217. Current run38034032131 is active on both platforms, so no current
 macOS or full-platform acceptance is inferred.
+
+## Slice203 — explicit native compatible merge
+
+Added a fresh v3 merge/retirement startup profile, source-local command routing
+and bounded collection of all required source images before the existing import.
+The complete executable transfer suite passes10 tests in304.60s, including the
+existing split/retirement tests and three new two-source merge histories. The
+new TCP/WAL and QUIC/checkpoint histories recover all eight boundaries, interrupt
+accepted import/activation waits, preserve both retry histories, keep sources
+fenced and retire them independently before target-only writes. Two negative
+profile tests and33 existing transfer contract tests also pass. Formatting and
+all four strict Clippy profiles pass. Initial wrong-scope and test-response
+comparison failures are retained with the final logs and source hashes under
+[slice203](baseline/slice203/README.md).
+
+The previously active71da217 operator run38034032131 is now terminal: Ubuntu
+passes122 counter,13 directory and7 transfer tests; macOS passes116 counter
+tests and fails six QUIC histories, preventing later targets from running. Raw
+logs retain that revision's scope. Those failures and the separate direct
+manifest-read timeout remain open; slice203 changes do not establish a macOS
+pass or full P0–P7 acceptance.

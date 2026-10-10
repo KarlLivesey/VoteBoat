@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 3 tests
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... 
+thread 'merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement' (1463222) panicked at tests/transfer_service.rs:195:9:
+20 ["add", "1", "1", "7"]:  Error: "ERR Application(InvalidCommand)\n"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... 
+thread 'merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement' (1463371) panicked at tests/transfer_service.rs:195:9:
+20 ["add", "1", "1", "7"]:  Error: "ERR Application(InvalidCommand)\n"
+
+FAILED
+test merge::tcp_operator_collects_both_images_before_importing_a_merge ... 
+thread 'merge::tcp_operator_collects_both_images_before_importing_a_merge' (1463890) panicked at tests/transfer_service.rs:195:9:
+20 ["add", "1", "1", "7"]:  Error: "ERR Application(InvalidCommand)\n"
+
+FAILED
+
+failures:
+
+failures:
+    merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement
+    merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement
+    merge::tcp_operator_collects_both_images_before_importing_a_merge
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 7 filtered out; finished in 2.48s
+
+error: test failed, to rerun pass `--test transfer_service`

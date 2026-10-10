@@ -31,7 +31,7 @@ fn wait_prefix(rig: &Cluster, g: u128, node: u16, name: &str, prefix: u64) {
         std::thread::sleep(Duration::from_millis(5));
     }
 }
-pub(super) fn checkpoint(rig: &Cluster) {
+pub(in super::super) fn checkpoint(rig: &Cluster) {
     for g in GROUPS {
         let prefix = (1..=3)
             .map(|n| field(&status(rig, g, n), "committed="))
@@ -59,6 +59,11 @@ impl Drop for WaitingClient {
 }
 pub(super) fn lost_proposal(rig: &mut Cluster, g: u128, verb: &str, before: &str) {
     let payload = (verb == "publish").then(|| publication(rig));
+    let mut words = vec!["transfer-step".to_owned(), verb.to_owned()];
+    words.extend(payload);
+    lost_command(rig, g, &words, before);
+}
+pub(in super::super) fn lost_command(rig: &mut Cluster, g: u128, words: &[String], before: &str) {
     let leader = (1..=3)
         .find(|n| status(rig, g, *n).contains("role=Leader"))
         .unwrap();
@@ -75,10 +80,7 @@ pub(super) fn lost_proposal(rig: &mut Cluster, g: u128, verb: &str, before: &str
     let log = rig.root.join(format!("{g}-{leader}.log"));
     let offset = fs::read_to_string(&log).unwrap().len();
     let mut command = rig.client(leader, 3, "command");
-    command.arg(g.to_string()).args(["transfer-step", verb]);
-    if let Some(payload) = payload {
-        command.arg(payload);
-    }
+    command.arg(g.to_string()).args(words);
     let mut client = WaitingClient(
         command
             .stdout(Stdio::piped())
@@ -94,9 +96,10 @@ pub(super) fn lost_proposal(rig: &mut Cluster, g: u128, verb: &str, before: &str
         }
         assert!(
             client.0.try_wait().unwrap().is_none(),
-            "client ended before accepted {verb}"
+            "client ended before accepted {}",
+            words[1]
         );
-        assert!(Instant::now() < deadline, "{verb} not admitted");
+        assert!(Instant::now() < deadline, "{} not admitted", words[1]);
         std::thread::sleep(Duration::from_millis(1));
     }
     drop(client);
@@ -106,7 +109,7 @@ pub(super) fn lost_proposal(rig: &mut Cluster, g: u128, verb: &str, before: &str
     if next.starts_with(&format!("OK next={before}")) {
         rig.operate("step");
     }
-    eprintln!("lost {verb} reply recovered next={next}");
+    eprintln!("lost {} reply recovered next={next}", words[1]);
 }
 fn unhex(hex: &str) -> Vec<u8> {
     assert_eq!(hex.len() % 2, 0);
