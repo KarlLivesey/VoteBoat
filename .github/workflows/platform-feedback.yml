@@ -25,8 +25,6 @@ jobs:
       - run: cargo fetch --locked
       - run: cargo clippy --locked --offline --all-targets --all-features -- -D warnings
       - run: cargo clippy --locked --offline --all-targets --no-default-features -- -D warnings
-      - name: Report function size and cognitive complexity
-        run: cargo clippy --locked --offline --all-targets --all-features -- -W clippy::too_many_lines -W clippy::cognitive_complexity --cap-lints warn
   test:
     name: Rust on ${{ matrix.os }}
     strategy:

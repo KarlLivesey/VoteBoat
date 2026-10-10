@@ -735,99 +735,169 @@ impl Directory {
     pub fn is_initialized(&self) -> bool {
         self.initialized
     }
+    fn checkpoint_magic(&self) -> &'static [u8; 8] {
+        if self.metadata_locators {
+            b"VBDIR015"
+        } else if self.remaining_transfer {
+            b"VBDIR014"
+        } else if self.cross_reparenting {
+            b"VBDIR013"
+        } else if self.reparent_guards {
+            b"VBDIR012"
+        } else if self.local_reparenting {
+            b"VBDIR011"
+        } else if self.child_slot_retirement {
+            b"VBDIR010"
+        } else if self.namespace_deletion {
+            b"VBDIR009"
+        } else if self.retained_insertion {
+            b"VBDIR008"
+        } else if self.cross_authority_insertion {
+            b"VBDIR007"
+        } else if self.recursive_insertion {
+            b"VBDIR006"
+        } else if self.responsibility_insertion {
+            b"VBDIR005"
+        } else if self.namespace_transfers {
+            b"VBDIR004"
+        } else if self.namespace_creation {
+            b"VBDIR003"
+        } else if self.group_creation {
+            b"VBDIR002"
+        } else {
+            b"VBDIR001"
+        }
+    }
     fn request(&self, bytes: &[u8]) -> Result<Request, ApplicationError> {
         if bytes.len() > MAX_DIRECTORY_COMMAND_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
-        let request = if bytes.starts_with(b"VBDINIT1")
-            || bytes.starts_with(b"VBDINIT2")
-            || bytes.starts_with(b"VBDINIT3")
-            || bytes.starts_with(b"VBDINIT4")
-            || bytes.starts_with(b"VBDINIT5")
-            || bytes.starts_with(b"VBDINIT6")
-            || bytes.starts_with(b"VBDINIT7")
-            || bytes.starts_with(b"VBDINIT8")
-            || bytes.starts_with(b"VBDINIT9")
-            || bytes.starts_with(b"VBDINI10")
-            || bytes.starts_with(b"VBDINI11")
-            || bytes.starts_with(b"VBDINI12")
-            || bytes.starts_with(b"VBDINI13")
-            || bytes.starts_with(b"VBDINI14")
-            || bytes.starts_with(b"VBDINI15")
-        {
+        let tag = bytes.get(..8).unwrap_or_default();
+        let request = if matches!(
+            tag,
+            b"VBDINIT1"
+                | b"VBDINIT2"
+                | b"VBDINIT3"
+                | b"VBDINIT4"
+                | b"VBDINIT5"
+                | b"VBDINIT6"
+                | b"VBDINIT7"
+                | b"VBDINIT8"
+                | b"VBDINIT9"
+                | b"VBDINI10"
+                | b"VBDINI11"
+                | b"VBDINI12"
+                | b"VBDINI13"
+                | b"VBDINI14"
+                | b"VBDINI15"
+        ) {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
             }
-            Ok(Request::Bootstrap)
+            Request::Bootstrap
         } else {
             if !self.initialized {
                 return Err(ApplicationError::NotApplied);
             }
-            if self.metadata_locators && bytes.starts_with(b"VBMLUP01") {
+            self.decode_request(bytes)?
+        };
+        self.validate_request_profile(&request)?;
+        Ok(request)
+    }
+    fn decode_request(&self, bytes: &[u8]) -> Result<Request, ApplicationError> {
+        match bytes.get(..8).unwrap_or_default() {
+            b"VBMLUP01" if self.metadata_locators => {
                 MetadataLocatorUpdate::decode(bytes).map(Request::MetadataLocator)
-            } else if self.cross_reparenting && bytes.starts_with(b"VBXRCM01") {
-                CommitReparent::decode(bytes).map(Request::CommitReparent)
-            } else if self.cross_reparenting && bytes.starts_with(b"VBXRPU01") {
-                PublishReparent::decode(bytes).map(Request::PublishReparent)
-            } else if self.cross_reparenting && bytes.starts_with(b"VBXRFI01") {
-                FinishReparent::decode(bytes).map(Request::FinishReparent)
-            } else if self.cross_reparenting && bytes.starts_with(b"VBXRRL01") {
-                ReleaseCommittedReparent::decode(bytes).map(Request::ReleaseCommitted)
-            } else if self.reparent_guards && bytes.starts_with(b"VBXRGR01") {
-                PrepareReparent::decode(bytes).map(Request::ReparentGuard)
-            } else if self.reparent_guards && bytes.starts_with(b"VBXRCN01") {
-                CancelReparent::decode(bytes).map(Request::CancelReparent)
-            } else if self.reparent_guards && bytes.starts_with(b"VBXRAB01") {
-                ReleaseReparentGuard::decode(bytes).map(Request::ReleaseReparent)
-            } else if self.local_reparenting && bytes.starts_with(b"VBRPAR01") {
-                ReparentPlan::decode(bytes).map(Request::Reparent)
-            } else if self.child_slot_retirement && bytes.starts_with(b"VBRSLOT1") {
-                RetireChildSlot::decode(bytes).map(Request::RetireChildSlot)
-            } else if self.namespace_deletion && bytes.starts_with(b"VBDDEL01") {
-                DeletionIntent::decode(bytes).map(Request::Deletion)
-            } else if self.namespace_deletion && bytes.starts_with(b"VBDDCM01") {
-                DeletionCompletion::decode(bytes).map(Request::DeletionCompletion)
-            } else if bytes.starts_with(b"VBNSPUB1") {
-                if !self.namespace_creation {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                NamespacePublication::decode(bytes).map(Request::Namespace)
-            } else if bytes.starts_with(b"VBGCRT01") {
-                if !self.group_creation {
-                    return Err(ApplicationError::InvalidCommand);
-                }
-                GroupCreationIntent::decode(bytes).map(Request::Create)
-            } else if bytes.starts_with(b"VBTINT01")
-                || bytes.starts_with(b"VBTINT02")
-                || (self.responsibility_insertion && bytes.starts_with(b"VBTINT03"))
-                || (self.recursive_insertion && bytes.starts_with(b"VBTINT04"))
-                || (self.cross_authority_insertion && bytes.starts_with(b"VBTINT05"))
-                || (self.retained_insertion && bytes.starts_with(b"VBTINT06"))
-                || (self.remaining_transfer && bytes.starts_with(b"VBTINT07"))
-            {
-                TransferIntent::decode(bytes).map(Request::Transfer)
-            } else if bytes.starts_with(b"VBTPUB01")
-                || (self.retained_insertion && bytes.starts_with(b"VBTPUB02"))
-            {
-                TransferPublication::decode(bytes).map(Request::Publication)
-            } else if bytes.starts_with(b"VBDPLAN1")
-                || (self.recursive_insertion && bytes.starts_with(b"VBDPLAN2"))
-                || (self.cross_authority_insertion && bytes.starts_with(b"VBDPLAN3"))
-                || (self.retained_insertion && bytes.starts_with(b"VBDPLAN4"))
-                || (self.remaining_transfer && bytes.starts_with(b"VBDPLAN5"))
-            {
-                DelegationPlan::decode(bytes).map(Request::Delegation)
-            } else if bytes.starts_with(b"VBDCOMP1") {
-                DelegationCompletion::decode(bytes).map(Request::DelegationCompletion)
-            } else if bytes.starts_with(b"VBDDECL1") {
-                DelegationDecline::decode(bytes).map(Request::DelegationDecline)
-            } else if bytes.starts_with(b"VBDCANC1") {
-                DelegationCancellation::decode(bytes).map(Request::DelegationCancellation)
-            } else {
-                DirectoryCommand::decode(bytes).map(Request::Publish)
             }
-        }?;
-        let intent = match &request {
+            b"VBXRCM01" | b"VBXRPU01" | b"VBXRFI01" | b"VBXRRL01" | b"VBXRGR01" | b"VBXRCN01"
+            | b"VBXRAB01" | b"VBRPAR01" => self.decode_reparent_request(bytes),
+            b"VBRSLOT1" if self.child_slot_retirement => {
+                RetireChildSlot::decode(bytes).map(Request::RetireChildSlot)
+            }
+            b"VBDDEL01" if self.namespace_deletion => {
+                DeletionIntent::decode(bytes).map(Request::Deletion)
+            }
+            b"VBDDCM01" if self.namespace_deletion => {
+                DeletionCompletion::decode(bytes).map(Request::DeletionCompletion)
+            }
+            b"VBNSPUB1" if self.namespace_creation => {
+                NamespacePublication::decode(bytes).map(Request::Namespace)
+            }
+            b"VBGCRT01" if self.group_creation => {
+                GroupCreationIntent::decode(bytes).map(Request::Create)
+            }
+            b"VBTINT01" | b"VBTINT02" => TransferIntent::decode(bytes).map(Request::Transfer),
+            b"VBTINT03" if self.responsibility_insertion => {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            }
+            b"VBTINT04" if self.recursive_insertion => {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            }
+            b"VBTINT05" if self.cross_authority_insertion => {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            }
+            b"VBTINT06" if self.retained_insertion => {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            }
+            b"VBTINT07" if self.remaining_transfer => {
+                TransferIntent::decode(bytes).map(Request::Transfer)
+            }
+            b"VBTPUB01" => TransferPublication::decode(bytes).map(Request::Publication),
+            b"VBTPUB02" if self.retained_insertion => {
+                TransferPublication::decode(bytes).map(Request::Publication)
+            }
+            b"VBDPLAN1" => DelegationPlan::decode(bytes).map(Request::Delegation),
+            b"VBDPLAN2" if self.recursive_insertion => {
+                DelegationPlan::decode(bytes).map(Request::Delegation)
+            }
+            b"VBDPLAN3" if self.cross_authority_insertion => {
+                DelegationPlan::decode(bytes).map(Request::Delegation)
+            }
+            b"VBDPLAN4" if self.retained_insertion => {
+                DelegationPlan::decode(bytes).map(Request::Delegation)
+            }
+            b"VBDPLAN5" if self.remaining_transfer => {
+                DelegationPlan::decode(bytes).map(Request::Delegation)
+            }
+            b"VBDCOMP1" => DelegationCompletion::decode(bytes).map(Request::DelegationCompletion),
+            b"VBDDECL1" => DelegationDecline::decode(bytes).map(Request::DelegationDecline),
+            b"VBDCANC1" => {
+                DelegationCancellation::decode(bytes).map(Request::DelegationCancellation)
+            }
+            _ => DirectoryCommand::decode(bytes).map(Request::Publish),
+        }
+    }
+    fn decode_reparent_request(&self, bytes: &[u8]) -> Result<Request, ApplicationError> {
+        match bytes.get(..8).unwrap_or_default() {
+            b"VBXRCM01" if self.cross_reparenting => {
+                CommitReparent::decode(bytes).map(Request::CommitReparent)
+            }
+            b"VBXRPU01" if self.cross_reparenting => {
+                PublishReparent::decode(bytes).map(Request::PublishReparent)
+            }
+            b"VBXRFI01" if self.cross_reparenting => {
+                FinishReparent::decode(bytes).map(Request::FinishReparent)
+            }
+            b"VBXRRL01" if self.cross_reparenting => {
+                ReleaseCommittedReparent::decode(bytes).map(Request::ReleaseCommitted)
+            }
+            b"VBXRGR01" if self.reparent_guards => {
+                PrepareReparent::decode(bytes).map(Request::ReparentGuard)
+            }
+            b"VBXRCN01" if self.reparent_guards => {
+                CancelReparent::decode(bytes).map(Request::CancelReparent)
+            }
+            b"VBXRAB01" if self.reparent_guards => {
+                ReleaseReparentGuard::decode(bytes).map(Request::ReleaseReparent)
+            }
+            b"VBRPAR01" if self.local_reparenting => {
+                ReparentPlan::decode(bytes).map(Request::Reparent)
+            }
+            _ => DirectoryCommand::decode(bytes).map(Request::Publish),
+        }
+    }
+    fn validate_request_profile(&self, request: &Request) -> Result<(), ApplicationError> {
+        let intent = match request {
             Request::Transfer(i) => Some(i),
             Request::Publication(p) => Some(p.intent()),
             Request::DelegationCompletion(c) => Some(c.decision.publication.intent()),
@@ -837,7 +907,7 @@ impl Directory {
         };
         if !self.remaining_transfer
             && (intent.is_some_and(TransferIntent::is_remaining_transfer)
-                || matches!(&request, Request::Delegation(p) if p.is_remaining_transfer()))
+                || matches!(request, Request::Delegation(p) if p.is_remaining_transfer()))
         {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -852,7 +922,7 @@ impl Directory {
         if !self.child_slot_retirement {
             let vacant_intent =
                 |i: &TransferIntent| i.before().has_vacancies() || i.after().has_vacancies();
-            let vacancies = match &request {
+            let vacancies = match request {
                 Request::Publish(c) => c.manifest.has_vacancies(),
                 Request::Namespace(c) => c.manifest.has_vacancies(),
                 Request::Deletion(c) => c.before.has_vacancies(),
@@ -868,7 +938,7 @@ impl Directory {
                 return Err(ApplicationError::UnsupportedSchema);
             }
         }
-        Ok(request)
+        Ok(())
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
@@ -1020,6 +1090,33 @@ impl Directory {
                     })
         })
     }
+    fn transfer_target_busy(&self, group: GroupIdentity) -> bool {
+        self.retired_slot_children
+            .values()
+            .any(|g| g.id == group.id)
+            || self.transfer_targets.contains(&group)
+            || self
+                .plan
+                .manifests
+                .values()
+                .chain(self.manifests.values())
+                .any(|m| {
+                    let input = m.input();
+                    input.authority == group
+                        || input.parent.is_some_and(|p| p.group == group)
+                        || match &input.execution {
+                            ExecutionMode::Single(g) => *g == group,
+                            ExecutionMode::Partitioned(routes)
+                            | ExecutionMode::Delegated(routes) => {
+                                routes.iter().any(|r| match r.target {
+                                    RouteTarget::Vacant => false,
+                                    RouteTarget::Group(g) => g == group,
+                                    RouteTarget::Child(c) => c.group == group,
+                                })
+                            }
+                        }
+                })
+    }
     fn begin_transfer(
         &mut self,
         operation: OperationId,
@@ -1086,33 +1183,7 @@ impl Directory {
             let RouteTarget::Group(group) = target.target else {
                 unreachable!("checked intent")
             };
-            if self
-                .retired_slot_children
-                .values()
-                .any(|g| g.id == group.id)
-                || self.transfer_targets.contains(&group)
-                || self
-                    .plan
-                    .manifests
-                    .values()
-                    .chain(self.manifests.values())
-                    .any(|m| {
-                        let input = m.input();
-                        input.authority == group
-                            || input.parent.is_some_and(|p| p.group == group)
-                            || match &input.execution {
-                                ExecutionMode::Single(g) => *g == group,
-                                ExecutionMode::Partitioned(routes)
-                                | ExecutionMode::Delegated(routes) => {
-                                    routes.iter().any(|r| match r.target {
-                                        RouteTarget::Vacant => false,
-                                        RouteTarget::Group(g) => g == group,
-                                        RouteTarget::Child(c) => c.group == group,
-                                    })
-                                }
-                            }
-                    })
-            {
+            if self.transfer_target_busy(group) {
                 return DirectoryOutcome::TransferGroupBusy;
             }
         }
@@ -1500,6 +1571,64 @@ impl Directory {
             completion: DelegationCompletion::decode(&h.bytes)?,
         }))
     }
+    fn control_permitted(&self, operation: OperationId, command: &Request, locator: bool) -> bool {
+        match command {
+            Request::MetadataLocator(_) => locator,
+            Request::DeletionCompletion(c) => self.deletion_permitted(operation, c),
+            Request::Publication(p) => self.publication_permitted(p),
+            Request::Namespace(p) => self.namespace_permitted(p),
+            Request::DelegationCompletion(c) => self.delegation_permitted(c),
+            Request::DelegationCancellation(c) => self.cancellation_permitted(c),
+            Request::CancelReparent(c) => self.cancel_reparent_permitted(operation, *c),
+            Request::ReleaseReparent(c) => {
+                self.guarded_operations.contains(&c.decision.guard)
+                    && self.release_reparent_permitted(operation, *c)
+            }
+            Request::CommitReparent(c) => self.commit_reparent_permitted(operation, c),
+            Request::PublishReparent(c) => self.publish_reparent_permitted(operation, c),
+            Request::FinishReparent(c) => self.finish_reparent_permitted(operation, c),
+            Request::ReleaseCommitted(c) => self.release_committed_permitted(operation, *c),
+            _ => false,
+        }
+    }
+    fn execute_request(
+        &mut self,
+        index: u64,
+        operation: OperationId,
+        command: Request,
+    ) -> DirectoryOutcome {
+        match command {
+            Request::MetadataLocator(u) => self.update_metadata_locators(u),
+            Request::ReparentGuard(p) => self.prepare_reparent(operation, p),
+            Request::CommitReparent(c) => self.commit_reparent(index, operation, c),
+            Request::PublishReparent(c) => self.publish_reparent(operation, c),
+            Request::FinishReparent(c) => self.finish_reparent(operation, c),
+            Request::ReleaseCommitted(c) => self.release_committed_reparent(operation, c),
+            Request::CancelReparent(c) => self.cancel_reparent(index, operation, c),
+            Request::ReleaseReparent(c) => self.release_reparent(operation, c),
+            Request::RetireChildSlot(r) => self.retire_child_slot(r),
+            Request::Reparent(plan) => self.reparent(plan),
+            Request::Deletion(i) => self.begin_deletion(operation, i),
+            Request::DeletionCompletion(c) => self.complete_deletion(operation, c),
+            Request::Publish(command) => self.publish(command),
+            Request::Create(intent) => self.reserve_group_creation(operation, intent),
+            Request::Namespace(p) => self.complete_namespace(operation, p),
+            Request::Transfer(intent) => self.begin_transfer(operation, intent),
+            Request::Publication(publication) => self.complete_transfer(operation, publication),
+            Request::Delegation(plan) => self.begin_delegation(operation, plan),
+            Request::DelegationCompletion(completion) => {
+                self.complete_delegation(operation, completion)
+            }
+            Request::DelegationDecline(decline) => self.decline_delegation(operation, decline),
+            Request::DelegationCancellation(cancellation) => {
+                self.cancel_delegation(operation, cancellation)
+            }
+            Request::Bootstrap => {
+                self.initialized = true;
+                DirectoryOutcome::Initialized
+            }
+        }
+    }
     fn execute(
         &mut self,
         index: u64,
@@ -1518,18 +1647,7 @@ impl Directory {
             )
         } else {
             let locator_control = matches!(&command, Request::MetadataLocator(u) if self.locator_permitted(u, bytes.len()));
-            let control = locator_control
-                || matches!(&command,Request::DeletionCompletion(c) if self.deletion_permitted(operation,c))
-                || matches!(&command,Request::Publication(p) if self.publication_permitted(p))
-                || matches!(&command,Request::Namespace(p) if self.namespace_permitted(p))
-                || matches!(&command,Request::DelegationCompletion(c) if self.delegation_permitted(c))
-                || matches!(&command,Request::DelegationCancellation(c) if self.cancellation_permitted(c))
-                || matches!(&command,Request::CancelReparent(c) if self.cancel_reparent_permitted(operation,*c))
-                || matches!(&command,Request::ReleaseReparent(c) if self.guarded_operations.contains(&c.decision.guard) && self.release_reparent_permitted(operation,*c))
-                || matches!(&command,Request::CommitReparent(c) if self.commit_reparent_permitted(operation,c))
-                || matches!(&command,Request::PublishReparent(c) if self.publish_reparent_permitted(operation,c))
-                || matches!(&command,Request::FinishReparent(c) if self.finish_reparent_permitted(operation,c))
-                || matches!(&command,Request::ReleaseCommitted(c) if self.release_committed_permitted(operation,*c));
+            let control = self.control_permitted(operation, &command, locator_control);
             if !control
                 && (self.remaining_operations() == 0
                     || self.history_bytes + bytes.len() > self.limits.history_bytes)
@@ -1547,37 +1665,7 @@ impl Directory {
                 return Err(ApplicationError::DedupCapacity);
             }
             let guarded_before = (!self.guarded_manifests.is_empty()).then(|| self.clone());
-            let mut outcome = match command {
-                Request::MetadataLocator(u) => self.update_metadata_locators(u),
-                Request::ReparentGuard(p) => self.prepare_reparent(operation, p),
-                Request::CommitReparent(c) => self.commit_reparent(index, operation, c),
-                Request::PublishReparent(c) => self.publish_reparent(operation, c),
-                Request::FinishReparent(c) => self.finish_reparent(operation, c),
-                Request::ReleaseCommitted(c) => self.release_committed_reparent(operation, c),
-                Request::CancelReparent(c) => self.cancel_reparent(index, operation, c),
-                Request::ReleaseReparent(c) => self.release_reparent(operation, c),
-                Request::RetireChildSlot(r) => self.retire_child_slot(r),
-                Request::Reparent(plan) => self.reparent(plan),
-                Request::Deletion(i) => self.begin_deletion(operation, i),
-                Request::DeletionCompletion(c) => self.complete_deletion(operation, c),
-                Request::Publish(command) => self.publish(command),
-                Request::Create(intent) => self.reserve_group_creation(operation, intent),
-                Request::Namespace(p) => self.complete_namespace(operation, p),
-                Request::Transfer(intent) => self.begin_transfer(operation, intent),
-                Request::Publication(publication) => self.complete_transfer(operation, publication),
-                Request::Delegation(plan) => self.begin_delegation(operation, plan),
-                Request::DelegationCompletion(completion) => {
-                    self.complete_delegation(operation, completion)
-                }
-                Request::DelegationDecline(decline) => self.decline_delegation(operation, decline),
-                Request::DelegationCancellation(cancellation) => {
-                    self.cancel_delegation(operation, cancellation)
-                }
-                Request::Bootstrap => {
-                    self.initialized = true;
-                    DirectoryOutcome::Initialized
-                }
-            };
+            let mut outcome = self.execute_request(index, operation, command);
             if let Some(before) = guarded_before {
                 if !self.guarded_state_preserved(&before) {
                     *self = before;
@@ -1828,37 +1916,7 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.metadata_locators {
-            b"VBDIR015"
-        } else if self.remaining_transfer {
-            b"VBDIR014"
-        } else if self.cross_reparenting {
-            b"VBDIR013"
-        } else if self.reparent_guards {
-            b"VBDIR012"
-        } else if self.local_reparenting {
-            b"VBDIR011"
-        } else if self.child_slot_retirement {
-            b"VBDIR010"
-        } else if self.namespace_deletion {
-            b"VBDIR009"
-        } else if self.retained_insertion {
-            b"VBDIR008"
-        } else if self.cross_authority_insertion {
-            b"VBDIR007"
-        } else if self.recursive_insertion {
-            b"VBDIR006"
-        } else if self.responsibility_insertion {
-            b"VBDIR005"
-        } else if self.namespace_transfers {
-            b"VBDIR004"
-        } else if self.namespace_creation {
-            b"VBDIR003"
-        } else if self.group_creation {
-            b"VBDIR002"
-        } else {
-            b"VBDIR001"
-        });
+        bytes.extend(self.checkpoint_magic());
         bytes.extend(self.applied.to_le_bytes());
         bytes.extend((self.limits.operations as u32).to_le_bytes());
         bytes.extend((self.limits.history_bytes as u64).to_le_bytes());
@@ -1893,38 +1951,7 @@ impl CheckpointStateMachine for Directory {
         }
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
-            if reader.take(8)?
-                != if self.metadata_locators {
-                    b"VBDIR015"
-                } else if self.remaining_transfer {
-                    b"VBDIR014"
-                } else if self.cross_reparenting {
-                    b"VBDIR013"
-                } else if self.reparent_guards {
-                    b"VBDIR012"
-                } else if self.local_reparenting {
-                    b"VBDIR011"
-                } else if self.child_slot_retirement {
-                    b"VBDIR010"
-                } else if self.namespace_deletion {
-                    b"VBDIR009"
-                } else if self.retained_insertion {
-                    b"VBDIR008"
-                } else if self.cross_authority_insertion {
-                    b"VBDIR007"
-                } else if self.recursive_insertion {
-                    b"VBDIR006"
-                } else if self.responsibility_insertion {
-                    b"VBDIR005"
-                } else if self.namespace_transfers {
-                    b"VBDIR004"
-                } else if self.namespace_creation {
-                    b"VBDIR003"
-                } else if self.group_creation {
-                    b"VBDIR002"
-                } else {
-                    b"VBDIR001"
-                }
+            if reader.take(8)? != self.checkpoint_magic()
                 || reader.u64()? != applied
                 || reader.u32()? as usize != self.limits.operations
                 || reader.u64()? != self.limits.history_bytes as u64

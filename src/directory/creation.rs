@@ -40,6 +40,46 @@ pub struct GroupCreationStatus {
     pub index: u64,
     pub intent: GroupCreationIntent,
 }
+fn read_quorum_tree(
+    r: &mut Reader<'_>,
+    depth: usize,
+    remaining: &mut usize,
+) -> Result<Tree, ApplicationError> {
+    if depth > Limits::default().max_depth || *remaining == 0 {
+        return Err(ApplicationError::InvalidCommand);
+    }
+    *remaining -= 1;
+    let tag = r.u8()?;
+    if tag == 0 {
+        return Ok(Tree::Voter(
+            NodeId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?,
+        ));
+    }
+    if tag != 1 && tag != 2 {
+        return Err(ApplicationError::InvalidCommand);
+    }
+    let count = r.u32()? as usize;
+    if count == 0 || count > *remaining {
+        return Err(ApplicationError::InvalidCommand);
+    }
+    if tag == 1 {
+        let mut children = Vec::with_capacity(count);
+        for _ in 0..count {
+            children.push(read_quorum_tree(r, depth + 1, remaining)?);
+        }
+        Ok(Tree::Majority(children))
+    } else {
+        let mut children = Vec::with_capacity(count);
+        for _ in 0..count {
+            children.push(WeightedChild {
+                weight: r.u64()?,
+                node: read_quorum_tree(r, depth + 1, remaining)?,
+            });
+        }
+        Ok(Tree::Weighted(children))
+    }
+}
+
 impl GroupCreationIntent {
     fn validate(&self) -> Result<(), ApplicationError> {
         let b = &self.bootstrap;
@@ -150,47 +190,8 @@ impl GroupCreationIntent {
             1 => GroupCreationMode::Staging,
             _ => return Err(ApplicationError::InvalidCommand),
         };
-        fn tree(
-            r: &mut Reader<'_>,
-            depth: usize,
-            remaining: &mut usize,
-        ) -> Result<Tree, ApplicationError> {
-            if depth > Limits::default().max_depth || *remaining == 0 {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            *remaining -= 1;
-            let tag = r.u8()?;
-            if tag == 0 {
-                return Ok(Tree::Voter(
-                    NodeId::new(r.u64()?).ok_or(ApplicationError::InvalidCommand)?,
-                ));
-            }
-            if tag != 1 && tag != 2 {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            let count = r.u32()? as usize;
-            if count == 0 || count > *remaining {
-                return Err(ApplicationError::InvalidCommand);
-            }
-            if tag == 1 {
-                let mut children = Vec::with_capacity(count);
-                for _ in 0..count {
-                    children.push(tree(r, depth + 1, remaining)?);
-                }
-                Ok(Tree::Majority(children))
-            } else {
-                let mut children = Vec::with_capacity(count);
-                for _ in 0..count {
-                    children.push(WeightedChild {
-                        weight: r.u64()?,
-                        node: tree(r, depth + 1, remaining)?,
-                    });
-                }
-                Ok(Tree::Weighted(children))
-            }
-        }
         let policy = Policy::new(
-            tree(&mut r, 0, &mut Limits::default().max_tree_nodes)?,
+            read_quorum_tree(&mut r, 0, &mut Limits::default().max_tree_nodes)?,
             Limits::default(),
         )
         .map_err(|_| ApplicationError::InvalidCommand)?;

@@ -8,10 +8,12 @@ no required branch checks gate ongoing implementation.
 
 `clippy.toml` pins the usual limits: 7 arguments, type complexity 250, cognitive
 complexity 25, and 100 lines per function. The first two belong to the standard
-Clippy checks. Cognitive complexity and function length are opt-in and currently
-reported in a separate CI audit: existing violations are not silently exempted,
-but that audit is not yet an enforced zero-warning gate. This is explicit debt,
-not a claim that every function already meets those limits.
+Clippy checks. Cognitive complexity and function length are explicitly denied
+in Cargo.toml, so they also fail plain `cargo clippy`. All four are errors under
+the same local/CI `-D warnings` commands;
+there is no warning-only audit or cap-lints override. Existing findings therefore
+fail this check until corrected. CI remains background feedback rather than a
+required merge check; that does not turn a failed lint run into a pass.
 
 Lint cannot validate module boundaries, failure recovery or composable contracts.
 Those still need the schema plan, review and conformance tests required by AGENTS.md.

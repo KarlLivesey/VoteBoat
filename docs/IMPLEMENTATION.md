@@ -163,7 +163,16 @@ Evidence and limits are recorded in the slice154f section below.
 two partial delegations, remaining ownership transfer, and retirement/reclamation.
 The full macro roadmap remains active; broader fault/platform cases are not implied.
 
-1. **156c, remaining native authority-move composition (current; P5/P6).**
+1. **Enforce and repair maintainability lints (current; all macro milestones).**
+   Enable the promised size/complexity limits in the ordinary strict local/CI
+   commands, then reduce the reported violations with bounded refactors. Depends
+   on the existing parser, ownership, recovery and provider contracts. Check
+   unchanged formats/refusal/atomicity using each affected subsystem's tests;
+   completion requires strict all-target all-feature/core-only Clippy with no
+   warnings. No suppressed baseline or increased thresholds. The first directory
+   cleanup removes its seven diagnostics; other production and fixture findings
+   remain explicit work. This priority does not redefine a red lint job as green.
+2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
    locator updates156c2c and all four selected owner profiles156c2d are implemented,
@@ -178,13 +187,13 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    authority, repeated changes and TCP/QUIC restart with old metadata unavailable.
    This completes the selected user-visible authority move; data writes retain
    their direct owner path.
-2. **Remaining public administration/API coverage (next; P4).** Make the
+3. **Remaining public administration/API coverage (following; P4).** Make the
    existing trusted Node/executable membership operations usable through bounded
    public ingress. Depends on authorization, durable operation status/resumption
    and named P4 failure evidence. Check refusal, original operation recovery
    across leader changes/restart and transport integration. Reuse existing
    consensus and host-provider seams.
-3. **Retained QUIC paused-follower failure (following; P7).** Reproduce the
+**Further retained work: QUIC paused-follower failure (P7).** Reproduce the
    existing failed catch-up gate, identify its cause and fix that path before
    broader tuning. Depends on the retained workload/evidence and current native
    transport/checkpoint contracts. Check resumed follower catch-up, bounded
@@ -13490,3 +13499,55 @@ it is not counted as coverage. These are selected Linux loopback/worker-abort hi
 power-loss, arbitrary network faults or macOS results. Retained/imported owner
 native composition remains current; public P4 ingress and the retained P7 QUIC
 failure remain next. The macro scope and full P0–P7 goal stay active.
+
+## Lint enforcement correction — schema plan, 10 October 2026
+
+The user identified the actual function-length/cognitive-complexity findings.
+Earlier strict Clippy checks omitted those opt-in lints; the separate audit used
+cap-lints warn. Calling that result a clean best-practices check was misleading.
+Enable both lints in Cargo.toml so the existing local and CI -D warnings commands
+fail on them, and remove the warning-only CI override. No baseline exemptions,
+raised thresholds or blanket allows. Existing violations are unresolved until
+an actual strict all-target run passes.
+
+Current mini deliverable: correct enforcement and split the reported directory
+parser into wire decoding, profile validation and execution dispatch. These are
+private, synchronous helpers over existing Request/Reader types. Preserve byte
+formats, feature gates, error order, ownership, guarded-state rollback and atomic
+checkpoint restore. Extract recursive group-creation policy decoding from its
+outer envelope. No new API, runtime, log, persistence schema or allocation budget.
+Check the changed directory/group-creation and metadata conformance tests, then
+rerun strict lint for the remaining findings. This supports every macro milestone
+by making the promised maintainability checks real; it is not feature completion.
+Next: remove remaining production findings by subsystem with relevant tests;
+then complete all-target fixture findings without suppressing checks. Continue
+keeping the full P0-P7 scope and its existing next capability items visible.
+
+The directory cleanup also shares its existing checkpoint magic selection between
+encoding and restore, and extracts the transfer-target conflict predicate. These
+are needed to bring the remaining directory functions under the same limits
+without dropping validation or merely moving lines into closures. Profile order,
+resource checks and mutation order remain unchanged.
+
+First cleanup validation:195 all-feature and158 core-only tests pass across
+10 affected directory/creation/lifecycle targets. Strict library lint removes all
+seven directory/group-creation diagnostics and still fails on41 production
+findings elsewhere; additional test/fixture findings remain from the full audit.
+This is explicitly not a clean lint result.
+
+Next bounded refactor: routed application control handling and checkpoint
+restore. Keep data projection/inner apply, receipt count/capacity, semantic history
+and publication order exact. Private helpers separate bootstrap/fence/scope
+control, pending admission replay and checkpoint decoding of fences, semantic
+history and ordered grant adoptions. Small private decoded-state records carry
+those dependencies; no public schema/API changes or runtime ownership changes.
+Restore continues on a clone and publishes only after every validation succeeds.
+Check routing/routed, scoped source, metadata adoption, reparenting, imported and
+retained lineage tests; full lint must still report unresolved modules honestly.
+
+Final first-cleanup checks: formatting and whitespace pass. The effective all-
+target strict run now fails with50 distinct library/inline-test diagnostics
+(41 production,9 inline-test), and core-only fails with40 (31 production,9
+inline-test). Integration fixtures are not fully enumerated by these failing
+builds; the earlier audit also reported their findings. Both complexity/length
+lints are deny-level even for plain cargo clippy. No clean lint result is claimed.
