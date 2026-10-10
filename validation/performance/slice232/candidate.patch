@@ -1,0 +1,882 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index 7acb5c1..59b2ebc 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -35,7 +35,7 @@
+         "tests/startup/multi/peer_rotation.rs",
+         "tests/counter_service/peer_discovery.rs"
+       ],
+-      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1\u20136, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write. Slice207b1 adds opt-in guarded credentials and pre-side-effect durable record validation to static/member/multi-group startup, using the existing credential journal and host-owned preparation. Slice209g exposes static prepare_for_discovery through the same native recovery and worker setup, returning owned NativeNodeParts before Node construction. Hosts wrap the native connector with public discovery and retain final Node validation; QUIC discovered Dial is opt-in, with unchanged provisioned pins and Accept addresses. Existing open methods keep configured routing. Downstream TCP/QUIC histories preserve original receipts through restart with stale configured dial addresses, and rejected/abandoned assembly returns or explicitly closes and joins original resources. Slice209h adds member and shared multi-group preparation through their existing recovery paths, preserving Recover-only member validation and the exact shared group/application inventory. Downstream TCP/QUIC histories recover member receipts and three independent checkpointed applications with one store binding. Executable source bootstrap remains separate. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries."
++      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1\u20136, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write. Slice207b1 adds opt-in guarded credentials and pre-side-effect durable record validation to static/member/multi-group startup, using the existing credential journal and host-owned preparation. Slice209g exposes static prepare_for_discovery through the same native recovery and worker setup, returning owned NativeNodeParts before Node construction. Hosts wrap the native connector with public discovery and retain final Node validation; QUIC discovered Dial is opt-in, with unchanged provisioned pins and Accept addresses. Existing open methods keep configured routing. Downstream TCP/QUIC histories preserve original receipts through restart with stale configured dial addresses, and rejected/abandoned assembly returns or explicitly closes and joins original resources. Slice209h adds member and shared multi-group preparation through their existing recovery paths, preserving Recover-only member validation and the exact shared group/application inventory. Downstream TCP/QUIC histories recover member receipts and three independent checkpointed applications with one store binding. Executable source bootstrap remains separate. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries. Slice232 candidate explicitly selects VBMJR001 manifest-journal creation for fresh stores, through the unchanged JournalIo/LogStore contracts. Recovery preserves selected legacy or journal metadata without automatic migration; new container readers are required. Candidate acceptance/performance remains subject to the original fixed gate."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -57,7 +57,7 @@
+         "tests/startup/discovery.rs",
+         "tests/counter_service/peer_discovery.rs"
+       ],
+-      "scope": "At most 256 sorted original group bootstraps within one native batch byte limit; exact fresh application map and provisioned voter stores. Creation publishes one durable bootstrap batch. Recovery requires the complete durable group inventory and exact original bootstraps, then verifies snapshots and replays each application before exposure. First snapshot directory retains its existing layout; additional paths bind group and incarnation. Pure preflight precedes files and sockets. Later rejection returns every application, possibly partially restored, plus the existing nonblocking cleanup handle for workers and connections. No rollback, migration, implicit group creation, hidden executor or ownership activation. Downstream TCP/QUIC three-group checkpoint/reopen/retry and failure tests use the public API. NodeParts remains the alternate-provider composition contract; Slice197b4b2a connects an explicit bounded group manifest to the counter executable, with group-addressed authenticated status/read/add/checkpoint and unchanged scoped request identities across routing. Three-process TCP/QUIC histories use independent counters with repeated operation IDs, checkpoint/reopen, exact-scope permission refusal and missing/changed manifest refusal. Slice197b4b2b1 adds bounded exact-group trusted administration manifests and authenticated configure/configuration-status commands. Per-group request owners share the Node completion queue through exact ticket routing; execution rechecks the live connection and exact group/operation. TCP/WAL and QUIC/checkpoint histories commit independent joint/final operations with repeated IDs, preserve unrelated data and retry histories, and reopen the original plans. Slice197b4b2b2 binds each executable maintenance application and leadership driver to its exact startup group. The opt-in schema2/wire8 profile exposes group-scoped move/status/resume/cancel with independently retained attempts and original records; TCP/WAL and QUIC/checkpoint histories cover repeated IDs, cancellation isolation, pending/completed recovery and wrong-profile refusal. Complete multi-group drain and macOS execution remain open. Slice209h exposes the same prepared native parts for host discovery composition, preserving one shared WAL and exact inventory. TCP/QUIC tests use stale configured Dial addresses, distinct per-group values and repeated operation IDs, verified checkpoint recovery, fresh store sessions and joined workers. Missing applications refuse before files; final Node assembly remains caller-owned. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries."
++      "scope": "At most 256 sorted original group bootstraps within one native batch byte limit; exact fresh application map and provisioned voter stores. Creation publishes one durable bootstrap batch. Recovery requires the complete durable group inventory and exact original bootstraps, then verifies snapshots and replays each application before exposure. First snapshot directory retains its existing layout; additional paths bind group and incarnation. Pure preflight precedes files and sockets. Later rejection returns every application, possibly partially restored, plus the existing nonblocking cleanup handle for workers and connections. No rollback, migration, implicit group creation, hidden executor or ownership activation. Downstream TCP/QUIC three-group checkpoint/reopen/retry and failure tests use the public API. NodeParts remains the alternate-provider composition contract; Slice197b4b2a connects an explicit bounded group manifest to the counter executable, with group-addressed authenticated status/read/add/checkpoint and unchanged scoped request identities across routing. Three-process TCP/QUIC histories use independent counters with repeated operation IDs, checkpoint/reopen, exact-scope permission refusal and missing/changed manifest refusal. Slice197b4b2b1 adds bounded exact-group trusted administration manifests and authenticated configure/configuration-status commands. Per-group request owners share the Node completion queue through exact ticket routing; execution rechecks the live connection and exact group/operation. TCP/WAL and QUIC/checkpoint histories commit independent joint/final operations with repeated IDs, preserve unrelated data and retry histories, and reopen the original plans. Slice197b4b2b2 binds each executable maintenance application and leadership driver to its exact startup group. The opt-in schema2/wire8 profile exposes group-scoped move/status/resume/cancel with independently retained attempts and original records; TCP/WAL and QUIC/checkpoint histories cover repeated IDs, cancellation isolation, pending/completed recovery and wrong-profile refusal. Complete multi-group drain and macOS execution remain open. Slice209h exposes the same prepared native parts for host discovery composition, preserving one shared WAL and exact inventory. TCP/QUIC tests use stale configured Dial addresses, distinct per-group values and repeated operation IDs, verified checkpoint recovery, fresh store sessions and joined workers. Missing applications refuse before files; final Node assembly remains caller-owned. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries. Slice232 candidate explicitly selects VBMJR001 manifest-journal creation for fresh stores, through the unchanged JournalIo/LogStore contracts. Recovery preserves selected legacy or journal metadata without automatic migration; new container readers are required. Candidate acceptance/performance remains subject to the original fixed gate."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -332,9 +332,12 @@
+         "tests/log_reclaim.rs",
+         "src/native/log_store/file.rs",
+         "examples/wal_benchmark.rs",
+-        "examples/benchmark/observe.rs"
++        "examples/benchmark/observe.rs",
++        "tests/manifest_journal.rs",
++        "src/native/log_store/manifest_journal_tests.rs",
++        "tests/provider_conformance.rs"
+       ],
+-      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories. A downstream local WAL timing wrapper forwards real FileLogIo through this same seam, verifies exact reopen/replay/retry state and reports primitive barrier costs without changing durability or claiming quorum throughput. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token."
++      "scope": "Dedicated native journal contract with optional atomic old/new pair replacement. FileLogIo retains exclusive lock across two bounded slots; replacement data and manifest plus directory sync precede atomic CURRENT selection and its directory sync, which precede old deletion. Legacy files open unchanged. Missing/corrupt selected pairs cannot fall back. Twenty-six native primitive-boundary failure cuts plus downstream crashable-journal and actual 100-group file-cleanup/restart histories. A downstream local WAL timing wrapper forwards real FileLogIo through this same seam, verifies exact reopen/replay/retry state and reports primitive barrier costs without changing durability or claiming quorum throughput. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice232 candidate adds explicit FileLogIo::create_with_manifest_journal with bounded VBMJR001 metadata: complete original 52-byte checksummed records, full WAL/file sync on established publication, atomic full file/directory publication on initial/4096-record compaction/replacement. Partial final records may be ignored; complete corruption, foreign bindings and regressing session/boundary fail. Original create and existing selected legacy formats remain unchanged, while new native startup explicitly selects journal creation. Candidate acceptance still requires crash/contract/service checks and the unchanged serial250ms gate; no adopted optimization is claimed yet."
+     },
+     {
+       "design_id": "C08",
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 762aa14..3b70214 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -121,7 +121,8 @@
+       "runners": [
+         {"file": "tests/provider_conformance.rs", "symbol": "host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native"},
+         {"file": "tests/provider_conformance.rs", "symbol": "model_log_store_satisfies_same_obligations_and_recovers_original_history"},
+-        {"file": "tests/provider_conformance.rs", "symbol": "file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets"}
++        {"file": "tests/provider_conformance.rs", "symbol": "file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets"},
++        {"file": "tests/provider_conformance.rs", "symbol": "journal_file_log_store_satisfies_same_scoped_contract_and_reopen"}
+       ],
+       "operations": [
+         {
+diff --git a/src/native/log_store/file.rs b/src/native/log_store/file.rs
+index 7493a6c..0af9215 100644
+--- a/src/native/log_store/file.rs
++++ b/src/native/log_store/file.rs
+@@ -15,7 +15,10 @@
+ //! Two bounded journal slots and an atomic durable CURRENT selection. Legacy
+ //! stores without CURRENT continue using log.wal/MANIFEST until first cleaning.
+ use super::{JournalIo, JournalTimings};
++#[path = "manifest_journal.rs"]
++mod manifest_journal;
+ use crate::native::vote_store::crc32c;
++use manifest_journal::State as ManifestJournal;
+ use std::time::Instant;
+ use std::{
+     fs::{self, File, OpenOptions},
+@@ -29,6 +32,8 @@ pub struct FileLogIo {
+     _lock: File,
+     generation: u64,
+     timings: Option<JournalTimings>,
++    journal: bool,
++    metadata: Option<ManifestJournal>,
+ }
+ impl FileLogIo {
+     /// Attach native diagnostics before handing this file to a store/worker.
+@@ -89,8 +94,18 @@ impl FileLogIo {
+             _lock: lock,
+             generation: 0,
+             timings: None,
++            journal: false,
++            metadata: None,
+         })
+     }
++    /// Fresh-store metadata format VBMJR001. Existing stores are never migrated
++    /// by this constructor; recover with open, which preserves their format.
++    /// Established publications still fully synchronize WAL and manifest files.
++    pub fn create_with_manifest_journal(directory: impl AsRef<Path>) -> io::Result<Self> {
++        let mut io = Self::create(directory)?;
++        io.journal = true;
++        Ok(io)
++    }
+     pub fn open(directory: impl AsRef<Path>) -> io::Result<Self> {
+         let directory = directory.as_ref().to_owned();
+         let lock = lock(&directory)?;
+@@ -119,7 +134,15 @@ impl FileLogIo {
+             Err(e) if e.kind() == io::ErrorKind::NotFound => 0,
+             Err(e) => return Err(e),
+         };
+-        File::open(directory.join(manifest_name(generation)))?;
++        let metadata = File::open(directory.join(manifest_name(generation)))?;
++        let mut header = Vec::new();
++        if metadata.metadata()?.is_file() {
++            metadata.take(8).read_to_end(&mut header)?;
++        }
++        // This is format selection, not store validation. Preserve legacy raw
++        // handle opening; NativeLogStore recovery rejects invalid metadata before
++        // any mutation. Never select another pair after a selected-file error.
++        let journal = header == manifest_journal::MAGIC;
+         let log = OpenOptions::new()
+             .read(true)
+             .write(true)
+@@ -130,6 +153,8 @@ impl FileLogIo {
+             _lock: lock,
+             generation,
+             timings: None,
++            journal,
++            metadata: None,
+         })
+     }
+     // Callback is private primitive-boundary fault injection, not a policy hook.
+@@ -161,6 +186,59 @@ impl FileLogIo {
+         after()?;
+         Ok(())
+     }
++    fn publish_journal_with(
++        &mut self,
++        bytes: &[u8],
++        mut after: impl FnMut() -> io::Result<()>,
++    ) -> io::Result<()> {
++        let result = (|| {
++            let path = self.directory.join(manifest_name(self.generation));
++            let old = match self.metadata.clone() {
++                Some(state) => Some(state),
++                None => match ManifestJournal::read(&path) {
++                    Ok(state) => Some(state),
++                    Err(e) if e.kind() == io::ErrorKind::NotFound => None,
++                    Err(e) => return Err(e),
++                },
++            };
++            let next = if let Some(old) = &old {
++                old.next(bytes)?
++            } else {
++                ManifestJournal::single(bytes)?
++            };
++            if old.as_ref().is_none_or(|s| s.full()) {
++                self.publish_with(&next.compacted(), &mut after)?;
++                self.metadata = Some(ManifestJournal::single(bytes)?);
++            } else {
++                let old = old.unwrap();
++                let mut file =
++                    self.timed(3, |_| OpenOptions::new().read(true).write(true).open(path))?;
++                after()?;
++                let size = file.metadata()?.len();
++                if size < old.length || size >= old.length + manifest_journal::RECORD as u64 {
++                    return Err(io::Error::new(
++                        io::ErrorKind::InvalidData,
++                        "manifest journal changed outside owner",
++                    ));
++                }
++                if size != old.length {
++                    file.set_len(old.length)?;
++                }
++                file.seek(SeekFrom::Start(old.length))?;
++                after()?;
++                self.timed(4, |_| file.write_all(bytes))?;
++                after()?;
++                self.timed(5, |_| file.sync_all())?;
++                after()?;
++                self.metadata = Some(next);
++            }
++            Ok(())
++        })();
++        if result.is_err() {
++            self.metadata = None;
++        }
++        result
++    }
+     // The callback injects primitive-boundary errors in native file tests. It
+     // carries no service policy; the normal path always continues.
+     fn replace_with(
+@@ -189,7 +267,12 @@ impl FileLogIo {
+             .create(true)
+             .truncate(true)
+             .open(self.directory.join(manifest_name(next)))?;
+-        metadata.write_all(manifest)?;
++        let encoded = if self.journal {
++            ManifestJournal::single(manifest)?.compacted()
++        } else {
++            manifest.to_vec()
++        };
++        metadata.write_all(&encoded)?;
+         after()?;
+         metadata.sync_all()?;
+         after()?;
+@@ -218,6 +301,7 @@ impl FileLogIo {
+         let old_generation = self.generation;
+         self.log = log;
+         self.generation = next;
++        self.metadata = None;
+         fs::remove_file(self.directory.join(log_name(old_generation)))?;
+         after()?;
+         fs::remove_file(self.directory.join(manifest_name(old_generation)))?;
+@@ -267,6 +351,14 @@ fn lock(directory: &Path) -> io::Result<File> {
+ }
+ impl JournalIo for FileLogIo {
+     fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
++        if self.journal {
++            self.metadata = None;
++            let state =
++                ManifestJournal::read(&self.directory.join(manifest_name(self.generation)))?;
++            let bytes = state.latest.to_vec();
++            self.metadata = Some(state);
++            return Ok(bytes);
++        }
+         let mut b = Vec::new();
+         File::open(self.directory.join(manifest_name(self.generation)))?
+             .take(53)
+@@ -301,7 +393,13 @@ impl JournalIo for FileLogIo {
+         self.log.set_len(length)
+     }
+     fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
+-        self.timed(2, |this| this.publish_with(bytes, || Ok(())))
++        self.timed(2, |this| {
++            if this.journal {
++                this.publish_journal_with(bytes, || Ok(()))
++            } else {
++                this.publish_with(bytes, || Ok(()))
++            }
++        })
+     }
+ 
+     fn supports_replacement(&self) -> bool {
+@@ -312,6 +410,10 @@ impl JournalIo for FileLogIo {
+     }
+ }
+ 
++#[cfg(test)]
++#[path = "manifest_journal_tests.rs"]
++mod manifest_journal_tests;
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+diff --git a/src/native/startup.rs b/src/native/startup.rs
+index e30cd04..d313af1 100644
+--- a/src/native/startup.rs
++++ b/src/native/startup.rs
+@@ -154,7 +154,7 @@ impl NativeMemberStartup {
+         let create = self.startup.mode == NativeOpenMode::Create;
+         let mut log = if create {
+             let mut log = NativeLogStore::create(
+-                FileLogIo::create(&self.startup.directory)?,
++                FileLogIo::create_with_manifest_journal(&self.startup.directory)?,
+                 self.startup.store,
+                 LogLimits::default(),
+             )?;
+@@ -815,7 +815,7 @@ fn recover_storage<A: CheckpointStateMachine>(
+ ) -> Result<StartupStorage, NativeStartupError> {
+     let create = config.mode == NativeOpenMode::Create;
+     let io = if create {
+-        FileLogIo::create(&config.directory)?
++        FileLogIo::create_with_manifest_journal(&config.directory)?
+     } else {
+         FileLogIo::open(&config.directory)?
+     };
+diff --git a/src/native/startup/multi/storage.rs b/src/native/startup/multi/storage.rs
+index 118d949..cf791cd 100644
+--- a/src/native/startup/multi/storage.rs
++++ b/src/native/startup/multi/storage.rs
+@@ -11,7 +11,7 @@ pub(super) fn recover<A: CheckpointStateMachine>(
+     let create = config.mode == NativeOpenMode::Create;
+     let store = if create {
+         let mut store = NativeLogStore::create(
+-            FileLogIo::create(&config.directory)?,
++            FileLogIo::create_with_manifest_journal(&config.directory)?,
+             config.store,
+             LogLimits::default(),
+         )?;
+diff --git a/tests/provider_conformance.rs b/tests/provider_conformance.rs
+index a855363..603fb44 100644
+--- a/tests/provider_conformance.rs
++++ b/tests/provider_conformance.rs
+@@ -61,6 +61,42 @@ mod native {
+     use super::*;
+     use voteboat::{log::LogLimits, native::log_store::*};
+ 
++    #[test]
++    fn journal_file_log_store_satisfies_same_scoped_contract_and_reopen() {
++        let root = std::env::temp_dir().join(format!(
++            "voteboat-journal-conformance-{}",
++            std::process::id()
++        ));
++        std::fs::create_dir_all(&root).unwrap();
++        let mut first = NativeLogStore::create(
++            FileLogIo::create_with_manifest_journal(root.join("first")).unwrap(),
++            identity(1),
++            LogLimits::default(),
++        )
++        .unwrap();
++        let mut second = NativeLogStore::create(
++            FileLogIo::create_with_manifest_journal(root.join("second")).unwrap(),
++            identity(2),
++            LogLimits::default(),
++        )
++        .unwrap();
++        cases::cross_store(&mut first, &mut second);
++        cases::exercise(&mut first, 38);
++        let old = first.binding();
++        let states = [1, 2, 50].map(|id| first.state(group(id)).unwrap());
++        drop(first);
++        let mut reopened = NativeLogStore::recover(
++            FileLogIo::open(root.join("first")).unwrap(),
++            identity(1),
++            LogLimits::default(),
++        )
++        .unwrap();
++        cases::reopened(&mut reopened, old, &states);
++        assert!(second.state(group(50)).is_ok());
++        drop((reopened, second));
++        std::fs::remove_dir_all(root).unwrap();
++    }
++
+     #[test]
+     fn model_log_store_satisfies_same_obligations_and_recovers_original_history() {
+         let io = ModelIo::default();
+diff --git a/src/native/log_store/manifest_journal.rs b/src/native/log_store/manifest_journal.rs
+new file mode 100644
+index 0000000..587d5a8
+--- /dev/null
++++ b/src/native/log_store/manifest_journal.rs
+@@ -0,0 +1,80 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Bounded metadata history. Complete corruption is never an older-slot fallback.
++use std::{
++    fs::File,
++    io::{self, Read},
++    path::Path,
++};
++pub(super) const MAGIC: &[u8; 8] = b"VBMJR001";
++pub(super) const RECORD: usize = 52;
++pub(super) const RECORDS: usize = 4096;
++const MAX_BYTES: usize = 8 + RECORD * RECORDS + RECORD - 1;
++
++#[derive(Clone)]
++pub(super) struct State {
++    pub length: u64,
++    pub latest: [u8; RECORD],
++}
++fn invalid(message: impl Into<String>) -> io::Error {
++    io::Error::new(io::ErrorKind::InvalidData, message.into())
++}
++fn validate(bytes: &[u8]) -> io::Result<()> {
++    crate::native::log_store::read_manifest(bytes)
++        .map(|_| ())
++        .map_err(|error| invalid(format!("manifest journal record: {error:?}")))
++}
++impl State {
++    pub fn single(bytes: &[u8]) -> io::Result<Self> {
++        validate(bytes)?;
++        Ok(Self {
++            length: (8 + RECORD) as u64,
++            latest: bytes.try_into().unwrap(),
++        })
++    }
++    pub fn next(&self, bytes: &[u8]) -> io::Result<Self> {
++        let next = Self::single(bytes)?;
++        let (old, boundary) = crate::native::log_store::read_manifest(&self.latest).unwrap();
++        let (new, end) = crate::native::log_store::read_manifest(bytes).unwrap();
++        if old.identity != new.identity || old.session.get() > new.session.get() || boundary > end {
++            return Err(invalid(
++                "manifest journal identity/session/boundary regression",
++            ));
++        }
++        Ok(Self {
++            length: self.length + RECORD as u64,
++            ..next
++        })
++    }
++    pub fn read(path: &Path) -> io::Result<Self> {
++        let file = File::open(path)?;
++        if file.metadata()?.len() > MAX_BYTES as u64 {
++            return Err(invalid("manifest journal capacity"));
++        }
++        let mut bytes = Vec::new();
++        file.take(MAX_BYTES as u64 + 1).read_to_end(&mut bytes)?;
++        Self::decode(&bytes)
++    }
++    pub fn decode(bytes: &[u8]) -> io::Result<Self> {
++        if bytes.len() < 8 + RECORD || bytes.len() > MAX_BYTES || &bytes[..8] != MAGIC {
++            return Err(invalid("manifest journal format/capacity"));
++        }
++        let (records, _incomplete_tail) = bytes[8..].as_chunks::<RECORD>();
++        let mut records = records.iter();
++        let mut state = Self::single(records.next().unwrap())?;
++        for record in records {
++            state = state.next(record)?;
++        }
++        // Only the incomplete final record is omitted. Every complete record,
++        // including a complete unsynchronized tail, must validate.
++        Ok(state)
++    }
++    pub fn compacted(&self) -> Vec<u8> {
++        let mut bytes = MAGIC.to_vec();
++        bytes.extend(self.latest);
++        bytes
++    }
++    pub fn full(&self) -> bool {
++        (self.length as usize - 8) / RECORD >= RECORDS
++    }
++}
+diff --git a/src/native/log_store/manifest_journal_tests.rs b/src/native/log_store/manifest_journal_tests.rs
+new file mode 100644
+index 0000000..ec47945
+--- /dev/null
++++ b/src/native/log_store/manifest_journal_tests.rs
+@@ -0,0 +1,347 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use crate::{contracts::HardState, native::log_store::*, quorum::*};
++use std::collections::BTreeMap;
++fn identity() -> StoreIdentity {
++    StoreIdentity {
++        id: StoreId::new(1).unwrap(),
++        incarnation: StoreIncarnation::new(1).unwrap(),
++    }
++}
++fn group() -> GroupIdentity {
++    GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    }
++}
++fn path(name: &str, case: usize) -> PathBuf {
++    std::env::temp_dir().join(format!(
++        "voteboat-manifest-journal-{}-{name}-{case}",
++        std::process::id()
++    ))
++}
++fn populated(path: &Path, generation: u64) -> NativeLogStore<FileLogIo> {
++    let mut store = NativeLogStore::create(
++        FileLogIo::create_with_manifest_journal(path).unwrap(),
++        identity(),
++        LogLimits::default(),
++    )
++    .unwrap();
++    let node = NodeId::new(1).unwrap();
++    let tickets = store
++        .append_batch(vec![LogMutation::Create(Bootstrap {
++            group: group(),
++            configuration: ConfigurationId::new(1).unwrap(),
++            policy: Policy::new(Tree::Voter(node), Limits::default()).unwrap(),
++            voter_stores: [(node, identity())].into(),
++        })])
++        .unwrap();
++    store.barrier(&tickets).unwrap();
++    for _ in 0..30 {
++        let old = store.state(group()).unwrap();
++        let tickets = store
++            .append_batch(vec![LogMutation::Update(LogUpdate {
++                group: group(),
++                expected_revision: old.revision,
++                hard_state: HardState {
++                    term: old.hard_state.term + 1,
++                    voted_for: Some(node),
++                },
++                commit_index: 0,
++                suffix: None,
++                snapshot: None,
++                snapshot_membership: None,
++            })])
++            .unwrap();
++        store.barrier(&tickets).unwrap();
++    }
++    if generation == 1 {
++        let reclaimed = store.reclaim(store.limits().max_wal_bytes).unwrap();
++        assert!(reclaimed.after_bytes < reclaimed.before_bytes);
++    }
++    assert_eq!(store.io.generation, generation);
++    store
++}
++fn recover(path: &Path) -> NativeLogStore<FileLogIo> {
++    NativeLogStore::recover(
++        FileLogIo::open(path).unwrap(),
++        identity(),
++        LogLimits::default(),
++    )
++    .unwrap()
++}
++fn next(store: &NativeLogStore<FileLogIo>) -> Vec<u8> {
++    crate::native::log_store::manifest(
++        StoreBinding {
++            session: StoreSession::new(store.binding().session.get() + 1).unwrap(),
++            ..store.binding()
++        },
++        store.length as u64,
++    )
++}
++#[test]
++fn append_boundaries_preserve_acknowledged_vote_and_exact_recovery_session() {
++    for generation in 0..=1 {
++        for cut in 1..=4 {
++            let path = path("append", generation as usize * 4 + cut);
++            let mut store = populated(&path, generation);
++            let expected = store.state(group()).unwrap();
++            let metadata = next(&store);
++            let timing = JournalTimings::default();
++            store.io.timings = Some(timing.clone());
++            let mut step = 0;
++            assert!(store
++                .io
++                .publish_journal_with(&metadata, || {
++                    step += 1;
++                    if step == cut {
++                        Err(io::Error::other("append boundary cut"))
++                    } else {
++                        Ok(())
++                    }
++                })
++                .is_err());
++            assert!(
++                store.io.metadata.is_none(),
++                "error invalidates cached metadata"
++            );
++            assert!(
++                FileLogIo::open(&path).is_err(),
++                "error retains exclusive lock"
++            );
++            let calls = timing.snapshot().publication;
++            assert_eq!(calls.open.calls, 1);
++            assert_eq!(calls.write.calls, u64::from(cut >= 3));
++            assert_eq!(calls.file_sync.calls, u64::from(cut >= 4));
++            assert_eq!(calls.rename.calls + calls.directory_sync.calls, 0);
++            drop(store);
++            let recovered = recover(&path);
++            assert_eq!(recovered.state(group()).unwrap(), expected);
++            assert_eq!(
++                recovered.binding().session.get(),
++                if cut < 3 { 2 } else { 3 }
++            );
++            drop(recovered);
++            fs::remove_dir_all(path).unwrap();
++        }
++    }
++}
++#[test]
++fn initial_and_bounded_compaction_use_full_atomic_publication() {
++    for cut in 1..=5 {
++        let initial = path("initial", cut);
++        let mut io = FileLogIo::create_with_manifest_journal(&initial).unwrap();
++        io.sync_log().unwrap();
++        let metadata = crate::native::log_store::manifest(
++            StoreBinding {
++                identity: identity(),
++                session: StoreSession::new(1).unwrap(),
++            },
++            0,
++        );
++        let mut step = 0;
++        assert!(io
++            .publish_journal_with(&metadata, || {
++                step += 1;
++                if step == cut {
++                    Err(io::Error::other("initial cut"))
++                } else {
++                    Ok(())
++                }
++            })
++            .is_err());
++        drop(io);
++        if cut < 4 {
++            assert!(FileLogIo::open(&initial).is_err());
++        } else {
++            assert_eq!(recover(&initial).binding().session.get(), 2);
++        }
++        fs::remove_dir_all(initial).unwrap();
++        compaction(cut);
++    }
++}
++fn compaction(cut: usize) {
++    let path = path("compact", cut);
++    let mut store = populated(&path, 0);
++    let expected = store.state(group()).unwrap();
++    let old = store.io.read_manifest().unwrap();
++    let mut full = manifest_journal::MAGIC.to_vec();
++    for _ in 0..manifest_journal::RECORDS {
++        full.extend(&old);
++    }
++    fs::write(path.join("MANIFEST"), &full).unwrap();
++    File::open(path.join("MANIFEST"))
++        .unwrap()
++        .sync_all()
++        .unwrap();
++    store.io.metadata = None;
++    let mut step = 0;
++    let metadata = next(&store);
++    assert!(store
++        .io
++        .publish_journal_with(&metadata, || {
++            step += 1;
++            if step == cut {
++                Err(io::Error::other("compaction cut"))
++            } else {
++                Ok(())
++            }
++        })
++        .is_err());
++    assert!(FileLogIo::open(&path).is_err());
++    drop(store);
++    let mut reopened = recover(&path);
++    assert_eq!(reopened.state(group()).unwrap(), expected);
++    assert!(
++        fs::metadata(path.join("MANIFEST")).unwrap().len()
++            <= (8 + 2 * manifest_journal::RECORD) as u64
++    );
++    let current = reopened.io.read_manifest().unwrap();
++    reopened.io.publish_manifest(&current).unwrap();
++    drop(reopened);
++    fs::remove_dir_all(path).unwrap();
++}
++#[test]
++fn every_partial_metadata_tail_recovers_the_last_complete_prefix() {
++    for generation in 0..=1 {
++        let base = path("tails-base", generation);
++        let mut store = populated(&base, generation as u64);
++        let expected = store.state(group()).unwrap();
++        let metadata = next(&store);
++        let name = manifest_name(generation as u64);
++        let last = store.io.read_manifest().unwrap();
++        drop(store);
++        for length in 0..=manifest_journal::RECORD {
++            let path = path("tail", generation * 53 + length);
++            fs::create_dir(&path).unwrap();
++            for item in fs::read_dir(&base).unwrap() {
++                let item = item.unwrap();
++                fs::copy(item.path(), path.join(item.file_name())).unwrap();
++            }
++            OpenOptions::new()
++                .append(true)
++                .open(path.join(&name))
++                .unwrap()
++                .write_all(&metadata[..length])
++                .unwrap();
++            let mut io = FileLogIo::open(&path).unwrap();
++            assert_eq!(
++                io.read_manifest().unwrap(),
++                if length == 52 { &metadata } else { &last }.to_vec()
++            );
++            let recovered = NativeLogStore::recover(io, identity(), LogLimits::default()).unwrap();
++            assert_eq!(recovered.state(group()).unwrap(), expected);
++            assert_eq!(
++                recovered.binding().session.get(),
++                if length == 52 { 3 } else { 2 }
++            );
++            drop(recovered);
++            assert!(fs::metadata(path.join(&name)).unwrap().len() <= (8 + 34 * 52) as u64);
++            fs::remove_dir_all(path).unwrap();
++        }
++        fs::remove_dir_all(base).unwrap();
++    }
++}
++#[test]
++fn complete_corruption_regression_and_unsupported_containers_fail_closed() {
++    let binding = StoreBinding {
++        identity: identity(),
++        session: StoreSession::new(2).unwrap(),
++    };
++    let row = crate::native::log_store::manifest(binding, 100);
++    let mut valid = manifest_journal::MAGIC.to_vec();
++    valid.extend(&row);
++    valid.extend(&row);
++    for at in 0..valid.len() {
++        let mut corrupt = valid.clone();
++        corrupt[at] ^= 1;
++        assert!(
++            ManifestJournal::decode(&corrupt).is_err(),
++            "complete corrupt byte={at}"
++        );
++    }
++    for (owner, boundary) in [
++        (
++            StoreBinding {
++                session: StoreSession::new(1).unwrap(),
++                ..binding
++            },
++            100,
++        ),
++        (binding, 99),
++        (
++            StoreBinding {
++                identity: StoreIdentity {
++                    id: StoreId::new(2).unwrap(),
++                    ..identity()
++                },
++                ..binding
++            },
++            100,
++        ),
++    ] {
++        let mut bytes = manifest_journal::MAGIC.to_vec();
++        bytes.extend(&row);
++        bytes.extend(crate::native::log_store::manifest(owner, boundary));
++        assert!(ManifestJournal::decode(&bytes).is_err());
++    }
++    for length in 0..60 {
++        assert!(ManifestJournal::decode(&valid[..length]).is_err());
++    }
++    assert!(
++        crate::native::log_store::read_manifest(&valid).is_err(),
++        "legacy readers reject rather than reinterpret new metadata"
++    );
++    let mut excessive = manifest_journal::MAGIC.to_vec();
++    for _ in 0..=manifest_journal::RECORDS {
++        excessive.extend(&row);
++    }
++    assert!(ManifestJournal::decode(&excessive).is_err());
++}
++#[test]
++fn every_replacement_boundary_retains_one_selected_journal_format_and_state() {
++    for generation in 0..=1 {
++        for cut in 1..=13 {
++            let path = path("replace", generation as usize * 13 + cut);
++            let mut store = populated(&path, generation);
++            let expected = store.state(group()).unwrap();
++            let states: BTreeMap<_, _> = [(group(), expected.clone())].into();
++            let bytes = NativeLogCodec
++                .encode_checkpoint(
++                    store.sequence,
++                    &states,
++                    store.limits(),
++                    store.limits().max_wal_bytes,
++                )
++                .unwrap();
++            let metadata = crate::native::log_store::manifest(store.binding(), bytes.len() as u64);
++            let mut step = 0;
++            assert!(store
++                .io
++                .replace_with(&bytes, &metadata, || {
++                    step += 1;
++                    if step == cut {
++                        Err(io::Error::other("replacement cut"))
++                    } else {
++                        Ok(())
++                    }
++                })
++                .is_err());
++            assert!(FileLogIo::open(&path).is_err());
++            drop(store);
++            let mut recovered = recover(&path);
++            assert!(recovered.io.journal);
++            assert_eq!(recovered.state(group()).unwrap(), expected);
++            let selected = recovered.io.read_manifest().unwrap();
++            assert!(
++                recovered.io.publish_manifest(&metadata).is_err(),
++                "prior session metadata cannot replace recovered binding"
++            );
++            assert_eq!(recovered.io.read_manifest().unwrap(), selected);
++            recovered.io.publish_manifest(&selected).unwrap();
++            drop(recovered);
++            fs::remove_dir_all(path).unwrap();
++        }
++    }
++}
+diff --git a/tests/manifest_journal.rs b/tests/manifest_journal.rs
+new file mode 100644
+index 0000000..9c64762
+--- /dev/null
++++ b/tests/manifest_journal.rs
+@@ -0,0 +1,112 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++#![cfg(feature = "native")]
++use voteboat::{
++    contracts::{HardState, StorageError},
++    identity::*,
++    log::*,
++    native::log_store::*,
++    quorum::*,
++};
++fn bootstrap() -> Bootstrap {
++    let node = NodeId::new(1).unwrap();
++    Bootstrap {
++        group: GroupIdentity {
++            id: GroupId::new(1).unwrap(),
++            incarnation: GroupIncarnation::new(1).unwrap(),
++        },
++        configuration: ConfigurationId::new(1).unwrap(),
++        policy: Policy::new(Tree::Voter(node), Limits::default()).unwrap(),
++        voter_stores: [(
++            node,
++            StoreIdentity {
++                id: StoreId::new(1).unwrap(),
++                incarnation: StoreIncarnation::new(1).unwrap(),
++            },
++        )]
++        .into(),
++    }
++}
++#[test]
++fn full_file_syncs_and_real_open_failure_preserve_scoped_recovery() {
++    let root = std::env::temp_dir().join(format!("voteboat-journal-public-{}", std::process::id()));
++    let timing = JournalTimings::default();
++    let boot = bootstrap();
++    let identity = boot.voter_stores[&NodeId::new(1).unwrap()];
++    let mut store = NativeLogStore::create(
++        FileLogIo::create_with_manifest_journal(&root)
++            .unwrap()
++            .with_timings(timing.clone()),
++        identity,
++        LogLimits::default(),
++    )
++    .unwrap();
++    let tickets = store
++        .append_batch(vec![LogMutation::Create(boot.clone())])
++        .unwrap();
++    assert_eq!(store.barrier(&tickets).unwrap().tickets, tickets);
++    let before = timing.snapshot();
++    assert_eq!(before.log_sync.calls, 2);
++    assert_eq!(before.manifest.calls, 2);
++    assert_eq!(before.publication.open.calls, 2);
++    assert_eq!(before.publication.write.calls, 2);
++    assert_eq!(before.publication.file_sync.calls, 2);
++    assert_eq!(before.publication.rename.calls, 1);
++    assert_eq!(before.publication.directory_sync.calls, 1);
++    let state = store.state(boot.group).unwrap();
++    let promise = HardState {
++        term: 1,
++        voted_for: Some(NodeId::new(1).unwrap()),
++    };
++    let pending = store
++        .append_batch(vec![LogMutation::Update(LogUpdate {
++            group: boot.group,
++            expected_revision: state.revision,
++            hard_state: promise,
++            commit_index: 0,
++            suffix: None,
++            snapshot: None,
++            snapshot_membership: None,
++        })])
++        .unwrap();
++    std::fs::rename(root.join("MANIFEST"), root.join("saved-manifest")).unwrap();
++    std::fs::create_dir(root.join("MANIFEST")).unwrap();
++    assert!(store.barrier(&pending).is_err());
++    assert_eq!(store.state(boot.group), Err(StorageError::Fenced));
++    assert!(
++        FileLogIo::open(&root).is_err(),
++        "failed publication keeps writer lock"
++    );
++    let failed = timing.snapshot();
++    assert_eq!(failed.log_sync.calls, 3);
++    assert_eq!(failed.manifest.errors, 1);
++    assert_eq!(failed.publication.open.errors, 1);
++    assert_eq!(failed.publication.write, before.publication.write);
++    assert_eq!(failed.publication.file_sync, before.publication.file_sync);
++    std::fs::remove_dir(root.join("MANIFEST")).unwrap();
++    std::fs::rename(root.join("saved-manifest"), root.join("MANIFEST")).unwrap();
++    drop(store);
++    let mut recovered = NativeLogStore::recover(
++        FileLogIo::open(&root).unwrap(),
++        identity,
++        LogLimits::default(),
++    )
++    .unwrap();
++    assert_eq!(
++        recovered.state(boot.group).unwrap().hard_state,
++        promise,
++        "actual complete synced bytes may recover without a success receipt"
++    );
++    assert_eq!(recovered.binding().session.get(), 2);
++    assert!(matches!(
++        recovered.barrier(&pending),
++        Err(StorageError::StaleTicket)
++    ));
++    assert_eq!(
++        timing.snapshot(),
++        failed,
++        "recovery does not own the prior reader"
++    );
++    drop(recovered);
++    std::fs::remove_dir_all(root).unwrap();
++}

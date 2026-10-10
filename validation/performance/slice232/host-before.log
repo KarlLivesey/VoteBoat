@@ -1,0 +1,6 @@
+Redacted pre-run host observation, 2026-10-10 15:52:15 UTC
+Linux 7.2.9-2-cachyos x86_64; AMD Ryzen 7 9800X3D, 16 threads
+Btrfs disk filesystem; one Sabrent SB-ROCKET-NVMe4-2TB shared device
+Three logical replicas on one physical desktop; no CPU/device isolation
+Load averages: 15.23 17.07 12.29
+Unrelated device inventory, machine name, mount paths and unrelated memory/process details omitted.

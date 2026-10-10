@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.89s
+     Running tests/journal_timings.rs (target/debug/deps/journal_timings-207084587ebfa094)
+
+running 3 tests
+test failed_rename_counts_only_invoked_steps_and_retains_staging_file ... FAILED
+test timing_selection_preserves_exact_barriers_default_recovery_and_reader_lifetime ... ok
+test failed_publication_is_counted_without_becoming_durable_evidence ... ok
+
+failures:
+
+---- failed_rename_counts_only_invoked_steps_and_retains_staging_file stdout ----
+
+thread 'failed_rename_counts_only_invoked_steps_and_retains_staging_file' (2094) panicked at tests/journal_timings.rs:157:32:
+called `Result::unwrap()` on an `Err` value: Os { code: 21, kind: IsADirectory, message: "Is a directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    failed_rename_counts_only_invoked_steps_and_retains_staging_file
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test journal_timings`

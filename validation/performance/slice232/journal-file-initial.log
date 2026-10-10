@@ -1,0 +1,20 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+warning: unused imports: `identity::*` and `log::*`
+ --> src/native/log_store/manifest_journal_tests.rs:4:35
+  |
+4 | use crate::{contracts::HardState, identity::*, log::*, native::log_store::*, quorum::*};
+  |                                   ^^^^^^^^^^^  ^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0609]: no field `reclaimed` on type `log::LogReclaimed`
+  --> src/native/log_store/manifest_journal_tests.rs:64:18
+   |
+64 |                 .reclaimed
+   |                  ^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `before_bytes`, `after_bytes`
+
+For more information about this error, try `rustc --explain E0609`.
+warning: `voteboat` (lib test) generated 1 warning
+error: could not compile `voteboat` (lib test) due to 1 previous error; 1 warning emitted

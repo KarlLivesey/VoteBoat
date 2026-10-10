@@ -1,0 +1,29 @@
+Candidate reproduction: apply candidate.patch to the recorded base in a separate
+checkout. These tests require the candidate; the accepted source does not expose
+the new constructor or test target. Run executable-spawning profiles sequentially.
+
+cargo +stable test --locked --offline --all-features --lib native::log_store::file
+cargo +stable test --locked --offline --all-features --test journal_timings --test log_reclaim --test log_store --test manifest_journal --test provider_conformance --test raft --test shared_barrier
+cargo +stable test --locked --offline --no-default-features --features native --test journal_timings --test log_reclaim --test manifest_journal --test provider_conformance
+.githooks/pre-push
+cargo +stable test --locked --offline --all-features --test counter_service --test directory_service --test transfer_service
+cargo +stable build --locked --offline --release --example native_benchmark
+target/release/examples/native_benchmark target/bench-slice232-reference tcp 256 1
+
+Archived raw/gate revalidation (gate exit1 is expected; child process permission
+is necessary for the raw validator, not evidence that the gate passed):
+node validation/check-serial-gate.mjs validation/performance/slice232/reference
+
+Archive/restore checks actually executed:
+sha256sum -c validation/performance/slice232/source.sha256
+sha256sum -c validation/performance/slice232/candidate-sources.sha256
+git apply --reverse --check validation/performance/slice232/candidate.patch
+git restore --source=HEAD -- src/native/log_store/file.rs src/native/startup.rs src/native/startup/multi/storage.rs tests/provider_conformance.rs docs/component-contracts.json docs/provider-conformance.json
+(Remove the three exact new candidate source/test files after archive verification.)
+git diff HEAD -- src tests Cargo.toml Cargo.lock examples docs/component-contracts.json docs/provider-conformance.json
+.githooks/pre-push
+cargo +stable build --locked --offline --release --example native_benchmark
+cargo +stable build --locked --offline --all-features --bins
+
+Initial failed checks are retained independently from final successful logs.
+No new performance run or broad test repeat after exact source restoration.

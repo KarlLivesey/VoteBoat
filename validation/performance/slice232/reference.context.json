@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice232-reference",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "9ee9eeb61311bc1746e32bea6482ad0f32a64121",
+  "executable_sha256": "8cb37a33c055e3a59d10276fd7a141096db34f4d3dd643970f2c33df760cc676",
+  "summary_sha256": "efc9638b0e5ff56f8b67ef5f753db1671c4ccb3b9ec515f89e57521889430056",
+  "samples_sha256": "67b564e26403f2dbfc9ec681b516a1ceec5efe8e524472ddd3187b74e3745bd8",
+  "source_changes": "Measured local candidate.patch at the base revision; exact candidate sources archived under candidate/. Gate failure rejects the candidate; production is restored afterwards.",
+  "candidate_patch_sha256": "f7349afecc91ef69ed7e9819fb8554a1f9143afb60bcde4638415187c0c68224"
+}

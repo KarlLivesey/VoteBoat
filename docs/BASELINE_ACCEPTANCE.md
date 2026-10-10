@@ -1,5 +1,18 @@
 # Baseline acceptance map
 
+Priority232: complete baseline features and functional Linux/macOS reliability
+before performance tuning and the user's Daybreak security pass. Breaking public
+interface changes are authorized while no users depend on them; keep contracts,
+callers and functional tests aligned. Original performance gates remain recorded
+for the subsequent milestone, not a condition for feature completion.
+The manifest-journal trial is rejected and fully archived in
+[slice232](../validation/performance/slice232/README.md): Linux services181/22/28
+and candidate strict profiles pass, but original serial p99 is461.764ms/250ms.
+Production/tests/inventories are restored exactly to9ee9eeb. Source231 Ubuntu
+181/22/28 passes; macOS counter181 passes, directory21/1 fails original recursive
+route floor upgrade and transfer is unrun. Functional drain/routing recovery and
+required operator/deployment integration are the immediate remaining work.
+
 Slice231 adds the shared BufferPool/FrameBuffer operation review with an actual
 independent host/native ownership-and-byte oracle:32 seeds of256 actions each
 plus deterministic control/quota/view/owner-slot boundaries. Broken usage and

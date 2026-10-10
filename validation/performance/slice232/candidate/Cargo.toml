@@ -1,0 +1,73 @@
+[package]
+name = "voteboat"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.98"
+license = "RPL-1.5"
+description = "Native-first composable consensus runtime, under development"
+repository = "https://github.com/KarlLivesey/VoteBoat"
+publish = false
+
+[features]
+default = ["native", "tls"]
+native = []
+tls = ["native", "dep:rustls"]
+quic = ["tls", "dep:quinn-proto", "dep:bytes"]
+
+[dependencies]
+ring = { version = "=0.17.14", default-features = false, features = ["std"] }
+rustls = { version = "=0.23.45", optional = true, default-features = false, features = ["std", "ring"] }
+quinn-proto = { version = "=0.11.19", optional = true, default-features = false, features = ["rustls-ring"] }
+bytes = { version = "=1.12.1", optional = true }
+
+[[example]]
+name = "durable_vote"
+required-features = ["native"]
+
+[[example]]
+name = "replicated_counter"
+required-features = ["native"]
+
+[workspace]
+exclude = ["VoteBoat-Design-Pack/reference-rust"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+cognitive_complexity = "deny"
+too_many_lines = "deny"
+
+[[bin]]
+name = "voteboat-counter"
+path = "src/bin/counter_service.rs"
+required-features = ["tls"]
+
+[[example]]
+name = "embedded_counter"
+required-features = ["tls"]
+
+[[example]]
+name = "native_benchmark"
+required-features = ["tls"]
+test = true
+
+[[example]]
+name = "wal_benchmark"
+required-features = ["native"]
+
+[[example]]
+name = "journal_attribution"
+required-features = ["native"]
+test = true
+
+[[bin]]
+name = "voteboat-directory"
+path = "src/bin/directory_service.rs"
+required-features = ["tls"]
+
+[[bin]]
+name = "voteboat-transfer"
+path = "src/bin/transfer_service.rs"
+required-features = ["tls"]

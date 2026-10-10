@@ -1,5 +1,16 @@
 # Validation report
 
+Rejected manifest-journal trial: [slice232](performance/slice232/README.md).
+Native file8, timings3/reclaim8/log-store9/new public1/provider27/Raft41/shared
+barrier8 pass; full Linux counter181/directory22/transfer28 pass. Candidate
+formatting/four strict profiles are zero. Original TCP256 receipts/recovery320/
+retry/join checks pass, but461.764ms p99 fails250ms. Exact candidate sources and
+patch are archived; production/tests/inventories are restored to9ee9eeb. No
+new format/API or causal performance gain is adopted. Source231 Ubuntu operators
+181/22/28 pass; macOS181 then directory21/1 fails original recursive-route floor
+upgrade, with transfer unrun. Features and functional Linux/macOS recovery now
+take priority; performance and security are later steps at the user's request.
+
 Shared buffer provider obligations: [slice231](baseline/slice231/README.md).
 The same independent owner/reservation/byte oracle checks32 seeds of256 actions
 per host/native provider plus deterministic quota, control, closure and owner-slot

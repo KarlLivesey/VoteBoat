@@ -1,0 +1,1105 @@
+{
+  "version": 1,
+  "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
+  "reviews": [
+    {
+      "public_contract": "PeerTransport",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/native/shared_contract.rs", "symbol": "independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership"},
+        {"file": "tests/native/shared_contract.rs", "symbol": "native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership"},
+        {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"}
+      ],
+      "operations": [
+        {
+          "names": ["security", "binding", "state", "limits", "usage"],
+          "obligation": "Expose the selected authenticated connection identity, lifecycle state and finite frame/decoded ceilings. Report retained send/completion/decoded ownership separately. Aborted accepted work releases its transport frame before its original queue lease.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "bounded_poll"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"}
+          ],
+          "remaining": ["The independent host provider is a bounded logical-frame test model with trusted test attestation, not cryptographic or OS I/O evidence. The native provider uses controlled HostSessions. Physical allocation accounting, all limit combinations and arbitrary downstream providers are not certified."]
+        },
+        {
+          "names": ["submit", "take_send"],
+          "obligation": "Rejected admission returns the exact original ticket/messages with no transport mutation. One accepted batch, including its unconsumed terminal completion, occupies the send slot. Partial writes and held local flush retain original ownership. Sent/Failed returns exactly once; only completing that exact original batch releases queue credits, and a replacement queue generation refuses it.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "rejected"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "invalid_admission"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"}
+          ],
+          "remaining": ["Selected control-message batches cover three groups and original queue generations. Full bulk/snapshot pressure, ticket exhaustion, all send-failure positions and restart/network uncertainty combinations remain. Local Sent and logical receipt never establish quorum durability."]
+        },
+        {
+          "names": ["poll"],
+          "obligation": "Validate poll budgets before progress. Bound reported plaintext calls/read/write bytes separately, retain accepted work across zero budgets and reject invalid budgets without mutation. All session polls in one transport visit share the original session call/read/write budget. Reject overreported progress before reusing a remainder; native follow-through advances plaintext-triggered work only within the remaining allowance. A held flush prevents terminal completion even after complete remote decode.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "bounded_poll"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "invalid_admission"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "plaintext_follow_through_uses_only_remaining_independent_session_budget"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "exhausted_and_zero_session_budgets_do_not_add_follow_through_polls"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "follow_through_failure_preserves_validated_receive_and_original_failed_batch"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "overreported_session_progress_on_either_poll_fails_before_reusing_budget"},
+            {"file": "tests/quic/frame_progress.rs", "symbol": "separate_group_frames_complete_with_coarse_owner_cadence"},
+            {"file": "tests/transport.rs", "symbol": "zero_and_single_call_budgets_preserve_bidirectional_progress"}
+          ],
+          "remaining": ["Shared histories use zero/three-call plaintext budgets and seven-byte progress; the separate one-call bidirectional check covers native transport only. Independent buffered HostSession and native QUIC framed traces cover selected whole-visit session budgets and failure on either poll. These do not prove wall-clock responsiveness, arbitrary callback bounds, every byte-pressure combination or the cause of macOS stalls. Poll counts need not match providers."]
+        },
+        {
+          "names": ["received_info", "take_received"],
+          "obligation": "Publish only complete validated batches with exact stable connection/class/count/capacity metadata. Keep the occupied decoded slot unchanged while a later frame waits. Taking returns the original ordered messages once and releases decoded accounting. Validated input survives a later local abort.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "take"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "draining"},
+            {"file": "tests/transport.rs", "symbol": "malformed_or_partial_frame_never_leaks_a_message"}
+          ],
+          "remaining": ["Independent host modeling transfers logical frames and uses the public native codec for sizing; it does not independently validate encrypted byte framing. Malformed-prefix and decode checks are native-only. Wider ingress/reconnect and changed-binding interleavings remain."]
+        },
+        {
+          "names": ["close", "abort"],
+          "obligation": "Close refuses new sends, retains the accepted original batch until all bytes and local flush finish, and leaves terminal observations available. Abort fails accepted partial work, drops its transport frame and preserves already validated receive observations; original external queue credit remains until exact completion.",
+          "assertions": [
+            {"file": "tests/native/shared_contract.rs", "symbol": "draining"},
+            {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"},
+            {"file": "tests/transport.rs", "symbol": "send_failure_and_transport_drop_release_pool_without_destroying_other_view"}
+          ],
+          "remaining": ["Shared traces cover selected held-flush close and partial-write abort points. Drop/shared-pool observations are native-only; every channel-close failure, completed-slot/partial-read combination and arbitrary host cleanup schedule remains unproven."]
+        }
+      ]
+    },
+    {
+      "public_contract": "TimerService",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "host_timer_exact_tokens_and_bounded_histories"},
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "native_timer_exact_tokens_and_bounded_histories"},
+        {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
+      ],
+      "operations": [
+        {
+          "names": ["owner", "capacity", "len"],
+          "obligation": "The volatile service owner and declared capacity remain stable; live exact group/kind deadlines determine length. Replacement consumes no additional slot, and expiration/cancellation releases its slot. is_empty derives the same live state.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"}
+          ],
+          "remaining": ["Finite capacity-three histories do not establish allocation behavior at all supported capacities or bounded execution of arbitrary host callbacks."]
+        },
+        {
+          "names": ["register", "cancel"],
+          "obligation": "Registration replaces only the exact group incarnation and kind with a fresh owner-scoped token, including at capacity. Overload leaves live work intact. Cancellation accepts only the exact live token; replaced, expired, canceled and modified tokens cannot remove another registration.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "owner_lifetime"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "scoped_cancellation"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
+          ],
+          "remaining": ["Sequence exhaustion and every store/session/lane identity mutation are not covered by these selected generation/group/kind/sequence/deadline checks; timer tokens are volatile, not durable evidence."]
+        },
+        {
+          "names": ["poll"],
+          "obligation": "Return each due exact token once within the caller budget, earliest deadlines first with unspecified tie order and exact lateness. Retain all unreturned work. Zero budget still observes monotonic time; regressed time rejects without consuming deadlines. Past registrations remain eligible.",
+          "assertions": [
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "poll_model"},
+            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
+            {"file": "tests/runtime.rs", "symbol": "expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns"}
+          ],
+          "remaining": ["Eight seeds of 128 sequential actions per provider and selected TimedShard integration do not prove all schedules, real-host responsiveness or the cause of platform liveness failures."]
+        }
+      ]
+    },
+    {
+      "public_contract": "LogStore",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/provider_conformance.rs", "symbol": "host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native"},
+        {"file": "tests/provider_conformance.rs", "symbol": "model_log_store_satisfies_same_obligations_and_recovers_original_history"},
+        {"file": "tests/provider_conformance.rs", "symbol": "file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets"},
+        {"file": "tests/provider_conformance.rs", "symbol": "journal_file_log_store_satisfies_same_scoped_contract_and_reopen"}
+      ],
+      "operations": [
+        {
+          "names": ["binding", "limits"],
+          "obligation": "Binding identifies one selected store incarnation and open session; declared limits validate. Invalid dependency tokens cannot change that binding or certify another store/session.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "cross_store"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"}
+          ],
+          "remaining": ["Concurrent multi-instance resource-pressure coverage beyond these two-store histories."]
+        },
+        {
+          "names": ["state"],
+          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"},
+            {"file": "tests/member_recovery/older_checkpoint.rs", "symbol": "mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application"}
+          ],
+          "remaining": ["Broader checkpoint/membership combinations and generated corruption/recovery histories beyond the selected old-checkpoint cases."]
+        },
+        {
+          "names": ["append_batch"],
+          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "refusal_and_reclamation"},
+            {"file": "tests/log_store.rs", "symbol": "every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix"}
+          ],
+          "remaining": ["General independently failing per-group batches for future backends; these providers implement stronger atomic batch recovery."]
+        },
+        {
+          "names": ["barrier"],
+          "obligation": "Certify only the supplied exact accepted tickets in the same domain: store identity/incarnation/session, group identity/incarnation, batch, revision, generation, last index and term. Invalid tokens retain genuine pending work. Uncertain persistence fences the store until explicit recovery; there is no cancel/rollback operation.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "cross_store"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"},
+            {"file": "tests/log_store.rs", "symbol": "failed_sync_or_publication_fences_without_acknowledging_the_transition"}
+          ],
+          "remaining": ["Broader generated device/sync failure schedules and future backend conformance. Physical sync may cover more bytes than the explicit returned evidence."]
+        },
+        {
+          "names": ["fetch_range"],
+          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/log_store.rs", "symbol": "compacted_log_ranges_and_committed_prefix_protection_with_native_and_host"}
+          ],
+          "remaining": ["Generated boundary/capacity histories and future backend coverage."]
+        },
+        {
+          "names": ["supports_reclaim", "reclaim"],
+          "obligation": "Declare optional physical reclamation. Unsupported calls fail without mutation. Reject outstanding transitions and insufficient budgets. Successful cleanup preserves every group's current durable state and snapshot references, does not move the logical retention floor and issues no new durability ticket.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "refusal_and_reclamation"},
+            {"file": "tests/log_reclaim.rs", "symbol": "rewrite_preserves_exact_live_state_and_never_reuses_tickets"}
+          ],
+          "remaining": ["General retention/segment policy and wider disk-full/device failure combinations."]
+        }
+      ]
+    },
+    {
+      "public_contract": "SnapshotStore",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshots_preserve_stages_exact_references_and_two_log_anchors"
+        },
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "identity",
+            "binding",
+            "limits"
+          ],
+          "obligation": "Identify the exact store/group incarnations and open session, with validated application/chunk bounds. Recovery keeps durable identity and changes the admission session.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Broader limit combinations and concurrent shared-resource pressure."
+          ]
+        },
+        {
+          "names": [
+            "begin"
+          ],
+          "obligation": "Admit one bounded stage for the selected group. Reject zero/oversized payloads, changed group, non-increasing history or occupied retained slots without altering the published image.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            }
+          ],
+          "remaining": [
+            "Generated metadata/membership and capacity combinations; native metadata encoding budgets have separate tests."
+          ]
+        },
+        {
+          "names": [
+            "write_chunk"
+          ],
+          "obligation": "Accept only the exact active ticket and ordered nonempty bounded chunks. Reject all changed identity/session/generation fields and wrong offset/size without consuming genuine work.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Generated chunk partitions and device failures beyond the existing native interruption suite."
+          ]
+        },
+        {
+          "names": [
+            "seal"
+          ],
+          "obligation": "Only a complete exact stage can be synchronized and sealed. Sealing does not publish or supersede the old root. Reject stale and repeated seals.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "abort_preserves_root"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "interrupted_chunks_seals_and_publication_recover_old_or_complete_new"
+            }
+          ],
+          "remaining": [
+            "Shared host conformance does not certify physical synchronization; future providers need their own device fault adapter."
+          ]
+        },
+        {
+          "names": [
+            "publish"
+          ],
+          "obligation": "Publish only the exact synchronized ticket, file length and checksum. Reject altered or foreign receipts without consuming the original stage. Preserve original metadata/data together; uncertainty fences native use until recovery.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "cross_store"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "interrupted_chunks_seals_and_publication_recover_old_or_complete_new"
+            }
+          ],
+          "remaining": [
+            "Broader membership/lifecycle compositions and alternative provider publication failures."
+          ]
+        },
+        {
+          "names": [
+            "abort"
+          ],
+          "obligation": "Discard only the exact active stage, before or after seal, without changing the published root. A stale session cannot cancel a fresh stage. Abort after publication is not rollback.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "abort_preserves_root"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "stage_identity_and_limits"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            }
+          ],
+          "remaining": [
+            "Asynchronous worker cancellation is a distinct contract, not established by these synchronous cases."
+          ]
+        },
+        {
+          "names": [
+            "load"
+          ],
+          "obligation": "Return the verified published metadata/application pair or explicitly empty new store. Unpublished stages remain invisible after file close/reopen. Missing/corrupt durable state is an error.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_image"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+            },
+            {
+              "file": "tests/snapshot.rs",
+              "symbol": "corruption_truncation_missing_data_and_identity_mismatch_fail_closed"
+            }
+          ],
+          "remaining": [
+            "File close/reopen is not hardware power-loss validation; native modeled failures and wider device tests remain distinct."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "SnapshotRetention",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshots_preserve_stages_exact_references_and_two_log_anchors"
+        },
+        {
+          "file": "tests/provider_conformance.rs",
+          "symbol": "host_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_snapshot_bindings_cannot_publish_or_pin_each_others_images"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_native.rs",
+          "symbol": "file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "latest_reference"
+          ],
+          "obligation": "Return the exact current published durable reference, independent of transient admission session. Reconciliation selects the authoritative pinned root or clears it.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Broader interrupted manifest updates and future backend recovery coverage."
+          ]
+        },
+        {
+          "names": [
+            "pin_for_log"
+          ],
+          "obligation": "Pin a verified exact published image before the caller records a durable log boundary. Repeated pins are idempotent; altered identity, generation, metadata, length or checksum cannot create an anchor. Anchored slots cannot be overwritten.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "cross_store"
+            }
+          ],
+          "remaining": [
+            "Cases supply the authoritative-log caller role; they do not themselves commit a WAL boundary."
+          ]
+        },
+        {
+          "names": [
+            "load_pinned"
+          ],
+          "obligation": "Retrieve the exact retained image even after another root is published and after file reopen. Reject every modified reference field and released anchor.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "assert_two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Further corruption of old retained slots and combined membership changes need wider device/fault coverage."
+          ]
+        },
+        {
+          "names": [
+            "reconcile_log"
+          ],
+          "obligation": "Select only the caller-supplied exact pinned durable-log reference and release other anchors. Reject unknown references or a pending stage without mutating pins/root. None releases all anchors and clears the root.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "two_pins"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot.rs",
+              "symbol": "reconcile"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_native.rs",
+              "symbol": "file_snapshots_preserve_same_contract_and_both_anchors_after_reopen"
+            }
+          ],
+          "remaining": [
+            "Caller must establish its authoritative durable log reference; general retention policy and combined interrupted WAL/manifest histories remain."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "SnapshotWorker",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/snapshot_worker_native.rs",
+          "symbol": "shared_worker_close_and_queries_use_host_snapshot_contracts"
+        },
+        {
+          "file": "tests/provider_conformance/snapshot_worker_native.rs",
+          "symbol": "shared_worker_close_and_queries_survive_native_file_reopen"
+        },
+        {
+          "file": "tests/snapshot_routes/envelopes.rs",
+          "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+        },
+        {
+          "file": "tests/snapshot_worker.rs",
+          "symbol": "downstream_worker_selection_rejection_stale_envelope_and_failure"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "binding"
+          ],
+          "obligation": "Fixed authoritative WAL store/session and worker generation scope every accepted ticket. Visit identity and original request must match before an owner consumes a completion.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_routes/envelopes.rs",
+              "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+            }
+          ],
+          "remaining": [
+            "Future external worker implementations need the same cases; callers must choose a fresh generation."
+          ]
+        },
+        {
+          "names": [
+            "limits",
+            "load_reservation",
+            "checkpoint_bytes"
+          ],
+          "obligation": "Validate configured bounds and report stable selected-group image/application allowances. Unassigned groups report no allowance and are refused before I/O.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "admission_rejects_wrong_scope_and_excess_capacity_without_progress"
+            }
+          ],
+          "remaining": [
+            "Broader combinations of allocation capacity, load bounds and provider scratch memory."
+          ]
+        },
+        {
+          "names": [
+            "usage"
+          ],
+          "obligation": "Retain request/image credits until terminal polling, including after close and while a result awaits observation. Release only the completed request; return zero usage when drained.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "bulk_snapshot_loads_leave_control_capacity_for_installation"
+            }
+          ],
+          "remaining": [
+            "General fairness and pressure across additional shared executors."
+          ]
+        },
+        {
+          "names": [
+            "submit"
+          ],
+          "obligation": "Return the exact original work and image allocation on rejection. Admit one request per group with nonzero increasing scoped sequence; reject foreign bindings, unassigned groups and post-close work without changing usage.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "admission_rejects_wrong_scope_and_excess_capacity_without_progress"
+            }
+          ],
+          "remaining": [
+            "Cancellation is not rollback: this contract has no per-request cancellation method."
+          ]
+        },
+        {
+          "names": [
+            "poll"
+          ],
+          "obligation": "Return bounded exact request/visit completions. Publication pins and verifies actual data before success; readiness/load/reconcile preserve exact references. Obsolete envelopes cannot release a live owner lease or fence its current core.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "wait"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "recovered_queries"
+            },
+            {
+              "file": "tests/snapshot_routes/envelopes.rs",
+              "symbol": "every_altered_snapshot_envelope_retains_the_original_live_lease"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "async_snapshot_short_write_sync_publication_pin_and_panic_fail_closed"
+            }
+          ],
+          "remaining": [
+            "Existing native failures are selected histories; future providers need independent crash/failure adapters and wider combined schedules."
+          ]
+        },
+        {
+          "names": [
+            "close",
+            "is_drained"
+          ],
+          "obligation": "Stop new admissions, retain and drain accepted work, and do not roll back acknowledged publication when the owner observation is discarded. Native reclaim joins its own worker and returns the selected stores only after terminal polling.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/snapshot_worker.rs",
+              "symbol": "close_preserves_accepted_work"
+            },
+            {
+              "file": "tests/provider_conformance/snapshot_worker_native.rs",
+              "symbol": "shared_worker_close_and_queries_survive_native_file_reopen"
+            },
+            {
+              "file": "tests/snapshot_worker.rs",
+              "symbol": "native_worker_uses_host_stores_and_retains_credits_until_terminal_poll"
+            }
+          ],
+          "remaining": [
+            "The new shared worker cases use the native executor with host/file stores; the core-only downstream worker exercises separate envelope/failure cases. Shared external executor lifetime remains provider-specific."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "CredentialJournal / CredentialRecordIo",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/credential.rs",
+          "symbol": "host_credential_journal_satisfies_shared_publication_contract_without_native"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "file_journal_satisfies_shared_contract_and_independent_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "owner"
+          ],
+          "obligation": "The fixed node, store ID and store incarnation identify the journal owner. Foreign fields are refused without publishing. Failed construction returns the same supplied I/O owner.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+            }
+          ],
+          "remaining": [
+            "Caller-provided exclusive writer lifetime is a precondition; these tests do not establish safety for concurrent writers."
+          ]
+        },
+        {
+          "names": [
+            "latest"
+          ],
+          "obligation": "Return no record for a new journal or the exact latest complete publication. Uncertain writes fence observations until reopen, which recovers the actual old or new record.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "file_journal_satisfies_shared_contract_and_independent_reopen"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            }
+          ],
+          "remaining": [
+            "Latest-only state is not a full administrative audit history; physical power-loss durability depends on the filesystem/device contract."
+          ]
+        },
+        {
+          "names": [
+            "publish"
+          ],
+          "obligation": "Validate the exact owner, nonzero sequence and increasing generations before replacement. Exact latest retries are idempotent; changed/superseded sequences and expected generations below the retained floor fail without mutation. Higher trusted startup generations may skip ahead. Certain failures preserve prior state; uncertain failures fence all further publication until reopen.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            }
+          ],
+          "remaining": [
+            "Injected before/after replacement failures are a bounded memory-I/O model, not every operating-system or device failure."
+          ]
+        },
+        {
+          "names": [
+            "read"
+          ],
+          "obligation": "Return the exact fixed 128-byte published record or absence; reject invalid lengths and propagate read failure. Journal construction validates checksum and ownership and returns the original I/O value on failure.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "raw_roundtrip"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+            },
+            {
+              "file": "tests/credential_journal.rs",
+              "symbol": "every_byte_corruption_of_committed_record_fails_closed"
+            }
+          ],
+          "remaining": [
+            "A checksum detects corruption but does not authenticate a hostile filesystem; path and writer ownership remain host responsibilities."
+          ]
+        },
+        {
+          "names": [
+            "replace"
+          ],
+          "obligation": "Replace exactly one bounded record recoverably. The same raw byte suite runs against memory and real files. A certain error preserves the prior bytes; an uncertain error permits either old or new complete record and requires reopening the journal.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "raw_roundtrip"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            },
+            {
+              "file": "tests/credential_journal.rs",
+              "symbol": "native_file_recovery_ignores_partial_staging_and_validates_published_record"
+            }
+          ],
+          "remaining": [
+            "Real-file tests cover successful process reopen and ignored partial staging; hardware power-loss and all rename/directory-sync fault combinations are not established."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "AdmissionPolicy / AdmissionRequest / AdmissionLease",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "host_admission_generated_ownership_and_refusal_history"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "native_admission_generated_ownership_and_refusal_history"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "host_admission_final_credit_release_crosses_threads_and_view_close"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "native_admission_final_credit_release_crosses_threads_and_view_close"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "opaque_lease_destroys_its_provider_token_once_after_all_thread_owners"
+        },
+        {
+          "file": "tests/admission.rs",
+          "symbol": "permissive_policy_cannot_cross_node_peer_background_or_control_reserves"
+        },
+        {
+          "file": "tests/admission.rs",
+          "symbol": "host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch"
+        },
+        {
+          "file": "tests/transport.rs",
+          "symbol": "policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "reserve"
+          ],
+          "obligation": "Reserve bounded optional bulk credits before payload ownership transfer. For the declared finite host/native budget profiles, each successful reservation owns its exact cost; rejected requests retain no partial batch/message/byte credits. Queue hard limits and reserved control capacity are independent of optional policy.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "reserve"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "refused_dimension"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "batch_ceiling"
+            },
+            {
+              "file": "tests/admission.rs",
+              "symbol": "permissive_policy_cannot_cross_node_peer_background_or_control_reserves"
+            }
+          ],
+          "remaining": [
+            "Generated traces are sequential and bounded to 32 seeds of 256 actions for each provider; they do not prove arbitrary concurrent schedules or every host policy. General client/disk/tenant admission remains separate."
+          ]
+        },
+        {
+          "names": [
+            "close"
+          ],
+          "obligation": "Closing an admission view stops its new reservations without revoking existing leases or closing sibling views. Credits remain owned after the original view is dropped, until the final lease owner releases them.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "cross_thread_release"
+            },
+            {
+              "file": "tests/admission.rs",
+              "symbol": "host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch"
+            }
+          ],
+          "remaining": [
+            "Thread handoff checks selected explicit orderings. They do not establish bounded execution of arbitrary host callbacks or system-wide shutdown policy."
+          ]
+        },
+        {
+          "names": [
+            "AdmissionLease::new",
+            "clone"
+          ],
+          "obligation": "A new opaque lease owns its provider token. Clones share the same reservation rather than charging again or releasing credits early. Exactly one final token destructor runs, including when lease ownership crosses threads or outlives a queue and its policy view.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "opaque_lease_destroys_its_provider_token_once_after_all_thread_owners"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "cross_thread_release"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "shared_history_detects_a_provider_releasing_accepted_credits_early"
+            },
+            {
+              "file": "tests/transport.rs",
+              "symbol": "policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release"
+            }
+          ],
+          "remaining": [
+            "Opaque token allocation failure and all concurrent queue/transport failure compositions are not established. Leases convey volatile accounting only, never durability or remote delivery."
+          ]
+        }
+      ]
+    },
+    {
+      "public_contract": "BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/buffer.rs",
+          "symbol": "host_buffer_generated_owner_class_and_byte_lifetimes"
+        },
+        {
+          "file": "tests/provider_conformance/buffer.rs",
+          "symbol": "native_buffer_generated_owner_class_and_byte_lifetimes"
+        },
+        {
+          "file": "tests/provider_conformance/buffer_mutants.rs",
+          "symbol": "shared_buffer_checker_detects_early_credit_release"
+        },
+        {
+          "file": "tests/provider_conformance/buffer_mutants.rs",
+          "symbol": "shared_buffer_checker_detects_nonzero_growth"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "limits",
+            "usage",
+            "control_reserve",
+            "owner_limits"
+          ],
+          "obligation": "For the selected finite profile, declarations remain stable across shared views. Sequential usage equals the reservations and lease count of live owned buffers, independent of visible byte length or originating view closure. Bulk cannot consume declared control headroom.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "verify"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "usage"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "quota_boundaries"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            }
+          ],
+          "remaining": [
+            "The shared profile has 168 bytes, seven leases, 24-byte/one-lease control headroom and two 72-byte/three-lease owner quotas. Concurrent diagnostic samples need not be an atomic snapshot of both fields; universal allocator/RSS accounting and every profile are not established."
+          ]
+        },
+        {
+          "names": [
+            "bind_owner"
+          ],
+          "obligation": "Selected views bind before acquisition, refuse invalid or changed owners and share reconnect reservations for exact node/store incarnations. Closed views refuse binding. Both live views and held buffers, including Control buffers without bulk charges, pin finite owner registrations until their final release.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "bind"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "registered"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "owner_lifetimes"
+            }
+          ],
+          "remaining": [
+            "Generated histories vary peer node/incarnation and selected invalid identities. Every identity-field mutation, registry contention and arbitrary concurrent reconnect schedules remain unproven; accounting identity grants no authorization."
+          ]
+        },
+        {
+          "names": [
+            "acquire",
+            "acquire_class"
+          ],
+          "obligation": "Reserve the maximum requested bytes and one lease before handing off an owned buffer. Refusal retains no partial owner/bulk/total charges. Selected Bulk acquisitions respect both byte and lease quotas, default acquire remains Bulk, and Control uses only available total capacity. Initial allocation stays within reservation; invalid or unbound views do not transfer ownership.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "acquire"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "refusal"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "quota_boundaries"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "native_owner_allocation_failure_returns_all_three_budgets"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "legacy_default_cannot_claim_a_reserve_without_class_implementation"
+            }
+          ],
+          "remaining": [
+            "Native allocation-overflow and unsupported declarations have separate existing checks, not an independent host allocator fault adapter. The selected uncontended shared model does not certify every concurrent pressure/failure schedule or bounded execution of arbitrary provider callbacks."
+          ]
+        },
+        {
+          "names": [
+            "resize",
+            "reservation",
+            "capacity"
+          ],
+          "obligation": "The owned reservation remains fixed while resize preserves the old prefix, zeroes newly exposed bytes and bounds actual capacity. Oversize resize refuses without changing bytes or credits. Mutable and immutable views expose the same storage and length. Shrink/regrow cannot resurrect stale truncated bytes.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "resize"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "write"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "verify"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_mutants.rs",
+              "symbol": "shared_buffer_checker_detects_nonzero_growth"
+            }
+          ],
+          "remaining": [
+            "Finite buffers are at most 168 reserved bytes. These checks do not establish allocation counts, all allocation-failure positions, storage-destruction ordering or zero abstraction overhead."
+          ]
+        },
+        {
+          "names": [
+            "close"
+          ],
+          "obligation": "Close stops new work on that view without closing siblings or revoking its accepted buffers. Buffers remain mutable after original views are dropped and return exact charges only on final Drop. Closing all views and then releasing every buffer leaves zero live credits and allows fresh owner registration.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "close"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_model.rs",
+              "symbol": "finish"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "prelude"
+            },
+            {
+              "file": "tests/provider_conformance/buffer.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/buffer_mutants.rs",
+              "symbol": "shared_buffer_checker_detects_early_credit_release"
+            },
+            {
+              "file": "tests/buffer.rs",
+              "symbol": "concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota"
+            }
+          ],
+          "remaining": [
+            "Shared histories use cloneable host/native views and 32 seeds of 256 sequential actions per provider plus deterministic boundaries. Existing native thread/transport integration is selected evidence, not a proof of all concurrent lifetimes, system-wide shutdown or arbitrary providers."
+          ]
+        }
+      ]
+    }
+  ]
+}

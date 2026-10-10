@@ -72,6 +72,15 @@ cause and revise this sketch before another material change.
 
 ### Macro plan
 
+Priority update232: finish baseline features and functional reliability on Linux
+and macOS first. The user explicitly defers performance tuning and security review
+to subsequent steps; Daybreak owns the security pass. P7 measurements and their
+original acceptance gates remain recorded, but are not prerequisites for this
+feature milestone. Protocol safety, durable recovery and bounded ownership remain
+functional requirements. Public interfaces may change incompatibly while there
+are no users; update contracts and callers together rather than retain adapters
+solely for compatibility. Preserve explicit migration for already-written data.
+
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. Actual TCP and optional QUIC static three-process histories pass on Linux and macOS at source223, including checkpoint/reopen and worker joins. Broader macOS/operator release validation and separate-host operational validation remain outstanding. Online membership runner acceptance is not a prerequisite to using the static service. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
@@ -830,16 +839,38 @@ requirements remain open. Full P0–P7 stays active; Daybreak owns security revi
 Previous-source230 operator run38063611738 at7a1f710 is actually in progress on
 Ubuntu/macOS at this observation; no terminal or current-source CI pass is claimed.
 
-Current: choose a P7 candidate that preserves all required durability work.
-Purpose: advance measured tuning with the unchanged250ms original serial gate.
-Depend on222/228's actual physical/timing evidence and229's rejected staging-only
-trial; reread the required design chapters before changing the storage design.
-Completion requires meaningful native crash/ownership checks, actual service
-recovery/retry/join histories and the unchanged raw-validated reference gate.
-No weaker file sync, optimistic voter evidence, replacement workload or causal
-speedup from uncontrolled shared-host comparisons.
+Rejected232: the bounded manifest-journal candidate passes8 native file tests
+(44 new primitive interruption cuts plus41 legacy cuts),106 final-record byte
+length cases, complete corruption/regression refusal and actual store recovery.
+Timings3/reclaim8/log-store9/new public test1/provider27/Raft41/shared-barrier8
+pass; native-only timings3/reclaim8/new test1/provider27 pass. Full Linux services
+pass counter181/directory22/transfer28; candidate formatting/four strict profiles
+finish zero. The unchanged serial TCP measurement completes256 receipts, recovery
+value320, original retries and worker joins, but461.764ms p99 fails250ms.
+The exact candidate sources/patch and raw evidence are archived in
+[slice232](../validation/performance/slice232/README.md). Production source,
+tests and contract inventories are restored exactly to9ee9eeb; no new manifest
+format or constructor is adopted. No causal performance claim from shared-host
+comparisons, hardware power-loss proof or macOS candidate execution is implied.
+Restored formatting and all four strict profiles finish zero; exact production/
+test/inventory diff is empty. Accepted release benchmark and all-feature service
+binaries are rebuilt sequentially after restoration. The pre-push hook remains
+enabled. Broad service tests are candidate evidence, not a rerun on restored code.
 
-Next: resolve the evidenced original drain confirmation boundary. Purpose:
+Source231 operator run38064123576 completes: Ubuntu181/22/28 passes; macOS
+counter181 passes, directory21/1 fails recursive_route_enforces_root_observation_floors
+with an interrupted/refused authority manifest upgrade; transfer is unrun.
+These source-specific results identify functional platform work. They are not
+candidate or later-source acceptance.
+
+Macro review232 closes the rejected trial and reprioritizes baseline feature
+completion. No further P7 optimization or broad security audit is on the immediate
+path. Functional drain/routing recovery, remaining baseline operator/deployment
+integration and matching Linux/macOS evidence are the release work. Optional global
+orchestration, external adapters, P8 and Windows do not become prerequisites.
+The full roadmap stays active, with performance/security as later milestones.
+
+Current: resolve the evidenced original drain confirmation boundary. Purpose:
 advance P4 operator recovery/platform acceptance without blocking static service.
 Depend on terminal229's exact19701 ERR NOT_LEADER, original durable drain record
 and current confirmation/routing contracts. Completion requires a native forced
@@ -848,15 +879,92 @@ conflict/error refusal, recovery/retry/join evidence and zero strict diagnostics
 Select the smallest demonstrated cause before editing; do not infer commit/read
 readiness from a role or widen deadlines. Background CI is feedback, not a gate.
 
-Following: broaden actual-core generated membership-transition histories.
-Purpose: advance chapter11/P0/P3/P4 validation beyond ordinary-majority schedules
-and selected deterministic membership cuts. Depend on existing RaftCore/model-I/O
-fixture, scoped durability tokens, current Joint/Final policy tests and recoverable
-configuration records. Completion requires bounded seed/action replay, actual
-configuration transitions under delayed/reordered completion and partition/reopen,
-independent committed-prefix/policy checks and retained minimal failing traces.
-Do not replace the core with a reference model or claim arbitrary schedule proof;
-reuse existing drivers before adding a harness. This does not block static service.
+Next: resolve the macOS recursive-route observation-floor failure. Purpose:
+advance P5 lookup correctness and the Linux/macOS feature milestone. Depend on
+source231's exact failure, existing directory route/read adapters and current
+manifest-upgrade contracts. Before editing classify the original unknown outcome
+versus terminal refusal. Completion requires original root observation floors,
+exact retained query/receipt semantics, bounded leader-loss/reopen checks, strict
+zero diagnostics and matching platform feedback. Do not relax floors or deadlines.
+
+Following: close concrete baseline operator/deployment integration gaps. Purpose:
+advance usable service, online membership and split/merge completion. Depend on
+the existing Node/executable operations and acceptance map, not new subsystems.
+Reconcile required operations with actual public workflows first; select one
+missing end-to-end capability and record its schema before editing. Completion
+requires executable/Rust usage, original-operation restart/retry/cleanup evidence,
+relevant Linux/macOS checks and updated contracts after any interface changes.
+Do not count optional global orchestration, performance tuning or security audits
+as feature blockers. Generated membership validation follows where a concrete
+functional gap requires it; a blanket provider audit is not a release prerequisite.
+
+### Slice232 schema plan — bounded append-only manifest publication candidate
+
+Purpose/dependencies:222/228 identify separate physical append/commit barriers;
+229's staging-only scheduling trial fails the original250ms gate. The native
+manifest currently creates/syncs/renames/syncs-directory on every publication.
+Try a bounded append-only metadata container for fresh stores so established
+publication still performs full WAL sync then full manifest-file sync, without
+changing a directory entry each time. No success or speedup is assumed. Design
+README/02/03/04/07/11/17 and JournalIo/recovery/reclamation contracts are reviewed.
+This advances current P7; original drain and generated membership histories follow.
+
+Data/API: JournalIo/LogStore contracts and logical format2 WAL stay unchanged.
+An explicit FileLogIo::create_with_manifest_journal constructor selects the new
+format; original FileLogIo::create retains legacy creation. Fresh native startup
+selects that constructor in the candidate; recovery never converts a legacy store.
+The versioned metadata container holds existing
+checksummed52-byte manifest records. Legacy stores retain the exact legacy path;
+open detects the selected metadata format, not a fallback to older files. Each
+container holds at most4096 complete records plus one bounded interrupted tail.
+At capacity, atomically compact to the new latest record through full file sync,
+rename and directory sync. Initialization and WAL pair replacement also retain
+full file/directory sync. Older readers reject the new header/length; binary
+rollback is not migration. No second authoritative log, worker or dependency.
+
+Transitions/ownership: metadata records form a validated contiguous physical
+prefix; an incomplete final record may be ignored, complete corrupt/foreign/
+regressing records fail closed. Within one selected WAL generation, store identity
+stays exact and session/boundary never regress. Established append truncates only
+the incomplete tail, appends the next complete record, syncs the entire metadata
+file, then permits store evidence. A sync/write error acknowledges nothing and
+fences NativeLogStore. Cached metadata is bounded, exclusive-lock scoped and
+invalidated on error/pair replacement; reopen revalidates actual bytes. Existing
+CURRENT generation selects exactly one WAL/metadata pair; recovered store session
+still advances. No maximum is substituted for a contiguous durable prefix.
+
+Acceptance: native initial/append/compaction/replacement primitive cuts, every
+partial-record tail, complete corruption/regression refusal, bounded file size,
+legacy compatibility and selected-pair/session/lock recovery. Keep existing
+downstream store, reclaim, snapshot/consensus and meaningful actual TCP/QUIC
+service recovery/retry/join histories. Timing counters must reflect actual calls,
+not claim directory work absent at initial/compaction/replacement boundaries.
+Measure the exact original uninstrumented256-after64 serial TCP workload and
+fixed250ms gate with candidate source/binary/raw/context evidence after all local
+checks are terminal. Reject/archive/restore if the gate fails; do not substitute
+load, weaker sync or causal claims from shared-host comparisons. Keep fmt/four
+strict profiles zero. Daybreak retains the security review.
+
+232 fixture revision: the first build used a nonexistent reclaim-result boolean;
+the actual API returns before_bytes/after_bytes. Require a strict physical shrink
+and retain that compile error separately. Pair-replacement continuation uses the
+fresh recovered session's actual selected metadata; the prior session record must
+be rejected unchanged. A recovery boundary cannot be rewritten with stale session
+or a shorter old-generation byte count merely to make a fixture pass.
+
+232 legacy compatibility revision: the established rename-failure test expects
+a raw FileLogIo handle before NativeLogStore rejects directory-valued metadata.
+Eager header read changed that staging boundary (2/1 journal timing result).
+Keep format probing bounded to regular-file bytes and preserve raw-handle opening;
+NativeLogStore still validates selected metadata before any recovery mutation.
+No other pair or older metadata is selected on error. Retain the initial failure.
+
+232 shared-check revision:26 provider cases pass; the new runner's redundant raw
+MANIFEST-name assertion fails after the shared exercise has already reclaimed
+into the selected pair. Remove that filename assumption and reopen through the
+actual provider's CURRENT selection; keep the shared state/session/ticket checks
+unchanged. The first strict pass also requires the stable fixed-size as_chunks
+API rather than chunks_exact; fix it without a lint allowance. Retain both logs.
 
 ### Slice231 schema plan — shared buffer ownership histories
 

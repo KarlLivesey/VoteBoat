@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "candidate_base_revision": "9ee9eeb61311bc1746e32bea6482ad0f32a64121",
+  "candidate_patch_sha256": "f7349afecc91ef69ed7e9819fb8554a1f9143afb60bcde4638415187c0c68224",
+  "candidate_source_hash_manifest_sha256": "f662692e203a2d5a026911aa1d92056a3f576df34c763be35fefae37fb54ec84",
+  "measured_executable_sha256": "8cb37a33c055e3a59d10276fd7a141096db34f4d3dd643970f2c33df760cc676",
+  "measurement_command": "target/release/examples/native_benchmark target/bench-slice232-reference tcp 256 1",
+  "start_utc": "2026-10-10T15:52:15Z",
+  "end_utc": "2026-10-10T15:52:46Z",
+  "process_exit": 0,
+  "gate_exit": 1,
+  "gate": {
+    "gate": "tcp-startup-serial-p99",
+    "budget_us": 250000,
+    "observed_p99_us": 461763.813,
+    "applied_ops_s": 10.423,
+    "operations": 256,
+    "passed": false,
+    "evidence_scope": "finite reference run; raw checker and native recovery gates required"
+  },
+  "summary_sha256": "efc9638b0e5ff56f8b67ef5f753db1671c4ccb3b9ec515f89e57521889430056",
+  "samples_sha256": "67b564e26403f2dbfc9ec681b516a1ceec5efe8e524472ddd3187b74e3745bd8",
+  "host": {
+    "physical_hosts": 1,
+    "physical_devices": 1,
+    "replicas": 3,
+    "cpu": "AMD Ryzen 7 9800X3D, 16 threads",
+    "kernel": "Linux 7.2.9-2-cachyos x86_64",
+    "filesystem": "btrfs",
+    "device": "Sabrent SB-ROCKET-NVMe4-2TB (shared disk)",
+    "isolation": false,
+    "details": "host-before.log"
+  },
+  "workload": {
+    "protocol": "TcpTls",
+    "groups": 1,
+    "assembly": "startup",
+    "warmup": 64,
+    "operations": 256,
+    "window": 1,
+    "payload_bytes": 8,
+    "heartbeat_ms": 50,
+    "election_min_ms": 1000,
+    "election_spread_ms": 1000
+  },
+  "durability": "Full WAL sync_all then full manifest-file sync_all; initial publication, bounded compaction and generation replacement retain atomic publication and full directory sync.",
+  "local_validation": {
+    "native_file_tests": 8,
+    "new_primitive_cuts": 44,
+    "legacy_primitive_cuts": 41,
+    "tail_lengths": 106,
+    "journal_timings": 3,
+    "reclaim": 8,
+    "log_store": 9,
+    "new_public_test": 1,
+    "provider": 27,
+    "raft": 41,
+    "shared_barrier": 8,
+    "services": {
+      "counter": 181,
+      "directory": 22,
+      "transfer": 28
+    },
+    "candidate_strict": "formatting and four profiles zero"
+  },
+  "disposition": "Rejected and archived. Production/tests/inventories restored to base. Performance and security deferred behind features by explicit user request.",
+  "preceding_ci": {
+    "revision": "9ee9eeb61311bc1746e32bea6482ad0f32a64121",
+    "run": 38064123576,
+    "ubuntu": {
+      "counter": 181,
+      "directory": 22,
+      "transfer": 28
+    },
+    "macos": {
+      "counter": 181,
+      "directory_pass": 21,
+      "directory_fail": 1,
+      "transfer": "unrun"
+    },
+    "details": "ci231-terminal.json"
+  },
+  "limitations": "Finite process/primitive and one-host measurement; no hardware power-loss, candidate macOS, general fault proof, sustainable-capacity or causal speedup claim.",
+  "restored_code_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "restored_release_executable_sha256": "f8887631b0ff44e6a6780a3ba61ca3365ec30109b89219f97e8e5928638d85e9",
+  "restored_validation": "Exact production/tests/inventory diff is empty; formatting and all four strict profiles finish zero. Accepted release example rebuilt after restoration. All-feature service binaries rebuilt sequentially; no broad service rerun claimed on restored source. Pre-push hook enabled.",
+  "publication": "PUBLICATION.md records environment redactions; original local logs remain ignored. Benchmark receipts are synthetic counter operation/group IDs and timings."
+}

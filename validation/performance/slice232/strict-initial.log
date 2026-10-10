@@ -1,0 +1,20 @@
+    Checking voteboat v0.1.0 (<workspace>)
+error: using `chunks_exact` with a constant chunk size
+  --> src/native/log_store/manifest_journal.rs:62:38
+   |
+62 |         let mut records = bytes[8..].chunks_exact(RECORD);
+   |                                      ^^^^^^^^^^^^^^^^^^^^
+   |
+help: consider using `as_chunks::<RECORD>()` instead
+  --> src/native/log_store/manifest_journal.rs:62:38
+   |
+62 |         let mut records = bytes[8..].chunks_exact(RECORD);
+   |                                      ^^^^^^^^^^^^^^^^^^^^
+   = note: you can access the chunks using `records.0.iter()`, and the remainder using `records.1`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+   = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: could not compile `voteboat` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 1 previous error
