@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: shared admission/provider conformance | Extend resource-lifetime evidence for P0/P2 and Rust embedding. | Completed recovery-budget contract162 and existing host/native ownership; select a concrete uncovered provider failure from the catalogue. | Host-substituted provider exhaustion, accepted work, cancellation and independent shutdown preserve exact ownership without lost credits. |
-| Next: faulted history verification | Improve P0/P1 evidence for successful and unknown write/read outcomes. | Existing actual-core fault harness and recorded operation identities/outcomes; reproducible seeds. | Check a bounded fault history against the declared single-group order; retain failures and distinguish unknown from success. |
-| Following: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger plus source and actual local/CI results. | Identify a concrete unresolved requirement and its smallest complete path; record data/API, state, ownership, failure/restart and acceptance plan before implementation. |
+| Current: faulted history verification | Improve P0/P1 evidence for successful and unknown write/read outcomes. | Existing actual-core fault harness and recorded operation identities/outcomes; reproducible seeds. | Check a bounded fault history against the declared single-group order; retain failures and distinguish unknown from success. |
+| Next: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger plus source and actual local/CI results. | Identify a concrete unresolved requirement and its smallest complete path; record the API, state, ownership, failure/restart and acceptance plan. |
+| Following: implement the selected unresolved capability | Close the next demonstrated baseline gap rather than adding a parallel subsystem. | Evidence review identifies the required contract and existing composition points. | A complete usable vertical slice with meaningful conformance/recovery coverage, strict lint and updated scope evidence. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -15180,3 +15180,54 @@ profile and warnings-denied API docs pass. New macOS execution is still pending.
 The previous full-sweep process handles are absent when checked this turn and
 none of their partial logs proves full completion; they are no longer described
 as live. The focused results above are the evidence for this changed slice.
+
+### 163 shared provider lifetime — schema plan
+
+Previous goal turn was progress:162 is committed/pushed asf669f7c with recovery
+admission, native/host conformance and zero strict lint. The source review finds
+existing independent admission, buffer, close and transport tests; do not add a
+new admission API or duplicate those checks. The missing selected composition is
+two connections sharing both replaceable providers while a failed connection's
+original outbound completion remains unconsumed.
+
+Use the existing public AdmissionPolicy/AdmissionLease, BufferPool/FrameBuffer,
+NativeOutbound and NativePeerTransport contracts. A bounded downstream history
+will run with independent host providers and with native providers. Hold bulk
+frame capacity plus one admission token through partial send; another connection
+must retain control progress, then resume data only after the exact old token is
+released. Abort releases frame capacity but not a returned outbound completion's
+admission token. A replacement queue generation rejects that stale completion
+without stealing its credits. Closing/dropping one view cannot close its sibling.
+All setup/work counts and poll loops remain bounded; no real-time claim or new
+durable state. Completion checks compare exact original bodies/tickets, usage,
+terminal results, successful sibling sends and final zero credits. Run transport,
+admission and buffer suites plus both strict lint configurations. This advances
+P0/P2 shared-provider conformance; faulted history verification follows, then the
+baseline evidence review. Existing broader catalogue gaps remain explicit.
+
+
+### 163 implemented — combined shared-provider lifetime
+
+One bounded generic transport history now runs with independent downstream
+AdmissionPolicy/BufferPool implementations and with their native equivalents.
+Two connections share both budgets. Partial I/O and withheld local flush keep a
+data frame and its admission token live; the sibling is refused data without
+losing its message, but delivers control through the reserved frame capacity.
+Aborting the first connection releases its frame while its returned Failed
+completion still owns admission credit. Closing/dropping that queue leaves the
+sibling live. A replacement queue generation rejects the exact old completion
+and returns its original ticket/body with credit retained. Only releasing it
+permits the sibling's next data message; final frame/admission usage is zero.
+
+No production API, protocol, durability or scheduler change. This closes the
+selected combined-lifetime conformance gap, not the remaining generic client,
+disk or connection admission work. Host sessions use trusted test attestations;
+this history adds no cryptographic or real-network claim. The full transport,
+admission and buffer targets pass28+8+13 tests; core-only versions pass1+1+6.
+Both strict Clippy profiles and formatting pass. Evidence:
+validation/baseline/slice163. Latest162 CI was observed running Linux/macOS with
+lint passed; those platform results are not counted as complete.
+
+Macro review: advances P0/P2 replacement-provider composition. The current mini
+plan moves to faulted history verification, then baseline evidence review and
+the capability selected by that review. Full P0–P7 remains active.

@@ -1,0 +1,69 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running tests/admission.rs (target/debug/deps/admission-8347fc82ab9de761)
+
+running 8 tests
+test downstream_owned_lease_survives_shared_view_close_and_clone_without_native ... ok
+test native::abandoned_batch_holds_queue_reservation_until_owner_queue_is_dropped ... ok
+test native::closed_policy_refuses_bulk_but_cannot_block_control_or_close_another_queue ... ok
+test native::failed_queue_construction_never_reserves_or_closes_the_host_policy ... ok
+test native::host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch ... ok
+test native::native_shared_budget_rolls_back_each_dimension_and_preserves_last_owner ... ok
+test native::permissive_policy_cannot_cross_node_peer_background_or_control_reserves ... ok
+test native::concurrent_native_policy_views_never_leak_partial_reservations ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/buffer.rs (target/debug/deps/buffer-b9d59c0c12e381d1)
+
+running 13 tests
+test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+test independent_downstream_pool_contract_without_native ... ok
+test native_owner_allocation_failure_returns_all_three_budgets ... ok
+test native_owner_isolation_reconnect_and_registration_lifetimes ... ok
+test unsupported_owner_declaration_refuses_binding ... ok
+test native_protected_bytes_and_slots_roll_back_exactly ... ok
+test owner_configuration_rejects_overbooking_and_overflow ... ok
+test native_owned_leases_survive_view_close_and_release_exact_shared_credits ... ok
+test concurrent_bulk_owners_cannot_take_control_headroom ... ok
+test concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota ... ok
+test native_pool_bounds_concurrent_owners_and_returns_all_credits ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/transport.rs (target/debug/deps/transport-e28af2cc17dfeb93)
+
+running 28 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

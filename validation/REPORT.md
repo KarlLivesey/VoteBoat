@@ -5014,3 +5014,20 @@ actual socket closure at unchanged virtual time while checking request and
 handshake state; all14 connect tests are checked locally. Fresh macOS CI remains
 unverified. This establishes selected admission/progress behavior, not bandwidth
 or tail-latency guarantees or complete P0–P7 acceptance.
+
+### Slice163 — combined provider lifetime
+
+Two new generic conformance histories compose shared admission and frame-buffer
+providers through native outbound/transport instances, using both independent
+host implementations and native implementations. Partial I/O, withheld flush,
+protected control progress, failed-connection completion ownership, stale
+replacement-generation refusal, sibling resumption and final zero credits pass.
+No production behavior or API changes. Host sessions use test attestation;
+no new cryptographic or actual-network claim is made.
+
+All49 all-feature transport/admission/buffer tests pass; all8 core-only tests
+pass. Both strict Clippy profiles remain zero, formatting passes and inventory
+metadata validates89 records. [Slice163 evidence](baseline/slice163/README.md)
+records exact commands and limits. The previous162 Linux/macOS CI run was still
+active when inspected and is not counted as platform success. Faulted-history
+verification is the next mini-plan item; full P0–P7 remains active.

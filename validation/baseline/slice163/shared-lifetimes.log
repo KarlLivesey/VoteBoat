@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s
+     Running tests/transport.rs (target/debug/deps/transport-e28af2cc17dfeb93)
+
+running 2 tests
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s
+

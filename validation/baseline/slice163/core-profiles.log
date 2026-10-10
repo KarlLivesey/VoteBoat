@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.31s
+     Running tests/admission.rs (target/debug/deps/admission-bde64080e7f9babc)
+
+running 1 test
+test downstream_owned_lease_survives_shared_view_close_and_clone_without_native ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/buffer.rs (target/debug/deps/buffer-c478a349ba9451cb)
+
+running 6 tests
+test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+test owner_configuration_rejects_overbooking_and_overflow ... ok
+test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+test independent_downstream_pool_contract_without_native ... ok
+test unsupported_owner_declaration_refuses_binding ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/transport.rs (target/debug/deps/transport-622e35714a6c1789)
+
+running 1 test
+test transport_limits_are_available_without_native_dependencies ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
