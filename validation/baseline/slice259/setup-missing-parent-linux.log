@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (<linux-workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.70s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+
+thread 'native::delegation::retained_failed_store_does_not_poison_the_next_history' (363) panicked at tests/routed/delegation.rs:161:48:
+called `Result::unwrap()` on an `Err` value: Os { code: 2, kind: NotFound, message: "No such file or directory" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::retained_failed_store_does_not_poison_the_next_history ... FAILED
+
+failures:
+
+failures:
+    native::delegation::retained_failed_store_does_not_poison_the_next_history
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 177 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test routed`

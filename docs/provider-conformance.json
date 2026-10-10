@@ -331,7 +331,7 @@
       ],
       "operations": [
         {
-          "names": ["owner", "capacity", "len"],
+          "names": ["owner", "capacity", "len", "is_empty"],
           "obligation": "The volatile service owner and declared capacity remain stable; live exact group/kind deadlines determine length. Replacement consumes no additional slot, and expiration/cancellation releases its slot. is_empty derives the same live state.",
           "assertions": [
             {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},

@@ -1,0 +1,11 @@
+{
+  "buildInputs": 653,
+  "buildInputChanges": [],
+  "metadataFiles": [
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "validation/check-provider-conformance.mjs",
+    "validation/check-provider-conformance.test.mjs"
+  ],
+  "note": "These metadata/checker files are not Rust build inputs; their hashes are bound separately."
+}

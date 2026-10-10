@@ -1,9 +1,57 @@
 # Baseline audits
 
-Latest implementation: [slice196b2](#slice196b2--authenticated-leadership-maintenance).
-Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
+Latest service evidence: [slice256](../validation/baseline/slice256/README.md).
+Latest feature review: [slice255](#slice255--functional-checkpoint).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice255 — functional checkpoint
+
+Reviewed7fc57d0 plus258's timer metadata correction against chapter01 R01–R19
+and the P0–P7 exits. This is a
+feature/evidence map, not release completion. Production differs from the
+source-preserved full Linux251 run only in the reviewed native manifest-source
+handoff adapters. The core below remains source-identical to that run; the
+new source seam has its own254 acceptance. Current static separate-host TCP/QUIC
+service checks pass256. Mac recursive recovery failures remain active257 work.
+
+| Requirement | Current implementation surface | Remaining acceptance or work |
+| --- | --- | --- |
+| R01 crash-fault consensus | Raft event/effect core, durable LogStore/PersistenceWorker, snapshots and native service. | Wider combined faults; original Mac full run remains live with failures. |
+| R02 recursive responsibilities | Manifest parent authorities, delegation, insertion, deletion, reparenting and recursive lookup. | Resolve actual Mac recursive history failures; selected histories are not arbitrary composition proof. |
+| R03 multiple execution lanes | Partitioned manifests, independent groups, source/target split and compatible merge. | Broader recursive deployment and recovery; no cross-lane total order is promised. |
+| R04 hierarchical quorum | Policy/JointPolicy and Membership::is_satisfied/frontier. Self-vote, received vote, read and commit sites inspected again. | Broader transition schedules; voter/learner counts found in allocation sizing are not quorum predicates. |
+| R05 selective participation | Explicit startup group inventory, bounded assignment pages, scoped manifest caches and remote lookup. | Broader placement/outage composition; no whole-directory or unrelated-log download is required. |
+| R06 shared WAL | Shared native log worker, append batches and scoped barriers. | Sustainable throughput is a P7 measurement, not another missing WAL implementation. |
+| R07 cheap idle groups | Shared scheduler/transport/workers and100-group assemblies. | Separate idle CPU/allocation and wider active fractions are P7 evidence. |
+| R08 direct child commits | Routed owner proposals and parent-offline child histories. | Resolve Mac composed histories without adding an ancestor commit. |
+| R09 safe transitions | Joint membership, durable source fence, target import, publication, activation and retirement guards. | Actual Mac lifecycle failures and broader combined cuts remain; never treat an unknown phase as an applied cut. |
+| R10 honest outcomes | Admission, persistence, commit/application and exact ClientCompletion outcomes. | Retain unknown/same-ID semantics in every caller;254d adds an actual controlled native negative. |
+| R11 deterministic testing | Explicit events/effects/time, delayed persistence, seeded actual-core schedules and Counter history checking. | General replay/minimization/reference comparison/fuzzing remain wider validation work. |
+| R12 bounded overload | Explicit admission, buffer, queue, image, retention and recovery limits. | Wider disk-full and competing recovery/connection coverage remains. |
+| R13 native providers | Native WAL/snapshots, scheduler, multiplexed TCP/TLS and QUIC/codecs. | No external adapter is required or claimed. |
+| R14 public seams | Domain traits plus NodeParts/from_parts, injected native/host providers. | Complete reusable obligation coverage;108 inventory entries alone do not certify them. |
+| R15 embedding | Caller-owned NodeParts and polling/cleanup; public native startup and embedded example. | Wider assembly/failure combinations; retain one selected store and explicit worker ownership. |
+| R16 optional availability | Public core modules; native/tls/quic compile gates and four strict build profiles. | Runtime evidence remains configuration-specific; all features cannot cover disabled branches. |
+| R17 persistence contract | LogStore batches/barriers/ranges, typed append/truncate/compact mutations, snapshots and recovery. | Backend/device conformance and explicit migration; generic byte read/write is insufficient. |
+| R18 authoritative store | Explicit store bindings and checked NodeParts assembly. | Backend migration remains explicit; no hidden parallel native WAL. |
+| R19 replacement contracts | Scoped identities, exact tickets, bounds, ownership/cancellation and stale-completion checks. | Provider metadata has13 partial reviews/82 named operations after258;95 inventory entries have no such review. Unreviewed metadata does not imply absent tests; coverage still needs inspection. |
+
+Public source points include [NodeParts](../src/runtime/node.rs),
+[LogStore](../src/log.rs), [timers/scheduler](../src/runtime.rs),
+[applications](../src/application.rs), [snapshots](../src/snapshot.rs),
+[scope transfer](../src/scope.rs) and [membership policies](../src/membership.rs).
+The [provider ledger](provider-conformance.json) remains explicit about partial
+reviews; its metadata checker verifies anchors only. Existing tests and their
+recorded scopes must supply behavioral evidence.
+
+The immediate functional exit is resolving demonstrated Mac recovery failures
+with preserved IDs/fault cuts and fresh affected histories. Static service256
+remains usable during that work. Then close the missing shared provider
+obligations and broader failure gates using the existing contracts, rather than
+adding a replacement protocol or unsolicited adapter. Performance/idle/resource
+attribution and security review follow the feature milestone. Full P0–P7 stays
+active; Windows and P8 stay deferred.
 
 ## Slice196b2 — authenticated leadership maintenance
 

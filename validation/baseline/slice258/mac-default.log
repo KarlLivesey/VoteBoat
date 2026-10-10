@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (<mac-workspace>/repo257)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 25.18s
+     Running tests/runtime.rs (target/debug/deps/runtime-41b68cdfb987d599)
+
+running 3 tests
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 30 filtered out; finished in 0.02s

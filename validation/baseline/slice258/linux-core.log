@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.43s
+     Running tests/runtime.rs (target/debug/deps/runtime-e5b1e7cd2c353ea9)
+
+running 2 tests
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s

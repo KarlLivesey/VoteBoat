@@ -1,0 +1,124 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 65 tests
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::cancellation::quic_cancelled_delegation_replans_and_recovers_from_checkpoints has been running for over 60 seconds
+test native::delegation::cancellation::tcp_cancelled_delegation_replans_and_recovers_from_wal has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::imported_partial::quic_partial_import_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::quic_partial_import_wal has been running for over 60 seconds
+test native::delegation::imported_partial::tcp_partial_import_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::tcp_partial_import_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::quic_partial_import_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+test native::delegation::imported_partial::quic_partial_import_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::cancellation::tcp_cancelled_delegation_replans_and_recovers_from_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal ... ok
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::cancellation::quic_cancelled_delegation_replans_and_recovers_from_checkpoints ... ok
+test native::delegation::imported_partial::tcp_partial_import_checkpoint ... ok
+test native::delegation::imported_partial::tcp_partial_import_wal ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints has been running for over 60 seconds
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints has been running for over 60 seconds
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_wal has been running for over 60 seconds
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_wal has been running for over 60 seconds
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal has been running for over 60 seconds
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal has been running for over 60 seconds
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints has been running for over 60 seconds
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal has been running for over 60 seconds
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut has been running for over 60 seconds
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_wal ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_wal ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal ... ok
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal ... ok
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 112 filtered out; finished in 2867.75s

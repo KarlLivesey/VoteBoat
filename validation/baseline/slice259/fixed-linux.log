@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (<linux-workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.98s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+test native::delegation::retained_failed_store_does_not_poison_the_next_history ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 177 filtered out; finished in 0.00s

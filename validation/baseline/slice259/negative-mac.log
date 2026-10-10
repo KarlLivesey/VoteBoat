@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (<mac-workspace>/repo259)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 21.27s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 1 test
+
+thread 'native::delegation::retained_failed_store_does_not_poison_the_next_history' (17846723) panicked at tests/routed/delegation.rs:172:49:
+called `Result::unwrap()` on an `Err` value: Custom { kind: AlreadyExists, error: "store already exists" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::retained_failed_store_does_not_poison_the_next_history ... FAILED
+
+failures:
+
+failures:
+    native::delegation::retained_failed_store_does_not_poison_the_next_history
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 177 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `--test routed`

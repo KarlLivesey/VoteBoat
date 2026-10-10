@@ -703,11 +703,13 @@
         "register",
         "cancel",
         "poll",
-        "len"
+        "len",
+        "is_empty"
       ],
       "native": "DeadlineQueue",
       "conformance": [
-        "tests/runtime.rs"
+        "tests/runtime.rs",
+        "tests/runtime/timer_contract.rs"
       ],
       "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down."
     },

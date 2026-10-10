@@ -1,0 +1,64 @@
+diff --git a/tests/routed/delegation.rs b/tests/routed/delegation.rs
+index cf366b4..fc93f74 100644
+--- a/tests/routed/delegation.rs
++++ b/tests/routed/delegation.rs
+@@ -144,0 +145,52 @@ fn phase_write<A>(
++fn history_root(protocol: NativePeerProtocol, checkpoint: bool) -> std::path::PathBuf {
++    use std::sync::atomic::{AtomicU64, Ordering};
++    static ROOTS: AtomicU64 = AtomicU64::new(0);
++    for _ in 0..32 {
++        let sequence = ROOTS
++            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
++            .expect("history root sequence exhausted");
++        let root = std::env::temp_dir().join(format!(
++            "voteboat-delegated-{}-{protocol:?}-{checkpoint}-{sequence}",
++            std::process::id()
++        ));
++        match std::fs::create_dir(&root) {
++            Ok(()) => return root,
++            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => (),
++            Err(e) => panic!("create history root {}: {e}", root.display()),
++        }
++    }
++    panic!("history root collision limit");
++}
++
++#[test]
++fn retained_failed_store_does_not_poison_the_next_history() {
++    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
++    let identity = StoreIdentity {
++        id: StoreId::new(1).unwrap(),
++        incarnation: StoreIncarnation::new(1).unwrap(),
++    };
++    let first = history_root(NativePeerProtocol::TcpTls, false);
++    std::fs::create_dir_all(first.join("200")).unwrap();
++    let store = NativeLogStore::create(
++        FileLogIo::create(first.join("200/1")).unwrap(),
++        identity,
++        LogLimits::default(),
++    )
++    .unwrap();
++    drop(store);
++    let original = super::creation_source::durable_files(&first);
++    let second = history_root(NativePeerProtocol::TcpTls, false);
++    std::fs::create_dir_all(second.join("200")).unwrap();
++    let store = NativeLogStore::create(
++        FileLogIo::create(second.join("200/1")).unwrap(),
++        identity,
++        LogLimits::default(),
++    )
++    .unwrap();
++    assert_ne!(first, second);
++    drop(store);
++    assert_eq!(super::creation_source::durable_files(&first), original);
++    std::fs::remove_dir_all(first).unwrap();
++    std::fs::remove_dir_all(second).unwrap();
++}
++
+@@ -155,5 +207 @@ impl Delegated {
+-        let root = std::env::temp_dir().join(format!(
+-            "voteboat-delegated-{}-{protocol:?}-{checkpoint}",
+-            std::process::id()
+-        ));
+-        std::fs::create_dir_all(&root).unwrap();
++        let root = history_root(protocol, checkpoint);

@@ -7,7 +7,18 @@ and graceful process cleanup. This closes that selected P1/P2 host-composition
 check; recursive Mac failures, full platform/provider coverage and P7 remain.
 Production matches91576fa, with source-linked temporary test observation only.
 The exact namespace diagnostic passes both in isolation without explaining its
-earlier Mac failure; broad254d recovery results remain independent and pending.
+earlier Mac failure. Preserved Linux254d finishes65/0; the corresponding Mac
+family remains live with reported failures. Their source scopes remain separate.
+
+Latest source audit: [R01–R19](BASELINE_AUDIT.md#slice255--functional-checkpoint).
+Existing timer contract checks pass selected all/core/native/default profiles
+on both hosts, with formatting/four strict profiles zero:
+[slice258](../validation/baseline/slice258/README.md). The public default is_empty
+metadata omission is corrected in the existing review;13 partial reviews now
+name82 operations. This does not imply full provider certification. Isolated
+unchanged cross-authority TCP/WAL passes1/0 on each host:
+[slice257](../validation/baseline/slice257/README.md). The first broad Mac failure
+remains unexplained; current259 isolates retained failed history directories.
 
 Terminal full Linux suite: [slice251](../validation/baseline/slice251/linux/README.md).
 Source-preserved ba67c8c finishes1826 passes, zero failures/ignored; routed171 and

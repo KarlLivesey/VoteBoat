@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (<mac-workspace>/repo257)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 40.31s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 1 test
+cross-authority insertion TcpTls checkpoint=false phase=Reserve
+cross-authority insertion TcpTls checkpoint=false phase=Intent
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+cross-authority insertion TcpTls checkpoint=false phase=Stage(21)
+cross-authority insertion TcpTls checkpoint=false phase=Stage(22)
+cross-authority insertion TcpTls checkpoint=false phase=Fence
+cross-authority insertion TcpTls checkpoint=false phase=Import(21)
+cross-authority insertion TcpTls checkpoint=false phase=Import(22)
+cross-authority insertion TcpTls checkpoint=false phase=ChildPublication
+cross-authority insertion TcpTls checkpoint=false phase=ParentPublication
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 176 filtered out; finished in 358.68s

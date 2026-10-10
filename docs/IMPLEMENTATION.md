@@ -83,7 +83,7 @@ solely for compatibility. Preserve explicit migration for already-written data.
 
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
-| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. Actual TCP and optional QUIC static three-process histories pass on Linux and macOS at source223, including checkpoint/reopen and worker joins. Broader macOS/operator release validation and separate-host operational validation remain outstanding. Online membership runner acceptance is not a prerequisite to using the static service. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
+| Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss/restart and shut down cleanly; document the same Rust composition. Slice256 passes TCP/TLS and QUIC with two Linux replicas and one Mac, a required Linux/Mac quorum, original cold retries and owned process/store cleanup. Public NodeParts embedding remains available. Broader operator/recovery acceptance stays separate; online membership is not a prerequisite. | First usable delivery on P0–P3; preserve it while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; bounded coordinated drain197 is implemented for explicit original plans; broader recovery and platform acceptance remain open. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
@@ -103,6 +103,23 @@ internal storage faults, macOS deployment and P7 performance gates remain open;
 this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
+
+Current checkpoint255–259: static mixed-host service256 is selected completed
+evidence. The R01–R19 source audit255 separates implemented features from wider
+acceptance; existing timer checks258 pass all/core/native/default on both hosts
+with only an is_empty metadata correction. Preserved Linux254d finishes65/0;
+Mac's corresponding family remains live with failures. Isolated257 TCP/WAL
+passes unchanged on both hosts and does not identify the first failure.
+
+| Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current259: isolate native delegation history stores | Prevent retained failed stores from contaminating later history construction; obtain trustworthy P5/P6 recovery evidence. | Actual old-root FileLogIo/LogStore AlreadyExists negative on each host; preserve original251/254d sources and failed files. | Unique exclusively created roots, original retained bytes unchanged, native regression on both hosts, four affected TCP/QUIC histories, source linkage and formatting/four strict profiles zero. |
+| Next: classify and fix the first actual Mac lifecycle failure | Close a demonstrated functional P5/P6 failure while keeping static service usable. | Terminal original failure body or fresh isolated reproduction; distinguish root collisions from the first cause. | Cause-specific failing-before/passing-after check, original IDs/fault cuts/ownership rules preserved, relevant Linux/Mac histories and strict zero. An isolated pass cannot close an unreproduced failure. |
+| Following: close the next missing provider obligation | Advance public Rust composition P0/R14/R19 using existing contracts. | Source audit of existing shared checkers and named assertions; select an actual uncovered obligation after the lifecycle diagnosis. | One bounded real host/native checker with a defective-provider negative, relevant feature profiles on both hosts and strict zero; retain partial coverage explicitly. |
+
+The full P0–P7 goal remains active. Performance tuning and security review follow
+feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
+mini-plan checkpoints below keep their original evidence scope.
 
 Completed202a covers the selected old-checkpoint/member recovery cases below.
 Completed199f corrects the recorded cancellation acceptance assumption and adds
@@ -25921,3 +25938,102 @@ cause and preserved contracts; completion requires a failing-before/passing-afte
 check, unchanged safety/bounds/ID contracts and relevant Linux/Mac checks plus
 strict zero. Separate-host256 is now selected completed evidence, not another
 prerequisite. Full P0–P7 remains active; performance/security follow features.
+
+257 initial diagnosis schema: isolate the actually failed TCP/WAL cross-authority
+insertion history on unchanged91576fa build inputs, with uncaptured terminal
+assertions and source hashes. Use a separate Mac checkout/cache and primary
+Linux target; neither live254d family nor original251 source is changed. No
+retry/predicate/timer is edited yet. Inspect the actual positive/fault call,
+receipt/operation and application facts before choosing a correction. Preserve
+failed roots; successful history keeps explicit abort/reclaim/join cleanup.
+Purpose: resolve a demonstrated P5/P6 functional compatibility failure rather
+than infer it from earlier deletion or isolated namespace results. Acceptance:
+exact failure body or explicit non-reproduction, then a controlled failing-before
+regression and relevant Linux/Mac checks for any installed change.
+
+255 audit schema: map each R01–R19 to current public/native source, separate
+implemented behavior from its acceptance scope, and retain the complete P0–P7
+exits. The audit changes documentation only; no authority/state/format transition
+or runtime ownership is introduced. Compare production sources against the
+source-preserved full Linux251 run and current256 host evidence; inspect the
+actual quorum sites and provider obligations, not only inventory names. Current
+production differs from ba67c8c only in the two reviewed manifest-source adapters.
+Record live/failed Mac scopes as such. Completion is a source-backed feature/gap
+map and a next deliverable tied to actual missing behavior or failed acceptance,
+without inventing performance/security or optional adapters as feature blockers.
+
+258 timer-obligation schema: the255 audit finds an existing generic TimerService
+checker for host/native providers, eight128-action modeled schedules and an
+actual wrong-owner cancellation negative. Reuse it; no new timer/helper/provider
+is needed. Map owner/capacity/register/cancel/poll/len/is_empty obligations to its
+assertions and execute the existing selected tests on Linux/Mac. Preserve exact
+tokens, stale generations/incarnations, replacement at capacity, monotonic time,
+zero-budget observation and earliest-deadline/lateness rules. Record remaining
+sequence-exhaustion/construction coverage as partial, never provider certification.
+Only provider evidence metadata/documentation changes; no clock, queue, format,
+durability or runtime lifetime transition. Completion: real selected results,
+complete operation anchors, checker validation and fmt/strict zero. This advances
+P0/R14/R19 while257 waits for its actual Mac failure body.
+
+258 scope correction before mutation: TimerService already has a partial review
+and shared host/native/cancellation-negative runners. The transaction guard
+rejects a duplicate review before either JSON file is written. Reuse that review;
+the actual metadata omission is the public default is_empty method, already
+described by its length obligation and tested by the existing shared assertions.
+Add its operation name to the existing inventory/review and link the existing
+checker file. Selected all-feature timer3/0 passes on each host with unchanged
+653 build inputs. No new provider, helper, test or runtime behavior is added.
+
+259 failure-isolation schema: Delegated::with_metadata reuses one path per
+process/protocol/checkpoint across many histories. Failed histories intentionally
+retain files, so a later Create can hit an earlier history's store. Isolated257
+TCP/WAL passes1/0 on both; it does not explain the first broad Mac failure.
+Extract the existing path selection so a controlled native FileLogIo/LogStore
+test can retain a closed original store and construct the next history under the
+same protocol/checkpoint. Old selection must fail with the actual existing-store
+refusal. Then allocate each root with a checked process-local sequence and an
+exclusive create_dir, bounded collision retries and no deletion of existing
+roots. Keep old bytes unchanged; successful independent stores close/remove
+explicitly. This helper is required for history ownership/failure isolation,
+not a production provider or protocol change. Preserve all original fault cuts,
+timers, quotas and assertions. Acceptance: controlled old/fixed native evidence,
+affected real histories on Linux/Mac, source linkage and fmt/four strict zero.
+The running original251/254d sources remain unchanged; root isolation cannot
+retroactively fix their first failures or turn their results into passes.
+
+255 source/evidence audit is recorded in BASELINE_AUDIT.md against all19
+requirements. Production still differs from the251 Linux source only in the
+two reviewed native manifest-source adapters. The actual self-vote, received-
+vote, read and commit-frontier quorum sites use the membership policy contracts;
+allocation sizing counts are not quorum checks. This audit closes no runtime
+failure or untested provider obligation.
+
+257 exact unchanged cross-authority TCP/WAL history finishes1/0 on Linux61.25s
+and Mac358.68s, with653 source inputs verified before/after. This is a recorded
+non-reproduction, not a cause or fix for the live broad Mac failure. Evidence:
+[257](../validation/baseline/slice257/README.md).
+
+258 selected acceptance: all/core/native/default timer checks finish3/2/3/3
+passes, zero failures/ignored on both hosts. Provider metadata tests finish24/0;
+formatting/four strict profiles are zero. Unchanged653 Rust inputs and separate
+metadata/checker inputs verify at terminal. The existing TimerService review now
+names its actual public is_empty default;108 contracts and13 partial reviews
+remain, with82 operations. No new production/provider/runtime/test behavior.
+Evidence: [258](../validation/baseline/slice258/README.md). Initial file-level
+Node failure and rejected setup guards remain separate from accepted evidence.
+
+Preserved254d Linux broad native delegation finishes65/0 in2867.75s; original
+source verifies at terminal and default/core/native strict checks are zero.
+The subsequent native::reparenting:: selector selects zero tests; actual
+reparenting histories are already inside the65 family. Mac's corresponding
+family is still live with failures. Evidence:
+[Linux family](../validation/baseline/slice254d/linux-family/README.md).
+
+259 controlled old-root regression fails0/1 on both hosts at the second actual
+FileLogIo/NativeLogStore Create with AlreadyExists. Initial missing-parent setup
+is retained separately and supplies no causal evidence. Fixed allocation uses
+a checked sequence, exclusive create_dir and at most32 collision attempts;
+never removes an existing directory. Fixed regression passes1/0 on both hosts
+and compares retained original bytes before successful closed-store cleanup.
+Formatting/four strict profiles are zero on both. The four real affected
+cross-authority histories remain running, so259's mini-plan acceptance is pending.
