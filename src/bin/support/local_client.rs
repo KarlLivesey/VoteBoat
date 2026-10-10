@@ -25,18 +25,7 @@ use std::{
     time::{Duration, Instant},
 };
 const NOT_LEADER: &str = "ERR NOT_LEADER\n";
-/// These outcomes permit another read-only observation. They say nothing about
-/// whether a mutation was accepted and do not authorize replay.
-pub(super) fn repeat_observation(reason: &str) -> bool {
-    matches!(
-        reason,
-        "authentication deadline expired"
-            | "request deadline expired"
-            | "reply deadline expired"
-            | "connection closed during request"
-            | "connection closed without a complete reply"
-    )
-}
+pub(super) use super::command_observation::repeat_observation;
 pub(super) fn exchange(
     target: &Endpoint,
     text: &[u8],

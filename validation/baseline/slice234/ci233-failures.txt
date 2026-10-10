@@ -1,0 +1,11 @@
+linux: preceding ae8f977, not candidate validation
+2026-10-10T16:14:29.6508268Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... FAILED
+2026-10-10T16:16:44.4969922Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic' (6175) panicked at tests/counter_service.rs:379:9:
+2026-10-10T16:16:44.4970586Z node 3 ["move-leader", "19750", "2", "1", "1", "1"]: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+2026-10-10T16:16:44.4998980Z test result: FAILED. 182 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 162.87s
+macos: preceding ae8f977, not candidate validation
+2026-10-10T16:18:46.1725020Z test result: ok. 183 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 261.57s
+2026-10-10T16:19:29.1612030Z test routes::recursive_route_enforces_root_observation_floors ... FAILED
+2026-10-10T16:19:33.8718350Z thread 'routes::recursive_route_enforces_root_observation_floors' (55081) panicked at tests/directory_service/routes.rs:407:9:
+2026-10-10T16:19:33.8720240Z unexpected stale-floor failure: Error: "recursive lookup failed: authority manifest upgrade refused or interrupted"
+2026-10-10T16:19:33.8984270Z test result: FAILED. 21 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 47.69s

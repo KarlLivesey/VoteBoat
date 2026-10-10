@@ -1,0 +1,20 @@
+Initial fixture compile (exit101; ManifestObservation has no PartialEq):
+cargo +stable test --locked --offline --all-features --bin voteboat-directory route_discovery::connection_tests
+
+Before production change, stalled TLS status/upgrade cases fail2 (exit101).
+After production change, route connection and authentication checks pass7:
+cargo +stable test --locked --offline --all-features --bin voteboat-directory route_discovery
+
+Final composition, all-feature then default, executed sequentially:
+cargo +stable test --locked --offline --all-features --bin voteboat-counter --bin voteboat-directory --test directory_service
+cargo +stable test --locked --offline --bin voteboat-counter --bin voteboat-directory --test directory_service
+
+Initial strict scan fails dead-code in transfer; final composition is zero:
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+cargo +stable build --locked --offline --all-features --bins
+
+gh run view 38066778525 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114255917500/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114255917624/logs

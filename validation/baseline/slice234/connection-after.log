@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.82s
+     Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-79774abd27047b3c)
+
+running 7 tests
+test route_discovery::connection_tests::interrupted_read_classification_keeps_invalid_and_incomplete_replies_terminal ... ok
+test route_discovery::connection_tests::exhausted_connection_budget_cannot_open_another_probe ... ok
+test route_discovery::tests::authority_authentication_cannot_extend_the_lookup_deadline ... ok
+test route_discovery::connection_tests::refused_or_wrong_version_upgrade_does_not_rotate_or_hide_the_reply ... ok
+test route_discovery::tests::authority_authentication_timeout_preserves_remaining_lookup_budget ... ok
+test route_discovery::connection_tests::timed_out_manifest_upgrade_rotates_without_admitting_a_source ... ok
+test route_discovery::connection_tests::timed_out_status_rotates_without_renewing_lookup_budget ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.60s
+

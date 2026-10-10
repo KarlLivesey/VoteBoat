@@ -148,6 +148,11 @@ Each connection probe has at most1.5 seconds within that same invocation budget.
 An expired authentication attempt drops its socket and permits another bounded
 probe; certificate or identity failures remain terminal. Exhausting the total
 deadline returns a recursive-lookup error with no partial route.
+Known read timeouts during the status probe or manifest-session upgrade also
+drop that attempt and rotate within the original bounds. Only the exact upgrade
+acknowledgement admits a source; refusals and malformed replies remain terminal
+and report their specific reply or interruption reason. Retries preserve the
+original query and minimum epoch/generation and never authorize a write.
 
 ## Recovery and scope
 

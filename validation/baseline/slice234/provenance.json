@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "base_revision": "ae8f97703bbdf6d1097b541ca7dc67d6dff437e6",
+  "scope": "Bounded read-only recursive status/manifest-session connection recovery",
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "after_route": 7,
+    "final_all": {
+      "counter_unit": 41,
+      "directory_unit": 11,
+      "directory_service": 22
+    },
+    "final_default": {
+      "counter_unit": 40,
+      "directory_unit": 11,
+      "directory_service": 17
+    },
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "budgets": {
+    "invocation_seconds": 10,
+    "attempts": 128,
+    "shared_status_upgrade_seconds": 1.5
+  },
+  "source_manifest_sha256": "5dcd448ba4f3c89b0d627c90ee3d258f9a7aa990f7ff26f7a39615106ca5a160",
+  "publication": {
+    "redacted_workspace_logs": 7,
+    "private_logs": "target/slice234-unpublished-logs"
+  },
+  "limits": "Finite Linux native histories; preceding-source CI is not candidate macOS acceptance; no broader P5, performance or security completion."
+}

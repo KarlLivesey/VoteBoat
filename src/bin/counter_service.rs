@@ -25,6 +25,8 @@ mod command_client;
 mod command_discovery;
 #[path = "support/command_endpoints.rs"]
 mod command_endpoints;
+#[path = "support/command_observation.rs"]
+mod command_observation;
 #[path = "support/counter_application.rs"]
 mod counter_application;
 #[path = "support/credential_reload.rs"]

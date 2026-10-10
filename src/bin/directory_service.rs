@@ -19,6 +19,8 @@ mod authority_endpoints;
 mod command_client;
 #[path = "support/command_endpoints.rs"]
 mod command_endpoints;
+#[path = "support/command_observation.rs"]
+mod command_observation;
 #[path = "support/credential_reload.rs"]
 mod credential_reload;
 #[path = "support/credential_worker.rs"]

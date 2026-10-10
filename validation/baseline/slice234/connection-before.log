@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.51s
+     Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-79774abd27047b3c)
+
+running 2 tests
+test route_discovery::connection_tests::timed_out_manifest_upgrade_rotates_without_admitting_a_source ... FAILED
+test route_discovery::connection_tests::timed_out_status_rotates_without_renewing_lookup_budget ... FAILED
+
+failures:
+
+---- route_discovery::connection_tests::timed_out_manifest_upgrade_rotates_without_admitting_a_source stdout ----
+
+thread 'route_discovery::connection_tests::timed_out_manifest_upgrade_rotates_without_admitting_a_source' (334252) panicked at src/bin/support/route_discovery/connection_tests.rs:145:5:
+Err("authority manifest upgrade refused or interrupted"); commands=["status\n", "manifest-session\n"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- route_discovery::connection_tests::timed_out_status_rotates_without_renewing_lookup_budget stdout ----
+
+thread 'route_discovery::connection_tests::timed_out_status_rotates_without_renewing_lookup_budget' (334253) panicked at src/bin/support/route_discovery/connection_tests.rs:145:5:
+Err("authority status interrupted: reply deadline expired"); commands=["status\n"]
+
+
+failures:
+    route_discovery::connection_tests::timed_out_manifest_upgrade_rotates_without_admitting_a_source
+    route_discovery::connection_tests::timed_out_status_rotates_without_renewing_lookup_budget
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 6 filtered out; finished in 1.50s
+
+error: test failed, to rerun pass `--bin voteboat-directory`

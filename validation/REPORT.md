@@ -1,5 +1,16 @@
 # Validation report
 
+Bounded recursive-route connection recovery: [slice234](baseline/slice234/README.md).
+Actual authenticated TLS status/upgrade timeouts reproduce before and recover
+after within unchanged budgets, retaining original floors and admitting sources
+only on exact ACK. Terminal replies remain specific. Final all-feature command
+units41/11 plus directory22, default40/11 plus directory17, formatting/four strict
+profiles and inventory108/conformance metadata pass. Initial compile/lint failures
+are retained. Preceding source233 Linux counter182/1 fails replacement setup19750
+UNKNOWN LeadershipChanged; macOS counter183 passes, directory21/1 retains the
+generic upgrade failure; later targets are unrun. Matching234 platform acceptance
+and broader P5 remain open. Functional features come before tuning/security.
+
 Planned drain admission after source leadership loss:
 [slice233](baseline/slice233/README.md). Actual TCP/QUIC regressions reproduce the
 original NOT_LEADER before and pass after composing the existing local group-drain

@@ -899,23 +899,47 @@ and trickled-socket WouldBlock. Ubuntu job114253944056 remains live at observati
 These are preceding-source results, not233 validation; matching feedback follows
 the push in the background.
 
-Current: resolve the macOS recursive-route observation-floor failure. Purpose:
-advance P5 lookup correctness and the Linux/macOS feature milestone. Depend on
-source231's exact failure, existing directory route/read adapters and current
-manifest-upgrade contracts. Before editing classify the original unknown outcome
-versus terminal refusal. Completion requires original root observation floors,
-exact retained query/receipt semantics, bounded leader-loss/reopen checks, strict
-zero diagnostics and matching platform feedback. Do not relax floors or deadlines.
+Implemented234: recursive status and manifest-session probes now reuse the
+existing read-only interruption classification. Known read timeouts drop the
+attempt and rotate within the original10s/128-probe/1.5s-attempt budgets. Only an
+exact authenticated manifest-v1 ACK admits a source or advances its generation;
+terminal refusals retain their actual reply/reason. Original request/floors and
+observation semantics remain. No provider, consensus or persistent-format change.
 
-Next: close the concrete macOS operator failures. Purpose: advance P4 and
-Linux/macOS functional acceptance. Depend on retained source232 job/log identity
-and existing original-operation/readiness/deadline contracts, not platform guesses.
-Classify preparing versus admitted configuration, explicit no-proposal Busy versus
-terminal conflict, actual conflict response versus authority loss, and macOS
-socket WouldBlock before each focused edit. Completion requires meaningful local
-regressions, unchanged records/floors/absolute budgets, cause-specific TCP/QUIC
-recovery and strict zero diagnostics; matching macOS feedback remains background.
-Do not weaken assertions to accept unrelated failures or run performance tuning.
+Actual TLS stalled-status and stalled-upgrade histories fail before and pass
+after; refusal/wrong-version, exhausted-budget and terminal-interruption checks
+also pass. Final all-feature command units41/11 and directory integration22 pass;
+default40/11 and directory17 pass. Formatting/four strict profiles finish zero;
+inventory108/conformance metadata pass, with9 partial reviews/68 operations.
+Initial fixture compilation and unused-module lint failures are retained with
+focused corrections in [slice234](../validation/baseline/slice234/README.md).
+
+Macro review234 advances P5 and functional Linux/macOS service completion. Exact
+preceding ae8f977 operator run38066778525 ends with Linux counter182/1 failing
+replacement setup19750 UNKNOWN LeadershipChanged; later targets are unrun.
+macOS counter183 passes, directory21/1 retains the generic upgrade error, and
+transfer is unrun. That generic text cannot prove the precise transport cause;
+234 adds bounded recovery and cause-specific terminal diagnostics. Matching
+platform feedback follows publication; broad P5/full-roadmap completion remains
+open. Performance and security remain later.
+
+Current: close original learner-replacement setup after sampled leadership loss.
+Purpose: advance online membership/P4 and Linux/macOS functional acceptance.
+Depend on source233 Linux job114255917500, original19750 LeadershipIntent and the
+existing exact-operation recovery contracts. Classify explicit non-admission,
+unknown outcome and terminal conflict before editing. Completion requires an
+actual interrupted/replayed original handoff, exact retained intent/receipt,
+learner import and replacement drain through recovery, unchanged absolute
+budgets, TCP/QUIC checks and zero strict diagnostics. Do not change the operation
+or assume that a sampled leader remains authoritative.
+
+Next: reconcile matching macOS route/operator feedback and close one concrete
+functional failure. Purpose: advance P5/service and platform acceptance. Depend
+on matching published source/job identities,234 diagnostics and existing floor,
+quorum-read and operation contracts. Completion requires a cause-specific local
+regression, original floors/records/budgets and matching platform evidence when
+available. Source233 macOS counter183 passes; older preparing/Busy/conflict/socket
+failures are retained but are not assumed to persist. CI remains background.
 
 Following: close concrete baseline operator/deployment integration gaps. Purpose:
 advance usable service, online membership and split/merge completion. Depend on
@@ -927,6 +951,55 @@ relevant Linux/macOS checks and updated contracts after any interface changes.
 Do not count optional global orchestration, performance tuning or security audits
 as feature blockers. Generated membership validation follows where a concrete
 functional gap requires it; a blanket provider audit is not a release prerequisite.
+
+### Slice234 schema plan — bounded recursive-route connection recovery
+
+Previous goal turn: progress;233 fixes planned follower-source drain admission,
+passes local native/default checks with zero strict diagnostics and pushes ae8f977.
+Current worktree is clean. Source231 macOS route-floor failure reports only the
+generic manifest-upgrade interruption; that old text does not identify its exact
+transport cause. Current code shares one1.5s probe/upgrade attempt budget and treats
+every upgrade failure as terminal. Selected authentication timeout already retries;
+known status/upgrade read deadlines should use the same bounded observation rule.
+
+Data/API: move the existing read-only repeat_observation classification into the
+shared command-observation module and retain its local-client re-export. Recursive
+status/manifest-session requests use it; mutations do not gain automatic retries.
+Keep exact ACK, original authority/request/floors,10s total,128 attempts and1.5s
+probe budget. No core, manifest format, provider seam or persistent cache change.
+Terminal errors include the actual status/upgrade reply or interruption reason.
+
+Transitions/ownership: known read timeout/empty complete-reply loss drops the
+attempt channel and returns unavailable to the existing rotating probe loop.
+Attempts/cursor advance once; neither deadline nor request allowances renew.
+Only an exact authenticated ACK constructs a source and advances generation.
+No failed connection creates an observation or route hint. Complete refusal,
+malformed/oversized/multiple-line replies, incomplete closed replies and explicit
+authentication errors stay terminal. Close/drop cancels the current remote source;
+subsequent admitted sources use a fresh generation to reject stale observations.
+
+Acceptance: first actual TLS scripts stall status and upgrade replies through the
+original1.5s attempt timeout; old code must fail, new code must rotate/reconnect
+under the same deadline, with no observation/hint from the failed attempt and
+the original minimum epoch retained. Check exact refusal/invalid ACK, exhausted
+attempt/overall budgets and known-vs-terminal interruption classification. Reuse
+full directory TCP/QUIC authority/quorum/routing/WAL/checkpoint tests and the
+unchanged root observation-floor checks. Run default relevant paths sequentially
+and fmt/four strict profiles to zero. Background matching platform feedback stays
+source-bound; do not infer that one timeout reproduction proves231's macOS cause.
+Advances P5/service reliability; remaining macOS operator failures and required
+operator/deployment integration follow. Performance/security remain later work.
+
+234 fixture correction: ManifestObservation intentionally has no PartialEq;
+the initial compile failure is retained. Match the Unavailable variant directly
+instead of adding an equality contract to production types for a test.
+
+234 lint correction: moving read-only policy into the generic command exchange
+module adds unused policy to the transfer executable, which does not do these
+automatic observations. The first strict scan correctly refuses dead code.
+Put the unchanged policy in a small shared module assembled only by its counter
+and directory consumers; keep transfer exchange/mutation semantics unchanged.
+No allowance or lint threshold change. The failed scan is retained separately.
 
 ### Slice233 schema plan — planned drain admission independent of leadership
 

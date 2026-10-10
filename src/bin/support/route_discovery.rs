@@ -17,6 +17,7 @@ use super::{
     authority_endpoints::Authorities,
     command_client::{self, Attempt},
     command_endpoints::Endpoint,
+    command_observation::repeat_observation,
     directory_connection::ACK,
     service_access::{Channel, ClientAccess},
     setup::{checked, Failure},
@@ -180,6 +181,7 @@ impl Discovery {
             Attempt::Reply(text) => {
                 return Err(format!("authority status refused: {}", text.trim()).into())
             }
+            Attempt::Interrupted(reason) if repeat_observation(reason) => return Ok(None),
             Attempt::Interrupted(reason) => {
                 return Err(format!("authority status interrupted: {reason}").into())
             }
@@ -194,7 +196,14 @@ impl Discovery {
         };
         match command_client::request(&mut channel, b"manifest-session\n", deadline, self.start) {
             Attempt::Reply(reply) if reply == ACK => (),
-            _ => return Err("authority manifest upgrade refused or interrupted".into()),
+            Attempt::Unavailable => return Ok(None),
+            Attempt::Interrupted(reason) if repeat_observation(reason) => return Ok(None),
+            Attempt::Reply(reply) => {
+                return Err(format!("authority manifest upgrade refused: {}", reply.trim()).into())
+            }
+            Attempt::Interrupted(reason) => {
+                return Err(format!("authority manifest upgrade interrupted: {reason}").into())
+            }
         }
         let cache = checked(NativeManifestCache::new(ManifestCacheLimits {
             manifests: 64,
@@ -340,3 +349,7 @@ impl Drop for Discovery {
 #[cfg(test)]
 #[path = "route_discovery/tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "route_discovery/connection_tests.rs"]
+mod connection_tests;

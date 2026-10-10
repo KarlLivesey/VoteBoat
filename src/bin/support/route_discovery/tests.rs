@@ -3,7 +3,7 @@
 use super::*;
 use std::{io::Read, net::TcpListener, path::Path};
 
-fn stalled_authority() -> (Discovery, Endpoint, TcpListener, ManifestLookup) {
+pub(super) fn stalled_authority() -> (Discovery, Endpoint, TcpListener, ManifestLookup) {
     let listener = TcpListener::bind(("127.0.0.1", 0)).unwrap();
     listener.set_nonblocking(true).unwrap();
     let endpoint = Endpoint {
