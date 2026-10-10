@@ -1,5 +1,18 @@
 # Validation report
 
+Planned drain after a later election: [slice238](baseline/slice238/README.md).
+Actual TCP/QUIC unread-handoff/third-voter-election histories fail the old guard
+and pass afterward. The runner preserves the Completed receipt and original
+configuration/plan; real configuration admission and source Final/applied/work
+quiescence checks still govern progress and stop. Original receipts/data survive
+cold recovery and source joins. Final all-feature counter188/unit43/drain44 and
+default drain31/unit41 pass, formatting/four strict profiles zero, inventory108/
+conformance metadata unchanged. Initial broad186/2 exposes and corrects the wrong
+source==drain-owner assumption; its failed evidence is retained. No new provider,
+core rule, storage format or timeout. Initial source binding remains next.
+Preceding237 macOS184/2 fails configure19770/add91001 unknown outcomes; later
+targets unrun, Linux still live at observation. No238 macOS/full-roadmap claim.
+
 Transfer readiness and read cleanup observations: [slice237](baseline/slice237/README.md).
 The fixture requires a bounded authenticated group1/inc1 intent observation before
 the fault cut, reselects only on exact read unavailability, and observes actual

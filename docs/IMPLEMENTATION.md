@@ -1009,21 +1009,45 @@ NOT_LEADER. Later targets are unrun. These exact source-specific results select
 administrative original-intent/current-authority composition next; they are not
 237 platform acceptance. Feature work and platform recovery remain the priority.
 
-Current: close original handoff binding and planned drain after another election.
+Implemented238: the planned drain runner preserves an exact Completed handoff
+after another voter becomes leader and proceeds with its bound configuration.
+Pending retains the existing original resume/observation path. Actual configure
+admission rechecks authority; committed Final/applied membership and owned-work
+quiescence remain prerequisites for source shutdown. No new handoff ID, plan,
+provider seam, consensus rule, storage format or deadline is introduced.
+
+Native TCP/QUIC histories publish the original drain, lose its handoff reply,
+complete the handoff, then elect the third voter. Both fail the old historical
+guard and pass after, preserving plan/journal, receipt and original data retries
+through shutdown/join and cold recovery. Initial broad186/2 exposes an incorrect
+added source==drain-owner invariant; these are distinct contracts and that check
+is removed. Final all-feature counter188/unit43/drain44 and default drain31/unit41
+pass sequentially, with formatting/four strict profiles zero and inventory108/
+conformance metadata unchanged. See [slice238](../validation/baseline/slice238/README.md).
+
+Macro review238 closes the historical-target election dependency for the operator
+milestone, while initial source binding before a record applies remains open.
+Preceding237 macOS114263268069 ends counter184/2: configure19770 and add91001 return
+UNKNOWN LeadershipChanged; directory/transfer are unrun. Its Linux job114263267950
+is still live at observation. These are source-bound earlier results, not238
+platform acceptance. Feature/Linux/macOS work stays ahead of tuning/security.
+
+Current: close original handoff source binding before the record applies.
 Purpose: advance P4/service Linux/macOS feature completion. Depend on exact source236
-Linux114261132503 and macOS114261132642 failures, durable LeadershipIntent and
-MembershipDrainPlan contracts, and existing bounded runner actions. Before editing,
-check how an original source is reconstructed before its record applies and why
-an historical target is required to remain leader. Completion requires unchanged
-original intent/target/plan through receipt loss, rollback/election and replay;
-actual quorum-backed handoff/configuration readiness and source shutdown, with
-native TCP/QUIC/default checks and strict zero. Interface changes are authorized;
-do not turn a current role hint or invalid changed intent into success.
+Linux114261132503 fresh19769 rejection, durable LeadershipIntent, proposal-context
+and accepted/applied recovery contracts. Before editing, define the complete
+request identity rather than reconstructing its source from the current leader.
+LeadershipIntent.source and DrainRecord.owner remain distinct. Interface changes
+are authorized; prefer an explicit bound request to compatibility scaffolding.
+Completion requires unchanged original intent through unknown reply, election,
+rollback/replay, exact conflict refusal, native TCP/QUIC/default checks and zero
+strict diagnostics. A role hint or invalid changed intent cannot imply success.
 
 Next: close concrete startup reservation and sampled data/read assumptions.
 Purpose: advance functional Linux/macOS operator acceptance. Depend on retained
-source235 AddrInUse and source23619901 NOT_LEADER evidence and existing listener,
-original-write and cancellation contracts. Select one cause before editing;
+source235 AddrInUse, source23619901 NOT_LEADER and source23719770/91001 uncertainty
+evidence and existing listener, original-write/configuration and cancellation
+contracts. Select one cause before editing;
 completion requires a reproducible reservation/ownership or role-change history,
 correct bounded original request recovery and cleanup, with zero strict diagnostics.
 Do not widen deadlines or accept unrelated errors; CI remains background.
@@ -1035,6 +1059,46 @@ actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+### Slice238 schema plan — continue a completed handoff after another election
+
+Purpose: advance P4/service functional Linux/macOS acceptance. Source236 macOS
+fails two planned drains on the historical-target-leader guard. The existing
+MembershipDrainPlan completion contract requires committed Final membership,
+applied state and owned-work quiescence; it does not require its original handoff
+target to remain leader. The runner must preserve the same journal/plan/operation
+and use actual configuration admission to establish current authority.
+
+Shape/state: return whether an exact handoff receipt is Completed from the
+existing runner action. Pending still requires original resume/observation.
+Completed permits submission of the bound configuration to the selected peer;
+NOT_LEADER/known uncertainty returns to the existing observation loop. Validate
+the original target/configuration/operation. Do not
+rewrite historical completion, choose a new handoff identity or infer readiness
+from a role hint. Source shutdown still requires actual local Final/applied and
+quiescence checks. No new public seam, protocol or persistent format is needed.
+
+Ownership/failure: keep the runner's shared request/deadline budget and existing
+socket cleanup. Configuration receipt loss does not imply commitment; reobserve
+the source and original configuration. Wrong target/operation and terminal phases
+remain errors. The fresh Begin source-binding ambiguity before an original record
+applies is a separate interface dependency; retain it explicitly for the next
+deliverable rather than relaxing maintenance admission in this slice.
+
+Acceptance: actual TCP/QUIC histories publish the original source drain, complete
+its exact handoff with an unread reply, then elect the third voter through a
+separate operation. Old runner must fail its historical guard; corrected runner
+must complete original Joint/Final, stop/join source and preserve original plan,
+receipt and data retries through cold recovery. Strict receipt refusals, relevant
+counter/default suites, formatting and four strict profiles must pass. The new
+test module is needed only to exercise this composed operator history.
+
+238 contract correction: the first full suite passes186 but fails two restart
+histories after an added source==drain-owner check. LeadershipIntent.source is
+the initiating leader; DrainRecord.owner is the node being evacuated. A handoff
+first initiated after restart can correctly have a different source. Remove that
+incorrect new invariant and keep the actual bound target/configuration/operation
+checks. Do not weaken the existing maintenance conflict or plan identity rules.
 
 ### Slice237 schema plan — fresh transfer readiness and observed read cleanup
 

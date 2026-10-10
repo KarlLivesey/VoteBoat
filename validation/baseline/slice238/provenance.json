@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "base_revision": "0129786340db4a6a74ea28501993211925f517f3",
+  "scope": "Planned drain continuation after an original handoff and later election",
+  "production_behavior_change": true,
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "initial_counter": {
+      "pass": 186,
+      "fail": 2,
+      "exit": 101,
+      "cause": "Incorrect additional equality between LeadershipIntent.source and DrainRecord.owner"
+    },
+    "after_selected": 2,
+    "full_all": 188,
+    "unit_all": 43,
+    "drain_all": 44,
+    "drain_default": 31,
+    "unit_default": 41,
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "new_public_seam": false,
+  "core_or_persistent_format_change": false,
+  "source_manifest_sha256": "1043c015ee26244251d4bfe4bdfc6e9cbabd6fe018666d267f12c6a542683aa8",
+  "publication": {
+    "redacted_workspace_logs": 10,
+    "private_logs": "target/slice238-unpublished-logs"
+  },
+  "limits": "Finite local Linux native TCP/TLS and QUIC operator histories; no matching macOS acceptance, before-applied original source binding, full P4/P0-P7, performance or security completion."
+}

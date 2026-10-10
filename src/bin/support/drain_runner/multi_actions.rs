@@ -52,7 +52,7 @@ impl Runner {
             .into()),
         }
     }
-    fn handoff(&mut self, peer: usize, row: &Assignment, voter: Voter) -> Result<(), Failure> {
+    fn handoff(&mut self, peer: usize, row: &Assignment, voter: Voter) -> Result<bool, Failure> {
         let command = format!(
             "move-leader {} {} {} {} {}",
             self.operation,
@@ -64,7 +64,9 @@ impl Runner {
         if let Some(text) = self.group_exchange(peer, row, &command)? {
             self.check_handoff(&text, row, voter)?;
             if field(&text, "phase")? == "Completed" {
-                return Err("original handoff is historical but its target is not the current leader; inspect the original drain plan".into());
+                // Completion preserves the original intent, not current leadership.
+                // The bound configuration proposal checks actual authority again.
+                return Ok(true);
             }
             if field(&text, "phase")? == "Pending" {
                 let command = format!("resume-leadership {}", self.operation);
@@ -73,7 +75,7 @@ impl Runner {
                 }
             }
         }
-        Ok(())
+        Ok(false)
     }
     fn check_handoff(&self, text: &str, row: &Assignment, voter: Voter) -> Result<(), Failure> {
         if field(text, "operation")?.parse::<u128>()? != self.operation
@@ -104,10 +106,13 @@ impl Runner {
         }
         match field(&text, "action")? {
             "completed" | "wait_for_commit" => Ok(()),
-            "inconclusive_local_absence" if self.endpoints[peer].node != voter.target => {
-                self.handoff(peer, row, voter)
-            }
             "inconclusive_local_absence" | "finalize_requires_authorization" => {
+                if field(&text, "action")? == "inconclusive_local_absence"
+                    && self.endpoints[peer].node != voter.target
+                    && !self.handoff(peer, row, voter)?
+                {
+                    return Ok(());
+                }
                 let attempt = self.exchange(peer, &row.command(&format!("configure {op}")))?;
                 configuration_attempt(attempt, op).map(|_| ())
             }
@@ -134,8 +139,13 @@ mod tests {
         let runner = configured(10000, 3, &args).unwrap();
         let row = Row::parse("OK sequence=1 operation=2 offset=0 groups=1 group=7 incarnation=3 configuration=9 done=false kind=voter target=1 store=1 store_incarnation=1 configuration_operation=7001", 1, 2, 0, 1).unwrap().assignment;
         let voter = row.voter.unwrap();
-        let receipt = "OK operation=2 configuration=9 target=1 target_store=1 target_incarnation=1 phase=Pending";
+        let receipt = "OK operation=2 source=3 configuration=9 target=1 target_store=1 target_incarnation=1 phase=Pending";
         runner.check_handoff(receipt, &row, voter).unwrap();
+        // A handoff initiated after another election has that leader as its
+        // source. This is distinct from the node whose local drain is planned.
+        runner
+            .check_handoff(&receipt.replace("source=3", "source=2"), &row, voter)
+            .unwrap();
         runner
             .check_handoff(&receipt.replace("Pending", "Completed"), &row, voter)
             .unwrap();

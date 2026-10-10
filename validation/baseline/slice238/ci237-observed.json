@@ -1,0 +1,150 @@
+{
+  "conclusion": "",
+  "headSha": "0129786340db4a6a74ea28501993211925f517f3",
+  "jobs": [
+    {
+      "completedAt": "0001-01-01T00:00:00Z",
+      "conclusion": "",
+      "databaseId": 114263267950,
+      "name": "Operators on ubuntu-latest",
+      "startedAt": "2026-10-10T16:50:52Z",
+      "status": "in_progress",
+      "steps": [
+        {
+          "completedAt": "2026-10-10T16:50:54Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-10T16:50:53Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:50:56Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-10T16:50:54Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:51:04Z",
+          "conclusion": "success",
+          "name": "Install pinned Rust toolchain",
+          "number": 3,
+          "startedAt": "2026-10-10T16:50:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:51:05Z",
+          "conclusion": "success",
+          "name": "Run cargo fetch --locked",
+          "number": 4,
+          "startedAt": "2026-10-10T16:51:04Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "0001-01-01T00:00:00Z",
+          "conclusion": "",
+          "name": "Exercise operator recovery",
+          "number": 5,
+          "startedAt": "2026-10-10T16:51:05Z",
+          "status": "in_progress"
+        },
+        {
+          "completedAt": "0001-01-01T00:00:00Z",
+          "conclusion": "",
+          "name": "Preserve operator results",
+          "number": 6,
+          "startedAt": "0001-01-01T00:00:00Z",
+          "status": "pending"
+        },
+        {
+          "completedAt": "0001-01-01T00:00:00Z",
+          "conclusion": "",
+          "name": "Post Run actions/checkout@v4",
+          "number": 12,
+          "startedAt": "0001-01-01T00:00:00Z",
+          "status": "pending"
+        }
+      ],
+      "url": "https://github.com/KarlLivesey/VoteBoat/actions/runs/38069300771/job/114263267950"
+    },
+    {
+      "completedAt": "2026-10-10T16:56:18Z",
+      "conclusion": "failure",
+      "databaseId": 114263268069,
+      "name": "Operators on macos-latest",
+      "startedAt": "2026-10-10T16:50:56Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-10T16:50:57Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-10T16:50:56Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:51:00Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-10T16:50:57Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:51:06Z",
+          "conclusion": "success",
+          "name": "Install pinned Rust toolchain",
+          "number": 3,
+          "startedAt": "2026-10-10T16:51:00Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:51:09Z",
+          "conclusion": "success",
+          "name": "Run cargo fetch --locked",
+          "number": 4,
+          "startedAt": "2026-10-10T16:51:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:56:09Z",
+          "conclusion": "failure",
+          "name": "Exercise operator recovery",
+          "number": 5,
+          "startedAt": "2026-10-10T16:51:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:56:11Z",
+          "conclusion": "success",
+          "name": "Preserve operator results",
+          "number": 6,
+          "startedAt": "2026-10-10T16:56:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:56:11Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 12,
+          "startedAt": "2026-10-10T16:56:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-10T16:56:16Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 13,
+          "startedAt": "2026-10-10T16:56:11Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/KarlLivesey/VoteBoat/actions/runs/38069300771/job/114263268069"
+    }
+  ],
+  "status": "in_progress",
+  "url": "https://github.com/KarlLivesey/VoteBoat/actions/runs/38069300771"
+}

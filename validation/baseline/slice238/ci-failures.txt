@@ -1,0 +1,18 @@
+Preceding source: 0129786340db4a6a74ea28501993211925f517f3 (slice237).
+Operator recovery run38069300771, macOS job114263268069: terminal failure.
+Counter184 pass / 2 fail; directory/transfer unrun.
+
+drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic
+tests/counter_service.rs:379:9
+node2 ["configure", "19770"]:
+UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+service log: administration operation=19770 outcome=Unknown(LeadershipChanged)
+
+maintenance::automatic_reclaim_service_tcp_recovers_and_retries
+tests/counter_service.rs:410:9
+["add", "91001", "7"]:
+UNKNOWN LeadershipChanged; retry the same operation ID and delta
+
+These distinct original configuration/write recovery failures remain open.
+They do not prove matching238 platform acceptance or an identical local schedule.
+Raw job log remains ignored at target/slice238-ci237-macos.log.

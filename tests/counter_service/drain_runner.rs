@@ -5,6 +5,8 @@ use super::*;
 mod confirmation;
 #[path = "drain_runner/follower.rs"]
 mod follower;
+#[path = "drain_runner/historical.rs"]
+mod historical;
 pub(super) use confirmation::confirmed;
 
 pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Command {

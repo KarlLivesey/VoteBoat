@@ -276,6 +276,11 @@ be a follower. Status exposes `multi=true groups=1` and one authenticated
 the bound assignment and plan fingerprint, finds the current leader and drives
 the exact handoff and joint/final completion. It asks the source
 to stop only after `ready=true` and the source rechecks its own stop conditions.
+If the original handoff is Completed but another voter now leads, the runner
+preserves that receipt and submits the bound configuration to the current leader.
+Configuration admission checks actual authority again. Historical completion
+alone does not authorize source shutdown. The handoff's initiating leader can
+differ from the node being drained after restart.
 
 The runner makes at most128 requests within45 seconds, with five-second request
 deadlines and one owned connection at a time. It is a foreground process; no
@@ -497,8 +502,9 @@ After a killed runner, unavailable source or unknown result, inspect the origina
 intent and rerun the same sequence and operation. Accepted work remains durable.
 Only known leadership/read transitions and an explicit no-proposal busy refusal
 are retried inside the budget. Other errors stop the runner and preserve IDs.
-If a historical completed handoff's target has since lost leadership, inspect
-and resolve that change explicitly; the runner cannot invent a new handoff ID.
+If a historical completed handoff's target has since lost leadership, the runner
+keeps the original receipt and continues the bound configuration through the
+current leader. It never invents a new handoff ID or rewrites the original plan.
 An invalid or incomplete endpoint list may be discovered after the source intent
 is durable: correct the list and resume, or explicitly cancel the original drain.
 Runner exit never cancels accepted work, changes the plan or deletes storage.

@@ -1,0 +1,25 @@
+Before the correction (0 pass / 2 fail, exit101):
+cargo +stable test --locked --offline --all-features --test counter_service original_planned_drain_survives_another_election -- --nocapture
+
+After the correction (2 pass): same focused command.
+
+Initial broad suite (186 pass / 2 fail):
+cargo +stable test --locked --offline --all-features --test counter_service
+The added source==drain-owner invariant was incorrect; preserve the distinct
+LeadershipIntent.source and DrainRecord.owner contracts instead.
+
+Final focused and broad checks:
+cargo +stable test --locked --offline --all-features --test counter_service drain
+cargo +stable test --locked --offline --all-features --bin voteboat-counter
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service drain
+cargo +stable test --locked --offline --bin voteboat-counter
+
+cargo +stable fmt --all
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Preceding source237 background evidence:
+gh run view 38069300771 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114263268069/logs

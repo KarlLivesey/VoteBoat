@@ -1,5 +1,16 @@
 # Baseline acceptance map
 
+Planned drain after a later election: [slice238](../validation/baseline/slice238/README.md).
+Native TCP/QUIC preserve the original plan/journal, Completed handoff and data
+retries through a third-voter election, bound Joint/Final configuration, source
+stop/join and cold recovery. Old runner fails2; final all-feature counter188/
+unit43/drain44 and default drain31/unit41 pass. Formatting/four strict profiles
+finish zero; inventory108/conformance metadata unchanged. Initial broad186/2
+corrects an added source==drain-owner assumption; failed evidence remains.
+Configuration admission and local Final/applied/quiescence still authorize each
+effect; historical completion alone is not current leadership or readiness.
+Initial source binding and other Linux/macOS acceptance histories remain open.
+
 Transfer readiness and read cleanup observations: [slice237](../validation/baseline/slice237/README.md).
 The fixture requires a bounded authenticated group1/inc1 intent observation before
 the fault cut, reselects only on exact read unavailability, and observes actual
