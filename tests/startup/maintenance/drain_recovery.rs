@@ -40,6 +40,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
                 }],
             },
             phase: DrainPhase::Active,
+            plan: None,
         })
         .unwrap();
     h.nodes[0].restore_drain(&journal).unwrap();

@@ -144,6 +144,47 @@ administration permits start/resume/cancel; shutdown permission permits stop.
 
 This profile retains the original replicas. It supports maintenance/reboot when
 the remaining configured voters can satisfy the policy. It rejects a required
-membership change. Replica replacement/removal and multi-group drain remain
-the next coordinated-drain work; these commands are not a decommissioning
+membership change. Executable membership changes and multi-group orchestration
+remain coordinated-drain work; these commands are not a decommissioning
 certificate. See [slice197b2a evidence](../validation/baseline/slice197b2a/README.md).
+
+## Membership-aware drain in Rust
+
+`MembershipDrainPlan` binds an explicit evacuation plan to the durable journal.
+For each assigned group, supply its original `Configuration`, exact handoff
+voter and original `PlannedVoterChange` joint/final records. Groups must be
+sorted and unique. The plan is bounded to 1024 groups and 4 MiB retained input.
+The target excludes the source from voters and retains it as a learner so the
+source can observe the final commit before shutdown. New voters must already
+be exact prepared learners; normal readiness and placement authorization still
+apply when submitting the configuration.
+
+Persist the original plan in host-owned configuration before publishing
+`plan.record(sequence)` through `DrainJournal`. The journal stores a canonical
+SHA-256 fingerprint, not the plan itself. On recovery, reload that original
+plan, verify it against the recovered journal, and call `Node::restore_drain`
+before polling or exposing application work. Changed policies, stores, IDs,
+handoff targets or assignment sets cannot substitute for the original plan.
+Local-only `DrainRecord` callers set `plan: None`; their existing V1 records
+remain readable. Bound plans use V2 records, at most 32912 bytes.
+
+Drive `plan.next(journal, core)` on each group's current leader:
+
+- `Transfer`: submit the exact `NodeControl::TransferLeadership` request.
+- `Configure`: submit the original record through `Node::configure`, retaining
+  its ticket and using normal readiness and execution-time authorization.
+- `Wait`: continue polling; preserve accepted tickets and original IDs.
+- `Completed`: this group has the exact committed final membership.
+
+The host owns action suppression, remote delivery, deadlines and cancellation
+of waits. The decision method performs no I/O. Lost replies do not change
+operation IDs or justify skipping joint consensus. Cancellation of the local
+journal gate does not reverse a committed configuration or a delivered handoff.
+
+`Node::membership_drain_ready(plan, journal)` checks the restored active record,
+complete local assignment coverage, every exact committed final configuration,
+application catch-up and local quiescence. Only then should the host start the
+ordinary joined shutdown. This is local durable evidence, not a measurement of
+current remote availability. Removing the remaining learner is a later explicit
+membership operation. The retained-replica executable refuses a bound journal
+because it cannot reload this host plan. See [slice197b2b1 evidence](../validation/baseline/slice197b2b1/README.md).

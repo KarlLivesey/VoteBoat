@@ -4,7 +4,7 @@ use crate::{drain::*, secure::PeerIdentity};
 mod file;
 mod format;
 pub use file::FileDrainRecord;
-pub const MAX_DRAIN_RECORD_BYTES: usize = 80 + 32 * crate::runtime::MAX_LOCAL_DRAIN_GROUPS + 32;
+pub const MAX_DRAIN_RECORD_BYTES: usize = 80 + 32 * crate::runtime::MAX_LOCAL_DRAIN_GROUPS + 64;
 
 /// Domain-specific atomic record I/O. A replacement recovers the old or whole
 /// new record; partial final records are corruption. No independent writer may

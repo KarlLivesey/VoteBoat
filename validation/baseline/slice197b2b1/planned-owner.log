@@ -1,0 +1,34 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.02s
+     Running tests/drain_journal.rs (target/debug/deps/drain_journal-7ca08b1b6cf053da)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests/drain_membership.rs (target/debug/deps/drain_membership-63856f411622f8bb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-3639936cb54e2253)
+
+running 1 test
+test node_facade::drain_recovery::planned_membership_drain_requires_restored_complete_assignments_and_final_commits ... FAILED
+
+failures:
+
+---- node_facade::drain_recovery::planned_membership_drain_requires_restored_complete_assignments_and_final_commits stdout ----
+
+thread 'node_facade::drain_recovery::planned_membership_drain_requires_restored_complete_assignments_and_final_commits' (506) panicked at tests/support/node.rs:62:29:
+MissingPeers
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    node_facade::drain_recovery::planned_membership_drain_requires_restored_complete_assignments_and_final_commits
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 169 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

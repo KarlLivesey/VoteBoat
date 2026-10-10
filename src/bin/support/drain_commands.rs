@@ -63,8 +63,11 @@ impl Driver {
             NativeDrainJournal::recover(io, owner)
         }
         .map_err(|(e, _)| format!("drain journal: {e:?}"))?;
-        checked(service.restore_drain(&journal))?;
         let latest = checked(journal.latest())?;
+        if latest.as_ref().is_some_and(|record| record.plan.is_some()) {
+            return Err("membership drain journal requires its original host plan; retained-replica profile cannot resume it".into());
+        }
+        checked(service.restore_drain(&journal))?;
         Ok(Self {
             journal: Some(journal),
             latest,

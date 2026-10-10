@@ -1,0 +1,104 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.26s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 83 tests
+test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test automatic_read_retries_only_exact_quorum_transition_replies ... ok
+test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test invalid_administration_is_rejected_before_store_open ... ok
+test invalid_deployment_is_rejected_before_store_creation ... ok
+test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+test history::tcp_faulted_client_histories_are_linearizable ... ok
+test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test history::quic_faulted_client_histories_are_linearizable ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test placement::generated_placement_executes_and_recovers_tcp ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+test placement::generated_placement_executes_and_recovers_quic ... ok
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+test trusted_startup_plan_promotes_and_restarts_quic ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+test leadership::maintenance_profile_refuses_existing_plain_counter_data ... FAILED
+test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+
+failures:
+
+---- leadership::maintenance_profile_refuses_existing_plain_counter_data stdout ----
+
+thread 'leadership::maintenance_profile_refuses_existing_plain_counter_data' (4073019) panicked at tests/counter_service/leadership.rs:306:9:
+incompatible profile was not refused
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    leadership::maintenance_profile_refuses_existing_plain_counter_data
+
+test result: FAILED. 82 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 45.95s
+
+error: test failed, to rerun pass `--test counter_service`

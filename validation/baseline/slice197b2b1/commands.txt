@@ -1,0 +1,17 @@
+# Run from repository root; native histories use authorized local sockets.
+cargo +stable test --locked --offline --all-features --test drain_journal --test drain_membership
+cargo +stable test --locked --offline --all-features --test startup membership_drain -- --nocapture
+cargo +stable test --locked --offline --all-features --test effect_owner planned_membership_drain
+# Initial regression and focused reproduction retain the old profile-test failure.
+cargo +stable test --locked --offline --all-features --test drain_membership --test drain_journal --test effect_owner --test startup --test counter_service
+cargo +stable test --locked --offline --all-features --test counter_service leadership::maintenance_profile_refuses_existing_plain_counter_data -- --exact --nocapture
+# Final runs after fixing the test's committed-data precondition:
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --all-features --test drain_membership --test drain_journal --test effect_owner --test startup
+cargo +stable test --locked --offline --no-default-features --test drain_membership --test effect_owner
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# The enabled pre-push hook repeats formatting and all three strict profiles.

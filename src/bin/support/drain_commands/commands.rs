@@ -44,6 +44,7 @@ impl Driver {
                 }],
             },
             phase: DrainPhase::Active,
+            plan: None,
         };
         if let Some(latest) = &self.latest {
             if latest.sequence == sequence && latest.request.operation == operation {

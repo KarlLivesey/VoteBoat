@@ -344,3 +344,62 @@ fn failed_journal_publication_stops_service_and_preserves_recovery_evidence() {
     assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
     c.stop();
 }
+
+#[test]
+fn retained_profile_refuses_to_interpret_a_membership_drain_journal() {
+    use voteboat::{
+        drain::*, identity::*, native::drain_journal::*, runtime::*, secure::PeerIdentity,
+    };
+    let mut c = cluster(false);
+    let source = c.leader();
+    kill(&mut c, source);
+    let owner = PeerIdentity {
+        node: NodeId::new(source as u64).unwrap(),
+        store: StoreIdentity {
+            id: StoreId::new(source as u128).unwrap(),
+            incarnation: StoreIncarnation::new(1).unwrap(),
+        },
+    };
+    let mut journal = NativeDrainJournal::recover(
+        FileDrainRecord::new(c.root.join(source.to_string()).join("drain.record")),
+        owner,
+    )
+    .ok()
+    .unwrap();
+    journal
+        .publish(DrainRecord {
+            owner,
+            sequence: 1,
+            request: LocalDrainRequest {
+                operation: OperationId::new(19799).unwrap(),
+                groups: vec![DrainGroup {
+                    group: GroupIdentity {
+                        id: GroupId::new(1).unwrap(),
+                        incarnation: GroupIncarnation::new(1).unwrap(),
+                    },
+                    configuration: ConfigurationId::new(1).unwrap(),
+                }],
+            },
+            phase: DrainPhase::Active,
+            plan: Some(DrainPlanDigest::from_bytes([7; 32])),
+        })
+        .unwrap();
+    let output = run(Command::new(BIN)
+        .args(["serve", "recover"])
+        .arg(c.root.join(source.to_string()))
+        .arg(source.to_string())
+        .arg(c.base.to_string())
+        .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
+        .arg("--service-access")
+        .arg(c.command_access.as_ref().unwrap())
+        .args([
+            "--leadership-maintenance",
+            "enabled",
+            "--node-drain",
+            "enabled",
+        ]));
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr)
+        .contains("membership drain journal requires its original host plan"));
+    c.stop();
+}

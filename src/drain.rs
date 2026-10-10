@@ -5,6 +5,8 @@ use crate::{
     runtime::{LocalDrainRequest, MAX_LOCAL_DRAIN_GROUPS},
     secure::PeerIdentity,
 };
+mod membership;
+pub use membership::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DrainPhase {
@@ -18,6 +20,8 @@ pub struct DrainRecord {
     pub sequence: u64,
     pub request: LocalDrainRequest,
     pub phase: DrainPhase,
+    /// Immutable host plan binding; None denotes the original local-only gate.
+    pub plan: Option<DrainPlanDigest>,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DrainJournalError {
@@ -52,6 +56,7 @@ impl DrainRecord {
             && (self == previous
                 || (self.sequence == previous.sequence
                     && self.request == previous.request
+                    && self.plan == previous.plan
                     && previous.phase == DrainPhase::Active
                     && self.phase == DrainPhase::Cancelled)
                 || (self.sequence > previous.sequence

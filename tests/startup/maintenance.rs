@@ -6,6 +6,8 @@ use voteboat::{maintenance::*, native::connect::*, raft::*, secure::PeerIdentity
 mod drain;
 #[path = "maintenance/drain_recovery.rs"]
 mod drain_recovery;
+#[path = "maintenance/membership_drain.rs"]
+mod membership_drain;
 type Managed = NativeNode<Maintenance<HostApplication>, NativeServiceConnector>;
 static DIRECTORY: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 struct History {
@@ -15,9 +17,14 @@ struct History {
     protocol: NativePeerProtocol,
     nodes: Vec<Managed>,
     clock: Instant,
+    member: bool,
+    administration: Option<voteboat::native::administration::NativeAdministrationPlan>,
 }
 impl History {
     fn new(protocol: NativePeerProtocol, version: u16) -> Self {
+        Self::new_mode(protocol, version, false)
+    }
+    fn new_mode(protocol: NativePeerProtocol, version: u16, member: bool) -> Self {
         let directory = root().with_extension(format!(
             "maintenance-{}",
             DIRECTORY.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
@@ -43,8 +50,15 @@ impl History {
             protocol,
             nodes: vec![],
             clock: Instant::now(),
+            member,
+            administration: None,
         };
         h.open(NativeOpenMode::Create, version);
+        if member {
+            // Membership recovery cannot invent a new voter from empty files.
+            drain_wire_nodes(std::mem::take(&mut h.nodes));
+            h.open(NativeOpenMode::Recover, version);
+        }
         h
     }
     fn open(&mut self, mode: NativeOpenMode, version: u16) {
@@ -59,20 +73,35 @@ impl History {
                     mode,
                     version,
                 );
-                c.open_with_protocol(
-                    self.protocol,
-                    Maintenance::new(group(), 9001, 4, app()).unwrap(),
-                    Arc::new(ThreadWake::current()),
-                    MonoTime(0),
-                )
-                .unwrap()
+                let app = Maintenance::new(group(), 9001, 4, app()).unwrap();
+                let wake = Arc::new(ThreadWake::current());
+                if self.member && mode != NativeOpenMode::Create {
+                    NativeMemberStartup {
+                        startup: c,
+                        provisioned_stores: self.bootstrap.voter_stores.clone(),
+                    }
+                    .open_with_protocol(self.protocol, app, wake, MonoTime(0))
+                    .unwrap()
+                } else {
+                    c.open_with_protocol(self.protocol, app, wake, MonoTime(0))
+                        .unwrap()
+                }
             })
             .collect();
     }
     fn poll(&mut self) {
         let now = MonoTime(self.clock.elapsed().as_millis() as u64);
         for (id, n) in self.nodes.iter_mut().enumerate() {
-            let progress = n.poll(now, NodePollBudget::default()).unwrap();
+            let progress = if let Some(administration) = &self.administration {
+                n.poll_with_configuration_authorization(
+                    now,
+                    NodePollBudget::default(),
+                    |core, proposal| administration.authorize(group(), core.membership(), proposal),
+                )
+            } else {
+                n.poll(now, NodePollBudget::default())
+            }
+            .unwrap();
             if let Some(replica) = progress.replica {
                 for step in replica.steps.iter().filter(|s| s.error.is_some()) {
                     eprintln!("node {} maintenance step {step:?}", id + 1);

@@ -51,8 +51,111 @@ fn journal(n: &Boat) -> Journal {
                     .collect(),
             },
             phase: DrainPhase::Active,
+            plan: None,
         }),
     }
+}
+
+fn planned(n: &Boat, all_groups: bool) -> MembershipDrainPlan {
+    use voteboat::{membership::*, placement::*, quorum::*};
+    let entries = n
+        .local()
+        .owner
+        .groups()
+        .take(if all_groups { usize::MAX } else { 1 })
+        .map(|group| {
+            let original = n
+                .local()
+                .owner
+                .core(group)
+                .unwrap()
+                .membership()
+                .stable()
+                .clone();
+            let target = Configuration::new(
+                ConfigurationId::new(3).unwrap(),
+                Policy::new(
+                    Tree::Majority(vec![Tree::Voter(node(2)), Tree::Voter(node(3))]),
+                    Limits::default(),
+                )
+                .unwrap(),
+                [(node(2), identity(2)), (node(3), identity(3))].into(),
+                [(node(1), identity(1))].into(),
+            )
+            .unwrap();
+            DrainMembershipGroup {
+                group,
+                original,
+                handoff: PeerIdentity {
+                    node: node(2),
+                    store: identity(2),
+                },
+                change: PlannedVoterChange {
+                    joint: ConfigurationRecord {
+                        operation: OperationId::new(200).unwrap(),
+                        expected: ConfigurationId::new(1).unwrap(),
+                        change: ConfigurationChange::Joint {
+                            id: ConfigurationId::new(2).unwrap(),
+                            next: target,
+                        },
+                    },
+                    finalize: ConfigurationRecord {
+                        operation: OperationId::new(200).unwrap(),
+                        expected: ConfigurationId::new(2).unwrap(),
+                        change: ConfigurationChange::Final {
+                            id: ConfigurationId::new(3).unwrap(),
+                        },
+                    },
+                },
+            }
+        })
+        .collect();
+    MembershipDrainPlan::new(journal(n).owner, OperationId::new(201).unwrap(), entries).unwrap()
+}
+
+#[test]
+fn planned_membership_drain_requires_restored_complete_assignments_and_final_commits() {
+    let mut n = boat(parts(3, true));
+    let plan = planned(&n, true);
+    let mut j = Journal {
+        owner: journal(&n).owner,
+        latest: Some(plan.record(1).unwrap()),
+    };
+    assert_eq!(
+        n.membership_drain_ready(&plan, &j),
+        Err(DrainPlanError::Unrestored)
+    );
+    n.restore_drain(&j).unwrap();
+    settle(&mut n);
+    assert!(!n.membership_drain_ready(&plan, &j).unwrap());
+    assert!(n.local().owner.groups().all(|g| !n
+        .local()
+        .owner
+        .core(g)
+        .unwrap()
+        .campaigning_enabled()));
+    let partial = planned(&n, false);
+    assert_eq!(
+        n.membership_drain_ready(&partial, &j),
+        Err(DrainPlanError::WrongIntent)
+    );
+    let mut other = boat(parts(3, true));
+    let partial_journal = Journal {
+        owner: j.owner,
+        latest: Some(partial.record(1).unwrap()),
+    };
+    other.restore_drain(&partial_journal).unwrap();
+    settle(&mut other);
+    assert!(!other
+        .membership_drain_ready(&partial, &partial_journal)
+        .unwrap());
+    j.latest.as_mut().unwrap().phase = DrainPhase::Cancelled;
+    assert_eq!(
+        n.membership_drain_ready(&plan, &j),
+        Err(DrainPlanError::WrongIntent)
+    );
+    shutdown(&mut n);
+    shutdown(&mut other);
 }
 #[test]
 fn recovered_stale_manifest_still_gates_every_actual_assignment() {

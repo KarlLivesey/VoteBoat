@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.46s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+
+thread 'maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints' (4053969) panicked at tests/startup/maintenance.rs:79:22:
+called `Result::unwrap()` on an `Err` value: NativeStartupRejected { reason: NativeStartupError { stage: "configuration", detail: "\"member recovery requires existing files and membership wire\"" }, .. }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp' (4053970) panicked at tests/startup/maintenance.rs:79:22:
+called `Result::unwrap()` on an `Err` value: NativeStartupRejected { reason: NativeStartupError { stage: "configuration", detail: "\"member recovery requires existing files and membership wire\"" }, .. }
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints ... FAILED
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... FAILED
+
+failures:
+
+failures:
+    maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints
+    maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test startup`

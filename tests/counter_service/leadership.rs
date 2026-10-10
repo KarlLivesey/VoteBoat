@@ -282,25 +282,27 @@ fn maintenance_profile_refuses_existing_plain_counter_data() {
     for id in 1..=3 {
         c.start(id, "create");
     }
-    c.leader();
-    assert!(c.routed(&["add", "96310", "7"]).contains("Value(7)"));
+    // Reopen the replica that applied the acknowledged command. A follower
+    // stopped immediately after the reply may not have learned that commit.
+    let node = c.leader();
+    assert!(c.ok(node, &["add", "96310", "7"]).contains("Value(7)"));
     c.stop();
     c.leadership_maintenance = true;
     let access = c.root.join("access.txt");
     fs::write(&access, "voteboat-service-access-v1 1\n3 admin 1 1\n").unwrap();
     c.command_access = Some(access);
     c.command_principal = Some(3);
-    c.start(1, "recover");
+    c.start(node, "recover");
     let end = Instant::now() + Duration::from_secs(10);
     loop {
-        if let Some(code) = c.children[0].as_mut().unwrap().try_wait().unwrap() {
+        if let Some(code) = c.children[node - 1].as_mut().unwrap().try_wait().unwrap() {
             assert!(!code.success());
             assert!(
-                c.service_log(1).contains("InvalidCommand"),
+                c.service_log(node).contains("InvalidCommand"),
                 "{}",
-                c.service_log(1)
+                c.service_log(node)
             );
-            c.children[0] = None;
+            c.children[node - 1] = None;
             break;
         }
         assert!(Instant::now() < end, "incompatible profile was not refused");

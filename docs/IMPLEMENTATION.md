@@ -128,9 +128,83 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197a: local drain admission and campaign gate | Keep a replica from immediately campaigning after handing off; advances coordinated drain197, P4/P2 and chapter09. |196 leadership transfer, exact bounded assignment inventory and existing Node ownership. | Reject ordinary new work while preserving maintenance/replication; disable automatic, explicit and transfer-triggered campaigns; retain leader heartbeat until handoff. Report unresolved/stale groups and outstanding results. Local readiness is not remote quorum or durable completion. |
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
 | Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
-| Current197b2b: membership-aware coordinated drain | Complete drain for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a operator path, existing placement authorization and joint/final membership executor. | Recover original placement/membership steps, preserve quorum throughout and refuse stale or unavailable assignments. Retained-replica maintenance alone does not complete this item. |
+| Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
+| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Persist/reload original executable plans, resume membership steps, preserve quorum and refuse stale/unavailable assignments. Exercise actual commands through interrupted joint/final recovery and shutdown. General multi-group orchestration and final learner removal remain explicit scope. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b2b1 schema plan — membership evacuation through Rust hosts
+
+The next usable Rust slice binds an immutable, bounded multi-group evacuation
+plan to the durable drain record. This is needed because existing local intent
+does not identify the exact joint/final targets, and a changed host plan could
+otherwise be substituted after restart. It advances the online-membership macro
+milestone; executable membership-aware drain follows as197b2b2 and assignment198
+remains next. Full multi-group/executable drain is not declared complete here.
+
+MembershipDrainPlan owns sorted group identities, original configurations, exact
+handoff voters and existing PlannedVoterChange joint/final records. Construction
+validates source/target stores, linked IDs, unchanged operation identities and
+retired voting rights. Source remains a learner in this slice so it can observe
+the committed final configuration before shutdown; later complete replica
+retirement still uses the existing membership protocol. New voters must already
+be learners; normal Node readiness and placement authorization remain mandatory.
+
+A canonical SHA-256 plan digest is bound to DrainRecord (new version only when
+present; old local-only records remain readable). The host supplies its original
+plan again on recovery and must match the digest before any derived action.
+Actions are pure: wait for a current-term committed leader, hand off to the exact
+target, submit original joint, wait for joint commit, submit original final,
+then report completed only for the exact committed final membership. No clocks,
+workers or bypass of ordinary configuration admission are introduced.
+
+Node planned readiness requires the restored active journal, matching plan,
+complete local assignment coverage, exact final committed configurations and
+drained local requests/owner dependencies. Stale configurations and incomplete
+joint state cannot satisfy it. Cancelled intent never reports completion.
+
+Acceptance: host/native journal roundtrip and changed-plan refusal; bounded,
+weighted/nested/multi-group plan checks; actual TCP/QUIC joint/final evacuation,
+restart at the joint and final boundaries, lost configuration observations and
+continued writes with the evacuated source stopped. Run affected native/Node
+and core-only suites and retain zero diagnostics in all three lint profiles.
+
+### Slice197b2b1 implementation evidence
+
+The public MembershipDrainPlan now validates and fingerprints the original
+bounded plan, derives handoff/joint/final actions from current Raft state and
+checks the recovered journal before execution. Node::membership_drain_ready
+requires that same restored intent, all current local groups, exact committed
+final membership, application catch-up and quiescent owned work. No placement
+or readiness check is bypassed. Digest-bearing native records use VBDR0002;
+old local-only records remain readable. The retained-replica executable rejects
+bound journals rather than treating them as its own completed operation.
+
+Six plan tests cover changed identities/recursive policy structure and weights,
+bounds, prepared learners and accepted-versus-committed/rolled-back membership.
+Eleven journal,170 Node and20 startup tests pass, including TCP/WAL and
+QUIC/checkpoint histories with lost joint observations, joint/final reopen,
+original operation IDs, source shutdown and remaining-voter writes/retries.
+The host must persist and reload the original plan: the journal contains its
+fingerprint, not a serialized plan. Native histories cover one group; host
+coverage checks multi-group completeness. Final learner removal, executable
+orchestration, combined replacement failures and macOS execution remain open.
+
+The first wider service run failed a profile-refusal test that reopened node1
+without establishing its local committed application data. A focused repeat
+reproduced the failure. The test now reopens the replica that applied the
+acknowledged plain-counter command, preserving the intended incompatible-data
+check. Raw failures and final validation are retained in
+[slice197b2b1 evidence](../validation/baseline/slice197b2b1/README.md).
+The final service run passes all84 tests; core-only plan/Node runs pass6/164.
+Formatting and all three strict all-target Clippy profiles have zero diagnostics;
+the inventory validates103 implemented contract records and their source paths.
+
+Macro review: this advances online membership and coordinated maintenance,
+without completing general drain or changing the full P0–P7 acceptance ledger.
+Next197b2b2 connects original executable plans and authenticated commands to
+these contracts;198 adds bounded assignment listing and199 validates operator
+recovery on both supported platforms.
 
 ### Slice197b2a implementation evidence
 

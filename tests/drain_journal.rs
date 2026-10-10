@@ -29,6 +29,7 @@ fn record() -> DrainRecord {
                 .collect(),
         },
         phase: DrainPhase::Active,
+        plan: None,
     }
 }
 #[derive(Default)]
@@ -151,6 +152,7 @@ fn owner_shape_and_maximum_retained_record_are_checked() {
         assert_eq!(journal.publish(r), Err(DrainJournalError::InvalidRecord));
     }
     let mut maximum = record();
+    maximum.plan = Some(DrainPlanDigest::from_bytes([1; 32]));
     maximum.request.groups = (1..=MAX_LOCAL_DRAIN_GROUPS)
         .map(|id| DrainGroup {
             group: GroupIdentity {
@@ -328,5 +330,43 @@ fn failed_initialization_preserves_old_or_complete_recovery() {
                 Err((DrainJournalError::MissingRecord, _))
             ));
         }
+    }
+}
+
+#[test]
+fn membership_plan_binding_roundtrips_and_cannot_change_during_cancellation() {
+    let io = HostIo::default();
+    let mut original = record();
+    original.plan = Some(DrainPlanDigest::from_bytes([7; 32]));
+    let mut journal = open(io.clone());
+    journal.publish(original.clone()).unwrap();
+    assert_eq!(
+        NativeDrainJournal::recover(io.clone(), owner())
+            .ok()
+            .unwrap()
+            .latest()
+            .unwrap(),
+        Some(original.clone())
+    );
+    let mut cancel = original.clone();
+    cancel.phase = DrainPhase::Cancelled;
+    cancel.plan = Some(DrainPlanDigest::from_bytes([8; 32]));
+    assert_eq!(
+        journal.publish(cancel.clone()),
+        Err(DrainJournalError::Conflict)
+    );
+    cancel.plan = original.plan;
+    journal.publish(cancel.clone()).unwrap();
+    assert_eq!(open(io.clone()).latest().unwrap(), Some(cancel));
+    let valid = io.0.borrow().bytes.clone().unwrap();
+    for at in 0..valid.len() {
+        let mut corrupt = valid.clone();
+        corrupt[at] ^= 1;
+        io.0.borrow_mut().bytes = Some(corrupt);
+        assert!(NativeDrainJournal::recover(io.clone(), owner()).is_err());
+    }
+    for cut in 0..valid.len() {
+        io.0.borrow_mut().bytes = Some(valid[..cut].to_vec());
+        assert!(NativeDrainJournal::recover(io.clone(), owner()).is_err());
     }
 }

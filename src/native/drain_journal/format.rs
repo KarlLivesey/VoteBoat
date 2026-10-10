@@ -40,7 +40,11 @@ pub(super) fn envelope(
 }
 pub(super) fn encode(record: &DrainRecord) -> Vec<u8> {
     let mut b = Vec::with_capacity(112 + record.request.groups.len() * 32);
-    b.extend_from_slice(b"VBDR0001");
+    b.extend_from_slice(if record.plan.is_some() {
+        b"VBDR0002"
+    } else {
+        b"VBDR0001"
+    });
     b.extend_from_slice(&record.sequence.to_be_bytes());
     b.extend_from_slice(&record.owner.node.get().to_be_bytes());
     b.extend_from_slice(&record.owner.store.id.get().to_be_bytes());
@@ -57,6 +61,9 @@ pub(super) fn encode(record: &DrainRecord) -> Vec<u8> {
         b.extend_from_slice(&group.group.incarnation.get().to_be_bytes());
         b.extend_from_slice(&group.configuration.get().to_be_bytes());
     }
+    if let Some(plan) = record.plan {
+        b.extend_from_slice(plan.as_bytes());
+    }
     let sum = digest(&SHA256, &b);
     b.extend_from_slice(sum.as_ref());
     b
@@ -65,7 +72,7 @@ pub(super) fn decode(b: &[u8]) -> Result<DrainRecord, DrainJournalError> {
     let invalid = DrainJournalError::InvalidRecord;
     if b.len() < 112
         || b.len() > MAX_DRAIN_RECORD_BYTES
-        || &b[..8] != b"VBDR0001"
+        || (&b[..8] != b"VBDR0001" && &b[..8] != b"VBDR0002")
         || b[65..72] != [0; 7]
         || digest(&SHA256, &b[..b.len() - 32]).as_ref() != &b[b.len() - 32..]
     {
@@ -74,7 +81,9 @@ pub(super) fn decode(b: &[u8]) -> Result<DrainRecord, DrainJournalError> {
     let u64_at = |i| u64::from_be_bytes(b[i..i + 8].try_into().unwrap());
     let u128_at = |i| u128::from_be_bytes(b[i..i + 16].try_into().unwrap());
     let count = usize::try_from(u64_at(72)).map_err(|_| invalid)?;
-    if count > crate::runtime::MAX_LOCAL_DRAIN_GROUPS || b.len() != 112 + count * 32 {
+    let has_plan = &b[..8] == b"VBDR0002";
+    let extra = if has_plan { 32 } else { 0 };
+    if count > crate::runtime::MAX_LOCAL_DRAIN_GROUPS || b.len() != 112 + count * 32 + extra {
         return Err(invalid);
     }
     let mut groups = Vec::with_capacity(count);
@@ -106,6 +115,9 @@ pub(super) fn decode(b: &[u8]) -> Result<DrainRecord, DrainJournalError> {
             2 => DrainPhase::Cancelled,
             _ => return Err(invalid),
         },
+        plan: has_plan.then(|| {
+            DrainPlanDigest::from_bytes(b[80 + count * 32..112 + count * 32].try_into().unwrap())
+        }),
     };
     r.validate()?;
     Ok(r)
