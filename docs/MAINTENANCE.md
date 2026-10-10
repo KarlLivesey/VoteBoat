@@ -310,3 +310,35 @@ configuration. Re-enrollment is a separate, explicitly authorized operation.
 Selected TCP/WAL and QUIC/checkpoint tests cover missing-quorum acceptance,
 lost replies, leader restart, exact membership recovery and stale-source
 admission refusal. Multi-group orchestration and arbitrary faults remain open.
+
+## Bounded multi-group Rust driver
+
+`MembershipDrainCoordinator::new(plan, in_flight_limit)` owns the original
+multi-group plan and a rotating scan cursor. Call `poll(journal, scan_budget,
+observe)` with fresh Raft views from the host's current group leaders. Missing
+views are skipped; per-group errors are returned alongside independent requests.
+The plan remains limited to1024 groups and4MiB; scan budgets are1–1024 and the
+in-flight limit is1–group count. There is at most one outstanding dispatch per
+group. Polling performs no I/O or background work and creates no runtime.
+
+Each request contains the original transfer/configuration action and an opaque
+`DrainDispatchTicket`. Retain that ticket alongside the ordinary Node request
+or transfer context. After rejection or the end of that wait, call `finish` to
+release the slot. Duplicate, foreign and pre-restart tickets are rejected.
+Finishing a ticket proves neither commit nor rollback. An unknown configuration
+result requires a fresh core observation before the next original-ID attempt.
+Transfer deadlines and cancellation remain the host's responsibility through
+the existing transfer context; an expired wait does not undo a delivered signal.
+
+The host still supplies readiness, execution-time placement authorization,
+normal Node polling, bounded completion processing and cleanup. Dropping the
+coordinator does not cancel accepted work. On restart, recover the original
+plan and journal, restore the source gate before polling Nodes, construct a new
+coordinator and observe committed state again. Do not count old completions.
+
+`observed_complete` counts only this scan. It is never an aggregate stop
+certificate. Use the source's `Node::membership_drain_ready` with that original
+plan and journal for the local stop check. The native shared-WAL tests exercise
+three groups with different handoff leaders, incomplete joint progress, lost
+waits and restart over TCP/QUIC. This Rust dispatcher does not add multi-group
+commands to the single-group executable or certify remote availability.

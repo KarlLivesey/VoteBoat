@@ -189,6 +189,7 @@ fn recover_groups(
     bootstraps: &[Bootstrap],
     capacity: usize,
     log: &SharedLog,
+    member: bool,
 ) -> Result<RecoveredGroups, Failure> {
     let mut cores = Vec::new();
     let mut applications = BTreeMap::new();
@@ -216,16 +217,18 @@ fn recover_groups(
             )?
         };
         let mut app = checked(Counter::new(capacity))?;
-        cores.push(
-            checked(recover_replica(
-                node(n),
-                bootstrap.group,
-                log,
-                &mut snap,
-                &mut app,
-            ))?
-            .0,
-        );
+        let core = checked(if member {
+            recover_member_replica(node(n), bootstrap.group, log, &mut snap, &mut app)
+        } else {
+            recover_replica(node(n), bootstrap.group, log, &mut snap, &mut app)
+        })?
+        .0;
+        cores.push(if member {
+            core.with_committed_snapshot_repair()
+                .with_configuration_replication()
+        } else {
+            core
+        });
         applications.insert(bootstrap.group, app);
         snapshots.insert(bootstrap.group, snap);
     }
@@ -329,7 +332,7 @@ fn connector(
     local: LocalIdentity,
     remote: &BTreeMap<NodeId, StoreIdentity>,
     addresses: &BTreeMap<u64, std::net::SocketAddr>,
-    protocol: NativePeerProtocol,
+    profile: (NativePeerProtocol, NativeTlsConfig),
     wake: Arc<dyn WorkerWake>,
     now: MonoTime,
 ) -> Result<NativeServiceConnector, Failure> {
@@ -354,6 +357,7 @@ fn connector(
         limits: ConnectLimits::default(),
         session: SessionLimits::default(),
     };
+    let (protocol, tls) = profile;
     let connector = match protocol {
         NativePeerProtocol::TcpTls => {
             let dialer = checked(NativeTcpDialer::spawn(
@@ -364,7 +368,7 @@ fn connector(
             ))?;
             NativeServiceConnector::Tcp(Box::new(checked(NativePeerConnector::new(
                 config,
-                tls(n),
+                tls,
                 pins,
                 dialer,
                 Some(TcpListener::bind(addresses[&n])?),
@@ -375,7 +379,7 @@ fn connector(
         NativePeerProtocol::Quic => NativeServiceConnector::Quic(Box::new(checked(
             voteboat::native::quic_connect::NativeQuicConnector::new(
                 config,
-                tls(n),
+                tls,
                 pins.into_iter()
                     .map(|(p, pin)| (p, (addresses[&p.get()], pin)))
                     .collect(),
@@ -405,6 +409,14 @@ impl ClusterSetup<'_> {
         n: u64,
         recovery: Option<SnapshotRecoveryLimits>,
     ) -> Result<(Replica<SharedLog>, Trace), Failure> {
+        self.open_profile(n, recovery, false)
+    }
+    fn open_profile(
+        &self,
+        n: u64,
+        recovery: Option<SnapshotRecoveryLimits>,
+        member: bool,
+    ) -> Result<(Replica<SharedLog>, Trace), Failure> {
         let Self {
             root,
             mode,
@@ -424,7 +436,7 @@ impl ClusterSetup<'_> {
             cores,
             applications,
             snapshots,
-        } = recover_groups(&directory, n, create, bootstraps, capacity, &log)?;
+        } = recover_groups(&directory, n, create, bootstraps, capacity, &log, member)?;
         let owner_id = RuntimeOwner {
             store: log.binding(),
             lane: ExecutionLaneId::new(lane).ok_or("invalid lane identity")?,
@@ -449,17 +461,15 @@ impl ClusterSetup<'_> {
         .peers()
         .collect::<BTreeMap<_, _>>();
         let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock)?;
-        let (outbound, roster) = peer_io(local, first, last, &remote, now)?;
+        let (version, codec) = wire_profile(member)?;
+        let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
         let Routers {
             ingress,
             results,
             clients,
             reads,
         } = application_routers(owner_id, local)?;
-        let factory = checked(NativeTransportFactory::new(
-            checked(NativeWireCodec::new(Default::default()))?,
-            Default::default(),
-        ))?;
+        let factory = checked(NativeTransportFactory::new(codec, Default::default()))?;
         let wake: Arc<dyn WorkerWake> = Arc::new(ThreadWake::current());
         let mut workers = spawn_workers(log, timed, snapshots, owner_id, wake.clone())?;
         workers.limit_recovery(recovery)?;
@@ -468,7 +478,8 @@ impl ClusterSetup<'_> {
             persistence,
             snapshots: snapshot_workers,
         } = workers;
-        let connector = connector(n, local, &remote, addresses, protocol, wake, now)?;
+        let profile = (protocol, checked(tls(n).with_wire_version(version))?);
+        let connector = connector(n, local, &remote, addresses, profile, wake, now)?;
         let parts = NodeParts {
             local: NodeLocalParts {
                 owner,
@@ -512,6 +523,16 @@ struct Workers {
     owner: EffectOwner<FairScheduler, DeadlineQueue, JitterEntropy>,
     persistence: NativeLogWorker<SharedLog>,
     snapshots: NodeSnapshots<NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>>,
+}
+fn wire_profile(member: bool) -> Result<(u16, NativeWireCodec), Failure> {
+    if member {
+        Ok((
+            8,
+            checked(NativeWireCodec::with_leadership_transfer(Default::default()))?,
+        ))
+    } else {
+        Ok((1, checked(NativeWireCodec::new(Default::default()))?))
+    }
 }
 impl Workers {
     fn limit_recovery(&mut self, limits: Option<SnapshotRecoveryLimits>) -> Result<(), Failure> {
@@ -571,6 +592,7 @@ fn peer_io(
     last: u64,
     remote: &BTreeMap<NodeId, StoreIdentity>,
     now: MonoTime,
+    version: u16,
 ) -> Result<(NativeOutbound, BenchmarkRoster), Failure> {
     let outbound = checked(NativeOutbound::new(
         OutboundBinding {
@@ -586,7 +608,7 @@ fn peer_io(
             outbound: outbound.binding(),
             first_generation: SecureSessionGeneration::new(first).ok_or("session exhausted")?,
             last_generation: SecureSessionGeneration::new(last).ok_or("session exhausted")?,
-            wire_version: 1,
+            wire_version: version,
             limits: PeerRosterLimits::default(),
             transport_limits: TransportLimits::default(),
         },
@@ -598,6 +620,9 @@ fn peer_io(
 
 type BenchmarkRoster = PeerRoster<NativePeerTransport<Box<dyn SecureSession>, NativeWireCodec>>;
 
+#[cfg(test)]
+#[path = "shared_drain.rs"]
+mod drain;
 #[cfg(test)]
 #[path = "shared_recovery.rs"]
 mod recovery;

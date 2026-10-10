@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.50s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+test shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress ... FAILED
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... FAILED
+
+failures:
+
+---- shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress stdout ----
+
+thread 'shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress' (231528) panicked at examples/benchmark/shared_drain.rs:336:17:
+ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(3), incarnation: GroupIncarnation(1) }, sequence: 2 }, operation: OperationId(203) }, outcome: Unknown(LeadershipChanged) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress stdout ----
+
+thread 'shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress' (231529) panicked at examples/benchmark/shared_drain.rs:336:17:
+ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(3), incarnation: GroupIncarnation(1) }, sequence: 2 }, operation: OperationId(203) }, outcome: Unknown(LeadershipChanged) }
+
+
+failures:
+    shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress
+    shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 28 filtered out; finished in 14.57s
+
+error: test failed, to rerun pass `--example native_benchmark`

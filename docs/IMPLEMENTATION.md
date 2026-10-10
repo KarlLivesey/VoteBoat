@@ -129,9 +129,81 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
 | Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
 | Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
-| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Slice197b2e covers explicit final learner removal after source shutdown, accepted-but-uncommitted recovery and stale-source gating. Automatic multi-group orchestration and broader replacement/retirement faults remain explicit scope. |
+| Completed197b2b2: executable membership-aware single-group drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Slice197b2e covers explicit final learner removal after source shutdown, accepted-but-uncommitted recovery and stale-source gating. |
+| Completed197b3: bounded multi-group Rust dispatcher | Advance independent membership evacuations fairly while retaining original identities; advances P4/P2 and chapter09. |197b2b1 immutable plan, journal, ordinary Node configuration ownership and native shared-WAL assembly. | Bounded scan/in-flight slots, stale ticket refusal, per-group errors, native TCP/QUIC mixed completed/joint/unstarted recovery and surviving writes/retries. Broader failures remain open. |
+| Current197b4: mixed-role and operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b3 dispatcher, retained-group drain path, exact assignment inventory and existing authenticated operator contracts. | Cover voter and learner-only source assignments together, preserve original plan through partial progress/restart, expose bounded operator start/status/resume/stop with no premature source stop. This remains planned work; the counter executable is still single-group. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b3 schema plan — bounded multi-group drain dispatcher
+
+The public MembershipDrainPlan already decides each group's safe next step;
+hosts still have to coordinate independent groups, suppress duplicate in-flight
+requests and fairly revisit unavailable groups. Add a host-driven coordinator
+owning the immutable bounded plan, a rotating cursor and at most one dispatch
+per group with a configured global in-flight ceiling. Each poll scans a bounded
+number of groups, asks the host for the currently observed core and emits only
+the original transfer/configuration actions. Missing or changed groups do not
+prevent independent groups advancing. Per-group errors remain explicit.
+
+Dispatch tickets have an opaque instance identity plus a checked sequence.
+Finishing an exact ticket only releases dispatch ownership; it never certifies
+commit or rollback. The host owns ordinary Node configuration tickets, control
+delivery, readiness, authorization and cancellation of waits. Dropping/restarting
+the coordinator cannot undo accepted work. A fresh coordinator reloads the same
+plan and verified journal, rejects old-instance completions, and re-observes
+committed cores before emitting further work. Existing source Node readiness
+remains the only aggregate local stop gate; cached dispatch observations are not
+global health or a completion certificate. No new durable record or Raft path.
+
+Acceptance: deterministic tests cover scan/in-flight bounds, round-robin progress,
+foreign/duplicate/old-instance tickets and per-group refusal without loss of
+other dispatches. Native TCP/QUIC shared-WAL nodes host three groups with distinct
+handoff leaders. Hold one group unavailable and another at committed joint while
+the first finishes; the source must not become ready. Restart from these mixed
+states and the original journal, finish all groups, then verify gated source
+shutdown and surviving writes/retries. The benchmark's existing shared native
+assembly gains an explicit member-test profile; normal benchmark defaults stay
+static. Multi-group executable administration, mixed learner-only source groups,
+and broad fault/platform gates remain explicit follow-up scope.
+
+### Slice197b3 implementation evidence
+
+Added public `MembershipDrainCoordinator`, `DrainDispatchTicket` and bounded
+result batches over the existing immutable plan and journal. The coordinator
+performs no I/O, caches no aggregate completion and creates no runtime. Exact
+instance-scoped tickets release dispatch slots only; fresh core state still
+decides every next action. A full window pauses the scan cursor so repeated
+completion of early groups cannot starve later groups. Per-group errors retain
+independent requests in the same returned batch.
+
+The native shared-WAL assembly has an explicit member profile selecting wire8,
+configuration replication and committed snapshot repair together. Static
+benchmark defaults remain unchanged. Three actual groups per node reach a mixed
+state: one final, one untouched and one committed joint, with different planned
+handoff leaders. The source refuses readiness there. Restart from WAL (TCP) or
+checkpoints (QUIC) with the original journal rejects an old dispatcher ticket,
+resumes the original operations and finishes all groups. Only then is the source
+drained/joined, after which the two remaining voters preserve old retries and
+accept new writes.
+
+Initial native failures are retained: the driver wrongly treated leadership
+change as a terminal error, then the shared assembly omitted the explicit
+configuration-replication capability and followers refused joint records.
+The fixes follow the existing unknown-result and member-startup contracts;
+no consensus gate was weakened. The deterministic fairness check also verifies
+that the next freed slot reaches the later group. See
+[slice197b3 evidence](../validation/baseline/slice197b3/README.md).
+All30 native benchmark assembly tests,29 minimal-profile Raft tests,11 native
+journal tests and six membership-plan tests pass. The two final native histories
+also check exact operation IDs and returned counter values. Formatting and all
+three strict Clippy profiles remain at zero diagnostics;104 inventory metadata
+and conformance-path checks pass.
+
+Macro review: multi-group Rust coordination now composes the existing safety
+checks. Mixed voter/learner-only assignments, multi-group executable controls,
+broader fault schedules and platform validation remain197/199 work. The full
+P0–P7 goal and remaining roadmap have not been reduced.
 
 ### Slice197b2e schema plan — final learner retirement after drain
 

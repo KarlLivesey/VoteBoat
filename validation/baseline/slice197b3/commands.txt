@@ -1,0 +1,12 @@
+# Run from repository root; native histories require authorized local sockets.
+cargo +stable test --locked --offline --no-default-features --test raft --test drain_membership --test drain_journal
+cargo +stable test --locked --offline --all-features --test drain_journal --test drain_membership
+cargo +stable test --locked --offline --all-features --example native_benchmark
+# After strengthening the exact receipt/value assertions:
+cargo +stable test --locked --offline --all-features --example native_benchmark shared::drain::
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# Enabled pre-push hook repeats formatting and all three strict Clippy profiles.

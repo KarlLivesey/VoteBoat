@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.50s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... FAILED
+test shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress ... FAILED
+
+failures:
+
+---- shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress stdout ----
+
+thread 'shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress' (247409) panicked at examples/benchmark/shared_drain.rs:450:9:
+mixed drain state timeout: /tmp/voteboat-multi-drain-247407-TcpTls-1791612960870491979
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress stdout ----
+
+thread 'shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress' (247408) panicked at examples/benchmark/shared_drain.rs:450:9:
+mixed drain state timeout: /tmp/voteboat-multi-drain-247407-Quic-1791612960870492580
+
+
+failures:
+    shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress
+    shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 28 filtered out; finished in 20.09s
+
+error: test failed, to rerun pass `--example native_benchmark`

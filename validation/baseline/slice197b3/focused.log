@@ -1,0 +1,10 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... ok
+test shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 17.76s

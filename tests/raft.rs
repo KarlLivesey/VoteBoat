@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 #[path = "raft/campaigning.rs"]
 mod campaigning;
+#[path = "raft/drain_coordinator.rs"]
+mod drain_coordinator;
 #[path = "raft/leadership.rs"]
 mod leadership;
 mod support;

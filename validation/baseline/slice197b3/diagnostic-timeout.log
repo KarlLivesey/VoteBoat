@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.87s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 1 test
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... FAILED
+
+failures:
+
+---- shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress stdout ----
+
+thread 'shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress' (254097) panicked at examples/benchmark/shared_drain.rs:471:9:
+mixed drain state timeout: /tmp/voteboat-multi-drain-254096-TcpTls-1791612989146935033, progress: [(0, [(1, Follower, 1, 0, 5), (2, Leader, 1, 0, 2), (3, Follower, 1, 0, 5)]), (1, [(1, Leader, 2, 6, 5), (2, Follower, 1, 0, 2), (3, Leader, 2, 6, 5)]), (2, [(1, Follower, 1, 0, 5), (2, Follower, 1, 0, 2), (3, Follower, 1, 0, 5)])], pending: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 29 filtered out; finished in 20.05s
+
+error: test failed, to rerun pass `--example native_benchmark`

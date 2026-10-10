@@ -7,6 +7,8 @@ use crate::{
 };
 mod membership;
 pub use membership::*;
+mod coordinator;
+pub use coordinator::*;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum DrainPhase {
