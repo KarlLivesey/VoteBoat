@@ -1,0 +1,2 @@
+1526695   29764    01:35:36  0.0 S<sl /home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo test --locked --offline --all-features --no-fail-fast
+1580417 1526695    01:33:39 22.9 S<l  /home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/routed-e306d78cde05e11d

@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running tests/transfer_operation.rs (target/debug/deps/transfer_operation-11004d1355ae88bd)
+
+running 6 tests
+test export_requires_exact_image_and_duplicate_images_are_rejected ... ok
+test observations_reject_failed_wrong_type_wrong_group_and_out_of_prefix_values ... ok
+test published_provenance_is_preserved_when_current_source_configuration_changes ... ok
+test initial_progress_is_ordered_and_a_fence_never_substitutes_for_staging ... ok
+test only_matching_recorded_activations_finish_the_original_operation ... ok
+test missing_prerequisites_and_changed_operation_or_configurations_fail_closed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

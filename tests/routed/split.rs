@@ -232,131 +232,9 @@ impl Split {
             targets,
         }
     }
-    // Every invocation starts from durable quorum observations. No volatile
-    // phase or previous client receipt participates in this decision.
+    // Exercise the public operator, not a second test-only decision machine.
     fn resume_one(&mut self) -> Phase {
-        let state = self.observed();
-        if state.intent.is_none() {
-            campaign(&mut self.parent, &self.clock, 1);
-            let _ = propose_recovering(
-                &mut self.parent,
-                &self.clock,
-                1,
-                200,
-                source_fixture::intent().encode(32768).unwrap(),
-            );
-            return Phase::Intent;
-        }
-        assert_eq!(
-            state.intent.as_ref().unwrap().intent,
-            source_fixture::intent()
-        );
-        for i in 0..2 {
-            if state.targets[i].staged_index.is_none() {
-                let g = 21 + i as u128;
-                let bytes = self.targets[i][0].local().applications[&group(g)]
-                    .bootstrap_command(65536)
-                    .unwrap();
-                campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
-                return Phase::Stage(g);
-            }
-        }
-        if state.source.is_none() {
-            campaign(&mut self.source, &self.clock, 20);
-            let _ = propose_recovering(
-                &mut self.source,
-                &self.clock,
-                20,
-                200,
-                source_fixture::freeze(),
-            );
-            return Phase::Fence;
-        }
-        let source_configuration = self.source[0]
-            .local()
-            .owner
-            .core(group(20))
-            .unwrap()
-            .membership()
-            .id();
-        for i in 0..2 {
-            if state.targets[i].imported.is_none() {
-                let g = 21 + i as u128;
-                let import = target_fixture::from_source(
-                    &self.source[0].local().applications[&group(20)],
-                    g,
-                    source_configuration,
-                );
-                let bytes = self.targets[i][0].local().applications[&group(g)]
-                    .import_command(&import, 65536)
-                    .unwrap();
-                campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
-                return Phase::Import(g);
-            }
-        }
-        if state.publication.is_none() {
-            return self.publish(state, source_configuration);
-        }
-        for i in 0..2 {
-            if state.targets[i].activated.is_none() {
-                let g = 21 + i as u128;
-                let activation = TargetActivation {
-                    metadata_configuration: self.parent[0]
-                        .local()
-                        .owner
-                        .core(group(1))
-                        .unwrap()
-                        .membership()
-                        .id(),
-                    decision: state.publication.clone().unwrap(),
-                };
-                let bytes = self.targets[i][0].local().applications[&group(g)]
-                    .activation_command(&activation, 65536)
-                    .unwrap();
-                campaign(&mut self.targets[i], &self.clock, g);
-                let _ = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
-                return Phase::Activate(g);
-            }
-        }
-        Phase::Done
-    }
-    fn publish(&mut self, state: Observed, source_configuration: ConfigurationId) -> Phase {
-        let source = SourceFenceEvidence::from_status(source_configuration, state.source.unwrap())
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-        let targets = state
-            .targets
-            .into_iter()
-            .enumerate()
-            .map(|(i, t)| {
-                let configuration = self.targets[i][0]
-                    .local()
-                    .owner
-                    .core(group(21 + i as u128))
-                    .unwrap()
-                    .membership()
-                    .id();
-                TargetReadyEvidence::from_status(configuration, t)
-                    .unwrap_or_else(|e| panic!("{:?}", e.0))
-            })
-            .collect();
-        let publication = TransferPublication::new(
-            OperationId::new(200).unwrap(),
-            source_fixture::intent(),
-            vec![source],
-            targets,
-        )
-        .unwrap_or_else(|e| panic!("{:?}", e.0));
-        campaign(&mut self.parent, &self.clock, 1);
-        let _ = propose_recovering(
-            &mut self.parent,
-            &self.clock,
-            1,
-            201,
-            publication.encode(65536).unwrap(),
-        );
-        Phase::Publish
+        operator::resume_one(self)
     }
     fn close_all(&mut self) {
         if self.checkpoint {
@@ -467,6 +345,8 @@ impl Split {
 
 #[path = "split_membership.rs"]
 mod membership;
+#[path = "split_operator.rs"]
+mod operator;
 #[path = "repeat.rs"]
 mod repeat;
 fn hint(key: u8) -> RouteHint {

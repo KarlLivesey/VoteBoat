@@ -119,7 +119,8 @@ strict profiles clean while advancing the remaining capability work.
 | Completed191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
 | Completed192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | R01–R19, operator surface and existing roadmap/catalogue ledgers reconciled;32 fresh quorum/activation/Raft tests pass. Current full-suite/platform and P7 performance remain unclosed. |
 | Completed193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
-| Current194: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through the same explicit operation identity; advances P6 operator support. |193 preview plus current source-fence/import/publication/activation/retirement contracts and authorization. | Exercise an actual operator-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the schema before implementation, retaining any unsupported profile explicitly. |
+| Completed194a: public transfer decisions | Reuse the existing recovery sequence in Rust hosts and the future command executor; advances P6 operator support. |193 preview, completed Node reads, source-fence/import/publication/activation contracts. | Six new decision tests and four native TCP/QUIC WAL/checkpoint phase histories pass; original IDs, ownership, data, retry/outbox and published configuration provenance remain checked. |
+| Current194b: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through authenticated commands with the same explicit operation identity; advances P6 operator support. |194a public decisions, actual source/target applications, current authorization and bounded service ownership. | Exercise an actual command-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the endpoint schema before implementation, retaining any unsupported profile explicitly. |
 | Next195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
 | Following196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
 
@@ -160,6 +161,68 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice194a implemented evidence — public recoverable transfer decisions
+
+Previous implementation turn193 was progress:ea882b1 added the bounded preview.
+This slice adds TransferOperation over the original checked intent and distinct
+lifecycle/publication IDs. Completed Node reads retain exact barrier identity,
+configuration and prefix. The pure next action reuses existing phase guards;
+unknown/missing/contradictory evidence cannot authorize progress. No runtime,
+storage owner, background worker, format or durability rule changed.
+
+The native split host now executes this public component instead of its private
+decision recipe. All four TCP/QUIC WAL/checkpoint histories pass in97.32s, with
+all nine phase reopens, exclusive serving, original retries/outbox and independent
+child writes. This is graceful phase recovery, not arbitrary power-loss coverage.
+All four existing joint-membership/unread-result abort histories also pass
+through the public operator in40.03s, retaining configuration2 import provenance
+after source finalization and recovery as configuration3.
+Six new finite adversarial operator tests and23 existing source/target/publication
+tests pass without defaults. Formatting, strict all-target Clippy for all/default/
+no-default features, warning-denied docs and97-record inventory checks pass.
+Logs, commands and source hashes are under validation/baseline/slice194a.
+
+Before publication, changed source configuration after import is explicitly
+inconsistent; no imported provenance is rewritten. After publication, its original
+proof remains even if current reads show another configuration. Complete records
+original activation, not current serving permission. The executable authenticated
+start/status/resume integration remains194b; broader195 fault cuts, maintenance,
+current platform/full-suite evidence and original P7 gate remain open.
+At capture the older baseline175 cargo/routed processes remain live, and CI
+38026128600 at ea882b1 is pending; neither is current-source full-suite evidence.
+
+### Slice194a schema plan — public recoverable transfer decisions
+
+The native tests contain the full resumption recipe but executable operators
+would otherwise reimplement it. Promote the checked decision path into a public
+TransferOperation over the exact original intent/lifecycle/publication IDs.
+This is the first part of194, not completion of its endpoint/execution deliverable.
+Keep194b (authenticated start/status/resume integration) next and195's fault cuts
+following it; the P6 macro milestone and original acceptance remain unchanged.
+
+Inputs are bounded observations built from successful completed quorum read
+outcomes: directory intent/publication, source fence and target status. Preserve
+the read barrier's group/configuration/index instead of reading a potentially
+changed bootstrap or live configuration afterward. Unknown/failed reads are not
+absence. The deterministic next action is intent, stage, fence, immutable export,
+import, publication, activation or historical completion. Contradictory/later
+phase evidence without its prerequisites fails closed and requires fresh reads.
+Original operation IDs and all durable proof checks remain in their current apps.
+
+The operation owns only bounded intent metadata; it creates no runtime, store,
+background work or durability token. One action may own a bounded import image;
+dropping it cancels no submitted work. After an unknown proposal outcome or
+restart, reconstruct the same plan and re-read statuses. Existing publication
+retains original configuration provenance; later configuration reads cannot
+rewrite it. Caller authorization, provider selection and encoding against the
+actual source/target guard are still required. No timeout means unfreeze.
+
+Acceptance: negative tests for failed/missing/wrong-scope/contradictory reads,
+wrong operation/image/configuration; native TCP/QUIC operator-driven split phases,
+lost observations and WAL/checkpoint resumption with old source fenced and retries
+preserved. The native test must execute the public decisions, not a copied test
+state machine. Keep the command endpoint unfinished until it actually exists.
 
 ### Slice193 implementation and acceptance record
 

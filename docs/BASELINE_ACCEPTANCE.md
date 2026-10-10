@@ -95,8 +95,8 @@ not a complete operator workflow.
 | add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
 | change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
 | split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
-| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts; real native histories. | Complete operator entry point joining these existing stages. Current194. |
-| resume-operation | Node::resume_configuration plus lifecycle status/query and exact original receipts. | General operator lifecycle resumption workflow; membership resumption already exists. |
+| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts;194a public TransferOperation drives real native phase/restart histories. | Complete authenticated command entry point joining these existing stages. Current194b. |
+| resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194a restartable transfer decisions. | Authenticated executable lifecycle resumption workflow; membership resumption already exists. |
 | retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
 
 Mutations must retain durable operation IDs and generation/authorization checks.
@@ -203,8 +203,8 @@ a passing test count.
 
 ## Next implementation decisions
 
-1. Slice193 implements read-only split preview; next connect the existing
-   durable lifecycle stages to explicit operator start/status/resumption. Reuse
+1. Slice193 implements read-only split preview and194a public restartable transfer
+   decisions; next connect these to authenticated operator start/status/resumption. Reuse
    the current contracts; do not create another consensus or ownership engine.
    Leadership transfer, coordinated node drain and the assignment-list command
    remain separate required operator work; public assignment iteration exists.

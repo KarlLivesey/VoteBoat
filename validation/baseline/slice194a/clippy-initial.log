@@ -1,0 +1,12 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: redundant closure
+  --> tests/transfer_operation.rs:35:40
+   |
+35 |                 entries: (1..=100).map(|index| source_fixture::noop(index)).collect(),
+   |                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace the closure with the function itself: `source_fixture::noop`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#redundant_closure
+   = note: `-D clippy::redundant-closure` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::redundant_closure)]`
+
+error: could not compile `voteboat` (test "transfer_operation") due to 1 previous error

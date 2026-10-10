@@ -1,0 +1,10 @@
+cargo +stable test --locked --offline --no-default-features --test transfer_operation
+cargo +stable test --locked --offline --no-default-features --test transfer_operation --test transfer_publication --test transfer_target --test transfer_source
+cargo +stable test --locked --offline --all-features --test routed split_resumes_every_phase -- --nocapture
+cargo +stable test --locked --offline --all-features --test routed split_fence_survives_joint -- --nocapture
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --no-deps --all-features
+node validation/check-inventory.mjs

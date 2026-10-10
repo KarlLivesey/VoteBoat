@@ -22,6 +22,8 @@ mod remaining;
 pub use insertion::InsertionChild;
 pub(crate) use insertion::{insertion_len, put_insertion, read_insertion};
 pub use preview::*;
+mod operation;
+pub use operation::*;
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;

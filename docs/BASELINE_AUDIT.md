@@ -1,9 +1,19 @@
 # Baseline audits
 
-Latest implementation: [slice193](#slice193--transfer-preview).
+Latest implementation: [slice194a](#slice194a--public-transfer-decisions).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice194a — public transfer decisions
+
+TransferOperation derives one checked next phase from completed Node reads and
+original operation IDs, without an I/O owner or durable phase counter. The native
+split recovery host now executes this public API. Six adversarial decision tests
+and eight TCP/QUIC WAL/checkpoint phase and joint-membership histories pass; existing ownership, data,
+retry and outbox checks remain. See validation/baseline/slice194a. Authenticated
+executable start/status/resume remains194b; the full baseline and original P7
+performance/validation obligations are unchanged.
 
 ## Slice193 — transfer preview
 

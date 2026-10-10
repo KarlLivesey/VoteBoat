@@ -1,0 +1,35 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/routed.rs (target/debug/deps/routed-b3f067cf63083bd0)
+
+running 4 tests
+joint_split protocol=Quic checkpoint=true phase=joint
+joint_split protocol=Quic checkpoint=true phase=fenced
+joint_split protocol=Quic checkpoint=true phase=joint_recovered
+joint_split protocol=Quic checkpoint=true phase=targets_active
+joint_split protocol=Quic checkpoint=true phase=final_recovered
+joint_split protocol=Quic checkpoint=true phase=children_recovered
+test native::split::membership::quic_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+joint_split protocol=Quic checkpoint=false phase=joint
+joint_split protocol=Quic checkpoint=false phase=fenced
+joint_split protocol=Quic checkpoint=false phase=joint_recovered
+joint_split protocol=Quic checkpoint=false phase=targets_active
+joint_split protocol=Quic checkpoint=false phase=final_recovered
+joint_split protocol=Quic checkpoint=false phase=children_recovered
+test native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+joint_split protocol=TcpTls checkpoint=false phase=joint
+joint_split protocol=TcpTls checkpoint=false phase=fenced
+joint_split protocol=TcpTls checkpoint=false phase=joint_recovered
+joint_split protocol=TcpTls checkpoint=false phase=targets_active
+joint_split protocol=TcpTls checkpoint=false phase=final_recovered
+joint_split protocol=TcpTls checkpoint=false phase=children_recovered
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+joint_split protocol=TcpTls checkpoint=true phase=joint
+joint_split protocol=TcpTls checkpoint=true phase=fenced
+joint_split protocol=TcpTls checkpoint=true phase=joint_recovered
+joint_split protocol=TcpTls checkpoint=true phase=targets_active
+joint_split protocol=TcpTls checkpoint=true phase=final_recovered
+joint_split protocol=TcpTls checkpoint=true phase=children_recovered
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 155 filtered out; finished in 40.03s
+

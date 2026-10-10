@@ -19,8 +19,9 @@ An authenticated trusted embedding host can resume from quorum-readable state:
 | Publication retained, a target inactive | Verify the original directory decision against that target's local import and commit activation. |
 | All required targets activated | Serve those disjoint scopes under their new epoch; retain original lineage and old-source fence. |
 
-This is a composition recipe, not a newly implemented autonomous coordinator,
-operator endpoint or cryptographic certificate scheme. The host authenticates the
+`transfer::TransferOperation` implements this decision sequence as a pure Rust
+component. It does not own a coordinator, operator endpoint or cryptographic
+certificate scheme. The host authenticates the
 actual observing group/configuration and obtains fresh quorum barriers. A timeout
 is an unknown result and never evidence that an intent/fence/import/publication/
 activation is absent. A local diagnostic or serializable record is insufficient.
@@ -35,10 +36,47 @@ of image hashes. After fencing, complete the transfer forward; no unfreeze path 
 provided. A partially activated split may serve one target while the other pauses.
 Ordinary active target writes and reads require no parent/source access.
 
+## Public decision API
+
+Construct `TransferOperation::new(intent, lifecycle_id, publication_id)` using
+the original distinct operation IDs. Its `reads()` lists every required group
+and query kind. Build `TransferObservation` values from successful results of
+`Node::complete_read`, using `intent_read`, `publication_read`, `source_read` and
+`target_read`. Other source guards have `target_source_read` and
+`scoped_source_read`; their broader combined histories remain separate evidence.
+The observation preserves the completed barrier's group, configuration and
+contiguous committed index. It is not a serializable certificate or a cached
+permission to act later.
+
+Call `next(&observations, &images)` to obtain one `TransferAction`. Encode the
+action through the actual source/target guard and submit it through the ordinary
+authorized Node API. `Export` identifies an immutable scope, fence and digest;
+provide its exact `ScopeImage` in the next call to obtain `Import`. The helper
+checks source/configuration/intent lineage, phase prerequisites and imported
+evidence before suggesting publication or activation. It never mutates storage
+or supplies an independent durability token.
+
+Discard observations after each action, unknown outcome or restart. Reconstruct
+the plan with the same intent and IDs and obtain fresh reads. Missing, failed or
+contradictory observations stop the decision; they cannot become evidence of
+absence. Before publication, changing a source configuration after import is
+reported as inconsistent and requires explicit resolution: this helper does not
+rewrite imported provenance. After publication, its original source
+configurations are preserved even if a subsequent read sees a newer one.
+
+`Complete` means all original activations were recorded. It grants no current
+serving rights after another transfer. Current owner checks still apply. Inline
+imports retain the existing 8 MiB command bound; at most 512 supplied image
+references are considered. The caller owns I/O, authentication, refresh,
+proposal lifetimes, resource reservations and shutdown. There is no background
+work to cancel by dropping the plan. The authenticated executable start/status/
+resume commands remain the next integration step.
+
 ## Selected native recovery ledger
 
 `tests/routed/split.rs` composes real three-replica metadata, source and two target
-groups. Its test host reconstructs the next action from fresh quorum observations
+groups. Its test host executes the public `TransferOperation` decisions from
+fresh completed Node quorum observations (`tests/routed/split_operator.rs`)
 on every invocation and discards action receipts. Expected retained statuses are
 comparison oracles only; they do not drive resumption.
 

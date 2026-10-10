@@ -1,0 +1,51 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.50s
+     Running tests/routed.rs (target/debug/deps/routed-b3f067cf63083bd0)
+
+running 4 tests
+split Quic checkpoint=false phase=Intent
+split Quic checkpoint=false phase=Stage(21)
+split Quic checkpoint=false phase=Stage(22)
+split Quic checkpoint=false phase=Fence
+split Quic checkpoint=false phase=Import(21)
+split Quic checkpoint=false phase=Import(22)
+split Quic checkpoint=false phase=Publish
+split Quic checkpoint=false phase=Activate(21)
+split Quic checkpoint=false phase=Activate(22)
+test native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+split Quic checkpoint=true phase=Intent
+split Quic checkpoint=true phase=Stage(21)
+test native::split::quic_split_resumes_every_phase_from_checkpoint_status_without_dual_owners has been running for over 60 seconds
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners has been running for over 60 seconds
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners has been running for over 60 seconds
+split Quic checkpoint=true phase=Stage(22)
+split Quic checkpoint=true phase=Fence
+split Quic checkpoint=true phase=Import(21)
+split Quic checkpoint=true phase=Import(22)
+split Quic checkpoint=true phase=Publish
+split Quic checkpoint=true phase=Activate(21)
+split Quic checkpoint=true phase=Activate(22)
+test native::split::quic_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+split TcpTls checkpoint=true phase=Intent
+split TcpTls checkpoint=true phase=Stage(21)
+split TcpTls checkpoint=true phase=Stage(22)
+split TcpTls checkpoint=true phase=Fence
+split TcpTls checkpoint=true phase=Import(21)
+split TcpTls checkpoint=true phase=Import(22)
+split TcpTls checkpoint=true phase=Publish
+split TcpTls checkpoint=true phase=Activate(21)
+split TcpTls checkpoint=true phase=Activate(22)
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+split TcpTls checkpoint=false phase=Intent
+split TcpTls checkpoint=false phase=Stage(21)
+split TcpTls checkpoint=false phase=Stage(22)
+split TcpTls checkpoint=false phase=Fence
+split TcpTls checkpoint=false phase=Import(21)
+split TcpTls checkpoint=false phase=Import(22)
+split TcpTls checkpoint=false phase=Publish
+split TcpTls checkpoint=false phase=Activate(21)
+split TcpTls checkpoint=false phase=Activate(22)
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 155 filtered out; finished in 97.32s
+
