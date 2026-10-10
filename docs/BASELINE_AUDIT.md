@@ -1,7 +1,27 @@
 # Baseline audits
 
-Latest: [review159](#review159--current-requirements-and-concrete-next-boundary).
+Latest implementation follow-up: [slice175](#slice175--platform-closure-and-live-validation-follow-up).
+Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
 Earlier reviews below retain their original revision and scope.
+
+## Slice175 — platform closure and live validation follow-up
+
+Actual slice173 CI logs expose fatal service handling of a peer closing between
+poll and send admission, BSD accepted-socket test assumptions, metrics tests
+assuming stable leadership, and an Ubuntu hundred-group checkpoint timeout.
+Slice175 fixes the close path without changing rejection ownership or consensus
+authority, and corrects those two fixture assumptions. The deterministic close
+regression was red before the fix;26 peer-driver,18 roster,28 transport and50
+service tests now pass locally. The checkpoint test passes alone in14.87s but
+its earlier15s timeout remains an open observation, not a proven production fix.
+
+The full all-feature sweep at3b4d324 is still running serialized routed histories;
+its snapshot in validation/baseline/slice175 is not a completed run. An older
+slice159 sweep is also still live and progressing. These actual live processes
+supersede earlier assumptions that handles were absent; neither supplies a
+terminal passing result yet. CI at3b4d324 has passed lint, with platform jobs
+still running at the recorded observation. Local targeted tests and code review
+do not establish macOS compatibility or close the remaining full-scope ledger.
 
 ## Original review136
 

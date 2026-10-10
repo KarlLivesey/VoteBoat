@@ -724,10 +724,19 @@ impl<P: PeerTransport> PeerRoster<P> {
                 p.accepted = Some(ticket);
                 Ok(())
             }
-            Err(r) => Err(PeerSendRejected {
-                reason: PeerRosterError::Transport(r.reason),
-                batch: r.batch,
-            }),
+            Err(r) => {
+                if r.reason == TransportError::Closed {
+                    // Closure can become visible between poll and admission.
+                    // This batch was never accepted; retire only this channel.
+                    Self::retire(p);
+                    Self::backoff(p, self.now, self.limits);
+                    Self::finish_retire(p);
+                }
+                Err(PeerSendRejected {
+                    reason: PeerRosterError::Transport(r.reason),
+                    batch: r.batch,
+                })
+            }
         }
     }
     fn retire(p: &mut Peer<P>) {

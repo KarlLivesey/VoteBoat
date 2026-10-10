@@ -1655,6 +1655,8 @@ fn reply_peer(
             assert!(Instant::now() < deadline, "expected a client connection");
             std::thread::sleep(Duration::from_millis(1));
         };
+        // BSD sockets can inherit O_NONBLOCK from the listening socket.
+        stream.set_nonblocking(false).unwrap();
         stream
             .set_read_timeout(Some(Duration::from_secs(2)))
             .unwrap();
@@ -1869,12 +1871,26 @@ fn metrics_history(quic: bool) {
     let leader = cluster.leader();
     let before = metrics(&cluster, leader);
     assert!(before["polls"] > 0);
-    assert!(cluster.ok(leader, &["add", "1", "7"]).contains("Value(7)"));
-    assert!(cluster
-        .ok(leader, &["add", "1", "7"])
-        .contains("duplicate=true"));
-    assert!(cluster.ok(leader, &["read"]).contains("value=7"));
-    let after = metrics(&cluster, leader);
+    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("Value(7)"));
+    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("duplicate=true"));
+    assert!(cluster.routed(&["read"]).contains("value=7"));
+    // The sampled peer may have lost leadership. Wait for its actual replay/
+    // replication counters; another peer's metrics cannot satisfy this check.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let after = loop {
+        let after = metrics(&cluster, leader);
+        if ["applications", "persistence_batches", "peer_received"]
+            .iter()
+            .all(|key| after[*key] > before[*key])
+        {
+            break after;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "sampled peer did not apply: {after:?}"
+        );
+        std::thread::park_timeout(Duration::from_millis(10));
+    };
     for (key, value) in &before {
         assert!(after[key] >= *value, "{key}");
     }
@@ -1893,12 +1909,10 @@ fn metrics_history(quic: bool) {
     for id in 2..=3 {
         cluster.start(id, "recover");
     }
-    let leader = cluster.leader();
-    assert!(cluster
-        .ok(leader, &["add", "1", "7"])
-        .contains("duplicate=true"));
-    assert!(cluster.ok(leader, &["read"]).contains("value=7"));
-    assert!(cluster.ok(leader, &["add", "2", "3"]).contains("Value(10)"));
+    cluster.leader();
+    assert!(authenticated_write(&cluster, &["add", "1", "7"]).contains("duplicate=true"));
+    assert!(cluster.routed(&["read"]).contains("value=7"));
+    assert!(authenticated_write(&cluster, &["add", "2", "3"]).contains("Value(10)"));
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
 }

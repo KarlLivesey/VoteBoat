@@ -1,0 +1,44 @@
+Starting revision: 3b4d32443ce484ab8e979a3d3f9dfbd065e705c1
+
+Baseline observation (started before source edits; still running):
+cargo +stable test --locked --offline --all-features --no-fail-fast
+Initial output was all-features.log, moved while live to
+/tmp/vb-slice175-all-features.log. all-features-in-progress.log is an incomplete
+snapshot, not a completed check. Existing exec session: 42300.
+An older still-progressing slice159 sweep writes /tmp/vb-baseline159-all.log.
+
+CI inspection (read-only):
+gh run view 38020455464 --log-failed
+gh run view 38020915003 --json jobs,headSha,status,conclusion
+CI173 failed; CI174 lint passed, Linux/macOS still in progress at observation.
+
+Regression first failed before production fix:
+cargo +stable test --locked --offline --all-features --test effect_owner close_between_poll_and_submit
+close-regression-red.log records Transport(Closed); close-regression-before.log
+is the earlier wrong-target/zero-test invocation and proves nothing.
+
+Final-source checks, all exit 0:
+cargo +stable test --locked --offline --all-features --test effect_owner peer_driver
+  peer-driver-final.log: 26 passed
+cargo +stable test --locked --offline --all-features --test peers --test transport
+  transport.log: 18 + 28 passed
+cargo +stable test --locked --offline --all-features --test counter_service
+  service-final.log: 50 passed, 41.56s
+cargo +stable test --locked --offline --all-features --test effect_owner automatic_hundred_group_checkpoints_reclaim_and_reopen
+  checkpoints-final.log: 1 passed, 14.87s; does not close earlier CI timeout
+cargo +stable test --locked --offline --no-default-features --test peers --test transport
+  core-transports.log: 18 + 1 passed
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+  clippy-all-final.log
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+  clippy-core.log
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+  doc.log
+node validation/check-inventory.mjs
+  inventory.log: 94 contracts, metadata/path check only
+git diff --check -- docs src tests
+
+source-sha256.txt identifies changed Rust files for final checks. Tests bind
+local sockets with the authorized host permissions. No macOS or separate-host
+execution is inferred from local checks. No lint levels were weakened.

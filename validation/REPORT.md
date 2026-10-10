@@ -5266,3 +5266,29 @@ consensus rules or lint limits were weakened. Credential preparation is local,
 not a replicated membership change or full audit history. Physical power loss,
 macOS/separate-host validation, peer key orchestration and remaining P0–P7 gates
 are not established by this slice.
+
+## Slice175 — peer close before send admission
+
+The deterministic host regression first failed with the same fatal
+PeerRosterError::Transport(Closed) seen in the slice173 macOS service log. After
+the fix it verifies exact rejected-ticket retention, backoff, a fresh connection
+generation, unrelated-peer progress and eventual delivery. A companion test
+retains fatal handling for wrong-binding rejection. No closure is reclassified
+as a successful local send or remote durable acknowledgement.
+
+Final-source Linux checks in validation/baseline/slice175 pass26 peer-driver,
+18 roster,28 transport and50 service tests. Core-only checks pass18 roster and
+one transport-limits test. The full service invocation ran
+without another counter_service invocation. The selected hundred-group
+checkpoint test passes in14.87s; the retained Ubuntu CI15s timeout remains
+unresolved rather than being declared fixed by a single local pass. The two
+service fixture fixes preserve timeout, exact operation and sampled-peer
+assertions while accounting for BSD accepted-socket flags and leader changes.
+
+Formatting, both strict all-target Clippy profiles, warnings-denied docs and
+94-contract inventory validation pass. The inventory check is metadata only.
+The starting-revision all-feature sweep is still live; its committed log snapshot
+is incomplete and predates this patch's build. Its active output is retained at
+/tmp/vb-slice175-all-features.log. Source hashes and command records distinguish
+that observation from the final-source selected tests. No complete baseline,
+macOS, separate-host or full-roadmap result is claimed.

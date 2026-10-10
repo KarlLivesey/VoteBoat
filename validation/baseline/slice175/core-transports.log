@@ -1,0 +1,33 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.70s
+     Running tests/peers.rs (target/debug/deps/peers-283b7bc791538ae2)
+
+running 18 tests
+test changed_provider_limits_are_retired_before_further_external_polling ... ok
+test bounded_attempts_timeout_backoff_and_stale_ready_connections ... ok
+test authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejected ... ok
+test construction_exhaustion_and_rejection_preserve_resources ... ok
+test drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work ... ok
+test fair_visits_and_aggregate_capacity_bound_connection_resources ... ok
+test failed_connection_holds_original_send_and_capacity_until_exact_completion ... ok
+test invalid_send_completion_fences_without_releasing_queue_credits ... ok
+test assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation ... ok
+test membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready ... ok
+test generation_range_exhaustion_never_hides_partially_issued_tickets ... ok
+test malformed_peer_messages_and_capacity_cannot_enter_ingress ... ok
+test outbound_priority_reordering_does_not_make_an_older_dispatch_stale ... ok
+test shutdown_drains_accepted_send_and_invalidates_pending_connection_ticket ... ok
+test receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect ... ok
+test prospective_assignments_keep_other_groups_without_admitting_input ... ok
+test revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor ... ok
+test store_replacement_requires_handoff_and_rejection_preserves_live_binding ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/transport.rs (target/debug/deps/transport-622e35714a6c1789)
+
+running 1 test
+test transport_limits_are_available_without_native_dependencies ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

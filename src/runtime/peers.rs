@@ -1011,12 +1011,13 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                     Ok(()) => out.sends += 1,
                     Err(rejected) => {
                         self.staged.push_back(*rejected.batch);
-                        if !matches!(
-                            rejected.reason,
+                        match rejected.reason {
                             PeerRosterError::Overloaded
-                                | PeerRosterError::Transport(TransportError::Overloaded)
-                        ) {
-                            return Err(PeerDriverError::Roster(rejected.reason));
+                            | PeerRosterError::Transport(TransportError::Overloaded) => (),
+                            PeerRosterError::Transport(TransportError::Closed) => {
+                                out.connection_failures += 1;
+                            }
+                            reason => return Err(PeerDriverError::Roster(reason)),
                         }
                     }
                 }

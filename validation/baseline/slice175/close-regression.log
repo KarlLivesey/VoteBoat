@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.90s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-df5ff286ac217b9a)
+
+running 2 tests
+test peer_driver::closed::invalid_binding_at_submit_still_fences_the_driver ... ok
+test peer_driver::closed::close_between_poll_and_submit_retains_ticket_and_reconnects_only_that_peer ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 153 filtered out; finished in 0.00s
+

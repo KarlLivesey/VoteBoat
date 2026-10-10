@@ -97,9 +97,38 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: bounded remote endpoint refresh172 | Fetch endpoint hints over authenticated TCP/TLS or QUIC; advances P5/C17. | Existing discovery/session contracts and owner-independent child routing. | Bounded single-flight refresh/retry, exact cancellation, stale refusal, explicit reconnect and cached-peer availability during source failure. External manifest fetching and executable integration remain open. |
 | Completed: credential generation and session revocation173 | Revoke old authenticated connections when prepared credentials change; advances C09/C21 and Rust embedding. | Existing SecureSession/ServiceAuthorizer contracts and chapter09/17 audit. | Host/native ownership and callback checks, selected TCP/QUIC reauthentication, TLS key/pin replacement and exact failed native transport batches. Executable publication remains open. |
 | Completed: staged executable credential publication174 | Make command-credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Complete bundle validation, durable local preparation, monotonic publication, old-channel revocation, exact latest retry/status, malformed-file refusal and restart digest/generation checks. Peer rotation and full audit history remain open. |
-| Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Direct evidence for selected gaps, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
+| Completed: peer closure recovery175 | Keep a healthy service running when a peer closes between poll and send admission; advances P1/C06 and platform validation. | Existing transport rejection ownership, roster backoff and connection generations. | Reproduced failure, exact-ticket retry after reconnect, unrelated-peer progress, invalid-binding refusal and all50 service histories. macOS execution of this revision and the earlier checkpoint timeout remain separate open checks. |
+| Current: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Finish the active full-suite observation, diagnose any terminal failures, and verify the macOS fixes; preserve the separate-host boundary and do not infer broad completion from narrow tests. |
 | Next: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Following: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+
+### Slice175 schema plan — peer close between poll and submit
+
+The174 worktree is clean/pushed. This audit runs the complete all-feature suite
+at3b4d324 and checks actual platform job logs. The173 macOS log shows a peer's
+ordinary TLS closure escaping as `Peer(Roster(Transport(Closed)))`, terminating
+an otherwise usable service. A transport can observe that closure after its
+last successful poll, so readiness at poll is not authority to accept a send.
+
+Shape: keep the existing PeerTransport, PeerRoster and PeerDriver contracts.
+On a pre-admission Closed result, retain the exact returned OutboundBatch,
+retire only that connection, apply normal reconnect backoff and generation
+checks, and let unrelated peers progress. Invalid binding/provider errors stay
+fatal. No new queue, worker, durability token or committed state is introduced.
+Restart reconstructs connection attempts under the existing new store session;
+the rejected batch has no send/durability completion merely from being queued.
+
+Transitions: connected -> rejected-before-acceptance -> old connection retired
+-> bounded retry -> fresh generation -> original batch delivered/completed.
+Accepted sends retain the existing exact completion/drain rules. Regression
+checks must first reproduce the fatal close with a host provider, then verify
+retained ticket/credits, unrelated progress, backoff and fresh connection.
+Malformed-provider rejection must still fence the driver.
+
+Platform fixture repairs are separate: set accepted fake-peer streams to blocking
+explicitly before timeout reads, and preserve exact write IDs when a metrics
+history encounters a real leadership change. Full local checks, named platform
+results and remaining gaps stay distinct; a local pass is not macOS execution.
 
 ### Slice174 schema plan — live executable credential reload
 
@@ -16164,3 +16193,41 @@ definition. The linked mini plan moves to remaining baseline/deployment evidence
 then measured performance and combined lifecycle fault gates. Automatic peer key
 rotation, external issuers/distribution, full audit history, physical power-loss,
 macOS/separate-host evidence and wider baseline requirements remain open.
+
+### Slice175 progress — recover pre-admission peer closure
+
+The preceding implementation turn progressed at3b4d324; the intervening feature-
+profile explanation did not change implementation state. Revalidated that commit,
+the actual worktree and the live full-suite handle before continuing this slice.
+The macOS CI log from slice173 exposed an ordinary closed TLS session escaping
+as Peer(Roster(Transport(Closed))) and terminating the entire service. A host
+regression reproduced that failure before the production change.
+
+PeerRoster now retires only the closed channel, applies its existing backoff and
+returns the exact unaccepted batch. PeerDriver retains that batch and records a
+connection failure while unrelated peers continue. The next connection uses a
+fresh generation. Wrong-binding and other provider errors still fence the driver;
+neither rejection nor reconnect creates a successful send or durability receipt.
+There is no new public interface or change to Raft commitment rules.
+
+Two service-fixture corrections address separately observed macOS failures:
+accepted fake-peer streams explicitly enter blocking mode before timeout reads,
+and metrics histories retry only LeadershipChanged uncertainty with the original
+operation and payload. They wait for the sampled peer's own counters to advance;
+they do not substitute another replica's counters or weaken the assertions.
+
+Linux validation:26 peer-driver tests,18 roster tests,28 transport tests and all50
+service tests pass. The separately run hundred-group automatic checkpoint/reopen
+test passes in14.87s, but does not resolve the earlier Ubuntu CI15s progress
+timeout. Formatting, both strict all-target Clippy profiles, documentation and
+inventory checks are recorded in validation/baseline/slice175. Raw failing CI and
+the red regression are retained. Core-profile results are recorded separately.
+
+The complete all-feature sweep was started at3b4d324 before these edits and is
+still active in its serialized routed histories. Its snapshot is explicitly
+incomplete; it is neither a final-source pass nor evidence of full P0–P7 closure.
+The older slice159 sweep was also found live and progressing, not restarted or
+terminated on an observation timeout. Background CI at3b4d324 has passed lint;
+platform test jobs were still running at the recorded observation. The next
+mini-plan item retains those actual-result checks and the unresolved platform/
+deployment gates; fixed-p99 performance and combined lifecycle faults follow.

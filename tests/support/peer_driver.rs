@@ -200,6 +200,7 @@ struct TransportControl {
     incoming: Option<ReceivedBatch>,
     readiness: Option<Message>,
     append: Option<Message>,
+    submit_error: Option<TransportError>,
 }
 pub(super) struct Transport {
     session: Session,
@@ -229,6 +230,12 @@ impl PeerTransport for Transport {
         }
     }
     fn submit(&mut self, batch: OutboundBatch) -> Result<(), TransportRejected> {
+        if let Some(reason) = self.control.borrow().submit_error {
+            return Err(TransportRejected {
+                reason,
+                batch: Box::new(batch),
+            });
+        }
         if self.sending.is_some() || self.done.is_some() || self.state() != TransportState::Open {
             Err(TransportRejected {
                 reason: TransportError::Overloaded,
@@ -390,6 +397,7 @@ impl PeerTransportFactory<Session> for Factory {
             incoming: None,
             readiness: None,
             append: None,
+            submit_error: None,
         }));
         self.controls
             .borrow_mut()
@@ -403,6 +411,8 @@ impl PeerTransportFactory<Session> for Factory {
     }
 }
 type Driver = PeerDriver<Connector, Factory>;
+#[path = "peer_driver_closed.rs"]
+mod closed;
 struct Fixture {
     owner: Owner,
     outbound: HostOutbound,

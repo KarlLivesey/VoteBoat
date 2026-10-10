@@ -1,0 +1,983 @@
+Rust on macos-latest	Run cargo test --locked --offline --all-features	﻿2026-10-10T03:25:19.2764390Z ##[group]Run cargo test --locked --offline --all-features
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.2764760Z ^[[36;1mcargo test --locked --offline --all-features^[[0m
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.2794850Z shell: /bin/bash -e {0}
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.2795020Z ##[endgroup]
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.4100880Z    Compiling libc v0.2.190
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.4109080Z    Compiling shlex v2.0.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.4109530Z    Compiling find-msvc-tools v0.1.14
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.6560650Z    Compiling cfg-if v1.0.5
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.6824350Z    Compiling cc v1.6.0
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.6996870Z    Compiling proc-macro2 v1.0.107
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:20.7616940Z    Compiling ring v0.17.14
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:22.7841200Z    Compiling quote v1.0.47
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:22.9012480Z    Compiling unicode-ident v1.0.26
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.2856500Z    Compiling rand_core v0.10.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.3067830Z    Compiling getrandom v0.2.17
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.3737740Z    Compiling getrandom v0.4.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.5094660Z    Compiling zeroize v1.9.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.5135820Z    Compiling untrusted v0.9.0
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.5554270Z    Compiling once_cell v1.21.4
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.5953040Z    Compiling rustls-pki-types v1.15.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.6638440Z    Compiling syn v3.0.6
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.8784290Z    Compiling rustls v0.23.45
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:23.9755200Z    Compiling thiserror v2.0.21
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:24.3449680Z    Compiling tracing-core v0.1.36
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:24.7068800Z    Compiling chacha20 v0.10.2
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:24.8283210Z    Compiling pin-project-lite v0.2.17
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:24.8627010Z    Compiling subtle v2.6.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:24.9240730Z    Compiling tracing v0.1.44
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.0347040Z    Compiling rand v0.10.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.0405070Z    Compiling thiserror-impl v2.0.21
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.4036440Z    Compiling rand_pcg v0.10.2
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.4741110Z    Compiling bytes v1.12.1
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.7249770Z    Compiling rustc-hash v2.1.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.7675400Z    Compiling lru-slab v0.1.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.8166900Z    Compiling tinyvec v1.13.3
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:25.8704430Z    Compiling slab v0.4.12
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:26.9490370Z    Compiling rustls-webpki v0.103.15
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:29.0838810Z    Compiling quinn-proto v0.11.19
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:30.3539040Z    Compiling voteboat v0.1.0 (/Users/runner/work/VoteBoat/VoteBoat)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.2404260Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 30s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.2840440Z      Running unittests src/lib.rs (target/debug/deps/voteboat-5b310d631d235113)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.2960950Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.2968920Z running 68 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3066720Z test native::dial::tests::dropping_owner_cancels_queue_and_stops_worker_after_active_call_returns ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3160560Z test native::dial::tests::cancellation_retains_active_and_queued_slots_until_actual_worker_receipts ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3194190Z test native::log_store::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3195790Z test native::log_store::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3198290Z test native::log_store::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3328650Z test native::dial::tests::panicked_worker_reports_every_accepted_ticket_once_and_fences_admission ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.3760380Z test native::group_creation::tests::immutable_file_binding_recovers_each_publication_boundary_and_rejects_other_bytes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.4069620Z test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.4071060Z test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.4074350Z test native::observability::events::tests::exhausted_sequence_preserves_state ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5002790Z test native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5011030Z test native::vote_store::tests::crc_castagnoli_check_vector ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5026590Z test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5039110Z test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5136770Z test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5138240Z test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5156000Z test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5157110Z test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5165290Z test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5175140Z test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5182040Z test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5189930Z test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5196700Z test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5201030Z test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5206200Z test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5214940Z test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5224770Z test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5227800Z test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5232170Z test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5261750Z test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5299030Z test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5324370Z test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5331460Z test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5346010Z test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5350660Z test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5354010Z test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5359640Z test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5367200Z test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5373460Z test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5393650Z test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5403420Z test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5404810Z test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5408370Z test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5414540Z test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5416830Z test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5420980Z test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5422410Z test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5437880Z test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5442370Z test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5451350Z test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5459510Z test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5461090Z test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5473040Z test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5483610Z test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5497040Z test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5501320Z test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5512650Z test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5530870Z test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5536480Z test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5548730Z test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5553230Z test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5558920Z test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5562880Z test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5564130Z test runtime::maintenance::tests::deadline_exhaustion_stops_instead_of_wrapping_or_spinning ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5564750Z test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:50.5565320Z test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:51.3395660Z test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2062830Z test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2064230Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2067290Z test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.91s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2068060Z      Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-4a7bd055a9db79a3)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2069100Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2106990Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2110970Z running 1 test
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2113570Z test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2114620Z      Running tests/activation_model.rs (target/debug/deps/activation_model-cbf132d21a4902ad)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2115060Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2115280Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2115800Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2265310Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2266500Z running 4 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2267220Z test election_receipts_need_exact_durable_promises_across_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2267810Z test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2882160Z test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2883060Z test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2883490Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2883750Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2884320Z      Running tests/admission.rs (target/debug/deps/admission-b8e5cf7087a75625)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2884570Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2986030Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.2986580Z running 8 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3008450Z test downstream_owned_lease_survives_shared_view_close_and_clone_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3010110Z test native::abandoned_batch_holds_queue_reservation_until_owner_queue_is_dropped ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3010900Z test native::closed_policy_refuses_bulk_but_cannot_block_control_or_close_another_queue ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3011470Z test native::failed_queue_construction_never_reserves_or_closes_the_host_policy ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3011950Z test native::host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3012460Z test native::native_shared_budget_rolls_back_each_dimension_and_preserves_last_owner ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3013060Z test native::permissive_policy_cannot_cross_node_peer_background_or_control_reserves ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3090990Z test native::concurrent_native_policy_views_never_leak_partial_reservations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3091530Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3091950Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3092540Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3093800Z      Running tests/application.rs (target/debug/deps/application-923f297b4b5a270b)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3195970Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3196420Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3210570Z test conflicting_operation_content_never_changes_the_original_effect ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3212540Z test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3213260Z test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3213850Z test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3214410Z test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3214840Z test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3215370Z test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3216330Z test retries_return_the_original_result_without_reapplying ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3216730Z test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3243190Z test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3243630Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3244080Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3244360Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3245590Z      Running tests/authorization.rs (target/debug/deps/authorization-c7f4180efc9428a5)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3357490Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3458490Z      Running tests/ballot_model.rs (target/debug/deps/ballot_model-56eb5fa81953dddc)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3458880Z running 4 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3559080Z test downstream_credentials_and_policy_pass_same_checked_scope_gate_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3660500Z test native::native_plan_scope_epoch_expiry_close_and_refresh_snapshots_are_checked ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3761740Z test simulator_unready_and_changed_host_sessions_never_pass_authorization ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3852360Z test native::invalid_native_plan_returns_original_allocation_without_changing_other_views ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3852920Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3853390Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3853810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3853910Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.3854070Z running 2 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:54.6994420Z test negative_controls_find_erased_promise_early_reply_and_store_reuse_counterexamples ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5129660Z test bounded_local_membership_ballot_model_checks_all_reachable_states ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5129990Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5130190Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.17s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5130650Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5141190Z      Running tests/ballots.rs (target/debug/deps/ballots-002bac8d1c6150ca)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5247470Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5248170Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5314760Z test host_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5315510Z test host_removal_and_compaction_keep_the_historical_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5319950Z test ballot_origin_is_checked_on_recovery_without_granting_current_authority ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5357610Z test native::failed_ballot_barriers_and_image_replacement_never_erase_a_durable_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5368810Z test native::host_decoder_cannot_publish_structurally_invalid_ballot_recovery ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5382360Z test native::native_image_and_restart_preserve_removed_candidate_after_compaction ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5389480Z test native::native_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5539760Z test native::actual_native_file_restart_keeps_ballot_origin_after_full_image_reclaim ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.5543290Z test native::written_ballot_is_not_durable_and_every_torn_vote_frame_recovers_one_promise ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.6996520Z test native::historical_ballot_image_rejects_torn_corrupt_and_invalid_origins ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7027840Z      Running tests/buffer.rs (target/debug/deps/buffer-c449ba90c6be5ca1)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7028130Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7028600Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7029060Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7112800Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7113570Z running 13 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7130570Z test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7132570Z test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7133190Z test concurrent_bulk_owners_cannot_take_control_headroom ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7134870Z test independent_downstream_pool_contract_without_native ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7136190Z test concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7137990Z test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7148990Z test native_owned_leases_survive_view_close_and_release_exact_shared_credits ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7159540Z test native_owner_allocation_failure_returns_all_three_budgets ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7176540Z test native_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7183420Z test native_protected_bytes_and_slots_roll_back_exactly ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7184620Z test owner_configuration_rejects_overbooking_and_overflow ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7185190Z test unsupported_owner_declaration_refuses_binding ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7263050Z test native_pool_bounds_concurrent_owners_and_returns_all_credits ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7263690Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7264090Z test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7264390Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7265480Z      Running tests/child_slots.rs (target/debug/deps/child_slots-6f82a60fe8a9b266)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7416370Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7416840Z running 10 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7523380Z test deleting_an_all_vacant_parent_needs_no_fictional_owner_or_child_obligations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7534620Z test foreign_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7535230Z test live_local_child_and_mismatched_original_facts_cannot_retire_a_slot ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7535690Z test native_cache_accepts_only_monotonic_trusted_child_retirement ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7536260Z test local_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7536860Z test retirement_preserves_pending_creation_publication_path ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7537480Z test retirement_serializes_with_parent_lifecycle_and_uses_bounded_ordinary_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7538050Z test successive_slot_retirements_replay_vacant_manifests_and_keep_identities_reserved ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.7543480Z test vacancy_codecs_and_original_directory_profiles_fail_closed ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8889980Z test retirement_native_journal_cuts_recover_only_original_or_completed_routes ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8944150Z      Running tests/configuration_capacity.rs (target/debug/deps/configuration_capacity-3adad41ee47bff9a)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8944630Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8945200Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.15s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8945610Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8996230Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.8996690Z running 5 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.9038360Z test native_count_matches_real_frames_and_exact_decode_and_frame_boundaries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.9039890Z test selected_native_transport_factory_preserves_codec_capacity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.9040490Z test unsupported_formats_policy_limits_and_invalid_envelopes_reject ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:55.9041150Z test checkpoint_operation_history_is_charged_before_another_configuration ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0689260Z test full_service_counter_retry_history_fits_selected_native_wire_versions ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0790530Z      Running tests/connect.rs (target/debug/deps/connect-a0f266547722b4c0)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0790830Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0801050Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0801540Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0814060Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0814360Z running 15 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0825440Z test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0851770Z test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.0985200Z test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.1274850Z test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.1659910Z test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.1849560Z test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.1851450Z test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.2257130Z test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.2659220Z test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.2761500Z test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3601350Z test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3689110Z test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3691180Z test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3777810Z test native::remote_discovery_drives_real_pinned_target_dial ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3911140Z test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3911520Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3911830Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.31s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3912190Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.3913860Z      Running tests/counter_service.rs (target/debug/deps/counter_service-1b87e148fe72a0a5)
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.4035520Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.4035860Z running 48 tests
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.5732870Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.6020530Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:56.6448450Z test automatic_read_retries_only_the_exact_read_not_ready_refusal ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:58.5064620Z test authenticated_service_principals_scope_commands_and_recover_tcp ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:26:59.9541950Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:05.5683200Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:05.7467950Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:05.9480260Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:08.5754200Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:08.6309570Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:10.8669370Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:14.1259740Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:15.7343510Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:19.8174790Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:26.0651950Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:26.0687450Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:26.1441370Z test invalid_administration_is_rejected_before_store_open ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:26.1991910Z test invalid_deployment_is_rejected_before_store_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:26.2031230Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.1501600Z test history::quic_faulted_client_histories_are_linearizable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:28.5179070Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:30.9244270Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:32.9669190Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:35.0294480Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.6984900Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.7110200Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.7202320Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.8774240Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.8961540Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:40.3562710Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:44.9569910Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:47.4575760Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:49.1215910Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:50.9777100Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:00.9274380Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:03.6141480Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:05.3632880Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:10.1962670Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:10.1989630Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:16.5913230Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:21.4559830Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:24.7775390Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:27.0638760Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:27.0677360Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... FAILED
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:31.8938430Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:32.4139740Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:34.4254330Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:49.2295460Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint has been running for over 60 seconds
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2956560Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2958580Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2959350Z failures:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2959860Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2960410Z ---- automatic_client_never_reroutes_uncertain_writes_or_other_errors stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2962830Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2963380Z thread '<unnamed>' (69657) panicked at tests/counter_service.rs:1663:53:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2964420Z called `Result::unwrap()` on an `Err` value: Os { code: 35, kind: WouldBlock, message: "Resource temporarily unavailable" }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2965640Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2966260Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2967020Z thread 'automatic_client_never_reroutes_uncertain_writes_or_other_errors' (69612) panicked at tests/counter_service.rs:1728:34:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2972690Z error: test failed, to rerun pass `--test counter_service`
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2973470Z called `Result::unwrap()` on an `Err` value: Any { .. }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2974580Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2976130Z ---- authenticated_service_principals_scope_commands_and_recover_tcp stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2976900Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2977540Z thread 'authenticated_service_principals_scope_commands_and_recover_tcp' (69611) panicked at tests/counter_service.rs:254:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2990940Z node 3 ["quit"]: ERR authentication failed
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2991520Z  Error: "request interrupted after connection; automatic routing stopped"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2992030Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2992370Z service log: ready node=3 peer=127.0.0.1:10003 transport=TcpTls command=127.0.0.1:10103
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2993120Z Error: "Peer(Roster(Transport(Closed)))"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2993450Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2993470Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2993900Z ---- interrupted_configuration_reply_is_unknown_and_preserves_original_operation stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2995370Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2995640Z thread '<unnamed>' (73091) panicked at tests/counter_service.rs:1663:53:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2996690Z called `Result::unwrap()` on an `Err` value: Os { code: 35, kind: WouldBlock, message: "Resource temporarily unavailable" }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2997350Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2998000Z thread 'interrupted_configuration_reply_is_unknown_and_preserves_original_operation' (73090) panicked at tests/counter_service.rs:2180:28:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2998960Z called `Result::unwrap()` on an `Err` value: Any { .. }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2999370Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.2999720Z ---- native_quic_metrics_are_volatile_and_preserve_recovery_and_retries stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3029510Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3030090Z thread 'native_quic_metrics_are_volatile_and_preserve_recovery_and_retries' (75153) panicked at tests/counter_service.rs:254:9:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3033830Z node 2 ["add", "1", "7"]: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3034650Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3035100Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3035410Z service log: ready node=2 peer=127.0.0.1:15890 transport=Quic command=127.0.0.1:15990
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3035770Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3035810Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3036070Z ---- native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3036490Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3037030Z thread 'native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries' (75251) panicked at tests/counter_service.rs:326:25:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3037960Z node 2 exit exit status: 1: ready node=2 peer=127.0.0.1:16018 transport=TcpTls command=127.0.0.1:16118
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3038680Z Error: "Peer(Roster(Transport(Closed)))"
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3038930Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3038930Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3039260Z ---- trickled_reply_cannot_extend_the_clients_absolute_routing_deadline stdout ----
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3039640Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3039890Z thread '<unnamed>' (80011) panicked at tests/counter_service.rs:1663:53:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3040670Z called `Result::unwrap()` on an `Err` value: Os { code: 35, kind: WouldBlock, message: "Resource temporarily unavailable" }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3041210Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3041630Z thread 'trickled_reply_cannot_extend_the_clients_absolute_routing_deadline' (80010) panicked at tests/counter_service.rs:1829:29:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3042400Z called `Result::unwrap()` on an `Err` value: Any { .. }
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3042730Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3042730Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3042850Z failures:
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3043210Z     authenticated_service_principals_scope_commands_and_recover_tcp
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3043820Z     automatic_client_never_reroutes_uncertain_writes_or_other_errors
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3044410Z     interrupted_configuration_reply_is_unknown_and_preserves_original_operation
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3045090Z     native_quic_metrics_are_volatile_and_preserve_recovery_and_retries
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3045640Z     native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3046220Z     trickled_reply_cannot_extend_the_clients_absolute_routing_deadline
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3046580Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3046880Z test result: FAILED. 42 passed; 6 failed; 0 ignored; 0 measured; 0 filtered out; finished in 127.89s
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3048470Z 
+Rust on macos-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:04.3066640Z ##[error]Process completed with exit code 101.
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	﻿2026-10-10T03:25:15.6887792Z ##[group]Run cargo test --locked --offline --all-features
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.6888266Z ^[[36;1mcargo test --locked --offline --all-features^[[0m
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.6951237Z shell: /usr/bin/bash -e {0}
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.6951513Z ##[endgroup]
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.8049219Z    Compiling libc v0.2.190
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.8050354Z    Compiling shlex v2.0.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.8050884Z    Compiling find-msvc-tools v0.1.14
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.8051459Z    Compiling cfg-if v1.0.5
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.8365752Z    Compiling proc-macro2 v1.0.107
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.9107705Z    Compiling quote v1.0.47
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:15.9940102Z    Compiling cc v1.6.0
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.1455491Z    Compiling unicode-ident v1.0.26
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.2173487Z    Compiling rand_core v0.10.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.3021357Z    Compiling getrandom v0.4.3
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.4567582Z    Compiling untrusted v0.9.0
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.5417913Z    Compiling once_cell v1.21.4
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.8193073Z    Compiling zeroize v1.9.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.8820429Z    Compiling syn v3.0.6
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:16.9341777Z    Compiling rustls-pki-types v1.15.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.2740469Z    Compiling getrandom v0.2.17
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.3845664Z    Compiling thiserror v2.0.21
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.3890920Z    Compiling cpufeatures v0.3.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.4180730Z    Compiling rustls v0.23.45
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.5091238Z    Compiling chacha20 v0.10.2
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.5930365Z    Compiling ring v0.17.14
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.6980486Z    Compiling tracing-core v0.1.36
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.7580755Z    Compiling pin-project-lite v0.2.17
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.7941286Z    Compiling subtle v2.6.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:17.8730487Z    Compiling rand v0.10.3
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.1675135Z    Compiling tracing v0.1.44
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.3239244Z    Compiling rand_pcg v0.10.2
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.3942310Z    Compiling lru-slab v0.1.3
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.4484556Z    Compiling rustc-hash v2.1.3
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.4839757Z    Compiling tinyvec v1.13.3
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.5175811Z    Compiling bytes v1.12.1
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:18.7358025Z    Compiling slab v0.4.12
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:19.0075117Z    Compiling thiserror-impl v2.0.21
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:30.6418490Z    Compiling rustls-webpki v0.103.15
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:32.8443134Z    Compiling quinn-proto v0.11.19
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:25:34.6548459Z    Compiling voteboat v0.1.0 (/home/runner/work/VoteBoat/VoteBoat)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5562138Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 51s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5806059Z      Running unittests src/lib.rs (target/debug/deps/voteboat-354c68027e80b385)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5818423Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5818741Z running 68 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5832802Z test native::dial::tests::dropping_owner_cancels_queue_and_stops_worker_after_active_call_returns ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5834493Z test native::log_store::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5836195Z test native::log_store::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5840371Z test native::log_store::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5846228Z test native::dial::tests::cancellation_retains_active_and_queued_slots_until_actual_worker_receipts ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.5859054Z test native::dial::tests::panicked_worker_reports_every_accepted_ticket_once_and_fences_admission ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7684588Z test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7686072Z test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7687353Z test native::observability::events::tests::exhausted_sequence_preserves_state ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7692917Z test native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7694632Z test native::vote_store::tests::crc_castagnoli_check_vector ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7703104Z test native::group_creation::tests::immutable_file_binding_recovers_each_publication_boundary_and_rejects_other_bytes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7707333Z test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7711999Z test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7730149Z test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7744344Z test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7769032Z test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7788287Z test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7811423Z test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7823653Z test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7824979Z test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7838287Z test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7839943Z test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7854492Z test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7861187Z test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7880907Z test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7882341Z test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7888635Z test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7892638Z test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7935638Z test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7984254Z test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7993438Z test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.7996318Z test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8006182Z test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8009895Z test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8015860Z test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8024922Z test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8030689Z test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8033741Z test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8051378Z test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8054025Z test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8062759Z test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8064535Z test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8066829Z test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8075241Z test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8077073Z test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8080462Z test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8090835Z test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8097938Z test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8108745Z test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8112186Z test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8117324Z test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8128330Z test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8131077Z test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8137796Z test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8153185Z test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8154526Z test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8166377Z test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8184742Z test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8195372Z test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8196788Z test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8203047Z test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8206439Z test runtime::maintenance::tests::deadline_exhaustion_stops_instead_of_wrapping_or_spinning ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8207687Z test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8208780Z test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:07.8210048Z test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:08.1504244Z test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7795133Z test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7796209Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7796980Z test result: ok. 68 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.20s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7797937Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7800550Z      Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7814261Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7814604Z running 1 test
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7818254Z test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7818734Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7819023Z test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7819784Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7820892Z      Running tests/activation_model.rs (target/debug/deps/activation_model-7810e5c977a70e2e)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7830978Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7831139Z running 4 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7841992Z test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7843081Z test election_receipts_need_exact_durable_promises_across_restart ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.7844176Z test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8619802Z test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8620649Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8621118Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8621707Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8622695Z      Running tests/admission.rs (target/debug/deps/admission-8347fc82ab9de761)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8633155Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8633337Z running 8 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8637745Z test downstream_owned_lease_survives_shared_view_close_and_clone_without_native ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8639547Z test native::abandoned_batch_holds_queue_reservation_until_owner_queue_is_dropped ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8640710Z test native::closed_policy_refuses_bulk_but_cannot_block_control_or_close_another_queue ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8641815Z test native::failed_queue_construction_never_reserves_or_closes_the_host_policy ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8642975Z test native::host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8645433Z test native::native_shared_budget_rolls_back_each_dimension_and_preserves_last_owner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8647929Z test native::permissive_policy_cannot_cross_node_peer_background_or_control_reserves ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8735132Z test native::concurrent_native_policy_views_never_leak_partial_reservations ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8735770Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8736230Z test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8736787Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8739028Z      Running tests/application.rs (target/debug/deps/application-845268a58f336dbe)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8747574Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8747727Z running 10 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8760475Z test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8761488Z test conflicting_operation_content_never_changes_the_original_effect ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8762397Z test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8763399Z test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8764460Z test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8765347Z test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8766117Z test retries_return_the_original_result_without_reapplying ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8766975Z test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8767921Z test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8810052Z test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8810672Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8811128Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8812089Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8812780Z      Running tests/authorization.rs (target/debug/deps/authorization-6812bfe02b407c6c)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8821905Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8822096Z running 4 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8825365Z test downstream_credentials_and_policy_pass_same_checked_scope_gate_without_native ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8826844Z test native::invalid_native_plan_returns_original_allocation_without_changing_other_views ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8828270Z test native::native_plan_scope_epoch_expiry_close_and_refresh_snapshots_are_checked ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8829048Z      Running tests/ballot_model.rs (target/debug/deps/ballot_model-06d13e2d58324d97)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8830205Z test simulator_unready_and_changed_host_sessions_never_pass_authorization ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8830564Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8830814Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8831409Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8838202Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:09.8838369Z running 2 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:10.2749852Z test negative_controls_find_erased_promise_early_reply_and_store_reuse_counterexamples ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1867457Z test bounded_local_membership_ballot_model_checks_all_reachable_states ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1867930Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1868236Z test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.30s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1868658Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1882568Z      Running tests/ballots.rs (target/debug/deps/ballots-e2e33625c8a1794e)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1894718Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1894931Z running 10 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1920043Z test host_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1921136Z test ballot_origin_is_checked_on_recovery_without_granting_current_authority ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1950221Z test host_removal_and_compaction_keep_the_historical_promise ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1951628Z test native::host_decoder_cannot_publish_structurally_invalid_ballot_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1980398Z test native::native_image_and_restart_preserve_removed_candidate_after_compaction ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1983172Z test native::failed_ballot_barriers_and_image_replacement_never_erase_a_durable_promise ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.1985918Z test native::native_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.2094780Z test native::actual_native_file_restart_keeps_ballot_origin_after_full_image_reclaim ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.2295285Z test native::written_ballot_is_not_durable_and_every_torn_vote_frame_recovers_one_promise ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4184357Z test native::historical_ballot_image_rejects_torn_corrupt_and_invalid_origins ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4185238Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4185626Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4186107Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4188487Z      Running tests/buffer.rs (target/debug/deps/buffer-b9d59c0c12e381d1)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4200594Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4200801Z running 13 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4211257Z test downstream_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4214161Z test downstream_protected_bytes_and_slots_survive_close_and_failed_admission ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4216643Z test legacy_default_cannot_claim_a_reserve_without_class_implementation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4218386Z test independent_downstream_pool_contract_without_native ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4223285Z test concurrent_bulk_owners_cannot_take_control_headroom ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4224124Z test native_owner_allocation_failure_returns_all_three_budgets ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4225019Z test native_owned_leases_survive_view_close_and_release_exact_shared_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4226057Z test native_owner_isolation_reconnect_and_registration_lifetimes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4226908Z test native_protected_bytes_and_slots_roll_back_exactly ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4228115Z test owner_configuration_rejects_overbooking_and_overflow ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4231612Z test unsupported_owner_declaration_refuses_binding ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4236102Z test concurrent_reconnected_owner_cannot_consume_other_owner_bulk_quota ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4291252Z test native_pool_bounds_concurrent_owners_and_returns_all_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4291665Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4291936Z test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4292294Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4294370Z      Running tests/child_slots.rs (target/debug/deps/child_slots-ab85c5fb9a63fcc1)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4305349Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4305532Z running 10 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4320214Z test deleting_an_all_vacant_parent_needs_no_fictional_owner_or_child_obligations ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4330441Z test foreign_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4331935Z test live_local_child_and_mismatched_original_facts_cannot_retire_a_slot ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4333422Z test local_deleted_child_retirement_preserves_retained_service_and_replay ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4334682Z test native_cache_accepts_only_monotonic_trusted_child_retirement ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4335852Z test retirement_preserves_pending_creation_publication_path ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4337089Z test retirement_serializes_with_parent_lifecycle_and_uses_bounded_ordinary_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4338452Z test successive_slot_retirements_replay_vacant_manifests_and_keep_identities_reserved ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.4354163Z test vacancy_codecs_and_original_directory_profiles_fail_closed ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6459014Z test retirement_native_journal_cuts_recover_only_original_or_completed_routes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6459833Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6460110Z test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6460524Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6464169Z      Running tests/configuration_capacity.rs (target/debug/deps/configuration_capacity-58c56bce2470e11a)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6475802Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6476039Z running 5 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6490231Z test selected_native_transport_factory_preserves_codec_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6491134Z test unsupported_formats_policy_limits_and_invalid_envelopes_reject ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6505664Z test native_count_matches_real_frames_and_exact_decode_and_frame_boundaries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.6516248Z test checkpoint_operation_history_is_charged_before_another_configuration ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8855540Z test full_service_counter_retry_history_fits_selected_native_wire_versions ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8856190Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8856626Z test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8857215Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8858927Z      Running tests/connect.rs (target/debug/deps/connect-3101a2bfa358f0f4)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8872316Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8872507Z running 15 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8876200Z test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8877213Z test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8891017Z test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8948323Z test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8983705Z test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8987363Z test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.8990887Z test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9012659Z test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9017986Z test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9131035Z test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9146410Z test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9153725Z test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9224757Z test native::remote_discovery_drives_real_pinned_target_dial ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9258907Z test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9392475Z test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9393299Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9393787Z test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9394558Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9396765Z      Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9410446Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9410749Z running 48 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9543651Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9702964Z test automatic_read_retries_only_the_exact_read_not_ready_refusal ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:11.9900697Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:17.3408445Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:17.6171309Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:17.7772819Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:19.9484928Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:19.9853206Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:21.8492059Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:22.7335264Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:22.8096198Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:23.7305645Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:23.9410332Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.2774602Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.2808722Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.3228824Z test invalid_administration_is_rejected_before_store_open ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.3680988Z test invalid_deployment_is_rejected_before_store_creation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.3706125Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.6729264Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:27.7983998Z test history::quic_faulted_client_histories_are_linearizable ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:29.0873130Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:30.0469010Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:31.1118525Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:31.9288209Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:31.9368631Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:31.9450637Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:32.8553949Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:32.8678123Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:33.7758545Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:34.9357573Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.1559951Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:36.9069113Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:40.9446061Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:43.2352163Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:44.4781052Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:45.3550465Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:47.9813545Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:47.9836212Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:52.7571283Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:55.4426809Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:57.2987026Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:27:58.6029216Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:01.8320125Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:03.8809348Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:05.4456348Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:08.5724919Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:08.6285496Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8023189Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8023804Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8024079Z test result: ok. 48 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 66.86s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8024442Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8027318Z      Running tests/credential_refresh.rs (target/debug/deps/credential_refresh-b7556b095d48a24e)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8039751Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8040027Z running 9 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8043338Z test host::extracting_parts_always_revokes_before_returning_raw_session ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8044384Z test host::downstream_validity_blocks_io_and_one_channel_close_preserves_others ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8047411Z test host::failed_construction_returns_unchanged_session_and_validity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8048622Z test host::simulator_or_unready_session_is_returned_before_guarding ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8060626Z test native::native_replace_is_monotonic_returns_material_and_close_is_scoped ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8061935Z test host::invalidation_during_provider_io_suppresses_success_and_scrubs_read_output ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8134156Z test native::native_transport_returns_exact_accepted_batch_as_failed_after_revocation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8152774Z test keys::replacement_certificate_requires_new_pin_but_preserves_stable_peer_identity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8211801Z test native_tls_rotation_revokes_old_io_and_new_session_is_usable ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8212151Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8212421Z test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8212775Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8215208Z      Running tests/delegation.rs (target/debug/deps/delegation-fa7c6af0258490b6)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8226985Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8227298Z running 14 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8261308Z test cancellation::decline_and_cancellation_codecs_are_bounded_and_reject_incomplete_provenance ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8280341Z test cancellation::failed_old_intent_can_be_declined_but_child_history_exhaustion_never_infers_refusal ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8303808Z test cancellation::ordered_child_intent_and_decline_races_never_revoke_a_successful_intent ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8316126Z test child_locator_refresh_requires_unchanged_parent_and_child_bindings ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8317530Z test cancellation::durable_decline_cancels_parent_and_fresh_transfer_preserves_real_data ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8318976Z test cancellation::same_group_cancellation_requires_actual_local_decline_and_exact_context ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8330731Z test native_parent_cache_accepts_child_epoch_refresh_and_preserves_rejected_view ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8331696Z test delegated_split_reserves_parent_and_recovers_epochs_without_ancestor_write_dependency ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8400301Z test parent_final_publication_keeps_its_reserve_after_ordinary_byte_and_pending_exhaustion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8410286Z test parent_reservation_and_completion_bind_exact_generation_operation_and_foreign_decision ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8426228Z test same_group_parent_and_child_require_actual_local_reservation_and_publication ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.8664075Z test repeat::delegated_split_merge_split_preserves_actual_lineage_and_recovers_later_movement_actions ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9259162Z test cancellation::parent_cancellation_keeps_reserved_credit_and_queries_account_nested_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9269903Z test new_codecs_queries_and_checkpoint_reject_truncations_and_account_nested_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9270519Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9270809Z test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9271162Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9274029Z      Running tests/deletion.rs (target/debug/deps/deletion-00aa7c0d996538ea)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9286929Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9287093Z running 12 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9306283Z test deletion_and_parent_delegation_serialize_and_failed_batches_keep_original_state ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9327202Z test deletion_locks_original_manifest_and_rejects_unresolved_creation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9328619Z test fence_read_view_does_not_promote_a_scoped_fence_to_whole_owner_evidence ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9330371Z test fixed_owner_fence_read_preserves_original_schema_and_data_guards ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9331568Z test partitioned_deletion_fences_every_distinct_owner_and_refuses_wrong_coverage ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9332738Z test leaf_deletion_preserves_fence_tombstone_and_original_retries ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9333803Z test recursive_foreign_authority_binds_original_child_observation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9336601Z test recursive_same_authority_requires_actual_local_child_tombstone ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9342296Z test reserved_completion_survives_exhausted_ordinary_capacity_and_pending_duplicates ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9355382Z test three_authority_deletion_propagates_only_original_published_tombstones ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:18.9486381Z test deletion_codecs_checkpoints_and_profiles_refuse_partial_or_changed_history ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1839095Z test deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1840824Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1841629Z test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1842396Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1842985Z      Running tests/dial.rs (target/debug/deps/dial-9faafdd84e8ccb86)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1854602Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1854795Z running 6 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1859491Z test host_can_supply_local_channel_type_and_exact_cancelled_receipts ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1863634Z test native::rejects_scope_and_timeout_before_connect_or_generation_consumption ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1866473Z test native::cancelling_completed_unpolled_success_closes_socket_before_slot_release ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1867770Z test rejects_unbounded_or_zero_limits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1868874Z test native::refusal_is_terminal_and_close_does_not_stop_another_dialer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1870106Z test native::tcp_success_is_nonblocking_and_preserves_exact_scope_and_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1870706Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1871170Z test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1871762Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1872647Z      Running tests/directory.rs (target/debug/deps/directory-d343254daebb4242)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1883465Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1883612Z running 31 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1901320Z test application_batch_failure_is_atomic_and_pending_admission_reserves_history ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1908079Z test creation::creation_admission_reserves_original_history_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1950329Z test checkpoint_rejects_bad_history_order_identity_and_lengths_without_partial_restore ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.1980212Z test committed_initialization_binds_the_full_plan_before_any_publication ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2009990Z test creation::creation_does_not_bypass_parent_transfer_reservation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2011239Z test creation::creation_mode_is_bound_before_apply_and_cross_schema_recovery_fails_closed ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2080382Z test creation::creation_codec_bounds_policy_counts_bindings_and_every_truncation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2081685Z test creation::creation_parent_authority_generation_and_known_routes_refuse ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2107849Z test creation::creation_reserves_only_new_identity_and_never_publishes_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2234105Z test directory_command_codec_is_bounded_canonical_and_rejects_every_truncation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2241822Z test directory_plan_checks_local_ancestry_grants_and_returns_original_inputs ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2247553Z test directory_publishes_committed_order_retries_original_outcomes_and_rejects_transfers ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2270185Z test independently_authored_child_directory_uses_verified_external_bootstrap_grant ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2450805Z test creation::creation_checkpoint_replays_reservations_and_atomic_batch_rejects_partial_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2472117Z test maximum_partition_map_roundtrips_and_pending_byte_reservation_covers_conflicts ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.2519880Z test large_plan_declares_initialization_envelope_and_restores_its_complete_binding ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3248247Z test checkpoint_reconstructs_publications_rejections_and_retry_history_atomically ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3506535Z test native::native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3517837Z test plan_depth_and_lifetime_limits_reject_before_retaining_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3527486Z test plan_refuses_multiple_parents_and_foreign_aliases_of_local_responsibilities ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3528689Z test read_receipts_charge_inline_and_nested_capacity_without_double_counting ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3530113Z test transfer::checked_split_and_merge_shape_bind_epochs_identity_and_distinct_groups ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3532712Z test transfer::directory_records_intent_without_publishing_ownership_and_locks_changes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3826673Z test transfer::intent_command_and_checkpoint_truncations_are_atomic_and_preserve_locks ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.3847613Z test transfer::lifecycle_read_view_preserves_original_api_and_counts_nested_result_capacity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4155991Z test native::native_three_replica_directory_commits_replays_compacts_and_installs_retry_state ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4164236Z test transfer::target_group_reservations_cover_other_assignments_and_overlapping_intents ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4168607Z test transfer::unknown_or_stale_intents_reject_and_retries_keep_original_failure ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4374708Z test native::native_transfer_intent_survives_lost_observation_snapshot_catchup_and_reopen ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4598381Z test creation::creation_native_wal_every_torn_frame_and_barrier_failure_recovers_old_or_complete_intent ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4725657Z test transfer::pending_intents_are_bounded_and_constructor_rejection_preserves_route_buffer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4726363Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4726674Z test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4727028Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4731804Z      Running tests/discovery.rs (target/debug/deps/discovery-d188ac34e801fa68)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4742971Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4743267Z running 4 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4746603Z test checked_discovery_refuses_wrong_identity_expiry_and_duplicate_completions ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4747485Z test construction_returns_live_parts_and_shared_host_views_close_independently ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4748614Z test downstream_discovery_substitutes_only_address_and_preserves_rejection_and_attempt_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4749861Z test native_cache_retains_generation_floors_and_bounds_even_after_expiry_and_close ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4750268Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4750566Z test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4751151Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4751569Z      Running tests/effect_owner.rs (target/debug/deps/effect_owner-df5ff286ac217b9a)
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4763431Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4763588Z running 153 tests
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4800585Z test application_boundary_and_one_use_read_are_checked_before_release ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4804502Z test application_results::byte_ceiling_prevents_application_and_close_drains_without_closing_shared_app ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4805986Z test application_results::held_results_backpressure_before_apply_control_reserve_and_retry_after_release ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4807540Z test application_results::written_and_wrong_effect_never_apply_or_publish_and_durable_application_is_ordered ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4824639Z test application_results::wrong_runtime_and_modified_committed_content_reject_before_application ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4827414Z test automatic_election_rejection_written_and_exact_durable_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4833790Z test application_results::retries_and_conflicting_content_emit_original_application_outcomes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4835027Z test callback_capacity_and_reservation_extension_are_bounded ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4836051Z test bulk_leases_leave_a_reserved_visit_for_control ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4837396Z test client_admission::cancelled_queued_wait_retains_capacity_until_execution_then_retry_returns_original ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4839160Z test application_results::host_receipts_nested_capacity_wrong_identity_and_partial_application_fail_closed ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4841159Z test client_admission::delayed_applied_reply_retains_verified_position_through_actual_log_compaction ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4842828Z test client_admission::host_admission_policy_and_wrong_runtime_reject_without_touching_shared_application ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4844421Z test client_admission::execution_revalidates_current_application_before_creating_persist ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4858753Z test client_admission::queued_retries_conflicts_and_capacity_use_exact_invocation_positions ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4864616Z test client_admission::stopping_runtime_returns_exact_unprocessed_tracked_inputs ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4866536Z test client_admission::recovered_unapplied_log_reserves_capacity_without_old_router_memory ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4871557Z test client_admission::tracked_step_and_written_do_not_publish_applied_before_commit_and_application ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4872835Z test client_admission::per_group_budget_close_and_foreign_completion_preserve_shared_owner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4873847Z test closing_drains_accepted_work_and_disarms_automatic_timers ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4878570Z test connection_budget::granted_authority_reply_reserves_candidate_until_protocol_rejection ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4880699Z test connection_budget::budget_replacement_preserves_history_and_rejects_tightening_below_owned_union ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4884539Z test connection_budget::competing_queued_changes_reserve_union_and_protocol_rejection_releases_only_queue_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4891032Z test connection_budget::local_configuration_events_reserve_peer_union_before_ownership_and_release_on_rejection ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4892285Z test connection_budget::stopping_a_group_returns_queued_reservation_and_registration_cannot_overbook_it ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4900814Z test durable_before_written_fences_without_releasing_a_vote ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4907539Z test failure_keeps_external_lease_charged_until_explicit_discard ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4910233Z test connection_budget::shared_future_peer_is_charged_once_but_conflicting_store_cannot_share_a_slot ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4912342Z test ingress::bulk_saturation_leaves_transport_ownership_and_control_reserve_for_another_peer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4915648Z test ingress::capacity_bytes_are_inspected_before_take_and_wrong_owner_cannot_dispatch ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4917215Z test ingress::blocked_group_retains_full_frame_charge_while_other_group_progresses_and_retry_completes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4918539Z test held_effect_stops_its_group_while_other_group_commits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4919991Z test ingress::false_receive_metadata_returns_original_batch_and_fences_without_credit_release ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4927051Z test ingress::retired_connection_discards_only_still_held_input_and_new_generation_can_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4928332Z test ingress::snapshots_have_separate_ceiling_and_cannot_consume_all_data_or_control_slots ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4932420Z test ingress::unknown_group_reports_terminal_rejection_and_closing_one_router_preserves_shared_owner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4933535Z test invalid_reservation_is_rejected_before_core_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:19.4945032Z test client_admission::runtime_rejection_preserves_original_request_without_spending_client_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:32.3382010Z test native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:37.2862257Z test native::automatic_hundred_group_checkpoints_reclaim_and_reopen ... FAILED
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8745782Z test native::automatic_elections_and_partition_replacement_preserve_hundred_group_history ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8763016Z test node_facade::abort_after_written_returns_unknown_and_durable_worker_work_without_rollback_or_false_applied ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8798114Z test node_facade::abort_preserves_earlier_success_and_network_remains_explicitly_drainable_without_core_access ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8806335Z test node_facade::all_poll_budgets_and_time_validate_before_either_driver_performs_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8829021Z test node_facade::automatic_checkpoints::abort_and_snapshot_failure_preserve_checkpoint_identity ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8867259Z test node_facade::automatic_checkpoints::concurrency_bound_and_shutdown_keep_exact_requests_until_durable ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8914454Z test node_facade::automatic_checkpoints::held_group_does_not_duplicate_or_block_another_group ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8948201Z test node_facade::automatic_checkpoints::manual_checkpoint_and_late_scans_do_not_invent_a_new_boundary ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.8980109Z test node_facade::automatic_checkpoints::policy_is_opt_in_and_validated_without_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9015266Z test node_facade::automatic_checkpoints::threshold_is_applied_distance_and_admission_is_not_completion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9035446Z test node_facade::automatic_maintenance::deadlines_coalesce_and_manual_results_remain_owned ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9041236Z test node_facade::automatic_maintenance::fatal_completion_preserves_diagnostics_and_wrong_receipt_preserves_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9049010Z test node_facade::automatic_maintenance::held_job_drains_on_shutdown_and_abort_retains_recovery_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9054446Z test node_facade::automatic_maintenance::overload_and_storage_refusal_back_off_without_a_poll_loop ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9061158Z test node_facade::automatic_maintenance::permanent_admission_refusal_stops_schedule_but_service_stays_running ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9069267Z test node_facade::automatic_maintenance::policy_is_optional_validated_before_work_and_clock_does_not_wrap ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9089916Z test node_facade::configuration_cancellation_is_unknown_and_does_not_undo_queued_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9100314Z test node_facade::configuration_cannot_expand_a_local_only_node_without_peer_providers ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9134274Z test node_facade::configuration_checks_enforced_application_envelope_before_authorization_or_persistence ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9158963Z test node_facade::configuration_committed_output_survives_shutdown_and_request_count_stays_bounded ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9166264Z test node_facade::configuration_limits_reject_with_original_request_and_no_core_mutation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9181548Z test node_facade::configuration_queued_behind_campaign_uses_its_actual_proposal_term ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9213756Z test node_facade::configuration_receipts_wait_for_durability_and_joint_then_final_commit ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9224914Z test node_facade::configuration_rejects_static_wire_before_persistence_even_with_host_authorization ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9243422Z test node_facade::configuration_shutdown_and_abort_preserve_unknown_outputs_and_ownership ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9266474Z test node_facade::configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9284256Z test node_facade::configuration_written_storage_failure_retains_unknown_receipt_for_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9290269Z test node_facade::constructor_requires_connections_for_rollback_reachable_recovered_learners ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9298785Z test node_facade::constructor_requires_voter_store_authorization_and_returns_original_parts_before_poll ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9538616Z test node_facade::delayed_readiness_and_restarted_peer_session_cannot_promote_through_owned_node ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9563995Z test node_facade::event_reporting::failed_event_sink_cannot_change_original_write_read_or_shutdown ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9601961Z test node_facade::facade_exact_client_and_read_outputs_hold_shutdown_until_consumer_completion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9603738Z test node_facade::maintenance_result_is_scoped_retained_and_part_of_shutdown ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9618900Z test node_facade::member_receive_modes_require_selected_wire_before_node_service_or_persistence ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9636637Z test node_facade::membership_routes_are_preflighted_and_rejections_return_owned_routes ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9645033Z test node_facade::node_retains_pin_checked_routes_across_live_poll_and_drain_and_rejects_withdrawal ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9679839Z test native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9704840Z test node_facade::provider_failure_fences_node_and_returns_unknown_with_original_selected_resources ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9707151Z test node_facade::queued_configuration_rechecks_authorization_and_default_poll_denies_it ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9712366Z test node_facade::route_plan_constructor_failure_returns_hints_and_leaves_owner_policy_uninstalled ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9714702Z test node_facade::refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9770332Z test node_facade::selected_host_placement_is_rechecked_at_execution_and_preserves_core_gates ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9776724Z test node_facade::stalled_accepted_write_keeps_quiescing_until_abort_and_returns_retained_original_lease ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9778602Z test node_facade::uncertain_maintenance_preserves_earlier_reply_and_failed_result ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9781090Z test node_facade::unknown_and_closed_admission_return_original_command_allocation_and_instances_shutdown_independently ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9802947Z test node_facade::unsupported_and_rejected_maintenance_preserve_running_service ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9826915Z test node_facade::unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_io ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9828453Z test node_facade::selected_transport_capacity_rechecks_version_and_roster_budgets_before_persistence ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9847447Z test node_facade::witness_controls_require_authority_wire_before_admission_and_close_with_node ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9849175Z test node_facade::wrong_maintenance_receipt_fences_without_losing_original_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9852943Z test peer_driver::binding_time_and_budget_errors_do_not_poll_provider_or_fence_owner ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9854974Z test peer_driver::bounded_staging_covers_whole_outbound_queue_so_one_stalled_peer_cannot_pin_other_peer_admission ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9858955Z test peer_driver::close_resolves_staged_work_but_waits_for_accepted_send_and_preserves_other_instance ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9863378Z test peer_driver::closing_connecting_driver_waits_for_actual_provider_receipts_before_reclaim ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9874089Z test peer_driver::construction_returns_selected_parts_on_route_or_budget_failure_without_closing_host_resources ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9877432Z test peer_driver::closing_network_resolves_queued_outbound_on_poll_without_closing_host_queue ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9894541Z test peer_driver::expired_attempt_retains_provider_slot_and_late_session_cannot_attach_or_spend_replacement_generation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9896278Z test peer_driver::explicit_disconnect_cancels_exact_attempt_and_other_peer_can_attach ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9897455Z test peer_driver::discovery_misses_back_off_without_fencing_but_invalid_scope_is_terminal ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9898701Z test peer_driver::failed_local_owner_can_drain_network_and_cancel_held_ingress_without_core_access ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9903414Z test peer_driver::local_configuration_admission_uses_retained_pins_and_prevents_queued_route_withdrawal ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9906433Z test peer_driver::invalid_factory_transport_is_aborted_and_fences_before_any_raft_or_send_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9907550Z test peer_driver::membership_removal_cancels_attempts_but_waits_for_obsolete_provider_receipts ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9910809Z test peer_driver::membership_removal_discards_held_input_and_completes_accepted_and_staged_output ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9912328Z test peer_driver::mis_scoped_connector_receipt_fences_and_closes_returned_session_for_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9917854Z test peer_driver::mis_scoped_transport_completion_keeps_exact_queue_payload_until_explicit_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9927986Z test peer_driver::oversized_outbound_poll_is_quarantined_whole_with_credits_until_explicit_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9938873Z test peer_driver::planned_retirement_waits_for_only_that_peers_original_outbound_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9941823Z test peer_driver::owned_route_plan_checks_pins_retains_queued_dependencies_and_rejects_stale_budget_restore ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9944207Z test peer_driver::prospective_routes_check_credentials_and_capacity_without_changing_roster_or_clock ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9948304Z test peer_driver::public_host_reactor_attaches_and_keeps_blocked_peer_credits_while_other_peer_and_ingress_progress ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9950786Z test peer_driver::rejected_queue_completion_returns_original_payload_and_holds_credit_for_recovery ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9952120Z test peer_driver::wrong_outbound_terminal_ticket_fences_instead_of_publishing_unscoped_local_completion ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9953766Z test peer_driver::retained_plan_connects_only_after_valid_witness_reply_and_preserves_live_bindings ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9955440Z test prospective_fanout_rejection_returns_input_without_ticket_or_fencing ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9969175Z test read_invocations::cancellation_before_read_step_keeps_capacity_and_cancels_ready_without_catchup ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9998411Z test read_invocations::admission_correlates_original_queries_and_retains_credits_through_consumer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:38.9999908Z test read_invocations::failed_construction_returns_selected_execution_owner_and_held_result ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0001303Z test read_invocations::current_output_bound_is_revalidated_before_executing_an_admitted_query ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0003061Z test read_invocations::fresh_owner_uses_live_core_read_floor_and_abort_preserves_completed_success ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0015906Z test read_invocations::lagging_ready_read_retries_and_cancelled_wait_does_not_execute_query ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0027438Z test read_invocations::per_group_retention_budget_leaves_other_groups_and_close_drains_accepted_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0052450Z test read_invocations::queued_cancel_is_exact_and_cannot_cancel_a_subsequent_read ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0067606Z test read_invocations::runtime_rejection_preserves_original_query_without_spending_ticket ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0075916Z test read_results::application_catchup_retries_without_consuming_query_or_barrier ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0078971Z test read_invocations::stale_queued_read_step_returns_exact_not_read_and_id_exhaustion_never_wraps ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0087970Z test read_results::global_byte_backpressure_and_wrong_effect_do_not_run_application ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0092623Z test read_results::nested_capacity_and_result_bound_reject_before_callback_and_wrong_runtime_is_intact ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0105286Z test read_results::per_group_overload_retains_original_query_and_other_group_progresses ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0106768Z test read_results::original_read_is_one_use_and_poll_keeps_allocation_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0117322Z test read_results::query_failure_consumes_authority_but_invalid_provider_fences_without_success ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0122097Z test replica_driver::assembly_rejects_missing_or_lagging_application_and_held_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0123731Z test replica_driver::invalid_accepted_send_ticket_fences_and_external_payload_stays_provider_owned ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0147428Z test replica_driver::overloaded_wal_retains_exact_leases_and_written_cannot_publish_applied ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0190421Z test replica_driver::public_host_components_drive_exact_applied_and_original_read_with_consumer_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0200230Z test replica_driver::snapshot_retry_policy_is_bounded_and_rejects_without_mutation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0210642Z test replica_driver::wrong_binding_clock_and_budget_reject_before_provider_poll_and_can_resume ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0230503Z test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0252061Z test snapshot_routes::bounded_routing_and_wrong_binding_reject_before_transfer ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0253567Z test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0257445Z test snapshot_routes::invalid_accepted_ticket_fences_but_returns_original_lease_for_discard ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0259111Z test snapshot_routes::oversized_provider_result_fences_and_releases_only_router_owned_payload ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0270412Z test snapshot_routes::recovery_budget::byte_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0280922Z test snapshot_routes::recovery_budget::checkpoint_publication_and_reconciliation_bypass_full_recovery_quota ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0305236Z test snapshot_routes::recovery_budget::count_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0322861Z test snapshot_routes::recovery_budget::oversized_recovery_and_invalid_limits_are_rejected_before_preparation ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0352024Z test snapshot_routes::recovery_budget::provider_refusal_and_failed_owner_discard_release_only_their_credits ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0353667Z test snapshot_routes::rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0356684Z test snapshot_routes::reservation::competing_snapshot_leases_release_speculation_and_all_finish ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0361708Z test snapshot_routes::reservation::rejected_worker_releases_only_speculation_and_retry_restores_budget ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:39.0858003Z test replica_driver::failed_worker_fences_without_applied_and_explicit_cleanup_releases_rejected_work ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:28:57.5924082Z test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9790493Z test native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups ... ok
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9792705Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9793022Z failures:
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9793248Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9793614Z ---- native::automatic_hundred_group_checkpoints_reclaim_and_reopen stdout ----
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9793991Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9794384Z thread 'native::automatic_hundred_group_checkpoints_reclaim_and_reopen' (21848) panicked at tests/support/native_node.rs:102:9:
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9794957Z facade progress timed out
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9795307Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9795608Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9795612Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9795689Z failures:
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9795961Z     native::automatic_hundred_group_checkpoints_reclaim_and_reopen
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9796225Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9796486Z test result: FAILED. 152 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 61.50s
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9796854Z 
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9843525Z error: test failed, to rerun pass `--test effect_owner`
+Rust on ubuntu-latest	Run cargo test --locked --offline --all-features	2026-10-10T03:29:20.9875960Z ##[error]Process completed with exit code 101.
