@@ -13600,3 +13600,62 @@ fails: production diagnostics fell from41 to35; core-only has25 production plus
 suppressed, thresholds raised or failing lint presented as a successful check.
 The next work remains the outstanding native/runtime/consensus/transfer findings,
 followed by fixture cleanup; the macro feature roadmap is unchanged.
+
+## Native lint cleanup — schema plan
+
+Next: keep native formats, budgets and ownership unchanged while separating
+observation validation from adoption, checkpoint framing from per-group decode,
+mutation envelope from create/snapshot/suffix payload decode, and QUIC setup and
+datagram progress. The observation helper retains negative-read invalidation and
+returns the caller's original owned outcome on rejection. Decode helpers share
+the same bounded cursor; no validation is dropped or reordered. QUIC helpers
+borrow the existing buffers/session/progress and preserve the exact skip/error
+paths and per-poll budgets. The worker split keeps the exact admitted ticket union,
+barrier scope validation and terminal completion/fencing behavior. No new public
+provider, thread, state schema or durability token. Check discovery, log-store,
+checkpoint/reclaim, QUIC, worker/shared-barrier and native service recovery tests.
+This advances the current lint deliverable under all macro milestones; startup
+and wire construction/dispatch are the next native pieces if findings remain.
+
+The first decoder extraction selected the encoder's same-named mutation method.
+Compilation caught the incorrect selection before validation. Restored that file
+from the unchanged committed source and narrowed the selector to the full decoder
+signature; no protocol or guard was changed to accommodate the error.
+
+Native validation exposed a startup fixture that wrapped Counter without forwarding
+its deployment_requirements contract. The default deliberately refuses membership
+use, so admission rejected the fixture before the expected transport-size check.
+The fix forwards the existing Counter contract; production admission and the
+expected oversized transport refusal remain unchanged. Verify the failure against
+the committed source, then rerun startup and the affected native worker/discovery
+histories. This is a fixture contract repair, not a relaxed admission rule.
+
+## Native lint cleanup — implemented evidence
+
+Separated authority-observation checks from adoption; native checkpoint framing
+from group validation; native WAL mutation decoding into create/update, snapshot,
+suffix and entry parsing; QUIC transport configuration and datagram polling; and
+worker barrier completion from request accumulation. Existing byte formats,
+error ordering, one-datagram retention, I/O budgets, durable-ticket union and
+fencing rules are unchanged. No public API or persistence schema changed.
+
+Local validation with cargo +stable, --locked --offline:77 all-feature tests
+pass across ten affected targets (ballots, log_reclaim, log_store,
+lookup_discovery, quic, quic_connect, shared_barrier, startup, worker, and the two
+routed TCP/QUIC parent-independence/discovery histories). The native-only
+selection passes47 tests across six targets. The original startup failure was
+also reproduced in an isolated copy of committed HEAD before fixing the host
+fixture's missing deployment contract. Formatting and whitespace checks pass.
+Strict all-feature library Clippy still fails with29 production diagnostics,
+down from35; these are28 length violations and one complexity violation. Inline
+test and integration fixture cleanup is still outstanding. These results do not
+claim a clean full-repository lint or full-suite pass.
+
+Next mini-step: split native wire validation/encoding/decoding by existing RPC
+families, retaining version gates, cursor/budget ordering and exact errors; then
+split startup assembly while preserving resource cleanup. Dependencies are the
+current native contracts and existing wire/startup conformance cases. Acceptance
+is unchanged round-trip/malformed/version/budget tests, startup failure cleanup,
+and fewer strict diagnostics without new allowances. This continues the current
+maintainability deliverable supporting all macro milestones, before returning to
+the documented native metadata composition and public ingress deliverables.

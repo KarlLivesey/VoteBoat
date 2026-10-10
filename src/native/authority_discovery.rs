@@ -59,6 +59,92 @@ impl NativeAuthorityDiscovery {
             closed: false,
         })
     }
+    fn check_observation(
+        &mut self,
+        request: &ManifestLookup,
+        ticket: &ReadInvocationTicket,
+        outcome: &ReadOutcome<Option<ResponsibilityManifest>>,
+        now: MonoTime,
+    ) -> Result<Option<ManifestObservationId>, ManifestDiscoveryError> {
+        if self.closed {
+            return Err(ManifestDiscoveryError::Closed);
+        }
+        if now < self.now {
+            return Err(ManifestDiscoveryError::TimeWentBack);
+        }
+        if ticket.binding != self.binding
+            || ticket.group != request.locator.authority
+            || ticket.sequence == 0
+        {
+            return Err(ManifestDiscoveryError::WrongAuthority);
+        }
+        let (barrier, manifest) = match outcome {
+            ReadOutcome::Read {
+                barrier,
+                result: Ok(Some(manifest)),
+            } => (barrier, manifest),
+            ReadOutcome::Read {
+                barrier,
+                result: Ok(None),
+            } => {
+                if barrier.group() != request.locator.authority
+                    || barrier.request() != ticket.request
+                {
+                    return Err(ManifestDiscoveryError::WrongAuthority);
+                }
+                if self
+                    .cache
+                    .get(request.locator.responsibility)
+                    .is_some_and(|m| m.input().authority != request.locator.authority)
+                {
+                    return Err(ManifestDiscoveryError::WrongAuthority);
+                }
+                if ticket.sequence <= self.highest_sequence {
+                    return Err(ManifestDiscoveryError::StaleObservation);
+                }
+                if let Some(prior) = self.observations.get_mut(&request.locator.responsibility) {
+                    if barrier.index() < prior.barrier.index()
+                        || barrier.term() < prior.barrier.term()
+                    {
+                        return Err(ManifestDiscoveryError::StaleObservation);
+                    }
+                    prior.live = false;
+                }
+                self.highest_sequence = ticket.sequence;
+                self.now = now;
+                return Err(ManifestDiscoveryError::Missing);
+            }
+            _ => return Err(ManifestDiscoveryError::Unavailable),
+        };
+        if barrier.group() != request.locator.authority || barrier.request() != ticket.request {
+            return Err(ManifestDiscoveryError::WrongAuthority);
+        }
+        request.check(manifest)?;
+        if let Some(prior) = self.observations.get(&request.locator.responsibility) {
+            if barrier.index() < prior.barrier.index() || barrier.term() < prior.barrier.term() {
+                return Err(ManifestDiscoveryError::StaleObservation);
+            }
+            if *barrier == prior.barrier && ticket.sequence == prior.sequence {
+                if !prior.live
+                    || now >= prior.expires_at
+                    || self.cache.get(request.locator.responsibility) != Some(manifest)
+                {
+                    return Err(ManifestDiscoveryError::StaleObservation);
+                }
+                return Ok(Some(prior.id));
+            }
+        }
+        if ticket.sequence <= self.highest_sequence {
+            return Err(ManifestDiscoveryError::StaleObservation);
+        }
+        now.0
+            .checked_add(self.lifetime_ms)
+            .ok_or(ManifestDiscoveryError::Exhausted)?;
+        self.next
+            .checked_add(1)
+            .ok_or(ManifestDiscoveryError::Exhausted)?;
+        Ok(None)
+    }
     pub fn usage(&self) -> ManifestCacheUsage {
         self.cache.usage()
     }
@@ -78,88 +164,7 @@ impl NativeAuthorityDiscovery {
             ReadOutcome<Option<ResponsibilityManifest>>,
         ),
     > {
-        let check = (|| {
-            if self.closed {
-                return Err(ManifestDiscoveryError::Closed);
-            }
-            if now < self.now {
-                return Err(ManifestDiscoveryError::TimeWentBack);
-            }
-            if ticket.binding != self.binding
-                || ticket.group != request.locator.authority
-                || ticket.sequence == 0
-            {
-                return Err(ManifestDiscoveryError::WrongAuthority);
-            }
-            let (barrier, manifest) = match &outcome {
-                ReadOutcome::Read {
-                    barrier,
-                    result: Ok(Some(manifest)),
-                } => (barrier, manifest),
-                ReadOutcome::Read {
-                    barrier,
-                    result: Ok(None),
-                } => {
-                    if barrier.group() != request.locator.authority
-                        || barrier.request() != ticket.request
-                    {
-                        return Err(ManifestDiscoveryError::WrongAuthority);
-                    }
-                    if self
-                        .cache
-                        .get(request.locator.responsibility)
-                        .is_some_and(|m| m.input().authority != request.locator.authority)
-                    {
-                        return Err(ManifestDiscoveryError::WrongAuthority);
-                    }
-                    if ticket.sequence <= self.highest_sequence {
-                        return Err(ManifestDiscoveryError::StaleObservation);
-                    }
-                    if let Some(prior) = self.observations.get_mut(&request.locator.responsibility)
-                    {
-                        if barrier.index() < prior.barrier.index()
-                            || barrier.term() < prior.barrier.term()
-                        {
-                            return Err(ManifestDiscoveryError::StaleObservation);
-                        }
-                        prior.live = false;
-                    }
-                    self.highest_sequence = ticket.sequence;
-                    self.now = now;
-                    return Err(ManifestDiscoveryError::Missing);
-                }
-                _ => return Err(ManifestDiscoveryError::Unavailable),
-            };
-            if barrier.group() != request.locator.authority || barrier.request() != ticket.request {
-                return Err(ManifestDiscoveryError::WrongAuthority);
-            }
-            request.check(manifest)?;
-            if let Some(prior) = self.observations.get(&request.locator.responsibility) {
-                if barrier.index() < prior.barrier.index() || barrier.term() < prior.barrier.term()
-                {
-                    return Err(ManifestDiscoveryError::StaleObservation);
-                }
-                if *barrier == prior.barrier && ticket.sequence == prior.sequence {
-                    if !prior.live
-                        || now >= prior.expires_at
-                        || self.cache.get(request.locator.responsibility) != Some(manifest)
-                    {
-                        return Err(ManifestDiscoveryError::StaleObservation);
-                    }
-                    return Ok(Some(prior.id));
-                }
-            }
-            if ticket.sequence <= self.highest_sequence {
-                return Err(ManifestDiscoveryError::StaleObservation);
-            }
-            now.0
-                .checked_add(self.lifetime_ms)
-                .ok_or(ManifestDiscoveryError::Exhausted)?;
-            self.next
-                .checked_add(1)
-                .ok_or(ManifestDiscoveryError::Exhausted)?;
-            Ok(None)
-        })();
+        let check = self.check_observation(&request, &ticket, &outcome, now);
         match check {
             Err(error) => return Err((error, outcome)),
             Ok(Some(id)) => {

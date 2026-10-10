@@ -174,83 +174,7 @@ pub(super) fn decode(
     // Canonical validation uses the same mandatory logical transition guards as
     // normal replay, then restores the exact persisted revision/generation.
     for _ in 0..count {
-        let create = d.mutation(limits)?;
-        let LogMutation::Create(bootstrap) = &create else {
-            return Err(StorageError::Corrupt("checkpoint bootstrap"));
-        };
-        let group = bootstrap.group;
-        let revision =
-            LogRevision::new(d.u64()?).ok_or(StorageError::Corrupt("checkpoint revision"))?;
-        let generation =
-            LogGeneration::new(d.u64()?).ok_or(StorageError::Corrupt("checkpoint generation"))?;
-        if generation.get() > revision.get() || revision.get() > sequence {
-            return Err(StorageError::Corrupt("checkpoint generation/revision"));
-        }
-        let origin = if extended {
-            decode_origin(&mut d)?
-        } else {
-            None
-        };
-        let mut one = BTreeMap::new();
-        apply_batch(&mut one, &[create], limits)
-            .map_err(|_| StorageError::Corrupt("checkpoint bootstrap validation"))?;
-        let has_snapshot = match d.u8()? {
-            0 => false,
-            1 => true,
-            _ => return Err(StorageError::Corrupt("checkpoint snapshot flag")),
-        };
-        let mut snapshot_hard = None;
-        if has_snapshot {
-            let mut snapshot = d.mutation(limits)?;
-            if !matches!(&snapshot, LogMutation::Update(u) if u.group == group && u.snapshot.is_some())
-            {
-                return Err(StorageError::Corrupt("checkpoint snapshot record"));
-            }
-            if extended {
-                snapshot_hard = Some(mask_ballot(&mut snapshot)?);
-            }
-            apply_batch(&mut one, &[snapshot], limits)
-                .map_err(|_| StorageError::Corrupt("checkpoint snapshot validation"))?;
-        }
-        let mut suffix = d.mutation(limits)?;
-        if !matches!(&suffix, LogMutation::Update(u) if u.group == group && u.snapshot.is_none() && u.suffix.as_ref().is_some_and(|s| s.from == one[&group].base_index() + 1))
-        {
-            return Err(StorageError::Corrupt("checkpoint suffix record"));
-        }
-        let hard = if extended {
-            Some(mask_ballot(&mut suffix)?)
-        } else {
-            None
-        };
-        apply_batch(&mut one, &[suffix], limits)
-            .map_err(|_| StorageError::Corrupt("checkpoint suffix validation"))?;
-        let mut s = one.remove(&group).unwrap();
-        if let Some(hard) = hard {
-            if snapshot_hard.is_some_and(|previous| previous != hard) {
-                return Err(StorageError::Corrupt("checkpoint hard-state mismatch"));
-            }
-            s.hard_state = hard;
-            s.ballot_origin = origin;
-            s.validate_ballot()
-                .map_err(|_| StorageError::Corrupt("checkpoint historical ballot"))?;
-        }
-        if revision.get() == 1
-            && (has_snapshot
-                || s.hard_state
-                    != crate::contracts::HardState {
-                        term: 0,
-                        voted_for: None,
-                    }
-                || s.commit_index != 0
-                || !s.entries.is_empty())
-        {
-            return Err(StorageError::Corrupt("checkpoint initial revision"));
-        }
-        if has_snapshot && generation.get() < 2 {
-            return Err(StorageError::Corrupt("checkpoint snapshot generation"));
-        }
-        s.revision = revision;
-        s.generation = generation;
+        let (group, s) = decode_group(&mut d, limits, extended, sequence)?;
         if result.keys().any(|g: &GroupIdentity| g.id == group.id)
             || result.insert(group, s).is_some()
         {
@@ -261,6 +185,88 @@ pub(super) fn decode(
         return Err(StorageError::Corrupt("checkpoint trailing payload"));
     }
     Ok((sequence, result, size))
+}
+
+fn decode_group(
+    d: &mut Decoder<'_>,
+    limits: LogLimits,
+    extended: bool,
+    sequence: u64,
+) -> Result<(GroupIdentity, GroupLog), StorageError> {
+    let create = d.mutation(limits)?;
+    let LogMutation::Create(bootstrap) = &create else {
+        return Err(StorageError::Corrupt("checkpoint bootstrap"));
+    };
+    let group = bootstrap.group;
+    let revision =
+        LogRevision::new(d.u64()?).ok_or(StorageError::Corrupt("checkpoint revision"))?;
+    let generation =
+        LogGeneration::new(d.u64()?).ok_or(StorageError::Corrupt("checkpoint generation"))?;
+    if generation.get() > revision.get() || revision.get() > sequence {
+        return Err(StorageError::Corrupt("checkpoint generation/revision"));
+    }
+    let origin = if extended { decode_origin(d)? } else { None };
+    let mut one = BTreeMap::new();
+    apply_batch(&mut one, &[create], limits)
+        .map_err(|_| StorageError::Corrupt("checkpoint bootstrap validation"))?;
+    let has_snapshot = match d.u8()? {
+        0 => false,
+        1 => true,
+        _ => return Err(StorageError::Corrupt("checkpoint snapshot flag")),
+    };
+    let mut snapshot_hard = None;
+    if has_snapshot {
+        let mut snapshot = d.mutation(limits)?;
+        if !matches!(&snapshot, LogMutation::Update(u) if u.group == group && u.snapshot.is_some())
+        {
+            return Err(StorageError::Corrupt("checkpoint snapshot record"));
+        }
+        if extended {
+            snapshot_hard = Some(mask_ballot(&mut snapshot)?);
+        }
+        apply_batch(&mut one, &[snapshot], limits)
+            .map_err(|_| StorageError::Corrupt("checkpoint snapshot validation"))?;
+    }
+    let mut suffix = d.mutation(limits)?;
+    if !matches!(&suffix, LogMutation::Update(u) if u.group == group && u.snapshot.is_none() && u.suffix.as_ref().is_some_and(|s| s.from == one[&group].base_index() + 1))
+    {
+        return Err(StorageError::Corrupt("checkpoint suffix record"));
+    }
+    let hard = if extended {
+        Some(mask_ballot(&mut suffix)?)
+    } else {
+        None
+    };
+    apply_batch(&mut one, &[suffix], limits)
+        .map_err(|_| StorageError::Corrupt("checkpoint suffix validation"))?;
+    let mut s = one.remove(&group).unwrap();
+    if let Some(hard) = hard {
+        if snapshot_hard.is_some_and(|previous| previous != hard) {
+            return Err(StorageError::Corrupt("checkpoint hard-state mismatch"));
+        }
+        s.hard_state = hard;
+        s.ballot_origin = origin;
+        s.validate_ballot()
+            .map_err(|_| StorageError::Corrupt("checkpoint historical ballot"))?;
+    }
+    if revision.get() == 1
+        && (has_snapshot
+            || s.hard_state
+                != crate::contracts::HardState {
+                    term: 0,
+                    voted_for: None,
+                }
+            || s.commit_index != 0
+            || !s.entries.is_empty())
+    {
+        return Err(StorageError::Corrupt("checkpoint initial revision"));
+    }
+    if has_snapshot && generation.get() < 2 {
+        return Err(StorageError::Corrupt("checkpoint snapshot generation"));
+    }
+    s.revision = revision;
+    s.generation = generation;
+    Ok((group, s))
 }
 
 /// Mandatory logical validation also runs on host codec results. Encoding is

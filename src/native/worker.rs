@@ -364,6 +364,18 @@ fn persist_window<L: LogStore>(
             }
         }
     }
+    finish_persist_window(store, fenced, tickets, pending, window_failure, out, wake);
+}
+
+fn finish_persist_window<L: LogStore>(
+    store: &mut L,
+    fenced: &mut bool,
+    tickets: Vec<LogTicket>,
+    pending: Vec<PendingBarrier>,
+    window_failure: Option<StorageError>,
+    out: &SyncSender<WorkerEvent>,
+    wake: &dyn WorkerWake,
+) {
     if pending.is_empty() {
         return;
     }

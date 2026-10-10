@@ -798,141 +798,154 @@ impl<'a> Decoder<'a> {
         let kind = self.u8()?;
         let group = self.group()?;
         match kind {
-            0 => {
-                let configuration = ConfigurationId::new(self.u64()?)
-                    .ok_or(StorageError::Corrupt("zero configuration"))?;
-                let tree = self.tree(0, &mut 0)?;
-                let policy = Policy::new(tree, PolicyLimits::default())
-                    .map_err(|_| StorageError::Corrupt("invalid policy"))?;
-                let count = self.u32()? as usize;
-                if count != policy.voters().len() {
-                    return Err(StorageError::Corrupt("voter identity count"));
-                }
-                let mut voter_stores = BTreeMap::new();
-                for _ in 0..count {
-                    let node =
-                        NodeId::new(self.u64()?).ok_or(StorageError::Corrupt("zero voter"))?;
-                    let id =
-                        StoreId::new(self.u128()?).ok_or(StorageError::Corrupt("zero store"))?;
-                    let incarnation = StoreIncarnation::new(self.u64()?)
-                        .ok_or(StorageError::Corrupt("zero store incarnation"))?;
-                    if voter_stores
-                        .insert(node, StoreIdentity { id, incarnation })
-                        .is_some()
-                    {
-                        return Err(StorageError::Corrupt("duplicate voter identity"));
-                    }
-                }
-                Ok(LogMutation::Create(Bootstrap {
-                    group,
-                    configuration,
-                    policy,
-                    voter_stores,
-                }))
-            }
-            1..=3 => {
-                let expected_revision =
-                    LogRevision::new(self.u64()?).ok_or(StorageError::Corrupt("zero revision"))?;
-                let hard_state = crate::contracts::HardState {
-                    term: self.u64()?,
-                    voted_for: NodeId::new(self.u64()?),
-                };
-                let commit_index = self.u64()?;
-                if kind == 2 || kind == 3 {
-                    let store = StoreIdentity {
-                        id: StoreId::new(self.u128()?)
-                            .ok_or(StorageError::Corrupt("zero snapshot store"))?,
-                        incarnation: StoreIncarnation::new(self.u64()?)
-                            .ok_or(StorageError::Corrupt("zero snapshot store incarnation"))?,
-                    };
-                    let reference = crate::snapshot::SnapshotRef {
-                        store,
-                        group: self.group()?,
-                        generation: SnapshotGeneration::new(self.u64()?)
-                            .ok_or(StorageError::Corrupt("zero snapshot generation"))?,
-                        configuration: ConfigurationId::new(self.u64()?)
-                            .ok_or(StorageError::Corrupt("zero snapshot configuration"))?,
-                        index: self.u64()?,
-                        term: self.u64()?,
-                        application_schema: self.u64()?,
-                        file_bytes: self.u64()?,
-                        checksum: self.u32()?,
-                    };
-                    return Ok(LogMutation::Update(LogUpdate {
-                        snapshot_membership: if kind == 3 {
-                            Some(Box::new(self.membership(reference.index)?))
-                        } else {
-                            None
-                        },
-                        group,
-                        expected_revision,
-                        hard_state,
-                        commit_index,
-                        suffix: None,
-                        snapshot: Some(reference),
-                    }));
-                }
-                let suffix = match self.u8()? {
-                    0 => None,
-                    1 => {
-                        let from = self.u64()?;
-                        let count = self.u32()? as usize;
-                        if count > limits.max_entries_per_group
-                            || count > self.b.len().saturating_sub(self.offset) / 17
-                        {
-                            return Err(StorageError::Corrupt("entry count budget"));
-                        }
-                        let mut entries = Vec::new();
-                        for _ in 0..count {
-                            let index = self.u64()?;
-                            let term = self.u64()?;
-                            let payload = match self.u8()? {
-                                0 => EntryPayload::Noop,
-                                2 => {
-                                    let record = self.configuration_record()?;
-                                    if record.retained_bytes() > limits.max_command_bytes {
-                                        return Err(StorageError::Corrupt(
-                                            "configuration payload budget",
-                                        ));
-                                    }
-                                    EntryPayload::Configuration(Box::new(record))
-                                }
-                                1 => {
-                                    let operation = OperationId::new(self.u128()?)
-                                        .ok_or(StorageError::Corrupt("zero operation"))?;
-                                    let len = self.u32()? as usize;
-                                    if len > limits.max_command_bytes {
-                                        return Err(StorageError::Corrupt("command budget"));
-                                    }
-                                    EntryPayload::Command {
-                                        operation,
-                                        bytes: self.take(len)?.to_vec(),
-                                    }
-                                }
-                                _ => return Err(StorageError::Corrupt("entry kind")),
-                            };
-                            entries.push(LogEntry {
-                                index,
-                                term,
-                                payload,
-                            });
-                        }
-                        Some(Suffix { from, entries })
-                    }
-                    _ => return Err(StorageError::Corrupt("suffix flag")),
-                };
-                Ok(LogMutation::Update(LogUpdate {
-                    snapshot_membership: None,
-                    group,
-                    expected_revision,
-                    hard_state,
-                    commit_index,
-                    suffix,
-                    snapshot: None,
-                }))
-            }
+            0 => self.mutation_create(group),
+            1..=3 => self.mutation_update(kind, group, limits),
             _ => Err(StorageError::Corrupt("mutation kind")),
         }
+    }
+    fn mutation_create(&mut self, group: GroupIdentity) -> Result<LogMutation, StorageError> {
+        let configuration =
+            ConfigurationId::new(self.u64()?).ok_or(StorageError::Corrupt("zero configuration"))?;
+        let tree = self.tree(0, &mut 0)?;
+        let policy = Policy::new(tree, PolicyLimits::default())
+            .map_err(|_| StorageError::Corrupt("invalid policy"))?;
+        let count = self.u32()? as usize;
+        if count != policy.voters().len() {
+            return Err(StorageError::Corrupt("voter identity count"));
+        }
+        let mut voter_stores = BTreeMap::new();
+        for _ in 0..count {
+            let node = NodeId::new(self.u64()?).ok_or(StorageError::Corrupt("zero voter"))?;
+            let id = StoreId::new(self.u128()?).ok_or(StorageError::Corrupt("zero store"))?;
+            let incarnation = StoreIncarnation::new(self.u64()?)
+                .ok_or(StorageError::Corrupt("zero store incarnation"))?;
+            if voter_stores
+                .insert(node, StoreIdentity { id, incarnation })
+                .is_some()
+            {
+                return Err(StorageError::Corrupt("duplicate voter identity"));
+            }
+        }
+        Ok(LogMutation::Create(Bootstrap {
+            group,
+            configuration,
+            policy,
+            voter_stores,
+        }))
+    }
+    fn mutation_update(
+        &mut self,
+        kind: u8,
+        group: GroupIdentity,
+        limits: LogLimits,
+    ) -> Result<LogMutation, StorageError> {
+        let expected_revision =
+            LogRevision::new(self.u64()?).ok_or(StorageError::Corrupt("zero revision"))?;
+        let hard_state = crate::contracts::HardState {
+            term: self.u64()?,
+            voted_for: NodeId::new(self.u64()?),
+        };
+        let commit_index = self.u64()?;
+        if kind == 2 || kind == 3 {
+            let reference = self.snapshot_reference()?;
+            return Ok(LogMutation::Update(LogUpdate {
+                snapshot_membership: if kind == 3 {
+                    Some(Box::new(self.membership(reference.index)?))
+                } else {
+                    None
+                },
+                group,
+                expected_revision,
+                hard_state,
+                commit_index,
+                suffix: None,
+                snapshot: Some(reference),
+            }));
+        }
+        let suffix = self.mutation_suffix(limits)?;
+        Ok(LogMutation::Update(LogUpdate {
+            snapshot_membership: None,
+            group,
+            expected_revision,
+            hard_state,
+            commit_index,
+            suffix,
+            snapshot: None,
+        }))
+    }
+    fn snapshot_reference(&mut self) -> Result<crate::snapshot::SnapshotRef, StorageError> {
+        let store = StoreIdentity {
+            id: StoreId::new(self.u128()?).ok_or(StorageError::Corrupt("zero snapshot store"))?,
+            incarnation: StoreIncarnation::new(self.u64()?)
+                .ok_or(StorageError::Corrupt("zero snapshot store incarnation"))?,
+        };
+        let reference = crate::snapshot::SnapshotRef {
+            store,
+            group: self.group()?,
+            generation: SnapshotGeneration::new(self.u64()?)
+                .ok_or(StorageError::Corrupt("zero snapshot generation"))?,
+            configuration: ConfigurationId::new(self.u64()?)
+                .ok_or(StorageError::Corrupt("zero snapshot configuration"))?,
+            index: self.u64()?,
+            term: self.u64()?,
+            application_schema: self.u64()?,
+            file_bytes: self.u64()?,
+            checksum: self.u32()?,
+        };
+        Ok(reference)
+    }
+    fn mutation_suffix(&mut self, limits: LogLimits) -> Result<Option<Suffix>, StorageError> {
+        let suffix = match self.u8()? {
+            0 => None,
+            1 => {
+                let from = self.u64()?;
+                let count = self.u32()? as usize;
+                if count > limits.max_entries_per_group
+                    || count > self.b.len().saturating_sub(self.offset) / 17
+                {
+                    return Err(StorageError::Corrupt("entry count budget"));
+                }
+                let mut entries = Vec::new();
+                for _ in 0..count {
+                    entries.push(self.mutation_entry(limits)?);
+                }
+                Some(Suffix { from, entries })
+            }
+            _ => return Err(StorageError::Corrupt("suffix flag")),
+        };
+        Ok(suffix)
+    }
+    fn mutation_entry(&mut self, limits: LogLimits) -> Result<LogEntry, StorageError> {
+        let index = self.u64()?;
+        let term = self.u64()?;
+        let payload = match self.u8()? {
+            0 => EntryPayload::Noop,
+            2 => {
+                let record = self.configuration_record()?;
+                if record.retained_bytes() > limits.max_command_bytes {
+                    return Err(StorageError::Corrupt("configuration payload budget"));
+                }
+                EntryPayload::Configuration(Box::new(record))
+            }
+            1 => {
+                let operation = OperationId::new(self.u128()?)
+                    .ok_or(StorageError::Corrupt("zero operation"))?;
+                let len = self.u32()? as usize;
+                if len > limits.max_command_bytes {
+                    return Err(StorageError::Corrupt("command budget"));
+                }
+                EntryPayload::Command {
+                    operation,
+                    bytes: self.take(len)?.to_vec(),
+                }
+            }
+            _ => return Err(StorageError::Corrupt("entry kind")),
+        };
+        Ok(LogEntry {
+            index,
+            term,
+            payload,
+        })
     }
     fn configuration(&mut self) -> Result<crate::membership::Configuration, StorageError> {
         let id =

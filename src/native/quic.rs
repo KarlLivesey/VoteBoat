@@ -72,6 +72,28 @@ pub struct NativeQuicSession {
     close_started: bool,
     peer_closed: bool,
 }
+fn bounded_transport(limits: SessionLimits) -> Result<Arc<TransportConfig>, SessionError> {
+    let mut transport = TransportConfig::default();
+    transport
+        .max_concurrent_bidi_streams(0u32.into())
+        .max_idle_timeout(Some(
+            Duration::from_secs(5)
+                .try_into()
+                .map_err(|_| SessionError::InvalidLimits)?,
+        ))
+        .max_concurrent_uni_streams(1u32.into())
+        .stream_receive_window((limits.write_buffer_bytes as u32).into())
+        .receive_window((limits.write_buffer_bytes as u32).into())
+        .send_window(limits.write_buffer_bytes as u64)
+        .crypto_buffer_size(limits.handshake_bytes)
+        .initial_mtu(MTU as u16)
+        .mtu_discovery_config(None)
+        .enable_segmentation_offload(false)
+        .datagram_receive_buffer_size(None)
+        .datagram_send_buffer_size(0)
+        .allow_spin(false);
+    Ok(Arc::new(transport))
+}
 impl NativeQuicSession {
     pub fn client(
         socket: UdpSocket,
@@ -124,26 +146,7 @@ impl NativeQuicSession {
                 .checked_add(limits.handshake_timeout_ms)
                 .ok_or(SessionError::InvalidLimits)?,
         );
-        let mut transport = TransportConfig::default();
-        transport
-            .max_concurrent_bidi_streams(0u32.into())
-            .max_idle_timeout(Some(
-                Duration::from_secs(5)
-                    .try_into()
-                    .map_err(|_| SessionError::InvalidLimits)?,
-            ))
-            .max_concurrent_uni_streams(1u32.into())
-            .stream_receive_window((limits.write_buffer_bytes as u32).into())
-            .receive_window((limits.write_buffer_bytes as u32).into())
-            .send_window(limits.write_buffer_bytes as u64)
-            .crypto_buffer_size(limits.handshake_bytes)
-            .initial_mtu(MTU as u16)
-            .mtu_discovery_config(None)
-            .enable_segmentation_offload(false)
-            .datagram_receive_buffer_size(None)
-            .datagram_send_buffer_size(0)
-            .allow_spin(false);
-        let transport = Arc::new(transport);
+        let transport = bounded_transport(limits)?;
         let mut tls_client = (*config.client).clone();
         tls_client.alpn_protocols = vec![ALPN.to_vec()];
         let mut tls_server = (*config.server).clone();
@@ -462,6 +465,103 @@ impl NativeQuicSession {
         }
         Ok(())
     }
+    fn poll_datagram_read(
+        &mut self,
+        instant: Instant,
+        budget: &SessionPollBudget,
+        progress: &mut SessionProgress,
+    ) -> Result<bool, SessionError> {
+        if budget.read_bytes - progress.read_bytes < MTU {
+            return Ok(false);
+        }
+        progress.io_calls += 1;
+        match self.socket.recv(&mut self.receive) {
+            Ok((n, remote)) => {
+                progress.read_bytes += n;
+                if remote != Some(self.options.remote) {
+                    return Ok(false);
+                }
+                if self.state == SessionState::Handshaking {
+                    self.handshake_read += n;
+                    if self.handshake_read > self.options.limits.handshake_bytes {
+                        return Err(SessionError::HandshakeTooLarge);
+                    }
+                }
+                self.scratch.clear();
+                let event = self.endpoint.handle(
+                    instant,
+                    self.options.remote,
+                    None,
+                    None,
+                    BytesMut::from(&self.receive[..n]),
+                    &mut self.scratch,
+                );
+                match event {
+                    Some(DatagramEvent::ConnectionEvent(handle, event)) => {
+                        if let Some((active, c)) = &mut self.connection {
+                            if *active == handle {
+                                c.handle_event(event);
+                            }
+                        }
+                    }
+                    Some(DatagramEvent::NewConnection(incoming)) if self.connection.is_none() => {
+                        self.connection = Some(
+                            self.endpoint
+                                .accept(incoming, instant, &mut self.scratch, None)
+                                .map_err(|_| SessionError::Authentication)?,
+                        );
+                    }
+                    Some(DatagramEvent::NewConnection(incoming)) => self.endpoint.ignore(incoming),
+                    Some(DatagramEvent::Response(_)) => (),
+                    None => (),
+                }
+                self.events(instant)?;
+                self.hello()?;
+            }
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => (),
+            Err(e) => return Err(SessionError::Io(e.kind())),
+        }
+        Ok(true)
+    }
+    fn poll_datagram_write(
+        &mut self,
+        instant: Instant,
+        budget: &SessionPollBudget,
+        progress: &mut SessionProgress,
+    ) -> Result<bool, SessionError> {
+        if self.pending.is_empty() {
+            if let Some((_, c)) = &mut self.connection {
+                if let Some(transmit) = c.poll_transmit(instant, 1, &mut self.pending) {
+                    if transmit.destination != self.options.remote
+                        || transmit.size > MTU
+                        || transmit.segment_size.is_some()
+                    {
+                        return Err(SessionError::Failed);
+                    }
+                    self.pending.truncate(transmit.size);
+                }
+            }
+        }
+        if self.pending.is_empty()
+            || self.pending.len() > budget.write_bytes - progress.written_bytes
+        {
+            return Ok(false);
+        }
+        progress.io_calls += 1;
+        match self.socket.send_to(&self.pending, self.options.remote) {
+            Ok(n) if n == self.pending.len() => {
+                progress.written_bytes += n;
+                if self.state == SessionState::Handshaking {
+                    self.handshake_written += n;
+                }
+                self.pending.clear();
+            }
+            Ok(_) => return Err(SessionError::Failed),
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => (),
+            Err(e) => return Err(SessionError::Io(e.kind())),
+        }
+        Ok(true)
+    }
     fn poll_inner(
         &mut self,
         now: MonoTime,
@@ -490,93 +590,13 @@ impl NativeQuicSession {
             // Alternate read/write; at most one datagram is retained on EAGAIN.
             let write = self.prefer_write;
             self.prefer_write = !self.prefer_write;
-            if !write {
-                if budget.read_bytes - progress.read_bytes < MTU {
-                    continue;
-                }
-                progress.io_calls += 1;
-                match self.socket.recv(&mut self.receive) {
-                    Ok((n, remote)) => {
-                        progress.read_bytes += n;
-                        if remote != Some(self.options.remote) {
-                            continue;
-                        }
-                        if self.state == SessionState::Handshaking {
-                            self.handshake_read += n;
-                            if self.handshake_read > self.options.limits.handshake_bytes {
-                                return Err(SessionError::HandshakeTooLarge);
-                            }
-                        }
-                        self.scratch.clear();
-                        let event = self.endpoint.handle(
-                            instant,
-                            self.options.remote,
-                            None,
-                            None,
-                            BytesMut::from(&self.receive[..n]),
-                            &mut self.scratch,
-                        );
-                        match event {
-                            Some(DatagramEvent::ConnectionEvent(handle, event)) => {
-                                if let Some((active, c)) = &mut self.connection {
-                                    if *active == handle {
-                                        c.handle_event(event);
-                                    }
-                                }
-                            }
-                            Some(DatagramEvent::NewConnection(incoming))
-                                if self.connection.is_none() =>
-                            {
-                                self.connection = Some(
-                                    self.endpoint
-                                        .accept(incoming, instant, &mut self.scratch, None)
-                                        .map_err(|_| SessionError::Authentication)?,
-                                );
-                            }
-                            Some(DatagramEvent::NewConnection(incoming)) => {
-                                self.endpoint.ignore(incoming)
-                            }
-                            Some(DatagramEvent::Response(_)) => (),
-                            None => (),
-                        }
-                        self.events(instant)?;
-                        self.hello()?;
-                    }
-                    Err(e) if e.kind() == io::ErrorKind::WouldBlock => (),
-                    Err(e) => return Err(SessionError::Io(e.kind())),
-                }
+            let check_handshake_budget = if write {
+                self.poll_datagram_write(instant, &budget, &mut progress)?
             } else {
-                if self.pending.is_empty() {
-                    if let Some((_, c)) = &mut self.connection {
-                        if let Some(transmit) = c.poll_transmit(instant, 1, &mut self.pending) {
-                            if transmit.destination != self.options.remote
-                                || transmit.size > MTU
-                                || transmit.segment_size.is_some()
-                            {
-                                return Err(SessionError::Failed);
-                            }
-                            self.pending.truncate(transmit.size);
-                        }
-                    }
-                }
-                if self.pending.is_empty()
-                    || self.pending.len() > budget.write_bytes - progress.written_bytes
-                {
-                    continue;
-                }
-                progress.io_calls += 1;
-                match self.socket.send_to(&self.pending, self.options.remote) {
-                    Ok(n) if n == self.pending.len() => {
-                        progress.written_bytes += n;
-                        if self.state == SessionState::Handshaking {
-                            self.handshake_written += n;
-                        }
-                        self.pending.clear();
-                    }
-                    Ok(_) => return Err(SessionError::Failed),
-                    Err(e) if e.kind() == io::ErrorKind::WouldBlock => (),
-                    Err(e) => return Err(SessionError::Io(e.kind())),
-                }
+                self.poll_datagram_read(instant, &budget, &mut progress)?
+            };
+            if !check_handshake_budget {
+                continue;
             }
             if self.handshake_read > self.options.limits.handshake_bytes
                 || self.handshake_written > self.options.limits.handshake_bytes

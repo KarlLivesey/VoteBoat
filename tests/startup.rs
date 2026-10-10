@@ -31,6 +31,9 @@ use voteboat::{
 struct HostApplication(Counter);
 impl StateMachine for HostApplication {
     type Receipt = CounterReceipt;
+    fn deployment_requirements(&self) -> Option<voteboat::raft::ReadinessRequirements> {
+        self.0.deployment_requirements()
+    }
     fn applied_index(&self) -> u64 {
         self.0.applied_index()
     }
