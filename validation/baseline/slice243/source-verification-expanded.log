@@ -1,0 +1,16 @@
+tests/counter_service.rs: OK
+tests/counter_service/write_recovery.rs: OK
+tests/counter_service/write_recovery/authentication.rs: OK
+tests/counter_service/read_failover.rs: OK
+tests/counter_service/peer_discovery.rs: OK
+src/bin/support/command_client.rs: OK
+src/bin/support/local_client.rs: OK
+Cargo.toml: OK
+Cargo.lock: OK
+docs/component-contracts.json: OK
+.githooks/pre-push: OK
+rust-toolchain.toml: OK
+examples/embedded_counter.rs: OK
+src/runtime/timed.rs: OK
+src/native/runtime.rs: OK
+src/bin/support/service_setup.rs: OK

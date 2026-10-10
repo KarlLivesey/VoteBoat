@@ -1,0 +1,7 @@
+strict 0
+operators 101
+counter-default 101
+library 0
+embedding-create 0
+embedding-retry 0
+embedding-fresh 0

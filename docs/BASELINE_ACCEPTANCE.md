@@ -1,5 +1,19 @@
 # Baseline acceptance map
 
+Direct native Mac verification: [slice243](../validation/baseline/slice243/README.md).
+Exact published source1e60e8a on arm64/macOS27.0/Rust1.98.0 passes focused write8,
+library71, formatting/four strict profiles and the durable Rust embedding7/retry7/
+fresh10 with worker joins. The broad default-concurrency operator run fails: counter
+65/131, directory9/13, transfer14/19; sequential default counter61/76 (passed/failed).
+Many counter diagnostics show repeated elections without a usable leader despite
+established peers. Two originally failing automatic-election TCP/QUIC histories
+pass unchanged with one test at a time. This narrows the investigation, not its
+exact cause or full acceptance. Source/host settings, synchronization, quorum and
+deadlines are unchanged. Original failed stores/logs remain for diagnosis; Linux
+197/138 and earlier CI remain separate. Next is concurrent Mac election progress,
+then status-wait cleanup and required integration. Feature/functional Linux/macOS
+work stays first; broader P0–P7 and later tuning/security remain open.
+
 Original write authentication-timeout recovery: [slice242](../validation/baseline/slice242/README.md).
 The caller accepts only the exact native deadline/interrupted pair, preserving
 scope, operation ID, delta and existing budget; other authentication and malformed

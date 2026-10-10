@@ -1,0 +1,7 @@
+1e60e8af1a1fc0080d167925c72ed5a071de0cf3
+arm64
+ProductName:		macOS
+ProductVersion:		27.0
+BuildVersion:		26A428
+cargo 1.98.0 (797e8a9bc 2026-08-05)
+rustc 1.98.0 (88d9e12ae 2026-08-18)

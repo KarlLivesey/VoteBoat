@@ -1,0 +1,38 @@
+Direct Mac checks in an isolated temporary Git checkout:
+git clone https://github.com/KarlLivesey/VoteBoat.git <task>/repo
+git checkout --detach 1e60e8af1a1fc0080d167925c72ed5a071de0cf3
+git rev-parse HEAD
+shasum -a 256 -c validation/baseline/slice242/source.sha256
+# After collection, feed the expanded slice243 manifest to the same Mac checkout:
+shasum -a 256 -c -
+# The local expanded manifest is supplied on SSH stdin.
+uname -m
+sw_vers
+cargo +stable --version
+rustc +stable --version
+cargo +stable fetch --locked
+
+Installed stable on this Mac is1.98.0; CI pins1.98.1. Results record this difference.
+All executable-spawning feature configurations are sequential, with no target
+overwrite during native tests. Later checks continue after recorded failures.
+The full operator/default invocations use libtest's default12 threads on this
+12-logical-CPU host. No test deadline, source or host limit is changed.
+
+cargo +stable test --locked --offline --all-features --test counter_service write_recovery
+.githooks/pre-push
+cargo +stable test --locked --offline --all-features --no-fail-fast --test counter_service --test directory_service --test transfer_service
+cargo +stable test --locked --offline --test counter_service
+cargo +stable test --locked --offline --all-features --lib
+cargo +stable run --locked --offline --all-features --example embedded_counter -- create <task>/embedded tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <task>/embedded tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <task>/embedded tests/fixtures/tls 2 3
+
+The operator/default, library and embedding invocations use TMPDIR=<task>/test-roots.
+The earlier focused write-recovery invocation uses the Mac's inherited TMPDIR.
+Task-scoped source/log/store directories are isolated from existing user checkouts.
+
+Focused diagnosis after all prior configurations finish:
+cargo +stable test --locked --offline --all-features --test counter_service authenticated_service_principals_scope_commands_and_recover -- --test-threads=1
+Only test concurrency changes. Source, application identity, network/storage
+providers, timings, caller bounds and TMPDIR match the broad checks. This selected
+comparison is not a replacement for the failing default-concurrency suites.

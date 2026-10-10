@@ -1,0 +1,6 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.03s
+     Running `target/debug/examples/embedded_counter create <mac-task>/embedded tests/fixtures/tls 1 7`
+outcome=Value(7) duplicate=false
+linearizable_value=7
+workers_joined=true

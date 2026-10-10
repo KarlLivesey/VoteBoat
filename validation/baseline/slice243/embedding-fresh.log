@@ -1,0 +1,5 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/examples/embedded_counter recover <mac-task>/embedded tests/fixtures/tls 2 3`
+outcome=Value(10) duplicate=false
+linearizable_value=10
+workers_joined=true

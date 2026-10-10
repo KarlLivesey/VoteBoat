@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "tested_revision": "1e60e8af1a1fc0080d167925c72ed5a071de0cf3",
+  "scope": "Direct native Mac platform validation and isolated comparison of automatic-election histories",
+  "production_behavior_change": false,
+  "new_public_seam": false,
+  "core_or_persistent_format_change": false,
+  "host_global_settings_changed": false,
+  "environment": {
+    "architecture": "arm64",
+    "os": "macOS27.0 build26A428",
+    "logical_cpus": 12,
+    "memory_gib": 96,
+    "cargo": "1.98.0 (797e8a9bc 2026-08-05)",
+    "rustc": "1.98.0 (88d9e12ae 2026-08-18)",
+    "ci_toolchain": "1.98.1",
+    "descriptor_soft_limit": 256,
+    "sampled_lsof_line_count": 21,
+    "descriptor_exhaustion_established": false
+  },
+  "validation": {
+    "source242_manifest": "all10 hashes pass",
+    "focused_write_recovery": {
+      "pass": 8,
+      "fail": 0,
+      "exit": 0
+    },
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "all_feature_operators": {
+      "exit": 101,
+      "counter": {
+        "pass": 65,
+        "fail": 131
+      },
+      "directory": {
+        "pass": 9,
+        "fail": 13
+      },
+      "transfer": {
+        "pass": 14,
+        "fail": 19
+      }
+    },
+    "default_counter": {
+      "pass": 61,
+      "fail": 76,
+      "exit": 101
+    },
+    "library": {
+      "pass": 71,
+      "fail": 0,
+      "exit": 0
+    },
+    "embedding": {
+      "create": {
+        "value": 7,
+        "duplicate": false,
+        "exit": 0
+      },
+      "cold_retry": {
+        "value": 7,
+        "duplicate": true,
+        "exit": 0
+      },
+      "cold_fresh": {
+        "value": 10,
+        "duplicate": false,
+        "exit": 0
+      },
+      "workers_joined": "all3 runs"
+    },
+    "isolated_original_startup": {
+      "pass": 2,
+      "fail": 0,
+      "exit": 0,
+      "test_threads": 1,
+      "source_or_deadline_change": false,
+      "before": "Both selected TCP/QUIC service-principal histories fail no leader in the broad run",
+      "interpretation": "Concurrent schedule affects the selected outcome; exact cause and broad platform acceptance remain unestablished"
+    },
+    "feature_configurations": "sequential",
+    "broad_concurrency": "libtest default on12-logical-CPU host, RUST_TEST_THREADS unset",
+    "expanded_source_manifest": "all16 hashes pass against immutable Mac checkout"
+  },
+  "failure_observations": {
+    "explicit_counter_leader_wait_failures": 72,
+    "counter_no_eligible_routing_mentions": 34,
+    "volatile_counter_roles": {
+      "Candidate": 80,
+      "Follower": 70
+    },
+    "evidence": "Local volatile observations, not authority, cause attribution or general liveness proof"
+  },
+  "source_manifest_sha256": "844b73dc5487b1aeebc585b8189326731577bace567df32d03131f9bdc85711c",
+  "publication": {
+    "private_local_logs": "target/slice243-macos-raw",
+    "private_mac_stores": "Retained task-scoped temporary checkout/test roots for diagnosis",
+    "normalization": "Task/workspace paths replaced; trailing whitespace and final blank lines removed"
+  },
+  "limits": "Selected native Mac paths pass; broad default-concurrency service suites fail. No full platform/P0-P7, performance or security completion. Linux242197/138 remains separate."
+}

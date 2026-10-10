@@ -1118,7 +1118,7 @@ receipt/data recovery and owned connection cleanup, exact refusal classification
 bounded deadline checks and zero formatting/four strict profiles. Do not infer
 consensus liveness from a successful retry classifier or widen timing budgets.
 
-Current243: verify the published source directly on the user's local Mac. Purpose:
+Implemented243: verify the published source directly on the user's local Mac. Purpose:
 advance functional macOS service and embedding acceptance without waiting on CI.
 Depend on authorized SSH access, an isolated Git checkout and installed Rust1.98;
 the supplied arm64 Mac runs macOS27.0 and has locked dependencies available.
@@ -1127,7 +1127,19 @@ and full counter operator checks, relevant Rust tests and strict formatting/lint
 Keep failures and diagnose their demonstrated cause; never substitute Linux passes
 for Mac evidence. Do not change an existing checkout or global machine settings.
 
-Next244: close status-wait admission/cleanup assumptions. Purpose: advance functional
+Current244: diagnose automatic election progress under concurrent Mac histories.
+Purpose: advance usable macOS service acceptance, whose ordinary auto-startup is
+required before optional lifecycle integration. Depend on exact-source243 failures,
+original candidate/term/peer diagnostics and existing timer/durable-vote contracts.
+Two originally failing TCP/QUIC histories pass unchanged with one test at a time;
+the broad12-thread suites still fail. Isolate completion/timer progress and confirm
+the cause before selecting a focused runtime or configurable assembly change.
+Completion requires a source-bound reproduction, original-operation/read/recovery
+and cleanup checks in the failing schedule, plus zero formatting/four strict profiles.
+Keep the broad failures; reduced-concurrency passes cannot replace them. No security
+review, performance claim or weaker synchronization/quorum is needed here.
+
+Next245: close status-wait admission/cleanup assumptions. Purpose: advance functional
 Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
 source237 read-release observations and public read/cancellation ticket ownership.
 Select and reproduce one actual failure before adding helpers. Completion requires
@@ -1169,6 +1181,56 @@ direct Mac access: exact-source native validation becomes the next deliverable,
 followed by status-wait recovery and a required integration gap. Feature completion
 and functional macOS/Linux remain first; full P0–P7, broader provider/lifecycle
 coverage and later tuning/security remain open.
+
+Implemented243 evidence: exact source1e60e8a and its source242 hashes are checked
+in an isolated clone on arm64/macOS27.0 with installed stable Rust1.98.0 (CI pins
+1.98.1). Focused write8 and library71 pass; formatting/four strict profiles are
+zero. The actual public Rust embedding creates7, cold-retries duplicate7 and
+cold-applies fresh10, joining workers every time. No code/provider/format, host
+setting, synchronization, quorum or deadline changes.
+
+The broad default-concurrency Mac run fails counter65/131, directory9/13 and
+transfer14/19; sequential default counter fails61/76 (passed/failed). Many retained
+counter diagnostics show repeated candidates/followers and no usable leader while
+peers are bound; they are volatile observations, not a cause or liveness proof.
+Both originally failing automatic-election/service-principal TCP/QUIC histories
+pass unchanged with --test-threads=1 after the earlier commands finish. That
+isolates a concurrency-sensitive outcome without clearing the broad failures.
+Original failed stores/logs remain in the owned temporary Mac checkout area for
+diagnosis, local raw logs remain under target, and no task VoteBoat processes
+remain after completed checks. See [slice243](../validation/baseline/slice243/README.md).
+
+Macro review243: direct Mac access removes the external platform-observation
+dependency, but exposes a functional auto-startup dependency under concurrent
+histories. Diagnose that actual election/completion schedule before status-wait
+or optional integration work. Keep selected embedding/static service passes and
+the broad failures distinct. The next deliverables are244 election progress,
+245 status-wait cleanup and one required operator gap. Full P0–P7 remains active;
+features/macOS/Linux functional acceptance remain first, tuning/security later.
+
+### Slice243 schema plan — exact-source native Mac verification
+
+Shape: source1e60e8af1a1fc0080d167925c72ed5a071de0cf3 is immutable test input.
+Use a fresh temporary Git clone on the supplied Mac, installed Rust1.98 and locked
+dependencies. Each command writes its own log and terminal exit code; publication
+records architecture, OS/toolchain, source and selected checks. No production
+API, persisted state or provider contract changes are needed for this deliverable.
+
+Transitions/ownership: prepare -> exact detached revision -> checks -> collect
+logs -> record pass/failure. Remote compilation and feature configurations run
+sequentially so executable replacement cannot invalidate running tests. Native
+tests retain their existing bounded socket/child/thread ownership. SSH owns only
+the task checkout and its logs; an observation timeout does not restart a command.
+Preserve failed test roots/logs for diagnosis, leave existing user checkouts and
+global settings untouched, and remove this task's temporary clone only after
+needed evidence has been collected. Stop on source/toolchain/dependency mismatch.
+
+Acceptance: verify manifest hashes and run formatting/four strict profiles,
+focused original-write TCP/QUIC histories, full counter/directory/transfer operator
+tests and Rust library tests. Record exact results, retain any failure and inspect
+its original diagnostics before a focused fix; preceding CI and Linux passes are
+separate. This advances the usable macOS service/embedding milestone. Status-wait
+cleanup and a required integration gap follow; performance/security stay later.
 
 ### Slice242 schema plan — original write recovery after authentication timeout
 
