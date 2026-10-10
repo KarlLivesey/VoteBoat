@@ -949,9 +949,161 @@ fn quic_child_writes_checkpoint_and_restart_without_parent_commits() {
 }
 
 use super::source_fixture;
+fn verify_frozen_export(
+    nodes: &[Node<source_fixture::Source>],
+    original_fence: voteboat::routed::OwnershipFence,
+    original_image: voteboat::scope::ScopeImage,
+) {
+    use voteboat::{bucket_counter::*, scope::*};
+    for n in nodes {
+        let source = &n.local().applications[&group(20)];
+        assert!(source.applied_index() > original_fence.index);
+        assert_eq!(source.routed().applied_index(), original_fence.index);
+        assert_eq!(
+            source.export_target(group(21), 65536).unwrap(),
+            original_image
+        );
+        assert_eq!(source.routed().application().value(&[1]), Ok(7));
+        assert_eq!(source.routed().application().value(&[200]), Ok(11));
+    }
+    let mut target = BucketCounter::new(
+        source_fixture::range(0, 128),
+        source_fixture::Policy,
+        source_fixture::bucket_limits(),
+    )
+    .unwrap();
+    target.import_scopes(&[original_image], 1).unwrap();
+    assert_eq!(target.value(&[1]), Ok(7));
+    assert_eq!(target.outbox().count(), 1);
+    let bytes = encode_add(&[1], 7, b"effect", 1024).unwrap();
+    assert!(
+        target
+            .apply_batch(&[source_fixture::entry(2, 1, bytes)])
+            .unwrap()[0]
+            .duplicate
+    );
+}
+fn stage_secondary_target(
+    root: &std::path::Path,
+    clock: &Instant,
+    protocol: NativePeerProtocol,
+) -> Vec<Node<target_fixture::Target>> {
+    let mut other_targets = open(
+        configuration(root, 22, &[1, 2, 3], NativeOpenMode::Create),
+        clock,
+        protocol,
+        || target_fixture::fresh_for(22),
+    );
+    campaign(&mut other_targets, clock, 22);
+    propose(
+        &mut other_targets,
+        clock,
+        22,
+        200,
+        target_fixture::fresh_for(22)
+            .bootstrap_command(65536)
+            .unwrap(),
+    );
+    assert!(other_targets
+        .iter()
+        .all(|n| n.local().applications[&group(22)]
+            .status()
+            .staged_index
+            .is_some()));
+    other_targets
+}
+fn prepare_target_import(
+    sources: &mut [Node<target_fixture::source::Source>],
+    clock: &Instant,
+) -> (
+    voteboat::transfer_source::SourceFreezeStatus,
+    voteboat::transfer_target::TargetImport,
+) {
+    use voteboat::transfer_source::*;
+    propose(
+        sources,
+        clock,
+        20,
+        100,
+        target_fixture::source::fresh()
+            .bootstrap_command(100000)
+            .unwrap(),
+    );
+    propose(sources, clock, 20, 1, target_fixture::source::data(1, 7));
+    propose(sources, clock, 20, 2, target_fixture::source::data(200, 11));
+    propose(sources, clock, 20, 200, target_fixture::source::freeze());
+    let SourceRead::Freeze(Some(status)) = read(sources, clock, 20, SourceQuery::Freeze) else {
+        panic!("source status")
+    };
+    let app = &sources[0].local().applications[&group(20)];
+    assert_eq!(status.fence, app.fence().unwrap());
+    let source_configuration = sources[0]
+        .local()
+        .owner
+        .core(group(20))
+        .unwrap()
+        .state()
+        .bootstrap
+        .configuration;
+    let import = target_fixture::from_source(app, 21, source_configuration);
+    (status, import)
+}
+fn verify_inactive_import(
+    targets: &mut [Node<target_fixture::Target>],
+    other_targets: &[Node<target_fixture::Target>],
+    status: &voteboat::transfer_source::SourceFreezeStatus,
+    original: &voteboat::transfer_target::TargetStatus,
+    bytes: &[u8],
+    clock: &Instant,
+) {
+    use voteboat::{transfer::ContentDigest, transfer_target::*};
+    let imported = original.imported.as_ref().unwrap();
+    assert_eq!(imported.digest, ContentDigest::sha256(bytes));
+    assert_eq!(imported.sources[0].fence, status.fence);
+    assert_eq!(
+        imported.sources[0].digest,
+        status
+            .exports
+            .iter()
+            .find(|e| e.target == group(21))
+            .unwrap()
+            .digest
+    );
+    assert_eq!(
+        read(targets, clock, 21, target_import_query()),
+        TargetRead::NotActive
+    );
+    // The selected facade rejects this synchronously, before proposal ownership.
+    let request = ClientRequest {
+        group: group(21),
+        operation: OperationId::new(3).unwrap(),
+        bytes: target_fixture::source::data(1, 1),
+    };
+    let ptr = request.bytes.as_ptr();
+    let rejected = targets[0].propose(request).unwrap_err();
+    assert_eq!(
+        rejected.reason,
+        ClientError::Application(ApplicationError::InvalidCommand)
+    );
+    assert_eq!(rejected.request.bytes.as_ptr(), ptr);
+    assert!(other_targets
+        .iter()
+        .all(|n| n.local().applications[&group(22)]
+            .status()
+            .imported
+            .is_none()));
+}
+fn target_import_query() -> voteboat::transfer_target::TargetQuery<Vec<u8>> {
+    use voteboat::transfer_target::TargetQuery;
+    TargetQuery::Data(RoutedQuery {
+        hint: target_fixture::source::hint(1),
+        key: vec![1],
+        query: vec![1],
+    })
+}
 fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    use voteboat::{bucket_counter::*, scope::*, transfer_source::*};
+    use voteboat::transfer_source::*;
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
         "voteboat-source-freeze-{}-{protocol:?}-{compact}",
@@ -1034,33 +1186,7 @@ fn source_freeze_recovery(protocol: NativePeerProtocol, compact: bool) {
             .digest,
         voteboat::transfer::ContentDigest::scope_image(&original_image)
     );
-    for n in &nodes {
-        let source = &n.local().applications[&group(20)];
-        assert!(source.applied_index() > original_fence.index);
-        assert_eq!(source.routed().applied_index(), original_fence.index);
-        assert_eq!(
-            source.export_target(group(21), 65536).unwrap(),
-            original_image
-        );
-        assert_eq!(source.routed().application().value(&[1]), Ok(7));
-        assert_eq!(source.routed().application().value(&[200]), Ok(11));
-    }
-    let mut target = BucketCounter::new(
-        source_fixture::range(0, 128),
-        source_fixture::Policy,
-        source_fixture::bucket_limits(),
-    )
-    .unwrap();
-    target.import_scopes(&[original_image], 1).unwrap();
-    assert_eq!(target.value(&[1]), Ok(7));
-    assert_eq!(target.outbox().count(), 1);
-    let bytes = encode_add(&[1], 7, b"effect", 1024).unwrap();
-    assert!(
-        target
-            .apply_batch(&[source_fixture::entry(2, 1, bytes)])
-            .unwrap()[0]
-            .duplicate
-    );
+    verify_frozen_export(&nodes, original_fence, original_image);
     // Target import above is local adapter evidence, not a committed activation.
     close(nodes, &clock, 20, || {});
     let nodes = open(
@@ -1099,9 +1225,41 @@ fn quic_transfer_source_freeze_survives_checkpoint_and_later_log_progress() {
 
 #[path = "../transfer_target/fixtures.rs"]
 mod target_fixture;
+fn verify_recovered_import(
+    targets: &mut [Node<target_fixture::Target>],
+    clock: &Instant,
+    original: &voteboat::transfer_target::TargetStatus,
+    bytes: Vec<u8>,
+) {
+    use voteboat::transfer_target::*;
+    let imported = original.imported.as_ref().unwrap();
+    campaign(targets, clock, 21);
+    let receipt = propose(targets, clock, 21, 200, bytes);
+    assert_eq!(
+        receipt.outcome,
+        TargetOutcome::Imported {
+            index: imported.index,
+            digest: imported.digest
+        }
+    );
+    assert_eq!(
+        read(targets, clock, 21, TargetQuery::Status),
+        TargetRead::Status(original.clone())
+    );
+    assert_eq!(
+        read(targets, clock, 21, target_import_query()),
+        TargetRead::NotActive
+    );
+    for target in targets {
+        let app = &target.local().applications[&group(21)];
+        assert_eq!(app.application().value(&[1]), Ok(7));
+        assert_eq!(app.application().outbox().count(), 1);
+        assert!(app.applied_index() > imported.index);
+    }
+}
 fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    use voteboat::{transfer::ContentDigest, transfer_source::*, transfer_target::*};
+    use voteboat::transfer_target::*;
     let clock = Instant::now();
     let root = std::env::temp_dir().join(format!(
         "voteboat-target-import-{}-{protocol:?}-{compact}",
@@ -1120,28 +1278,7 @@ fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
         protocol,
         target_fixture::fresh,
     );
-    let mut other_targets = open(
-        configuration(&root, 22, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
-        || target_fixture::fresh_for(22),
-    );
-    campaign(&mut other_targets, &clock, 22);
-    propose(
-        &mut other_targets,
-        &clock,
-        22,
-        200,
-        target_fixture::fresh_for(22)
-            .bootstrap_command(65536)
-            .unwrap(),
-    );
-    assert!(other_targets
-        .iter()
-        .all(|n| n.local().applications[&group(22)]
-            .status()
-            .staged_index
-            .is_some()));
+    let mut other_targets = stage_secondary_target(&root, &clock, protocol);
     campaign(&mut sources, &clock, 20);
     campaign(&mut targets, &clock, 21);
     // Stage targets before committing the source's irreversible cut.
@@ -1153,62 +1290,11 @@ fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
         target_fixture::fresh().bootstrap_command(65536).unwrap(),
     );
     assert!(matches!(staged.outcome, TargetOutcome::Staged { .. }));
-    let query = || {
-        TargetQuery::Data(RoutedQuery {
-            hint: target_fixture::source::hint(1),
-            key: vec![1],
-            query: vec![1],
-        })
-    };
     assert_eq!(
-        read(&mut targets, &clock, 21, query()),
+        read(&mut targets, &clock, 21, target_import_query()),
         TargetRead::NotActive
     );
-    propose(
-        &mut sources,
-        &clock,
-        20,
-        100,
-        target_fixture::source::fresh()
-            .bootstrap_command(100000)
-            .unwrap(),
-    );
-    propose(
-        &mut sources,
-        &clock,
-        20,
-        1,
-        target_fixture::source::data(1, 7),
-    );
-    propose(
-        &mut sources,
-        &clock,
-        20,
-        2,
-        target_fixture::source::data(200, 11),
-    );
-    propose(
-        &mut sources,
-        &clock,
-        20,
-        200,
-        target_fixture::source::freeze(),
-    );
-    let SourceRead::Freeze(Some(status)) = read(&mut sources, &clock, 20, SourceQuery::Freeze)
-    else {
-        panic!("source status")
-    };
-    let app = &sources[0].local().applications[&group(20)];
-    assert_eq!(status.fence, app.fence().unwrap());
-    let source_configuration = sources[0]
-        .local()
-        .owner
-        .core(group(20))
-        .unwrap()
-        .state()
-        .bootstrap
-        .configuration;
-    let import = target_fixture::from_source(app, 21, source_configuration);
+    let (status, import) = prepare_target_import(&mut sources, &clock);
     let bytes = target_fixture::fresh()
         .import_command(&import, 65536)
         .unwrap();
@@ -1217,41 +1303,14 @@ fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
     let TargetRead::Status(original) = read(&mut targets, &clock, 21, TargetQuery::Status) else {
         panic!("target status")
     };
-    let imported = original.imported.as_ref().unwrap();
-    assert_eq!(imported.digest, ContentDigest::sha256(&bytes));
-    assert_eq!(imported.sources[0].fence, status.fence);
-    assert_eq!(
-        imported.sources[0].digest,
-        status
-            .exports
-            .iter()
-            .find(|e| e.target == group(21))
-            .unwrap()
-            .digest
+    verify_inactive_import(
+        &mut targets,
+        &other_targets,
+        &status,
+        &original,
+        &bytes,
+        &clock,
     );
-    assert_eq!(
-        read(&mut targets, &clock, 21, query()),
-        TargetRead::NotActive
-    );
-    // The selected facade rejects this synchronously, before proposal ownership.
-    let request = ClientRequest {
-        group: group(21),
-        operation: OperationId::new(3).unwrap(),
-        bytes: target_fixture::source::data(1, 1),
-    };
-    let ptr = request.bytes.as_ptr();
-    let rejected = targets[0].propose(request).unwrap_err();
-    assert_eq!(
-        rejected.reason,
-        ClientError::Application(ApplicationError::InvalidCommand)
-    );
-    assert_eq!(rejected.request.bytes.as_ptr(), ptr);
-    assert!(other_targets
-        .iter()
-        .all(|n| n.local().applications[&group(22)]
-            .status()
-            .imported
-            .is_none()));
     close(sources, &clock, 20, || {
         drive(&mut targets, &clock, |_| true);
         drive(&mut other_targets, &clock, |_| true);
@@ -1282,29 +1341,7 @@ fn target_import_recovery(protocol: NativePeerProtocol, compact: bool) {
         protocol,
         target_fixture::fresh,
     );
-    campaign(&mut targets, &clock, 21);
-    let receipt = propose(&mut targets, &clock, 21, 200, bytes);
-    assert_eq!(
-        receipt.outcome,
-        TargetOutcome::Imported {
-            index: imported.index,
-            digest: imported.digest
-        }
-    );
-    assert_eq!(
-        read(&mut targets, &clock, 21, TargetQuery::Status),
-        TargetRead::Status(original.clone())
-    );
-    assert_eq!(
-        read(&mut targets, &clock, 21, query()),
-        TargetRead::NotActive
-    );
-    for target in &targets {
-        let app = &target.local().applications[&group(21)];
-        assert_eq!(app.application().value(&[1]), Ok(7));
-        assert_eq!(app.application().outbox().count(), 1);
-        assert!(app.applied_index() > imported.index);
-    }
+    verify_recovered_import(&mut targets, &clock, &original, bytes);
     close(targets, &clock, 21, || {});
     let targets = open(
         configuration(&root, 21, &[1, 2, 3], NativeOpenMode::Recover),

@@ -174,6 +174,9 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    Examples now pass in all-feature/TLS profiles. Integration-test violations
    remain explicit work; all-target Clippy still fails. Keep both strict checks
    at zero after cleanup, and fix any new diagnostics in the same change.
+   Once both baselines reach zero, install a repository pre-push hook that runs
+   formatting plus strict all-target/all-feature Clippy and rejects failures.
+   Preserve any existing hook configuration; CI remains a second check.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -14029,3 +14032,45 @@ interpret pending execution as a pass. The broader run started before the final
 small fixture refactors; re-run their affected filters against the final build.
 Continue mini item1 with remaining routed setup/recovery histories and other
 integration targets; the next two feature deliverables remain unchanged.
+
+### Lookup discovery test cleanup — schema plan
+
+Keep the real Node read source, bounded original tickets, cache invalidation,
+expiry/floor checks and late positive cancellation. Share only the identical
+metadata bootstrap. Separate refresh/floor verification from cancellation and
+recovery handoff; keep the original read deadline and explicit receipt drain.
+For service restart, separate cached child operation with metadata offline,
+fresh-binding lookup after reopen, and child retry/recovery. Preserve all I/O
+ownership and shutdown order. Acceptance: TCP/QUIC lookup tests and strict lint
+for this fixture; no production discovery or routing changes.
+
+### Native transfer fixture cleanup — schema plan
+
+Separate source freeze/export verification, secondary-target staging, source
+import preparation, and inactive-target refusal checks. Pass native node handles,
+clock and original fence/status explicitly. Preserve the same fixture bytes,
+operation IDs, discarded receipts, pointer-preserving refusal assertion,
+checkpoint/wal boundary and reopen sequence. Acceptance: strict fixture lint and
+all TCP/QUIC WAL/checkpoint source/import histories. This remains mini item1.
+
+## Lookup and native transfer fixture cleanup — implemented evidence
+
+Shared the identical metadata initialization, separated lookup refresh/floor
+checks from late cancellation and recovery handoff, and split cached child
+service from metadata/child restart verification. Source-freeze export checks,
+sibling staging, frozen import preparation, inactive refusal and import recovery
+now have named phases. Provider ownership, original bytes/tickets and all retry,
+refusal and shutdown checks remain intact. No production changes.
+
+The four automatic lookup/service tests and eight source-freeze/target-import
+TCP/QUIC WAL/checkpoint tests pass against these changes. Formatting and
+whitespace checks pass. The complete strict all-target/all-feature scan finishes
+with185 distinct remaining diagnostics, including25 in routed. These remaining
+failures are outside the changed functions. The last core-only scan has94.
+The two targeted QUIC nested-merge retirement tests passed; TCP cases and the
+broader routed regression run remain in progress. This is not zero yet.
+
+The user's follow-up requires a pre-push hook once zero is reached. No hook has
+been activated while this backlog remains. The planned hook will fail a normal
+push on formatting or strict all-target/all-feature Clippy failure, retaining
+background CI checks as well. Continue the existing lint cleanup mini item.
