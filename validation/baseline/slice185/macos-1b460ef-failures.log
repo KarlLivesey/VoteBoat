@@ -1,0 +1,22 @@
+2026-10-10T04:04:42.7597710Z
+2026-10-10T04:04:42.7598270Z failures:
+2026-10-10T04:04:42.7598590Z
+2026-10-10T04:04:42.7600140Z ---- authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic stdout ----
+2026-10-10T04:04:42.7606170Z
+2026-10-10T04:04:42.7608890Z thread 'authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic' (65640) panicked at tests/native_member_startup.rs:1189:18:
+2026-10-10T04:04:42.7611210Z called `Result::unwrap()` on an `Err` value: Replica(Owner(Worker(Runtime(Fenced))))
+2026-10-10T04:04:42.7613510Z note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+2026-10-10T04:04:42.7614440Z
+2026-10-10T04:04:42.7617450Z ---- quic_promoted_leader_loss_requires_retained_restored_witness stdout ----
+2026-10-10T04:04:42.7618580Z
+2026-10-10T04:04:42.7619700Z thread 'quic_promoted_leader_loss_requires_retained_restored_witness' (65837) panicked at tests/native_member_startup.rs:1144:9:
+2026-10-10T04:04:42.7621540Z assertion failed: shutdown.elapsed() < Duration::from_secs(5)
+2026-10-10T04:04:42.7622230Z
+2026-10-10T04:04:42.7622240Z
+2026-10-10T04:04:42.7622480Z failures:
+2026-10-10T04:04:42.7623340Z     authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic
+2026-10-10T04:04:42.7624620Z     quic_promoted_leader_loss_requires_retained_restored_witness
+2026-10-10T04:04:42.7625300Z
+2026-10-10T04:04:42.7626030Z test result: FAILED. 48 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 23.98s
+2026-10-10T04:04:42.7626960Z
+2026-10-10T04:04:42.7629910Z error: test failed, to rerun pass `--test native_member_startup`

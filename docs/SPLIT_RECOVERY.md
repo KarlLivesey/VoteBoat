@@ -74,3 +74,33 @@ feedback and does not gate further work. Compatible [merge](MERGE_RECOVERY.md) a
 selected [repeated transfers](REPEATED_TRANSFERS.md) are covered. Recursive lifecycle
 and retirement remain, followed by measured P7 tuning. The full
 P0–P7 objective stays active; P8 remains deferred.
+
+## Source membership changes during a split
+
+Source membership and transferred ownership are separate state. The split's
+source remains one Raft log while it changes voters through joint consensus.
+A source fence cannot be undone by that configuration change, restart or by
+losing a configuration reply. Imported provenance names the configuration under
+which the source was observed, rather than the original bootstrap configuration.
+Later source finalization does not rewrite an already imported lineage record.
+
+The slice185 native history stages both targets, commits source joint
+configuration2 (voters1/2/3 changing to2/3, with1 retained as learner), then
+commits the source fence. It leaves the configuration completion unread and
+aborts the source owners. Recovery preserves the joint operation, exact fence
+and export bytes. Source, target and metadata observations drive import,
+publication and activation through the existing public APIs. The operation's
+local durable status generates its authorized finalization through
+`Node::resume_configuration`; an obsolete expected-configuration record is not
+submitted as a fresh change.
+
+After final configuration3 is recovered, all source replicas remain fenced and
+replica1 is a learner. Targets retain configuration2 in their import provenance.
+Child writes and retries continue with source/metadata off, then survive target
+reopen without repeating outbox effects. The test fixture selects explicit
+member startup and drains aborted transport and storage ownership before reopen.
+It does not use a bootstrap ID as current quorum evidence.
+
+This selected composition does not establish arbitrary concurrent reconfiguration,
+new-voter interruption, revocation, rollback, device power-loss or all recursive
+lifecycle schedules. Those remain separate baseline obligations.

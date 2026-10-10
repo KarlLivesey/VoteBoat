@@ -5437,3 +5437,18 @@ Clippy profile was added to the enabled push hook and CI. All three Clippy
 profiles and formatting are clean. Exact commands, scope and logs are in
 [slice184](baseline/slice184/README.md). No executable discovery integration,
 new macOS/separate-host result or complete P0–P7 certificate is claimed.
+
+## Slice185 — source membership and split recovery composition
+
+Four native TCP/TLS/QUIC × WAL/checkpoint histories pass with a source fence
+committed during joint membership. They preserve the unread original result,
+reject its stale ticket after abort/reopen, retain exact fence/export and import
+configuration lineage, finalize the same configuration operation, and recover
+independent child retries without duplicate outbox work. All50 native-member cases pass on Linux. One existing full-phase
+static split history also passes after the fixture starts using observed current
+configuration IDs. No production protocol or durability rule changed.
+Formatting and all three strict Clippy profiles are clean; see
+[slice185](baseline/slice185/README.md) for commands and phase traces.
+The older macOS job114126028727 at1b460ef separately reported two failures;
+its saved excerpt is evidence of unresolved platform work, not this slice passing
+on macOS or proof of the cause. Broader P0–P7 acceptance remains open.

@@ -108,9 +108,89 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: reject unproven write-overlap experiment183 | Evaluate ordinary leader replication during local synchronization; advances P7 evidence. | Original workload, unchanged local/quorum durability and bounded ownership tests. | Candidate passed affected safety suites but failed one run and showed no performance benefit; patch and raw results retained, original production path restored. |
 | Retained: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Completed: authenticated remote manifest lookup184 | Let cold Rust clients resolve remotely hosted directory paths; advances P5/C17 and usable embedding. | Existing ManifestDiscovery/NativeManifestLookup, authenticated sessions, bounded manifest codec and selected source authority. | Native TCP/QUIC and short-I/O host runs fetch only requested path segments, reject stale/wrong authority replies, retain cache during source loss and preserve owner-side fencing. |
-| Current: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+| Completed: selected source joint/split recovery185 | Couple membership with source fencing and retry lineage; advances P4/P6. | Native member startup, original configuration results and existing split fixture. | Four TCP/QUIC × WAL/checkpoint abort/reopen histories, exact stale-ticket refusal and target retry/outbox recovery; broader schedules remain below. |
+| Retained: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
+| Current: diagnose observed macOS membership failures186 | Resolve concrete platform failures; advances P1/P4 and native deployment. | Job114126028727 at1b460ef, exact local reproductions and worker/shutdown ownership contracts. | Identify the worker fencing cause and shutdown stall without suppressing errors or widening deadlines; record local and fresh platform outcomes separately while other work continues. |
 | Next: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
 | Following: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice185 implementation and acceptance record
+
+Four selected native source-membership/split histories now combine configuration
+and ownership state that earlier native tests exercised separately. Explicit
+member startup reopens source group20 with the original bootstrap and provisioned
+stores, using membership-capable wire6. Voters1/2/3 commit a joint transition to
+2/3 while retaining1 as a learner; source fencing follows in the same source log.
+The joint request completion remains unread until owner abort. The recovery
+handoff retains and checks that exact original committed completion, drains
+closed peer transport through its recovery API, joins workers and reopens WAL or
+the joint checkpoint. Old owner tickets are stale in the replacement Node.
+
+The exact source fence and exported images survive. Source configuration2 is
+retained in target import provenance, separately from bootstrap1 and later
+source final3. Existing split resumption drives durable import, publication and
+activation, checking NotActive/fenced behavior at each phase. The original
+membership operation's durable status supplies its authorized final record.
+After another source abort/reopen, replica1 is a non-voter and every source
+replica retains its fence. Metadata/source then stop; child writes and original
+retries survive target reopen with the same values and exactly two outbox items.
+
+The changed fixture now reads current observed membership for provenance; the
+old bootstrap shortcut was only valid in static histories. No production code,
+wire format, quorum policy rule or durability dependency changed. An initial
+helper tried ordinary peer polling after owner abort and was correctly refused;
+it now uses the existing PeerDriver::drain contract. An attempted fresh proposal
+of an obsolete joint record was correctly rejected by admission. The test now
+uses configuration_status/resume_configuration rather than weakening that gate.
+
+Four final native histories pass, with phase traces. The existing static full-phase
+TCP/WAL split test and all50 native-member tests pass on Linux. Formatting and
+all three strict Clippy profiles pass through the enabled hook. Exact commands
+and results are retained in validation/baseline/slice185.
+
+Background review found two failures in older macOS job114126028727 at1b460ef:
+QUIC promotion returned Replica(Owner(Worker(Runtime(Fenced)))); promoted-leader
+loss exceeded its5-second shutdown bound. Both isolated local cases and the
+full50-test Linux target pass. This does not diagnose or fix macOS. The saved
+job excerpt and concrete next mini-plan preserve that unresolved platform work.
+These are finite native application/transport compositions, not device-power-loss,
+arbitrary rollback/new-voter/revocation or a general distributed proof. Broader
+combined fault gates, deployment integration and original P7 budgets remain open;
+the full P0–P7 goal has not been reduced or marked complete.
+
+### Slice185 schema plan — split fencing during joint source membership
+
+The P4/P6 ledger has separate native membership and split phase histories, but
+no selected history combining a source configuration transition with its split
+fence and import lineage. Add that composition before broader deployment work.
+The existing source group keeps its one log; its membership and ownership epochs
+remain different state. Targets stay staged until the original source fence,
+imports and metadata publication are durable.
+
+Use the existing native Split fixture plus explicit NativeMemberStartup for the
+source. Submit an authorized joint change from voters1/2/3 to2/3 with1 retained
+as learner. Commit a source fence during joint configuration2. Keep its original
+configuration completion unread, then abort the source owners, reclaim their
+native storage workers and reopen from WAL or a joint checkpoint. Old volatile
+tickets cannot act in the new owner. Recover the same fence/export bytes and
+joint operation, import with the observed configuration context, publish and
+activate targets; only then finalize source configuration3. Target operation IDs,
+digests and outbox contents survive retries while metadata/source are offline.
+
+New test helpers are needed only to select membership-capable source startup,
+submit exact administrative records, and reclaim an aborted source with its
+unread completion. They must return original owned providers and poll bounded
+cleanup, not mint read barriers or fabricate configuration evidence. Existing
+fixture provenance uses bootstrap IDs; update it to current observed membership
+where needed so it does not confuse origin with active configuration.
+
+Acceptance: TCP/TLS and QUIC, WAL and checkpoint reopen; same joint record and
+fence after recovery, stale ticket refusal, source remains fenced at every cut,
+no target serves before activation, imported retry identity/outbox preserved,
+final membership2/3 and learner1 recover, and child service with ancestors off.
+Keep the current/next plans (combined faults, deployment integration, full-scope
+review) and every other open P0–P7 requirement. These finite histories do not
+complete broader new-voter, rollback, device-power-loss or liveness gates.
 
 ### Slice184 verified result
 

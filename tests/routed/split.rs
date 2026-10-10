@@ -278,9 +278,8 @@ impl Split {
             .owner
             .core(group(20))
             .unwrap()
-            .state()
-            .bootstrap
-            .configuration;
+            .membership()
+            .id();
         for i in 0..2 {
             if state.targets[i].imported.is_none() {
                 let g = 21 + i as u128;
@@ -309,9 +308,8 @@ impl Split {
                         .owner
                         .core(group(1))
                         .unwrap()
-                        .state()
-                        .bootstrap
-                        .configuration,
+                        .membership()
+                        .id(),
                     decision: state.publication.clone().unwrap(),
                 };
                 let bytes = self.targets[i][0].local().applications[&group(g)]
@@ -337,9 +335,8 @@ impl Split {
                     .owner
                     .core(group(21 + i as u128))
                     .unwrap()
-                    .state()
-                    .bootstrap
-                    .configuration;
+                    .membership()
+                    .id();
                 TargetReadyEvidence::from_status(configuration, t)
                     .unwrap_or_else(|e| panic!("{:?}", e.0))
             })
@@ -468,6 +465,8 @@ impl Split {
     }
 }
 
+#[path = "split_membership.rs"]
+mod membership;
 #[path = "repeat.rs"]
 mod repeat;
 fn hint(key: u8) -> RouteHint {

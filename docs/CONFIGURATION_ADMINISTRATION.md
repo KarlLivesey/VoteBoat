@@ -291,3 +291,10 @@ public TLS fixture. The CLI's optional data `auto` mode currently searches only
 nodes1–3; it is not dynamic membership discovery. Administration commands also
 require an explicit target. Rust hosts retain their existing provider/Node
 composition and current-scope checks.
+
+Slice185 also exercises configuration recovery while a split fences that same
+source group. The unread joint result remains owned across abort; reopening from
+WAL or a joint checkpoint rejects the old volatile ticket. Durable status supplies
+the final record for the original operation through `resume_configuration`.
+Finalizing membership does not unfreeze ownership or change the provenance of
+already imported target data. See [split recovery](SPLIT_RECOVERY.md).

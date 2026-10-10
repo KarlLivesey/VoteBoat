@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.70s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 1 test
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... FAILED
+
+failures:
+
+---- native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort stdout ----
+
+thread 'native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort' (2417898) panicked at tests/routed/split_membership.rs:127:21:
+OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(20), incarnation: GroupIncarnation(1) }, sequence: 3 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(20), incarnation: GroupIncarnation(1) }, sequence: 30 }, operation: Some(OperationId(500)), read: None, error: Some(Configuration(TransportCapacity(Wire(InvalidMessage("configuration admission journal"))))) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 158 filtered out; finished in 4.30s
+
+error: test failed, to rerun pass `--test routed`
