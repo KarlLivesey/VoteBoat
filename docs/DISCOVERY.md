@@ -281,3 +281,30 @@ macOS and separate-host validation remain outside this slice.
 for a provisioned authenticated source. It composes with the original quorum-read
 lookup driver and the existing route resolver; it does not mint local read
 barriers or activate ownership.
+
+## Counter executable integration (slice188)
+
+The counter executable composes NativeDiscoveryResponder with an immutable,
+bounded command-endpoint view. `--discovery-peers` loads the existing command
+file at startup; `--discover-via` selects a separately pinned source. A flushed
+versioned acknowledgement hands the existing authenticated session to the binary
+protocol, without losing its credential guard. The original command deadline
+bounds all refreshes. The server owner loop remains the progress driver.
+
+Each response uses the recovered source store session as its hint generation and
+a30-second TTL. Within a source process its configured endpoints cannot change.
+Restart reads a new view and obtains a new store session. This CLI starts a new
+client cache per invocation and does not compare generations from different
+sources. It does not persist or reuse an address after a failed refresh.
+
+Only addresses come from discovery. Requested service identities, certificate
+pins and TLS names remain client configuration. The source cannot redirect a
+client to an unpinned identity. Tests in tests/counter_service/command_discovery.rs
+exercise changed versus bootstrap addresses, access denial, missing mappings,
+source-name refusal and original retries after checkpoint/restart over TCP and
+QUIC peer clusters. These are loopback tests, not separate-host certification.
+
+This integrates endpoint discovery only. The executable does not yet host the
+Directory application, publish committed responsibility manifests, or orchestrate
+placement. See COUNTER_SERVICE.md for commands and REMOTE_MANIFESTS.md for the
+separate Rust manifest-discovery component.

@@ -139,8 +139,34 @@ The retained server certificate/name budget is1MiB.
 Auto mode scans the supplied nodes in numeric order, with the existing ten-second
 deadline and exact non-acceptance retry rules. A connected TLS failure or unknown
 write stops routing. Addresses confer no permissions or leadership. The file is
-reloaded for each CLI invocation; there is no automatic discovery or live server
-listener replacement. Commands remain TCP/TLS even when Raft peers use QUIC.
+reloaded for each CLI invocation. Optional endpoint discovery is described below;
+server listeners are selected at startup. Commands remain TCP/TLS even when Raft peers use QUIC.
+
+To resolve current command addresses from a running service, add
+`--discovery-peers advertised.txt` to that service's startup command. The file
+uses the same bounded format above and requires `--service-access`. It is an
+immutable startup view; restart with a changed file to advertise changed
+addresses. Configure reachable addresses, not wildcard listener addresses.
+
+Clients select a pinned source from their own command file:
+
+```sh
+target/debug/voteboat-counter client 43000 auto read --command-peers bootstrap.txt --discover-via 1 --service-tls /your/client-tls --principal 1
+```
+
+The source address must be reachable in bootstrap.txt. Other listed addresses
+may be obsolete: the client resolves its requested targets over the existing
+authenticated discovery protocol before sending any command. Every target still
+needs its independent certificate pin and TLS name in the client configuration.
+An unavailable source, missing mapping or failed authentication stops before
+command submission; there is no fallback to obsolete addresses. Discovery and
+commands share one ten-second invocation deadline. Source selection is explicit;
+the client creates no background resolver or cache across invocations.
+
+Readers, writers and administrators may inspect endpoint hints in their service
+scope. Hints confer no membership, ownership or quorum authority. Endpoint
+requests do not touch Raft. Recursive responsibility manifests still require a
+separate authority service; this option does not implement that service.
 
 Executable TCP/QUIC cluster tests use wildcard listeners and non-default loopback
 ports, verify access denial and TLS-name rejection, then preserve same-ID retries
@@ -416,7 +442,7 @@ their own existing bounded credits and control reserves.
 
 Peer addresses and TLS names are configurable. Rust startup is generic over the
 application, while the CLI still selects a fixed three-voter counter bootstrap.
-Automatic discovery, a generic multi-group configuration loader, richer
+Executable manifest discovery, a generic multi-group configuration loader, richer
 application protocols and operational packaging remain work. Counter deduplication and WAL capacity are
 bounded; manual checkpoints do not automatically reclaim physical WAL bytes.
 Online membership, recursive responsibilities and split/merge remain unfinished.

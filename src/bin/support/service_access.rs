@@ -44,7 +44,7 @@ fn material(path: &Path, max: u64) -> Result<Vec<u8>, Failure> {
     }
     Ok(bytes)
 }
-fn transport_identity(number: u64, client: bool) -> PeerIdentity {
+pub(super) fn transport_identity(number: u64, client: bool) -> PeerIdentity {
     let namespace = if client { 1u64 << 63 } else { 1u64 << 62 };
     PeerIdentity {
         node: NodeId::new(namespace | number).unwrap(),
@@ -404,7 +404,8 @@ impl Channel {
                 | "events"
                 | "maintenance"
                 | "configuration-status"
-                | "credential-status",
+                | "credential-status"
+                | "discover",
             ) => ServiceAction::Inspect,
             Some("read") => ServiceAction::Read,
             Some("add") => ServiceAction::Write,
@@ -432,6 +433,13 @@ impl Channel {
         )
         .map(|_| ())
         .map_err(|_| "AUTHORIZATION".into())
+    }
+    /// Move the authenticated session exactly once after an upgrade acknowledgement.
+    pub fn take_secure(&mut self) -> Option<Box<dyn SecureSession>> {
+        match self {
+            Self::Tls { session, .. } => session.take(),
+            _ => None,
+        }
     }
     pub fn is_flushed(&self) -> bool {
         match self {

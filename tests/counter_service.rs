@@ -33,6 +33,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/command_discovery.rs"]
+mod command_discovery;
 #[path = "counter_service/command_endpoints.rs"]
 mod command_endpoints;
 #[path = "counter_service/credential_reload.rs"]
@@ -82,6 +84,8 @@ struct Cluster {
     command_principal: Option<u64>,
     command_peers: Option<PathBuf>,
     remote_commands: bool,
+    discovery_peers: Option<PathBuf>,
+    discover_via: Option<u64>,
     tls: Option<PathBuf>,
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
@@ -147,6 +151,8 @@ impl Cluster {
             command_principal: None,
             command_peers: None,
             remote_commands: false,
+            discovery_peers: None,
+            discover_via: None,
             tls: None,
             listeners,
             udp_sockets,
@@ -209,6 +215,9 @@ impl Cluster {
         if let Some(path) = &self.command_access {
             command.arg("--service-access").arg(path);
         }
+        if let Some(path) = &self.discovery_peers {
+            command.arg("--discovery-peers").arg(path);
+        }
         if self.remote_commands {
             command
                 .arg("--command-listen")
@@ -266,6 +275,9 @@ impl Cluster {
                 }))
                 .arg("--principal")
                 .arg(principal.to_string());
+        }
+        if let Some(source) = self.discover_via {
+            command.arg("--discover-via").arg(source.to_string());
         }
         run(&mut command)
     }
@@ -331,8 +343,11 @@ impl Cluster {
         }
     }
     fn stop(&mut self) {
+        // Keep the selected discovery source available until other commands finish.
+        let mut nodes = (1..=self.children.len()).collect::<Vec<_>>();
+        nodes.sort_by_key(|id| Some(*id as u64) == self.discover_via);
         // Intake closes independently; each node must drain and join its workers.
-        for id in 1..=self.children.len() {
+        for id in nodes {
             if self.children[id - 1].is_some() {
                 self.ok(id, &["quit"]);
             }

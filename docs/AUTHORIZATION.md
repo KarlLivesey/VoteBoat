@@ -113,3 +113,10 @@ target and operator-provisioned placement. See [client target semantics](COUNTER
 for bounded parsing, exact retry comparison and compacted-history refusal.
 
 Slices173–174 add [credential generations, session guards and explicit live reload](CREDENTIAL_REFRESH.md) for Rust hosts and the executable. Prepared command-policy/TLS replacement revokes existing guarded sessions without changing voter membership. The executable records local preparation before publication; automatic peer rotation, external secret distribution and general durable audit remain open.
+
+Endpoint discovery is an authenticated Inspect operation. Serve with
+`--discovery-peers FILE` and `--service-access FILE`; clients opt into
+`--discover-via NODE` with independently pinned command peers. The upgrade
+moves the same GuardedSession into NativeDiscoveryResponder; credential leases
+remain effective until closure. The view advertises only configured command
+identities and does not authorize Raft participation or command execution.

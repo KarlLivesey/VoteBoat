@@ -1,4 +1,4 @@
-# Baseline acceptance map — review159, updated187
+# Baseline acceptance map — review159, updated188
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
@@ -32,7 +32,8 @@ Slice187 adds authenticated, explicitly configured remote command listeners and
 client endpoint lists. Native executable TCP/QUIC tests use non-default command
 ports, enforce access and TLS names, and preserve retry/recovery behavior. This
 closes the command path's hard-coded loopback limitation; it does not prove
-separate-machine deployment or wire executable manifest/endpoint discovery.
+separate-machine deployment. Slice188 wires authenticated command endpoint
+discovery through the public protocol; executable manifest discovery remains open.
 Slice186a preserves original worker errors and corrects test shutdown clocks;
 fresh macOS confirmation remains outstanding.
 

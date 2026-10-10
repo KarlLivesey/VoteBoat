@@ -15,6 +15,8 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/command_discovery.rs"]
+mod command_discovery;
 #[path = "support/command_endpoints.rs"]
 mod command_endpoints;
 #[path = "support/credential_reload.rs"]
@@ -43,7 +45,7 @@ use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -59,6 +61,7 @@ PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
+Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
@@ -70,9 +73,20 @@ enum Pending {
     Configure(OperationId),
 }
 enum Phase {
-    Input { bytes: [u8; 256], len: usize },
+    Input {
+        bytes: [u8; 256],
+        len: usize,
+    },
     Pending(Pending),
-    Output { bytes: Vec<u8>, sent: usize },
+    DiscoveryAck {
+        source: command_discovery::Source,
+        sent: usize,
+    },
+    Discovery(Box<command_discovery::Server>),
+    Output {
+        bytes: Vec<u8>,
+        sent: usize,
+    },
 }
 struct Connection {
     stream: service_access::Channel,
@@ -128,9 +142,11 @@ fn command(
     administration: &mut Option<administration::Administration>,
     quit: &mut bool,
     credentials: &mut credential_reload::Commands<'_>,
+    discovery: &Option<command_discovery::Source>,
 ) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
+        ["discover"] => return Ok(Phase::DiscoveryAck { source: discovery.clone().ok_or("endpoint discovery disabled")?, sent: 0 }),
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
         ["maintenance"] => maintenance_status(service),
         ["events", session, after, count] => observer.events(session, after, count)?,
@@ -272,6 +288,7 @@ struct PreparedService {
     administration: Option<administration::Administration>,
     listener: TcpListener,
     peer_address: std::net::SocketAddr,
+    discovery: Option<command_discovery::Source>,
 }
 fn prepare_service(
     mode: &str,
@@ -288,6 +305,8 @@ fn prepare_service(
     let admin_mode = options.remote_admin;
     let command_address =
         command_endpoints::listener(options.command_listen, access_path.is_some(), base, id)?;
+    let mut discovery =
+        command_discovery::Source::load(options.discovery_peers.as_deref(), access_path.is_some())?;
     let remote = admin_mode != administration::Mode::Automatic;
     let create = checked_service_mode(
         mode,
@@ -317,12 +336,16 @@ fn prepare_service(
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     options.configure_maintenance(&mut service)?;
+    if let Some(source) = discovery.as_mut() {
+        source.bind_session(service.local().owner.identity().store.session.get());
+    }
     Ok(PreparedService {
         service,
         credentials,
         administration,
         listener,
         peer_address,
+        discovery,
     })
 }
 fn serve(
@@ -346,6 +369,7 @@ fn serve(
     let owner = service.local().owner.identity();
     let mut observer = Diagnostics::new(owner).map_err(|e| format!("diagnostic setup: {e:?}"))?;
     let command_local = service_access::server_local(id, owner.store.session);
+    let discovery = prepared.discovery;
     let mut command_generation = 0u64;
     let start = Instant::now();
     println!(
@@ -385,6 +409,7 @@ fn serve(
                         &mut administration,
                         &mut quit,
                         &mut commands,
+                        &discovery,
                     )
                 },
             )
@@ -412,17 +437,7 @@ fn serve(
             owner,
         )?;
         outputs(&mut service, &mut connection)?;
-        if let Some(admin) = administration.as_mut() {
-            admin.tick(&mut service, quit)?;
-            if let Some(reply) = admin.take_reply() {
-                if let Some(c) = connection
-                    .as_mut()
-                    .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
-                {
-                    c.reply(reply);
-                }
-            }
-        }
+        advance_administration(&mut service, &mut administration, &mut connection, quit)?;
         if quit && connection.is_none() && shutdown_started.is_none() {
             service.begin_shutdown();
             shutdown_started = Some(Instant::now());
@@ -439,6 +454,26 @@ fn serve(
     observer.close();
     setup::join(service)?;
     println!("stopped node={id} workers_joined=true");
+    Ok(())
+}
+fn advance_administration(
+    service: &mut Service,
+    administration: &mut Option<administration::Administration>,
+    connection: &mut Option<Connection>,
+    quit: bool,
+) -> Result<(), Failure> {
+    if let Some(admin) = administration.as_mut() {
+        admin.tick(service, quit)?;
+        if let Some(reply) = admin.take_reply() {
+            if let Some(c) = connection
+                .as_mut()
+                .filter(|c| matches!(c.phase, Phase::Pending(Pending::Configure(_))))
+            {
+                c.reply(reply);
+            }
+        }
+    }
+
     Ok(())
 }
 fn main() -> Result<(), Failure> {
@@ -510,6 +545,15 @@ impl Connection {
         time: MonoTime,
         mut command: impl FnMut(&str) -> Result<Phase, String>,
     ) -> Option<&'static str> {
+        if let Phase::Discovery(server) = &mut self.phase {
+            if Instant::now() >= self.deadline {
+                return Some("deadline");
+            }
+            return server
+                .poll(time, voteboat::secure::SessionPollBudget::default())
+                .err()
+                .map(|_| "discovery channel");
+        }
         let mut remove = false;
         let mut remove_reason = "channel";
         if Instant::now() >= self.deadline {
@@ -559,7 +603,27 @@ impl Connection {
                             remove_reason = "complete";
                         }
                     }
-                    Phase::Pending(_) => (),
+                    Phase::DiscoveryAck { source, sent } => {
+                        let bytes = command_discovery::ACK.as_bytes();
+                        match self.stream.write(&bytes[*sent..]) {
+                            Ok(0) if *sent != bytes.len() => remove = true,
+                            Ok(n) => *sent += n,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => (),
+                            Err(_) => remove = true,
+                        }
+                        if !remove && *sent == bytes.len() && self.stream.is_flushed() {
+                            let server = self
+                                .stream
+                                .take_secure()
+                                .ok_or("missing authenticated session".into())
+                                .and_then(|session| source.clone().serve(session, time));
+                            match server {
+                                Ok(server) => self.phase = Phase::Discovery(Box::new(server)),
+                                Err(_) => remove = true,
+                            }
+                        }
+                    }
+                    Phase::Pending(_) | Phase::Discovery(_) => (),
                 },
             }
         }
@@ -606,6 +670,7 @@ struct StartupOptions {
     admin_plan: Option<std::path::PathBuf>,
     service_access: Option<std::path::PathBuf>,
     command_listen: Option<SocketAddr>,
+    discovery_peers: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
@@ -643,6 +708,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut admin_plan = None;
     let mut service_access = None;
     let mut command_listen = None;
+    let mut discovery_peers = None;
     let mut remote_admin = administration::Mode::Automatic;
     let mut wal_reclaim_ms = None;
     let mut checkpoint_entries = None;
@@ -657,6 +723,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--remote-admin-policy"
                 | "--service-access"
                 | "--command-listen"
+                | "--discovery-peers"
                 | "--wal-reclaim-ms"
                 | "--checkpoint-entries"
         ) {
@@ -693,6 +760,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
                 service_access = Some(std::path::PathBuf::from(value));
             }
+            "--discovery-peers" if discovery_peers.is_none() && args[0] == "serve" => {
+                discovery_peers = Some(std::path::PathBuf::from(value));
+            }
             "--command-listen" if command_listen.is_none() && args[0] == "serve" => {
                 command_listen = Some(value.parse()?);
             }
@@ -719,6 +789,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         admin_plan,
         service_access,
         command_listen,
+        discovery_peers,
         remote_admin,
         wal_reclaim_ms,
         checkpoint_entries,

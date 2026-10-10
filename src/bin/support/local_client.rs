@@ -32,38 +32,37 @@ enum Attempt {
     Interrupted(&'static str),
     Reply(String),
 }
-fn exchange(
+fn connect(
     target: &Endpoint,
-    text: &[u8],
     deadline: Instant,
     auth: Option<&ClientAccess>,
     start: Instant,
-) -> Attempt {
+) -> Result<Channel, Attempt> {
     let Some(remaining) = deadline.checked_duration_since(Instant::now()) else {
-        return Attempt::Unavailable;
+        return Err(Attempt::Unavailable);
     };
     let mut stream =
         match TcpStream::connect_timeout(&target.address, remaining.min(Duration::from_secs(2))) {
             Ok(stream) => stream,
-            Err(_) => return Attempt::Unavailable,
+            Err(_) => return Err(Attempt::Unavailable),
         };
     if stream.set_nonblocking(true).is_err() {
-        return Attempt::Interrupted("could not configure connected socket");
+        return Err(Attempt::Interrupted("could not configure connected socket"));
     }
     if let Some(auth) = auth {
         let selector = format!("{}\n", auth.principal.get());
         let mut selected = 0;
         while selected < selector.len() {
             if Instant::now() >= deadline {
-                return Attempt::Interrupted("authentication deadline expired");
+                return Err(Attempt::Interrupted("authentication deadline expired"));
             }
             match stream.write(&selector.as_bytes()[selected..]) {
-                Ok(0) => return Attempt::Interrupted("closed authentication selector"),
+                Ok(0) => return Err(Attempt::Interrupted("closed authentication selector")),
                 Ok(n) => selected += n,
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                     std::thread::park_timeout(Duration::from_millis(1))
                 }
-                Err(_) => return Attempt::Interrupted("authentication selector failed"),
+                Err(_) => return Err(Attempt::Interrupted("authentication selector failed")),
             }
         }
     }
@@ -71,21 +70,38 @@ fn exchange(
     let mut stream = if let Some(auth) = auth {
         match Channel::client(stream, auth, target.node, timestamp()) {
             Ok(stream) => stream,
-            Err(_) => return Attempt::Interrupted("authentication setup failed"),
+            Err(_) => return Err(Attempt::Interrupted("authentication setup failed")),
         }
     } else {
         Channel::Plain(stream)
     };
     loop {
         if Instant::now() >= deadline {
-            return Attempt::Interrupted("authentication deadline expired");
+            return Err(Attempt::Interrupted("authentication deadline expired"));
         }
         match stream.poll_client(timestamp()) {
             Ok(true) => break,
             Ok(false) => std::thread::park_timeout(Duration::from_millis(1)),
-            Err(_) => return Attempt::Interrupted("authentication failed"),
+            Err(_) => return Err(Attempt::Interrupted("authentication failed")),
         }
     }
+    Ok(stream)
+}
+fn exchange(
+    target: &Endpoint,
+    text: &[u8],
+    deadline: Instant,
+    auth: Option<&ClientAccess>,
+    start: Instant,
+) -> Attempt {
+    let mut stream = match connect(target, deadline, auth, start) {
+        Ok(s) => s,
+        Err(e) => return e,
+    };
+    request(&mut stream, text, deadline, start)
+}
+fn request(stream: &mut Channel, text: &[u8], deadline: Instant, start: Instant) -> Attempt {
+    let timestamp = || MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
     let mut sent = 0;
     while sent < text.len() {
         if Instant::now() >= deadline {
@@ -172,14 +188,19 @@ struct Options {
     tls_directory: Option<PathBuf>,
     principal: Option<u64>,
     command_peers: Option<PathBuf>,
+    discover_via: Option<u64>,
 }
 fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
     let mut tls_directory = None;
     let mut principal = None;
     let mut command_peers = None;
+    let mut discover_via = None;
     while command.len() >= 2 {
         let flag = command[command.len() - 2].as_str();
-        if !matches!(flag, "--service-tls" | "--principal" | "--command-peers") {
+        if !matches!(
+            flag,
+            "--service-tls" | "--principal" | "--command-peers" | "--discover-via"
+        ) {
             break;
         }
         let value = command.pop().unwrap();
@@ -188,6 +209,9 @@ fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
                 tls_directory = Some(std::path::PathBuf::from(value))
             }
             "--principal" if principal.is_none() => principal = Some(value.parse::<u64>()?),
+            "--discover-via" if discover_via.is_none() => {
+                discover_via = Some(value.parse::<u64>()?)
+            }
             "--command-peers" if command_peers.is_none() => {
                 command_peers = Some(PathBuf::from(value))
             }
@@ -197,16 +221,38 @@ fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
     if command_peers.is_some() && (tls_directory.is_none() || principal.is_none()) {
         return Err("--command-peers requires --service-tls and --principal".into());
     }
+    if discover_via.is_some() && command_peers.is_none() {
+        return Err("--discover-via requires --command-peers".into());
+    }
     Ok(Options {
         tls_directory,
         principal,
         command_peers,
+        discover_via,
     })
 }
 pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> {
     let mut command = input.to_vec();
     let options = options(&mut command)?;
-    let targets = command_endpoints::targets(base, id, options.command_peers.as_deref())?;
+    let mut targets = command_endpoints::targets(
+        base,
+        if options.discover_via.is_some() {
+            None
+        } else {
+            id
+        },
+        options.command_peers.as_deref(),
+    )?;
+    let source = options
+        .discover_via
+        .map(|node| {
+            targets
+                .iter()
+                .find(|t| t.node == node)
+                .cloned()
+                .ok_or("discovery source missing from command peers")
+        })
+        .transpose()?;
     let auth = match (options.tls_directory.as_deref(), options.principal) {
         (None, None) => None,
         (Some(directory), Some(principal)) => {
@@ -214,6 +260,12 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
         }
         _ => return Err("select --service-tls and --principal together".into()),
     };
+    if let Some(node) = id {
+        targets.retain(|t| t.node == node);
+    }
+    if targets.is_empty() {
+        return Err("target node missing from command peers".into());
+    }
     let command = command.as_slice();
     if id.is_none() {
         match command {
@@ -234,6 +286,21 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
     let text = format!("{}\n", command.join(" "));
     let start = Instant::now();
     let deadline = start + Duration::from_secs(10);
+    if let Some(source) = source {
+        let mut stream = connect(&source, deadline, auth.as_ref(), start).map_err(|_| {
+            "discovery source connection/authentication failed before command submission"
+        })?;
+        match request(&mut stream, b"discover\n", deadline, start) {
+            Attempt::Reply(reply) if reply == super::command_discovery::ACK => (),
+            _ => {
+                return Err(
+                    "discovery upgrade refused or interrupted before command submission".into(),
+                )
+            }
+        }
+        let session = stream.take_secure().ok_or("discovery requires TLS")?;
+        super::command_discovery::resolve(session, source.node, &mut targets, start, deadline)?;
+    }
     if id.is_some() {
         return match exchange(&targets[0], text.as_bytes(), deadline, auth.as_ref(), start) {
             Attempt::Unavailable => Err("node unavailable before connection".into()),

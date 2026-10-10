@@ -1,0 +1,31 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0532]: expected tuple struct or tuple variant, found unit variant `SessionState::Ready`
+  --> src/bin/support/command_discovery.rs:50:13
+   |
+50 |         let SessionState::Ready(binding) = session.state() else {
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+  ::: src/secure.rs:63:5
+   |
+63 |     Ready,
+   |     ----- `SessionState::Ready` defined here
+   |
+help: use this syntax instead
+   |
+50 -         let SessionState::Ready(binding) = session.state() else {
+50 +         let SessionState::Ready = session.state() else {
+   |
+help: consider importing this tuple variant instead
+   |
+16 + use std::task::Poll::Ready;
+   |
+help: if you import `Ready`, refer to it directly
+   |
+50 -         let SessionState::Ready(binding) = session.state() else {
+50 +         let Ready(binding) = session.state() else {
+   |
+
+For more information about this error, try `rustc --explain E0532`.
+error: could not compile `voteboat` (bin "voteboat-counter") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 1 previous error

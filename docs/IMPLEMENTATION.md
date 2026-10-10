@@ -113,9 +113,93 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: preserve worker errors and shutdown clocks186a | Repair locally reproduced diagnostic/time defects; advances P1/P4 and native deployment. | Original macOS failures, injected storage failure and a native history starting beyond ten seconds. | Original storage error reaches recovery with fencing/retention intact; late-clock histories and all50 member tests pass. A frozen cleanup clock exposed by that run is corrected. Original macOS outcomes remain unconfirmed. |
 | Current: cross-platform failure confirmation186b | Resolve the remaining observed platform failures; advances P1/P4. | Fresh macOS execution of the corrected error and clock paths; pending resource diagnostics identify any remaining cause. | Record actual platform outcomes, retain new failures, and repair their demonstrated causes without suppressing errors or widening deadlines. Continue the independent audit while CI runs. |
 | Completed: authenticated remote command endpoints187 | Make the existing durable service usable from explicitly configured remote clients; advances P1/P5 deployment. | Existing command TLS/access policy, bounded CLI routing and provisioned certificate pins. | TCP/QUIC executable clusters use selected listeners, enforce permissions/TLS names and retain retries/recovery; six new tests and the full60-test service suite pass. Separate-machine validation remains open. |
-| Current independent deliverable: remaining discovery/deployment audit188 | Close explicit P0–P7 integration gaps while keeping the usable service; advances deployment/composition. | Remote command endpoints and the actual manifest/endpoint discovery APIs. | Verify a usable executable path for authority discovery and placement orchestration; retain every unsupported operation and require actual owner-side fencing. |
-| Next: selected discovery/deployment integration | Implement the concrete missing executable composition identified by188; advances P5 and usable embedding. | Audit-selected public source/lookup/placement contracts, deployment identities and bounded credentials. | A real executable/host path performs the selected operation with authorization, failure cleanup, restart and owner-side checks; do not substitute static hints for dynamic authority. |
-| Following: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+| Completed188: executable endpoint discovery | Resolve current command addresses through the public authenticated protocol; advances P1/P5 deployment. | Independent command pins, bounded startup endpoint view and NativeRemotePeerDiscovery/Responder. | Full64-test service run plus all5 discovery tests pass; stale addresses, source identity, permissions, scope, startup refusal and checkpoint/retry recovery are exercised. Manifest authority remains separate. |
+| Current189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
+| Next190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
+| Following191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
+| Parallel: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+
+### Slice188 implementation and acceptance record
+
+The counter executable now serves an opt-in authenticated endpoint-discovery
+view and its CLI can resolve command destinations before submission. The view
+uses the existing bounded command-peer format; startup validation precedes TLS,
+files and listeners. Each service start binds its recovered store session to
+hint generations. Changes require restart. Names and certificate pins remain
+client-owned, with the same64-target/1MiB pin bounds. Requests use the existing
+NativeDiscoveryResponder/NativeRemotePeerDiscovery wire protocol after an
+Inspect-authorized, flushed acknowledgement. The same guarded session moves
+into the responder, retaining credential revocation. No new public contract,
+worker, socket listener, persistent format or consensus effect was introduced.
+The private endpoint view closes independently of its shared immutable data.
+
+Client source selection is explicit; bootstrap routes for other peers may be
+obsolete. Missing mappings, source/name authentication failures and refused
+upgrades stop before command submission. The original command bytes and the
+single ten-second invocation deadline survive discovery. Existing exact
+non-acceptance routing and unknown-write rules remain unchanged. Discovery owns
+no application ticket; closing its session cannot cancel a committed command.
+The small administration-progress helper retains the prior order and was
+extracted to keep the enlarged service loop within the existing size lint.
+
+Validation: all64 service tests passed in42.38s, including the initial four new
+discovery cases. The final five-case discovery run passed in2.76s after adding
+scope/startup refusal coverage; its source changes only add that test. TCP and
+QUIC histories resolve actual endpoints different from the bootstrap file,
+enforce writer permissions and preserve same-ID retries after checkpoint and
+restart. Refusal checks prove the data remains unchanged. Formatting and strict
+all-target Clippy default/all-feature/no-default profiles and the95-contract
+inventory pass. Raw results and code hashes are in validation/baseline/slice188.
+Initial compilation corrected an incorrect SessionState::Ready assumption to
+use require_authenticated; the loop size lint was repaired by extracting
+administration progress, without changing thresholds or suppressing diagnostics.
+
+Macro review: executable endpoint discovery advances P1/P5 deployment. It does
+not host Directory, publish responsibility manifests, orchestrate placement,
+prove separate-host deployment or satisfy the outstanding P7 latency gate.
+The audit selects a real executable metadata authority next, then cold recursive
+lookup and explicit placement execution. Original baseline175 remains live
+(verified PIDs1526695/1580417); its old source cannot certify this slice. CI
+38024528515 remains pending behind38022391223, whose Linux job is still running
+and whose already-recorded macOS failure predates186. No new platform pass is
+claimed. The full P0–P7 goal remains active.
+
+### Slice188 schema plan — executable command endpoint discovery
+
+Audit: the counter executable has no Directory application or committed manifest
+publication interface. Wiring recursive manifest lookup there requires a real
+metadata service, not fabricated authority. This slice connects its existing
+command transport to the existing public endpoint-discovery protocol; metadata
+service and placement orchestration remain next, not implicitly completed.
+
+Data/API: optional serve --discovery-peers FILE reads the existing bounded
+command-peer format before opening storage/listeners. It requires service access.
+The immutable startup view exposes only exact service PeerIdentity endpoints.
+Generation is the recovered local store session; changed addresses require a new
+service start. A client --discover-via NODE selects one already pinned source
+from --command-peers. The source supplies addresses only; names, certificates,
+permissions, membership and leader/read authority stay independently configured.
+
+Transitions/ownership: authenticated Inspect authorizes a discover command; its
+acknowledgement is fully flushed before handing the original guarded session to
+NativeDiscoveryResponder. The existing owner loop polls it with bounded budgets
+and the original connection deadline. No new worker/listener/runtime. Client
+hands the acknowledged session to NativeRemotePeerDiscovery, resolves selected
+identities before submitting the original command, then closes discovery.
+Retain a single ten-second invocation deadline and at most64 pinned targets.
+
+Failure/restart: missing/invalid/expired hints, failed source authentication or
+partial protocol exchange stop before command submission; no stale-address
+fallback. Session revocation and shutdown close discovery without touching Raft
+work. No pending writes or quorum reads are created by endpoint requests. The
+startup view is configuration, not durable authority; new clients fetch anew,
+and this CLI never retains floors across source identities or invocations.
+
+Acceptance: real TCP/QUIC service clusters resolve addresses differing from the
+client bootstrap file; original write retries survive checkpoint/restart; bad
+source identity, absent endpoints, disabled/plaintext discovery and malformed
+startup input fail closed. Existing command and credential tests remain clean.
+Run formatting, all three strict Clippy profiles, affected tests and inventory.
 
 ### Slice187 implementation and acceptance record
 

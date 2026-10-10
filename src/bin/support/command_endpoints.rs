@@ -24,7 +24,7 @@ use std::{
 pub const MAX_TARGETS: usize = 64;
 const MAX_BYTES: u64 = 16 * 1024;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Endpoint {
     pub node: u64,
     pub address: SocketAddr,
@@ -78,7 +78,7 @@ pub fn targets(
         .collect())
 }
 
-fn load(path: &Path) -> Result<Vec<Endpoint>, Failure> {
+pub fn load(path: &Path) -> Result<Vec<Endpoint>, Failure> {
     let mut bytes = Vec::new();
     std::fs::File::open(path)?
         .take(MAX_BYTES + 1)
