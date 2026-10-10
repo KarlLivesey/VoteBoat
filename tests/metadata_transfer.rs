@@ -489,3 +489,6 @@ fn rejected_control_ids_survive_recovery_and_do_not_exhaust_the_success_reserve(
     );
     assert_eq!(final_copy.export(100000).unwrap(), image);
 }
+
+#[path = "metadata_transfer/target.rs"]
+mod target;

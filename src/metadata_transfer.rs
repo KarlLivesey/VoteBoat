@@ -16,6 +16,7 @@
 //!
 //! Select before bootstrap. Exports preserve the original authority/index
 //! domain; an image is not permission to activate another metadata group.
+mod target;
 use crate::{
     application::*,
     directory::*,
@@ -26,6 +27,7 @@ use crate::{
     transfer::{ContentDigest, DirectoryQuery, DirectoryRead, LifecycleDirectory},
 };
 use std::{collections::BTreeMap, mem::size_of};
+pub use target::*;
 
 pub const METADATA_SOURCE_SCHEMA: u64 = 1;
 pub const MAX_METADATA_IMAGE_BYTES: usize = 64 * 1024 * 1024;
@@ -793,6 +795,9 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
         if rejected
             .keys()
             .any(|op| next.directory.directory().contains_operation(*op))
+            || rejected
+                .values()
+                .any(|index| next.directory.directory().contains_command_at(*index))
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -819,6 +824,7 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
             if next.bootstrap.is_none()
                 || index == 0
                 || next.directory.directory().contains_operation(operation)
+                || next.directory.directory().contains_command_at(index)
                 || next.rejected.contains_key(&operation)
                 || !next.matches(&plan)
             {

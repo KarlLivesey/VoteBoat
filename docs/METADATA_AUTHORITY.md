@@ -1,7 +1,8 @@
 # Moving metadata authority
 
-The source half is implemented. Target import/activation and live-owner refresh
-are the next slices; a frozen image alone does not authorize a new metadata group.
+Source fencing and non-serving target import are implemented. Publication,
+activation and live-owner refresh remain; an imported image alone does not
+authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction
@@ -48,3 +49,21 @@ The selected downstream tests cover source/plan bounds, closed subtrees, stale
 and pending views, exhausted history, exact retries, malformed checkpoints and
 native journal interruption at every fence-frame byte. They establish the source
 half, not end-to-end authority movement or native socket deployment.
+
+`MetadataAuthorityTarget` binds a pristine source profile, complete plan, transfer
+operation and source configuration before bootstrap. Commit its selected
+`bootstrap_command`, then `import_command` with the source image and verified
+configuration. Quorum status reports the destination's own stage/import indices
+separately from source F. Exact retries and checkpoints preserve both domains.
+
+`historical_directory()` exposes the original source history for inspection,
+including original operation results. It is not a serving destination directory.
+The target validates image/plan/rejection digests, bootstrap, complete manifests
+and original indices; no directory command may occupy the source fence or a
+rejected-control index. Changed imports and wrong construction bindings refuse.
+
+This target profile accepts no activation or directory service. The next slice
+must add checked source publication and a writable destination base without
+rewriting historical provenance. Selected tests cover truncated/corrupt imports,
+atomic recovery and every native import-frame byte cut; socket composition and
+live-owner/locator refresh remain later work.

@@ -1977,6 +1977,30 @@
         "tests/metadata_transfer.rs"
       ],
       "scope": "Slice156a implements only the source half of metadata authority movement. Select before bootstrap with an immutable export bound. Complete settled manifest views bind destination identity, local ancestry and generation updates; concrete data groups and ownership epochs remain unchanged. A committed source fence preserves the original authority/index-domain checkpoint and digest, refuses directory service and retains exact retries. Source control reserve survives exhausted ordinary history. A separate bounded rejected-control ID ledger survives checkpoint/export with its own digest and does not consume the successful-fence reserve. Snapshot recovery binds profile/bootstrap/F/digest; downstream tests cover stale and pending views, atomic refusal, checkpoint corruption and native journal every-byte/sync/publication interruptions reaching old or complete state. Foreign quorum provenance remains authenticated host input. No target activation, live-owner grant refresh, networked movement, arbitrary fault or platform claim."
+    },
+    {
+      "design_id": "C05/C15/C23",
+      "public_contract": "MetadataAuthorityTarget / MetadataImportStatus / MetadataTargetStatus",
+      "operations": [
+        "new",
+        "bootstrap_command",
+        "import_command",
+        "status",
+        "historical_directory",
+        "imported_image",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "readiness_requirements"
+      ],
+      "native": "Non-serving deterministic target over existing application, checkpoint and native/host journal contracts; no second storage or runtime owner.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/target.rs"
+      ],
+      "scope": "Slice156b1 binds a pristine source profile, canonical complete plan, transfer operation and source configuration before staging. Bounded import verifies the original checkpoint and rejection ledger without relabelling source authority or indices. Target-local stage/import indices remain separate from source F and historical command outcomes. Exact retries preserve original results; changed imports, malformed/truncated checkpoints, wrong bindings and rehashed invalid provenance refuse atomically. Pending admission uses the same transition path. Native ModelIo every-byte/sync/publication interruptions recover staged or complete imported history. Historical inspection is not active directory service. This profile has no activation or mutation service. Source publication, writable destination base, live-owner/locator refresh, native socket composition and broader platform/fault evidence remain open."
     }
   ],
   "not_yet_implemented": [

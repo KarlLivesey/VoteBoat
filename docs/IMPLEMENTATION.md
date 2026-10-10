@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a implemented; target activation/owner refresh156b/c remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation156b2 and owner refresh156c remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -163,13 +163,14 @@ Evidence and limits are recorded in the slice154f section below.
 two partial delegations, remaining ownership transfer, and retirement/reclamation.
 The full macro roadmap remains active; broader fault/platform cases are not implied.
 
-1. **156b, metadata target import and activation (current; P5).**156a now
-   supplies a settled source view, durable fence and bounded exact-F export.
-   Import that history without relabelling old authority-local indices, preserve
-   original operation outcomes and activate the new metadata authority only from
-   verified source facts. Depends on156a and an explicit target checkpoint/base
-   representation. Check original-index provenance, no service before activation,
-   immutable source fencing, idempotent import/activation and partial recovery.
+1. **156b2, metadata publication and activation (current; P5).**156a supplies
+   the source fence/export;156b1 stages and imports original-domain history into
+   a non-serving destination. Add a checked outgoing decision, destination
+   activation and a separate writable base that preserves inherited operation
+   reservations. Depends on those exact source/import observations and an
+   explicit migrated base representation. Check original-index provenance,
+   immutable source fencing, no service before activation, idempotent decisions,
+   new destination writes and partial recovery. This advances recursive routing.
 2. **156c, owner refresh and native authority-move composition (next; P5/P6).**
    Connect activated metadata to live data-owner grants and parent/child locators.
    Depends on156b and existing fenced grant-adoption contracts. Check stale routes,
@@ -12825,3 +12826,59 @@ This is156a only. Target import must preserve original authority/index provenanc
 and reserve its original operation IDs, including the source fence.156b remains
 current;156c must refresh live owner grants and parent/child locators and exercise
 native end-to-end recovery. The full P0–P7 objective remains active.
+
+## Slice156b1 schema plan — non-serving metadata target import
+
+The existing Directory snapshot replays original command indices and its exact
+bootstrap authority. Do not rewrite those fields to a destination group. First
+build a target wrapper with its own local stage/import indices and an immutable
+historical directory restored at source F. Bind the source template/profile,
+complete move plan, source configuration and operation at target construction.
+Reject any changed image digest, rejected-ID ledger, plan, schema or source
+identity. Canonical bounded import commands carry the source checkpoint and
+original-domain rejected operations. Target snapshots retain the local phase
+indices separately from that historical state.
+
+This target is deliberately non-serving until a separate outgoing decision and
+activation protocol exists; neither import success nor a historical manifest is
+current authority. Its public Node/read/checkpoint contracts expose stage/import
+status and explicitly historical inspection. Exact retries retain original
+phase indices, conflicts cannot replace the import, and invalid restore is atomic.
+Check real source export/import, wrong configurations/profiles/IDs, truncation,
+stale attempts, lost stage/import results, original operation lookup and native
+journal cuts recovering only old-stage or complete-import state.
+
+156b2 must add the outgoing source publication, destination activation and an
+explicit migrated writable base without relabelling original history.156c still
+refreshes owner grants/locators and supplies native socket composition. This split
+is required by the existing Directory provenance contract, not a redefinition of
+the full authority-movement requirement.
+
+## Slice156b1 implemented — non-serving target import
+
+`MetadataAuthorityTarget` selects a source profile, complete move plan, transfer
+operation and source configuration before bootstrap. Its bounded VBMATB01 stage
+and VBMATI01 import commands preserve the original image, rejected control IDs
+and source-local history. VBMAT001 checkpoints retain local stage/import indices
+separately from source F. Historical inspection remains bound to the old group;
+the destination accepts no directory service or activation command in this profile.
+
+Image validation checks the complete settled view, original bootstrap, schema,
+digests, transfer identity and rejection ledger. Source fence and rejected-control
+indices must not overlap underlying directory commands. Both source restore and
+target import now enforce that distinction. Exact stage/import retries return
+the original phase indices; changed imports cannot replace historical state.
+Proposal admission simulates pending order, and failed batches/restores are atomic.
+
+All12 metadata-transfer tests pass with all features, including five target
+cases;10 pass core-only. Tests distinguish destination import index3 from source
+F12, preserve original publication retries, reject rehashed invalid provenance,
+exercise every checkpoint/command truncation and replay lost results. The native
+ModelIo test cuts every import-frame byte plus sync/publication boundaries and
+recovers only staged or fully imported history before exact retry/checkpoint.
+This uses the actual native codec/store, not sockets or hardware power loss.
+All-target/all-feature Clippy with warnings denied passes.
+
+Activation is not implemented by this slice.156b2 supplies the outgoing decision
+and writable destination base;156c supplies owner/locator refresh and native
+composition. The macro milestones and full P0–P7 goal remain open.

@@ -4657,3 +4657,23 @@ Final rejection-history checks preserve failed control IDs through snapshot/expo
 prevent ID reuse and retain successful freeze capacity after the failure ledger
 is full. The ledger digest is included in the source status. Final all-feature
 and core-only tests plus Clippy pass; all sessions are terminal.
+
+## Slice156b1 — non-serving metadata target import
+
+`cargo +stable test --all-features --locked --offline --test metadata_transfer`
+passes12 cases; the matching `--no-default-features` run passes10. Five new target
+cases cover staged/imported status and exact retry, source F12 versus destination
+I3, original source publication outcomes, constructor/configuration identity,
+pending order, truncations/corruption and atomic checkpoint restore. Rehashed
+rejection records and a forged fence overlapping a directory command refuse.
+The source restore applies the same command-index separation check.
+
+The new native case injects every append-byte cut plus synchronization and
+publication failures through NativeLogCodec/NativeLogStore with ModelIo. Recovery
+reaches staged-only and complete-import states, then exact retry/checkpoint keeps
+the original history. This is modeled native journal evidence, not socket service
+or hardware power loss. No destination activation is claimed.
+
+All-target/all-feature Clippy with `-D warnings` passes. Publication, a writable
+destination base, owner/locator refresh and end-to-end native composition remain.
+Formatting, whitespace and the83-contract inventory/path check also pass.

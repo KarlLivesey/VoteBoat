@@ -567,6 +567,9 @@ impl Directory {
     pub(crate) fn contains_operation(&self, operation: OperationId) -> bool {
         self.history.contains_key(&operation)
     }
+    pub(crate) fn contains_command_at(&self, index: u64) -> bool {
+        self.history.values().any(|history| history.index == index)
+    }
     pub(crate) fn has_bootstrap(&self) -> bool {
         self.initialized
     }
