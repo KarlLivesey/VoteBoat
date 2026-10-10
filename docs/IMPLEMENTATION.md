@@ -285,9 +285,33 @@ Run38047529334 on previous source629db60 subsequently has a passing Ubuntu
 operator job; macOS remains live at this observation. This is previous-source
 platform evidence, not validation of the current helper or global acceptance.
 
-Current: diagnose macOS remaining group liveness/preparation failures using actual
-run38046741849 evidence (counter153 pass/5 fail). Depend on retained logs and
-existing shared-group session/owner contracts. Identify the earliest failed
+Implemented214: the existing numeric local-volatile metrics reply now snapshots
+exact driver/roster/outbound usage and up to8 peer queue/binding details, reporting
+omitted count. Maximum rendering reserves1KiB for original counters and stays
+inside the unchanged4KiB client reply budget. These are decreasing gauges, so
+native tests retain monotonic comparisons only for the existing counter fields.
+Actual TCP/QUIC traffic/recovery/original retries pass2 metrics histories; full
+counter target passes162. Failure-only probes preserve group scope, make no
+write retry, use one3s deadline (including fixture-gate waiting) and stop at8
+nodes/24 commands; output records each sequential observation. Four scripted/
+native cleanup checks pass in both all-feature and default builds. The initial
+default cleanup test incorrectly included concurrent lock contention in its
+accepted-child phase; isolate child ownership before its unchanged50ms deadline.
+The retained failure demonstrates correct pre-spawn expiry, not a runtime bug.
+Clippy's chunks_exact finding was corrected to as_chunks with an explicit empty
+remainder check; final formatting/four strict configurations pass with zero
+diagnostics. The full162 run predates these final test-only phase/check changes;
+focused final checks cover them. Preparation recovery selection passes2; default
+TCP metrics and max-render tests also pass. Macro review214 adds the missing
+observations needed for P2/platform diagnosis, without changing protocol,
+timeouts, access rules, durability evidence or making a liveness/performance claim.
+
+Current: diagnose macOS remaining group liveness/preparation failures using
+actual run38047957086/33afe94 (counter147 pass/11 fail; Ubuntu157/1). Earlier
+38047529334/629db60 Ubuntu passes all targets, but macOS finishes145/13. Later
+targets on failing counter jobs were not run. Depend on retained logs, new
+failure-only queue/binding/timing observations and shared-group session/owner
+contracts. Identify the earliest failed
 transition, add bounded diagnostic evidence if necessary and reproduce a focused
 cause before fixing. Completion requires affected original operation/history
 checks locally plus the supported platform run, rather than increasing timeouts
@@ -311,6 +335,43 @@ requires terminal observed outcomes under the original deadlines and recorded
 identities, not an enlarged timeout or omitted failing history. This advances
 the usable service macro milestone; separate-host provisioning and broader faults
 remain explicit rather than silently counted as complete.
+
+### Slice214 schema plan — bounded liveness failure observations
+
+Retained macOS runs show post-drain routing deadlines and high recovered terms,
+but existing failure output omits current peer queues/bindings and node poll
+timings. Those observations are needed to distinguish disconnected transport,
+retained outbound work and slow owner polling before changing liveness behavior.
+The pending-configuration case also reports preparation rather than an admitted
+record; do not assume every failed test reached its intended fault boundary.
+
+Data/API: extend the existing local-volatile metrics reply with exact current
+PeerDriverUsage, PeerRosterUsage and OutboundUsage scalar fields. Include at most
+eight tracked peer details (binding present and owned queue usage), with explicit
+omitted count. Use existing public seams; add no new provider or background
+poller. Snapshotting only reads local state and provides no quorum authority.
+Keep the original diagnostic counter fields and access policy unchanged; new
+gauge fields remain numeric for existing metrics parsers and may decrease.
+
+Ownership/transitions: the response owns only its bounded rendered text; it
+cannot complete/fail/cancel a send or alter admission. Max-value rendering must
+fit the current4KiB reply budget, reserving1KiB for original fields. On a routed
+or direct request failure, failed authenticated-write recovery, group election
+deadline or administration preparation deadline, collect current group
+status plus node metrics/timings through read-only commands, with one shared
+absolute diagnostic deadline and finite command/node count. Stopped/unavailable
+nodes are reported, not replaced. Preserve the original routing result and its
+deadline; diagnostic success must not turn it into a retry/pass. These are
+sequential post-failure observations, not an atomic cross-node snapshot.
+
+Acceptance: bounded max-value rendering/truncated peer count, native TCP/QUIC
+metrics with actual traffic and unchanged operations; scripted failed-route
+diagnostic selection and deadline/exhaustion without extra commands; affected
+counter histories and formatting/four strict lint profiles. Run platform feedback
+in the background to collect the next actual failure observation. This advances
+usable Linux/macOS reliability and P2 diagnostic evidence, not performance tuning
+or a broad security audit. MacOS acceptance remains open until actual outcomes
+pass; no timeout or Raft rule change is justified by this diagnostic slice.
 
 ### Slice213 schema plan — original merge retirement after leadership loss
 

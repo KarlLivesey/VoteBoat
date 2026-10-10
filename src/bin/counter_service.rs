@@ -74,6 +74,8 @@ mod service_setup;
 #[path = "support/counter_setup.rs"]
 mod setup;
 use diagnostics::Diagnostics;
+#[path = "support/peer_metrics.rs"]
+mod peer_metrics;
 use setup::{checked, group, Failure, Service};
 use std::{
     io::{Read, Write},
@@ -243,7 +245,11 @@ fn command(
         ["maintenance"] => maintenance_status(service),
         ["list-assigned-groups", cursor, limit] => assignment_listing::list(service, cursor, limit)?,
         ["events", session, after, count] => observer.events(session, after, count)?,
-        ["metrics"] => observer.metrics(),
+        ["metrics"] => {
+            let mut reply = observer.metrics();
+            peer_metrics::append(service, &mut reply);
+            reply
+        },
         ["timings"] => observer.timings(),
         ["explain-quorum", voters, offset, count] => quorum_diagnostics::explain(service, voters, offset, count)?,
         ["configuration-status", operation] => administration::status(service, group, operation)?,

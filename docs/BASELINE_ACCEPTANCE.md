@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice214 adds bounded current driver/roster/outbound observations to the existing
+numeric metrics and failure-only fixture status/timing probes. Actual TCP/QUIC
+metric/recovery checks pass2 and the counter target passes162; final scoped,
+deadline/gate and caller-cleanup checks pass4 in both builds, default metrics and
+maximum formatting pass, preparation recovery passes2. The full162 precedes final
+test-only corrections; focused checks cover those changes. Formatting/four strict
+lints pass with zero diagnostics. No protocol/access/deadline changes or macOS
+root-cause claim. Latest previous-source33afe94 Ubuntu157/1 and macOS147/11 remain
+open; later targets on failed counter jobs did not run. This closes the missing
+diagnostic observation step, not platform liveness or whole P2/P0–P7 acceptance.
+
 Slice213 aligns the merge retirement fixture with the documented original-release
 resumption contract. An exact leadership-change uncertainty permits at most four
 fixture attempts with unchanged source/release; other failures remain terminal.

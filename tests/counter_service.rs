@@ -53,6 +53,8 @@ mod drain_retirement;
 mod drain_runner;
 #[path = "counter_service/events.rs"]
 mod events;
+#[path = "counter_service/failure_diagnostics.rs"]
+mod failure_diagnostics;
 #[path = "counter_service/group_admin.rs"]
 mod group_admin;
 #[path = "counter_service/group_drain.rs"]
@@ -343,7 +345,7 @@ impl Cluster {
         }
         run(&mut command)
     }
-    fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
+    fn client(&self, target: &str, args: &[&str]) -> Command {
         let mut command = Command::new(BIN);
         command
             .args(["client", &self.base.to_string(), target])
@@ -363,16 +365,20 @@ impl Cluster {
         if let Some(source) = self.discover_via {
             command.arg("--discover-via").arg(source.to_string());
         }
-        run(&mut command)
+        command
+    }
+    fn target(&self, target: &str, args: &[&str]) -> std::process::Output {
+        run(&mut self.client(target, args))
     }
     fn ok(&self, id: usize, args: &[&str]) -> String {
         let output = self.request(id, args);
         assert!(
             output.status.success(),
-            "node {id} {args:?}: {} {}\nservice log: {}",
+            "node {id} {args:?}: {} {}\nservice log: {}\n{}",
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
-            self.service_log(id)
+            self.service_log(id),
+            failure_diagnostics::snapshot(self, args)
         );
         String::from_utf8(output.stdout).unwrap()
     }
@@ -392,9 +398,14 @@ impl Cluster {
     }
     fn routed(&self, args: &[&str]) -> String {
         let output = self.target("auto", args);
+        let diagnostics = if output.status.success() {
+            String::new()
+        } else {
+            failure_diagnostics::snapshot(self, args)
+        };
         assert!(
             output.status.success(),
-            "{args:?}: {} {}",
+            "{args:?}: {} {}\n{diagnostics}",
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr)
         );
@@ -2000,7 +2011,7 @@ fn metrics_history(quic: bool) {
             std::thread::sleep(Duration::from_millis(10));
         };
         assert!(reply.starts_with("OK evidence=local_volatile "), "{reply}");
-        assert!(reply.len() < 1024);
+        assert!(reply.len() < 4096);
         reply
             .split_whitespace()
             .skip(2)
@@ -2039,8 +2050,13 @@ fn metrics_history(quic: bool) {
         std::thread::park_timeout(Duration::from_millis(10));
     };
     for (key, value) in &before {
-        assert!(after[key] >= *value, "{key}");
+        if !key.starts_with("outbound_")
+            && (!key.starts_with("peer_") || matches!(key.as_str(), "peer_sends" | "peer_received"))
+        {
+            assert!(after[key] >= *value, "{key}");
+        }
     }
+    failure_diagnostics::check_peer_metrics(&after);
     assert!(after["applications"] > before["applications"]);
     assert!(after["persistence_batches"] > before["persistence_batches"]);
     assert!(after["peer_received"] > before["peer_received"]);
@@ -2083,10 +2099,15 @@ fn authenticated_write(cluster: &Cluster, args: &[&str]) -> String {
         if output.status.success() {
             return text;
         }
-        assert!(text.starts_with("UNKNOWN LeadershipChanged;"), "{text}");
+        assert!(
+            text.starts_with("UNKNOWN LeadershipChanged;"),
+            "{text}\n{}",
+            failure_diagnostics::snapshot(cluster, args)
+        );
         assert!(
             Instant::now() < deadline,
-            "leadership failed to settle: {text}"
+            "leadership failed to settle: {text}\n{}",
+            failure_diagnostics::snapshot(cluster, args)
         );
         std::thread::park_timeout(Duration::from_millis(10));
     }
@@ -2599,7 +2620,8 @@ fn wait_administration_event(cluster: &Cluster, id: usize, event: &str) {
         }
         assert!(
             Instant::now() < deadline,
-            "missing {event}; logs at {path:?}: {text}"
+            "missing {event}; logs at {path:?}: {text}\n{}",
+            failure_diagnostics::snapshot(cluster, &["status"])
         );
         std::thread::park_timeout(Duration::from_millis(5));
     }

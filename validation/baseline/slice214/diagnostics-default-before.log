@@ -1,0 +1,24 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 4 tests
+test failure_diagnostics::failure_diagnostics_preserve_scope_and_never_reissue_the_failed_write ... ok
+test failure_diagnostics::failure_diagnostics_stop_at_shared_deadline_and_bound_node_count ... ok
+test failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller ... FAILED
+test failure_diagnostics::failure_diagnostics_stop_at_fixture_gate_deadline_without_spawning ... ok
+
+failures:
+
+---- failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller stdout ----
+
+thread 'failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller' (1303874) panicked at tests/counter_service/failure_diagnostics.rs:207:5:
+diagnostic fixture gate deadline reached; no caller spawned
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 109 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test counter_service`

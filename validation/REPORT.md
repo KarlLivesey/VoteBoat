@@ -1,5 +1,21 @@
 # Validation report — slice 35
 
+Bounded liveness observations: [slice214](baseline/slice214/README.md). Current
+driver/roster/outbound gauges and eight peer details extend the existing numeric
+local-volatile metrics within its4KiB buffer. Native TCP/QUIC metrics histories
+pass2 and the all-feature counter target passes162. Final failure-only probes
+preserve failed writes and have a shared3s deadline/8-node limit; scoped selection,
+exhaustion, fixture lock and actual caller cleanup pass4 in both feature builds.
+The initial default test confused pre-admission lock expiry with accepted-child
+cleanup; isolate ownership under the same50ms bound. One Clippy iterator finding
+is corrected; formatting/four strict profiles pass. The full162 run predates
+these final test-only corrections; focused final checks cover changed behavior.
+Actual preparation recovery passes2 and default TCP metrics passes. This does
+not diagnose/fix the underlying macOS stall yet. Previous-source629db60 macOS
+finishes145/13;33afe94 Ubuntu157/1 and macOS147/11, with later targets unexecuted
+on failed jobs. Raw terminal logs are retained and new observations guide the
+next cause-specific fix; full platform/P0–P7 completion remains open.
+
 Original merge retirement: [slice213](baseline/slice213/README.md). The scripted
 explicit leadership-loss continuation fails the previous single-attempt fixture;
 the bounded original-source/release helper passes3 independent refusal/identity/

@@ -51,11 +51,12 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
         }
         assert!(
             Instant::now() < end,
-            "group {group}:{incarnation} root={:?} last_status={observations:?}\nnode1={}\nnode2={}\nnode3={}",
+            "group {group}:{incarnation} root={:?} last_status={observations:?}\nnode1={}\nnode2={}\nnode3={}\n{}",
             c.root,
             c.service_log(1),
             c.service_log(2),
-            c.service_log(3)
+            c.service_log(3),
+            failure_diagnostics::snapshot(c, &["group", group, incarnation, "status"])
         );
         std::thread::sleep(Duration::from_millis(10));
     }

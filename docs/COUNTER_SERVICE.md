@@ -385,6 +385,10 @@ follower without a live quorum. It cannot change membership or authorize writes.
 For local process counters, run `voteboat-counter client BASE_PORT NODE metrics`.
 These counters reset on restart and are labelled `evidence=local_volatile`;
 they do not establish quorum or durability. See [observability](OBSERVABILITY.md).
+The same reply includes current peer connection/binding and outbound queue usage.
+These are gauges and may decrease. It reports up to eight peers individually;
+`peer_omitted` counts additional peers. All values stay numeric and fit the
+existing4KiB reply limit.
 For bounded recent operational events, use `client BASE_PORT NODE events 0 0 16`,
 then continue with the returned session and next cursor. Events reset on restart;
 overflow and cursor gaps are reported explicitly.
