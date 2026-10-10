@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: couldn't read `tests/transfer_service/startup_recovery.rs`: No such file or directory (os error 2)
+  --> tests/transfer_service.rs:27:1
+   |
+27 | mod startup_recovery;
+   | ^^^^^^^^^^^^^^^^^^^^^
+
+error: could not compile `voteboat` (test "transfer_service") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

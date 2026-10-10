@@ -1,0 +1,20 @@
+{
+  "base": "60d37d7b2fc812dfa6ffbc106623e0f1e36efa9b",
+  "broadSuite": {
+    "log": "transfer-all.log",
+    "changedFile": "tests/transfer_service/startup_recovery.rs",
+    "sha256": "9bb65928176ea0de448ed49c83fd7a6a5b850fb55d084cdcb9ceeb26e756a612",
+    "difference": "resume took the PID before SIGCONT; all other final source hashes unchanged"
+  },
+  "final": {
+    "log": [
+      "startup-default.log",
+      "startup-quic-final.log",
+      "strict-final.log"
+    ],
+    "changedFile": "tests/transfer_service/startup_recovery.rs",
+    "sha256": "09a6dfd80e7e9bef75bcd3938b0cb5e5a785e492e90569096b664bddcfa7e0a3",
+    "difference": "resume retains the PID until SIGCONT succeeds, allowing Drop cleanup on failure"
+  },
+  "unchangedProduction": true
+}

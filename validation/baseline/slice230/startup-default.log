@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-dd9e22fa20ce81be)
+
+running 6 tests
+test startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan ... ok
+test startup_discovery::discovery_deadline_is_not_renewed_and_other_probe_failures_are_terminal ... ok
+test startup_data::original_source_write_requires_exact_applied_value_identity_index_and_wrapper ... ok
+test startup_data::original_source_write_repeats_exact_record_after_leadership_loss ... ok
+test startup_data::original_source_write_bounds_retries_and_preserves_other_failures ... ok
+test startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 15.53s
+

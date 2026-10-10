@@ -32,6 +32,13 @@ mod retirement;
 mod retirement_retry;
 #[path = "transfer_service/revocation.rs"]
 mod revocation;
+#[path = "transfer_service/startup_data.rs"]
+mod startup_data;
+#[path = "transfer_service/startup_discovery.rs"]
+mod startup_discovery;
+#[cfg(unix)]
+#[path = "transfer_service/startup_recovery.rs"]
+mod startup_recovery;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
 static NEXT: AtomicU16 = AtomicU16::new(14000);
 // A concurrent fork can briefly inherit another fixture's reserved listeners.
@@ -57,6 +64,7 @@ struct Cluster {
     quic: bool,
     admin: u64,
     peer_credentials: bool,
+    retirement: bool,
     children: Vec<(u128, u16, Child)>,
 }
 impl Cluster {
@@ -157,6 +165,7 @@ impl Cluster {
             quic,
             admin: 3,
             peer_credentials,
+            retirement,
             children: Vec::new(),
         };
         if peer_credentials {
@@ -319,8 +328,8 @@ fn initialize(rig: &Cluster) {
     initialization::command(rig, 1, "initialize");
     initialization::command(rig, 1, "grant");
     initialization::command(rig, 20, "initialize");
-    rig.ok(20, &["add", "1", "1", "7"]);
-    rig.ok(20, &["add", "2", "200", "11"]);
+    startup_data::add(rig, "1", "1", "7", 7);
+    startup_data::add(rig, "2", "200", "11", 11);
 }
 fn finish(mut rig: Cluster) {
     assert!(rig.operate("status").contains("Complete"));

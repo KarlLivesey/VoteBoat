@@ -1,0 +1,62 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: variable does not need to be mutable
+  --> tests/transfer_service/startup_discovery.rs:37:5
+   |
+37 |     mut pause: impl FnMut(),
+   |     ----^^^^^
+   |     |
+   |     help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `pause`
+  --> tests/transfer_service/startup_discovery.rs:37:5
+   |
+37 |     mut pause: impl FnMut(),
+   |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_pause`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voteboat` (test "transfer_service") generated 2 warnings (run `cargo fix --test "transfer_service" -p voteboat` to apply 2 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.54s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 4 tests
+test startup_data::original_source_write_repeats_exact_record_after_leadership_loss ... FAILED
+test startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan ... FAILED
+test startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover ... FAILED
+test startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover ... FAILED
+
+failures:
+
+---- startup_data::original_source_write_repeats_exact_record_after_leadership_loss stdout ----
+
+thread 'startup_data::original_source_write_repeats_exact_record_after_leadership_loss' (659474) panicked at tests/transfer_service/startup_data.rs:97:5:
+Err("UNKNOWN Unknown(LeadershipChanged)\n Error: \"outcome unknown; inspect and retry original operation\"\n")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan stdout ----
+
+thread 'startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan' (659475) panicked at tests/transfer_service/startup_discovery.rs:58:23:
+called `Result::unwrap()` on an `Err` value: "no leader in initial scan"
+
+---- startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover stdout ----
+
+thread 'startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover' (659476) panicked at tests/transfer_service/startup_discovery.rs:12:29:
+group 20 leader discovery: no leader in initial scan
+
+---- startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover stdout ----
+
+thread 'startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover' (659477) panicked at tests/transfer_service/startup_discovery.rs:12:29:
+group 20 leader discovery: no leader in initial scan
+
+
+failures:
+    startup_data::original_source_write_repeats_exact_record_after_leadership_loss
+    startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan
+    startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover
+    startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 21 filtered out; finished in 1.00s
+
+error: test failed, to rerun pass `--test transfer_service`

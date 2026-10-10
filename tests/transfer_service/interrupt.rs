@@ -2,12 +2,16 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 pub(super) fn read(rig: &mut Cluster) {
-    let leader = (1..=3)
-        .find(|node| {
-            let out = rig.request(*node, 3, 1, &["status"]);
-            out.status.success() && String::from_utf8_lossy(&out.stdout).contains("role=Leader")
-        })
-        .expect("metadata leader");
+    let leader = startup_discovery::leader(rig, 1, &[1, 2, 3]);
+    // The selected role alone cannot authorize the read cut. Complete a fresh
+    // quorum read at that endpoint before deliberately removing its quorum.
+    let ready = rig.request(leader, rig.admin, 1, &["transfer-read", "intent"]);
+    assert!(
+        ready.status.success(),
+        "metadata preparation: {}",
+        String::from_utf8_lossy(&ready.stderr)
+    );
+    assert!(String::from_utf8_lossy(&ready.stdout).starts_with("OK observation "));
     let stopped = (1..=3).filter(|n| *n != leader).collect::<Vec<_>>();
     for n in &stopped {
         let at = rig

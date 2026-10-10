@@ -770,17 +770,40 @@ ahead of further P7 candidates. Existing static service remains usable; broad
 operator/platform acceptance remains open. No security expansion; Daybreak owns
 that review. No additional performance helper is planned without a concrete need.
 
-Current: resolve the two evidenced transfer startup assumptions. Purpose: advance
-P6 and usable-service validation with reliable original-operation recovery.
-Depend on229's retained failures, existing original initialization/data identities,
-operation deduplication, role discovery and admitted-read cancellation checks.
-Check actual state/response ownership before changing fixture policy; a role is
-not a quorum read or durable result. Completion requires actual TCP/QUIC forced
-leadership/unknown-outcome histories, unchanged original receipts/payloads and
-budgets, checkpoint/reopen/joins and no suppression of unrelated errors. No
-production deadline increase or speculative rewrite.
+Implemented230: transfer setup explicitly repeats the identical source add only
+after the exact native LeadershipChanged reply/error, using the existing four
+attempts. Exact typed operation/value/index/wrapper checks reject conflicting or
+malformed positive receipts. Shared bounded leader discovery replaces the single
+scan; a fresh pinned quorum read prepares the interruption before removing voters.
+Role remains only a routing hint. Two real TCP/QUIC histories retain the admitted
+old-leader request, pause its owned process, recover/elect other voters and obtain
+that exact UNKNOWN. Original retries, changed-content terminal refusal, unchanged
+values, metadata-quorum absence/child independence, read cancellation, WAL or
+checkpoint reopen, complete split/target retries and worker joins pass.
 
-Next: review the next uncovered replacement-provider operation set through
+Five scripted cause/bound/receipt checks and both native histories pass; the full
+concurrent all-feature transfer suite passes28 in72.24s. Initial missing-module,
+strict-caller/single-scan and incorrect positive-conflict expectations remain in
+the evidence. The public ingress actually rejects changed content with InvalidCommand
+before append; the corrected check requires one attempt and unchanged read value.
+After the broad pass, the pause guard retains its PID until resume succeeds, so
+failed resume still gets Drop cleanup. Final selected builds and strict checks
+are recorded in [slice230](../validation/baseline/slice230/README.md).
+No production behavior/deadline/durability/provider/security change is made.
+
+Terminal229 run38062453286 at60d37d7: macOS passes181 counter/22 directory/21
+transfer tests. Ubuntu counter180/1 fails original drain19701 with exact
+ERR NOT_LEADER at confirmation; later targets are unrun. This is separate from
+230's transfer startup corrections, not a current-source platform pass or a
+claim that all earlier failures are resolved. Raw source-specific logs remain.
+
+Macro review230 completes the selected P6/service startup recovery deliverable;
+the full P0–P7 goal remains active. The static service stays usable independently
+of wider operator acceptance. Provider obligations, generated/combined fault
+histories, deployment/platform coverage and original250ms P7 remain open.
+Security review remains the user's Daybreak work.
+
+Current: review the next uncovered replacement-provider operation set through
 shared downstream/native checks. Purpose: make the promised mix-and-match Rust
 interfaces assessable, not add another prerequisite to using the service.
 Depend on the existing108-entry inventory and8 partial reviews/57 operations;
@@ -789,15 +812,73 @@ requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
 
-Following: choose a P7 candidate that preserves all required durability work.
+Next: choose a P7 candidate that preserves all required durability work.
 Purpose: advance measured tuning with the unchanged250ms original serial gate.
 Depend on222/228's actual physical/timing evidence and229's rejected staging-only
 trial; reread the required design chapters before changing the storage design.
 Completion requires meaningful native crash/ownership checks, actual service
 recovery/retry/join histories and the unchanged raw-validated reference gate.
 No weaker file sync, optimistic voter evidence, replacement workload or causal
-speedup from uncontrolled shared-host comparisons. Keep remaining terminal228
-operator/platform boundaries and the full P0–P7 scope active independently of CI.
+speedup from uncontrolled shared-host comparisons.
+
+Following: resolve the evidenced original drain confirmation boundary. Purpose:
+advance P4 operator recovery/platform acceptance without blocking static service.
+Depend on terminal229's exact19701 ERR NOT_LEADER, original durable drain record
+and current confirmation/routing contracts. Completion requires a native forced
+leader-change history, exact original plan/operation preservation and terminal
+conflict/error refusal, recovery/retry/join evidence and zero strict diagnostics.
+Select the smallest demonstrated cause before editing; do not infer commit/read
+readiness from a role or widen deadlines. Background CI is feedback, not a gate.
+
+### Slice230 schema plan — original transfer startup after leadership changes
+
+Purpose/dependencies:229's concurrent failures occur before transfer phases: a
+source add returns exact UNKNOWN LeadershipChanged and an interruption fixture
+assumes one status scan finds a metadata leader. Existing initialization already
+allows four explicit original retries; interruption support already has bounded
+15s discovery. Reuse those contracts rather than changing production routing,
+deadlines, durability or adding a prerequisite to the static service. This
+advances current P6/service validation; provider review and P7 are next/following.
+
+Data/API: private test-only source-data continuation keeps the same group and
+add/operation/key/delta words on each attempt. Accept only the existing exact
+leadership-loss outcome and original error; preserve other failures. A positive
+result must contain the exact applied bucket operation/value and positive index,
+not merely OK or a committed conflict. Four attempts remain bounded; a duplicate
+receipt may have a later physical index while retaining its original value.
+Extract the existing15s metadata/source leader scan for both interruption users;
+role is a routing hint, not durable or quorum-read evidence. Existing5s admitted
+read/proposal observations and production12s command deadlines remain.
+
+Transitions/ownership: controlled native TCP/QUIC regression kills source followers,
+retains an original pending client until its local proposal admission, pauses only
+the owned old-leader process, recovers two voters and observes their election,
+then resumes the old process. Its actual LeadershipChanged response remains an
+unknown original, not non-admission or success. Explicit continuation uses the
+same profile/record; changed-content conflict, deduplication and quorum reads
+decide results. Pause/client guards resume/kill/join owned children on failures;
+Cluster still owns server cleanup. No new production seam or process control API.
+
+Acceptance: cause-specific scripted retry/receipt/error/bound checks plus actual
+native leadership-loss response, original data retry/conflict/no-duplicate effect,
+checkpoint/WAL restart, admitted metadata-read cancellation and complete split/
+target retry/join histories. Scripted delayed-election discovery must reject the
+old single-scan assumption and bound exhaustion; native interruption still waits
+for fresh admitted-read output. Keep full transfer acceptance distinct from
+selected passes and background source/platform failures. Run relevant default/
+all-feature checks sequentially and keep fmt/four strict profiles zero. Security
+review remains with Daybreak; no security corpus or performance tuning here.
+
+230 focused revision: original strict caller/single-scan checks fail0/4; bounded
+discovery then exposes actual old-leader UNKNOWN on both native transports0/2.
+After retry correction,5 scripted checks pass but both native cases reject the
+test's positive OperationConflict assumption: public source proposal admission
+returns ERR Application(InvalidCommand) before append. Require that exact refusal,
+one attempt and unchanged quorum-read value. Also prepare the interruption cut
+with a fresh pinned metadata quorum read before removing voters; the discovered
+role does not establish current-term read readiness. Keep the5s admitted-read cut
+and production12s command limits. The initial missing-module assembly error is
+retained separately; it is not evidence of either behavioral cause.
 
 ### Slice229 schema plan — prepare metadata before the WAL barrier
 

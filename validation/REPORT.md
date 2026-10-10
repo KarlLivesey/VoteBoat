@@ -1,5 +1,20 @@
 # Validation report
 
+Original transfer startup recovery: [slice230](baseline/slice230/README.md).
+Exact original-record continuation and shared bounded election discovery pass
+five scripted checks and actual TCP/QUIC leadership-loss/recovery histories.
+The full concurrent transfer suite passes28; after a pause-guard cleanup fix,
+final default checks pass6 and the QUIC native history passes1. Original values,
+deduplication, changed-content terminal refusal, metadata-outage child service,
+read cancellation, checkpoint/WAL reopen, split/target retries and joins pass.
+Initial cause-specific failures and the wrong conflict expectation remain.
+Formatting and all four strict profiles finish zero. No production or security
+behavior changes. Terminal previous60d37d7 CI passes macOS181/22/21; Ubuntu180/1
+fails original drain19701 confirmation with ERR NOT_LEADER before later targets.
+These are source-specific platform results, not current-source acceptance.
+Broader provider/fault/deployment/platform and original250ms P7 remain open;
+the full P0–P7 goal stays active. Security review remains with Daybreak.
+
 Rejected staging-preparation candidate: [slice229](performance/slice229/README.md).
 Trial native59 primitive cuts, downstream combined/default/fencing3, timings3,
 reclaim8/log-store9/provider22, native-only3/3/8/9 and Raft41/shared barrier8 pass.

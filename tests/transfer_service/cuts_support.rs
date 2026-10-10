@@ -72,17 +72,7 @@ pub(in super::super) fn lost_command(rig: &mut Cluster, g: u128, words: &[String
     eprintln!("lost {} reply recovered next={next}", words[1]);
 }
 pub(in super::super) fn interrupt_command(rig: &mut Cluster, g: u128, words: &[String]) {
-    let deadline = Instant::now() + Duration::from_secs(15);
-    let leader = loop {
-        if let Some(leader) = (1..=3).find(|n| status(rig, g, *n).contains("role=Leader")) {
-            break leader;
-        }
-        assert!(
-            Instant::now() < deadline,
-            "group {g} did not elect before interruption"
-        );
-        std::thread::sleep(Duration::from_millis(10));
-    };
+    let leader = startup_discovery::leader(rig, g, &[1, 2, 3]);
     for n in (1..=3).filter(|n| *n != leader) {
         let at = rig
             .children

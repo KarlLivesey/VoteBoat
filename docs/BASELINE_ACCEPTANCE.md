@@ -1,5 +1,18 @@
 # Baseline acceptance map
 
+Slice230 closes the selected transfer startup assumptions with explicit identical
+request continuation after exact native LeadershipChanged and repeated bounded
+leader discovery. A role remains a hint; the interruption cut first completes
+a fresh pinned quorum read. Actual TCP/QUIC unknown-outcome, original dedup/value,
+metadata-outage child service, cancellation, WAL/checkpoint reopen, complete
+split/target retries and joins pass. Full transfer28, final default6 and final
+QUIC1 pass; retained failures and source hashes are in
+[slice230](../validation/baseline/slice230/README.md). Formatting/four strict
+profiles remain zero. No production/provider/security change. Terminal prior
+60d37d7 macOS181/22/21 passes; Ubuntu180/1 fails drain19701 ERR NOT_LEADER and
+later targets are unrun. Wider provider/fault/deployment/platform and original
+250ms P7/full P0–P7 acceptance remain open. Daybreak owns the security review.
+
 Slice229 rejects the staging-preparation scheduling candidate. Native/process
 cut and downstream/conformance/consensus checks pass; counter181/directory22 pass.
 Transfer19/2 startup failures are retained, with both original QUIC histories

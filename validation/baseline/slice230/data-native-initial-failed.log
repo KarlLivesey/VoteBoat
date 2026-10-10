@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 2 tests
+original source reply retained: UNKNOWN Unknown(LeadershipChanged)
+
+thread 'startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover' (669314) panicked at tests/transfer_service/startup_recovery.rs:159:6:
+called `Result::unwrap()` on an `Err` value: "UNKNOWN Unknown(LeadershipChanged)\n\n Error: \"outcome unknown; inspect and retry original operation\"\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover ... FAILED
+original source reply retained: UNKNOWN Unknown(LeadershipChanged)
+
+thread 'startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover' (669313) panicked at tests/transfer_service/startup_recovery.rs:159:6:
+called `Result::unwrap()` on an `Err` value: "UNKNOWN Unknown(LeadershipChanged)\n\n Error: \"outcome unknown; inspect and retry original operation\"\n"
+test startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover ... FAILED
+
+failures:
+
+failures:
+    startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover
+    startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 23 filtered out; finished in 5.97s
+
+error: test failed, to rerun pass `--test transfer_service`

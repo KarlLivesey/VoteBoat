@@ -1,0 +1,25 @@
+Base: 60d37d7b2fc812dfa6ffbc106623e0f1e36efa9b
+
+Retained initial/focused validation, with fixture revisions between runs:
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --test transfer_service startup_ -- --nocapture
+cargo +stable test --locked --offline --all-features --test transfer_service startup_recovery -- --nocapture
+
+Broad corrected fixture before final pause-guard cleanup correction:
+cargo +stable test --locked --offline --all-features --test transfer_service
+
+Final selected validation:
+cargo +stable test --locked --offline --test transfer_service startup_
+cargo +stable test --locked --offline --all-features --test transfer_service startup_recovery::quic_
+.githooks/pre-push
+sha256sum --check validation/baseline/slice230/source.sha256
+git diff --check
+
+Exact completed previous-source background CI, never retriggered:
+gh run view 38062453286 --json status,conclusion,headSha,jobs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114243302073/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114243302165/logs
+
+Loopback/native child-process/signal/network/git actions use the required sandbox
+permission. Service-spawning feature builds run sequentially. Push repeats the
+enabled formatting and four strict all-target Clippy checks; no hook bypass.
