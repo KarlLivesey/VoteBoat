@@ -48,10 +48,54 @@ fn configured_pair(
     b_version: u16,
     limits: SessionLimits,
 ) -> (NativeQuicSession, NativeQuicSession) {
+    configured_pair_with(a_version, b_version, limits, |_, _| ()).0
+}
+// Controlled virtual-time fixtures keep real UDP input readiness explicit.
+// These observer handles consume no packet and grant no session authority.
+struct Arrivals([UdpSocket; 2]);
+impl Arrivals {
+    fn capture(a: &UdpSocket, b: &UdpSocket) -> Self {
+        Self([a.try_clone().unwrap(), b.try_clone().unwrap()])
+    }
+    fn emitted(&self, source: usize, written: usize) {
+        if written > 0 {
+            await_datagram(
+                &self.0[1 - source],
+                None,
+                self.0[source].local_addr().unwrap(),
+            );
+        }
+    }
+    fn ready(&self, a: &mut NativeQuicSession, b: &mut NativeQuicSession) -> u64 {
+        for now in 0..5000 {
+            for (index, session) in [&mut *a, &mut *b].into_iter().enumerate() {
+                let progress = session
+                    .poll(MonoTime(now), SessionPollBudget::default())
+                    .unwrap();
+                self.emitted(index, progress.written_bytes);
+            }
+            if a.state() == SessionState::Ready && b.state() == SessionState::Ready {
+                return now;
+            }
+        }
+        panic!(
+            "controlled QUIC handshake stalled: {:?} {:?}",
+            a.state(),
+            b.state()
+        );
+    }
+}
+fn configured_pair_with<O>(
+    a_version: u16,
+    b_version: u16,
+    limits: SessionLimits,
+    capture: impl FnOnce(&UdpSocket, &UdpSocket) -> O,
+) -> ((NativeQuicSession, NativeQuicSession), O) {
     let a = UdpSocket::bind("127.0.0.1:0").unwrap();
     let b = UdpSocket::bind("127.0.0.1:0").unwrap();
     let aa = a.local_addr().unwrap();
     let ba = b.local_addr().unwrap();
+    let observation = capture(&a, &b);
     let options = |n, peer, remote| QuicSessionOptions {
         local: local(n),
         peer: support::tls::peer(local(peer)),
@@ -59,7 +103,7 @@ fn configured_pair(
         generation: SecureSessionGeneration::new(n).unwrap(),
         limits,
     };
-    (
+    let pair = (
         NativeQuicSession::client(
             a,
             &support::tls::configuration(1)
@@ -78,7 +122,8 @@ fn configured_pair(
             MonoTime(0),
         )
         .unwrap(),
-    )
+    );
+    (pair, observation)
 }
 fn ready(a: &mut NativeQuicSession, b: &mut NativeQuicSession) -> u64 {
     for now in 0..5000 {
@@ -664,6 +709,32 @@ fn closing_an_unacknowledged_send_fails_on_peer_loss_instead_of_hanging() {
     assert_eq!(a.next_deadline(), None);
 }
 
+// Sending a datagram does not establish receiver readiness. Observe the exact
+// fixture input without consuming it before testing the native identity gate.
+fn await_datagram(socket: &UdpSocket, expected: Option<&[u8]>, source: std::net::SocketAddr) {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+    let mut bytes = [0; 1200];
+    loop {
+        match socket.peek_from(&mut bytes) {
+            Ok((count, remote)) => {
+                assert_eq!(remote, source);
+                assert!(count > 0);
+                if let Some(expected) = expected {
+                    assert_eq!(&bytes[..count], expected);
+                }
+                return;
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                assert!(
+                    std::time::Instant::now() < deadline,
+                    "fixture datagram did not arrive"
+                );
+                std::thread::park_timeout(std::time::Duration::from_millis(1));
+            }
+            Err(error) => panic!("fixture datagram observation failed: {error}"),
+        }
+    }
+}
 #[test]
 fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
     let a = UdpSocket::bind("127.0.0.1:0").unwrap();
@@ -677,6 +748,7 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
         generation: SecureSessionGeneration::new(1).unwrap(),
         limits,
     };
+    let arrival = b.try_clone().unwrap();
     let mut server = NativeQuicSession::server(
         b,
         &support::tls::configuration(2),
@@ -687,6 +759,8 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
     assert_eq!(server.next_deadline(), Some(MonoTime(10500)));
     let foreign = UdpSocket::bind("127.0.0.1:0").unwrap();
     foreign.send_to(&[0; 1200], ba).unwrap();
+    await_datagram(&arrival, Some(&[0; 1200]), foreign.local_addr().unwrap());
+    drop(arrival);
     let p = server
         .poll(MonoTime(500), SessionPollBudget::default())
         .unwrap();
@@ -708,6 +782,7 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
         MonoTime(0),
     )
     .unwrap();
+    let arrival = b.try_clone().unwrap();
     let mut server = NativeQuicSession::server(
         b,
         &support::tls::configuration(2),
@@ -723,9 +798,12 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
         MonoTime(0),
     )
     .unwrap();
-    client
+    let output = client
         .poll(MonoTime(0), SessionPollBudget::default())
         .unwrap();
+    assert!(output.written_bytes > 128);
+    await_datagram(&arrival, None, aa);
+    drop(arrival);
     assert_eq!(
         server.poll(MonoTime(0), SessionPollBudget::default()),
         Err(SessionError::HandshakeTooLarge)

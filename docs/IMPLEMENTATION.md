@@ -1610,7 +1610,7 @@ has reported two QUIC transport failures and routed recovery failures. These
 cannot inherit success from252's separate focused checkout. Keep the full P0–P7
 objective active, feature/functional Mac/Linux work first and tuning/security later.
 
-Next253: diagnose the two completed Mac QUIC target failures from251 before
+Completed253 (schema recorded before editing): diagnose the two completed Mac QUIC target failures from251 before
 editing native transport or its fixture. Purpose: close concrete P1/C06 platform
 acceptance. Depend on the retained full-suite log: three16-byte chunks are fully
 received within the original6ms/50ms virtual schedule but final flush is false;
@@ -1623,7 +1623,115 @@ retain the failed schedule and distinguish functional delivery from a claimed
 50ms physical latency guarantee. Require actual Mac/Linux checks and zero strict
 profiles. Do not add a production socket abstraction merely to pass the fixture.
 
-Following254: diagnose the actual Mac routed recovery failures after the current
+253 evidence/schema before the focused arrival fix: unchanged isolated QUIC
+passes15 on Linux and fails14/1 on Mac at the same immediate foreign1200-byte
+read assertion. The original full Mac target fails13/2, including raw chunk
+flush; the isolated chunk case passes unchanged, so do not claim its cause or
+clear the broad failure. Native UDP send completion does not guarantee an
+immediate receiver read. Establish the intended fixture input first: keep one
+owned clone of the otherwise unpolled receiving socket, non-destructively peek
+until the exact datagram and foreign source address arrive within a two-second
+physical fixture deadline, then drop the observer clone. Execute the original
+single native Session poll at MonoTime500 with its original budget, require
+read_bytes1200, no authenticated binding and the original10500 timeout. The peek
+consumes no datagram, grants no authority and changes no native transport/API,
+limits or clock. Failure closes the local observer through ordinary owned Drop.
+This helper is needed to prove the rejected input reached the tested receiver;
+zero bytes cannot witness foreign-packet refusal. Preserve the original raw
+6ms/50ms chunk schedule and recorded failure for separate follow-through review.
+Acceptance: actual Linux/Mac native QUIC target, exact original positive receive/
+identity/deadline assertions and zero formatting/four strict Clippy profiles.
+
+253 arrival candidate evidence, incomplete: Linux original and arrival targets
+both pass15. Original isolated Mac fails14/1 at the immediate foreign read;
+arrival Mac passes that exact assertion, but its target fails13/2 in raw chunk
+and separate-frame coarse schedules. All original bytes reach the receiver;
+local flush/third exact send completion is absent at virtual48. Those failures
+remain, with no early Sent or extra deadline substituted. Candidate formatting
+and all four strict Clippy profiles finish zero on both hosts;651 candidate
+inputs verify before Mac execution. Retain raw logs/source under target/slice253
+and the remote task's slice253. The arrival correction is uncommitted pending
+this target's remaining delivery/ACK schedule diagnosis. 252 is published as
+c585f8d on origin/main; the primary checkout remains on ba67c8c with its live251
+source untouched. Fast-forward it only after both original full handles finish,
+preserving its own plan edits already incorporated in252's committed plan.
+
+253 diagnostic schema before ACK changes: preserve the exact original raw and
+framed poll order,6ms cadence,50ms virtual horizon, native UDP and all budgets.
+Capture bounded per-tick value records: admitted/received bytes or exact frame
+counts, sender flush/usage, raw public next deadlines and both original poll
+progress records. Allocate the finite trace before execution and format only
+after the loop; normal test capture hides successful output. No extra session
+poll, I/O, timer advancement or production change. This diagnostic is needed to
+identify the last data/ACK transition rather than infer it from final48-byte
+receipt. Trace capture can perturb physical timing; a passing traced run alone
+cannot clear the preserved original failure. Use actual failed trace/counters to
+choose the smallest focused correction without weakening flush or resource
+ownership. Source-bound platform checks and zero strict profiles remain required.
+
+253 controlled-delivery schema after the actual failed trace: Mac trace-all
+fails14/1. At tick18 the sender writes51 bytes while the receiver reads zero;
+the receiver consumes them at24. The third send similarly occurs at42 and is
+received at48, with receiver next deadline73 beyond the unchanged50 horizon.
+Native flush correctly remains false. This identifies an unmodelled arrival
+schedule in a fixture explicitly described as controlled virtual time; it does
+not establish a kernel cause or physical latency guarantee.
+
+Keep native UDP and the original write/poll/read order,6ms cadence,50ms horizon,
+one owner visit and its original8-call/byte budgets. For only the controlled
+chunk/frame fixtures, supply owned non-consuming socket observer clones before
+native construction. After a provider reports an actual UDP write, wait for
+peer input readiness with the existing two-second fixture deadline before the
+peer visit/next virtual tick. Validate the observed source address and a positive
+bounded datagram; native crypto/decoding still consumes and validates it. Observe
+the same handshake schedule before the test horizon starts. The ordinary pair
+builder requests no observers and allocates no observer handles. No extra native
+poll or early flush/Sent, forced ACK, wire/data mutation or production change.
+Observer Drop closes only its own handles; failure preserves original native
+ownership/cleanup. The small capture-enabled fixture builder is needed to observe
+native sockets without adding a production API. Explicitly record this changed
+physical fixture input condition, preserving old failed unobserved results.
+Acceptance: original raw/framed bytes, exact tickets and returned credits at the
+original virtual exits on Mac/Linux, selected closure/timeout tests, broader
+QUIC target and zero strict profiles. It is not a passing result for the old
+uncontrolled physical delivery schedule or any P7 latency workload.
+
+253 byte-ceiling arrival schema after controlled14/1: all original controlled
+raw/framed cases now pass on Mac, but the later server handshake-ceiling assertion
+sees zero input after the client's first poll. It shares the same immediate-read
+fixture assumption. Clone that receiving socket before native construction,
+require the actual client's reported UDP output exceeds the unchanged128-byte
+ceiling, non-destructively observe input from its exact source, then drop the
+observer and execute the original single server poll at MonoTime0. Keep exact
+HandshakeTooLarge and absent-binding assertions; no handshake/parser/limit or
+native budget change. Preserve this additional actual failure before the fix.
+
+253 implemented evidence: the final native QUIC target passes15/15 on Linux and
+Mac. Formatting and all four strict Clippy profiles finish with zero diagnostics
+on both;651 build inputs verify before the final tests. Production, dependencies,
+public contracts, native budgets, timers, wire format and acknowledgement gates
+are unchanged. Selected raw/frame fixtures now explicitly establish physical UDP
+input readiness before advancing their controlled virtual schedule. Owned observer
+handles peek without consuming packets; the original native poll validates them.
+Original6ms/50ms and1ms/150ms schedules, exact data/tickets/credits, final local
+flush, closure and identity/handshake-limit checks remain. The128-byte ceiling
+test requires actual output then observes arrival before its original single poll.
+
+The failed traced Mac schedule shows actual sends at18/42 reaching native reads
+at24/48; the final acknowledgement deadline73 lies beyond the original horizon.
+That explains why final flush remained false; it does not identify a kernel cause.
+Original full Mac13/2, isolated14/1, arrival13/2, traced14/1 and controlled14/1
+results remain alongside the final15/0. The old unobserved physical schedule is
+not claimed passing, and the finite virtual fixture is not a P7 latency result.
+See [slice253](../validation/baseline/slice253/README.md) for source/patch/raw hashes.
+
+Macro review253: selected P1/C06 functional Mac/Linux transport acceptance advances.
+This closes the fixture-input dependency, not broad platform acceptance or all
+P0–P7 requirements. Both original251 full suites remain live on preserved source;
+reported Mac routed failures retain their own pending terminal assertion bodies.
+Do not rebuild those debug executables or transfer this isolated result to them.
+
+Next254: diagnose the actual Mac routed recovery failures after the current
 routed target emits its terminal assertion bodies. Purpose: advance native P5/P6
 feature acceptance, including namespace competition, parent-offline recovery and
 recursive deletion. Depend on251's retained original input/phase/operation data
@@ -1633,6 +1741,17 @@ source fences, retry lineage and cleanup checks. Completion requires the origina
 failed histories and relevant broad platform targets on source-matched Linux/Mac
 with zero strict profiles. Missing evidence does not become an invented feature
 or a reason to substitute security/performance work.
+
+Following255: finish the functional release-gap decision from the original
+R01–R19/P0–P6 acceptance ledger after254 identifies its actual dependency. Purpose:
+advance the smallest remaining usable Linux/Mac capability rather than add generic
+helpers. Depend on terminal251 results, the updated native recovery contract and
+the existing implementation inventory. Completion: name one concrete required
+functional exit and its existing evidence; if functionality exists, add its missing
+acceptance check rather than invent a new feature. Sketch API/data, ownership,
+restart and refusal paths before implementing that bounded exit; execute relevant
+source-matched Mac/Linux checks with zero formatting/four strict profiles. P7
+tuning, security review and P8/Windows remain outside this immediate milestone.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,

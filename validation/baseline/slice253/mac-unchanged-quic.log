@@ -1,0 +1,38 @@
+   Compiling voteboat v0.1.0 (<mac-isolated-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.96s
+     Running tests/quic.rs (target/debug/deps/quic-76c89f95a40a22d5)
+
+running 15 tests
+test frame_progress::multiplexed_group_frame_completes_with_coarse_owner_cadence ... ok
+test frame_progress::separate_group_frames_complete_with_coarse_owner_cadence ... ok
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... ok
+test handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate ... FAILED
+test chunk_progress::serialized_small_chunks_preserve_acknowledged_flush_within_election_interval ... ok
+test close_drains_sent_bytes_and_clean_eof_does_not_discard_unread_data ... ok
+test closing_an_unacknowledged_send_fails_on_peer_loss_instead_of_hanging ... ok
+test frame_progress::separate_group_frames_complete_with_fine_owner_cadence ... ok
+test authenticated_udp_sessions_preserve_identity_and_partial_ordered_bytes ... ok
+test single_call_budgets_are_fair_and_clock_reversal_fences ... ok
+test invalid_certificate_name_or_exact_store_never_exposes_a_binding ... ok
+test lost_initial_and_application_datagrams_retransmit_without_changing_bytes ... ok
+test three_raft_replicas_commit_through_quic_framing_and_exact_log_completions ... ok
+test native_framed_transport_retains_original_credits_until_exact_send_completion ... ok
+test quic_authenticates_exact_selected_wire_version_without_downgrade ... ok
+
+failures:
+
+---- handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate stdout ----
+
+thread 'handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate' (17098602) panicked at tests/quic.rs:693:5:
+assertion `left == right` failed
+  left: 0
+ right: 1200
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+error: test failed, to rerun pass `--test quic`

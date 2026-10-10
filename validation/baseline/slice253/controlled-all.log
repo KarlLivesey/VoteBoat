@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (<linux-isolated-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running tests/quic.rs (target/debug/deps/quic-08ec27dd5beb7107)
+
+running 15 tests
+test handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate ... ok
+test single_call_budgets_are_fair_and_clock_reversal_fences ... ok
+test close_drains_sent_bytes_and_clean_eof_does_not_discard_unread_data ... ok
+test frame_progress::separate_group_frames_complete_with_coarse_owner_cadence ... ok
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... ok
+test chunk_progress::serialized_small_chunks_preserve_acknowledged_flush_within_election_interval ... ok
+test frame_progress::multiplexed_group_frame_completes_with_coarse_owner_cadence ... ok
+test closing_an_unacknowledged_send_fails_on_peer_loss_instead_of_hanging ... ok
+test frame_progress::separate_group_frames_complete_with_fine_owner_cadence ... ok
+test authenticated_udp_sessions_preserve_identity_and_partial_ordered_bytes ... ok
+test invalid_certificate_name_or_exact_store_never_exposes_a_binding ... ok
+test lost_initial_and_application_datagrams_retransmit_without_changing_bytes ... ok
+test native_framed_transport_retains_original_credits_until_exact_send_completion ... ok
+test three_raft_replicas_commit_through_quic_framing_and_exact_log_completions ... ok
+test quic_authenticates_exact_selected_wire_version_without_downgrade ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

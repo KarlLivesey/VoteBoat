@@ -1,5 +1,15 @@
 # Baseline acceptance map
 
+Controlled native QUIC fixture input: [slice253](../validation/baseline/slice253/README.md).
+Linux/Mac native QUIC15/15 pass; formatting/four strict profiles are zero and651
+build inputs verify. Non-consuming socket observations establish physical arrival
+for the original virtual raw/frame schedule and identity/handshake-ceiling input.
+Native production, budgets, flush/Sent semantics, exact bytes/tickets/credits and
+virtual horizons remain unchanged. Original failed schedules remain; no acceptance
+for their old uncontrolled arrival condition, full platform suite or P7 latency
+is claimed. Original251 full suites are still live, including reported Mac routed
+failures awaiting terminal assertion bodies;254 diagnoses those independently.
+
 Selected application-provider conformance:
 [slice252](../validation/baseline/slice252/README.md). The same public-trait checker
 executes native Counter and an independent host Set application with distinct

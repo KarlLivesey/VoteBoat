@@ -15,11 +15,14 @@ struct Link {
     receiver: Transport,
     queue: NativeOutbound,
     start: u64,
+    last: [TransportProgress; 2],
+    arrivals: Arrivals,
 }
 impl Link {
     fn new() -> Self {
-        let (mut a, mut b) = configured_pair(1, 1, SessionLimits::default());
-        let start = ready(&mut a, &mut b);
+        let ((mut a, mut b), arrivals) =
+            configured_pair_with(1, 1, SessionLimits::default(), Arrivals::capture);
+        let start = arrivals.ready(&mut a, &mut b);
         let build = |n| {
             NativeOutbound::new(
                 OutboundBinding {
@@ -41,11 +44,16 @@ impl Link {
                 .unwrap(),
             queue,
             start,
+            last: [TransportProgress::default(); 2],
+            arrivals,
         }
     }
     fn poll(&mut self, elapsed: u64) {
         let budget = TransportPollBudget::default();
-        for transport in [&mut self.sender, &mut self.receiver] {
+        for (index, transport) in [&mut self.sender, &mut self.receiver]
+            .into_iter()
+            .enumerate()
+        {
             let p = transport
                 .poll(MonoTime(self.start + elapsed), budget)
                 .unwrap();
@@ -54,6 +62,8 @@ impl Link {
             assert!(p.session.io_calls <= budget.session.io_calls);
             assert!(p.session.read_bytes <= budget.session.read_bytes);
             assert!(p.session.written_bytes <= budget.session.write_bytes);
+            self.last[index] = p;
+            self.arrivals.emitted(index, p.session.written_bytes);
         }
     }
 }
@@ -98,6 +108,7 @@ fn history(cadence: usize, multiplexed: bool) {
     let mut delivered = Vec::new();
     let mut completed = 0;
     let mut elapsed = 0;
+    let mut trace = Vec::with_capacity(50usize.div_ceil(cadence));
     // Real encrypted UDP/framing at selected virtual time; no wall-clock or
     // macOS cadence claim. Do not weaken local ACK/flush completion semantics.
     for time in (0..50).step_by(cadence) {
@@ -126,11 +137,20 @@ fn history(cadence: usize, multiplexed: bool) {
             link.queue.complete(done.batch, done.result).unwrap();
             completed += 1;
         }
+        trace.push((
+            time,
+            completed,
+            delivered.len(),
+            link.sender.usage(),
+            waiting.len(),
+            link.last,
+        ));
         if completed == total && delivered == expected {
             break;
         }
     }
     println!("cadence={cadence} multiplexed={multiplexed} elapsed={elapsed} completed={completed}/{total} delivered={} sending={} completion={} waiting={}", delivered.len(), link.sender.usage().sending, link.sender.usage().completion, waiting.len());
+    println!("tick/completed/delivered/sender-usage/waiting/polls: {trace:#?}");
     assert_eq!(
         delivered, expected,
         "group control burst did not arrive within selected heartbeat interval"

@@ -1,0 +1,2 @@
+coarse=0
+strict=0

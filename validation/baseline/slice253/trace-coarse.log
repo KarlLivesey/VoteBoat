@@ -1,0 +1,581 @@
+   Compiling voteboat v0.1.0 (<linux-isolated-checkout>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running tests/quic.rs (target/debug/deps/quic-08ec27dd5beb7107)
+
+running 3 tests
+cadence=6 horizon=50 elapsed=48 admitted=48 received=48 flushed=true
+tick/admitted/received/flushed/sender-deadline/receiver-deadline/polls: [
+    (
+        0,
+        16,
+        16,
+        false,
+        Some(
+            28,
+        ),
+        Some(
+            5000,
+        ),
+        [
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 45,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 45,
+                written_bytes: 31,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        6,
+        16,
+        16,
+        true,
+        Some(
+            5006,
+        ),
+        Some(
+            34,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 31,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 30,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        12,
+        16,
+        16,
+        true,
+        Some(
+            37,
+        ),
+        Some(
+            34,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 30,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 0,
+                written_bytes: 0,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        18,
+        32,
+        32,
+        false,
+        Some(
+            51,
+        ),
+        Some(
+            43,
+        ),
+        [
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 51,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 51,
+                written_bytes: 0,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        24,
+        32,
+        32,
+        false,
+        Some(
+            51,
+        ),
+        Some(
+            57,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 0,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 37,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        30,
+        32,
+        32,
+        true,
+        Some(
+            55,
+        ),
+        Some(
+            57,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 37,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 0,
+                written_bytes: 0,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        36,
+        48,
+        48,
+        false,
+        Some(
+            73,
+        ),
+        Some(
+            61,
+        ),
+        [
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 51,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 51,
+                written_bytes: 0,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        42,
+        48,
+        48,
+        false,
+        Some(
+            73,
+        ),
+        Some(
+            78,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 0,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 5,
+                read_bytes: 0,
+                written_bytes: 34,
+                became_ready: false,
+            },
+        ],
+    ),
+    (
+        48,
+        48,
+        48,
+        true,
+        Some(
+            73,
+        ),
+        Some(
+            78,
+        ),
+        [
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 34,
+                written_bytes: 0,
+                became_ready: false,
+            },
+            SessionProgress {
+                io_calls: 4,
+                read_bytes: 0,
+                written_bytes: 0,
+                became_ready: false,
+            },
+        ],
+    ),
+]
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... ok
+cadence=6 multiplexed=true elapsed=6 completed=1/1 delivered=3 sending=false completion=false waiting=0
+tick/completed/delivered/sender-usage/waiting/polls: [
+    (
+        0,
+        0,
+        3,
+        TransportUsage {
+            send_frame_bytes: 511,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: true,
+            completion: false,
+        },
+        0,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 0,
+                    written_bytes: 541,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 0,
+                written_bytes: 511,
+                received: false,
+                sent: false,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 8,
+                    read_bytes: 541,
+                    written_bytes: 61,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 511,
+                written_bytes: 0,
+                received: true,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        6,
+        1,
+        3,
+        TransportUsage {
+            send_frame_bytes: 0,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: false,
+            completion: false,
+        },
+        0,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 61,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: true,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 0,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: false,
+            },
+        ],
+    ),
+]
+test frame_progress::multiplexed_group_frame_completes_with_coarse_owner_cadence ... ok
+cadence=6 multiplexed=false elapsed=30 completed=3/3 delivered=3 sending=false completion=false waiting=0
+tick/completed/delivered/sender-usage/waiting/polls: [
+    (
+        0,
+        0,
+        1,
+        TransportUsage {
+            send_frame_bytes: 189,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: true,
+            completion: false,
+        },
+        2,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 0,
+                    written_bytes: 219,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 0,
+                written_bytes: 189,
+                received: false,
+                sent: false,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 8,
+                    read_bytes: 219,
+                    written_bytes: 61,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 189,
+                written_bytes: 0,
+                received: true,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        6,
+        1,
+        1,
+        TransportUsage {
+            send_frame_bytes: 0,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: false,
+            completion: false,
+        },
+        2,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 61,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: true,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 0,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        12,
+        1,
+        2,
+        TransportUsage {
+            send_frame_bytes: 189,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: true,
+            completion: false,
+        },
+        1,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 0,
+                    written_bytes: 225,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 0,
+                written_bytes: 189,
+                received: false,
+                sent: false,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 225,
+                    written_bytes: 33,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 189,
+                written_bytes: 0,
+                received: true,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        18,
+        2,
+        2,
+        TransportUsage {
+            send_frame_bytes: 0,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: false,
+            completion: false,
+        },
+        1,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 33,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: true,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 0,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        24,
+        2,
+        3,
+        TransportUsage {
+            send_frame_bytes: 189,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: true,
+            completion: false,
+        },
+        0,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 0,
+                    written_bytes: 225,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 0,
+                written_bytes: 189,
+                received: false,
+                sent: false,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 7,
+                    read_bytes: 225,
+                    written_bytes: 33,
+                    became_ready: false,
+                },
+                plaintext_calls: 2,
+                read_bytes: 189,
+                written_bytes: 0,
+                received: true,
+                sent: false,
+            },
+        ],
+    ),
+    (
+        30,
+        3,
+        3,
+        TransportUsage {
+            send_frame_bytes: 0,
+            receive_frame_bytes: 24,
+            decoded_bytes: 0,
+            sending: false,
+            completion: false,
+        },
+        0,
+        [
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 33,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: true,
+            },
+            TransportProgress {
+                session: SessionProgress {
+                    io_calls: 4,
+                    read_bytes: 0,
+                    written_bytes: 0,
+                    became_ready: false,
+                },
+                plaintext_calls: 1,
+                read_bytes: 0,
+                written_bytes: 0,
+                received: false,
+                sent: false,
+            },
+        ],
+    ),
+]
+test frame_progress::separate_group_frames_complete_with_coarse_owner_cadence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s

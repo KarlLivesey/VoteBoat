@@ -1,0 +1,174 @@
+diff --git a/tests/quic.rs b/tests/quic.rs
+index 49d68ac..982afa5 100644
+--- a/tests/quic.rs
++++ b/tests/quic.rs
+@@ -50,0 +51,43 @@ fn configured_pair(
++    configured_pair_with(a_version, b_version, limits, |_, _| ()).0
++}
++// Controlled virtual-time fixtures keep real UDP input readiness explicit.
++// These observer handles consume no packet and grant no session authority.
++struct Arrivals([UdpSocket; 2]);
++impl Arrivals {
++    fn capture(a: &UdpSocket, b: &UdpSocket) -> Self {
++        Self([a.try_clone().unwrap(), b.try_clone().unwrap()])
++    }
++    fn emitted(&self, source: usize, written: usize) {
++        if written > 0 {
++            await_datagram(
++                &self.0[1 - source],
++                None,
++                self.0[source].local_addr().unwrap(),
++            );
++        }
++    }
++    fn ready(&self, a: &mut NativeQuicSession, b: &mut NativeQuicSession) -> u64 {
++        for now in 0..5000 {
++            for (index, session) in [&mut *a, &mut *b].into_iter().enumerate() {
++                let progress = session
++                    .poll(MonoTime(now), SessionPollBudget::default())
++                    .unwrap();
++                self.emitted(index, progress.written_bytes);
++            }
++            if a.state() == SessionState::Ready && b.state() == SessionState::Ready {
++                return now;
++            }
++        }
++        panic!(
++            "controlled QUIC handshake stalled: {:?} {:?}",
++            a.state(),
++            b.state()
++        );
++    }
++}
++fn configured_pair_with<O>(
++    a_version: u16,
++    b_version: u16,
++    limits: SessionLimits,
++    capture: impl FnOnce(&UdpSocket, &UdpSocket) -> O,
++) -> ((NativeQuicSession, NativeQuicSession), O) {
+@@ -54,0 +98 @@ fn configured_pair(
++    let observation = capture(&a, &b);
+@@ -62 +106 @@ fn configured_pair(
+-    (
++    let pair = (
+@@ -81 +125,2 @@ fn configured_pair(
+-    )
++    );
++    (pair, observation)
+@@ -666,0 +712,26 @@ fn closing_an_unacknowledged_send_fails_on_peer_loss_instead_of_hanging() {
++// Sending a datagram does not establish receiver readiness. Observe the exact
++// fixture input without consuming it before testing the native identity gate.
++fn await_datagram(socket: &UdpSocket, expected: Option<&[u8]>, source: std::net::SocketAddr) {
++    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
++    let mut bytes = [0; 1200];
++    loop {
++        match socket.peek_from(&mut bytes) {
++            Ok((count, remote)) => {
++                assert_eq!(remote, source);
++                assert!(count > 0);
++                if let Some(expected) = expected {
++                    assert_eq!(&bytes[..count], expected);
++                }
++                return;
++            }
++            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
++                assert!(
++                    std::time::Instant::now() < deadline,
++                    "fixture datagram did not arrive"
++                );
++                std::thread::park_timeout(std::time::Duration::from_millis(1));
++            }
++            Err(error) => panic!("fixture datagram observation failed: {error}"),
++        }
++    }
++}
+@@ -679,0 +751 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
++    let arrival = b.try_clone().unwrap();
+@@ -689,0 +762,2 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
++    await_datagram(&arrival, Some(&[0; 1200]), foreign.local_addr().unwrap());
++    drop(arrival);
+@@ -710,0 +785 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
++    let arrival = b.try_clone().unwrap();
+@@ -726 +801 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
+-    client
++    let output = client
+@@ -728,0 +804,3 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
++    assert!(output.written_bytes > 128);
++    await_datagram(&arrival, None, aa);
++    drop(arrival);
+diff --git a/tests/quic/chunk_progress.rs b/tests/quic/chunk_progress.rs
+index 98de345..55ffad7 100644
+--- a/tests/quic/chunk_progress.rs
++++ b/tests/quic/chunk_progress.rs
+@@ -18,2 +18,10 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
+-    let (mut sender, mut receiver) = pair();
+-    let start = ready(&mut sender, &mut receiver);
++    let ((mut sender, mut receiver), arrivals) = configured_pair_with(
++        1,
++        1,
++        SessionLimits {
++            write_buffer_bytes: 256,
++            ..SessionLimits::default()
++        },
++        Arrivals::capture,
++    );
++    let start = arrivals.ready(&mut sender, &mut receiver);
+@@ -26,0 +35 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
++    let mut trace = Vec::with_capacity((horizon as usize).div_ceil(cadence));
+@@ -40 +49,2 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
+-        for session in [&mut sender, &mut receiver] {
++        let mut polls = [SessionProgress::default(); 2];
++        for (index, session) in [&mut sender, &mut receiver].into_iter().enumerate() {
+@@ -44,0 +55,2 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
++            polls[index] = progress;
++            arrivals.emitted(index, progress.written_bytes);
+@@ -54,0 +67,9 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
++        trace.push((
++            elapsed,
++            written,
++            received.len(),
++            sender.is_flushed(),
++            sender.next_deadline().map(|t| t.0.saturating_sub(start)),
++            receiver.next_deadline().map(|t| t.0.saturating_sub(start)),
++            polls,
++        ));
+@@ -59,0 +81 @@ fn history(cadence: usize, chunks: u8, horizon: u64) {
++    println!("tick/admitted/received/flushed/sender-deadline/receiver-deadline/polls: {trace:#?}");
+diff --git a/tests/quic/frame_progress.rs b/tests/quic/frame_progress.rs
+index a6b9fa2..57ce159 100644
+--- a/tests/quic/frame_progress.rs
++++ b/tests/quic/frame_progress.rs
+@@ -17,0 +18,2 @@ struct Link {
++    last: [TransportProgress; 2],
++    arrivals: Arrivals,
+@@ -21,2 +23,3 @@ impl Link {
+-        let (mut a, mut b) = configured_pair(1, 1, SessionLimits::default());
+-        let start = ready(&mut a, &mut b);
++        let ((mut a, mut b), arrivals) =
++            configured_pair_with(1, 1, SessionLimits::default(), Arrivals::capture);
++        let start = arrivals.ready(&mut a, &mut b);
+@@ -43,0 +47,2 @@ impl Link {
++            last: [TransportProgress::default(); 2],
++            arrivals,
+@@ -48 +53,4 @@ impl Link {
+-        for transport in [&mut self.sender, &mut self.receiver] {
++        for (index, transport) in [&mut self.sender, &mut self.receiver]
++            .into_iter()
++            .enumerate()
++        {
+@@ -56,0 +65,2 @@ impl Link {
++            self.last[index] = p;
++            self.arrivals.emitted(index, p.session.written_bytes);
+@@ -100,0 +111 @@ fn history(cadence: usize, multiplexed: bool) {
++    let mut trace = Vec::with_capacity(50usize.div_ceil(cadence));
+@@ -128,0 +140,8 @@ fn history(cadence: usize, multiplexed: bool) {
++        trace.push((
++            time,
++            completed,
++            delivered.len(),
++            link.sender.usage(),
++            waiting.len(),
++            link.last,
++        ));
+@@ -133,0 +153 @@ fn history(cadence: usize, multiplexed: bool) {
++    println!("tick/completed/delivered/sender-usage/waiting/polls: {trace:#?}");
