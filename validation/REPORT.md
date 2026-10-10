@@ -1,5 +1,19 @@
 # Validation report
 
+Original physical receipt attribution: [slice228](performance/slice228/README.md).
+All256 original measured receipts match exact earlier append/later commit-only
+records on every replica in both222 modes:512 selected physical batches per
+replica. Source hashes are unchanged; copied native validation distinguishes
+unsealed tails, corruption, replacement lineage and combined batches without
+issuing durable evidence. Native5/all and5/native-only plus artifact mutation6
+pass; formatting/four strict profiles finish zero. No production change or new
+latency measurement. Physical records do not establish sync count or critical
+path. Original250ms gate still fails at471.057ms p99. Terminal preceding227:
+Ubuntu181/22/21 passes; macOS179/2 fails original grouped-write routing and pending
+configuration admission after quorum loss, before later suites. Matching platform,
+candidate crash/gate, broader provider/fault/deployment and full P0–P7 remain open.
+Broad security review stays with Daybreak.
+
 Native preparing admission: [slice227](baseline/slice227/README.md). The fixture
 reroutes an unchanged record only after an actual exact follower refusal; fresh
 local preparing evidence retains its unread channel for the original kill cut.

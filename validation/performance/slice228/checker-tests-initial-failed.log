@@ -1,0 +1,57 @@
+✔ all original receipt positions map in both actual three-replica runs (42.17229ms)
+✔ later duplicate operation IDs cannot substitute for the original committed position (24.835268ms)
+✔ a command commit without its exact earlier append cannot be attributed (22.946948ms)
+✔ a measured receipt cannot move to an unrelated log position (15.196167ms)
+✔ physical offset holes and mismatched event ownership are refused (11.983378ms)
+✖ a command append is not reported as a combined append and commit (5.654089ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 162.355133
+
+✖ failing tests:
+
+test at validation/check-journal-attribution.test.mjs:74:1
+✖ a command append is not reported as a combined append and commit (5.654089ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /physical classification/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: event batch metadata\n' +
+    '+ actual - expected\n' +
+    '\n' +
+    "+ 'append_only'\n" +
+    "- 'combined'\n"
+  
+      at reject (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.test.mjs:23:12)
+      at TestContext.<anonymous> (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.test.mjs:75:5)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: AssertionError [ERR_ASSERTION]: event batch metadata
+    + actual - expected
+    
+    + 'append_only'
+    - 'combined'
+    
+        at journal (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.mjs:76:28)
+        at file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.mjs:109:52
+        at Array.map (<anonymous>)
+        at verifyAttribution (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.mjs:109:35)
+        at file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.test.mjs:23:25
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at reject (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.test.mjs:23:12)
+        at TestContext.<anonymous> (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-journal-attribution.test.mjs:75:5)
+        at Test.runInAsyncScope (node:async_hooks:227:14),
+    expected: /physical classification/,
+    operator: 'throws',
+    diff: 'simple'
+  }

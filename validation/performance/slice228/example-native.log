@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running unittests examples/journal_attribution.rs (target/debug/examples/journal_attribution-83a64290468cd58f)
+
+running 5 tests
+test tests::native_identity_and_durable_corruption_refuse_without_modifying_source ... ok
+test tests::replacement_keeps_the_discarded_append_distinct_from_the_committed_entry ... ok
+test tests::combined_batch_commits_the_old_command_not_its_new_append ... ok
+test tests::complete_written_and_torn_tails_are_not_credited_as_original_durability ... ok
+test tests::current_selection_and_missing_lock_are_refused_without_creating_files ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

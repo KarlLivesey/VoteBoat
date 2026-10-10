@@ -1,5 +1,17 @@
 # Baseline acceptance map
 
+Slice228 maps every original measured222 receipt to exact physical append and
+commit-only records across all three replicas in both modes. All256 receipts
+have2 distinct records per replica; later duplicate requests cannot replace
+original positions. Source is unchanged, copied native validation emits no
+durability evidence, and native5/all+5/native-only/artifact mutation6 pass.
+Formatting/four strict profiles stay zero. This completes offline attribution,
+not a storage optimization, sync/critical-path measurement or the original250ms
+gate (still471.057ms p99). Preceding227 Ubuntu181/22/21 passes; macOS179/2 fails
+group7/3 original add42/5 routing and configuration21101 preparing/admission after
+quorum loss, before later suites. Candidate crash/gate, platform/provider/fault/
+deployment and full P0–P7 remain open. Daybreak owns the broader security review.
+
 Slice227 distinguishes an actual follower refusal from a fresh preparing event
 in the native unread-configuration fixture. It retains the original record and
 channel for the kill/reopen cut; uncertainty/conflict/committed replies cannot

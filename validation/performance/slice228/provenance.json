@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "scope": "offline_original_receipt_positions",
+  "analysis_base_revision": "b448fffed6160ab91552830afd511453a5e4698d",
+  "analysis_changes": "journal_attribution example and artifact checker; exact source hashes in analysis-source.sha256",
+  "original_measurement_revision": "b379cbba24da1ce3354c6e3fa653af9249871046",
+  "production_codec_changes_since_measurement": false,
+  "build_command": "cargo +stable build --locked --offline --no-default-features --features native --example journal_attribution",
+  "executable_sha256": "896faa5c9e8ece0339efbefa2151a5d3c95754f35d0f0aaa662715c1c9028a3c",
+  "source_hash_manifest_sha256": "e998876a29ddecbc0887624ad1a8944f5903991f32e0b12a1ed337c941bdf481",
+  "source_journal_hash_manifest_sha256": "64cea106acd2592357f40f053eb71cccbb7fe69022b5a6351fe467f9da2b8c8c",
+  "source_journals_after_check_sha256": "6947ecc054406d3dc3466380b134775f7d8275fdc50cf6520d3d057b48f687db",
+  "source_unchanged": true,
+  "original_receipts": {
+    "reference": "787a51696a8ad59d16a477c7a64ac30986f802d853569172a9ccc860b094b873",
+    "diagnostic": "b6b4c3ea33a28dc2786b2984d17a4206a88af2d104336ef57e4f4adafc512c8b"
+  },
+  "result_sha256": {
+    "reference": "d1d53a246cd14d05bd4486eaf99cd6099a851c341b30149f18c277296a03741c",
+    "diagnostic": "709615dd4ae15d6b616547c0ebf00e566146111a872b05e9fd600fc04502a819"
+  },
+  "validation": {
+    "native_all": 5,
+    "native_only": 5,
+    "artifact_mutation_checks": 6,
+    "formatting_and_four_strict_profiles": "zero diagnostics"
+  },
+  "latency_measured": false,
+  "synchronization_measured": false,
+  "limitations": "Sealed legacy single group1/incarnation1, 8-byte counter commands; rejects CURRENT, snapshots and unsealed tails. Physical records do not measure file-call counts, latency or critical path. Original250ms gate still fails. No candidate implemented.",
+  "preceding_ci": {
+    "revision": "b448fffed6160ab91552830afd511453a5e4698d",
+    "run": 38059461105,
+    "ubuntu": {
+      "counter": 181,
+      "directory": 22,
+      "transfer": 21,
+      "result": "success"
+    },
+    "macos": {
+      "counter_pass": 179,
+      "counter_fail": 2,
+      "directory": "unrun",
+      "transfer": "unrun",
+      "result": "failure"
+    }
+  }
+}

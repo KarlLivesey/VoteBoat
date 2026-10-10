@@ -708,12 +708,41 @@ service remains usable; online runner acceptance is not its prerequisite. Move
 the independent failed-P7 attribution to current work while matching CI runs,
 keeping remaining operator/platform feedback and full P0–P7 active.
 
-Current: attribute the failed P7 gate to exact durability operations before selecting
+Implemented228: offline sealed-journal attribution uses unchanged public native
+recovery/codec/apply contracts on an owned copy while the source remains locked
+and unchanged. All256 original measured receipts map on all three replicas in
+both222 modes to512 physical records per replica: exact earlier append and later
+commit-only batch. Full journals contain651 frames/87525 bytes each; later319/320
+requests at indices323/324 cannot substitute for original receipt positions.
+Combined old-commit/new-append and discarded suffix generations are explicitly
+distinguished. Existing manifest boundary, identity/checksums and bounded replay
+refuse unsealed/corrupt/unsupported data; copied recovery session is never durable
+evidence. Native-file5/all and5/native-only, actual-corpus mutation6, formatting
+and four strict profiles pass. Initial fixture/worker failures remain retained
+with focused corrections. Source hashes match before/after and the codec/storage
+diff since the original measurement is empty. See
+[raw attribution](../validation/performance/slice228/README.md).
+
+Terminal227 run38059461105 at b448fff: Ubuntu counter181/directory22/transfer21
+passes. macOS counter179/2 fails group7/3 original add42/5 leader routing (sampled
+term47) and original configuration21101 missing configuration_queued after quorum
+loss/preparing deadline. Later macOS targets are unrun. These remain independent
+functional boundaries;228 changes no production behavior and fixes neither.
+
+Macro review228 completes the physical-attribution component of P7, not the
+candidate or fixed250ms gate. Offline physical records establish neither a
+synchronization count nor per-command latency/critical path. No new benchmark,
+optimization or provider seam is introduced. Original reference471.057ms and
+diagnostic872.815ms remain distinct; full P0–P7 stays active. Security review stays
+with Daybreak. No further attribution helper is planned without a concrete need
+for the smallest storage candidate's acceptance check.
+
+Current: use the completed P7 physical attribution to select
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
 250ms serial TCP gate. Depend on222's raw reference/diagnostic, one authoritative
 log-store binding and existing JournalIo/native publication contracts; reread the
 design's required storage/consensus chapters before any redesign. Completion
-requires original-operation attribution and a bounded cause-specific candidate
+requires a bounded cause-specific candidate
 with meaningful crash/ownership checks, followed by the unchanged reference gate.
 Aggregate file-call durations alone cannot justify fewer durability barriers or
 optimistic voter evidence. No speculative rewrite or replacement workload.
@@ -729,13 +758,58 @@ no expanded security/fuzz corpus or automatic certification claim.
 
 Following: resolve the next evidenced operator/platform boundary after attribution.
 Purpose: advance P4 and broader usable-service validation without blocking the
-static service. Depend on terminal226's exact initial source refusal/grouped-write
-deadline,227's original-record admission checks and matching native timings.
+static service. Depend on terminal227's exact grouped-write routing/configuration
+admission deadline,227's original-record admission checks and matching native timings.
 Distinguish stale endpoint, channel ownership and actual scheduling/storage delay
 before editing; keep original operation/record/source scope and existing budgets.
 Completion requires cause-specific actual TCP/QUIC interruption/restart/receipt/
 join checks and matching platform evidence. Do not infer commit from a role,
 deadline or preparation event; no security expansion or automatic success claim.
+
+### Slice228 schema plan — original-operation physical journal attribution
+
+Purpose/dependencies:222's overlapping sync/publication totals cannot identify
+which physical records append or commit an original measured command. Use its
+retained quiescent native journals and receipt CSVs to establish those mappings
+before choosing a P7 candidate. This is offline attribution through existing
+public JournalIo/LogCodec/apply_batch contracts, not a new production observer,
+provider seam, runtime or authoritative log binding.
+
+Data/API: an explicitly native example accepts one retained legacy replica path
+and its exact store identity. Require an existing LOCK and refuse CURRENT/compacted
+journals. Read bounded manifest/WAL bytes under FileLogIo's exclusive lock; run
+unchanged NativeLogStore recovery only on an owned in-memory copy. That helper is
+an analysis fixture, not a durable backend. Native recovery validates format,
+checksums, identity, sequences and transitions. Require the source manifest's
+validated boundary to equal its entire WAL: complete written tails and torn tails
+are refused, not credited as original durability. Replayed batches must reproduce
+the same recovered single benchmark group without snapshots.
+
+Emit bounded physical-batch and command-event CSV rows: exact sequence/offset/
+length, append versus commit-only/combined/control classification, original
+operation/index/term and group incarnation, contiguous commit movement and
+revision/generation. Track append and newly committed entries independently;
+a batch may append a new command while committing an earlier one. Match original
+measurement receipts by operation/index/group and retain term/generation distinctions.
+No wall timing or one-sync-per-frame conclusion follows from this offline table.
+
+Ownership/failure: the source stays locked through analysis and is never appended,
+truncated, synchronized or republished. Only the copied validator increments its
+session; that identity never escapes as voter, client or lifecycle evidence.
+Reject mismatched, corrupt, unsupported, unsealed and over-budget inputs before
+publishing rows. All file handles and copied state are locally owned and drop on
+failure. Inspect manifest's native-v2 boundary field only after the native validator
+checks its complete format/identity/checksum; do not add a second recovery authority.
+
+Acceptance: actual native-file fixtures distinguish combined old-commit/new-append,
+replacement lineage, unbarriered/torn tails, wrong identity/corrupt data, selected
+CURRENT and lock contention, and prove source manifest/WAL unchanged. Analyze
+all six retained222 replica journals, bind their before/after hashes and original
+receipt hashes, and require every original measured operation to map correctly
+on all three replicas. Retain raw rows and count limits separately from latency
+evidence. Keep formatting/four strict profiles zero. The original250ms gate and
+meaningful candidate crash/ownership checks remain required; attribution alone
+does not complete P7 or the full P0–P7 goal. Security stays with Daybreak.
 
 ### Slice227 schema plan — observe preparing admission across endpoint changes
 

@@ -1,0 +1,14 @@
+✔ all original receipt positions map in both actual three-replica runs (42.44336ms)
+✔ later duplicate operation IDs cannot substitute for the original committed position (24.897786ms)
+✔ a command commit without its exact earlier append cannot be attributed (21.41599ms)
+✔ a measured receipt cannot move to an unrelated log position (17.361999ms)
+✔ physical offset holes and mismatched event ownership are refused (12.244558ms)
+✔ a command append is not reported as a combined append and commit (7.822345ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 164.53942

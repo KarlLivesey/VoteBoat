@@ -1,0 +1,30 @@
+SPDX-License-Identifier: RPL-1.5
+Offline attribution; no new latency benchmark or service suite run.
+
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --example journal_attribution
+cargo +stable test --locked --offline --no-default-features --features native --example journal_attribution
+cargo +stable build --locked --offline --no-default-features --features native --example journal_attribution
+
+Before inspection:
+sha256sum target/bench-slice222-{reference,diagnostic}/replica{1,2,3}/{MANIFEST,log.wal,LOCK} target/bench-slice222-{reference,diagnostic}/{summary.txt,samples.csv}
+
+For each mode=reference,diagnostic and replica=1,2,3:
+target/debug/examples/journal_attribution target/bench-slice222-${mode}/replica${replica} ${replica} 1 > validation/performance/slice228/${mode}-replica${replica}.csv 2> validation/performance/slice228/${mode}-replica${replica}.log
+
+For each mode=reference,diagnostic:
+node validation/check-journal-attribution.mjs validation/performance/slice222/${mode}.csv validation/performance/slice228/${mode}-replica1.csv validation/performance/slice228/${mode}-replica2.csv validation/performance/slice228/${mode}-replica3.csv > validation/performance/slice228/${mode}.json 2> validation/performance/slice228/${mode}-check.log
+
+node --test validation/check-journal-attribution.test.mjs
+.githooks/pre-push
+sha256sum --check validation/performance/slice228/source-journals-before.sha256
+git diff b379cbba24da1ce3354c6e3fa653af9249871046 HEAD -- src/log.rs src/native/log_store.rs src/native/log_store/file.rs src/native/log_store/checkpoint.rs
+
+gh run view 38059461105 --json status,conclusion,jobs
+gh run view 38059461105 --job 114234575243 --log
+gh run view 38059461105 --job 114234575407 --log
+
+Source and binary hashes are in analysis-source.sha256 and analysis-binary.sha256.
+Initial failures are retained separately from final validation. Node test workers
+and GitHub access use required sandbox permission; service feature builds are
+sequential. The enabled pre-push hook is not bypassed.

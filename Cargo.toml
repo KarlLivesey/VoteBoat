@@ -57,6 +57,11 @@ test = true
 name = "wal_benchmark"
 required-features = ["native"]
 
+[[example]]
+name = "journal_attribution"
+required-features = ["native"]
+test = true
+
 [[bin]]
 name = "voteboat-directory"
 path = "src/bin/directory_service.rs"

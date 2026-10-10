@@ -1,0 +1,15 @@
+✖ validation/check-journal-attribution.test.mjs (148.932239ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 152.985619
+
+✖ failing tests:
+
+test at validation/check-journal-attribution.test.mjs:1:1
+✖ validation/check-journal-attribution.test.mjs (148.932239ms)
+  'test failed'
