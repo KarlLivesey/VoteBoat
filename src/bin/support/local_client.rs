@@ -44,7 +44,9 @@ fn retryable_reply(command: &[String], response: &str) -> bool {
         || command == ["read"]
             && matches!(
                 response,
-                "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"
+                "ERR NotRead(ReadNotReady)\n"
+                    | "ERR Unavailable(LeadershipChanged)\n"
+                    | "ERR Draining\n"
             )
 }
 fn terminal(response: String) -> Result<(), Failure> {

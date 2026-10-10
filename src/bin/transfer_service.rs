@@ -3,6 +3,8 @@
 //! Authenticated explicit split administration over the native guarded apps.
 #[path = "support/transfer_app.rs"]
 mod app;
+#[path = "support/transfer_binding.rs"]
+mod binding;
 #[path = "support/transfer_client.rs"]
 mod client;
 #[path = "support/command_client.rs"]
@@ -13,6 +15,8 @@ mod command_endpoints;
 mod connection;
 #[path = "support/transfer_profile.rs"]
 mod profile;
+#[path = "support/transfer_retirement.rs"]
+mod retirement;
 #[path = "support/transfer_server.rs"]
 mod server;
 #[path = "support/service_access.rs"]
@@ -22,7 +26,7 @@ mod setup;
 #[path = "support/transfer_wire.rs"]
 mod wire;
 use setup::Failure;
-const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--deployment FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...";
+const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--deployment FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...";
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     match args.as_slice() {

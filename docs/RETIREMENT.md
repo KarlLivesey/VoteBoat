@@ -22,6 +22,13 @@ publication/configuration references against the actual local frozen source.
 Foreign observation provenance is trusted authenticated host input; serialized
 facts are not cryptographic quorum certificates.
 
+`TransferOperation::retirement_proof(&observations, source, release_id)` now
+builds that proof from the complete original observation set. It requires all
+original activations, selects the source's recorded fence and binds the explicit
+release ID to it. The function performs no I/O and releases no data itself.
+The [transfer executable](TRANSFER_SERVICE.md#retiring-the-original-source)
+uses this same contract for its explicit fresh-store retirement profile.
+
 Propose this command using the original source freeze operation ID. Only ordered
 apply after matching durable quorum commitment at R can retire the owner.
 Successful apply retains the fence, intent, source export commitments, complete

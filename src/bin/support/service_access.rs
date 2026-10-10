@@ -417,6 +417,7 @@ impl Channel {
                 | "list-assigned-groups"
                 | "configuration-status"
                 | "leadership-status"
+                | "retirement-status"
                 | "drain-status"
                 | "drain-group"
                 | "credential-status"
@@ -430,7 +431,7 @@ impl Channel {
                 "configure" | "configure-record" | "reload-access" | "initialize" | "publish"
                 | "grant" | "transfer-step" | "transfer-export" | "move-leader"
                 | "resume-leadership" | "cancel-leadership" | "drain-node" | "resume-drain"
-                | "cancel-drain",
+                | "cancel-drain" | "retire-group",
             ) => ServiceAction::Configure,
             _ => return Err("unknown authorized command".into()),
         };

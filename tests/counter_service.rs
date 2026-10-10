@@ -1808,6 +1808,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         Some(b"ERR Overloaded\n".as_slice()),
         Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
         Some(b"ERR Unavailable(LeadershipChanged)\n".as_slice()),
+        Some(b"ERR Draining\n".as_slice()),
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
@@ -1838,10 +1839,12 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
     }
 }
 #[test]
-fn automatic_read_retries_only_exact_quorum_transition_replies() {
+fn automatic_read_retries_only_exact_unavailable_replica_replies() {
     for reply in [
         b"ERR NotRead(ReadNotReady)\n".as_slice(),
         b"ERR Unavailable(LeadershipChanged)\n",
+        b"ERR Draining\n",
+        b"ERR Draining trailing\n",
         b"ERR NotRead(StaleRead)\n",
         b"ERR Unavailable(OwnerFailed)\n",
         b"ERR Unavailable(Cancelled)\n",
@@ -1855,7 +1858,9 @@ fn automatic_read_retries_only_exact_quorum_transition_replies() {
         let second = cluster.take_listener(102);
         if matches!(
             reply,
-            b"ERR NotRead(ReadNotReady)\n" | b"ERR Unavailable(LeadershipChanged)\n"
+            b"ERR NotRead(ReadNotReady)\n"
+                | b"ERR Unavailable(LeadershipChanged)\n"
+                | b"ERR Draining\n"
         ) {
             let second = reply_peer(second, Some(b"OK value=7\n"));
             assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
@@ -1874,6 +1879,7 @@ fn automatic_read_retries_only_exact_quorum_transition_replies() {
     for reply in [
         b"ERR NotRead(ReadNotReady)\n".as_slice(),
         b"ERR Unavailable(LeadershipChanged)\n",
+        b"ERR Draining\n",
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(reply));

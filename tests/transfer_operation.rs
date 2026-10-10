@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
+#[path = "transfer_operation/retirement.rs"]
+mod retirement;
 #[path = "transfer_source/fixtures.rs"]
 pub mod source_fixture;
 mod support;

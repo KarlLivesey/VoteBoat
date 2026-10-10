@@ -142,7 +142,7 @@ impl Connection {
                 checked(node.control(b.group, NodeControl::Checkpoint))?;
                 self.reply("OK checkpoint_admitted".into());
             }
-            ["read", _] | ["transfer-read", _] | ["transfer-export", _] => {
+            ["read", _] | ["transfer-read", _] | ["transfer-export", _] | ["retirement-status"] => {
                 let query = node.local().applications[&b.group].query(p, b, &words)?;
                 match node.read(b.group, query) {
                     Ok(t) => {

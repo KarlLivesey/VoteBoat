@@ -17,6 +17,8 @@ mod cuts;
 mod interrupt;
 #[path = "transfer_service/profiles.rs"]
 mod profiles;
+#[path = "transfer_service/retirement.rs"]
+mod retirement;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
 static NEXT: AtomicU16 = AtomicU16::new(14000);
 const GROUPS: [u128; 4] = [1, 20, 21, 22];
@@ -28,6 +30,9 @@ struct Cluster {
 }
 impl Cluster {
     fn new(quic: bool) -> Self {
+        Self::with_retirement(quic, false)
+    }
+    fn with_retirement(quic: bool, retirement: bool) -> Self {
         let (base, held, udp) = loop {
             let base = NEXT.fetch_add(1024, Ordering::Relaxed);
             let mut held = Vec::new();
@@ -61,10 +66,12 @@ impl Cluster {
         for group in GROUPS {
             fs::create_dir_all(root.join(group.to_string())).unwrap();
         }
-        let plan = Command::new(BIN)
-            .args(["plan", "1", "20", "21", "22", "10", "128", "200", "201"])
-            .output()
-            .unwrap();
+        let mut plan = Command::new(BIN);
+        plan.args(["plan", "1", "20", "21", "22", "10", "128", "200", "201"]);
+        if retirement {
+            plan.arg("--retirement");
+        }
+        let plan = plan.output().unwrap();
         assert!(
             plan.status.success(),
             "plan: {}",

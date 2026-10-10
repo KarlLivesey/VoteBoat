@@ -50,6 +50,10 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
     let mut config =
         setup::configuration(Path::new(root), id, base, Path::new(tls), create, peers)?;
     config.startup.bootstrap.group = binding.group;
+    let source_binding = super::binding::SourceBinding::new(&config, &profile, binding);
+    if let Some(record) = &source_binding {
+        record.check(create)?;
+    }
     let access = Access::load(Path::new(access), Path::new(tls), id)?;
     println!("credential_digest={:02x?}", access.digest);
     let access = ActiveAccess::new(access.policy.generation(), access);
@@ -68,15 +72,14 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             )
         }
         Role::Source => {
+            if profile.retirement {
+                let app = super::retirement::source(&profile, binding)?;
+                let node = open_source(config, protocol, app, source_binding, create)?;
+                return run(node, listener, profile, binding, access, id);
+            }
             let app = app::source(&profile, binding)?;
-            run(
-                setup::open_application(config, protocol, false, app)?,
-                listener,
-                profile,
-                binding,
-                access,
-                id,
-            )
+            let node = open_source(config, protocol, app, source_binding, create)?;
+            run(node, listener, profile, binding, access, id)
         }
         Role::Target => {
             let app = app::target(&profile, binding)?;
@@ -90,6 +93,22 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             )
         }
     }
+}
+fn open_source<A: App>(
+    config: voteboat::native::startup::NativeMemberStartup,
+    protocol: NativePeerProtocol,
+    app: A,
+    record: Option<super::binding::SourceBinding>,
+    create: bool,
+) -> Result<Node<A>, Failure> {
+    let node = setup::open_application(config, protocol, false, app)?;
+    if let Some(record) = record {
+        if let Err(error) = record.finish(create) {
+            recover(node, Instant::now())?;
+            return Err(error);
+        }
+    }
+    Ok(node)
 }
 fn run<A: App>(
     mut node: Node<A>,

@@ -93,6 +93,44 @@ QUIC/checkpoints. They also interrupt admitted fence/publication commands before
 quorum acknowledgement. Original IDs, serving restrictions and child retries
 are checked. This is selected process-crash coverage, not arbitrary power loss.
 
+## Retiring the original source
+
+Select `plan ... --retirement` **before creating the source stores**. This emits
+`voteboat-transfer-profile-v2-retirement`; its source uses the existing
+`RetirementGuard`. Keep that exact profile file for recovery. The source records
+its profile digest and node/store/group identities in `transfer-source-profile`
+under the native directory lock, before serving. V1 cannot open a marked source;
+v2 recovery refuses missing, corrupt or changed bindings. This is a fresh-store
+profile, not an upgrade or a rolling-migration mechanism. Interrupted initial
+binding requires explicit inspection; never delete old stores to bypass refusal.
+
+After the split completes, explicitly release external retention promises:
+
+```sh
+$V client "$D/profile" "$D/endpoints" "$TLS" 3 retire 20 700
+$V command "$D/profile" "$D/endpoints" "$TLS" 3 20 retirement-status
+```
+
+Here `700` is the operator's stable retention-release ID. The client obtains
+fresh authenticated quorum observations, requires every original activation,
+and constructs a proof bound to source20's original operation and fence. It
+submits retirement through that source's existing Raft log, then confirms the
+same release with a quorum read. `retirement-status` requires Inspect;
+`retire-group PROOF_HEX` requires Configure. The latter accepts the bounded proof
+encoding for hosts using `TransferOperation::retirement_proof` directly.
+
+If a connection or process fails, repeat the same profile, source and release.
+An already-retired source answers without requiring the metadata/target groups
+to remain available; a different release is refused. Status retains the original
+retirement index and is historical evidence, not current target health. Retired
+sources refuse ordinary reads, writes and exports. They retain freeze/lineage
+evidence across WAL and checkpoint recovery and cannot thaw.
+
+Retirement releases live application payloads. It does not delete the replica,
+erase backups, remove membership, or bypass snapshot/WAL retention. External
+retention promises must actually be released by the operator. General retention
+policy and physical cleanup remain separate work.
+
 ## Contracts and limits
 
 Read replies originate from `Node::complete_read`. The transient observation
@@ -114,6 +152,6 @@ transfers to the existing recovery owner and reclaims its workers.
 Before publication, a source configuration change after import requires explicit
 resolution rather than rewriting provenance. Historical `Complete` does not
 authorize a target that later loses ownership. Arbitrary persistence cuts,
-concurrent membership changes, recursive profiles, full retention/retirement,
+concurrent membership changes, recursive profiles, general retention policy,
 macOS and separate-host deployment remain distinct acceptance work. See
 [split recovery](SPLIT_RECOVERY.md) and the [baseline ledger](BASELINE_ACCEPTANCE.md).

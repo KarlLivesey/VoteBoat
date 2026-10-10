@@ -216,11 +216,71 @@ impl Client {
         };
         self.ask(group, &command, false)
     }
+    fn retire(&self, args: &[String]) -> Result<(), Failure> {
+        let [group, id] = args else {
+            return Err("expected retire SOURCE RELEASE_ID".into());
+        };
+        let (source, release) = super::retirement::release(&self.profile, group, id)?;
+        if let Some(status) = self.retirement_status(source, release)? {
+            println!("{status}");
+            return Ok(());
+        }
+        let observations = self.observations()?;
+        let proof = checked(self.profile.operation.retirement_proof(
+            &observations,
+            source,
+            release,
+        ))?;
+        let bytes = checked(proof.encode(voteboat::retirement::MAX_RETIREMENT_PROOF_BYTES))?;
+        let reply = self.ask(
+            source,
+            &format!("retire-group {}", wire::hex(&bytes)),
+            false,
+        )?;
+        println!("{reply}");
+        if reply.starts_with("UNKNOWN") {
+            return Err(
+                "retirement outcome unknown; repeat the same profile, source and release".into(),
+            );
+        }
+        let status = self
+            .retirement_status(source, release)?
+            .ok_or("retirement not confirmed; retry the same profile, source and release")?;
+        println!("{status}");
+        Ok(())
+    }
+    fn retirement_status(
+        &self,
+        source: GroupIdentity,
+        release: OperationId,
+    ) -> Result<Option<String>, Failure> {
+        let status = self.ask(source, "retirement-status", true)?;
+        if !status.split_whitespace().any(|s| s == "retirement=retired") {
+            return Ok(None);
+        }
+        for expected in [
+            format!("source={}", source.id.get()),
+            format!("incarnation={}", source.incarnation.get()),
+            format!("operation={}", self.profile.operation.operation().get()),
+            format!("release={}", release.get()),
+        ] {
+            if !status.split_whitespace().any(|s| s == expected) {
+                return Err("conflicting retirement identity or release".into());
+            }
+        }
+        Ok(Some(status))
+    }
 }
 pub fn operate(args: &[String]) -> Result<(), Failure> {
-    let [profile, endpoints, tls, principal, verb] = args else {
+    let [profile, endpoints, tls, principal, verb, rest @ ..] = args else {
         return Err(super::HELP.into());
     };
+    if verb == "retire" {
+        return Client::load(profile, endpoints, tls, principal)?.retire(rest);
+    }
+    if !rest.is_empty() {
+        return Err(super::HELP.into());
+    }
     if !matches!(verb.as_str(), "status" | "start" | "resume" | "step") {
         return Err("expected status, start, resume or step".into());
     }
@@ -260,7 +320,10 @@ pub fn command(args: &[String]) -> Result<(), Failure> {
     }
     let client = Client::load(profile, endpoints, tls, principal)?;
     let group = client.profile.binding(group)?.group;
-    let read = matches!(words[0].as_str(), "status" | "read" | "transfer-read");
+    let read = matches!(
+        words[0].as_str(),
+        "status" | "read" | "transfer-read" | "retirement-status"
+    );
     let reply = client.ask(group, &words.join(" "), read)?;
     println!("{reply}");
     if reply.starts_with("UNKNOWN") {

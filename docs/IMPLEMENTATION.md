@@ -137,9 +137,91 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
-| Current199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
-| Next200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
-| Following201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
+| Parallel199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+| Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
+| Current201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
+| Next202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
+| Following203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. |
+
+### Slices199b/200 implemented evidence and macro review
+
+The explicit retire-group operator path now reuses RetirementGuard through the
+fresh v2 source profile. The public proof builder validates the complete original
+observations, all target activations, exact source and explicit release, binding
+the release to the observed original fence. It performs no I/O. The client
+confirms the same release by quorum status; an unknown result retains the exact
+profile/source/release for resumption. Already-retired status works with metadata
+offline. Old/changed/missing/corrupt source bindings refuse recovery; no existing
+unwrapped store is migrated. Source data/export stays refused after recovery.
+
+Final local all-feature execution passes one binding unit test, seven retirement
+contract/file tests, ten transfer-operation tests and all seven transfer-service
+histories. The new TCP/WAL and QUIC/checkpoint histories include an admitted
+retirement without quorum, lost wait, process restart, conflicting releases,
+retired-checkpoint recovery and independent child retries/new writes. All122
+counter-service histories also pass after the exact draining-read routing fix.
+The initial Ubuntu failure and the separately corrected test-profile fixture
+failure remain preserved; neither is represented as a platform pass.
+
+Formatting, default/all/core/native-only strict Clippy and the105-entry contract
+inventory pass. Evidence and commands: validation/baseline/slice199b and slice200.
+The macro plan closes this original-source retirement operator gap, not all P6
+acceptance. Current201 checks reusable provider obligations, next202 targets
+combined membership/checkpoint recovery, and203 extends compatible merge
+operator profiles. Platform199 continues independently. General retention,
+physical decommissioning, broader profiles, P7 and full P0–P7 remain open.
+
+### Slice199b schema plan — route reads past drained replicas
+
+The completed Ubuntu job114158445225 for78382c0 reports121 service tests
+passing and one failure: the final auto-routed read in the QUIC retired-learner
+history returns `ERR Draining`. The former source has intentionally reopened
+with its durable drain gate; the two current voters still serve. Auto routing
+must try the next configured replica for that exact read refusal. Preserve
+explicit-node refusals, the same request/deadline budgets, and terminal handling
+of write uncertainty, malformed replies and authorization errors. Extend the
+existing socket-level routing test to fail before the fix, then rerun both
+retirement histories and the full service target. No consensus change is needed.
+
+### Slice200 schema plan — explicit retirement operator workflow
+
+Purpose: complete the chapter09 retire-group operation using the existing
+RetirementGuard, advancing P6 without changing consensus or storage formats.
+The public TransferOperation will build a RetirementProof from the complete
+original quorum-observation set, an exact source and an explicit release ID.
+It constructs the RetentionRelease using that source's observed original fence.
+It requires completed activation and validates the exact source/fence/operation;
+observations remain authenticated host input, never cryptographic certificates.
+
+The executable gets an explicit v2 transfer profile, selected before bootstrap.
+Only its source uses RetirementGuard. A bounded immutable local profile binding
+records the profile digest, node/store and group identities before serving. It
+is written under the native directory lock after fresh creation; recovery checks
+it before opening and again under that lock. V1 cannot open a marked v2 source,
+and v2 cannot reinterpret an unmarked old source. A crash before binding finishes
+fails closed and requires inspection; no implicit migration or cleanup occurs.
+
+Commands: quorum-backed retirement-status and retire-group with a bounded exact
+proof. The client obtains original transfer observations and explicitly supplied
+release identity, then submits the original source operation. Lost waits do not
+cancel retirement. Retried proofs and status must identify the same release;
+changed release/source/fence and unauthorized commands refuse. Retired sources
+retain status/freeze evidence, refuse data/export, and never thaw. Retirement
+does not claim physical deletion: checkpoint/pin/reclamation remain separate.
+
+Acceptance: proof conformance (incomplete/mismatched observations and release),
+actual TCP/QUIC split then retirement, lost wait/restart, WAL and retired-checkpoint
+recovery, independent child retry/write, authorization and profile refusal.
+Keep all four strict profiles and formatting clean. Next201 remains the reusable
+provider obligation audit; platform199 continues independently in background.
+
+The first expanded profile-recovery assertions used an extra blank profile row
+to alter its digest. The parser correctly rejected that malformed row before
+the binding check, so the test expected the wrong error. The preserved profile
+reproduces `expected ROLE GROUP INC BOOTSTRAP GRANT_OR_ZERO` without opening a
+store. Change this fixture to extra whitespace within the valid header, which
+keeps the same parsed operation and reaches the exact-byte binding refusal.
+No parser or production safety check is weakened.
 
 ### Slice199 schema plan — independent operator platform evidence
 

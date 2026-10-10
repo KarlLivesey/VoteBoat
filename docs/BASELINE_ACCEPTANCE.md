@@ -110,6 +110,14 @@ Slice198 adds bounded authenticated assignment listing and selected TCP/QUIC
 configuration/restart cursor tests. Broader platform/fault acceptance remains
 open; these selected histories do not close those ledger entries.
 
+Slice200 adds a public proof builder and the explicit fresh-v2 source retirement
+operator path. It uses existing RetirementGuard semantics and an immutable local
+profile binding; it does not migrate an existing unwrapped source. Commands
+retain the original lifecycle operation and explicit release ID, use quorum
+status after lost replies/restart, and keep retired source data/export fenced.
+General retention policy, physical decommissioning, broader recursive operator
+profiles and full platform/fault acceptance remain separate obligations.
+
 Mutations must retain durable operation IDs and generation/authorization checks.
 Previews must not reserve resources, fence sources or act as durability evidence.
 Peer credential rotation, full persisted admin audit, complete core metrics and

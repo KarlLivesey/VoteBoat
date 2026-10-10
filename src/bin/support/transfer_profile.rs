@@ -22,6 +22,8 @@ pub struct Binding {
 pub struct Profile {
     pub operation: TransferOperation,
     pub groups: BTreeMap<u128, Binding>,
+    pub retirement: bool,
+    pub digest: ContentDigest,
 }
 impl Profile {
     pub fn load(path: &Path) -> Result<Self, Failure> {
@@ -35,8 +37,13 @@ impl Profile {
             .ok_or("missing transfer profile")?
             .split_whitespace()
             .collect::<Vec<_>>();
-        let ["voteboat-transfer-profile-v1", operation, publication] = head.as_slice() else {
+        let [version, operation, publication] = head.as_slice() else {
             return Err("invalid transfer profile".into());
+        };
+        let retirement = match *version {
+            "voteboat-transfer-profile-v1" => false,
+            "voteboat-transfer-profile-v2-retirement" => true,
+            _ => return Err("invalid transfer profile".into()),
         };
         let first = lines
             .next()
@@ -94,7 +101,12 @@ impl Profile {
                 return Err("duplicate group".into());
             }
         }
-        let profile = Self { operation, groups };
+        let profile = Self {
+            operation,
+            groups,
+            retirement,
+            digest: ContentDigest::sha256(text.as_bytes()),
+        };
         profile.validate()?;
         Ok(profile)
     }
@@ -158,9 +170,15 @@ impl Profile {
 }
 pub fn plan(args: &[String]) -> Result<String, Failure> {
     use voteboat::placement::PlacementRequirements;
-    let [authority, source, left, right, responsibility, split, lifecycle, publication] = args
+    let [authority, source, left, right, responsibility, split, lifecycle, publication, rest @ ..] =
+        args
     else {
         return Err(super::HELP.into());
+    };
+    let version = match rest {
+        [] => "voteboat-transfer-profile-v1",
+        [flag] if flag == "--retirement" => "voteboat-transfer-profile-v2-retirement",
+        _ => return Err("expected optional --retirement".into()),
     };
     let group = |s: &str| -> Result<GroupIdentity, Failure> {
         Ok(GroupIdentity {
@@ -213,7 +231,7 @@ pub fn plan(args: &[String]) -> Result<String, Failure> {
     ]);
     let intent = TransferIntent::new(before, checked(ResponsibilityManifest::new(after))?)
         .map_err(|e| format!("invalid split: {:?}", e.0))?;
-    let text=format!("voteboat-transfer-profile-v1 {lifecycle} {publication}\nintent {}\nmetadata {} 1 1000 1001\nsource {} 1 100 0\ntarget {} 1 {lifecycle} 0\ntarget {} 1 {lifecycle} 0\n",wire::hex(&checked(intent.encode(MAX_TRANSFER_INTENT_BYTES))?),authority.id.get(),source.id.get(),left.id.get(),right.id.get());
+    let text=format!("{version} {lifecycle} {publication}\nintent {}\nmetadata {} 1 1000 1001\nsource {} 1 100 0\ntarget {} 1 {lifecycle} 0\ntarget {} 1 {lifecycle} 0\n",wire::hex(&checked(intent.encode(MAX_TRANSFER_INTENT_BYTES))?),authority.id.get(),source.id.get(),left.id.get(),right.id.get());
     Profile::parse(&text)?;
     Ok(text)
 }

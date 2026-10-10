@@ -5,6 +5,7 @@ use super::*;
 use crate::{scope::ScopeImage, transfer_target::*};
 mod observation;
 pub use observation::*;
+mod retirement;
 mod validation;
 use validation::State;
 

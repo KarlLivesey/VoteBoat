@@ -341,7 +341,7 @@ Followers reject service writes/reads. Automatic routing retries the exact origi
 command after a failed connection attempt or the explicit `ERR NOT_LEADER`
 reply (including an invocation rejected before proposal execution). For reads,
 it also retries the exact `ERR NotRead(ReadNotReady)` and
-`ERR Unavailable(LeadershipChanged)` responses, obtaining a fresh quorum barrier
+`ERR Unavailable(LeadershipChanged)` and `ERR Draining` responses, obtaining a fresh quorum barrier
 on the next attempt. Explicit node selection returns either response directly. It stops on
 Unknown, incomplete/invalid replies, connected I/O failures, or other errors. It
 never automatically resends an uncertain write to another node. A lost write
