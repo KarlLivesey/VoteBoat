@@ -185,6 +185,17 @@ remain; both platform jobs start and complete at8cc6852. This proves workflow
 activation, not successful platform acceptance. Implemented210d retains zero
 formatting/Clippy diagnostics in all four required profiles after the final host
 reset/cleanup regression. The pre-push hook remains enabled.
+Implemented210e reproduces the exact pending-configuration response over real
+TCP/QUIC quorum loss and corrects two fixture helpers to preserve original-record
+retries. The old response classifier fails on that observed result. The new histories
+reject a changed target without altering local accepted state, commit after
+quorum restoration and retain exact duplicate receipts/data through cold recovery.
+Configuration11, full counter158 and default TCP configuration7 pass locally;
+formatting and all four strict Clippy profiles pass with zero diagnostics.
+The preceding fe6d5ff Ubuntu
+operator job has155 passes/1 failure on that exact response (now covered); its
+macOS job is still running. No production behavior or deadline change. Existing
+operator concurrency already preserves active runs; no workflow edit is needed.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -206,6 +217,37 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210e schema plan — original configuration replay after local persistence
+
+The prior8cc6852 Ubuntu operator run fails both client-target transport histories
+because leader_request rejects the exact response "UNKNOWN exact record locally
+durable but not committed; preserve original record". The native administrative
+path deliberately returns this result for an exact retained uncommitted record.
+It is neither commit evidence nor permission to change the operation/payload.
+
+Add real TCP/QUIC histories over the existing authenticated target-administration
+fixture. Commit original Counter data, take both other voters offline, submit an
+unchanged-voter Learners record and let the bounded command wait end. Observe
+local durable accepted/not-committed status, replay the identical record and
+require the exact unknown result. The old retry classifier must reject it.
+After correction it recognizes only this exact configuration-record response
+alongside its existing leadership uncertainty; its10s outer deadline stays.
+Refuse a changed target for the same ID without changing local durable status,
+restore quorum and use original-record retries to get a positive commit.
+Repeat the original record for an exact duplicate receipt, then verify its status
+and original data after cold recovery. A pre-commit local record may legally be
+rolled back by Raft; never infer cluster-wide commit from that observation.
+
+Ownership: Cluster owns processes/ports and command channels; no new production
+API, persistence format or helper outside the existing fixtures is needed. An
+unknown command releases only its caller wait. Accepted WAL state and Raft
+configuration rules remain authoritative across reconnect/restart. Acceptance:
+failing-before real histories, passing TCP/QUIC recovery, affected full counter
+tests and zero formatting/all strict lint profiles. This advances the current
+usable Linux/macOS operator milestone. The next two deliverables remain combined
+membership/lifecycle fault coverage and bounded malformed codecs. Matching CI
+continues in the background; unrelated platform failures remain explicit.
 
 ### Slice210d schema plan — diagnose QUIC survivor liveness
 

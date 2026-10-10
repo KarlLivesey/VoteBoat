@@ -39,6 +39,8 @@ mod assignments;
 mod command_discovery;
 #[path = "counter_service/command_endpoints.rs"]
 mod command_endpoints;
+#[path = "counter_service/configuration_pending.rs"]
+mod configuration_pending;
 #[path = "counter_service/credential_reload.rs"]
 mod credential_reload;
 #[path = "counter_service/drain.rs"]
@@ -2337,7 +2339,7 @@ fn retryable_leader_response(args: &[&str], text: &str) -> bool {
     match args {
         ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
-        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n"),
+        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n"),
         ["cancel-leadership", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n" | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n" | "ERR Unavailable(LeadershipChanged)\n"),
         _ => false,
     }
@@ -2597,7 +2599,7 @@ fn retry_configuration_record(cluster: &mut Cluster, record: &str) {
         }
         let text = String::from_utf8(output.stdout).unwrap();
         assert!(
-            text.starts_with("UNKNOWN LeadershipChanged;") || text == "ERR NOT_LEADER\n",
+            retryable_leader_response(&["configure-record", record], &text),
             "configuration retry failed: {text} {}",
             String::from_utf8_lossy(&output.stderr)
         );

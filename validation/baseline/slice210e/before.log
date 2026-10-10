@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.48s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+
+thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp' (251185) panicked at tests/counter_service/configuration_pending.rs:55:5:
+assertion failed: retryable_leader_response(&["configure-record", RECORD], &unknown)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... FAILED
+
+thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic' (251184) panicked at tests/counter_service/configuration_pending.rs:55:5:
+assertion failed: retryable_leader_response(&["configure-record", RECORD], &unknown)
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... FAILED
+
+failures:
+
+failures:
+    configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic
+    configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 156 filtered out; finished in 5.98s
+
+error: test failed, to rerun pass `--test counter_service`

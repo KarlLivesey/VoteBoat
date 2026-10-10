@@ -1,5 +1,17 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210e adds real TCP/QUIC quorum-loss histories for an exact locally durable,
+uncommitted configuration record. The old fixture rejects its documented unknown
+result; corrected helpers repeat only the original record, preserving deadlines.
+A changed target conflicts without altering local accepted status; quorum return
+commits the original record, with exact duplicate receipt and original data
+recovery after cold restart. All11 selected configuration and158 full local
+counter histories pass, alongside7 default TCP configuration checks and zero
+formatting/all strict Clippy diagnostics. No production administration behavior changes. The
+preceding fe6d5ff Ubuntu operator job passes155 and fails1 on that same exact
+response; macOS remains in progress. This does not close platform acceptance or
+the remaining combined membership/lifecycle schedules.
+
 Slice210d identifies the reproduced QUIC survivor stall as disconnected-output
 retention: a healthy authenticated connection keeps receiving, but256 queued
 batches to the offline voter pin rejected Send effects in all three local groups.

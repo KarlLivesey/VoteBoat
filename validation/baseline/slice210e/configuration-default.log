@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.74s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 7 tests
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 102 filtered out; finished in 8.99s
+

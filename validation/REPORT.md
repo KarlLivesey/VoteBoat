@@ -1,5 +1,14 @@
 # Validation report — slice 35
 
+Pending configuration replay: [slice210e](baseline/slice210e/README.md). Both real
+TCP/QUIC quorum-loss histories fail with the old unknown-response classifier.
+The corrected fixtures preserve original records, refuse conflicting targets
+without local state mutation and verify committed duplicate/data receipts after
+quorum restoration and cold recovery. Configuration11 and full counter158 pass
+locally. The prior fe6d5ff Ubuntu job has155 passes/1 failure on the same response;
+matching supported-platform acceptance remains open. Local accepted status is
+not quorum commit evidence, and no production behavior/deadline changed.
+
 Disconnected-output liveness: [slice210d](baseline/slice210d/README.md). Instrumented
 native failures retain healthy QUIC protocol progress but expose256 unsent
 batches for the offline peer and three pinned Send leases. The cause-specific
